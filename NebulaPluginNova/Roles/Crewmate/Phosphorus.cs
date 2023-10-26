@@ -25,7 +25,8 @@ public class Phosphorus : ConfigurableStandardRole
     private NebulaConfiguration PlaceCoolDownOption = null!;
     private NebulaConfiguration LampCoolDownOption = null!;
     private NebulaConfiguration LampDurationOption = null!;
-    
+    private NebulaConfiguration LampStrengthOption = null!;
+
     protected override void LoadOptions()
     {
         base.LoadOptions();
@@ -34,6 +35,7 @@ public class Phosphorus : ConfigurableStandardRole
         PlaceCoolDownOption = new NebulaConfiguration(RoleConfig, "placeCoolDown", null, 5f, 60f, 5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
         LampCoolDownOption = new NebulaConfiguration(RoleConfig, "lampCoolDown", null, 5f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
         LampDurationOption = new NebulaConfiguration(RoleConfig, "lampDuration", null, 7.5f, 30f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
+        LampStrengthOption = new NebulaConfiguration(RoleConfig, "lampStrength", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
     private static IDividedSpriteLoader lanternSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Lantern.png", 100f, 4);
@@ -146,6 +148,7 @@ public class Phosphorus : ConfigurableStandardRole
           if (lantern != null)
           {
               SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(lantern.Position);
+              lightRenderer.transform.localScale *= MyRole.LampStrengthOption.GetFloat();
 
               IEnumerator CoLight()
               {

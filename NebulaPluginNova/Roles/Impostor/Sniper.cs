@@ -165,6 +165,7 @@ public class Sniper : ConfigurableStandardRole
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.SnipeCoolDownOption.KillCoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 killButton.SetLabel("snipe");
+                killButton.SetCanUseByMouseClick();
             }
         }
 

@@ -60,10 +60,10 @@ public class NebulaPlugin : BasePlugin
 
     public const bool IsSnapshot = false;
     //public const string VisualVersion = "v2.0";
-    public const string VisualVersion = "Snapshot 23.10.26a";
+    public const string VisualVersion = "Snapshot 23.10.26b";
 
     public const int PluginEpoch = 101;
-    public const int PluginBuildNum = 1029;
+    public const int PluginBuildNum = 1030;
 
     static public HttpClient HttpClient
     {

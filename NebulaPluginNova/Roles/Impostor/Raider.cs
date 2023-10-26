@@ -185,6 +185,7 @@ public class Raider : ConfigurableStandardRole
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.ThrowCoolDownOption.KillCoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 killButton.SetLabel("throw");
+                killButton.SetCanUseByMouseClick();
             }
         }
 

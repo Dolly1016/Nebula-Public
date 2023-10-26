@@ -1,4 +1,6 @@
 ﻿using AmongUs.GameOptions;
+using Epic.OnlineServices.Lobby;
+using UnityEngine;
 
 namespace Nebula.Modules.ScriptComponents;
 
@@ -56,6 +58,16 @@ public class ModAbilityButton : INebulaScriptComponent
         if (VanillaButton) UnityEngine.Object.Destroy(VanillaButton.gameObject);
     }
 
+    private bool CheckMouseClick()
+    {
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            var dis = (Vector2)Input.mousePosition - new Vector2(Screen.width, Screen.height) * 0.5f;
+            return dis.magnitude < 280f;
+        }
+        return false;
+    }
+
     public override void Update()
     {
         //表示・非表示切替
@@ -77,8 +89,9 @@ public class ModAbilityButton : INebulaScriptComponent
         VanillaButton.cooldownTimerText.text = timerText;
         VanillaButton.cooldownTimerText.color = EffectActive ? Color.green : Color.white;
 
-        if (keyCode?.KeyDownInGame ?? false) DoClick();
+        if ((keyCode?.KeyDownInGame ?? false) || (canUseByMouseClick && CheckMouseClick())) DoClick();
         if (subKeyCode?.KeyDownInGame ?? false) DoSubClick();
+        
     }
 
     public override void OnMeetingStart()
@@ -224,6 +237,14 @@ public class ModAbilityButton : INebulaScriptComponent
 
         return this;
     }
+
+    private bool canUseByMouseClick = false;
+    public ModAbilityButton SetCanUseByMouseClick(bool onlyLook = false)
+    {
+        if(!onlyLook)canUseByMouseClick = true;
+        ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true);
+        return this;
+    }
 }
 
 public static class ButtonEffect
@@ -322,6 +343,8 @@ public static class ButtonEffect
     
 
     static ISpriteLoader keyBindBackgroundSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindBackground.png", 100f);
+    static ISpriteLoader mouseActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionIcon.png", 100f);
+
     static public GameObject? AddKeyGuide(GameObject button, KeyCode key, Vector2 pos,bool removeExistingGuide)
     {
         if(removeExistingGuide)button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "HotKeyGuide") GameObject.Destroy(obj); }));
@@ -361,5 +384,26 @@ public static class ButtonEffect
     static public GameObject? SetKeyGuideOnSmallButton(GameObject button, KeyCode key)
     {
         return AddKeyGuide(button, key, new Vector2(0.28f, 0.28f), true);
+    }
+
+    static public GameObject? SetMouseActionIcon(GameObject button,bool show)
+    {
+        if (!show)
+        {
+            button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "MouseAction") GameObject.Destroy(obj); }));
+            return null;
+        }
+        else
+        {
+            GameObject obj = new GameObject();
+            obj.name = "MouseAction";
+            obj.transform.SetParent(button.transform);
+            obj.layer = button.layer;
+            SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
+            renderer.transform.localPosition = new Vector3(0.48f, -0.29f) + new Vector3(0f, 0f, -10f);
+            renderer.sprite = mouseActionSprite.GetSprite();
+            return obj;
+        }
+        
     }
 }

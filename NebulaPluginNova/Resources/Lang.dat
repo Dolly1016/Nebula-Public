@@ -272,6 +272,7 @@
 "options.role.phosphorus.placeCoolDown" : "Place Cool Down"
 "options.role.phosphorus.lampCoolDown" : "Lamp Cool Down"
 "options.role.phosphorus.lampDuration" : "Lamp Duration"
+"options.role.phosphorus.lampStrength" : "Lamp Strength"
 
 "role.provocateur.name" : "Provocateur"
 "role.provocateur.short" : "P"

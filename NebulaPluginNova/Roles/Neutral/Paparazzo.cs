@@ -41,6 +41,12 @@ public class PaparazzoShot : MonoBehaviour
         focus = true;
     }
 
+    public void SetUpButton(Action action)
+    {
+        var button = gameObject.SetUpButton();
+        button.OnClick.AddListener(() => { if (focus) { action.Invoke(); GameObject.Destroy(button); } });
+    }
+
     public void Update()
     {
         if (focus)
@@ -285,6 +291,7 @@ public class Paparazzo : ConfigurableStandardRole
                 return null;
             }
         };
+
         public override void OnActivated()
         {
             NebulaGameManager.Instance?.CriteriaManager.AddCriteria(PaparazzoCriteria);
@@ -308,6 +315,7 @@ public class Paparazzo : ConfigurableStandardRole
                 shotButton.CoolDownTimer = Bind(new Timer(0f, MyRole.ShotCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 shotButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 shotButton.SetLabel("shot");
+                shotButton.SetCanUseByMouseClick(true);
             }
 
         }
@@ -323,6 +331,8 @@ public class Paparazzo : ConfigurableStandardRole
                 var pos = MyPlayer.MyControl.transform.localPosition;
                 pos.z = -10f;
                 shot.transform.localPosition = pos;
+
+                shot.SetUpButton(() => shotButton.DoClick());
             }
 
             if (MyFinder != null && (MeetingHud.Instance || ExileController.Instance || MyPlayer.IsDead))

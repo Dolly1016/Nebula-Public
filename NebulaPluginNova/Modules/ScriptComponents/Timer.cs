@@ -6,6 +6,19 @@ using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 
 namespace Nebula.Modules.ScriptComponents;
 
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.IsKillTimerEnabled), MethodType.Getter)]
+class PlayerIsKillTimerEnabledPatch
+{
+    public static void Postfix(PlayerControl __instance, ref bool __result)
+    {
+        if(Minigame.Instance && Minigame.Instance.TryCast<SwitchMinigame>())
+        {
+            __result = false;
+        }
+    }
+}
+
 public class Timer : INebulaScriptComponent
 {
     private Func<bool>? predicate = null;
@@ -102,8 +115,11 @@ public class Timer : INebulaScriptComponent
         return SetPredicate(() =>
         {
             if (PlayerControl.LocalPlayer.CanMove) return true;
+            if (PlayerControl.LocalPlayer.inMovingPlat || PlayerControl.LocalPlayer.onLadder) return true;
+
             if (Minigame.Instance && 
             ((bool)Minigame.Instance.MyNormTask
+            || Minigame.Instance.TryCast<SwitchMinigame>() != null
             || Minigame.Instance.TryCast<IDoorMinigame>() != null
             || Minigame.Instance.TryCast<VitalsMinigame>() != null
             || Minigame.Instance.TryCast<MultistageMinigame>() != null
