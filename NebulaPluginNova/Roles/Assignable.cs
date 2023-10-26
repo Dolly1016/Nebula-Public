@@ -45,7 +45,9 @@ public abstract class AssignableInstance : ScriptHolder
     public virtual void OnGameStart() { }
     public virtual void Update() { }
     public virtual void LocalUpdate() { }
+    public virtual void LocalHudUpdate() { }
     public virtual void OnMeetingStart() { }
+    public virtual void OnStartExileCutScene() { }
     public virtual void OnMeetingEnd() { }
     public virtual void OnEndVoting() { }
     public virtual void OnGameReenabled() { }
@@ -71,4 +73,6 @@ public abstract class AssignableInstance : ScriptHolder
     public virtual void OnOpenNormalMap() { }
     public virtual void OnOpenAdminMap() { }
     public virtual void OnMapInstantiated() { }
+
+    public virtual string? GetExtraTaskText() => null;
 }

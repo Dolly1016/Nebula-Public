@@ -109,6 +109,10 @@ public class Jackal : ConfigurableStandardRole
                         lockSprite = null;
                         leftText = null;
                     }
+                    else
+                    {
+                        if(leftText)leftText!.text = left.ToString();
+                    }
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.KillCoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
@@ -200,6 +204,8 @@ public class Sidekick : ConfigurableRole
     }
 
     public override float GetRoleChance(int count) => 0f;
+
+    public override bool IsSpawnable { get => Jackal.MyRole.IsSpawnable && Jackal.MyRole.CanCreateSidekickOption && !IsModifierOption; }
 
     public class Instance : RoleInstance
     {

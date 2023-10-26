@@ -592,6 +592,25 @@ public class NebulaConfiguration
         Mapper = (i) => (float)(step * i + min);
     }
 
+    public void ChangeAs(string mapped,bool share)
+    {
+        if (MaxValue >= 128)
+        {
+            ChangeValue(int.TryParse(mapped, out var num) ? num : 0,share);
+        }
+        else
+        {
+            for (int i = 0; i <= MaxValue; i++)
+            {
+                if ((GetMapped(i)?.ToString() ?? "null").Equals(mapped))
+                {
+                    ChangeValue(i, share);
+                    break;
+                }
+            }
+        }
+    }
+
     public void ChangeValue(bool increment)
     {
         if (entry == null) return;
@@ -609,19 +628,21 @@ public class NebulaConfiguration
         entry.Share();
     }
 
-    public void ChangeValue(int newValue)
+    public void ChangeValue(int newValue,bool share = true)
     {
         if (entry == null) return;
         entry.UpdateValue(Mathf.Clamp(newValue, 0, MaxValue), true);
         OnValueChanged?.Invoke();
-        entry.Share();
+        if (share) entry.Share();
     }
 
     public int CurrentValue => (IsShown && entry != null) ? entry.CurrentValue : InvalidatedValue;
-    
-    public object? GetMapped()
+
+    public object? GetMapped() => GetMapped(CurrentValue);
+
+    private object? GetMapped(int currentValue)
     {
-        return Mapper != null ? Mapper.Invoke(CurrentValue) : CurrentValue;
+        return Mapper != null ? Mapper.Invoke(currentValue) : currentValue;
     }
 
     public int GetMappedInt()

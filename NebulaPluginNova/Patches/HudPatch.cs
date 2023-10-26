@@ -60,7 +60,7 @@ public static class HudManagerCoStartGamePatch
             PlayerControl.LocalPlayer.killTimer = 10f;
             HudManager.Instance.KillButton.SetCoolDown(10f, AmongUsUtil.VanillaKillCoolDown);
 
-            ShipStatus.Instance.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>().ForceSabTime(10f);
+            ShipStatus.Instance.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>().SetInitialSabotageCooldown();
             PlayerControl.LocalPlayer.AdjustLighting();
             yield return __instance.CoFadeFullScreen(Color.black, Color.clear, 0.2f, false);
             __instance.FullScreen.transform.localPosition = new Vector3(0f, 0f, -500f);
@@ -73,4 +73,24 @@ public static class HudManagerCoStartGamePatch
         return false;
     }
 
+}
+
+[HarmonyPatch(typeof(TaskPanelBehaviour), nameof(TaskPanelBehaviour.SetTaskText))]
+class TaskTextPatch
+{
+    public static void Postfix(TaskPanelBehaviour __instance)
+    {
+        try
+        {
+            var text = __instance.taskText.text;
+            PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r =>
+            {
+                string? str = r.GetExtraTaskText();
+                if (str != null) text += "\n" + str;
+            });
+
+            __instance.taskText.text = text;
+        }
+        catch { }
+    }
 }

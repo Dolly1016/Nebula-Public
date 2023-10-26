@@ -147,6 +147,18 @@ public class Reaper : ConfigurableStandardRole
                         GetVent("ElectricalVent")!.Right = activate ? GetVent("ShowersVent") : null;
                     }
                     break;
+                case 5:
+                    //Fungle
+                    GetVent("NorthWestJungleVent")!.Center = activate ? GetVent("SouthWestJungleVent") : null;
+                    GetVent("SouthWestJungleVent")!.Center = activate ? GetVent("NorthWestJungleVent") : null;
+
+                    GetVent("NorthEastJungleVent")!.Center = activate ? GetVent("SouthEastJungleVent") : null;
+                    GetVent("SouthEastJungleVent")!.Center = activate ? GetVent("NorthEastJungleVent") : null;
+
+                    GetVent("StorageVent")!.Center = activate ? GetVent("CommunicationsVent") : null;
+                    GetVent("CommunicationsVent")!.Center = activate ? GetVent("StorageVent") : null;
+
+                    break;
             }
         }
 

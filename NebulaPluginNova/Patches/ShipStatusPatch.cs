@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Nebula.Patches;
 
@@ -22,7 +23,19 @@ public class ShipStatusPatch
                 shadowObj.transform.SetParent(vent.transform);
                 shadowObj.transform.localPosition = new Vector3(0f, 0f, 0f);
                 shadowObj.transform.localScale = new Vector3(1f, 1f, 1f);
-                shadowObj.AddComponent<SpriteRenderer>().sprite = vent.GetComponent<SpriteRenderer>().sprite;
+
+                Sprite sprite = null!;
+
+                if (AmongUsUtil.CurrentMapId == 5)
+                {
+                    var renderer = vent.transform.GetChild(3);
+                    sprite = renderer.GetComponent<SpriteRenderer>().sprite;
+                    shadowObj.transform.localPosition = renderer.transform.localPosition + new Vector3(0,0,-0.1f);
+                }
+                else
+                    sprite = vent.GetComponent<SpriteRenderer>().sprite;
+
+                shadowObj.AddComponent<SpriteRenderer>().sprite = sprite;
                 shadowObj.layer = LayerExpansion.GetShadowLayer();
 
                 vent.gameObject.layer = LayerExpansion.GetDefaultLayer();

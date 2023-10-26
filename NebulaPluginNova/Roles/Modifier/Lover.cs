@@ -112,5 +112,6 @@ public class Lover : ConfigurableModifier
 
         public PlayerModInfo? MyLover => NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault(p => p.PlayerId != MyPlayer.PlayerId && p.AllModifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId));
         public override string? IntroText => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover?.DefaultName ?? "ERROR").Color(MyRole.RoleColor));
+        public override bool InvalidateCrewmateTask => true;
     }
 }

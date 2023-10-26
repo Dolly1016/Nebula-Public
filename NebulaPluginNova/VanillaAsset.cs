@@ -67,7 +67,7 @@ public class VanillaAsset
 
     static public GameSettingMenu PlayerOptionsMenuPrefab { get; private set; } = null!;
 
-    static public ShipStatus[] MapAsset = new ShipStatus[5];
+    static public ShipStatus[] MapAsset = new ShipStatus[6];
 
     static public void LoadAssetAtInitialize()
     {
@@ -150,5 +150,20 @@ public class VanillaAsset
         scroller.ScrollToTop();
 
         return scroller;
+    }
+
+    private static Material? highlightMaterial = null;
+    public static Material GetHighlightMaterial()
+    {
+        if (highlightMaterial != null) return new Material(highlightMaterial);
+        foreach (var mat in UnityEngine.Resources.FindObjectsOfTypeAll(Il2CppType.Of<Material>()))
+        {
+            if (mat.name == "HighlightMat")
+            {
+                highlightMaterial = mat.TryCast<Material>();
+                break;
+            }
+        }
+        return new Material(highlightMaterial);
     }
 }

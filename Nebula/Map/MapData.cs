@@ -468,7 +468,7 @@ public class MapData
             y2 = temp;
         }
 
-        Color color = new Color(40 / 255f, 40 / 255f, 40 / 255f);
+        Color color = new Color(40f / 255f, 40f / 255f, 40f / 255f, 10f / 255f);
         var texture = new Texture2D(x2 - x1, y2 - y1, TextureFormat.RGB24, false);
 
         int num;

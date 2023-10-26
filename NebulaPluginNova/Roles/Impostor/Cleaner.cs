@@ -63,6 +63,7 @@ public class Cleaner : ConfigurableStandardRole
                 cleanButton.OnClick = (button) => {
                     AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.ParentId,MyPlayer.PlayerId,EventDetail.Clean);
                     if (MyRole.SyncKillAndCleanCoolDownOption) PlayerControl.LocalPlayer.killTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
+                    cleanButton.StartCoolDown();
                 };
                 cleanButton.CoolDownTimer = Bind(new Timer(MyRole.CleanCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 cleanButton.SetLabelType(ModAbilityButton.LabelType.Standard);

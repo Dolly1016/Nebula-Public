@@ -28,7 +28,7 @@ public class Painter : ConfigurableStandardRole
         base.LoadOptions();
 
         SampleCoolDownOption = new NebulaConfiguration(RoleConfig, "sampleCoolDown", null, 0f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        PaintCoolDownOption = new NebulaConfiguration(RoleConfig, "paintCoolDown", null, 5f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
+        PaintCoolDownOption = new NebulaConfiguration(RoleConfig, "paintCoolDown", null, 0f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
         LoseSampleOnMeetingOption = new NebulaConfiguration(RoleConfig, "loseSampleOnMeeting", null, false, false);
         TransformAfterMeetingOption = new NebulaConfiguration(RoleConfig, "transformAfterMeeting", null, false, false);
     }
@@ -38,8 +38,8 @@ public class Painter : ConfigurableStandardRole
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? paintButton = null;
 
-        static private ISpriteLoader sampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
-        static private ISpriteLoader paintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
+        static public ISpriteLoader sampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
+        static public ISpriteLoader paintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
         public override AbstractRole Role => MyRole;
         public Instance(PlayerModInfo player) : base(player)
         {
@@ -57,15 +57,14 @@ public class Painter : ConfigurableStandardRole
 
                 sampleButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
                 sampleButton.SetSprite(sampleButtonSprite.GetSprite());
-                sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
+                sampleButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 sampleButton.OnClick = (button) => {
-                    if (paintButton!.CoolDownTimer!.CurrentTime < 5f) paintButton!.CoolDownTimer!.SetTime(5f).Resume();
-                    sample = sampleTracker.CurrentTarget!.GetModInfo()?.GetOutfit(75);
+                    sample = sampleTracker.CurrentTarget?.GetModInfo()?.GetOutfit(75) ?? null;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
-                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample!, paintButton.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample!, paintButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(MyRole.SampleCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabelType(ModAbilityButton.LabelType.Standard);

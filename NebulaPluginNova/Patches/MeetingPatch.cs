@@ -8,6 +8,47 @@ using static MeetingHud;
 
 namespace Nebula.Patches;
 
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
+class ReportDeadBodyPatch
+{
+    public static void Postfix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo target)
+    {
+        if (target == null)
+        {
+            NebulaGameManager.Instance!.EmergencyCalls++;
+            if (NebulaGameManager.Instance!.EmergencyCalls == GeneralConfigurations.NumOfMeetingsOption) ShipStatus.Instance.BreakEmergencyButton();
+        }
+    }
+}
+
+
+[HarmonyPatch(typeof(LogicOptionsNormal), nameof(LogicOptionsNormal.GetDiscussionTime))]
+class GetDiscussionTimePatch
+{
+    public static void Postfix(LogicOptionsNormal __instance, ref int __result)
+    {
+        __result -= (int)(GeneralConfigurations.DeathPenaltyOption.GetFloat() * (float)(NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0f));
+        __result = Mathf.Max(0, __result);
+    }
+}
+
+
+[HarmonyPatch(typeof(MeetingIntroAnimation), nameof(MeetingIntroAnimation.CoRun))]
+class MeetingIntroStartPatch
+{
+    public static void Postfix(MeetingIntroAnimation __instance,ref Il2CppSystem.Collections.IEnumerator __result)
+    {
+        __result = Effects.Sequence(
+            __result,
+            Effects.Action((Il2CppSystem.Action)(() =>
+            {
+                NebulaGameManager.Instance?.OnMeetingStart();
+            }))
+            );
+    }
+}
+
+
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
 class MeetingStartPatch
 {
@@ -24,13 +65,28 @@ class MeetingStartPatch
     {
         foreach(var content in meetingContent)
         {
-            if (content.NameText) content.Player.UpdateNameText(content.NameText, true);
-            if (content.RoleText) content.Player.UpdateRoleText(content.RoleText);
+            try
+            {
+                if (content.NameText) content.Player.UpdateNameText(content.NameText, true);
+                if (content.RoleText) content.Player.UpdateRoleText(content.RoleText);
+            }
+            catch
+            {
+                if(content.RoleText) content.RoleText.gameObject.SetActive(false);
+            }
+        }
+
+        foreach(var p in MeetingHud.Instance.playerStates)
+        {
+            p.PlayerIcon.cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            p.PlayerIcon.cosmetics.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         }
     }
 
     static void Postfix(MeetingHud __instance)
     {
+        MeetingHudExtension.Reset();
+
         NebulaManager.Instance.CloseAllUI();
 
         List<MeetingPlayerContent> allContents = new();
@@ -53,7 +109,7 @@ class MeetingStartPatch
             roleText.transform.localScale = new Vector3(0.57f,0.57f);
             roleText.rectTransform.sizeDelta += new Vector2(0.35f, 0f);
 
-            allContents.Add(new() { Player = Helpers.GetPlayer(player.TargetPlayerId)!.GetModInfo()!, NameText = player.NameText, RoleText = roleText });
+            allContents.Add(new() { Player = NebulaGameManager.Instance!.GetModPlayerInfo(player.TargetPlayerId)!, NameText = player.NameText, RoleText = roleText });
 
             player.CancelButton.GetComponent<SpriteRenderer>().material = __instance.Glass.material;
             player.ConfirmButton.GetComponent<SpriteRenderer>().material = __instance.Glass.material;
@@ -61,9 +117,6 @@ class MeetingStartPatch
             player.ConfirmButton.transform.GetChild(0).GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.None;
 
         }
-
-        NebulaGameManager.Instance?.OnMeetingStart();
-
 
         Update(allContents);
 
@@ -84,6 +137,7 @@ class MeetingClosePatch
 { 
     public static void Postfix(MeetingHud __instance)
     {
+        NebulaGameManager.Instance?.AllRoleAction(r => r.OnStartExileCutScene());
         NebulaManager.Instance.CloseAllUI();
     }
 }
@@ -97,13 +151,43 @@ class VoteMaskPatch
     }
 }
 
+[HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.SetTargetPlayerId))]
+class VoteAreaVCPatch
+{
+    private static SpriteLoader VCFrameSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingVCFrame.png", 119f);
+    public static void Postfix(PlayerVoteArea __instance)
+    {
+
+        if (GeneralConfigurations.UseVoiceChatOption)
+        {
+            var frame = UnityHelper.CreateObject<SpriteRenderer>("VCFrame", __instance.transform, new Vector3(0, 0, -0.5f));
+            frame.sprite = VCFrameSprite.GetSprite();
+            frame.color = Color.clear;
+            var col = Palette.PlayerColors[__instance.TargetPlayerId];
+            var client = NebulaGameManager.Instance?.VoiceChatManager?.GetClient(__instance.TargetPlayerId);
+            float alpha = 0f;
+            if (client != null)
+            {
+                var script = frame.gameObject.AddComponent<ScriptBehaviour>();
+                script.UpdateHandler += () =>
+                {
+                    if (client.Level > 0.18f)
+                        alpha = Mathf.Clamp(alpha + Time.deltaTime * 4f, 0f, 1f);
+                    else
+                        alpha = Mathf.Clamp(alpha - Time.deltaTime * 4f, 0f, 1f);
+                    col.a = (byte)(alpha * 255f);
+                    frame.color = col;
+                };
+            }
+        }
+    }
+}
+
 [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.Start))]
 class VoteAreaPatch
 {
     public static void Postfix(PlayerVoteArea __instance)
     {
-        MeetingHudExtension.Reset();
-
         try
         {
             var maskParent = UnityHelper.CreateObject<SortingGroup>("MaskedObjects", __instance.transform, new Vector3(0, 0, -0.1f));
@@ -125,11 +209,14 @@ class VoteAreaPatch
             __instance.PlayerIcon.cosmetics.hat.BackLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
             __instance.PlayerIcon.cosmetics.visor.Image.gameObject.AddComponent<ZOrderedSortingGroup>();
             __instance.PlayerIcon.cosmetics.skin.layer.gameObject.AddComponent<ZOrderedSortingGroup>();
+            __instance.PlayerIcon.cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.currentBodySprite.BodySprite.gameObject.AddComponent<ZOrderedSortingGroup>();
         }
         catch { }
     }
 }
+
+
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Confirm))]
 class CastVotePatch
@@ -211,6 +298,7 @@ static class CheckForEndVotingPatch
     {
         //投票が済んでない場合、なにもしない
         if (!__instance.playerStates.All((PlayerVoteArea ps) => ps.AmDead || ps.DidVote)) return false;
+
 
         {
             Dictionary<byte, int> dictionary = ModCalculateVotes(__instance);

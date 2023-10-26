@@ -17,6 +17,7 @@ public class Marionette : ConfigurableStandardRole
     private NebulaConfiguration PlaceCoolDownOption = null!;
     private NebulaConfiguration SwapCoolDownOption = null!;
     private NebulaConfiguration DecoyDurationOption = null!;
+    private NebulaConfiguration CanSeeDecoyInShadowOption = null!;
 
     protected override void LoadOptions()
     {
@@ -25,6 +26,7 @@ public class Marionette : ConfigurableStandardRole
         PlaceCoolDownOption = new(RoleConfig, "placeCoolDown", null, 5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
         SwapCoolDownOption = new(RoleConfig, "swapCoolDown", null, 2.5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
         DecoyDurationOption = new(RoleConfig, "decoyDuration", null, 5f, 180f, 5f, 40f, 40f) { Decorator = NebulaConfiguration.SecDecorator };
+        CanSeeDecoyInShadowOption = new(RoleConfig, "canSeeDecoyInShadow", null, false, false);
     }
 
     [NebulaPreLoad]
@@ -32,7 +34,7 @@ public class Marionette : ConfigurableStandardRole
     {
         public static string MyTag = "Decoy";
         private static SpriteLoader decoySprite = SpriteLoader.FromResource("Nebula.Resources.Decoy.png", 150f);
-        public Decoy(Vector2 pos,bool reverse) : base(pos,ZOption.Just,true, decoySprite.GetSprite()) {
+        public Decoy(Vector2 pos,bool reverse) : base(pos,ZOption.Just,MyRole.CanSeeDecoyInShadowOption, decoySprite.GetSprite()) {
             MyRenderer.flipX = reverse;
             MyBehaviour = MyRenderer.gameObject.AddComponent<EmptyBehaviour>();
         }

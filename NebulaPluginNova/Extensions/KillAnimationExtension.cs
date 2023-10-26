@@ -21,7 +21,12 @@ public static class KillAnimationExtension
         foreach(var r in deadBody.bodyRenderers) target.SetPlayerMaterialColors(r);
         
         target.SetPlayerMaterialColors(deadBody.bloodSplatter);
-        Vector3 vector = target.transform.position + killAnim.BodyOffset;
+
+        //死体の発生場所を決定 (移動中は移動後の位置に発生)
+        Vector2 deadBodyPlayerPos = target.transform.position;
+        if(target.inMovingPlat || target.onLadder) deadBodyPlayerPos = target.GetModInfo()?.GoalPos ?? deadBodyPlayerPos;
+
+        Vector3 vector = (Vector3)deadBodyPlayerPos + killAnim.BodyOffset;
         vector.z = vector.y / 1000f;
         deadBody.transform.position = vector;
         if (isParticipant)

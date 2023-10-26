@@ -15,7 +15,8 @@ public class ClientOption
 {
     public enum ClientOptionType
     {
-        OutputCosmicHash
+        OutputCosmicHash,
+        UseNoiseReduction
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
@@ -45,6 +46,7 @@ public class ClientOption
     static public void Load()
     {
         new ClientOption(ClientOptionType.OutputCosmicHash, "outputHash", new string[] { "options.switch.off", "options.switch.on" }, 0);
+        new ClientOption(ClientOptionType.UseNoiseReduction, "noiseReduction", new string[] { "options.switch.off", "options.switch.on" }, 0);
     }
 }
 
@@ -100,7 +102,8 @@ public static class StartOptionMenuPatch
             {
                 nebulaContext.Append(new MetaContext.Button(() =>
                 {
-                    NebulaGameManager.Instance?.VoiceChatManager?.OpenSettingScreen();
+                    __instance.Close();
+                    NebulaGameManager.Instance?.VoiceChatManager?.OpenSettingScreen(__instance);
                 }, buttonAttr)
                 { TranslationKey = "config.client.vcSettings", Alignment = IMetaContext.AlignmentOption.Center });
             }

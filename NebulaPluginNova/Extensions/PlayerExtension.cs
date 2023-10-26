@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using MS.Internal.Xml.XPath;
 using Nebula.Modules;
 using Nebula.Utilities;
 using UnityEngine.Networking.PlayerConnection;
@@ -24,7 +25,7 @@ public static class PlayerExtension
         player.cosmetics.skin.SetEnterVent(player.cosmetics.FlipX);
         player.moveable = false;
 
-        yield return player.MyPhysics.Animations.CoPlayEnterVentAnimation();
+        yield return player.MyPhysics.Animations.CoPlayEnterVentAnimation(0);
 
         player.MyPhysics.myPlayer.Visible = false;
         player.cosmetics.skin.SetIdle(player.cosmetics.FlipX);
@@ -74,11 +75,11 @@ public static class PlayerExtension
            var killer = Helpers.GetPlayer(message.killerId);
            var target = Helpers.GetPlayer(message.targetId);
 
-           if (killer == null || target == null) return;
+           if (target == null) return;
 
            // MurderPlayer ここから
 
-           if (killer.AmOwner)
+           if (killer && killer!.AmOwner)
            {
                if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(killer.KillSfx, false, 0.8f, null);
                killer.SetKillTimer(AmongUsUtil.VanillaKillCoolDown);
@@ -100,17 +101,17 @@ public static class PlayerExtension
                    {
                    }
                }
-               if(message.showOverlay)DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer.Data, target.Data);
+               if (message.showOverlay) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
                target.cosmetics.SetNameMask(false);
                target.RpcSetScanner(false);
            }
-           killer.MyPhysics.StartCoroutine(killer.KillAnimations[System.Random.Shared.Next(killer.KillAnimations.Count)].CoPerformModKill(killer, target, message.blink).WrapToIl2Cpp());
+           if (killer) killer!.MyPhysics.StartCoroutine(killer.KillAnimations[System.Random.Shared.Next(killer.KillAnimations.Count)].CoPerformModKill(killer, target, message.blink).WrapToIl2Cpp());
 
            // MurderPlayer ここまで
 
 
            var targetInfo = target.GetModInfo();
-           var killerInfo = killer.GetModInfo();
+           var killerInfo = killer?.GetModInfo();
 
            if (targetInfo != null)
            {
@@ -140,17 +141,15 @@ public static class PlayerExtension
            var killer = Helpers.GetPlayer(message.killerId);
            var target = Helpers.GetPlayer(message.targetId);
 
-           if (killer == null || target == null) return;
+           if (target == null) return;
 
-           if (!target.AmOwner)
-               if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(killer.KillSfx, false, 0.8f, null);
-
+           if (!target.AmOwner) if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(target.KillSfx, false, 0.8f, null);
 
            target.Die(DeathReason.Exile, false);
 
            if (target.AmOwner)
            {
-               DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer.Data, target.Data);
+               DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
                NebulaGameManager.Instance!.CanSeeAllInfo = true;
            }
 
@@ -201,6 +200,14 @@ public static class PlayerExtension
         "MarkAsExtraVictim",
         (message, _) => MeetingHudExtension.ExtraVictims.Add(message)
         );
+
+    static public void ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, TranslatableTag playerState, TranslatableTag? recordState, bool showOverlay)
+    {
+        if (MeetingHud.Instance)
+            RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay));
+        else
+            RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
+    }
 
     static public void ModKill(this PlayerControl killer, PlayerControl target, bool showBlink, TranslatableTag playerState, TranslatableTag? recordState, bool showOverlay = true)
     {

@@ -52,8 +52,6 @@ public class Phosphorus : ConfigurableStandardRole
         }
     }
 
-    static private SpriteLoader lightMaskSprite = SpriteLoader.FromResource("Nebula.Resources.LightMask.png", 100f);
-
     public class Instance : Crewmate.Instance
     {
         private ModAbilityButton? placeButton = null;
@@ -147,7 +145,7 @@ public class Phosphorus : ConfigurableStandardRole
           var lantern = NebulaSyncObject.GetObject<Lantern>(message);
           if (lantern != null)
           {
-              SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(lantern.Position, lightMaskSprite.GetSprite());
+              SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(lantern.Position);
 
               IEnumerator CoLight()
               {

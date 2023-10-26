@@ -78,17 +78,22 @@ public class Raider : ConfigurableStandardRole
                 {
                     var pos = Position;
                     var size = MyRole.AxeSizeOption.GetFloat();
-                    foreach(var p in PlayerControl.AllPlayerControls)
+                    if (!MeetingHud.Instance)
                     {
-                        if (p.Data.IsDead || p.AmOwner) continue;
-                        if (!MyRole.CanKillImpostorOption && p.Data.Role.IsImpostor) continue;
-
-                        if (p.GetTruePosition().Distance(pos) < size * 0.4f)
+                        foreach (var p in PlayerControl.AllPlayerControls)
                         {
-                            PlayerControl.LocalPlayer.ModKill(p, false, PlayerState.Beaten, EventDetail.Kill);
-                            killed = true;
-                        }
+                            if (p.Data.IsDead || p.AmOwner) continue;
+                            if (!MyRole.CanKillImpostorOption && p.Data.Role.IsImpostor) continue;
 
+                            if (p.GetTruePosition().Distance(pos) < size * 0.4f)
+                            {
+                                //不可視なプレイヤーは無視
+                                if (p.GetModInfo()?.HasAttribute(AttributeModulator.PlayerAttribute.Invisible) ?? false) continue;
+
+                                PlayerControl.LocalPlayer.ModKill(p, false, PlayerState.Beaten, EventDetail.Kill);
+                                killed = true;
+                            }
+                        }
                     }
                 }
 
@@ -168,7 +173,11 @@ public class Raider : ConfigurableStandardRole
                 killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 killButton.OnClick = (button) =>
                 {
-                    if (MyAxe != null) RpcThrow.Invoke((MyAxe!.ObjectId, MyAxe!.Position, MyPlayer.MouseAngle));
+                    if (MyAxe != null)
+                    {
+                        RpcThrow.Invoke((MyAxe!.ObjectId, MyAxe!.Position, MyPlayer.MouseAngle));
+                        NebulaAsset.PlaySE(NebulaAudioClip.ThrowAxe);
+                    }
                     MyAxe = null;
                     button.StartCoolDown();
                     equipButton.SetLabel("equip");

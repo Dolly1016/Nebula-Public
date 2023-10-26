@@ -1,9 +1,11 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Nebula.Behaviour;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Nebula.Roles.Crewmate.Phosphorus;
 
 namespace Nebula.Extensions;
 
@@ -24,6 +26,9 @@ public static class ShipExtension
                 break;
             case 4:
                 ModifyAirship();
+                break;
+            case 5:
+                ModifyFungle();
                 break;
         }
     }
@@ -113,7 +118,49 @@ public static class ShipExtension
         }
     }
 
+    private static void ModifyFungle()
+    {
+        //しばらくの措置として見た目チェンジサボ廃止
+        ShipStatus.Instance.MapPrefab.infectedOverlay.transform.GetChild(6).GetChild(0).gameObject.SetActive(false);
 
+        if (GeneralConfigurations.FungleSimpleLaboratoryOption) ModifyLaboratory();
+
+        if (GeneralConfigurations.FungleThinFogOption)
+        {
+            var renderer = ShipStatus.Instance.transform.FindChild("FungleJungleShadow").GetChild(0).GetComponent<MeshRenderer>();
+            var color = renderer.material.color;
+            color.a = 0.35f;
+            renderer.material.color = color;
+        }
+        if (GeneralConfigurations.FungleGlowingCampfireOption)
+        {
+            var light = AmongUsUtil.GenerateCustomLight(new(-9.8f, 1.65f));
+            var script = light.gameObject.AddComponent<ScriptBehaviour>();
+            float t = 0f;
+            script.UpdateHandler += () =>
+            {
+                t -= Time.deltaTime;
+                if (t < 0f)
+                {
+                    light.transform.localScale = Vector3.one * (1.3f + (float)System.Random.Shared.NextDouble() * 0.05f);
+                    t = 0.08f;
+                }
+            };
+        }
+        if (GeneralConfigurations.FungleGlowingMushroomOption)
+        {
+            void SetUpGlowingMush(GameObject obj)
+            {
+                var light = AmongUsUtil.GenerateCustomLight(new(0, 0));
+                light.transform.SetParent(obj.transform);
+                light.material.SetColor("_Color", Color.white.AlphaMultiplied(0.35f));
+                light.transform.localScale = Vector3.one * 1.9f;
+                light.transform.localPosition = new Vector3(0f, 0f, -50f);
+            }
+            ShipStatus.Instance.transform.FindChild("Outside").GetChild(0).GetChild(5).gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)SetUpGlowingMush);
+            SetUpGlowingMush(ShipStatus.Instance.FastRooms[SystemTypes.Reactor].transform.FindChild("GlowingMushroom").gameObject);
+        }
+    }
 
 
 
@@ -372,5 +419,49 @@ public static class ShipExtension
         airship.GapPlatform.SetSide(true);
         airship.outOfOrderPlat.SetActive(true);
         airship.GapPlatform.transform.localPosition = airship.GapPlatform.DisabledPosition;
+    }
+
+    static private SpriteLoader customLaboratorySprite = SpriteLoader.FromResource("Nebula.Resources.FungleCustomLaboratory.png", 100f);
+    static private SpriteLoader customLaboratoryWallSprite = SpriteLoader.FromResource("Nebula.Resources.FungleCustomLaboratoryWall.png", 100f);
+    static private void ModifyLaboratory()
+    {
+        Transform laboratory = ShipStatus.Instance.FastRooms[SystemTypes.Laboratory].transform;
+
+        //画像を更新する
+        laboratory.GetChild(0).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().sprite = customLaboratorySprite.GetSprite();
+        laboratory.GetChild(0).GetChild(2).GetChild(1).GetComponent<SpriteRenderer>().sprite = customLaboratoryWallSprite.GetSprite();
+
+        //壁を編集する
+        var collider = laboratory.GetChild(2).gameObject.GetComponent<PolygonCollider2D>();
+        var newCollider = laboratory.GetChild(2).gameObject.AddComponent<PolygonCollider2D>();
+
+        var points = collider.points.ToArray();
+        var polygon1 = new List<Vector2>();
+        polygon1.Add(new(0.45f, -1.71f));
+        polygon1.AddRange(points.Skip(17).Take(14));
+        polygon1.Add(new(0.45f, -1.89f));
+
+        var polygon2 = new List<Vector2>();
+        polygon2.AddRange(points.Take(16));
+        polygon2.Add(new(1.2f, -1.71f));
+        polygon2.Add(new(1.2f, -1.89f));
+        polygon2.AddRange(points.Skip(31).Take(3));
+
+        Il2CppSystem.Collections.Generic.List<Vector2> ToList(Vector2[] array)
+        {
+            Il2CppSystem.Collections.Generic.List<Vector2> list = new(array.Length);
+            foreach (var el in array) list.Add(el);
+            return list;
+        }
+
+        collider.SetPath(0, ToList(polygon1.ToArray()));
+        newCollider.SetPath(0, ToList(polygon2.ToArray()));
+
+        //ラボ上部にサンプル採取タスクを追加
+        GameObject collectSampleConsole = ShipStatus.Instance.transform.GetChild(5).GetChild(0).GetChild(2).GetChild(0).gameObject;
+        var labSample = GameObject.Instantiate(collectSampleConsole, collectSampleConsole.transform.parent);
+        labSample.name = "CollectSamples (Lab)";
+        labSample.transform.GetChild(0).GetComponent<Console>().ConsoleId = 8;
+        labSample.transform.localPosition = new(-8.393f, -2.4575f, 1f);
     }
 }

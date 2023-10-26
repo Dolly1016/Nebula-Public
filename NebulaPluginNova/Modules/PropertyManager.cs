@@ -9,19 +9,28 @@ namespace Nebula.Modules;
 public interface INebulaProperty
 {
     public string GetString();
+    public float GetFloat();
 }
 
 public class NebulaFunctionProperty : INebulaProperty
 {
     Func<string> myFunc;
-    public NebulaFunctionProperty(string id, Func<string> func)
+    Func<float> myFloatFunc;
+    public NebulaFunctionProperty(string id, Func<string> func, Func<float> floatFunc)
     {
         myFunc = func;
+        myFloatFunc = floatFunc;
+
         PropertyManager.Register(id, this);
     }
 
     public string GetString() { 
         return myFunc.Invoke();
+    }
+
+    public float GetFloat()
+    {
+        return myFloatFunc.Invoke();
     }
 }
 

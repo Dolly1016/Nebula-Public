@@ -60,9 +60,10 @@ public class NebulaGameEnd
     static public CustomEndCondition ImpostorWin = new(17, "impostor", Palette.ImpostorRed, 16);
     static public CustomEndCondition VultureWin = new(24, "vulture", Roles.Neutral.Vulture.MyRole.RoleColor, 32);
     static public CustomEndCondition JesterWin = new(25, "jester", Roles.Neutral.Jester.MyRole.RoleColor, 32);
-    static public CustomEndCondition JackalWin = new(26, "jackal", Roles.Neutral.Jackal.MyRole.RoleColor, 16);
+    static public CustomEndCondition JackalWin = new(26, "jackal", Roles.Neutral.Jackal.MyRole.RoleColor, 18);
     static public CustomEndCondition ArsonistWin = new(27, "arsonist", Roles.Neutral.Arsonist.MyRole.RoleColor, 32);
     static public CustomEndCondition LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.RoleColor, 18);
+    static public CustomEndCondition PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.RoleColor, 32);
     static public CustomEndCondition NoGame = new(128, "nogame", InvalidColor, 128);
 
     static public CustomExtraWin ExtraLoversWin = new(0, "lover", Roles.Modifier.Lover.MyRole.RoleColor);
@@ -104,11 +105,15 @@ public class EndGameManagerSetUpPatch
     {
         MetaContext context = new();
         string text = "";
+
+        NebulaGameManager.Instance!.CanSeeAllInfo = true;
+
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
         {
             //Name Text
             string nameText = p.DefaultName;
             string stateText = p.MyState?.Text ?? "";
+            if (p.IsDead && p.MyKiller != null) stateText += "<color=#FF6666><size=75%> by " + (p.MyKiller?.DefaultName ?? "ERROR") + "</size></color>";
             string taskText = p.Tasks.Quota > 0 ? $" ({p.Tasks.ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
 
             //Role Text
@@ -132,7 +137,7 @@ public class EndGameManagerSetUpPatch
             if (roleText.Length > 0) roleText += " → ";
             roleText += entries[entries.Length - 1].Item2;
 
-            text += $"{nameText}<indent=15px>{taskText}</indent><indent=24px>{stateText}</indent><indent=34px>{roleText}</indent>\n";
+            text += $"{nameText}<indent=15px>{taskText}</indent><indent=24px>{stateText}</indent><indent=45px>{roleText}</indent>\n";
         }
 
         context.Append(new MetaContext.VariableText(new TextAttribute(TextAttribute.BoldAttr) { Font = font, Size = new(6f, 4.2f), Alignment = TMPro.TextAlignmentOptions.Left }.EditFontSize(1.4f, 1f, 1.4f))

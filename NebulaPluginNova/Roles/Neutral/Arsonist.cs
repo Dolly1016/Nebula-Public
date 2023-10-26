@@ -1,5 +1,7 @@
-﻿using Nebula.Configuration;
+﻿using Nebula.Behaviour;
+using Nebula.Configuration;
 using Nebula.Utilities;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,18 +75,33 @@ public class Arsonist : ConfigurableStandardRole
             if (AmOwner)
             {
                 var IconsHolder = HudContent.InstantiateContent("ArsonistIcons", true, true, false, true);
-                foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                Bind(IconsHolder.gameObject);
+
+                var ajust = UnityHelper.CreateObject<ScriptBehaviour>("Ajust", IconsHolder.transform, Vector3.zero);
+                ajust.UpdateHandler += () =>
+                {
+                    if (MeetingHud.Instance)
+                    {
+                        ajust.transform.localScale = new(0.65f, 0.65f, 1f);
+                        ajust.transform.localPosition = new(-0.45f, -0.37f, 0f);
+                    }
+                    else
+                    {
+                        ajust.transform.localScale = Vector3.one;
+                        ajust.transform.localPosition = Vector3.zero;
+                    }
+                };
+                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                 {
                     if (p.AmOwner) continue;
 
-                    var icon = AmongUsUtil.GetPlayerIcon(p.DefaultOutfit, IconsHolder.transform, Vector3.zero, Vector3.one * 0.31f);
+                    var icon = AmongUsUtil.GetPlayerIcon(p.DefaultOutfit, ajust.transform, Vector3.zero, Vector3.one * 0.31f);
                     icon.ToggleName(false);
                     icon.SetAlpha(0.35f);
                     playerIcons.Add((p.PlayerId,icon));
 
                     UpdateIcons();
                 }
-                Bind(new GameObjectBinding(IconsHolder.gameObject));
 
                 var douseTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)));
 

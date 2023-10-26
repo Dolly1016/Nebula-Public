@@ -2,6 +2,7 @@
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using Nebula.Game;
+using Nebula.Map;
 using Nebula.Modules;
 using Nebula.Utilities;
 using Rewired.UI.ControlMapper;
@@ -255,16 +256,31 @@ public class NebulaManager : MonoBehaviour
         File.WriteAllBytesAsync(GetPicturePath(out string displayPath), tex.EncodeToPNG());
     }
 
+
     public void Update()
     {
-
         /*
         if (Input.GetKeyDown(KeyCode.T))
         {
-            UnityHelper.CreateObject<TextField>("TextField", null, new Vector3(0, 0, -200f), LayerExpansion.GetUILayer());
+            Vector2 pos = new Vector2(-25f, 16f);
+            Vector2 size = new Vector2(53f, -33f);
+            var texture = MapData.GetCurrentMapData().OutputMap(pos,size);
+            var obj = GameObject.Find("BuskerMap");
+            if (obj != null) GameObject.Destroy(obj);
+
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("BuskerMap", null, (Vector3)(pos + size * 0.5f) + new Vector3(0, 0, -10f), LayerExpansion.GetDefaultLayer());
+            renderer.sprite = texture.ToSprite(10f);
+            renderer.color = Color.white.AlphaMultiplied(0.5f);
+
+            File.WriteAllBytes("Map.png", UnityEngine.ImageConversion.EncodeToPNG(texture));
+        }
+
+        if(Input.GetKeyDown(KeyCode.Y)) {
+            Camera.main.orthographicSize += 3f;
+            Camera.main.transform.FindChild("ShadowQuad").gameObject.SetActive(false);
+            if (Camera.main.orthographicSize > 20f) Camera.main.orthographicSize = 3f;
         }
         */
-
 
         if (NebulaPlugin.FinishedPreload)
         {

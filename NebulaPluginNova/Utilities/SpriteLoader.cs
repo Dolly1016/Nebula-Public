@@ -185,6 +185,19 @@ public class ZipTextureLoader : ITextureLoader
     }
 }
 
+public class StreamTextureLoader : ITextureLoader
+{
+    Texture2D texture;
+
+    public StreamTextureLoader(Stream stream)
+    {
+        texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
+        GraphicsHelper.LoadImage(texture, stream.ReadBytes(), false);
+    }
+
+    public Texture2D GetTexture() => texture;
+}
+
 public class UnloadTextureLoader : ITextureLoader
 {
     Texture2D texture = null!;
@@ -257,29 +270,6 @@ public class AssetTextureLoader : ITextureLoader
     {
         if (!texture) texture = NebulaAsset.LoadAsset<Texture2D>(address);
         return texture;
-    }
-}
-
-public class AddressedTextureLoader : ITextureLoader
-{
-    string address;
-    INameSpace nameSpace;
-    Texture2D texture = null!;
-
-    public AddressedTextureLoader(INameSpace nameSpace, string innerAddress)
-    {
-        this.nameSpace = nameSpace;
-        this.address = innerAddress;
-    }
-
-    public Texture2D GetTexture()
-    {
-        if (!texture)
-        {
-            using var stream = nameSpace.OpenRead(address);
-            if (stream != null) texture = GraphicsHelper.LoadTextureFromStream(stream);
-        }
-        return texture!;
     }
 }
 

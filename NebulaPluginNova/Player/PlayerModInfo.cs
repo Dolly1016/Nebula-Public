@@ -140,6 +140,8 @@ public class PlayerModInfo
     private List<OutfitCandidate> outfits = new List<OutfitCandidate>();
     private TMPro.TextMeshPro roleText;
 
+    public Vector2? GoalPos = null;
+
     public PlayerTaskState Tasks { get; set; }
 
     public bool HasCrewmateTasks
@@ -214,15 +216,23 @@ public class PlayerModInfo
             newOutfit = outfits[0].outfit;
         }
 
-        MyControl.RawSetColor(newOutfit.ColorId);
-        //MyControl.RawSetName(newOutfit.PlayerName);
-        MyControl.RawSetHat(newOutfit.HatId, newOutfit.ColorId);
-        MyControl.RawSetSkin(newOutfit.SkinId, newOutfit.ColorId);
-        MyControl.RawSetVisor(newOutfit.VisorId, newOutfit.ColorId);
-        MyControl.RawSetPet(newOutfit.PetId, newOutfit.ColorId);
-        MyControl.RawSetColor(newOutfit.ColorId);
-        MyControl.MyPhysics.ResetAnimState();
-        MyControl.cosmetics.StopAllAnimations();
+        try
+        {
+            MyControl.RawSetColor(newOutfit.ColorId);
+            //MyControl.RawSetName(newOutfit.PlayerName);
+            MyControl.RawSetHat(newOutfit.HatId, newOutfit.ColorId);
+            MyControl.RawSetSkin(newOutfit.SkinId, newOutfit.ColorId);
+            MyControl.RawSetVisor(newOutfit.VisorId, newOutfit.ColorId);
+            MyControl.RawSetPet(newOutfit.PetId, newOutfit.ColorId);
+            MyControl.RawSetColor(newOutfit.ColorId);
+            MyControl.MyPhysics.ResetAnimState();
+            MyControl.cosmetics.StopAllAnimations();
+        }
+        catch (Exception e){
+            Debug.LogError("Outfit Error: Error occurred on changing " + DefaultName + " 's outfit");
+            if (!MyControl) Debug.LogError(" - PlayerControl is INVALID.");
+            Debug.LogError(e.ToString());
+        }
     }
 
     public void AddOutfit(OutfitCandidate outfit)
@@ -361,13 +371,16 @@ public class PlayerModInfo
         (message, isCalledByMe) =>
         {
             var player = NebulaGameManager.Instance!.RegisterPlayer(PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.PlayerId == message.playerId)));
-            if(message.isRole)
+            if (message.isRole)
                 player.SetRole(Roles.Roles.AllRoles[message.assignableId], message.arguments);
             else
                 player.SetModifier(Roles.Roles.AllModifiers[message.assignableId], message.arguments);
 
-            if (NebulaGameManager.Instance.GameState != NebulaGameStates.NotStarted) HudManager.Instance.UpdateHudContent();
-            
+            if (NebulaGameManager.Instance.GameState != NebulaGameStates.NotStarted)
+            {
+                HudManager.Instance.UpdateHudContent();
+                if (player.AmOwner) player.UpdateTaskState();
+            }
         }
         );
 
@@ -511,7 +524,7 @@ public class PlayerModInfo
 
           if (message.bodyId == byte.MaxValue)
           {
-              if(info.deadBodyCache && message.pos.magnitude < 10000) info.deadBodyCache.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
+              if(info.deadBodyCache && message.pos.magnitude < 10000) info.deadBodyCache!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
               info.HoldingDeadBody = null;
           }
           else
@@ -663,15 +676,25 @@ public class PlayerModInfo
         });
     }
 
+    public void FixedUpdate()
+    {
+        RoleAction((role) => {
+            role.Update();
+            if (MyControl.AmOwner) role.LocalHudUpdate();
+        });
+    }
+
+    public void UpdateTaskState()
+    {
+        if (!Role.HasAnyTasks)
+            Tasks.WaiveAllTasksAsOutsider();
+        else if (!Role.HasCrewmateTasks)
+            Tasks.BecomeToOutsider();
+    }
+
     public void OnGameStart()
     {
-        if (AmOwner)
-        {
-            if (!Role.HasAnyTasks)
-                Tasks.WaiveAllTasksAsOutsider();
-            else if (!Role.HasCrewmateTasks)
-                Tasks.BecomeToOutsider();
-        }
+        if(AmOwner)UpdateTaskState();
 
         UpdateOutfit();
 

@@ -25,6 +25,7 @@ public class Sniper : ConfigurableStandardRole
     private NebulaConfiguration ShotEffectiveRangeOption = null!;
     private NebulaConfiguration ShotNoticeRangeOption = null!;
     private NebulaConfiguration StoreRifleOnFireOption = null!;
+    private NebulaConfiguration CanSeeRifleInShadowOption = null!;
 
     protected override void LoadOptions()
     {
@@ -32,9 +33,10 @@ public class Sniper : ConfigurableStandardRole
 
         SnipeCoolDownOption = new(RoleConfig, "snipeCoolDown", KillCoolDownConfiguration.KillCoolDownType.Immediate, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 20f, -10f, 1f);
         ShotSizeOption = new(RoleConfig, "shotSize", null, 0.25f, 4f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
-        ShotEffectiveRangeOption = new(RoleConfig, "shotEffectiveRange", null, 2.5f, 40f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.OddsDecorator };
-        ShotNoticeRangeOption = new(RoleConfig, "shotNoticeRange", null, 2.5f, 40f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.OddsDecorator };
+        ShotEffectiveRangeOption = new(RoleConfig, "shotEffectiveRange", null, 2.5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.OddsDecorator };
+        ShotNoticeRangeOption = new(RoleConfig, "shotNoticeRange", null, 2.5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.OddsDecorator };
         StoreRifleOnFireOption = new(RoleConfig, "storeRifleOnFire", null, true, true);
+        CanSeeRifleInShadowOption = new(RoleConfig, "canSeeRifleInShadow", null, false, false);
     }
 
     [NebulaRPCHolder]
@@ -49,6 +51,7 @@ public class Sniper : ConfigurableStandardRole
             Renderer = UnityHelper.CreateObject<SpriteRenderer>("SniperRifle", null, owner.MyControl.transform.position, LayerExpansion.GetObjectsLayer());
             Renderer.sprite = rifleSprite.GetSprite();
             Renderer.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+            Renderer.gameObject.layer = MyRole.CanSeeRifleInShadowOption ? LayerExpansion.GetObjectsLayer() : LayerExpansion.GetDefaultLayer();
         }
 
         public override void Update()
@@ -78,6 +81,8 @@ public class Sniper : ConfigurableStandardRole
 
                 //インポスターは無視
                 if (p.Role.Role.RoleCategory == RoleCategory.ImpostorRole) continue;
+                //不可視なプレイヤーは無視
+                if (p.HasAttribute(AttributeModulator.PlayerAttribute.Invisible)) continue;
 
                 var pos = p.MyControl.GetTruePosition();
                 Vector2 diff = pos - (Vector2)Renderer.transform.position;
@@ -96,6 +101,7 @@ public class Sniper : ConfigurableStandardRole
         }
     }
 
+    [NebulaRPCHolder]
     public class Instance : Impostor.Instance
     {
         private ModAbilityButton? equipButton = null;
@@ -121,8 +127,11 @@ public class Sniper : ConfigurableStandardRole
                 equipButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 equipButton.OnClick = (button) =>
                 {
-                    if(MyRifle == null)
+                    if (MyRifle == null)
+                    {
+                        NebulaAsset.PlaySE(NebulaAudioClip.SniperEquip);
                         equipButton.SetLabel("unequip");
+                    }
                     else
                         equipButton.SetLabel("equip");
 
@@ -136,6 +145,7 @@ public class Sniper : ConfigurableStandardRole
                 killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 killButton.OnClick = (button) =>
                 {
+                    NebulaAsset.PlaySE(NebulaAudioClip.SniperShot);
                     var target = MyRifle?.GetTarget(MyRole.ShotSizeOption.GetFloat(), MyRole.ShotEffectiveRangeOption.GetFloat());
                     if (target != null)
                     {

@@ -46,17 +46,13 @@ public class NebulaEndCriteria
                             return NebulaGameEnd.ImpostorWin;
                         }
                     }
-                    ISystemType? systemType2 = status.Systems.ContainsKey(SystemTypes.Reactor) ? status.Systems[SystemTypes.Reactor] : null;
-                    if (systemType2 == null)
+
+                    foreach (ISystemType systemType2 in ShipStatus.Instance.Systems.Values)
                     {
-                        systemType2 = status.Systems.ContainsKey(SystemTypes.Laboratory) ? status.Systems[SystemTypes.Laboratory] : null;
-                    }
-                    if (systemType2 != null)
-                    {
-                        ICriticalSabotage? criticalSystem = systemType2.TryCast<ICriticalSabotage>();
-                        if (criticalSystem != null && criticalSystem.Countdown < 0f)
+                        ICriticalSabotage? criticalSabotage = systemType2.TryCast<ICriticalSabotage>();
+                        if (criticalSabotage != null && criticalSabotage.Countdown < 0f)
                         {
-                            criticalSystem.ClearSabotage();
+                            criticalSabotage.ClearSabotage();
                             return NebulaGameEnd.ImpostorWin;
                         }
                     }
@@ -90,6 +86,8 @@ public class NebulaEndCriteria
             int completed = 0;
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
+                if (p.IsDisconnected) continue;
+
                 if (!p.Tasks.IsCrewmateTask) continue;
                 quota += p.Tasks.Quota;
                 completed += p.Tasks.TotalCompleted;
@@ -134,7 +132,7 @@ public class NebulaEndCriteria
                 if (p.Role.Role.Team == Impostor.MyTeam) return null;
             }
 
-            return jackals * 2 >= totalAlive ? NebulaGameEnd.ImpostorWin : null;
+            return jackals * 2 >= totalAlive ? NebulaGameEnd.JackalWin : null;
         }
     };
 

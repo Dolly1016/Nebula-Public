@@ -18,7 +18,8 @@ public static class GeneralConfigurations
         Vent = 0,
         Console = 1,
         Blueprint = 2,
-        Wiring = 3
+        Wiring = 3,
+        Light = 4,
     }
 
     static public NebulaConfiguration GameModeOption = new(null, "options.gamemode", null, CustomGameMode.AllGameMode.Count - 1, 0, 0);
@@ -28,6 +29,7 @@ public static class GeneralConfigurations
         new(),
         new(),
         null!,
+        new(),
         new(),
     };
 
@@ -55,6 +57,7 @@ public static class GeneralConfigurations
         new NebulaConfiguration(null,"options.map.customization.polus",null,int.MaxValue,int.MaxValue,int.MaxValue),
         null!,
         new NebulaConfiguration(null,"options.map.customization.airship",null,int.MaxValue,int.MaxValue,int.MaxValue),
+        new NebulaConfiguration(null,"options.map.customization.fungle",null,int.MaxValue,int.MaxValue,int.MaxValue),
     };
 
     static private NebulaConfiguration.NebulaByteConfiguration GenerateMapCustomization(byte mapId, MapOptionType type,string id,bool defaultValue,Vector2 pos) {
@@ -78,9 +81,16 @@ public static class GeneralConfigurations
     static public NebulaConfiguration.NebulaByteConfiguration AirshipVaultWireOption = GenerateMapCustomization(4, MapOptionType.Wiring, "vaultWiring", false, new(-11.5f, 12.5f));
     static public NebulaConfiguration.NebulaByteConfiguration AirshipHallwayWireOption = GenerateMapCustomization(4, MapOptionType.Wiring, "hallwayWiring", false, new(-10.3f, -0.25f));
     static public NebulaConfiguration.NebulaByteConfiguration AirshipMedicalWireOption = GenerateMapCustomization(4, MapOptionType.Wiring, "medicalWiring", false, new(27f, -5f));
+    static public NebulaConfiguration.NebulaByteConfiguration FungleSimpleLaboratoryOption = GenerateMapCustomization(5, MapOptionType.Blueprint, "simpleLaboratory", false, new(-3.2f, -11f));
+    static public NebulaConfiguration.NebulaByteConfiguration FungleThinFogOption = GenerateMapCustomization(5, MapOptionType.Blueprint, "thinFog", false, new(3.1f, -14f));
+    static public NebulaConfiguration.NebulaByteConfiguration FungleGlowingCampfireOption = GenerateMapCustomization(5, MapOptionType.Light, "glowingCampfire", false, new(-9.8f, 1.65f));
+    static public NebulaConfiguration.NebulaByteConfiguration FungleGlowingMushroomOption = GenerateMapCustomization(5, MapOptionType.Light, "glowingMushroom", false, new(14.7f, -12.5f));
+    static public NebulaConfiguration.NebulaByteConfiguration FungleQuickPaceDoorMinigameOption = GenerateMapCustomization(5, MapOptionType.Console, "quickPaceDoorMinigame", false, new(-21f, -15f));
 
     static public ConfigurationHolder MeetingOptions = new("options.meeting", null, ConfigurationTab.Settings, CustomGameMode.Standard | CustomGameMode.FreePlay);
+    static public NebulaConfiguration DeathPenaltyOption = new(MeetingOptions, "deathPenalty", null, 0f, 20f, 0.5f, 0f, 0f) { Decorator = NebulaConfiguration.SecDecorator };
     static public NebulaConfiguration NoticeExtraVictimsOption = new NebulaConfiguration(MeetingOptions, "noticeExtraVictims", null, false, false);
+    static public NebulaConfiguration NumOfMeetingsOption = new(MeetingOptions, "numOfMeeting", null, 0, 15, 10, 10);
 
     static public ConfigurationHolder ExclusiveAssignmentOptions = new("options.exclusiveAssignment", null, ConfigurationTab.Settings, CustomGameMode.Standard | CustomGameMode.FreePlay);
     static public ExclusiveAssignmentConfiguration ExclusiveOptionBody = new(ExclusiveAssignmentOptions, 10);

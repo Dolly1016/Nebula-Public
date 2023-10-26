@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 
 namespace Nebula.Utilities;
 
@@ -15,7 +16,7 @@ public static class AmongUsUtil
     public static UiElement CurrentUiElement => ControllerManager.Instance.CurrentUiState.CurrentSelection;
     public static bool InMeeting => MeetingHud.Instance == null && ExileController.Instance == null;
     public static byte CurrentMapId => GameOptionsManager.Instance.CurrentGameOptions.MapId;
-    private static string[] mapName = new string[] { "skeld", "mira", "polus", "undefined", "airship" };
+    private static string[] mapName = new string[] { "skeld", "mira", "polus", "undefined", "airship", "fungle" };
     public static string ToMapName(byte mapId) => mapName[mapId];
     public static string ToDisplayString(SystemTypes room, byte? mapId = null) => Language.Translate("location." + mapName[mapId ?? CurrentMapId] + "." + Enum.GetName(typeof(SystemTypes), room)!.HeadLower());
     public static float VanillaKillCoolDown => GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
@@ -134,10 +135,12 @@ public static class AmongUsUtil
         return NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault((p) => p.HoldingDeadBody.HasValue && p.HoldingDeadBody.Value == body.ParentId);
     }
 
-    public static SpriteRenderer GenerateCustomLight(Vector2 position,Sprite lightSprite)
+
+    static private SpriteLoader lightMaskSprite = SpriteLoader.FromResource("Nebula.Resources.LightMask.png", 100f);
+    public static SpriteRenderer GenerateCustomLight(Vector2 position,Sprite? lightSprite = null)
     {
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light", null, (Vector3)position + new Vector3(0, 0, -50f), LayerExpansion.GetDrawShadowsLayer());
-        renderer.sprite = lightSprite;
+        renderer.sprite = lightSprite ?? lightMaskSprite.GetSprite();
         renderer.material.shader = NebulaAsset.MultiplyBackShader;
 
         return renderer;
@@ -187,5 +190,103 @@ public static class AmongUsUtil
         GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
 
         return playerControl;
+    }
+
+    public static readonly string[] AllVanillaOptions =
+    {
+        "vanilla.map",
+        "vanilla.impostors",
+        "vanilla.killDistance",
+        "vanilla.numOfEmergencyMeetings",
+        "vanilla.emergencyCoolDown",
+        "vanilla.discussionTime",
+        "vanilla.votingTime",
+        "vanilla.numOfCommonTasks",
+        "vanilla.numOfShortTasks",
+        "vanilla.numOfLongTasks",
+        "vanilla.visualTasks",
+        "vanilla.confirmImpostor",
+        "vanilla.anonymousVotes"
+    };
+
+    public static void ChangeOptionAs(string name,string value)
+    {
+        switch (name)
+        {
+            case "vanilla.map":
+                GameOptionsManager.Instance.CurrentGameOptions.SetByte(ByteOptionNames.MapId, (byte)Array.IndexOf(mapName, value.HeadLower()));
+                break;
+            case "vanilla.impostors":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.NumImpostors, int.Parse(value));
+                break;
+            case "vanilla.killDistance":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.KillDistance, int.Parse(value));
+                break;
+            case "vanilla.numOfEmergencyMeetings":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.NumEmergencyMeetings, int.Parse(value));
+                break;
+            case "vanilla.emergencyCoolDown":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.EmergencyCooldown, int.Parse(value));
+                break;
+            case "vanilla.discussionTime":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.DiscussionTime, int.Parse(value));
+                break;
+            case "vanilla.votingTime":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.VotingTime, int.Parse(value));
+                break;
+            case "vanilla.numOfCommonTasks":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.NumCommonTasks, int.Parse(value));
+                break;
+            case "vanilla.numOfShortTasks":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.NumShortTasks, int.Parse(value));
+                break;
+            case "vanilla.numOfLongTasks":
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.NumLongTasks, int.Parse(value));
+                break;
+            case "vanilla.visualTasks":
+                GameOptionsManager.Instance.CurrentGameOptions.SetBool(BoolOptionNames.VisualTasks, bool.Parse(value));
+                break;
+            case "vanilla.confirmImpostor":
+                GameOptionsManager.Instance.CurrentGameOptions.SetBool(BoolOptionNames.ConfirmImpostor, bool.Parse(value));
+                break;
+            case "vanilla.anonymousVotes":
+                GameOptionsManager.Instance.CurrentGameOptions.SetBool(BoolOptionNames.AnonymousVotes, bool.Parse(value));
+                break;
+        }
+    }
+
+    public static string GetOptionAsString(string name)
+    {
+        switch (name)
+        {
+            case "vanilla.map":
+                return mapName[GameOptionsManager.Instance.CurrentGameOptions.GetByte(ByteOptionNames.MapId)].HeadUpper();
+            case "vanilla.impostors":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumImpostors).ToString();
+            case "vanilla.killDistance":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.KillDistance).ToString();
+            case "vanilla.numOfEmergencyMeetings":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumEmergencyMeetings).ToString();
+            case "vanilla.emergencyCoolDown":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.EmergencyCooldown).ToString();
+            case "vanilla.discussionTime":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.DiscussionTime).ToString();
+            case "vanilla.votingTime":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.VotingTime).ToString();
+            case "vanilla.numOfCommonTasks":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumCommonTasks).ToString();
+            case "vanilla.numOfShortTasks":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumShortTasks).ToString();
+            case "vanilla.numOfLongTasks":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumLongTasks).ToString();
+            case "vanilla.visualTasks":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetBool(BoolOptionNames.VisualTasks).ToString();
+            case "vanilla.confirmImpostor":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetBool(BoolOptionNames.ConfirmImpostor).ToString();
+            case "vanilla.anonymousVotes":
+                return GameOptionsManager.Instance.CurrentGameOptions.GetBool(BoolOptionNames.AnonymousVotes).ToString();
+        }
+
+        return "Invalid";
     }
 }

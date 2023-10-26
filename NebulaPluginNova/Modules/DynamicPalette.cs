@@ -711,8 +711,15 @@ public class NebulaPlayerTab : MonoBehaviour
 
             PreviewColor(null, null, null);
         };
+
+        float lastB = -1f;
+        float lastBTime = 0f;
         BrTargetKnob.OnDragging = (y) => {
             float b = (y + (BrightnessHeight * 0.5f)) / BrightnessHeight;
+            if (lastB == b || Mathf.Abs(Time.time - lastBTime) < 0.05f) return;
+            lastBTime = Time.time;
+            lastB = b;
+
             PreviewColor(null, null, b);
         };
 
@@ -806,6 +813,9 @@ public class NebulaPlayerTab : MonoBehaviour
         while (hue >= 64) hue -= 64;
     }
 
+    byte lastH = 0, lastD = 0;
+    float lastTime = 0f;
+
     public void Update()
     {
         BrTargetKnob.gameObject.SetActive(DynamicPalette.MyColor.GetShadowPattern() != byte.MaxValue);
@@ -817,6 +827,11 @@ public class NebulaPlayerTab : MonoBehaviour
         {
             ToColorParam(pos, out var h, out var d);
 
+            if ((h == lastH && d == lastD) || Mathf.Abs(Time.time - lastTime) < 0.05f) return;
+            lastTime = Time.time;
+            lastH = h;
+            lastD = d;
+
             if (edittingVisorColor)
             {
                 DynamicPalette.VisorColors[PreviewColorId] = DynamicPalette.AllColorPalette[0].GetColor(h, d, 1f);
@@ -824,7 +839,6 @@ public class NebulaPlayerTab : MonoBehaviour
             }
             else
             {
-                
                 PreviewColor(h, d, null);
             }
         }

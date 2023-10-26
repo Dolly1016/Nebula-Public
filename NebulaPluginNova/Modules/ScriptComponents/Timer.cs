@@ -106,6 +106,7 @@ public class Timer : INebulaScriptComponent
             ((bool)Minigame.Instance.MyNormTask
             || Minigame.Instance.TryCast<IDoorMinigame>() != null
             || Minigame.Instance.TryCast<VitalsMinigame>() != null
+            || Minigame.Instance.TryCast<MultistageMinigame>() != null
             )) return true;
             return false;
         });

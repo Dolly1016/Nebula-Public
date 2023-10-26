@@ -174,6 +174,7 @@ public class NebulaSettingMenu : MonoBehaviour
         SecondScroller.SetYBoundsMax(SecondScreen.SetContext(new Vector2(7.8f, 4.1f), CurrentHolder.GetContext()) - 4.1f);
 
         List<IMetaParallelPlacable> topContents = new();
+
         if(CurrentHolder.RelatedAssignable != null)
         {
             var assignable = CurrentHolder.RelatedAssignable;
@@ -226,6 +227,26 @@ public class NebulaSettingMenu : MonoBehaviour
             foreach (var related in assignable.RelatedOnConfig()) if(related.RelatedConfig != null) topContents.Add(new MetaContext.Button(() => OpenSecondaryPage(related.RelatedConfig!), RelatedButtonAttr) { RawText = related.DisplayName.Color(related.RoleColor) });
         }
 
+        if (ConfigPreset.AllPresets.Any(preset => preset.relatedHolder == CurrentHolder.Id))
+        {
+            void OpenPresetScreen()
+            { 
+                var screen = MetaScreen.GenerateWindow(new Vector2(3.8f, 3.2f), HudManager.Instance.transform, Vector3.zero, true, true);
+
+                MetaContext inner = new();
+                inner.Append(ConfigPreset.AllPresets.Where(preset => preset.relatedHolder == CurrentHolder.Id), (preset) => new MetaContext.Button(() => { preset.LoadPreset(new()); UpdateSecondaryPage(); screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(2.4f, 0.35f) } )
+                {
+                    RawText = preset.DisplayName,
+                    Alignment = IMetaContext.AlignmentOption.Center,
+                }.SetAsMaskedButton(), 1, -1, 0, 0.64f);
+
+                screen!.SetContext(new MetaContext.ScrollView(new(3.8f, 3.1f), inner, true));
+            }
+
+
+            topContents.Add(new MetaContext.Button(() => OpenPresetScreen(), RelatedButtonAttr) { TranslationKey = "preset.preset" });
+        }
+
         SecondTopScreen.SetContext(new Vector2(7.8f,0.4f),new CombinedContext(0.4f, topContents.ToArray()) { Alignment = IMetaContext.AlignmentOption.Right});
         SecondTitle.text = CurrentHolder.Title.Text;
     }
@@ -239,7 +260,7 @@ public class NebulaSettingMenu : MonoBehaviour
         UpdateSecondaryPage();
     }
 
-    private void OpenFirstPage()
+    public void OpenFirstPage()
     {
         CloseAllPage();
         FirstPage.SetActive(true);
@@ -248,7 +269,11 @@ public class NebulaSettingMenu : MonoBehaviour
 
     private void CloseAllPage()
     {
-        FirstPage.SetActive(false);
-        SecondPage.SetActive(false);
+        try
+        {
+            FirstPage.SetActive(false);
+            SecondPage.SetActive(false);
+        }
+        catch { }
     }
 }

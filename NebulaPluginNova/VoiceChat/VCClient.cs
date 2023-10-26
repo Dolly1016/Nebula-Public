@@ -13,9 +13,19 @@ namespace Nebula.VoiceChat;
 
 public class VCClient : IDisposable
 {
+    public enum VCState
+    {
+        Discussion,
+        Dead,
+        Distanced,
+        GhostVC,
+        Comm,
+    }
+
     private OpusDotNet.OpusDecoder myDecoder;
     private BufferedWaveProvider bufferedProvider;
     private VolumeSampleProvider volumeFilter;
+    private VolumeMeter volumeMeter;
     private PanningSampleProvider panningFilter;
     private PlayerControl relatedControl;
     private PlayerModInfo? relatedInfo = null;
@@ -23,6 +33,14 @@ public class VCClient : IDisposable
     private float wallRatio = 1f;
     private bool onRadio = false;
     private int radioMask;
+    private DataEntry<float> volumeEntry;
+
+
+    public float Level => volumeMeter.Level;
+    public float Volume { get => volumeEntry.Value; }
+    public void SetVolume(float val, bool withSave) { if (withSave) volumeEntry.Value = val; else volumeEntry.SetValueWithoutSave(val); }
+    public PlayerControl MyPlayer => relatedControl;
+
     public VoiceType VoiceType { get; private set; }
 
     public void SetVoiceType(VoiceType voiceType)
@@ -35,7 +53,7 @@ public class VCClient : IDisposable
     }
 
     public bool IsValid => relatedControl;
-    public bool CanHear => !relatedControl.AmOwner && (PlayerControl.LocalPlayer.Data.IsDead || !relatedControl.Data.IsDead);
+    public bool CanHear => (PlayerControl.LocalPlayer.Data.IsDead || !relatedControl.Data.IsDead);
     public VCClient(PlayerControl player) {
         relatedControl = player;
 
@@ -43,8 +61,11 @@ public class VCClient : IDisposable
         bufferedProvider = new(new(22050, 1));
         var floatConverter = new WaveToSampleProvider(new Wave16ToFloatProvider(bufferedProvider));
         volumeFilter = new(floatConverter);
-        panningFilter = new(volumeFilter);
+        volumeMeter = new(volumeFilter, player.AmOwner);
+        panningFilter = new(volumeMeter);
         panningFilter.Pan = 0f;
+
+        volumeEntry = new FloatDataEntry(player.Puid, VoiceChatManager.VCSaver, 1f);
     }
 
     public void OnGameStart()
@@ -54,12 +75,17 @@ public class VCClient : IDisposable
 
     private void UpdateAudio()
     {
-        bool aliveAll = AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started;
+        bool atLobby = AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Joined;
 
-        if (!aliveAll && !CanHear) return;
+        if (!atLobby && !CanHear)
+        {
+            volumeFilter.Volume = 0f;
+            panningFilter.Pan = 0f;
+            return;
+        }
 
         //互いに死んでいる場合
-        if (!aliveAll && PlayerControl.LocalPlayer.Data.IsDead && relatedControl.Data.IsDead)
+        if (PlayerControl.LocalPlayer.Data.IsDead && relatedControl.Data.IsDead)
         {
             volumeFilter.Volume = 1f;
             panningFilter.Pan = 0f;
@@ -67,7 +93,7 @@ public class VCClient : IDisposable
         }
 
         //ラジオ
-        if ((aliveAll || !relatedControl.Data.IsDead) && VoiceType == VoiceType.Radio)
+        if (!relatedControl.Data.IsDead && VoiceType == VoiceType.Radio)
         {
             volumeFilter.Volume = ((1 << PlayerControl.LocalPlayer.PlayerId) & radioMask) == 0 ? 0f : 1f;
             panningFilter.Pan = 0f;
@@ -83,7 +109,7 @@ public class VCClient : IDisposable
         }
 
         //コミュサボ
-        if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && GeneralConfigurations.AffectedByCommsSabOption && !PlayerControl.LocalPlayer.Data.IsDead && (!PlayerControl.LocalPlayer.Data.Role?.IsImpostor ?? true) && AmongUsUtil.InCommSab)
+        if (!atLobby && GeneralConfigurations.AffectedByCommsSabOption && !PlayerControl.LocalPlayer.Data.IsDead && (!PlayerControl.LocalPlayer.Data.Role?.IsImpostor ?? true) && AmongUsUtil.InCommSab)
         {
             volumeFilter.Volume = 0f;
             return;
@@ -125,6 +151,7 @@ public class VCClient : IDisposable
     public void Update()
     {
         UpdateAudio();
+        volumeFilter.Volume *= Volume;
     }
 
     public void Dispose()

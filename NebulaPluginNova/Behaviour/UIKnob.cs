@@ -1,4 +1,5 @@
-﻿using Il2CppInterop.Runtime.Injection;
+﻿using Il2CppInterop.Runtime.Attributes;
+using Il2CppInterop.Runtime.Injection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Nebula.Behaviour;
 
-public class UIKnob : PassiveUiElement
+public class UIKnob : Scrollbar
 {
     static UIKnob() => ClassInjector.RegisterTypeInIl2Cpp<UIKnob>();
     public UIKnob(System.IntPtr ptr) : base(ptr) { }
@@ -17,18 +18,23 @@ public class UIKnob : PassiveUiElement
     public (float min, float max) Range = (0.0f, 0.0f);
     public bool IsVert = true;
 
-    public Action? OnHold, OnRelease;
-    public Action<float>? OnDragging;
+    public Action? OnHold = null, OnRelease = null;
+    public Action<float>? OnDragging = null;
     public SpriteRenderer? Renderer = null;
 
     private bool isHolding = false;
+
     public bool IsHolding { get => isHolding; private set {
             if (value == isHolding) return;
             isHolding = value;
-            if (value)
-                OnHold?.Invoke();
-            else
-                OnRelease?.Invoke();
+            try
+            {
+                if (value)
+                    OnHold?.Invoke();
+                else
+                    OnRelease?.Invoke();
+            }
+            catch { }
         } 
     }
 
@@ -39,22 +45,43 @@ public class UIKnob : PassiveUiElement
 
     public override void ReceiveClickUp()
     {
-        IsHolding = false;
+        PassiveButtonManager.Instance.controller.amTouching = null;
+        try
+        {
+            IsHolding = false;
+        }
+        catch { }
     }
 
     public override void ReceiveClickDrag(Vector2 dragDelta)
     {
-        float delta = IsVert ? dragDelta.y : dragDelta.x;
+        try
+        {
+            float delta = IsVert ? dragDelta.y : dragDelta.x;
 
+            var localPos = transform.localPosition;
+            localPos += new Vector3(IsVert ? 0f : delta, IsVert ? delta : 0f, 0f);
+            if (IsVert)
+                localPos.y = Math.Clamp(localPos.y, Range.min, Range.max);
+            else
+                localPos.x = Math.Clamp(localPos.x, Range.min, Range.max);
+            transform.localPosition = localPos;
+
+            OnDragging?.Invoke(IsVert ? localPos.y : localPos.x);
+        }
+        catch (Exception e){
+            Debug.Log(e.ToString());
+        }
+    }
+
+    public void SetValue(float value)
+    {
         var localPos = transform.localPosition;
-        localPos += new Vector3(IsVert ? 0f : delta, IsVert ? delta : 0f, 0f);
         if (IsVert)
-            localPos.y = Mathf.Clamp(localPos.y, Range.min, Range.max);
+            localPos.y = Math.Clamp(value, Range.min, Range.max);
         else
-            localPos.x = Mathf.Clamp(localPos.x, Range.min, Range.max);
+            localPos.x = Math.Clamp(value, Range.min, Range.max);
         transform.localPosition = localPos;
-
-        OnDragging?.Invoke(IsVert ? localPos.y : localPos.x);
     }
 
     public override void ReceiveMouseOver()
@@ -67,11 +94,6 @@ public class UIKnob : PassiveUiElement
         if (Renderer) Renderer!.color = Color.white;
     }
 
-    public override void OnEnable()
-    {
-        OnMouseOut = new UnityEngine.Events.UnityEvent();
-        OnMouseOver = new UnityEngine.Events.UnityEvent();
-    }
 
     public override bool HandleDown => true;
     public override bool HandleUp => true;

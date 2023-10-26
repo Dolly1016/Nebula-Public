@@ -23,6 +23,7 @@
 
 "ui.dialog.yes" : "Yes"
 "ui.dialog.no" : "No"
+"ui.dialog.ok" : "OK"
 "ui.dialog.exit" : "Exit"
 "ui.common.loading" : "Now Loading..."
 "ui.update.waitFinishing" : "Wait for updating..."
@@ -100,10 +101,17 @@
 "options.map.customization.airship.vaultWiring" : "Extra Wiring Console (Vault)"
 "options.map.customization.airship.hallwayWiring" : "Extra Wiring Console (Hallway)"
 "options.map.customization.airship.medicalWiring" : "Extra Wiring Console (Medical)"
+"options.map.customization.fungle.simpleLaboratory" : "Simple Laboratory"
+"options.map.customization.fungle.thinFog" : "Thin Fog"
+"options.map.customization.fungle.glowingCampfire" : "Glowing Campfire"
+"options.map.customization.fungle.glowingMushroom" : "Glowing Mushroom"
+"options.map.customization.fungle.quickPaceDoorMinigame" : "Quick Pace Door Minigame"
 
 "options.meeting" : "Meeting Options"
 "options.meeting.detail" : "About meeting"
 "options.meeting.noticeExtraVictims" : "Notice Extra Victims"
+"options.meeting.deathPenalty" : "Death Penalty"
+"options.meeting.numOfMeeting" : "Num Of Meetings"
 
 "options.consoleRestriction" : "Console Restriction"
 "options.consoleRestriction.detail" : "About restriction for vitals, admin and cameras"
@@ -219,14 +227,6 @@
 "options.role.doctor.chargesPerTasks" : "Charges Per Tasks" 
 "role.doctor.gadgetLeft" : "%SECOND%s"
 
-"role.doctor.name" : "Doctor"
-"role.doctor.blurb" : "Thus They Died"
-"options.role.doctor.detail" : "Doctor has portable vitals."
-"options.role.doctor.portableVitalsCharge" : "Portable Vitals Charge"
-"options.role.doctor.maxPortableVitalsCharge" : "Max Portable Vitals Charge"
-"options.role.doctor.chargesPerTasks" : "Charges Per Tasks" 
-"role.doctor.gadgetLeft" : "%SECOND%s"
-
 "role.necromancer.name" : "Necromancer"
 "role.necromancer.short" : "N"
 "role.necromancer.blurb" : "Revive Phantoms"
@@ -234,6 +234,8 @@
 "options.role.necromancer.reviveCoolDown" : "Revive Cool Down"
 "options.role.necromancer.reviveDuration" : "Revive Duration"
 "options.role.necromancer.detectedRange" : "Detected Range"
+"options.role.necromancer.reviveMinRange" : "Revive Room Min Distance"
+"options.role.necromancer.reviveMaxRange" : "Revive Room Max Distance"
 "role.necromancer.phantomMessage" : "Please take me to %ROOM%..."
 
 "role.niceGuesser.name" : "Nice Guesser"
@@ -284,6 +286,7 @@
 "role.seer.blurb" : "You Will See Players Die"
 "options.role.seer.detail" : "Seer can see the ghosts to find out where victims died."
 "options.role.seer.ghostDuration" : "Ghost Duration"
+"options.role.seer.canSeeGhostsInShadow" : "Can See Ghosts In Shadow"
 
 "role.sheriff.name" : "Sheriff"
 "role.sheriff.short" : "S"
@@ -335,6 +338,18 @@
 "options.role.evilTrapper.killTrapSoundDistance" : "Kill Trap Sound Distance"
 "options.role.evilTrapper.costOfKillTrap" : "Cost Of Kill Trap"
 
+"role.illusioner.name" : "Illusioner"
+"role.illusioner.short" : "Il"
+"role.illusioner.blurb" : "What Wonderful True Love!"
+"options.role.illusioner.detail" : "Illusioner combines the abilities of Painter and Morphing."
+"options.role.illusioner.sampleCoolDown" : "Sample Cool Down"
+"options.role.illusioner.morphCoolDown" : "Morph Cool Down"
+"options.role.illusioner.morphDuration" : "Morph Duration"
+"options.role.illusioner.paintCoolDown" : "Paint Cool Down"
+"options.role.illusioner.loseSampleOnMeeting" : "Lose Sample On Meeting"
+"options.role.illusioner.transformAfterMeeting" : "Transform After Meeting"
+"options.role.illusioner.sampleOriginalLook" : "Sample Original Look"
+
 "role.jailer.name" : "Jailer"
 "role.jailer.short" : "J"
 "role.jailer.blurb" : "Be Under the Control"
@@ -350,6 +365,7 @@
 "options.role.marionette.placeCoolDown" : "Place Cool Down"
 "options.role.marionette.swapCoolDown" : "Swap Cool Down"
 "options.role.marionette.decoyDuration" : "Decoy Duration"
+"options.role.marionette.canSeeDecoyInShadow" : "Can See Decoy In Shadow"
 
 "role.morphing.name" : "Morphing"
 "role.morphing.short" : "Mo"
@@ -392,6 +408,7 @@
 "options.role.sniper.shotEffectiveRange" : "Shot Effective Range"
 "options.role.sniper.shotNoticeRange" : "Snipe Notice Range"
 "options.role.sniper.storeRifleOnFire" : "Store Rifle On Fire"
+"options.role.sniper.canSeeRifleInShadow" : "Can See Rifle In Shadow"
 
 # Neutral Roles
 
@@ -423,6 +440,17 @@
 "role.jester.blurb" : "Get Voted Out"
 "options.role.jester.detail" : "Jester schemes to be exiled to win.<br>Crewmates must not vote for the Jester!"
 "options.role.jester.canDragDeadBody" : "Can Drag Dead Body"
+
+"role.paparazzo.name" : "Paparazzo"
+"role.paparazzo.short" : "P"
+"role.paparazzo.blurb" : "Take a Best Shot!"
+"role.paparazzo.taskText" : "Take a Photo and Disclose (%DETAIL%)"
+"role.paparazzo.taskTextSubject" : "Subjects: %CS%/%GS%"
+"role.paparazzo.taskTextDisclosed" : "Disclosed: %CD%/%GD%"
+"options.role.paparazzo.detail" : "Paparazzo takes a photo and disclose it at a meeting."
+"options.role.paparazzo.shotCoolDown" : "Shot Cool Down"
+"options.role.paparazzo.requiredSubjects" : "Required Subjects"
+"options.role.paparazzo.requiredDisclosed" : "Required Disclosed"
 
 "role.vulture.name" : "Vulture"
 "role.vulture.short" : "V"
@@ -461,6 +489,7 @@
 "teams.arsonist" : "Arsonist"
 "teams.jackal" : "Jackal"
 "teams.jester" : "Jester"
+"teams.paparazzo" : "Paparazzo"
 "teams.vulture" : "Vulture"
 
 # Location
@@ -530,6 +559,25 @@
 "location.airship.toilet" : "Toilet"
 "location.airship.vault" : "Vault"
 "location.airship.viewingDeck" : "Viewing Deck"
+"location.fungle.beach" : "Beach"
+"location.fungle.cafeteria" : "Cafeteria"
+"location.fungle.campfire" : "Campfire"
+"location.fungle.comms" : "Comms."
+"location.fungle.dropship" : "Dropship"
+"location.fungle.fishingDock" : "Dock"
+"location.fungle.greenhouse" : "Greenhouse"
+"location.fungle.highlands" : "Highlands"
+"location.fungle.jungle" : "Jungle"
+"location.fungle.kitchen" : "Kitchen"
+"location.fungle.laboratory" : "Laboratory"
+"location.fungle.lookout" : "Lookout"
+"location.fungle.meetingRoom" : "Meeting Room"
+"location.fungle.miningPit" : "Mining Pit"
+"location.fungle.reactor" : "Reactor"
+"location.fungle.recRoom" : "Splash Zone"
+"location.fungle.storage" : "Storage"
+"location.fungle.sleepingQuarters" : "The Dorm"
+"location.fungle.upperEngine" : "Upper Engine"
 
 # Button
 
@@ -556,6 +604,7 @@
 "button.label.release" : "release"
 "button.label.revive" : "revive"
 "button.label.sample" : "sample"
+"button.label.shot" : "shot"
 "button.label.snipe" : "snipe"
 "button.label.sidekick" : "sidekick"
 "button.label.swap" : "swap"
@@ -615,6 +664,7 @@
 "end.jester" : "Jester Wins%EXTRA%"
 "end.vulture" : "Vulture Wins%EXTRA%"
 "end.lover" : "Lovers Win%EXTRA%"
+"end.paparazzo" : "Paparazzo Win%EXTRA%"
 "end.nogame" : "No Game"
 
 "end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
@@ -688,6 +738,18 @@
 "config.client.keyBindings" : "Key Bindings"
 "config.client.vcSettings" : "VC Settings"
 "config.client.outputHash" : "Output Hash"
+"config.client.noiseReduction" : "Noise Reduction"
+
+# Preset
+
+"preset.preset" : "Preset"
+"preset.saveAs" : "Save As..."
+"preset.enterPresetName" : "Please enter a preset name."
+"preset.save" : "Save"
+"preset.reload" : "Reload"
+"preset.saveSuccess" : "Saving is complete."
+"preset.loadSuccess" : "Preset loaded successfully."
+"preset.loadFailed" : "Failed to load preset."
 
 # Developer Studio
 

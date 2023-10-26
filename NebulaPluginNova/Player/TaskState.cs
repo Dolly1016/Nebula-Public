@@ -126,7 +126,7 @@ public class PlayerTaskState
 
         taskCandidates.Clear();
 
-        num = 0; foreach (var t in ShipStatus.Instance.NormalTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
+        num = 0; foreach (var t in ShipStatus.Instance.ShortTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
         ShipStatus.Instance.AddTasksFromList(ref num, shortTasks, newTaskIdList, hashSet, taskCandidates);
 
         player.Data.Tasks = new(newTaskIdList.Count);

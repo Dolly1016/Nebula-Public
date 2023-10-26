@@ -29,7 +29,7 @@ public class HudGrid : MonoBehaviour
         GameObject.Destroy(buttonParent.gameObject.GetComponent<GridArrange>());
         GameObject.Destroy(buttonParent.gameObject.GetComponent<AspectPosition>());
         ButtonsHolder = buttonParent;
-        StaticButtonsHolder = UnityHelper.CreateObject("StaticButtons", buttonParent.parent, new Vector3(0, 0, -30f)).transform;
+        StaticButtonsHolder = UnityHelper.CreateObject("StaticButtons", buttonParent.parent, new Vector3(0, 0, -40f)).transform;
 
         HudContent AddVanillaButtons(GameObject obj,int priority)
         {
@@ -42,9 +42,9 @@ public class HudGrid : MonoBehaviour
 
         AddVanillaButtons(HudManager.Instance.UseButton.gameObject,1000);
         AddVanillaButtons(HudManager.Instance.PetButton.gameObject,1000);
-        AddVanillaButtons(HudManager.Instance.ImpostorVentButton.gameObject,998);
+        AddVanillaButtons(HudManager.Instance.ImpostorVentButton.gameObject,997);
         AddVanillaButtons(HudManager.Instance.ReportButton.gameObject,999);
-        AddVanillaButtons(HudManager.Instance.SabotageButton.gameObject, 997);
+        AddVanillaButtons(HudManager.Instance.SabotageButton.gameObject, 998);
         AddVanillaButtons(HudManager.Instance.KillButton.gameObject, -1).MarkAsKillButtonContent();
         
 

@@ -148,6 +148,7 @@ public class NebulaGameManager
 
     //自身のキルボタン用トラッカー
     private ObjectTracker<PlayerControl> KillButtonTracker = null!;
+    public int EmergencyCalls = 0;
 
     //天界視点フラグ
     public bool CanSeeAllInfo { get; set; }
@@ -255,6 +256,8 @@ public class NebulaGameManager
 
     public void OnMeetingEnd(PlayerControl? player)
     {
+        if (PlayerControl.LocalPlayer.Data.IsDead) CanSeeAllInfo = true;
+
         ConsoleRestriction?.OnMeetingEnd();
         Scheduler.Execute(RPCScheduler.RPCTrigger.AfterMeeting);
 
@@ -286,6 +289,8 @@ public class NebulaGameManager
         var localModInfo = PlayerControl.LocalPlayer.GetModInfo();
         if (localModInfo != null)
         {
+            localModInfo.RoleAction(r => r.LocalHudUpdate());
+
             //ベントボタン
             var ventTimer = PlayerControl.LocalPlayer.inVent ? localModInfo.Role?.VentDuration : localModInfo.Role?.VentCoolDown;
             string ventText = "";
@@ -375,6 +380,8 @@ public class NebulaGameManager
     public IEnumerator CoWaitAndEndGame()
     {
         if(GameState != NebulaGameStates.Finished) GameState = NebulaGameStates.WaitGameResult;
+
+        while (ExileController.Instance && !Minigame.Instance) yield return null;
 
         yield return DestroyableSingleton<HudManager>.Instance.CoFadeFullScreen(Color.clear, Color.black, 0.5f, false);
         if (AmongUsClient.Instance.AmHost) GameManager.Instance.RpcEndGame(EndState?.EndCondition == NebulaGameEnd.CrewmateWin ? GameOverReason.HumansByTask : GameOverReason.ImpostorByKill, false);

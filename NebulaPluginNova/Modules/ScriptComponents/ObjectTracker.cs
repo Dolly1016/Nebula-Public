@@ -18,7 +18,7 @@ public static class ObjectTrackers
     {
         distance ??= AmongUsUtil.VanillaKillDistance;
         return new ObjectTracker<PlayerControl>(distance.Value, tracker, PlayerSupplier,
-            (p) => (candidatePredicate?.Invoke(p) ?? true) && !(p.GetModInfo()?.HasAttribute(AttributeModulator.PlayerAttribute.Invisible) ?? false),
+            (p) => (candidatePredicate?.Invoke(p) ?? true) && !(p.GetModInfo()?.HasAttribute(AttributeModulator.PlayerAttribute.Invisible) ?? false) && !p.Data.IsDead,
             DefaultPlayerPosConverter, DefaultPlayerRendererConverter);
     }
 

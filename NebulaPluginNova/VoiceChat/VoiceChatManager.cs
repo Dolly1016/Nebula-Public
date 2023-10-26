@@ -6,6 +6,7 @@ using NAudio.Dsp;
 using NAudio.Utils;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Nebula.Behaviour;
 using Nebula.Configuration;
 using System;
 using System.Collections.Generic;
@@ -55,6 +56,7 @@ public class VoiceChatRadio
 [NebulaRPCHolder]
 public class VoiceChatManager : IDisposable
 {
+    public static DataSaver VCSaver = new("VoiceChat");
 
     TcpListener? myListener = null;
     TcpClient? myClient;
@@ -76,6 +78,9 @@ public class VoiceChatManager : IDisposable
     private bool usingMic = false;
     private Coroutine? myCoroutine = null;
 
+    public float LocalLevel = 0f;
+
+    public VCClient? GetClient(byte playerId) => allClients.TryGetValue(playerId, out var client) ? client : null;
     public void AddRadio(VoiceChatRadio radio)=>allRadios.Add(radio);
     public void RemoveRadio(VoiceChatRadio radio)
     {
@@ -104,7 +109,7 @@ public class VoiceChatManager : IDisposable
             return false;
         }
         }
-    static public bool IsInDiscussion => (MeetingHud.Instance && MeetingHud.Instance.CurrentState != MeetingHud.VoteStates.Animating) || (ExileController.Instance && !Minigame.Instance);
+    static public bool IsInDiscussion => (MeetingHud.Instance || ExileController.Instance) && !Minigame.Instance;
     public VoiceChatManager()
     {
         var format = WaveFormat.CreateIeeeFloatWaveFormat(22050, 2);
@@ -216,7 +221,8 @@ public class VoiceChatManager : IDisposable
 
         if (!usingMic) return;
 
-        IsMuting = Input.GetKey(KeyCode.V);
+        if (NebulaInput.GetInput(KeyAssignmentType.Mute).KeyDown) IsMuting = !IsMuting;
+
         InfoShower.SetMute(IsMuting);
 
         if (currentRadio != null && (PlayerControl.LocalPlayer.Data?.IsDead ?? false))
@@ -253,7 +259,7 @@ public class VoiceChatManager : IDisposable
 
         ProcessStartInfo processStartInfo = new ProcessStartInfo();
         processStartInfo.FileName = "VoiceChatSupport.exe";
-        processStartInfo.Arguments = id;
+        processStartInfo.Arguments = (ClientOption.AllOptions[ClientOption.ClientOptionType.UseNoiseReduction].Value) + id;
         processStartInfo.CreateNoWindow = true;
         processStartInfo.UseShellExecute = false;
         childProcess = Process.Start(processStartInfo);
@@ -339,6 +345,7 @@ public class VoiceChatManager : IDisposable
             }
 
             if (IsMuting) continue;
+
             RpcSendAudio.Invoke((PlayerControl.LocalPlayer.PlayerId, currentRadio != null, currentRadio?.RadioMask ?? 0, resSize, res));
         }
     }
@@ -373,24 +380,48 @@ public class VoiceChatManager : IDisposable
             return (id, isRadio, radioMask, length, reader.ReadBytes(length));
             },
         (message,calledByMe) => {
-            if (calledByMe) return;
             if (NebulaGameManager.Instance?.VoiceChatManager?.allClients.TryGetValue(message.clientId, out var client) ?? false)
                 client?.OnReceivedData(message.isRadio, message.radioMask, message.dataAry);
         }
         );
 
 
-    public void OpenSettingScreen()
+    public void OpenSettingScreen(OptionsMenuBehaviour menu)
     {
         var screen = MetaScreen.GenerateWindow(new Vector2(7f,3.2f), HudManager.Instance.transform, Vector3.zero, true, false, true);
 
         MetaContext context = new();
 
-        /*
-        context.Append(allClients.Values, (client) => {
-            return 
-        }, 3, -1, 0, 0.5f);
-        */
+
+        context.Append(allClients.Values.Where(v=>!v.MyPlayer.AmOwner), (client) => {
+
+        return new MetaContext.Text(TextAttribute.BoldAttr)
+        {
+            RawText = client.MyPlayer.name,
+            PostBuilder = (text) =>
+            {
+                var bar = GameObject.Instantiate(menu.MusicSlider, text.transform.parent);
+                GameObject.Destroy(bar.transform.GetChild(0).gameObject);
+                
+                var collider = bar.Bar.GetComponent<BoxCollider2D>();
+                collider.size = new Vector2(1.2f,0.2f);
+                collider.offset = Vector2.zero;
+
+                bar.Bar.size = new Vector2(1f, 0.02f);
+                bar.Range = new(-0.5f, 0.5f);
+                bar.Bar.transform.localPosition = Vector3.zero;
+                bar.Dot.transform.localScale = new Vector3(0.18f, 0.18f, 1f);
+                bar.transform.localPosition = new Vector3(0, -0.26f, -1f);
+                bar.transform.localScale = new Vector3(1f, 1f, 1f);
+                bar.SetValue(client.Volume * 0.5f);
+                bar.OnValueChange = new();
+                bar.OnValueChange.AddListener(() => client.SetVolume(bar.Value * 2f, true));
+            }
+        };
+        }, 4, -1, 0, 0.65f);
+        
+
+        screen.SetContext(context);
     }
 }
 
@@ -421,6 +452,33 @@ public class SampleFunctionalProvider : ISampleProvider
 
     public Func<float, float>? OnRead = null;
     public Action<float[], int>? OnReadArray = null;
+}
+
+public class VolumeMeter : ISampleProvider
+{
+    private readonly ISampleProvider source;
+
+    public WaveFormat WaveFormat => source.WaveFormat;
+    private bool OnlySampleVolume;
+    public float Level { get; private set; }
+    public VolumeMeter(ISampleProvider source,bool onlySampleVolume)
+    {
+        this.source = source;
+        OnlySampleVolume = onlySampleVolume;
+    }
+
+    public int Read(float[] buffer, int offset, int sampleCount)
+    {
+        int result = source.Read(buffer, offset, sampleCount);
+
+        Level = 0f;
+        for (int i = 0; i < sampleCount; i++)
+        {
+            if(buffer[offset + i] > Level) Level = buffer[offset + i];
+            if (OnlySampleVolume) buffer[offset + i] = 0f;
+        }
+        return result;
+    }
 }
 
 

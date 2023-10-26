@@ -21,7 +21,8 @@ file static class TrapperSystem
     private const int CommTrapId = 2;
     private const int KillTrapId = 3;
     public static void OnActivated(RoleInstance myRole, (int id,int cost)[] buttonVariation, List<Trapper.Trap> localTraps)
-    {   
+    {
+        Vector2? pos = null;
         int buttonIndex = 0;
         int leftCost = Trapper.NumOfChargesOption;
         var placeButton = myRole.Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability).SubKeyBind(KeyAssignmentType.AidAction);
@@ -38,13 +39,14 @@ file static class TrapperSystem
         };
         placeButton.OnEffectStart = (button) =>
         {
+            pos = myRole.MyPlayer.MyControl.GetTruePosition() + new Vector2(0f, 0.085f);
             float duration = Trapper.PlaceDurationOption.GetFloat();
             PlayerModInfo.RpcSpeedModulator.Invoke((myRole.MyPlayer.PlayerId, new SpeedModulator(0f, true, duration, false, 10, 0)));
         };
         placeButton.OnEffectEnd = (button) => 
         {
             placeButton.StartCoolDown();
-            localTraps.Add(Trapper.Trap.GenerateTrap(buttonVariation[buttonIndex].id, myRole.MyPlayer.MyControl.GetTruePosition()));
+            localTraps.Add(Trapper.Trap.GenerateTrap(buttonVariation[buttonIndex].id, pos!.Value));
             leftCost -= buttonVariation[buttonIndex].cost;
             usesText.text = leftCost.ToString();
             if (buttonVariation[buttonIndex].id == KillTrapId) NebulaAsset.RpcPlaySE.Invoke((NebulaAudioClip.TrapperKillTrap, PlayerControl.LocalPlayer.transform.position, Trapper.KillTrapSoundDistanceOption.GetFloat() * 0.6f, Trapper.KillTrapSoundDistanceOption.GetFloat()));

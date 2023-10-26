@@ -22,7 +22,7 @@ static file class GuesserSystem
         MetaContext context = new();
 
         MetaContext inner = new();
-        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess), r => new MetaContext.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayName.Color(r.RoleColor), PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess && r.IsSpawnable), r => new MetaContext.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayName.Color(r.RoleColor), PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
         MetaContext.ScrollView scroller = new(new(6.6f, 3.8f), inner, true) { Alignment = IMetaContext.AlignmentOption.Center };
         context.Append(scroller);
         context.Append(new MetaContext.Text(TextAttribute.BoldAttr) { MyText = new CombinedComponent(new TranslateTextComponent("role.guesser.leftGuess"), new RawTextComponent(" : " + leftGuess.ToString())), Alignment = IMetaContext.AlignmentOption.Center });

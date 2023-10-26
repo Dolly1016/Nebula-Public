@@ -5,6 +5,7 @@ using Nebula.Behaviour;
 using Nebula.Configuration;
 using Nebula.Game;
 using Nebula.Modules;
+using PowerTools;
 using static UnityEngine.RemoteConfigSettingsHelper;
 
 namespace Nebula.Patches;
@@ -79,6 +80,13 @@ public static class PlayerUpdatePatch
         NebulaGameManager.Instance.GetModPlayerInfo(__instance.PlayerId)?.Update();
 
         if (__instance.AmOwner) NebulaGameManager.Instance.OnFixedUpdate();
+
+        if(__instance.cosmetics.transform.localScale.z < 100f)
+        {
+            var scale = __instance.cosmetics.transform.localScale;
+            scale.z = 100f;
+            __instance.cosmetics.transform.localScale = scale;
+        }
     }
 }
 
@@ -262,3 +270,176 @@ class WalkPatch
             );
     }
 }
+
+[HarmonyPatch(typeof(KillOverlay), nameof(KillOverlay.ShowKillAnimation), typeof(GameData.PlayerInfo), typeof(GameData.PlayerInfo))]
+public static class KillOverlayPatch
+{
+    public static bool Prefix(KillOverlay __instance, GameData.PlayerInfo killer, GameData.PlayerInfo victim)
+    {
+        if (killer.PlayerId == victim.PlayerId)
+        {
+            __instance.ShowKillAnimation(__instance.KillAnims[3], killer, victim);
+            return false;
+        }
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.Initialize))]
+public static class OverlayKillAnimationInitializePatch
+{
+    public static void Postfix(OverlayKillAnimation __instance, GameData.PlayerInfo kInfo, GameData.PlayerInfo vInfo)
+    {
+        if (kInfo.PlayerId == vInfo.PlayerId)
+        {
+            __instance.transform.GetChild(0).gameObject.SetActive(false);
+            __instance.transform.GetChild(2).gameObject.SetActive(false);
+
+            float x = 0.6f;
+            var victim = __instance.transform.GetChild(1);
+            victim.localPosition = new(x, 0f, 0f);
+            var pet = __instance.transform.GetChild(3);
+            pet.localPosition = new(x, -0.37f, 0f);
+
+            IEnumerator CoMoveLeft()
+            {
+                yield return new WaitForSeconds(0.44f);
+                while(x > -1.8f)
+                {
+                    if (!__instance) yield break;
+                    x -= (x - (-1.8f)) * Time.deltaTime * 5.2f;
+                    victim!.localPosition = new(x, 0f, 0f);
+                    pet!.localPosition = new(x, -0.37f, 0f);
+                    yield return null;
+                }
+            }
+            NebulaManager.Instance.StartCoroutine(CoMoveLeft().WrapToIl2Cpp());
+        }
+    }
+}
+
+[HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.LoadVictimSkin))]
+public static class LoadVictimSkinPatch
+{
+    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] GameData.PlayerOutfit victimOutfit)
+    {
+        var script = __instance.victimParts.gameObject.AddComponent<ScriptBehaviour>();
+        SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(victimOutfit.SkinId);
+        SpriteAnim skinSpriteAnim = __instance.victimParts.GetSkinSpriteAnim();
+
+        script.ActiveHandler += () =>
+        {
+            
+            switch (__instance.KillType)
+            {
+                case KillAnimType.Stab:
+                    skinSpriteAnim.Play(skin.KillStabVictim, 1f);
+                    break;
+                case KillAnimType.Tongue:
+                    skinSpriteAnim.Play(skin.KillTongueVictim, 1f);
+                    break;
+                case KillAnimType.Shoot:
+                    skinSpriteAnim.Play(skin.KillShootVictim, 1f);
+                    break;
+                case KillAnimType.Neck:
+                    skinSpriteAnim.Play(skin.KillNeckVictim, 1f);
+                    break;
+                case KillAnimType.RHM:
+                    skinSpriteAnim.Play(skin.KillRHMVictim, 1f);
+                    break;
+                default:
+                    break;
+            }
+        };
+        if (script.gameObject.active) script.OnEnable();
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.LoadKillerSkin))]
+public static class LoadKillerSkinPatch
+{
+    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] GameData.PlayerOutfit killerOutfit)
+    {
+        var script = __instance.killerParts.gameObject.AddComponent<ScriptBehaviour>();
+        SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(killerOutfit.SkinId);
+        SpriteAnim skinSpriteAnim = __instance.killerParts.GetSkinSpriteAnim();
+
+        script.ActiveHandler += () =>
+        {
+
+            switch (__instance.KillType)
+            {
+                case KillAnimType.Stab:
+                    skinSpriteAnim.Play(skin.KillStabImpostor, 1f);
+                    break;
+                case KillAnimType.Tongue:
+                    skinSpriteAnim.Play(skin.KillTongueImpostor, 1f);
+                    break;
+                case KillAnimType.Shoot:
+                    skinSpriteAnim.Play(skin.KillShootImpostor, 1f);
+                    break;
+                case KillAnimType.Neck:
+                    skinSpriteAnim.Play(skin.KillNeckImpostor, 1f);
+                    break;
+                default:
+                    break;
+            }
+        };
+        if (script.gameObject.active) script.OnEnable();
+        return false;
+    }
+}
+
+
+//移動後の位置に死体が発生するようにする
+
+[HarmonyPatch(typeof(MovingPlatformBehaviour), nameof(MovingPlatformBehaviour.UsePlatform))]
+public static class UsePlatformPatch
+{
+    public static void Postfix(MovingPlatformBehaviour __instance, [HarmonyArgument(0)]PlayerControl target)
+    {
+        try
+        {
+            target.GetModInfo()!.GoalPos = __instance.transform.parent.TransformPoint((!__instance.IsLeft) ? __instance.LeftUsePosition : __instance.RightUsePosition);
+        }
+        catch {
+            Debug.Log($"Skipped presetting goal position on use MovingPlatform. (for {target.name})");
+        }
+    }
+}
+
+[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.ClimbLadder))]
+public static class UseLadderPatch
+{
+    public static void Postfix(PlayerPhysics __instance, [HarmonyArgument(0)] Ladder source)
+    {
+        try
+        {
+            Vector2 pos = source.Destination.transform.position;
+            if (source.Destination.IsTop) pos += new Vector2(0f, 1.2f);
+            __instance.myPlayer.GetModInfo()!.GoalPos = pos;
+        }
+        catch
+        {
+            Debug.Log($"Skipped presetting goal position on climbing Ladder. (for {__instance.name})");
+        }
+    }
+}
+
+[HarmonyPatch(typeof(ZiplineBehaviour), nameof(ZiplineBehaviour.Use),typeof(PlayerControl),typeof(bool))]
+public static class UseZiplinePatch
+{
+    public static void Postfix(ZiplineBehaviour __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] bool fromTop)
+    {
+        try
+        {
+            player.GetModInfo()!.GoalPos = fromTop ? __instance.landingPositionBottom.position : __instance.landingPositionTop.position;
+        }
+        catch
+        {
+            Debug.Log($"Skipped presetting goal position on use ZiplineBehaviour. (for {__instance.name})");
+        }
+    }
+}
+

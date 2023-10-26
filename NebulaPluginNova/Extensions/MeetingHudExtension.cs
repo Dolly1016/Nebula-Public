@@ -1,4 +1,5 @@
 ﻿using Epic.OnlineServices.Presence;
+using Il2CppSystem.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ public static class MeetingHudExtension
 {
     public static void ResetPlayerState(this MeetingHud meetingHud)
     {
+        Reset();
         foreach (PlayerVoteArea pva in meetingHud.playerStates)
         {
             bool isDead = NebulaGameManager.Instance?.GetModPlayerInfo(pva.TargetPlayerId)?.IsDead ?? true;
@@ -38,6 +40,7 @@ public static class MeetingHudExtension
 
     public static Dictionary<byte, int> WeightMap= new();
     public static Dictionary<byte, int> LastVotedForMap = new();
+    public static List<GameObject> LeftContents = new();
     public static List<(byte exiledId, byte sourceId, TranslatableTag playerState, TranslatableTag eventTag)> ExtraVictims = new();
 
     public static void Reset()
@@ -45,6 +48,15 @@ public static class MeetingHudExtension
         LastVotedForMap.Clear();
         WeightMap.Clear();
         ExtraVictims.Clear();
+        LeftContents.Clear();
+    }
+
+    public static void AddLeftContent(GameObject obj)
+    {
+        obj.transform.SetParent(MeetingHud.Instance.transform);
+        obj.layer = LayerExpansion.GetUILayer();
+        obj.transform.localPosition = new Vector3(-4.8f, 1.8f - 1.2f * (float)LeftContents.Count, -40f);
+        LeftContents.Add(obj);
     }
 
     public static void ExileExtraVictims()

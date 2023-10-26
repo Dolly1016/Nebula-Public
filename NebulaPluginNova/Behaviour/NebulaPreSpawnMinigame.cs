@@ -13,7 +13,7 @@ namespace Nebula.Behaviour;
 
 public class NebulaPreSpawnLocation
 {
-    static public string[] MapName = new string[] { "Skeld", "Mira", "Polus", "Invalid", "Airship" };
+    static public string[] MapName = new string[] { "Skeld", "Mira", "Polus", "Invalid", "Airship", "Fungle" };
 
     static public NebulaPreSpawnLocation[][] Locations = new NebulaPreSpawnLocation[][]{
         new NebulaPreSpawnLocation[]{ 
@@ -85,6 +85,14 @@ public class NebulaPreSpawnLocation
             new("Toilet", new Vector2(32.3184f, 7.0118f)),
             new("Vault", new Vector2(-8.789f, 8.049f)),
             new("ViewingDeck", new Vector2(-13.9798f, -15.8316f))
+        },
+        new NebulaPreSpawnLocation[]
+        {
+            new("Campfire", new Vector2(-9.79f, 3.0949f)),
+            new("Comms", new Vector2(24.0248f, 13.625f)),
+            new("Laboratory", new Vector2(-5.2573f, -9.1099f)),
+            new("Greenhouse", new Vector2(9.3125f, -11.8004f)),
+            new("MeetingRoom", new Vector2(-1.2941f, -1.5503f)),
         }
         };
 
@@ -183,7 +191,8 @@ public class NebulaPreSpawnMinigame : Minigame
         UnderText.text = "";
 
 
-        int candidates = GeneralConfigurations.SpawnCandidatesOption;
+        int candidates = Mathf.Min(GeneralConfigurations.SpawnCandidatesOption, cand.Length);
+
         if (GeneralConfigurations.SpawnMethodOption.CurrentValue == 2) candidates = 1;
 
         Tuple<SpriteRenderer, TextMeshPro>[] allButton = new Tuple<SpriteRenderer, TextMeshPro>[candidates];

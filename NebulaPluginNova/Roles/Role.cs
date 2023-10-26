@@ -53,6 +53,7 @@ public abstract class AbstractRole : IAssignableBase
     public virtual bool CanLoad(IntroAssignableModifier modifier)=> CanLoadDefault(modifier);
 
     public virtual bool CanBeGuess { get => true; }
+    public virtual bool IsSpawnable { get => true; }
 
     public abstract void Load();
 
@@ -129,7 +130,7 @@ public abstract class ConfigurableRole : AbstractRole {
 
         public KillCoolDownConfiguration(ConfigurationHolder holder, string id, KillCoolDownType defaultType, float step, float immediateMin, float immediateMax, float relativeMin, float relativeMax, float ratioStep, float ratioMin, float ratioMax, float defaultImmediate, float defaultRelative, float defaultRatio)
         {
-            new NebulaFunctionProperty(holder.Id + "." + id, () => NebulaConfiguration.SecDecorator.Invoke(KillCoolDown));
+            new NebulaFunctionProperty(holder.Id + "." + id, () => NebulaConfiguration.SecDecorator.Invoke(KillCoolDown), () => KillCoolDown);
 
             selectionOption = new NebulaConfiguration(holder, id, null, AllSelections, (int)defaultType, (int)defaultType);
             selectionOption.Editor = () =>
@@ -337,5 +338,7 @@ public abstract class ConfigurableStandardRole : ConfigurableRole
         RoleSecondaryChanceOption.Shower = null;
 
         modifierFilter = new NebulaModifierFilterConfigEntry(RoleConfig.Id + ".modifierFilter", Array.Empty<string>());
-    }   
+    }
+
+    public override bool IsSpawnable { get => RoleCountOption.CurrentValue > 0; }
 }

@@ -729,6 +729,7 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
         public Predicate<char>? TextPredicate;
         public Action<TextField>? PostBuilder;
         public string DefaultText = "";
+        public string? Hint = null;
         public bool WithMaskMaterial = false;
 
         public TextInput(int maxLines,float fontSize,Vector2 size,bool useSharpField = false)
@@ -764,6 +765,7 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
             button.OnClick.AddListener(() => field.GainFocus());
             TextFieldRef?.Set(field);
             if (DefaultText.Length > 0) field.SetText(DefaultText);
+            if (Hint!=null) field.SetHint(Hint!);
 
             PostBuilder?.Invoke(field);
         }
@@ -1111,5 +1113,19 @@ public class MetaScreen : MonoBehaviour
         }
 
         return screen;
+    }
+}
+
+public static class MetaUI
+{
+    static public void ShowConfirmDialog(Transform transform, ITextComponent text)
+    {
+        MetaScreen screen = MetaScreen.GenerateWindow(new(3.5f, 1.35f), transform, Vector3.zero, true, true);
+
+        MetaContext context = new();
+
+        context.Append(new MetaContext.Text(new(TextAttribute.ContentAttr) { Size = new(3.3f, 0.8f) }) { MyText = text, Alignment = AlignmentOption.Center });
+        context.Append(new MetaContext.Button(screen.CloseScreen, TextAttribute.BoldAttr) { TranslationKey = "ui.dialog.ok", Alignment = AlignmentOption.Center });
+        screen.SetContext(context);
     }
 }

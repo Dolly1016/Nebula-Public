@@ -45,6 +45,7 @@ public class Jester : ConfigurableStandardRole
         public override Timer? VentCoolDown => ventCoolDown;
         public override Timer? VentDuration => ventDuration;
 
+
         public Instance(PlayerModInfo player) : base(player)
         {
             if (MyRole.CanDragDeadBodyOption) draggable = Bind(new Scripts.Draggable());

@@ -20,11 +20,13 @@ public class Seer : ConfigurableStandardRole
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration GhostDurationOption = null!;
+    private NebulaConfiguration CanSeeGhostsInShadowOption = null!;
     protected override void LoadOptions()
     {
         base.LoadOptions();
 
         GhostDurationOption = new(RoleConfig, "ghostDuration", null, 15f, 300f, 15f, 90f, 90f) { Decorator = NebulaConfiguration.SecDecorator };
+        CanSeeGhostsInShadowOption = new(RoleConfig, "canSeeGhostsInShadow", null, false, false);
     }
 
     [NebulaPreLoad]
@@ -37,9 +39,9 @@ public class Seer : ConfigurableStandardRole
         private int index;
         public Ghost(Vector2 pos, float time) : base()
         {
-            renderer = UnityHelper.CreateObject<SpriteRenderer>("Ghost", null, (Vector3)pos + new Vector3(0, 0, -10f), LayerExpansion.GetDrawShadowsLayer());
+            renderer = UnityHelper.CreateObject<SpriteRenderer>("Ghost", null, (Vector3)pos + new Vector3(0, 0, -1f));
             this.time = time;
-
+            renderer.gameObject.layer = MyRole.CanSeeGhostsInShadowOption ? LayerExpansion.GetObjectsLayer() : LayerExpansion.GetDefaultLayer();
             renderer.sprite = ghostSprite.GetSprite(0);
         }
 
