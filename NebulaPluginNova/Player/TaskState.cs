@@ -103,6 +103,17 @@ public class PlayerTaskState
         RpcSyncTaskState.Invoke(this);
     }
 
+    public void ReleaseAllTaskState()
+    {
+        TotalCompleted = 0;
+        TotalTasks = 0;
+        CurrentCompleted = 0;
+        CurrentTasks = 0;
+        Quota = 0;
+        RpcSyncTaskState.Invoke(this);
+        RecomputeTasks(0, 0, 0);
+    }
+
     private void RecomputeTasks(int shortTasks, int longTasks, int commonTasks)
     {
         player.myTasks.RemoveAll((Il2CppSystem.Predicate<PlayerTask>)((task) => {

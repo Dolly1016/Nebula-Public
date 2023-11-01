@@ -3,6 +3,7 @@ using AmongUs.GameOptions;
 using Nebula.Game;
 using Nebula.Modules;
 using Nebula.Roles;
+using Nebula.Roles.Complex;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
@@ -101,7 +102,7 @@ public class AttributeModulator : TimeLimitedModulator
 
 
 [NebulaRPCHolder]
-public class PlayerModInfo
+public class PlayerModInfo : IRuntimePropertyHolder
 {
     public class OutfitCandidate
     {
@@ -166,7 +167,7 @@ public class PlayerModInfo
         foreach (var m in myModifiers) yield return m;
     }
 
-    public void RoleAction(Action<AssignableInstance> action)
+    public void AssignableAction(Action<AssignableInstance> action)
     {
         foreach (var role in AllAssigned()) action(role);
     }
@@ -225,8 +226,12 @@ public class PlayerModInfo
             MyControl.RawSetVisor(newOutfit.VisorId, newOutfit.ColorId);
             MyControl.RawSetPet(newOutfit.PetId, newOutfit.ColorId);
             MyControl.RawSetColor(newOutfit.ColorId);
-            MyControl.MyPhysics.ResetAnimState();
-            MyControl.cosmetics.StopAllAnimations();
+
+            if (MyControl.MyPhysics.Animations.IsPlayingRunAnimation())
+            {
+                MyControl.MyPhysics.ResetAnimState();
+                MyControl.cosmetics.StopAllAnimations();
+            }
         }
         catch (Exception e){
             Debug.LogError("Outfit Error: Error occurred on changing " + DefaultName + " 's outfit");
@@ -259,8 +264,8 @@ public class PlayerModInfo
         var text = onMeeting ? DefaultName : CurrentOutfit.PlayerName;
         var color = Color.white;
 
-        RoleAction(r => r.DecoratePlayerName(ref text, ref color));
-        PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r=>r.DecorateOtherPlayerName(this,ref text,ref color));
+        AssignableAction(r => r.DecoratePlayerName(ref text, ref color));
+        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r=>r.DecorateOtherPlayerName(this,ref text,ref color));
 
         if (showDefaultName && !CurrentOutfit.PlayerName.Equals(DefaultName))
             text += (" (" + DefaultName + ")").Color(Color.gray);
@@ -281,7 +286,7 @@ public class PlayerModInfo
         ModifierAction(m => m.DecorateRoleName(ref text));
 
         if (myRole?.HasAnyTasks ?? true)
-            text += (" (" + Tasks.ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((myRole?.HasCrewmateTasks ?? false) ? CrewTaskColor : FakeTaskColor);
+            text += (" (" + Tasks.ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((HasCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
         
         roleText.text = text;
 
@@ -364,6 +369,37 @@ public class PlayerModInfo
             return false;
         });
         if (NebulaGameManager.Instance?.GameState != NebulaGameStates.NotStarted) HudManager.Instance.UpdateHudContent();
+    }
+
+    public bool TryGetProperty(string id, out INebulaProperty? property)
+    {
+        property = null;
+        string prefix = $"players.{PlayerId}.";
+        if (!id.StartsWith(prefix)) return false;
+
+        string subStr = id.Substring(prefix.Length);
+        if(subStr=="roleArgument")
+        {
+            property = new NebulaInstantProperty() { IntegerArrayProperty = Role?.GetRoleArgument() };
+            return true;
+        }else if(subStr == "leftGuess")
+        {
+            property = new NebulaInstantProperty() { IntegerProperty = TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1 };
+            return true;
+        }
+        if (Role?.TryGetProperty(subStr, out property) ?? false) return true;
+
+        return false;
+    }
+
+    public IEnumerator CoGetRoleArgument(Action<int[]> callback)
+    {
+        yield return PropertyRPC.CoGetProperty<int[]>(PlayerId, $"players.{PlayerId}.roleArgument", callback, () => callback.Invoke(new int[0]));
+    }
+
+    public IEnumerator CoGetLeftGuess(Action<int> callback)
+    {
+        yield return PropertyRPC.CoGetProperty<int>(PlayerId, $"players.{PlayerId}.leftGuess", callback, () => callback.Invoke(-1));
     }
 
     public readonly static RemoteProcess<(byte playerId,int assignableId, int[] arguments,bool isRole)> RpcSetAssignable = new(
@@ -670,7 +706,7 @@ public class PlayerModInfo
         UpdateAttributeModulators();
         UpdateVisibility(true);
 
-        RoleAction((role) => {
+        AssignableAction((role) => {
             role.Update();
             if (MyControl.AmOwner) role.LocalUpdate();
         });
@@ -678,7 +714,7 @@ public class PlayerModInfo
 
     public void FixedUpdate()
     {
-        RoleAction((role) => {
+        AssignableAction((role) => {
             role.Update();
             if (MyControl.AmOwner) role.LocalHudUpdate();
         });
@@ -688,7 +724,7 @@ public class PlayerModInfo
     {
         if (!Role.HasAnyTasks)
             Tasks.WaiveAllTasksAsOutsider();
-        else if (!Role.HasCrewmateTasks)
+        else if (!HasCrewmateTasks)
             Tasks.BecomeToOutsider();
     }
 
@@ -698,7 +734,7 @@ public class PlayerModInfo
 
         UpdateOutfit();
 
-        RoleAction((role) =>role.OnGameStart());
+        AssignableAction((role) =>role.OnGameStart());
     }
 
     public void OnMeetingStart()

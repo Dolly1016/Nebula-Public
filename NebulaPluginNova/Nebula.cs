@@ -33,6 +33,7 @@ public static class ToolsInstaller
         yield return null;
 
         InstallTool("VoiceChatSupport");
+        InstallTool("CPUAffinityEditor");
     }
     private static void InstallTool(string name)
     {
@@ -60,10 +61,11 @@ public class NebulaPlugin : BasePlugin
 
     public const bool IsSnapshot = false;
     //public const string VisualVersion = "v2.0";
-    public const string VisualVersion = "Snapshot 23.10.26b";
+    public const string VisualVersion = "Snapshot 23.11.02a";
+    //public const string VisualVersion = "Mayor Debug";
 
     public const int PluginEpoch = 101;
-    public const int PluginBuildNum = 1030;
+    public const int PluginBuildNum = 1043;
 
     static public HttpClient HttpClient
     {
@@ -196,20 +198,6 @@ public class NebulaPlugin : BasePlugin
         {
             new GameObject("NebulaManager").AddComponent<NebulaManager>();
         });
-    }
-
-    public static void Test()
-    {
-        var obj = UnityHelper.CreateObject("Icon", null, new Vector3(0, 0, -100f), LayerExpansion.GetUILayer());
-
-        var guageLoader = SpriteLoader.FromResource("Nebula.Resources.AttributeGuage.png", 100f);
-        var loader= XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.AttributeIcon.png", 100f, 33, true);
-        obj.AddComponent<SpriteRenderer>().sprite = loader.GetSprite(0);
-
-        var guage= UnityHelper.CreateObject<SpriteRenderer>("Guage", obj.transform, new Vector3(0, 0, -1f));
-        guage.sprite = guageLoader.GetSprite();
-        guage.material.shader = NebulaAsset.GuageShader;
-        guage.material.SetFloat("_Guage",0.4f);
     }
 }
 

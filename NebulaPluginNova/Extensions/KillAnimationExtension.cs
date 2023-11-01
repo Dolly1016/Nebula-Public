@@ -39,7 +39,7 @@ public static class KillAnimationExtension
             }
         }
 
-        NebulaGameManager.Instance?.AllRoleAction((r) => r.OnDeadBodyGenerated(deadBody));
+        NebulaGameManager.Instance?.AllAssignableAction((r) => r.OnDeadBodyGenerated(deadBody));
 
         target.Die(DeathReason.Kill, false);
         yield return source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);

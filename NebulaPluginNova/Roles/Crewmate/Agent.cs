@@ -19,7 +19,7 @@ public class Agent : ConfigurableStandardRole
     public override Color RoleColor => new Color(166f / 255f, 183f / 255f, 144f / 255f);
     public override Team Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration NumOfExemptedTasksOption = null!;
     private NebulaConfiguration NumOfExtraTasksOption = null!;
@@ -46,17 +46,23 @@ public class Agent : ConfigurableStandardRole
         private TMPro.TextMeshPro UsesText = null!;
 
         public override Timer? VentDuration => ventDuration;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(PlayerModInfo player, int[] argument) : base(player)
         {
+            if (argument.Length >= 1) leftVent = argument[0];
         }
+
+        public override int[]? GetRoleArgument() => new int[] { leftVent };
 
         public override void OnEnterVent(Vent vent)
         {
-            ventDuration.Start();
+            if (AmOwner)
+            {
+                ventDuration.Start();
 
-            leftVent--;
-            UsesText.text = leftVent.ToString();
-            if (leftVent <= 0) UsesText.transform.parent.gameObject.SetActive(false);
+                leftVent--;
+                UsesText.text = leftVent.ToString();
+                if (leftVent <= 0) UsesText.transform.parent.gameObject.SetActive(false);
+            }
         }
 
         public override void OnSetTaskLocal(ref List<GameData.TaskInfo> tasks)

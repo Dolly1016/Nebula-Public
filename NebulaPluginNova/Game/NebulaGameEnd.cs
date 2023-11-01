@@ -114,7 +114,7 @@ public class EndGameManagerSetUpPatch
             string nameText = p.DefaultName;
             string stateText = p.MyState?.Text ?? "";
             if (p.IsDead && p.MyKiller != null) stateText += "<color=#FF6666><size=75%> by " + (p.MyKiller?.DefaultName ?? "ERROR") + "</size></color>";
-            string taskText = p.Tasks.Quota > 0 ? $" ({p.Tasks.ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
+            string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $" ({p.Tasks.ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
 
             //Role Text
             string roleText = "";

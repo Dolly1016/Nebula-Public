@@ -64,7 +64,7 @@ public class Busker : ConfigurableStandardRole
 
                 reviveButon.SetSprite(reviveButtonSprite.GetSprite());
                 reviveButon.Availability = (button) => MyPlayer.MyControl.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.transform.position);
-                reviveButon.Visibility = (button) => button.EffectActive;
+                reviveButon.Visibility = (button) => button.EffectActive && Helpers.AllDeadBodies().Any(deadBody => deadBody.ParentId == MyPlayer.PlayerId);
                 reviveButon.EffectTimer = Bind(new Timer(0f, MyRole.PseudocideDurationOption.GetFloat()));
                 reviveButon.OnClick = (button) => {
                     using (RPCRouter.CreateSection("ReviveBusker")) {

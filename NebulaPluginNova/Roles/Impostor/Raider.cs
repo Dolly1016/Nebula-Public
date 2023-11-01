@@ -68,6 +68,15 @@ public class Raider : ConfigurableStandardRole
                 var diff = (pos - MyRenderer.transform.position) * Time.deltaTime * 7.5f;
                 Position += (Vector2)diff;
                 MyRenderer.flipY = Mathf.Cos(Owner.MouseAngle) < 0f;
+
+                if (AmOwner)
+                {
+                    var vec = MyRenderer.transform.position - PlayerControl.LocalPlayer.transform.position;
+                    if(PhysicsHelpers.AnyNonTriggersBetween(PlayerControl.LocalPlayer.GetTruePosition(),(Vector2)vec.normalized,((Vector2)vec).magnitude, Constants.ShipAndAllObjectsMask))
+                        MyRenderer.color = Color.red;
+                    else
+                        MyRenderer.color = Color.white;
+                }
             }
             else if (state == 1)
             {
@@ -125,6 +134,7 @@ public class Raider : ConfigurableStandardRole
             CanSeeInShadow = true;
             MyRenderer.sprite = thrownAxeSprite.GetSprite();
             thrownTime = NebulaGameManager.Instance!.CurrentTime;
+            MyRenderer.color = Color.white;
         }
 
         public static void Load()
@@ -169,7 +179,7 @@ public class Raider : ConfigurableStandardRole
                 equipButton.SetLabel("equip");
 
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(KeyAssignmentType.Kill);
-                killButton.Availability = (button) => MyAxe != null && MyPlayer.MyControl.CanMove;
+                killButton.Availability = (button) => MyAxe != null && MyPlayer.MyControl.CanMove && MyAxe.MyRenderer.color.b > 0.5f;
                 killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 killButton.OnClick = (button) =>
                 {
@@ -182,7 +192,7 @@ public class Raider : ConfigurableStandardRole
                     button.StartCoolDown();
                     equipButton.SetLabel("equip");
                 };
-                killButton.CoolDownTimer = Bind(new Timer(MyRole.ThrowCoolDownOption.KillCoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(MyRole.ThrowCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 killButton.SetLabel("throw");
                 killButton.SetCanUseByMouseClick();
@@ -193,6 +203,11 @@ public class Raider : ConfigurableStandardRole
         {
             UnequipAxe();
             equipButton?.SetLabel("equip");
+        }
+
+        public override void OnDead()
+        {
+            if (AmOwner && MyAxe != null) UnequipAxe();
         }
 
         void EquipAxe()

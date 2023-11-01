@@ -36,7 +36,7 @@ public class BountyHunter : ConfigurableStandardRole
         ArrowUpdateIntervalOption = new(RoleConfig, "arrowUpdateInterval", null, 5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator, Predicate = () => ShowBountyArrowOption };
     }
 
-    float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.KillCoolDown, OthersKillCoolDownOption.KillCoolDown, AmongUsUtil.VanillaKillCoolDown);
+    float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CurrentCoolDown, OthersKillCoolDownOption.CurrentCoolDown, AmongUsUtil.VanillaKillCoolDown);
 
     public class Instance : Impostor.Instance
     {
@@ -124,11 +124,11 @@ public class BountyHunter : ConfigurableStandardRole
                     if(killTracker.CurrentTarget!.PlayerId == currentBounty)
                     {
                         ChangeBounty();
-                        button.CoolDownTimer!.Start(MyRole.BountyKillCoolDownOption.KillCoolDown);
+                        button.CoolDownTimer!.Start(MyRole.BountyKillCoolDownOption.CurrentCoolDown);
                     }
                     else
                     {
-                        button.CoolDownTimer!.Start(MyRole.OthersKillCoolDownOption.KillCoolDown);
+                        button.CoolDownTimer!.Start(MyRole.OthersKillCoolDownOption.CurrentCoolDown);
                     }
 
                 };

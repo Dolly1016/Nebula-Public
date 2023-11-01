@@ -31,4 +31,10 @@ public static class ManagedEffects
         while (!task.IsCompleted) yield return null;
         yield break;
     }
+
+    static public IEnumerator WaitAll(this IEnumerable<IEnumerator?> enumerators)
+    {
+        var coroutines = enumerators.Where(e => e != null).Select(e=>e.WrapToIl2Cpp()).ToArray();
+        yield return Effects.All(coroutines);
+    }
 }

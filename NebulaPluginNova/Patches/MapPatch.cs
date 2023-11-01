@@ -113,7 +113,7 @@ public static class OpenNormalMapPatch
 
     static void Postfix(MapCountOverlay __instance)
     {
-        PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r=>r.OnOpenNormalMap());
+        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r=>r.OnOpenNormalMap());
     }
 }
 
@@ -123,7 +123,7 @@ public static class OpenSabotageMapPatch
 
     static void Postfix(MapCountOverlay __instance)
     {
-        PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r => r.OnOpenSabotageMap());
+        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnOpenSabotageMap());
     }
 }
 
@@ -133,7 +133,7 @@ public static class OpenAdminMapPatch
 
     static void Postfix(MapCountOverlay __instance)
     {
-        PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r => r.OnOpenAdminMap());
+        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnOpenAdminMap());
     }
 }
 
@@ -142,7 +142,7 @@ public static class InitMapPatch
 {
     static void Postfix(MapBehaviour __instance)
     {
-        PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r => r.OnMapInstantiated());
+        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnMapInstantiated());
     }
 }
 

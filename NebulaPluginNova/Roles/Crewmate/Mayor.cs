@@ -18,7 +18,7 @@ public class Mayor : ConfigurableStandardRole
     public override Color RoleColor => new Color(30f / 255f, 96f / 255f, 85f / 255f);
     public override Team Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
 
     private NebulaConfiguration MinVoteOption = null!;
     private NebulaConfiguration MaxVoteOption = null!;
@@ -44,9 +44,12 @@ public class Mayor : ConfigurableStandardRole
     public class Instance : Crewmate.Instance
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(PlayerModInfo player, int[] arguments) : base(player)
         {
+            if(arguments.Length >= 1) myVote = arguments[0];
         }
+
+        public override int[]? GetRoleArgument() => new int[] { myVote };
 
         static private SpriteLoader leftButtonSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingButtonLeft.png", 100f);
         static private SpriteLoader rightButtonSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingButtonRight.png", 100f);
@@ -83,7 +86,7 @@ public class Mayor : ConfigurableStandardRole
                 var myArea = MeetingHud.Instance.playerStates.FirstOrDefault(v=>v.TargetPlayerId == MyPlayer.PlayerId);
                 if (myArea is null) return;
 
-                var leftRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Minus", MeetingHud.Instance.SkipVoteButton.transform, new Vector3(1.5f, 0f));
+                var leftRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Minus", MeetingHud.Instance.SkipVoteButton.transform, new Vector3(2f, 0f));
                 leftRenderer.sprite = leftButtonSprite.GetSprite();
                 var leftButton = leftRenderer.gameObject.SetUpButton(true);
                 leftButton.OnMouseOver.AddListener(() => leftRenderer.color = Color.gray);
@@ -94,7 +97,7 @@ public class Mayor : ConfigurableStandardRole
                 });
                 leftRenderer.gameObject.AddComponent<BoxCollider2D>().size = new Vector2(0.6f, 0.6f);
 
-                var rightRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Plus", MeetingHud.Instance.SkipVoteButton.transform, new Vector3(3.1f, 0f));
+                var rightRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Plus", MeetingHud.Instance.SkipVoteButton.transform, new Vector3(3.6f, 0f));
                 rightRenderer.sprite = rightButtonSprite.GetSprite();
                 var rightButton = rightRenderer.gameObject.SetUpButton(true);
                 rightButton.OnMouseOver.AddListener(() => rightRenderer.color = Color.gray);

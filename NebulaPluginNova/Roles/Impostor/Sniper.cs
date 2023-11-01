@@ -136,6 +136,19 @@ public class Sniper : ConfigurableStandardRole
                         equipButton.SetLabel("equip");
 
                     RpcEquip.Invoke((MyPlayer.PlayerId, MyRifle == null));
+
+                    if(MyRifle != null)
+                    {
+                        var circle = UnityHelper.CreateObject<EffectCircle>("Circle", PlayerControl.LocalPlayer.transform, Vector3.zero, LayerExpansion.GetDefaultLayer());
+                        circle.Color = Palette.ImpostorRed;
+                        circle.OuterRadius = () => MyRole.ShotNoticeRangeOption.GetFloat();
+                        var script = circle.gameObject.AddComponent<ScriptBehaviour>();
+                        script.UpdateHandler += () =>
+                        {
+                            if (MyRifle == null) circle.Disappear();
+                        };
+                        Bind(new GameObjectBinding(circle.gameObject));
+                    }
                 };
                 equipButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 equipButton.SetLabel("equip");
@@ -162,11 +175,16 @@ public class Sniper : ConfigurableStandardRole
                     if (MyRole.StoreRifleOnFireOption) RpcEquip.Invoke((MyPlayer.PlayerId, false));
 
                 };
-                killButton.CoolDownTimer = Bind(new Timer(MyRole.SnipeCoolDownOption.KillCoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(MyRole.SnipeCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 killButton.SetLabel("snipe");
                 killButton.SetCanUseByMouseClick();
             }
+        }
+
+        public override void OnDead()
+        {
+            if (AmOwner && MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
         }
 
         public override void OnMeetingStart()

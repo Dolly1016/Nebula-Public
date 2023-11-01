@@ -44,7 +44,7 @@ public class LightPatch
         float radiusRate = Mathf.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, t);
         float range = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(hasImpostorVision ? FloatOptionNames.ImpostorLightMod : FloatOptionNames.CrewLightMod);
         float rate = 1f;
-        info?.RoleAction(r=>r.EditLightRange(ref rate));
+        info?.AssignableAction(r=>r.EditLightRange(ref rate));
         rate = Mathf.Lerp(lastRange, rate, 0.7f * Time.deltaTime);
         lastRange = rate;
         __result = radiusRate * range * rate;

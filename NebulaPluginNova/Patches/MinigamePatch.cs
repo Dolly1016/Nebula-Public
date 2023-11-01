@@ -1,6 +1,27 @@
 ﻿namespace Nebula.Patches;
 
 
+[HarmonyPatch(typeof(Minigame), nameof(Minigame.Begin))]
+class MinigameBeginPatch
+{
+    static bool Prefix(Minigame __instance, [HarmonyArgument(0)] PlayerTask task)
+    {
+        Minigame.Instance = __instance;
+        __instance.MyTask = task;
+        __instance.MyNormTask = task ? task.TryCast<NormalPlayerTask>() : null;
+        __instance.timeOpened = Time.realtimeSinceStartup;
+        if (PlayerControl.LocalPlayer)
+        {
+            if (MapBehaviour.Instance) MapBehaviour.Instance.Close();
+            
+            //タスクに吸い寄せられるのを阻止
+            PlayerControl.LocalPlayer.NetTransform.HaltSmoothly();
+        }
+        __instance.StartCoroutine(__instance.CoAnimateOpen());
+        return false;
+    }
+}
+
 [HarmonyPatch(typeof(MedScanMinigame), nameof(MedScanMinigame.FixedUpdate))]
 class MedScanMinigameFixedUpdatePatch
 {

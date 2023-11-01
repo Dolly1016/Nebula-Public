@@ -5,8 +5,77 @@ using Nebula.Modules;
 using UnityEngine.Rendering;
 using Nebula.Behaviour;
 using static MeetingHud;
+using Steamworks;
 
 namespace Nebula.Patches;
+
+[NebulaRPCHolder]
+public static class MeetingModRpc
+{
+    public static readonly RemoteProcess RpcBreakEmergencyButton = new("BreakEmergencyButton",
+        (_) => ShipStatus.Instance.BreakEmergencyButton());
+
+    public static readonly RemoteProcess<(List<VoterState> states, byte exiled, bool tie)> RpcModCompleteVoting = new("CompleteVoting", 
+        (writer,message) => {
+            writer.Write(message.states.Count);
+            foreach(var state in message.states)
+            {
+                writer.Write(state.VoterId);
+                writer.Write(state.VotedForId);
+            }
+            writer.Write(message.exiled);
+            writer.Write(message.tie);
+        },
+        (reader) => {
+            List<VoterState> states = new();
+            int statesNum = reader.ReadInt32();
+            for (int i = 0; i < statesNum; i++) states.Add(new() { VoterId = reader.ReadByte(), VotedForId = reader.ReadByte() });
+
+            return (states,reader.ReadByte(),reader.ReadBoolean());
+        },
+        (message, _) => {
+            ForcelyVotingComplete(MeetingHud.Instance, message.states, message.exiled, message.tie);
+        }
+        );
+
+    private static void ForcelyVotingComplete(MeetingHud meetingHud, List<VoterState> states, byte exiled, bool tie)
+    {
+        if (meetingHud.state == MeetingHud.VoteStates.Results) return;
+
+        meetingHud.state = MeetingHud.VoteStates.Results;
+        meetingHud.resultsStartedAt = meetingHud.discussionTimer;
+        meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
+        meetingHud.wasTie = tie;
+        meetingHud.SkipVoteButton.gameObject.SetActive(false);
+        meetingHud.SkippedVoting.gameObject.SetActive(true);
+        AmongUsClient.Instance.DisconnectHandlers.Remove(meetingHud.TryCast<IDisconnectHandler>());
+        for (int i = 0; i < GameData.Instance.PlayerCount; i++)
+        {
+            PlayerControl @object = GameData.Instance.AllPlayers[i].Object;
+            if (@object != null && @object.Data != null && @object.Data.Role) @object.Data.Role.OnVotingComplete();
+        }
+        meetingHud.PopulateResults(states.ToArray());
+        meetingHud.SetupProceedButton();
+        try
+        {
+            MeetingHud.VoterState voterState = states.FirstOrDefault((MeetingHud.VoterState s) => s.VoterId == PlayerControl.LocalPlayer.PlayerId);
+            GameData.PlayerInfo playerById = GameData.Instance.GetPlayerById(voterState.VotedForId);
+            DestroyableSingleton<AchievementManager>.Instance.OnMeetingVote(PlayerControl.LocalPlayer.Data, playerById);
+        }
+        catch 
+        {
+        }
+
+        if (DestroyableSingleton<HudManager>.Instance.Chat.IsOpenOrOpening)
+        {
+            DestroyableSingleton<HudManager>.Instance.Chat.ForceClosed();
+            ControllerManager.Instance.CloseOverlayMenu(DestroyableSingleton<HudManager>.Instance.Chat.name);
+        }
+        ControllerManager.Instance.CloseOverlayMenu(meetingHud.name);
+        ControllerManager.Instance.OpenOverlayMenu(meetingHud.name, null, meetingHud.ProceedButtonUi);
+        DestroyableSingleton<DebugAnalytics>.Instance.Analytics.MeetingEnded(Time.realtimeSinceStartup - TempData.TimeLastMeetingStarted, meetingHud.exiledPlayer);
+    }
+}
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 class ReportDeadBodyPatch
@@ -16,7 +85,7 @@ class ReportDeadBodyPatch
         if (target == null)
         {
             NebulaGameManager.Instance!.EmergencyCalls++;
-            if (NebulaGameManager.Instance!.EmergencyCalls == GeneralConfigurations.NumOfMeetingsOption) ShipStatus.Instance.BreakEmergencyButton();
+            if (NebulaGameManager.Instance!.EmergencyCalls == GeneralConfigurations.NumOfMeetingsOption) MeetingModRpc.RpcBreakEmergencyButton.Invoke();
         }
     }
 }
@@ -137,7 +206,7 @@ class MeetingClosePatch
 { 
     public static void Postfix(MeetingHud __instance)
     {
-        NebulaGameManager.Instance?.AllRoleAction(r => r.OnStartExileCutScene());
+        NebulaGameManager.Instance?.AllAssignableAction(r => r.OnStartExileCutScene());
         NebulaManager.Instance.CloseAllUI();
     }
 }
@@ -157,29 +226,34 @@ class VoteAreaVCPatch
     private static SpriteLoader VCFrameSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingVCFrame.png", 119f);
     public static void Postfix(PlayerVoteArea __instance)
     {
-
-        if (GeneralConfigurations.UseVoiceChatOption)
+        try
         {
-            var frame = UnityHelper.CreateObject<SpriteRenderer>("VCFrame", __instance.transform, new Vector3(0, 0, -0.5f));
-            frame.sprite = VCFrameSprite.GetSprite();
-            frame.color = Color.clear;
-            var col = Palette.PlayerColors[__instance.TargetPlayerId];
-            var client = NebulaGameManager.Instance?.VoiceChatManager?.GetClient(__instance.TargetPlayerId);
-            float alpha = 0f;
-            if (client != null)
+            if (GeneralConfigurations.UseVoiceChatOption)
             {
-                var script = frame.gameObject.AddComponent<ScriptBehaviour>();
-                script.UpdateHandler += () =>
+                var frame = UnityHelper.CreateObject<SpriteRenderer>("VCFrame", __instance.transform, new Vector3(0, 0, -0.5f));
+                frame.sprite = VCFrameSprite.GetSprite();
+                frame.color = Color.clear;
+                var col = Palette.PlayerColors[__instance.TargetPlayerId];
+                if(Mathf.Max((int)col.r, (int)col.g, (int)col.b) < 100) col = Color.Lerp(col, Color.white, 0.4f);
+                
+                var client = NebulaGameManager.Instance?.VoiceChatManager?.GetClient(__instance.TargetPlayerId);
+                float alpha = 0f;
+                if (client != null)
                 {
-                    if (client.Level > 0.18f)
-                        alpha = Mathf.Clamp(alpha + Time.deltaTime * 4f, 0f, 1f);
-                    else
-                        alpha = Mathf.Clamp(alpha - Time.deltaTime * 4f, 0f, 1f);
-                    col.a = (byte)(alpha * 255f);
-                    frame.color = col;
-                };
+                    var script = frame.gameObject.AddComponent<ScriptBehaviour>();
+                    script.UpdateHandler += () =>
+                    {
+                        if (client.Level > 0.12f)
+                            alpha = Mathf.Clamp(alpha + Time.deltaTime * 4f, 0f, 1f);
+                        else
+                            alpha = Mathf.Clamp(alpha - Time.deltaTime * 4f, 0f, 1f);
+                        col.a = (byte)(alpha * 255f);
+                        frame.color = col;
+                    };
+                }
             }
         }
+        catch { }
     }
 }
 
@@ -241,7 +315,7 @@ class CastVotePatch
         
         //CmdCastVote(Mod)
         int vote = 1;
-        NebulaGameManager.Instance?.GetModPlayerInfo(PlayerControl.LocalPlayer.PlayerId)?.RoleAction((r) => r.OnCastVoteLocal(suspectStateIdx, ref vote));
+        NebulaGameManager.Instance?.GetModPlayerInfo(PlayerControl.LocalPlayer.PlayerId)?.AssignableAction((r) => r.OnCastVoteLocal(suspectStateIdx, ref vote));
         __instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, suspectStateIdx, vote);
         return false;
     }
@@ -299,7 +373,6 @@ static class CheckForEndVotingPatch
         //投票が済んでない場合、なにもしない
         if (!__instance.playerStates.All((PlayerVoteArea ps) => ps.AmDead || ps.DidVote)) return false;
 
-
         {
             Dictionary<byte, int> dictionary = ModCalculateVotes(__instance);
             KeyValuePair<byte, int> max = dictionary.MaxPair(out bool tie);
@@ -313,7 +386,7 @@ static class CheckForEndVotingPatch
                     if (!state.DidVote) continue;
 
                     var modInfo = NebulaGameManager.Instance?.GetModPlayerInfo(state.TargetPlayerId);
-                    modInfo?.RoleAction(r=>r.OnTieVotes(ref extraVotes,state));
+                    modInfo?.AssignableAction(r=>r.OnTieVotes(ref extraVotes,state));
                 }
 
                 foreach (byte target in extraVotes) dictionary.AddValue(target, 1);
@@ -323,7 +396,12 @@ static class CheckForEndVotingPatch
             }
 
 
-            GameData.PlayerInfo exiled = GameData.Instance.AllPlayers.Find((Il2CppSystem.Predicate<GameData.PlayerInfo>)((GameData.PlayerInfo v) => !tie && v.PlayerId == max.Key));
+            GameData.PlayerInfo exiled = null!;
+            try
+            {
+                exiled = GameData.Instance.AllPlayers.Find((Il2CppSystem.Predicate<GameData.PlayerInfo>)((GameData.PlayerInfo v) => !tie && v.PlayerId == max.Key));
+            }
+            catch { }
             List<MeetingHud.VoterState> allStates = new();
 
             //記名投票分
@@ -353,9 +431,22 @@ static class CheckForEndVotingPatch
                 });
             }
 
-            __instance.RpcVotingComplete(allStates.ToArray(), exiled, tie);
+            allStates.Add(new() { VoterId = byte.MaxValue-1});
+            //__instance.RpcVotingComplete(allStates.ToArray(), exiled, tie);
+            MeetingModRpc.RpcModCompleteVoting.Invoke((allStates, exiled?.PlayerId ?? byte.MaxValue, tie));
+
+
         }
 
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
+class VotingCompletePatch
+{
+    public static bool Prefix(MeetingHud __instance)
+    {
         return false;
     }
 }
@@ -384,7 +475,7 @@ class PopulateResultPatch
 
     public static bool Prefix(MeetingHud __instance, [HarmonyArgument(0)]Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<MeetingHud.VoterState> states)
     {
-        NebulaGameManager.Instance?.AllRoleAction(r => r.OnEndVoting());
+        NebulaGameManager.Instance?.AllAssignableAction(r => r.OnEndVoting());
 
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.MeetingVotingResults);
 
@@ -400,6 +491,7 @@ class PopulateResultPatch
 
         //OrderByは安定ソート
         foreach (var state in states.OrderBy(s => s.VotedForId)){
+            if (state.VoterId == byte.MaxValue - 1) continue;
             if(state.VotedForId != lastVoteFor)
             {
                 lastVoteFor = state.VotedForId;

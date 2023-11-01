@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using Epic.OnlineServices;
 using Il2CppSystem.Reflection.Metadata.Ecma335;
 using Nebula.Configuration;
 using Nebula.Modules;
@@ -114,7 +115,7 @@ public abstract class ConfigurableRole : AbstractRole {
                 case 2:
                     return ratioOption;
             }
-
+            
             throw new Exception("Invalid kill cool option is selected.");
         }
         private static string[] AllSelections = new string[] { "options.killCoolDown.type.immediate", "options.killCoolDown.type.relative", "options.killCoolDown.type.ratio" };
@@ -130,7 +131,7 @@ public abstract class ConfigurableRole : AbstractRole {
 
         public KillCoolDownConfiguration(ConfigurationHolder holder, string id, KillCoolDownType defaultType, float step, float immediateMin, float immediateMax, float relativeMin, float relativeMax, float ratioStep, float ratioMin, float ratioMax, float defaultImmediate, float defaultRelative, float defaultRatio)
         {
-            new NebulaFunctionProperty(holder.Id + "." + id, () => NebulaConfiguration.SecDecorator.Invoke(KillCoolDown), () => KillCoolDown);
+            new NebulaFunctionProperty(holder.Id + "." + id, () => NebulaConfiguration.SecDecorator.Invoke(CurrentCoolDown), () => CurrentCoolDown);
 
             selectionOption = new NebulaConfiguration(holder, id, null, AllSelections, (int)defaultType, (int)defaultType);
             selectionOption.Editor = () =>
@@ -163,7 +164,7 @@ public abstract class ConfigurableRole : AbstractRole {
                         str += ratioOption!.ToDisplayString();
                         break;
                 }
-                str += (" (" + NebulaConfiguration.SecDecorator.Invoke(KillCoolDown) + ")").Color(Color.gray);
+                str += (" (" + NebulaConfiguration.SecDecorator.Invoke(CurrentCoolDown) + ")").Color(Color.gray);
                 return str;
             };
 
@@ -179,7 +180,7 @@ public abstract class ConfigurableRole : AbstractRole {
             minCoolDown = immediateMin;
         }
 
-        public float KillCoolDown
+        public float CurrentCoolDown
         {
             get
             {
@@ -200,16 +201,26 @@ public abstract class ConfigurableRole : AbstractRole {
 
     public class VentConfiguration
     {
+        private bool isOptional = false;
         private NebulaConfiguration selectionOption;
         private NebulaConfiguration? coolDownOption, durationOption, usesOption;
-        public VentConfiguration(ConfigurationHolder holder, (int min, int max, int defaultValue)? ventUses, (float min, float max, float defaultValue)? ventCoolDown, (float min, float max, float defaultValue)? ventDuration)
+        public VentConfiguration(ConfigurationHolder holder, (int min, int max, int defaultValue)? ventUses, (float min, float max, float defaultValue)? ventCoolDown, (float min, float max, float defaultValue)? ventDuration,bool optional = false)
         {
+            isOptional = optional;
             selectionOption = new NebulaConfiguration(holder, "ventOption", new TranslateTextComponent("role.general.ventOption"), false, false);
 
             coolDownOption = durationOption = usesOption = null;
 
             List<IMetaParallelPlacable> list = new();
-            list.Add(new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.4f,TMPro.TextAlignmentOptions.Left)) { MyText = selectionOption.Title });
+            if (isOptional)
+                list.Add(new MetaContext.Button(() =>
+                {
+                    selectionOption.ChangeValue(true);
+                    if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage();
+                }, new(TextAttribute.BoldAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial, Size = new(1.4f, 0.3f) })
+                { Text = selectionOption.Title });
+            else
+                list.Add(new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.4f, TMPro.TextAlignmentOptions.Left)) { MyText = selectionOption.Title });
             list.Add(NebulaConfiguration.OptionTextColon);
 
             void AddOptionToEditor(NebulaConfiguration config)
@@ -240,9 +251,27 @@ public abstract class ConfigurableRole : AbstractRole {
                 AddOptionToEditor(usesOption);
             }
 
-            selectionOption.Editor = () => new CombinedContext(0.55f, IMetaContext.AlignmentOption.Center, list.ToArray());
+            selectionOption.Editor = () =>
+            {
+                MetaContext context = new();
+                if (isOptional && !selectionOption.GetBool())
+                    context.Append(new CombinedContext(
+                        new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.8f)) { TranslationKey = "role.general.canUseVent" },
+                        NebulaConfiguration.OptionTextColon,
+                        new MetaContext.HorizonalMargin(0.1f),
+                        NebulaConfiguration.OptionButtonContext(() => selectionOption.ChangeValue(true), selectionOption.ToDisplayString())
+                        ));
+
+                if (!isOptional || selectionOption.GetBool())
+                    context.Append(new CombinedContext(0.55f, IMetaContext.AlignmentOption.Center, list.ToArray()));
+                return context;
+            };
             selectionOption.Shower = () =>
             {
+                if(isOptional && !selectionOption)
+                {
+                    return Language.Translate("role.general.canUseVent") + " : " + selectionOption.ToDisplayString();
+                }
                 var str = selectionOption.Title.Text + " :";
                 if (coolDownOption != null) str += "\n" + Language.Translate("role.general.ventCoolDown.short") + " : " + coolDownOption.ToDisplayString();
                 if (durationOption != null) str += "\n" + Language.Translate("role.general.ventDuration.short") + " : " + durationOption.ToDisplayString();
@@ -254,6 +283,7 @@ public abstract class ConfigurableRole : AbstractRole {
         public int Uses => usesOption?.GetMappedInt() ?? 0;
         public float CoolDown => coolDownOption?.GetFloat() ?? 0f;
         public float Duration => durationOption?.GetFloat() ?? 0f;
+        public bool CanUseVent => !isOptional || selectionOption.GetBool();
     }
 }
 

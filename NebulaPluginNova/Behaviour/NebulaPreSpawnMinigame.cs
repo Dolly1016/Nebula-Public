@@ -93,19 +93,44 @@ public class NebulaPreSpawnLocation
             new("Laboratory", new Vector2(-5.2573f, -9.1099f)),
             new("Greenhouse", new Vector2(9.3125f, -11.8004f)),
             new("MeetingRoom", new Vector2(-1.2941f, -1.5503f)),
+            new("Cafeteria", new Vector2(-16.2874f, 7.1993f)),
+            new("Dropship", new Vector2(-9.4613f, 13.3676f)),
+            new("SplashZone", new Vector2(-16.9936f, -0.2838f)),
+            new("Kitchen", new Vector2(-17.0477f, -7.7723f)),
+            new("Storage", new Vector2(1.2842f, 4.2345f)),
+            new("UpperEngine", new Vector2(21.9515f, 2.8107f)),
+            new("MiningPit", new Vector2(11.9868f, 9.4421f)),
+            new("Lookout", new Vector2(7.1789f, 1.5662f)),
+            new("Reactor", new Vector2(21.9125f, -7.0967f)),
+            new("Jungle", new Vector2[]{ 
+                new Vector2(18.44f, -12.3383f),//リアクター左下
+                new Vector2(9.4571f, -15.5648f),//グリーンハウス下
+                new Vector2(3.8322f, -6.0519f),//グリーンハウス左上
+                new Vector2(-4.2053f, -14.8184f),//ラボ下
+                new Vector2(2.3421f, -12.0085f),//グリーンハウス・ラボ間
+                new Vector2(15.2272f, -6.1833f)//リアクター左
+                })
         }
         };
 
     public string LocationName { get; private init; }
     public string? AudioClip { get; private init; }
-    public Vector2? Position { get; set; }
+    public Vector2[]? Positions { get; set; }
+    public Vector2? Position => Positions != null ? Positions[System.Random.Shared.Next(Positions.Length)] : null;
     public int? VanillaIndex { get; private init; }
     public string AssetImagePath(byte mapId) => "assets/SpawnCandidates/" + MapName[mapId] + "/" + LocationName + ".png";
-    public IDividedSpriteLoader GetSprite(byte mapId) => new XOnlyDividedSpriteLoader(new AssetTextureLoader(AssetImagePath(mapId)), 115f, ImageSize, true) { Pivot = new(0.5f, 0f) };
+    public IDividedSpriteLoader GetSprite(byte mapId) => new DividedSpriteLoader(new AssetTextureLoader(AssetImagePath(mapId)), 115f, ImageSize, ImageSize, true) { Pivot = new(0.5f, 0f) };
     private int ImageSize { get; set; } = 200;
     public NebulaPreSpawnLocation(string locationName,Vector2 pos,string? audioClip = null) { 
         this.LocationName = locationName;
-        this.Position = pos;
+        this.Positions = new Vector2[] { pos };
+        this.AudioClip = audioClip;
+    }
+
+    public NebulaPreSpawnLocation(string locationName, Vector2[] pos, string? audioClip = null)
+    {
+        this.LocationName = locationName;
+        this.Positions = pos;
         this.AudioClip = audioClip;
     }
 
@@ -322,7 +347,7 @@ public class NebulaPreSpawnMinigame : Minigame
         foreach(var loc in cand)
         {
             if (loc.VanillaIndex.HasValue)
-                loc.Position = minigamePrefab!.Locations[loc.VanillaIndex.Value].Location;
+                loc.Positions = new Vector2[] { minigamePrefab!.Locations[loc.VanillaIndex.Value].Location };
         }
 
         for (int i = 0; i < candidates; i++){

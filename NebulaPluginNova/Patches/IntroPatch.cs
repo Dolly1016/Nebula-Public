@@ -55,6 +55,7 @@ public static class ShowIntroPatch
 
         yield return CoShowTeam(__instance,myInfo!,shownPlayers.ToArray(), 3f);
         yield return CoShowRole(__instance,myInfo!);
+        ShipStatus.Instance.StartSFX();
         GameObject.Destroy(__instance.gameObject);
     }
 

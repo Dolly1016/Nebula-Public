@@ -52,19 +52,18 @@ public static class NebulaExileWrapUp
 
                 using (RPCRouter.CreateSection("ExilePlayer"))
                 {
-                    info.RoleAction(role =>
+                    info.AssignableAction(role =>
                     {
                         role.OnExiled();
                         role.OnDead();
                     });
 
-                    PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r => r.OnPlayerDeadLocal(@object));
+                    PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(@object));
 
-                    NebulaGameManager.Instance.Syncronizer.SendSync(SynchronizeTag.PostExile);
+                    NebulaGameManager.Instance.Syncronizer.SendSync(SynchronizeTag.CheckExtraVictims);
                 }
 
-                yield return NebulaGameManager.Instance.Syncronizer.CoSync(Modules.SynchronizeTag.PostExile, true, true, false);
-                NebulaGameManager.Instance.Syncronizer.ResetSync(Modules.SynchronizeTag.PostExile);
+                yield return NebulaGameManager.Instance.Syncronizer.CoSyncAndReset(Modules.SynchronizeTag.CheckExtraVictims, true, true, false);
             }
 
             bool extraExile = MeetingHudExtension.ExtraVictims.Count > 0;
@@ -99,15 +98,19 @@ public static class NebulaExileWrapUp
             }
         }
 
+        yield return NebulaGameManager.Instance?.AllPlayerInfo().Select(p => p.Role?.CoMeetingEnd()).WaitAll();
+        NebulaGameManager.Instance!.Syncronizer.SendSync(SynchronizeTag.PostMeeting);
+        yield return NebulaGameManager.Instance!.Syncronizer.CoSyncAndReset(Modules.SynchronizeTag.PostMeeting, true, true, false);
+
         NebulaGameManager.Instance?.OnMeetingEnd(__instance.exiled?.Object);
-        NebulaGameManager.Instance?.AllRoleAction(r=>r.OnMeetingEnd());
+        NebulaGameManager.Instance?.AllAssignableAction(r=>r.OnMeetingEnd());
 
         yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform.parent, GameStatistics.EventVariation.MeetingEnd, EventDetail.MeetingEnd);
 
 
         
 
-        NebulaGameManager.Instance?.AllRoleAction(r=>r.OnGameReenabled());
+        NebulaGameManager.Instance?.AllAssignableAction(r=>r.OnGameReenabled());
         NebulaGameManager.Instance?.AllScriptAction(s=>s.OnGameReenabled());
 
         __instance.ReEnableGameplay();

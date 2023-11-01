@@ -116,7 +116,7 @@ public static class RoleHistoryHelper {
 }
 
 [NebulaRPCHolder]
-public class NebulaGameManager
+public class NebulaGameManager : IRuntimePropertyHolder
 {
     static private NebulaGameManager? instance = null;
     static public NebulaGameManager? Instance { get => instance; }
@@ -249,7 +249,7 @@ public class NebulaGameManager
         foreach (var p in allModPlayers) p.Value.OnMeetingStart();
         foreach (var script in allScripts) script.OnMeetingStart();
 
-        AllRoleAction(r=>r.OnMeetingStart());
+        AllAssignableAction(r=>r.OnMeetingStart());
 
         Scheduler.Execute(RPCScheduler.RPCTrigger.PreMeeting);
     }
@@ -289,7 +289,7 @@ public class NebulaGameManager
         var localModInfo = PlayerControl.LocalPlayer.GetModInfo();
         if (localModInfo != null)
         {
-            localModInfo.RoleAction(r => r.LocalHudUpdate());
+            localModInfo.AssignableAction(r => r.LocalHudUpdate());
 
             //ベントボタン
             var ventTimer = PlayerControl.LocalPlayer.inVent ? localModInfo.Role?.VentDuration : localModInfo.Role?.VentCoolDown;
@@ -317,7 +317,7 @@ public class NebulaGameManager
             AttributeShower.Update(localModInfo);
         }
 
-        CheckAndEndGame(CriteriaManager.OnUpdate());
+        if(!ExileController.Instance || Minigame.Instance) CheckAndEndGame(CriteriaManager.OnUpdate());
     }
 
     public void OnFixedUpdate() {
@@ -416,9 +416,14 @@ public class NebulaGameManager
 
     public IEnumerable<PlayerModInfo> AllPlayerInfo() => allModPlayers.Values;
 
-    public void AllRoleAction(Action<AssignableInstance> action)
+    public void AllAssignableAction(Action<AssignableInstance> action)
     {
-        foreach (var p in AllPlayerInfo()) p.RoleAction(action);
+        foreach (var p in AllPlayerInfo()) p.AssignableAction(action);
+    }
+
+    public void AllRoleAction(Action<RoleInstance> action)
+    {
+        foreach (var p in AllPlayerInfo()) action.Invoke(p.Role);
     }
 
     public IEnumerable<INebulaScriptComponent> AllScripts() => allScripts;
@@ -436,6 +441,14 @@ public class NebulaGameManager
     public void RpcInvokeForcelyWin(CustomEndCondition endCondition, int winnersMask)
     {
         RpcSpecialWin.Invoke(new(endCondition.Id, winnersMask));
+    }
+
+    public bool TryGetProperty(string id,out INebulaProperty? property)
+    {
+        foreach (var p in allModPlayers.Values) if (p.TryGetProperty(id, out property)) return true;
+
+        property = null;
+        return false;
     }
 
     static RemoteProcess<Tuple<int, int>> RpcSpecialWin = new RemoteProcess<Tuple<int, int>>(
@@ -458,7 +471,7 @@ public class NebulaGameManager
         (_) =>
         {
             NebulaGameManager.Instance?.CheckGameState();
-            NebulaGameManager.Instance?.AllRoleAction(r=>r.OnActivated());
+            NebulaGameManager.Instance?.AllAssignableAction(r=>r.OnActivated());
         }
 
         );

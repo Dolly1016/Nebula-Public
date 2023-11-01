@@ -68,7 +68,7 @@ public class NebulaConfigEntryManager
                 int done = 0;
                 while (done < AllConfig.Count)
                 {
-                    int max = Mathf.Min(AllConfig.Count, done + 500);
+                    int max = Mathf.Min(AllConfig.Count, done + 100);
                     yield return new Tuple<int, int>(done, max);
                     done = max;
                 }
@@ -539,6 +539,9 @@ public class NebulaConfiguration
         if (holder != null) entryId = holder.Id + "." + entryId;
 
         entry = new NebulaStandardConfigEntry(entryId, defaultValue);
+        var clampVal = Mathf.Clamp(entry.CurrentValue, 0, maxValue);
+        if (entry.CurrentValue != clampVal) entry.UpdateValue(clampVal, false);
+
         Title = title ?? new TranslateTextComponent(entryId);
 
         Shower = () => Title.Text + " : " + ToDisplayString();

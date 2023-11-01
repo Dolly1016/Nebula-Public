@@ -83,7 +83,7 @@ class TaskTextPatch
         try
         {
             var text = __instance.taskText.text;
-            PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r =>
+            PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r =>
             {
                 string? str = r.GetExtraTaskText();
                 if (str != null) text += "\n" + str;

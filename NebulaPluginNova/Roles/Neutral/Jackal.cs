@@ -114,7 +114,7 @@ public class Jackal : ConfigurableStandardRole
                         if(leftText)leftText!.text = left.ToString();
                     }
                 };
-                killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.KillCoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 killButton.SetLabel("kill");
 
@@ -236,7 +236,7 @@ public class Sidekick : ConfigurableRole
                         MyPlayer.MyControl.ModKill(myTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
                         button.StartCoolDown();
                     };
-                    killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.KillCoolDown).SetAsKillCoolDown().Start());
+                    killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
                     killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                     killButton.SetLabel("kill");
                 }

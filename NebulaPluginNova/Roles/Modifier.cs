@@ -79,11 +79,14 @@ public abstract class ConfigurableStandardModifier : ConfigurableModifier
     {
     }
 
+    static public NebulaConfiguration GenerateRoleChanceOption(ConfigurationHolder holder) =>
+        new(holder, "chance", new TranslateTextComponent("options.modifier.chance"), 10f, 100f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
+
     protected override void LoadOptions() {
         CrewmateRoleCountOption = new(RoleConfig, "crewmateCount", new TranslateTextComponent("options.role.crewmateCount"), 15, 0, 0);
         ImpostorRoleCountOption = new(RoleConfig, "impostorCount", new TranslateTextComponent("options.role.impostorCount"), 5, 0, 0);
         NeutralRoleCountOption = new(RoleConfig, "neutralCount", new TranslateTextComponent("options.role.neutralCount"), 10, 0, 0);
-        RoleChanceOption = new(RoleConfig, "chance", new TranslateTextComponent("options.modifier.chance"), 10f, 100f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
+        RoleChanceOption = GenerateRoleChanceOption(RoleConfig);
     }
 
     private void TryAssign(IRoleAllocator.RoleTable roleTable,RoleCategory category,int num)

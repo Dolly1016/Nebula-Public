@@ -14,16 +14,18 @@ public class Sheriff : ConfigurableStandardRole
     public override Color RoleColor => new Color(240f / 255f, 191f / 255f, 0f);
     public override Team Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
+    private NebulaConfiguration NumOfShotsOption = null!;
     private NebulaConfiguration CanKillMadmateOption = null!;
-    
+
     protected override void LoadOptions()
     {
         base.LoadOptions();
 
         KillCoolDownOption = new(RoleConfig, "killCoolDown", KillCoolDownConfiguration.KillCoolDownType.Relative, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 25f, -5f, 1f);
+        NumOfShotsOption = new(RoleConfig, "numOfShots", null, 1, 15, 3, 3);
         CanKillMadmateOption = new(RoleConfig, "canKillMadmate", null, false, false);
     }
 
@@ -33,9 +35,12 @@ public class Sheriff : ConfigurableStandardRole
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SheriffKillButton.png", 100f);
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        private int leftShots = MyRole.NumOfShotsOption;
+        public Instance(PlayerModInfo player, int[] arguments) : base(player)
         {
+            if(arguments.Length >= 1) leftShots = arguments[0];
         }
+        public override int[]? GetRoleArgument() => new int[] { leftShots };
 
         private bool CanKill(PlayerControl target)
         {
@@ -52,9 +57,13 @@ public class Sheriff : ConfigurableStandardRole
             {
                 var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(KeyAssignmentType.Kill);
+
+                var leftText = killButton.ShowUsesIcon(3);
+                leftText.text = leftShots.ToString();
+
                 killButton.SetSprite(buttonSprite.GetSprite());
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && leftShots > 0;
                 killButton.OnClick = (button) => {
                     if (CanKill(killTracker.CurrentTarget!)) 
                         MyPlayer.MyControl.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill); 
@@ -64,8 +73,10 @@ public class Sheriff : ConfigurableStandardRole
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.MyControl, killTracker.CurrentTarget!);
                     }
                     button.StartCoolDown();
+
+                    leftText.text = (--leftShots).ToString();
                 };
-                killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.KillCoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 killButton.SetLabel("kill");
             }

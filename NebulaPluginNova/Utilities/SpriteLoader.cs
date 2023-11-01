@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Compression;
 using Cpp2IL.Core.Extensions;
+using UnityEngine;
 
 namespace Nebula.Utilities;
 
@@ -202,21 +203,23 @@ public class UnloadTextureLoader : ITextureLoader
 {
     Texture2D texture = null!;
     
-    public UnloadTextureLoader(byte[] byteTexture)
+    public UnloadTextureLoader(byte[] byteTexture, bool isFake = false)
     {
         texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
         GraphicsHelper.LoadImage(texture, byteTexture, false);
-        texture.hideFlags |= HideFlags.DontUnloadUnusedAsset | HideFlags.HideAndDontSave;
+        if (!isFake) texture.hideFlags |= HideFlags.DontUnloadUnusedAsset | HideFlags.HideAndDontSave;
     }
 
     public class AsyncLoader
     {
         public UnloadTextureLoader? Result { get; private set; } = null;
         Func<Stream?> stream;
+        bool IsFake;
 
-        public AsyncLoader(Func<Stream?> stream)
+        public AsyncLoader(Func<Stream?> stream, bool isFake = false)
         {
             this.stream = stream;
+            this.IsFake = isFake;
         }
 
         private async Task<byte[]> ReadStreamAsync(Action<Exception>? exceptionHandler = null)
@@ -248,7 +251,7 @@ public class UnloadTextureLoader : ITextureLoader
             var task = ReadStreamAsync(exceptionHandler);
             while (!task.IsCompleted) yield return new WaitForSeconds(0.15f);
             
-            Result = new UnloadTextureLoader(task.Result);
+            Result = new UnloadTextureLoader(task.Result,IsFake);
         }
     }
 
@@ -357,9 +360,10 @@ public class DividedSpriteLoader : ISpriteLoader, IDividedSpriteLoader
 
         if (!sprites[index])
         {
+            var texture2D = texture.GetTexture();
             int _x = index % division!.Item1;
             int _y = index / division!.Item1;
-            sprites[index] = texture.GetTexture().ToSprite(new Rect(_x * size.Item1, -_y * size.Item2, size.Item1, -size.Item2), Pivot, pixelsPerUnit);
+            sprites[index] = texture2D.ToSprite(new Rect(_x * size.Item1, (division.Item2 - _y - 1) * size.Item2, size.Item1, size.Item2), Pivot, pixelsPerUnit);
         }
         return sprites[index];
     }

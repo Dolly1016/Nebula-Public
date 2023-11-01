@@ -138,6 +138,6 @@ public class NebulaInput
         modInput[KeyAssignmentType.AidAction] = new(GetModKeyCodeGetter("aidAction", KeyCode.LeftShift));
         modInput[KeyAssignmentType.Command] = new(GetModKeyCodeGetter("command", KeyCode.LeftControl));
         modInput[KeyAssignmentType.Screenshot] = new(GetModKeyCodeGetter("screenshot", KeyCode.P));
-        modInput[KeyAssignmentType.Mute] = new(GetModKeyCodeGetter("mute", KeyCode.V));
+        modInput[KeyAssignmentType.Mute] = new(GetModKeyCodeGetter("mute", KeyCode.M));
     }
 }

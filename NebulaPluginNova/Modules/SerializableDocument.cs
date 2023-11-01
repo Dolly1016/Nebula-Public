@@ -182,6 +182,25 @@ public class SerializableDocument
     [JsonSerializableField(true)]
     public DocumentReference? Document = null;
 
+    //アラインメント(非推奨)
+    [JsonSerializableField(true)]
+    public string? Alignment = null;
+    public IMetaContext.AlignmentOption GetAlignment()
+    {
+        if (Alignment == null) return IMetaContext.AlignmentOption.Left;
+
+        switch (Alignment)
+        {
+            case "Center":
+                return IMetaContext.AlignmentOption.Center;
+            case "Left":
+                return IMetaContext.AlignmentOption.Left;
+            case "Right":
+                return IMetaContext.AlignmentOption.Right;
+        }
+        return IMetaContext.AlignmentOption.Left;
+    }
+
     public INameSpace? RelatedNamespace = null;
 
     private ISpriteLoader? imageLoader = null;
@@ -273,7 +292,7 @@ public class SerializableDocument
                 }
                 list.Add(mpp);
             }
-            return new CombinedContext(list.ToArray()) { Alignment = IMetaContext.AlignmentOption.Left };
+            return new CombinedContext(list.ToArray()) { Alignment = GetAlignment() };
         }
 
         if(TranslationKey != null || RawText != null)
@@ -338,11 +357,11 @@ public class SerializableDocument
 
             if (IsVariable ?? false)
             {
-                return new MetaContext.VariableText(attr) { RawText = text, Alignment = IMetaContext.AlignmentOption.Left, PostBuilder =  PostBuilder };
+                return new MetaContext.VariableText(attr) { RawText = text, Alignment = GetAlignment(), PostBuilder =  PostBuilder };
             }
             else
             {
-                return new MetaContext.Text(attr) { RawText = text, Alignment = IMetaContext.AlignmentOption.Left, PostBuilder = PostBuilder };
+                return new MetaContext.Text(attr) { RawText = text, Alignment = GetAlignment(), PostBuilder = PostBuilder };
             }
         }
 
@@ -370,9 +389,9 @@ public class SerializableDocument
             }
             catch { }
             if (sprite)
-                return new MetaContext.Image(sprite) { Width = Width ?? 1f, PostBuilder = image => image.maskInteraction = useMaskedMaterial ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None };
+                return new MetaContext.Image(sprite) { Width = Width ?? 1f, PostBuilder = image => image.maskInteraction = useMaskedMaterial ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None, Alignment = GetAlignment() };
             else
-                return new MetaContext.VariableText(new TextAttribute(TextAttribute.BoldAttrLeft) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(1.4f)) { RawText = lastImagePath.Color(UnityEngine.Color.gray), Alignment = IMetaContext.AlignmentOption.Left };
+                return new MetaContext.VariableText(new TextAttribute(TextAttribute.BoldAttrLeft) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(1.4f)) { RawText = lastImagePath.Color(UnityEngine.Color.gray), Alignment = GetAlignment() };
         }
 
         if (HSpace != null) return new MetaContext.HorizonalMargin(HSpace.Value);

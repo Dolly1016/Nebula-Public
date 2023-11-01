@@ -136,6 +136,6 @@ public class SetUpCertificationPatch
 {
     public static void Postfix(PlayerControl __instance)
     {
-        __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
+        if(LobbyBehaviour.Instance) __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
     }
 }

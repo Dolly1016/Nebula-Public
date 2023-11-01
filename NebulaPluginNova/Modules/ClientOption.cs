@@ -3,6 +3,7 @@ using Nebula.Behaviour;
 using Rewired.UI.ControlMapper;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,8 @@ public class ClientOption
     public enum ClientOptionType
     {
         OutputCosmicHash,
-        UseNoiseReduction
+        UseNoiseReduction,
+        ProcessorAffinity
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
@@ -38,15 +40,62 @@ public class ClientOption
     public string DisplayName => Language.Translate("config.client." + id);
     public string DisplayValue => Language.Translate(selections[configEntry.Value]);
     public int Value => configEntry.Value;
-
+    public Action? OnValueChanged;
     public void Increament()
     {
         configEntry.Value = (configEntry.Value + 1) % selections.Length;
+        OnValueChanged?.Invoke();
     }
     static public void Load()
     {
         new ClientOption(ClientOptionType.OutputCosmicHash, "outputHash", new string[] { "options.switch.off", "options.switch.on" }, 0);
         new ClientOption(ClientOptionType.UseNoiseReduction, "noiseReduction", new string[] { "options.switch.off", "options.switch.on" }, 0);
+        new ClientOption(ClientOptionType.ProcessorAffinity, "processorAffinity", new string[] {
+        "config.client.processorAffinity.dontCare",
+        "config.client.processorAffinity.dualCoreHT",
+        "config.client.processorAffinity.dualCore",
+        "config.client.processorAffinity.singleCore"}, 0)
+        { OnValueChanged = ReflectProcessorAffinity };
+
+        ReflectProcessorAffinity();
+    }
+
+    static public void ReflectProcessorAffinity()
+    {
+        try
+        {
+            string? mode = null;
+            switch (AllOptions[ClientOptionType.ProcessorAffinity].Value)
+            {
+                case 0:
+                    mode = "0";
+                    break;
+                case 1:
+                    mode = "2HT";
+                    break;
+                case 2:
+                    mode = "2";
+                    break;
+                case 3:
+                    mode = "1";
+                    break;
+            }
+
+            if (mode == null) return;
+
+            var process = System.Diagnostics.Process.GetCurrentProcess();
+            string id = process.Id.ToString();
+
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = "CPUAffinityEditor.exe";
+            processStartInfo.Arguments = id + " " + mode;
+            processStartInfo.CreateNoWindow = true;
+            processStartInfo.UseShellExecute = false;
+            Process.Start(processStartInfo);
+        }
+        catch
+        {
+        }
     }
 }
 
@@ -63,7 +112,6 @@ public static class StartOptionMenuPatch
                 if (AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
                     HudManager.Instance.ShowVanillaKeyGuide();
             });
-            Debug.Log("Addlistener: "+button.name);
         }
         var tabs = new List<TabGroup>(__instance.Tabs.ToArray());
 
@@ -85,7 +133,7 @@ public static class StartOptionMenuPatch
             nebulaContext.Append(ClientOption.AllOptions.Values, (option) => new MetaContext.Button(()=> {
                 option.Increament();
                 SetNebulaContext();
-            }, buttonAttr) { RawText = option.DisplayName + " : " + option.DisplayValue }, 2, -1, 0, 0.4f);
+            }, buttonAttr) { RawText = option.DisplayName + " : " + option.DisplayValue }, 2, -1, 0, 0.55f);
             nebulaContext.Append(new MetaContext.VerticalMargin(0.2f));
 
             if (!AmongUsClient.Instance || AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started)

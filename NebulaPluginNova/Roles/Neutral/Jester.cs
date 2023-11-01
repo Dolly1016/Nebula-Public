@@ -21,7 +21,7 @@ public class Jester : ConfigurableStandardRole
     {
         base.LoadOptions();
 
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
+        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
         CanDragDeadBodyOption = new NebulaConfiguration(RoleConfig, "canDragDeadBody", null, true, true);
     }
 
@@ -42,8 +42,10 @@ public class Jester : ConfigurableStandardRole
         private Scripts.Draggable? draggable = null;
         private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
         private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
         public override Timer? VentCoolDown => ventCoolDown;
         public override Timer? VentDuration => ventDuration;
+        public override bool CanUseVent => canUseVent;
 
 
         public Instance(PlayerModInfo player) : base(player)

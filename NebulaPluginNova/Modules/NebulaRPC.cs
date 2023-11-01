@@ -88,13 +88,16 @@ public static class RPCRouter
 
     static RPCSection? currentSection = null;
     static List<NebulaRPCInvoker> evacuateds = new();
-    public static void SendRpc(string name, int hash, Action<MessageWriter> sender, Action localBodyProcess) { 
+    public static void SendRpc(string name, int hash, Action<MessageWriter> sender, Action localBodyProcess) {
         if(currentSection == null)
         {
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 64, Hazel.SendOption.Reliable, -1);
             writer.Write(hash);
             sender.Invoke(writer);
+            //NebulaPlugin.Log.Print(null, "sent RPC:" + name + "(size:" + writer.Length + ")");
             AmongUsClient.Instance.FinishRpcImmediately(writer);
+
+            
 
             try
             {
@@ -433,6 +436,123 @@ public class DivisibleRemoteProcess<Parameter, DividedParameter> : RemoteProcess
     }
 }
 
+[NebulaRPCHolder]
+public static class PropertyRPC
+{
+    record PropertyRequest
+    {
+        public RequestType type;
+        public Action<object>? Callback;
+        public Action? ErrorCallback;
+    }
+
+    public enum RequestType
+    {
+        Byte,
+        Integer,
+        Float,
+        IntegerArray,
+        FloatArray,
+        ByteArray,
+        String,
+    }
+    private static Dictionary<RequestType, Type> RequestTypeMap = new Dictionary<RequestType, Type>() {
+        { RequestType.Byte, typeof(byte) },
+        { RequestType.Integer, typeof(int) },
+        { RequestType.Float, typeof(float) },
+        { RequestType.ByteArray, typeof(byte[])},
+        { RequestType.IntegerArray, typeof(int[]) },
+        { RequestType.FloatArray, typeof(float[]) },
+        { RequestType.String, typeof(string) }
+    };
+    private static Dictionary<int, PropertyRequest> MyRequests = new();
+
+    private static RemoteProcess<(int requestId, bool isSuccess, RequestType type, object obj)> RpcPropertyReply = new(
+        "PropertyReply",
+        (writer, message) => {
+            var objWriter = RemoteProcessAsset.GetProcess(RequestTypeMap[message.type]).Item1;
+            writer.Write(message.requestId);
+            writer.Write(message.isSuccess);
+            objWriter.Invoke(writer, message.obj);
+        },
+        (reader) => {
+            var requestId = reader.ReadInt32();
+            var isSuccess = reader.ReadBoolean();
+            if (MyRequests.TryGetValue(requestId, out var request))
+            {
+                if (isSuccess)
+                {
+                    var objReader = RemoteProcessAsset.GetProcess(RequestTypeMap[request.type]).Item2;
+                    request.Callback?.Invoke(objReader.Invoke(reader));
+                }
+                else
+                {
+                    request.ErrorCallback?.Invoke();
+                }
+                MyRequests.Remove(requestId);
+            }
+            return (0, false, RequestType.Integer, null!);
+        },
+        (_, _) => { }
+        );
+
+    private static RemoteProcess<(byte targetId, int requestId, string propertyId, RequestType type)> RpcPropertyRequest = new(
+        "PropertyRequest",
+        (message, _)=>{
+            if(message.targetId == PlayerControl.LocalPlayer.PlayerId)
+            {
+                var property = PropertyManager.GetProperty(message.propertyId);
+                if(property == null)
+                {
+                    RpcPropertyReply.Invoke((message.requestId, false, RequestType.Integer, null!));
+                    return;
+                }
+
+                switch (message.type)
+                {
+                    case RequestType.Byte:
+                        RpcPropertyReply.Invoke((message.requestId, true, RequestType.Byte, property.GetByte()));
+                        break;
+                    case RequestType.ByteArray:
+                        RpcPropertyReply.Invoke((message.requestId, true, RequestType.ByteArray, property.GetByteArray()));
+                        break;
+                    case RequestType.Integer:
+                        RpcPropertyReply.Invoke((message.requestId, true, RequestType.Integer, property.GetInteger()));
+                        break;
+                    case RequestType.IntegerArray:
+                        RpcPropertyReply.Invoke((message.requestId, true, RequestType.IntegerArray, property.GetIntegerArray()));
+                        break;
+                    case RequestType.Float:
+                        RpcPropertyReply.Invoke((message.requestId, true, RequestType.Float, property.GetFloat()));
+                        break;
+                    case RequestType.String:
+                        RpcPropertyReply.Invoke((message.requestId, true, RequestType.String, property.GetString()));
+                        break;
+                    default:
+                        RpcPropertyReply.Invoke((message.requestId, false, RequestType.Integer, null!));
+                        break;
+                }
+            }
+        }
+    );
+
+    private static IEnumerator CoGetProperty(byte targetPlayerId, string propertyId, RequestType propertyType, Action<object>? callBack, Action? errorAction)
+    {
+        int id = System.Random.Shared.Next(int.MaxValue >> 1);
+        PropertyRequest request = new() { Callback = callBack, ErrorCallback = errorAction, type = propertyType };
+        MyRequests[id] = request;
+
+        RpcPropertyRequest.Invoke((targetPlayerId, id, propertyId, propertyType));
+
+        while (MyRequests.ContainsKey(id)) yield return null;
+
+        yield break;
+    }
+
+    public static IEnumerator CoGetProperty<T>(byte targetPlayerId, string propertyId, Action<T>? callBack, Action? errorCallBack) =>
+        CoGetProperty(targetPlayerId, propertyId, RequestTypeMap.First(entry=>entry.Value == typeof(T)).Key, (obj)=>callBack?.Invoke((T)obj), errorCallBack);
+}
+
 public class RPCScheduler
 {
     public enum RPCTrigger
@@ -475,4 +595,3 @@ class NebulaRPCHandlerPatch
         RemoteProcessBase.AllNebulaProcess[reader.ReadInt32()].Receive(reader);
     }
 }
-

@@ -9,6 +9,7 @@ public class Lover : ConfigurableModifier
     public override string LocalizedName => "lover";
     public override string CodeName => "LVR";
     public override Color RoleColor => new Color(255f / 255f, 0f / 255f, 184f / 255f);
+    private NebulaConfiguration RoleChanceOption = null!;
     private NebulaConfiguration NumOfPairsOption = null!;
     private NebulaConfiguration ChanceOfAssigningImpostorsOption = null!;
     private NebulaConfiguration AllowExtraWinOption = null!;
@@ -26,6 +27,9 @@ public class Lover : ConfigurableModifier
 
         for (int i = 0; i < maxPairs; i++)
         {
+            float chance = RoleChanceOption.GetFloat() / 100f;
+            if ((float)System.Random.Shared.NextDouble() >= chance) continue;
+
             try
             {
                 first = others[othersIndex++];
@@ -44,6 +48,7 @@ public class Lover : ConfigurableModifier
 
     protected override void LoadOptions()
     {
+        RoleChanceOption = ConfigurableStandardModifier.GenerateRoleChanceOption(RoleConfig);
         NumOfPairsOption = new(RoleConfig, "numOfPairs", null, 0, 7, 0, 0);
         ChanceOfAssigningImpostorsOption = new(RoleConfig, "chanceOfAssigningImpostors", null, 0f, 100f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
         AllowExtraWinOption = new(RoleConfig, "allowExtraWin", null, true, true);

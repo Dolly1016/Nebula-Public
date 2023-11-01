@@ -1,4 +1,5 @@
 ﻿using AmongUs.Data;
+using Cpp2IL.Core.Extensions;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Reflection.Internal;
@@ -83,7 +84,7 @@ public class CustomCosmicItem : CustomItemGrouped
         }
     }
 
-    public virtual IEnumerator Activate()
+    public virtual IEnumerator Activate(bool addToMoreCosmic = true)
     {
         string holder = SubholderPath;
         foreach (var image in AllImage())
@@ -208,14 +209,14 @@ public class CosmicHat : CustomCosmicItem
 
     public HatData MyHat { get; private set; } = null!;
     public HatViewData MyView { get; private set; } = null!;
-    public override IEnumerator Activate()
+    public override IEnumerator Activate(bool addToMoreCosmic)
     {
         foreach (var image in AllImage()) {
             image.Pivot = new Vector2(0.53f, 0.575f);
             image.PixelsPerUnit = 112.875f;
         }
 
-        yield return base.Activate();
+        yield return base.Activate(addToMoreCosmic);
 
         if (!IsValid) yield break;
 
@@ -255,7 +256,7 @@ public class CosmicHat : CustomCosmicItem
         if (ClimbDown != null) ClimbDown.RequirePlayFirstState = true;
         if (ClimbDownFlip != null) ClimbDownFlip.RequirePlayFirstState = true;
 
-        MoreCosmic.AllHats.Add(hat.ProductId, this);        
+        if(addToMoreCosmic) MoreCosmic.AllHats.Add(hat.ProductId, this);        
     }
 
     public override string Category { get => "hats"; }
@@ -301,7 +302,7 @@ public class CosmicVisor : CustomCosmicItem
     public bool HasClimbUpImage => Climb != null;
     public bool HasClimbDownImage => (ClimbDown ?? Climb) != null;
 
-    public override IEnumerator Activate()
+    public override IEnumerator Activate(bool addToMoreCosmic)
     {
         foreach (var image in AllImage())
         {
@@ -309,7 +310,7 @@ public class CosmicVisor : CustomCosmicItem
             image.PixelsPerUnit = 112.875f;
         }
 
-        yield return base.Activate();
+        yield return base.Activate(addToMoreCosmic);
 
         if (!IsValid) yield break;
 
@@ -343,7 +344,7 @@ public class CosmicVisor : CustomCosmicItem
         if (ClimbDown != null) ClimbDown.RequirePlayFirstState = true;
         if (ClimbDownFlip != null) ClimbDownFlip.RequirePlayFirstState = true;
 
-        MoreCosmic.AllVisors.Add(visor.ProductId, this);
+        if (addToMoreCosmic) MoreCosmic.AllVisors.Add(visor.ProductId, this);
     }
     public override string Category { get => "visors"; }
 }
@@ -355,9 +356,9 @@ public class CosmicNamePlate : CustomCosmicItem
 
     public NamePlateData MyPlate { get; private set; } = null!;
     public NamePlateViewData MyView { get; private set; } = null!;
-    public override IEnumerator Activate()
+    public override IEnumerator Activate(bool addToMoreCosmic)
     {
-        yield return base.Activate();
+        yield return base.Activate(addToMoreCosmic);
         if (!IsValid) yield break;
 
         var viewdata = ScriptableObject.CreateInstance<NamePlateViewData>();
@@ -379,7 +380,7 @@ public class CosmicNamePlate : CustomCosmicItem
         nameplate.ViewDataRef = assetRef;
         nameplate.CreateAddressableAsset();
 
-        MoreCosmic.AllNameplates.Add(nameplate.ProductId, this);
+        if (addToMoreCosmic) MoreCosmic.AllNameplates.Add(nameplate.ProductId, this);
     }
     public override string Category { get => "namePlates"; }
 }
@@ -416,8 +417,8 @@ public class CustomItemBundle
     [JSFieldAmbiguous]
     public List<CosmicPackage> Packages = new();
 
-    public string? RelatedLocalAddress { get; private set; } = null;
-    public string? RelatedRemoteAddress { get; private set; } = null;
+    public string? RelatedLocalAddress { get; set; } = null;
+    public string? RelatedRemoteAddress { get; set; } = null;
     public ZipArchive? RelatedZip { get; private set; } = null;
 
     public bool IsActive { get;private set; } = false;
@@ -444,29 +445,34 @@ public class CustomItemBundle
         if (AllBundles.ContainsKey(BundleName!)) throw new Exception("Duplicated Bundle Error");
     }
 
-    public IEnumerator Activate()
+    public IEnumerator Activate(bool addToMoreCosmic)
     {
         IsActive = true;
-        AllBundles[BundleName!] = this;
+        if(addToMoreCosmic) AllBundles[BundleName!] = this;
 
         foreach (var item in AllCosmicItem())
         {
-            yield return item.Activate();
+            item.MyBundle = this;
+
+            yield return item.Activate(addToMoreCosmic);
         }
 
-        foreach (var package in Packages) MoreCosmic.AllPackages.Add(package.Package, package);
+        if (addToMoreCosmic)
+        {
+            foreach (var package in Packages) MoreCosmic.AllPackages.Add(package.Package, package);
 
-        var hatList = HatManager.Instance.allHats.ToList();
-        foreach (var item in Hats) if (item.IsValid) hatList.Add(item.MyHat);
-        HatManager.Instance.allHats = hatList.ToArray();
-        
-        var visorList = HatManager.Instance.allVisors.ToList();
-        foreach (var item in Visors) if (item.IsValid) visorList.Add(item.MyVisor);
-        HatManager.Instance.allVisors = visorList.ToArray();
+            var hatList = HatManager.Instance.allHats.ToList();
+            foreach (var item in Hats) if (item.IsValid) hatList.Add(item.MyHat);
+            HatManager.Instance.allHats = hatList.ToArray();
 
-        var nameplateList = HatManager.Instance.allNamePlates.ToList();
-        foreach (var item in NamePlates) if (item.IsValid) nameplateList.Add(item.MyPlate);
-        HatManager.Instance.allNamePlates = nameplateList.ToArray();
+            var visorList = HatManager.Instance.allVisors.ToList();
+            foreach (var item in Visors) if (item.IsValid) visorList.Add(item.MyVisor);
+            HatManager.Instance.allVisors = visorList.ToArray();
+
+            var nameplateList = HatManager.Instance.allNamePlates.ToList();
+            foreach (var item in NamePlates) if (item.IsValid) nameplateList.Add(item.MyPlate);
+            HatManager.Instance.allNamePlates = nameplateList.ToArray();
+        }
     }
 
     public Stream? OpenStream(string path)
@@ -517,6 +523,8 @@ public class CustomItemBundle
     {
         if (RelatedZip != null)
             return new UnloadTextureLoader.AsyncLoader(() => RelatedZip.GetEntry(RelatedLocalAddress + category + "/" + address)?.Open());
+        else if (RelatedRemoteAddress == null)
+            return new UnloadTextureLoader.AsyncLoader(() => File.OpenRead(RelatedLocalAddress + category + "/" + address), true);
         else
             return new UnloadTextureLoader.AsyncLoader(() => File.OpenRead(RelatedLocalAddress + category + "/" + subholder + "/" + address));
     }
@@ -629,7 +637,7 @@ public static class MoreCosmic
         {
             if (loadedBundles.Count > 0)
             {
-                foreach (var bundle in loadedBundles) if(bundle != null) ActivateQueue.Enqueue(new(bundle!.Activate()));
+                foreach (var bundle in loadedBundles) if(bundle != null) ActivateQueue.Enqueue(new(bundle!.Activate(true)));
                 loadedBundles.Clear();
             }
         }
@@ -964,7 +972,7 @@ public static class ExiledPlayerHideHandsPatch
         if (hp.Hat == null) return;
 
         if (MoreCosmic.AllHats.TryGetValue(hp.Hat.ProductId, out var modHat))
-            if (modHat.HideHands) foreach (var hand in __instance.Player.Hands) hand.gameObject.SetActive(false);
+            if (modHat.HideHands) __instance.Player.gameObject.transform.FindChild("HandSlot").gameObject.SetActive(false);
     }
 }
 

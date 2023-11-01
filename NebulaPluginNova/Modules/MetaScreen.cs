@@ -517,6 +517,36 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
         }
     }
 
+    public class CustomContext : IMetaContext, IMetaParallelPlacable
+    {
+        public Vector2 Size { get; set; }
+
+        public AlignmentOption Alignment { get; set; }
+        public Generator ContentGenerator;
+
+        public delegate void Generator(Transform parent, Vector2 center);
+
+        public CustomContext(Vector2 size, AlignmentOption alignment,Generator generator)
+        {
+            Size = size;
+            Alignment = alignment;
+            ContentGenerator = generator;
+        }
+
+        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        {
+            width = CalcWidth(Alignment, cursor, size, Size.x);
+            ContentGenerator.Invoke(screen.transform, new Vector2((width.min + width.max)*0.5f, cursor.y - Size.y*0.5f));
+            return Size.y;
+        }
+
+        public float Generate(GameObject screen, Vector2 center, out float width)
+        {
+            width = Size.x;
+            ContentGenerator.Invoke(screen.transform, center);
+            return Size.y;
+        }
+    }
 
     public class VerticalMargin : IMetaContext, IMetaParallelPlacable
     {

@@ -33,12 +33,17 @@ public class VCClient : IDisposable
     private float wallRatio = 1f;
     private bool onRadio = false;
     private int radioMask;
-    private DataEntry<float> volumeEntry;
+    private DataEntry<float>? volumeEntry;
+    public uint sId = 0;
 
 
     public float Level => volumeMeter.Level;
-    public float Volume { get => volumeEntry.Value; }
-    public void SetVolume(float val, bool withSave) { if (withSave) volumeEntry.Value = val; else volumeEntry.SetValueWithoutSave(val); }
+    public float Volume { get => volumeEntry?.Value ?? 1f; }
+    public void SetVolume(float val, bool withSave) {
+        if (volumeEntry == null) { return; }
+        if (withSave) volumeEntry.Value = val; else volumeEntry.SetValueWithoutSave(val); 
+    }
+
     public PlayerControl MyPlayer => relatedControl;
 
     public VoiceType VoiceType { get; private set; }
@@ -65,7 +70,14 @@ public class VCClient : IDisposable
         panningFilter = new(volumeMeter);
         panningFilter.Pan = 0f;
 
-        volumeEntry = new FloatDataEntry(player.Puid, VoiceChatManager.VCSaver, 1f);
+        
+        IEnumerator CoSetVolumeEntry()
+        {
+            while (player.Puid == null || player.Puid.Length == 0) yield return null;
+            volumeEntry = new FloatDataEntry(player.Puid, VoiceChatManager.VCSaver, 1f);
+        }
+
+        NebulaManager.Instance.StartCoroutine(CoSetVolumeEntry().WrapToIl2Cpp());
     }
 
     public void OnGameStart()
@@ -85,7 +97,7 @@ public class VCClient : IDisposable
         }
 
         //互いに死んでいる場合
-        if (PlayerControl.LocalPlayer.Data.IsDead && relatedControl.Data.IsDead)
+        if (!atLobby && PlayerControl.LocalPlayer.Data.IsDead && relatedControl.Data.IsDead)
         {
             volumeFilter.Volume = 1f;
             panningFilter.Pan = 0f;
@@ -101,7 +113,7 @@ public class VCClient : IDisposable
         }
 
         //会議中
-        if (VoiceChatManager.IsInDiscussion)
+        if (!atLobby && VoiceChatManager.IsInDiscussion)
         {
             volumeFilter.Volume = (PlayerControl.LocalPlayer.Data.IsDead || !relatedControl.Data.IsDead) ? 1f : 0f;
             panningFilter.Pan = 0f;
@@ -165,15 +177,18 @@ public class VCClient : IDisposable
     public ISampleProvider MyProvider { get => panningFilter; }
 
     private byte[] rawAudioData = new byte[5760];
-    public void OnReceivedData(bool isRadio, int radioMask, byte[] data)
+    public void OnReceivedData(uint sId, bool isRadio, int radioMask, byte[] data)
     {
+        if (sId < this.sId) return;
+        this.sId = sId;
+
         onRadio = isRadio;
         SetVoiceType((isRadio && !(relatedControl.Data?.IsDead ?? false)) ? VoiceType.Radio : VoiceType.Normal);
     
 
         if(VoiceType != VoiceType.Radio)
         {
-            if ((relatedControl.Data?.IsDead ?? false) && VoiceChatManager.CanListenGhostVoice) 
+            if ((relatedControl.Data?.IsDead ?? false) && VoiceChatManager.CanListenGhostVoice && (relatedInfo?.MyKiller?.PlayerId ?? byte.MaxValue) == PlayerControl.LocalPlayer.PlayerId) 
                 SetVoiceType(VoiceType.Ghost);
             else
                 SetVoiceType(VoiceType.Normal);

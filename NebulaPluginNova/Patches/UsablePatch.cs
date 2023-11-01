@@ -93,6 +93,7 @@ public static class EnterVentPatch
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
         pc.GetModInfo()?.Role.OnEnterVent(__instance);
+        NebulaGameManager.Instance?.AllRoleAction(r => r.OnEnterVent(pc, __instance));
         pc.GetModInfo()?.Role.VentDuration?.Start();
     }
 }
@@ -103,6 +104,7 @@ public static class ExitVentPatch
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
         pc.GetModInfo()?.Role.OnExitVent(__instance);
+        NebulaGameManager.Instance?.AllRoleAction(r => r.OnExitVent(pc, __instance));
         pc.GetModInfo()?.Role.VentCoolDown?.Start();
     }
 }
@@ -158,5 +160,19 @@ class MovingPlatformBehaviourSetSidePatch
     {
         __instance.IsDirty = true;
         return !GeneralConfigurations.AirshipOneWayMeetingRoomOption;
+    }
+}
+
+//フリープレイPC
+
+[HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.Start))]
+class SystemConsoleStartPatch
+{
+    static bool Prefix(SystemConsole __instance)
+    {
+        if (__instance.FreeplayOnly && GeneralConfigurations.CurrentGameMode != CustomGameMode.FreePlay)
+            UnityEngine.Object.Destroy(__instance.gameObject);
+
+        return false;
     }
 }

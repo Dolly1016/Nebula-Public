@@ -69,7 +69,7 @@ public class Painter : ConfigurableStandardRole
                 sampleButton.CoolDownTimer = Bind(new Timer(MyRole.SampleCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 sampleButton.SetLabel("sample");
-
+                
                 paintButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.SecondaryAbility);
                 paintButton.SetSprite(paintButtonSprite.GetSprite());
                 paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;

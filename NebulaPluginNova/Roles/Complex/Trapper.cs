@@ -49,7 +49,11 @@ file static class TrapperSystem
             localTraps.Add(Trapper.Trap.GenerateTrap(buttonVariation[buttonIndex].id, pos!.Value));
             leftCost -= buttonVariation[buttonIndex].cost;
             usesText.text = leftCost.ToString();
-            if (buttonVariation[buttonIndex].id == KillTrapId) NebulaAsset.RpcPlaySE.Invoke((NebulaAudioClip.TrapperKillTrap, PlayerControl.LocalPlayer.transform.position, Trapper.KillTrapSoundDistanceOption.GetFloat() * 0.6f, Trapper.KillTrapSoundDistanceOption.GetFloat()));
+
+            if (Trapper.KillTrapSoundDistanceOption.GetFloat() > 0f)
+            {
+                if (buttonVariation[buttonIndex].id == KillTrapId) NebulaAsset.RpcPlaySE.Invoke((NebulaAudioClip.TrapperKillTrap, PlayerControl.LocalPlayer.transform.position, Trapper.KillTrapSoundDistanceOption.GetFloat() * 0.6f, Trapper.KillTrapSoundDistanceOption.GetFloat()));
+            }
         };
         placeButton.OnSubAction = (button) =>
         {
@@ -232,6 +236,9 @@ public class Trapper : ConfigurableStandardRole
         private uint lastCommPlayersMask = 0;
         public override void LocalUpdate()
         {
+            //会議中はなにもしない
+            if (MeetingHud.Instance || ExileController.Instance) return;
+
             uint commMask = 0;
             foreach(var commTrap in commTraps)
             {
@@ -268,6 +275,8 @@ public class Trapper : ConfigurableStandardRole
 
         public override void OnActivated()
         {
+            base.OnActivated();
+
             if (AmOwner) TrapperSystem.OnActivated(this, new (int, int)[] { (0, 1), (1, 1), (3, CostOfKillTrapOption) }, localTraps);
         }
 
@@ -278,6 +287,9 @@ public class Trapper : ConfigurableStandardRole
 
         public override void LocalUpdate()
         {
+            //会議中はなにもしない
+            if (MeetingHud.Instance || ExileController.Instance) return;
+
             if (!(PlayerControl.LocalPlayer.killTimer > 0f)) {
                 killTraps.RemoveAll((killTrap) => {
                 foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())

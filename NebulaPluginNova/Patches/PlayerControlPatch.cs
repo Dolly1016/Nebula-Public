@@ -110,7 +110,7 @@ public static class PlayerCompleteTaskPatch
         if (!__instance.AmOwner) return;
 
         __instance.GetModInfo()?.Tasks.OnCompleteTask();
-        __instance.GetModInfo()?.RoleAction((r)=>r.OnTaskCompleteLocal());
+        __instance.GetModInfo()?.AssignableAction((r)=>r.OnTaskCompleteLocal());
     }
 }
 
@@ -134,6 +134,16 @@ public static class PlayerStartMeetingPatch
             info == null ? GameStatistics.EventVariation.EmergencyButton : GameStatistics.EventVariation.Report, __instance.PlayerId,
             info == null ? 0 : (1 << info.PlayerId))
         { RelatedTag = tag });
+    }
+}
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CurrentOutfit), MethodType.Getter)]
+class CurrentOutfitPatch
+{
+    public static bool Prefix(PlayerControl __instance, ref GameData.PlayerOutfit __result)
+    {
+        __result = __instance.GetModInfo()?.CurrentOutfit!;
+        return __result == null;
     }
 }
 
@@ -181,7 +191,7 @@ class SetTaskPAtch
         var tasksList = tasks.ToArray().ToList();
         int num = tasksList.Count;
         var info = __instance.GetModInfo();
-        info?.RoleAction((r)=>r.OnSetTaskLocal(ref tasksList));
+        info?.AssignableAction((r)=>r.OnSetTaskLocal(ref tasksList));
         if (num != tasksList.Count) info?.Tasks.ReplaceTasks(tasksList.Count);
 
         __instance.StartCoroutine(CoSetTasks().WrapToIl2Cpp());

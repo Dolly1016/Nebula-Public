@@ -3,6 +3,7 @@ using Il2CppSystem.Runtime.Remoting.Messaging;
 using Il2CppSystem.Runtime.Serialization;
 using Il2CppSystem.Web.Util;
 using MonoMod.Utils;
+using Nebula.Behaviour;
 using System;
 using System.Collections;
 using System.Linq;
@@ -165,5 +166,27 @@ public class VanillaAsset
             }
         }
         return new Material(highlightMaterial);
+    }
+
+    public static PlayerDisplay GetPlayerDisplay()
+    {
+        AmongUsClient.Instance.PlayerPrefab.gameObject.SetActive(false);
+        var display = UnityEngine.Object.Instantiate(AmongUsClient.Instance.PlayerPrefab.gameObject);
+        AmongUsClient.Instance.PlayerPrefab.gameObject.SetActive(true);
+
+        GameObject.Destroy(display.GetComponent<PlayerControl>());
+        GameObject.Destroy(display.GetComponent<PlayerPhysics>());
+        GameObject.Destroy(display.GetComponent<Rigidbody2D>());
+        GameObject.Destroy(display.GetComponent<CircleCollider2D>());
+        GameObject.Destroy(display.GetComponent<CustomNetworkTransform>());
+        GameObject.Destroy(display.GetComponent<BoxCollider2D>());
+        GameObject.Destroy(display.GetComponent<DummyBehaviour>());
+        GameObject.Destroy(display.GetComponent<AudioSource>());
+        GameObject.Destroy(display.GetComponent<PassiveButton>());
+        GameObject.Destroy(display.GetComponent<HnSImpostorScreamSfx>());
+
+        display.gameObject.SetActive(true);
+
+        return display.AddComponent<PlayerDisplay>();
     }
 }

@@ -30,7 +30,7 @@ public class Arsonist : ConfigurableStandardRole
     {
         base.LoadOptions();
 
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
+        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
         DouseCoolDownOption = new NebulaConfiguration(RoleConfig, "douseCoolDown", null, 2.5f, 30f, 2.5f, 10f, 10f);
         DouseDurationOption = new NebulaConfiguration(RoleConfig, "douseDuration", null, 1f, 10f, 0.5f, 3f, 3f);
     }
@@ -41,12 +41,16 @@ public class Arsonist : ConfigurableStandardRole
 
         private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
         private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
         public override Timer? VentCoolDown => ventCoolDown;
         public override Timer? VentDuration => ventDuration;
+        public override bool CanUseVent => canUseVent;
 
         public Instance(PlayerModInfo player) : base(player)
         {
         }
+
+        public virtual int[]? GetShiftArguments(PlayerModInfo player) => null;
 
         private ModAbilityButton? douseButton = null;
         private ModAbilityButton? igniteButton = null;

@@ -112,7 +112,7 @@ public class Guesser : ConfigurableStandardRole
     public override Team Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if(MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; yield return GuesserModifier.MyRole; }
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => IsEvil ? new EvilInstance(player) : new NiceInstance(player);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
 
     static public NebulaConfiguration NumOfGuessOption = null!;
 
@@ -146,8 +146,9 @@ public class Guesser : ConfigurableStandardRole
     {
         public override AbstractRole Role => MyNiceRole;
         private int leftGuess = NumOfGuessOption;
-        public NiceInstance(PlayerModInfo player) : base(player)
+        public NiceInstance(PlayerModInfo player, int[] arguments) : base(player)
         {
+            if(arguments.Length>=1)leftGuess = arguments[0];
         }
 
         public override void OnMeetingStart()
@@ -165,8 +166,9 @@ public class Guesser : ConfigurableStandardRole
     {
         public override AbstractRole Role => MyEvilRole;
         private int leftGuess = NumOfGuessOption;
-        public EvilInstance(PlayerModInfo player) : base(player)
+        public EvilInstance(PlayerModInfo player, int[] arguments) : base(player)
         {
+            if (arguments.Length >= 1) leftGuess = arguments[0];
         }
 
         public override void OnMeetingStart()
@@ -190,21 +192,23 @@ public class GuesserModifier : ConfigurableStandardModifier
     public override Color RoleColor => Guesser.MyNiceRole.RoleColor;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return Guesser.MyNiceRole; yield return Guesser.MyEvilRole; }
 
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
     public class Instance : ModifierInstance
     {
         public override AbstractModifier Role => MyRole;
-        private int leftGuess = Guesser.NumOfGuessOption;
+        public int LeftGuess = Guesser.NumOfGuessOption;
 
-        public Instance(PlayerModInfo player) : base(player){}
+        public Instance(PlayerModInfo player,int[] arguments) : base(player){
+            if (arguments.Length > 0)LeftGuess = arguments[0];
+        }
 
         public override void OnMeetingStart()
         {
             //追加役職Guesserは役職としてのGuesserがある場合効果を発揮しない
             if (MyPlayer.Role.Role is Guesser) return;
 
-            if (AmOwner) GuesserSystem.OnMeetingStart(leftGuess, () => leftGuess--);
+            if (AmOwner) GuesserSystem.OnMeetingStart(LeftGuess, () => LeftGuess--);
         }
 
         public override void OnDead()

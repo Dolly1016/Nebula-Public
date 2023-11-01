@@ -1,12 +1,4 @@
-﻿using Nebula.Configuration;
-using Nebula.Modules.ScriptComponents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Nebula.Roles.Neutral;
+﻿namespace Nebula.Roles.Neutral;
 
 public class Vulture : ConfigurableStandardRole
 {
@@ -19,18 +11,18 @@ public class Vulture : ConfigurableStandardRole
     public override Color RoleColor => new Color(140f / 255f, 70f / 255f, 18f / 255f);
     public override Team Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
-    private NebulaConfiguration EatCoolDownOption = null!;
+    private KillCoolDownConfiguration EatCoolDownOption = null!;
     private NebulaConfiguration NumOfEatenToWinOption = null!;
     private new VentConfiguration VentConfiguration = null!;
     protected override void LoadOptions()
     {
         base.LoadOptions();
 
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
+        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
 
-        EatCoolDownOption = new NebulaConfiguration(RoleConfig, "eatCoolDown", null, 5f, 60f, 5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
+        EatCoolDownOption = new(RoleConfig, "eatCoolDown", KillCoolDownConfiguration.KillCoolDownType.Immediate, 5f, 5f, 60f, -40f, 20f, 0.125f, 0.125f, 2f, 20f, -10f, 0.5f);
         NumOfEatenToWinOption = new NebulaConfiguration(RoleConfig, "numOfTheEatenToWin", null, 1, 8, 3, 3);
     }
 
@@ -45,10 +37,14 @@ public class Vulture : ConfigurableStandardRole
 
         private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
         private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
         public override Timer? VentCoolDown => ventCoolDown;
         public override Timer? VentDuration => ventDuration;
-        public Instance(PlayerModInfo player) : base(player)
+        public override bool CanUseVent => canUseVent;
+        int leftEaten = MyRole.NumOfEatenToWinOption;
+        public Instance(PlayerModInfo player, int[] arguments) : base(player)
         {
+            if (arguments.Length >= 1) leftEaten = arguments[0];
         }
 
         private List<(DeadBody deadBody, Arrow arrow)> AllArrows = new();
@@ -78,8 +74,6 @@ public class Vulture : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                int leftEaten = MyRole.NumOfEatenToWinOption;
-
                 var eatTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.MyControl, (d) => true));
 
                 eatButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
@@ -91,10 +85,11 @@ public class Vulture : ConfigurableStandardRole
                     AmongUsUtil.RpcCleanDeadBody(eatTracker.CurrentTarget!.ParentId,MyPlayer.PlayerId,EventDetail.Eat);
                     leftEaten--;
                     usesIcon.text=leftEaten.ToString();
+                    eatButton.StartCoolDown();
 
                     if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId);
                 };
-                eatButton.CoolDownTimer = Bind(new Timer(MyRole.EatCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                eatButton.CoolDownTimer = Bind(new Timer(MyRole.EatCoolDownOption.CurrentCoolDown).SetAsAbilityCoolDown().Start());
                 eatButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 eatButton.SetLabel("eat");
                 usesIcon.text= leftEaten.ToString();

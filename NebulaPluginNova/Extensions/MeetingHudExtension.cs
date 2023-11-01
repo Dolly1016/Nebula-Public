@@ -70,12 +70,12 @@ public static class MeetingHudExtension
             player.MyControl.Data.IsDead = true;
             player.MyState = victims.playerState;
 
-            player.RoleAction(role =>
+            player.AssignableAction(role =>
             {
                 role.OnDead();
             });
 
-            PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r => r.OnPlayerDeadLocal(player.MyControl));
+            PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(player.MyControl));
 
             NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, victims.sourceId == byte.MaxValue ? null : victims.sourceId, 1 << victims.exiledId) { RelatedTag = victims.eventTag });
         }

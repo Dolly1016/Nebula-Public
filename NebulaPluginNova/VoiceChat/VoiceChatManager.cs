@@ -322,6 +322,7 @@ public class VoiceChatManager : IDisposable
 
         int resSize;
         byte[] headRes = new byte[2];
+        uint sId = GetClient(PlayerControl.LocalPlayer.PlayerId)?.sId ?? 0;
         while (true)
         {
             //ヘッダーを受信 (長さのみ)
@@ -346,7 +347,7 @@ public class VoiceChatManager : IDisposable
 
             if (IsMuting) continue;
 
-            RpcSendAudio.Invoke((PlayerControl.LocalPlayer.PlayerId, currentRadio != null, currentRadio?.RadioMask ?? 0, resSize, res));
+            RpcSendAudio.Invoke((PlayerControl.LocalPlayer.PlayerId, sId++, currentRadio != null, currentRadio?.RadioMask ?? 0, resSize, res));
         }
     }
 
@@ -363,10 +364,11 @@ public class VoiceChatManager : IDisposable
         if (myCoroutine != null) NebulaManager.Instance?.StopCoroutine(myCoroutine);
     }
 
-    static private RemoteProcess<(byte clientId,bool isRadio,int radioMask,int dataLength,byte[] dataAry)> RpcSendAudio = new(
+    static private RemoteProcess<(byte clientId,uint sId, bool isRadio,int radioMask,int dataLength,byte[] dataAry)> RpcSendAudio = new(
         "SendAudio",
         (writer,message) => {
             writer.Write(message.clientId);
+            writer.Write(message.sId);
             writer.Write(message.isRadio);
             writer.Write(message.radioMask);
             writer.Write(message.dataLength);
@@ -374,14 +376,15 @@ public class VoiceChatManager : IDisposable
         },
         (reader) => {
             byte id = reader.ReadByte();
+            uint sId = reader.ReadUInt32();
             bool isRadio = reader.ReadBoolean();
             int radioMask = reader.ReadInt32();
             int length = reader.ReadInt32();
-            return (id, isRadio, radioMask, length, reader.ReadBytes(length));
+            return (id, sId, isRadio, radioMask, length, reader.ReadBytes(length));
             },
         (message,calledByMe) => {
             if (NebulaGameManager.Instance?.VoiceChatManager?.allClients.TryGetValue(message.clientId, out var client) ?? false)
-                client?.OnReceivedData(message.isRadio, message.radioMask, message.dataAry);
+                client?.OnReceivedData(message.sId, message.isRadio,  message.radioMask, message.dataAry);
         }
         );
 
@@ -413,9 +416,9 @@ public class VoiceChatManager : IDisposable
                 bar.Dot.transform.localScale = new Vector3(0.18f, 0.18f, 1f);
                 bar.transform.localPosition = new Vector3(0, -0.26f, -1f);
                 bar.transform.localScale = new Vector3(1f, 1f, 1f);
-                bar.SetValue(client.Volume * 0.5f);
+                bar.SetValue(client.Volume * 0.25f);
                 bar.OnValueChange = new();
-                bar.OnValueChange.AddListener(() => client.SetVolume(bar.Value * 2f, true));
+                bar.OnValueChange.AddListener(() => client.SetVolume(bar.Value * 4f, true));
             }
         };
         }, 4, -1, 0, 0.65f);

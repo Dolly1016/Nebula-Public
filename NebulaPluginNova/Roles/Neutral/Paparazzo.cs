@@ -204,7 +204,7 @@ public class Paparazzo : ConfigurableStandardRole
     public override Color RoleColor => new Color(202f / 255f, 118f / 255f, 140f / 255f);
     public override Team Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration ShotCoolDownOption = null!;
     private NebulaConfiguration RequiredSubjectsOption = null!;
@@ -214,7 +214,7 @@ public class Paparazzo : ConfigurableStandardRole
     {
         base.LoadOptions();
 
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
+        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
         ShotCoolDownOption = new NebulaConfiguration(RoleConfig, "shotCoolDown", null, 2.5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
         RequiredSubjectsOption = new NebulaConfiguration(RoleConfig, "requiredSubjects", null, 1, 15, 5, 5);
         RequiredDisclosedOption = new NebulaConfiguration(RoleConfig, "requiredDisclosed", null, 1, 15, 3, 3);
@@ -226,14 +226,20 @@ public class Paparazzo : ConfigurableStandardRole
 
         private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
         private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
         public override Timer? VentCoolDown => ventCoolDown;
         public override Timer? VentDuration => ventDuration;
+        public override bool CanUseVent => canUseVent;
         private List<(Transform holder,PaparazzoShot shot,int playerMask)> shots = new();
         private HudContent? shotsHolder = null;
         private bool canWin = false;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(PlayerModInfo player, int[] arguments) : base(player)
         {
+            if(arguments.Length == 2)
+            {
+
+            }
         }
 
         private ModAbilityButton? shotButton = null;
@@ -306,6 +312,7 @@ public class Paparazzo : ConfigurableStandardRole
                 shotButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyFinder != null;
                 shotButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 shotButton.OnClick = (button) => {
+                    GameObject.Destroy(MyFinder?.MyObject?.GetComponent<PassiveButton>());
                     MyFinder?.MyObject?.TakePicture(shots);
                     MyFinder?.Detach();
                     MyFinder = null;
@@ -415,8 +422,9 @@ public class Paparazzo : ConfigurableStandardRole
                     {
                         if (!shot.shot) continue;
                         if (shot.shot.gameObject.TryGetComponent<PassiveButton>(out var button)) GameObject.Destroy(button);
-                        if (hourglass) GameObject.Destroy(hourglass.gameObject);
                     }
+
+                    if (hourglass) GameObject.Destroy(hourglass.gameObject);
                 }
 
                 NebulaManager.Instance.StartCoroutine(CoWaitSharing().WrapToIl2Cpp());
@@ -439,7 +447,9 @@ public class Paparazzo : ConfigurableStandardRole
                     {
                         if (MyPlayer.IsDead) return;
 
-                        DisclosedMask |= shot.playerMask;
+                        int aliveMask = 0;
+                        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) if (!p.IsDead) aliveMask |= 1 << p.PlayerId;
+                        DisclosedMask |= (shot.playerMask & aliveMask);
                         RpcShareState.Invoke((MyPlayer.PlayerId, CapturedMask, DisclosedMask));
 
                         CheckPaparazzoWin();

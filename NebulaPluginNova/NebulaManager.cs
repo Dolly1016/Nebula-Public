@@ -256,7 +256,6 @@ public class NebulaManager : MonoBehaviour
         File.WriteAllBytesAsync(GetPicturePath(out string displayPath), tex.EncodeToPNG());
     }
 
-
     public void Update()
     {
         /*

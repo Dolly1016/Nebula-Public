@@ -8,6 +8,8 @@ using static Il2CppSystem.Linq.Expressions.Interpreter.InitializeLocalInstructio
 using static Nebula.Modules.NebulaAddon;
 using System.Text;
 using System.IO.Compression;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Nebula.Behaviour;
 
@@ -219,6 +221,7 @@ public class DevStudio : MonoBehaviour
         return (context, ()=>StartCoroutine(CoLoadAddons().WrapToIl2Cpp()), null);
     }
 
+    //Addon
     public (IMetaContext context, Action? postAction, Func<bool>? confirm) ShowAddonScreen(DevAddon addon)
     {
         MetaContext context = new();
@@ -287,6 +290,7 @@ public class DevStudio : MonoBehaviour
 
         //Contents of add-on
         (string translationKey,Func<DevAddon,(IMetaContext context, Action? postAction, Func<bool>? confirm)>)[] edtiors = {
+            ("devStudio.ui.addon.cosmetics",ShowCosmeticsScreen),
             ("devStudio.ui.addon.document",ShowDocumentScreen)
         };
 
@@ -305,6 +309,7 @@ public class DevStudio : MonoBehaviour
         );
     }
 
+    //Document
     private (IMetaContext context, Action? postAction, Func<bool>? confirm) ShowDocumentEditorScreen(DevAddon addon, string path, string id, SerializableDocument doc)
     {
         void Save()
@@ -767,6 +772,219 @@ public class DevStudio : MonoBehaviour
         }
 
         return (context, () => StartCoroutine(CoShowDocument().WrapToIl2Cpp()), null);
+    }
+
+
+    (IMetaContext context, Reference<PlayerDisplay> player) GetPlayerDisplayContext()
+    {
+        MetaContext context = new();
+        Reference<PlayerDisplay> display = new();
+
+        context.Append(new MetaContext.CustomContext(new Vector2(1.5f,3.5f),IMetaContext.AlignmentOption.Center,
+            (parent,center) => {
+                display.Set(VanillaAsset.GetPlayerDisplay());
+                display.Value!.transform.SetParent(parent);
+                display.Value!.transform.localPosition = (Vector3)center + new Vector3(0, 0, 1f);
+                display.Value!.transform.localScale = new(1.75f, 1.75f, 1f);
+            }));
+
+        var allStateButtons = new (string translationKey, Action action)[]
+        {
+            ("idle", ()=> display.Value!.Animations.PlayIdleAnimation()),
+            ("run", ()=> display.Value!.Animations.PlayRunAnimation()),
+            ("climbUp", ()=> display.Value!.Animations.PlayClimbAnimation(false)),
+            ("climbDown", ()=> display.Value!.Animations.PlayClimbAnimation(true)),
+            ("enterVent", ()=> display.Value!.StartCoroutine(display.Value!.Animations.CoPlayEnterVentAnimation(0))),
+            ("exitVent", ()=> display.Value!.StartCoroutine(Effects.Sequence(display.Value!.Animations.CoPlayExitVentAnimation(), ManagedEffects.Action(()=>display.Value!.Animations.PlayIdleAnimation()).WrapToIl2Cpp()))),
+            ("jump", ()=> display.Value!.StartCoroutine(display.Value!.Animations.CoPlayJumpAnimation())),
+        };
+
+        context.Append(allStateButtons, state => new MetaContext.Button(state.action, new(TextAttribute.BoldAttr) { Size = new(1.4f, 0.18f) }) { TranslationKey = state.translationKey },
+            2, -1, 0, 0.44f);
+        context.Append(new CombinedContext(
+            new MetaContext.StateButton(false) { OnChanged = (flag) => display.Value!.Cosmetics.SetFlipX(flag) },
+            new MetaContext.HorizonalMargin(0.15f),
+            new MetaContext.Text(new(TextAttribute.BoldAttrLeft) { Size = new(0.8f, 0.12f) }) { TranslationKey = "flip" }
+            ));
+
+        return (context, display);
+    }
+
+
+    //Cosmetics
+    private static readonly string[][] ImageContentTranslationKey = {
+        new string[]{ "devStudio.ui.cosmetics.contents.main", "devStudio.ui.cosmetics.contents.climbUp" },
+        new string[]{ "devStudio.ui.cosmetics.contents.back", "devStudio.ui.cosmetics.contents.climbUpBack" },
+        new string[]{ "devStudio.ui.cosmetics.contents.flipped", "devStudio.ui.cosmetics.contents.climbDown" },
+        new string[]{ "devStudio.ui.cosmetics.contents.backFlipped", "devStudio.ui.cosmetics.contents.climbDownBack" },
+    };
+    private (IMetaContext context, Action? postAction, Func<bool>? confirm) ShowCostumeEditorScreen<Costume>(Costume costume,params (string translationKey,string fieldName, string? flipName, string? backName, string? backFlipName, int variation)[] contents) where Costume : CustomCosmicItem
+    {
+        MetaContext context = new();
+
+        var contexts = context.Split(0.35f, 0.1f, 0.55f);
+
+        (var displayContext, var displayRef) = GetPlayerDisplayContext();
+        contexts[0].Append(displayContext);
+
+        CombinedContext GetTextInputContext(string translationKey, string hint, Reference<TextField> textRef)
+        {
+            return new CombinedContext(
+            new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Right, Size = new(1f, 0.4f) }) { TranslationKey = translationKey },
+            new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(0.1f, 0.4f) }) { RawText = ":" },
+            new MetaContext.HorizonalMargin(0.15f),
+            new MetaContext.TextInput(1, 1.8f, new(3.3f, 0.28f)) {
+                TextFieldRef = textRef,
+                Hint = hint.Color(Color.gray)
+            })
+            { Alignment = IMetaContext.AlignmentOption.Left };
+        }
+
+        Reference<TextField> titleRef = new(), authorRef = new();
+        contexts[2].Append(GetTextInputContext("name", "Title", titleRef));
+        contexts[2].Append(GetTextInputContext("author", "Author", authorRef));
+        contexts[2].Append(new CombinedContext(
+            new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Right, Size = new(1f, 0.4f) }) { TranslationKey = "package" },
+            new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(0.1f, 0.4f) }) { RawText = ":" },
+            new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(2.5f, 0.4f) }) { RawText = costume.Package }
+            ) { Alignment = IMetaContext.AlignmentOption.Left });
+
+        contexts[2].Append(new MetaContext.VerticalMargin(0.12f));
+
+        contexts[2].Append(contents.Where(c => c.variation == -1), c => {
+            return new CombinedContext(
+                new MetaContext.HorizonalMargin(0.16f),
+                new MetaContext.StateButton(false) { OnChanged = flag=> { } },
+                new MetaContext.HorizonalMargin(0.08f),
+                new MetaContext.Text(new(TextAttribute.BoldAttr) { Size = new(0.8f, 0.2f) }) { TranslationKey = c.translationKey }
+                );
+        },3,-1,0,0.3f);
+
+        contexts[2].Append(new MetaContext.VerticalMargin(0.12f));
+
+        MetaContext.Button GetContentButton(string translationKey, string fieldName)
+        {
+            return new MetaContext.Button(() => { }, new(TextAttribute.BoldAttr) { Size = new(0.85f, 0.23f) }) { TranslationKey = translationKey, Alignment = IMetaContext.AlignmentOption.Center };
+        }
+
+        foreach (var content in contents)
+        {
+            if (content.variation == -1) continue;
+            List<IMetaParallelPlacable> buttons = new();
+            buttons.Add(new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(1f, 0.3f) }) { Alignment = IMetaContext.AlignmentOption.Right, TranslationKey = content.translationKey });
+            buttons.Add(new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(0.1f, 0.45f) }) { RawText = ":" });
+            buttons.Add(GetContentButton(ImageContentTranslationKey[0][content.variation], content.fieldName));
+            if (content.flipName != null) buttons.Add(GetContentButton(ImageContentTranslationKey[1][content.variation], content.flipName));
+            if (content.backName != null) buttons.Add(GetContentButton(ImageContentTranslationKey[2][content.variation], content.backName));
+            if (content.backFlipName != null) buttons.Add(GetContentButton(ImageContentTranslationKey[3][content.variation], content.backFlipName));
+
+            contexts[2].Append(new CombinedContext(buttons.ToArray()) { Alignment = IMetaContext.AlignmentOption.Left });
+        }
+        return (context, () => { }, null);
+    }
+
+    //Cosmetics
+    private (IMetaContext context, Action? postAction, Func<bool>? confirm) ShowCosmeticsScreen(DevAddon addon)
+    {
+        Stream? stream = addon.OpenRead("MoreCosmic/Contents.json");
+        CustomItemBundle? bundle = null;
+
+        if (stream != null)
+        {
+            string json = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
+            bundle = (CustomItemBundle?)JsonStructure.Deserialize(json, typeof(CustomItemBundle));
+            bundle!.RelatedLocalAddress = addon.FolderPath + "/MoreCosmic/";
+
+            var coroutine = new StackfullCoroutine(bundle.Activate(false));
+            while(coroutine.MoveNext()) { }
+            
+        }
+        
+
+        MetaContext context = new();
+
+        context.Append(new MetaContext.Text(new TextAttribute(TextAttribute.TitleAttr) { Font = VanillaAsset.BrookFont, Styles = TMPro.FontStyles.Normal, Size = new(3f, 0.45f) }.EditFontSize(5.2f)) { TranslationKey = "devStudio.ui.addon.cosmetics" });
+        context.Append(new MetaContext.VerticalMargin(0.2f));
+
+        Reference<MetaContext.ScrollView.InnerScreen> innerRef = new();
+
+        void GenerateSprite(Sprite? mainSprite, Sprite? backSprite, Transform parent, bool adaptive,float scale = 0.6f)
+        {
+            if (mainSprite != null)
+            {
+                var mainRenderer = UnityHelper.CreateObject<SpriteRenderer>("Main", parent, new Vector3(-0.8f, 0f, -1f));
+                mainRenderer.transform.localScale = new Vector3(scale,scale,1f);
+                mainRenderer.sprite = mainSprite;
+                mainRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                if (adaptive)
+                {
+                    mainRenderer.material = HatManager.Instance.MaskedPlayerMaterial;
+                    PlayerMaterial.SetColors(NebulaPlayerTab.PreviewColorId, mainRenderer);
+                }
+            }
+
+            if(backSprite != null)
+            {
+                var backRenderer = UnityHelper.CreateObject<SpriteRenderer>("Back", parent, new Vector3(-0.8f, 0f, -0.9f));
+                backRenderer.transform.localScale = new Vector3(scale, scale, 1f);
+                backRenderer.sprite = backSprite;
+                backRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                if (adaptive)
+                {
+                    backRenderer.material = HatManager.Instance.MaskedPlayerMaterial;
+                    PlayerMaterial.SetColors(NebulaPlayerTab.PreviewColorId, backRenderer);
+                }
+            }
+        }
+
+        var categories = new (string translationKey, Func<IMetaContext> contextProvider)[]
+        {
+            ("devStudio.ui.cosmetics.hats", () => {
+                if(bundle == null)return null!;
+                MetaContext context = new();
+                context.Append(bundle.Hats, hat=>{
+                    return new MetaContext.Button(()=>{
+                        OpenScreen(() => ShowCostumeEditorScreen(hat,
+                            ("devStudio.ui.cosmetics.attributes.adaptive", nameof(CosmicHat.Adaptive),null,null,null,-1),
+                            ("devStudio.ui.cosmetics.attributes.bounce", nameof(CosmicHat.Bounce),null,null,null,-1),
+                            ("devStudio.ui.cosmetics.attributes.hideHands", nameof(CosmicHat.HideHands),null,null,null,-1),
+                            ("devStudio.ui.cosmetics.attributes.isSkinny", nameof(CosmicHat.IsSkinny),null,null,null,-1),
+                            ("devStudio.ui.cosmetics.attributes.idle",nameof(CosmicHat.Main),nameof(CosmicHat.Back),nameof(CosmicHat.Flip),nameof(CosmicHat.BackFlip),0),
+                            ("devStudio.ui.cosmetics.attributes.move",nameof(CosmicHat.Move),nameof(CosmicHat.MoveBack),nameof(CosmicHat.MoveFlip),nameof(CosmicHat.MoveBackFlip),0),
+                            ("devStudio.ui.cosmetics.attributes.climb",nameof(CosmicHat.Climb),nameof(CosmicHat.ClimbFlip),nameof(CosmicHat.ClimbDown),nameof(CosmicHat.ClimbDownFlip),1),
+                            ("devStudio.ui.cosmetics.attributes.enterVent",nameof(CosmicHat.EnterVent),nameof(CosmicHat.EnterVentBack),nameof(CosmicHat.EnterVentFlip),nameof(CosmicHat.EnterVentBackFlip),0),
+                            ("devStudio.ui.cosmetics.attributes.exitVent",nameof(CosmicHat.ExitVent),nameof(CosmicHat.ExitVentBack),nameof(CosmicHat.ExitVentFlip),nameof(CosmicHat.ExitVentBackFlip),0),
+                            ("devStudio.ui.cosmetics.attributes.preview",nameof(CosmicHat.Preview),null,null,null,0)
+                            ));
+                    }, new(TextAttribute.BoldAttrLeft){ Size = new(2.4f,0.4f)})
+                    {
+                        RawText = hat.UnescapedName,
+                        PostBuilder = (_,renderer,text) => {
+                            renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                            text.transform.localPosition += new Vector3(0.75f,0f,0f);
+                            GenerateSprite((hat.Preview ?? hat.Main ?? hat.Move)?.GetSprite(0), (hat.Main != null && hat.Preview == null) ? hat.Back?.GetSprite(0) : null,renderer.transform , hat.Adaptive);
+                        }
+                    };
+                },2,-1,0,0.85f);
+                return context;
+            }),
+            ("devStudio.ui.cosmetics.visors", () => null!),
+            ("devStudio.ui.cosmetics.nameplates", () => null!),
+            ("devStudio.ui.cosmetics.packages", () => null!)
+        };
+        
+
+        context.Append(categories, category =>
+        {
+            return new MetaContext.Button(() => {
+                innerRef.Value!.SetContext(categories[0].contextProvider.Invoke());
+            }, TextAttribute.BoldAttr) { TranslationKey = category.translationKey };
+        }, categories.Length, 1, 0, 0.6f);
+
+        
+        context.Append(new MetaContext.ScrollView(new(6f, 4f), new MetaContext()) { Alignment = IMetaContext.AlignmentOption.Center, InnerRef = innerRef });
+
+        return (context, () => { innerRef.Value!.SetContext(categories[0].contextProvider.Invoke()); }, null);
     }
 
     private void ShowConfirmWindow(Action yesAction,Action noAction,string text,bool canCancelClickOutside = false)

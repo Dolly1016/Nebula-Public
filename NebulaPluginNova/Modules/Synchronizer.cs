@@ -7,14 +7,15 @@ namespace Nebula.Modules;
 public enum SynchronizeTag
 {
     PreSpawnMinigame,
-    PostExile
+    CheckExtraVictims,
+    PostMeeting
 }
 
 [NebulaRPCHolder]
 public class Synchronizer
 {
     public Dictionary<SynchronizeTag, uint> sync = new();
-
+    
     public void ResetSync(SynchronizeTag tag)
     {
         sync[tag] = 0;
@@ -46,6 +47,13 @@ public class Synchronizer
 
             yield return null;
         }        
+    }
+
+    public IEnumerator CoSyncAndReset(SynchronizeTag tag, bool withSurviver = true, bool withGhost = false, bool withBot = false)
+    {
+        yield return CoSync(tag, withSurviver, withGhost, withBot);
+        ResetSync(tag);
+        yield break;
     }
 
     public bool TestSync(SynchronizeTag tag, bool withSurviver = true, bool withGhost = false, bool withBot = false)

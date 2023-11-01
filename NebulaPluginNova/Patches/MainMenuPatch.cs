@@ -271,6 +271,7 @@ public static class MainMenuClearScreenPatch
     }
 }
 
+
 [HarmonyPatch(typeof(Constants), nameof(Constants.GetBroadcastVersion))]
 class ServerVersionPatch
 {

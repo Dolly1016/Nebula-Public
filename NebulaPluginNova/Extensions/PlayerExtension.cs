@@ -54,6 +54,25 @@ public static class PlayerExtension
         if (player.AmOwner) player.MyPhysics.inputHandler.enabled = false;
     }
 
+    public static void HaltSmoothly(this CustomNetworkTransform netTransform)
+    {
+        ushort minSid = (ushort)(netTransform.lastSequenceId + 1);
+        netTransform.SnapToSmoothly(netTransform.transform.position);
+    }
+
+    public static void SnapToSmoothly(this CustomNetworkTransform netTransform, Vector2 position)
+    {
+        //netTransform.ClearPositionQueues();
+        
+        Transform transform = netTransform.transform;
+        netTransform.body.position = position;
+        transform.position = position;
+        netTransform.body.velocity = Vector2.zero;
+
+        netTransform.sendQueue.Enqueue(position);
+        netTransform.SetDirtyBit(2U);
+    }
+
     public static void StopAllAnimations(this CosmeticsLayer layer)
     {
         try
@@ -118,15 +137,15 @@ public static class PlayerExtension
                targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
                targetInfo.MyKiller = killerInfo;
                targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
-               targetInfo?.RoleAction(role =>
+               targetInfo?.AssignableAction(role =>
                {
                    role.OnMurdered(killer!);
                    role.OnDead();
                });
            }
-           if (killerInfo != null) killerInfo.RoleAction(r => r.OnKillPlayer(target));
+           if (killerInfo != null) killerInfo.AssignableAction(r => r.OnKillPlayer(target));
 
-           PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r => r.OnPlayerDeadLocal(target));
+           PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(target));
        }
        );
 
@@ -170,15 +189,15 @@ public static class PlayerExtension
                targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
                targetInfo.MyKiller = killerInfo;
                targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
-               targetInfo?.RoleAction(role =>
+               targetInfo?.AssignableAction(role =>
                {
                    role.OnMurdered(killer!);
                    role.OnDead();
                });
            }
-           if (killerInfo != null) killerInfo.RoleAction(r => r.OnKillPlayer(target));
+           if (killerInfo != null) killerInfo.AssignableAction(r => r.OnKillPlayer(target));
 
-           PlayerControl.LocalPlayer.GetModInfo()?.RoleAction(r => r.OnPlayerDeadLocal(target));
+           PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(target));
 
            if (MeetingHud.Instance)
            {

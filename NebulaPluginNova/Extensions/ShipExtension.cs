@@ -56,6 +56,11 @@ public static class ShipExtension
 
     private static void ModifyPolus()
     {
+        var commRoom = ShipStatus.Instance.FastRooms[SystemTypes.Comms];
+        var commPos = commRoom.transform.localPosition;
+        commPos.z = 0.0001f;
+        commRoom.transform.localPosition = commPos;
+
         if (GeneralConfigurations.PolusSpecimenVentOption) CreateVent(SystemTypes.Specimens, "SpecimenVent", new UnityEngine.Vector2(-1f, -1.35f));
 
         if (!GeneralConfigurations.PolusAdminOption)

@@ -19,7 +19,7 @@ public class Phosphorus : ConfigurableStandardRole
     public override Color RoleColor => new Color(249f / 255f, 188f / 255f, 81f / 255f);
     public override Team Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration NumOfLampsOption = null!;
     private NebulaConfiguration PlaceCoolDownOption = null!;
@@ -64,8 +64,9 @@ public class Phosphorus : ConfigurableStandardRole
 
         public override AbstractRole Role => MyRole;
         
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(PlayerModInfo player, int[] arguments) : base(player)
         {
+            if (arguments.Length > 0) globalLanterns = arguments;
         }
 
 

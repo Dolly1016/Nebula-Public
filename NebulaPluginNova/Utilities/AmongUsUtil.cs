@@ -74,12 +74,12 @@ public static class AmongUsUtil
             if (p < (fadeIn / duration))
             {
                 if (flash != null)
-                    flash.color = new Color(color.r, color.g, color.b, Mathf.Clamp01(maxAlpha * p / (fadeIn / duration)));
+                    flash.color = new Color(color.r, color.g, color.b, color.a * Mathf.Clamp01(maxAlpha * p / (fadeIn / duration)));
             }
             else
             {
                 if (flash != null)
-                    flash.color = new Color(color.r, color.g, color.b, Mathf.Clamp01(maxAlpha * (1 - p) / (fadeOut / duration)));
+                    flash.color = new Color(color.r, color.g, color.b, color.a * Mathf.Clamp01(maxAlpha * (1 - p) / (fadeOut / duration)));
             }
             if (p == 1f && flash != null)
             {

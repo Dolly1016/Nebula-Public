@@ -844,7 +844,7 @@ public class NebulaPlayerTab : MonoBehaviour
         }
     }
 
-    static byte PreviewColorId = 15;
+    static public readonly byte PreviewColorId = 15;
 
     private void AfterPreviewColor(byte concernedHue, byte concernedDistance,string? displayName = null)
     {

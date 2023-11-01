@@ -99,6 +99,7 @@ public class ObjectTracker<T> : INebulaScriptComponent where T : MonoBehaviour
             if (!IgnoreColliders && PhysicsHelpers.AnyNonTriggersBetween(myPos, dVec.normalized, magnitude, Constants.ShipAndObjectsMask)) continue;
 
             candidate = t;
+            distance = magnitude;
         }
 
         CurrentTarget = candidate;
