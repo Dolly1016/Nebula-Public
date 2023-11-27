@@ -1,6 +1,7 @@
 ﻿using Epic.OnlineServices.Stats;
 using Nebula.Configuration;
 using System;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -12,13 +13,14 @@ public class Sheriff : ConfigurableStandardRole
 
     public override string LocalizedName => "sheriff";
     public override Color RoleColor => new Color(240f / 255f, 191f / 255f, 0f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     private NebulaConfiguration NumOfShotsOption = null!;
     private NebulaConfiguration CanKillMadmateOption = null!;
+    private NebulaConfiguration CanKillHidingPlayerOption = null!;
 
     protected override void LoadOptions()
     {
@@ -27,6 +29,7 @@ public class Sheriff : ConfigurableStandardRole
         KillCoolDownOption = new(RoleConfig, "killCoolDown", KillCoolDownConfiguration.KillCoolDownType.Relative, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 25f, -5f, 1f);
         NumOfShotsOption = new(RoleConfig, "numOfShots", null, 1, 15, 3, 3);
         CanKillMadmateOption = new(RoleConfig, "canKillMadmate", null, false, false);
+        CanKillHidingPlayerOption = new(RoleConfig, "canKillHidingPlayer", null, false, false);
     }
 
     public class Instance : Crewmate.Instance
@@ -55,8 +58,8 @@ public class Sheriff : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(KeyAssignmentType.Kill);
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead, MyRole.CanKillHidingPlayerOption));
+                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
 
                 var leftText = killButton.ShowUsesIcon(3);
                 leftText.text = leftShots.ToString();
@@ -69,7 +72,7 @@ public class Sheriff : ConfigurableStandardRole
                         MyPlayer.MyControl.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill); 
                     else
                     {
-                        MyPlayer.MyControl.ModKill(MyPlayer.MyControl, true, PlayerState.Misfired, null); 
+                        MyPlayer.MyControl.ModSuicide(false, PlayerState.Misfired, null);
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.MyControl, killTracker.CurrentTarget!);
                     }
                     button.StartCoolDown();
@@ -77,7 +80,6 @@ public class Sheriff : ConfigurableStandardRole
                     leftText.text = (--leftShots).ToString();
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 killButton.SetLabel("kill");
             }
         }

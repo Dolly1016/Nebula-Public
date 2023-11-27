@@ -10,7 +10,9 @@ namespace Nebula.Map;
 public abstract class MapData
 {
     abstract protected Vector2[] MapArea { get; }
+    abstract protected SystemTypes[] SabotageTypes { get; }
 
+    public SystemTypes[] GetSabotageSystemTypes() => SabotageTypes;
     public bool CheckMapArea(Vector2 position)
     {
         int num = Physics2D.OverlapCircleNonAlloc(position, 0.23f, PhysicsHelpers.colliderHits, Constants.ShipAndAllObjectsMask);

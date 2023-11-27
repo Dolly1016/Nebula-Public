@@ -286,7 +286,7 @@ public static class KillOverlayPatch
 {
     public static bool Prefix(KillOverlay __instance, GameData.PlayerInfo killer, GameData.PlayerInfo victim)
     {
-        if (killer.PlayerId == victim.PlayerId)
+        if (killer == null ||  killer.PlayerId == victim.PlayerId)
         {
             __instance.ShowKillAnimation(__instance.KillAnims[3], killer, victim);
             return false;

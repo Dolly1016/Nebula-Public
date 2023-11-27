@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Neutral;
 
@@ -54,7 +55,7 @@ public class PaparazzoShot : MonoBehaviour
             var mouseInfo = PlayerModInfo.LocalMouseInfo;
             var dis = Mathf.Min(mouseInfo.distance, 2.4f + Mathf.Abs(Mathf.Cos(mouseInfo.angle)) * 1.7f);
             var targetPos = PlayerControl.LocalPlayer.transform.localPosition + new Vector3(Mathf.Cos(mouseInfo.angle), Mathf.Sin(mouseInfo.angle)) * dis;
-            targetPos.z = -30f;
+            targetPos.z = -5f;
 
             transform.localPosition -= (transform.localPosition - targetPos) * Time.deltaTime * 8.6f;
             var scale = transform.localScale.x;
@@ -92,6 +93,9 @@ public class PaparazzoShot : MonoBehaviour
         RenderTexture rt = new RenderTexture((int)(frameRenderer.size.x * 100f * scale.x), (int)(frameRenderer.size.y * 100f * scale.y), 16);
         rt.Create();
         cam.targetTexture = rt;
+
+        foreach (var usable in ShipStatus.Instance.GetComponentsInChildren<IUsable>()) usable.SetOutline(false, false);
+        
         cam.Render();
 
         RenderTexture.active = cam.targetTexture;
@@ -118,7 +122,7 @@ public class PaparazzoShot : MonoBehaviour
         int playerNum = 0;
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
         {
-            if (p.Data.IsDead || p.inVent || (p.GetModInfo()?.HasAttribute(AttributeModulator.PlayerAttribute.Invisible) ?? false)) continue;
+            if (p.Data.IsDead || p.inVent || (p.GetModInfo()?.HasAttribute(Virial.Game.PlayerAttribute.Invisible) ?? false)) continue;
             if (p.AmOwner) continue;
 
             if (collider.OverlapPoint(p.transform.position))
@@ -202,7 +206,7 @@ public class Paparazzo : ConfigurableStandardRole
 
     public override string LocalizedName => "paparazzo";
     public override Color RoleColor => new Color(202f / 255f, 118f / 255f, 140f / 255f);
-    public override Team Team => MyTeam;
+    public override RoleTeam Team => MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
@@ -307,7 +311,7 @@ public class Paparazzo : ConfigurableStandardRole
                 shotsHolder = HudContent.InstantiateContent("Pictures", true, true, false, true);
                 Bind(shotsHolder.gameObject);
 
-                shotButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability).SubKeyBind(KeyAssignmentType.AidAction);
+                shotButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 shotButton.SetSprite(cameraButtonSprite.GetSprite());
                 shotButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyFinder != null;
                 shotButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -320,7 +324,6 @@ public class Paparazzo : ConfigurableStandardRole
                 };
                 shotButton.OnSubAction= (button) => MyFinder?.MyObject!.ToggleDirection();
                 shotButton.CoolDownTimer = Bind(new Timer(0f, MyRole.ShotCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                shotButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 shotButton.SetLabel("shot");
                 shotButton.SetCanUseByMouseClick(true);
             }
@@ -396,7 +399,7 @@ public class Paparazzo : ConfigurableStandardRole
         static private SpriteLoader hourGlassSprite = SpriteLoader.FromResource("Nebula.Resources.Hourglass.png", 100f);
         public override void OnMeetingStart()
         {
-            if (AmOwner)
+            if (AmOwner && !MyPlayer.IsDead)
             {
                 bool shareFlag = false;
                 float timer = 20f;
@@ -548,6 +551,8 @@ public class Paparazzo : ConfigurableStandardRole
                 }
 
                 NebulaManager.Instance.StartCoroutine(CoShow().WrapToIl2Cpp());
+
+                if (MeetingHud.Instance != null) MeetingHud.Instance.ResetPlayerState();
             }
         }
         );

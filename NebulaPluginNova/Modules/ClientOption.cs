@@ -154,6 +154,12 @@ public static class StartOptionMenuPatch
                     NebulaGameManager.Instance?.VoiceChatManager?.OpenSettingScreen(__instance);
                 }, buttonAttr)
                 { TranslationKey = "config.client.vcSettings", Alignment = IMetaContext.AlignmentOption.Center });
+
+                nebulaContext.Append(new MetaContext.Button(() =>
+                {
+                    NebulaGameManager.Instance?.VoiceChatManager?.Rejoin();
+                }, buttonAttr)
+                { TranslationKey = "config.client.vcRejoin", Alignment = IMetaContext.AlignmentOption.Center });
             }
 
 

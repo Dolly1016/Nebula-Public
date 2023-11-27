@@ -1,11 +1,13 @@
-﻿using Discord;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Hazel;
 using System.Collections;
 using InnerNet;
 using Nebula.Modules;
 using UnityEngine;
 using UnityEngine.TextCore;
+using System.Drawing;
+using UnityEngine.UI;
+using Nebula.Utilities;
 
 namespace Nebula.Game;
 
@@ -96,6 +98,59 @@ public class NebulaGameEnd
     }
 }
 
+public class LastGameHistory
+{
+    static public IMetaContext? LastContext;
+
+    public static void SetHistory(TMPro.TMP_FontAsset font, IMetaContext roleContext, string endCondition)
+    {
+        LastContext = new MetaContext(new MetaContext.Text(new(TextAttribute.BoldAttrLeft) { Font = font }) { RawText = endCondition }, new MetaContext.VerticalMargin(0.15f), roleContext);        
+    }
+
+    public static Texture2D GenerateTexture()
+    {
+        var gameObject = UnityHelper.CreateObject("History", null, Vector3.zero, 30);
+
+        float height = LastContext!.Generate(gameObject, new Vector2(0,0),new Vector2(10f,10f),out var width);
+
+        gameObject.ForEachAllChildren(obj => obj.layer = 30);
+
+        var camObject = UnityHelper.CreateObject("Cam", null, new Vector3((width.min + width.max) * 0.5f, -height * 0.5f, -10f));
+
+        Camera cam = camObject.AddComponent<Camera>();
+        cam.orthographic = true;
+        cam.orthographicSize = (height + 0.35f) * 0.5f;
+        cam.transform.localScale = Vector3.one;
+        cam.clearFlags = CameraClearFlags.Color;
+        cam.backgroundColor = Color.black;
+        cam.cullingMask = 1 << 30;
+        cam.enabled = true;
+
+        RenderTexture rt = new RenderTexture((int)((width.max - width.min) * 100f), (int)(height * 100f), 16);
+        rt.Create();
+
+        cam.targetTexture = rt;
+        cam.Render();
+
+        RenderTexture.active = cam.targetTexture;
+        Texture2D texture2D = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false, false);
+        texture2D.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        texture2D.Apply();
+
+        RenderTexture.active = null;
+        cam.targetTexture = null;
+        GameObject.Destroy(rt);
+        GameObject.Destroy(gameObject);
+        GameObject.Destroy(camObject);
+
+        return texture2D;
+    }
+
+    public static void SaveResult(string path)
+    {
+        File.WriteAllBytesAsync(path, GenerateTexture().EncodeToPNG());
+    }
+}
 
 [HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.SetEverythingUp))]
 public class EndGameManagerSetUpPatch
@@ -111,7 +166,7 @@ public class EndGameManagerSetUpPatch
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
         {
             //Name Text
-            string nameText = p.DefaultName;
+            string nameText = p.DefaultName.Color((NebulaGameManager.Instance.EndState!.WinnersMask & (1 << p.PlayerId)) != 0 ? Color.yellow : Color.white);
             string stateText = p.MyState?.Text ?? "";
             if (p.IsDead && p.MyKiller != null) stateText += "<color=#FF6666><size=75%> by " + (p.MyKiller?.DefaultName ?? "ERROR") + "</size></color>";
             string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $" ({p.Tasks.ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
@@ -200,7 +255,7 @@ public class EndGameManagerSetUpPatch
             {
                 poolablePlayer.SetFlipX(i % 2 == 0);
             }
-            poolablePlayer.UpdateFromPlayerOutfit(player.DefaultOutfit, PlayerMaterial.MaskType.None, false, true);
+            poolablePlayer.UpdateFromPlayerOutfit(player.DefaultOutfit, PlayerMaterial.MaskType.None, player.IsDead, true);
 
             poolablePlayer.SetName(player.DefaultName, new Vector3(1f / vector.x, 1f / vector.y, 1f / vector.z), Color.white, -15f); ;
             poolablePlayer.SetNamePosition(new Vector3(0f, -1.31f, -0.5f));
@@ -240,6 +295,8 @@ public class EndGameManagerSetUpPatch
         button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpContext(button, GetRoleContent(__instance.WinText.font)));
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpContextIf(button));
         button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+
+        LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
     }
 }
 

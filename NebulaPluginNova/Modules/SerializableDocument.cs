@@ -201,6 +201,22 @@ public class SerializableDocument
         return IMetaContext.AlignmentOption.Left;
     }
 
+    public TMPro.TextAlignmentOptions GetTextAlignment()
+    {
+        if (Alignment == null) return TextAlignmentOptions.Left;
+
+        switch (Alignment)
+        {
+            case "Center":
+                return TextAlignmentOptions.Center;
+            case "Left":
+                return TextAlignmentOptions.Left;
+            case "Right":
+                return TextAlignmentOptions.Right;
+        }
+        return TextAlignmentOptions.Left;
+    }
+
     public INameSpace? RelatedNamespace = null;
 
     private ISpriteLoader? imageLoader = null;
@@ -255,7 +271,7 @@ public class SerializableDocument
     }
 
     public IMetaContext? Build(Reference<MetaContext.ScrollView.InnerScreen>? myScreen, bool useMaskedMaterial = true, int leftNesting = MaxNesting, INameSpace? nameSpace = null) => BuildInternal(nameSpace ?? RelatedNamespace, null, myScreen, c => c.Build(myScreen, useMaskedMaterial, leftNesting, nameSpace ?? RelatedNamespace), true, useMaskedMaterial, leftNesting);
-    public IMetaContext? BuildReference(FunctionalEnvironment? table, INameSpace? nameSpace, Reference<MetaContext.ScrollView.InnerScreen>? myScreen, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, leftNesting), false, true, leftNesting);
+    public IMetaContext? BuildReference(FunctionalEnvironment? table, INameSpace? nameSpace, Reference<MetaContext.ScrollView.InnerScreen>? myScreen, bool buildHyperLink, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, buildHyperLink, leftNesting), buildHyperLink, true, leftNesting);
 
 
     public IMetaContext? BuildInternal(INameSpace? nameSpace, FunctionalEnvironment? arguments, Reference<MetaContext.ScrollView.InnerScreen>? myScreen, Func<SerializableDocument, IMetaContext?> builder, bool buildHyperLink,bool useMaskedMaterial, int leftNesting)
@@ -271,6 +287,8 @@ public class SerializableDocument
         if (Contents != null)
         {
             MetaContext context = new();
+            context.MaxWidth = Width;
+
             foreach(var c in Contents)
             {
                 var subContext = builder.Invoke(c);
@@ -309,7 +327,7 @@ public class SerializableDocument
                 FontMaxSize = Mathf.Max(fontSize, attr.FontMaxSize),
                 Color = Color?.AsColor(arguments) ?? UnityEngine.Color.white,
                 Styles = IsBold.HasValue ? (IsBold.Value ? TMPro.FontStyles.Bold : TMPro.FontStyles.Normal) : attr.Styles,
-                Alignment = TMPro.TextAlignmentOptions.Left,
+                Alignment = GetTextAlignment(),
                 FontMaterial = useMaskedMaterial ? VanillaAsset.StandardMaskedFontMaterial : null
                
             };
@@ -373,11 +391,11 @@ public class SerializableDocument
                 if (image.Contains("::"))
                 {
                     var splitted = image.Split("::", 2);
-                    imageLoader = NameSpaceManager.ResolveOrGetDefault(splitted[0]).GetSprite(splitted[1] + ".png", 100f);
+                    imageLoader = NameSpaceManager.ResolveOrGetDefault(splitted[0]).GetSprite(splitted[1], 100f);
                 }
                 else
                 {
-                    imageLoader = (nameSpace ?? NameSpaceManager.DefaultNameSpace).GetSprite(image + ".png", 100f);
+                    imageLoader = (nameSpace ?? NameSpaceManager.DefaultNameSpace).GetSprite(image, 100f);
                 }
                 lastImagePath = image;
             }
@@ -416,7 +434,7 @@ public class SerializableDocument
                     }
                 }
                 doc ??= DocumentManager.GetDocument(ConsiderArgumentAsStr(Document.Id));
-                return doc?.BuildReference(new FunctionalEnvironment(Document.Arguments, arguments), nameSpace, myScreen, leftNesting - 1) ?? new MetaContext();
+                return doc?.BuildReference(new FunctionalEnvironment(Document.Arguments, arguments), nameSpace, myScreen, buildHyperLink, leftNesting - 1) ?? new MetaContext();
             }
         }
         //無効なコンテンツ

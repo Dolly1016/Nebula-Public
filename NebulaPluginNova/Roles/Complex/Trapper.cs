@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Complex;
 
@@ -25,7 +26,7 @@ file static class TrapperSystem
         Vector2? pos = null;
         int buttonIndex = 0;
         int leftCost = Trapper.NumOfChargesOption;
-        var placeButton = myRole.Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability).SubKeyBind(KeyAssignmentType.AidAction);
+        var placeButton = myRole.Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
         placeButton.SetSprite(buttonSprites[buttonVariation[0].id]?.GetSprite());
         placeButton.Availability = (button) => myRole.MyPlayer.MyControl.CanMove && leftCost >= buttonVariation[buttonIndex].cost;
         placeButton.Visibility = (button) => !myRole.MyPlayer.MyControl.Data.IsDead && leftCost > 0;
@@ -63,7 +64,6 @@ file static class TrapperSystem
         };
         placeButton.CoolDownTimer = myRole.Bind(new Timer(0f, Trapper.PlaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
         placeButton.EffectTimer = myRole.Bind(new Timer(0f, Trapper.PlaceDurationOption.GetFloat()));
-        placeButton.SetLabelType(ModAbilityButton.LabelType.Standard);
         placeButton.SetLabel("place");
     }
 
@@ -91,7 +91,7 @@ public class Trapper : ConfigurableStandardRole
 
     public override string LocalizedName => IsEvil ? "evilTrapper" : "niceTrapper";
     public override Color RoleColor => IsEvil ? Palette.ImpostorRed : new Color(206f / 255f, 219f / 255f, 96f / 255f);
-    public override Team Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
+    public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if (MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; }
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => IsEvil ? new EvilInstance(player) : new NiceInstance(player);
@@ -196,12 +196,12 @@ public class Trapper : ConfigurableStandardRole
         {
             KillTrapSoundDistanceOption = new NebulaConfiguration(RoleConfig, "killTrapSoundDistance", null, 0f, 20f, 1.25f, 10f, 10f) { Decorator = NebulaConfiguration.OddsDecorator };
             CostOfKillTrapOption = new NebulaConfiguration(RoleConfig, "costOfKillTrap", null, 1, 5, 2, 2);
-            KillTrapSizeOption ??= new NebulaConfiguration(null, "killTrapSize", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
+            KillTrapSizeOption ??= new NebulaConfiguration(RoleConfig, "killTrapSize", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
         }
         else
         {
             CostOfCommTrapOption = new NebulaConfiguration(RoleConfig, "costOfCommTrap", null, 1, 5, 2, 2);
-            CommTrapSizeOption ??= new NebulaConfiguration(null, "commTrapSize", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
+            CommTrapSizeOption ??= new NebulaConfiguration(RoleConfig, "commTrapSize", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
         }
 
         var commonOptions = new NebulaConfiguration[] { PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption };
@@ -245,7 +245,7 @@ public class Trapper : ConfigurableStandardRole
                 foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                 {
                     if (p.AmOwner) continue;
-                    if (p.IsDead || p.HasAttribute(AttributeModulator.PlayerAttribute.Invisible)) continue;
+                    if (p.IsDead || p.HasAttribute(Virial.Game.PlayerAttribute.Invisible)) continue;
                     if (p.MyControl.transform.position.Distance(commTrap.Position) < CommTrapSizeOption.GetFloat() * 0.35f)
                     {
                         //直前にトラップを踏んでいるプレイヤーは無視する

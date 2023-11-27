@@ -63,6 +63,8 @@ public class NebulaLog
         static public LogCategory Language = new("Language");
         static public LogCategory Addon = new("Addon");
         static public LogCategory Document = new("Documentation");
+        static public LogCategory Preset = new("Preset");
+        static public LogCategory Scripting = new("Scripting");
     }
 
     public void Print(LogCategory? category,string message)

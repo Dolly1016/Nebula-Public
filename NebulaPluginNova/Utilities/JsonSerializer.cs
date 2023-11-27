@@ -2,6 +2,7 @@
 using Nebula.Modules;
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
@@ -72,9 +73,9 @@ public static class JsonStructure
         if (type.Equals(typeof(string)))
             return trimmed;
         if (type.Equals(typeof(float)))
-            return float.Parse(trimmed);
+            return float.Parse(trimmed, CultureInfo.InvariantCulture);
         if (type.Equals(typeof(double)))
-            return double.Parse(trimmed);
+            return double.Parse(trimmed, CultureInfo.InvariantCulture);
         if (type.Equals(typeof(bool)))
             return bool.Parse(trimmed);
         return null;

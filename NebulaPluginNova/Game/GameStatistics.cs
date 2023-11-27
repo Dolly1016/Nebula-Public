@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Modules;
 using System.Collections;
+using Virial.Text;
 
 namespace Nebula.Game;
 
@@ -26,6 +27,29 @@ public static class EventDetail
     static public TranslatableTag Embroil = new("statistics.events.embroil");
     static public TranslatableTag Trap = new("statistics.events.trap");
     static public TranslatableTag Accident = new("statistics.events.accident");
+    static public TranslatableTag FakeSabotage = new("statistics.events.fakeSabotage");
+
+    static public void Load()
+    {
+        Virial.Text.EventDetails.Kill = Kill;
+        Virial.Text.EventDetails.Exiled = Exiled;
+        Virial.Text.EventDetails.Misfire = Misfire;
+        Virial.Text.EventDetails.GameStart = GameStart;
+        Virial.Text.EventDetails.GameEnd = GameEnd;
+        Virial.Text.EventDetails.MeetingEnd = MeetingEnd;
+        Virial.Text.EventDetails.Report = Report;
+        Virial.Text.EventDetails.BaitReport = BaitReport;
+        Virial.Text.EventDetails.EmergencyButton = EmergencyButton;
+        Virial.Text.EventDetails.Disconnect = Disconnect;
+        Virial.Text.EventDetails.Revive = Revive;
+        Virial.Text.EventDetails.Eat = Eat;
+        Virial.Text.EventDetails.Clean = Clean;
+        Virial.Text.EventDetails.Missed = Missed;
+        Virial.Text.EventDetails.Guess = Guess;
+        Virial.Text.EventDetails.Embroil = Embroil;
+        Virial.Text.EventDetails.Trap = Trap;
+        Virial.Text.EventDetails.Accident = Accident;
+    }
 }
 
 public enum GameStatisticsGatherTag
@@ -76,7 +100,7 @@ public class GameStatistics
         public byte? SourceId { get; private init; }
         public int TargetIdMask { get; private set; }
         public Tuple<byte, Vector2>[] Position { get; private init; }
-        public TranslatableTag? RelatedTag { get; set; } = null;
+        public CommunicableTextTag? RelatedTag { get; set; } = null;
 
 
         public Event(EventVariation variation, byte? sourceId, int targetIdMask,GameStatisticsGatherTag? positionTag = null)

@@ -15,13 +15,14 @@ namespace Nebula.Behaviour
         Waiting,
         UnmatchedEpoch,
         UnmatchedBuild,
+        UnmatchedAddon,
         Uncertified,
     }
 
     [NebulaRPCHolder]
     public class Certification
     {
-        private static RemoteProcess<(byte playerId, int epoch, int build)> RpcHandshake = new(
+        private static RemoteProcess<(byte playerId, int epoch, int build, int addonHash)> RpcHandshake = new(
             "Handshake", (message, calledByMe) => {
                 var player = Helpers.GetPlayer(message.playerId);
                 if (player?.gameObject.TryGetComponent<UncertifiedPlayer>(out var certification) ?? false)
@@ -30,6 +31,8 @@ namespace Nebula.Behaviour
                         certification.Reject(UncertifiedReason.UnmatchedEpoch);
                     else if (message.build != NebulaPlugin.PluginBuildNum)
                         certification.Reject(UncertifiedReason.UnmatchedBuild);
+                    else if (message.addonHash != NebulaAddon.AddonHandshakeHash)
+                        certification.Reject(UncertifiedReason.UnmatchedAddon);
                     else
                         certification.Certify();
                 }
@@ -42,7 +45,7 @@ namespace Nebula.Behaviour
 
         private static void Handshake()
         {
-            RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum));
+            RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash));
         }
 
         public static void RequireHandshake()
@@ -105,7 +108,8 @@ namespace Nebula.Behaviour
             State = reason;
             OnStateChanged();
 
-            if(MyControl?.OwnerId == AmongUsClient.Instance.HostId)
+            //MyControl?.OwnerId == AmongUsClient.Instance.HostId
+            if (MyControl?.AmOwner ?? false)
             {
                 var screen = MetaScreen.GenerateWindow(new(3.2f,1.58f),HudManager.Instance.transform,Vector3.zero, true,false,true);
                 var context = new MetaContext();

@@ -21,6 +21,9 @@ using UnityEngine.SceneManagement;
 using System.Reflection;
 using Nebula.Patches;
 using Il2CppSystem.Net.NetworkInformation;
+using Cpp2IL.Core.Extensions;
+using Virial;
+using JetBrains.Annotations;
 
 namespace Nebula;
 
@@ -32,16 +35,17 @@ public static class ToolsInstaller
         Patches.LoadPatch.LoadingText = "Installing Tools";
         yield return null;
 
-        InstallTool("VoiceChatSupport");
-        InstallTool("CPUAffinityEditor");
+        InstallTool("VoiceChatSupport.exe");
+        InstallTool("CPUAffinityEditor.exe");
+        InstallTool("opus.dll");
     }
     private static void InstallTool(string name)
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
-        Stream? stream = assembly.GetManifestResourceStream("Nebula.Resources.Tools." + name + ".exe");
+        Stream? stream = assembly.GetManifestResourceStream("Nebula.Resources.Tools." + name);
         if (stream == null) return;
 
-        var file = File.Create(name + ".exe");
+        var file = File.Create(name);
         byte[] data = new byte[stream.Length];
         stream.Read(data);
         file.Write(data);
@@ -57,16 +61,15 @@ public class NebulaPlugin : BasePlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.0.0";
+    public const string PluginVersion = "2.0.1";
 
-    public const bool IsSnapshot = false;
-    //public const string VisualVersion = "v2.0";
-    public const string VisualVersion = "Snapshot 23.11.02a";
+    //public const string VisualVersion = "v2.0.1";
+    public const string VisualVersion = "Snapshot 23.11.28b";
     //public const string VisualVersion = "Mayor Debug";
 
     public const int PluginEpoch = 101;
-    public const int PluginBuildNum = 1043;
-
+    public const int PluginBuildNum = 1054;
+    
     static public HttpClient HttpClient
     {
         get
@@ -190,6 +193,9 @@ public class NebulaPlugin : BasePlugin
     {
         MyPlugin = this;
 
+        var assembly = Assembly.GetExecutingAssembly();
+        Assembly.Load(assembly.GetManifestResourceStream("Nebula.Resources.API.NebulaAPI.dll").ReadBytes());
+
         Harmony.PatchAll();
 
         SetWindowText(FindWindow(null!, Application.productName),"Among Us w/ " + GetNebulaVersionString());
@@ -198,6 +204,25 @@ public class NebulaPlugin : BasePlugin
         {
             new GameObject("NebulaManager").AddComponent<NebulaManager>();
         });
+
+        new NebulaFunctionProperty("myPuid", ()=>
+        {
+            try
+            {
+                return PlayerControl.LocalPlayer.Data.Puid;
+            }
+            catch
+            {
+                return "";
+            }
+        },() => 0f);
+
+        SetUpNebulaImpl();
+    }
+
+    private void SetUpNebulaImpl()
+    {
+        NebulaAPI.instance = new NebulaImpl();
     }
 }
 

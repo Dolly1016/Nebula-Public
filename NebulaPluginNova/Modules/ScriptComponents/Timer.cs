@@ -2,6 +2,7 @@
 using Rewired.Libraries.SharpDX.RawInput;
 using Rewired.Utils.Platforms.Windows;
 using System.ComponentModel.DataAnnotations;
+using Virial.Components;
 using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -19,7 +20,7 @@ class PlayerIsKillTimerEnabledPatch
     }
 }
 
-public class Timer : INebulaScriptComponent
+public class Timer : INebulaScriptComponent, GameTimer
 {
     private Func<bool>? predicate = null;
     private bool isActive;
@@ -127,6 +128,22 @@ public class Timer : INebulaScriptComponent
             return false;
         });
     }
+
+    GameTimer GameTimer.SetAsKillCoolTimer() => SetAsKillCoolDown();
+
+    GameTimer GameTimer.SetAsAbilityTimer() => SetAsAbilityCoolDown();
+
+    GameTimer GameTimer.Start(float? time = null) => Start(time);
+
+    GameTimer GameTimer.Pause() => Pause();
+
+    GameTimer GameTimer.Resume() => Resume();
+
+    GameTimer GameTimer.SetRange(float min, float max) => SetRange(min, max);
+
+    GameTimer GameTimer.SetTime(float time) => SetTime(time);
+
+    GameTimer GameTimer.Expand(float time) => Expand(time);
 }
 
 public class AdvancedTimer : Timer

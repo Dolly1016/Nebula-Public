@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.Profiling;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Neutral;
 
@@ -18,7 +19,7 @@ public class ChainShifter : ConfigurableStandardRole
 
     public override string LocalizedName => "chainShifter";
     public override Color RoleColor => new Color(115f / 255f, 115f / 255f, 115f / 255f);
-    public override Team Team => MyTeam;
+    public override RoleTeam Team => MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -66,7 +67,7 @@ public class ChainShifter : ConfigurableStandardRole
 
                 var playerTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
 
-                chainShiftButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                chainShiftButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 chainShiftButton.SetSprite(buttonSprite.GetSprite());
                 chainShiftButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove && shiftTarget == null;
                 chainShiftButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -80,7 +81,6 @@ public class ChainShifter : ConfigurableStandardRole
                     shiftIcon = null;
                 };
                 chainShiftButton.CoolDownTimer = Bind(new Timer(MyRole.ShiftCoolDown.GetFloat()).SetAsAbilityCoolDown().Start());
-                chainShiftButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 chainShiftButton.SetLabel("shift");
             }
         }
@@ -121,7 +121,7 @@ public class ChainShifter : ConfigurableStandardRole
                 if (targetGuess != -1) MyPlayer.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
 
                 int leftCrewmateTask = 0;
-                if (player.Tasks.IsCrewmateTask)
+                if (player.Tasks.IsCrewmateTask && player.Tasks.HasExecutableTasks)
                 {
                     leftCrewmateTask = Mathf.Max(0, player.Tasks.Quota - player.Tasks.TotalCompleted);
 

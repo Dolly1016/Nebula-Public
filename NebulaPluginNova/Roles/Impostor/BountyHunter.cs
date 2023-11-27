@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -16,7 +17,7 @@ public class BountyHunter : ConfigurableStandardRole
 
     public override string LocalizedName => "bountyHunter";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -113,9 +114,9 @@ public class BountyHunter : ConfigurableStandardRole
                 bountyTimer = Bind(new Timer(MyRole.ChangeBountyIntervalOption.GetFloat())).Start();
                 arrowTimer = Bind(new Timer(MyRole.ArrowUpdateIntervalOption.GetFloat())).Start();
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => !p.Data.Role.IsImpostor && !p.Data.IsDead));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => !p.Data.Role.IsImpostor && !p.Data.IsDead, Impostor.MyRole.CanKillHidingPlayerOption));
 
-                killButton = Bind(new ModAbilityButton(false,true)).KeyBind(KeyAssignmentType.Kill);
+                killButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 killButton.OnClick = (button) => {
@@ -133,7 +134,7 @@ public class BountyHunter : ConfigurableStandardRole
 
                 };
                 killButton.CoolDownTimer = Bind(new AdvancedTimer(AmongUsUtil.VanillaKillCoolDown, MyRole.MaxKillCoolDown).SetDefault(AmongUsUtil.VanillaKillCoolDown).SetAsKillCoolDown().Start(10f));
-                killButton.SetLabelType(ModAbilityButton.LabelType.Impostor);
+                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 
                 var iconHolder = HudContent.InstantiateContent("BountyHolder",true);

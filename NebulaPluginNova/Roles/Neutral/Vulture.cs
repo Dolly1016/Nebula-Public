@@ -1,4 +1,6 @@
-﻿namespace Nebula.Roles.Neutral;
+﻿using Virial.Assignable;
+
+namespace Nebula.Roles.Neutral;
 
 public class Vulture : ConfigurableStandardRole
 {
@@ -9,7 +11,7 @@ public class Vulture : ConfigurableStandardRole
 
     public override string LocalizedName => "vulture";
     public override Color RoleColor => new Color(140f / 255f, 70f / 255f, 18f / 255f);
-    public override Team Team => MyTeam;
+    public override RoleTeam Team => MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
@@ -46,6 +48,7 @@ public class Vulture : ConfigurableStandardRole
         {
             if (arguments.Length >= 1) leftEaten = arguments[0];
         }
+        public override int[]? GetRoleArgument() => new int[] { leftEaten };
 
         private List<(DeadBody deadBody, Arrow arrow)> AllArrows = new();
         public override void OnDeadBodyGenerated(DeadBody deadBody)
@@ -76,7 +79,7 @@ public class Vulture : ConfigurableStandardRole
             {
                 var eatTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.MyControl, (d) => true));
 
-                eatButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                eatButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 var usesIcon = eatButton.ShowUsesIcon(2);
                 eatButton.SetSprite(buttonSprite.GetSprite());
                 eatButton.Availability = (button) => eatTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
@@ -90,7 +93,6 @@ public class Vulture : ConfigurableStandardRole
                     if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId);
                 };
                 eatButton.CoolDownTimer = Bind(new Timer(MyRole.EatCoolDownOption.CurrentCoolDown).SetAsAbilityCoolDown().Start());
-                eatButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 eatButton.SetLabel("eat");
                 usesIcon.text= leftEaten.ToString();
             }

@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Nebula.Behaviour;
 using Nebula.Configuration;
+using Nebula.Events;
 using Nebula.Game;
 using System;
 using System.Collections;
@@ -8,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using Virial.Events.Meeting;
+using Virial.Events.Player;
 using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Patches;
@@ -57,8 +60,13 @@ public static class NebulaExileWrapUp
                         role.OnExiled();
                         role.OnDead();
                     });
+                    EventManager.HandleEvent(new PlayerDeadEvent(info));
 
                     PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(@object));
+
+                    var checkEvent = new CheckExtraVictimEvent(info);
+                    EventManager.HandleEvent(checkEvent);
+                    foreach (var victim in checkEvent.ExtraVictim) victim.victim.VanillaPlayer.ModMarkAsExtraVictim(victim.killer?.VanillaPlayer, victim.reason, victim.eventDetail);
 
                     NebulaGameManager.Instance.Syncronizer.SendSync(SynchronizeTag.CheckExtraVictims);
                 }

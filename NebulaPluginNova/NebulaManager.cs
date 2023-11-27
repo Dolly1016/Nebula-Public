@@ -7,6 +7,7 @@ using Nebula.Modules;
 using Nebula.Utilities;
 using Rewired.UI.ControlMapper;
 using System.Collections;
+using System.Text;
 using UnityEngine;
 
 namespace Nebula;
@@ -125,13 +126,13 @@ public class NebulaManager : MonoBehaviour
 {
     public class MetaCommand
     {
-        public KeyAssignmentType? KeyAssignmentType = null;
+        public Virial.Compat.VirtualKeyInput? KeyAssignmentType = null;
         public VirtualInput? DefaultKeyInput = null;
         public VirtualInput? KeyInput => KeyAssignmentType != null ? NebulaInput.GetInput(KeyAssignmentType.Value) : DefaultKeyInput;
         public string TranslationKey;
         public Func<bool> Predicate;
         public Action CommandAction;
-
+        
         public MetaCommand(string translationKey, Func<bool> predicate,Action commandAction)
         {
             TranslationKey = translationKey;
@@ -190,6 +191,14 @@ public class NebulaManager : MonoBehaviour
             ()=>NebulaManager.Instance.ToggleConsole()
         )
         { DefaultKeyInput = new(KeyCode.Return) });
+
+        commands.Add(new("help.command.saveResult",
+            () => LastGameHistory.LastContext != null,
+            () => LastGameHistory.SaveResult(GetPicturePath(out string displayPath))
+        )
+        { DefaultKeyInput = new(KeyCode.F3) });
+
+
     }
 
     private void ToggleConsole()
@@ -258,38 +267,18 @@ public class NebulaManager : MonoBehaviour
 
     public void Update()
     {
-        /*
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            Vector2 pos = new Vector2(-25f, 16f);
-            Vector2 size = new Vector2(53f, -33f);
-            var texture = MapData.GetCurrentMapData().OutputMap(pos,size);
-            var obj = GameObject.Find("BuskerMap");
-            if (obj != null) GameObject.Destroy(obj);
-
-            var renderer = UnityHelper.CreateObject<SpriteRenderer>("BuskerMap", null, (Vector3)(pos + size * 0.5f) + new Vector3(0, 0, -10f), LayerExpansion.GetDefaultLayer());
-            renderer.sprite = texture.ToSprite(10f);
-            renderer.color = Color.white.AlphaMultiplied(0.5f);
-
-            File.WriteAllBytes("Map.png", UnityEngine.ImageConversion.EncodeToPNG(texture));
-        }
-
-        if(Input.GetKeyDown(KeyCode.Y)) {
-            Camera.main.orthographicSize += 3f;
-            Camera.main.transform.FindChild("ShadowQuad").gameObject.SetActive(false);
-            if (Camera.main.orthographicSize > 20f) Camera.main.orthographicSize = 3f;
-        }
-        */
+        
+        
 
         if (NebulaPlugin.FinishedPreload)
         {
             //スクリーンショット
-            if (NebulaInput.GetInput(KeyAssignmentType.Screenshot).KeyDown) StartCoroutine(CaptureAndSave(NebulaInput.GetInput(KeyAssignmentType.Command).KeyState).WrapToIl2Cpp());
+            if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDown) StartCoroutine(CaptureAndSave(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyState).WrapToIl2Cpp());
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
                 //コマンド
-                if (NebulaInput.GetInput(KeyAssignmentType.Command).KeyDown)
+                if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyDown)
                 {
                     MetaContext context = new();
                     context.Append(new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = "help.command", Alignment = IMetaContext.AlignmentOption.Left });
@@ -310,13 +299,13 @@ public class NebulaManager : MonoBehaviour
                 }
 
                 //コマンド
-                if (NebulaInput.GetInput(KeyAssignmentType.Command).KeyUp)
+                if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyUp)
                 {
                     if (HelpRelatedObject == null) HideHelpContext();
                 }
 
                 //コマンド
-                if (NebulaInput.GetInput(KeyAssignmentType.Command).KeyState)
+                if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyState)
                 {
                     foreach (var command in commands)
                     {

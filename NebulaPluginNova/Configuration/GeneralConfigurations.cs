@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.Rendering;
 using static Il2CppMono.Security.X509.X520;
 
 namespace Nebula.Configuration;
@@ -24,7 +25,16 @@ public static class GeneralConfigurations
 
     static public NebulaConfiguration GameModeOption = new(null, "options.gamemode", null, CustomGameMode.AllGameMode.Count - 1, 0, 0);
 
-    static public List<(NebulaConfiguration.NebulaByteConfiguration configuration, MapOptionType type, Vector2 position)>[] MapCustomizations = new List<(NebulaConfiguration.NebulaByteConfiguration, MapOptionType,Vector2)>[]{
+    public class MapCustomization
+    {
+        public List<(NebulaConfiguration.NebulaByteConfiguration configuration, MapOptionType type, Vector2 position)> BoolOptions = new();
+        public List<(NebulaConfiguration configuration, Vector2 position)> StandardOptions = new();
+
+        public void Register(NebulaConfiguration.NebulaByteConfiguration configuration, MapOptionType type,Vector2 position) => BoolOptions.Add((configuration,type,position));
+        public void Register(NebulaConfiguration configuration, Vector2 position) => StandardOptions.Add((configuration,position));
+    }
+
+    static public MapCustomization[] MapCustomizations = new MapCustomization[]{
         new(),
         new(),
         new(),
@@ -62,10 +72,19 @@ public static class GeneralConfigurations
 
     static private NebulaConfiguration.NebulaByteConfiguration GenerateMapCustomization(byte mapId, MapOptionType type,string id,bool defaultValue,Vector2 pos) {
         id = "options.map.customization." + AmongUsUtil.ToMapName(mapId) + "." + id;
-        NebulaConfiguration.NebulaByteConfiguration option = new(MapCustomizationOptions[mapId], id, MapCustomizations[mapId].Count, defaultValue);
-        MapCustomizations[mapId].Add((option, type, pos));
+        NebulaConfiguration.NebulaByteConfiguration option = new(MapCustomizationOptions[mapId], id, MapCustomizations[mapId].BoolOptions.Count, defaultValue);
+        MapCustomizations[mapId].Register(option, type, pos);
         return option;
     }
+
+    static private NebulaConfiguration GenerateMapCustomization(byte mapId, Vector2 pos,NebulaConfiguration config)
+    {
+        MapCustomizations[mapId].Register(config, pos);
+        config.Editor = NebulaConfiguration.EmptyEditor;
+        config.Shower = ()=> AmongUsUtil.CurrentMapId == mapId ? (config.Title.Text + " : " + config.ToDisplayString()) : null; 
+        return config;
+    }
+
     static public NebulaConfiguration.NebulaByteConfiguration SkeldAdminOption = GenerateMapCustomization(0, MapOptionType.Console, "useAdmin",true,new(4.7f,-8.6f));
     static public NebulaConfiguration.NebulaByteConfiguration SkeldCafeVentOption = GenerateMapCustomization(0, MapOptionType.Vent, "cafeteriaVent", false, new(-2.4f, 5f));
     static public NebulaConfiguration.NebulaByteConfiguration SkeldStorageVentOption = GenerateMapCustomization(0, MapOptionType.Vent, "storageVent", false, new(-1f, -16.7f));
@@ -76,7 +95,7 @@ public static class GeneralConfigurations
     static public NebulaConfiguration.NebulaByteConfiguration AirshipRecordAdminOption = GenerateMapCustomization(4, MapOptionType.Console, "useRecordsAdmin", true, new(19.9f, 12f));
     static public NebulaConfiguration.NebulaByteConfiguration AirshipMeetingVentOption = GenerateMapCustomization(4, MapOptionType.Vent, "meetingVent", false, new(6.6f, 14f));
     static public NebulaConfiguration.NebulaByteConfiguration AirshipElectricalVentOption = GenerateMapCustomization(4, MapOptionType.Vent, "electricalVent", false, new(16.3f, -8.8f));
-    static public NebulaConfiguration.NebulaByteConfiguration AirshipOneWayMeetingRoomOption = GenerateMapCustomization(4, MapOptionType.Blueprint, "oneWayMeetingRoom", false, new(13.5f, 10f));
+    static public NebulaConfiguration.NebulaByteConfiguration AirshipOneWayMeetingRoomOption = GenerateMapCustomization(4, MapOptionType.Blueprint, "oneWayMeetingRoom", false, new(13.5f, 11.5f));
     static public NebulaConfiguration.NebulaByteConfiguration AirshipArmoryWireOption = GenerateMapCustomization(4, MapOptionType.Wiring, "armoryWiring", false, new(-11.3f, -7.4f));
     static public NebulaConfiguration.NebulaByteConfiguration AirshipVaultWireOption = GenerateMapCustomization(4, MapOptionType.Wiring, "vaultWiring", false, new(-11.5f, 12.5f));
     static public NebulaConfiguration.NebulaByteConfiguration AirshipHallwayWireOption = GenerateMapCustomization(4, MapOptionType.Wiring, "hallwayWiring", false, new(-10.3f, -0.25f));
@@ -86,6 +105,15 @@ public static class GeneralConfigurations
     static public NebulaConfiguration.NebulaByteConfiguration FungleGlowingCampfireOption = GenerateMapCustomization(5, MapOptionType.Light, "glowingCampfire", false, new(-9.8f, 1.65f));
     static public NebulaConfiguration.NebulaByteConfiguration FungleGlowingMushroomOption = GenerateMapCustomization(5, MapOptionType.Light, "glowingMushroom", false, new(14.7f, -12.5f));
     static public NebulaConfiguration.NebulaByteConfiguration FungleQuickPaceDoorMinigameOption = GenerateMapCustomization(5, MapOptionType.Console, "quickPaceDoorMinigame", false, new(-21f, -15f));
+
+    static public NebulaConfiguration SkeldReactorDurationOption = GenerateMapCustomization(0, new(-21.2f, -5.2f), new(MapOptions, "customization.skeld.reactorDuration",null,10f,120f,5f,30f,30f) { Decorator = NebulaConfiguration.SecDecorator });
+    static public NebulaConfiguration SkeldO2DurationOption = GenerateMapCustomization(0, new(6.4f, -4.7f), new(MapOptions, "customization.skeld.lifeSupportDuration", null, 10f, 120f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator });
+    static public NebulaConfiguration MiraReactorDurationOption = GenerateMapCustomization(1, new(2.5f, 13.5f), new(MapOptions, "customization.mira.reactorDuration", null, 10f, 120f, 5f, 45f, 45f) { Decorator = NebulaConfiguration.SecDecorator });
+    static public NebulaConfiguration MiraO2DurationOption = GenerateMapCustomization(1, new(17.8f, 24.2f), new(MapOptions, "customization.mira.lifeSupportDuration", null, 10f, 120f, 5f, 45f, 45f) { Decorator = NebulaConfiguration.SecDecorator });
+    static public NebulaConfiguration PolusReactorDurationOption = GenerateMapCustomization(2, new(23f, -2.7f), new(MapOptions, "customization.polus.reactorDuration", null, 10f, 120f, 5f, 60f, 60f) { Decorator = NebulaConfiguration.SecDecorator });
+    static public NebulaConfiguration AirshipHeliDurationOption = GenerateMapCustomization(4, new(2.5f, 6.2f), new(MapOptions, "customization.airship.heliDuration", null, 10f, 120f, 5f, 60f, 60f) { Decorator = NebulaConfiguration.SecDecorator });
+    static public NebulaConfiguration FungleReactorDurationOption = GenerateMapCustomization(5, new(22.4f, -6.8f), new(MapOptions, "customization.fungle.reactorDuration", null, 10f, 120f, 5f, 60f, 60f) { Decorator = NebulaConfiguration.SecDecorator });
+
 
     static public ConfigurationHolder MeetingOptions = new("options.meeting", null, ConfigurationTab.Settings, CustomGameMode.Standard | CustomGameMode.FreePlay);
     static public NebulaConfiguration DeathPenaltyOption = new(MeetingOptions, "deathPenalty", null, 0f, 20f, 0.5f, 0f, 0f) { Decorator = NebulaConfiguration.SecDecorator };
@@ -138,32 +166,48 @@ public static class GeneralConfigurations
             }
         }
 
+       
+
         context.Append(new CombinedContext(
             new MetaContext.Button(() => OpenMapEditor(screen, Lessen()), new(TextAttribute.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = "<<"},
             new MetaContext.Text(TextAttribute.BoldAttr) { RawText = Constants.MapNames[mapId.Value] },
             new MetaContext.Button(() => OpenMapEditor(screen, Increase()), new(TextAttribute.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = ">>" }
             ));
         if (mapId.Value is 0 or 4) context.Append(new MetaContext.VerticalMargin(0.35f));
-        context.Append(MetaContext.Image.AsMapImage(mapId.Value, 5.6f, MapCustomizations[mapId.Value],
-            (c) => (new MetaContext.Image(mapCustomizationSprite.GetSprite((int)c.type))
-            {
-                Width = 0.5f,
-                PostBuilder = (renderer) =>
+
+        var contents = Enumerable.Concat(
+            MapCustomizations[mapId.Value].BoolOptions.Select(
+                c => ((IMetaParallelPlacable)new MetaContext.Image(mapCustomizationSprite.GetSprite((int)c.type))
                 {
-                    renderer.color = c.configuration.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.65f);
-                    var button = renderer.gameObject.SetUpButton(true);
-                    button.OnMouseOver.AddListener(() => {
-                        MetaContext context = new();
-                        context.Append(new MetaContext.VariableText(TextAttribute.BoldAttr) { Alignment = IMetaContext.AlignmentOption.Left, TranslationKey = c.configuration.Id }).Append(NebulaConfiguration.GetDetailContext(c.configuration.Id + ".detail"));
-                        NebulaManager.Instance.SetHelpContext(button,context);
-                    });
-                    button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpContext());
-                    button.OnClick.AddListener(() => { c.configuration.ToggleValue(); renderer.color = c.configuration.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.65f); });
-                    var collider = button.gameObject.AddComponent<BoxCollider2D>();
-                    collider.isTrigger = true;
-                    collider.size = new(0.5f, 0.5f);
-                }
-            }, c.position)));
+                    Width = 0.5f,
+                    PostBuilder = (renderer) =>
+                    {
+                        renderer.color = c.configuration.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.65f);
+                        var button = renderer.gameObject.SetUpButton(true);
+                        button.OnMouseOver.AddListener(() => {
+                            MetaContext context = new();
+                            context.Append(new MetaContext.VariableText(TextAttribute.BoldAttr) { Alignment = IMetaContext.AlignmentOption.Left, TranslationKey = c.configuration.Id }).Append(NebulaConfiguration.GetDetailContext(c.configuration.Id + ".detail"));
+                            NebulaManager.Instance.SetHelpContext(button, context);
+                        });
+                        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpContext());
+                        button.OnClick.AddListener(() => { c.configuration.ToggleValue(); renderer.color = c.configuration.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.65f); });
+                        var collider = button.gameObject.AddComponent<BoxCollider2D>();
+                        collider.isTrigger = true;
+                        collider.size = new(0.5f, 0.5f);
+                    }
+                }, c.position)),
+            MapCustomizations[mapId.Value].StandardOptions.Select(
+                c=> {
+                    TMPro.TextMeshPro valueText = null!;
+                    return ((IMetaParallelPlacable)new CombinedContext(new MetaContext(
+                        new MetaContext.Text(new(TextAttribute.BoldAttrLeft) { Size = new(0.55f, 0.15f) }) { MyText = c.configuration.Title },
+                        new MetaContext.Text(new(TextAttribute.BoldAttr) { Size = new(0.55f, 0.28f) }) { RawText = c.configuration.ToDisplayString(), PostBuilder = text => valueText = text }
+                        ), MetaContext.Button.GetTwoWayButton(increament => { c.configuration.ChangeValue(increament); valueText.text = c.configuration.ToDisplayString(); }))
+                    { PostBuilder = obj => obj.AddComponent<SortingGroup>().sortingOrder = 12 }, c.position);
+                })
+            );
+
+        context.Append(MetaContext.Image.AsMapImage(mapId.Value, 5.6f, contents));
 
         screen.SetContext(context);
     }

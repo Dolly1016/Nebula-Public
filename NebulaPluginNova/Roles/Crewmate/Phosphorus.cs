@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -17,7 +18,7 @@ public class Phosphorus : ConfigurableStandardRole
 
     public override string LocalizedName => "phosphorus";
     public override Color RoleColor => new Color(249f / 255f, 188f / 255f, 81f / 255f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
@@ -79,7 +80,7 @@ public class Phosphorus : ConfigurableStandardRole
             {
                 localLanterns = new();
 
-                lanternButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                lanternButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 lanternButton.SetSprite(lanternButtonSprite.GetSprite());
                 lanternButton.Availability = (button) => MyPlayer.MyControl.CanMove ;
                 lanternButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && globalLanterns != null;
@@ -93,12 +94,11 @@ public class Phosphorus : ConfigurableStandardRole
                 lanternButton.OnEffectEnd = (button) => lanternButton.StartCoolDown();
                 lanternButton.CoolDownTimer = Bind(new Timer(0f, MyRole.LampCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 lanternButton.EffectTimer = Bind(new Timer(0f, MyRole.LampDurationOption.GetFloat()));
-                lanternButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 lanternButton.SetLabel("lantern");
 
                 int left = MyRole.NumOfLampsOption;
 
-                placeButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 var usesText = placeButton.ShowUsesIcon(3);
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) => MyPlayer.MyControl.CanMove;
@@ -113,7 +113,6 @@ public class Phosphorus : ConfigurableStandardRole
                     placeButton.StartCoolDown();
                 };
                 placeButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PlaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown());
-                placeButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 placeButton.SetLabel("place");
                 usesText.text = left.ToString();
 

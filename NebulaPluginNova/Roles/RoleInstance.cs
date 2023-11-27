@@ -1,4 +1,5 @@
 ﻿using Nebula.Modules;
+using Virial.Assignable;
 
 namespace Nebula.Roles;
 
@@ -43,5 +44,7 @@ public abstract class RoleInstance : AssignableInstance, IRuntimePropertyHolder
         property = null;
         return false;
     }
+
+    public virtual bool CanSeeOthersFakeSabotage { get => Role.RoleCategory == RoleCategory.ImpostorRole; }
 
 }

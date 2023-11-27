@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 using static Nebula.Roles.Assignment.IRoleAllocator;
 
 namespace Nebula.Roles;
@@ -89,7 +90,7 @@ public abstract class ConfigurableStandardModifier : ConfigurableModifier
         RoleChanceOption = GenerateRoleChanceOption(RoleConfig);
     }
 
-    private void TryAssign(IRoleAllocator.RoleTable roleTable,RoleCategory category,int num)
+    private void TryAssign(IRoleAllocator.RoleTable roleTable, RoleCategory category,int num)
     {
         int reallyNum = 0;
         float chance = RoleChanceOption.GetFloat() / 100f;

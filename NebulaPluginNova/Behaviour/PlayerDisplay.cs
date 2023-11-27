@@ -24,6 +24,9 @@ public class PlayerDisplay : MonoBehaviour
 
         SetBodyType(PlayerBodyTypes.Normal);
         Cosmetics.ToggleName(false);
+
+        Cosmetics.zIndexSpacing = 0.001f;
+        Cosmetics.SetCosmeticZIndices();
     }
 
     public void UpdateFromDefault()

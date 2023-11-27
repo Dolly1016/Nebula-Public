@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -10,7 +11,7 @@ public class Marionette : ConfigurableStandardRole
 
     public override string LocalizedName => "marionette";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -76,7 +77,7 @@ public class Marionette : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                placeButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 placeButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy == null;
@@ -96,10 +97,9 @@ public class Marionette : ConfigurableStandardRole
                     placeButton.StartCoolDown();
                     swapButton?.StartCoolDown();
                 };
-                placeButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 placeButton.SetLabel("place");
 
-                destroyButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                destroyButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 destroyButton.SetSprite(destroyButtonSprite.GetSprite());
                 destroyButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 destroyButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy != null;
@@ -115,10 +115,9 @@ public class Marionette : ConfigurableStandardRole
 
                     placeButton.StartCoolDown();
                 };
-                destroyButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 destroyButton.SetLabel("destroy");
 
-                swapButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.SecondaryAbility).SubKeyBind(KeyAssignmentType.AidAction);
+                swapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 swapButton.SetSprite(swapButtonSprite.GetSprite());
                 swapButton.Availability = (button) => MyPlayer.MyControl.CanMove || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour;
                 swapButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy != null;
@@ -134,11 +133,10 @@ public class Marionette : ConfigurableStandardRole
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         swapButton.ResetKeyBind();
-                        monitorButton!.KeyBind(KeyAssignmentType.SecondaryAbility);
-                        monitorButton!.SubKeyBind(KeyAssignmentType.AidAction);
+                        monitorButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                        monitorButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                     });
                 };
-                swapButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 swapButton.SetLabel("swap");
 
                 monitorButton = Bind(new ModAbilityButton());
@@ -158,11 +156,10 @@ public class Marionette : ConfigurableStandardRole
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         monitorButton.ResetKeyBind();
-                        swapButton!.KeyBind(KeyAssignmentType.SecondaryAbility);
-                        swapButton!.SubKeyBind(KeyAssignmentType.AidAction);
+                        swapButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                        swapButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                     });
                 };
-                monitorButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 monitorButton.SetLabel("monitor");
             }
         }

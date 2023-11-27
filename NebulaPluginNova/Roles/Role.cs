@@ -4,6 +4,7 @@ using Il2CppSystem.Reflection.Metadata.Ecma335;
 using Nebula.Configuration;
 using Nebula.Modules;
 using Nebula.Utilities;
+using Virial.Assignable;
 using static Il2CppMono.Security.X509.X520;
 
 namespace Nebula.Roles;
@@ -12,14 +13,6 @@ namespace Nebula.Roles;
 public class NebulaRoleHoler : Attribute
 {
 
-}
-
-[Flags]
-public enum RoleCategory
-{
-    ImpostorRole = 0x01,
-    NeutralRole = 0x02,
-    CrewmateRole = 0x04
 }
 
 public abstract class AbstractRole : IAssignableBase
@@ -38,7 +31,7 @@ public abstract class AbstractRole : IAssignableBase
     public int Id { get; set; }
     public abstract int RoleCount { get; }
     public abstract float GetRoleChance(int count);
-    public abstract Team Team { get; }
+    public abstract RoleTeam Team { get; }
 
     //追加付与ロールに役職プールの占有性があるか(追加付与ロールが無い場合、無意味)
     public virtual bool HasAdditionalRoleOccupancy { get => true; }

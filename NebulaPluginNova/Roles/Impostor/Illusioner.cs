@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -13,7 +14,7 @@ public class Illusioner : ConfigurableStandardRole
 
     public override string LocalizedName => "illusioner";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[]? arguments) => new Instance(player);
 
@@ -59,7 +60,7 @@ public class Illusioner : ConfigurableStandardRole
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
 
-                sampleButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 sampleButton.SetSprite(Morphing.Instance.SampleButtonSprite.GetSprite());
                 sampleButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -71,10 +72,9 @@ public class Illusioner : ConfigurableStandardRole
                     sampleIcon = AmongUsUtil.GetPlayerIcon(sample, sampleButton.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(MyRole.SampleCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                sampleButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 sampleButton.SetLabel("sample");
 
-                morphButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.SecondaryAbility).SubKeyBind(KeyAssignmentType.AidAction);
+                morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 morphButton.SetSprite(Morphing.Instance.MorphButtonSprite.GetSprite());
                 morphButton.Availability = (button) => MyPlayer.MyControl.CanMove && sample != null;
                 morphButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -86,8 +86,8 @@ public class Illusioner : ConfigurableStandardRole
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         morphButton.ResetKeyBind();
-                        paintButton!.KeyBind(KeyAssignmentType.SecondaryAbility);
-                        paintButton!.SubKeyBind(KeyAssignmentType.AidAction);
+                        paintButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                        paintButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                     });
                 };
                 morphButton.OnEffectStart = (button) =>
@@ -112,7 +112,6 @@ public class Illusioner : ConfigurableStandardRole
                 };
                 morphButton.CoolDownTimer = Bind(new Timer(MyRole.MorphCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 morphButton.EffectTimer = Bind(new Timer(MyRole.MorphDurationOption.GetFloat()));
-                morphButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 morphButton.SetLabel("morph");
 
                 paintButton = Bind(new ModAbilityButton());
@@ -132,8 +131,8 @@ public class Illusioner : ConfigurableStandardRole
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         paintButton.ResetKeyBind();
-                        morphButton!.KeyBind(KeyAssignmentType.SecondaryAbility);
-                        morphButton!.SubKeyBind(KeyAssignmentType.AidAction);
+                        morphButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                        morphButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                     });
                 };
                 paintButton.OnMeeting = (button) =>
@@ -146,7 +145,6 @@ public class Illusioner : ConfigurableStandardRole
                     }
                 };
                 paintButton.CoolDownTimer = Bind(new Timer(MyRole.PaintCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                paintButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 paintButton.SetLabel("paint");
             }
         }

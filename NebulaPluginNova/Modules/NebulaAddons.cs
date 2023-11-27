@@ -1,10 +1,12 @@
 ﻿using Epic.OnlineServices.PlayerDataStorage;
+using Mono.CSharp;
 using NAudio.MediaFoundation;
 using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,10 +27,13 @@ public class NebulaAddon : IDisposable, INameSpace
         public string Description = "";
         [JsonSerializableField]
         public string Version = "";
+        [JsonSerializableField]
+        public int Priority = 0;
     }
 
     static private Dictionary<string, NebulaAddon> allAddons = new();
-    static public IEnumerable<NebulaAddon> AllAddons => allAddons.Values;
+    static private List<NebulaAddon> allOrderedAddons = new();
+    static public IEnumerable<NebulaAddon> AllAddons => allOrderedAddons;
     static public NebulaAddon? GetAddon(string id)
     {
         if (allAddons.TryGetValue(id, out var addon)) return addon;
@@ -42,6 +47,7 @@ public class NebulaAddon : IDisposable, INameSpace
 
         Directory.CreateDirectory("Addons");
 
+        var md5 = MD5.Create();
 
         //ローカルなアドオンを更新
         foreach (var dir in Directory.GetDirectories("Addons", "*"))
@@ -54,15 +60,18 @@ public class NebulaAddon : IDisposable, INameSpace
 
         //組込アドオンの読み込み
         Assembly assembly = Assembly.GetExecutingAssembly();
-        foreach (var file in assembly.GetManifestResourceNames().Where(name => name.StartsWith("Nebula.Resources.Addons.") && name.EndsWith(".zip"))) {
+        foreach (var file in assembly.GetManifestResourceNames().Where(name => name.StartsWith("Nebula.Resources.Addons.") && name.EndsWith(".zip")))
+        {
             try
             {
                 var stream = assembly.GetManifestResourceStream(file);
                 if (stream == null) continue;
                 var zip = new ZipArchive(stream);
 
-                var addon = new NebulaAddon(zip, file);
+                var addon = new NebulaAddon(zip, file) { Priority = -100 };
                 allAddons.Add(addon.Id, addon);
+
+                addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(assembly.GetManifestResourceStream(file)!)).ComputeConstantHash();
             }
             catch
             {
@@ -82,12 +91,23 @@ public class NebulaAddon : IDisposable, INameSpace
             {
                 var addon = new NebulaAddon(zip, file);
                 allAddons.Add(addon.Id, addon);
+
+                addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(File.OpenRead(file))).ComputeConstantHash();
             }
             catch
             {
                 NebulaPlugin.Log.Print(NebulaLog.LogCategory.Addon, "Failed to load addon \"" + Path.GetFileName(file) + "\".");
             }
         }
+
+        allOrderedAddons = new List<NebulaAddon>(allAddons.Values.OrderBy(addon => addon.Priority));
+
+        foreach (var addon in allOrderedAddons)
+        {
+            if (addon.Archive.Entries.Any(entry => entry.FullName.StartsWith(addon.InZipPath + "Scripts/"))) addon.NeedHandshake = true;
+        }
+
+        AddonScriptManager.EvaluateScript("Initializers");
     }
 
     static private string MetaFileName = "addon.meta";
@@ -107,6 +127,7 @@ public class NebulaAddon : IDisposable, INameSpace
             Author = meta.Author;
             Description = meta.Description;
             Version = meta.Version;
+            Priority = meta.Priority;
 
             InZipPath = entry.FullName.Substring(0, entry.FullName.Length - MetaFileName.Length);
             break;
@@ -139,7 +160,7 @@ public class NebulaAddon : IDisposable, INameSpace
     {
         innerAddress = (InZipPath + innerAddress).Replace('/', '.');
         Debug.Log(innerAddress);
-        foreach(var entry in Archive.Entries)
+        foreach (var entry in Archive.Entries)
         {
             if (entry.FullName.Replace('/', '.') == innerAddress) return entry.Open();
         }
@@ -152,6 +173,25 @@ public class NebulaAddon : IDisposable, INameSpace
     public string Description { get; private set; } = "";
     public string Version { get; private set; } = "";
     public string AddonName { get; private set; } = "";
+    public int Priority { get; private set; } = 0;
     public Sprite? Icon { get; private set; } = null;
     public ZipArchive Archive { get; private set; }
+
+    //互換性チェックが必要なアドオン
+    public bool NeedHandshake { get; private set; } = false;
+
+    public int HandshakeHash { get; private set; } = 0;
+
+    static public int AddonHandshakeHash
+    {
+        get
+        {
+            int val = 0;
+            foreach(var addon in allOrderedAddons)
+            {
+                if(addon.NeedHandshake) val ^= addon.HandshakeHash;
+            }
+            return val;
+        }
+    }
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -17,7 +18,7 @@ public class Agent : ConfigurableStandardRole
 
     public override string LocalizedName => "agent";
     public override Color RoleColor => new Color(166f / 255f, 183f / 255f, 144f / 255f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
 
@@ -75,14 +76,13 @@ public class Agent : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                taskButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(KeyAssignmentType.Ability));
+                taskButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
                 taskButton.SetSprite(buttonSprite.GetSprite());
                 taskButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyPlayer.Tasks.IsCompletedCurrentTasks;
                 taskButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 taskButton.OnClick = (button) => {
                     MyPlayer.Tasks.GainExtraTasksAndRecompute(MyRole.NumOfExtraTasksOption, 0, 0, false);
                 };
-                taskButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 taskButton.SetLabel("agent");
 
 

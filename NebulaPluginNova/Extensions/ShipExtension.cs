@@ -43,6 +43,9 @@ public static class ShipExtension
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.Admin].gameObject.transform.parent.GetChild(0).GetChild(3).gameObject;
             GameObject.Destroy(obj.transform.GetChild(1).GetComponent<CircleCollider2D>());
         }
+
+        ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.SkeldO2DurationOption.GetFloat();
+        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.GetFloat();
     }
 
     private static void ModifyMira()
@@ -52,6 +55,9 @@ public static class ShipExtension
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.Admin].gameObject.transform.FindChild("MapTable").gameObject;
             GameObject.Destroy(obj.transform.GetChild(0).gameObject);
         }
+
+        ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.MiraO2DurationOption.GetFloat();
+        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.MiraReactorDurationOption.GetFloat();
     }
 
     private static void ModifyPolus()
@@ -70,6 +76,8 @@ public static class ShipExtension
             GameObject.Destroy(obj.transform.GetChild(1).GetComponent<BoxCollider2D>());
             GameObject.Destroy(obj.transform.GetChild(2).gameObject);
         }
+
+        ShipStatus.Instance.Systems[SystemTypes.Laboratory].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.PolusReactorDurationOption.GetFloat();
     }
 
     private static SpriteLoader medicalWiringSprite = SpriteLoader.FromResource("Nebula.Resources.AirshipWiringM.png",100f);
@@ -165,6 +173,8 @@ public static class ShipExtension
             ShipStatus.Instance.transform.FindChild("Outside").GetChild(0).GetChild(5).gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)SetUpGlowingMush);
             SetUpGlowingMush(ShipStatus.Instance.FastRooms[SystemTypes.Reactor].transform.FindChild("GlowingMushroom").gameObject);
         }
+
+        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.FungleReactorDurationOption.GetFloat();
     }
 
 

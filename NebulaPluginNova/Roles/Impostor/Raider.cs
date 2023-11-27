@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 using static Nebula.Roles.Crewmate.Phosphorus;
 using static UnityEngine.UI.GridLayoutGroup;
 
@@ -20,7 +21,7 @@ public class Raider : ConfigurableStandardRole
 
     public override string LocalizedName => "raider";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -97,7 +98,7 @@ public class Raider : ConfigurableStandardRole
                             if (p.GetTruePosition().Distance(pos) < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
-                                if (p.GetModInfo()?.HasAttribute(AttributeModulator.PlayerAttribute.Invisible) ?? false) continue;
+                                if (p.GetModInfo()?.HasAttribute(Virial.Game.PlayerAttribute.Invisible) ?? false) continue;
 
                                 PlayerControl.LocalPlayer.ModKill(p, false, PlayerState.Beaten, EventDetail.Kill);
                                 killed = true;
@@ -162,7 +163,7 @@ public class Raider : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                equipButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 equipButton.SetSprite(buttonSprite.GetSprite());
                 equipButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 equipButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -175,10 +176,9 @@ public class Raider : ConfigurableStandardRole
 
                     if (MyAxe == null) EquipAxe(); else UnequipAxe();
                 };
-                equipButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 equipButton.SetLabel("equip");
 
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(KeyAssignmentType.Kill);
+                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => MyAxe != null && MyPlayer.MyControl.CanMove && MyAxe.MyRenderer.color.b > 0.5f;
                 killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 killButton.OnClick = (button) =>
@@ -193,8 +193,8 @@ public class Raider : ConfigurableStandardRole
                     equipButton.SetLabel("equip");
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.ThrowCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 killButton.SetLabel("throw");
+                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
                 killButton.SetCanUseByMouseClick();
             }
         }

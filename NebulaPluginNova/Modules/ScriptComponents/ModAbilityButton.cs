@@ -1,18 +1,14 @@
 ﻿using AmongUs.GameOptions;
 using Epic.OnlineServices.Lobby;
 using UnityEngine;
+using Virial.Compat;
+using Virial.Components;
+using Virial.Media;
 
 namespace Nebula.Modules.ScriptComponents;
 
-public class ModAbilityButton : INebulaScriptComponent
+public class ModAbilityButton : INebulaScriptComponent, Virial.Components.AbilityButton
 {
-    public enum LabelType
-    {
-        Standard,
-        Impostor,
-        Utility,
-        Crewmate,
-    }
 
     public ActionButton VanillaButton { get; private set; }
 
@@ -29,6 +25,7 @@ public class ModAbilityButton : INebulaScriptComponent
     public Action<ModAbilityButton>? OnClick { get; set; } = null;
     public Action<ModAbilityButton>? OnSubAction { get; set; } = null;
     public Action<ModAbilityButton>? OnMeeting { get; set; } = null;
+    public Action<ModAbilityButton>? OnStartTaskPhase { get; set; } = null;
     public Predicate<ModAbilityButton>? Availability { get; set; } = null;
     public Predicate<ModAbilityButton>? Visibility { get; set; } = null;
     private VirtualInput? keyCode { get; set; } = null;
@@ -50,6 +47,8 @@ public class ModAbilityButton : INebulaScriptComponent
         gridContent.MarkAsKillButtonContent(isArrangedAsKillButton);
         gridContent.SetPriority(priority);
         NebulaGameManager.Instance?.HudGrid.RegisterContent(gridContent, isLeftSideButton);
+
+        SetLabelType(Virial.Components.AbilityButton.LabelType.Standard);
 
     }
 
@@ -134,12 +133,15 @@ public class ModAbilityButton : INebulaScriptComponent
     }
 
     public bool UseCoolDownSupport { get; set; } = true;
+
     public override void OnGameReenabled() {
         if (UseCoolDownSupport) StartCoolDown();
+        OnStartTaskPhase?.Invoke(this);
     }
 
     public override void OnGameStart() {
         if (UseCoolDownSupport && CoolDownTimer != null) CoolDownTimer!.Start(Mathf.Min(CoolDownTimer!.Max, CoolDownOnGameStart));
+        OnStartTaskPhase?.Invoke(this);
     }
 
     public ModAbilityButton DoClick()
@@ -175,21 +177,21 @@ public class ModAbilityButton : INebulaScriptComponent
         return this;
     }
 
-    public ModAbilityButton SetLabelType(LabelType labelType)
+    public ModAbilityButton SetLabelType(Virial.Components.AbilityButton.LabelType labelType)
     {
         Material? material = null;
         switch (labelType)
         {
-            case LabelType.Standard:
+            case Virial.Components.AbilityButton.LabelType.Standard:
                 material = HudManager.Instance.UseButton.fastUseSettings[ImageNames.UseButton].FontMaterial;
                 break;
-            case LabelType.Utility:
+            case Virial.Components.AbilityButton.LabelType.Utility:
                 material = HudManager.Instance.UseButton.fastUseSettings[ImageNames.PolusAdminButton].FontMaterial;
                 break;
-            case LabelType.Impostor:
+            case Virial.Components.AbilityButton.LabelType.Impostor:
                 material = RoleManager.Instance.GetRole(RoleTypes.Shapeshifter).Ability.FontMaterial;
                 break;
-            case LabelType.Crewmate:
+            case Virial.Components.AbilityButton.LabelType.Crewmate:
                 material = RoleManager.Instance.GetRole(RoleTypes.Engineer).Ability.FontMaterial;
                 break;
 
@@ -212,7 +214,7 @@ public class ModAbilityButton : INebulaScriptComponent
         return this;
     }
 
-    public ModAbilityButton KeyBind(KeyAssignmentType keyCode) => KeyBind(NebulaInput.GetInput(keyCode));
+    public ModAbilityButton KeyBind(Virial.Compat.VirtualKeyInput keyCode) => KeyBind(NebulaInput.GetInput(keyCode));
     public ModAbilityButton KeyBind(VirtualInput keyCode)
     {
         VanillaButton.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((c) => { if (c.name.Equals("HotKeyGuide")) GameObject.Destroy(c); }));
@@ -223,7 +225,7 @@ public class ModAbilityButton : INebulaScriptComponent
     }
 
     private static SpriteLoader aidActionSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindOption.png", 100f);
-    public ModAbilityButton SubKeyBind(KeyAssignmentType keyCode) => SubKeyBind(NebulaInput.GetInput(keyCode));
+    public ModAbilityButton SubKeyBind(Virial.Compat.VirtualKeyInput keyCode) => SubKeyBind(NebulaInput.GetInput(keyCode));
     public ModAbilityButton SubKeyBind(VirtualInput keyCode)
     {
         this.subKeyCode = keyCode;
@@ -243,6 +245,82 @@ public class ModAbilityButton : INebulaScriptComponent
     {
         if(!onlyLook)canUseByMouseClick = true;
         ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true);
+        return this;
+    }
+
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.SetImage(Image image) => SetSprite(image.GetSprite());
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.SetLabel(string translationKey) => SetLabel(translationKey);
+
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.SetCoolDownTimer(GameTimer timer)
+    {
+        CoolDownTimer = timer as Timer;
+        return this;
+    }
+
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.SetEffectTimer(GameTimer timer)
+    {
+        EffectTimer = timer as Timer;
+        return this;
+    }
+
+    GameTimer? Virial.Components.AbilityButton.GetCoolDownTimer() => CoolDownTimer;
+
+    GameTimer? Virial.Components.AbilityButton.GetEffectTimer() => EffectTimer;
+
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.StartCoolDown() => StartCoolDown();
+
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.StartEffect() => ActivateEffect();
+
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.InterruptEffect() => InactivateEffect();
+
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.SetLabelType(Virial.Components.AbilityButton.LabelType type) => SetLabelType(type);
+
+    Predicate<Virial.Components.AbilityButton> Virial.Components.AbilityButton.Availability { set => Availability = value; }
+    Predicate<Virial.Components.AbilityButton> Virial.Components.AbilityButton.Visibility { set => Visibility = value; }
+    Action<Virial.Components.AbilityButton> Virial.Components.AbilityButton.OnUpdate { set => OnUpdate = value; }
+    Action<Virial.Components.AbilityButton> Virial.Components.AbilityButton.OnClick { set => OnClick = value; }
+    Action<Virial.Components.AbilityButton> Virial.Components.AbilityButton.OnSubAction { set => OnSubAction = value; }
+    Action<Virial.Components.AbilityButton> Virial.Components.AbilityButton.OnEffectStart { set => OnEffectStart = value; }
+    Action<Virial.Components.AbilityButton> Virial.Components.AbilityButton.OnEffectEnd { set => OnEffectEnd = value; }
+
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.BindKey(VirtualKeyInput input) => KeyBind(input);
+    Virial.Components.AbilityButton Virial.Components.AbilityButton.BindSubKey(VirtualKeyInput input) => SubKeyBind(input);
+
+    public Virial.Components.AbilityButton SetUpAsAbilityButton(Virial.IBinder binder, float coolDown, Action onClick) => SetUpAsAbilityButton(binder,null,null,coolDown,onClick);
+
+    public Virial.Components.AbilityButton SetUpAsAbilityButton(Virial.IBinder binder, Func<bool>? canUseAbilityNow, Func<bool>? hasAbilityCharge, float coolDown, Action onClick)
+    {
+        KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+        Availability = button => (canUseAbilityNow?.Invoke() ?? true) && PlayerControl.LocalPlayer.CanMove;
+        Visibility = button => (hasAbilityCharge?.Invoke() ?? true) && !PlayerControl.LocalPlayer.Data.IsDead;
+        OnClick = button => { onClick(); CoolDownTimer?.Start(); };
+        CoolDownTimer = binder.Bind(new Timer(coolDown)).SetAsAbilityCoolDown().Start();
+        OnEffectEnd = button => StartCoolDown();
+
+        return this;
+    }
+
+    public Virial.Components.AbilityButton SetUpAsEffectButton(Virial.IBinder binder, float coolDown, float duration, Action onEffectStart, Action? onEffectEnd = null) => SetUpAsEffectButton(binder, null, null, coolDown, duration, onEffectStart, onEffectEnd);
+    public Virial.Components.AbilityButton SetUpAsEffectButton(Virial.IBinder binder, System.Func<bool>? canUseAbilityNow, System.Func<bool>? hasAbilityCharge, float coolDown, float duration, Action onEffectStart, Action? onEffectEnd = null)
+    {
+        KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+        Availability = button => (canUseAbilityNow?.Invoke() ?? true) && PlayerControl.LocalPlayer.CanMove;
+        Visibility = button => (hasAbilityCharge?.Invoke() ?? true)  && !PlayerControl.LocalPlayer.Data.IsDead;
+        OnClick = button => button.ActivateEffect();
+        OnEffectStart = (button) =>
+        {
+            onEffectStart.Invoke();
+        };
+        OnEffectEnd = (button) =>
+        {
+            onEffectEnd?.Invoke();
+            StartCoolDown();
+        };
+        OnMeeting = button => button.StartCoolDown();
+        EffectTimer = binder.Bind(new Timer(duration));
+        CoolDownTimer = binder.Bind(new Timer(coolDown)).SetAsAbilityCoolDown().Start();
+        OnEffectEnd = button => StartCoolDown();
+
         return this;
     }
 }

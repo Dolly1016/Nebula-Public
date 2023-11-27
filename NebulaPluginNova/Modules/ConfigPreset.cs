@@ -1,4 +1,5 @@
-﻿using Iced.Intel;
+﻿using Epic.OnlineServices.Logging;
+using Iced.Intel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -195,14 +196,22 @@ public class ConfigPreset
                         break;
                     case "SET":
                         if (ShouldSkip()) break;
-                        if (args[1].StartsWith("vanilla."))
+
+                        try
                         {
-                            AmongUsUtil.ChangeOptionAs(args[1], table.GetValue(args[2]).AsString());
+                            if (args[1].StartsWith("vanilla."))
+                            {
+                                AmongUsUtil.ChangeOptionAs(args[1], table.GetValue(args[2]).AsString());
+                            }
+                            else
+                            {
+                                var option = NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[1]);
+                                if (option != null) option.ChangeAs(table.GetValue(args[2]).AsString(), false);
+                            }
                         }
-                        else
+                        catch
                         {
-                            var option = NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[1]);
-                            if (option != null) option.ChangeAs(table.GetValue(args[2]).AsString(), false);
+                            NebulaPlugin.Log.Print(NebulaLog.LogCategory.Preset, "Load Failed: " + args[1]);
                         }
                         break;
                     case "SUBSTITUTE":

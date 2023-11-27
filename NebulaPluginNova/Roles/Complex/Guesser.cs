@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Complex;
 
@@ -109,7 +110,7 @@ public class Guesser : ConfigurableStandardRole
 
     public override string LocalizedName => IsEvil ? "evilGuesser" : "niceGuesser";
     public override Color RoleColor => IsEvil ? Palette.ImpostorRed : new Color(1f, 1f, 0f);
-    public override Team Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
+    public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if(MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; yield return GuesserModifier.MyRole; }
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);

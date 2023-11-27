@@ -1,22 +1,23 @@
-﻿using System;
+﻿using Nebula.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 
 namespace Nebula.Modules.ScriptComponents;
 
-public abstract class INebulaBindableComponent
+public abstract class INebulaBindableComponent : IReleasable
 {
     public INebulaBindableComponent()
     {
     }
 
     public virtual void Release() { }
-
 }
 
-public abstract class INebulaScriptComponent : INebulaBindableComponent
+public abstract class INebulaScriptComponent : INebulaBindableComponent, ILifespan
 {
     public INebulaScriptComponent()
     {
@@ -35,6 +36,7 @@ public abstract class INebulaScriptComponent : INebulaBindableComponent
     public bool MarkedRelease { get; private set; } = false;
     public virtual bool UpdateWithMyPlayer { get => false; }
 
+    bool ILifespan.IsDeadObject => MarkedRelease;
 }
 
 public class GameObjectBinding : INebulaScriptComponent
@@ -54,6 +56,7 @@ public class GameObjectBinding : INebulaScriptComponent
     public override void Update() { }
     public override void OnReleased() {
         if (MyObject) GameObject.Destroy(MyObject);
+        MyObject = null;
     }
 }
 
@@ -78,11 +81,11 @@ public class ComponentBinding<T> : INebulaScriptComponent where T : MonoBehaviou
     }
 }
 
-public class ScriptHolder : INebulaBindableComponent
+public class ScriptHolder : INebulaBindableComponent, IBinder
 {
 
-    private List<INebulaBindableComponent> myComponent { get; init; } = new();
-    public T Bind<T>(T component) where T : INebulaBindableComponent
+    private List<IReleasable> myComponent { get; init; } = new();
+    public T Bind<T>(T component) where T : IReleasable
     {
         BindComponent(component);
         return component;
@@ -94,7 +97,7 @@ public class ScriptHolder : INebulaBindableComponent
         return gameObject;
     }
 
-    public void BindComponent(INebulaBindableComponent component) => myComponent.Add(component);
+    public void BindComponent(IReleasable component) => myComponent.Add(component);
 
     protected void ReleaseComponents()
     {

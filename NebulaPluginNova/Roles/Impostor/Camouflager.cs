@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -15,7 +16,7 @@ public class Camouflager : ConfigurableStandardRole
 
     public override string LocalizedName => "camouflager";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -45,7 +46,7 @@ public class Camouflager : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                camouflageButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                camouflageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 camouflageButton.SetSprite(buttonSprite.GetSprite());
                 camouflageButton.Availability = (button) =>MyPlayer.MyControl.CanMove;
                 camouflageButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -61,9 +62,9 @@ public class Camouflager : ConfigurableStandardRole
                     RpcCamouflage.Invoke(new(MyPlayer.PlayerId,false));
                     button.StartCoolDown();
                 };
+                camouflageButton.OnMeeting = button => button.StartCoolDown();
                 camouflageButton.CoolDownTimer = Bind(new Timer(MyRole.CamoCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 camouflageButton.EffectTimer = Bind(new Timer(MyRole.CamoDurationOption.GetFloat()));
-                camouflageButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 camouflageButton.SetLabel("camo");
             }
         }

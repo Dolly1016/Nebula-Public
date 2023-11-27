@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<AssemblyName>NebulaAPI</AssemblyName>
+    <RootNamespace>Virial</RootNamespace>
+    <PlatformTarget>x86</PlatformTarget>
+    <NoWin32Manifest>true</NoWin32Manifest>
+    <PackageId>NebulaAPI</PackageId>
+    <Title>Nebula API</Title>
+    <Version>1.0.0</Version>
+    <Authors>Dolly</Authors>
+    <Description>Among UsのMod "Nebula on the Ship"におけるスクリプトで使用できるAPIです。</Description>
+    <PackageProjectUrl>https://sparkling-dianella-4d1.notion.site/Nebula-on-the-Ship-API-96b2f818267642a182461e1391c2553a</PackageProjectUrl>
+    <NeutralLanguage>ja-JP</NeutralLanguage>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<Reference Include="..\..\Among Us\BepInEx\core\*.dll" />
+	<Reference Include="..\..\Among Us\BepInEx\interop\*.dll" />
+  </ItemGroup>
+	
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+	<Message Text="Second occurrence" />
+	<Copy SourceFiles="bin\Release\net6.0\NebulaAPI.dll" DestinationFolder="$(AmongUsRelease)\" />
+	<Copy SourceFiles="bin\Release\net6.0\NebulaAPI.dll" DestinationFolder="..\NebulaPluginNova\Resources\API" />
+  </Target>
+	
+	
+</Project>

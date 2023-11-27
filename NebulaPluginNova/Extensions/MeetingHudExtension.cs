@@ -1,11 +1,15 @@
 ﻿using Epic.OnlineServices.Presence;
 using Il2CppSystem.Data;
+using Il2CppSystem.Reflection;
+using Nebula.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using Virial.Events.Player;
+using Virial.Text;
 
 namespace Nebula.Extensions;
 
@@ -36,12 +40,14 @@ public static class MeetingHudExtension
             voter.ThumbsDown.enabled = false;
             voter.UnsetVote();
         }
+
+        if (AmongUsClient.Instance.AmHost) meetingHud.CheckForEndVoting();
     }
 
     public static Dictionary<byte, int> WeightMap= new();
     public static Dictionary<byte, int> LastVotedForMap = new();
     public static List<GameObject> LeftContents = new();
-    public static List<(byte exiledId, byte sourceId, TranslatableTag playerState, TranslatableTag eventTag)> ExtraVictims = new();
+    public static List<(byte exiledId, byte sourceId, CommunicableTextTag playerState, CommunicableTextTag eventTag)> ExtraVictims = new();
 
     public static void Reset()
     {
@@ -74,6 +80,7 @@ public static class MeetingHudExtension
             {
                 role.OnDead();
             });
+            EventManager.HandleEvent(new PlayerDeadEvent(player));
 
             PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(player.MyControl));
 

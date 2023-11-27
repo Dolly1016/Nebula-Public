@@ -85,3 +85,12 @@ public static class BlockGameOverPatch
         return false;
     }
 }
+
+[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoCreateOnlineGame))]
+static class CreateOnlineGamePatch
+{
+    static void Prefix(AmongUsClient __instance)
+    {
+        NebulaConfigEntryManager.RestoreAll();
+    }
+}

@@ -63,4 +63,6 @@ public class AirshipData : MapData
         };
 
     protected override Vector2[] MapArea => MapPositions;
+
+    protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.HeliSabotage, SystemTypes.Comms, SystemTypes.Electrical };
 }

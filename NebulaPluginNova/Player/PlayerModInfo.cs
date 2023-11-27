@@ -1,5 +1,7 @@
 ﻿using AmongUs.Data.Player;
 using AmongUs.GameOptions;
+using NAudio.CoreAudioApi;
+using Nebula.Extensions;
 using Nebula.Game;
 using Nebula.Modules;
 using Nebula.Roles;
@@ -7,6 +9,8 @@ using Nebula.Roles.Complex;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using Virial.Game;
+using Virial.Text;
 using static Il2CppSystem.Globalization.CultureInfo;
 using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 using static UnityEngine.GraphicsBuffer;
@@ -29,6 +33,23 @@ public static class PlayerState
     public static TranslatableTag Trapped = new("state.trapped");
     public static TranslatableTag Revived = new("state.revived");
     public static TranslatableTag Pseudocide = new("state.pseudocide");
+    public static TranslatableTag Deranged = new("state.deranged");
+
+    public static void Load()
+    {
+        Virial.Text.PlayerStates.Alive = Alive;
+        Virial.Text.PlayerStates.Dead = Dead;
+        Virial.Text.PlayerStates.Exiled = Exiled;
+        Virial.Text.PlayerStates.Misfired = Misfired;
+        Virial.Text.PlayerStates.Sniped = Sniped;
+        Virial.Text.PlayerStates.Beaten = Beaten;
+        Virial.Text.PlayerStates.Guessed = Guessed;
+        Virial.Text.PlayerStates.Misguessed = Misguessed;
+        Virial.Text.PlayerStates.Embroiled = Embroiled;
+        Virial.Text.PlayerStates.Suicide = Suicide;
+        Virial.Text.PlayerStates.Revived = Revived;
+        Virial.Text.PlayerStates.Pseudocide = Pseudocide;
+    }
 }
 
 public class TimeLimitedModulator
@@ -83,14 +104,6 @@ public class SpeedModulator : TimeLimitedModulator
 
 public class AttributeModulator : TimeLimitedModulator
 {
-    public enum PlayerAttribute
-    {
-        Accel,
-        Decel,
-        Invisible,
-        CurseOfBloody,
-        MaxId
-    }
 
     public PlayerAttribute Attribute;
 
@@ -102,7 +115,7 @@ public class AttributeModulator : TimeLimitedModulator
 
 
 [NebulaRPCHolder]
-public class PlayerModInfo : IRuntimePropertyHolder
+public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
 {
     public class OutfitCandidate
     {
@@ -141,6 +154,7 @@ public class PlayerModInfo : IRuntimePropertyHolder
     private List<OutfitCandidate> outfits = new List<OutfitCandidate>();
     private TMPro.TextMeshPro roleText;
 
+    public FakeSabotageStatus FakeSabotage { get; private set; } = new();
     public Vector2? GoalPos = null;
 
     public PlayerTaskState Tasks { get; set; }
@@ -158,7 +172,7 @@ public class PlayerModInfo : IRuntimePropertyHolder
     //各種収集データ
     public PlayerModInfo? MyKiller = null;
     public float? DeathTimeStamp = null;
-    public TranslatableTag? MyState = PlayerState.Alive;
+    public CommunicableTextTag? MyState = PlayerState.Alive;
 
     public IEnumerable<AssignableInstance> AllAssigned()
     {
@@ -280,27 +294,38 @@ public class PlayerModInfo : IRuntimePropertyHolder
     static public readonly Color FakeTaskColor = new Color(0x86 / 255f, 0x86 / 255f, 0x86 / 255f);
     static public readonly Color CrewTaskColor = new Color(0xFA / 255f, 0xD9 / 255f, 0x34 / 255f);
     public void UpdateRoleText(TMPro.TextMeshPro roleText) {
-        
-        string text = myRole?.DisplayRoleName ?? "Undefined";
 
-        ModifierAction(m => m.DecorateRoleName(ref text));
+        string text = "";
 
-        if (myRole?.HasAnyTasks ?? true)
-            text += (" (" + Tasks.ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((HasCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
-        
+        if ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || AmOwner)
+        {
+            text += myRole?.DisplayRoleName ?? "Undefined";
+
+            ModifierAction(m => m.DecorateRoleName(ref text));
+
+            if (myRole?.HasAnyTasks ?? true)
+                text += (" (" + Tasks.ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((HasCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
+        }
+
+        if((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || (PlayerControl.LocalPlayer.GetModInfo()?.Role.CanSeeOthersFakeSabotage ?? false))
+        {
+            var fakeStr = FakeSabotage.MyFakeTasks.Join(type => Language.Translate("sabotage." + type.ToString().HeadLower()), ", ");
+            if(fakeStr.Length>0)fakeStr = ("("+fakeStr+")").Color(Color.gray);
+            text += fakeStr;
+        }
+
         roleText.text = text;
-
-        roleText.gameObject.SetActive((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || AmOwner);
+        roleText.gameObject.SetActive(true);
     }
 
     private void SetRole(AbstractRole role, int[] arguments)
     {
         myRole?.Inactivate();
 
-        if (role.RoleCategory == Roles.RoleCategory.ImpostorRole)
-            DestroyableSingleton<RoleManager>.Instance.SetRole(MyControl, RoleTypes.Impostor);
+        if (role.RoleCategory == Virial.Assignable.RoleCategory.ImpostorRole)
+            DestroyableSingleton<RoleManager>.Instance.SetRole(MyControl, MyControl.Data.IsDead ? RoleTypes.ImpostorGhost : RoleTypes.Impostor);
         else
-            DestroyableSingleton<RoleManager>.Instance.SetRole(MyControl, RoleTypes.Crewmate);
+            DestroyableSingleton<RoleManager>.Instance.SetRole(MyControl, MyControl.Data.IsDead ? RoleTypes.CrewmateGhost : RoleTypes.Crewmate);
         
         myRole = role.CreateInstance(this, arguments);
 
@@ -319,8 +344,8 @@ public class PlayerModInfo : IRuntimePropertyHolder
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true));
     }
 
-    public void OnSetAttribute(AttributeModulator.PlayerAttribute attribute) {
-        if(attribute == AttributeModulator.PlayerAttribute.CurseOfBloody)
+    public void OnSetAttribute(PlayerAttribute attribute) {
+        if(attribute == PlayerAttribute.CurseOfBloody)
         {
             IEnumerator CoCurseUpdate()
             {
@@ -349,9 +374,9 @@ public class PlayerModInfo : IRuntimePropertyHolder
             NebulaManager.Instance.StartCoroutine(CoCurseUpdate().WrapToIl2Cpp());
         }
     }
-    public void OnUnsetAttribute(AttributeModulator.PlayerAttribute attribute) { }
+    public void OnUnsetAttribute(PlayerAttribute attribute) { }
 
-    public bool HasAttribute(AttributeModulator.PlayerAttribute attribute) => attributeModulators.Any(m => m.Attribute == attribute);
+    public bool HasAttribute(PlayerAttribute attribute) => attributeModulators.Any(m => m.Attribute == attribute);
 
     public NebulaRPCInvoker RpcInvokerSetRole(AbstractRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), true));
     public NebulaRPCInvoker RpcInvokerSetModifier(AbstractModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), false));
@@ -612,13 +637,13 @@ public class PlayerModInfo : IRuntimePropertyHolder
         foreach (var m in attributeModulators) maskAfter |= 1ul << (int)m.Attribute;
 
         ulong mask = maskBefore ^ maskAfter;
-        for(int i = 0; i < (int)AttributeModulator.PlayerAttribute.MaxId; i++)
+        for(int i = 0; i < (int)PlayerAttribute.MaxId; i++)
         {
-            if ((mask & (1ul << i)) != 0) OnUnsetAttribute((AttributeModulator.PlayerAttribute)i);
+            if ((mask & (1ul << i)) != 0) OnUnsetAttribute((PlayerAttribute)i);
         }
     }
 
-    public IEnumerable<(AttributeModulator.PlayerAttribute attribute, float percentage)> GetValidAttributes()
+    public IEnumerable<(PlayerAttribute attribute, float percentage)> GetValidAttributes()
     {
         float accelMax = 0f, accelCurrent = 0f;
         float decelMax = 0f, decelCurrent = 0f;
@@ -637,10 +662,10 @@ public class PlayerModInfo : IRuntimePropertyHolder
                 if (decelCurrent < mod.Timer) decelCurrent = mod.Timer;
             }
         }
-        if (accelMax > 0f && accelCurrent > 0f) yield return (AttributeModulator.PlayerAttribute.Accel, accelCurrent / accelMax);
-        if (decelMax > 0f && decelCurrent > 0f) yield return (AttributeModulator.PlayerAttribute.Decel, decelCurrent / decelMax);
+        if (accelMax > 0f && accelCurrent > 0f) yield return (PlayerAttribute.Accel, accelCurrent / accelMax);
+        if (decelMax > 0f && decelCurrent > 0f) yield return (PlayerAttribute.Decel, decelCurrent / decelMax);
 
-        for (int i = 0; i < (int)AttributeModulator.PlayerAttribute.MaxId; i++)
+        for (int i = 0; i < (int)PlayerAttribute.MaxId; i++)
         {
             float max = 0f, current = 0f;
             foreach(var attribute in attributeModulators.Where(attr => (int)attr.Attribute == i))
@@ -648,13 +673,13 @@ public class PlayerModInfo : IRuntimePropertyHolder
                 if (max < attribute.MaxTime) max = attribute.MaxTime;
                 if (current < attribute.Timer) current = attribute.Timer;
             }
-            if (max > 0f && current > 0f) yield return ((AttributeModulator.PlayerAttribute)i, current / max);
+            if (max > 0f && current > 0f) yield return ((PlayerAttribute)i, current / max);
         }
 
     }
     public void UpdateVisibility(bool update)
     {
-        bool isInvisible = HasAttribute(AttributeModulator.PlayerAttribute.Invisible) || IsDead;
+        bool isInvisible = HasAttribute(PlayerAttribute.Invisible) || IsDead;
         MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(!MyControl.inVent && ((!isInvisible) || AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)));
 
         if (IsDead) return;
@@ -740,6 +765,8 @@ public class PlayerModInfo : IRuntimePropertyHolder
     public void OnMeetingStart()
     {
         foreach (var m in speedModulators) m.OnMeetingStart();
+
+        FakeSabotage.OnMeetingStart();
     }
 
     public void CalcSpeed(ref float speed)
@@ -753,4 +780,32 @@ public class PlayerModInfo : IRuntimePropertyHolder
         CalcSpeed(ref speed);
         return speed;
     }
+
+    void Virial.Game.Player.MurderPlayer(Virial.Game.Player player, CommunicableTextTag playerState, CommunicableTextTag eventDetail, bool showBlink, bool showKillOverlay)
+    {
+        MyControl.ModFlexibleKill(player.VanillaPlayer, showBlink, playerState, eventDetail, showKillOverlay);
+    }
+
+    void Virial.Game.Player.Suicide(CommunicableTextTag playerState, CommunicableTextTag eventDetail, bool showKillOverlay)
+    {
+        MyControl.ModFlexibleKill(MyControl,false,playerState,eventDetail,showKillOverlay);
+    }
+
+    void Virial.Game.Player.GainAttribute(PlayerAttribute attribute, float duration, bool canPassMeeting, int priority, int? duplicateTag)
+    {
+        if (attribute is PlayerAttribute.Accel or PlayerAttribute.Decel) return;
+
+        RpcAttrModulator.Invoke(new(PlayerId, new(attribute, duration, canPassMeeting, priority, duplicateTag ?? 0)));
+    }
+
+    void Virial.Game.Player.GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, int? duplicateTag)
+    {
+        RpcSpeedModulator.Invoke(new(PlayerId, new(speedRate, true, duration, canPassMeeting, priority, duplicateTag ?? 0)));
+        
+    }
+
+    //Virial
+
+    string Virial.Game.Player.Name => DefaultName;
+    PlayerControl Virial.Game.Player.VanillaPlayer => MyControl;
 }

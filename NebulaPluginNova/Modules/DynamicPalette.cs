@@ -61,6 +61,10 @@ public class DynamicPalette
         //カモフラージャーカラー
         Palette.PlayerColors[16] = Palette.PlayerColors[6].Multiply(new Color32(180, 180, 180, 255));
         Palette.ShadowColors[16] = Palette.ShadowColors[6].Multiply(new Color32(180, 180, 180, 255));
+        
+        //プレビューカラーを設定しておく(Dev. Studio用)
+        Palette.PlayerColors[NebulaPlayerTab.PreviewColorId] = DynamicPalette.MyColor.MainColor;
+        Palette.ShadowColors[NebulaPlayerTab.PreviewColorId] = DynamicPalette.MyColor.ShadowColor;
     }
 
     static public IEnumerator CoLoad()

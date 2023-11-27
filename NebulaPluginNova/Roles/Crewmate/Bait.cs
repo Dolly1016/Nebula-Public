@@ -4,6 +4,7 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -15,7 +16,7 @@ public class Bait : ConfigurableStandardRole
 
     public override string LocalizedName => "bait";
     public override Color RoleColor => new Color(0f / 255f, 247f / 255f, 255f / 255f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 

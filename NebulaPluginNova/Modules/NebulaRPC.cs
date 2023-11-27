@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Text;
 using static Nebula.Player.PlayerModInfo;
 
 namespace Nebula.Modules;
@@ -214,15 +215,16 @@ public static class RemoteProcessAsset
                 writer.Write(mod.Priority);
                 writer.Write(mod.DuplicateTag);
             },
-            (reader) => new AttributeModulator((AttributeModulator.PlayerAttribute)reader.ReadInt32(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadInt32(), reader.ReadInt32())
+            (reader) => new AttributeModulator((Virial.Game.PlayerAttribute)reader.ReadInt32(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadInt32(), reader.ReadInt32())
         );
         defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj).Id), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
+        defaultProcessDic[typeof(CommunicableTextTag)] = defaultProcessDic[typeof(TranslatableTag)];
     }
 
     static public (Action<MessageWriter, object>, Func<MessageReader, object>) GetProcess(Type type)
     {
         if(type.IsAssignableTo(typeof(Enum)))
-            return defaultProcessDic[typeof(int)];
+            return defaultProcessDic[Enum.GetUnderlyingType(type)];
         return defaultProcessDic[type];
     }
 

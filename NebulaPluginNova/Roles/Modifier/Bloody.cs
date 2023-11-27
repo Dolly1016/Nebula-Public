@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
@@ -35,7 +36,7 @@ public class Bloody : ConfigurableStandardModifier
 
         public override void OnMurdered(PlayerControl murder)
         {
-            if (AmOwner) PlayerModInfo.RpcAttrModulator.Invoke((murder.PlayerId, new AttributeModulator(AttributeModulator.PlayerAttribute.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1)));
+            if (AmOwner) PlayerModInfo.RpcAttrModulator.Invoke((murder.PlayerId, new AttributeModulator(PlayerAttribute.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1)));
         }
     }
 }

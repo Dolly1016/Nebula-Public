@@ -6,6 +6,8 @@ using UnityEngine.Rendering;
 using Nebula.Behaviour;
 using static MeetingHud;
 using Steamworks;
+using System.Reflection;
+using Nebula.Map;
 
 namespace Nebula.Patches;
 
@@ -34,18 +36,21 @@ public static class MeetingModRpc
             return (states,reader.ReadByte(),reader.ReadBoolean());
         },
         (message, _) => {
+            Debug.Log($"Invoked ModVotingComplete (exiled:{message.exiled})");
             ForcelyVotingComplete(MeetingHud.Instance, message.states, message.exiled, message.tie);
         }
         );
 
     private static void ForcelyVotingComplete(MeetingHud meetingHud, List<VoterState> states, byte exiled, bool tie)
     {
+        //追放者とタイ投票の結果だけは必ず書き換える
+        meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
+        meetingHud.wasTie = tie;
+
         if (meetingHud.state == MeetingHud.VoteStates.Results) return;
 
         meetingHud.state = MeetingHud.VoteStates.Results;
         meetingHud.resultsStartedAt = meetingHud.discussionTimer;
-        meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
-        meetingHud.wasTie = tie;
         meetingHud.SkipVoteButton.gameObject.SetActive(false);
         meetingHud.SkippedVoting.gameObject.SetActive(true);
         AmongUsClient.Instance.DisconnectHandlers.Remove(meetingHud.TryCast<IDisconnectHandler>());
@@ -60,7 +65,6 @@ public static class MeetingModRpc
         {
             MeetingHud.VoterState voterState = states.FirstOrDefault((MeetingHud.VoterState s) => s.VoterId == PlayerControl.LocalPlayer.PlayerId);
             GameData.PlayerInfo playerById = GameData.Instance.GetPlayerById(voterState.VotedForId);
-            DestroyableSingleton<AchievementManager>.Instance.OnMeetingVote(PlayerControl.LocalPlayer.Data, playerById);
         }
         catch 
         {
@@ -73,20 +77,41 @@ public static class MeetingModRpc
         }
         ControllerManager.Instance.CloseOverlayMenu(meetingHud.name);
         ControllerManager.Instance.OpenOverlayMenu(meetingHud.name, null, meetingHud.ProceedButtonUi);
-        DestroyableSingleton<DebugAnalytics>.Instance.Analytics.MeetingEnded(Time.realtimeSinceStartup - TempData.TimeLastMeetingStarted, meetingHud.exiledPlayer);
     }
 }
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 class ReportDeadBodyPatch
 {
-    public static void Postfix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo target)
+    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo target)
     {
+        //会議室が開くか否かのチェック
+        if (AmongUsClient.Instance.IsGameOver || MeetingHud.Instance) return false;
+        
+        //フェイクタスクでない緊急タスクがある場合ボタンは押せない
+        if (target == null &&
+            PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)
+            (task => PlayerTask.TaskIsEmergency(task) && 
+                (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.Any(
+                    type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType == task.TaskType) ?? false))) == null)
+                return false;
+            
+        
+
+        if (__instance.Data.IsDead) return false;
+        MeetingRoomManager.Instance.AssignSelf(__instance, target);
+        if (!AmongUsClient.Instance.AmHost) return false;
+        
+        HudManager.Instance.OpenMeetingRoom(__instance);
+        __instance.RpcStartMeeting(target);
+
         if (target == null)
         {
             NebulaGameManager.Instance!.EmergencyCalls++;
             if (NebulaGameManager.Instance!.EmergencyCalls == GeneralConfigurations.NumOfMeetingsOption) MeetingModRpc.RpcBreakEmergencyButton.Invoke();
         }
+
+        return false;
     }
 }
 
@@ -243,7 +268,7 @@ class VoteAreaVCPatch
                     var script = frame.gameObject.AddComponent<ScriptBehaviour>();
                     script.UpdateHandler += () =>
                     {
-                        if (client.Level > 0.12f)
+                        if (client.Level > 0.09f)
                             alpha = Mathf.Clamp(alpha + Time.deltaTime * 4f, 0f, 1f);
                         else
                             alpha = Mathf.Clamp(alpha - Time.deltaTime * 4f, 0f, 1f);
@@ -443,11 +468,26 @@ static class CheckForEndVotingPatch
 }
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
-class VotingCompletePatch
+class CancelVotingCompleteDirectlyPatch
 {
     public static bool Prefix(MeetingHud __instance)
     {
+        Debug.Log($"Canceled VotingComplete Directly");
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.HandleRpc))]
+class CancelVotingCompleteByRPCPatch
+{
+    public static bool Prefix(MeetingHud __instance, [HarmonyArgument(0)] byte callId)
+    {
+        if (callId == 23)
+        {
+            Debug.Log($"Canceled VotingComplete on HandleRpc");
+            return false;
+        }
+        return true;
     }
 }
 
@@ -475,10 +515,11 @@ class PopulateResultPatch
 
     public static bool Prefix(MeetingHud __instance, [HarmonyArgument(0)]Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<MeetingHud.VoterState> states)
     {
+        Debug.Log("Called PopulateResults");
+
         NebulaGameManager.Instance?.AllAssignableAction(r => r.OnEndVoting());
 
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.MeetingVotingResults);
-
         foreach (var voteArea in __instance.playerStates)
         {
             voteArea.ClearForResults();

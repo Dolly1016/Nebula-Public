@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -17,7 +18,7 @@ public class Doctor : ConfigurableStandardRole
 
     public override string LocalizedName => "doctor";
     public override Color RoleColor => new Color(128f / 255f, 255f / 255f, 221f / 255f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -53,7 +54,7 @@ public class Doctor : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                vitalButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                vitalButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 vitalButton.SetSprite(HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image);
                 vitalButton.Availability = (button) => MyPlayer.MyControl.CanMove && vitalTimer > 0f;
                 vitalButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -100,7 +101,7 @@ public class Doctor : ConfigurableStandardRole
 
                     vitalsMinigame.StartCoroutine(CoUpdate().WrapToIl2Cpp());
                 };
-                vitalButton.SetLabelType(ModAbilityButton.LabelType.Utility);
+                vitalButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Utility);
                 vitalButton.SetLabel("vital");
             }
         }

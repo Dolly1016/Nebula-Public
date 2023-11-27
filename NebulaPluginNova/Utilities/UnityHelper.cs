@@ -140,5 +140,13 @@ public static class UnityHelper
         }
         yield break;
     }
+
+    public static void ForEachAllChildren(this GameObject gameObject,Action<GameObject> todo)
+    {
+        gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => {
+            todo.Invoke(obj);
+            obj.ForEachAllChildren(todo);
+        }));
+    }
 }
 

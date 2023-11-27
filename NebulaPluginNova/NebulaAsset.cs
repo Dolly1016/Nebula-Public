@@ -19,7 +19,8 @@ public enum NebulaAudioClip {
     Trapper2s,
     Trapper3s,
     TrapperKillTrap,
-    Camera
+    Camera,
+    FakeSabo
 }
 
 [NebulaPreLoad]
@@ -53,6 +54,7 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.Trapper3s] = AssetBundle.LoadAsset<AudioClip>("PlaceTrap3s.wav").MarkDontUnload();
         audioMap[NebulaAudioClip.TrapperKillTrap] = AssetBundle.LoadAsset<AudioClip>("PlaceKillTrap.wav").MarkDontUnload();
         audioMap[NebulaAudioClip.Camera] = AssetBundle.LoadAsset<AudioClip>("Camera.mp3").MarkDontUnload();
+        audioMap[NebulaAudioClip.FakeSabo] = AssetBundle.LoadAsset<AudioClip>("FakeSabo.ogg").MarkDontUnload();
 
         PaparazzoShot = AssetBundle.LoadAsset<GameObject>("PhotoObject").MarkDontUnload();
     }

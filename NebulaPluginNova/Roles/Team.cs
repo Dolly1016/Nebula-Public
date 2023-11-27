@@ -3,18 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles;
 
-public enum TeamRevealType
-{
-    OnlyMe,
-    Everyone,
-    Teams,
-}
-
-[NebulaPreLoad]
-public class Team
+public class Team : RoleTeam
 {
     public string TranslationKey { get; private init; }
     public Color Color { get; private init; }

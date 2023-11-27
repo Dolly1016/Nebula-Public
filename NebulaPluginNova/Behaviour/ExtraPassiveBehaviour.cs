@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Il2CppInterop.Runtime.Injection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace Nebula.Behaviour;
 
 public class ExtraPassiveBehaviour : MonoBehaviour
 {
+    static ExtraPassiveBehaviour() => ClassInjector.RegisterTypeInIl2Cpp<ExtraPassiveBehaviour>();
+
     private PassiveUiElement myElement = null!;
 
     public void Start()
@@ -17,7 +20,7 @@ public class ExtraPassiveBehaviour : MonoBehaviour
 
     public void Update()
     {
-        if(AmongUsUtil.CurrentUiElement == myElement)
+        if(PassiveButtonManager.Instance.Buttons.Contains(myElement))
         {
             OnPiled?.Invoke();
 

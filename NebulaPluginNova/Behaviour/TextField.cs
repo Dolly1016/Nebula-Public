@@ -84,6 +84,8 @@ public class TextField : MonoBehaviour
     public Predicate<char>? InputPredicate;
     public Action<string>? UpdateAction;
     public Action<string>? LostFocusAction;
+    //trueを返すとフォーカスを失います。
+    public Predicate<string>? EnterAction;
 
     static private TextField? validField = null;
 
@@ -371,7 +373,10 @@ public class TextField : MonoBehaviour
 
         if(!AllowMultiLine && Input.GetKeyDown(KeyCode.Return))
         {
-            ChangeFocus(null);
+            if (EnterAction?.Invoke(myInput) ?? true)
+            {
+                ChangeFocus(null);
+            }
             return;
         }
 

@@ -73,8 +73,14 @@ public class VCClient : IDisposable
         
         IEnumerator CoSetVolumeEntry()
         {
-            while (player.Puid == null || player.Puid.Length == 0) yield return null;
-            volumeEntry = new FloatDataEntry(player.Puid, VoiceChatManager.VCSaver, 1f);
+            string puid = "";
+            while (puid.Length == 0)
+            {
+                yield return new WaitForSeconds(1f);
+                yield return PropertyRPC.CoGetProperty<string>(player.PlayerId, "myPuid", result => puid = result, null);
+            }
+            Debug.Log($"Gain PUID of {player.name} ({player.PlayerId} : {puid}");
+            volumeEntry = new FloatDataEntry(puid, VoiceChatManager.VCSaver, 1f);
         }
 
         NebulaManager.Instance.StartCoroutine(CoSetVolumeEntry().WrapToIl2Cpp());

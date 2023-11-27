@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.IO.Compression;
 using Cpp2IL.Core.Extensions;
 using UnityEngine;
+using Virial.Media;
 
 namespace Nebula.Utilities;
 
@@ -18,7 +19,7 @@ public interface ITextureLoader
     Texture2D GetTexture();
 }
 
-public interface ISpriteLoader
+public interface ISpriteLoader : Image
 {
     Sprite GetSprite();
 }

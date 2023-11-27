@@ -55,4 +55,6 @@ public class PolusData : MapData
     };
 
     protected override Vector2[] MapArea => MapPositions;
+
+    protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Laboratory, SystemTypes.Comms, SystemTypes.Electrical };
 }

@@ -11,19 +11,6 @@ using System.Threading.Tasks;
 
 namespace Nebula.Utilities;
 
-public enum KeyAssignmentType
-{
-    Kill,
-    Vent,
-    Use,
-    Ability,
-    SecondaryAbility,
-    AidAction,
-    Command,
-    Screenshot,
-    Mute
-}
-
 public interface IKeyAssignment
 {
     static protected List<IKeyAssignment> allKeyAssignments = new();
@@ -114,9 +101,9 @@ public class NebulaInput
         return Input.GetKey(keyCode);
     }
 
-    private static Dictionary<KeyAssignmentType, VirtualInput> modInput = new();
+    private static Dictionary<Virial.Compat.VirtualKeyInput, VirtualInput> modInput = new();
 
-    static public VirtualInput GetInput(KeyAssignmentType type) => modInput[type];
+    static public VirtualInput GetInput(Virial.Compat.VirtualKeyInput type) => modInput[type];
 
     static public void Load()
     {
@@ -131,13 +118,14 @@ public class NebulaInput
             return () => assignment.KeyInput;
         }
 
-        modInput[KeyAssignmentType.Kill] = new(GetVanillaKeyCode(8), GetModKeyCodeGetter("kill", KeyCode.Q));
-        modInput[KeyAssignmentType.Vent] = new(GetVanillaKeyCode(50));
-        modInput[KeyAssignmentType.Ability] = new(GetModKeyCodeGetter("ability", KeyCode.F));
-        modInput[KeyAssignmentType.SecondaryAbility] = new(GetModKeyCodeGetter("secondaryAbility", KeyCode.G));
-        modInput[KeyAssignmentType.AidAction] = new(GetModKeyCodeGetter("aidAction", KeyCode.LeftShift));
-        modInput[KeyAssignmentType.Command] = new(GetModKeyCodeGetter("command", KeyCode.LeftControl));
-        modInput[KeyAssignmentType.Screenshot] = new(GetModKeyCodeGetter("screenshot", KeyCode.P));
-        modInput[KeyAssignmentType.Mute] = new(GetModKeyCodeGetter("mute", KeyCode.M));
+        modInput[Virial.Compat.VirtualKeyInput.Kill] = new(GetVanillaKeyCode(8), GetModKeyCodeGetter("kill", KeyCode.Q));
+        modInput[Virial.Compat.VirtualKeyInput.Vent] = new(GetVanillaKeyCode(50));
+        modInput[Virial.Compat.VirtualKeyInput.Ability] = new(GetModKeyCodeGetter("ability", KeyCode.F));
+        modInput[Virial.Compat.VirtualKeyInput.SecondaryAbility] = new(GetModKeyCodeGetter("secondaryAbility", KeyCode.G));
+        modInput[Virial.Compat.VirtualKeyInput.AidAction] = new(GetModKeyCodeGetter("aidAction", KeyCode.LeftShift));
+        modInput[Virial.Compat.VirtualKeyInput.Command] = new(GetModKeyCodeGetter("command", KeyCode.LeftControl));
+        modInput[Virial.Compat.VirtualKeyInput.Screenshot] = new(GetModKeyCodeGetter("screenshot", KeyCode.P));
+        modInput[Virial.Compat.VirtualKeyInput.Mute] = new(GetModKeyCodeGetter("mute", KeyCode.M));
+        modInput[Virial.Compat.VirtualKeyInput.Help] = new(GetModKeyCodeGetter("help", KeyCode.H));
     }
 }

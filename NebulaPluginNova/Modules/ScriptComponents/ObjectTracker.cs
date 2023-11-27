@@ -14,11 +14,11 @@ public static class ObjectTrackers
     static private Func<DeadBody, Vector2> DefaultDeadBodyPosConverter = (d) => d.TruePosition;
     static private Func<DeadBody, SpriteRenderer> DefaultDeadBodyRendererConverter = (d) => d.bodyRenderers[0];
 
-    public static ObjectTracker<PlayerControl> ForPlayer(float? distance, PlayerControl tracker, Predicate<PlayerControl>? candidatePredicate)
+    public static ObjectTracker<PlayerControl> ForPlayer(float? distance, PlayerControl tracker, Predicate<PlayerControl>? candidatePredicate, bool canTrackInVent = false)
     {
         distance ??= AmongUsUtil.VanillaKillDistance;
         return new ObjectTracker<PlayerControl>(distance.Value, tracker, PlayerSupplier,
-            (p) => (candidatePredicate?.Invoke(p) ?? true) && !(p.GetModInfo()?.HasAttribute(AttributeModulator.PlayerAttribute.Invisible) ?? false) && !p.Data.IsDead,
+            (p) => (canTrackInVent || !p.inVent) && (candidatePredicate?.Invoke(p) ?? true) && !(p.GetModInfo()?.HasAttribute(Virial.Game.PlayerAttribute.Invisible) ?? false) && !p.Data.IsDead,
             DefaultPlayerPosConverter, DefaultPlayerRendererConverter);
     }
 

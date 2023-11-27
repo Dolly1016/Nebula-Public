@@ -18,7 +18,7 @@ public class Draggable : ScriptHolder
         {
             ObjectTracker<DeadBody> deadBodyTracker = Bind(ObjectTrackers.ForDeadBody(null, role.MyPlayer.MyControl, (d) => d.GetHolder() == null));
 
-            var dragButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+            var dragButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
             dragButton.SetSprite(buttonSprite.GetSprite());
             dragButton.Availability = (button) =>
             {
@@ -36,7 +36,6 @@ public class Draggable : ScriptHolder
                     role.MyPlayer.ReleaseDeadBody();
             };
             dragButton.OnUpdate = (button) => dragButton.SetLabel(role.MyPlayer.HoldingDeadBody.HasValue ? "release" : "drag");
-            dragButton.SetLabelType(ModAbilityButton.LabelType.Standard);
             dragButton.SetLabel("drag");
         }
     }

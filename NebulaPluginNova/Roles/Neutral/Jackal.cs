@@ -1,5 +1,6 @@
 ﻿using Nebula.Configuration;
 using Nebula.VoiceChat;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Neutral;
 
@@ -12,9 +13,9 @@ public class Jackal : ConfigurableStandardRole
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return Sidekick.MyRole; }
     public override string LocalizedName => "jackal";
     public override Color RoleColor => new Color(8f / 255f, 190f / 255f, 245f / 255f);
-    public override Team Team => MyTeam;
+    public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Length == 1 ? arguments[0] : player.PlayerId);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Length >= 1 ? arguments[0] : player.PlayerId, arguments.Length >= 2 ? arguments[1] : MyRole.NumOfKillingToCreateSidekickOption.GetMappedInt());
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     public NebulaConfiguration CanCreateSidekickOption = null!;
@@ -37,9 +38,11 @@ public class Jackal : ConfigurableStandardRole
         private ModAbilityButton? sidekickButton = null;
         public override AbstractRole Role => MyRole;
         public int JackalTeamId;
-        public Instance(PlayerModInfo player,int jackalTeamId) : base(player)
+        private int leftKillingToCreateSidekick = MyRole.NumOfKillingToCreateSidekickOption.GetMappedInt();
+        public Instance(PlayerModInfo player,int jackalTeamId, int needToCreateSidekick) : base(player)
         {
             JackalTeamId = jackalTeamId;
+            leftKillingToCreateSidekick = needToCreateSidekick;
         }
 
         static private ISpriteLoader sidekickButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SidekickButton.png", 115f);
@@ -57,26 +60,25 @@ public class Jackal : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                int left = MyRole.NumOfKillingToCreateSidekickOption.CurrentValue;
                 bool hasSidekick = false;
 
-                var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead && !IsMySidekick(p.GetModInfo())));
+                var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead && !IsMySidekick(p.GetModInfo()), Impostor.Impostor.MyRole.CanKillHidingPlayerOption));
 
                 SpriteRenderer? lockSprite = null;
                 TMPro.TextMeshPro? leftText = null;
 
                 if ((JackalTeamId == MyPlayer.PlayerId && MyRole.CanCreateSidekickOption) || Sidekick.MyRole.CanCreateSidekickChainlyOption)
                 {
-                    sidekickButton = Bind(new ModAbilityButton(true)).KeyBind(KeyAssignmentType.Ability);
+                    sidekickButton = Bind(new ModAbilityButton(true)).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
 
-                    if (left > 0)
+                    if (leftKillingToCreateSidekick > 0)
                     {
                         lockSprite = sidekickButton.VanillaButton.AddLockedOverlay();
                         leftText = sidekickButton.ShowUsesIcon(3);
-                        leftText.text = left.ToString();
+                        leftText.text = leftKillingToCreateSidekick.ToString();
                     }
                     sidekickButton.SetSprite(sidekickButtonSprite.GetSprite());
-                    sidekickButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove && left <= 0;
+                    sidekickButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove && leftKillingToCreateSidekick <= 0;
                     sidekickButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && !hasSidekick;
                     sidekickButton.OnClick = (button) =>
                     {
@@ -89,11 +91,10 @@ public class Jackal : ConfigurableStandardRole
                         hasSidekick = true;
                     };
                     sidekickButton.CoolDownTimer = Bind(new Timer(15).Start());
-                    sidekickButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                     sidekickButton.SetLabel("sidekick");
                 }
 
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(KeyAssignmentType.Kill);
+                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 killButton.OnClick = (button) =>
@@ -101,8 +102,8 @@ public class Jackal : ConfigurableStandardRole
                     MyPlayer.MyControl.ModKill(myTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
                     button.StartCoolDown();
 
-                    left--;
-                    if (left == 0)
+                    leftKillingToCreateSidekick--;
+                    if (leftKillingToCreateSidekick == 0)
                     {
                         if (lockSprite) GameObject.Destroy(lockSprite!.gameObject);
                         if (leftText) GameObject.Destroy(leftText!.transform.parent.gameObject);
@@ -111,11 +112,11 @@ public class Jackal : ConfigurableStandardRole
                     }
                     else
                     {
-                        if(leftText)leftText!.text = left.ToString();
+                        if(leftText)leftText!.text = leftKillingToCreateSidekick.ToString();
                     }
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
+                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 
                 if (GeneralConfigurations.JackalRadioOption)
@@ -178,7 +179,7 @@ public class Sidekick : ConfigurableRole
     public override string LocalizedName => "sidekick";
     
     public override Color RoleColor => Jackal.MyRole.RoleColor;
-    public override Team Team => Jackal.MyTeam;
+    public override RoleTeam Team => Jackal.MyTeam;
 
     public override int RoleCount => 0;
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Length == 1 ? arguments[0] : 0);
@@ -228,7 +229,7 @@ public class Sidekick : ConfigurableRole
                 {
                     var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
 
-                    killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(KeyAssignmentType.Kill);
+                    killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                     killButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
                     killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                     killButton.OnClick = (button) =>
@@ -237,7 +238,6 @@ public class Sidekick : ConfigurableRole
                         button.StartCoolDown();
                     };
                     killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
-                    killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                     killButton.SetLabel("kill");
                 }
 

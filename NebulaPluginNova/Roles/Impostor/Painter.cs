@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -14,7 +15,7 @@ public class Painter : ConfigurableStandardRole
 
     public override string LocalizedName => "painter";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -55,7 +56,7 @@ public class Painter : ConfigurableStandardRole
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
 
-                sampleButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 sampleButton.SetSprite(sampleButtonSprite.GetSprite());
                 sampleButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -67,10 +68,9 @@ public class Painter : ConfigurableStandardRole
                     sampleIcon = AmongUsUtil.GetPlayerIcon(sample!, paintButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(MyRole.SampleCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                sampleButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 sampleButton.SetLabel("sample");
                 
-                paintButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.SecondaryAbility);
+                paintButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 paintButton.SetSprite(paintButtonSprite.GetSprite());
                 paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
                 paintButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -92,7 +92,6 @@ public class Painter : ConfigurableStandardRole
                     }
                 };
                 paintButton.CoolDownTimer = Bind(new Timer(MyRole.PaintCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                paintButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 paintButton.SetLabel("paint");
             }
         }

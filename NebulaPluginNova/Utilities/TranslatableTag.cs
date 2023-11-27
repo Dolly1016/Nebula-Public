@@ -4,15 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Text;
 
 namespace Nebula.Utilities;
 
 [NebulaPreLoad(NebulaPreLoad.FinalizerType.LoadOnly)]
-public class TranslatableTag
+public class TranslatableTag : CommunicableTextTag
 {
     static public List<TranslatableTag> AllTag = new();
 
     public string TranslateKey { get; private set; }
+    string CommunicableTextTag.TranslationKey => TranslateKey;
+
     public string Text => Language.Translate(TranslateKey);
     public int Id { get;private set; }
 

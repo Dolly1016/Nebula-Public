@@ -5,11 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils;
+using Epic.OnlineServices.Presence;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppSystem.Reflection;
 using MS.Internal.Xml.XPath;
+using Nebula.Events;
 using Nebula.Modules;
 using Nebula.Utilities;
 using UnityEngine.Networking.PlayerConnection;
+using Virial.Events.Player;
+using Virial.Text;
 
 namespace Nebula.Extensions;
 
@@ -89,9 +94,9 @@ public static class PlayerExtension
        {
            var recordTag = TranslatableTag.ValueOf(message.recordId);
            if (recordTag != null)
-               NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, message.killerId, 1 << message.targetId) { RelatedTag = recordTag });
+               NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, message.killerId == byte.MaxValue ? null : message.killerId, 1 << message.targetId) { RelatedTag = recordTag });
 
-           var killer = Helpers.GetPlayer(message.killerId);
+           var killer = Helpers.GetPlayer(message.killerId == byte.MaxValue ? message.targetId : message.killerId);
            var target = Helpers.GetPlayer(message.targetId);
 
            if (target == null) return;
@@ -137,11 +142,14 @@ public static class PlayerExtension
                targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
                targetInfo.MyKiller = killerInfo;
                targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
-               targetInfo?.AssignableAction(role =>
+               targetInfo.AssignableAction(role =>
                {
                    role.OnMurdered(killer!);
                    role.OnDead();
                });
+
+               if (killerInfo != null) EventManager.HandleEvent(new PlayerMurderEvent(targetInfo, killerInfo));
+               EventManager.HandleEvent(new PlayerDeadEvent(targetInfo));
            }
            if (killerInfo != null) killerInfo.AssignableAction(r => r.OnKillPlayer(target));
 
@@ -173,12 +181,8 @@ public static class PlayerExtension
            }
 
 
-           if (MeetingHud.Instance != null)
-           {
-               MeetingHud.Instance.ResetPlayerState();
-
-               if (AmongUsClient.Instance.AmHost) MeetingHud.Instance.CheckForEndVoting();
-           }
+           if (MeetingHud.Instance != null) MeetingHud.Instance.ResetPlayerState();
+           
 
 
            var targetInfo = target.GetModInfo();
@@ -189,11 +193,15 @@ public static class PlayerExtension
                targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
                targetInfo.MyKiller = killerInfo;
                targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
-               targetInfo?.AssignableAction(role =>
+               targetInfo.AssignableAction(role =>
                {
                    role.OnMurdered(killer!);
                    role.OnDead();
                });
+
+               if (killerInfo != null) EventManager.HandleEvent(new PlayerMurderEvent(targetInfo, killerInfo));
+               EventManager.HandleEvent(new PlayerDeadEvent(targetInfo));
+
            }
            if (killerInfo != null) killerInfo.AssignableAction(r => r.OnKillPlayer(target));
 
@@ -215,12 +223,12 @@ public static class PlayerExtension
        }
        );
 
-    static RemoteProcess<(byte exiledId, byte sourceId, TranslatableTag stateId, TranslatableTag recordId)> RpcMarkAsExtraVictim = new(
+    static RemoteProcess<(byte exiledId, byte sourceId, CommunicableTextTag stateId, CommunicableTextTag recordId)> RpcMarkAsExtraVictim = new(
         "MarkAsExtraVictim",
         (message, _) => MeetingHudExtension.ExtraVictims.Add(message)
         );
 
-    static public void ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, TranslatableTag playerState, TranslatableTag? recordState, bool showOverlay)
+    static public void ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay)
     {
         if (MeetingHud.Instance)
             RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay));
@@ -228,17 +236,22 @@ public static class PlayerExtension
             RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
     }
 
-    static public void ModKill(this PlayerControl killer, PlayerControl target, bool showBlink, TranslatableTag playerState, TranslatableTag? recordState, bool showOverlay = true)
+    static public void ModSuicide(this PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
+    {
+        RpcKill.Invoke((byte.MaxValue, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
+    }
+
+    static public void ModKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
     {
         RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink,showOverlay));
     }
 
-    static public void ModMeetingKill(this PlayerControl killer, PlayerControl target, bool showOverlay, TranslatableTag playerState, TranslatableTag? recordState)
+    static public void ModMeetingKill(this PlayerControl killer, PlayerControl target, bool showOverlay, CommunicableTextTag playerState, CommunicableTextTag? recordState)
     {
         RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay));
     }
 
-    static public void ModMarkAsExtraVictim(this PlayerControl exiled,PlayerControl? source, TranslatableTag playerState,TranslatableTag recordState)
+    static public void ModMarkAsExtraVictim(this PlayerControl exiled,PlayerControl? source, CommunicableTextTag playerState, CommunicableTextTag recordState)
     {
         RpcMarkAsExtraVictim.Invoke((exiled.PlayerId, source?.PlayerId ?? byte.MaxValue, playerState, recordState));
 

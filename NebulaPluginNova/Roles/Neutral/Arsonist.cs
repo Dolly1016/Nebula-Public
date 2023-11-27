@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Neutral;
 
@@ -19,9 +20,9 @@ public class Arsonist : ConfigurableStandardRole
 
     public override string LocalizedName => "arsonist";
     public override Color RoleColor => new Color(229f / 255f, 93f / 255f, 0f / 255f);
-    public override Team Team => MyTeam;
+    public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
 
     private NebulaConfiguration DouseCoolDownOption = null!;
     private NebulaConfiguration DouseDurationOption = null!;
@@ -45,12 +46,22 @@ public class Arsonist : ConfigurableStandardRole
         public override Timer? VentCoolDown => ventCoolDown;
         public override Timer? VentDuration => ventDuration;
         public override bool CanUseVent => canUseVent;
-
-        public Instance(PlayerModInfo player) : base(player)
+        private int initialDousedMask = 0;
+        public Instance(PlayerModInfo player, int[] arguments) : base(player)
         {
+            if (arguments.Length == 1) initialDousedMask = arguments[0];
         }
 
-        public virtual int[]? GetShiftArguments(PlayerModInfo player) => null;
+        public override int[]? GetRoleArgument()
+        {
+            int mask = 0;
+            foreach(var icon in playerIcons.Where(icon => icon.icon.GetAlpha() > 0.8f))
+            {
+                mask |= 1 << icon.playerId;
+            }
+            return new int[] { mask };
+        }
+
 
         private ModAbilityButton? douseButton = null;
         private ModAbilityButton? igniteButton = null;
@@ -107,9 +118,15 @@ public class Arsonist : ConfigurableStandardRole
                     UpdateIcons();
                 }
 
+                if (initialDousedMask != 0)
+                {
+                    foreach (var icon in playerIcons) if (((1 << icon.playerId) & initialDousedMask) != 0) icon.icon.SetAlpha(1f);
+                    CheckIgnitable();
+                }
+
                 var douseTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)));
 
-                douseButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                douseButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 douseButton.SetSprite(douseButtonSprite.GetSprite());
                 douseButton.Availability = (button) => MyPlayer.MyControl.CanMove && douseTracker.CurrentTarget != null;
                 douseButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && !canIgnite;
@@ -132,11 +149,10 @@ public class Arsonist : ConfigurableStandardRole
                 };
                 douseButton.CoolDownTimer = Bind(new Timer(0f, MyRole.DouseCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 douseButton.EffectTimer = Bind(new Timer(0f, MyRole.DouseDurationOption.GetFloat()));
-                douseButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 douseButton.SetLabel("douse");
 
                 bool won = false;
-                igniteButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                igniteButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 igniteButton.SetSprite(IgniteButtonSprite.GetSprite());
                 igniteButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 igniteButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && canIgnite && !won;
@@ -144,7 +160,6 @@ public class Arsonist : ConfigurableStandardRole
                     NebulaGameManager.Instance.RpcInvokeSpecialWin(NebulaGameEnd.ArsonistWin, 1 << MyPlayer.PlayerId);
                     won = true;
                 };
-                igniteButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 igniteButton.SetLabel("ignite");
             }
 

@@ -5,10 +5,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.EventSystems;
+using Virial;
+using Virial.Attributes;
 
 namespace Nebula.Roles;
 
-[NebulaPreLoad(typeof(RemoteProcessBase),typeof(Team))]
+[NebulaPreLoad(typeof(RemoteProcessBase),typeof(Team),typeof(NebulaAddon))]
 public class Roles
 {
     static public IReadOnlyList<AbstractRole> AllRoles { get; private set; } = null!;
@@ -35,6 +38,20 @@ public class Roles
     static public void Register(Team team) {
         allTeams?.Add(team);
     }
+
+    static private void SetNebulaTeams()
+    {
+        //Set Up Team
+        Virial.Assignable.NebulaTeams.CrewmateTeam = Crewmate.Crewmate.MyTeam;
+        Virial.Assignable.NebulaTeams.ImpostorTeam = Impostor.Impostor.MyTeam;
+        Virial.Assignable.NebulaTeams.ArsonistTeam = Neutral.Arsonist.MyTeam;
+        Virial.Assignable.NebulaTeams.ChainShifterTeam = Neutral.ChainShifter.MyTeam;
+        Virial.Assignable.NebulaTeams.JackalTeam = Neutral.Jackal.MyTeam;
+        Virial.Assignable.NebulaTeams.JesterTeam = Neutral.Jester.MyTeam;
+        Virial.Assignable.NebulaTeams.PaparazzoTeam = Neutral.Paparazzo.MyTeam;
+        Virial.Assignable.NebulaTeams.VultureTeam = Neutral.Vulture.MyTeam;
+    }
+
     static public IEnumerator CoLoad()
     {
         Patches.LoadPatch.LoadingText = "Building Roles Database";
@@ -46,7 +63,14 @@ public class Roles
 
         foreach (var type in types)
             System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-        
+
+        SetNebulaTeams();
+
+        AddonScriptManager.ExecuteEvent(CallingEvent.PreRoles);
+        AddonScriptManager.EvaluateScript("Roles");
+        AddonScriptManager.ExecuteEvent(CallingEvent.PostRoles);
+
+        foreach (var addonRole in NebulaImpl.Instance.AllRoles) new AddonRole(addonRole);
 
         allRoles!.Sort((role1, role2) => {
             int diff;

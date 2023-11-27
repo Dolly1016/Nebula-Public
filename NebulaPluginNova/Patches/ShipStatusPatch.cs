@@ -1,4 +1,5 @@
-﻿using Nebula.Configuration;
+﻿using Hazel;
+using Nebula.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,10 @@ public class ShipStatusPatch
 {
     static public void Postfix(ShipStatus __instance)
     {
+        __instance.StartCoroutine(Effects.Sequence(Effects.Wait(0.1f),ManagedEffects.Action(Modify).WrapToIl2Cpp()));
+    }
+
+    static private void Modify() { 
         ShipExtension.PatchModification(AmongUsUtil.CurrentMapId);
         if (GeneralConfigurations.SilentVentOption)
         {
@@ -40,6 +45,19 @@ public class ShipStatusPatch
 
                 vent.gameObject.layer = LayerExpansion.GetDefaultLayer();
             }
+        }
+    }
+}
+
+//ヘリサボタージュ　ここだけ定数なのでパッチングで対応
+[HarmonyPatch(typeof(HeliSabotageSystem), nameof(HeliSabotageSystem.UpdateSystem))]
+class HeliSabotageSystemPatch
+{
+    static void Postfix(HeliSabotageSystem __instance, [HarmonyArgument(1)] MessageReader msgReader)
+    {
+        if((msgReader.GetPrevByte() & 240) == (int)HeliSabotageSystem.Tags.DamageBit)
+        {
+            __instance.Countdown = GeneralConfigurations.AirshipHeliDurationOption.GetFloat();
         }
     }
 }

@@ -5,6 +5,7 @@ using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Reflection.Internal;
 using Il2CppSystem.Text.RegularExpressions;
 using Innersloth.Assets;
+using PowerTools;
 using Rewired.Utils.Platforms.Windows;
 using Sentry;
 using System;
@@ -40,11 +41,12 @@ public class CustomCosmicItem : CustomItemGrouped
     public string Author = "Unknown";
     [JsonSerializableField]
     public string Package = "None";
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public string? TranslationKey = null;
 
     public string UnescapedName => Regex.Unescape(Name).Replace('_', ' ');
     public string UnescapedAuthor => Regex.Unescape(Author).Replace('_', ' ');
+    public static string GetEscapedString(string text) => Regex.Escape(text.Replace(' ', '_'));
 
     public virtual string Category { get => "Undefined"; }
     public bool IsValid { get; private set; } = true;
@@ -62,7 +64,7 @@ public class CustomCosmicItem : CustomItemGrouped
 
     public string SubholderPath => Author.ToByteString() + "/" + Name.ToByteString();
 
-    public bool HasAnimation => AllImage().Any(image => image.Length > 1);
+    public bool HasAnimation => AllImage().Any(image => image.GetLength() > 1);
 
     public async Task Preactivate()
     {
@@ -73,10 +75,10 @@ public class CustomCosmicItem : CustomItemGrouped
             string? hash = null;
             if (stream != null)
             {
-                hash = System.BitConverter.ToString(CustomItemBundle.MD5.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+                hash = CosmicImage.ComputeImageHash(stream);
                 stream.Close();
             }
-            if(hash == null || !(image.Hash?.Equals(hash) ?? true))
+            if(MyBundle.RelatedRemoteAddress != null &&( hash == null || !(image.Hash?.Equals(hash) ?? true)))
             {
                 //更新を要する場合
                 await MyBundle.DownloadAsset(Category, holder, image.Address);
@@ -125,12 +127,14 @@ public class CustomCosmicItem : CustomItemGrouped
 
 public class CosmicImage
 {
-    [JsonSerializableField]
-    public string? Hash = "-";
+    [JsonSerializableField(true)]
+    public string? Hash = null;
     [JsonSerializableField]
     public string Address = "";
-    [JsonSerializableField]
-    public int Length = 1;
+    [JsonSerializableField(true)]
+    public int? Length = null;
+
+    public int GetLength() => Length ?? 1;
 
     public float PixelsPerUnit = 100f;
     public Vector2 Pivot = new Vector2(0.5f, 0.5f);
@@ -141,8 +145,9 @@ public class CosmicImage
 
     public bool TryLoadImage(ITextureLoader textureLoader)
     {
-        this.spriteLoader = new XOnlyDividedSpriteLoader(textureLoader, PixelsPerUnit, Length) { Pivot = Pivot };
-        for (int i = 0; i < Length; i++) if (!spriteLoader.GetSprite(i)) return false;
+        int length = GetLength();
+        this.spriteLoader = new XOnlyDividedSpriteLoader(textureLoader, PixelsPerUnit, length) { Pivot = Pivot };
+        for (int i = 0; i < length; i++) if (!spriteLoader.GetSprite(i)) return false;
         return true;
     }
 
@@ -150,59 +155,64 @@ public class CosmicImage
     {
         return spriteLoader?.GetSprite(index) ?? null;
     }
+
+    public static string ComputeImageHash(Stream stream)
+    {
+        return System.BitConverter.ToString(CustomItemBundle.MD5.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+    }
 }
 
 public class CosmicHat : CustomCosmicItem
 {
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Main;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Flip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Back;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? BackFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Move;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? MoveFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? MoveBack;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? MoveBackFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Climb;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ClimbFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ClimbDown;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ClimbDownFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? EnterVent;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? EnterVentFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ExitVent;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ExitVentFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? EnterVentBack;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? EnterVentBackFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ExitVentBack;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ExitVentBackFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Preview;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public bool Bounce = false;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public bool Adaptive = false;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public bool HideHands = false;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public bool IsSkinny = false;
     [JSFieldAmbiguous]
     public int FPS = 1;
@@ -220,28 +230,29 @@ public class CosmicHat : CustomCosmicItem
 
         if (!IsValid) yield break;
 
-        var viewdata = ScriptableObject.CreateInstance<HatViewData>();
-        HatData hat = ScriptableObject.CreateInstance<HatData>();
-        MyHat = hat;
-        MyView = viewdata;
-        viewdata.MarkDontUnload();
-        hat.MarkDontUnload();
+        MyHat ??= ScriptableObject.CreateInstance<HatData>();
+        MyHat.MarkDontUnload();
+        if (MyView == null)
+        {
+            MyView = ScriptableObject.CreateInstance<HatViewData>();
+            var assetRef = new AssetReference(MyView.Pointer);
+            MyHat.ViewDataRef = assetRef;
+            MyView.MarkDontUnload();
+        }
 
-        hat.name = UnescapedName + "\n<size=1.6>by " + UnescapedAuthor + "</size>";
-        hat.displayOrder = 99;
-        hat.ProductId = "noshat_" + Author + "_" + Name;
-        hat.InFront = true;
-        hat.NoBounce = !Bounce;
-        hat.ChipOffset = new Vector2(0f, 0.2f);
-        hat.Free = true;
-        hat.PreviewCrewmateColor = Adaptive;
-        hat.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0) ?? Back?.GetSprite(0) ?? Move?.GetSprite(0);
+        MyHat.name = UnescapedName + "\n<size=1.6>by " + UnescapedAuthor + "</size>";
+        MyHat.displayOrder = 99;
+        MyHat.ProductId = "noshat_" + Author + "_" + Name;
+        MyHat.InFront = true;
+        MyHat.NoBounce = !Bounce;
+        MyHat.ChipOffset = new Vector2(0f, 0.2f);
+        MyHat.Free = true;
+        MyHat.PreviewCrewmateColor = Adaptive;
+        MyHat.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0) ?? Back?.GetSprite(0) ?? Move?.GetSprite(0);
 
-        if (Adaptive) viewdata.AltShader = MoreCosmic.AdaptiveShader;
+        if (Adaptive) MyView.AltShader = MoreCosmic.AdaptiveShader;
 
-        var assetRef = new AssetReference(viewdata.Pointer);
-        hat.ViewDataRef = assetRef;
-        hat.CreateAddressableAsset();
+        MyHat.CreateAddressableAsset();
 
         if (EnterVent != null) EnterVent.RequirePlayFirstState = true;
         if (EnterVentBack != null) EnterVentBack.RequirePlayFirstState = true;
@@ -256,7 +267,7 @@ public class CosmicHat : CustomCosmicItem
         if (ClimbDown != null) ClimbDown.RequirePlayFirstState = true;
         if (ClimbDownFlip != null) ClimbDownFlip.RequirePlayFirstState = true;
 
-        if(addToMoreCosmic) MoreCosmic.AllHats.Add(hat.ProductId, this);        
+        if(addToMoreCosmic) MoreCosmic.AllHats.Add(MyHat.ProductId, this);        
     }
 
     public override string Category { get => "hats"; }
@@ -264,35 +275,35 @@ public class CosmicHat : CustomCosmicItem
 
 public class CosmicVisor : CustomCosmicItem
 {
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Main;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Flip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Move;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? MoveFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? EnterVent;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? EnterVentFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ExitVent;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ExitVentFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Preview;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Climb;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ClimbFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ClimbDown;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? ClimbDownFlip;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public bool Adaptive = false;
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public bool BehindHat = false;
     [JSFieldAmbiguous]
     public int FPS = 1;
@@ -314,26 +325,27 @@ public class CosmicVisor : CustomCosmicItem
 
         if (!IsValid) yield break;
 
-        var viewdata = ScriptableObject.CreateInstance<VisorViewData>();
-        VisorData visor = ScriptableObject.CreateInstance<VisorData>();
-        MyVisor = visor;
-        MyView = viewdata;
-        viewdata.MarkDontUnload();
-        visor.MarkDontUnload();
+        MyVisor = ScriptableObject.CreateInstance<VisorData>();
+        MyVisor.MarkDontUnload();
+        if (MyView == null)
+        {
+            MyView = ScriptableObject.CreateInstance<VisorViewData>();
+            MyView.MarkDontUnload();
+            var assetRef = new AssetReference(MyView.Pointer);
+            MyVisor.ViewDataRef = assetRef;
+        }
 
-        visor.name = UnescapedName + "\n<size=1.6>by " + UnescapedAuthor + "</size>";
-        visor.displayOrder = 99;
-        visor.ProductId = "nosvisor_" + Author + "_" + Name;
-        visor.ChipOffset = new Vector2(0f, 0.2f);
-        visor.Free = true;
-        visor.PreviewCrewmateColor = Adaptive;
-        visor.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0);
+        MyVisor.name = UnescapedName + "\n<size=1.6>by " + UnescapedAuthor + "</size>";
+        MyVisor.displayOrder = 99;
+        MyVisor.ProductId = "nosvisor_" + Author + "_" + Name;
+        MyVisor.ChipOffset = new Vector2(0f, 0.2f);
+        MyVisor.Free = true;
+        MyVisor.PreviewCrewmateColor = Adaptive;
+        MyVisor.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0);
 
-        if (Adaptive) viewdata.AltShader = MoreCosmic.AdaptiveShader;
+        if (Adaptive) MyView.AltShader = MoreCosmic.AdaptiveShader;
 
-        var assetRef = new AssetReference(viewdata.Pointer);
-        visor.ViewDataRef = assetRef;
-        visor.CreateAddressableAsset();
+        MyVisor.CreateAddressableAsset();
 
         if (EnterVent != null) EnterVent.RequirePlayFirstState = true;
         if (EnterVentFlip != null) EnterVentFlip.RequirePlayFirstState = true;
@@ -344,14 +356,14 @@ public class CosmicVisor : CustomCosmicItem
         if (ClimbDown != null) ClimbDown.RequirePlayFirstState = true;
         if (ClimbDownFlip != null) ClimbDownFlip.RequirePlayFirstState = true;
 
-        if (addToMoreCosmic) MoreCosmic.AllVisors.Add(visor.ProductId, this);
+        if (addToMoreCosmic) MoreCosmic.AllVisors.Add(MyVisor.ProductId, this);
     }
     public override string Category { get => "visors"; }
 }
 
-public class CosmicNamePlate : CustomCosmicItem
+public class CosmicNameplate : CustomCosmicItem
 {
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public CosmicImage? Plate;
 
     public NamePlateData MyPlate { get; private set; } = null!;
@@ -361,28 +373,30 @@ public class CosmicNamePlate : CustomCosmicItem
         yield return base.Activate(addToMoreCosmic);
         if (!IsValid) yield break;
 
-        var viewdata = ScriptableObject.CreateInstance<NamePlateViewData>();
-        NamePlateData nameplate = ScriptableObject.CreateInstance<NamePlateData>();
-        MyPlate = nameplate;
-        MyView = viewdata;
-        viewdata.MarkDontUnload();
-        nameplate.MarkDontUnload();
+        MyPlate = ScriptableObject.CreateInstance<NamePlateData>();
+        MyPlate.MarkDontUnload();
+        if (MyView == null)
+        {
+            MyView = ScriptableObject.CreateInstance<NamePlateViewData>();
+            MyView.MarkDontUnload(); 
+            var assetRef = new AssetReference(MyView.Pointer);
+            MyPlate.ViewDataRef = assetRef;
+        }
 
-        viewdata.Image = Plate?.GetSprite(0);
+        MyView.Image = Plate?.GetSprite(0);
 
-        nameplate.name = UnescapedName + "\n<size=1.6>by " + UnescapedAuthor + "</size>";
-        nameplate.displayOrder = 99;
-        nameplate.ProductId = "nosplate_" + Author + "_" + Name;
-        nameplate.ChipOffset = new Vector2(0f, 0.2f);
-        nameplate.Free = true;
-        nameplate.SpritePreview = Plate?.GetSprite(0);
-        var assetRef = new AssetReference(viewdata.Pointer);
-        nameplate.ViewDataRef = assetRef;
-        nameplate.CreateAddressableAsset();
+        MyPlate.name = UnescapedName + "\n<size=1.6>by " + UnescapedAuthor + "</size>";
+        MyPlate.displayOrder = 99;
+        MyPlate.ProductId = "nosplate_" + Author + "_" + Name;
+        MyPlate.ChipOffset = new Vector2(0f, 0.2f);
+        MyPlate.Free = true;
+        MyPlate.SpritePreview = Plate?.GetSprite(0);
 
-        if (addToMoreCosmic) MoreCosmic.AllNameplates.Add(nameplate.ProductId, this);
+        MyPlate.CreateAddressableAsset();
+
+        if (addToMoreCosmic) MoreCosmic.AllNameplates.Add(MyPlate.ProductId, this);
     }
-    public override string Category { get => "namePlates"; }
+    public override string Category { get => "nameplates"; }
 }
 
 public class CosmicPackage : CustomItemGrouped
@@ -391,7 +405,7 @@ public class CosmicPackage : CustomItemGrouped
     public string Package = "None";
     [JsonSerializableField]
     public string Format = "Custom Package";
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public string? TranslationKey = null;
     [JsonSerializableField]
     public int Priority = 1;
@@ -413,10 +427,10 @@ public class CustomItemBundle
     [JSFieldAmbiguous]
     public List<CosmicVisor> Visors = new();
     [JSFieldAmbiguous]
-    public List<CosmicNamePlate> NamePlates = new();
+    public List<CosmicNameplate> Nameplates = new();
     [JSFieldAmbiguous]
     public List<CosmicPackage> Packages = new();
-
+    
     public string? RelatedLocalAddress { get; set; } = null;
     public string? RelatedRemoteAddress { get; set; } = null;
     public ZipArchive? RelatedZip { get; private set; } = null;
@@ -427,7 +441,7 @@ public class CustomItemBundle
     {
         foreach (var item in Hats) yield return item;
         foreach (var item in Visors) yield return item;
-        foreach (var item in NamePlates) yield return item;
+        foreach (var item in Nameplates) yield return item;
     }
 
     private IEnumerable<CustomItemGrouped> AllContents()
@@ -470,7 +484,7 @@ public class CustomItemBundle
             HatManager.Instance.allVisors = visorList.ToArray();
 
             var nameplateList = HatManager.Instance.allNamePlates.ToList();
-            foreach (var item in NamePlates) if (item.IsValid) nameplateList.Add(item.MyPlate);
+            foreach (var item in Nameplates) if (item.IsValid) nameplateList.Add(item.MyPlate);
             HatManager.Instance.allNamePlates = nameplateList.ToArray();
         }
     }
@@ -524,7 +538,10 @@ public class CustomItemBundle
         if (RelatedZip != null)
             return new UnloadTextureLoader.AsyncLoader(() => RelatedZip.GetEntry(RelatedLocalAddress + category + "/" + address)?.Open());
         else if (RelatedRemoteAddress == null)
-            return new UnloadTextureLoader.AsyncLoader(() => File.OpenRead(RelatedLocalAddress + category + "/" + address), true);
+            return new UnloadTextureLoader.AsyncLoader(() => {
+                var data = File.ReadAllBytes(RelatedLocalAddress + category + "/" + address);
+                return new MemoryStream(data);
+            }, true);
         else
             return new UnloadTextureLoader.AsyncLoader(() => File.OpenRead(RelatedLocalAddress + category + "/" + subholder + "/" + address));
     }
@@ -576,8 +593,21 @@ public static class MoreCosmic
 {
     public static Dictionary<string, CosmicHat> AllHats = new();
     public static Dictionary<string, CosmicVisor> AllVisors = new();
-    public static Dictionary<string, CosmicNamePlate> AllNameplates = new();
+    public static Dictionary<string, CosmicNameplate> AllNameplates = new();
     public static Dictionary<string, CosmicPackage> AllPackages = new();
+
+    private static string DebugProductId = "NEBULA_DEBUG";
+    public static void RegisterDebugHat(CosmicHat hat)
+    {
+        hat.MyHat.ProductId = DebugProductId;
+        AllHats[DebugProductId] = hat;
+    }
+
+    public static void RegisterDebugVisor(CosmicVisor visor)
+    {
+        visor.MyVisor.ProductId = DebugProductId;
+        AllVisors[DebugProductId] = visor;
+    }
 
     private static Material? adaptiveShader = null;
     public static Material AdaptiveShader { get {
@@ -998,7 +1028,7 @@ public enum PlayerAnimState
 public class NebulaCosmeticsLayer : MonoBehaviour
 {
     public CosmeticsLayer MyLayer = null!;
-    public PlayerPhysics? MyPhysics;
+    public PlayerAnimations? MyAnimations = null!;
 
     public HatData? CurrentHat;
     public VisorData? CurrentVisor;
@@ -1024,7 +1054,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     public void Awake()
     {
         MyLayer = gameObject.GetComponent<CosmeticsLayer>();
-        transform.parent?.gameObject.TryGetComponent<PlayerPhysics>(out MyPhysics);
+        MyAnimations =transform.parent.GetComponentInChildren<PlayerAnimations>();
     }
 
     public void LateUpdate()
@@ -1048,23 +1078,19 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             PlayerAnimState animState = PlayerAnimState.Idle;
             bool flip = MyLayer.FlipX;
 
-            if (MyPhysics)
+            if (MyAnimations)
             {
-                var anim = MyPhysics!.Animations;
-                if (anim)
-                {
-                    var current = anim.Animator.m_currAnim;
-                    if (current == anim.group.ClimbUpAnim)
-                        animState = PlayerAnimState.ClimbUp;
-                    else if (current == anim.group.ClimbDownAnim)
-                        animState = PlayerAnimState.ClimbDown;
-                    else if (current == anim.group.RunAnim)
-                        animState = PlayerAnimState.Run;
-                    else if (current == anim.group.EnterVentAnim)
-                        animState = PlayerAnimState.EnterVent;
-                    else if (current == anim.group.ExitVentAnim)
-                        animState = PlayerAnimState.ExitVent;
-                }
+                var current = MyAnimations!.Animator.m_currAnim;
+                if (current == MyAnimations!.group.ClimbUpAnim)
+                    animState = PlayerAnimState.ClimbUp;
+                else if (current == MyAnimations!.group.ClimbDownAnim)
+                    animState = PlayerAnimState.ClimbDown;
+                else if (current == MyAnimations!.group.RunAnim)
+                    animState = PlayerAnimState.Run;
+                else if (current == MyAnimations!.group.EnterVentAnim)
+                    animState = PlayerAnimState.EnterVent;
+                else if (current == MyAnimations!.group.ExitVentAnim)
+                    animState = PlayerAnimState.ExitVent;
             }
 
             void SetImage(ref CosmicImage? current, CosmicImage? normal, CosmicImage? flipped)
@@ -1105,6 +1131,10 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                     case PlayerAnimState.ClimbDown:
                         SetImage(ref frontImage, CurrentModHat.Climb, CurrentModHat.ClimbFlip);
                         SetImage(ref frontImage, CurrentModHat.ClimbDown, CurrentModHat.ClimbDownFlip);
+                        
+                        SpriteAnimNodeSync? spriteAnimNodeSync = MyLayer.hat?.SpriteSyncNode ?? MyLayer.hat?.GetComponent<SpriteAnimNodeSync>();
+                        if (spriteAnimNodeSync) spriteAnimNodeSync!.NodeId = 0;
+                        
                         backImage = null;
                         break;
                     case PlayerAnimState.EnterVent:
@@ -1118,8 +1148,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 }
 
                 //インデックスの調整
-                HatFrontIndex %= frontImage?.Length ?? 1;
-                HatBackIndex %= backImage?.Length ?? 1;
+                HatFrontIndex %= frontImage?.GetLength() ?? 1;
+                HatBackIndex %= backImage?.GetLength() ?? 1;
                 if (lastHatFrontImage != frontImage && (frontImage?.RequirePlayFirstState ?? true)) HatFrontIndex = 0;
                 if (lastHatBackImage != backImage && (backImage?.RequirePlayFirstState ?? true)) HatBackIndex = 0;
                 lastHatFrontImage = frontImage;
@@ -1174,7 +1204,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 }
 
                 //インデックスの調整
-                VisorIndex %= image?.Length ?? 1;
+                VisorIndex %= image?.GetLength() ?? 1;
                 if (lastVisorImage != image && (image?.RequirePlayFirstState ?? true)) VisorIndex = 0;
                 lastVisorImage = image;
 
@@ -1349,7 +1379,7 @@ public static class TabEnablePatch
     {
         public static bool Prefix(NameplatesTab __instance)
         {
-            (NamePlateData, CosmicNamePlate?)[] unlockedNamePlates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(nameplate => MoreCosmic.AllNameplates.TryGetValue(nameplate.ProductId, out var modNameplate) ? (nameplate, modNameplate) : (nameplate, null)).ToArray();
+            (NamePlateData, CosmicNameplate?)[] unlockedNamePlates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(nameplate => MoreCosmic.AllNameplates.TryGetValue(nameplate.ProductId, out var modNameplate) ? (nameplate, modNameplate) : (nameplate, null)).ToArray();
 
             SetUpTab(__instance, HatManager.Instance.allNamePlates.First(v => v.IsEmpty), unlockedNamePlates,
                 () => HatManager.Instance.GetNamePlateById(DataManager.Player.Customization.NamePlate),

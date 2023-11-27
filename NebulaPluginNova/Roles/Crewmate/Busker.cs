@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -16,7 +17,7 @@ public class Busker : ConfigurableStandardRole
 
     public override string LocalizedName => "busker";
     public override Color RoleColor => new Color(255f / 255f, 172f / 255f, 117f / 255f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -46,8 +47,8 @@ public class Busker : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                var pseudocideButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(KeyAssignmentType.Ability));
-                var reviveButon = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(KeyAssignmentType.Ability));
+                var pseudocideButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
+                var reviveButon = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
 
                 pseudocideButton.SetSprite(pseudocideButtonSprite.GetSprite());
                 pseudocideButton.Availability = (button) => MyPlayer.MyControl.CanMove;
@@ -59,7 +60,6 @@ public class Busker : ConfigurableStandardRole
                         reviveButon.ActivateEffect();
                     });
                 };
-                pseudocideButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 pseudocideButton.SetLabel("pseudocide");
 
                 reviveButon.SetSprite(reviveButtonSprite.GetSprite());
@@ -78,7 +78,6 @@ public class Busker : ConfigurableStandardRole
                 {
                     if (MyPlayer.IsDead) NebulaGameManager.Instance!.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Accident, null, 1 << MyPlayer.PlayerId);
                 };
-                reviveButon.SetLabelType(ModAbilityButton.LabelType.Standard);
                 reviveButon.SetLabel("revive");
 
             }

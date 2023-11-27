@@ -4,8 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
+
+public static class ExtraExileRoleSystem
+{
+    public static void MarkExtraVictim(PlayerModInfo player, bool includeImpostors = true, bool expandTargetWhenNobodyCanBeMarked = false)
+    {
+        var voters = MeetingHudExtension.LastVotedForMap
+                .Where(entry => entry.Value == player.PlayerId && entry.Key != player.PlayerId)
+                .Select(entry => NebulaGameManager.Instance!.GetModPlayerInfo(entry.Key))
+                .Where(p => !p!.IsDead && (includeImpostors || p.Role.Role.RoleCategory != RoleCategory.ImpostorRole))
+                .ToArray();
+        
+        if(voters.Length == 0 && expandTargetWhenNobodyCanBeMarked)
+        {
+            voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && (includeImpostors || p.Role.Role.RoleCategory != RoleCategory.ImpostorRole)).ToArray();
+        }
+        if (voters.Length == 0) return;
+        voters[System.Random.Shared.Next(voters.Length)]!.MyControl.ModMarkAsExtraVictim(player.MyControl, PlayerState.Embroiled, EventDetail.Embroil);
+    }
+}
 
 public class Provocateur : ConfigurableStandardRole
 {
@@ -15,7 +35,7 @@ public class Provocateur : ConfigurableStandardRole
 
     public override string LocalizedName => "provocateur";
     public override Color RoleColor => new Color(112f / 255f, 255f / 255f, 89f / 255f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -44,7 +64,7 @@ public class Provocateur : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                embroilButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                embroilButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 embroilButton.SetSprite(buttonSprite.GetSprite());
                 embroilButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 embroilButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -58,7 +78,6 @@ public class Provocateur : ConfigurableStandardRole
                 };
                 embroilButton.CoolDownTimer = Bind(new Timer(0f, MyRole.EmbroilCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 embroilButton.EffectTimer = Bind(new Timer(0f, MyRole.EmbroilDurationOption.GetFloat()));
-                embroilButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 embroilButton.SetLabel("embroil");
             }
         }
@@ -77,14 +96,7 @@ public class Provocateur : ConfigurableStandardRole
         {
             if (!AmOwner) return;
 
-            var voters = MeetingHudExtension.LastVotedForMap
-                .Where(entry => entry.Value == MyPlayer.PlayerId && entry.Key != MyPlayer.PlayerId)
-                .Select(entry => NebulaGameManager.Instance!.GetModPlayerInfo(entry.Key))
-                .Where(p => !p!.IsDead)
-                .ToArray();
-
-            if (voters.Length == 0) return;
-            voters[System.Random.Shared.Next(voters.Length)]!.MyControl.ModMarkAsExtraVictim(MyPlayer.MyControl, PlayerState.Embroiled, EventDetail.Embroil);
+            ExtraExileRoleSystem.MarkExtraVictim(MyPlayer);
         }
     }
 }

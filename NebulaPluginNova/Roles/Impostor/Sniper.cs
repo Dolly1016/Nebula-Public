@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -16,7 +17,7 @@ public class Sniper : ConfigurableStandardRole
 
     public override string LocalizedName => "sniper";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -26,6 +27,7 @@ public class Sniper : ConfigurableStandardRole
     private NebulaConfiguration ShotNoticeRangeOption = null!;
     private NebulaConfiguration StoreRifleOnFireOption = null!;
     private NebulaConfiguration CanSeeRifleInShadowOption = null!;
+    private NebulaConfiguration CanKillHidingPlayerOption = null!;
 
     protected override void LoadOptions()
     {
@@ -37,6 +39,7 @@ public class Sniper : ConfigurableStandardRole
         ShotNoticeRangeOption = new(RoleConfig, "shotNoticeRange", null, 2.5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.OddsDecorator };
         StoreRifleOnFireOption = new(RoleConfig, "storeRifleOnFire", null, true, true);
         CanSeeRifleInShadowOption = new(RoleConfig, "canSeeRifleInShadow", null, false, false);
+        CanKillHidingPlayerOption = new(RoleConfig, "canKillHidingPlayer", null, false, false);
     }
 
     [NebulaRPCHolder]
@@ -77,12 +80,12 @@ public class Sniper : ConfigurableStandardRole
 
             foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
-                if (p.IsDead || p.AmOwner) continue;
+                if (p.IsDead || p.AmOwner || ((!MyRole.CanKillHidingPlayerOption) && p.MyControl.inVent)) continue;
 
                 //インポスターは無視
                 if (p.Role.Role.RoleCategory == RoleCategory.ImpostorRole) continue;
                 //不可視なプレイヤーは無視
-                if (p.HasAttribute(AttributeModulator.PlayerAttribute.Invisible)) continue;
+                if (p.HasAttribute(Virial.Game.PlayerAttribute.Invisible)) continue;
 
                 var pos = p.MyControl.GetTruePosition();
                 Vector2 diff = pos - (Vector2)Renderer.transform.position;
@@ -121,7 +124,7 @@ public class Sniper : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                equipButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 equipButton.SetSprite(buttonSprite.GetSprite());
                 equipButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 equipButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -150,10 +153,9 @@ public class Sniper : ConfigurableStandardRole
                         Bind(new GameObjectBinding(circle.gameObject));
                     }
                 };
-                equipButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 equipButton.SetLabel("equip");
 
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(KeyAssignmentType.Kill);
+                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => MyRifle != null && MyPlayer.MyControl.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 killButton.OnClick = (button) =>
@@ -176,7 +178,7 @@ public class Sniper : ConfigurableStandardRole
 
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.SnipeCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(ModAbilityButton.LabelType.Standard);
+                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
                 killButton.SetLabel("snipe");
                 killButton.SetCanUseByMouseClick();
             }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -16,10 +17,19 @@ public class Impostor : ConfigurableStandardRole
 
     public override string LocalizedName => "impostor";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
     public override bool IsDefaultRole => true;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+
+    public NebulaConfiguration CanKillHidingPlayerOption = null!;
+
+    protected override void LoadOptions()
+    {
+        base.LoadOptions();
+
+        CanKillHidingPlayerOption = new(RoleConfig, "canKillHidingPlayer", null, false, false);
+    }
 
     public class Instance : RoleInstance
     {

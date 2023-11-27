@@ -35,7 +35,6 @@ public class MetaRole : AbstractModifier
                 roleButton.OnClick = (button) => {
                     OpenRoleWindow();  
                 };
-                roleButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 roleButton.SetLabel("operate");
             }
         }

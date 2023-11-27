@@ -44,4 +44,6 @@ public class SkeldData : MapData
         new(2.6f, -7.1f), new(6.3f, -9.5f)
     };
     protected override Vector2[] MapArea => MapPositions;
+
+    protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };
 }

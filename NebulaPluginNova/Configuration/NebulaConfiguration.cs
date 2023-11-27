@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using Virial.Assignable;
 using static Il2CppSystem.Linq.Expressions.Interpreter.NullableMethodCallInstruction;
 
 namespace Nebula.Configuration;
@@ -103,9 +104,14 @@ public class NebulaConfigEntryManager
         RpcShareAll.Invoke(0);
     }
 
-    static public void RestoreAllAndShare()
+    static public void RestoreAll()
     {
         foreach (var cfg in AllConfig) cfg.LoadFromSaveData();
+    }
+
+    static public void RestoreAllAndShare()
+    {
+        RestoreAll();
         ShareAll();
     }
 
@@ -415,7 +421,7 @@ public class NebulaConfiguration
     public Func<int, object?>? Mapper { get; set; } = null;
     public Func<bool>? Predicate { get; set; } = null;
     public Func<IMetaContext?>? Editor { get; set; } = null;
-    public Func<string>? Shower { get; set; }
+    public Func<string?>? Shower { get; set; }
     public bool LoopAtBothEnds { get; set; } = true;
     public int MaxValue { get; private init; }
     private int InvalidatedValue { get; init; }
@@ -512,6 +518,9 @@ public class NebulaConfiguration
     static public Func<object?, string> SecDecorator = (mapped) => mapped + Language.Translate("options.sec");
     static public Func<IMetaContext?> EmptyEditor = () => null;
 
+    public string DefaultShowerString => Title.Text + " : " + ToDisplayString();
+    
+
     public NebulaConfiguration(ConfigurationHolder? holder, Func<IMetaContext?> editor)
     {
         MyHolder = holder;
@@ -544,7 +553,7 @@ public class NebulaConfiguration
 
         Title = title ?? new TranslateTextComponent(entryId);
 
-        Shower = () => Title.Text + " : " + ToDisplayString();
+        Shower = () => DefaultShowerString;
 
         AllConfigurations.Add(this);
     }

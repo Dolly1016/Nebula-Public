@@ -1,6 +1,7 @@
 ﻿using Innersloth.IO;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,7 +49,7 @@ public class StringDataEntry : DataEntry<string>
 
 public class FloatDataEntry : DataEntry<float>
 {
-    public override float Parse(string str) { return float.Parse(str); }
+    public override float Parse(string str) { return float.Parse(str, CultureInfo.InvariantCulture); }
     public FloatDataEntry(string name, DataSaver saver, float defaultValue) : base(name, saver, defaultValue) { }
 }
 

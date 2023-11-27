@@ -1,4 +1,7 @@
-﻿using Nebula.Behaviour;
+﻿using BepInEx.Unity.IL2CPP.UnityEngine;
+using Mono.CSharp;
+using Nebula.Behaviour;
+using Nebula.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +10,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Nebula.Modules;
+
+public class MyInteraction : InteractiveBase
+{
+}
 
 public class CommandConsole
 {
@@ -22,6 +29,20 @@ public class CommandConsole
 
         myInput = UnityHelper.CreateObject<TextField>("InputField", consoleObject.transform, new Vector3(0, 0, -1f));
         myInput.SetSize(size,1.6f);
+
+        //おためしでMono.CSharpを使えるようにしています。
+
+        CSScripting script = new();
+
+        myInput.EnterAction = (text) =>
+        {
+            script.PopLogText();
+            if (!script.Evaluate(text, out var error)) Debug.Log(error);
+            Debug.Log(script.PopLogText());
+
+            myInput.SetText("");
+            return false;
+        };
 
         var backGround = UnityHelper.CreateObject<SpriteRenderer>("Background", myInput.transform, new Vector3(0, 0, 1f));
         backGround.sprite = NebulaAsset.SharpWindowBackgroundSprite.GetSprite();

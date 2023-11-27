@@ -1,5 +1,6 @@
 ﻿using Nebula.Configuration;
 using UnityEngine.AI;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -11,7 +12,7 @@ public class Necromancer : ConfigurableStandardRole
 
     public override string LocalizedName => "necromancer";
     public override Color RoleColor => new Color(108f / 255f, 50f / 255f, 160f / 255f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -137,7 +138,7 @@ public class Necromancer : ConfigurableStandardRole
                     message.text = Language.Translate("role.necromancer.phantomMessage").Replace("%ROOM%", AmongUsUtil.ToDisplayString(currentTargetRoom.Value));
                 };
 
-                reviveButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.SecondaryAbility);
+                reviveButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 reviveButton.SetSprite(buttonSprite.GetSprite());
                 reviveButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyPlayer.HoldingDeadBody.HasValue && canReviveHere();
                 reviveButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -160,7 +161,6 @@ public class Necromancer : ConfigurableStandardRole
                 };
                 reviveButton.CoolDownTimer = Bind(new Timer(MyRole.ReviveCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 reviveButton.EffectTimer = Bind(new Timer(MyRole.ReviveDurationOption.GetFloat()));
-                reviveButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 reviveButton.SetLabel("revive");
             }
         }

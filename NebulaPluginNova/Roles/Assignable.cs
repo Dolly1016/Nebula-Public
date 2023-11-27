@@ -75,4 +75,7 @@ public abstract class AssignableInstance : ScriptHolder
     public virtual void OnMapInstantiated() { }
 
     public virtual string? GetExtraTaskText() => null;
+
+    public virtual bool CanFixLight { get => true; }
+    public virtual bool CanFixComm { get => true; }
 }

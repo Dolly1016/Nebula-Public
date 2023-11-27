@@ -138,4 +138,9 @@ public static class Helpers
         }
         return result;
     }
+
+    static public T Random<T>(this T[] array)
+    {
+        return array[System.Random.Shared.Next(array.Length)];
+    }
 }

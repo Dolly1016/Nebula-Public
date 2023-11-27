@@ -2,6 +2,7 @@
 using Assets.CoreScripts;
 using Il2CppSystem.Net.NetworkInformation;
 using Nebula.Configuration;
+using Nebula.Events;
 using Nebula.Modules;
 using Nebula.Player;
 using Nebula.Roles;
@@ -12,6 +13,7 @@ using UnityEngine;
 using UnityEngine.Networking.Types;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
+using Virial.Events.Meeting;
 using static Rewired.UI.ControlMapper.ControlMapper;
 using static UnityEngine.GraphicsBuffer;
 
@@ -145,6 +147,7 @@ public class NebulaGameManager : IRuntimePropertyHolder
     public ConsoleRestriction ConsoleRestriction { get; private set; } = new();
     public AttributeShower AttributeShower { get; private set; } = new();
     public RPCScheduler Scheduler { get; private set; } = new();
+    public FakeSabotageStatus? LocalFakeSabotage => PlayerControl.LocalPlayer.GetModInfo()?.FakeSabotage;
 
     //自身のキルボタン用トラッカー
     private ObjectTracker<PlayerControl> KillButtonTracker = null!;
@@ -170,7 +173,6 @@ public class NebulaGameManager : IRuntimePropertyHolder
         vcConnectButton.SetSprite(vcConnectSprite.GetSprite());
         vcConnectButton.OnClick = (_) => VoiceChatManager!.Rejoin();
         vcConnectButton.SetLabel("rejoin");
-        vcConnectButton.SetLabelType(ModAbilityButton.LabelType.Standard);
     }
 
 
@@ -252,6 +254,8 @@ public class NebulaGameManager : IRuntimePropertyHolder
         AllAssignableAction(r=>r.OnMeetingStart());
 
         Scheduler.Execute(RPCScheduler.RPCTrigger.PreMeeting);
+
+        EventManager.HandleEvent(new MeetingStartEvent());
     }
 
     public void OnMeetingEnd(PlayerControl? player)
@@ -325,7 +329,7 @@ public class NebulaGameManager : IRuntimePropertyHolder
 
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
         {
-            KillButtonTracker ??= ObjectTrackers.ForPlayer(null, PlayerControl.LocalPlayer, (p) => p.PlayerId != PlayerControl.LocalPlayer.PlayerId && !p.Data.IsDead && !p.Data.Role.IsImpostor);
+            KillButtonTracker ??= ObjectTrackers.ForPlayer(null, PlayerControl.LocalPlayer, (p) => p.PlayerId != PlayerControl.LocalPlayer.PlayerId && !p.Data.IsDead && !p.Data.Role.IsImpostor, Roles.Impostor.Impostor.MyRole.CanKillHidingPlayerOption);
             KillButtonTracker.Update();
             HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget);
         }

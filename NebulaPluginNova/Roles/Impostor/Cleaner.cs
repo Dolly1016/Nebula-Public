@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
 using static Rewired.UnknownControllerHat;
 
 namespace Nebula.Roles.Impostor;
@@ -16,7 +17,7 @@ public class Cleaner : ConfigurableStandardRole
 
     public override string LocalizedName => "cleaner";
     public override Color RoleColor => Palette.ImpostorRed;
-    public override Team Team => Impostor.MyTeam;
+    public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -56,7 +57,7 @@ public class Cleaner : ConfigurableStandardRole
             {
                 var cleanTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.MyControl, (d) => true));
 
-                cleanButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                cleanButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 cleanButton.SetSprite(buttonSprite.GetSprite());
                 cleanButton.Availability = (button) => cleanTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
                 cleanButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -66,7 +67,6 @@ public class Cleaner : ConfigurableStandardRole
                     cleanButton.StartCoolDown();
                 };
                 cleanButton.CoolDownTimer = Bind(new Timer(MyRole.CleanCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                cleanButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 cleanButton.SetLabel("clean");
             }
         }

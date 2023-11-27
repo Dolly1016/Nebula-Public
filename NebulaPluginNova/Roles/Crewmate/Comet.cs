@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -15,7 +17,7 @@ public class Comet : ConfigurableStandardRole
 
     public override string LocalizedName => "comet";
     public override Color RoleColor => new Color(121f / 255f, 175f / 255f, 206f / 255f);
-    public override Team Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
@@ -45,7 +47,7 @@ public class Comet : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                boostButton = Bind(new ModAbilityButton()).KeyBind(KeyAssignmentType.Ability);
+                boostButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 boostButton.SetSprite(buttonSprite.GetSprite());
                 boostButton.Availability = (button) => MyPlayer.MyControl.CanMove;
                 boostButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -54,13 +56,12 @@ public class Comet : ConfigurableStandardRole
                     using (RPCRouter.CreateSection("CometBlaze"))
                     {
                         PlayerModInfo.RpcSpeedModulator.Invoke(new(MyPlayer.PlayerId, new(MyRole.BlazeSpeedOption.GetFloat(), true, MyRole.BlazeDurationOption.GetFloat(), false, 100)));
-                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new(AttributeModulator.PlayerAttribute.Invisible, MyRole.BlazeDurationOption.GetFloat(), false, 100)));
+                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new(PlayerAttribute.Invisible, MyRole.BlazeDurationOption.GetFloat(), false, 100)));
                     }
                 };
                 boostButton.OnEffectEnd = (button) => boostButton.StartCoolDown();
                 boostButton.CoolDownTimer = Bind(new Timer(0f, MyRole.BlazeCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 boostButton.EffectTimer = Bind(new Timer(0f, MyRole.BlazeDurationOption.GetFloat()));
-                boostButton.SetLabelType(ModAbilityButton.LabelType.Standard);
                 boostButton.SetLabel("blaze");
             }
         }

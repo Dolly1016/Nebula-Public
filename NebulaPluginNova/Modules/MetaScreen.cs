@@ -1,5 +1,6 @@
 ﻿using Iced.Intel;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppSystem.Net.NetworkInformation;
 using Nebula.Behaviour;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -64,8 +65,11 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
 {
     List<IMetaContext> contents = new();
 
+    public MetaContext(params IMetaContext?[] contents) { foreach (var c in contents) Append(c); }
+
     public int Count => contents.Count;
     public AlignmentOption Alignment => AlignmentOption.Center;
+    public float? MaxWidth = null;
     public float Generate(GameObject screen, Vector2 cursor, Vector2 size,out (float,float) width)
     {
         if (contents.Count == 0)
@@ -73,6 +77,8 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
             width = (cursor.x,cursor.x);
             return 0f;
         }
+
+        size.x = size.x > 0f ? Mathf.Min(MaxWidth ?? size.x, size.x) : (MaxWidth ?? size.x);
 
         float widthMin = size.x / 2;
         float widthMax = cursor.x;
@@ -108,7 +114,7 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
         float heightSum = 0;
         foreach (var c in contents)
         {
-            float height = c.Generate(subscreen, new Vector2(0, -heightSum), new Vector2(0, 0), out var innerWidth);
+            float height = c.Generate(subscreen, new Vector2(0, -heightSum), new Vector2(MaxWidth ?? 0f, 0), out var innerWidth);
             widthMin = Math.Min(widthMin, innerWidth.min);
             widthMax = Math.Max(widthMax, innerWidth.max);
             heightSum += height;
@@ -215,7 +221,7 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
             return mySize.y + 0.1f;
         }
 
-        public static Image AsMapImage<T>(byte mapId,float width,IEnumerable<T> collection,Func<T,(IMetaParallelPlacable context,Vector2 pos)> converter)
+        public static Image AsMapImage(byte mapId,float width,IEnumerable<(IMetaParallelPlacable context, Vector2 pos)> contents)
         {
             return new Image(NebulaAsset.GetMapSprite(mapId, 0xFFFFFFF))
             {
@@ -227,13 +233,13 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
 
                     var canvas = UnityHelper.CreateObject("OnMapContent", renderer.transform, new Vector3(0, 0, -1f));
 
-                    var center = (Vector2)VanillaAsset.MapAsset[mapId].MapPrefab.transform.GetChild(5).localPosition;
-                    var scale = VanillaAsset.MapAsset[mapId].MapScale;
+                    var posCenter = (Vector2)VanillaAsset.MapAsset[mapId].MapPrefab.transform.GetChild(5).localPosition;
+                    var posScale = VanillaAsset.MapAsset[mapId].MapScale;
+                    Vector2 GetMapPos(Vector2 pos) => (Vector2)(pos / posScale) + posCenter;
 
-                    foreach (var c in collection)
+                    foreach (var c in contents)
                     {
-                        (var context,var pos) = converter.Invoke(c);
-                        context.Generate(canvas, (Vector2)(pos / scale) + center,out _);
+                        c.context.Generate(canvas, GetMapPos(c.pos), out _);
                     }
                 }
             };
@@ -425,6 +431,20 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
 
             return TextAttribute.Size.y + TextMargin;
         }
+
+        static public MetaContext GetTwoWayButton(Action<bool> buttonAction)
+        {
+            MetaContext context = new MetaContext();
+
+            for (int i = 0; i < 2; i++)
+            {
+                int copied = i;
+                context.Append(new Button(()=>buttonAction.Invoke(copied == 0), new(TextAttribute.BoldAttr) { Size = new(0.18f, 0.08f) }) { RawText = copied == 0 ? "▲" : "▼"});
+            }
+
+            
+            return context;
+        }
     }
 
     public class StateButton : IMetaContext, IMetaParallelPlacable
@@ -433,8 +453,8 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
         public Action<bool>? OnChanged { get; set; }
         public Reference<bool>? StateRef { get; set; }
         public bool WithMaskMaterial { get; set; } = false;
-
-        public StateButton(bool state) {}
+        public bool FirstState = false;
+        public StateButton() { }
 
         private void Generate(GameObject obj)
         {
@@ -493,15 +513,15 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
             return 0.25f;
         }
 
-        public static CombinedContext CheckBox(string translateKey,float width,bool isBold,bool state,Action<bool> onChanged, bool maskMaterial = false)
+        public static CombinedContext CheckBox(string translateKey,float width,bool isBold,Reference<bool> state,Action<bool> onChanged, bool maskMaterial = false)
         {
             return new CombinedContext(
-                new StateButton(state) { OnChanged = onChanged, WithMaskMaterial = maskMaterial },
+                new StateButton() { StateRef = state, OnChanged = onChanged, WithMaskMaterial = maskMaterial },
                 new Text(new(isBold ? TextAttribute.BoldAttr : TextAttribute.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(width, 0.3f), Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = translateKey }
                 );
         }
 
-        public static CombinedContext TopLabelCheckBox(string translateKey, float? width, bool isBold, bool state, Action<bool> onChanged,bool maskMaterial = false)
+        public static CombinedContext TopLabelCheckBox(string translateKey, float? width, bool isBold, Reference<bool> state, Action<bool> onChanged,bool maskMaterial = false)
         {
             IMetaParallelPlacable label;
             if (width == null)
@@ -512,7 +532,7 @@ public class MetaContext : IMetaContext, IMetaParallelPlacable
             return new CombinedContext(
                 label,
                 new Text(new(isBold ? TextAttribute.BoldAttr : TextAttribute.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(0.15f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = ":" },
-                new StateButton(state) { OnChanged = onChanged, WithMaskMaterial = maskMaterial }                
+                new StateButton() { StateRef = state, OnChanged = onChanged, WithMaskMaterial = maskMaterial }                
                 );
         }
     }
@@ -927,6 +947,7 @@ public class CombinedContext : IMetaContext, IMetaParallelPlacable
     IMetaParallelPlacable[] contents;
     public AlignmentOption Alignment { get; set; }
     float? height;
+    public Action<GameObject>? PostBuilder = null;
 
     public CombinedContext(float height, AlignmentOption alignment, params IMetaParallelPlacable[] contents)
     {
@@ -970,12 +991,14 @@ public class CombinedContext : IMetaContext, IMetaParallelPlacable
 
         width = CalcWidth(Alignment, cursor, size, x, -x / 2f, x / 2f);
 
+        PostBuilder?.Invoke(combinedScreen);
+
         return height;
     }
 
     public float Generate(GameObject screen, Vector2 center, out float width)
     {
-        var combinedScreen = UnityHelper.CreateObject("CombinedScreen", screen.transform, Vector3.zero);
+        var combinedScreen = UnityHelper.CreateObject("CombinedScreen", screen.transform, center);
         float x = 0f;
         float height = 0f;
         foreach (var c in contents)
@@ -991,6 +1014,8 @@ public class CombinedContext : IMetaContext, IMetaParallelPlacable
         combinedScreen.transform.localPosition += new Vector3(-x / 2f, 0f, 0f);
 
         width = x;
+
+        PostBuilder?.Invoke(combinedScreen);
 
         return height;
     }
@@ -1148,7 +1173,7 @@ public class MetaScreen : MonoBehaviour
 
 public static class MetaUI
 {
-    static public void ShowConfirmDialog(Transform transform, ITextComponent text)
+    static public void ShowConfirmDialog(Transform? transform, ITextComponent text)
     {
         MetaScreen screen = MetaScreen.GenerateWindow(new(3.5f, 1.35f), transform, Vector3.zero, true, true);
 
@@ -1156,6 +1181,25 @@ public static class MetaUI
 
         context.Append(new MetaContext.Text(new(TextAttribute.ContentAttr) { Size = new(3.3f, 0.8f) }) { MyText = text, Alignment = AlignmentOption.Center });
         context.Append(new MetaContext.Button(screen.CloseScreen, TextAttribute.BoldAttr) { TranslationKey = "ui.dialog.ok", Alignment = AlignmentOption.Center });
+        screen.SetContext(context);
+    }
+
+    static public void ShowYesOrNoDialog(Transform? transform, Action yesAction, Action noAction,string text, bool canCancelClickOutside = false)
+    {
+        MetaScreen screen = MetaScreen.GenerateWindow(new(3.9f, 1.14f), transform, Vector3.zero, true, canCancelClickOutside);
+        MetaContext context = new();
+        Reference<TextField> refName = new();
+
+        context.Append(new MetaContext.Text(new TextAttribute(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(3f, 0.6f) }) { RawText = text, Alignment = IMetaContext.AlignmentOption.Center });
+
+        context.Append(new CombinedContext(
+            new MetaContext.Button(() => { noAction.Invoke(); screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.5f, 0.3f) })
+            { TranslationKey = "ui.dialog.no", Alignment = IMetaContext.AlignmentOption.Center },
+            new MetaContext.HorizonalMargin(0.3f),
+            new MetaContext.Button(() => { yesAction.Invoke(); screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.5f, 0.3f) })
+            { TranslationKey = "ui.dialog.yes", Alignment = IMetaContext.AlignmentOption.Center }
+            ));
+
         screen.SetContext(context);
     }
 }

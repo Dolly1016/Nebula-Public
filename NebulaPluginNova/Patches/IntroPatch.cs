@@ -45,10 +45,10 @@ public static class ShowIntroPatch
         var myInfo = PlayerControl.LocalPlayer.GetModInfo();
         switch (myInfo?.Role.Role.Team.RevealType)
         {
-            case Roles.TeamRevealType.OnlyMe:
+            case Virial.Assignable.TeamRevealType.OnlyMe:
                 shownPlayers = new PlayerControl[] { PlayerControl.LocalPlayer };
                 break;
-            case Roles.TeamRevealType.Teams:
+            case Virial.Assignable.TeamRevealType.Teams:
                 shownPlayers = shownPlayers.Where(p => p.GetModInfo()?.Role.Role.Team == myInfo.Role.Role.Team);
                 break;
         }

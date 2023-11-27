@@ -13,7 +13,7 @@ public class AttributeShower
         private static ISpriteLoader guageSprite = SpriteLoader.FromResource("Nebula.Resources.AttributeGuage.png", 100f);
         private static IDividedSpriteLoader imageSprites = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.AttributeIcon.png", 100f, 33, true);
 
-        public AttributeModulator.PlayerAttribute Attribute { get; private set; }
+        public Virial.Game.PlayerAttribute Attribute { get; private set; }
         public Transform MyTransform { get; private set; }
 
         private SpriteRenderer guageRenderer;
@@ -21,7 +21,7 @@ public class AttributeShower
             guageRenderer.material.SetFloat("_Guage", Mathf.Clamp01(ratio));
         }
 
-        public AttributeIcon(Transform parent,AttributeModulator.PlayerAttribute attribute)
+        public AttributeIcon(Transform parent,Virial.Game.PlayerAttribute attribute)
         {
             MyTransform = UnityHelper.CreateObject("AttrIcon", parent, Vector3.zero).transform;
             var renderer = MyTransform.gameObject.AddComponent<SpriteRenderer>();

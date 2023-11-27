@@ -5,18 +5,19 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Media;
 
 namespace Nebula.Utilities;
 
-public interface INameSpace
+public interface INameSpace : Virial.Assets.INameSpace
 {
-    Stream? OpenRead(string innerAddress);
     ISpriteLoader? GetSprite(string innerAddress, float pixelsPerUnit = 100f)
     {
-        var stream = OpenRead(innerAddress);
+        var stream = OpenRead(innerAddress + ".png");
         return stream != null ? new SpriteLoader(new StreamTextureLoader(stream), pixelsPerUnit) : null;
     }
-    
+
+    Image? Virial.Assets.INameSpace.GetImage(string innerAddress, float pixelsPerUnit) => GetSprite(innerAddress, pixelsPerUnit);
 }
 
 public class NameSpaceManager
@@ -30,7 +31,7 @@ public class NameSpaceManager
 
         public ISpriteLoader? GetSprite(string innerAddress,float pixelsPerUnit = 100f)
         {
-            return SpriteLoader.FromResource("Nebula.Resources." + innerAddress, pixelsPerUnit);
+            return SpriteLoader.FromResource("Nebula.Resources." + innerAddress + ".png", pixelsPerUnit);
         }
     }
 
@@ -58,6 +59,7 @@ public class NameSpaceManager
 
         public ISpriteLoader? GetSprite(string innerAddress, float pixelsPerUnit = 100f)
         {
+            Debug.Log("test:" + innerAddress);
             return new WrapSpriteLoader(() => spriteDoc.TryGetValue(innerAddress, out var sprite) ? sprite.Invoke() : null!);
         }
     }

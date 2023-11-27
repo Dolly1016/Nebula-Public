@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Virial.Assignable;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 
 namespace Nebula.VoiceChat;
@@ -100,7 +101,7 @@ public class VoiceChatManager : IDisposable
             var localInfo = PlayerControl.LocalPlayer.GetModInfo();
             if (localInfo == null) return false;
 
-            if (localInfo.Role.Role.RoleCategory == Roles.RoleCategory.ImpostorRole) return true;
+            if (localInfo.Role.Role.RoleCategory == RoleCategory.ImpostorRole) return true;
             if (killerHearDead != 2) return false;
 
             if (localInfo.Role.Role == Roles.Neutral.Jackal.MyRole) return true;
@@ -221,7 +222,7 @@ public class VoiceChatManager : IDisposable
 
         if (!usingMic) return;
 
-        if (NebulaInput.GetInput(KeyAssignmentType.Mute).KeyDown) IsMuting = !IsMuting;
+        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDown) IsMuting = !IsMuting;
 
         InfoShower.SetMute(IsMuting);
 
@@ -414,6 +415,7 @@ public class VoiceChatManager : IDisposable
                 bar.Range = new(-0.5f, 0.5f);
                 bar.Bar.transform.localPosition = Vector3.zero;
                 bar.Dot.transform.localScale = new Vector3(0.18f, 0.18f, 1f);
+                bar.Dot.transform.SetLocalZ(-0.1f);
                 bar.transform.localPosition = new Vector3(0, -0.26f, -1f);
                 bar.transform.localScale = new Vector3(1f, 1f, 1f);
                 bar.SetValue(client.Volume * 0.25f);

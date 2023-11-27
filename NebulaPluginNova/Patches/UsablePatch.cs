@@ -23,7 +23,7 @@ public static class KeyboardInputPatch
         if (KeyboardJoystick.player.GetButtonDown(4) && !HudManager.Instance.Chat.IsOpenOrOpening)
             HudManager.Instance.ToggleMapVisible(GameManager.Instance.GetMapOptions());
 
-        if (NebulaInput.GetInput(KeyAssignmentType.Kill).KeyDown && HudManager.Instance.KillButton.gameObject.active) HudManager.Instance.KillButton.DoClick();
+        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Kill).KeyDown && HudManager.Instance.KillButton.gameObject.active) HudManager.Instance.KillButton.DoClick();
         if (KeyboardJoystick.player.GetButtonDown(50) && HudManager.Instance.ImpostorVentButton.gameObject.active) HudManager.Instance.ImpostorVentButton.DoClick();
 
         return false;
@@ -116,12 +116,22 @@ public static class ConsoleCanUsePatch
     {
         canUse = couldUse = false;
 
-        if (ShipStatus.Instance.SpecialTasks.Any((task) => __instance.TaskTypes.Contains(task.TaskType))) return true;
-
-        if (__instance.AllowImpostor) return true;
-
         var info = NebulaGameManager.Instance?.GetModPlayerInfo(PlayerControl.LocalPlayer.PlayerId);
         if (info == null) return true;
+
+        if (ShipStatus.Instance.SpecialTasks.Any((task) => __instance.TaskTypes.Contains(task.TaskType)))
+        {
+            if (
+                (__instance.TaskTypes.Contains(TaskTypes.FixLights) && info.AllAssigned().Any(assignable => !assignable.CanFixLight)) ||
+                (__instance.TaskTypes.Contains(TaskTypes.FixComms) && info.AllAssigned().Any(assignable => !assignable.CanFixComm))
+                )
+            {
+                __result = float.MaxValue;
+                return false;
+            }
+        }
+
+        if (__instance.AllowImpostor) return true;
 
         if (!info.Role.HasAnyTasks)
         {

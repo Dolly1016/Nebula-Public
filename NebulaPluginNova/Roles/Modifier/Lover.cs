@@ -1,4 +1,6 @@
-﻿using Nebula.Roles.Assignment;
+﻿using Il2CppSystem.Data;
+using Nebula.Roles.Assignment;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Modifier;
 
@@ -16,10 +18,11 @@ public class Lover : ConfigurableModifier
     public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments[0]);
 
     public override void Assign(IRoleAllocator.RoleTable roleTable) {
-        var impostors = roleTable.GetPlayers(RoleCategory.ImpostorRole).OrderBy(_=>Guid.NewGuid()).ToArray();
-        var others = roleTable.GetPlayers(RoleCategory.CrewmateRole | RoleCategory.NeutralRole).OrderBy(_ => Guid.NewGuid()).ToArray();
+        var impostors = roleTable.GetPlayers(RoleCategory.ImpostorRole).Where(p => p.role.CanLoad(this)).OrderBy(_=>Guid.NewGuid()).ToArray();
+        var others = roleTable.GetPlayers(RoleCategory.CrewmateRole | RoleCategory.NeutralRole).Where(p => p.role.CanLoad(this)).OrderBy(_ => Guid.NewGuid()).ToArray();
         int impostorsIndex = 0;
         int othersIndex = 0;
+
 
         int maxPairs = NumOfPairsOption;
         float chanceImpostor = ChanceOfAssigningImpostorsOption.GetFloat() / 100f;
@@ -77,6 +80,18 @@ public class Lover : ConfigurableModifier
             if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || (MyLover?.AmOwner ?? false)) text += " ♥".Color(colors[loversId]);
         }
 
+        public override void OnDead()
+        {
+            if (AmOwner)
+            {
+                var myLover = MyLover;
+                if (myLover == null) return;
+                if (myLover.IsDead) return;
+
+                myLover.MyControl.ModSuicide(false, PlayerState.Suicide, EventDetail.Kill);
+            }
+        }
+
         public override void OnMurdered(PlayerControl murder)
         {
             if(AmOwner && murder.PlayerId != MyPlayer.PlayerId)
@@ -85,7 +100,7 @@ public class Lover : ConfigurableModifier
                 if (myLover == null) return;
                 if (myLover.IsDead) return;
 
-                myLover.MyControl.ModKill(myLover.MyControl,false,PlayerState.Suicide,EventDetail.Kill);
+                myLover.MyControl.ModSuicide( false,PlayerState.Suicide,EventDetail.Kill);
             }
         }
 
