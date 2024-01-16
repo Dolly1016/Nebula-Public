@@ -77,7 +77,7 @@ public class ComponentBinding<T> : INebulaScriptComponent where T : MonoBehaviou
     public override void Update() { }
     public override void OnReleased()
     {
-        if (MyObject) GameObject.Destroy(MyObject.gameObject);
+        if (MyObject) GameObject.Destroy(MyObject!.gameObject);
     }
 }
 

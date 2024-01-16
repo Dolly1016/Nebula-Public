@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Nebula.Modules.MetaContext;
 
 namespace Nebula.Patches;
 
@@ -84,7 +85,7 @@ public static class MainMenuSetUpPatch
                 SoundManager.Instance.PlaySound(VanillaAsset.SelectClip, false, 0.8f);
                 clickAction.Invoke();
             });
-            obj.transform.localPosition = new Vector3(0f, 0.66f - index * 0.68f, 0f);
+            obj.transform.localPosition = new Vector3(0f, 0.98f - index * 0.68f, 0f);
 
             index++;
         }
@@ -94,6 +95,9 @@ public static class MainMenuSetUpPatch
             if (!VersionsScreen) CreateVersionsScreen();
             VersionsScreen?.SetActive(true);
             __instance.screenTint.enabled = true;
+        });
+        SetUpButton("title.buttons.achievements", () => {
+            AchievementViewer.Open(__instance);
         });
         SetUpButton("title.buttons.addons", () => {
             __instance.ResetScreen();
@@ -139,19 +143,21 @@ public static class MainMenuSetUpPatch
             };
 
 
-            var inner = new MetaContext();
+            var inner = new MetaContextOld();
             foreach (var addon in NebulaAddon.AllAddons)
             {
-                inner.Append(new CombinedContext(0.5f,
-                    new MetaContext.Image(addon.Icon) { Width = 0.3f },
-                    new MetaContext.HorizonalMargin(0.1f),
-                    new MetaContext.Text(NameAttribute) { RawText = addon.AddonName },
-                    new MetaContext.Text(VersionAttribute) { RawText = addon.Version },
-                    new MetaContext.Text(AuthorAttribute) { RawText = "by " + addon.Author })
-                { Alignment = IMetaContext.AlignmentOption.Left });
-                inner.Append(new MetaContext.Text(DescAttribute) { RawText = addon.Description });
+                if (addon.IsHidden) continue;
+
+                inner.Append(new CombinedContextOld(0.5f,
+                    new MetaContextOld.Image(addon.Icon) { Width = 0.3f },
+                    new MetaContextOld.HorizonalMargin(0.1f),
+                    new MetaContextOld.Text(NameAttribute) { RawText = addon.AddonName },
+                    new MetaContextOld.Text(VersionAttribute) { RawText = addon.Version },
+                    new MetaContextOld.Text(AuthorAttribute) { RawText = "by " + addon.Author })
+                { Alignment = IMetaContextOld.AlignmentOption.Left });
+                inner.Append(new MetaContextOld.Text(DescAttribute) { RawText = addon.Description });
             }
-            screen.SetContext(new MetaContext.ScrollView(new Vector2(6.2f, 4.1f), inner, true) { Alignment = IMetaContext.AlignmentOption.Center });
+            screen.SetContext(new MetaContextOld.ScrollView(new Vector2(6.2f, 4.1f), inner, true) { Alignment = IMetaContextOld.AlignmentOption.Center });
         }
 
         void CreateVersionsScreen()
@@ -183,20 +189,20 @@ public static class MainMenuSetUpPatch
                 Alignment = TMPro.TextAlignmentOptions.Center
             };
 
-            Reference<MetaContext.ScrollView.InnerScreen> innerRef = new();
+            Reference<MetaContextOld.ScrollView.InnerScreen> innerRef = new();
             List<ModUpdater.ReleasedInfo>? versions = null;
-            MetaContext staticContext = new();
+            MetaContextOld staticContext = new();
 
-            MetaContext menuContext = new();
+            MetaContextOld menuContext = new();
             menuContext.Append(Enum.GetValues<ModUpdater.ReleasedInfo.ReleaseCategory>(), (category) =>
-            new MetaContext.Button(() => UpdateContents(category), new(TextAttribute.BoldAttr) { Size = new(0.95f, 0.28f) }) { TranslationKey = ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)category] }
+            new MetaContextOld.Button(() => UpdateContents(category), new(TextAttribute.BoldAttr) { Size = new(0.95f, 0.28f) }) { TranslationKey = ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)category] }
                 , 1, -1, 0, 0.6f);
 
-            staticContext.Append(new ParallelContext(
-                new(new MetaContext.HorizonalMargin(0.1f),0.1f),
+            staticContext.Append(new ParallelContextOld(
+                new(new MetaContextOld.HorizonalMargin(0.1f),0.1f),
                 new(menuContext,1f),
-                new(new MetaContext.HorizonalMargin(0.1f), 0.1f),
-                new(new MetaContext.ScrollView(new Vector2(5f, 4f), new MetaContext(), true) { Alignment = IMetaContext.AlignmentOption.Center, InnerRef = innerRef },5f)));
+                new(new MetaContextOld.HorizonalMargin(0.1f), 0.1f),
+                new(new MetaContextOld.ScrollView(new Vector2(5f, 4f), new MetaContextOld(), true) { Alignment = IMetaContextOld.AlignmentOption.Center, InnerRef = innerRef },5f)));
             
             screen.SetContext(staticContext);
 
@@ -206,40 +212,54 @@ public static class MainMenuSetUpPatch
             {
                 if (versions == null) return;
 
-                var inner = new MetaContext();
+                var inner = new MetaContextOld();
 
                 foreach (var version in versions)
                 {
                     if (category != null && version.Category != category) continue;
 
-                    List<IMetaParallelPlacable> placable = new();
-                    placable.Add(new MetaContext.Text(CategoryAttribute) { MyText = ITextComponent.From(ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)version.Category], ModUpdater.ReleasedInfo.CategoryColors[(int)version.Category])});
-                    placable.Add(new MetaContext.HorizonalMargin(0.15f));
-                    placable.Add(new MetaContext.Text(NameAttribute) { RawText = version.Version!.Replace('_', ' '),
-                        PostBuilder = text => {
-                            var button = text.gameObject.SetUpButton(true);
-                            button.gameObject.AddComponent<BoxCollider2D>().size = text.rectTransform.sizeDelta;
-                            button.OnClick.AddListener(() => Application.OpenURL("https://github.com/Dolly1016/Nebula/releases/tag/" + version.RawTag));
-                            button.OnMouseOver.AddListener(() => {
-                                text.color = Color.green;
-                            });
-                            button.OnMouseOut.AddListener(() => {
-                                text.color = Color.white;
-                            });
-                        }
-                    });
-                    placable.Add(new MetaContext.HorizonalMargin(0.15f));
+                    try
+                    {
+                        List<IMetaParallelPlacableOld> placable = new();
+                        placable.Add(new MetaContextOld.Text(CategoryAttribute) { MyText = NebulaGUIContextEngine.Instance.TextComponent(ModUpdater.ReleasedInfo.CategoryColors[(int)version.Category], ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)version.Category]) });
+                        placable.Add(new MetaContextOld.HorizonalMargin(0.15f));
+                        placable.Add(new MetaContextOld.Text(NameAttribute)
+                        {
+                            RawText = version.Version!.Replace('_', ' '),
+                            PostBuilder = text =>
+                            {
+                                var button = text.gameObject.SetUpButton(true);
+                                button.gameObject.AddComponent<BoxCollider2D>().size = text.rectTransform.sizeDelta;
+                                button.OnClick.AddListener(() => Application.OpenURL("https://github.com/Dolly1016/Nebula/releases/tag/" + version.RawTag));
+                                button.OnMouseOver.AddListener(() =>
+                                {
+                                    text.color = Color.green;
+                                });
+                                button.OnMouseOut.AddListener(() =>
+                                {
+                                    text.color = Color.white;
+                                });
+                            }
+                        });
+                        placable.Add(new MetaContextOld.HorizonalMargin(0.15f));
 
-                    if (version.Epoch == NebulaPlugin.PluginEpoch && version.BuildNum != NebulaPlugin.PluginBuildNum)
-                    {
-                        placable.Add(new MetaContext.Button(()=>NebulaManager.Instance.StartCoroutine(version.CoUpdateAndShowDialog().WrapToIl2Cpp()), ButtonAttribute) { TranslationKey = "version.fetching.gainPackage", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
+                        if (version.Epoch == NebulaPlugin.PluginEpoch && version.BuildNum != NebulaPlugin.PluginBuildNum)
+                        {
+                            placable.Add(new MetaContextOld.Button(() => NebulaManager.Instance.StartCoroutine(version.CoUpdateAndShowDialog().WrapToIl2Cpp()), ButtonAttribute) { TranslationKey = "version.fetching.gainPackage", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
+                        }
+                        else
+                        {
+                            placable.Add(new MetaContextOld.HorizonalMargin(0.13f));
+                            placable.Add(new MetaContextOld.Text(ButtonAttribute) { TranslationKey = version.Epoch == NebulaPlugin.PluginEpoch ? "version.fetching.current" : "version.fetching.mismatched", });
+                        }
+
+
+                        inner.Append(new CombinedContextOld(0.5f, placable.ToArray()) { Alignment = IMetaContextOld.AlignmentOption.Left });
                     }
-                    else
+                    catch
                     {
-                        placable.Add(new MetaContext.HorizonalMargin(0.13f));
-                        placable.Add(new MetaContext.Text(ButtonAttribute) { TranslationKey = version.Epoch == NebulaPlugin.PluginEpoch ? "version.fetching.current" : "version.fetching.mismatched", });
+                        Debug.Log("[Invalid Tag]" + version.RawTag ?? "NULL");
                     }
-                    inner.Append(new CombinedContext(0.5f, placable.ToArray()) { Alignment = IMetaContext.AlignmentOption.Left });
                 }
 
                 innerRef.Value?.SetContext(inner);
@@ -271,12 +291,17 @@ public static class MainMenuClearScreenPatch
     }
 }
 
-
 [HarmonyPatch(typeof(Constants), nameof(Constants.GetBroadcastVersion))]
 class ServerVersionPatch
 {
+
+    private static bool IsCustomServer()
+    {
+        return ServerManager.Instance?.CurrentRegion.TranslateName is StringNames.NoTranslation or null;
+    }
+
     static void Postfix(ref int __result)
     {
-        if(!MainMenuSetUpPatch.IsLocalGame) __result += 25;
+        if(!MainMenuSetUpPatch.IsLocalGame && !IsCustomServer()) __result += 25;
     }
 }

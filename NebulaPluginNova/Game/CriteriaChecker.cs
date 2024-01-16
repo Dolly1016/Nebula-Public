@@ -43,7 +43,7 @@ public class NebulaEndCriteria
                         if (lifeSuppSystemType != null && lifeSuppSystemType.Countdown < 0f)
                         {
                             lifeSuppSystemType.Countdown = 10000f;
-                            return NebulaGameEnd.ImpostorWin;
+                            return NebulaGameEnd.SabotageWin;
                         }
                     }
 
@@ -53,7 +53,7 @@ public class NebulaEndCriteria
                         if (criticalSabotage != null && criticalSabotage.Countdown < 0f)
                         {
                             criticalSabotage.ClearSabotage();
-                            return NebulaGameEnd.ImpostorWin;
+                            return NebulaGameEnd.SabotageWin;
                         }
                     }
                 }
@@ -102,11 +102,14 @@ public class NebulaEndCriteria
         {
             int impostors = 0;
             int totalAlive = 0;
+            
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
                 if (p.IsDead) continue;
                 totalAlive++;
-                if (p.Role.Role.Team == Impostor.MyTeam) impostors++;
+
+                //Loversではないインポスターのみカウントに入れる
+                if (p.Role.Role.Team == Impostor.MyTeam && !p.TryGetModifier<Lover.Instance>(out _)) impostors++;
 
                 //ジャッカル陣営が生存している間は勝利できない
                 if (p.Role.Role.Team == Jackal.MyTeam || p.AllModifiers.Any(m => m.Role == SidekickModifier.MyRole)) return null;
@@ -128,6 +131,8 @@ public class NebulaEndCriteria
                 totalAlive++;
                 if (p.Role.Role.Team == Jackal.MyTeam || p.AllModifiers.Any(m => m.Role == SidekickModifier.MyRole)) jackals++;
 
+                //ラバーズが生存している間は勝利できない
+                if (p.TryGetModifier<Lover.Instance>(out _)) return null;
                 //インポスターが生存している間は勝利できない
                 if (p.Role.Role.Team == Impostor.MyTeam) return null;
             }

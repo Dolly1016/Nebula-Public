@@ -133,7 +133,7 @@ public class Timer : INebulaScriptComponent, GameTimer
 
     GameTimer GameTimer.SetAsAbilityTimer() => SetAsAbilityCoolDown();
 
-    GameTimer GameTimer.Start(float? time = null) => Start(time);
+    GameTimer GameTimer.Start(float? time) => Start(time);
 
     GameTimer GameTimer.Pause() => Pause();
 

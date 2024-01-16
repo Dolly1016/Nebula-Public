@@ -18,6 +18,13 @@ using Virial.Text;
 
 namespace Nebula.Extensions;
 
+public enum KillResult
+{
+    Kill,
+    Guard,
+    ObviousGuard
+}
+
 [NebulaRPCHolder]
 public static class PlayerExtension
 {
@@ -142,6 +149,7 @@ public static class PlayerExtension
                targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
                targetInfo.MyKiller = killerInfo;
                targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
+               targetInfo.MyControl.Data.IsDead = true;
                targetInfo.AssignableAction(role =>
                {
                    role.OnMurdered(killer!);
@@ -149,11 +157,19 @@ public static class PlayerExtension
                });
 
                if (killerInfo != null) EventManager.HandleEvent(new PlayerMurderEvent(targetInfo, killerInfo));
-               EventManager.HandleEvent(new PlayerDeadEvent(targetInfo));
+               else EventManager.HandleEvent(new PlayerDeadEvent(targetInfo));
+
+               //1ずつ加算するのでこれで十分
+               if (targetInfo.AmOwner && (NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0) == 1)
+                   new StaticAchievementToken("firstKill");
+
            }
            if (killerInfo != null) killerInfo.AssignableAction(r => r.OnKillPlayer(target));
 
-           PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(target));
+           PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => {
+               r.OnAnyoneDeadLocal(target);
+               if (killer != null) r.OnAnyoneMurderedLocal(target, killer);
+           });
        }
        );
 
@@ -205,7 +221,11 @@ public static class PlayerExtension
            }
            if (killerInfo != null) killerInfo.AssignableAction(r => r.OnKillPlayer(target));
 
-           PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(target));
+           PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r =>
+           {
+               r.OnAnyoneDeadLocal(target);
+               if (killer != null) r.OnAnyoneMurderedLocal(target, killer);
+           });
 
            if (MeetingHud.Instance)
            {
@@ -228,27 +248,54 @@ public static class PlayerExtension
         (message, _) => MeetingHudExtension.ExtraVictims.Add(message)
         );
 
-    static public void ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay)
+    static public KillResult ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay)
     {
-        if (MeetingHud.Instance)
+        var isMeetingKill = MeetingHud.Instance;
+        if (CheckKill(null, target, playerState, recordState, isMeetingKill, out var result))
+        {
+            if (MeetingHud.Instance)
+                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay));
+            else
+                RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
+        }
+        return result;
+
+    }
+
+    static private bool CheckKill(PlayerControl? killer, PlayerControl target, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool isMeetingKill, out KillResult result)
+    {
+        var targetInfo = target.GetModInfo()!;
+        var killerInfo = killer?.GetModInfo() ?? targetInfo;
+        var localResult = KillResult.Kill;
+        targetInfo.AssignableAction(r => { if (localResult == KillResult.Kill) localResult = r.CheckKill(killerInfo, playerState, recordState, isMeetingKill); });
+        result = localResult;
+           
+        if (result != KillResult.Kill) RpcOnGuard.Invoke((killerInfo.PlayerId, targetInfo.PlayerId, result == KillResult.ObviousGuard));
+
+
+
+        return result == KillResult.Kill;
+    }
+
+    static public KillResult ModSuicide(this PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
+    {
+        if(CheckKill(null, target, playerState, recordState, false,out var result))
+            RpcKill.Invoke((byte.MaxValue, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
+        return result;
+    }
+
+    static public KillResult ModKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
+    {
+        if (CheckKill(killer, target, playerState, recordState, false, out var result))
+            RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink,showOverlay));
+        return result;
+    }
+
+    static public KillResult ModMeetingKill(this PlayerControl killer, PlayerControl target, bool showOverlay, CommunicableTextTag playerState, CommunicableTextTag? recordState)
+    {
+        if (CheckKill(killer, target, playerState, recordState, true, out var result))
             RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay));
-        else
-            RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
-    }
-
-    static public void ModSuicide(this PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
-    {
-        RpcKill.Invoke((byte.MaxValue, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
-    }
-
-    static public void ModKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
-    {
-        RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink,showOverlay));
-    }
-
-    static public void ModMeetingKill(this PlayerControl killer, PlayerControl target, bool showOverlay, CommunicableTextTag playerState, CommunicableTextTag? recordState)
-    {
-        RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay));
+        return result;
     }
 
     static public void ModMarkAsExtraVictim(this PlayerControl exiled,PlayerControl? source, CommunicableTextTag playerState, CommunicableTextTag recordState)
@@ -285,6 +332,21 @@ public static class PlayerExtension
             var player = Helpers.GetPlayer(message.playerId);
             if (!player) return;
             player?.StartCoroutine(message.isDive ? player.CoDive() : player.CoGush());
+        }
+        );
+
+    static RemoteProcess<(byte killerId, byte targetId, bool targetCanSeeGuard)> RpcOnGuard = new(
+        "Guard",
+        (message, _) =>
+        {
+            var killer = NebulaGameManager.Instance?.GetModPlayerInfo(message.killerId)!;
+            NebulaGameManager.Instance?.GetModPlayerInfo(message.targetId)?.AssignableAction(a=>a.OnGuard(killer!));
+
+            if (message.killerId == PlayerControl.LocalPlayer.PlayerId || (message.targetCanSeeGuard && message.targetId == PlayerControl.LocalPlayer.PlayerId))
+            {
+                Helpers.GetPlayer(message.targetId)?.ShowFailedMurder();
+                PlayerControl.LocalPlayer.SetKillTimer(AmongUsUtil.VanillaKillCoolDown);
+            }
         }
         );
 

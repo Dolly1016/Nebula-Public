@@ -8,6 +8,11 @@ namespace Nebula.Utilities;
 
 public static class ManagedEffects
 {
+    static public IEnumerator Sequence(params IEnumerator[] enumerator)
+    {
+        foreach(var e in enumerator) yield return e;
+    }
+
     static public IEnumerator ToCoroutine(this Action action)
     {
         action.Invoke();

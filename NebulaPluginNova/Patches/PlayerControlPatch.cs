@@ -19,6 +19,7 @@ public static class PlayerStartPatch
         __result = Effects.Sequence(new Il2CppSystem.Collections.IEnumerator[] {
             __result,
             Effects.Action((Il2CppSystem.Action)(()=>{
+                __instance.SetColor(__instance.PlayerId);
                 if(PlayerControl.LocalPlayer)DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
             }))
             }.ToArray());
@@ -32,6 +33,16 @@ public static class PlayerGetColorPatch
     {
         __instance.colorID = 15;
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CmdCheckColor))]
+public static class PlayerCheckColorPatch
+{
+    static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] ref byte bodyColor)
+    {
+        bodyColor = __instance.PlayerId;
+        return true;
     }
 }
 
@@ -191,8 +202,9 @@ class SetTaskPAtch
         var tasksList = tasks.ToArray().ToList();
         int num = tasksList.Count;
         var info = __instance.GetModInfo();
-        info?.AssignableAction((r)=>r.OnSetTaskLocal(ref tasksList));
-        if (num != tasksList.Count) info?.Tasks.ReplaceTasks(tasksList.Count);
+        int extra = 0;
+        info?.AssignableAction((r) => { r.OnSetTaskLocal(ref tasksList, out var unacquired); extra += unacquired; });
+        if (num != tasksList.Count || extra > 0) info?.Tasks.ReplaceTasks(tasksList.Count, extra);
 
         __instance.StartCoroutine(CoSetTasks().WrapToIl2Cpp());
 

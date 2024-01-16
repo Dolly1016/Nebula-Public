@@ -17,7 +17,7 @@ namespace Nebula.Roles.Impostor;
 public class Raider : ConfigurableStandardRole
 {
     static public Raider MyRole = new Raider();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "raider";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -52,8 +52,9 @@ public class Raider : ConfigurableStandardRole
         private float thrownAngle = 0f;
         private int state = 0;
         private float speed = MyRole.AxeSpeedOption.GetFloat();
-        private bool killed = false;
+        private int killed = 0;
         private float thrownTime = 0f;
+        AchievementToken<int>? acTokenChallenge = null;
 
         public RaiderAxe(PlayerControl owner) : base(owner.GetTruePosition(),ZOption.Front,false,staticAxeSprite.GetSprite())
         {
@@ -95,13 +96,23 @@ public class Raider : ConfigurableStandardRole
                             if (p.Data.IsDead || p.AmOwner) continue;
                             if (!MyRole.CanKillImpostorOption && p.Data.Role.IsImpostor) continue;
 
-                            if (p.GetTruePosition().Distance(pos) < size * 0.4f)
+                            if (!Helpers.AnyNonTriggersBetween(p.GetTruePosition(),pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
                                 if (p.GetModInfo()?.HasAttribute(Virial.Game.PlayerAttribute.Invisible) ?? false) continue;
 
                                 PlayerControl.LocalPlayer.ModKill(p, false, PlayerState.Beaten, EventDetail.Kill);
-                                killed = true;
+                                killed |= 1 << p.PlayerId;
+
+                                if(killed >= 3)
+                                {
+                                    acTokenChallenge ??= new("raider.challenge", killed, (val, _) => 
+                                    /*人数都合でゲームが終了している*/ NebulaGameManager.Instance!.EndState!.EndReason == NebulaEndReason.Situation && 
+                                    /*勝利している*/ NebulaGameManager.Instance.EndState!.CheckWin(Owner.PlayerId) &&
+                                    /*最後の死亡者がこの斧によってキルされている*/ (killed & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
+                                    );
+                                    acTokenChallenge.Value = killed;
+                                }
                             }
                         }
                     }
@@ -113,7 +124,7 @@ public class Raider : ConfigurableStandardRole
                     MyRenderer.sprite = stuckAxeSprite.GetSprite();
                     MyRenderer.transform.eulerAngles = new Vector3(0f, 0f, thrownAngle * 180f / Mathf.PI);
 
-                    if (AmOwner && !killed)
+                    if (AmOwner && killed == 0)
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Missed, NebulaGameManager.Instance.CurrentTime - thrownTime, PlayerControl.LocalPlayer, 0);
                 }
                 else
@@ -157,12 +168,17 @@ public class Raider : ConfigurableStandardRole
         {
         }
 
+        AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
+        StaticAchievementToken? acTokenCommon = null;
+        
         public override void OnActivated()
         {
             base.OnActivated();
 
             if (AmOwner)
             {
+                acTokenAnother = Achievement.GenerateSimpleTriggerToken("raider.another1");
+
                 equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 equipButton.SetSprite(buttonSprite.GetSprite());
                 equipButton.Availability = (button) => MyPlayer.MyControl.CanMove;
@@ -191,6 +207,8 @@ public class Raider : ConfigurableStandardRole
                     MyAxe = null;
                     button.StartCoolDown();
                     equipButton.SetLabel("equip");
+
+                    acTokenAnother.Value.triggered = true;
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.ThrowCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabel("throw");
@@ -208,6 +226,24 @@ public class Raider : ConfigurableStandardRole
         public override void OnDead()
         {
             if (AmOwner && MyAxe != null) UnequipAxe();
+
+            if (acTokenAnother != null && (MyPlayer.MyState == PlayerState.Guessed || MyPlayer.MyState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
+        }
+
+        public override void OnKillPlayer(PlayerControl target)
+        {
+            base.OnKillPlayer(target);
+        
+            if(target.GetModInfo()?.MyState == PlayerState.Beaten)
+                acTokenCommon ??= new("raider.common1");
+            
+        }
+
+        public override void OnMeetingEnd()
+        {
+            base.OnMeetingEnd();
+
+            if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
         }
 
         void EquipAxe()

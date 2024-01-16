@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Virial.Game;
+
+public interface GameEnd
+{
+}
+
+public static class NebulaGameEnd
+{
+    public static GameEnd CrewmateGameEnd { get; internal set; } = null!;
+    public static GameEnd ImpostorGameEnd { get; internal set; } = null!;
+    public static GameEnd ArsonistGameEnd { get; internal set; } = null!;
+    public static GameEnd JackalGameEnd { get; internal set; } = null!;
+    public static GameEnd JesterGameEnd { get; internal set; } = null!;
+    public static GameEnd PaparazzoGameEnd { get; internal set; } = null!;
+    public static GameEnd VultureGameEnd { get; internal set; } = null!;
+}

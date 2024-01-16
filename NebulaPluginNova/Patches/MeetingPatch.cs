@@ -17,6 +17,20 @@ public static class MeetingModRpc
     public static readonly RemoteProcess RpcBreakEmergencyButton = new("BreakEmergencyButton",
         (_) => ShipStatus.Instance.BreakEmergencyButton());
 
+    public static readonly RemoteProcess<(byte reporter,byte reported)> RpcNoticeStartMeeting = new("ModStartMeeting",
+    (message,_) =>
+    {
+        var reporter = NebulaGameManager.Instance?.GetModPlayerInfo(message.reporter);
+        var reported = NebulaGameManager.Instance?.GetModPlayerInfo(message.reported);
+
+        NebulaGameManager.Instance?.AllAssignableAction(a => a.OnPreMeetingStart(reporter!, reported));
+
+        if (reported != null) 
+            NebulaGameManager.Instance?.AllAssignableAction(a => a.OnReported(reporter!, reported));
+        else
+            NebulaGameManager.Instance?.AllAssignableAction(a => a.OnEmergencyMeeting(reporter!));
+    });
+
     public static readonly RemoteProcess<(List<VoterState> states, byte exiled, bool tie)> RpcModCompleteVoting = new("CompleteVoting", 
         (writer,message) => {
             writer.Write(message.states.Count);
@@ -31,18 +45,33 @@ public static class MeetingModRpc
         (reader) => {
             List<VoterState> states = new();
             int statesNum = reader.ReadInt32();
-            for (int i = 0; i < statesNum; i++) states.Add(new() { VoterId = reader.ReadByte(), VotedForId = reader.ReadByte() });
+            for (int i = 0; i < statesNum; i++)
+            {
+                var state = new VoterState() { VoterId = reader.ReadByte(), VotedForId = reader.ReadByte() };
+                states.Add(state);
+            }
 
             return (states,reader.ReadByte(),reader.ReadBoolean());
         },
         (message, _) => {
-            Debug.Log($"Invoked ModVotingComplete (exiled:{message.exiled})");
             ForcelyVotingComplete(MeetingHud.Instance, message.states, message.exiled, message.tie);
         }
         );
 
     private static void ForcelyVotingComplete(MeetingHud meetingHud, List<VoterState> states, byte exiled, bool tie)
     {
+        var readonlyStates = states.ToArray();
+        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(a =>
+        {
+            a.OnVotedLocal(Helpers.GetPlayer(
+            ((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255));
+
+            var votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => Helpers.GetPlayer(id)).Distinct().ToArray();
+            a.OnVotedForMeLocal(votedBy!);
+
+            a.OnDiscloseVotingLocal(readonlyStates);
+        });
+
         //追放者とタイ投票の結果だけは必ず書き換える
         meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
         meetingHud.wasTie = tie;
@@ -92,8 +121,8 @@ class ReportDeadBodyPatch
         if (target == null &&
             PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)
             (task => PlayerTask.TaskIsEmergency(task) && 
-                (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.Any(
-                    type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType == task.TaskType) ?? false))) == null)
+                (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.All(
+                    type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true))) != null)
                 return false;
             
         
@@ -104,6 +133,8 @@ class ReportDeadBodyPatch
         
         HudManager.Instance.OpenMeetingRoom(__instance);
         __instance.RpcStartMeeting(target);
+
+        MeetingModRpc.RpcNoticeStartMeeting.Invoke((__instance.PlayerId, target?.PlayerId ?? 255));
 
         if (target == null)
         {
@@ -133,11 +164,11 @@ class MeetingIntroStartPatch
     public static void Postfix(MeetingIntroAnimation __instance,ref Il2CppSystem.Collections.IEnumerator __result)
     {
         __result = Effects.Sequence(
-            __result,
             Effects.Action((Il2CppSystem.Action)(() =>
             {
                 NebulaGameManager.Instance?.OnMeetingStart();
-            }))
+            })),
+            __result            
             );
     }
 }

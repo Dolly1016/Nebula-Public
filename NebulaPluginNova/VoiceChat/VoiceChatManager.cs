@@ -101,7 +101,7 @@ public class VoiceChatManager : IDisposable
             var localInfo = PlayerControl.LocalPlayer.GetModInfo();
             if (localInfo == null) return false;
 
-            if (localInfo.Role.Role.RoleCategory == RoleCategory.ImpostorRole) return true;
+            if (localInfo.Role.Role.Category == RoleCategory.ImpostorRole) return true;
             if (killerHearDead != 2) return false;
 
             if (localInfo.Role.Role == Roles.Neutral.Jackal.MyRole) return true;
@@ -283,14 +283,14 @@ public class VoiceChatManager : IDisposable
         {
             var screen = MetaScreen.GenerateWindow(new(2.4f, 1f), HudManager.Instance.transform, Vector3.zero, true, true, false);
 
-            MetaContext context = new();
+            MetaContextOld context = new();
 
-            context.Append(new MetaContext.Text(TextAttribute.BoldAttr) { Alignment = IMetaContext.AlignmentOption.Center, TranslationKey = "voiceChat.dialog.confirm" });
-            context.Append(new MetaContext.VerticalMargin(0.15f));
-            context.Append(new CombinedContext(0.45f,
-                new MetaContext.Button(() => { AllowedUsingMic = true; screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.42f, 0.2f) }) { Alignment = IMetaContext.AlignmentOption.Center, TranslationKey = "ui.dialog.yes" },
-                new MetaContext.HorizonalMargin(0.1f),
-                new MetaContext.Button(() => { AllowedUsingMic = false; screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.42f, 0.2f) }) { Alignment = IMetaContext.AlignmentOption.Center, TranslationKey = "ui.dialog.no" }));
+            context.Append(new MetaContextOld.Text(TextAttribute.BoldAttr) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "voiceChat.dialog.confirm" });
+            context.Append(new MetaContextOld.VerticalMargin(0.15f));
+            context.Append(new CombinedContextOld(0.45f,
+                new MetaContextOld.Button(() => { AllowedUsingMic = true; screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.42f, 0.2f) }) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "ui.dialog.yes" },
+                new MetaContextOld.HorizonalMargin(0.1f),
+                new MetaContextOld.Button(() => { AllowedUsingMic = false; screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.42f, 0.2f) }) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "ui.dialog.no" }));
 
             screen.SetContext(context);
 
@@ -394,12 +394,12 @@ public class VoiceChatManager : IDisposable
     {
         var screen = MetaScreen.GenerateWindow(new Vector2(7f,3.2f), HudManager.Instance.transform, Vector3.zero, true, false, true);
 
-        MetaContext context = new();
+        MetaContextOld context = new();
 
 
         context.Append(allClients.Values.Where(v=>!v.MyPlayer.AmOwner), (client) => {
 
-        return new MetaContext.Text(TextAttribute.BoldAttr)
+        return new MetaContextOld.Text(TextAttribute.BoldAttr)
         {
             RawText = client.MyPlayer.name,
             PostBuilder = (text) =>

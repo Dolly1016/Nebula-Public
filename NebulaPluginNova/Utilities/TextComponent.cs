@@ -4,40 +4,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Text;
 
 namespace Nebula.Utilities;
 
-public interface ITextComponent
+public class CombinedComponent : TextComponent
 {
-    string Text { get; }
+    TextComponent[] components;
 
-    public static ITextComponent From(string translationKey, Color color)
-    {
-        return new ColorTextComponent(color, new TranslateTextComponent(translationKey));
-    }
-}
-
-public class CombinedComponent : ITextComponent
-{
-    ITextComponent[] components;
-
-    public CombinedComponent(params ITextComponent[] components)
+    public CombinedComponent(params TextComponent[] components)
     {
         this.components = components;
     }
 
-    public string Text { get {
-            StringBuilder builder = new();
-            foreach (var str in components) builder.Append(str.Text);
-            return builder.ToString();
-        }
+    public string GetString()
+    {
+        StringBuilder builder = new();
+        foreach (var str in components) builder.Append(str.GetString());
+        return builder.ToString();
     }
 }
 
-public class RawTextComponent : ITextComponent
+public class RawTextComponent : TextComponent
 {
     public string RawText { get; set; }
-    public string Text => RawText;
+    public string GetString() => RawText;
 
     public RawTextComponent(string text)
     {
@@ -45,7 +36,7 @@ public class RawTextComponent : ITextComponent
     }
 }
 
-public class LazyTextComponent : ITextComponent
+public class LazyTextComponent : TextComponent
 {
     private Func<string> supplier;
     public LazyTextComponent(Func<string> supplier)
@@ -53,25 +44,25 @@ public class LazyTextComponent : ITextComponent
         this.supplier = supplier;
     }
 
-    public string Text => supplier.Invoke();
+    public string GetString() => supplier.Invoke();
 }
 
-public class ColorTextComponent : ITextComponent
+public class ColorTextComponent : TextComponent
 {
     public Color Color { get; set; }
-    ITextComponent Inner { get; set; }
-    public string Text => Inner.Text.Color(Color);
-    public ColorTextComponent(Color color, ITextComponent inner)
+    TextComponent Inner { get; set; }
+    public string GetString() => Inner.GetString().Color(Color);
+    public ColorTextComponent(Color color, TextComponent inner)
     {
         Color = color;
         Inner = inner;
     }
 }
 
-public class TranslateTextComponent : ITextComponent
+public class TranslateTextComponent : TextComponent
 {
     public string TranslationKey { get; set; }
-    public string Text => Language.Translate(TranslationKey);
+    public string GetString() => Language.Translate(TranslationKey);
     public TranslateTextComponent(string translationKey)
     {
         TranslationKey = translationKey;

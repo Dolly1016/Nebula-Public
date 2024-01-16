@@ -12,7 +12,7 @@ namespace Nebula.Roles.Impostor;
 public class Camouflager : ConfigurableStandardRole
 {
     static public Camouflager MyRole = new Camouflager();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "camouflager";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -36,6 +36,9 @@ public class Camouflager : ConfigurableStandardRole
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CamoButton.png", 115f);
         public override AbstractRole Role => MyRole;
+
+        private AchievementToken<bool>? acTokenCommon;
+        private AchievementToken<(bool cleared, int killed)>? acTokenChallenge;
         public Instance(PlayerModInfo player) : base(player)
         {
         }
@@ -46,6 +49,9 @@ public class Camouflager : ConfigurableStandardRole
 
             if (AmOwner)
             {
+                acTokenCommon = new("camouflager.common1", false, (val, _) => val);
+                acTokenChallenge = new("camouflager.challenge", (false, 0), (val, _) => val.cleared);
+
                 camouflageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 camouflageButton.SetSprite(buttonSprite.GetSprite());
                 camouflageButton.Availability = (button) =>MyPlayer.MyControl.CanMove;
@@ -56,11 +62,20 @@ public class Camouflager : ConfigurableStandardRole
                 camouflageButton.OnEffectStart = (button) =>
                 {
                     RpcCamouflage.Invoke(new(MyPlayer.PlayerId,true));
+
+                    acTokenCommon!.Value = true;
+                    acTokenChallenge!.Value.killed = 0;
+                    
                 };
                 camouflageButton.OnEffectEnd = (button) =>
                 {
                     RpcCamouflage.Invoke(new(MyPlayer.PlayerId,false));
                     button.StartCoolDown();
+
+                    if(acTokenChallenge!.Value.killed >= 4)
+                    {
+                        acTokenChallenge!.Value.cleared = true;
+                    }
                 };
                 camouflageButton.OnMeeting = button => button.StartCoolDown();
                 camouflageButton.CoolDownTimer = Bind(new Timer(MyRole.CamoCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
@@ -68,6 +83,12 @@ public class Camouflager : ConfigurableStandardRole
                 camouflageButton.SetLabel("camo");
             }
         }
+
+        public override void OnAnyoneMurderedLocal(PlayerControl dead, PlayerControl murderer)
+        {
+            if (acTokenChallenge != null) acTokenChallenge.Value.killed++;
+        }
+
     }
 
     private static GameData.PlayerOutfit CamouflagerOutfit = new() { PlayerName = "", ColorId = 16, HatId = "hat_NoHat", SkinId = "skin_None", VisorId = "visor_EmptyVisor", PetId= "pet_EmptyPet" };

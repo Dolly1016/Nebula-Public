@@ -95,8 +95,6 @@ public class TextAttribute
         FontMaterial= orig.FontMaterial;
     }
 
-    public TextAttribute AlterColor(Color color)
-    {
-        return new TextAttribute(this) { Color = color};
-    }
+    public TextAttribute AlterColor(Color color) => new (this) { Color = color};
+    public TextAttribute AlterAutoSizing(bool allowAutoSizing) => new(this) { AllowAutoSizing = allowAutoSizing };
 }

@@ -13,7 +13,7 @@ namespace Nebula.Roles.Impostor;
 public class Sniper : ConfigurableStandardRole
 {
     static public Sniper MyRole = new Sniper();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "sniper";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -35,7 +35,7 @@ public class Sniper : ConfigurableStandardRole
 
         SnipeCoolDownOption = new(RoleConfig, "snipeCoolDown", KillCoolDownConfiguration.KillCoolDownType.Immediate, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 20f, -10f, 1f);
         ShotSizeOption = new(RoleConfig, "shotSize", null, 0.25f, 4f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
-        ShotEffectiveRangeOption = new(RoleConfig, "shotEffectiveRange", null, 2.5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.OddsDecorator };
+        ShotEffectiveRangeOption = new(RoleConfig, "shotEffectiveRange", null, 2.5f, 60f, 2.5f, 25f, 25f) { Decorator = NebulaConfiguration.OddsDecorator };
         ShotNoticeRangeOption = new(RoleConfig, "shotNoticeRange", null, 2.5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.OddsDecorator };
         StoreRifleOnFireOption = new(RoleConfig, "storeRifleOnFire", null, true, true);
         CanSeeRifleInShadowOption = new(RoleConfig, "canSeeRifleInShadow", null, false, false);
@@ -83,7 +83,7 @@ public class Sniper : ConfigurableStandardRole
                 if (p.IsDead || p.AmOwner || ((!MyRole.CanKillHidingPlayerOption) && p.MyControl.inVent)) continue;
 
                 //インポスターは無視
-                if (p.Role.Role.RoleCategory == RoleCategory.ImpostorRole) continue;
+                if (p.Role.Role.Category == RoleCategory.ImpostorRole) continue;
                 //不可視なプレイヤーは無視
                 if (p.HasAttribute(Virial.Game.PlayerAttribute.Invisible)) continue;
 
@@ -114,6 +114,10 @@ public class Sniper : ConfigurableStandardRole
         public override AbstractRole Role => MyRole;
         public SniperRifle? MyRifle = null;
         public override bool HasVanillaKillButton => false;
+
+        AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
+        StaticAchievementToken? acTokenCommon = null;
+
         public Instance(PlayerModInfo player) : base(player)
         {
         }
@@ -124,6 +128,9 @@ public class Sniper : ConfigurableStandardRole
 
             if (AmOwner)
             {
+                acTokenAnother = Achievement.GenerateSimpleTriggerToken("sniper.another1");
+                AchievementToken<int> acTokenChallenge = new("sniper.challenge", 0, (val, _) => val >= 2);
+
                 equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 equipButton.SetSprite(buttonSprite.GetSprite());
                 equipButton.Availability = (button) => MyPlayer.MyControl.CanMove;
@@ -165,6 +172,9 @@ public class Sniper : ConfigurableStandardRole
                     if (target != null)
                     {
                         MyPlayer.MyControl.ModKill(target!.MyControl, false, PlayerState.Sniped, EventDetail.Kill);
+
+                        acTokenCommon ??= new("sniper.common1");
+                        if (MyPlayer.MyControl.GetTruePosition().Distance(target!.MyControl.GetTruePosition()) > 20f) acTokenChallenge.Value++;
                     }
                     else
                     {
@@ -175,6 +185,8 @@ public class Sniper : ConfigurableStandardRole
                     button.StartCoolDown();
 
                     if (MyRole.StoreRifleOnFireOption) RpcEquip.Invoke((MyPlayer.PlayerId, false));
+
+                    acTokenAnother.Value.triggered = true;
 
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.SnipeCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
@@ -187,6 +199,8 @@ public class Sniper : ConfigurableStandardRole
         public override void OnDead()
         {
             if (AmOwner && MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
+
+            if (acTokenAnother != null && (MyPlayer.MyState == PlayerState.Guessed || MyPlayer.MyState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
         public override void OnMeetingStart()
@@ -196,6 +210,12 @@ public class Sniper : ConfigurableStandardRole
                 if (MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
                 equipButton?.SetLabel("equip");
             }
+        }
+        public override void OnMeetingEnd()
+        {
+            base.OnMeetingEnd();
+
+            if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
         }
 
         void EquipRifle()

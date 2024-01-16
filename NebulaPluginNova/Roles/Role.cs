@@ -5,6 +5,7 @@ using Nebula.Configuration;
 using Nebula.Modules;
 using Nebula.Utilities;
 using Virial.Assignable;
+using Virial.Configuration;
 using static Il2CppMono.Security.X509.X520;
 
 namespace Nebula.Roles;
@@ -15,9 +16,9 @@ public class NebulaRoleHoler : Attribute
 
 }
 
-public abstract class AbstractRole : IAssignableBase
+public abstract class AbstractRole : IAssignableBase, DefinedRole
 {
-    public abstract RoleCategory RoleCategory { get; }
+    public abstract RoleCategory Category { get; }
     //内部用の名称。AllRolesのソートに用いる
     public virtual string InternalName { get => LocalizedName; }
     //翻訳キー用の名称。
@@ -26,6 +27,7 @@ public abstract class AbstractRole : IAssignableBase
     public virtual string IntroBlurb { get => Language.Translate("role." + LocalizedName + ".blurb"); }
     public virtual string ShortName { get => Language.Translate("role." + LocalizedName + ".short"); }
     public abstract Color RoleColor { get; }
+    Virial.Color DefinedRole.RoleColor => new Virial.Color(RoleColor);
     public virtual bool IsDefaultRole { get => false; }
     public abstract RoleInstance CreateInstance(PlayerModInfo player, int[] arguments);
     public int Id { get; set; }
@@ -40,6 +42,7 @@ public abstract class AbstractRole : IAssignableBase
 
     //For Config
     public virtual NebulaModifierFilterConfigEntry? ModifierFilter { get => null; }
+    
     public virtual IEnumerable<IAssignableBase> RelatedOnConfig() { yield break; }
     public virtual ConfigurationHolder? RelatedConfig { get => null; }
 
@@ -48,6 +51,8 @@ public abstract class AbstractRole : IAssignableBase
 
     public virtual bool CanBeGuess { get => true; }
     public virtual bool IsSpawnable { get => true; }
+
+    ModifierFilter? DefinedRole.ModifierFilter => ModifierFilter;
 
     public abstract void Load();
 
@@ -75,7 +80,7 @@ public abstract class ConfigurableRole : AbstractRole {
     public override sealed void Load()
     {
         SerializableDocument.RegisterColor("role." + InternalName, RoleColor);
-        RoleConfig = new ConfigurationHolder("options.role." + InternalName, new ColorTextComponent(RoleColor, new TranslateTextComponent("role." + LocalizedName + ".name")), myTabMask ?? ConfigurationTab.FromRoleCategory(RoleCategory), CustomGameMode.AllGameModeMask);
+        RoleConfig = new ConfigurationHolder("options.role." + InternalName, new ColorTextComponent(RoleColor, new TranslateTextComponent("role." + LocalizedName + ".name")), myTabMask ?? ConfigurationTab.FromRoleCategory(Category), CustomGameMode.AllGameModeMask);
         RoleConfig.Priority = IsDefaultRole ? 0 : 1;
         RoleConfig.RelatedAssignable = this;
         LoadOptions();
@@ -124,27 +129,27 @@ public abstract class ConfigurableRole : AbstractRole {
 
         public KillCoolDownConfiguration(ConfigurationHolder holder, string id, KillCoolDownType defaultType, float step, float immediateMin, float immediateMax, float relativeMin, float relativeMax, float ratioStep, float ratioMin, float ratioMax, float defaultImmediate, float defaultRelative, float defaultRatio)
         {
-            new NebulaFunctionProperty(holder.Id + "." + id, () => NebulaConfiguration.SecDecorator.Invoke(CurrentCoolDown), () => CurrentCoolDown);
+            new NebulaGlobalFunctionProperty(holder.Id + "." + id, () => NebulaConfiguration.SecDecorator.Invoke(CurrentCoolDown), () => CurrentCoolDown);
 
             selectionOption = new NebulaConfiguration(holder, id, null, AllSelections, (int)defaultType, (int)defaultType);
             selectionOption.Editor = () =>
             {
                 var currentOption = GetCurrentOption();
 
-                return new CombinedContext(0.55f, IMetaContext.AlignmentOption.Center,
-                    new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(2.5f, TMPro.TextAlignmentOptions.Left)) { RawText = selectionOption.Title.Text },
+                return new CombinedContextOld(0.55f, IMetaContextOld.AlignmentOption.Center,
+                    new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(2.5f, TMPro.TextAlignmentOptions.Left)) { RawText = selectionOption.Title.GetString() },
                     NebulaConfiguration.OptionTextColon,
-                    new MetaContext.HorizonalMargin(0.04f),
+                    new MetaContextOld.HorizonalMargin(0.04f),
                     NebulaConfiguration.OptionButtonContext(() => selectionOption.ChangeValue(true), selectionOption.ToDisplayString(), 0.9f),
-                    new MetaContext.HorizonalMargin(0.2f),
+                    new MetaContextOld.HorizonalMargin(0.2f),
                     NebulaConfiguration.OptionButtonContext(() => currentOption.ChangeValue(false), "<<"),
-                    new MetaContext.Text(NebulaConfiguration.OptionValueAttr) { RawText = currentOption.ToDisplayString() },
+                    new MetaContextOld.Text(NebulaConfiguration.OptionValueAttr) { RawText = currentOption.ToDisplayString() },
                     NebulaConfiguration.OptionButtonContext(() => currentOption.ChangeValue(true), ">>")
                 );
             };
             selectionOption.Shower = () =>
             {
-                var str = selectionOption.Title.Text + " : ";
+                var str = selectionOption.Title.GetString() + " : ";
                 switch (selectionOption.CurrentValue)
                 {
                     case 0:
@@ -204,24 +209,24 @@ public abstract class ConfigurableRole : AbstractRole {
 
             coolDownOption = durationOption = usesOption = null;
 
-            List<IMetaParallelPlacable> list = new();
+            List<IMetaParallelPlacableOld> list = new();
             if (isOptional)
-                list.Add(new MetaContext.Button(() =>
+                list.Add(new MetaContextOld.Button(() =>
                 {
                     selectionOption.ChangeValue(true);
                     if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage();
                 }, new(TextAttribute.BoldAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial, Size = new(1.4f, 0.3f) })
                 { Text = selectionOption.Title });
             else
-                list.Add(new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.4f, TMPro.TextAlignmentOptions.Left)) { MyText = selectionOption.Title });
+                list.Add(new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(1.4f, TMPro.TextAlignmentOptions.Left)) { MyText = selectionOption.Title });
             list.Add(NebulaConfiguration.OptionTextColon);
 
             void AddOptionToEditor(NebulaConfiguration config)
             {
-                list.Add(new MetaContext.HorizonalMargin(0.1f));
-                list.Add(new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.1f)) { MyText = config!.Title });
+                list.Add(new MetaContextOld.HorizonalMargin(0.1f));
+                list.Add(new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(1.1f)) { MyText = config!.Title });
                 list.Add(NebulaConfiguration.OptionButtonContext(() => config.ChangeValue(false), "<<"));
-                list.Add(new MetaContext.Text(NebulaConfiguration.OptionShortValueAttr) { MyText = new LazyTextComponent(() => config.ToDisplayString()) });
+                list.Add(new MetaContextOld.Text(NebulaConfiguration.OptionShortValueAttr) { MyText = new LazyTextComponent(() => config.ToDisplayString()) });
                 list.Add(NebulaConfiguration.OptionButtonContext(() => config.ChangeValue(true), ">>"));
             }
 
@@ -246,17 +251,17 @@ public abstract class ConfigurableRole : AbstractRole {
 
             selectionOption.Editor = () =>
             {
-                MetaContext context = new();
+                MetaContextOld context = new();
                 if (isOptional && !selectionOption.GetBool())
-                    context.Append(new CombinedContext(
-                        new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.8f)) { TranslationKey = "role.general.canUseVent" },
+                    context.Append(new CombinedContextOld(
+                        new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(1.8f)) { TranslationKey = "role.general.canUseVent" },
                         NebulaConfiguration.OptionTextColon,
-                        new MetaContext.HorizonalMargin(0.1f),
+                        new MetaContextOld.HorizonalMargin(0.1f),
                         NebulaConfiguration.OptionButtonContext(() => selectionOption.ChangeValue(true), selectionOption.ToDisplayString())
                         ));
 
                 if (!isOptional || selectionOption.GetBool())
-                    context.Append(new CombinedContext(0.55f, IMetaContext.AlignmentOption.Center, list.ToArray()));
+                    context.Append(new CombinedContextOld(0.55f, IMetaContextOld.AlignmentOption.Center, list.ToArray()));
                 return context;
             };
             selectionOption.Shower = () =>
@@ -265,7 +270,7 @@ public abstract class ConfigurableRole : AbstractRole {
                 {
                     return Language.Translate("role.general.canUseVent") + " : " + selectionOption.ToDisplayString();
                 }
-                var str = selectionOption.Title.Text + " :";
+                var str = selectionOption.Title.GetString() + " :";
                 if (coolDownOption != null) str += "\n" + Language.Translate("role.general.ventCoolDown.short") + " : " + coolDownOption.ToDisplayString();
                 if (durationOption != null) str += "\n" + Language.Translate("role.general.ventDuration.short") + " : " + durationOption.ToDisplayString();
                 if (usesOption != null) str += "\n" + Language.Translate("role.general.ventUses.short") + " : " + usesOption.ToDisplayString();
@@ -312,27 +317,27 @@ public abstract class ConfigurableStandardRole : ConfigurableRole
         {
             if (RoleCount <= 1)
             {
-                return new CombinedContext(0.55f, IMetaContext.AlignmentOption.Center,
-                new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.8f)) { RawText = ChanceOptionText.Text },
+                return new CombinedContextOld(0.55f, IMetaContextOld.AlignmentOption.Center,
+                new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(1.8f)) { RawText = ChanceOptionText.GetString() },
                 NebulaConfiguration.OptionTextColon,
                 NebulaConfiguration.OptionButtonContext(() => RoleChanceOption.ChangeValue(false), "<<"),
-                new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(0.8f)) { RawText = RoleChanceOption.ToDisplayString() },
+                new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(0.8f)) { RawText = RoleChanceOption.ToDisplayString() },
                 NebulaConfiguration.OptionButtonContext(() => RoleChanceOption.ChangeValue(true), ">>")
                 );
             }
             else
             {
-                return new CombinedContext(0.55f, IMetaContext.AlignmentOption.Center,
-               new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.8f)) { RawText = ChanceOptionText.Text },
+                return new CombinedContextOld(0.55f, IMetaContextOld.AlignmentOption.Center,
+               new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(1.8f)) { RawText = ChanceOptionText.GetString() },
                NebulaConfiguration.OptionTextColon,
                NebulaConfiguration.OptionButtonContext(() => RoleChanceOption.ChangeValue(false), "<<"),
-               new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(0.8f)) { RawText = RoleChanceOption.ToDisplayString() },
+               new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(0.8f)) { RawText = RoleChanceOption.ToDisplayString() },
                NebulaConfiguration.OptionButtonContext(() => RoleChanceOption.ChangeValue(true), ">>"),
-               new MetaContext.HorizonalMargin(0.3f),
-               new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(1.4f)) { RawText = SecondaryChanceOptionText.Text },
+               new MetaContextOld.HorizonalMargin(0.3f),
+               new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(1.4f)) { RawText = SecondaryChanceOptionText.GetString() },
                NebulaConfiguration.OptionTextColon,
                NebulaConfiguration.OptionButtonContext(() => RoleSecondaryChanceOption.ChangeValue(false), "<<"),
-               new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(0.8f)) { RawText = RoleSecondaryChanceOption.ToDisplayString() },
+               new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(0.8f)) { RawText = RoleSecondaryChanceOption.ToDisplayString() },
                NebulaConfiguration.OptionButtonContext(() => RoleSecondaryChanceOption.ChangeValue(true), ">>")
                );
             }

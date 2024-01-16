@@ -9,6 +9,7 @@ using Nebula.Roles.Complex;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using Virial.Assignable;
 using Virial.Game;
 using Virial.Text;
 using static Il2CppSystem.Globalization.CultureInfo;
@@ -34,6 +35,7 @@ public static class PlayerState
     public static TranslatableTag Revived = new("state.revived");
     public static TranslatableTag Pseudocide = new("state.pseudocide");
     public static TranslatableTag Deranged = new("state.deranged");
+    public static TranslatableTag Cursed = new("state.cursed");
 
     public static void Load()
     {
@@ -142,7 +144,9 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
     private bool requiredUpdateMouseAngle { get; set; }
     public void RequireUpdateMouseAngle()=> requiredUpdateMouseAngle= true;
     
-    public byte? HoldingDeadBody { get; private set; } = null;
+    public byte? HoldingDeadBodyId { get; private set; } = null;
+    public bool HoldingAnyDeadBody => HoldingDeadBodyId != null;
+
     private DeadBody? deadBodyCache { get; set; } = null;
     private List<SpeedModulator> speedModulators = new();
     private List<AttributeModulator> attributeModulators = new();
@@ -150,6 +154,9 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
     public RoleInstance Role => myRole;
     private RoleInstance myRole = null!;
     private List<ModifierInstance> myModifiers = new();
+    RuntimeRole Virial.Game.Player.Role => myRole;
+    IEnumerable<RuntimeModifier> Virial.Game.Player.Modifiers => myModifiers;
+
 
     private List<OutfitCandidate> outfits = new List<OutfitCandidate>();
     private TMPro.TextMeshPro roleText;
@@ -301,7 +308,8 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
         {
             text += myRole?.DisplayRoleName ?? "Undefined";
 
-            ModifierAction(m => m.DecorateRoleName(ref text));
+            AssignableAction(r => { var newName = r.OverrideRoleName(text, false); if (newName != null) text = newName; });
+            AssignableAction(m => m.DecorateRoleName(ref text));
 
             if (myRole?.HasAnyTasks ?? true)
                 text += (" (" + Tasks.ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((HasCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
@@ -322,11 +330,15 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
     {
         myRole?.Inactivate();
 
-        if (role.RoleCategory == Virial.Assignable.RoleCategory.ImpostorRole)
-            DestroyableSingleton<RoleManager>.Instance.SetRole(MyControl, MyControl.Data.IsDead ? RoleTypes.ImpostorGhost : RoleTypes.Impostor);
+        var isDead = MyControl.Data.IsDead;
+
+        if (role.Category == Virial.Assignable.RoleCategory.ImpostorRole)
+            DestroyableSingleton<RoleManager>.Instance.SetRole(MyControl, RoleTypes.Impostor);
         else
-            DestroyableSingleton<RoleManager>.Instance.SetRole(MyControl, MyControl.Data.IsDead ? RoleTypes.CrewmateGhost : RoleTypes.Crewmate);
-        
+            DestroyableSingleton<RoleManager>.Instance.SetRole(MyControl, RoleTypes.Crewmate);
+
+        if(isDead) MyControl.Die(DeathReason.Kill, false);
+
         myRole = role.CreateInstance(this, arguments);
 
         if(NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized)myRole.OnActivated();
@@ -508,12 +520,18 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
        }
        );
 
+    [NebulaRPC]
+    public void RpcTest(int val)
+    {
+        Debug.Log(PlayerId + ", " + val);
+    }
+
     private void UpdateHoldingDeadBody()
     {
-        if (!HoldingDeadBody.HasValue) return;
+        if (!HoldingDeadBodyId.HasValue) return;
 
         //同じ死体を持つプレイヤーがいる
-        if (NebulaGameManager.Instance?.AllPlayerInfo().Any(p => p.PlayerId < PlayerId && p.HoldingDeadBody.HasValue && p.HoldingDeadBody.Value == HoldingDeadBody.Value) ?? false)
+        if (NebulaGameManager.Instance?.AllPlayerInfo().Any(p => p.PlayerId < PlayerId && p.HoldingDeadBodyId.HasValue && p.HoldingDeadBodyId.Value == HoldingDeadBodyId.Value) ?? false)
         {
             deadBodyCache = null;
             if (AmOwner) ReleaseDeadBody();
@@ -521,9 +539,9 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
         }
 
 
-        if (!deadBodyCache || deadBodyCache!.ParentId != HoldingDeadBody.Value)
+        if (!deadBodyCache || deadBodyCache!.ParentId != HoldingDeadBodyId.Value)
         {
-            deadBodyCache = Helpers.AllDeadBodies().FirstOrDefault((d) => d.ParentId == HoldingDeadBody.Value);
+            deadBodyCache = Helpers.AllDeadBodies().FirstOrDefault((d) => d.ParentId == HoldingDeadBodyId.Value);
             if (!deadBodyCache)
             {
                 deadBodyCache = null;
@@ -586,11 +604,11 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
           if (message.bodyId == byte.MaxValue)
           {
               if(info.deadBodyCache && message.pos.magnitude < 10000) info.deadBodyCache!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
-              info.HoldingDeadBody = null;
+              info.HoldingDeadBodyId = null;
           }
           else
           {
-              info.HoldingDeadBody = message.bodyId;
+              info.HoldingDeadBodyId = message.bodyId;
               var deadBody = Helpers.AllDeadBodies().FirstOrDefault(d => d.ParentId == message.bodyId);
               info.deadBodyCache = deadBody;
               if (deadBody && message.pos.magnitude < 10000) deadBody!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
@@ -713,9 +731,8 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
 
         if (MyControl.cosmetics.currentPet)
         {
-            if (MyControl.cosmetics.currentPet.rend != null) MyControl.cosmetics.currentPet.rend.color = color;
-
-            if (MyControl.cosmetics.currentPet.shadowRend != null) MyControl.cosmetics.currentPet.shadowRend.color = color;
+            foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = color;
+            foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = color;
         }
 
         if (MyControl.cosmetics.visor != null) MyControl.cosmetics.visor.Image.color = color;

@@ -113,12 +113,12 @@ public class ModUpdater
         public IEnumerator CoUpdateAndShowDialog()
         {
             var preWindow = MetaScreen.GenerateWindow(new Vector2(3f, 1.2f), null, new Vector3(0, 0, 0), true, true, true);
-            preWindow.SetContext(new MetaContext.Text(new(TextAttribute.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.waitFinishing" });
+            preWindow.SetContext(new MetaContextOld.Text(new(TextAttribute.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.waitFinishing" });
             yield return UpdateAsync().WaitAsCoroutine();
             preWindow.CloseScreen();
 
             var postWindow = MetaScreen.GenerateWindow(new Vector2(3f, 1.2f), null, new Vector3(0, 0, 0), true, true, true);
-            postWindow.SetContext(new MetaContext.Text(new(TextAttribute.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.finishUpdate" });
+            postWindow.SetContext(new MetaContextOld.Text(new(TextAttribute.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.finishUpdate" });
         }
     }
 

@@ -40,7 +40,7 @@ public class NebulaSettingMenu : MonoBehaviour
         MainHolderMask.sprite = VanillaAsset.FullScreenSprite;
         MainHolderMask.transform.localScale = new Vector3(6f,4.5f);
         MainHolder = UnityHelper.CreateObject<MetaScreen>("MainHolder", MainHolderParent.transform, new Vector3(0f, 0f));
-        MainHolder.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += MetaContext.ScrollView.GetDistHistoryUpdater(() => MainHolder.transform.localPosition.y, "SettingsMenu");
+        MainHolder.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += MetaContextOld.ScrollView.GetDistHistoryUpdater(() => MainHolder.transform.localPosition.y, "SettingsMenu");
 
         FirstScroller = VanillaAsset.GenerateScroller(new Vector2(4f, 4.5f), MainHolderParent.transform, new Vector3(2.2f, -0.05f, -1f), MainHolder.transform, new FloatRange(0f, 1f),4.6f);
         UpdateLeftTab();
@@ -61,7 +61,7 @@ public class NebulaSettingMenu : MonoBehaviour
         TextAttribute.TitleAttr.Reflect(SecondTitle);
         SecondTitle.text = "Configuration Title";
         SecondTitle.transform.localPosition = new Vector3(-2.8f, 1.9f, -10f);
-        new MetaContext.Button(() => OpenFirstPage(), new(TextAttribute.BoldAttr) { Size = new Vector2(0.4f, 0.28f) }) { RawText = "<<" }.Generate(SecondPage, new Vector2(-4.8f, 1.9f),out _);
+        new MetaContextOld.Button(() => OpenFirstPage(), new(TextAttribute.BoldAttr) { Size = new Vector2(0.4f, 0.28f) }) { RawText = "<<" }.Generate(SecondPage, new Vector2(-4.8f, 1.9f),out _);
         SecondTopScreen = UnityHelper.CreateObject<MetaScreen>("SecondTopScreen", SecondPage.transform, new Vector3(0f, 1.9f, -5f));
 
         OpenFirstPage();
@@ -69,27 +69,27 @@ public class NebulaSettingMenu : MonoBehaviour
 
     private void UpdateLeftTab()
     {
-        MetaContext context = new();
+        MetaContextOld context = new();
 
-        context.Append(new MetaContext.Text(new(TextAttribute.BoldAttr)) { RawText = Language.Translate("options.gamemode"), Alignment = IMetaContext.AlignmentOption.Center });
+        context.Append(new MetaContextOld.Text(new(TextAttribute.BoldAttr)) { RawText = Language.Translate("options.gamemode"), Alignment = IMetaContextOld.AlignmentOption.Center });
         
-        context.Append(new MetaContext.Button(() => {
+        context.Append(new MetaContextOld.Button(() => {
             GeneralConfigurations.GameModeOption.ChangeValue(true);
             UpdateMainTab();
             UpdateLeftTab();
-        }, new(TextAttribute.BoldAttr) { Size = new(1.5f, 0.3f) }) { RawText = Language.Translate(GeneralConfigurations.CurrentGameMode.TranslateKey),Alignment = IMetaContext.AlignmentOption.Center});
-        context.Append(new MetaContext.VerticalMargin(0.2f));
+        }, new(TextAttribute.BoldAttr) { Size = new(1.5f, 0.3f) }) { RawText = Language.Translate(GeneralConfigurations.CurrentGameMode.TranslateKey),Alignment = IMetaContextOld.AlignmentOption.Center});
+        context.Append(new MetaContextOld.VerticalMargin(0.2f));
         foreach (var tab in ConfigurationTab.AllTab)
         {
             ConfigurationTab copiedTab = tab;
             context.Append(
-                new MetaContext.Button(() => {
+                new MetaContextOld.Button(() => {
                     CurrentTab = copiedTab;
                     UpdateMainTab();
                 }, new(TextAttribute.BoldAttr) { Size = new(1.7f, 0.26f) })
                 {
                     RawText = tab.DisplayName,
-                    Alignment = IMetaContext.AlignmentOption.Center,
+                    Alignment = IMetaContextOld.AlignmentOption.Center,
                     PostBuilder = (button, renderer, text) =>
                     {
                         renderer.color = tab.Color;
@@ -105,11 +105,11 @@ public class NebulaSettingMenu : MonoBehaviour
 
     private void UpdateMainTab(bool stay = false)
     {
-        if (!stay) MetaContext.ScrollView.RemoveDistHistory("SettingsMenu");
-        MainHolder.transform.localPosition = new Vector3(0, MetaContext.ScrollView.TryGetDistHistory("SettingsMenu"), 0);
+        if (!stay) MetaContextOld.ScrollView.RemoveDistHistory("SettingsMenu");
+        MainHolder.transform.localPosition = new Vector3(0, MetaContextOld.ScrollView.TryGetDistHistory("SettingsMenu"), 0);
         RightHolder.SetContext(null);
 
-        MetaContext context = new();
+        MetaContextOld context = new();
 
         TextAttribute mainTextAttr = new(TextAttribute.BoldAttr)
         {
@@ -134,9 +134,9 @@ public class NebulaSettingMenu : MonoBehaviour
 
             if (!holder.IsShown || ((holder.TabMask & CurrentTab) == 0) || (holder.GameModeMask & GeneralConfigurations.CurrentGameMode) == 0) continue;
 
-            context.Append(new MetaContext.Button(() => OpenSecondaryPage(copiedHolder), mainTextAttr)
+            context.Append(new MetaContextOld.Button(() => OpenSecondaryPage(copiedHolder), mainTextAttr)
             {
-                RawText = holder.Title.Text,
+                RawText = holder.Title.GetString(),
                 PostBuilder = (button, renderer, text) => { 
                     renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                     text.transform.localPosition += new Vector3(0.03f, -0.03f, 0f);
@@ -151,13 +151,13 @@ public class NebulaSettingMenu : MonoBehaviour
                     {
                         StringBuilder builder = new();
                         copiedHolder.GetShownString(ref builder);
-                        RightHolder.SetContext(new(2.2f, 3.8f),new MetaContext.Text(RightTextAttr) { RawText = builder.ToString() });
+                        RightHolder.SetContext(new(2.2f, 3.8f),new MetaContextOld.Text(RightTextAttr) { RawText = builder.ToString() });
                     });
                 },
-                Alignment = IMetaContext.AlignmentOption.Center,
+                Alignment = IMetaContextOld.AlignmentOption.Center,
                 Color = (copiedHolder.IsActivated?.Invoke() ?? true) ? Color.white : new Color(0.2f,0.2f,0.2f)
             });
-            context.Append(new MetaContext.VerticalMargin(0.05f));
+            context.Append(new MetaContextOld.VerticalMargin(0.05f));
         }
 
         FirstScroller.SetYBoundsMax(MainHolder.SetContext(new Vector2(3.2f, 4.5f), context) - 4.5f);
@@ -173,7 +173,7 @@ public class NebulaSettingMenu : MonoBehaviour
 
         SecondScroller.SetYBoundsMax(SecondScreen.SetContext(new Vector2(7.8f, 4.1f), CurrentHolder.GetContext()) - 4.1f);
 
-        List<IMetaParallelPlacable> topContents = new();
+        List<IMetaParallelPlacableOld> topContents = new();
 
         if(CurrentHolder.RelatedAssignable != null)
         {
@@ -187,19 +187,19 @@ public class NebulaSettingMenu : MonoBehaviour
                     if (!screen)
                         screen = MetaScreen.GenerateWindow(new Vector2(5f, 3.2f), HudManager.Instance.transform, Vector3.zero, true, true);
 
-                    MetaContext inner = new();
-                    inner.Append(Roles.Roles.AllIntroAssignableModifiers().Where(m => role.CanLoadDefault(m)), (m) => new MetaContext.Button(() => { role.ModifierFilter!.ToggleAndShare(m); OpenFilterScreen(screen,role); }, RelatedInsideButtonAttr)
+                    MetaContextOld inner = new();
+                    inner.Append(Roles.Roles.AllIntroAssignableModifiers().Where(m => role.CanLoadDefault(m)), (m) => new MetaContextOld.Button(() => { role.ModifierFilter!.ToggleAndShare(m); OpenFilterScreen(screen,role); }, RelatedInsideButtonAttr)
                     {
                         RawText = m.DisplayName.Color(m.RoleColor),
                         PostBuilder = (button, renderer, text) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask,
-                        Alignment = IMetaContext.AlignmentOption.Center,
+                        Alignment = IMetaContextOld.AlignmentOption.Center,
                         Color = role.ModifierFilter!.Contains(m) ? new Color(0.24f, 0.24f, 0.24f) : Color.white
                     }, 3, -1, 0, 0.6f);
 
-                    screen!.SetContext(new MetaContext.ScrollView(new(5f, 3.1f), inner, true));
+                    screen!.SetContext(new MetaContextOld.ScrollView(new(5f, 3.1f), inner, true) { ScrollerTag = "roleFilter" });
                 }
 
-                if (role.ModifierFilter != null) topContents.Add(new MetaContext.Button(() => OpenFilterScreen(null, role), RelatedButtonAttr) { TranslationKey = "options.role.modifierFilter" });
+                if (role.ModifierFilter != null) topContents.Add(new MetaContextOld.Button(() => OpenFilterScreen(null, role), RelatedButtonAttr) { TranslationKey = "options.role.modifierFilter" });
             }else if(assignable is IntroAssignableModifier iam)
             {
                 //付与されうるModifier
@@ -209,46 +209,46 @@ public class NebulaSettingMenu : MonoBehaviour
                     if (!screen)
                         screen = MetaScreen.GenerateWindow(new Vector2(5f, 3.2f), HudManager.Instance.transform, Vector3.zero, true, true);
 
-                    MetaContext inner = new();
-                    inner.Append(Roles.Roles.AllRoles.Where(r=>r.ModifierFilter != null && r.CanLoadDefault(modifier)), (role) => new MetaContext.Button(() => { role.ModifierFilter!.ToggleAndShare(iam); OpenFilterScreen(screen, modifier); }, RelatedInsideButtonAttr)
+                    MetaContextOld inner = new();
+                    inner.Append(Roles.Roles.AllRoles.Where(r=>r.ModifierFilter != null && r.CanLoadDefault(modifier)), (role) => new MetaContextOld.Button(() => { role.ModifierFilter!.ToggleAndShare(iam); OpenFilterScreen(screen, modifier); }, RelatedInsideButtonAttr)
                     {
                         RawText = role.DisplayName.Color(role.RoleColor),
                         PostBuilder = (button, renderer, text) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask,
-                        Alignment = IMetaContext.AlignmentOption.Center,
+                        Alignment = IMetaContextOld.AlignmentOption.Center,
                         Color = role.ModifierFilter!.Contains(modifier) ? new Color(0.24f, 0.24f, 0.24f) : Color.white
                     }, 3, -1, 0, 0.6f);
 
-                    screen!.SetContext(new MetaContext.ScrollView(new(5f, 3.1f), inner, true));
+                    screen!.SetContext(new MetaContextOld.ScrollView(new(5f, 3.1f), inner, true) { ScrollerTag = "modifierFilter"});
                 }
 
-                topContents.Add(new MetaContext.Button(() => OpenFilterScreen(null, iam), RelatedButtonAttr) { TranslationKey = "options.role.modifierFilter" });
+                topContents.Add(new MetaContextOld.Button(() => OpenFilterScreen(null, iam), RelatedButtonAttr) { TranslationKey = "options.role.modifierFilter" });
             }
 
-            foreach (var related in assignable.RelatedOnConfig()) if(related.RelatedConfig != null) topContents.Add(new MetaContext.Button(() => OpenSecondaryPage(related.RelatedConfig!), RelatedButtonAttr) { RawText = related.DisplayName.Color(related.RoleColor) });
+            foreach (var related in assignable.RelatedOnConfig()) if(related.RelatedConfig != null) topContents.Add(new MetaContextOld.Button(() => OpenSecondaryPage(related.RelatedConfig!), RelatedButtonAttr) { RawText = related.DisplayName.Color(related.RoleColor) });
         }
 
-        if (ConfigPreset.AllPresets.Any(preset => preset.relatedHolder == CurrentHolder.Id))
+        if (IConfigPreset.AllPresets.Any(preset => preset.RelatedHolder == CurrentHolder.Id))
         {
             void OpenPresetScreen()
             { 
                 var screen = MetaScreen.GenerateWindow(new Vector2(3.8f, 3.2f), HudManager.Instance.transform, Vector3.zero, true, true);
 
-                MetaContext inner = new();
-                inner.Append(ConfigPreset.AllPresets.Where(preset => preset.relatedHolder == CurrentHolder.Id), (preset) => new MetaContext.Button(() => { preset.LoadPreset(new()); UpdateSecondaryPage(); screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(2.4f, 0.35f) } )
+                MetaContextOld inner = new();
+                inner.Append(IConfigPreset.AllPresets.Where(preset => preset.RelatedHolder == CurrentHolder.Id), (preset) => new MetaContextOld.Button(() => { preset.LoadPreset(); UpdateSecondaryPage(); screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(2.4f, 0.35f) } )
                 {
                     RawText = preset.DisplayName,
-                    Alignment = IMetaContext.AlignmentOption.Center,
+                    Alignment = IMetaContextOld.AlignmentOption.Center,
                 }.SetAsMaskedButton(), 1, -1, 0, 0.64f);
 
-                screen!.SetContext(new MetaContext.ScrollView(new(3.8f, 3.1f), inner, true));
+                screen!.SetContext(new MetaContextOld.ScrollView(new(3.8f, 3.1f), inner, true));
             }
 
 
-            topContents.Add(new MetaContext.Button(() => OpenPresetScreen(), RelatedButtonAttr) { TranslationKey = "preset.preset" });
+            topContents.Add(new MetaContextOld.Button(() => OpenPresetScreen(), RelatedButtonAttr) { TranslationKey = "preset.preset" });
         }
 
-        SecondTopScreen.SetContext(new Vector2(7.8f,0.4f),new CombinedContext(0.4f, topContents.ToArray()) { Alignment = IMetaContext.AlignmentOption.Right});
-        SecondTitle.text = CurrentHolder.Title.Text;
+        SecondTopScreen.SetContext(new Vector2(7.8f,0.4f),new CombinedContextOld(0.4f, topContents.ToArray()) { Alignment = IMetaContextOld.AlignmentOption.Right});
+        SecondTitle.text = CurrentHolder.Title.GetString();
     }
 
     private void OpenSecondaryPage(ConfigurationHolder holder) 

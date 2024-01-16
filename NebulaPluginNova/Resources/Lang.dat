@@ -4,6 +4,7 @@
 "title.label.nebula" : "Nebula on the Ship"
 
 "title.buttons.update" : "Update to Latest NoS"
+"title.buttons.achievements" : "Achievements"
 "title.buttons.addons" : "Add-ons"
 "title.buttons.developersStudio" : "Dev. Studio"
 
@@ -149,6 +150,8 @@
 "options.role.crewmateCount" : "Crewmate Assignment"
 "options.role.impostorCount" : "Impostor Assignment"
 "options.role.neutralCount" : "Neutral Assignment"
+"options.role.definiteCount" : "Definitely"
+"options.role.randomCount" : "Randomly"
 
 "options.killCoolDown.type.immediate" : "Immediate"
 "options.killCoolDown.type.relative" : "Relative"
@@ -188,6 +191,11 @@
 "role.trapper.placeCoolDown" : "Place Cool Down"
 "role.trapper.placeDuration" : "Place Duration"
 "role.trapper.numOfCharges" : "Num Of Charges"
+"role.trapper.speedTrapSize" : "Speed Trap Size"
+"role.trapper.accelRate" : "Accel Rate"
+"role.trapper.decelRate" : "Decel Rate"
+"role.trapper.speedDuration" : "Accel / Decel Duration"
+ 
 
 # Common Roles
 
@@ -262,6 +270,7 @@
 "role.niceTrapper.blurb" : "Entrap and Find the Impostors"
 "options.role.niceTrapper.detail" : "Nice Trapper sets traps with various effects."
 "options.role.niceTrapper.costOfCommTrap" : "Cost Of Comm. Trap"
+"options.role.niceTrapper.commTrapSize" : "Comm. Trap Size"
 
 "role.madmate.name" : "Madmate"
 "role.madmate.short" : "Ma"
@@ -271,6 +280,9 @@
 "options.role.madmate.embroilVotersOnExile" : "Embroil Voters On Exile"
 "options.role.madmate.canFixLight" : "Can Fix Light"
 "options.role.madmate.canFixComms" : "Can Fix Comms"
+"options.role.madmate.hasImpostorVision" : "Has Impostor Vision"
+"options.role.madmate.canUseVents" : "Can Use Vents"
+"options.role.madmate.canMoveInVents" : "Can Move In Vents"
 
 "role.mayor.name" : "Mayor"
 "role.mayor.short" : "M"
@@ -359,6 +371,7 @@
 "options.role.evilTrapper.detail" : "Evil Trapper sets traps with various effects.<br>Killing by trap shares its kill cool down too."
 "options.role.evilTrapper.killTrapSoundDistance" : "Kill Trap Sound Distance"
 "options.role.evilTrapper.costOfKillTrap" : "Cost Of Kill Trap"
+"options.role.evilTrapper.killTrapSize" : "Kill Trap Size"
 
 "role.illusioner.name" : "Illusioner"
 "role.illusioner.short" : "Il"
@@ -436,7 +449,7 @@
 "role.stirrer.name" : "Stirrer"
 "role.stirrer.short" : "St"
 "role.stirrer.blurb" : "Hallucination Kills You"
-"options.role.stirrer.detail" : "stirrer can inflict fake sabotage on players.<br>Fake emergency sabotage kills unresolved players."
+"options.role.stirrer.detail" : "Stirrer inflicts fake sabotage on players.<br>Unsolved fake emergency sabotage would eventually kill them."
 "options.role.stirrer.stirCoolDown" : "Stir Cool Down"
 "options.role.stirrer.sabotageCharge" : "Sabotage Charge"
 "options.role.stirrer.sabotageMaxCharge" : "Sabotage Max Charge"
@@ -479,7 +492,7 @@
 "role.jester.blurb" : "Get Voted Out"
 "options.role.jester.detail" : "Jester schemes to be exiled to win.<br>Crewmates must not vote for the Jester!"
 "options.role.jester.canDragDeadBody" : "Can Drag Dead Body"
-"options.role.jester.canFixComm" : "Can Fix Comms"
+"options.role.jester.canFixComms" : "Can Fix Comms"
 "options.role.jester.canFixLight" : "Can Fix Light"
 
 "role.paparazzo.name" : "Paparazzo"
@@ -513,6 +526,13 @@
 "options.role.bloody.detail" : "When Bloody is murdered, the killer lefts bloody footprints for a while."
 "options.role.bloody.curseDuration" : "Curse Duration"
 
+"role.damned.name" : "Damned"
+"options.role.damned.detail" : "Damned is unconscious modifier.<br>The curse of Damned prevents one kill and has a dynamic effect for game."
+"role.damned.prefix" : "Damned"
+"options.role.damned.takeOverRoleOfKiller" : "Take Over Role Of Killer"
+"options.role.damned.damnedMurderMyKiller" : "Damned Murder My Killer"
+"options.role.damned.killDelay" : "Kill Delay"
+
 "role.tieBreaker.name" : "Tie Breaker"
 "options.role.tieBreaker.detail" : "When the vote results in a tie, Tie Breaker cast an additional vote."
 
@@ -522,6 +542,16 @@
 "options.role.lover.numOfPairs" : "Num Of Pairs"
 "options.role.lover.chanceOfAssigningImpostors" : "Chance Of Assigning Impostors"
 "options.role.lover.allowExtraWin" : "Allow Extra Win" 
+
+"role.secret.name" : "Secret"
+"role.secret.short" : "?"
+"role.secret.blurb" : "Wake Up!"
+"role.secretInGame.name" : "Secret"
+"role.secretInGame.short" : "?"
+"role.secretInGame.blurb" : "Wake Up!"
+"options.role.secret.detail" : "Secret hides your role.<br>Players do task or kill for arousal."
+"options.role.secret.killingForArousal" : "Num Of Killing For Arousal"
+"options.role.secret.tasksForArousal" : "Num Of Tasks For Arousal"
 
 # Teams
 
@@ -727,6 +757,7 @@
 "help.tabs.modifiers" : "Modifiers"
 "help.tabs.options" : "Options"
 "help.tabs.slides" : "Slides"
+"help.tabs.achievements" : "Achievements"
 "help.slides.share" : "Share"
 "help.command" : "Commands"
 "help.command.nogame" : "No Game"
@@ -894,3 +925,13 @@
 "devStudio.ui.cosmetics.attributes.behindHat" : "Behind Hat"
 "devStudio.ui.cosmetics.hint.needToSetTitle" : "Enter the costume's name!"
 "devStudio.ui.cosmetics.failedToCopy" : "Failed to copy the file."
+
+# Achievements
+
+"achievement.ui.title" : "Achievements"
+"achievement.ui.cond" : "[Constraint]"
+"achievement.ui.allAchievements" : "All"
+"achievement.title.hidden" : "Unachieved"
+"achievement.title.hiddenDetail" : "Details have not been disclosed..."
+"achievement.type.challenge" : "Challenge"
+"achievement.type.secret" : "Secret"

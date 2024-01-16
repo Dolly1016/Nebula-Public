@@ -7,6 +7,9 @@ using Virial.Game;
 
 namespace Virial.Events.Player;
 
+/// <summary>
+/// プレイヤーが何者かにキルされた際に呼び出されます。
+/// </summary>
 public class PlayerMurderEvent : PlayerDeadEvent
 {
     public Game.Player Killer { get; internal set; }

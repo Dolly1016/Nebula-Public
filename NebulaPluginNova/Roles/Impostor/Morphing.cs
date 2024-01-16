@@ -7,13 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Il2CppSystem.Net.NetworkInformation;
 
 namespace Nebula.Roles.Impostor;
 
 public class Morphing : ConfigurableStandardRole
 {
     static public Morphing MyRole = new Morphing();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "morphing";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -43,9 +44,17 @@ public class Morphing : ConfigurableStandardRole
         static public ISpriteLoader SampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
         static public ISpriteLoader MorphButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
         public override AbstractRole Role => MyRole;
+
+        StaticAchievementToken? acTokenCommon = null;
+        StaticAchievementToken? acTokenAnother1 = null;
+        StaticAchievementToken? acTokenAnother2 = null;
+        AchievementToken<(bool kill,bool exile)>? acTokenChallenge = null;
+
         public Instance(PlayerModInfo player) : base(player)
         {
         }
+
+        GameData.PlayerOutfit? sample = null;
 
         public override void OnActivated()
         {
@@ -53,7 +62,8 @@ public class Morphing : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                GameData.PlayerOutfit? sample = null;
+                acTokenChallenge = new("morphing.challenge", (false, false), (val, _) => val.kill && val.exile);
+
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
 
@@ -66,7 +76,7 @@ public class Morphing : ConfigurableStandardRole
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
-                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample, morphButton.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample, morphButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(MyRole.SampleCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
@@ -81,11 +91,30 @@ public class Morphing : ConfigurableStandardRole
                 morphButton.OnEffectStart = (button) =>
                 {
                     PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new("Morphing", 50, true, sample!)));
+                    acTokenCommon ??= new("morphing.common1");
                 };
                 morphButton.OnEffectEnd = (button) =>
                 {
                     PlayerModInfo.RpcRemoveOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, "Morphing"));
                     morphButton.CoolDownTimer?.Start();
+                };
+                morphButton.OnUpdate = (button) =>
+                {
+                    //すれ違いチェック
+                    if (button.EffectActive && acTokenAnother2 == null)
+                    {
+                        int colorId = MyPlayer.GetOutfit(75).ColorId;
+                        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                        {
+                            if (p.AmOwner) continue;
+                            if (p.CurrentOutfit.ColorId != colorId) continue;
+                            if (p.MyControl.GetTruePosition().Distance(MyPlayer.MyControl.GetTruePosition()) < 0.8f)
+                            {
+                                acTokenAnother2 ??= new("morphing.another2");
+                                break;
+                            }
+                        }
+                    }
                 };
                 morphButton.OnMeeting = (button) =>
                 {
@@ -95,13 +124,36 @@ public class Morphing : ConfigurableStandardRole
                     {
                         if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                         sampleIcon = null;
-                        sample = null;
                     }
                 };
                 morphButton.CoolDownTimer = Bind(new Timer(MyRole.MorphCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 morphButton.EffectTimer = Bind(new Timer(MyRole.MorphDurationOption.GetFloat()));
                 morphButton.SetLabel("morph");
             }
+        }
+
+        public override void OnMeetingEnd()
+        {
+            base.OnMeetingEnd();
+
+            if (MyRole.LoseSampleOnMeetingOption) sample = null;
+        }
+
+        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        {
+            if (acTokenChallenge != null && exiled.GetModInfo()!.DefaultOutfit.ColorId == (sample?.ColorId ?? -1))
+                acTokenChallenge.Value.exile = true;
+        }
+
+        public override void OnKillPlayer(PlayerControl target)
+        {
+            var targetId = target.GetModInfo()?.GetOutfit(75).ColorId;
+            var sampleId = sample?.ColorId;
+            if (targetId.HasValue && sampleId.HasValue && targetId.Value == sampleId.Value)
+                acTokenAnother1 ??= new("morphing.another1");
+
+            if (morphButton != null && acTokenChallenge != null && morphButton.EffectActive)
+                acTokenChallenge.Value.kill = true;
         }
     }
 }

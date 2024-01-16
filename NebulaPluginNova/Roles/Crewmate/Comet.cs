@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Il2CppSystem.Runtime.CompilerServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ public class Comet : ConfigurableStandardRole
 {
     static public Comet MyRole = new Comet();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "comet";
     public override Color RoleColor => new Color(121f / 255f, 175f / 255f, 206f / 255f);
@@ -43,10 +44,15 @@ public class Comet : ConfigurableStandardRole
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BoostButton.png", 115f);
         private ModAbilityButton? boostButton = null;
+
+        AchievementToken<bool>? acTokenCommon;
+
         public override void OnActivated()
         {
             if (AmOwner)
             {
+                acTokenCommon = new((AmongUsUtil.CurrentMapId is 0 or 4) ? "comet.common1" : "comet.common2", false, (val, _) => val);
+
                 boostButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 boostButton.SetSprite(buttonSprite.GetSprite());
                 boostButton.Availability = (button) => MyPlayer.MyControl.CanMove;
@@ -58,6 +64,7 @@ public class Comet : ConfigurableStandardRole
                         PlayerModInfo.RpcSpeedModulator.Invoke(new(MyPlayer.PlayerId, new(MyRole.BlazeSpeedOption.GetFloat(), true, MyRole.BlazeDurationOption.GetFloat(), false, 100)));
                         PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new(PlayerAttribute.Invisible, MyRole.BlazeDurationOption.GetFloat(), false, 100)));
                     }
+                    acTokenCommon.Value = true;
                 };
                 boostButton.OnEffectEnd = (button) => boostButton.StartCoolDown();
                 boostButton.CoolDownTimer = Bind(new Timer(0f, MyRole.BlazeCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
@@ -71,6 +78,14 @@ public class Comet : ConfigurableStandardRole
         public override void EditLightRange(ref float range)
         {
             if(boostButton?.EffectActive ?? false) range *= MyRole.BlazeVisionOption.GetFloat();
+        }
+
+        public override void OnAnyoneMurderedLocal(PlayerControl dead, PlayerControl murderer)
+        {
+            if (!Helpers.AnyNonTriggersBetween(MyPlayer.MyControl.GetTruePosition(), dead.GetTruePosition(), out var vec) &&
+                vec.magnitude < MyRole.BlazeVisionOption.GetFloat() * 0.75f) 
+                new StaticAchievementToken("comet.challenge");
+
         }
     }
 }

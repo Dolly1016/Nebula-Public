@@ -1,9 +1,11 @@
-﻿using AmongUs.GameOptions;
+﻿using AmongUs.Data.Player;
+using AmongUs.GameOptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static GameData;
 
 namespace Nebula.Player;
 
@@ -20,6 +22,8 @@ public class PlayerTaskState
     public bool IsCompletedCurrentTasks => CurrentCompleted >= CurrentTasks;
     public bool HasExecutableTasks => CurrentTasks > 0;
 
+    AchievementToken<bool>? acTokenGhostTask = null;
+
     private PlayerControl player { get; init; }
 
     public PlayerTaskState(PlayerControl player)
@@ -29,6 +33,8 @@ public class PlayerTaskState
         GetTasks(out int shortTasks, out int longTasks, out int commonTasks);
         int sum = shortTasks + longTasks + commonTasks;
         Quota = TotalTasks = CurrentTasks = sum;
+
+        if (player.AmOwner) acTokenGhostTask = new("doTaskEvenDead", true, (val, _) => val && Quota >= 8 && TotalCompleted >= Quota);
     }
 
     public string ToString(bool canSee)
@@ -46,6 +52,8 @@ public class PlayerTaskState
     public void OnCompleteTask()
     {
         RpcUpdateTaskState.Invoke((player.PlayerId, TaskUpdateMessage.CompleteTask));
+
+        if (acTokenGhostTask != null) acTokenGhostTask.Value &= player.Data.IsDead;
     }
 
     public void BecomeToOutsider()
@@ -81,7 +89,7 @@ public class PlayerTaskState
     }
 
     //いま保持しているタスクを新たなものに切り替えます。
-    public void ReplaceTasks(int tasks)
+    public void ReplaceTasks(int tasks, int unacquired = 0)
     {
         TotalTasks -= CurrentTasks;
         Quota -= CurrentTasks;
@@ -90,16 +98,17 @@ public class PlayerTaskState
         CurrentTasks = tasks;
         CurrentCompleted = 0;
         TotalTasks += tasks;
-        Quota += tasks;
+        Quota += tasks + unacquired;
         RpcSyncTaskState.Invoke(this);
     }
 
-    public void GainExtraTasks(int tasks, bool addQuota = false)
+    public void GainExtraTasks(int tasks, bool addQuota = false, int unacquired = 0)
     {
         TotalTasks += tasks;
         CurrentTasks = tasks;
         CurrentCompleted = 0;
         if (addQuota) Quota += tasks;
+        if (unacquired > 0) Quota += unacquired;
         RpcSyncTaskState.Invoke(this);
     }
 
@@ -114,13 +123,34 @@ public class PlayerTaskState
         RecomputeTasks(0, 0, 0);
     }
 
-    private void RecomputeTasks(int shortTasks, int longTasks, int commonTasks)
+    private void RemoveAllTasks()
     {
         player.myTasks.RemoveAll((Il2CppSystem.Predicate<PlayerTask>)((task) => {
             if (ShipStatus.Instance.SpecialTasks.Any(t => t.TaskType == task.TaskType)) return false;
             GameObject.Destroy(task.gameObject);
             return true;
         }));
+    }
+
+    public void ResetTasks(List<GameData.TaskInfo> tasks)
+    {
+        RemoveAllTasks();
+
+        foreach(var t in tasks.Select(task =>
+        {
+            var orig = ShipStatus.Instance.GetTaskById(task.TypeId);
+            var t = GameObject.Instantiate<NormalPlayerTask>(orig, PlayerControl.LocalPlayer.transform);
+            t.Id = task.Id;
+            t.Index = t.Index;
+            t.Owner = PlayerControl.LocalPlayer;
+            t.Initialize();
+            return t;
+        })) player.myTasks.Add(t);
+    }
+
+    private void RecomputeTasks(int shortTasks, int longTasks, int commonTasks)
+    {
+        RemoveAllTasks();
 
         Il2CppSystem.Collections.Generic.List<byte> newTaskIdList = new();
         Il2CppSystem.Collections.Generic.List<NormalPlayerTask> taskCandidates = new();

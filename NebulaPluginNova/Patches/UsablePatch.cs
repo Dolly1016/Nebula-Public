@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AmongUs.GameOptions;
 using HarmonyLib;
+using NAudio.MediaFoundation;
+using Nebula.Events;
 using Nebula.Player;
 
 namespace Nebula.Patches;
@@ -92,6 +94,8 @@ public static class EnterVentPatch
 {
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
+        EventManager.HandleEvent(new Virial.Events.Player.PlayerExitVentEvent(pc.GetModInfo()!));
+
         pc.GetModInfo()?.Role.OnEnterVent(__instance);
         NebulaGameManager.Instance?.AllRoleAction(r => r.OnEnterVent(pc, __instance));
         pc.GetModInfo()?.Role.VentDuration?.Start();
@@ -103,9 +107,31 @@ public static class ExitVentPatch
 {
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
+        EventManager.HandleEvent(new Virial.Events.Player.PlayerEnterVentEvent(pc.GetModInfo()!));
+
         pc.GetModInfo()?.Role.OnExitVent(__instance);
         NebulaGameManager.Instance?.AllRoleAction(r => r.OnExitVent(pc, __instance));
         pc.GetModInfo()?.Role.VentCoolDown?.Start();
+    }
+}
+
+[HarmonyPatch(typeof(Vent), nameof(Vent.Use))]
+public static class VentUsePatch
+{
+    public static bool Prefix(Vent __instance)
+    {
+        __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
+        if (!flag) return false;
+
+        PlayerControl localPlayer = PlayerControl.LocalPlayer;
+        bool isNotEnter = localPlayer.inVent && !localPlayer.walkingToVent;
+        if (isNotEnter)
+            localPlayer.MyPhysics.RpcExitVent(__instance.Id);
+        if (!localPlayer.walkingToVent)
+            localPlayer.MyPhysics.RpcEnterVent(__instance.Id);
+
+        __instance.SetButtons(!isNotEnter && localPlayer.GetModInfo()!.Role.CanMoveInVent);
+        return false;
     }
 }
 

@@ -59,7 +59,7 @@ public static class GeneralConfigurations
         new string[] { "options.map.spawnMethod.default", "options.map.spawnMethod.selective", "options.map.spawnMethod.random" }, 0, 0);
     static public NebulaConfiguration SpawnCandidatesOption = new NebulaConfiguration(MapOptions, "spawnCandidates", null, 1, 8, 1, 1) { Predicate = () => (SpawnMethodOption.GetString()?.Equals("options.map.spawnMethod.selective")) ?? false };
     static public NebulaConfiguration SilentVentOption = new NebulaConfiguration(MapOptions, "silentVents", null, false, false);
-    static public NebulaConfiguration MapEditorOption = new NebulaConfiguration(MapOptions, ()=> new MetaContext.Button(() => OpenMapEditor(MetaScreen.GenerateWindow(new(7.5f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, false, true)), TextAttribute.BoldAttr) { Alignment =IMetaContext.AlignmentOption.Center, TranslationKey = "options.map.customization" });
+    static public NebulaConfiguration MapEditorOption = new NebulaConfiguration(MapOptions, ()=> new MetaContextOld.Button(() => OpenMapEditor(MetaScreen.GenerateWindow(new(7.5f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, false, true)), TextAttribute.BoldAttr) { Alignment =IMetaContextOld.AlignmentOption.Center, TranslationKey = "options.map.customization" });
     static public NebulaConfiguration[] MapCustomizationOptions = new NebulaConfiguration[]
     {
         new NebulaConfiguration(null,"options.map.customization.skeld",null,int.MaxValue,int.MaxValue,int.MaxValue),
@@ -81,7 +81,7 @@ public static class GeneralConfigurations
     {
         MapCustomizations[mapId].Register(config, pos);
         config.Editor = NebulaConfiguration.EmptyEditor;
-        config.Shower = ()=> AmongUsUtil.CurrentMapId == mapId ? (config.Title.Text + " : " + config.ToDisplayString()) : null; 
+        config.Shower = ()=> AmongUsUtil.CurrentMapId == mapId ? (config.Title.GetString() + " : " + config.ToDisplayString()) : null; 
         return config;
     }
 
@@ -138,7 +138,7 @@ public static class GeneralConfigurations
     {
         mapId ??= AmongUsUtil.CurrentMapId;
 
-        MetaContext context = new();
+        MetaContextOld context = new();
 
         byte Lessen()
         {
@@ -168,16 +168,16 @@ public static class GeneralConfigurations
 
        
 
-        context.Append(new CombinedContext(
-            new MetaContext.Button(() => OpenMapEditor(screen, Lessen()), new(TextAttribute.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = "<<"},
-            new MetaContext.Text(TextAttribute.BoldAttr) { RawText = Constants.MapNames[mapId.Value] },
-            new MetaContext.Button(() => OpenMapEditor(screen, Increase()), new(TextAttribute.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = ">>" }
+        context.Append(new CombinedContextOld(
+            new MetaContextOld.Button(() => OpenMapEditor(screen, Lessen()), new(TextAttribute.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = "<<"},
+            new MetaContextOld.Text(TextAttribute.BoldAttr) { RawText = Constants.MapNames[mapId.Value] },
+            new MetaContextOld.Button(() => OpenMapEditor(screen, Increase()), new(TextAttribute.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = ">>" }
             ));
-        if (mapId.Value is 0 or 4) context.Append(new MetaContext.VerticalMargin(0.35f));
+        if (mapId.Value is 0 or 4) context.Append(new MetaContextOld.VerticalMargin(0.35f));
 
         var contents = Enumerable.Concat(
             MapCustomizations[mapId.Value].BoolOptions.Select(
-                c => ((IMetaParallelPlacable)new MetaContext.Image(mapCustomizationSprite.GetSprite((int)c.type))
+                c => ((IMetaParallelPlacableOld)new MetaContextOld.Image(mapCustomizationSprite.GetSprite((int)c.type))
                 {
                     Width = 0.5f,
                     PostBuilder = (renderer) =>
@@ -185,8 +185,8 @@ public static class GeneralConfigurations
                         renderer.color = c.configuration.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.65f);
                         var button = renderer.gameObject.SetUpButton(true);
                         button.OnMouseOver.AddListener(() => {
-                            MetaContext context = new();
-                            context.Append(new MetaContext.VariableText(TextAttribute.BoldAttr) { Alignment = IMetaContext.AlignmentOption.Left, TranslationKey = c.configuration.Id }).Append(NebulaConfiguration.GetDetailContext(c.configuration.Id + ".detail"));
+                            MetaContextOld context = new();
+                            context.Append(new MetaContextOld.VariableText(TextAttribute.BoldAttr) { Alignment = IMetaContextOld.AlignmentOption.Left, TranslationKey = c.configuration.Id }).Append(NebulaConfiguration.GetDetailContext(c.configuration.Id + ".detail"));
                             NebulaManager.Instance.SetHelpContext(button, context);
                         });
                         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpContext());
@@ -199,15 +199,15 @@ public static class GeneralConfigurations
             MapCustomizations[mapId.Value].StandardOptions.Select(
                 c=> {
                     TMPro.TextMeshPro valueText = null!;
-                    return ((IMetaParallelPlacable)new CombinedContext(new MetaContext(
-                        new MetaContext.Text(new(TextAttribute.BoldAttrLeft) { Size = new(0.55f, 0.15f) }) { MyText = c.configuration.Title },
-                        new MetaContext.Text(new(TextAttribute.BoldAttr) { Size = new(0.55f, 0.28f) }) { RawText = c.configuration.ToDisplayString(), PostBuilder = text => valueText = text }
-                        ), MetaContext.Button.GetTwoWayButton(increament => { c.configuration.ChangeValue(increament); valueText.text = c.configuration.ToDisplayString(); }))
+                    return ((IMetaParallelPlacableOld)new CombinedContextOld(new MetaContextOld(
+                        new MetaContextOld.Text(new(TextAttribute.BoldAttrLeft) { Size = new(0.55f, 0.15f) }) { MyText = c.configuration.Title },
+                        new MetaContextOld.Text(new(TextAttribute.BoldAttr) { Size = new(0.55f, 0.28f) }) { RawText = c.configuration.ToDisplayString(), PostBuilder = text => valueText = text }
+                        ), MetaContextOld.Button.GetTwoWayButton(increament => { c.configuration.ChangeValue(increament); valueText.text = c.configuration.ToDisplayString(); }))
                     { PostBuilder = obj => obj.AddComponent<SortingGroup>().sortingOrder = 12 }, c.position);
                 })
             );
 
-        context.Append(MetaContext.Image.AsMapImage(mapId.Value, 5.6f, contents));
+        context.Append(MetaContextOld.Image.AsMapImage(mapId.Value, 5.6f, contents));
 
         screen.SetContext(context);
     }
@@ -265,10 +265,10 @@ public static class GeneralConfigurations
                 toggleOption = new(holder, "category." + index, null, false, false);
                 toggleOption.Editor = () =>
                 {
-                    MetaContext context = new();
+                    MetaContextOld context = new();
 
-                    List<IMetaParallelPlacable> contents = new();
-                    contents.Add(NebulaConfiguration.OptionButtonContext(() => toggleOption.ChangeValue(true), toggleOption.Title.Text, 0.85f));
+                    List<IMetaParallelPlacableOld> contents = new();
+                    contents.Add(NebulaConfiguration.OptionButtonContext(() => toggleOption.ChangeValue(true), toggleOption.Title.GetString(), 0.85f));
                     contents.Add(NebulaConfiguration.OptionTextColon);
 
 
@@ -285,7 +285,7 @@ public static class GeneralConfigurations
                             isFirst = false;
                         }
                         if (innerText.Length > 0) innerText = "(" + innerText + ")";
-                        contents.Add(new MetaContext.Text(NebulaConfiguration.GetOptionBoldAttr(4.8f,TMPro.TextAlignmentOptions.Left)) { RawText = Language.Translate("options.inactivated") + " " + innerText.Color(Color.gray) });
+                        contents.Add(new MetaContextOld.Text(NebulaConfiguration.GetOptionBoldAttr(4.8f,TMPro.TextAlignmentOptions.Left)) { RawText = Language.Translate("options.inactivated") + " " + innerText.Color(Color.gray) });
                     }
                     else
                     {
@@ -294,10 +294,10 @@ public static class GeneralConfigurations
                             var role = assignment.CurrentValue == short.MaxValue ? null : Roles.Roles.AllRoles[assignment.CurrentValue];
 
                             var copiedAssignment = assignment;
-                            contents.Add(new MetaContext.Button(() =>
+                            contents.Add(new MetaContextOld.Button(() =>
                             {
                                 MetaScreen screen = MetaScreen.GenerateWindow(new(6.5f, 3f), HudManager.Instance.transform, Vector3.zero, true, true);
-                                MetaContext inner = new();
+                                MetaContextOld inner = new();
                                 inner.Append(Roles.Roles.AllRoles.Prepend(null), (role) => NebulaConfiguration.OptionButtonContext(
                                     () =>
                                     {
@@ -307,13 +307,13 @@ public static class GeneralConfigurations
                                     role?.DisplayName.Color(role.RoleColor) ?? "None",
                                     1.1f
                                     ), 4, -1, 0, 0.45f);
-                                screen.SetContext(new MetaContext.ScrollView(new Vector2(6.5f, 3f), inner));
+                                screen.SetContext(new MetaContextOld.ScrollView(new Vector2(6.5f, 3f), inner));
                             }, new(NebulaConfiguration.OptionValueAttr) { Size = new(1.3f, 0.3f) })
                             { RawText = role?.DisplayName.Color(role.RoleColor) ?? "None", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
                         }
                     }
 
-                    context.Append(new CombinedContext(0.65f, contents.ToArray()));
+                    context.Append(new CombinedContextOld(0.65f, contents.ToArray()));
                     return context;
                 };
                 toggleOption.Shower = () =>
@@ -330,7 +330,7 @@ public static class GeneralConfigurations
                         innerText += role?.DisplayName.Color(role.RoleColor) ?? "None";
                         isFirst = false;
                     }
-                    return toggleOption.Title.Text + " : " + innerText;
+                    return toggleOption.Title.GetString() + " : " + innerText;
                 };
 
                 roles = new NebulaStringConfigEntry[3];

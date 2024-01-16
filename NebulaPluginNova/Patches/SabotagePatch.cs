@@ -22,6 +22,29 @@ public static class HqCommSabotagePatch
     }
 }
 
+//偽タスクでは常に見た目上の解決中プレイヤーが0人になる
+[HarmonyPatch(typeof(HqHudOverrideTask), nameof(HqHudOverrideTask.AppendTaskText))]
+public static class HqCommSabotageTextPatch
+{
+    static bool Prefix(HqHudOverrideTask __instance, [HarmonyArgument(0)]StringBuilder sb)
+    {
+        if (NebulaGameManager.Instance?.LocalFakeSabotage?.HasFakeSabotage(SystemTypes.Comms) ?? false)
+        {
+            __instance.even = !__instance.even;
+            Color color = __instance.even ? Color.yellow : Color.red;
+            sb.Append(color.ToTextColor());
+            sb.Append(DestroyableSingleton<TranslationController>.Instance.GetString(TaskTypes.FixComms));
+            sb.Append(" (0/2)");
+            sb.Append("</color>");
+            for (int i = 0; i < __instance.Arrows.Length; i++) __instance.Arrows[i].image.color = color;
+            
+            return false;
+        }
+
+        return true;
+    }
+}
+
 [HarmonyPatch(typeof(HudOverrideTask), nameof(HudOverrideTask.FixedUpdate))]
 public static class CommSabotagePatch
 {

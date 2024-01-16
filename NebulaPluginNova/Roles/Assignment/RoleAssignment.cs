@@ -40,6 +40,11 @@ public abstract class IRoleAllocator
             modifiers.Add(new(role, arguments ?? Array.Empty<int>(), player.PlayerId));
         }
 
+        public void SetRole(byte player, AbstractRole role, int[]? arguments = null)
+        {
+            roles.Add(new(role, arguments ?? Array.Empty<int>(), player));
+        }
+
         public void SetModifier(byte player, AbstractModifier role, int[]? arguments = null)
         {
             modifiers.Add(new(role, arguments ?? Array.Empty<int>(), player));
@@ -58,7 +63,7 @@ public abstract class IRoleAllocator
 
         public IEnumerable<(byte playerId,AbstractRole role)> GetPlayers(RoleCategory category)
         {
-            foreach (var tuple in roles) if ((tuple.role.RoleCategory & category) != 0) yield return (tuple.playerId, tuple.role);
+            foreach (var tuple in roles) if ((tuple.role.Category & category) != 0) yield return (tuple.playerId, tuple.role);
         }
     }
 
@@ -99,7 +104,7 @@ public class StandardRoleAllocator : IRoleAllocator
         List<RoleAssignChance> rolePool = new(), preferentialPool = new();
         foreach (var r in allRoles)
         {
-            if (r.RoleCategory != category) continue;
+            if (r.Category != category) continue;
             for (int i = 0; i < r.RoleCount; i++)
             {
                 float prob = r.GetRoleChance(i);
@@ -183,8 +188,9 @@ public class StandardRoleAllocator : IRoleAllocator
         foreach (var p in impostors) table.SetRole(p, Impostor.Impostor.MyRole);
         foreach (var p in others) table.SetRole(p, Crewmate.Crewmate.MyRole);
 
-        foreach (var m in Roles.AllIntroAssignableModifiers()) m.Assign(table);
+        foreach (var m in Roles.AllIntroAssignableModifiers().OrderBy(im => im.AssignPriority)) m.Assign(table);
 
         table.Determine();
     }
+
 }

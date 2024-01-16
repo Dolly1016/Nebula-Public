@@ -13,7 +13,7 @@ public class Busker : ConfigurableStandardRole
 {
     static public Busker MyRole = new Busker();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "busker";
     public override Color RoleColor => new Color(255f / 255f, 172f / 255f, 117f / 255f);
@@ -37,6 +37,7 @@ public class Busker : ConfigurableStandardRole
         static private ISpriteLoader pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
         static private ISpriteLoader reviveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskReviveButton.png", 115f);
 
+        AchievementToken<(bool isCleared,float lastRevive)>? acTokenChallenge;
 
         public override AbstractRole Role => MyRole;
         public Instance(PlayerModInfo player) : base(player)
@@ -62,6 +63,8 @@ public class Busker : ConfigurableStandardRole
                 };
                 pseudocideButton.SetLabel("pseudocide");
 
+                StaticAchievementToken? acTokenCommon1 = null;
+
                 reviveButon.SetSprite(reviveButtonSprite.GetSprite());
                 reviveButon.Availability = (button) => MyPlayer.MyControl.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.transform.position);
                 reviveButon.Visibility = (button) => button.EffectActive && Helpers.AllDeadBodies().Any(deadBody => deadBody.ParentId == MyPlayer.PlayerId);
@@ -73,14 +76,30 @@ public class Busker : ConfigurableStandardRole
                     }
                     reviveButon.InactivateEffect();
                     pseudocideButton.StartCoolDown();
+                    acTokenCommon1 ??= new("busker.common1");
+                    acTokenChallenge ??= new("busker.challenge", (false, 0f), (val, _) => val.isCleared);
+                    acTokenChallenge.Value.lastRevive = NebulaGameManager.Instance!.CurrentTime;
                 };
                 reviveButon.OnEffectEnd = (button) =>
                 {
-                    if (MyPlayer.IsDead) NebulaGameManager.Instance!.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Accident, null, 1 << MyPlayer.PlayerId);
+                    if (MyPlayer.IsDead)
+                    {
+                        NebulaGameManager.Instance!.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Accident, null, 1 << MyPlayer.PlayerId);
+                        new StaticAchievementToken("busker.another1");
+                    }
                 };
                 reviveButon.SetLabel("revive");
 
             }
         }
+
+        private void CheckChallengeAchievement(PlayerModInfo reporter)
+        {
+            if (acTokenChallenge != null && !reporter.AmOwner) acTokenChallenge.Value.isCleared |= NebulaGameManager.Instance!.CurrentTime - acTokenChallenge.Value.lastRevive < 2f;
+        }
+
+        public override void OnReported(PlayerModInfo reporter, PlayerModInfo reported) => CheckChallengeAchievement(reporter);
+        public override void OnEmergencyMeeting(PlayerModInfo reporter) => CheckChallengeAchievement(reporter);
+        
     }
 }

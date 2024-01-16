@@ -9,7 +9,10 @@ namespace Virial;
 
 public struct Color
 {
-    public float R, G, B, A;
+    public float R { get; private init; }
+    public float G { get; private init; }
+    public float B { get; private init; }
+    public float A { get; private init; }
 
     public Color(float r, float g, float b, float a = 1f)
     {

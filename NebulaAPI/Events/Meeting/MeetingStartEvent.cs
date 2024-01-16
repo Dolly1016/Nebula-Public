@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Meeting;
 
+/// <summary>
+/// 会議が始まる際に呼び出されます。
+/// </summary>
 public class MeetingStartEvent
 {
 }

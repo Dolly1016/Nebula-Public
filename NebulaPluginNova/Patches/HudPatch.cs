@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Nebula.Behaviour;
 using Nebula.Game;
 using System;
 using System.Collections;
@@ -31,7 +32,7 @@ public static class HudManagerUpdatePatch
     {
         NebulaGameManager.Instance?.OnUpdate();
 
-        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDown && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
+        if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDown && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
         {
             HelpScreen.OpenHelpScreen();
         }

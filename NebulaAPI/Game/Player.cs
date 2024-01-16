@@ -1,4 +1,5 @@
-﻿using Virial.Text;
+﻿using Virial.Assignable;
+using Virial.Text;
 
 namespace Virial.Game;
 
@@ -23,4 +24,7 @@ public interface Player
     public void GainAttribute(PlayerAttribute attribute, float duration, bool canPassMeeting, int priority, int? duplicateTag = null);
     public void GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, int? duplicateTag = null);
     public bool HasAttribute(PlayerAttribute attribute);
+
+    public RuntimeRole Role { get; }
+    public IEnumerable<RuntimeModifier> Modifiers { get; }
 }

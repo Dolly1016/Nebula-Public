@@ -12,7 +12,7 @@ namespace Nebula.Roles.Impostor;
 public class Stirrer : ConfigurableStandardRole
 {
     static public Stirrer MyRole = new Stirrer();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "stirrer";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -50,6 +50,8 @@ public class Stirrer : ConfigurableStandardRole
 
         Dictionary<byte, int> sabotageChargeMap = new();
 
+        StaticAchievementToken? acTokenCommon = null, acTokenChallenge = null;
+        
         public override void OnActivated()
         {
             base.OnActivated();
@@ -77,18 +79,27 @@ public class Stirrer : ConfigurableStandardRole
                 sabotageButton.Availability = (button) => MyPlayer.MyControl.CanMove && sabotageChargeMap.Any(entry => entry.Value > 0) && PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null;
                 sabotageButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 sabotageButton.OnClick = (button) => {
+                    int count = 0;
                     foreach (var entry in sabotageChargeMap)
                     {
                         if (entry.Value > 0)
                         {
                             var p = NebulaGameManager.Instance!.GetModPlayerInfo(entry.Key);
-                            if (p?.Role.Role.RoleCategory == RoleCategory.ImpostorRole) continue;
+                            if (p?.Role.Role.Category == RoleCategory.ImpostorRole) continue;
 
-                            if (!(p?.IsDead ?? false)) FakeSabotageStatus.RpcPushFakeSabotage(p!, MapData.GetCurrentMapData().GetSabotageSystemTypes().Random());
+                            if (!(p?.IsDead ?? false))
+                            {
+                                FakeSabotageStatus.RpcPushFakeSabotage(p!, MapData.GetCurrentMapData().GetSabotageSystemTypes().Random());
+                                count++;
+                            }
                         }
                         sabotageChargeMap[entry.Key] = entry.Value - 1;
                     }
                     button.CoolDownTimer?.Start(MyRole.SabotageIntervalOption.GetFloat());
+
+                    acTokenCommon ??= new("stirrer.common1");
+                    if(count >= 7 && MyRole.SabotageChargeOption <= 3 && !(MyRole.StirCoolDownOption.GetFloat() > 10f)) acTokenChallenge ??= new("stirrer.challenge");
+
                 };
                 sabotageButton.CoolDownTimer = Bind(new Timer(Mathf.Max(MyRole.SabotageIntervalOption.GetFloat(), MyRole.SabotageCoolDownOption.GetFloat())).SetAsAbilityCoolDown().Start(MyRole.SabotageCoolDownOption.GetFloat()));
                 sabotageButton.SetLabel("fakeSabotage");
@@ -101,7 +112,7 @@ public class Stirrer : ConfigurableStandardRole
         {
             if(sabotageChargeMap.TryGetValue(player.PlayerId,out int val))
             {
-                if (player.Role.Role.RoleCategory == RoleCategory.ImpostorRole) return;
+                if (player.Role.Role.Category == RoleCategory.ImpostorRole) return;
                 if (val <= 0) return;
                 text += StringExtensions.Color(" (" + val + ")", Color.gray);
             }

@@ -19,6 +19,9 @@ file static class TrapperSystem
         SpriteLoader.FromResource("Nebula.Resources.Buttons.KillTrapButton.png",115f),
         null
     };
+
+    private const int AccelTrapId = 0;
+    private const int DecelTrapId = 1;
     private const int CommTrapId = 2;
     private const int KillTrapId = 3;
     public static void OnActivated(RoleInstance myRole, (int id,int cost)[] buttonVariation, List<Trapper.Trap> localTraps)
@@ -30,7 +33,7 @@ file static class TrapperSystem
         placeButton.SetSprite(buttonSprites[buttonVariation[0].id]?.GetSprite());
         placeButton.Availability = (button) => myRole.MyPlayer.MyControl.CanMove && leftCost >= buttonVariation[buttonIndex].cost;
         placeButton.Visibility = (button) => !myRole.MyPlayer.MyControl.Data.IsDead && leftCost > 0;
-        var usesText = placeButton.ShowUsesIcon(myRole.Role.RoleCategory == RoleCategory.ImpostorRole ? 0 : 3);
+        var usesText = placeButton.ShowUsesIcon(myRole.Role.Category == RoleCategory.ImpostorRole ? 0 : 3);
         usesText.text = leftCost.ToString();
         placeButton.OnClick = (button) =>
         {
@@ -55,6 +58,12 @@ file static class TrapperSystem
             {
                 if (buttonVariation[buttonIndex].id == KillTrapId) NebulaAsset.RpcPlaySE.Invoke((NebulaAudioClip.TrapperKillTrap, PlayerControl.LocalPlayer.transform.position, Trapper.KillTrapSoundDistanceOption.GetFloat() * 0.6f, Trapper.KillTrapSoundDistanceOption.GetFloat()));
             }
+
+            if (myRole.Role.Category == RoleCategory.ImpostorRole && buttonVariation[buttonIndex].id == DecelTrapId)
+                new StaticAchievementToken("evilTrapper.common1");
+            if (myRole.Role.Category == RoleCategory.CrewmateRole && buttonVariation[buttonIndex].id == AccelTrapId)
+                new StaticAchievementToken("niceTrapper.common1");
+
         };
         placeButton.OnSubAction = (button) =>
         {
@@ -87,7 +96,7 @@ public class Trapper : ConfigurableStandardRole
     static public Trapper MyEvilRole = new(true);
 
     public bool IsEvil { get; private set; }
-    public override RoleCategory RoleCategory => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
+    public override RoleCategory Category => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
 
     public override string LocalizedName => IsEvil ? "evilTrapper" : "niceTrapper";
     public override Color RoleColor => IsEvil ? Palette.ImpostorRed : new Color(206f / 255f, 219f / 255f, 96f / 255f);
@@ -208,7 +217,7 @@ public class Trapper : ConfigurableStandardRole
         foreach (var option in commonOptions) option.Title = new CombinedComponent(new TranslateTextComponent("role.general.common"), new RawTextComponent(" "), new TranslateTextComponent(option.Id));
 
         CommonEditorOption = new NebulaConfiguration(RoleConfig, () => {
-            MetaContext context = new();
+            MetaContextOld context = new();
             foreach (var option in commonOptions) context.Append(option.GetEditor()!);
             return context;
         });
@@ -219,18 +228,28 @@ public class Trapper : ConfigurableStandardRole
         public override AbstractRole Role => MyNiceRole;
         private int leftCharge = NumOfChargesOption;
         private List<Trap> localTraps = new(), commTraps = new();
+
+        AchievementToken<(bool cleared, int playerMask)>? acTokenChallenge = null;
         public NiceInstance(PlayerModInfo player) : base(player)
         {
         }
 
         public override void OnActivated()
         {
-            if (AmOwner) TrapperSystem.OnActivated(this, new (int, int)[] { (0, 1), (1, 1), (2, CostOfCommTrapOption) }, localTraps);
+            if (AmOwner)
+            {
+                TrapperSystem.OnActivated(this, new (int, int)[] { (0, 1), (1, 1), (2, CostOfCommTrapOption) }, localTraps);
+                acTokenChallenge = new("niceTrapper.challenge", (false, 0), (val, _) => val.cleared);
+            }
         }
 
         public override void OnMeetingStart()
         {
-            if (AmOwner) TrapperSystem.OnMeetingStart(localTraps, commTraps);
+            if (AmOwner)
+            {
+                TrapperSystem.OnMeetingStart(localTraps, commTraps);
+                acTokenChallenge!.Value.playerMask = 0;
+            }
         }
 
         private uint lastCommPlayersMask = 0;
@@ -256,6 +275,10 @@ public class Trapper : ConfigurableStandardRole
                         var arrow = new Arrow().SetColorByOutfit(p.GetOutfit(75));
                         arrow.TargetPos = commTrap.Position;
                         NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
+
+                        acTokenChallenge!.Value.playerMask |= 1 << p.PlayerId;
+                        if(!acTokenChallenge.Value.cleared && NebulaGameManager.Instance.AllPlayerInfo().Count(p => (acTokenChallenge!.Value.playerMask & (1 << p.PlayerId)) != 0) >= 8)
+                            acTokenChallenge.Value.cleared = true;
                     }
                 }
             }
@@ -273,17 +296,23 @@ public class Trapper : ConfigurableStandardRole
         {
         }
 
+        AchievementToken<int>? acTokenChallenge = null;
         public override void OnActivated()
         {
             base.OnActivated();
 
-            if (AmOwner) TrapperSystem.OnActivated(this, new (int, int)[] { (0, 1), (1, 1), (3, CostOfKillTrapOption) }, localTraps);
+            if (AmOwner)
+            {
+                TrapperSystem.OnActivated(this, new (int, int)[] { (0, 1), (1, 1), (3, CostOfKillTrapOption) }, localTraps);
+                acTokenChallenge = new("evilTrapper.challenge", 0, (val, _) => val >= 2 && NebulaEndState.CurrentEndState!.CheckWin(MyPlayer.PlayerId) && !MyPlayer.IsDead);
+            }
         }
 
         public override void OnMeetingStart()
         {
             if (AmOwner) TrapperSystem.OnMeetingStart(localTraps,killTraps);
         }
+
 
         public override void LocalUpdate()
         {
@@ -303,6 +332,7 @@ public class Trapper : ConfigurableStandardRole
                             {
                                 PlayerControl.LocalPlayer.ModKill(p.MyControl,false,PlayerState.Trapped,EventDetail.Trap);
                                 RpcTrapKill.Invoke(killTrap.ObjectId);
+                                acTokenChallenge!.Value++;
                             }
 
                             return true;

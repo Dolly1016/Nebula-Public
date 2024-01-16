@@ -80,10 +80,25 @@ public class Lover : ConfigurableModifier
             if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || (MyLover?.AmOwner ?? false)) text += " ♥".Color(colors[loversId]);
         }
 
+        public override void OnGameEnd(NebulaEndState endState)
+        {
+            if (AmOwner)
+            {
+                if (endState.EndCondition == NebulaGameEnd.LoversWin)
+                {
+                    if (!MyPlayer.IsDead) new StaticAchievementToken("lover.common1");
+
+                    if (MyPlayer.Role.Role.Category != RoleCategory.ImpostorRole && NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole) == 2)
+                        new StaticAchievementToken("lover.challenge");
+                }
+            }
+        }
         public override void OnDead()
         {
             if (AmOwner)
             {
+                if (MyPlayer.MyState == PlayerState.Suicide) new StaticAchievementToken("lover.another1");
+
                 var myLover = MyLover;
                 if (myLover == null) return;
                 if (myLover.IsDead) return;
@@ -109,6 +124,8 @@ public class Lover : ConfigurableModifier
             if (AmOwner)
             {
                 MyLover?.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+
+                if(DateTime.Now.Month == 12) new StaticAchievementToken("christmas");
             }
         }
 

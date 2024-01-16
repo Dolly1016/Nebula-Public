@@ -14,7 +14,7 @@ public class Phosphorus : ConfigurableStandardRole
 {
     static public Phosphorus MyRole = new Phosphorus();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "phosphorus";
     public override Color RoleColor => new Color(249f / 255f, 188f / 255f, 81f / 255f);
@@ -78,6 +78,8 @@ public class Phosphorus : ConfigurableStandardRole
         {
             if (AmOwner)
             {
+                StaticAchievementToken? acTokenChallenge = null;
+
                 localLanterns = new();
 
                 lanternButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
@@ -90,6 +92,13 @@ public class Phosphorus : ConfigurableStandardRole
                 lanternButton.OnEffectStart = (button) =>
                 {
                     CombinedRemoteProcess.CombinedRPC.Invoke(globalLanterns!.Select((id)=>RpcLantern.GetInvoker(id)).ToArray());
+
+                    if (acTokenChallenge == null)
+                    {
+                        var lanterns = globalLanterns!.Select(id => NebulaSyncObject.GetObject<Lantern>(id)!);
+                        var deadBodies = Helpers.AllDeadBodies();
+                        if (lanterns.Any(l => deadBodies.Any(d => d.TruePosition.Distance(l.Position) < 0.8f))) acTokenChallenge = new("phosphorus.challenge");
+                    }
                 };
                 lanternButton.OnEffectEnd = (button) => lanternButton.StartCoolDown();
                 lanternButton.CoolDownTimer = Bind(new Timer(0f, MyRole.LampCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
@@ -111,6 +120,9 @@ public class Phosphorus : ConfigurableStandardRole
                     usesText.text = left.ToString();
 
                     placeButton.StartCoolDown();
+
+                    new StaticAchievementToken("phosphorus.common1");
+                    new StaticAchievementToken("phosphorus.common2");
                 };
                 placeButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PlaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown());
                 placeButton.SetLabel("place");

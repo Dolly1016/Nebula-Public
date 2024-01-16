@@ -10,7 +10,7 @@ namespace Nebula.Roles.Impostor;
 public class Illusioner : ConfigurableStandardRole
 {
     static public Illusioner MyRole = new Illusioner();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "illusioner";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -45,6 +45,9 @@ public class Illusioner : ConfigurableStandardRole
         private ModAbilityButton? morphButton = null;
         private ModAbilityButton? paintButton = null;
 
+        StaticAchievementToken? acTokenMorphingCommon = null, acTokenPainterCommon = null, acTokenCommon = null;
+        AchievementToken<int>? acTokenChallenge = null;
+
         public override AbstractRole Role => MyRole;
         public Instance(PlayerModInfo player) : base(player)
         {
@@ -56,6 +59,13 @@ public class Illusioner : ConfigurableStandardRole
 
             if (AmOwner)
             {
+                acTokenChallenge = new("illusioner.challenge", 0, (val, _) =>
+                {
+                    return
+                    NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.MyState == PlayerState.Exiled && (val & (1 << p.PlayerId)) != 0).Count() > 0 &&
+                    NebulaGameManager.Instance!.AllPlayerInfo().Where(p => (p.MyKiller?.AmOwner ?? false) && (val & (1 << p.PlayerId)) != 0).Count() > 0;
+                });
+
                 GameData.PlayerOutfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
@@ -66,6 +76,7 @@ public class Illusioner : ConfigurableStandardRole
                 sampleButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 sampleButton.OnClick = (button) => {
                     sample = sampleTracker.CurrentTarget?.GetModInfo()?.GetOutfit(MyRole.SampleOriginalLookOption ? 35 : 75) ?? null;
+                    if (sample != null) acTokenChallenge.Value |= 1 << sample.ColorId;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
@@ -93,6 +104,9 @@ public class Illusioner : ConfigurableStandardRole
                 morphButton.OnEffectStart = (button) =>
                 {
                     PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new("Morphing", 50, true, sample!)));
+
+                    acTokenMorphingCommon ??= new("morphing.common1");
+                    if (acTokenPainterCommon != null) acTokenCommon ??= new("illusioner.common1");
                 };
                 morphButton.OnEffectEnd = (button) =>
                 {
@@ -125,6 +139,9 @@ public class Illusioner : ConfigurableStandardRole
                     else
                         invoker.InvokeSingle();
                     button.StartCoolDown();
+
+                    acTokenPainterCommon ??= new("painter.common1");
+                    if (acTokenMorphingCommon != null) acTokenCommon ??= new("illusioner.common1");
                 };
                 paintButton.OnSubAction = (button) =>
                 {

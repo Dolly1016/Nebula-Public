@@ -13,7 +13,7 @@ public class Mayor : ConfigurableStandardRole
 {
     static public Mayor MyRole = new Mayor();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "mayor";
     public override Color RoleColor => new Color(30f / 255f, 96f / 255f, 85f / 255f);
@@ -57,10 +57,35 @@ public class Mayor : ConfigurableStandardRole
 
         private int myVote = 0;
         private int currentVote = 0;
+
+        AchievementToken<(bool cleared, byte myVotedFor, bool triggered)>? acTokenCommon = null;
+        AchievementToken<(int meetings, bool clearable)>? acTokenAnother = null;
+        AchievementToken<(bool cleared, byte myVotedFor, bool triggered)>? acTokenChallenge = null;
+
+        public override void OnActivated()
+        {
+            base.OnActivated();
+
+            if (AmOwner)
+            {
+                acTokenCommon = new("mayor.common1", (false, 0, false), (val, _) => val.cleared);
+                acTokenAnother = new("mayor.another1", (0, true), (val, _) => val.meetings >= 3 && val.clearable);
+                acTokenChallenge = new("mayor.challenge", (false,0,false), (val, _) => val.cleared);
+            }
+        }
+
         public override void OnMeetingStart()
         {
+            if (AmOwner)
+            {
+                acTokenCommon!.Value.triggered = false;
+                acTokenChallenge!.Value.triggered = false;
+            }
+
             if (AmOwner && !MyPlayer.IsDead)
             {
+                if (acTokenAnother != null) acTokenAnother.Value.meetings++;
+
                 var countText = UnityEngine.Object.Instantiate(MeetingHud.Instance.TitleText, MeetingHud.Instance.SkipVoteButton.transform);
                 countText.gameObject.SetActive(true);
                 countText.gameObject.GetComponent<TextTranslatorTMP>().enabled = false;
@@ -114,11 +139,43 @@ public class Mayor : ConfigurableStandardRole
         public override void OnCastVoteLocal(byte target, ref int vote)
         {
             vote = currentVote;
+
+            if (acTokenAnother != null) acTokenAnother.Value.clearable &= currentVote == 0;
+            if (acTokenCommon != null) acTokenCommon.Value.triggered = currentVote >= 2;
         }
 
         public override void OnEndVoting()
         {
             if (MeetingHud.Instance.playerStates.FirstOrDefault(v => v.TargetPlayerId == MyPlayer.PlayerId)?.DidVote ?? false) myVote -= currentVote;
+        }
+
+        public override void OnDiscloseVotingLocal(MeetingHud.VoterState[] result)
+        {
+            var myVote = result.FirstOrDefault(v => v.VoterId == MyPlayer.PlayerId);
+            if (myVote.VoterId != MyPlayer.PlayerId) return;
+
+            var myVotedFor = myVote.VotedForId;
+            acTokenCommon!.Value.myVotedFor = myVotedFor;
+            acTokenChallenge!.Value.myVotedFor = myVotedFor;
+
+            if (!result.Any(v => v.VoterId != MyPlayer.PlayerId && v.VotedForId == myVotedFor)) acTokenChallenge!.Value.triggered = true;
+        }
+
+        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        {
+            if (acTokenCommon!.Value.triggered)
+            {
+                acTokenCommon.Value.cleared |= exiled.PlayerId == acTokenCommon.Value.myVotedFor;
+            }
+
+            if (acTokenChallenge!.Value.triggered && exiled.PlayerId == acTokenChallenge.Value.myVotedFor)
+            {
+                var team = exiled.GetModInfo()?.Role.Role.Team;
+                if(team != NebulaTeams.JesterTeam && team != NebulaTeams.CrewmateTeam)
+                {
+                    acTokenChallenge.Value.cleared = true;
+                }
+            }
         }
     }
 }

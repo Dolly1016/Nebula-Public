@@ -12,7 +12,7 @@ namespace Nebula.Roles.Impostor;
 public class Jailer : ConfigurableStandardRole
 {
     static public Jailer MyRole = new Jailer();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "jailer";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -23,6 +23,7 @@ public class Jailer : ConfigurableStandardRole
     private NebulaConfiguration CanMoveWithMapWatchingOption = null!;
     private NebulaConfiguration CanIdentifyDeadBodiesOption = null!;
     private NebulaConfiguration CanIdentifyImpostorsOption = null!;
+
     protected override void LoadOptions()
     {
         base.LoadOptions();
@@ -39,6 +40,9 @@ public class Jailer : ConfigurableStandardRole
         {
         }
 
+        AchievementToken<bool>? acTokenCommon = null;
+        AchievementToken<int>? acTokenChallenge = null;
+
         public override void OnOpenSabotageMap()
         {
             MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
@@ -50,18 +54,58 @@ public class Jailer : ConfigurableStandardRole
 
             MapBehaviour.Instance.countOverlayAllowsMovement = MyRole.CanMoveWithMapWatchingOption;
             if (!MapBehaviour.Instance.countOverlayAllowsMovement) PlayerControl.LocalPlayer.NetTransform.Halt();
+
+            acTokenCommon ??= new("jailer.common1", false, (val, _) => val);
         }
 
+        public override void OnKillPlayer(PlayerControl target)
+        {
+            if (AmOwner)
+            {
+                if (acTokenCommon != null) acTokenCommon.Value = true;
+
+                if (acTokenChallenge != null)
+                {
+                    var pos = PlayerControl.LocalPlayer.GetTruePosition();
+                    Collider2D? room = null;
+                    foreach (var entry in ShipStatus.Instance.FastRooms)
+                    {
+                        if (entry.value.roomArea.OverlapPoint(pos))
+                        {
+                            room = entry.value.roomArea;
+                            break;
+                        }
+                    }
+
+                    if (room != null)
+                    {
+                        if (Helpers.AllDeadBodies().Any(d => d.ParentId != target.PlayerId && room.OverlapPoint(d.TruePosition)))
+                        {
+                            acTokenChallenge!.Value++;
+                        }
+                    }
+                }
+            }
+
+        }
         protected override void OnInactivated()
         {
-            if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
+            if (AmOwner)
+            {
+                if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
+            }
         }
 
         public override void OnActivated()
         {
             base.OnActivated();
 
-            if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
+            if (AmOwner)
+            {
+                if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
+
+                acTokenChallenge = new("jailer.challenge", 0, (val, _) => val >= 2);
+            }
         }
 
         public override void OnMapInstantiated()

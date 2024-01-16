@@ -12,7 +12,7 @@ public class Crewmate : ConfigurableStandardRole
     static public Crewmate MyRole = new Crewmate();
     static public Team MyTeam = new("teams.crewmate", Palette.CrewmateBlue, TeamRevealType.Everyone);
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "crewmate";
     public override Color RoleColor => Palette.CrewmateBlue;

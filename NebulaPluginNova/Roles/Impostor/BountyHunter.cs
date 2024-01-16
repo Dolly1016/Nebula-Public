@@ -13,7 +13,7 @@ namespace Nebula.Roles.Impostor;
 public class BountyHunter : ConfigurableStandardRole
 {
     static public BountyHunter MyRole = new BountyHunter();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "bountyHunter";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -45,6 +45,11 @@ public class BountyHunter : ConfigurableStandardRole
 
         public override AbstractRole Role => MyRole;
         public override bool HasVanillaKillButton => false;
+
+        private AchievementToken<bool>? acTokenKillBounty;
+        private AchievementToken<bool>? acTokenKillNonBounty;
+        private AchievementToken<(bool cleared,Queue<float> history)>? acTokenChallenge;
+
         public Instance(PlayerModInfo player) : base(player)
         {
         }
@@ -111,6 +116,10 @@ public class BountyHunter : ConfigurableStandardRole
 
             if (AmOwner)
             {
+                acTokenKillBounty = new("bountyHunter.common1", false, (val, _) => val);
+                acTokenKillNonBounty = new("bountyHunter.another1", false, (val, _) => val);
+                acTokenChallenge = new("bountyHunter.challenge", (false, new()), (val, _) => val.cleared);
+
                 bountyTimer = Bind(new Timer(MyRole.ChangeBountyIntervalOption.GetFloat())).Start();
                 arrowTimer = Bind(new Timer(MyRole.ArrowUpdateIntervalOption.GetFloat())).Start();
 
@@ -126,10 +135,20 @@ public class BountyHunter : ConfigurableStandardRole
                     {
                         ChangeBounty();
                         button.CoolDownTimer!.Start(MyRole.BountyKillCoolDownOption.CurrentCoolDown);
+                        acTokenKillBounty.Value = true;
                     }
                     else
                     {
                         button.CoolDownTimer!.Start(MyRole.OthersKillCoolDownOption.CurrentCoolDown);
+                        acTokenKillNonBounty.Value = true;
+                    }
+
+                    acTokenChallenge.Value.history.Enqueue(Time.time);
+                    if(acTokenChallenge.Value.history.Count >= 3)
+                    {
+                        float first = acTokenChallenge.Value.history.DequeAt(3);
+                        float last = Time.time;
+                        if (last - first < 30f) acTokenChallenge.Value.cleared = true;
                     }
 
                 };

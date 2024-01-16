@@ -8,11 +8,58 @@ using System.Threading.Tasks;
 
 namespace Nebula.Modules;
 
-[NebulaPreLoad]
-public class ConfigPreset
+public interface IConfigPreset
 {
-    static Dictionary<string, ConfigPreset> allPresets = new();
-    static public IEnumerable<ConfigPreset> AllPresets => allPresets.Values;
+    static protected Dictionary<string, IConfigPreset> allPresets = new();
+    static public IEnumerable<IConfigPreset> AllPresets => allPresets.Values;
+
+    bool LoadPreset();
+    string Id { get; }
+    string DisplayName { get; }
+    string? Detail { get; }
+    string? RelatedHolder { get; }
+    bool IsHidden { get; }
+}
+
+public class ScriptPreset : IConfigPreset{
+    Action onLoad;
+    public string Id { get; private set; }
+    public string DisplayName { get; private set; }
+    public string? Detail { get; private set; }
+    public string? RelatedHolder { get; private set; }
+    public bool IsHidden => false;
+
+
+    public ScriptPreset(string id, string displayName, string? detail, string? relatedHolder, Action onLoad)
+    {
+        this.Id = id;
+        this.DisplayName = displayName;
+        this.Detail = detail;
+        this.RelatedHolder = relatedHolder;
+        this.onLoad = onLoad;
+
+        IConfigPreset.allPresets.Add(id,this);
+        
+    }
+
+    bool IConfigPreset.LoadPreset()
+    {
+        try
+        {
+            onLoad.Invoke();
+        }catch(Exception ex)
+        {
+            NebulaPlugin.Log.Print(null, ex.ToString());
+            return false;
+        }
+        return true;
+        
+    }
+    
+}
+[NebulaPreLoad]
+public class ConfigPreset : IConfigPreset
+{
 
     NebulaAddon? addon;
     string path;
@@ -21,6 +68,7 @@ public class ConfigPreset
     public string? detail = null;
     public string? relatedHolder = null;
     public bool IsHidden { get;private set; }
+    string IConfigPreset.Id => Name;
     public string DisplayName => displayName ?? Name;
     public string? Detail => detail;
     public string? RelatedHolder => relatedHolder;
@@ -34,7 +82,7 @@ public class ConfigPreset
         try
         {
             ReadHeader();
-            allPresets[name] = this;
+            IConfigPreset.allPresets[name] = this;
         }
         catch
         {
@@ -42,9 +90,10 @@ public class ConfigPreset
         }
     }
 
+    //ローカルのプリセットを再読み込みします
     public static void LoadLocal(bool reload = true)
     {
-        if(reload) foreach (var entry in allPresets) if (entry.Value.addon == null) allPresets.Remove(entry.Key);
+        if(reload) foreach (var entry in IConfigPreset.allPresets) if (entry.Value is ConfigPreset cp && cp.addon == null) IConfigPreset.allPresets.Remove(entry.Key);
 
         string presetsFolder = "Presets";
         Directory.CreateDirectory(presetsFolder);
@@ -129,6 +178,9 @@ public class ConfigPreset
         }
 
     }
+
+    public bool LoadPreset() => LoadPreset(new());
+
     public bool LoadPreset(FunctionalEnvironment table,bool share = true)
     {
         try
@@ -218,11 +270,14 @@ public class ConfigPreset
                         table.Arguments[args[1]] = table.GetValue(args[2]);
                         break;
                     case "QUOTE":
-                        if (allPresets.TryGetValue(table.GetValue(args[1]).AsString(), out var preset))
+                        if (IConfigPreset.allPresets.TryGetValue(table.GetValue(args[1]).AsString(), out var preset))
                         {
                             Dictionary<string, string> rawTable = new();
                             for (int i = 2; i < args.Length; i++) rawTable["#ARG" + (i - 2).ToString()] = args[i];
-                            preset.LoadPreset(new(rawTable, table), false);
+                            if (preset is ConfigPreset cp)
+                                cp.LoadPreset(new(rawTable, table), false);
+                            else
+                                preset.LoadPreset();
                         }
                         break;
                     case "UNPACK":

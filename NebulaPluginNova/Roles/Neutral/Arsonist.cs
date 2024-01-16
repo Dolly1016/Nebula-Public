@@ -16,7 +16,7 @@ public class Arsonist : ConfigurableStandardRole
     static public Arsonist MyRole = new Arsonist();
     static public Team MyTeam = new("teams.arsonist", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
-    public override RoleCategory RoleCategory => RoleCategory.NeutralRole;
+    public override RoleCategory Category => RoleCategory.NeutralRole;
 
     public override string LocalizedName => "arsonist";
     public override Color RoleColor => new Color(229f / 255f, 93f / 255f, 0f / 255f);
@@ -70,9 +70,11 @@ public class Arsonist : ConfigurableStandardRole
         private List<(byte playerId,PoolablePlayer icon)> playerIcons = new();
         private bool canIgnite;
 
-        private void CheckIgnitable()
+        private bool CheckDoused((byte playerId, PoolablePlayer icon) p) => p.icon.GetAlpha() > 0.8f;
+        private bool CheckIgnitable()
         {
-            canIgnite = playerIcons.All(tuple => tuple.icon.GetAlpha() > 0.8f);
+            canIgnite = playerIcons.All(CheckDoused);
+            return canIgnite;
         }
         
         public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => false;
@@ -183,6 +185,31 @@ public class Arsonist : ConfigurableStandardRole
                 return false;
             });
             CheckIgnitable();
+        }
+
+        StaticAchievementToken? acTokenCommon;
+        public override void OnMeetingStart()
+        {
+            base.OnMeetingStart();
+
+            if (AmOwner)
+            {
+                if (acTokenCommon == null && playerIcons.Count(icon => CheckDoused(icon) && ((!NebulaGameManager.Instance?.GetModPlayerInfo(icon.playerId)?.IsDead) ?? false)) >= 3)
+                    acTokenCommon = new("arsonist.common1");
+            }
+        }
+
+        AchievementToken<bool>? acTokenChallenge;
+        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        {
+            var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon));
+            if (notDoused.Count == 1 && notDoused[0].playerId == exiled.PlayerId)
+                acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
+        }
+
+        public override void OnGameEnd(NebulaEndState endState)
+        {
+            if (acTokenChallenge != null) acTokenChallenge.Value = endState.CheckWin(MyPlayer.PlayerId) && endState.EndCondition == NebulaGameEnd.ArsonistWin;
         }
     }
 }

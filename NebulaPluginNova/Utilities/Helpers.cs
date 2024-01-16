@@ -1,4 +1,5 @@
 ﻿using Il2CppSystem.Reflection.Internal;
+using Mono.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,19 +59,29 @@ public static class Helpers
 
     public static int ComputeConstantHash(this string str)
     {
-        const int MulPrime = 127;
-        const int SurPrime = 104729;
+        const long MulPrime = 467;
+        const int SurPrime = 9670057;
 
-        int val = 0;
-        int mul = 1;
+        long val = 0;
         foreach (char c in str)
         {
-            mul *= MulPrime;
-            mul %= SurPrime;
-            val += (int)c * mul;
+            val *= MulPrime;
+            val += c;
             val %= SurPrime;
         }
-        return val;
+        return (int)(val % SurPrime);
+    }
+
+    public static string ComputeConstantHashAsString(this string str)
+    {
+        var val = str.ComputeConstantHash();
+        StringBuilder builder = new StringBuilder();
+        while(val > 0)
+        {
+            builder.Append((char)('a' + (val % 26)));
+            val /= 26;
+        }
+        return builder.ToString();
     }
 
     public static DeadBody[] AllDeadBodies()
@@ -142,5 +153,19 @@ public static class Helpers
     static public T Random<T>(this T[] array)
     {
         return array[System.Random.Shared.Next(array.Length)];
+    }
+
+    //指定の大きさまでQueueを小さくしてから要素を取り出します。呼び出し後のQueueの要素数は最大でexpectedSize - 1になります。
+    static public T DequeAt<T>(this Queue<T> queue, int expectedSize)
+    {
+        while (queue.Count > expectedSize) queue.Dequeue();
+        return queue.Dequeue();
+    }
+
+    static public bool AnyNonTriggersBetween(Vector2 pos1, Vector2 pos2, out Vector2 vector, int? layerMask = null)
+    {
+        layerMask ??= Constants.ShipAndAllObjectsMask;
+        vector = pos2 - pos1;
+        return PhysicsHelpers.AnyNonTriggersBetween(pos1, vector.normalized, vector.magnitude, layerMask!.Value);
     }
 }

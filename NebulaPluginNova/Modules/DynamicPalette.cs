@@ -436,7 +436,8 @@ public class DynamicPalette
             //まだプレイヤーが追加されていない場合は即座に反映させなくても大丈夫
             try
             {
-                PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.PlayerId == message.playerId))?.RawSetColor(message.playerId);
+                var player = PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.PlayerId == message.playerId));
+                if (isCalledByMe) player?.RpcSetColor(player!.PlayerId);
             }
             catch{ }
         }
@@ -498,24 +499,24 @@ public class DynamicPalette
         var screen = MetaScreen.GenerateWindow(new Vector2(6.7f, 4.2f), PlayerCustomizationMenu.Instance.transform, new Vector3(0f, 0f, 0f), true, false, true);
         screen.transform.parent.FindChild("Background").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.85f);
 
-        MetaContext context = new();
+        MetaContextOld context = new();
 
-        context.Append(new CombinedContext(
-            new MetaContext.Button(() => { screen.CloseScreen(); OpenCatalogue(TargetRenderer, ShownColor, true); }, TextAttribute.BoldAttr) { RawText = "Body Color" },
-            new MetaContext.HorizonalMargin(0.15f),
-            new MetaContext.Button(() => { screen.CloseScreen(); OpenCatalogue(TargetRenderer, ShownColor, false); }, TextAttribute.BoldAttr) { RawText = "Visor Color" }
+        context.Append(new CombinedContextOld(
+            new MetaContextOld.Button(() => { screen.CloseScreen(); OpenCatalogue(TargetRenderer, ShownColor, true); }, TextAttribute.BoldAttr) { RawText = "Body Color" },
+            new MetaContextOld.HorizonalMargin(0.15f),
+            new MetaContextOld.Button(() => { screen.CloseScreen(); OpenCatalogue(TargetRenderer, ShownColor, false); }, TextAttribute.BoldAttr) { RawText = "Visor Color" }
             ));
-        context.Append(new MetaContext.VerticalMargin(0.05f));
+        context.Append(new MetaContextOld.VerticalMargin(0.05f));
 
-        MetaContext inner = new();
+        MetaContextOld inner = new();
 
-        MetaContext.ScrollView scrollView = new(new(6.7f, 3.55f), inner, true);
+        MetaContextOld.ScrollView scrollView = new(new(6.7f, 3.55f), inner, true);
         
         foreach(var category in (isBodyColor ? ColorCatalogue : VisorColorCatalogue))
         {
-            inner.Append(new MetaContext.Text(new(TextAttribute.BoldAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial}) { TranslationKey = "inventory.catalogue." + category.Key });
+            inner.Append(new MetaContextOld.Text(new(TextAttribute.BoldAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial}) { TranslationKey = "inventory.catalogue." + category.Key });
             inner.Append(category.Value, (col) =>
-                new MetaContext.Image(colorButtonSprite.GetSprite())
+                new MetaContextOld.Image(colorButtonSprite.GetSprite())
                 {
                     Width = 0.96f,
                     PostBuilder = (renderer) =>
@@ -560,18 +561,18 @@ public class DynamicPalette
                         });
                         button.OnMouseOver.AddListener(() =>
                         {
-                            MetaContext context = new();
-                            context.Append(new MetaContext.VariableText(new(TextAttribute.BoldAttr) { Alignment = TextAlignmentOptions.Left }) { RawText = col.DisplayName });
+                            MetaContextOld context = new();
+                            context.Append(new MetaContextOld.VariableText(new(TextAttribute.BoldAttr) { Alignment = TextAlignmentOptions.Left }) { RawText = col.DisplayName });
                             if(col.TranslationKey != null)
                             {
                                 var detail = Language.Find(col.TranslationKey + ".detail");
-                                if (detail != null) context.Append(new MetaContext.VariableText(TextAttribute.ContentAttr) { RawText = detail });
+                                if (detail != null) context.Append(new MetaContextOld.VariableText(TextAttribute.ContentAttr) { RawText = detail });
                             }
                             NebulaManager.Instance.SetHelpContext(button,context);
                         });
                         button.OnMouseOut.AddListener(NebulaManager.Instance.HideHelpContext);
                     },
-                    Alignment = IMetaContext.AlignmentOption.Left
+                    Alignment = IMetaContextOld.AlignmentOption.Left
                 }
             , 6, -1, 0, 0.65f);
         }
@@ -615,7 +616,7 @@ public class NebulaPlayerTab : MonoBehaviour
     static private SpriteLoader saveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.ColorSave.png", 100f);
     public void Start()
     {
-        new MetaContext.Button(() => DynamicPalette.OpenCatalogue(TargetRenderer, () => PreviewColor(null, null, null)), TextAttribute.BoldAttr) { TranslationKey = "inventory.palette.catalogue" }.Generate(gameObject, new Vector2(2.9f, 2.25f),out _);
+        new MetaContextOld.Button(() => DynamicPalette.OpenCatalogue(TargetRenderer, () => PreviewColor(null, null, null)), TextAttribute.BoldAttr) { TranslationKey = "inventory.palette.catalogue" }.Generate(gameObject, new Vector2(2.9f, 2.25f),out _);
 
         DynamicPaletteRenderer = UnityHelper.CreateObject<SpriteRenderer>("DynamicPalette",transform, new Vector3(0.4f, -0.1f, -80f));
         DynamicPaletteRenderer.sprite = spritePalette.GetSprite();

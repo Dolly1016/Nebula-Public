@@ -13,7 +13,7 @@ public class Reaper : ConfigurableStandardRole
 
     static public Reaper MyRole = new Reaper();
 
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "reaper";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -37,6 +37,9 @@ public class Reaper : ConfigurableStandardRole
         private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
         public override Timer? VentCoolDown => ventCoolDown;
         public override Timer? VentDuration => ventDuration;
+
+        StaticAchievementToken? acTokenCommon = null;
+        AchievementToken<int>? acTokenChallenge = null;
 
         public Instance(PlayerModInfo player) : base(player)
         {
@@ -168,7 +171,12 @@ public class Reaper : ConfigurableStandardRole
             base.OnActivated();
 
             draggable?.OnActivated(this);
-            if (AmOwner) EditVentInfo(true);
+            if (AmOwner)
+            {
+                EditVentInfo(true);
+
+                acTokenChallenge = new("reaper.challenge", 0, (val, _) => val >= 5);
+            }
         }
 
         public override void OnDead()
@@ -180,6 +188,23 @@ public class Reaper : ConfigurableStandardRole
         {
             draggable?.OnInactivated(this);
             if (AmOwner) EditVentInfo(false);
+        }
+
+        public override void OnEnterVent(Vent vent)
+        {
+            if (AmOwner && MyPlayer.HoldingAnyDeadBody)
+                acTokenCommon ??= new("reaper.common1");
+        }
+
+        //キルのたびに加算、発見されるたびに減算してレポートされていない死体を計上する
+        public override void OnKillPlayer(PlayerControl target)
+        {
+            if (acTokenChallenge != null && !MeetingHud.Instance) acTokenChallenge.Value++;
+        }
+
+        public override void OnReported(PlayerModInfo reporter, PlayerModInfo reported)
+        {
+            if(acTokenChallenge != null && AmOwner && (reported.MyKiller?.AmOwner ?? false)) acTokenChallenge.Value--;
         }
     }
 }

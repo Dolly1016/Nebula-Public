@@ -15,7 +15,7 @@ public class ChainShifter : ConfigurableStandardRole
     static public ChainShifter MyRole = new ChainShifter();
     static public Team MyTeam = new("teams.chainShifter", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
-    public override RoleCategory RoleCategory => RoleCategory.NeutralRole;
+    public override RoleCategory Category => RoleCategory.NeutralRole;
 
     public override string LocalizedName => "chainShifter";
     public override Color RoleColor => new Color(115f / 255f, 115f / 255f, 115f / 255f);
@@ -93,6 +93,8 @@ public class ChainShifter : ConfigurableStandardRole
 
         public override IEnumerator? CoMeetingEnd()
         {
+            if (!AmOwner) yield break;
+
             if (!canExecuteShift) yield break;
             if (shiftTarget == null) yield break;
             if(!shiftTarget) yield break;
@@ -147,6 +149,9 @@ public class ChainShifter : ConfigurableStandardRole
                 }
             }
 
+            //会議終了からすぐにゲームが終了すればよい
+            new AchievementToken<float>("chainShifter.challenge", Time.time, (val, _) => Time.time - val < 15f && NebulaGameManager.Instance.EndState.CheckWin(MyPlayer.PlayerId));
+
             yield return new WaitForSeconds(0.2f);
 
             yield break;
@@ -155,6 +160,18 @@ public class ChainShifter : ConfigurableStandardRole
         public override void OnMeetingEnd()
         {
             shiftTarget = null;
+        }
+
+
+        public override void OnMurdered(PlayerControl murder)
+        {
+            base.OnMurdered(murder);
+            if (murder.AmOwner) new StaticAchievementToken("chainShifter.common1");
+        }
+
+        public override void OnGameEnd(NebulaEndState endState)
+        {
+            if (AmOwner) new StaticAchievementToken("chainShifter.another1");
         }
     }
 }

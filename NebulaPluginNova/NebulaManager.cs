@@ -1,14 +1,17 @@
 ﻿using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
+using Nebula.Commands;
 using Nebula.Game;
 using Nebula.Map;
 using Nebula.Modules;
+using Nebula.Modules.MetaContext;
 using Nebula.Utilities;
 using Rewired.UI.ControlMapper;
 using System.Collections;
 using System.Text;
 using UnityEngine;
+using Virial.Media;
 
 namespace Nebula;
 
@@ -31,7 +34,7 @@ public class MouseOverPopup : MonoBehaviour
         background.sprite = NebulaAsset.SharpWindowBackgroundSprite.GetSprite();
         background.drawMode = SpriteDrawMode.Sliced;
         background.tileMode = SpriteTileMode.Continuous;
-        background.color = new Color(0.17f, 0.17f, 0.17f, 1f);
+        background.color = new Color(0.14f, 0.14f, 0.14f, 1f);
 
         screenSize = new Vector2(7f, 4f);
         myScreen = MetaScreen.GenerateScreen(screenSize,transform,Vector3.zero,false,false,false);
@@ -46,7 +49,7 @@ public class MouseOverPopup : MonoBehaviour
         relatedButton = null;
     }
 
-    public void SetContext(PassiveUiElement? related, IMetaContext? context)
+    public void SetContextOld(PassiveUiElement? related, IMetaContextOld? context)
     {
         myScreen.SetContext(null);
 
@@ -106,6 +109,67 @@ public class MouseOverPopup : MonoBehaviour
 
         background.transform.localPosition = new Vector3((width.min + width.max) / 2f, screenSize.y / 2f - height / 2f, 1f);
         background.size = new Vector2((width.max - width.min) + 0.22f, height + 0.1f);
+
+        Update();
+    }
+
+    public void SetContext(PassiveUiElement? related, Virial.Media.GUIContext? context)
+    {
+        myScreen.SetContext(null);
+
+        if (context == null)
+        {
+            gameObject.SetActive(false);
+            relatedButton = null;
+            return;
+        }
+
+        gameObject.SetActive(true);
+
+        relatedButton = related;
+        transform.SetParent(UnityHelper.FindCamera(LayerExpansion.GetUILayer())!.transform);
+
+        bool isLeft = Input.mousePosition.x < Screen.width / 2f;
+        bool isLower = Input.mousePosition.y < Screen.height / 2f;
+
+        myScreen.SetContext(context, new Vector2(0.5f, 0.5f), out var size);
+
+        
+
+        float[] xRange = new float[2], yRange = new float[2];
+        xRange[0] = -size.Width * 0.5f - 0.15f;
+        xRange[1] = size.Width * 0.5f + 0.15f;
+        yRange[0] = -size.Height * 0.5f - 0.15f;
+        yRange[1] = size.Height * 0.5f + 0.15f;
+
+        Vector2 anchorPoint = new(xRange[isLeft ? 0 : 1], yRange[isLower ? 0 : 1]);
+
+        var pos = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer());
+        pos.z = -800f;
+        transform.position = pos - (Vector3)anchorPoint;
+
+        //範囲外にはみ出た表示の是正
+        {
+            var lower = UnityHelper.ScreenToWorldPoint(new(10f, 10f), LayerExpansion.GetUILayer());
+            var upper = UnityHelper.ScreenToWorldPoint(new(Screen.width - 10f, Screen.height - 10f), LayerExpansion.GetUILayer());
+            float diff;
+
+            diff = (transform.position.x + xRange[0]) - lower.x;
+            if (diff < 0f) transform.position -= new Vector3(diff, 0f);
+
+            diff = (transform.position.y + yRange[0]) - lower.y;
+            if (diff < 0f) transform.position -= new Vector3(0f, diff);
+
+            diff = (transform.position.x + xRange[1]) - upper.x;
+            if (diff > 0f) transform.position -= new Vector3(diff, 0f);
+
+            diff = (transform.position.y + yRange[1]) - upper.y;
+            if (diff > 0f) transform.position -= new Vector3(0f, diff);
+        }
+
+
+        background.transform.localPosition = new Vector3(0f, 0f, 1f);
+        background.size = new Vector2(size.Width + 0.22f, size.Height + 0.1f);
 
         Update();
     }
@@ -201,7 +265,7 @@ public class NebulaManager : MonoBehaviour
 
     }
 
-    private void ToggleConsole()
+    public void ToggleConsole()
     {
         if (console == null) console = new CommandConsole();
         else console.IsShown = !console.IsShown;
@@ -267,21 +331,23 @@ public class NebulaManager : MonoBehaviour
 
     public void Update()
     {
-        
-        
+        if (NebulaInput.GetKeyDown(KeyCode.T))
+        {
+            PlayerControl.LocalPlayer.GetModInfo()?.RpcTest(5);
+        }
 
         if (NebulaPlugin.FinishedPreload)
         {
             //スクリーンショット
-            if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDown) StartCoroutine(CaptureAndSave(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyState).WrapToIl2Cpp());
+            if (!TextField.AnyoneValid && NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDown) StartCoroutine(CaptureAndSave(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyState).WrapToIl2Cpp());
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
                 //コマンド
                 if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyDown)
                 {
-                    MetaContext context = new();
-                    context.Append(new MetaContext.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = "help.command", Alignment = IMetaContext.AlignmentOption.Left });
+                    MetaContextOld context = new();
+                    context.Append(new MetaContextOld.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = "help.command", Alignment = IMetaContextOld.AlignmentOption.Left });
                     string commandsStr = "";
                     foreach (var command in commands)
                     {
@@ -292,7 +358,7 @@ public class NebulaManager : MonoBehaviour
 
                         commandsStr += " :" + Language.Translate(command.TranslationKey);
                     }
-                    context.Append(new MetaContext.VariableText(TextAttribute.ContentAttr) { RawText = commandsStr });
+                    context.Append(new MetaContextOld.VariableText(TextAttribute.ContentAttr) { RawText = commandsStr });
 
                     if (commandsStr.Length > 0) SetHelpContext(null, context);
 
@@ -344,7 +410,9 @@ public class NebulaManager : MonoBehaviour
         mouseOverPopup = UnityHelper.CreateObject<MouseOverPopup>("MouseOverPopup",transform,Vector3.zero);
     }
 
-    public void SetHelpContext(PassiveUiElement? related, IMetaContext? context) => mouseOverPopup.SetContext(related, context);
+    public void SetHelpContext(PassiveUiElement? related, IMetaContextOld? context) => mouseOverPopup.SetContextOld(related, context);
+    public void SetHelpContext(PassiveUiElement? related, Virial.Media.GUIContext? context) => mouseOverPopup.SetContext(related, context);
+
     public void HideHelpContext() => mouseOverPopup.SetContext(null, null);
     public void HideHelpContextIf(PassiveUiElement? related)
     {

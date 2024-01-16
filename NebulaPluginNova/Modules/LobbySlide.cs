@@ -34,7 +34,7 @@ public abstract class LobbySlide
 
     public abstract void Reshare();
     public virtual void Abandon() { }
-    public abstract IMetaContext Show(out float height);
+    public abstract IMetaContextOld Show(out float height);
 
 
     protected static TextAttribute TitleAttribute = new(TextAttribute.TitleAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(5f, 0.5f) };
@@ -57,13 +57,13 @@ public abstract class LobbyImageSlide : LobbySlide
         if (mySlide && mySlide!.texture) GameObject.Destroy(mySlide!.texture);
     }
 
-    public override IMetaContext Show(out float height)
+    public override IMetaContextOld Show(out float height)
     {
         height = 1.4f;
 
-        MetaContext context = new();
+        MetaContextOld context = new();
 
-        context.Append(new MetaContext.Text(TitleAttribute) { RawText = Title, Alignment = IMetaContext.AlignmentOption.Center });
+        context.Append(new MetaContextOld.Text(TitleAttribute) { RawText = Title, Alignment = IMetaContextOld.AlignmentOption.Center });
 
         if (mySlide != null)
         {
@@ -71,12 +71,12 @@ public abstract class LobbyImageSlide : LobbySlide
             float width = Mathf.Min(5.4f, mySlide.bounds.size.x / mySlide.bounds.size.y * 2.9f);
             height += width / mySlide.bounds.size.x * mySlide.bounds.size.y;
 
-            context.Append(new MetaContext.Image(mySlide) { Alignment = IMetaContext.AlignmentOption.Center, Width = width });
+            context.Append(new MetaContextOld.Image(mySlide) { Alignment = IMetaContextOld.AlignmentOption.Center, Width = width });
         }
 
-        context.Append(new MetaContext.VerticalMargin(0.2f));
+        context.Append(new MetaContextOld.VerticalMargin(0.2f));
 
-        context.Append(new MetaContext.Text(CaptionAttribute) { RawText = Caption, Alignment = IMetaContext.AlignmentOption.Center });
+        context.Append(new MetaContextOld.Text(CaptionAttribute) { RawText = Caption, Alignment = IMetaContextOld.AlignmentOption.Center });
 
 
         return context;

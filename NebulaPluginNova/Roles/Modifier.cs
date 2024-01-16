@@ -7,11 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Configuration;
+using static Il2CppMono.Security.X509.X520;
 using static Nebula.Roles.Assignment.IRoleAllocator;
 
 namespace Nebula.Roles;
 
-public abstract class AbstractModifier : IAssignableBase
+public abstract class AbstractModifier : IAssignableBase, DefinedModifier
 {
     public virtual string InternalName { get => LocalizedName; }
     public abstract string LocalizedName { get; }
@@ -22,20 +24,52 @@ public abstract class AbstractModifier : IAssignableBase
 
     public virtual void Load() { }
     public virtual IEnumerable<IAssignableBase> RelatedOnConfig() { yield break; }
-    public virtual ConfigurationHolder? RelatedConfig { get => null; }
 
+    public virtual ConfigurationHolder? RelatedConfig { get => null; }
 
     public AbstractModifier()
     {
         Roles.Register(this);
         SerializableDocument.RegisterColor("role." + InternalName, RoleColor);
     }
+
+    RoleFilter? DefinedModifier.RoleFilter => null;
 }
 
-public abstract class IntroAssignableModifier : AbstractModifier
+public abstract class IntroAssignableModifier : AbstractModifier, DefinedModifier, RoleFilter
 {
     public virtual void Assign(IRoleAllocator.RoleTable roleTable) { }
     public abstract string CodeName { get; }
+    public virtual int AssignPriority { get => 0; }
+
+    RoleFilter? DefinedModifier.RoleFilter => this;
+
+
+    void RoleFilter.Filter(FilterAction filterAction, params DefinedRole[] roles)
+    {
+        if (!AmongUsClient.Instance.AmHost) throw new Virial.NonHostPlayerException("Only host can edit role filter.");
+
+        switch (filterAction)
+        {
+            case FilterAction.And:
+                foreach(var r in Roles.AllRoles)
+                    if (!(r.ModifierFilter?.Contains(this) ?? true) && roles.Contains(r)) r.ModifierFilter!.ToggleAndShare(this);
+                break;
+            case FilterAction.Or:
+                foreach (var r in Roles.AllRoles)
+                    if ((r.ModifierFilter?.Contains(this) ?? false) && roles.Contains(r)) r.ModifierFilter!.ToggleAndShare(this);
+                break;
+            case FilterAction.Set:
+                foreach (var r in Roles.AllRoles)
+                    if (r.ModifierFilter != null && r.ModifierFilter.Contains(this) == roles.Contains(r)) r.ModifierFilter!.ToggleAndShare(this);
+                break;
+        }
+    }
+
+    bool RoleFilter.Test(DefinedRole role)
+    {
+        return role.ModifierFilter?.Test(this) ?? false;
+    }
 }
 
 public abstract class ConfigurableModifier : IntroAssignableModifier
@@ -67,10 +101,13 @@ public abstract class ConfigurableModifier : IntroAssignableModifier
 
 public abstract class ConfigurableStandardModifier : ConfigurableModifier
 {
-    NebulaConfiguration CrewmateRoleCountOption = null!;
-    NebulaConfiguration ImpostorRoleCountOption = null!;
-    NebulaConfiguration NeutralRoleCountOption = null!;
-    NebulaConfiguration RoleChanceOption = null!;
+    protected NebulaConfiguration CrewmateRoleCountOption { get; private set; } = null!;
+    protected NebulaConfiguration CrewmateRandomRoleCountOption { get; private set; } = null!;
+    protected NebulaConfiguration ImpostorRoleCountOption { get; private set; } = null!;
+    protected NebulaConfiguration ImpostorRandomRoleCountOption { get; private set; } = null!;
+    protected NebulaConfiguration NeutralRoleCountOption { get; private set; } = null!;
+    protected NebulaConfiguration NeutralRandomRoleCountOption { get; private set; } = null!;
+    protected NebulaConfiguration RoleChanceOption { get; private set; } = null!;
 
     public ConfigurableStandardModifier(int TabMask) : base(TabMask)
     {
@@ -81,31 +118,72 @@ public abstract class ConfigurableStandardModifier : ConfigurableModifier
     }
 
     static public NebulaConfiguration GenerateRoleChanceOption(ConfigurationHolder holder) =>
-        new(holder, "chance", new TranslateTextComponent("options.modifier.chance"), 10f, 100f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
+        new(holder, "chance", new TranslateTextComponent("options.modifier.chance"), 10f, 90f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
 
     protected override void LoadOptions() {
         CrewmateRoleCountOption = new(RoleConfig, "crewmateCount", new TranslateTextComponent("options.role.crewmateCount"), 15, 0, 0);
         ImpostorRoleCountOption = new(RoleConfig, "impostorCount", new TranslateTextComponent("options.role.impostorCount"), 5, 0, 0);
         NeutralRoleCountOption = new(RoleConfig, "neutralCount", new TranslateTextComponent("options.role.neutralCount"), 10, 0, 0);
+
+        CrewmateRandomRoleCountOption = new(RoleConfig, "crewmateRandomCount", null, 15, 0, 0) { Editor = () => null, Shower = () => null };
+        ImpostorRandomRoleCountOption = new(RoleConfig, "impostorRandomCount", null, 5, 0, 0) { Editor = () => null, Shower = () => null };
+        NeutralRandomRoleCountOption = new(RoleConfig, "neutralRandomCount", null, 10, 0, 0) { Editor = () => null, Shower = () => null };
+
+        void SetShowerAndEditor(NebulaConfiguration countOption, NebulaConfiguration randomOption)
+        {
+            countOption.Editor = () =>
+            {
+                return new CombinedContextOld(0.55f, IMetaContextOld.AlignmentOption.Center,
+                    new MetaContextOld.Text(new(NebulaConfiguration.OptionTitleAttr) { Size = new(2.2f,0.4f)}) { RawText = countOption.Title.GetString(), PostBuilder = (text) => countOption.TitlePostBuild(text, null) },
+                    NebulaConfiguration.OptionTextColon,
+                    NebulaConfiguration.OptionButtonContext(() => countOption.ChangeValue(false), "<<"),
+                    new MetaContextOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = countOption.ToDisplayString() },
+                    NebulaConfiguration.OptionButtonContext(() => countOption.ChangeValue(true), ">>"),
+                    NebulaConfiguration.OptionRawText("(",0.2f),
+                    NebulaConfiguration.OptionTranslatedText("options.role.randomCount", 0.7f),
+                    NebulaConfiguration.OptionTextColon,
+                    NebulaConfiguration.OptionButtonContext(() => randomOption.ChangeValue(false), "<<"),
+                    new MetaContextOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = randomOption.ToDisplayString() },
+                    NebulaConfiguration.OptionButtonContext(() => randomOption.ChangeValue(true), ">>"),
+                    NebulaConfiguration.OptionRawText(")", 0.2f)
+                );
+            };
+            countOption.Shower = () =>
+            {
+                return countOption.Title.GetString() + ": (" +
+                Language.Translate("options.role.definiteCount") + ": " + countOption.ToDisplayString() + ", " +
+                Language.Translate("options.role.randomCount") + ": " + randomOption.ToDisplayString() + ")";
+            };
+        }
+        SetShowerAndEditor(CrewmateRoleCountOption, CrewmateRandomRoleCountOption);
+        SetShowerAndEditor(ImpostorRoleCountOption, ImpostorRandomRoleCountOption);
+        SetShowerAndEditor(NeutralRoleCountOption, NeutralRandomRoleCountOption);
+
         RoleChanceOption = GenerateRoleChanceOption(RoleConfig);
+        RoleChanceOption.Predicate = () => CrewmateRandomRoleCountOption > 0 || ImpostorRandomRoleCountOption > 0 || NeutralRandomRoleCountOption > 0;
     }
 
-    private void TryAssign(IRoleAllocator.RoleTable roleTable, RoleCategory category,int num)
+    private void TryAssign(IRoleAllocator.RoleTable roleTable, RoleCategory category,int num,int randomNum)
     {
-        int reallyNum = 0;
+        int reallyNum = num;
         float chance = RoleChanceOption.GetFloat() / 100f;
-        for (int i = 0; i < num; i++) if (!(chance < 1f) || (float)System.Random.Shared.NextDouble() < chance) reallyNum++;
+        for (int i = 0; i < randomNum; i++) if (!(chance < 1f) || (float)System.Random.Shared.NextDouble() < chance) reallyNum++;
 
         var players = roleTable.GetPlayers(category).Where(tuple=>tuple.role.CanLoad(this)).OrderBy(i => Guid.NewGuid()).ToArray();
         reallyNum = Mathf.Min(players.Length, reallyNum);
 
-        for (int i = 0; i < reallyNum; i++) roleTable.SetModifier(players[i].playerId, this);
+        for (int i = 0; i < reallyNum; i++) AssignToTable(roleTable, players[i].playerId);
+    }
+
+    virtual protected void AssignToTable(IRoleAllocator.RoleTable roleTable, byte playerId)
+    {
+        roleTable.SetModifier(playerId, this);
     }
 
     public override void Assign(IRoleAllocator.RoleTable roleTable)
     {
-        TryAssign(roleTable, RoleCategory.CrewmateRole, CrewmateRoleCountOption);
-        TryAssign(roleTable, RoleCategory.ImpostorRole, ImpostorRoleCountOption);
-        TryAssign(roleTable, RoleCategory.NeutralRole, NeutralRoleCountOption);
+        TryAssign(roleTable, RoleCategory.CrewmateRole, CrewmateRoleCountOption,CrewmateRandomRoleCountOption);
+        TryAssign(roleTable, RoleCategory.ImpostorRole, ImpostorRoleCountOption,ImpostorRandomRoleCountOption);
+        TryAssign(roleTable, RoleCategory.NeutralRole, NeutralRoleCountOption,NeutralRandomRoleCountOption);
     }
 }

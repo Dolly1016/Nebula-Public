@@ -23,25 +23,25 @@ public class VoiceChatInfo : MonoBehaviour
         myScreen = MetaScreen.GenerateScreen(new Vector2(2f, 0.45f), transform, new Vector3(0, 0, -1f), false, false, false);
     }
 
-    private IMetaContext? radioContext = null;
+    private IMetaContextOld? radioContext = null;
     private float timer = 0f;
     private bool isMute = false;
     private bool MustShow => timer > 0f || radioContext != null || isMute;
 
     public void SetRadioContext(string displayText,Color color)
     {
-        var context = new MetaContext();
+        var context = new MetaContextOld();
 
         context.Append(
-            new ParallelContext(
-            new(new MetaContext.Image(iconRadioSprite.GetSprite()) { Width = 0.22f, Alignment = IMetaContext.AlignmentOption.Center }, 0.35f),
-            new(new MetaContext()
-            .Append(new MetaContext.VerticalMargin(0.015f))
-            .Append(new MetaContext.Text(SmallTextAttribute) { Alignment = IMetaContext.AlignmentOption.Center, TranslationKey = "voiceChat.info.radio" })
-            .Append(new MetaContext.VerticalMargin(-0.07f))
-            .Append(new MetaContext.Text(TextAttribute) { Alignment = IMetaContext.AlignmentOption.Center, RawText = displayText.Color(color) })
+            new ParallelContextOld(
+            new(new MetaContextOld.Image(iconRadioSprite.GetSprite()) { Width = 0.22f, Alignment = IMetaContextOld.AlignmentOption.Center }, 0.35f),
+            new(new MetaContextOld()
+            .Append(new MetaContextOld.VerticalMargin(0.015f))
+            .Append(new MetaContextOld.Text(SmallTextAttribute) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "voiceChat.info.radio" })
+            .Append(new MetaContextOld.VerticalMargin(-0.07f))
+            .Append(new MetaContextOld.Text(TextAttribute) { Alignment = IMetaContextOld.AlignmentOption.Center, RawText = displayText.Color(color) })
             , 1.6f))
-            { Alignment = IMetaContext.AlignmentOption.Center });
+            { Alignment = IMetaContextOld.AlignmentOption.Center });
         radioContext = context;
 
         ShowContext();
@@ -58,11 +58,11 @@ public class VoiceChatInfo : MonoBehaviour
         timer = 2.7f;
 
         if (isMute)
-            myScreen.SetContext(new MetaContext.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.mute"), Alignment = IMetaContext.AlignmentOption.Center });
+            myScreen.SetContext(new MetaContextOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.mute"), Alignment = IMetaContextOld.AlignmentOption.Center });
         else if (radioContext != null)
             myScreen.SetContext(radioContext);
         else
-            myScreen.SetContext(new MetaContext.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.unmute"), Alignment = IMetaContext.AlignmentOption.Center });
+            myScreen.SetContext(new MetaContextOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.unmute"), Alignment = IMetaContextOld.AlignmentOption.Center });
     }
 
     public static TextAttribute TextAttribute { get; private set; } = new(TextAttribute.BoldAttr) { Size = new(1.2f, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaxSize = 1.8f, FontMinSize = 1f, FontSize = 1.8f };

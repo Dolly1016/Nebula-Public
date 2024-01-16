@@ -1,4 +1,5 @@
 ﻿using Nebula.Configuration;
+using Nebula.Modules;
 using Virial.Assignable;
 
 namespace Nebula.Roles.Neutral;
@@ -8,7 +9,7 @@ public class Jester : ConfigurableStandardRole
     static public Jester MyRole = new Jester();
     static public Team MyTeam = new("teams.jester", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
-    public override RoleCategory RoleCategory => RoleCategory.NeutralRole;
+    public override RoleCategory Category => RoleCategory.NeutralRole;
 
     public override string LocalizedName => "jester";
     public override Color RoleColor => new Color(253f / 255f, 84f / 255f, 167f / 255f);
@@ -82,6 +83,16 @@ public class Jester : ConfigurableStandardRole
 
         public override bool CanFixComm => MyRole.CanFixCommsOption;
         public override bool CanFixLight => MyRole.CanFixLightOption;
+
+
+        StaticAchievementToken? acTokenCommon = null;
+        public override void OnVotedForMeLocal(PlayerControl[] voters)
+        {
+            if(voters.Length > 0 && voters.Any(v=>!v.AmOwner))
+                acTokenCommon ??= new StaticAchievementToken("jester.common1");
+            if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || voters.Any(v => v.PlayerId == p.PlayerId)) ?? false)
+                new StaticAchievementToken("jester.challenge");
+        }
     }
 }
 

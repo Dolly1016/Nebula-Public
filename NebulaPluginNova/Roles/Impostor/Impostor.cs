@@ -13,7 +13,7 @@ public class Impostor : ConfigurableStandardRole
 {
     static public Impostor MyRole = new Impostor();
     static public Team MyTeam = new("teams.impostor", Palette.ImpostorRed,TeamRevealType.Teams);
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "impostor";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -43,7 +43,7 @@ public class Impostor : ConfigurableStandardRole
             if (AmOwner)
             {
                 if (GeneralConfigurations.ImpostorsRadioOption) {
-                    VoiceChatRadio impostorRadio = new((p) => p.Role.Role.RoleCategory == RoleCategory.ImpostorRole, Language.Translate("voiceChat.info.impostorRadio"), Palette.ImpostorRed);
+                    VoiceChatRadio impostorRadio = new((p) => p.Role.Role.Category == RoleCategory.ImpostorRole, Language.Translate("voiceChat.info.impostorRadio"), Palette.ImpostorRed);
                     Bind(new NebulaGameScript() {
                         OnActivatedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.AddRadio(impostorRadio) ,
                         OnReleasedEvent = ()=> NebulaGameManager.Instance?.VoiceChatManager?.RemoveRadio(impostorRadio)
@@ -56,7 +56,7 @@ public class Impostor : ConfigurableStandardRole
 
         public override void DecoratePlayerName(ref string text, ref Color color)
         {
-            if (PlayerControl.LocalPlayer.GetModInfo()?.Role.Role.RoleCategory == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
+            if (PlayerControl.LocalPlayer.GetModInfo()?.Role.Role.Category == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
         }
     }
 }

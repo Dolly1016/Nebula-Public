@@ -67,7 +67,7 @@ public class PaparazzoShot : MonoBehaviour
         }
     }
 
-    public void TakePicture(List<(Transform holder, PaparazzoShot shot,int playerMask)> shots)
+    public void TakePicture(List<(Transform holder, PaparazzoShot shot,int playerMask)> shots,Action<bool>? callback = null)
     {
         focus = false;
 
@@ -147,6 +147,9 @@ public class PaparazzoShot : MonoBehaviour
 
             if ((playerMask & ((~(PlayerControl.LocalPlayer.GetModInfo()?.Role as Paparazzo.Instance)?.DisclosedMask) ?? 0)) == 0)
             {
+                //失敗時
+                callback?.Invoke(false);
+
                 var scale = transform.localScale.x;
                 while (scale > 0f)
                 {
@@ -159,6 +162,9 @@ public class PaparazzoShot : MonoBehaviour
             }
             else
             {
+                //成功時
+                callback?.Invoke(true);
+
                 var t = UnityHelper.CreateObject("Picture", transform.parent, transform.localPosition);
                 transform.SetParent(t.transform, true);
                 shots.Add((t.transform, this,playerMask));
@@ -177,6 +183,8 @@ public class PaparazzoShot : MonoBehaviour
                     };
                     num++;
                 }
+
+                if (num >= 4) new StaticAchievementToken("paparazzo.common2");
 
                 players.transform.localScale = new Vector3(0f, 0f, 1f);
                 var playersScale = 0f;
@@ -202,7 +210,7 @@ public class Paparazzo : ConfigurableStandardRole
     static public Paparazzo MyRole = new Paparazzo();
     static public Team MyTeam = new("teams.paparazzo", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
-    public override RoleCategory RoleCategory => RoleCategory.NeutralRole;
+    public override RoleCategory Category => RoleCategory.NeutralRole;
 
     public override string LocalizedName => "paparazzo";
     public override Color RoleColor => new Color(202f / 255f, 118f / 255f, 140f / 255f);
@@ -237,6 +245,8 @@ public class Paparazzo : ConfigurableStandardRole
         private List<(Transform holder,PaparazzoShot shot,int playerMask)> shots = new();
         private HudContent? shotsHolder = null;
         private bool canWin = false;
+
+        AchievementToken<(bool cleared, int? lastAlive)>? acTokenChallenge = null;
 
         public Instance(PlayerModInfo player, int[] arguments) : base(player)
         {
@@ -308,6 +318,9 @@ public class Paparazzo : ConfigurableStandardRole
 
             if (AmOwner)
             {
+                var acTokenCommon = new AchievementToken<int>("paparazzo.common1", 0, (val, _) => val >= 3);
+                acTokenChallenge = new("paparazzo.challenge",(false,null),(val,_)=>val.cleared);
+
                 shotsHolder = HudContent.InstantiateContent("Pictures", true, true, false, true);
                 Bind(shotsHolder.gameObject);
 
@@ -317,7 +330,7 @@ public class Paparazzo : ConfigurableStandardRole
                 shotButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 shotButton.OnClick = (button) => {
                     GameObject.Destroy(MyFinder?.MyObject?.GetComponent<PassiveButton>());
-                    MyFinder?.MyObject?.TakePicture(shots);
+                    MyFinder?.MyObject?.TakePicture(shots, success => acTokenCommon.Value += success ? 1 : 0);
                     MyFinder?.Detach();
                     MyFinder = null;
                     shotButton.StartCoolDown();
@@ -458,10 +471,23 @@ public class Paparazzo : ConfigurableStandardRole
                         CheckPaparazzoWin();
                         SharePicture(shot.shot.centerRenderer.transform.localScale.x, shot.shot.transform.localEulerAngles.z, shot.shot.centerRenderer.sprite.texture);
                         shareFlag = true;
+
+                        if(acTokenChallenge != null) acTokenChallenge.Value.lastAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead);
                     });
 
 
                 }
+            }
+        }
+
+        public override void OnMeetingEnd()
+        {
+            base.OnMeetingEnd();
+
+            if (acTokenChallenge != null)
+            {
+                acTokenChallenge.Value.cleared |= acTokenChallenge.Value.lastAlive - NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead) >= 4;
+                acTokenChallenge.Value.lastAlive = null;
             }
         }
 

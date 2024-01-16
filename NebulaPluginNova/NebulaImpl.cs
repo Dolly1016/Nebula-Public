@@ -1,5 +1,6 @@
 ﻿using Nebula.Compat;
 using Nebula.Events;
+using Nebula.Modules.MetaContext;
 using Nebula.Roles;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial;
 using Virial.Assignable;
+using Virial.Media;
 using Virial.Text;
 
 namespace Nebula;
@@ -23,11 +25,13 @@ public class NebulaImpl : INebula
 
     public List<AbstractRoleDef> AllRoles = new();
 
-    public string APIVersion => "1.0";
+    public string APIVersion => "1.1.1";
 
     public Virial.Assets.INameSpace NebulaAsset => NameSpaceManager.DefaultNameSpace;
 
     public Virial.Assets.INameSpace InnerslothAsset => NameSpaceManager.InnerslothNameSpace;
+
+    public Virial.Media.GUI GUILibrary => NebulaGUIContextEngine.Instance;
 
     public CommunicableTextTag RegisterCommunicableText(string translationKey)
     {
@@ -36,7 +40,13 @@ public class NebulaImpl : INebula
 
     public void RegisterRole(AbstractRoleDef roleDef)
     {
+        AddonScriptManager.GetScriptingByAssembly(roleDef.GetType().Assembly)?.Addon.MarkAsNeedingHandshake();
         AllRoles.Add(roleDef);
+    }
+
+    public void RegisterPreset(string id, string name, string? detail, string? relatedHolder, Action onLoad)
+    {
+        new ScriptPreset(id, name, detail, relatedHolder, onLoad);
     }
 
     public RoleTeam CreateTeam(string translationKey, Virial.Color color, TeamRevealType revealType)
@@ -69,4 +79,11 @@ public class NebulaImpl : INebula
         if (NebulaGameManager.Instance == null) yield break;
         foreach (var p in NebulaGameManager.Instance.AllPlayerInfo()) yield return p;
     }
+
+    public Virial.Game.Player? LocalPlayer => PlayerControl.LocalPlayer ? PlayerControl.LocalPlayer.GetModInfo() : null;
+
+    public DefinedRole? GetRole(string roleId) => Roles.Roles.AllRoles.FirstOrDefault(r => r.LocalizedName == roleId);
+    
+    public DefinedModifier? GetModifier(string modifierId) => Roles.Roles.AllModifiers.FirstOrDefault(m => m.LocalizedName == modifierId);
+    
 }

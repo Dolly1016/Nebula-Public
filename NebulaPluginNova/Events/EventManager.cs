@@ -32,7 +32,11 @@ public class EventManager
         }
     }
 
-    public static void HandleEvent<Event>(Event targetEvent) where Event : class => HandleEvent(typeof(Event), targetEvent);
+    public static Event HandleEvent<Event>(Event targetEvent) where Event : class
+    {
+        HandleEvent(typeof(Event), targetEvent);
+        return targetEvent;
+    }
 
     public static void HandleEvent(Type? eventType, object targetEvent)
     {

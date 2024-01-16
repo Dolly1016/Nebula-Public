@@ -12,7 +12,7 @@ public class Bait : ConfigurableStandardRole
 {
     static public Bait MyRole = new Bait();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "bait";
     public override Color RoleColor => new Color(0f / 255f, 247f / 255f, 255f / 255f);
@@ -36,9 +36,11 @@ public class Bait : ConfigurableStandardRole
 
     }
 
+    [NebulaRPCHolder]
     public class Instance : Crewmate.Instance
     {
         public override AbstractRole Role => MyRole;
+        AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
         public Instance(PlayerModInfo player) : base(player)
         {
         }
@@ -55,12 +57,31 @@ public class Bait : ConfigurableStandardRole
         {
             if (murderer.PlayerId == MyPlayer.PlayerId) return;
 
+            if (AmOwner)
+            {
+                new StaticAchievementToken("bait.common1");
+                acTokenChallenge ??= new("bait.challenge", (false,true), (val,_) => val.cleared);
+            }
+
             if (PlayerControl.LocalPlayer.PlayerId == murderer.PlayerId) NebulaManager.Instance.StartCoroutine(CoReport(murderer).WrapToIl2Cpp());
         }
 
         public override void OnEnterVent(PlayerControl player,Vent vent)
         {
             if (AmOwner && MyRole.CanSeeVentFlashOption) AmongUsUtil.PlayQuickFlash(Role.RoleColor.AlphaMultiplied(0.3f));
+        }
+
+        public override void OnMeetingEnd()
+        {
+            base.OnMeetingEnd();
+
+            if (acTokenChallenge != null) acTokenChallenge.Value.triggered = false;
+        }
+
+        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        {
+            if ((acTokenChallenge?.Value.triggered ?? false) && exiled.PlayerId == (MyPlayer.MyKiller?.PlayerId ?? 255))
+                acTokenChallenge.Value.cleared = true;
         }
     }
 }

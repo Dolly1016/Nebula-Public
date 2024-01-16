@@ -14,7 +14,7 @@ namespace Nebula.Roles;
 public class AddonRole : ConfigurableStandardRole
 {
     public AbstractRoleDef MyDef;
-    public override RoleCategory RoleCategory => MyDef.RoleCategory;
+    public override RoleCategory Category => MyDef.RoleCategory;
 
     public override string LocalizedName => MyDef.LocalizedName;
     public override Color RoleColor => MyDef.RoleColor.ToUnityColor();
@@ -25,8 +25,6 @@ public class AddonRole : ConfigurableStandardRole
     protected override void LoadOptions()
     {
         base.LoadOptions();
-
-        MyDef.LoadOptions();
     }
 
     public AddonRole(AbstractRoleDef roleDef)
@@ -47,8 +45,7 @@ public class AddonRoleInstance : RoleInstance, IBinderLifespan
         MyRoleInstance = (MyAddonRole.MyDef.RoleInstanceType?.GetConstructor(new Type[0])?.Invoke(new object?[0]) as AbstractRoleInstanceCommon);
         if (MyRoleInstance != null)
         {
-            MyRoleInstance.MyPlayer = player;
-            MyRoleInstance.MyBinderLifespan = this;
+            MyRoleInstance.RuntimeRole = this;
         }
         MyRoleInstance?.SetRole(MyAddonRole.MyDef);
     }
@@ -74,5 +71,25 @@ public class AddonRoleInstance : RoleInstance, IBinderLifespan
     {
         MyRoleInstance?.OnUpdate();
         if (AmOwner) MyRoleInstance?.OnLocalUpdate();
+    }
+
+    public override bool CheckWins(CustomEndCondition endCondition, ref ulong _)
+    {
+        if (MyRoleInstance != null) return MyRoleInstance!.CheckWin(endCondition);
+
+        if (Role.Category == RoleCategory.ImpostorRole)
+            return endCondition == NebulaGameEnd.ImpostorWin;
+        else if (Role.Category == RoleCategory.CrewmateRole)
+            return endCondition == NebulaGameEnd.CrewmateWin;
+        
+        return false;
+    }
+
+    public override void DecoratePlayerName(ref string text, ref Color color)
+    {
+        if (Role.Category == RoleCategory.ImpostorRole)
+        {
+            if (PlayerControl.LocalPlayer.GetModInfo()?.Role.Role.Category == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
+        }
     }
 }

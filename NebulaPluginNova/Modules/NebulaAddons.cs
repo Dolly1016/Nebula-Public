@@ -28,7 +28,12 @@ public class NebulaAddon : IDisposable, INameSpace
         [JsonSerializableField]
         public string Version = "";
         [JsonSerializableField]
+        public int Build = 0;
+        [JsonSerializableField]
         public int Priority = 0;
+
+        [JsonSerializableField]
+        public bool Hidden = false;
     }
 
     static private Dictionary<string, NebulaAddon> allAddons = new();
@@ -102,11 +107,6 @@ public class NebulaAddon : IDisposable, INameSpace
 
         allOrderedAddons = new List<NebulaAddon>(allAddons.Values.OrderBy(addon => addon.Priority));
 
-        foreach (var addon in allOrderedAddons)
-        {
-            if (addon.Archive.Entries.Any(entry => entry.FullName.StartsWith(addon.InZipPath + "Scripts/"))) addon.NeedHandshake = true;
-        }
-
         AddonScriptManager.EvaluateScript("Initializers");
     }
 
@@ -125,9 +125,11 @@ public class NebulaAddon : IDisposable, INameSpace
             Id = meta.Id ?? Path.GetFileNameWithoutExtension(path);
             AddonName = meta.Name;
             Author = meta.Author;
+            Build = Mathf.Max(0, meta.Build);
             Description = meta.Description;
             Version = meta.Version;
             Priority = meta.Priority;
+            IsHidden = meta.Hidden;
 
             InZipPath = entry.FullName.Substring(0, entry.FullName.Length - MetaFileName.Length);
             break;
@@ -172,15 +174,19 @@ public class NebulaAddon : IDisposable, INameSpace
     public string Author { get; private set; } = "";
     public string Description { get; private set; } = "";
     public string Version { get; private set; } = "";
+    public int Build { get; private set; } = 0;
     public string AddonName { get; private set; } = "";
     public int Priority { get; private set; } = 0;
+    public bool IsHidden { get; private set; } = false;
     public Sprite? Icon { get; private set; } = null;
     public ZipArchive Archive { get; private set; }
 
     //互換性チェックが必要なアドオン
-    public bool NeedHandshake { get; private set; } = false;
+    public bool NeedHandshake { get; set; } = false;
 
     public int HandshakeHash { get; private set; } = 0;
+
+    public void MarkAsNeedingHandshake() { NeedHandshake = true; }
 
     static public int AddonHandshakeHash
     {

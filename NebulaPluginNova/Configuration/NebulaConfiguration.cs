@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using Virial.Assignable;
+using Virial.Configuration;
 using static Il2CppSystem.Linq.Expressions.Interpreter.NullableMethodCallInstruction;
 
 namespace Nebula.Configuration;
@@ -192,7 +193,7 @@ public class NebulaStringConfigEntry : INebulaConfigEntry
     }
 }
 
-public class NebulaModifierFilterConfigEntry
+public class NebulaModifierFilterConfigEntry : ModifierFilter
 {
     class FilterEntry : INebulaConfigEntry
     {
@@ -288,6 +289,39 @@ public class NebulaModifierFilterConfigEntry
 
         Save();
     }
+
+    public void Filter(FilterAction filterAction, params DefinedModifier[] modifiers)
+    {
+        if (!AmongUsClient.Instance.AmHost) throw new Virial.NonHostPlayerException("Only host can edit modifier filter.");
+        switch (filterAction)
+        {
+            case FilterAction.And:
+                foreach(var iam in Roles.Roles.AllIntroAssignableModifiers()) if(!modifiers.Contains(iam)) this.modifiers.Add(iam);
+                break;
+            case FilterAction.Or:
+                this.modifiers.RemoveWhere(m=>modifiers.Contains(m));
+                break;
+            case FilterAction.Set:
+                this.modifiers.Clear();
+                foreach (var iam in Roles.Roles.AllIntroAssignableModifiers()) if (!modifiers.Contains(iam)) this.modifiers.Add(iam);
+                break;
+        }
+
+        foreach (INebulaConfigEntry config in sharingEntry)
+        {
+            config.LoadFromSaveData();
+            config.Share();
+        }
+
+        Save();
+    }
+
+    public bool Test(DefinedModifier modifier)
+    {
+        if (modifier is IntroAssignableModifier iam)
+            return !Contains(iam);
+        return false;
+    }
 }
 
 
@@ -310,7 +344,7 @@ public class ConfigurationHolder
     private int tabMask,gamemodeMask;
     public string Id { get; private set; }
     public int Priority { get; set; }
-    public ITextComponent Title { get; private init; }
+    public Virial.Text.TextComponent Title { get; private init; }
     private List<NebulaConfiguration> myConfigurations = new();
     public IEnumerable<NebulaConfiguration> MyConfigurations => myConfigurations;
     public IAssignableBase? RelatedAssignable = null;
@@ -318,7 +352,7 @@ public class ConfigurationHolder
 
     internal void RegisterOption(NebulaConfiguration config) => myConfigurations.Add(config);
 
-    public ConfigurationHolder(string id, ITextComponent? title,int tabMask,int gamemodeMask)
+    public ConfigurationHolder(string id, Virial.Text.TextComponent? title,int tabMask,int gamemodeMask)
     {
         Id = id;
         AllHolders.Add(this);
@@ -340,9 +374,9 @@ public class ConfigurationHolder
         return this;
     }
 
-    public IMetaContext GetContext()
+    public IMetaContextOld GetContext()
     {
-        MetaContext context = new();
+        MetaContextOld context = new();
         foreach(var config in myConfigurations)
         {
             if (!config.IsShown) continue;
@@ -353,7 +387,7 @@ public class ConfigurationHolder
         return context;
     }
 
-    public int TabMask => tabMask;
+    public int TabMask { get => tabMask; set => tabMask = value; }
     public int GameModeMask => gamemodeMask;
     public bool IsShown => ((entry?.CurrentValue ?? 1) == 1) && (predicate?.Invoke() ?? true);
     public void Toggle()
@@ -367,7 +401,7 @@ public class ConfigurationHolder
     {
         builder ??= new();
 
-        builder.Append(Title.Text + "\n");
+        builder.Append(Title.GetString() + "\n");
         foreach (var config in MyConfigurations)
         {
             if (!config.IsShown) continue;
@@ -382,7 +416,7 @@ public class ConfigurationHolder
 }
 
 
-public class NebulaConfiguration
+public class NebulaConfiguration : ValueConfiguration
 {
     public class NebulaByteConfiguration
     {
@@ -420,25 +454,25 @@ public class NebulaConfiguration
     public Func<object?, string>? Decorator { get; set; } = null;
     public Func<int, object?>? Mapper { get; set; } = null;
     public Func<bool>? Predicate { get; set; } = null;
-    public Func<IMetaContext?>? Editor { get; set; } = null;
+    public Func<IMetaContextOld?>? Editor { get; set; } = null;
     public Func<string?>? Shower { get; set; }
     public bool LoopAtBothEnds { get; set; } = true;
     public int MaxValue { get; private init; }
     private int InvalidatedValue { get; init; }
-    public ITextComponent Title { get; set; }
+    public Virial.Text.TextComponent Title { get; set; }
     public string Id => entry?.Name ?? "Undefined";
     public bool IsShown => (MyHolder?.IsShown ?? true) && (Predicate?.Invoke() ?? true);
     public Action? OnValueChanged = null;
 
     public static List<NebulaConfiguration> AllConfigurations = new();
 
-    public static IMetaContext? GetDetailContext(string detailId) {
+    public static IMetaContextOld? GetDetailContext(string detailId) {
         var context = DocumentManager.GetDocument(detailId)?.Build(null, false);
 
         if (context == null)
         {
             string? display = Language.Find(detailId);
-            if (display != null) context = new MetaContext.VariableText(TextAttribute.ContentAttr) { Alignment = IMetaContext.AlignmentOption.Left, RawText = display };
+            if (display != null) context = new MetaContextOld.VariableText(TextAttribute.ContentAttr) { Alignment = IMetaContextOld.AlignmentOption.Left, RawText = display };
         }
 
         return context;
@@ -446,7 +480,7 @@ public class NebulaConfiguration
 
     public void TitlePostBuild(TextMeshPro text, string? detailId)
     {
-        IMetaContext? context = null;
+        IMetaContextOld? context = null;
 
         detailId ??= Id;
         detailId += ".detail";
@@ -462,15 +496,15 @@ public class NebulaConfiguration
         button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpContext(button, context));
         button.OnMouseOut.AddListener(()=>NebulaManager.Instance.HideHelpContext());
     }
-    public IMetaContext? GetEditor()
+    public IMetaContextOld? GetEditor()
     {
         if (Editor != null)
             return Editor.Invoke();
-        return new CombinedContext(0.55f, IMetaContext.AlignmentOption.Center,
-            new MetaContext.Text(OptionTitleAttr) { RawText = Title.Text, PostBuilder = (text) => TitlePostBuild(text, null) },
+        return new CombinedContextOld(0.55f, IMetaContextOld.AlignmentOption.Center,
+            new MetaContextOld.Text(OptionTitleAttr) { RawText = Title.GetString(), PostBuilder = (text) => TitlePostBuild(text, null) },
             OptionTextColon,
             OptionButtonContext(() => ChangeValue(false), "<<"),
-            new MetaContext.Text(OptionValueAttr) { RawText = ToDisplayString()},
+            new MetaContextOld.Text(OptionValueAttr) { RawText = ToDisplayString()},
             OptionButtonContext(() => ChangeValue(true), ">>")
             );
     }
@@ -499,8 +533,8 @@ public class NebulaConfiguration
         FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
         Size = new Vector2(0.32f, 0.22f) 
     };
-    static public MetaContext.Button OptionButtonContext(Action clickAction,string rawText,float? width = null) {
-        return new MetaContext.Button(() =>
+    static public MetaContextOld.Button OptionButtonContext(Action clickAction,string rawText,float? width = null) {
+        return new MetaContextOld.Button(() =>
         {
             clickAction();
             if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage();
@@ -510,18 +544,20 @@ public class NebulaConfiguration
             PostBuilder = (button, renderer, text) => { renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; }
         };
     }
-    static public IMetaParallelPlacable OptionTextColon => new MetaContext.Text(new(OptionTitleAttr) { Size = new Vector2(0.2f, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = ":" };
-    
+    static public IMetaParallelPlacableOld OptionTranslatedText(string translationKey, float width) => new MetaContextOld.Text(new(OptionTitleAttr) { Size = new Vector2(width, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center }) { TranslationKey = translationKey };
+    static public IMetaParallelPlacableOld OptionRawText(string text, float width) => new MetaContextOld.Text(new(OptionTitleAttr) { Size = new Vector2(width, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = text };
+    static public IMetaParallelPlacableOld OptionTextColon => OptionRawText(":",0.2f);
+
 
     static public Func<object?, string> PercentageDecorator = (mapped) => mapped + Language.Translate("options.percentage");
     static public Func<object?, string> OddsDecorator = (mapped) => mapped + Language.Translate("options.cross");
     static public Func<object?, string> SecDecorator = (mapped) => mapped + Language.Translate("options.sec");
-    static public Func<IMetaContext?> EmptyEditor = () => null;
+    static public Func<IMetaContextOld?> EmptyEditor = () => null;
 
-    public string DefaultShowerString => Title.Text + " : " + ToDisplayString();
+    public string DefaultShowerString => Title.GetString() + " : " + ToDisplayString();
     
 
-    public NebulaConfiguration(ConfigurationHolder? holder, Func<IMetaContext?> editor)
+    public NebulaConfiguration(ConfigurationHolder? holder, Func<IMetaContextOld?> editor)
     {
         MyHolder = holder;
         MyHolder?.RegisterOption(this);
@@ -535,7 +571,7 @@ public class NebulaConfiguration
         AllConfigurations.Add(this);
     }
 
-    public NebulaConfiguration(ConfigurationHolder? holder, string id,ITextComponent? title, int maxValue,int defaultValue,int invalidatedValue)
+    public NebulaConfiguration(ConfigurationHolder? holder, string id, Virial.Text.TextComponent? title, int maxValue,int defaultValue,int invalidatedValue)
     {
         MaxValue = maxValue;
         defaultValue = Mathf.Clamp(defaultValue,0,maxValue);
@@ -558,47 +594,47 @@ public class NebulaConfiguration
         AllConfigurations.Add(this);
     }
 
-    public NebulaConfiguration(ConfigurationHolder? holder, string id, ITextComponent? title, int minValue,int maxValue, int defaultValue, int invalidatedValue) :
+    public NebulaConfiguration(ConfigurationHolder? holder, string id, Virial.Text.TextComponent? title, int minValue,int maxValue, int defaultValue, int invalidatedValue) :
         this(holder, id, title, maxValue-minValue, defaultValue-minValue, invalidatedValue - minValue)
     {
         Mapper = (i) => i + minValue;
     }
 
-    public NebulaConfiguration(ConfigurationHolder? holder, string id, ITextComponent? title, bool defaultValue, bool invalidatedValue) :
+    public NebulaConfiguration(ConfigurationHolder? holder, string id, Virial.Text.TextComponent? title, bool defaultValue, bool invalidatedValue) :
         this(holder, id, title, 1, defaultValue ? 1 : 0, invalidatedValue ? 1 : 0)
     {
         Mapper = (i) => i == 1;
         Decorator = (v) => Language.Translate((bool)v! ? "options.switch.on" : "options.switch.off");
     }
 
-    public NebulaConfiguration(ConfigurationHolder? holder, string id, ITextComponent? title, object?[] selections, object? defaultValue, object? invalidatedValue,Func<object?,string> decorator) :
+    public NebulaConfiguration(ConfigurationHolder? holder, string id, Virial.Text.TextComponent? title, object?[] selections, object? defaultValue, object? invalidatedValue,Func<object?,string> decorator) :
         this(holder, id, title, selections.Count() - 1, Array.IndexOf(selections, defaultValue), Array.IndexOf(selections, invalidatedValue))
     {
         Mapper = (i) => selections[i];
         Decorator = decorator;
     }
 
-    public NebulaConfiguration(ConfigurationHolder? holder,string id, ITextComponent? title, string[] selections,string defaultValue,string invalidatedValue):
+    public NebulaConfiguration(ConfigurationHolder? holder,string id, Virial.Text.TextComponent? title, string[] selections,string defaultValue,string invalidatedValue):
         this(holder,id, title, selections.Length-1,Array.IndexOf(selections,defaultValue), Array.IndexOf(selections, invalidatedValue))
     {
         Mapper = (i) => selections[i];
         Decorator = (v) => Language.Translate((string?)v);
     }
 
-    public NebulaConfiguration(ConfigurationHolder? holder, string id, ITextComponent? title, string[] selections, int defaultIndex,int invalidatedIndex) :
+    public NebulaConfiguration(ConfigurationHolder? holder, string id, Virial.Text.TextComponent? title, string[] selections, int defaultIndex,int invalidatedIndex) :
        this(holder, id, title, selections.Length - 1, defaultIndex, invalidatedIndex)
     {
         Mapper = (i) => selections[i];
         Decorator = (v) => Language.Translate((string?)v);
     }
 
-    public NebulaConfiguration(ConfigurationHolder? holder, string id, ITextComponent? title, float[] selections, float defaultValue, float invalidatedValue) :
+    public NebulaConfiguration(ConfigurationHolder? holder, string id, Virial.Text.TextComponent? title, float[] selections, float defaultValue, float invalidatedValue) :
         this(holder, id, title, selections.Length - 1, Array.IndexOf(selections, defaultValue), Array.IndexOf(selections, invalidatedValue))
     {
         Mapper = (i) => selections[i];
     }
 
-    public NebulaConfiguration(ConfigurationHolder? holder, string id, ITextComponent? title, float min,float max,float step, float defaultValue, float invalidatedValue) :
+    public NebulaConfiguration(ConfigurationHolder? holder, string id, Virial.Text.TextComponent? title, float min,float max,float step, float defaultValue, float invalidatedValue) :
         this(holder, id, title, (int)((max - min) / step), (int)((defaultValue-min)/step), (int)((invalidatedValue - min) / step))
     {
         Mapper = (i) => (float)(step * i + min);
@@ -650,6 +686,8 @@ public class NebulaConfiguration
 
     public int CurrentValue => (IsShown && entry != null) ? entry.CurrentValue : InvalidatedValue;
 
+    string ValueConfiguration.CurrentValue => GetString();
+
     public object? GetMapped() => GetMapped(CurrentValue);
 
     private object? GetMapped(int currentValue)
@@ -680,6 +718,62 @@ public class NebulaConfiguration
     public string ToDisplayString()
     {
         return Decorator?.Invoke(GetMapped()) ?? GetString() ?? "None";
+    }
+
+    bool ValueConfiguration.UpdateValue(int value)
+    {
+        for(int i= 0; i <= MaxValue; i++)
+        {
+            var val = (Mapper?.Invoke(i) ?? i) as int?;
+            if (val.HasValue && val.Value == value)
+            {
+                ChangeValue(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool ValueConfiguration.UpdateValue(float value)
+    {
+        for (int i = 0; i <= MaxValue; i++)
+        {
+            var val = Mapper?.Invoke(i) as float?;
+            if (val.HasValue && val.Value == value)
+            {
+                ChangeValue(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool ValueConfiguration.UpdateValue(bool value)
+    {
+        for (int i = 0; i <= MaxValue; i++)
+        {
+            var val = Mapper?.Invoke(i) as bool?;
+            if (val.HasValue && val.Value == value)
+            {
+                ChangeValue(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool ValueConfiguration.UpdateValue(string value)
+    {
+        for (int i = 0; i <= MaxValue; i++)
+        {
+            var val = Mapper?.Invoke(i) as string;
+            if (val == value)
+            {
+                ChangeValue(i);
+                return true;
+            }
+        }
+        return false;
     }
 
     public static implicit operator bool(NebulaConfiguration config) => config.GetBool();

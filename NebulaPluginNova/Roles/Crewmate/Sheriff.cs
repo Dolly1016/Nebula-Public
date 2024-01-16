@@ -9,7 +9,7 @@ public class Sheriff : ConfigurableStandardRole
 {
     static public Sheriff MyRole = new Sheriff();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "sheriff";
     public override Color RoleColor => new Color(240f / 255f, 191f / 255f, 0f);
@@ -45,12 +45,24 @@ public class Sheriff : ConfigurableStandardRole
         }
         public override int[]? GetRoleArgument() => new int[] { leftShots };
 
+        private AchievementToken<bool>? acTokenShot;
+        private AchievementToken<bool>? acTokenMisshot;
+        private AchievementToken<int>? acTokenChallenge;
+
+        public override void OnGameStart()
+        {
+            if (AmOwner) {
+                int impostors = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.Role.Role.Category == RoleCategory.ImpostorRole) ?? 0;
+                if(impostors > 0) acTokenChallenge = new("sheriff.challenge", impostors, (val, _) => val == 0);
+            }
+        }
+
         private bool CanKill(PlayerControl target)
         {
             var info = target.GetModInfo();
             if (info == null) return true;
             if (info.Role.Role == Madmate.MyRole) return Sheriff.MyRole.CanKillMadmateOption;
-            if (info.Role.Role.RoleCategory == RoleCategory.CrewmateRole) return false;
+            if (info.Role.Role.Category == RoleCategory.CrewmateRole) return false;
             return true;
         }
 
@@ -58,6 +70,9 @@ public class Sheriff : ConfigurableStandardRole
         {
             if (AmOwner)
             {
+                acTokenShot = new("sheriff.common1",false,(val,_)=>val);
+                acTokenMisshot = new("sheriff.another1", false, (val, _) => val);
+
                 var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead, MyRole.CanKillHidingPlayerOption));
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
 
@@ -68,12 +83,19 @@ public class Sheriff : ConfigurableStandardRole
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && leftShots > 0;
                 killButton.OnClick = (button) => {
-                    if (CanKill(killTracker.CurrentTarget!)) 
-                        MyPlayer.MyControl.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill); 
+                    if (CanKill(killTracker.CurrentTarget!))
+                    {
+                        MyPlayer.MyControl.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
+
+                        acTokenShot!.Value = true;
+                        if (acTokenChallenge != null && killTracker.CurrentTarget.GetModInfo()?.Role.Role.Category == RoleCategory.ImpostorRole) acTokenChallenge!.Value--;
+                    }
                     else
                     {
                         MyPlayer.MyControl.ModSuicide(false, PlayerState.Misfired, null);
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.MyControl, killTracker.CurrentTarget!);
+
+                        acTokenMisshot!.Value = true;
                     }
                     button.StartCoolDown();
 

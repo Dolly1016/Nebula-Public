@@ -7,7 +7,7 @@ public class Vulture : ConfigurableStandardRole
     static public Vulture MyRole = new Vulture();
     static public Team MyTeam = new("teams.vulture", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
-    public override RoleCategory RoleCategory => RoleCategory.NeutralRole;
+    public override RoleCategory Category => RoleCategory.NeutralRole;
 
     public override string LocalizedName => "vulture";
     public override Color RoleColor => new Color(140f / 255f, 70f / 255f, 18f / 255f);
@@ -44,6 +44,9 @@ public class Vulture : ConfigurableStandardRole
         public override Timer? VentDuration => ventDuration;
         public override bool CanUseVent => canUseVent;
         int leftEaten = MyRole.NumOfEatenToWinOption;
+
+        AchievementToken<bool>? acTokenChallenge;
+
         public Instance(PlayerModInfo player, int[] arguments) : base(player)
         {
             if (arguments.Length >= 1) leftEaten = arguments[0];
@@ -73,10 +76,19 @@ public class Vulture : ConfigurableStandardRole
             });
         }
 
+        public override void OnReported(PlayerModInfo reporter, PlayerModInfo reported)
+        {
+            if (acTokenChallenge != null) acTokenChallenge.Value = false;
+        }
+
         public override void OnActivated()
         {
             if (AmOwner)
             {
+                acTokenChallenge = new("vulture.challenge", true, (val, _) =>  val && NebulaEndState.CurrentEndState!.EndCondition == NebulaGameEnd.VultureWin && NebulaEndState.CurrentEndState!.CheckWin(MyPlayer.PlayerId) );
+
+                StaticAchievementToken? acTokenCommon = null;
+
                 var eatTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.MyControl, (d) => true));
 
                 eatButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
@@ -89,6 +101,8 @@ public class Vulture : ConfigurableStandardRole
                     leftEaten--;
                     usesIcon.text=leftEaten.ToString();
                     eatButton.StartCoolDown();
+
+                    acTokenCommon ??= new("vulture.common1");
 
                     if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId);
                 };

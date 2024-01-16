@@ -7,7 +7,7 @@ namespace Nebula.Roles.Impostor;
 public class Marionette : ConfigurableStandardRole
 {
     static public Marionette MyRole = new Marionette();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "marionette";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -71,12 +71,20 @@ public class Marionette : ConfigurableStandardRole
         {
         }
 
+        AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
+        StaticAchievementToken? acTokenCommon = null;
+        AchievementToken<(bool cleared, float swapTime)>? acTokenCommon2 = null;
+        AchievementToken<(bool cleared, float killTime)>? acTokenChallenge = null;
         public override void OnActivated()
         {
             base.OnActivated();
 
             if (AmOwner)
             {
+                acTokenAnother = Achievement.GenerateSimpleTriggerToken("marionette.another1");
+                acTokenCommon2 = new("marionette.common2", (false,-100f),(val,_) => val.cleared);
+                acTokenChallenge = new("marionette.challenge", (false,-100f),(val,_)=>val.cleared);
+
                 placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) => MyPlayer.MyControl.CanMove;
@@ -96,6 +104,7 @@ public class Marionette : ConfigurableStandardRole
                     });
                     placeButton.StartCoolDown();
                     swapButton?.StartCoolDown();
+                    acTokenCommon ??= new("marionette.common1");
                 };
                 placeButton.SetLabel("place");
 
@@ -127,6 +136,13 @@ public class Marionette : ConfigurableStandardRole
                     DecoySwap.Invoke((MyPlayer.PlayerId, MyDecoy!.ObjectId));
                     button.StartCoolDown();
                     AmongUsUtil.SetCamTarget();
+
+                    float currentTime = NebulaGameManager.Instance!.CurrentTime;
+                    acTokenCommon2.Value.cleared |= currentTime - acTokenCommon2.Value.swapTime < 10f;
+                    acTokenCommon2.Value.swapTime = currentTime;
+                    acTokenAnother!.Value.triggered = true;
+                    if (currentTime - acTokenChallenge.Value.killTime < 1f && MyPlayer.MyControl.GetTruePosition().Distance(MyDecoy!.Position) > 30f)
+                        acTokenChallenge.Value.cleared = true;
                 };
                 swapButton.OnSubAction = (button) =>
                 {
@@ -176,6 +192,23 @@ public class Marionette : ConfigurableStandardRole
 
                 monitorButton?.DoSubClick();
             }
+        }
+
+        public override void OnDead()
+        {
+            if (acTokenAnother != null && (MyPlayer.MyState == PlayerState.Guessed || MyPlayer.MyState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
+        }
+
+        public override void OnMeetingEnd()
+        {
+            base.OnMeetingEnd();
+
+            if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
+        }
+
+        public override void OnKillPlayer(PlayerControl target)
+        {
+            if (acTokenChallenge != null) acTokenChallenge.Value.killTime = NebulaGameManager.Instance!.CurrentTime;
         }
 
     }

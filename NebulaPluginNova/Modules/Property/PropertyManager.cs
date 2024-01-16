@@ -15,19 +15,23 @@ public interface INebulaProperty
     public byte[] GetByteArray() => new byte[0];
     public int[] GetIntegerArray() => new int[0];
     public int[] GetFloatArray() => new int[0];
+    public INebulaProperty Bind(string argument) { return this; }
 }
 
-public class NebulaFunctionProperty : INebulaProperty
+//グローバルな空間に存在するプロパティ
+public class NebulaGlobalFunctionProperty : INebulaProperty
 {
     Func<string>? myFunc;
     Func<float>? myFloatFunc;
     Func<int>? myIntegerFunc;
     Func<byte>? myByteFunc;
+    Func<string, INebulaProperty>? myBindFunc;
 
-    public NebulaFunctionProperty(string id, Func<string> func, Func<float> floatFunc)
+    public NebulaGlobalFunctionProperty(string id, Func<string> func, Func<float> floatFunc, Func<string, INebulaProperty>? bindFunc = null)
     {
         myFunc = func;
         myFloatFunc = floatFunc;
+        myBindFunc = bindFunc;
 
         PropertyManager.Register(id, this);
     }
@@ -50,6 +54,8 @@ public class NebulaFunctionProperty : INebulaProperty
     {
         return myIntegerFunc?.Invoke() ?? 0;
     }
+
+    public INebulaProperty Bind(string argument) { return myBindFunc?.Invoke(argument) ?? this; }
 }
 
 public class NebulaInstantProperty : INebulaProperty
@@ -86,14 +92,16 @@ static public class PropertyManager
 
     static public INebulaProperty? GetProperty(string id)
     {
-        //関数プロパティ
+        var splitted = id.Split('?');
+        if (splitted.Length == 1 || splitted.Length == 2)
         {
-            if (allProperties.TryGetValue(id, out var property)) return property;
-        }
+            INebulaProperty? prop = null;
+            //関数プロパティ
+            if (allProperties.TryGetValue(splitted[0], out var propInGlob)) prop = propInGlob;
+            //ゲーム内プロパティ
+            if (NebulaGameManager.Instance?.TryGetProperty(splitted[0], out var propInGame) ?? false) prop = propInGame;
 
-        //ゲーム内プロパティ
-        {
-            if (NebulaGameManager.Instance?.TryGetProperty(id, out var property) ?? false) return property;
+            return splitted.Length == 2 ? prop?.Bind(splitted[1]) : prop;
         }
 
         return null;

@@ -11,7 +11,7 @@ using Nebula.Utilities;
 
 namespace Nebula.Game;
 
-public class CustomEndCondition
+public class CustomEndCondition : Virial.Game.GameEnd
 {
     static private HashSet<CustomEndCondition> allEndConditions= new();
     static public CustomEndCondition? GetEndCondition(byte id) => allEndConditions.FirstOrDefault(end => end.Id == id);
@@ -55,11 +55,13 @@ public class CustomExtraWin
 }
 
 [NebulaRPCHolder]
+[NebulaPreLoad]
 public class NebulaGameEnd
 {
     static private Color InvalidColor = new Color(72f / 255f, 78f / 255f, 84f / 255f);
     static public CustomEndCondition CrewmateWin = new(16, "crewmate", Palette.CrewmateBlue, 16);
     static public CustomEndCondition ImpostorWin = new(17, "impostor", Palette.ImpostorRed, 16);
+    static public CustomEndCondition SabotageWin = new(18, "impostor", Palette.ImpostorRed, 16); //内部的な終了条件 ImpostorWinに置き換えられる
     static public CustomEndCondition VultureWin = new(24, "vulture", Roles.Neutral.Vulture.MyRole.RoleColor, 32);
     static public CustomEndCondition JesterWin = new(25, "jester", Roles.Neutral.Jester.MyRole.RoleColor, 32);
     static public CustomEndCondition JackalWin = new(26, "jackal", Roles.Neutral.Jackal.MyRole.RoleColor, 18);
@@ -70,41 +72,53 @@ public class NebulaGameEnd
 
     static public CustomExtraWin ExtraLoversWin = new(0, "lover", Roles.Modifier.Lover.MyRole.RoleColor);
 
-    private readonly static RemoteProcess<(byte conditionId, int winnersMask,ulong extraWinMask)> RpcEndGame = new(
+    static public void Load()
+    {
+        Virial.Game.NebulaGameEnd.CrewmateGameEnd = CrewmateWin;
+        Virial.Game.NebulaGameEnd.ImpostorGameEnd = ImpostorWin;
+        Virial.Game.NebulaGameEnd.VultureGameEnd = VultureWin;
+        Virial.Game.NebulaGameEnd.JesterGameEnd = JesterWin;
+        Virial.Game.NebulaGameEnd.JackalGameEnd = JackalWin;
+        Virial.Game.NebulaGameEnd.ArsonistGameEnd = ArsonistWin;
+        Virial.Game.NebulaGameEnd.PaparazzoGameEnd = PaparazzoWin;
+    }
+
+    private readonly static RemoteProcess<(byte conditionId, int winnersMask,ulong extraWinMask, NebulaEndReason endReason)> RpcEndGame = new(
        "EndGame",
        (message, isCalledByMe) =>
        {
            if (NebulaGameManager.Instance != null)
            {
-               NebulaGameManager.Instance.EndState ??= new NebulaEndState(message.conditionId,message.winnersMask,message.extraWinMask);
-               NebulaGameManager.Instance.ToGameEnd();
+               NebulaGameManager.Instance.EndState ??= new NebulaEndState(message.conditionId,message.winnersMask,message.extraWinMask, message.endReason);
                NebulaGameManager.Instance.OnGameEnd();
+               NebulaGameManager.Instance.AllAssignableAction(a => a.OnGameEnd(NebulaGameManager.Instance.EndState));
+               NebulaGameManager.Instance.ToGameEnd();
            }
        }
        );
 
-    public static bool RpcSendGameEnd(CustomEndCondition winCondition, int winnersMask, ulong extraWinMask)
+    public static bool RpcSendGameEnd(CustomEndCondition winCondition, int winnersMask, ulong extraWinMask, NebulaEndReason endReason)
     {
         if (NebulaGameManager.Instance?.EndState != null) return false;
-        RpcEndGame.Invoke((winCondition.Id, winnersMask, extraWinMask));
+        RpcEndGame.Invoke((winCondition.Id, winnersMask, extraWinMask, endReason));
         return true;
     }
 
-    public static bool RpcSendGameEnd(CustomEndCondition winCondition,HashSet<byte> winners, ulong extraWinMask)
+    public static bool RpcSendGameEnd(CustomEndCondition winCondition,HashSet<byte> winners, ulong extraWinMask, NebulaEndReason endReason)
     {
         int winnersMask = 0;
         foreach (byte w in winners) winnersMask |= ((int)1 << w);
-        return RpcSendGameEnd(winCondition, winnersMask, extraWinMask);
+        return RpcSendGameEnd(winCondition, winnersMask, extraWinMask, endReason);
     }
 }
 
 public class LastGameHistory
 {
-    static public IMetaContext? LastContext;
+    static public IMetaContextOld? LastContext;
 
-    public static void SetHistory(TMPro.TMP_FontAsset font, IMetaContext roleContext, string endCondition)
+    public static void SetHistory(TMPro.TMP_FontAsset font, IMetaContextOld roleContext, string endCondition)
     {
-        LastContext = new MetaContext(new MetaContext.Text(new(TextAttribute.BoldAttrLeft) { Font = font }) { RawText = endCondition }, new MetaContext.VerticalMargin(0.15f), roleContext);        
+        LastContext = new MetaContextOld(new MetaContextOld.Text(new(TextAttribute.BoldAttrLeft) { Font = font }) { RawText = endCondition }, new MetaContextOld.VerticalMargin(0.15f), roleContext);        
     }
 
     public static Texture2D GenerateTexture()
@@ -156,9 +170,9 @@ public class LastGameHistory
 public class EndGameManagerSetUpPatch
 {
     static SpriteLoader InfoButtonSprite = SpriteLoader.FromResource("Nebula.Resources.InformationButton.png", 100f);
-    private static IMetaContext GetRoleContent(TMPro.TMP_FontAsset font)
+    private static IMetaContextOld GetRoleContent(TMPro.TMP_FontAsset font)
     {
-        MetaContext context = new();
+        MetaContextOld context = new();
         string text = "";
 
         NebulaGameManager.Instance!.CanSeeAllInfo = true;
@@ -195,8 +209,8 @@ public class EndGameManagerSetUpPatch
             text += $"{nameText}<indent=15px>{taskText}</indent><indent=24px>{stateText}</indent><indent=45px>{roleText}</indent>\n";
         }
 
-        context.Append(new MetaContext.VariableText(new TextAttribute(TextAttribute.BoldAttr) { Font = font, Size = new(6f, 4.2f), Alignment = TMPro.TextAlignmentOptions.Left }.EditFontSize(1.4f, 1f, 1.4f))
-        { Alignment = IMetaContext.AlignmentOption.Left, RawText = text });
+        context.Append(new MetaContextOld.VariableText(new TextAttribute(TextAttribute.BoldAttr) { Font = font, Size = new(6f, 4.2f), Alignment = TMPro.TextAlignmentOptions.Left }.EditFontSize(1.4f, 1f, 1.4f))
+        { Alignment = IMetaContextOld.AlignmentOption.Left, RawText = text });
 
         return context;
     }
@@ -297,6 +311,12 @@ public class EndGameManagerSetUpPatch
         button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
 
         LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
+
+        //Achievements
+        if (GeneralConfigurations.CurrentGameMode == CustomGameMode.Standard && endCondition != NebulaGameEnd.NoGame)
+        {
+            NebulaManager.Instance.StartCoroutine(NebulaAchievementManager.CoShowAchievements(NebulaManager.Instance, NebulaAchievementManager.UniteAll()).WrapToIl2Cpp());
+        }
     }
 }
 

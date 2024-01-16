@@ -1,13 +1,4 @@
-﻿using BepInEx.Configuration;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Nebula.Behaviour;
-using Rewired;
-using Rewired.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Behaviour;
 
 namespace Nebula.Utilities;
 

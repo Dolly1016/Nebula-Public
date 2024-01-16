@@ -12,18 +12,16 @@ global using System.Collections;
 global using HarmonyLib;
 global using Timer = Nebula.Modules.ScriptComponents.Timer;
 global using Color = UnityEngine.Color;
+global using GUIContext = Virial.Media.GUIContext;
+global using GUI = Nebula.Modules.MetaContext.NebulaGUIContextEngine;
+
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
-using Nebula;
-using Nebula.Roles;
 using System.Runtime.InteropServices;
 using UnityEngine.SceneManagement;
 using System.Reflection;
-using Nebula.Patches;
-using Il2CppSystem.Net.NetworkInformation;
 using Cpp2IL.Core.Extensions;
 using Virial;
-using JetBrains.Annotations;
 
 namespace Nebula;
 
@@ -61,14 +59,14 @@ public class NebulaPlugin : BasePlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.0.1";
+    public const string PluginVersion = "2.1.1";
 
-    //public const string VisualVersion = "v2.0.1";
-    public const string VisualVersion = "Snapshot 23.11.28b";
+    //public const string VisualVersion = "v2.1.1";
+    public const string VisualVersion = "Snapshot 23.12.30a";
     //public const string VisualVersion = "Mayor Debug";
 
-    public const int PluginEpoch = 101;
-    public const int PluginBuildNum = 1054;
+    public const int PluginEpoch = 102;
+    public const int PluginBuildNum = 1062;
     
     static public HttpClient HttpClient
     {
@@ -204,18 +202,6 @@ public class NebulaPlugin : BasePlugin
         {
             new GameObject("NebulaManager").AddComponent<NebulaManager>();
         });
-
-        new NebulaFunctionProperty("myPuid", ()=>
-        {
-            try
-            {
-                return PlayerControl.LocalPlayer.Data.Puid;
-            }
-            catch
-            {
-                return "";
-            }
-        },() => 0f);
 
         SetUpNebulaImpl();
     }

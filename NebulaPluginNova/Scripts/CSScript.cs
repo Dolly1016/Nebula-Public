@@ -69,8 +69,10 @@ namespace Nebula.Scripts
         Evaluator evaluator;
         StringBuilder myOutput;
         ReportPrinter reportPrinter;
-        
-        public CSScripting()
+        NebulaAddon addon;
+        public NebulaAddon Addon { get => addon; }
+
+        public CSScripting(NebulaAddon addon)
         {
             myOutput = new StringBuilder();
 
@@ -86,21 +88,51 @@ namespace Nebula.Scripts
 
             reportPrinter = new StreamReportPrinter(new StringWriter(myOutput));
             evaluator = new Evaluator(new CompilerContext(settings, reportPrinter)) { InteractiveBaseClass = typeof(ScriptInteraction) };
-            
-            
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                
+
                 string? name = assembly.GetName().Name;
                 if (name != null && Assemblies.Contains(name)) evaluator.ReferenceAssembly(assembly);
-                
-                
+            }
+
+            this.addon = addon; 
+        }
+
+        
+        public bool Evaluate(string program, out string? errorText) => Evaluate(program, out errorText, out _);
+        static private FieldInfo? sourceFileField = null;
+        static private FieldInfo SourceFileField
+        {
+            get
+            {
+                sourceFileField ??= typeof(Evaluator).GetField("source_file", BindingFlags.Instance | BindingFlags.NonPublic);
+                return sourceFileField!;
             }
         }
 
-        public bool Evaluate(string program, out string? errorText) => Evaluate(program, out errorText, out _);
+        static private FieldInfo? moduleField = null;
+        static private FieldInfo ModuleField
+        {
+            get
+            {
+                moduleField ??= typeof(Evaluator).GetField("module", BindingFlags.Instance | BindingFlags.NonPublic)!;
+                return moduleField;
+            }
+        }
+
+        private Assembly myAssembly;
+        public Assembly Assembly { get
+            {
+                myAssembly ??= (ModuleField.GetValue(evaluator) as ModuleContainer)!.DeclaringAssembly.Builder;
+                return myAssembly;
+            } 
+        }
+
         public bool Evaluate(string program, out string? errorText,out object? result)
         {
+            (SourceFileField.GetValue(evaluator) as CompilationSourceFile)?.Usings?.Clear();
+
             result = null;
             errorText = null;
 
@@ -145,11 +177,16 @@ public static class AddonScriptManager
     {
         if (!scriptings.TryGetValue(addon, out var scripting))
         {
-            scripting = new CSScripting();
+            scripting = new CSScripting(addon);
             scripting.Evaluate($"#define NOS_API_{Virial.NebulaAPI.APIVersion.Replace('.', '_')}\n", out _);
             scriptings.Add(addon, scripting);
         }
         return scripting;
+    }
+
+    static public CSScripting? GetScriptingByAssembly(Assembly assembly)
+    {
+        return scriptings.Values.FirstOrDefault(script => script.Assembly == assembly);
     }
 
     static private void Evaluate(CSScripting scripting, ZipArchiveEntry program)

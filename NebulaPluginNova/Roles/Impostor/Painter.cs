@@ -11,7 +11,7 @@ namespace Nebula.Roles.Impostor;
 public class Painter : ConfigurableStandardRole
 {
     static public Painter MyRole = new Painter();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "painter";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -46,12 +46,17 @@ public class Painter : ConfigurableStandardRole
         {
         }
 
+        StaticAchievementToken? acTokenCommon = null;
+        AchievementToken<int[]> acTokenChallenge = null;
+
         public override void OnActivated()
         {
             base.OnActivated();
 
             if (AmOwner)
             {
+                acTokenChallenge = new("painter.challenge", new int[15], (val, _) => val.Count(v => v >= 2) >= 3);
+
                 GameData.PlayerOutfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
@@ -75,7 +80,13 @@ public class Painter : ConfigurableStandardRole
                 paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
                 paintButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 paintButton.OnClick = (button) => {
-                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, sample ?? MyPlayer.GetOutfit(75))));
+                    var outfit = sample ?? MyPlayer.GetOutfit(75);
+
+                    acTokenCommon ??= new("painter.common1");
+                    if (sampleTracker.CurrentTarget!.GetModInfo()!.GetOutfit(75).ColorId != outfit.ColorId)
+                        acTokenChallenge.Value[sampleTracker.CurrentTarget!.PlayerId]++;
+
+                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, outfit)));
                     if (MyRole.TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else

@@ -14,7 +14,7 @@ public class Doctor : ConfigurableStandardRole
 {
     static public Doctor MyRole = new Doctor();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "doctor";
     public override Color RoleColor => new Color(128f / 255f, 255f / 255f, 221f / 255f);
@@ -52,6 +52,9 @@ public class Doctor : ConfigurableStandardRole
 
         public override void OnActivated()
         {
+            StaticAchievementToken? acTokenCommon = null;
+            StaticAchievementToken? acTokenChallenge = null;
+
             if (AmOwner)
             {
                 vitalButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
@@ -82,7 +85,11 @@ public class Doctor : ConfigurableStandardRole
 
                     IEnumerator CoUpdate()
                     {
-                        while(vitalsMinigame.amClosing != Minigame.CloseState.Closing)
+                        acTokenCommon ??= new("doctor.common1");
+
+                        int lastAliveCount = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead);
+
+                        while (vitalsMinigame.amClosing != Minigame.CloseState.Closing)
                         {
                             vitalTimer -= Time.deltaTime;
                             if (vitalTimer < 0f)
@@ -95,6 +102,11 @@ public class Doctor : ConfigurableStandardRole
 
                             yield return null;
                         }
+
+                        //生存者の数に変化がある
+                        if(lastAliveCount != NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead))
+                            acTokenChallenge = new("doctor.challenge");
+                        
 
                         if (vitalsMinigame.amClosing != Minigame.CloseState.Closing) vitalsMinigame.Close();
                     }

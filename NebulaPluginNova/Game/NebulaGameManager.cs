@@ -27,18 +27,30 @@ public enum NebulaGameStates
     Finished
 }
 
+public enum NebulaEndReason
+{
+    Task,
+    Situation,
+    Special,
+    Sabotage
+}
+
 public class NebulaEndState {
-    public int WinnersMask;
-    public byte ConditionId;
-    public ulong ExtraWinMask;
+    static public NebulaEndState? CurrentEndState => NebulaGameManager.Instance?.EndState;
+
+    public int WinnersMask { get; init; }
+    public byte ConditionId { get; init; }
+    public ulong ExtraWinMask { get; init; }
+    public NebulaEndReason EndReason { get; init; }
     public CustomEndCondition? EndCondition => CustomEndCondition.GetEndCondition(ConditionId);
     public IEnumerable<CustomExtraWin> ExtraWins => CustomExtraWin.AllExtraWins.Where(e => ((ulong)(1 << e.Id) & ExtraWinMask) != 0ul);
-
-    public NebulaEndState(byte conditionId, int winnersMask,ulong extraWinMask)
+    public bool CheckWin(byte playerId) => ((1 << playerId) & WinnersMask) != 0;
+    public NebulaEndState(byte conditionId, int winnersMask,ulong extraWinMask, NebulaEndReason reason)
     {
         WinnersMask = winnersMask;
         ConditionId = conditionId;
         ExtraWinMask = extraWinMask;
+        EndReason = reason;
     }
 }
 
@@ -111,8 +123,14 @@ public static class RoleHistoryHelper {
     static public string ConvertToRoleName(RoleInstance role, List<AssignableInstance> modifier, bool isShort)
     {
         string result = isShort ? role.Role.ShortName : role.Role.DisplayName;
+        foreach (var m in modifier)
+        {
+            var newName = m.OverrideRoleName(result, isShort);
+            if(newName != null) result = newName;
+        }
         Color color = role.Role.RoleColor;
         foreach (var m in modifier) m.DecoratePlayerName(ref result, ref color);
+        foreach (var m in modifier) m.DecorateRoleName(ref result);
         return result.Replace(" ","").Color(color);
     }
 }
@@ -126,6 +144,7 @@ public class NebulaGameManager : IRuntimePropertyHolder
     private Dictionary<byte, PlayerModInfo> allModPlayers;
 
     private HashSet<INebulaScriptComponent> allScripts = new HashSet<INebulaScriptComponent>();
+    public List<AchievementTokenBase> AllAchievementTokens = new();
 
     //ゲーム開始時からの経過時間
     public float CurrentTime { get; private set; } = 0f;
@@ -173,6 +192,7 @@ public class NebulaGameManager : IRuntimePropertyHolder
         vcConnectButton.SetSprite(vcConnectSprite.GetSprite());
         vcConnectButton.OnClick = (_) => VoiceChatManager!.Rejoin();
         vcConnectButton.SetLabel("rejoin");
+
     }
 
 
@@ -224,10 +244,16 @@ public class NebulaGameManager : IRuntimePropertyHolder
             );
     }
 
-    private void CheckAndEndGame(CustomEndCondition? endCondition,int winnersMask = 0)
+    private void CheckAndEndGame(CustomEndCondition? endCondition, NebulaEndReason endReason, int winnersMask = 0)
     {
         if(endCondition == null) return;
         if (GameState != NebulaGameStates.Initialized) return;
+
+        if(endCondition == NebulaGameEnd.SabotageWin)
+        {
+            endCondition = NebulaGameEnd.ImpostorWin;
+            endReason = NebulaEndReason.Sabotage;
+        }
 
         int extraMask = 0;
         ulong extraWinMask = 0;
@@ -236,12 +262,12 @@ public class NebulaGameManager : IRuntimePropertyHolder
         foreach (var p in allModPlayers) if (p.Value.AllAssigned().Any(a => a.CheckExtraWins(endCondition, winnersMask, ref extraWinMask))) extraMask |= (1 << p.Value.PlayerId);
         winnersMask |= extraMask;
 
-        NebulaGameEnd.RpcSendGameEnd(endCondition!, winnersMask, extraWinMask);
+        NebulaGameEnd.RpcSendGameEnd(endCondition!, winnersMask, extraWinMask,endReason);
     }
 
     public void OnTaskUpdated()
     {
-        CheckAndEndGame(CriteriaManager.OnTaskUpdated());
+        CheckAndEndGame(CriteriaManager.OnTaskUpdated(), NebulaEndReason.Task);
     }
 
     public void OnMeetingStart()
@@ -267,7 +293,7 @@ public class NebulaGameManager : IRuntimePropertyHolder
 
         var tuple = CriteriaManager.OnExiled(player);
         if(tuple == null) return;
-        CheckAndEndGame(tuple.Item1,tuple.Item2);
+        CheckAndEndGame(tuple.Item1, NebulaEndReason.Situation, tuple.Item2);
 
     }
 
@@ -321,7 +347,7 @@ public class NebulaGameManager : IRuntimePropertyHolder
             AttributeShower.Update(localModInfo);
         }
 
-        if(!ExileController.Instance || Minigame.Instance) CheckAndEndGame(CriteriaManager.OnUpdate());
+        if(!ExileController.Instance || Minigame.Instance) CheckAndEndGame(CriteriaManager.OnUpdate(), NebulaEndReason.Situation);
     }
 
     public void OnFixedUpdate() {
@@ -358,6 +384,15 @@ public class NebulaGameManager : IRuntimePropertyHolder
     public void OnGameEnd()
     {
         GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.GameEnd, null, 0) { RelatedTag = EventDetail.GameEnd });
+
+        if (EndState!.CheckWin(PlayerControl.LocalPlayer.PlayerId)) {
+            if (EndState!.EndReason == NebulaEndReason.Task && allModPlayers.Values.All(p => !p.IsDead))
+                new StaticAchievementToken("challenge.crewmate");
+            if (EndState!.EndReason == NebulaEndReason.Situation && EndState!.EndCondition == NebulaGameEnd.ImpostorWin &&
+                /*キル数2以上*/ allModPlayers.Values.Count(p => p.MyKiller?.AmOwner ?? false) >= 2 &&
+                /*最後の死亡者をキルしている*/ (allModPlayers.Values.MaxBy(p => p.DeathTimeStamp ?? 0f)?.MyKiller?.AmOwner ?? false))
+                new StaticAchievementToken("challenge.impostor");
+        }
     }
 
     public PlayerModInfo? GetModPlayerInfo(byte playerId)
@@ -466,7 +501,7 @@ public class NebulaGameManager : IRuntimePropertyHolder
         (message, _) =>
         {
             if (!AmongUsClient.Instance.AmHost) return;
-            NebulaGameManager.Instance?.CheckAndEndGame(CustomEndCondition.GetEndCondition((byte)message.Item1), message.Item2);
+            NebulaGameManager.Instance?.CheckAndEndGame(CustomEndCondition.GetEndCondition((byte)message.Item1), NebulaEndReason.Special, message.Item2);
         }
         );
 
@@ -479,6 +514,8 @@ public class NebulaGameManager : IRuntimePropertyHolder
         }
 
         );
+
+    public PlayerModInfo? GetLastDead => allModPlayers.Values.MaxBy(p => p.DeathTimeStamp ?? 0f);
 }
 
 public static class NebulaGameManagerExpansion

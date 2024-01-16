@@ -14,7 +14,7 @@ public class Agent : ConfigurableStandardRole
 {
     static public Agent MyRole = new Agent();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "agent";
     public override Color RoleColor => new Color(166f / 255f, 183f / 255f, 144f / 255f);
@@ -66,8 +66,9 @@ public class Agent : ConfigurableStandardRole
             }
         }
 
-        public override void OnSetTaskLocal(ref List<GameData.TaskInfo> tasks)
+        public override void OnSetTaskLocal(ref List<GameData.TaskInfo> tasks, out int extraQuota)
         {
+            extraQuota = 0;
             int extempts = MyRole.NumOfExemptedTasksOption;
             for (int i = 0; i < extempts; i++) tasks.RemoveAt(System.Random.Shared.Next(tasks.Count));
         }
@@ -88,6 +89,21 @@ public class Agent : ConfigurableStandardRole
 
                 Bind(new GameObjectBinding(HudManager.Instance.ImpostorVentButton.ShowUsesIcon(3, out UsesText)));
                 UsesText.text = leftVent.ToString();
+            }
+        }
+
+        public override void OnGameEnd(NebulaEndState endState)
+        {
+            if (AmOwner)
+            {
+                if (endState.CheckWin(MyPlayer.PlayerId) && MyPlayer.Tasks.TotalTasks > 0 && MyRole.NumOfExemptedTasksOption <= 3)
+                {
+                    if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota > 0 && AmongUsUtil.NumOfAllTasks >= 8)
+                        new StaticAchievementToken("agent.common1");
+
+                    if(MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota >= 5)
+                        new StaticAchievementToken("agent.challenge");
+                }
             }
         }
     }

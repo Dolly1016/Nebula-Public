@@ -8,7 +8,7 @@ public class Necromancer : ConfigurableStandardRole
 {
     static public Necromancer MyRole = new Necromancer();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "necromancer";
     public override Color RoleColor => new Color(108f / 255f, 50f / 255f, 160f / 255f);
@@ -60,7 +60,7 @@ public class Necromancer : ConfigurableStandardRole
 
         public override void LocalUpdate()
         {
-            bool flag = MyPlayer.HoldingDeadBody.HasValue;
+            bool flag = MyPlayer.HoldingDeadBodyId.HasValue;
             if (myArrow != null) myArrow.IsActive = flag;
             message.gameObject.SetActive(flag);
             if (flag) message.color = MyRole.RoleColor.AlphaMultiplied(MathF.Sin(Time.time * 2.4f) * 0.2f + 0.8f);
@@ -73,7 +73,7 @@ public class Necromancer : ConfigurableStandardRole
 
                 foreach (var deadbody in Helpers.AllDeadBodies())
                 {
-                    if (MyPlayer.HoldingDeadBody == deadbody.ParentId) continue;
+                    if (MyPlayer.HoldingDeadBodyId == deadbody.ParentId) continue;
                     if ((deadbody.TruePosition - myPos).magnitude > maxDis) continue;
 
                     detected = true;
@@ -101,7 +101,7 @@ public class Necromancer : ConfigurableStandardRole
 
                 bool canReviveHere()
                 {
-                    return !(!currentTargetRoom.HasValue || !MyPlayer.HoldingDeadBody.HasValue || !ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.OverlapPoint(MyPlayer.MyControl.GetTruePosition()));
+                    return !(!currentTargetRoom.HasValue || !MyPlayer.HoldingDeadBodyId.HasValue || !ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.OverlapPoint(MyPlayer.MyControl.GetTruePosition()));
                 }
 
                 myArrow = Bind(new Arrow());
@@ -138,16 +138,24 @@ public class Necromancer : ConfigurableStandardRole
                     message.text = Language.Translate("role.necromancer.phantomMessage").Replace("%ROOM%", AmongUsUtil.ToDisplayString(currentTargetRoom.Value));
                 };
 
+
+                StaticAchievementToken? acTokenCommon = null;
+                AchievementToken<(bool cleared, int bitFlag)> acTokenChalenge = new("necromancer.challenge", (false, 0), (val, _) => val.cleared);
+
                 reviveButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 reviveButton.SetSprite(buttonSprite.GetSprite());
-                reviveButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyPlayer.HoldingDeadBody.HasValue && canReviveHere();
+                reviveButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyPlayer.HoldingDeadBodyId.HasValue && canReviveHere();
                 reviveButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 reviveButton.OnClick = (button) => button.ActivateEffect();
                 reviveButton.OnEffectEnd = (button) =>
                 {
                     if (!button.EffectTimer!.IsInProcess)
                     {
-                        Helpers.GetPlayer(MyPlayer.HoldingDeadBody)?.ModRevive(MyPlayer.MyControl, MyPlayer.MyControl.transform.position, true);
+                        acTokenCommon ??= new("necromancer.common1");
+                        acTokenChalenge.Value.cleared |= (acTokenChalenge.Value.bitFlag & (1 << MyPlayer.HoldingDeadBodyId!.Value)) != 0;
+                        acTokenChalenge.Value.bitFlag |= 1 << MyPlayer.HoldingDeadBodyId!.Value;
+
+                        Helpers.GetPlayer(MyPlayer.HoldingDeadBodyId)?.ModRevive(MyPlayer.MyControl, MyPlayer.MyControl.transform.position, true);
                         button.CoolDownTimer!.Start();
                     }
                 };
@@ -175,7 +183,7 @@ public class Necromancer : ConfigurableStandardRole
             draggable?.OnInactivated(this);
         }
 
-        public override void OnPlayerDeadLocal(PlayerControl dead)
+        public override void OnAnyoneDeadLocal(PlayerControl dead)
         {
             resurrectionRoom?.Remove(dead.PlayerId);
         }

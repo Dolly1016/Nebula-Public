@@ -17,6 +17,13 @@ public class Roles
     static public IReadOnlyList<AbstractRole> AllRoles { get; private set; } = null!;
 
     static public IReadOnlyList<AbstractModifier> AllModifiers { get; private set; } = null!;
+    
+    static public IEnumerable<IAssignableBase> AllAsignables()
+    {
+        foreach(var r in AllRoles) yield return r;
+        foreach (var m in AllModifiers) yield return m;
+    }
+
     static public IEnumerable<IntroAssignableModifier> AllIntroAssignableModifiers()
     {
         foreach (var m in AllModifiers) if (m is IntroAssignableModifier iam) yield return iam;
@@ -75,7 +82,7 @@ public class Roles
         allRoles!.Sort((role1, role2) => {
             int diff;
             
-            diff = (int)role1.RoleCategory - (int)role2.RoleCategory;
+            diff = (int)role1.Category - (int)role2.Category;
             if (diff != 0) return diff;
 
             diff = (role1.IsDefaultRole ? -1 : 1) - (role2.IsDefaultRole ? -1 : 1);

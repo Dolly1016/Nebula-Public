@@ -21,7 +21,6 @@ public interface ITextureLoader
 
 public interface ISpriteLoader : Image
 {
-    Sprite GetSprite();
 }
 
 public interface IDividedSpriteLoader

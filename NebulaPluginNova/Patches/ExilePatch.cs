@@ -62,10 +62,13 @@ public static class NebulaExileWrapUp
                     });
                     EventManager.HandleEvent(new PlayerDeadEvent(info));
 
-                    PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(@object));
+                    PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r =>
+                    {
+                        r.OnAnyoneDeadLocal(@object);
+                        r.OnAnyoneExiledLocal(@object);
+                    });
 
-                    var checkEvent = new CheckExtraVictimEvent(info);
-                    EventManager.HandleEvent(checkEvent);
+                    var checkEvent = EventManager.HandleEvent(new CheckExtraVictimEvent(info));
                     foreach (var victim in checkEvent.ExtraVictim) victim.victim.VanillaPlayer.ModMarkAsExtraVictim(victim.killer?.VanillaPlayer, victim.reason, victim.eventDetail);
 
                     NebulaGameManager.Instance.Syncronizer.SendSync(SynchronizeTag.CheckExtraVictims);

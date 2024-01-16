@@ -463,7 +463,7 @@ public class TextField : MonoBehaviour
 
     private void ShowCursor()
     {
-        myCursor.gameObject.SetActive(true);
+        myCursor.gameObject.SetActive(validField == this);
         cursorTimer = 0.8f;
     }
 
@@ -477,7 +477,7 @@ public class TextField : MonoBehaviour
         allFields.Remove(this);
     }
 
-    static private void ChangeFocus(TextField? field)
+    static public void ChangeFocus(TextField? field)
     {
         if (field == validField) return;
         if (validField != null) validField.LoseFocus();

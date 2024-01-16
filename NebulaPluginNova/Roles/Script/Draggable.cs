@@ -22,12 +22,12 @@ public class Draggable : ScriptHolder
             dragButton.SetSprite(buttonSprite.GetSprite());
             dragButton.Availability = (button) =>
             {
-                return (deadBodyTracker.CurrentTarget != null || role.MyPlayer.HoldingDeadBody.HasValue) && role.MyPlayer.MyControl.CanMove;
+                return (deadBodyTracker.CurrentTarget != null || role.MyPlayer.HoldingDeadBodyId.HasValue) && role.MyPlayer.MyControl.CanMove;
             };
             dragButton.Visibility = (button) => !role.MyPlayer.MyControl.Data.IsDead;
             dragButton.OnClick = (button) =>
             {
-                if (!role.MyPlayer.HoldingDeadBody.HasValue)
+                if (!role.MyPlayer.HoldingDeadBodyId.HasValue)
                 {
                     role.MyPlayer.HoldDeadBody(deadBodyTracker.CurrentTarget!);
                     OnHoldingDeadBody?.Invoke(deadBodyTracker.CurrentTarget!);
@@ -35,7 +35,7 @@ public class Draggable : ScriptHolder
                 else
                     role.MyPlayer.ReleaseDeadBody();
             };
-            dragButton.OnUpdate = (button) => dragButton.SetLabel(role.MyPlayer.HoldingDeadBody.HasValue ? "release" : "drag");
+            dragButton.OnUpdate = (button) => dragButton.SetLabel(role.MyPlayer.HoldingDeadBodyId.HasValue ? "release" : "drag");
             dragButton.SetLabel("drag");
         }
     }

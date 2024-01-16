@@ -660,6 +660,16 @@
 "devStudio.ui.hint.requiredText" : "#必須"
 "devStudio.ui.hint.duplicatedId" : "#重複しています"
 
+# Achievements
+
+"achievement.ui.title" : "Achievements"
+"achievement.ui.cond" : "[制約]"
+"achievement.ui.allAchievements" : "全実績"
+"achievement.title.hidden" : "未達成の実績"
+"achievement.title.hiddenDetail" : "実績を達成すると達成条件が明かされます。"
+"achievement.type.challenge" : "チャレンジ"
+"achievement.type.secret" : "シークレット"
+
 # Documents
 
 "options.map.silentVents.detail" : "オンに設定することで視界外のベントの開閉が見えなくなります。"

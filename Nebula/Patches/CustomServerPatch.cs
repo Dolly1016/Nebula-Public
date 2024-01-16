@@ -40,9 +40,10 @@ public static class RegionMenuOpenPatch
         ServerManager.DefaultRegions = regions;
         serverManager.AvailableRegions = regions;
 
+
     }
 
-    public static void Initialize()
+    public static void Load()
     {
         SaveIp = NebulaPlugin.Instance.Config.Bind("CustomServer", "Ip", "");
         SavePort = NebulaPlugin.Instance.Config.Bind("CustomServer", "Port", (ushort)22000);

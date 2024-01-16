@@ -1,4 +1,5 @@
 ﻿using Nebula.Configuration;
+using Nebula.Roles.Impostor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,12 @@ public static class ExtraExileRoleSystem
         var voters = MeetingHudExtension.LastVotedForMap
                 .Where(entry => entry.Value == player.PlayerId && entry.Key != player.PlayerId)
                 .Select(entry => NebulaGameManager.Instance!.GetModPlayerInfo(entry.Key))
-                .Where(p => !p!.IsDead && (includeImpostors || p.Role.Role.RoleCategory != RoleCategory.ImpostorRole))
+                .Where(p => !p!.IsDead && (includeImpostors || p.Role.Role.Category != RoleCategory.ImpostorRole))
                 .ToArray();
         
         if(voters.Length == 0 && expandTargetWhenNobodyCanBeMarked)
         {
-            voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && (includeImpostors || p.Role.Role.RoleCategory != RoleCategory.ImpostorRole)).ToArray();
+            voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && (includeImpostors || p.Role.Role.Category != RoleCategory.ImpostorRole)).ToArray();
         }
         if (voters.Length == 0) return;
         voters[System.Random.Shared.Next(voters.Length)]!.MyControl.ModMarkAsExtraVictim(player.MyControl, PlayerState.Embroiled, EventDetail.Embroil);
@@ -31,7 +32,7 @@ public class Provocateur : ConfigurableStandardRole
 {
     static public Provocateur MyRole = new Provocateur();
 
-    public override RoleCategory RoleCategory => RoleCategory.CrewmateRole;
+    public override RoleCategory Category => RoleCategory.CrewmateRole;
 
     public override string LocalizedName => "provocateur";
     public override Color RoleColor => new Color(112f / 255f, 255f / 255f, 89f / 255f);
@@ -89,6 +90,9 @@ public class Provocateur : ConfigurableStandardRole
             if (AmOwner && embroilButton.EffectActive && !murderer.Data.IsDead)
             {
                 MyPlayer.MyControl.ModKill(murderer,false,PlayerState.Embroiled,EventDetail.Embroil);
+                
+                var murdererRole = murderer.GetModInfo()?.Role.Role;
+                if (murdererRole is Sniper or Raider && murderer.GetTruePosition().Distance(MyPlayer.MyControl.GetTruePosition()) > 10f) new StaticAchievementToken("provocateur.challenge");
             }
         }
 
@@ -97,6 +101,7 @@ public class Provocateur : ConfigurableStandardRole
             if (!AmOwner) return;
 
             ExtraExileRoleSystem.MarkExtraVictim(MyPlayer);
+            new StaticAchievementToken("provocateur.common1");
         }
     }
 }

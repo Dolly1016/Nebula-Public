@@ -377,7 +377,7 @@ public static class WinAPI
 public static class UnityDragAndDropHook
 {
     public delegate void DroppedFilesEvent(List<string> aPathNames, POINT aDropPoint);
-    public static event DroppedFilesEvent OnDroppedFiles;
+    public static event DroppedFilesEvent OnDroppedFiles = null!;
 
 
     private static uint threadId;

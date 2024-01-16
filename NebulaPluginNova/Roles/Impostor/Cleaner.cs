@@ -13,7 +13,7 @@ namespace Nebula.Roles.Impostor;
 public class Cleaner : ConfigurableStandardRole
 {
     static public Cleaner MyRole = new Cleaner();
-    public override RoleCategory RoleCategory => RoleCategory.ImpostorRole;
+    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "cleaner";
     public override Color RoleColor => Palette.ImpostorRed;
@@ -37,6 +37,10 @@ public class Cleaner : ConfigurableStandardRole
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CleanButton.png", 115f);
         public override AbstractRole Role => MyRole;
+
+        StaticAchievementToken? acTokenCommon = null;
+        AchievementToken<(bool cleared, int removed)>? acTokenChallenge = null;
+
         public Instance(PlayerModInfo player) : base(player)
         {
         }
@@ -55,6 +59,8 @@ public class Cleaner : ConfigurableStandardRole
 
             if (AmOwner)
             {
+                acTokenChallenge = new("cleaner.challenge",(false,0),(val,_)=>val.cleared);
+
                 var cleanTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.MyControl, (d) => true));
 
                 cleanButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
@@ -65,10 +71,24 @@ public class Cleaner : ConfigurableStandardRole
                     AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.ParentId,MyPlayer.PlayerId,EventDetail.Clean);
                     if (MyRole.SyncKillAndCleanCoolDownOption) PlayerControl.LocalPlayer.killTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
                     cleanButton.StartCoolDown();
+
+                    acTokenCommon ??= new("cleaner.common1");
+                    acTokenChallenge.Value.removed++;
                 };
                 cleanButton.CoolDownTimer = Bind(new Timer(MyRole.CleanCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 cleanButton.SetLabel("clean");
             }
+        }
+
+
+        public override void OnEmergencyMeeting(PlayerModInfo reporter)
+        {
+            if (acTokenChallenge != null) acTokenChallenge.Value.cleared = acTokenChallenge.Value.removed >= 2;
+        }
+
+        public override void OnMeetingEnd()
+        {
+            if (acTokenChallenge != null) acTokenChallenge.Value.removed = 0;
         }
     }
 }

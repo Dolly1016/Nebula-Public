@@ -129,37 +129,37 @@ public static class StartOptionMenuPatch
         void SetNebulaContext()
         {
             var buttonAttr = new TextAttribute(TextAttribute.BoldAttr) { Size = new Vector2(2.05f, 0.26f) };
-            MetaContext nebulaContext = new();
-            nebulaContext.Append(ClientOption.AllOptions.Values, (option) => new MetaContext.Button(()=> {
+            MetaContextOld nebulaContext = new();
+            nebulaContext.Append(ClientOption.AllOptions.Values, (option) => new MetaContextOld.Button(()=> {
                 option.Increament();
                 SetNebulaContext();
             }, buttonAttr) { RawText = option.DisplayName + " : " + option.DisplayValue }, 2, -1, 0, 0.55f);
-            nebulaContext.Append(new MetaContext.VerticalMargin(0.2f));
+            nebulaContext.Append(new MetaContextOld.VerticalMargin(0.2f));
 
             if (!AmongUsClient.Instance || AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started)
             {
-                nebulaContext.Append(new MetaContext.Button(() =>
+                nebulaContext.Append(new MetaContextOld.Button(() =>
                 {
                     __instance.OpenTabGroup(tabs.Count - 1);
                     SetKeyBindingContext();
                 }, buttonAttr)
-                { TranslationKey = "config.client.keyBindings", Alignment = IMetaContext.AlignmentOption.Center });
+                { TranslationKey = "config.client.keyBindings", Alignment = IMetaContextOld.AlignmentOption.Center });
             }
 
             if(NebulaGameManager.Instance?.VoiceChatManager != null)
             {
-                nebulaContext.Append(new MetaContext.Button(() =>
+                nebulaContext.Append(new MetaContextOld.Button(() =>
                 {
                     __instance.Close();
                     NebulaGameManager.Instance?.VoiceChatManager?.OpenSettingScreen(__instance);
                 }, buttonAttr)
-                { TranslationKey = "config.client.vcSettings", Alignment = IMetaContext.AlignmentOption.Center });
+                { TranslationKey = "config.client.vcSettings", Alignment = IMetaContextOld.AlignmentOption.Center });
 
-                nebulaContext.Append(new MetaContext.Button(() =>
+                nebulaContext.Append(new MetaContextOld.Button(() =>
                 {
                     NebulaGameManager.Instance?.VoiceChatManager?.Rejoin();
                 }, buttonAttr)
-                { TranslationKey = "config.client.vcRejoin", Alignment = IMetaContext.AlignmentOption.Center });
+                { TranslationKey = "config.client.vcRejoin", Alignment = IMetaContextOld.AlignmentOption.Center });
             }
 
 
@@ -177,10 +177,10 @@ public static class StartOptionMenuPatch
 
         void SetKeyBindingContext()
         {
-            MetaContext keyBindingContext = new();
+            MetaContextOld keyBindingContext = new();
             TMPro.TextMeshPro? text = null;
             keyBindingContext.Append(IKeyAssignment.AllKeyAssignments, (assignment) =>
-            new MetaContext.Button(() =>
+            new MetaContextOld.Button(() =>
             {
                 currentAssignment = assignment;
                 SetKeyBindingContext();

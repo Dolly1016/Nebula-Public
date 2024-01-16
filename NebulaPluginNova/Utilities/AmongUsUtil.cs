@@ -132,7 +132,7 @@ public static class AmongUsUtil
 
     public static PlayerModInfo? GetHolder(this DeadBody body)
     {
-        return NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault((p) => p.HoldingDeadBody.HasValue && p.HoldingDeadBody.Value == body.ParentId);
+        return NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault((p) => p.HoldingDeadBodyId.HasValue && p.HoldingDeadBodyId.Value == body.ParentId);
     }
 
 
@@ -289,4 +289,9 @@ public static class AmongUsUtil
 
         return "Invalid";
     }
+
+    static public int NumOfShortTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumShortTasks);
+    static public int NumOfCommonTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumCommonTasks);
+    static public int NumOfLongTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumLongTasks);
+    static public int NumOfAllTasks => NumOfShortTasks + NumOfLongTasks + NumOfCommonTasks;
 }

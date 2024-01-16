@@ -61,7 +61,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
     {
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            var dis = (Vector2)Input.mousePosition - new Vector2(Screen.width, Screen.height) * 0.5f;
+            var dis = (UnityEngine.Vector2)Input.mousePosition - new UnityEngine.Vector2(Screen.width, Screen.height) * 0.5f;
             return dis.magnitude < 280f;
         }
         return false;
@@ -233,7 +233,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
 
         if (guideObj != null)
         {
-            var renderer = UnityHelper.CreateObject<SpriteRenderer>("HotKeyOption", guideObj.transform, new Vector3(0.12f, 0.07f, -2f));
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("HotKeyOption", guideObj.transform, new UnityEngine.Vector3(0.12f, 0.07f, -2f));
             renderer.sprite = aidActionSprite.GetSprite();
         }
 
@@ -409,8 +409,8 @@ public static class ButtonEffect
         GameObject obj = new GameObject("Overlay");
         obj.layer = LayerExpansion.GetUILayer();
         obj.transform.SetParent(button.gameObject.transform);
-        obj.transform.localScale = new Vector3(1, 1, 1);
-        obj.transform.localPosition = new Vector3(0, 0, -1f - order);
+        obj.transform.localScale = new(1, 1, 1);
+        obj.transform.localPosition = new(0, 0, -1f - order);
         var renderer = obj.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;
         return renderer;
@@ -423,7 +423,7 @@ public static class ButtonEffect
     static ISpriteLoader keyBindBackgroundSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindBackground.png", 100f);
     static ISpriteLoader mouseActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionIcon.png", 100f);
 
-    static public GameObject? AddKeyGuide(GameObject button, KeyCode key, Vector2 pos,bool removeExistingGuide)
+    static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide)
     {
         if(removeExistingGuide)button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "HotKeyGuide") GameObject.Destroy(obj); }));
 
@@ -436,7 +436,7 @@ public static class ButtonEffect
         obj.transform.SetParent(button.transform);
         obj.layer = button.layer;
         SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
-        renderer.transform.localPosition = (Vector3)pos + new Vector3(0f, 0f, -10f);
+        renderer.transform.localPosition = (UnityEngine.Vector3)pos + new UnityEngine.Vector3(0f, 0f, -10f);
         renderer.sprite = keyBindBackgroundSprite.GetSprite();
 
         GameObject numObj = new GameObject();
@@ -444,24 +444,24 @@ public static class ButtonEffect
         numObj.transform.SetParent(obj.transform);
         numObj.layer = button.layer;
         renderer = numObj.AddComponent<SpriteRenderer>();
-        renderer.transform.localPosition = new Vector3(0, 0, -1f);
+        renderer.transform.localPosition = new(0, 0, -1f);
         renderer.sprite = numSprite;
 
         return obj;
     }
     static public GameObject? SetKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide = true)
     {
-        return AddKeyGuide(button, key, new Vector2(0.48f, 0.48f),removeExistingGuide);
+        return AddKeyGuide(button, key, new(0.48f, 0.48f),removeExistingGuide);
     }
 
     static public GameObject? SetSubKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide)
     {
-        return AddKeyGuide(button, key, new Vector2(0.48f, 0.13f),removeExistingGuide);
+        return AddKeyGuide(button, key, new(0.48f, 0.13f),removeExistingGuide);
     }
 
     static public GameObject? SetKeyGuideOnSmallButton(GameObject button, KeyCode key)
     {
-        return AddKeyGuide(button, key, new Vector2(0.28f, 0.28f), true);
+        return AddKeyGuide(button, key, new(0.28f, 0.28f), true);
     }
 
     static public GameObject? SetMouseActionIcon(GameObject button,bool show)
@@ -478,7 +478,7 @@ public static class ButtonEffect
             obj.transform.SetParent(button.transform);
             obj.layer = button.layer;
             SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
-            renderer.transform.localPosition = new Vector3(0.48f, -0.29f) + new Vector3(0f, 0f, -10f);
+            renderer.transform.localPosition = new(0.48f, -0.29f, -10f);
             renderer.sprite = mouseActionSprite.GetSprite();
             return obj;
         }

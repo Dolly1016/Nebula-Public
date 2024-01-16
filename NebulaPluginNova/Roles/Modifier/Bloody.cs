@@ -25,6 +25,7 @@ public class Bloody : ConfigurableStandardModifier
     public class Instance : ModifierInstance
     {
         public override AbstractModifier Role => MyRole;
+        AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
         public Instance(PlayerModInfo player) : base(player)
         {
         }
@@ -36,8 +37,31 @@ public class Bloody : ConfigurableStandardModifier
 
         public override void OnMurdered(PlayerControl murder)
         {
-            if (AmOwner) PlayerModInfo.RpcAttrModulator.Invoke((murder.PlayerId, new AttributeModulator(PlayerAttribute.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1)));
+            if (AmOwner && !murder.AmOwner)
+            {
+                PlayerModInfo.RpcAttrModulator.Invoke((murder.PlayerId, new AttributeModulator(PlayerAttribute.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1)));
+                new StaticAchievementToken("bloody.common1");
+                acTokenChallenge = new("bloody.challenge",(false,true),(val,_)=>val.cleared);
+            }
         }
+
+        public override void OnMeetingEnd()
+        {
+            base.OnMeetingEnd();
+
+            if (acTokenChallenge?.Value.triggered ?? false)
+                acTokenChallenge.Value.triggered = false;
+        }
+
+        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        {
+            base.OnAnyoneExiledLocal(exiled);
+
+            if (acTokenChallenge?.Value.triggered ?? false)
+                acTokenChallenge.Value.cleared = exiled.PlayerId == (MyPlayer.MyKiller?.PlayerId ?? 255);
+        }
+
+
     }
 }
 

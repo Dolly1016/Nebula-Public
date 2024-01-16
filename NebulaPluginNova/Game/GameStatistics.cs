@@ -1,6 +1,8 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Nebula.Events;
 using Nebula.Modules;
 using System.Collections;
+using Virial.Events.Statistics;
 using Virial.Text;
 
 namespace Nebula.Game;
@@ -28,6 +30,7 @@ public static class EventDetail
     static public TranslatableTag Trap = new("statistics.events.trap");
     static public TranslatableTag Accident = new("statistics.events.accident");
     static public TranslatableTag FakeSabotage = new("statistics.events.fakeSabotage");
+    static public TranslatableTag Curse = new("statistics.events.curse");
 
     static public void Load()
     {
@@ -91,6 +94,8 @@ public class GameStatistics
             ShowPlayerPosition = showPlayerPosition;
         }
         static public EventVariation ValueOf(int id) => AllEvents[id];
+
+        
     }
 
     public class Event
@@ -145,34 +150,39 @@ public class GameStatistics
         }
     }
 
-    private List<Event> AllEvents { get; set; } = new List<Event>();
-    public Event[] Sealed { get => AllEvents.ToArray(); }
+    private List<Event> allEvents { get; set; } = new List<Event>();
+    public IEnumerable<Event> AllEvents => allEvents;
+    public Event[] Sealed { get => allEvents.ToArray(); }
 
     public Dictionary<GameStatisticsGatherTag, Dictionary<byte, Vector2>> Gathering { get; set; } = new();
 
     public void RecordEvent(Event statisticsEvent)
     {
+        EventManager.HandleEvent(new StatisticsEvent(
+            NebulaGameManager.Instance!.GetModPlayerInfo(statisticsEvent.SourceId ?? 255), 
+            NebulaGameManager.Instance.AllPlayerInfo().Where(p => ((1 << p.PlayerId) & statisticsEvent.TargetIdMask) != 0).ToArray(),
+            statisticsEvent.RelatedTag));
 
-        int index = AllEvents.Count;
+        int index = allEvents.Count;
 
         if (statisticsEvent.Variation.CanCombine)
         {
             //末尾から検索
-            for (int i = AllEvents.Count - 1; i >= 0; i--)
+            for (int i = allEvents.Count - 1; i >= 0; i--)
             {
-                if (AllEvents[i].Time > statisticsEvent.Time) index = i;
+                if (allEvents[i].Time > statisticsEvent.Time) index = i;
 
                 //ある程度以上離れた時間のイベントまで来たら検索をやめる
-                if (statisticsEvent.Time - AllEvents[i].Time > 5f) break;
+                if (statisticsEvent.Time - allEvents[i].Time > 5f) break;
 
-                if (AllEvents[i].IsSimilar(statisticsEvent))
+                if (allEvents[i].IsSimilar(statisticsEvent))
                 {
-                    AllEvents[i].Combine(statisticsEvent);
+                    allEvents[i].Combine(statisticsEvent);
                     return;
                 }
             }
         }
-        AllEvents.Insert(index, statisticsEvent);
+        allEvents.Insert(index, statisticsEvent);
     }
 
     public void RpcRecordEvent(EventVariation variation, TranslatableTag relatedTag, PlayerControl? source,params PlayerControl[] targets)
@@ -464,17 +474,17 @@ public class GameStatisticsViewer : MonoBehaviour
             button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
 
             button.OnMouseOver.AddListener(()=> {
-                MetaContext context = new();
+                MetaContextOld context = new();
 
                 foreach (var near in statisticsEvent.Position)
                 {
                     if (near.Item2.Distance(pos.Item2) > 0.6f) continue;
 
-                    if (context.Count > 0) context.Append(new MetaContext.VerticalMargin(0.1f));
+                    if (context.Count > 0) context.Append(new MetaContextOld.VerticalMargin(0.1f));
                     var roleText = NebulaGameManager.Instance.RoleHistory.EachMoment(history => history.PlayerId == near.Item1 && !(history.Time > statisticsEvent.Time),
                         (role, modifiers) => RoleHistoryHelper.ConvertToRoleName(role, modifiers, false)).LastOrDefault();
-                    context.Append(new MetaContext.Text(TextAttribute.BoldAttrLeft) { RawText = NebulaGameManager.Instance.GetModPlayerInfo(near.Item1)!.DefaultName });
-                    context.Append(new MetaContext.VariableText(new TextAttribute(TextAttribute.BoldAttrLeft) { Alignment = TMPro.TextAlignmentOptions.TopLeft }.EditFontSize(1.35f)) { RawText = roleText ?? "" });
+                    context.Append(new MetaContextOld.Text(Nebula.Utilities.TextAttribute.BoldAttrLeft) { RawText = NebulaGameManager.Instance.GetModPlayerInfo(near.Item1)!.DefaultName });
+                    context.Append(new MetaContextOld.VariableText(new Nebula.Utilities.TextAttribute(Nebula.Utilities.TextAttribute.BoldAttrLeft) { Alignment = TMPro.TextAlignmentOptions.TopLeft }.EditFontSize(1.35f)) { RawText = roleText ?? "" });
 
                 }
 

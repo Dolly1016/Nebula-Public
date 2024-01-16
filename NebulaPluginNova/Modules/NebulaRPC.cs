@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HarmonyLib.Public.Patching;
 using Hazel;
 using Il2CppSystem.CodeDom;
 using Il2CppSystem.Reflection.Internal;
@@ -16,11 +17,19 @@ using static Nebula.Player.PlayerModInfo;
 
 namespace Nebula.Modules;
 
+
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public class NebulaRPCHolder : Attribute
 {
 
 }
+
+[AttributeUsage(AttributeTargets.Method)]
+public class NebulaRPC : Attribute
+{
+
+}
+
 
 public class NebulaRPCInvoker
 {
@@ -28,12 +37,22 @@ public class NebulaRPCInvoker
     Action<MessageWriter> sender;
     Action localBodyProcess;
     int hash;
-
+    public bool IsDummy { get; private set; }
+    
     public NebulaRPCInvoker(int hash, Action<MessageWriter> sender, Action localBodyProcess)
     {
         this.hash = hash;
         this.sender = sender;
         this.localBodyProcess = localBodyProcess;
+        this.IsDummy = false;
+    }
+
+    public NebulaRPCInvoker(Action localAction)
+    {
+        this.hash = 0;
+        this.sender = null!;
+        this.localBodyProcess = localAction;
+        this.IsDummy = true;
     }
 
     public void Invoke(MessageWriter writer)
@@ -45,11 +64,10 @@ public class NebulaRPCInvoker
 
     public void InvokeSingle()
     {
-        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 64, Hazel.SendOption.Reliable, -1);
-        writer.Write(hash);
-        sender.Invoke(writer);
-        AmongUsClient.Instance.FinishRpcImmediately(writer);
-        localBodyProcess.Invoke();
+        if(IsDummy)
+            localBodyProcess.Invoke();
+        else
+            RPCRouter.SendRpc("Invoker", hash, (writer) => sender.Invoke(writer), () => localBodyProcess.Invoke());
     }
 
     public void InvokeLocal()
@@ -68,7 +86,7 @@ public static class RPCRouter
             if (currentSection != this) return;
 
             currentSection = null;
-            Debug.Log($"End Evacuating Rpcs ({Name})");
+            Debug.Log($"End Evacuating Rpcs ({Name}, Size = {evacuateds.Count})");
 
             CombinedRemoteProcess.CombinedRPC.Invoke(evacuateds.ToArray());
             evacuateds.Clear();
@@ -141,13 +159,74 @@ public class RemoteProcessBase
         AllNebulaProcess[Hash] = this;
     }
 
+    static private void SwapMethodPointer(MethodInfo method0, MethodInfo method1)
+    {
+        unsafe
+        {
+            var functionPointer0 = method0.MethodHandle.Value.ToPointer();
+            var functionPointer1 = method1.MethodHandle.Value.ToPointer();
+            var functionShiftedPointer0 = *((int*)new IntPtr(((int*)functionPointer0 + 1)).ToPointer());
+            var functionShiftedPointer1 = *((int*)new IntPtr(((int*)functionPointer1 + 1)).ToPointer());
+            *((int*)new IntPtr(((int*)functionPointer0 + 1)).ToPointer()) = functionShiftedPointer1;
+            *((int*)new IntPtr(((int*)functionPointer1 + 1)).ToPointer()) = functionShiftedPointer0;
+        }
+    }
+
+    static Dictionary<string, RemoteProcess<object[]>> harmonyRpcMap = new();
+    static private void WrapRpcMethod(Harmony harmony, MethodInfo method)
+    {
+        //元の静的メソッドをコピーしておく
+        var copiedOriginal = harmony.Patch(method);
+
+        //メソッド呼び出しのパラメータを取得
+        var parameters = method.GetParameters();
+
+        //RPCを定義し、登録
+
+        List<(Action<MessageWriter, object> writer, Func<MessageReader, object> reader)> processList = new();
+        if (!method.IsStatic) processList.Add(RemoteProcessAsset.GetProcess(method.DeclaringType!));
+        processList.AddRange(parameters.Select(p => RemoteProcessAsset.GetProcess(p.ParameterType)));
+        
+        RemoteProcess<object[]> rpc = new(method.Name,
+            (writer, args) =>
+            {
+                for (int i = 0; i < processList.Count; i++) processList[i].writer(writer, args[i]);
+            },
+            (reader) =>
+            {
+                return processList.Select(p => p.reader(reader)).ToArray();
+            },
+            (args, _) =>
+            {
+                copiedOriginal.Invoke(null, args);
+            }
+            );
+        harmonyRpcMap[method.DeclaringType!.FullName + "." + method.Name] = rpc;
+
+        //静的メソッドをRPC呼び出しに変更
+        static bool RpcPrefix(object? __instance, object[] __args, MethodBase __originalMethod)
+        {
+            var name = __originalMethod.DeclaringType!.FullName + "." + __originalMethod.Name;
+            if (!__originalMethod.IsStatic) __args = __args.Prepend(__instance!).ToArray();
+            harmonyRpcMap[name].Invoke(__args);
+            return false;
+        }
+        
+        var prefixInfo = RpcPrefix;
+        
+        var newMethod = harmony.Patch(method, new HarmonyMethod(prefixInfo.Method));
+    }
+
     static public void Load()
     {
         var types = Assembly.GetAssembly(typeof(RemoteProcessBase))?.GetTypes().Where((type) => type.IsDefined(typeof(NebulaRPCHolder)));
         if (types == null) return;
 
         foreach (var type in types)
+        {
             System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+            foreach(var method in type.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC)))) WrapRpcMethod(NebulaPlugin.MyPlugin.Harmony, method);
+        }
     }
 
     public virtual void Receive(MessageReader reader) { }
@@ -219,6 +298,7 @@ public static class RemoteProcessAsset
         );
         defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj).Id), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
         defaultProcessDic[typeof(CommunicableTextTag)] = defaultProcessDic[typeof(TranslatableTag)];
+        defaultProcessDic[typeof(PlayerModInfo)] = ((writer, obj) => writer.Write(((PlayerModInfo)obj).PlayerId), (reader) => NebulaGameManager.Instance?.GetModPlayerInfo(reader.ReadByte())!);
     }
 
     static public (Action<MessageWriter, object>, Func<MessageReader, object>) GetProcess(Type type)
@@ -341,8 +421,14 @@ public class CombinedRemoteProcess : RemoteProcessBase
     {
         RPCRouter.SendRpc(Name, Hash, (writer) =>
         {
-            writer.Write(invokers.Length);
-            foreach (var invoker in invokers) invoker.Invoke(writer);
+            writer.Write(invokers.Count(i=>!i.IsDummy));
+            foreach (var invoker in invokers)
+            {
+                if (!invoker.IsDummy)
+                    invoker.Invoke(writer);
+                else
+                    invoker.InvokeLocal();
+            }
         },
         () => { });
     }

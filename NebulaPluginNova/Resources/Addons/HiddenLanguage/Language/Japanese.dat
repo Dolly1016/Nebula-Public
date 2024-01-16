@@ -1,0 +1,399 @@
+"achievement.agent.common1.title" : "見えない献身"
+"achievement.agent.common1.goal" : "代行タスクをこなして勝利する。"
+"achievement.agent.common1.cond" : "タスク免除数: 3以下+タスク総量: 8以上"
+
+"achievement.agent.challenge.title" : "パーフェクトクルーメイト"
+"achievement.agent.challenge.goal" : "代行タスクを5つ以上こなしてタスク勝利する。"
+"achievement.agent.challenge.cond" : "タスク免除数: 3以下"
+
+"achievement.bait.common1.title" : "計画通り"
+"achievement.bait.common1.goal" : "ベイトレポートを発動させる。"
+"achievement.bait.common1.cond" : ""
+
+"achievement.bait.challenge.title" : "命懸けの計略"
+"achievement.bait.challenge.goal" : "自身をベイトレポートしたプレイヤーが会議で追放される。"
+"achievement.bait.challenge.cond" : ""
+
+"achievement.busker.common1.title" : "イッツ・ショータイム"
+"achievement.busker.common1.goal" : "偽装死ののち、復活する。"
+"achievement.busker.common1.cond" : ""
+
+"achievement.busker.another1.title" : "危険な大道芸"
+"achievement.busker.another1.goal" : "偽装死ののち、復活に失敗する。"
+"achievement.busker.another1.cond" : ""
+
+"achievement.busker.challenge.title" : "手に汗握る瞬間を"
+"achievement.busker.challenge.goal" : "復活から2秒以内に会議が開かれる。"
+"achievement.busker.challenge.cond" : "自身による死体の通報、緊急ボタンは無効"
+
+"achievement.comet.common1.title" : "船上の彗星"
+"achievement.comet.common1.goal" : "透明化能力を使用する。"
+"achievement.comet.common1.cond" : "The Skeld あるいは Airship 限定"
+
+"achievement.comet.common2.title" : "地上の彗星"
+"achievement.comet.common2.goal" : "透明化能力を使用する。"
+"achievement.comet.common2.cond" : "MIRA HQ, Polus あるいは The Fungle 限定"
+
+"achievement.comet.challenge.title" : "不可視の目撃者"
+"achievement.comet.challenge.goal" : "透明化能力の使用中、間近にキル現場を目撃する。"
+"achievement.comet.challenge.cond" : ""
+
+"achievement.doctor.common1.title" : "速やかな死亡診断"
+"achievement.doctor.common1.goal" : "ポータブルバイタルをひらく。"
+"achievement.doctor.common1.cond" : ""
+
+"achievement.doctor.challenge.title" : "斯くして奴は死んだ"
+"achievement.doctor.challenge.goal" : "ポータブルバイタルで死の瞬間を目撃する。"
+"achievement.doctor.challenge.cond" : "初期使用可能時間: 10秒以下+タスクによるチャージ: 2秒以下"
+
+"achievement.madmate.common1.title" : "身代わり"
+"achievement.madmate.common1.goal" : "インポスターが生存しているときに会議で追放される。"
+"achievement.madmate.common1.cond" : ""
+
+"achievement.madmate.another1.title" : "戦略的な死、あるいは"
+"achievement.madmate.another1.goal" : "インポスターにキルされて死亡する。"
+"achievement.madmate.another1.cond" : ""
+
+"achievement.madmate.challenge.title" : "狂いに満ちた結論"
+"achievement.madmate.challenge.goal" : "インポスターが全員生存している状態でインポスター勝利する。"
+"achievement.madmate.challenge.cond" : ""
+
+"achievement.mayor.common1.title" : "鶴の一声"
+"achievement.mayor.common1.goal" : "複数票を投じてプレイヤーを追放する。"
+"achievement.mayor.common1.cond" : "追放先のプレイヤーに投票していない場合は無効"
+
+"achievement.mayor.another1.title" : "徒死"
+"achievement.mayor.another1.goal" : "すべての票を保持したまま死亡する。"
+"achievement.mayor.another1.cond" : "3回以上会議に参加している"
+
+"achievement.mayor.challenge.title" : "孤立無援の為政者"
+"achievement.mayor.challenge.goal" : "自身の票だけで敵陣営のプレイヤーを追放に付させる。"
+"achievement.mayor.challenge.cond" : "追放が有利にはたらく相手(ジェスター)は除く"
+
+"achievement.necromancer.common1.title" : "死灰復燃"
+"achievement.necromancer.common1.goal" : "プレイヤーを復活させる。"
+"achievement.necromancer.common1.cond" : ""
+
+"achievement.necromancer.challenge.title" : "無尽の死霊兵団"
+"achievement.necromancer.challenge.goal" : "1ゲーム中に同じプレイヤーを2回復活させる。"
+"achievement.necromancer.challenge.cond" : ""
+
+"achievement.niceTrapper.common1.title" : "仁慈"
+"achievement.niceTrapper.common1.goal" : "加速トラップを設置する。"
+"achievement.niceTrapper.common1.cond" : ""
+
+"achievement.niceTrapper.challenge.title" : "安楽椅子探偵"
+"achievement.niceTrapper.challenge.goal" : "コミュトラップで8人の動向を把握する。"
+"achievement.niceTrapper.challenge.cond" : "会議のたびに把握人数はリセットされる"
+
+"achievement.phosphorus.common1.title" : "光あれ"
+"achievement.phosphorus.common1.goal" : "ランタンを通算3個設置する。"
+"achievement.phosphorus.common1.cond" : ""
+
+"achievement.phosphorus.common2.title" : "遍く照らす燐光"
+"achievement.phosphorus.common2.goal" : "ランタンを通算20個設置する。"
+"achievement.phosphorus.common2.cond" : ""
+
+"achievement.phosphorus.challenge.title" : "死にせめてもの救済を"
+"achievement.phosphorus.challenge.goal" : "死体をランタンの光で照らす。"
+"achievement.phosphorus.challenge.cond" : ""
+
+"achievement.provocateur.common1.title" : "最期の足掻き"
+"achievement.provocateur.common1.goal" : "会議でプレイヤーを道連れにする。"
+"achievement.provocateur.common1.cond" : ""
+
+"achievement.provocateur.challenge.title" : "第六感の解放"
+"achievement.provocateur.challenge.goal" : "10m以上離れたRaiderもしくはSniperを巻き込んで死亡する。"
+"achievement.provocateur.challenge.cond" : ""
+
+"achievement.seer.common1.title" : "亡者を見る者"
+"achievement.seer.common1.goal" : "幽霊を間近に目撃する。"
+"achievement.seer.common1.cond" : ""
+
+"achievement.seer.challenge.title" : "真理を見る者"
+"achievement.seer.challenge.goal" : "全ての投票で非クルーメイト陣営に票を投じる。"
+"achievement.seer.challenge.cond" : "スキップ票および白票投票をした場合クリア不可+投票回数: 3回以上"
+
+"achievement.sheriff.common1.title" : "保安官の使命"
+"achievement.sheriff.common1.goal" : "インポスターを撃ち抜く。"
+"achievement.sheriff.common1.cond" : ""
+
+"achievement.sheriff.another1.title" : "青白い硝煙"
+"achievement.sheriff.another1.goal" : "誤射で死亡する。"
+"achievement.sheriff.another1.cond" : ""
+
+"achievement.sheriff.challenge.title" : "正義の執行者"
+"achievement.sheriff.challenge.goal" : "インポスター全員を自身の手で始末する。"
+"achievement.sheriff.challenge.cond" : "インポスター: 2人以上"
+
+"achievement.bountyHunter.common1.title" : "欲深き凶行"
+"achievement.bountyHunter.common1.goal" : "賞金首をキルする。"
+"achievement.bountyHunter.common1.cond" : ""
+
+"achievement.bountyHunter.another1.title" : "はした金にもならない"
+"achievement.bountyHunter.another1.goal" : "賞金首以外をキルする。"
+"achievement.bountyHunter.another1.cond" : ""
+
+"achievement.bountyHunter.challenge.title" : "誰も逃しはしない"
+"achievement.bountyHunter.challenge.goal" : "30秒以内に3キルを決める。"
+"achievement.bountyHunter.challenge.cond" : ""
+
+"achievement.camouflager.common1.title" : "あなたは誰？"
+"achievement.camouflager.common1.goal" : "カモフラージュを発動する。"
+"achievement.camouflager.common1.cond" : ""
+
+"achievement.camouflager.challenge.title" : "見境のない残虐行為"
+"achievement.camouflager.challenge.goal" : "カモフラージュ発動中に自他問わず合計4回以上のキルが発生する。"
+"achievement.camouflager.challenge.cond" : ""
+
+"achievement.cleaner.common1.title" : "忘却の彼方"
+"achievement.cleaner.common1.goal" : "死体を1つ消去する。"
+"achievement.cleaner.common1.cond" : ""
+
+"achievement.cleaner.challenge.title" : "その死に意味は無い"
+"achievement.cleaner.challenge.goal" : "2つ以上の死体を消した上でボタンによる緊急会議が始まる。"
+"achievement.cleaner.challenge.cond" : ""
+
+"achievement.evilTrapper.common1.title" : "妨害"
+"achievement.evilTrapper.common1.goal" : "減速トラップを設置する。"
+"achievement.evilTrapper.common1.cond" : ""
+
+"achievement.evilTrapper.challenge.title" : "計画的犯行"
+"achievement.evilTrapper.challenge.goal" : "2回以上トラップキルを起こし、最後まで生き延びて勝利する。"
+"achievement.evilTrapper.challenge.cond" : ""
+
+"achievement.illusioner.common1.title" : "上位互換"
+"achievement.illusioner.common1.goal" : "ペイント能力と変身能力をともに1回以上使用する。"
+"achievement.illusioner.common1.cond" : ""
+
+"achievement.illusioner.challenge.title" : "依拠不明の讒言"
+"achievement.illusioner.challenge.goal" : "ペイントか変身いずれかのサンプル元プレイヤーを1人以上会議で追放し、<br>1人以上自分の手でキルする。"
+"achievement.illusioner.challenge.cond" : ""
+
+"achievement.jailer.common1.title" : "高次的存在"
+"achievement.jailer.common1.goal" : "マップを開いてからキルする。"
+"achievement.jailer.common1.cond" : ""
+
+"achievement.jailer.challenge.title" : "絶対秘匿主義"
+"achievement.jailer.challenge.goal" : "死体が存在する部屋の中で合計2人のプレイヤーをキルする。"
+"achievement.jailer.challenge.cond" : ""
+
+"achievement.marionette.common1.title" : "寸劇"
+"achievement.marionette.common1.goal" : "デコイを設置する。"
+"achievement.marionette.common1.cond" : ""
+
+"achievement.marionette.another1.title" : "喜劇"
+"achievement.marionette.another1.goal" : "デコイとスワップした直後の会議で追放されるか推測されて死亡する。"
+"achievement.marionette.another1.cond" : ""
+
+"achievement.marionette.common2.title" : "怱劇"
+"achievement.marionette.common2.goal" : "10秒以内に2回、デコイと位置をスワップする。"
+"achievement.marionette.common2.cond" : ""
+
+"achievement.marionette.challenge.title" : "血の劇作法"
+"achievement.marionette.challenge.goal" : "キルの直後にデコイとスワップして30m以上移動する。"
+"achievement.marionette.challenge.cond" : ""
+
+"achievement.morphing.common1.title" : "浮つくアリバイ"
+"achievement.morphing.common1.goal" : "サンプルを採取し、変身する。"
+"achievement.morphing.common1.cond" : "Illusionerでもクリア可能"
+
+"achievement.morphing.another1.title" : "デスマスク"
+"achievement.morphing.another1.goal" : "サンプルと同じ見た目の相手をキルする。"
+"achievement.morphing.another1.cond" : ""
+
+"achievement.morphing.another2.title" : "ドッペルゲンガー邂逅"
+"achievement.morphing.another2.goal" : "変身中に同じ見た目のプレイヤーと至近距離ですれ違う。"
+"achievement.morphing.another2.cond" : ""
+
+"achievement.morphing.challenge.title" : "所在不明の罪業"
+"achievement.morphing.challenge.goal" : "変身状態でキルしかつ、会議時に所持しているサンプル元の<br>プレイヤーが追放される。"
+"achievement.morphing.challenge.cond" : ""
+
+"achievement.painter.common1.title" : "ペルソナとの永訣"
+"achievement.painter.common1.goal" : "サンプルを採取し、見た目を塗り替える。"
+"achievement.painter.common1.cond" : "Illusionerでもクリア可能"
+
+"achievement.painter.challenge.title" : "正体不明の証人"
+"achievement.painter.challenge.goal" : "3人のプレイヤーの見た目をそれぞれ2回以上塗り替える"
+"achievement.painter.challenge.cond" : "同じ見た目への塗り替えはカウント対象外"
+
+"achievement.raider.common1.title" : "乱暴者"
+"achievement.raider.common1.goal" : "斧でプレイヤーをキルする。"
+"achievement.raider.common1.cond" : ""
+
+"achievement.raider.another1.title" : "悪い子にはお仕置き！"
+"achievement.raider.another1.goal" : "斧を投げた直後の会議で追放されるか推測されて死亡する。"
+"achievement.raider.another1.cond" : ""
+
+"achievement.raider.challenge.title" : "宇宙一のあばれん坊"
+"achievement.raider.challenge.goal" : "一回の投擲で3人のプレイヤーをキルし、ゲームを終わらせる。"
+"achievement.raider.challenge.cond" : ""
+
+"achievement.reaper.common1.title" : "船中引き回し"
+"achievement.reaper.common1.goal" : "死体を掴み、ベントに入る。"
+"achievement.reaper.common1.cond" : ""
+
+"achievement.reaper.challenge.title" : "死神隠し"
+"achievement.reaper.challenge.goal" : "5人の死体を通報されないまま闇に葬る。"
+"achievement.reaper.challenge.cond" : ""
+
+"achievement.sniper.common1.title" : "精度よし"
+"achievement.sniper.common1.goal" : "狙撃によってプレイヤー1人をキルする。"
+"achievement.sniper.common1.cond" : ""
+
+"achievement.sniper.another1.title" : "轟音"
+"achievement.sniper.another1.goal" : "発砲直後の会議で追放されるか推測されて死亡する。"
+"achievement.sniper.another1.cond" : ""
+
+"achievement.sniper.challenge.title" : "狙撃の名手"
+"achievement.sniper.challenge.goal" : "20m以上離れた位置から合計2人のプレイヤーをキルする。"
+"achievement.sniper.challenge.cond" : "有効射程: 20x以上"
+
+"achievement.stirrer.common1.title" : "混乱の引き金"
+"achievement.stirrer.common1.goal" : "偽サボタージュを引き起こす。"
+"achievement.stirrer.common1.cond" : ""
+
+"achievement.stirrer.challenge.title" : "偽りの北斗七星"
+"achievement.stirrer.challenge.goal" : "一度に7人のプレイヤーに偽のサボタージュを付与する。"
+"achievement.stirrer.challenge.cond" : "一度のチャージの付与数: 3以下+付与クールダウン: 10秒以上"
+
+"achievement.arsonist.common1.title" : "油臭い会議室"
+"achievement.arsonist.common1.goal" : "油を塗った3人を生きたまま会議に参加させる。"
+"achievement.arsonist.common1.cond" : ""
+
+"achievement.arsonist.challenge.title" : "策略に浸された会議"
+"achievement.arsonist.challenge.goal" : "油が塗れていない最後の一人を会議で追放したうえで発火させ、勝利する。"
+"achievement.arsonist.challenge.cond" : ""
+
+"achievement.chainShifter.common1.title" : "事の顛末"
+"achievement.chainShifter.common1.goal" : "Chain Shifterをキルする。"
+"achievement.chainShifter.common1.cond" : ""
+
+"achievement.chainShifter.another1.title" : "回避不能"
+"achievement.chainShifter.another1.goal" : "Chain Shifterを受け取り、そのまま敗北する。"
+"achievement.chainShifter.another1.cond" : ""
+
+"achievement.chainShifter.challenge.title" : "厄災が襲い来る"
+"achievement.chainShifter.challenge.goal" : "役職を入れ替えた直後にゲームが終了し、勝利する。"
+"achievement.chainShifter.challenge.cond" : ""
+
+"achievement.jackal.common1.title" : "友情"
+"achievement.jackal.common1.goal" : "誰かにSidekickを付与する。"
+"achievement.jackal.common1.cond" : ""
+
+"achievement.jackal.challenge.title" : "血の騒ぐ最終決戦"
+"achievement.jackal.challenge.goal" : "インポスターと自身の2人だけが残った状態から勝利する。"
+"achievement.jackal.challenge.cond" : "キルによってゲームが終了すること"
+
+"achievement.sidekick.common1.title" : "ずっと友だち"
+"achievement.sidekick.common1.goal" : "SidekickからJackalに昇格する。"
+"achievement.sidekick.common1.cond" : ""
+
+"achievement.sidekick.common2.title" : "友情の鎖"
+"achievement.sidekick.common2.goal" : "SidekickからJackalに昇格したのち、自身もSidekickを付与する。"
+"achievement.sidekick.common2.cond" : ""
+
+"achievement.sidekick.challenge.title" : "裏社会の処世術"
+"achievement.sidekick.challenge.goal" : "インポスターからSidekickに変化したうえでジャッカル勝利する。"
+"achievement.sidekick.challenge.cond" : "ゲーム中にJackalに昇格しても達成可能"
+
+"achievement.jester.common1.title" : "戯言に揺れて"
+"achievement.jester.common1.goal" : "会議で1票以上の票を得る。"
+"achievement.jester.common1.cond" : "自身の票は対象外"
+
+"achievement.jester.challenge.title" : "処刑台に踊る道化"
+"achievement.jester.challenge.goal" : "満場一致で追放された上で勝利する。"
+"achievement.jester.challenge.cond" : ""
+
+"achievement.paparazzo.common1.title" : "白日の事件簿"
+"achievement.paparazzo.common1.goal" : "有効な写真を3枚撮影する。"
+"achievement.paparazzo.common1.cond" : ""
+
+"achievement.paparazzo.common2.title" : "スクープ！秘密の会合"
+"achievement.paparazzo.common2.goal" : "一枚の写真に4人以上のプレイヤーを写す。"
+"achievement.paparazzo.common2.cond" : ""
+
+"achievement.paparazzo.challenge.title" : "揺れる輿論"
+"achievement.paparazzo.challenge.goal" : "写真を公開した会議内で、何らかの理由で4人以上死亡する。"
+"achievement.paparazzo.challenge.cond" : "自身がその会議で死亡してしまった場合は無効"
+
+"achievement.vulture.common1.title" : "捕食者"
+"achievement.vulture.common1.goal" : "死体を1つ捕食する。"
+"achievement.vulture.common1.cond" : ""
+
+"achievement.vulture.challenge.title" : "不自然な平穏"
+"achievement.vulture.challenge.goal" : "死体がレポートされること無く勝利する。"
+"achievement.vulture.challenge.cond" : ""
+
+"achievement.guesser.common1.title" : "尻尾を出したが最後"
+"achievement.guesser.common1.goal" : "1人のプレイヤーを推察によってキルする。"
+"achievement.guesser.common1.cond" : ""
+
+"achievement.guesser.challenge.title" : "破邪顕正"
+"achievement.guesser.challenge.goal" : "3人のプレイヤーを推察によってキルする。"
+"achievement.guesser.challenge.cond" : ""
+
+"achievement.bloody.common1.title" : "死してなお"
+"achievement.bloody.common1.goal" : "効果「血の足跡」を付与する。"
+"achievement.bloody.common1.cond" : ""
+
+"achievement.bloody.challenge.title" : "後は任せた！"
+"achievement.bloody.challenge.goal" : "自身の能力によって効果「血の足跡」を付与された相手が<br>直後の会議で追放される。"
+"achievement.bloody.challenge.cond" : ""
+
+"achievement.lover.common1.title" : "それはときに盲目"
+"achievement.lover.common1.goal" : "ラバーズ単独勝利する。"
+"achievement.lover.common1.cond" : ""
+
+"achievement.lover.another1.title" : "それはときに激情"
+"achievement.lover.another1.goal" : "相方を失い、後追い自殺する。"
+"achievement.lover.another1.cond" : ""
+
+"achievement.lover.challenge.title" : "未必の恋"
+"achievement.lover.challenge.goal" : "インポスターが2人生存しており、<br>自身はインポスターではない状態でラバーズ単独勝利する。"
+"achievement.lover.challenge.cond" : ""
+
+"achievement.tieBreaker.common1.title" : "革命家"
+"achievement.tieBreaker.common1.goal" : "追加投票を決める。"
+"achievement.tieBreaker.common1.cond" : ""
+
+"achievement.tieBreaker.challenge.title" : "執念の一票"
+"achievement.tieBreaker.challenge.goal" : "自身の追加票によって敵を追放させる。"
+"achievement.tieBreaker.challenge.cond" : ""
+
+"achievement.secret.common1.title" : "覚醒"
+"achievement.secret.common1.goal" : "キルやタスクによって元の役職を覚醒させる。"
+"achievement.secret.common1.cond" : ""
+
+"achievement.secret.another1.title" : "微睡"
+"achievement.secret.another1.goal" : "覚醒せずに勝利する。"
+"achievement.secret.another1.cond" : ""
+
+"achievement.secret.challenge.title" : "ローマ、一日にして成れり"
+"achievement.secret.challenge.goal" : "覚醒後に役職のチャレンジ実績を達成する。"
+"achievement.secret.challenge.cond" : ""
+
+"achievement.firstKill.title" : "ヴァニタスに描く生命"
+"achievement.firstKill.goal" : "通算で10回初手キルされる。"
+"achievement.firstKill.cond" : ""
+
+"achievement.christmas.title" : "末永くご爆発下さい"
+"achievement.christmas.goal" : "ラバーズで追放される。"
+"achievement.christmas.cond" : "12月限定"
+
+"achievement.challenge.impostor.title" : "糜爛"
+"achievement.challenge.impostor.goal" : "仲間が全員生存している状態で自身のキルによって<br>インポスターとして勝利する。"
+"achievement.challenge.impostor.cond" : "自身の手によって2人以上キルすること"
+
+"achievement.challenge.crewmate.title" : "無疵"
+"achievement.challenge.crewmate.goal" : "誰も死んでいない状態でタスク勝利する。"
+"achievement.challenge.crewmate.cond" : ""
+
+"achievement.threeRoles.title" : "三つ巴"
+"achievement.threeRoles.goal" : "インポスター陣営でLoverとSidekickのモディファイアを付与される。"
+"achievement.threeRoles.cond" : ""
+
+"achievement.doTaskEvenDead.title" : "死出の旅"
+"achievement.doTaskEvenDead.goal" : "死亡した状態で全てのタスクをこなす。"
+"achievement.doTaskEvenDead.cond" : "タスク総量: 8以上"

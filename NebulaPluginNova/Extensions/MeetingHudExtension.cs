@@ -2,6 +2,7 @@
 using Il2CppSystem.Data;
 using Il2CppSystem.Reflection;
 using Nebula.Events;
+using Nebula.Patches;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,7 +83,12 @@ public static class MeetingHudExtension
             });
             EventManager.HandleEvent(new PlayerDeadEvent(player));
 
-            PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnPlayerDeadLocal(player.MyControl));
+            var killer = Helpers.GetPlayer(victims.sourceId);
+            PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r =>
+            {
+                r.OnAnyoneDeadLocal(player.MyControl);
+                if (killer != null) r.OnAnyoneMurderedLocal(player.MyControl, killer);
+            });
 
             NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, victims.sourceId == byte.MaxValue ? null : victims.sourceId, 1 << victims.exiledId) { RelatedTag = victims.eventTag });
         }

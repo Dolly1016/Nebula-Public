@@ -20,13 +20,13 @@ static file class GuesserSystem
     {
         var window = MetaScreen.GenerateWindow(new(7.4f, 4.2f), HudManager.Instance.transform, new Vector3(0, 0, -50f), true, false);
 
-        MetaContext context = new();
+        MetaContextOld context = new();
 
-        MetaContext inner = new();
-        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess && r.IsSpawnable), r => new MetaContext.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayName.Color(r.RoleColor), PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
-        MetaContext.ScrollView scroller = new(new(6.6f, 3.8f), inner, true) { Alignment = IMetaContext.AlignmentOption.Center };
+        MetaContextOld inner = new();
+        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess && r.IsSpawnable), r => new MetaContextOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayName.Color(r.RoleColor), PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+        MetaContextOld.ScrollView scroller = new(new(6.6f, 3.8f), inner, true) { Alignment = IMetaContextOld.AlignmentOption.Center };
         context.Append(scroller);
-        context.Append(new MetaContext.Text(TextAttribute.BoldAttr) { MyText = new CombinedComponent(new TranslateTextComponent("role.guesser.leftGuess"), new RawTextComponent(" : " + leftGuess.ToString())), Alignment = IMetaContext.AlignmentOption.Center });
+        context.Append(new MetaContextOld.Text(TextAttribute.BoldAttr) { MyText = new CombinedComponent(new TranslateTextComponent("role.guesser.leftGuess"), new RawTextComponent(" : " + leftGuess.ToString())), Alignment = IMetaContextOld.AlignmentOption.Center });
 
         window.SetContext(context);
 
@@ -98,6 +98,13 @@ static file class GuesserSystem
         if (LastGuesserWindow) LastGuesserWindow.CloseScreen();
         LastGuesserWindow = null!;
     }
+
+    static public void OnGameEnd(PlayerModInfo myInfo)
+    {
+        var guessKills = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.MyState == PlayerState.Guessed && p.MyKiller == myInfo) ?? 0;
+        if (guessKills >= 1) new StaticAchievementToken("guesser.common1");
+        if (guessKills >= 3) new StaticAchievementToken("guesser.challenge");
+    }
 }
 
 public class Guesser : ConfigurableStandardRole
@@ -106,7 +113,7 @@ public class Guesser : ConfigurableStandardRole
     static public Guesser MyEvilRole = new(true);
 
     public bool IsEvil { get; private set; }
-    public override RoleCategory RoleCategory => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
+    public override RoleCategory Category => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
 
     public override string LocalizedName => IsEvil ? "evilGuesser" : "niceGuesser";
     public override Color RoleColor => IsEvil ? Palette.ImpostorRed : new Color(1f, 1f, 0f);
@@ -137,7 +144,7 @@ public class Guesser : ConfigurableStandardRole
         foreach (var option in commonOptions) option.Title = new CombinedComponent(new TranslateTextComponent("role.general.common"), new RawTextComponent(" "), new TranslateTextComponent(option.Id));
 
         CommonEditorOption = new NebulaConfiguration(RoleConfig, () => {
-            MetaContext context = new();
+            MetaContextOld context = new();
             foreach (var option in commonOptions) context.Append(option.GetEditor()!);
             return context;
         });
@@ -161,6 +168,11 @@ public class Guesser : ConfigurableStandardRole
         {
             if (AmOwner) GuesserSystem.OnDead();
         }
+
+        public override void OnGameEnd(NebulaEndState endState)
+        {
+            if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
+        }
     }
 
     public class EvilInstance : Impostor.Impostor.Instance
@@ -180,6 +192,11 @@ public class Guesser : ConfigurableStandardRole
         public override void OnDead()
         {
             if (AmOwner) GuesserSystem.OnDead();
+        }
+
+        public override void OnGameEnd(NebulaEndState endState)
+        {
+            if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
         }
     }
 }
@@ -219,6 +236,11 @@ public class GuesserModifier : ConfigurableStandardModifier
         public override void DecoratePlayerName(ref string text, ref Color color)
         {
             if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " ⊕".Color(MyRole.RoleColor);
+        }
+
+        public override void OnGameEnd(NebulaEndState endState)
+        {
+            if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
         }
 
         public override string? IntroText => Language.Translate("role.guesser.blurb");
