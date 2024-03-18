@@ -8,6 +8,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 using static Nebula.Roles.Crewmate.Phosphorus;
 using static UnityEngine.UI.GridLayoutGroup;
 
@@ -41,7 +42,7 @@ public class Raider : ConfigurableStandardRole
     }
 
     [NebulaPreLoad]
-    public class RaiderAxe : NebulaSyncStandardObject
+    public class RaiderAxe : NebulaSyncStandardObject, IGameEntity
     {
         public static string MyTag = "RaiderAxe";
         
@@ -60,7 +61,7 @@ public class Raider : ConfigurableStandardRole
         {
         }
 
-        public override void Update()
+        void IGameEntity.HudUpdate()
         {
             if (state == 0)
             {
@@ -99,19 +100,21 @@ public class Raider : ConfigurableStandardRole
                             if (!Helpers.AnyNonTriggersBetween(p.GetTruePosition(),pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
-                                if (p.GetModInfo()?.HasAttribute(Virial.Game.PlayerAttribute.Invisible) ?? false) continue;
+                                if (p.GetModInfo()?.IsInvisible ?? false) continue;
 
-                                PlayerControl.LocalPlayer.ModKill(p, false, PlayerState.Beaten, EventDetail.Kill);
-                                killed |= 1 << p.PlayerId;
-
-                                if(killed >= 3)
+                                if (PlayerControl.LocalPlayer.ModKill(p, false, PlayerState.Beaten, EventDetail.Kill) == KillResult.Kill)
                                 {
-                                    acTokenChallenge ??= new("raider.challenge", killed, (val, _) => 
-                                    /*人数都合でゲームが終了している*/ NebulaGameManager.Instance!.EndState!.EndReason == NebulaEndReason.Situation && 
-                                    /*勝利している*/ NebulaGameManager.Instance.EndState!.CheckWin(Owner.PlayerId) &&
-                                    /*最後の死亡者がこの斧によってキルされている*/ (killed & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
-                                    );
-                                    acTokenChallenge.Value = killed;
+                                    killed |= 1 << p.PlayerId;
+
+                                    if (killed >= 3)
+                                    {
+                                        acTokenChallenge ??= new("raider.challenge", killed, (val, _) =>
+                                        /*人数都合でゲームが終了している*/ NebulaGameManager.Instance!.EndState!.EndReason == GameEndReason.Situation &&
+                                        /*勝利している*/ NebulaGameManager.Instance.EndState!.CheckWin(Owner.PlayerId) &&
+                                        /*最後の死亡者がこの斧によってキルされている*/ (killed & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
+                                        );
+                                        acTokenChallenge.Value = killed;
+                                    }
                                 }
                             }
                         }
@@ -155,7 +158,7 @@ public class Raider : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
@@ -177,7 +180,7 @@ public class Raider : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                acTokenAnother = Achievement.GenerateSimpleTriggerToken("raider.another1");
+                acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("raider.another1");
 
                 equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 equipButton.SetSprite(buttonSprite.GetSprite());
@@ -217,32 +220,28 @@ public class Raider : ConfigurableStandardRole
             }
         }
 
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
             UnequipAxe();
             equipButton?.SetLabel("equip");
         }
 
-        public override void OnDead()
+        void IGamePlayerEntity.OnDead()
         {
             if (AmOwner && MyAxe != null) UnequipAxe();
 
             if (acTokenAnother != null && (MyPlayer.MyState == PlayerState.Guessed || MyPlayer.MyState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
-        public override void OnKillPlayer(PlayerControl target)
+        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
         {
-            base.OnKillPlayer(target);
-        
-            if(target.GetModInfo()?.MyState == PlayerState.Beaten)
+            if(AmOwner && target.Unbox()?.MyState == PlayerState.Beaten)
                 acTokenCommon ??= new("raider.common1");
             
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd()
         {
-            base.OnMeetingEnd();
-
             if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
         }
 

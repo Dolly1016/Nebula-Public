@@ -1,0 +1,24 @@
+﻿{
+	"Contents" : [
+		{
+			"Document" : {
+				"Id" : "templates.roleName",
+				"Arguments" : {
+					"roleName" : "paparazzo"
+				}
+			}
+		},
+		{
+			"TranslationKey" : "role.paparazzo.doc.main"
+		},
+		{
+			"Document" : {
+				"Id" : "templates.buttonContent",
+				"Arguments" : {
+					"buttonName" : "CameraButton",
+					"textKey" : "role.paparazzo.doc.cameraButton"
+				}
+			}
+		}
+	]
+}

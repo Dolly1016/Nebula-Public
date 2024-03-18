@@ -43,25 +43,25 @@ public class MetaRole : AbstractModifier
         {
             var window = MetaScreen.GenerateWindow(new Vector2(7.5f, 4.5f), HudManager.Instance.transform, new Vector3(0, 0, -400f), true, false);
 
-            MetaContextOld context = new MetaContextOld();
+            MetaWidgetOld widget = new MetaWidgetOld();
 
-            context.Append(new MetaContextOld.Text(TextAttribute.TitleAttr) { RawText = Language.Translate("role.metaRole.ui.roles") });
+            widget.Append(new MetaWidgetOld.Text(TextAttributeOld.TitleAttr) { RawText = Language.Translate("role.metaRole.ui.roles") });
 
-            var roleTitleAttr = new TextAttribute(TextAttribute.BoldAttr) { Size = new Vector2(1.4f, 0.26f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
-            MetaContextOld scrollInnner = new();
-            MetaContextOld.ScrollView scrollView = new(new(7.4f, 4f), scrollInnner);
-            scrollInnner.Append(Roles.AllRoles, (role) => new MetaContextOld.Button(() => { 
+            var roleTitleAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.26f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
+            MetaWidgetOld scrollInnner = new();
+            MetaWidgetOld.ScrollView scrollView = new(new(7.4f, 4f), scrollInnner);
+            scrollInnner.Append(Roles.AllRoles, (role) => new MetaWidgetOld.Button(() => { 
                 MyPlayer.RpcInvokerSetRole(role, null).InvokeSingle();
                 window.CloseScreen();
             }, roleTitleAttr)
             {
                 RawText = role.DisplayName.Color(role.RoleColor),
                 PostBuilder = (button, renderer, text) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask,
-                Alignment = IMetaContextOld.AlignmentOption.Center
+                Alignment = IMetaWidgetOld.AlignmentOption.Center
             }, 4, -1, 0, 0.6f);
-            context.Append(scrollView);
+            widget.Append(scrollView);
 
-            window.SetContext(context);
+            window.SetWidget(widget);
         }
     }
 }

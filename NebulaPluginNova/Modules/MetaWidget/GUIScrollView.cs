@@ -9,9 +9,9 @@ using UnityEngine;
 using Virial.Compat;
 using Virial.Media;
 
-namespace Nebula.Modules.MetaContext;
+namespace Nebula.Modules.MetaWidget;
 
-public class GUIScrollView : AbstractGUIContext
+public class GUIScrollView : AbstractGUIWidget
 {
     //スクローラの位置を記憶する
     private static Dictionary<string, float> distDic = new();
@@ -42,18 +42,18 @@ public class GUIScrollView : AbstractGUIContext
             this.myAnchor = new(new(0f, 1f), new(-innerSize.Width * 0.5f, innerSize.Height * 0.5f, -0.01f));
         }
 
-        public void SetContext(GUIContext? context, out Size actualSize)
+        public void SetWidget(GUIWidget? widget, out Size actualSize)
         {
             screen.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => GameObject.Destroy(obj)));
 
-            if (context != null)
+            if (widget != null)
             {
-                var obj = context.Instantiate(myAnchor, innerSize, out actualSize);
+                var obj = widget.Instantiate(myAnchor, innerSize, out actualSize);
                 if (obj != null)
                 {
                     obj.transform.SetParent(screen.transform, false);
 
-                    scroller.SetBounds(new FloatRange(0, actualSize.Height - scrollViewSizeY), null);
+                    scroller.SetBounds(new FloatRange(0, Math.Max(0f,actualSize.Height - scrollViewSizeY)), null);
                     scroller.ScrollRelative(UnityEngine.Vector2.zero);
 
                     foreach (var button in screen.GetComponentsInChildren<PassiveButton>()) button.ClickMask = scrollerCollider;
@@ -73,9 +73,9 @@ public class GUIScrollView : AbstractGUIContext
     internal ListArtifact<InnerScreen> InnerArtifact { get; private init; }
     public Artifact<GUIScreen> Artifact { get; private init; }
 
-    public GUIContext? Inner { get; init; } = null;
+    public GUIWidgetSupplier? Inner { get; init; } = null;
 
-    public GUIScrollView(Virial.Media.GUIAlignment alignment, UnityEngine.Vector2 size, GUIContext? inner) : base(alignment) {
+    public GUIScrollView(Virial.Media.GUIAlignment alignment, UnityEngine.Vector2 size, GUIWidgetSupplier? inner) : base(alignment) {
         this.Size = size;
 
         this.InnerArtifact = new();
@@ -84,7 +84,7 @@ public class GUIScrollView : AbstractGUIContext
     }
 
 
-    public override GameObject? Instantiate(Size size, out Size actualSize)
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
         var view = UnityHelper.CreateObject("ScrollView", null, new UnityEngine.Vector3(0f, 0f, 0f),LayerExpansion.GetUILayer());
         var inner = UnityHelper.CreateObject("Inner", view.transform, new UnityEngine.Vector3(-0.2f, 0f, -0.1f));
@@ -103,10 +103,11 @@ public class GUIScrollView : AbstractGUIContext
         var innerScreen = new InnerScreen(inner, new(innerSize), scroller, hitBox,Size.y);
         InnerArtifact.Values.Add(innerScreen);
 
-        innerScreen.SetContext(Inner, out var innerActualSize);
+        innerScreen.SetWidget(Inner?.Invoke(), out var innerActualSize);
         float height = innerActualSize.Height;
 
-        
+        scroller.SetBounds(new FloatRange(0, Math.Max(0f,height - Size.y)), null);
+
         if (ScrollerTag != null && distDic.TryGetValue(ScrollerTag, out var val))
             scroller.Inner.transform.localPosition = scroller.Inner.transform.localPosition +
                 new UnityEngine.Vector3(0f, Mathf.Clamp(val + scroller.ContentYBounds.min, scroller.ContentYBounds.min, scroller.ContentYBounds.max), 0f);
@@ -115,6 +116,8 @@ public class GUIScrollView : AbstractGUIContext
             scroller.Inner.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += () => { distDic[ScrollerTag] = scroller.Inner.transform.localPosition.y - scroller.ContentYBounds.min; };
 
         actualSize = new(Size.x + 0.15f, Size.y + 0.08f);
+
+        scroller.UpdateScrollBars();
 
         return view;
     }

@@ -12,8 +12,10 @@ global using System.Collections;
 global using HarmonyLib;
 global using Timer = Nebula.Modules.ScriptComponents.Timer;
 global using Color = UnityEngine.Color;
-global using GUIContext = Virial.Media.GUIContext;
-global using GUI = Nebula.Modules.MetaContext.NebulaGUIContextEngine;
+global using GUIWidget = Virial.Media.GUIWidget;
+global using GUI = Nebula.Modules.MetaWidget.NebulaGUIWidgetEngine;
+global using Image = Virial.Media.Image;
+global using GamePlayer = Virial.Game.Player;
 
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
@@ -59,14 +61,14 @@ public class NebulaPlugin : BasePlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.1.1";
+    public const string PluginVersion = "2.2.3.1";
 
-    //public const string VisualVersion = "v2.1.1";
-    public const string VisualVersion = "Snapshot 23.12.30a";
-    //public const string VisualVersion = "Mayor Debug";
+    //public const string VisualVersion = "v2.2.3.1";
+    public const string VisualVersion = "Snapshot 24.03.17a";
+    //public const string VisualVersion = "RPC Debug 2";
 
-    public const int PluginEpoch = 102;
-    public const int PluginBuildNum = 1062;
+    public const int PluginEpoch = 103;
+    public const int PluginBuildNum = 1091;
     
     static public HttpClient HttpClient
     {

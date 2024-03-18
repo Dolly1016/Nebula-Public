@@ -23,56 +23,61 @@ public class VoiceChatInfo : MonoBehaviour
         myScreen = MetaScreen.GenerateScreen(new Vector2(2f, 0.45f), transform, new Vector3(0, 0, -1f), false, false, false);
     }
 
-    private IMetaContextOld? radioContext = null;
+    private IMetaWidgetOld? radioWidget = null;
     private float timer = 0f;
     private bool isMute = false;
-    private bool MustShow => timer > 0f || radioContext != null || isMute;
+    private VCFilteringMode filter => NebulaGameManager.Instance?.VoiceChatManager?.FilteringMode ?? VCFilteringMode.All;
+    private bool MustShow => timer > 0f || radioWidget != null || isMute || filter != VCFilteringMode.All;
 
-    public void SetRadioContext(string displayText,Color color)
+    public void SetRadioWidget(string displayText,Color color)
     {
-        var context = new MetaContextOld();
+        var widget = new MetaWidgetOld();
 
-        context.Append(
-            new ParallelContextOld(
-            new(new MetaContextOld.Image(iconRadioSprite.GetSprite()) { Width = 0.22f, Alignment = IMetaContextOld.AlignmentOption.Center }, 0.35f),
-            new(new MetaContextOld()
-            .Append(new MetaContextOld.VerticalMargin(0.015f))
-            .Append(new MetaContextOld.Text(SmallTextAttribute) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "voiceChat.info.radio" })
-            .Append(new MetaContextOld.VerticalMargin(-0.07f))
-            .Append(new MetaContextOld.Text(TextAttribute) { Alignment = IMetaContextOld.AlignmentOption.Center, RawText = displayText.Color(color) })
+        widget.Append(
+            new ParallelWidgetOld(
+            new(new MetaWidgetOld.Image(iconRadioSprite.GetSprite()) { Width = 0.22f, Alignment = IMetaWidgetOld.AlignmentOption.Center }, 0.35f),
+            new(new MetaWidgetOld()
+            .Append(new MetaWidgetOld.VerticalMargin(0.015f))
+            .Append(new MetaWidgetOld.Text(SmallTextAttribute) { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = "voiceChat.info.radio" })
+            .Append(new MetaWidgetOld.VerticalMargin(-0.07f))
+            .Append(new MetaWidgetOld.Text(TextAttribute) { Alignment = IMetaWidgetOld.AlignmentOption.Center, RawText = displayText.Color(color) })
             , 1.6f))
-            { Alignment = IMetaContextOld.AlignmentOption.Center });
-        radioContext = context;
+            { Alignment = IMetaWidgetOld.AlignmentOption.Center });
+        radioWidget = widget;
 
-        ShowContext();
+        ShowWidget();
     }
 
-    public void UnsetRadioContext()
+    public void UnsetRadioWidget()
     {
-        radioContext = null;
-        ShowContext();
+        radioWidget = null;
+        ShowWidget();
     }
 
-    private void ShowContext()
+    public void ShowWidget()
     {
         timer = 2.7f;
 
-        if (isMute)
-            myScreen.SetContext(new MetaContextOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.mute"), Alignment = IMetaContextOld.AlignmentOption.Center });
-        else if (radioContext != null)
-            myScreen.SetContext(radioContext);
+        if (isMute && filter != VCFilteringMode.All)
+            myScreen.SetWidget(new MetaWidgetOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.mute") + "\n" + Language.Translate("voiceChat.info.filtering" + (int)filter), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+        else if (filter != VCFilteringMode.All)
+            myScreen.SetWidget(new MetaWidgetOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.filtering" + (int)filter), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+        else if (isMute)
+            myScreen.SetWidget(new MetaWidgetOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.mute"), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+        else if (radioWidget != null)
+            myScreen.SetWidget(radioWidget);
         else
-            myScreen.SetContext(new MetaContextOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.unmute"), Alignment = IMetaContextOld.AlignmentOption.Center });
+            myScreen.SetWidget(new MetaWidgetOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.unmute"), Alignment = IMetaWidgetOld.AlignmentOption.Center });
     }
 
-    public static TextAttribute TextAttribute { get; private set; } = new(TextAttribute.BoldAttr) { Size = new(1.2f, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaxSize = 1.8f, FontMinSize = 1f, FontSize = 1.8f };
-    public static TextAttribute SmallTextAttribute { get; private set; } = new(TextAttribute.BoldAttr) { Size = new(1.2f, 0.15f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaxSize = 1.2f, FontMinSize = 0.7f, FontSize = 1.2f };
+    public static TextAttributeOld TextAttribute { get; private set; } = new(TextAttributeOld.BoldAttr) { Size = new(1.2f, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaxSize = 1.8f, FontMinSize = 1f, FontSize = 1.8f };
+    public static TextAttributeOld SmallTextAttribute { get; private set; } = new(TextAttributeOld.BoldAttr) { Size = new(1.2f, 0.15f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaxSize = 1.2f, FontMinSize = 0.7f, FontSize = 1.2f };
     public void SetMute(bool mute)
     {
         if (isMute == mute) return;
         isMute = mute;
 
-        ShowContext();
+        ShowWidget();
     }
 
     public void Update()

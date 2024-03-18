@@ -72,7 +72,7 @@ public abstract class IntroAssignableModifier : AbstractModifier, DefinedModifie
     }
 }
 
-public abstract class ConfigurableModifier : IntroAssignableModifier
+public abstract class ConfigurableModifier : IntroAssignableModifier, IConfiguableAssignable
 {
     public ConfigurationHolder RoleConfig { get; private set; } = null!;
     public override ConfigurationHolder? RelatedConfig { get => RoleConfig; }
@@ -120,6 +120,9 @@ public abstract class ConfigurableStandardModifier : ConfigurableModifier
     static public NebulaConfiguration GenerateRoleChanceOption(ConfigurationHolder holder) =>
         new(holder, "chance", new TranslateTextComponent("options.modifier.chance"), 10f, 90f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
 
+    static public NebulaConfiguration Generate100PercentRoleChanceOption(ConfigurationHolder holder) =>
+        new(holder, "chance", new TranslateTextComponent("options.modifier.chance"), 10f, 100f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
+
     protected override void LoadOptions() {
         CrewmateRoleCountOption = new(RoleConfig, "crewmateCount", new TranslateTextComponent("options.role.crewmateCount"), 15, 0, 0);
         ImpostorRoleCountOption = new(RoleConfig, "impostorCount", new TranslateTextComponent("options.role.impostorCount"), 5, 0, 0);
@@ -129,22 +132,27 @@ public abstract class ConfigurableStandardModifier : ConfigurableModifier
         ImpostorRandomRoleCountOption = new(RoleConfig, "impostorRandomCount", null, 5, 0, 0) { Editor = () => null, Shower = () => null };
         NeutralRandomRoleCountOption = new(RoleConfig, "neutralRandomCount", null, 10, 0, 0) { Editor = () => null, Shower = () => null };
 
+        RoleConfig.IsActivated = () => 
+            CrewmateRoleCountOption > 0 || CrewmateRandomRoleCountOption > 0 ||
+            ImpostorRoleCountOption > 0 || ImpostorRandomRoleCountOption > 0 ||
+            NeutralRoleCountOption > 0 || NeutralRandomRoleCountOption > 0;
+
         void SetShowerAndEditor(NebulaConfiguration countOption, NebulaConfiguration randomOption)
         {
             countOption.Editor = () =>
             {
-                return new CombinedContextOld(0.55f, IMetaContextOld.AlignmentOption.Center,
-                    new MetaContextOld.Text(new(NebulaConfiguration.OptionTitleAttr) { Size = new(2.2f,0.4f)}) { RawText = countOption.Title.GetString(), PostBuilder = (text) => countOption.TitlePostBuild(text, null) },
+                return new CombinedWidgetOld(0.55f, IMetaWidgetOld.AlignmentOption.Center,
+                    new MetaWidgetOld.Text(new(NebulaConfiguration.OptionTitleAttr) { Size = new(2.2f,0.4f)}) { RawText = countOption.Title.GetString(), PostBuilder = (text) => countOption.TitlePostBuild(text, null) },
                     NebulaConfiguration.OptionTextColon,
-                    NebulaConfiguration.OptionButtonContext(() => countOption.ChangeValue(false), "<<"),
-                    new MetaContextOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = countOption.ToDisplayString() },
-                    NebulaConfiguration.OptionButtonContext(() => countOption.ChangeValue(true), ">>"),
+                    NebulaConfiguration.OptionButtonWidget(() => countOption.ChangeValue(false), "<<"),
+                    new MetaWidgetOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = countOption.ToDisplayString() },
+                    NebulaConfiguration.OptionButtonWidget(() => countOption.ChangeValue(true), ">>"),
                     NebulaConfiguration.OptionRawText("(",0.2f),
                     NebulaConfiguration.OptionTranslatedText("options.role.randomCount", 0.7f),
                     NebulaConfiguration.OptionTextColon,
-                    NebulaConfiguration.OptionButtonContext(() => randomOption.ChangeValue(false), "<<"),
-                    new MetaContextOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = randomOption.ToDisplayString() },
-                    NebulaConfiguration.OptionButtonContext(() => randomOption.ChangeValue(true), ">>"),
+                    NebulaConfiguration.OptionButtonWidget(() => randomOption.ChangeValue(false), "<<"),
+                    new MetaWidgetOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = randomOption.ToDisplayString() },
+                    NebulaConfiguration.OptionButtonWidget(() => randomOption.ChangeValue(true), ">>"),
                     NebulaConfiguration.OptionRawText(")", 0.2f)
                 );
             };

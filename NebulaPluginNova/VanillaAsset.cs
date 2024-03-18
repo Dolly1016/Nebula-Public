@@ -69,6 +69,10 @@ public class VanillaAsset
     static public GameSettingMenu PlayerOptionsMenuPrefab { get; private set; } = null!;
 
     static public ShipStatus[] MapAsset = new ShipStatus[6];
+    static public Vector2 GetMapCenter(byte mapId) => MapAsset[mapId].MapPrefab.transform.GetChild(5).localPosition;
+    static public float GetMapScale(byte mapId) => VanillaAsset.MapAsset[mapId].MapScale;
+    static public Vector2 ConvertToMinimapPos(Vector2 pos,Vector2 center, float scale)=> (pos / scale) + center;
+    static public Vector2 ConvertToMinimapPos(Vector2 pos, byte mapId) => ConvertToMinimapPos(pos, GetMapCenter(mapId), GetMapScale(mapId));
 
     static public void LoadAssetAtInitialize()
     {
@@ -77,6 +81,9 @@ public class VanillaAsset
 
         PlayerOptionsMenuPrefab = UnityHelper.FindAsset<GameSettingMenu>("PlayerOptionsMenu")!;
     }
+
+    public static void PlaySelectSE() => SoundManager.Instance.PlaySound(SelectClip, false, 0.8f);
+    public static void PlayHoverSE() => SoundManager.Instance.PlaySound(HoverClip, false, 0.8f);
 
     static public IEnumerator CoLoadAssetOnTitle()
     {

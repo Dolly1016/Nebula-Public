@@ -1,0 +1,15 @@
+﻿{
+	"Contents" : [
+		{
+			"Document" : {
+				"Id" : "templates.roleName",
+				"Arguments" : {
+					"roleName" : "obsessional"
+				}
+			}
+		},
+		{
+			"TranslationKey" : "role.obsessional.doc.main"
+		}
+	]
+}

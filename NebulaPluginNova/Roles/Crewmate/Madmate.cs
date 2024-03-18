@@ -1,14 +1,9 @@
-﻿using Nebula.Modules;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Madmate : ConfigurableStandardRole
+public class Madmate : ConfigurableStandardRole, HasCitation
 {
     static public Madmate MyRole = new Madmate();
 
@@ -16,17 +11,20 @@ public class Madmate : ConfigurableStandardRole
 
     public override string LocalizedName => "madmate";
     public override Color RoleColor => Palette.ImpostorRed;
+    Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
     public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration EmbroilVotersOnExileOption = null!;
+    private NebulaConfiguration LimitEmbroiledPlayersToVotersOption = null!;
+
     private NebulaConfiguration CanFixLightOption = null!;
     private NebulaConfiguration CanFixCommsOption = null!;
     private NebulaConfiguration HasImpostorVisionOption = null!;
     private NebulaConfiguration CanUseVentsOption = null!;
     private NebulaConfiguration CanMoveInVentsOption = null!;
-    private NebulaConfiguration CanIdenfityImpostorsOption = null!;
+    private NebulaConfiguration CanIdentifyImpostorsOption = null!;
     private NebulaConfiguration[] NumOfTasksToIdentifyImpostorsOptions = null!;
 
 
@@ -40,22 +38,24 @@ public class Madmate : ConfigurableStandardRole
         CanUseVentsOption = new NebulaConfiguration(RoleConfig, "canUseVents", null, false, false);
         CanMoveInVentsOption = new NebulaConfiguration(RoleConfig, "canMoveInVents", null, false, false);
 
-        EmbroilVotersOnExileOption = new NebulaConfiguration(RoleConfig, "embroilVotersOnExile", null, false, false);
-        CanIdenfityImpostorsOption = new NebulaConfiguration(RoleConfig, "canIdentifyImpostors", null, 3, 0, 0);
+        EmbroilVotersOnExileOption = new NebulaConfiguration(RoleConfig, "embroilPlayersOnExile", null, false, false);
+        LimitEmbroiledPlayersToVotersOption = new NebulaConfiguration(RoleConfig, "limitEmbroiledPlayersToVoters", null, true, true);
+
+        CanIdentifyImpostorsOption = new NebulaConfiguration(RoleConfig, "canIdentifyImpostors", null, 3, 0, 0);
 
         NumOfTasksToIdentifyImpostorsOptions = new NebulaConfiguration[]{
-            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors0",null,1,10,2,2),
-            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors1",null,1,10,4,4),
-            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors2",null,1,10,6,6)
+            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors0",null,0,10,2,2),
+            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors1",null,0,10,4,4),
+            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors2",null,0,10,6,6)
         };
 
-        CanIdenfityImpostorsOption.Shower = () =>
+        CanIdentifyImpostorsOption.Shower = () =>
         {
-            return CanIdenfityImpostorsOption.DefaultShowerString
+            return CanIdentifyImpostorsOption.DefaultShowerString
                 + StringExtensions.Color(
                     " (" +
                     NumOfTasksToIdentifyImpostorsOptions
-                        .Take(CanIdenfityImpostorsOption.GetMappedInt())
+                        .Take(CanIdentifyImpostorsOption.GetMappedInt())
                         .Join(option => option.ToDisplayString(), ", ")
                     + ")", Color.gray);
         };
@@ -64,25 +64,25 @@ public class Madmate : ConfigurableStandardRole
 
         new NebulaConfiguration(RoleConfig, () =>
         {
-            if (CanIdenfityImpostorsOption.CurrentValue == 0) return null;
+            if (CanIdentifyImpostorsOption.CurrentValue == 0) return null;
 
             List<IMetaParallelPlacableOld> placable = new();
 
-            for (int i = 0; i < CanIdenfityImpostorsOption.CurrentValue; i++)
+            for (int i = 0; i < CanIdentifyImpostorsOption.CurrentValue; i++)
             {
-                if (i != 0) placable.Add(new MetaContextOld.HorizonalMargin(0.25f));
+                if (i != 0) placable.Add(new MetaWidgetOld.HorizonalMargin(0.25f));
 
                 var option = NumOfTasksToIdentifyImpostorsOptions[i];
-                placable.Add(NebulaConfiguration.OptionButtonContext(() => option.ChangeValue(false), "<<"));
-                placable.Add(new MetaContextOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = option.ToDisplayString() });
-                placable.Add(NebulaConfiguration.OptionButtonContext(() => option.ChangeValue(true), ">>"));
+                placable.Add(NebulaConfiguration.OptionButtonWidget(() => option.ChangeValue(false), "<<"));
+                placable.Add(new MetaWidgetOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = option.ToDisplayString() });
+                placable.Add(NebulaConfiguration.OptionButtonWidget(() => option.ChangeValue(true), ">>"));
             }
 
-            return new CombinedContextOld(placable.ToArray());
+            return new CombinedWidgetOld(placable.ToArray());
         });
     }
     
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
         List<byte> impostors = new();
 
@@ -98,7 +98,7 @@ public class Madmate : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                var numOfTasksOptions = MyRole.NumOfTasksToIdentifyImpostorsOptions.Take(MyRole.CanIdenfityImpostorsOption.GetMappedInt());
+                var numOfTasksOptions = MyRole.NumOfTasksToIdentifyImpostorsOptions.Take(MyRole.CanIdentifyImpostorsOption.GetMappedInt());
                 int max = numOfTasksOptions.Max(option => option.GetMappedInt());
 
                 using (RPCRouter.CreateSection("MadmateTask"))
@@ -114,6 +114,7 @@ public class Madmate : ConfigurableStandardRole
             base.OnActivated();
 
             SetMadmateTask();
+            if(AmOwner) IdentifyImpostors();
         }
 
         public override void OnGameStart()
@@ -121,19 +122,24 @@ public class Madmate : ConfigurableStandardRole
             base.OnGameStart();
 
             SetMadmateTask();
+            if (AmOwner) IdentifyImpostors();
         }
 
-        public override void OnTaskCompleteLocal()
+        private void IdentifyImpostors()
         {
             //インポスター判別のチャンスだけ繰り返す
-            while(MyRole.CanIdenfityImpostorsOption.GetMappedInt() > impostors.Count && MyPlayer.Tasks.CurrentCompleted >= MyRole.NumOfTasksToIdentifyImpostorsOptions[impostors.Count].GetMappedInt())
+            while (MyRole.CanIdentifyImpostorsOption.GetMappedInt() > impostors.Count && MyPlayer.Tasks.CurrentCompleted >= MyRole.NumOfTasksToIdentifyImpostorsOptions[impostors.Count].GetMappedInt())
             {
                 var pool = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole && !impostors.Contains(p.PlayerId)).ToArray();
                 //候補が残っていなければ何もしない
                 if (pool.Length == 0) return;
                 impostors.Add(pool[System.Random.Shared.Next(pool.Length)].PlayerId);
             }
-            
+        }
+
+        public override void OnTaskCompleteLocal()
+        {
+            IdentifyImpostors();
         }
 
         public override void DecorateOtherPlayerName(PlayerModInfo player, ref string text, ref Color color)
@@ -141,20 +147,30 @@ public class Madmate : ConfigurableStandardRole
             if (impostors.Contains(player.PlayerId) && player.Role.Role.Category == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
         }
 
-        public override void OnExiled()
+        void IGamePlayerEntity.OnExiled()
         {
             if (!AmOwner) return;
-            if (!MyRole.EmbroilVotersOnExileOption) return;
-
-            ExtraExileRoleSystem.MarkExtraVictim(MyPlayer, false, true);
 
             if (NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole))
                 new StaticAchievementToken("madmate.common1");
+
+            if (!MyRole.EmbroilVotersOnExileOption) return;
+
+            if (MyRole.LimitEmbroiledPlayersToVotersOption)
+                ExtraExileRoleSystem.MarkExtraVictim(MyPlayer, false, true);
+            else
+            {
+                var voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && p.Role.Role.Category != RoleCategory.ImpostorRole).ToArray();
+                if (voters.Length > 0) voters.Random().MyControl.ModMarkAsExtraVictim(MyPlayer.MyControl, PlayerState.Embroiled, EventDetail.Embroil);
+            }
+
+            
+
         }
 
-        public override void OnMurdered(PlayerControl murder)
+        void IGamePlayerEntity.OnMurdered(GamePlayer murder)
         {
-            if(AmOwner && murder.GetModInfo()?.Role.Role.Category == RoleCategory.ImpostorRole)
+            if(AmOwner && murder.Unbox()?.Role.Role.Category == RoleCategory.ImpostorRole)
                 new StaticAchievementToken("madmate.another1");
         }
 
@@ -164,13 +180,14 @@ public class Madmate : ConfigurableStandardRole
                 new StaticAchievementToken("madmate.challenge");
         }
 
-        public override bool HasAnyTasks => MyRole.CanIdenfityImpostorsOption.GetMappedInt() > 0;
+        public override bool HasAnyTasks => MyRole.CanIdentifyImpostorsOption.GetMappedInt() > 0;
 
         public override bool CanFixComm => MyRole.CanFixCommsOption;
         public override bool CanFixLight => MyRole.CanFixLightOption;
         public override bool CanMoveInVent => MyRole.CanMoveInVentsOption;
         public override bool CanUseVent => MyRole.CanUseVentsOption;
         public override bool HasImpostorVision => MyRole.HasImpostorVisionOption;
+        public override bool IgnoreBlackout => MyRole.HasImpostorVisionOption;
     }
 }
 

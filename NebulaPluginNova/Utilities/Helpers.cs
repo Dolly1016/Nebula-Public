@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace Nebula.Utilities;
 
@@ -29,6 +31,7 @@ public class Reference<T>
 
 public static class Helpers
 {
+    public static int CurrentMonth => DateTime.Now.Month;
     public static void DeleteDirectoryWithInnerFiles(string directoryPath)
     {
         if (!Directory.Exists(directoryPath)) return;
@@ -150,9 +153,27 @@ public static class Helpers
         return result;
     }
 
+    static public int[] Sequential(int length)
+    {
+        var array = new int[length];
+        for (int i = 0; i < length; i++) array[i] = i;
+        return array;
+    }
+
     static public T Random<T>(this T[] array)
     {
         return array[System.Random.Shared.Next(array.Length)];
+    }
+
+    static public T Get<T>(this T[] array, int index, T defaultValue) {
+        if (index < array.Length) return array[index];
+        return defaultValue;
+    }
+
+    static public T Get<T>(this List<T> array, int index, T defaultValue)
+    {
+        if (index < array.Count) return array[index];
+        return defaultValue;
     }
 
     //指定の大きさまでQueueを小さくしてから要素を取り出します。呼び出し後のQueueの要素数は最大でexpectedSize - 1になります。

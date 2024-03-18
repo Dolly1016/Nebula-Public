@@ -33,6 +33,29 @@ public static class ShipExtension
         }
     }
 
+    public static void PatchEarlierModification(byte mapId)
+    {
+        switch (mapId)
+        {
+            case 0:
+                ModifyEarlierSkeld();
+                break;
+            case 1:
+                ModifyEarierMira();
+                break;
+            case 2:
+                ModifyEarlierPolus();
+                break;
+            case 4:
+                ModifyEarlierAirship();
+                break;
+            case 5:
+                ModifyEarlierFungle();
+                break;
+        }
+    }
+
+    private static void ModifyEarlierSkeld() { }
     private static void ModifySkeld()
     {
         if (GeneralConfigurations.SkeldCafeVentOption) CreateVent(SystemTypes.Cafeteria, "CafeUpperVent", new UnityEngine.Vector2(-2.1f, 3.8f));
@@ -48,6 +71,7 @@ public static class ShipExtension
         ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.GetFloat();
     }
 
+    private static void ModifyEarierMira() { }
     private static void ModifyMira()
     {
         if (!GeneralConfigurations.MiraAdminOption)
@@ -60,6 +84,7 @@ public static class ShipExtension
         ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.MiraReactorDurationOption.GetFloat();
     }
 
+    private static void ModifyEarlierPolus() { }
     private static void ModifyPolus()
     {
         var commRoom = ShipStatus.Instance.FastRooms[SystemTypes.Comms];
@@ -81,6 +106,23 @@ public static class ShipExtension
     }
 
     private static SpriteLoader medicalWiringSprite = SpriteLoader.FromResource("Nebula.Resources.AirshipWiringM.png",100f);
+
+    private static void ModifyEarlierAirship() {
+        //配線タスク
+        ActivateWiring("task_wiresHallway2", 2);
+        if (GeneralConfigurations.AirshipArmoryWireOption) ActivateWiring("task_electricalside2", 3).Room = SystemTypes.Armory;
+        ActivateWiring("task_wireShower", 4);
+        ActivateWiring("taks_wiresLounge", 5);
+        if (GeneralConfigurations.AirshipMedicalWireOption)
+        {
+            CreateConsole(SystemTypes.Medical, "task_wireMedical", medicalWiringSprite.GetSprite(), new Vector2(-0.84f, 5.63f), 0f);
+            ActivateWiring("task_wireMedical", 6).Room = SystemTypes.Medical;
+        }
+        if (GeneralConfigurations.AirshipHallwayWireOption) ActivateWiring("panel_wireHallwayL", 7);
+        ActivateWiring("task_wiresStorage", 8);
+        if (GeneralConfigurations.AirshipVaultWireOption) ActivateWiring("task_electricalSide", 9).Room = SystemTypes.VaultRoom;
+        ActivateWiring("task_wiresMeeting", 10);
+    }
     private static void ModifyAirship()
     {
         //宿舎下ダウンロード
@@ -99,22 +141,23 @@ public static class ShipExtension
         //ラウンジゴミ箱タスク
         EditConsole(SystemTypes.Lounge, "task_garbage5", (c) => c.checkWalls = true);
 
+        ShipStatus.Instance.FastRooms[SystemTypes.HallOfPortraits].transform.GetChild(3).gameObject.layer = LayerExpansion.GetShipLayer();
+
+        var ventilation = ShipStatus.Instance.FastRooms[SystemTypes.Ventilation].transform;
+        ventilation.GetChild(5).gameObject.layer = LayerExpansion.GetShortObjectsLayer();
+        ventilation.GetChild(6).gameObject.layer = LayerExpansion.GetShortObjectsLayer();
+
+        //メイン暗室
+        {
+            var obj = ShipStatus.Instance.FastRooms[SystemTypes.MainHall].gameObject;
+            var collider = obj.transform.GetChild(0).GetComponent<BoxCollider2D>();
+            var size = collider.size;
+            size.y = 4.399f;
+            collider.size = size;
+        }
+
         if (GeneralConfigurations.AirshipMeetingVentOption) CreateVent(SystemTypes.MeetingRoom, "MeetingVent", new Vector2(-3.1f, -1.6f)).transform.localPosition += new Vector3(0, 0, 2);
         if (GeneralConfigurations.AirshipElectricalVentOption) CreateVent(SystemTypes.Electrical, "ElectricalVent", new Vector2(-0.275f, -1.7f)).transform.localPosition += new Vector3(0, 0, 1);
-
-        ActivateWiring("task_wiresHallway2", 2);
-        if (GeneralConfigurations.AirshipArmoryWireOption) ActivateWiring("task_electricalside2", 3).Room = SystemTypes.Armory;
-        ActivateWiring("task_wireShower", 4);
-        ActivateWiring("taks_wiresLounge", 5);
-        if (GeneralConfigurations.AirshipMedicalWireOption)
-        {
-            CreateConsole(SystemTypes.Medical, "task_wireMedical", medicalWiringSprite.GetSprite(), new Vector2(-0.84f, 5.63f), 0f);
-            ActivateWiring("task_wireMedical", 6).Room = SystemTypes.Medical;
-        }
-        if(GeneralConfigurations.AirshipHallwayWireOption)ActivateWiring("panel_wireHallwayL", 7);
-        ActivateWiring("task_wiresStorage", 8);
-        if (GeneralConfigurations.AirshipVaultWireOption) ActivateWiring("task_electricalSide", 9).Room = SystemTypes.VaultRoom;
-        ActivateWiring("task_wiresMeeting", 10);
 
         if (GeneralConfigurations.AirshipOneWayMeetingRoomOption) ModifyMeetingRoom();
 
@@ -129,8 +172,27 @@ public static class ShipExtension
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.Records].gameObject;
             GameObject.Destroy(obj.transform.FindChild("records_admin_map").gameObject);
         }
+
+        if (GeneralConfigurations.AirshipHarderDownloadOption)
+        {
+            var obj = ShipStatus.Instance.FastRooms[SystemTypes.GapRoom].gameObject;
+            var panel = obj.transform.FindChild("panel_data");
+            panel.localPosition = new Vector3(4.52f, -3.95f, 0.1f);
+        }
+
+        if (GeneralConfigurations.AirshipBetterImpostorVisonOption || GeneralConfigurations.AirshipShadedLowerFloorOption)
+        {
+            var obj = ShipStatus.Instance.FastRooms[SystemTypes.GapRoom].gameObject;
+
+            var ledgeShadow = obj.transform.FindChild("Shadow").FindChild("LedgeShadow").GetComponent<OneWayShadows>();
+            //インポスターについてのみ影を無効化
+            if(GeneralConfigurations.AirshipBetterImpostorVisonOption)  ledgeShadow.IgnoreImpostor = true;
+            //上下両方から見えないように
+            if (GeneralConfigurations.AirshipShadedLowerFloorOption) ledgeShadow.RoomCollider.enabled = false;
+        }
     }
 
+    private static void ModifyEarlierFungle() { }
     private static void ModifyFungle()
     {
         //しばらくの措置として見た目チェンジサボ廃止

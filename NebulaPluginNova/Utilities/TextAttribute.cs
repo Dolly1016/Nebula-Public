@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace Nebula.Utilities;
 
-public class TextAttribute
+public class TextAttributeOld
 {
-    static public readonly TextAttribute TitleAttr = new TextAttribute() {
+    static public readonly TextAttributeOld TitleAttr = new TextAttributeOld() {
         Alignment = TMPro.TextAlignmentOptions.Left,
         Styles = TMPro.FontStyles.Bold,
         FontMaxSize = 3f,
         FontMinSize = 1f,
         FontSize = 3f
     };
-    static public readonly TextAttribute ContentAttr = new TextAttribute()
+    static public readonly TextAttributeOld ContentAttr = new TextAttributeOld()
     {
         Alignment = TMPro.TextAlignmentOptions.TopLeft,
         Styles = TMPro.FontStyles.Normal,
@@ -24,7 +24,7 @@ public class TextAttribute
         FontSize = 1.5f,
         Size = new Vector2(8f, 2f)
     };
-    static public readonly TextAttribute NormalAttr = new TextAttribute()
+    static public readonly TextAttributeOld NormalAttr = new TextAttributeOld()
     {
         Alignment = TMPro.TextAlignmentOptions.Center,
         Styles = TMPro.FontStyles.Normal,
@@ -33,9 +33,9 @@ public class TextAttribute
         FontSize = 1.8f,
         Size = new Vector2(1.7f, 0.3f)
     };
-    static public readonly TextAttribute NormalAttrLeft = new(NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Left };
+    static public readonly TextAttributeOld NormalAttrLeft = new(NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Left };
 
-    static public readonly TextAttribute BoldAttr = new TextAttribute()
+    static public readonly TextAttributeOld BoldAttr = new TextAttributeOld()
     {
         Alignment = TMPro.TextAlignmentOptions.Center,
         Styles = TMPro.FontStyles.Bold,
@@ -44,7 +44,7 @@ public class TextAttribute
         FontSize = 1.8f,
         Size = new Vector2(1.7f, 0.3f)
     };
-    static public readonly TextAttribute BoldAttrLeft = new(BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left };
+    static public readonly TextAttributeOld BoldAttrLeft = new(BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left };
 
     public Color Color { get; set; } = Color.white;
     public TMPro.TextAlignmentOptions Alignment { get; set; } = TMPro.TextAlignmentOptions.Center;
@@ -56,8 +56,8 @@ public class TextAttribute
     public float FontSize { get; set; } = 1.5f;
     public bool AllowAutoSizing { get; set; } = true;
     public Vector2 Size { get; set; } = new Vector2(3f, 0.5f);
-    public TextAttribute EditFontSize(float size) => EditFontSize(size, size, size);
-    public TextAttribute EditFontSize(float size,float min,float max)
+    public TextAttributeOld EditFontSize(float size) => EditFontSize(size, size, size);
+    public TextAttributeOld EditFontSize(float size,float min,float max)
     {
         FontMaxSize = max;
         FontMinSize = min;
@@ -82,8 +82,8 @@ public class TextAttribute
         if (FontMaterial != null) text.fontMaterial = FontMaterial;
     }
 
-    public TextAttribute() { }
-    public TextAttribute(TextAttribute orig) {
+    public TextAttributeOld() { }
+    public TextAttributeOld(TextAttributeOld orig) {
         Color = orig.Color;
         Alignment = orig.Alignment;
         Styles = orig.Styles;
@@ -95,6 +95,6 @@ public class TextAttribute
         FontMaterial= orig.FontMaterial;
     }
 
-    public TextAttribute AlterColor(Color color) => new (this) { Color = color};
-    public TextAttribute AlterAutoSizing(bool allowAutoSizing) => new(this) { AllowAutoSizing = allowAutoSizing };
+    public TextAttributeOld AlterColor(Color color) => new (this) { Color = color};
+    public TextAttributeOld AlterAutoSizing(bool allowAutoSizing) => new(this) { AllowAutoSizing = allowAutoSizing };
 }

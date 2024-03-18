@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -55,7 +56,7 @@ public class Phosphorus : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? lanternButton = null;
@@ -134,7 +135,7 @@ public class Phosphorus : ConfigurableStandardRole
         }
 
 
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
             //ランタンを全て設置していたら全員に公開する
             if(localLanterns != null && localLanterns.Count == MyRole.NumOfLampsOption)

@@ -1,10 +1,12 @@
 ﻿using Nebula.Map;
+using Nebula.Roles.Modifier;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -24,6 +26,7 @@ public class Busker : ConfigurableStandardRole
     private NebulaConfiguration PseudocideCoolDownOption = null!;
     private NebulaConfiguration PseudocideDurationOption = null!;
 
+    public override bool CanLoadDefault(IntroAssignableModifier modifier) => modifier is not Lover;
     protected override void LoadOptions()
     {
         base.LoadOptions();
@@ -32,7 +35,7 @@ public class Busker : ConfigurableStandardRole
         PseudocideDurationOption = new(RoleConfig, "pseudocideDuration", null, 5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, IGameEntity
     {
         static private ISpriteLoader pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
         static private ISpriteLoader reviveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskReviveButton.png", 115f);
@@ -57,7 +60,7 @@ public class Busker : ConfigurableStandardRole
                 pseudocideButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PseudocideCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 pseudocideButton.OnClick = (button) => {
                     NebulaManager.Instance.ScheduleDelayAction(() => {
-                        MyPlayer.MyControl.ModKill(MyPlayer.MyControl, false, PlayerState.Suicide, null, false);
+                        MyPlayer.MyControl.ModKill(MyPlayer.MyControl, false, PlayerState.Pseudocide, null, false);
                         reviveButon.ActivateEffect();
                     });
                 };
@@ -95,11 +98,14 @@ public class Busker : ConfigurableStandardRole
 
         private void CheckChallengeAchievement(PlayerModInfo reporter)
         {
-            if (acTokenChallenge != null && !reporter.AmOwner) acTokenChallenge.Value.isCleared |= NebulaGameManager.Instance!.CurrentTime - acTokenChallenge.Value.lastRevive < 2f;
+            if (AmOwner)
+            {
+                if (acTokenChallenge != null && !reporter.AmOwner) acTokenChallenge.Value.isCleared |= NebulaGameManager.Instance!.CurrentTime - acTokenChallenge.Value.lastRevive < 2f;
+            }
         }
 
-        public override void OnReported(PlayerModInfo reporter, PlayerModInfo reported) => CheckChallengeAchievement(reporter);
-        public override void OnEmergencyMeeting(PlayerModInfo reporter) => CheckChallengeAchievement(reporter);
+        void IGameEntity.OnReported(GamePlayer reporter, GamePlayer reported) => CheckChallengeAchievement(reporter.Unbox());
+        void IGameEntity.OnEmergencyMeeting(GamePlayer reporter) => CheckChallengeAchievement(reporter.Unbox());
         
     }
 }

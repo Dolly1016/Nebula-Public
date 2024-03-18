@@ -50,6 +50,7 @@ internal enum AttributeTemplateFlag
     IsFlexible      = 0b1 << 8,
 }
 
+[Flags]
 public enum AttributeParams
 {
     StandardBared           = AttributeTemplateFlag.FontStandard    | AttributeTemplateFlag.AlignmentCenter | AttributeTemplateFlag.MaterialBared   | AttributeTemplateFlag.IsFlexible,
@@ -96,6 +97,36 @@ public enum AttributeAsset
     /// Preset読み込み画面の各プリセットのボタンと同じ大きさです。
     /// </summary>
     StandardLargeWideMasked,
+
+    /// <summary>
+    /// 中揃えの小見出しや注目を浴びるテキスト、ボタン向けの可変サイズテキスト属性です。
+    /// </summary>
+    CenteredBold,
+
+    /// <summary>
+    /// 主にオーバーレイ向けの見出し用可変サイズテキスト属性です。
+    /// </summary>
+    OverlayTitle,
+
+    /// <summary>
+    /// 主にオーバーレイ向けの本文用可変サイズテキスト属性です。
+    /// </summary>
+    OverlayContent,
+
+    /// <summary>
+    /// SerializableDocumentのTextStyle"Standard"で提供されているテキスト属性です。
+    /// </summary>
+    DocumentStandard,
+
+    /// <summary>
+    /// SerializableDocumentのTextStyle"Bold"で提供されているテキスト属性です。
+    /// </summary>
+    DocumentBold,
+
+    /// <summary>
+    /// SerializableDocumentのTextStyle"Title"で提供されているテキスト属性です。
+    /// </summary>
+    DocumentTitle,
 }
 
 [Flags]
@@ -122,6 +153,22 @@ internal class StaticFont : Font
     {
         FontMaterial = material;
         Font = font;
+    }
+}
+
+internal class DynamicFont : Font
+{
+    public Material? FontMaterial => FontMaterialSupplier.Invoke();
+
+    public TMP_FontAsset Font => FontSupplier.Invoke();
+
+    public Func<Material?> FontMaterialSupplier { get; init; }
+    public Func<TMP_FontAsset> FontSupplier { get; init; }
+
+    public DynamicFont(Func<Material?> material, Func<TMP_FontAsset> font)
+    {
+        FontMaterialSupplier = material;
+        FontSupplier = font;
     }
 }
 

@@ -291,7 +291,7 @@ public class ConsoleShower : MonoBehaviour
             background.color = Color.white.RGBMultiplied(0.13f);
 
             TextMeshPro text = null!;
-            new MetaContextOld.Text(new(TextAttribute.NormalAttrLeft) { Font = VanillaAsset.VersionFont, Size = new(6f, 4f), FontSize = 1.5f, AllowAutoSizing = false }) { PostBuilder = t => text = t }.Generate(holder, Vector3.zero, out _);
+            new MetaWidgetOld.Text(new(TextAttributeOld.NormalAttrLeft) { Font = VanillaAsset.VersionFont, Size = new(6f, 4f), FontSize = 1.5f, AllowAutoSizing = false }) { PostBuilder = t => text = t }.Generate(holder, Vector3.zero, out _);
 
             newBubble = new(holder, background, text, new());
         }

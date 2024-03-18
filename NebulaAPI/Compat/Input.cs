@@ -17,5 +17,6 @@ public enum VirtualKeyInput
     Command,
     Screenshot,
     Mute,
+    VCFilter,
     Help
 }

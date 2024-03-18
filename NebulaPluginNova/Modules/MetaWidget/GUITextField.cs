@@ -9,12 +9,12 @@ using Virial.Compat;
 using Virial.Media;
 using Virial.Text;
 using static Il2CppSystem.Net.Http.Headers.Parser;
-using static Nebula.Modules.IMetaContextOld;
+using static Nebula.Modules.IMetaWidgetOld;
 
-namespace Nebula.Modules.MetaContext;
+namespace Nebula.Modules.MetaWidget;
 
 
-public class GUITextField : AbstractGUIContext
+public class GUITextField : AbstractGUIWidget
 {
     internal ListArtifact<TextField> Artifact = new();
     public Size FieldSize { get; init; }
@@ -30,7 +30,7 @@ public class GUITextField : AbstractGUIContext
         FieldSize = size;
     }
 
-    public override GameObject? Instantiate(Size size, out Size actualSize)
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
         var unitySize = FieldSize.ToUnityVector();
         var obj = UnityHelper.CreateObject("TextField", null, UnityEngine.Vector3.zero);

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
+using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
 
-public class Arrow : INebulaScriptComponent
+public class Arrow : INebulaScriptComponent, IGameEntity
 {
     private SpriteRenderer? arrowRenderer;
     public Vector2 TargetPos;
@@ -41,20 +43,27 @@ public class Arrow : INebulaScriptComponent
 
     public Arrow SetColor(Color mainColor) => SetColor(mainColor, mainColor * 0.65f);
 
-    public override void OnReleased()
+    void IGameEntity.OnReleased()
     {
         if (arrowRenderer) GameObject.Destroy(arrowRenderer!.gameObject);
         arrowRenderer = null;
     }
 
     private static float perc = 0.925f;
-    public override void Update()
+    void IGameEntity.HudUpdate()
     {
         if (!arrowRenderer) return;
 
         //視点中心からのベクトル
-        Camera main = Camera.main;
-        Vector2 vector = TargetPos - (Vector2)main.transform.position;
+        Camera main = UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
+
+        //距離を測るための表示用のカメラ
+        Camera worldCam = (NebulaGameManager.Instance?.WideCamera.IsShown ?? false) ? NebulaGameManager.Instance.WideCamera.Camera : Camera.main;
+
+        //見た目上の矢印の位置のベクトル
+        Vector2 vector = (TargetPos - (Vector2)main.transform.position) / (worldCam.orthographicSize / 3f);
+
+        //目的地との見た目上の離れ具合
         float num = vector.magnitude / (main.orthographicSize * perc);
 
         //近くの矢印を隠す
@@ -63,21 +72,25 @@ public class Arrow : INebulaScriptComponent
         if (!flag) return;
 
         bool Between(float value, float min, float max) => value > min && value < max;
-        Vector2 viewportPoint = main.WorldToViewportPoint(TargetPos);
+
+        //スクリーン上の位置
+        Vector2 viewportPoint = worldCam.WorldToViewportPoint(TargetPos);
+
         if (Between(viewportPoint.x, 0f, 1f) && Between(viewportPoint.y, 0f, 1f))
         {
             //画面内を指す矢印
-
-            arrowRenderer.transform.localPosition = vector - vector.normalized * 0.6f;
+            arrowRenderer.transform.localPosition = (vector - vector.normalized * 0.6f).AsVector3(2f);
             arrowRenderer.transform.localScale = IsSmallenNearPlayer ? Vector3.one * Mathf.Clamp(num, 0f, 1f) : Vector3.one;
         }
         else
         {
             //画面外を指す矢印
             Vector2 vector3 = new Vector2(Mathf.Clamp(viewportPoint.x * 2f - 1f, -1f, 1f), Mathf.Clamp(viewportPoint.y * 2f - 1f, -1f, 1f));
+            
+            //UIのカメラに合わせて位置を調節する
             float orthographicSize = main.orthographicSize;
             float num3 = main.orthographicSize * main.aspect;
-            Vector3 vector4 = new Vector3(Mathf.LerpUnclamped(0f, num3 * 0.88f, vector3.x), Mathf.LerpUnclamped(0f, orthographicSize * 0.79f, vector3.y), 0f);
+            Vector3 vector4 = new Vector3(Mathf.LerpUnclamped(0f, num3 * 0.88f, vector3.x), Mathf.LerpUnclamped(0f, orthographicSize * 0.79f, vector3.y), 2f);
             arrowRenderer.transform.localPosition = vector4;
             arrowRenderer.transform.localScale = Vector3.one;
         }
@@ -95,7 +108,7 @@ public class Arrow : INebulaScriptComponent
             a -= Time.deltaTime * 0.85f;
             if (a < 0f)
             {
-                Release();
+                this.ReleaseIt();
                 a = 0f;
             }
             arrowRenderer.color = new Color(arrowRenderer.color.r, arrowRenderer.color.g, arrowRenderer.color.b, a);

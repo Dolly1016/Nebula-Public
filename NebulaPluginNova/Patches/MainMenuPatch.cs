@@ -1,5 +1,5 @@
 ﻿using Nebula.Behaviour;
-using Nebula.Modules.MetaContext;
+using Nebula.Modules.MetaWidget;
 
 namespace Nebula.Patches;
 
@@ -57,7 +57,7 @@ public static class MainMenuSetUpPatch
         nebulaPassiveButton.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         nebulaPassiveButton.OnClick.AddListener(() =>
         {
-            SoundManager.Instance.PlaySound(VanillaAsset.SelectClip, false, 0.8f);
+            VanillaAsset.PlaySelectSE();
             __instance.ResetScreen();
             NebulaScreen?.SetActive(true);
             __instance.screenTint.enabled = true;
@@ -82,7 +82,7 @@ public static class MainMenuSetUpPatch
             var passiveButton = obj.GetComponent<PassiveButton>();
             passiveButton.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
             passiveButton.OnClick.AddListener(() => {
-                SoundManager.Instance.PlaySound(VanillaAsset.SelectClip, false, 0.8f);
+                VanillaAsset.PlaySelectSE();
                 clickAction.Invoke();
             });
             obj.transform.localPosition = new Vector3(0f, 0.98f - index * 0.68f, 0f);
@@ -116,26 +116,26 @@ public static class MainMenuSetUpPatch
 
             var screen = MetaScreen.GenerateScreen(new Vector2(6.2f, 4.1f), AddonsScreen.transform, new Vector3(-0.1f, 0, 0f), false, false, false);
 
-            TextAttribute NameAttribute = new(TextAttribute.BoldAttr) { 
+            TextAttributeOld NameAttribute = new(TextAttributeOld.BoldAttr) { 
                 FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
                 Size = new Vector2(3.4f,0.3f),
                 Alignment = TMPro.TextAlignmentOptions.Left
             };
 
-            TextAttribute VersionAttribute = new TextAttribute(TextAttribute.NormalAttr)
+            TextAttributeOld VersionAttribute = new TextAttributeOld(TextAttributeOld.NormalAttr)
             {
                 FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
                 Size = new Vector2(0.8f, 0.3f),
                 Alignment = TMPro.TextAlignmentOptions.Left
             }.EditFontSize(1.4f, 1f, 1.4f);
-            TextAttribute AuthorAttribute = new TextAttribute(TextAttribute.NormalAttr)
+            TextAttributeOld AuthorAttribute = new TextAttributeOld(TextAttributeOld.NormalAttr)
             {
                 FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
                 Size = new Vector2(1.2f, 0.3f),
                 Alignment = TMPro.TextAlignmentOptions.Left
             }.EditFontSize(1.4f, 1f, 1.4f);
 
-            TextAttribute DescAttribute = new TextAttribute(TextAttribute.NormalAttr) {
+            TextAttributeOld DescAttribute = new TextAttributeOld(TextAttributeOld.NormalAttr) {
                 FontMaterial = VanillaAsset.StandardMaskedFontMaterial, 
                 Alignment = TMPro.TextAlignmentOptions.TopLeft,
                 Size = new Vector2(5.8f,0.4f),
@@ -143,21 +143,21 @@ public static class MainMenuSetUpPatch
             };
 
 
-            var inner = new MetaContextOld();
+            var inner = new MetaWidgetOld();
             foreach (var addon in NebulaAddon.AllAddons)
             {
                 if (addon.IsHidden) continue;
 
-                inner.Append(new CombinedContextOld(0.5f,
-                    new MetaContextOld.Image(addon.Icon) { Width = 0.3f },
-                    new MetaContextOld.HorizonalMargin(0.1f),
-                    new MetaContextOld.Text(NameAttribute) { RawText = addon.AddonName },
-                    new MetaContextOld.Text(VersionAttribute) { RawText = addon.Version },
-                    new MetaContextOld.Text(AuthorAttribute) { RawText = "by " + addon.Author })
-                { Alignment = IMetaContextOld.AlignmentOption.Left });
-                inner.Append(new MetaContextOld.Text(DescAttribute) { RawText = addon.Description });
+                inner.Append(new CombinedWidgetOld(0.5f,
+                    new MetaWidgetOld.Image(addon.Icon) { Width = 0.3f },
+                    new MetaWidgetOld.HorizonalMargin(0.1f),
+                    new MetaWidgetOld.Text(NameAttribute) { RawText = addon.AddonName },
+                    new MetaWidgetOld.Text(VersionAttribute) { RawText = addon.Version },
+                    new MetaWidgetOld.Text(AuthorAttribute) { RawText = "by " + addon.Author })
+                { Alignment = IMetaWidgetOld.AlignmentOption.Left });
+                inner.Append(new MetaWidgetOld.Text(DescAttribute) { RawText = addon.Description });
             }
-            screen.SetContext(new MetaContextOld.ScrollView(new Vector2(6.2f, 4.1f), inner, true) { Alignment = IMetaContextOld.AlignmentOption.Center });
+            screen.SetWidget(new MetaWidgetOld.ScrollView(new Vector2(6.2f, 4.1f), inner, true) { Alignment = IMetaWidgetOld.AlignmentOption.Center });
         }
 
         void CreateVersionsScreen()
@@ -167,14 +167,14 @@ public static class MainMenuSetUpPatch
 
             var screen = MetaScreen.GenerateScreen(new Vector2(6.2f, 4.1f), VersionsScreen.transform, new Vector3(-0.1f, 0, 0f), false, false, false);
 
-            TextAttribute NameAttribute = new(TextAttribute.BoldAttr)
+            TextAttributeOld NameAttribute = new(TextAttributeOld.BoldAttr)
             {
                 FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
                 Size = new Vector2(2.2f, 0.3f),
                 Alignment = TMPro.TextAlignmentOptions.Left
             };
 
-            TextAttribute CategoryAttribute = new(TextAttribute.BoldAttr)
+            TextAttributeOld CategoryAttribute = new(TextAttributeOld.BoldAttr)
             {
                 FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
                 Size = new Vector2(0.8f, 0.3f),
@@ -182,37 +182,37 @@ public static class MainMenuSetUpPatch
             };
             CategoryAttribute.EditFontSize(1.2f,0.6f,1.2f);
 
-            TextAttribute ButtonAttribute = new(TextAttribute.BoldAttr)
+            TextAttributeOld ButtonAttribute = new(TextAttributeOld.BoldAttr)
             {
                 FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
                 Size = new Vector2(1f, 0.2f),
                 Alignment = TMPro.TextAlignmentOptions.Center
             };
 
-            Reference<MetaContextOld.ScrollView.InnerScreen> innerRef = new();
+            Reference<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
             List<ModUpdater.ReleasedInfo>? versions = null;
-            MetaContextOld staticContext = new();
+            MetaWidgetOld staticWidget = new();
 
-            MetaContextOld menuContext = new();
-            menuContext.Append(Enum.GetValues<ModUpdater.ReleasedInfo.ReleaseCategory>(), (category) =>
-            new MetaContextOld.Button(() => UpdateContents(category), new(TextAttribute.BoldAttr) { Size = new(0.95f, 0.28f) }) { TranslationKey = ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)category] }
+            MetaWidgetOld menuWidget = new();
+            menuWidget.Append(Enum.GetValues<ModUpdater.ReleasedInfo.ReleaseCategory>(), (category) =>
+            new MetaWidgetOld.Button(() => UpdateContents(category), new(TextAttributeOld.BoldAttr) { Size = new(0.95f, 0.28f) }) { TranslationKey = ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)category] }
                 , 1, -1, 0, 0.6f);
 
-            staticContext.Append(new ParallelContextOld(
-                new(new MetaContextOld.HorizonalMargin(0.1f),0.1f),
-                new(menuContext,1f),
-                new(new MetaContextOld.HorizonalMargin(0.1f), 0.1f),
-                new(new MetaContextOld.ScrollView(new Vector2(5f, 4f), new MetaContextOld(), true) { Alignment = IMetaContextOld.AlignmentOption.Center, InnerRef = innerRef },5f)));
+            staticWidget.Append(new ParallelWidgetOld(
+                new(new MetaWidgetOld.HorizonalMargin(0.1f),0.1f),
+                new(menuWidget,1f),
+                new(new MetaWidgetOld.HorizonalMargin(0.1f), 0.1f),
+                new(new MetaWidgetOld.ScrollView(new Vector2(5f, 4f), new MetaWidgetOld(), true) { Alignment = IMetaWidgetOld.AlignmentOption.Center, InnerRef = innerRef },5f)));
             
-            screen.SetContext(staticContext);
+            screen.SetWidget(staticWidget);
 
-            innerRef.Value?.SetLoadingContext();
+            innerRef.Value?.SetLoadingWidget();
 
             void UpdateContents(ModUpdater.ReleasedInfo.ReleaseCategory? category = null)
             {
                 if (versions == null) return;
 
-                var inner = new MetaContextOld();
+                var inner = new MetaWidgetOld();
 
                 foreach (var version in versions)
                 {
@@ -221,9 +221,9 @@ public static class MainMenuSetUpPatch
                     try
                     {
                         List<IMetaParallelPlacableOld> placable = new();
-                        placable.Add(new MetaContextOld.Text(CategoryAttribute) { MyText = NebulaGUIContextEngine.Instance.TextComponent(ModUpdater.ReleasedInfo.CategoryColors[(int)version.Category], ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)version.Category]) });
-                        placable.Add(new MetaContextOld.HorizonalMargin(0.15f));
-                        placable.Add(new MetaContextOld.Text(NameAttribute)
+                        placable.Add(new MetaWidgetOld.Text(CategoryAttribute) { MyText = NebulaGUIWidgetEngine.Instance.TextComponent(ModUpdater.ReleasedInfo.CategoryColors[(int)version.Category], ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)version.Category]) });
+                        placable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
+                        placable.Add(new MetaWidgetOld.Text(NameAttribute)
                         {
                             RawText = version.Version!.Replace('_', ' '),
                             PostBuilder = text =>
@@ -241,20 +241,20 @@ public static class MainMenuSetUpPatch
                                 });
                             }
                         });
-                        placable.Add(new MetaContextOld.HorizonalMargin(0.15f));
+                        placable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
 
                         if (version.Epoch == NebulaPlugin.PluginEpoch && version.BuildNum != NebulaPlugin.PluginBuildNum)
                         {
-                            placable.Add(new MetaContextOld.Button(() => NebulaManager.Instance.StartCoroutine(version.CoUpdateAndShowDialog().WrapToIl2Cpp()), ButtonAttribute) { TranslationKey = "version.fetching.gainPackage", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
+                            placable.Add(new MetaWidgetOld.Button(() => NebulaManager.Instance.StartCoroutine(version.CoUpdateAndShowDialog().WrapToIl2Cpp()), ButtonAttribute) { TranslationKey = "version.fetching.gainPackage", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
                         }
                         else
                         {
-                            placable.Add(new MetaContextOld.HorizonalMargin(0.13f));
-                            placable.Add(new MetaContextOld.Text(ButtonAttribute) { TranslationKey = version.Epoch == NebulaPlugin.PluginEpoch ? "version.fetching.current" : "version.fetching.mismatched", });
+                            placable.Add(new MetaWidgetOld.HorizonalMargin(0.13f));
+                            placable.Add(new MetaWidgetOld.Text(ButtonAttribute) { TranslationKey = version.Epoch == NebulaPlugin.PluginEpoch ? "version.fetching.current" : "version.fetching.mismatched", });
                         }
 
 
-                        inner.Append(new CombinedContextOld(0.5f, placable.ToArray()) { Alignment = IMetaContextOld.AlignmentOption.Left });
+                        inner.Append(new CombinedWidgetOld(0.5f, placable.ToArray()) { Alignment = IMetaWidgetOld.AlignmentOption.Left });
                     }
                     catch
                     {
@@ -262,7 +262,7 @@ public static class MainMenuSetUpPatch
                     }
                 }
 
-                innerRef.Value?.SetContext(inner);
+                innerRef.Value?.SetWidget(inner);
             }
 
 

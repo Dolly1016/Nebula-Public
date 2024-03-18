@@ -33,6 +33,9 @@
 "ui.update.waitFinishing" : "Wait for updating..."
 "ui.update.finishUpdate" : "Update finished!<br>Please restart the game."
 "ui.document.tooLongNesting" : "[The nesting is too long.]"
+"ui.citation.openUrl" : "Click to open the link."
+"ui.meeting.leftClick" : "LeftClick: Use Ability"
+"ui.meeting.rightClick": "RightClick: Change Ability"
 
 # Versions
 
@@ -87,8 +90,14 @@
 "options.map.spawnMethod.default" : "Default"
 "options.map.spawnMethod.selective" : "Selective"
 "options.map.spawnMethod.random" : "Random"
-"options.map.spawnCandidates" : "Num of Spawning Candidates"
+"options.map.spawnCandidates" : "Spawning Candidates"
+"options.map.spawnCandidatesFilter" : "Spawn Candidates Filter"
 "options.map.silentVents" : "Silent Vents"
+"options.map.canOpenMapWhileUsingUtility" : "Can Open Map While Using Utility"
+"options.map.randomizedWiring" : "Randomized Wiring"
+"options.map.stepsOfWiringGame" : "Steps Of Wiring Game"
+"options.map.ladderCoolDown" : "Ladder Cool Down"
+"options.map.ziplineCoolDown" : "Zipline Cool Down"
 "options.map.customization" : "Map Customization"
 "options.map.customization.skeld.useAdmin" : "Admin Console"
 "options.map.customization.skeld.cafeteriaVent" : "Extra Vent (Cafeteria)"
@@ -111,6 +120,9 @@
 "options.map.customization.airship.hallwayWiring" : "Extra Wiring Console (Hallway)"
 "options.map.customization.airship.medicalWiring" : "Extra Wiring Console (Medical)"
 "options.map.customization.airship.heliDuration" : "Heli Sabo."
+"options.map.customization.airship.harderDownload" : "Harder Download Task"
+"options.map.customization.airship.betterImpostorVision" : "Impostor Can See Separate Floor"
+"options.map.customization.airship.shadedLowerFloor" : "Shaded Lower Floor"
 "options.map.customization.fungle.simpleLaboratory" : "Simple Laboratory"
 "options.map.customization.fungle.thinFog" : "Thin Fog"
 "options.map.customization.fungle.glowingCampfire" : "Glowing Campfire"
@@ -123,6 +135,7 @@
 "options.meeting.noticeExtraVictims" : "Notice Extra Victims"
 "options.meeting.deathPenalty" : "Death Penalty"
 "options.meeting.numOfMeeting" : "Num Of Meetings"
+"options.meeting.showRoleOfExiled" : "Confirm Role Of Exiled"
 
 "options.consoleRestriction" : "Console Restriction"
 "options.consoleRestriction.detail" : "About restriction for vitals, admin and cameras"
@@ -137,10 +150,13 @@
 "options.voiceChat.useVoiceChat" : "Use Voice Chat"
 "options.voiceChat.wallsBlockAudio" : "Walls Block Audio"
 "options.voiceChat.killersHearDead" : "Killers Hear Dead"
+"options.voiceChat.killersHearDead.onlyMyKiller" : "Only My Killer"
 "options.voiceChat.killersHearDead.onlyImpostors" : "Only Impostors"
 "options.voiceChat.impostorsRadio" : "Impostors Radio"
 "options.voiceChat.jackalRadio" : "Jackal Radio"
+"options.voiceChat.loversRadio" : "Lovers Radio"
 "options.voiceChat.affectedByCommsSab" : "Affected By Comms. Sabotage"
+"options.voiceChat.isolateGhostsStrictly" : "Isolate Ghosts Strictly"
 
 "options.role.count" : "Role Assignment"
 "options.role.chance" : "Assignment Chance"
@@ -170,6 +186,8 @@
 "options.exclusiveAssignment.category.8" : "Category 9"
 "options.exclusiveAssignment.category.9" : "Category 10"
 
+"options.commonSetting" : "Common Settings"
+
 # Roles
 
 "role.general.canUseVent" : "Can Use Vent"
@@ -185,8 +203,11 @@
 # Complex Roles
 
 "role.guesser.numOfGuess" : "Num Of Guess"
-"options.role.guesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+"role.guesser.numOfGuessPerMeeting" : "Num Of Guess Per Meeting"
+"role.guesser.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
 "role.guesser.leftGuess" : "Left Guess"
+"role.guesser.guessableFilter" : "Guessable Filter"
+"options.role.guesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
 
 "role.trapper.placeCoolDown" : "Place Cool Down"
 "role.trapper.placeDuration" : "Place Duration"
@@ -195,7 +216,6 @@
 "role.trapper.accelRate" : "Accel Rate"
 "role.trapper.decelRate" : "Decel Rate"
 "role.trapper.speedDuration" : "Accel / Decel Duration"
- 
 
 # Common Roles
 
@@ -214,6 +234,7 @@
 "options.role.agent.detail" : "You can gain extra tasks to cover someone else's incomplete ones."
 "options.role.agent.numOfExemptedTasks" : "Num of Exempted Tasks"
 "options.role.agent.numOfExtraTasks" : "Num of Extra Tasks"
+"options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent" : "Suicide If Someone Else Completes Tasks Before Agent"
 
 "role.bait.name" : "Bait"
 "role.bait.short" : "B"
@@ -277,7 +298,8 @@
 "role.madmate.blurb" : "Assist Impostors"
 "options.role.madmate.detail" : "Madmate is on the side of imposters.<br>Obstruct crewmates to help imposters win."
 "options.role.madmate.canIdentifyImpostors" : "Can Identify Impostors"
-"options.role.madmate.embroilVotersOnExile" : "Embroil Voters On Exile"
+"options.role.madmate.embroilPlayersOnExile" : "Embroil Players On Exile"
+"options.role.madmate.limitEmbroiledPlayersToVoters" : "Limit Embroiled Players To Voters"
 "options.role.madmate.canFixLight" : "Can Fix Light"
 "options.role.madmate.canFixComms" : "Can Fix Comms"
 "options.role.madmate.hasImpostorVision" : "Has Impostor Vision"
@@ -328,6 +350,15 @@
 "options.role.sheriff.numOfShots" : "Num Of Shots"
 "options.role.sheriff.canKillHidingPlayer" : "Can Kill Hiding Player"
 
+"role.ubiquitous.name" : "Ubiquitous"
+"role.ubiquitous.short" : "U"
+"role.ubiquitous.blurb" : "Anytime, Anywhere"
+"options.role.ubiquitous.detail" : "Ubiquitous can operate drones. After the meeting,<br>the used drone will display the location of nearby players on the map."
+"options.role.ubiquitous.microphoneRadious" : "Microphone Radious"
+"options.role.ubiquitous.detectionRadious" : "Detection Radious"
+"options.role.ubiquitous.doorHackCoolDown" : "Door Hacking Cool Down"
+"options.role.ubiquitous.doorHackRadious" : "Door Hacking Radious"
+
 # Impostor Roles
 
 "role.impostor.name" : "Impostor"
@@ -360,13 +391,34 @@
 "options.role.cleaner.cleanCoolDown" : "Clean Cool Down"
 "options.role.cleaner.syncKillAndCleanCoolDown" : "Sync Kill And Clean Cool Down"
 
+"role.effacer.name" : "Effacer"
+"role.effacer.short" : "E"
+"role.effacer.blurb" : "Effacer Blurb"
+"options.role.effacer.detail" : "Effacer Detail"
+"options.role.effacer.effaceCoolDown" : "Efface Cool Down"
+"options.role.effacer.effaceDuration" : "Efface Duration"
+
 "role.evilGuesser.name" : "Evil Guesser"
 "role.evilGuesser.short" : "G"
 "role.evilGuesser.blurb" : "Guess and Shoot"
 "options.role.evilGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
 
+"role.evilTracker.name" : "Evil Tracker"
+"role.evilTracker.short" : "Tk"
+"role.evilTracker.blurb" : "Insidious Creeping"
+"options.role.evilTracker.detail" : "Evil Tracker can track the player and see where they are.<br>They can also check the progress of tasks on the meeting."
+"options.role.evilTracker.showKillFlash" : "Show Kill Flash"
+"options.role.evilTracker.trackCoolDown" : "Track Cool Down"
+"options.role.evilTracker.taskTracking" : "Task Tracking"
+"options.role.evilTracker.taskTracking.off" : "Off"
+"options.role.evilTracker.taskTracking.onlyTarget" : "Only Target"
+"options.role.evilTracker.taskTracking.on" : "On"
+"options.role.evilTracker.updateArrowInterval" : "Update Arrow Interval"
+"options.role.evilTracker.canChangeTarget" : "Can Change Target"
+"options.role.evilTracker.trackImpostors" : "Track Impostors"
+
 "role.evilTrapper.name" : "Evil Trapper"
-"role.evilTrapper.short" : "T"
+"role.evilTrapper.short" : "Tp"
 "role.evilTrapper.blurb" : "Entrap and Kill Crewmates"
 "options.role.evilTrapper.detail" : "Evil Trapper sets traps with various effects.<br>Killing by trap shares its kill cool down too."
 "options.role.evilTrapper.killTrapSoundDistance" : "Kill Trap Sound Distance"
@@ -443,8 +495,11 @@
 "options.role.sniper.shotEffectiveRange" : "Shot Effective Range"
 "options.role.sniper.shotNoticeRange" : "Snipe Notice Range"
 "options.role.sniper.storeRifleOnFire" : "Store Rifle On Fire"
+"options.role.sniper.storeRifleOnUsingUtility" : "Store Rifle On Using Utility"
 "options.role.sniper.canSeeRifleInShadow" : "Can See Rifle In Shadow"
 "options.role.sniper.canKillHidingPlayer" : "Can Kill Hiding Player"
+"options.role.sniper.aimAssist" : "Aim Assist"
+"options.role.sniper.delayInAimAssistActivation" : "Delay In Aim Assist Activation"
 
 "role.stirrer.name" : "Stirrer"
 "role.stirrer.short" : "St"
@@ -465,11 +520,25 @@
 "options.role.arsonist.douseCoolDown" : "Douse Cool Down"
 "options.role.arsonist.douseDuration" : "Douse Duration"
 
+"role.avenger.name" : "Avenger"
+"role.avenger.short" : "A"
+"options.role.avenger.detail" : "When a Lovers partner is killed, the remaining becomes Avenger.<br>Achieve your revenge and steal the victory."
+"options.role.avenger.killCoolDown" : "Kill Cool Down"
+"options.role.avenger.canKnowExistanceOfAvenger" : "Can Know Existance Of Avenger"
+"options.role.avenger.canKnowExistanceOfAvenger.off" : "Off"
+"options.role.avenger.canKnowExistanceOfAvenger.onlyTarget" : "Only Target"
+"options.role.avenger.canKnowExistanceOfAvenger.on" : "On"
+"options.role.avenger.targetCanKnowAvenger" : "Target Can Know Avenger"
+"options.role.avenger.showAvengerFlashForTarget" : "Show Avenger Flash"
+"options.role.avenger.notificationForAvengerInterval" : "Notification For Avenger Interval"
+"options.role.avenger.notificationForTargetInterval" : "Notification For Target Interval"
+
 "role.chainShifter.name" : "Chain Shifter"
 "role.chainShifter.short" : "C"
 "role.chainShifter.blurb" : "Suffer The Calamity"
 "options.role.chainShifter.detail" : "Chain Shifter has no way to win."
 "options.role.chainShifter.shiftCoolDown" : "Shift Cool Down"
+"options.role.chainShifter.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
 
 "role.jackal.name" : "Jackal"
 "role.jackal.short" : "J"
@@ -478,6 +547,7 @@
 "options.role.jackal.killCoolDown" : "Kill Cool Down"
 "options.role.jackal.canCreateSidekick" : "Can Create Sidekick"
 "options.role.jackal.numOfKillingToCreateSidekick" : "Num of Killing to Create Sidekick"
+"options.role.jackal.numOfKillingToWin" : "Num of Killing to Win"
 
 "role.sidekick.name" : "Sidekick"
 "role.sidekick.short" : "S"
@@ -542,6 +612,18 @@
 "options.role.lover.numOfPairs" : "Num Of Pairs"
 "options.role.lover.chanceOfAssigningImpostors" : "Chance Of Assigning Impostors"
 "options.role.lover.allowExtraWin" : "Allow Extra Win" 
+"options.role.lover.avengerMode" : "Avenger Mode"
+
+"role.obsessional.name" : "Obsessional"
+"options.role.obsessional.detail" : "Obsessional is obsessed by specific target.<br>Obsessional can only win when the target wins."
+"role.obsessional.blurb" : "You're obsessed by the %NAME%"
+"options.role.obsessional.canWinEvenIfObsessionalTargetDie" : "Can Win Even If Obsessional Target Dies"
+"options.role.obsessional.canWinEvenIfObsessionalDie" : "Can Win Even If Obsessional Dies"
+"options.role.obsessional.obsessionalSuicideWhenObsessionalTargetDie" : "Obsessional Suicides When Obsessional Target Dies"
+"options.role.obsessional.impostorObsessionalObsessesOver" : "Impostor Obsessional Obsesses Over..."
+"options.role.obsessional.impostorObsessionalObsessesOver.default" : "Default"
+"options.role.obsessional.impostorObsessionalObsessesOver.neutralOnly" : "Neutral Only"
+"options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate" : "Non-Crewmate"
 
 "role.secret.name" : "Secret"
 "role.secret.short" : "?"
@@ -659,12 +741,17 @@
 
 "button.label.agent" : "agent"
 "button.label.blaze" : "blaze"
+"button.label.callBack" : "call back"
 "button.label.camo" : "camo"
 "button.label.clean" : "clean"
+"button.label.collatorSample" : "sample"
 "button.label.destroy" : "destroy"
+"button.label.doorHack" : "door hack"
 "button.label.douse" : "douse"
 "button.label.drag" : "drag"
+"button.label.drone" : "drone"
 "button.label.eat" : "eat"
+"button.label.efface" : "efface"
 "button.label.embroil" : "embroil"
 "button.label.equip" : "equip"
 "button.label.fakeSabotage" : "fake sabo"
@@ -688,6 +775,7 @@
 "button.label.stir" : "stir"
 "button.label.swap" : "swap"
 "button.label.throw" : "throw"
+"button.label.track" : "track"
 "button.label.unequip" : "unequip"
 "button.label.vital" : "vitals"
 
@@ -698,6 +786,8 @@
 "game.prespawn.spawnIn" : "You Spawn In"
 
 "game.meeting.someoneDisappeared" : "Someone disappeared too."
+"game.meeting.roleText" : "%PLAYER% is %ROLE%."
+"game.meeting.roleJesterText" : "Hahaha..."
 
 # Statistics
 
@@ -719,6 +809,8 @@
 "statistics.events.trap" : "Entrap"
 "statistics.events.guess" : "Guess"
 "statistics.events.fakeSabotage" : "Fake Sabotage"
+"statistics.events.curse" : "Curse"
+"statistics.events.layoff" : "Layoff"
 
 # States
 
@@ -735,6 +827,8 @@
 "state.trapped" : "Trapped"
 "state.revived" : "Revived"
 "state.deranged" : "Deranged"
+"state.pseudocide" : "Pseudocide"
+"state.cursed" : "Cursed"
 
 # Endings
 
@@ -746,9 +840,11 @@
 "end.vulture" : "Vulture Wins%EXTRA%"
 "end.lover" : "Lovers Win%EXTRA%"
 "end.paparazzo" : "Paparazzo Win%EXTRA%"
+"end.avenger" : "Avenger Win%EXTRA%"
 "end.nogame" : "No Game"
 
 "end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
+"end.extra.obsessional" : " <color=#FFFFFF>with</color> Obsessional"
 
 # Help
 
@@ -771,6 +867,8 @@
 "voiceChat.dialog.confirm" : "Are you sure you want to join the voice chat?"
 "voiceChat.info.mute" : "Muted"
 "voiceChat.info.unmute" : "Unmuted"
+"voiceChat.info.filtering1" : "Filtering: Alive Only"
+"voiceChat.info.filtering2" : "Filtering: Dead Only"
 "voiceChat.info.radio" : "Radio"
 "voiceChat.info.impostorRadio" : "Impostor Radio"
 "voiceChat.info.jackalRadio" : "Jackal Radio"
@@ -814,6 +912,7 @@
 "input.command" : "Command"
 "input.screenshot" : "Screenshot"
 "input.mute" : "Mute"
+"input.vcFilter" : "VC Filtering"
 "input.help" : "Help"
 "input.recording" : "Recording..."
 
@@ -838,6 +937,7 @@
 "preset.save" : "Save"
 "preset.reload" : "Reload"
 "preset.saveSuccess" : "Saving is complete."
+"preset.saveFailed" : "Saving is failed.<br>More information can be found in NebulaLog.txt."
 "preset.loadSuccess" : "Preset loaded successfully."
 "preset.loadFailed" : "Failed to load preset."
 
@@ -877,6 +977,8 @@
 "devStudio.ui.document.element.vertical" : "Vertical Space"
 "devStudio.ui.document.element.horizontal" : "Horizontal Space"
 "devStudio.ui.document.element.documentRef" : "Document"
+"devStudio.ui.document.element.citation" : "Citation"
+"devStudio.ui.document.element.paste" : "Paste"
 "devStudio.ui.document.editor.color" : "Color"
 "devStudio.ui.document.editor.image" : "Image"
 "devStudio.ui.document.editor.width" : "Width"
@@ -884,6 +986,9 @@
 "devStudio.ui.document.editor.fontSize" : "Font Size"
 "devStudio.ui.document.editor.isBold" : "Bold"
 "devStudio.ui.document.editor.document" : "Document ID"
+"devStudio.ui.document.editor.citation" : "Citation"
+"devStudio.ui.document.editor.alignment" : "Alignment"
+"devStudio.ui.document.editor.move" : "Move"
 "devStudio.ui.hint.requiredText" : "#Required"
 "devStudio.ui.hint.duplicatedId" : "#Already existed"
 "devStudio.ui.cosmetics.hats" : "Hats"
@@ -895,9 +1000,9 @@
 "devStudio.ui.cosmetics.contents.flipped" : "Flipped"
 "devStudio.ui.cosmetics.contents.backFlipped" : "Back Flipped"
 "devStudio.ui.cosmetics.contents.climbUp" : "Climb Up"
-"devStudio.ui.cosmetics.contents.climbUpBack" : "Climb Up Back"
+"devStudio.ui.cosmetics.contents.climbUpBack" : "Climb Up Flipped"
 "devStudio.ui.cosmetics.contents.climbDown" : "Climb Down"
-"devStudio.ui.cosmetics.contents.climbDownBack" : "Climb Down Back"
+"devStudio.ui.cosmetics.contents.climbDownBack" : "Climb Down Flipped"
 "devStudio.ui.cosmetics.contents.image" : "Image"
 "devStudio.ui.cosmetics.anim.idle" : "Idle"
 "devStudio.ui.cosmetics.anim.run" : "Run"
@@ -925,13 +1030,27 @@
 "devStudio.ui.cosmetics.attributes.behindHat" : "Behind Hat"
 "devStudio.ui.cosmetics.hint.needToSetTitle" : "Enter the costume's name!"
 "devStudio.ui.cosmetics.failedToCopy" : "Failed to copy the file."
+"devStudio.ui.language.newFile" : "Generate Language File"
+"devStudio.ui.language.newFile.confirm" : "Generate a file successfully."
+"devStudio.ui.language.editFile" : "Edit Language File"
+"devStudio.ui.language.addMissing" : "Add Missing Keys"
+"devStudio.ui.language.addMissing.confirm" : "Add %NUM% of key(s) to the file successfully."
+"devStudio.ui.language.delete" : "Delete Language File"
+"devStudio.ui.language.delete.confirm" : "Deleted the file successfully."
 
 # Achievements
 
 "achievement.ui.title" : "Achievements"
 "achievement.ui.cond" : "[Constraint]"
 "achievement.ui.allAchievements" : "All"
+"achievement.ui.cleared" : "[Cleared]"
+"achievement.ui.equipped" : "[Equipped]"
+"achievement.ui.setTitle" : "CLICK To Set This Title."
+"achievement.ui.unsetTitle" : "CLICK To Unset This Title."
+"achievement.ui.unselected" : "(Unselected)"
+"achievement.ui.unselected.detail" : "CLICK To Select Your Title."
 "achievement.title.hidden" : "Unachieved"
 "achievement.title.hiddenDetail" : "Details have not been disclosed..."
 "achievement.type.challenge" : "Challenge"
 "achievement.type.secret" : "Secret"
+"achievement.type.seasonal" : "Seasonal"

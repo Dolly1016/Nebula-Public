@@ -8,14 +8,13 @@ using Virial.Compat;
 using Virial.Media;
 using Virial.Text;
 
-namespace Nebula.Modules.MetaContext;
-
+namespace Nebula.Modules.MetaWidget;
 public class GUIButton : NoSGUIText
 {
-    public Action? OnClick { get; init; }
-    public Action? OnRightClick { get; init; }
-    public Action? OnMouseOver { get; init; }
-    public Action? OnMouseOut { get; init; }
+    public GUIClickableAction? OnClick { get; init; }
+    public GUIClickableAction? OnRightClick { get; init; }
+    public GUIClickableAction? OnMouseOver { get; init; }
+    public GUIClickableAction? OnMouseOut { get; init; }
     public Color? Color { get; init; }
     public Color? SelectedColor { get; init; }
 
@@ -23,6 +22,7 @@ public class GUIButton : NoSGUIText
     public string TranslationKey { init { Text = new TranslateTextComponent(value); } }
     public bool AsMaskedButton { get; init; }
     public float TextMargin { get; init; } = 0.26f;
+    override protected bool AllowGenerateCollider => false;
 
     public GUIButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text) : base(alignment,attribute,text)
     {
@@ -31,7 +31,7 @@ public class GUIButton : NoSGUIText
     }
 
 
-    public override GameObject? Instantiate(Size size, out Size actualSize)
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
         var inner = base.Instantiate(size, out actualSize)!;
 
@@ -50,11 +50,18 @@ public class GUIButton : NoSGUIText
         collider.isTrigger = true;
 
         var passiveButton = button.gameObject.SetUpButton(true, button, Color, SelectedColor);
-        if (OnClick != null) passiveButton.OnClick.AddListener(OnClick);
-        if (OnMouseOut != null) passiveButton.OnMouseOut.AddListener(OnMouseOut);
-        if (OnMouseOver != null) passiveButton.OnMouseOver.AddListener(OnMouseOver);
+        GUIClickable clickable = new(passiveButton);
+        if (OnClick != null) passiveButton.OnClick.AddListener(()=>OnClick(clickable));
+        if (OnMouseOut != null) passiveButton.OnMouseOut.AddListener(()=>OnMouseOut(clickable));
+        if (OnMouseOver != null) passiveButton.OnMouseOver.AddListener(()=>OnMouseOver(clickable));
 
-        if (OnRightClick != null) passiveButton.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked += OnRightClick;
+        if(OverlayWidget != null)
+        {
+            passiveButton.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(passiveButton, OverlayWidget()));
+            passiveButton.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(passiveButton));
+        }
+
+        if (OnRightClick != null) passiveButton.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked += ()=>OnRightClick(clickable);
 
         actualSize.Width += TextMargin + 0.1f;
         actualSize.Height += TextMargin + 0.1f;

@@ -101,7 +101,7 @@ public class NebulaAddon : IDisposable, INameSpace
             }
             catch
             {
-                NebulaPlugin.Log.Print(NebulaLog.LogCategory.Addon, "Failed to load addon \"" + Path.GetFileName(file) + "\".");
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Addon, "Failed to load addon \"" + Path.GetFileName(file) + "\".");
             }
         }
 

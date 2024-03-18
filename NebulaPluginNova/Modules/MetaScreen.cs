@@ -3,14 +3,15 @@ using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Net.NetworkInformation;
 using JetBrains.Annotations;
 using Nebula.Behaviour;
+using Nebula.Modules.MetaWidget;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Virial.Media;
-using static Nebula.Modules.IMetaContextOld;
+using static Nebula.Modules.IMetaWidgetOld;
 
 namespace Nebula.Modules;
 
-public interface IMetaContextOld
+public interface IMetaWidgetOld
 {
     public enum AlignmentOption
     {
@@ -63,11 +64,11 @@ public interface IMetaParallelPlacableOld
 
 }
 
-public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
+public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
 {
-    List<IMetaContextOld> contents = new();
+    List<IMetaWidgetOld> contents = new();
 
-    public MetaContextOld(params IMetaContextOld?[] contents) { foreach (var c in contents) Append(c); }
+    public MetaWidgetOld(params IMetaWidgetOld?[] contents) { foreach (var c in contents) Append(c); }
 
     public int Count => contents.Count;
     public AlignmentOption Alignment => AlignmentOption.Center;
@@ -108,7 +109,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
             return 0f;
         }
 
-        var subscreen = UnityHelper.CreateObject("MetaContext", screen.transform, new Vector3(center.x, center.y, -0.1f));
+        var subscreen = UnityHelper.CreateObject("MetaWidget", screen.transform, new Vector3(center.x, center.y, -0.1f));
 
         float widthMin = float.MaxValue;
         float widthMax = float.MinValue;
@@ -128,19 +129,19 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         return heightSum;
     }
 
-    public MetaContextOld Append(IMetaContextOld? content)
+    public MetaWidgetOld Append(IMetaWidgetOld? content)
     {
         if (content != null) contents.Add(content);
         return this;
     }
 
     //linesを-1にすると全部を並べる
-    public MetaContextOld Append<T>(IEnumerable<T> enumerable,Func<T, IMetaParallelPlacableOld> converter,int perLine,int lines,int page,float height,bool fixedHeight = false, AlignmentOption alignment = AlignmentOption.Center)
+    public MetaWidgetOld Append<T>(IEnumerable<T> enumerable,Func<T, IMetaParallelPlacableOld> converter,int perLine,int lines,int page,float height,bool fixedHeight = false, AlignmentOption alignment = AlignmentOption.Center)
     {
         int skip = lines > 0 ? page * lines : 0;
         int leftLines = lines;
         int index = 0;
-        IMetaParallelPlacableOld[] contextList = new IMetaParallelPlacableOld[perLine];
+        IMetaParallelPlacableOld[] widgetList = new IMetaParallelPlacableOld[perLine];
 
         foreach(var content in enumerable)
         {
@@ -150,12 +151,12 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
                 continue;
             }
 
-            contextList[index] = converter.Invoke(content);
+            widgetList[index] = converter.Invoke(content);
             index++;
 
             if(index == perLine)
             {
-                Append(new CombinedContextOld(height, contextList) { Alignment = alignment });
+                Append(new CombinedWidgetOld(height, widgetList) { Alignment = alignment });
                 index = 0;
                 leftLines--;
 
@@ -165,8 +166,8 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
 
         if (index != 0)
         {
-            for (; index < perLine; index++) contextList[index] = new HorizonalMargin(0f);
-            Append(new CombinedContextOld(height, contextList) { Alignment = alignment });
+            for (; index < perLine; index++) widgetList[index] = new HorizonalMargin(0f);
+            Append(new CombinedWidgetOld(height, widgetList) { Alignment = alignment });
             leftLines--;
         }
 
@@ -175,14 +176,14 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         return this;
     }
 
-    public MetaContextOld[] Split(params float[] ratios)
+    public MetaWidgetOld[] Split(params float[] ratios)
     {
-        var contents = ratios.Select(ratio => new Tuple<IMetaContextOld,float>(new MetaContextOld(),ratio)).ToArray();
-        Append(new ParallelContextOld(contents));
-        return contents.Select(c => (MetaContextOld)c.Item1).ToArray();
+        var contents = ratios.Select(ratio => new Tuple<IMetaWidgetOld,float>(new MetaWidgetOld(),ratio)).ToArray();
+        Append(new ParallelWidgetOld(contents));
+        return contents.Select(c => (MetaWidgetOld)c.Item1).ToArray();
     }
 
-    public class Image : IMetaContextOld, IMetaParallelPlacableOld
+    public class Image : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public AlignmentOption Alignment { get; set; }
         public float Width { get; set; }
@@ -223,8 +224,11 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
             return mySize.y + 0.1f;
         }
 
-        public static Image AsMapImage(byte mapId,float width,IEnumerable<(IMetaParallelPlacableOld context, Vector2 pos)> contents)
+        public static Image AsMapImage(byte mapId,float width,IEnumerable<(IMetaParallelPlacableOld widget, Vector2 pos)> contents)
         {
+            if (mapId == 1) width *= 0.96f;
+            if (mapId == 4) width *= 1.2f;
+            if (mapId == 5) width *= 1.1f;
             return new Image(NebulaAsset.GetMapSprite(mapId, 0xFFFFFFF))
             {
                 Width = width,
@@ -235,23 +239,23 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
 
                     var canvas = UnityHelper.CreateObject("OnMapContent", renderer.transform, new Vector3(0, 0, -1f));
 
-                    var posCenter = (Vector2)VanillaAsset.MapAsset[mapId].MapPrefab.transform.GetChild(5).localPosition;
-                    var posScale = VanillaAsset.MapAsset[mapId].MapScale;
+                    var posCenter = VanillaAsset.GetMapCenter(mapId);
+                    var posScale = VanillaAsset.GetMapScale(mapId);
                     Vector2 GetMapPos(Vector2 pos) => (Vector2)(pos / posScale) + posCenter;
 
                     foreach (var c in contents)
                     {
-                        c.context.Generate(canvas, GetMapPos(c.pos), out _);
+                        c.widget.Generate(canvas, VanillaAsset.ConvertToMinimapPos(c.pos,posCenter,posScale), out _);
                     }
                 }
             };
         }
     }
 
-    public class Text : IMetaContextOld, IMetaParallelPlacableOld
+    public class Text : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public AlignmentOption Alignment { get; set; }
-        public TextAttribute TextAttribute { get; set; }
+        public TextAttributeOld TextAttribute { get; set; }
         
         public Virial.Text.TextComponent? MyText { get; set; } = null;
         public string RawText { set { MyText = new RawTextComponent(value); } }
@@ -259,7 +263,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         
         public Action<TMPro.TextMeshPro>? PostBuilder { get; set; }
 
-        public Text(TextAttribute attribute)
+        public Text(TextAttributeOld attribute)
         {
             TextAttribute = attribute;
         }
@@ -299,16 +303,16 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
     }
 
-    public class VariableText : IMetaContextOld, IMetaParallelPlacableOld
+    public class VariableText : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public AlignmentOption Alignment { get; set; }
-        public TextAttribute TextAttribute { get; set; }
+        public TextAttributeOld TextAttribute { get; set; }
         public Virial.Text.TextComponent? MyText { get; set; } = null;
         public string RawText { set { MyText = new RawTextComponent(value); } }
         public string TranslationKey { set { MyText = new TranslateTextComponent(value); } }
         public Action<TMPro.TextMeshPro>? PostBuilder { get; set; } = null;
 
-        public VariableText(TextAttribute attribute)
+        public VariableText(TextAttributeOld attribute)
         {
             TextAttribute = attribute;
         }
@@ -356,10 +360,10 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
     }
 
-    public class Button : IMetaContextOld, IMetaParallelPlacableOld
+    public class Button : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public AlignmentOption Alignment { get; set; }
-        public TextAttribute TextAttribute { get; set; }
+        public TextAttributeOld TextAttribute { get; set; }
         public Action? OnClick { get; set; }
         public Action? OnMouseOver { get; set; }
         public Action? OnMouseOut { get; set; }
@@ -370,7 +374,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         public string TranslationKey { set { Text = new TranslateTextComponent(value); } }
 
         public Action<PassiveButton, SpriteRenderer, TMPro.TextMeshPro>? PostBuilder { get; set; }
-        public Button(Action? onClick, TextAttribute attribute)
+        public Button(Action? onClick, TextAttributeOld attribute)
         {
             TextAttribute = attribute;
             OnClick = onClick;
@@ -378,7 +382,12 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
 
         public Button SetAsMaskedButton()
         {
-            PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            var lastBuilder = PostBuilder;
+            PostBuilder = (button, renderer, text) =>
+            {
+                if (lastBuilder != null) lastBuilder(button, renderer, text);
+                renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            };
             return this;
         }
 
@@ -434,22 +443,22 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
             return TextAttribute.Size.y + TextMargin;
         }
 
-        static public MetaContextOld GetTwoWayButton(Action<bool> buttonAction)
+        static public MetaWidgetOld GetTwoWayButton(Action<bool> buttonAction)
         {
-            MetaContextOld context = new MetaContextOld();
+            MetaWidgetOld widget = new MetaWidgetOld();
 
             for (int i = 0; i < 2; i++)
             {
                 int copied = i;
-                context.Append(new Button(()=>buttonAction.Invoke(copied == 0), new(TextAttribute.BoldAttr) { Size = new(0.18f, 0.08f) }) { RawText = copied == 0 ? "▲" : "▼"});
+                widget.Append(new Button(()=>buttonAction.Invoke(copied == 0), new(TextAttributeOld.BoldAttr) { Size = new(0.18f, 0.08f) }) { RawText = copied == 0 ? "▲" : "▼"});
             }
 
             
-            return context;
+            return widget;
         }
     }
 
-    public class StateButton : IMetaContextOld, IMetaParallelPlacableOld
+    public class StateButton : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public AlignmentOption Alignment { get; set; }
         public Action<bool>? OnChanged { get; set; }
@@ -460,7 +469,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
 
         private void Generate(GameObject obj)
         {
-            var attr = new TextAttribute(TextAttribute.NormalAttr) { Size = new(0.36f, 0.36f), FontMaterial = WithMaskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null }.EditFontSize(2f, 1f, 2f);
+            var attr = new TextAttributeOld(TextAttributeOld.NormalAttr) { Size = new(0.36f, 0.36f), FontMaterial = WithMaskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null }.EditFontSize(2f, 1f, 2f);
 
             var checkMark = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, obj.transform);
             attr.Reflect(checkMark);
@@ -515,31 +524,31 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
             return 0.25f;
         }
 
-        public static CombinedContextOld CheckBox(string translateKey,float width,bool isBold,Reference<bool> state,Action<bool> onChanged, bool maskMaterial = false)
+        public static CombinedWidgetOld CheckBox(string translateKey,float width,bool isBold,Reference<bool> state,Action<bool> onChanged, bool maskMaterial = false)
         {
-            return new CombinedContextOld(
+            return new CombinedWidgetOld(
                 new StateButton() { StateRef = state, OnChanged = onChanged, WithMaskMaterial = maskMaterial },
-                new Text(new(isBold ? TextAttribute.BoldAttr : TextAttribute.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(width, 0.3f), Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = translateKey }
+                new Text(new(isBold ? TextAttributeOld.BoldAttr : TextAttributeOld.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(width, 0.3f), Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = translateKey }
                 );
         }
 
-        public static CombinedContextOld TopLabelCheckBox(string translateKey, float? width, bool isBold, Reference<bool> state, Action<bool> onChanged,bool maskMaterial = false)
+        public static CombinedWidgetOld TopLabelCheckBox(string translateKey, float? width, bool isBold, Reference<bool> state, Action<bool> onChanged,bool maskMaterial = false)
         {
             IMetaParallelPlacableOld label;
             if (width == null)
-                label = new VariableText(new(isBold ? TextAttribute.BoldAttr : TextAttribute.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(5f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = translateKey };
+                label = new VariableText(new(isBold ? TextAttributeOld.BoldAttr : TextAttributeOld.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(5f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = translateKey };
             else
-                label = new Text(new(isBold ? TextAttribute.BoldAttr : TextAttribute.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(width.Value, 0.3f), Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = translateKey };
+                label = new Text(new(isBold ? TextAttributeOld.BoldAttr : TextAttributeOld.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(width.Value, 0.3f), Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = translateKey };
         
-            return new CombinedContextOld(
+            return new CombinedWidgetOld(
                 label,
-                new Text(new(isBold ? TextAttribute.BoldAttr : TextAttribute.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(0.15f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = ":" },
+                new Text(new(isBold ? TextAttributeOld.BoldAttr : TextAttributeOld.NormalAttr) { FontMaterial = maskMaterial ? VanillaAsset.StandardMaskedFontMaterial : null, Size = new(0.15f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = ":" },
                 new StateButton() { StateRef = state, OnChanged = onChanged, WithMaskMaterial = maskMaterial }                
                 );
         }
     }
 
-    public class CustomContext : IMetaContextOld, IMetaParallelPlacableOld
+    public class CustomWidget : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public Vector2 Size { get; set; }
 
@@ -548,7 +557,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
 
         public delegate void Generator(Transform parent, Vector2 center);
 
-        public CustomContext(Vector2 size, AlignmentOption alignment,Generator generator)
+        public CustomWidget(Vector2 size, AlignmentOption alignment,Generator generator)
         {
             Size = size;
             Alignment = alignment;
@@ -570,19 +579,19 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
     }
 
-    public class WrappedContext : IMetaContextOld, IMetaParallelPlacableOld
+    public class WrappedWidget : IMetaWidgetOld, IMetaParallelPlacableOld
     {
-        public AlignmentOption Alignment => Context.Alignment switch { GUIAlignment.Left => AlignmentOption.Left, GUIAlignment.Right => AlignmentOption.Right, _ => AlignmentOption.Center };
-        public GUIContext Context;
+        public AlignmentOption Alignment => Widget.Alignment switch { GUIAlignment.Left => AlignmentOption.Left, GUIAlignment.Right => AlignmentOption.Right, _ => AlignmentOption.Center };
+        public GUIWidget? Widget;
 
-        public WrappedContext(GUIContext context)
+        public WrappedWidget(GUIWidget? widget)
         {
-            Context = context;
+            Widget = widget;
         }
 
         public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
         {
-            var result = Context.Instantiate(new Anchor(new(0f, 1f), new(cursor.x, cursor.y)), new(size), out var actual);
+            var result = (Widget ?? GUIEmptyWidget.Default).Instantiate(new Anchor(new(0f, 1f), new(cursor.x, cursor.y)), new(size), out var actual);
             if (result != null) result.transform.SetParent(screen.transform, false);
             width = CalcWidth(Alignment, cursor, size, actual.Width);
             return actual.Height;
@@ -590,7 +599,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
 
         public float Generate(GameObject screen, Vector2 center, out float width)
         {
-            var result = Context.Instantiate(new Anchor(new(0.5f, 0.5f), new(0f, 0f)), new(10f, 10f), out var actual);
+            var result = Widget.Instantiate(new Anchor(new(0.5f, 0.5f), new(0f, 0f)), new(10f, 10f), out var actual);
             if (result != null) result.transform.SetParent(screen.transform, false);
 
             width = actual.Width;
@@ -598,7 +607,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
     }
 
-    public class VerticalMargin : IMetaContextOld, IMetaParallelPlacableOld
+    public class VerticalMargin : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public float Margin { get; set; }
 
@@ -622,7 +631,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
     }
 
-    public class HorizonalMargin : IMetaContextOld, IMetaParallelPlacableOld
+    public class HorizonalMargin : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public float Width { get; set; }
 
@@ -645,7 +654,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
     }
 
-    public class ScrollView : IMetaContextOld, IMetaParallelPlacableOld
+    public class ScrollView : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         private static Dictionary<string, float> distDic = new();
         public static void RemoveDistHistory(string tag) => distDic.Remove(tag);
@@ -663,29 +672,29 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
             private float scrollViewSizeY;
             private Scroller scroller;
             private Collider2D scrollerCollider;
-            public void SetContext(IMetaContextOld? context)
+            public void SetWidget(IMetaWidgetOld? widget)
             {
                 //子を削除
                 screen.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => GameObject.Destroy(obj)));
 
-                float height = context?.Generate(screen, new Vector2(-innerSize.x / 2f, innerSize.y / 2f), innerSize) ?? 0f;
+                float height = widget?.Generate(screen, new Vector2(-innerSize.x / 2f, innerSize.y / 2f), innerSize) ?? 0f;
                 scroller.SetBounds(new FloatRange(0, height - scrollViewSizeY), null);
                 scroller.ScrollRelative(Vector2.zero);
 
                 foreach (var button in screen.GetComponentsInChildren<PassiveButton>()) button.ClickMask = scrollerCollider;
             }
 
-            public void SetStaticContext(IMetaParallelPlacableOld? context)
+            public void SetStaticWidget(IMetaParallelPlacableOld? widget)
             {
                 //子を削除
                 screen.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => GameObject.Destroy(obj)));
 
-                context?.Generate(screen, new Vector2(0f, 0f), out _);
+                widget?.Generate(screen, new Vector2(0f, 0f), out _);
                 scroller.SetBounds(new FloatRange(0f, 0f), null);
                 scroller.ScrollRelative(Vector2.zero);
             }
 
-            public void SetLoadingContext() => SetStaticContext(new MetaContextOld.Text(new TextAttribute(TextAttribute.BoldAttr).EditFontSize(2.8f)) { TranslationKey = "ui.common.loading" });
+            public void SetLoadingWidget() => SetStaticWidget(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.BoldAttr).EditFontSize(2.8f)) { TranslationKey = "ui.common.loading" });
             
 
             public InnerScreen(GameObject screen,Vector2 innerSize, Scroller scroller, Collider2D scrollerCollider, float scrollViewSizeY)
@@ -699,14 +708,14 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
 
         public AlignmentOption Alignment { get; set; }
-        public IMetaContextOld? Inner = null;
+        public IMetaWidgetOld? Inner = null;
         public Vector2 Size;
         public bool WithMask;
         public Reference<InnerScreen>? InnerRef = null;
         public string? ScrollerTag = null;
         public Action? PostBuilder = null;
 
-        public ScrollView(Vector2 size,IMetaContextOld inner,bool withMask=true)
+        public ScrollView(Vector2 size,IMetaWidgetOld inner,bool withMask=true)
         {
             this.Size = size;
             this.Inner = inner;
@@ -797,7 +806,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
     }
 
-    public class TextInput : IMetaContextOld, IMetaParallelPlacableOld
+    public class TextInput : IMetaWidgetOld, IMetaParallelPlacableOld
     {
 
         public AlignmentOption Alignment { get; set; } = AlignmentOption.Left;
@@ -867,22 +876,22 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         }
     }
 
-    public class FramedContext : IMetaContextOld, IMetaParallelPlacableOld
+    public class FramedWidget : IMetaWidgetOld, IMetaParallelPlacableOld
     {
-        public AlignmentOption Alignment => (context as IMetaContextOld)?.Alignment ?? AlignmentOption.Center;
-        object context { get; set; }
+        public AlignmentOption Alignment => (widget as IMetaWidgetOld)?.Alignment ?? AlignmentOption.Center;
+        object widget { get; set; }
         Vector2 extended { get; set; }
         public Color? HighlightColor { get; set; }
         public Action<SpriteRenderer>? PostBuilder { get; set; }
 
-        public FramedContext(IMetaContextOld context,Vector2 extended) { 
-            this.context = context;
+        public FramedWidget(IMetaWidgetOld widget,Vector2 extended) { 
+            this.widget = widget;
             this.extended = extended;
         }
 
-        public FramedContext(IMetaParallelPlacableOld context,Vector2 extended)
+        public FramedWidget(IMetaParallelPlacableOld widget,Vector2 extended)
         {
-            this.context = context;
+            this.widget = widget;
             this.extended = extended;
         }
 
@@ -891,7 +900,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
         {
             var frame = UnityHelper.CreateObject("SizedFrame", screen.transform, new(0f, 0f, -0.5f));
 
-            IMetaContextOld mc = (context as IMetaContextOld) ?? new MetaContextOld();
+            IMetaWidgetOld mc = (widget as IMetaWidgetOld) ?? new MetaWidgetOld();
 
 
             float height = mc.Generate(frame, cursor + new Vector2(extended.x, -extended.y), size - new Vector2(extended.x, extended.y) * 2f, out width);
@@ -911,7 +920,7 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
             float height = 0f;
             var frame = UnityHelper.CreateObject("SizedFrame", screen.transform, new(center.x, center.y, -1f));
             width = 0f;
-            if(context is IMetaParallelPlacableOld mpp)
+            if(widget is IMetaParallelPlacableOld mpp)
             {
                 height = mpp.Generate(frame, Vector2.zero,out width);
             }
@@ -931,10 +940,10 @@ public class MetaContextOld : IMetaContextOld, IMetaParallelPlacableOld
     }
 }
 
-public class ParallelContextOld : IMetaContextOld
+public class ParallelWidgetOld : IMetaWidgetOld
 {
-    Tuple<IMetaContextOld, float>[] contents;
-    public ParallelContextOld(params Tuple<IMetaContextOld,float>[] contents)
+    Tuple<IMetaWidgetOld, float>[] contents;
+    public ParallelWidgetOld(params Tuple<IMetaWidgetOld,float>[] contents)
     {
         this.contents = contents;
     }
@@ -972,22 +981,22 @@ public class ParallelContextOld : IMetaContextOld
     }
 }
 
-public class CombinedContextOld : IMetaContextOld, IMetaParallelPlacableOld
+public class CombinedWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
 {
     IMetaParallelPlacableOld[] contents;
     public AlignmentOption Alignment { get; set; }
     float? height;
     public Action<GameObject>? PostBuilder = null;
 
-    public CombinedContextOld(float height, AlignmentOption alignment, params IMetaParallelPlacableOld[] contents)
+    public CombinedWidgetOld(float height, AlignmentOption alignment, params IMetaParallelPlacableOld[] contents)
     {
         this.contents = contents.ToArray();
         this.Alignment = alignment;
         this.height = height < 0f ? null : height;
     }
 
-    public CombinedContextOld(float height, params IMetaParallelPlacableOld[] contents) : this(height, AlignmentOption.Center, contents) { }
-    public CombinedContextOld(params IMetaParallelPlacableOld[] contents) : this(-1f, AlignmentOption.Center, contents) { }
+    public CombinedWidgetOld(float height, params IMetaParallelPlacableOld[] contents) : this(height, AlignmentOption.Center, contents) { }
+    public CombinedWidgetOld(params IMetaParallelPlacableOld[] contents) : this(-1f, AlignmentOption.Center, contents) { }
 
     public float Generate(GameObject screen, Vector2 cursor,Vector2 size, out (float min, float max) width)
     {
@@ -1098,24 +1107,24 @@ public class MetaScreen : MonoBehaviour, GUIScreen
             }
         } }
 
-    public float SetContext(Vector2? border, IMetaContextOld? context)
+    public float SetWidget(Vector2? border, IMetaWidgetOld? widget)
     {
         if(border != null) Border = border.Value;
 
-        return SetContext(context);
+        return SetWidget(widget);
     }
 
-    private void ClearContext()
+    private void ClearWidget()
     {
         gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) =>
         {
             if (obj.name != "BorderLine") GameObject.Destroy(obj);
         }));
     }
-    public float SetContext(IMetaContextOld? context,out (float min,float max) width) {
-        ClearContext();
+    public float SetWidget(IMetaWidgetOld? widget,out (float min,float max) width) {
+        ClearWidget();
 
-        if (context == null)
+        if (widget == null)
         {
             width = (0f, 0f);
             return 0f;
@@ -1123,10 +1132,10 @@ public class MetaScreen : MonoBehaviour, GUIScreen
 
         Vector2 cursor = Border / 2f;
         cursor.x *= -1f;
-        return context.Generate(gameObject, cursor, Border, out width);
+        return widget.Generate(gameObject, cursor, Border, out width);
     }
 
-    public float SetContext(IMetaContextOld? context) => SetContext(context, out var _);
+    public float SetWidget(IMetaWidgetOld? widget) => SetWidget(widget, out var _);
 
     public void CloseScreen()
     {
@@ -1209,12 +1218,12 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         this.border = border;
     }
 
-    public void SetContext(GUIContext context, out Virial.Compat.Size actualSize) => SetContext(context, new(0f, 1f), out actualSize);
-    public void SetContext(GUIContext context, UnityEngine.Vector2 anchor, out Virial.Compat.Size actualSize)
+    public void SetWidget(GUIWidget widget, out Virial.Compat.Size actualSize) => SetWidget(widget, new(0f, 1f), out actualSize);
+    public void SetWidget(GUIWidget widget, UnityEngine.Vector2 anchor, out Virial.Compat.Size actualSize)
     {
-        ClearContext();
+        ClearWidget();
 
-        var obj = context.Instantiate(new Anchor(new(anchor.x,anchor.y), new Virial.Compat.Vector3(border.x * (anchor.x - 0.5f), border.y * (anchor.y - 0.5f), -0.1f)), new(border), out actualSize);
+        var obj = widget.Instantiate(new Anchor(new(anchor.x,anchor.y), new Virial.Compat.Vector3(border.x * (anchor.x - 0.5f), border.y * (anchor.y - 0.5f), -0.1f)), new(border), out actualSize);
         if (obj != null)
         {
             obj.transform.SetParent(transform, false);
@@ -1228,29 +1237,29 @@ public static class MetaUI
     {
         MetaScreen screen = MetaScreen.GenerateWindow(new(3.5f, 1.35f), transform, Vector3.zero, true, true);
 
-        MetaContextOld context = new();
+        MetaWidgetOld widget = new();
 
-        context.Append(new MetaContextOld.Text(new(TextAttribute.ContentAttr) { Size = new(3.3f, 0.8f) }) { MyText = text, Alignment = AlignmentOption.Center });
-        context.Append(new MetaContextOld.Button(screen.CloseScreen, TextAttribute.BoldAttr) { TranslationKey = "ui.dialog.ok", Alignment = AlignmentOption.Center });
-        screen.SetContext(context);
+        widget.Append(new MetaWidgetOld.Text(new(TextAttributeOld.ContentAttr) { Size = new(3.3f, 0.8f) }) { MyText = text, Alignment = AlignmentOption.Center });
+        widget.Append(new MetaWidgetOld.Button(screen.CloseScreen, TextAttributeOld.BoldAttr) { TranslationKey = "ui.dialog.ok", Alignment = AlignmentOption.Center });
+        screen.SetWidget(widget);
     }
 
     static public void ShowYesOrNoDialog(Transform? transform, Action yesAction, Action noAction,string text, bool canCancelClickOutside = false)
     {
         MetaScreen screen = MetaScreen.GenerateWindow(new(3.9f, 1.14f), transform, Vector3.zero, true, canCancelClickOutside);
-        MetaContextOld context = new();
+        MetaWidgetOld widget = new();
         Reference<TextField> refName = new();
 
-        context.Append(new MetaContextOld.Text(new TextAttribute(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(3f, 0.6f) }) { RawText = text, Alignment = IMetaContextOld.AlignmentOption.Center });
+        widget.Append(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(3f, 0.6f) }) { RawText = text, Alignment = IMetaWidgetOld.AlignmentOption.Center });
 
-        context.Append(new CombinedContextOld(
-            new MetaContextOld.Button(() => { noAction.Invoke(); screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.5f, 0.3f) })
-            { TranslationKey = "ui.dialog.no", Alignment = IMetaContextOld.AlignmentOption.Center },
-            new MetaContextOld.HorizonalMargin(0.3f),
-            new MetaContextOld.Button(() => { yesAction.Invoke(); screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.5f, 0.3f) })
-            { TranslationKey = "ui.dialog.yes", Alignment = IMetaContextOld.AlignmentOption.Center }
+        widget.Append(new CombinedWidgetOld(
+            new MetaWidgetOld.Button(() => { noAction.Invoke(); screen.CloseScreen(); }, new(TextAttributeOld.BoldAttr) { Size = new(0.5f, 0.3f) })
+            { TranslationKey = "ui.dialog.no", Alignment = IMetaWidgetOld.AlignmentOption.Center },
+            new MetaWidgetOld.HorizonalMargin(0.3f),
+            new MetaWidgetOld.Button(() => { yesAction.Invoke(); screen.CloseScreen(); }, new(TextAttributeOld.BoldAttr) { Size = new(0.5f, 0.3f) })
+            { TranslationKey = "ui.dialog.yes", Alignment = IMetaWidgetOld.AlignmentOption.Center }
             ));
 
-        screen.SetContext(context);
+        screen.SetWidget(widget);
     }
 }

@@ -2,6 +2,7 @@
 using UnityEngine;
 using Virial.Assets;
 using Virial.Assignable;
+using Virial.Attributes;
 using Virial.Components;
 using Virial.Game;
 using Virial.Media;
@@ -27,6 +28,7 @@ internal interface INebula
     IEnumerable<Player> GetPlayers();
     Player? LocalPlayer { get; }
     Media.GUI GUILibrary { get; }
+    Game.Game? CurrentGame { get; }
 
     DefinedRole? GetRole(string roleId);
     DefinedModifier? GetModifier(string modifierId);
@@ -37,6 +39,7 @@ public static class NebulaAPI
 {
     static internal INebula instance = null!;
 
+    [RequiringHandshake]
     static public void RegisterRole(AbstractRoleDef roleDef) => instance.RegisterRole(roleDef);
     static public void RegisterPreset(string id, string displayName, string? detail, string? relatedHolder, Action onLoad) => instance.RegisterPreset(id,displayName,detail,relatedHolder,onLoad);
     static public RoleTeam CreateTeam(string translationKey, Color color, TeamRevealType revealType) => instance.CreateTeam(translationKey, color, revealType);
@@ -51,11 +54,30 @@ public static class NebulaAPI
     static public INameSpace NebulaAsset => instance.NebulaAsset;
     static public INameSpace InnerslothAsset => instance.InnerslothAsset;
     static public INameSpace GetAddon(string addonId) => instance.GetAddon(addonId);
-    static public void RegisterEventHandler(ILifespan lifespan, object handler) => instance.RegisterEventHandler(lifespan, handler); 
+    static public void RegisterEventHandler(ILifespan lifespan, object handler) => instance.RegisterEventHandler(lifespan, handler);
+
+    /// <summary>
+    /// ゲーム中の全プレイヤーを取得します。
+    /// 代わりに<see cref="Game.Game.GetAllPlayers"/>を使用してください。
+    /// </summary>
+    /// <returns>ゲーム中の全プレイヤー</returns>
+    [Obsolete]
     static public IEnumerable<Player> GetPlayers() => instance.GetPlayers();
+
+    /// <summary>
+    /// 自身の操作しているプレイヤーを取得します。
+    /// 代わりに<see cref="Game.Game.LocalPlayer"/>を使用してください。
+    /// </summary>
+    [Obsolete]
     static public Player? LocalPlayer => instance.LocalPlayer;
+
     static public Media.GUI GUI => instance.GUILibrary;
 
     static public DefinedRole? GetRole(string roleId) => instance.GetRole(roleId);
     static public DefinedModifier? GetModifier(string modifierId) => instance.GetModifier(modifierId);
+
+    /// <summary>
+    /// 現在のゲームを取得します。
+    /// </summary>
+    static public Game.Game? CurrentGame => instance.CurrentGame;
 }

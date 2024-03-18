@@ -1,7 +1,9 @@
 ﻿using HarmonyLib;
 using Nebula.Patches;
+using Nebula.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -74,6 +76,11 @@ public class Language
         for (uint i = 0; i <= 15; i++) yield return i;
     }
 
+    public static IEnumerable<string> AllLanguageName()
+    {
+        for (uint i = 0; i <= 15; i++) yield return GetLanguage(i);
+    }
+
     public static string GetLanguageShownString(uint language)
     {
         return TranslationController.Instance.Languages[(SupportedLangs)language].Name;
@@ -118,15 +125,16 @@ public class Language
         return "English";
     }
 
+    public static Stream? OpenDefaultLangStream() => StreamHelper.OpenFromResource("Nebula.Resources.Lang.dat");
     public static IEnumerator CoLoad()
     {
         LoadPatch.LoadingText = "Loading Language Data";
         yield return null;
 
         DefaultLanguage = new Language();
-        DefaultLanguage.Deserialize(StreamHelper.OpenFromResource("Nebula.Resources.Color.dat"));
-        DefaultLanguage.Deserialize(StreamHelper.OpenFromResource("Nebula.Resources.Lang.dat"));
-        DefaultLanguage.Deserialize(StreamHelper.OpenFromResource("Nebula.Resources.SecretLang.dat"));
+        using (var stream = StreamHelper.OpenFromResource("Nebula.Resources.Color.dat")) DefaultLanguage.Deserialize(stream);
+        using (var stream = OpenDefaultLangStream()) DefaultLanguage.Deserialize(stream);
+        using (var stream = StreamHelper.OpenFromResource("Nebula.Resources.SecretLang.dat")) DefaultLanguage.Deserialize(stream);
         DefaultLanguage.translationMap["empty"] = "";
 
         EastAsianFontChanger.LoadFont();
@@ -149,18 +157,27 @@ public class Language
         }
     }
 
-    public void Deserialize(Stream? stream)
+    public void Deserialize(Stream? stream) => Deserialize(stream, (key, text) => translationMap[key] = text);
+    static public void Deserialize(Stream? stream, Action<string,string> pairAction, Action<string>? commentAction = null)
     {
         if (stream == null) return;
         using (var reader = new StreamReader(stream, Encoding.GetEncoding("utf-8"))) {
             string? line;
             string[] strings;
-            string? key = null;
 
             while ((line = reader.ReadLine()) != null)
             {
-                if (line.Length < 3) continue;
-                if (line[0] == '#') continue;
+                if (line.Length < 3)
+                {
+                    if (commentAction != null) commentAction("");
+                    continue;
+                }
+
+                if (line[0] == '#')
+                {
+                    if(commentAction != null) commentAction(line);
+                    continue;
+                }
 
                 strings = line.Split(':', 2);
                 for(int i = 0; i < 2; i++)
@@ -174,20 +191,18 @@ public class Language
                     }
                     catch
                     {
-                        NebulaPlugin.Log.Print(NebulaLog.LogCategory.Language,"Cannot read the line \"" + line + "\"");
+                        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Language,"Cannot read the line \"" + line + "\"");
                         continue;
                     }
                 }
 
                 if (strings.Length != 2)
                 {
-                    NebulaPlugin.Log.Print(NebulaLog.LogCategory.Language, "Failed to read the line \"" + line + "\"");
+                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Language, "Failed to read the line \"" + line + "\"");
                     continue;
                 }
 
-
-                key = strings[0];
-                translationMap[key] = strings[1];
+                pairAction.Invoke(strings[0], strings[1]);
             }
         }
     }
@@ -209,6 +224,27 @@ public class Language
         if (DefaultLanguage?.translationMap.TryGetValue(translationKey, out result) ?? false)
             return result!;
         return null;
+    }
+
+    public static string? FindFromDefault(string? translationKey)
+    {
+        return (DefaultLanguage?.TryGetText(translationKey, out var result) ?? false) ? result : null;
+    }
+
+    public bool HasKey(string? translationKey)
+    {
+        if (translationKey == null) return false;
+        return translationMap.ContainsKey(translationKey);
+    }
+
+    public bool TryGetText(string? translationKey, [MaybeNullWhen(false)] out string text)
+    {
+        if (translationKey == null)
+        {
+            text = null;
+            return false;
+        }
+        return translationMap.TryGetValue(translationKey,out text);
     }
 }
 

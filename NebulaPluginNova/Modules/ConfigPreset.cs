@@ -49,7 +49,7 @@ public class ScriptPreset : IConfigPreset{
             onLoad.Invoke();
         }catch(Exception ex)
         {
-            NebulaPlugin.Log.Print(null, ex.ToString());
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, ex.ToString());
             return false;
         }
         return true;
@@ -86,7 +86,7 @@ public class ConfigPreset : IConfigPreset
         }
         catch
         {
-            NebulaPlugin.Log.Print(null, $"Preset \"{name}\" is invalid preset file.");
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, $"Preset \"{name}\" is invalid preset file.");
         }
     }
 
@@ -263,7 +263,7 @@ public class ConfigPreset : IConfigPreset
                         }
                         catch
                         {
-                            NebulaPlugin.Log.Print(NebulaLog.LogCategory.Preset, "Load Failed: " + args[1]);
+                            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Preset, "Load Failed: " + args[1]);
                         }
                         break;
                     case "SUBSTITUTE":
@@ -302,18 +302,39 @@ public class ConfigPreset : IConfigPreset
 
         foreach (var option in AmongUsUtil.AllVanillaOptions)
             result += "\nSET:" + option + ":'" + AmongUsUtil.GetOptionAsString(option) + "'";
-        
+
+        bool error = false;
         foreach(var option in NebulaConfiguration.AllConfigurations)
         {
-            result += "\nSET:" + option.Id + ":'" + (option.MaxValue >= 128 ? option.CurrentValue.ToString() : (option.GetMapped()?.ToString() ?? "null")) + "'";
+            try
+            {
+                result += "\nSET:" + option.Id + ":'" + (option.MaxValue >= 128 ? option.CurrentValue.ToString() : (option.GetMapped()?.ToString() ?? "null")) + "'";
+            }catch(Exception e)
+            {
+                error = true;
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Preset,
+                    $"The value of the option \"{option.Id}\" is invalid. (value: {option.CurrentValue})\nException -> " + e.ToString()
+                    );
+                
+            }
         }
+
+        //1回でもエラーが起きていれば例外を投げる (出せるだけエラーを出し切ってから投げる)
+        if (error) throw new Exception();
 
         return result;
     }
 
-    static public void OutputAndReloadSettings(string name)
+    static public bool OutputAndReloadSettings(string name)
     {
-        File.WriteAllText("Presets/" + name + ".dat", OutputCurrentSettings(name), Encoding.UTF8);
-        LoadLocal();
+        try
+        {
+            File.WriteAllText("Presets/" + name + ".dat", OutputCurrentSettings(name), Encoding.UTF8);
+            LoadLocal();
+        }catch(Exception e)
+        {
+            return false;
+        }
+        return true;
     }
 }

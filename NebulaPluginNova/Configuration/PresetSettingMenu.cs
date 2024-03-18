@@ -1,6 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
-using Nebula.Modules.MetaContext;
+using Nebula.Modules.MetaWidget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,65 +24,66 @@ public class PresetSettingMenu : MonoBehaviour
         Virial.Compat.Artifact<GUIScreen> innerRef = null!;
         void ShowInner()
         {
-            List<GUIContext> context = new();
+            List<GUIWidget> widget = new();
             foreach (var preset in IConfigPreset.AllPresets)
             {
                 if (preset.IsHidden || preset.RelatedHolder != null) continue;
 
-                context.Add(GUI.Instance.RawButton(
+                widget.Add(GUI.Instance.RawButton(
                     GUIAlignment.Center, GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.StandardLargeWideMasked),
                     preset.DisplayName,
-                    () => {
+                    _ => {
                         MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent(preset.LoadPreset() ? "preset.loadSuccess" : "preset.loadFailed"));
                         NebulaSettingMenu.Instance?.OpenFirstPage();
-                    }));
+                    }, elem => NebulaManager.Instance.SetHelpWidget(elem.uiElement, preset.Detail), elem => NebulaManager.Instance.HideHelpWidgetIf(elem.uiElement)));
             }
             
-            innerRef.Do(screen => screen.SetContext(GUI.Instance.VerticalHolder(GUIAlignment.Center, context), out _));
+            innerRef.Do(screen => screen.SetWidget(GUI.Instance.VerticalHolder(GUIAlignment.Center, widget), out _));
         }
 
-        var context = NebulaImpl.Instance.GUILibrary.VerticalHolder(Virial.Media.GUIAlignment.Center,
+        var widget = NebulaImpl.Instance.GUILibrary.VerticalHolder(Virial.Media.GUIAlignment.Center,
             GUI.Instance.LocalizedButton(
                 Virial.Media.GUIAlignment.Center,
                 GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.StandardMediumMasked),
                 "preset.saveAs",
-                () =>
+                _ =>
                 {
                     var popup = MetaScreen.GenerateWindow(new(4f, 1.7f), HudManager.Instance.transform, Vector3.zero, true, false);
-                    MetaContextOld context = new();
+                    MetaWidgetOld widget = new();
                     Reference<TextField> fieldRef = new();
-                    context.Append(new MetaContextOld.Text(TextAttribute.NormalAttrLeft) { Alignment = IMetaContextOld.AlignmentOption.Left, TranslationKey = "preset.enterPresetName" });
-                    context.Append(new MetaContextOld.VerticalMargin(0.1f));
-                    context.Append(new MetaContextOld.TextInput(1, 1.2f, new(3f, 0.28f)) { Hint = "Current Output".Color(Color.gray), TextFieldRef = fieldRef, Alignment = IMetaContextOld.AlignmentOption.Center });
-                    context.Append(new MetaContextOld.VerticalMargin(0.1f));
-                    context.Append(new MetaContextOld.Button(() =>
+                    widget.Append(new MetaWidgetOld.Text(TextAttributeOld.NormalAttrLeft) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = "preset.enterPresetName" });
+                    widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
+                    widget.Append(new MetaWidgetOld.TextInput(1, 1.2f, new(3f, 0.28f)) { Hint = "Current Output".Color(Color.gray), TextFieldRef = fieldRef, Alignment = IMetaWidgetOld.AlignmentOption.Center });
+                    widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
+                    widget.Append(new MetaWidgetOld.Button(() =>
                     {
                         string name = fieldRef.Value!.Text;
                         if (name.Length == 0) name = "Current Output";
-                        ConfigPreset.OutputAndReloadSettings(name);
+                        bool success = ConfigPreset.OutputAndReloadSettings(name);
                         ShowInner();
                         popup.CloseScreen();
 
-                        MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent("preset.saveSuccess"));
-                    }, TextAttribute.BoldAttr)
-                    { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "preset.save" });
-                    popup.SetContext(context);
+                        MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent(success ? "preset.saveSuccess" : "preset.saveFailed"));
+
+                    }, TextAttributeOld.BoldAttr)
+                    { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = "preset.save" });
+                    popup.SetWidget(widget);
                     TextField.EditFirstField();
                 }),
             GUI.Instance.LocalizedButton(
                 Virial.Media.GUIAlignment.Center,
                 GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.StandardMediumMasked),
                 "preset.reload",
-                () => {
+                _ => {
                     ConfigPreset.LoadLocal();
                     ShowInner();
                 })
             );
 
-        screen.SetContext(context, out _);
+        screen.SetWidget(widget, out _);
 
         MetaScreen mainScreen = MetaScreen.GenerateScreen(new Vector2(6f, 4f), transform, new(0.9f, -0.4f, -10f), false, false, false);
-        mainScreen.SetContext(GUI.Instance.ScrollView(Virial.Media.GUIAlignment.Top, new(5f, 4f), "Preset", null, out innerRef), out _);
+        mainScreen.SetWidget(GUI.Instance.ScrollView(Virial.Media.GUIAlignment.Top, new(5f, 4f), "Preset", null, out innerRef), out _);
 
         ShowInner();
     }

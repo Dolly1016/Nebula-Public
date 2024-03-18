@@ -2,10 +2,26 @@
 	"Arguments" : [
 		"roleName",
 	],
-	"TranslationKey" : "#Concat(ToRoleName(roleName),'.name')",
-	"IsBold" : True,
-	"Color" : {
-		"Style" : "#ToRoleName(roleName)"
-	},
-	"FontSize" : 2.8
+	"Aligned" : [
+		{
+			"TranslationKey" : "#Concat(ToRoleName(roleName),'.name')",
+			"IsBold" : True,
+			"Color" : {
+				"Style" : "#ToRoleName(roleName)"
+			},
+			"FontSize" : 2.8
+		},
+		{
+			"HSpace" : 0.25
+		},
+		{
+			"Document" : {
+				"Id" : "#If(GetCitation(GetRole(roleName)),'templates.citation','')",
+				"Arguments" : {
+					"citation" : "#GetCitation(GetRole(roleName))"
+				},
+				"Alignment" : "Bottom"
+			}
+		},
+	]
 }

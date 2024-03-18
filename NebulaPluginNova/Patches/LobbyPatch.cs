@@ -127,7 +127,8 @@ public class RequireHandshakePatch
 {
     public static void Postfix(GameData __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
-        if (AmongUsClient.Instance.AmHost) Certification.RequireHandshake();
+        //if (AmongUsClient.Instance.AmHost)
+        Certification.RequireHandshake();
     }
 }
 

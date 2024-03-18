@@ -107,6 +107,10 @@ public class Roles
         foreach (var role in allRoles) role.Load();
         foreach (var modifier in allModifiers) modifier.Load();
 
+        //Can Be Guessedのオプション
+        foreach (var role in allRoles.Where(r => r.CanBeGuessDefault)) role.CanBeGuessOption = new NebulaConfiguration(null, "role." + role.LocalizedName + ".canBeGuess", null, true, true);
+        
+
         allRoles = null;
         allModifiers = null;
         allTeams = null;

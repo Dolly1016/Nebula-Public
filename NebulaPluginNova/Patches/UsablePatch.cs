@@ -169,6 +169,23 @@ public static class ConsoleCanUsePatch
     }
 }
 
+[HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.CanUse))]
+public static class SystemConsoleCanUsePatch
+{
+    public static void Postfix(SystemConsole __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc, [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse)
+    {
+        var info = NebulaGameManager.Instance?.GetModPlayerInfo(PlayerControl.LocalPlayer.PlayerId);
+        if (info == null) return;
+
+        //緊急会議コンソールの使用をブロック
+        if(__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting))
+        {
+            canUse = false;
+            couldUse = false;
+        }
+    }
+}
+
 [HarmonyPatch(typeof(MovingPlatformBehaviour), nameof(MovingPlatformBehaviour.MeetingCalled))]
 class MovingPlatformBehaviourMeetingCalledPatch
 {
@@ -210,5 +227,90 @@ class SystemConsoleStartPatch
             UnityEngine.Object.Destroy(__instance.gameObject);
 
         return false;
+    }
+}
+
+
+[HarmonyPatch(typeof(ArrowBehaviour), nameof(ArrowBehaviour.UpdatePosition))]
+public static class ArrowUpdatePatch
+{
+    public static bool Prefix(ArrowBehaviour __instance)
+    {
+        //表示するのはUIカメラ
+        Camera main = UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
+        //距離を測るのは表示用のカメラ
+        Camera worldCam = (NebulaGameManager.Instance?.WideCamera.IsShown ?? false) ? NebulaGameManager.Instance.WideCamera.Camera : Camera.main;
+
+        Vector2 del = __instance.target - main.transform.position;
+
+        float num = del.magnitude / (worldCam.orthographicSize * __instance.perc);
+        if (__instance.image != null) __instance.image.enabled = (num > __instance.minDistanceToShowArrow);
+
+        Vector2 vector = worldCam.WorldToViewportPoint(__instance.target);
+
+        //カメラに合わせて見かけ上の位置に偽装させる
+        var tempTarget = __instance.target;
+        var diff = __instance.target - HudManager.Instance.transform.position;
+        var pos = HudManager.Instance.transform.position + diff / (worldCam.orthographicSize / 3f);
+        pos.z = tempTarget.z;
+        __instance.target = pos;
+
+        if (__instance.Between(vector.x, 0f, 1f) && __instance.Between(vector.y, 0f, 1f))
+            __instance.CloseBehaviour(del, num);
+        else
+            __instance.DistancedBehaviour(vector, del, num, main);
+
+        __instance.target = tempTarget;
+
+        __instance.transform.LookAt2d(__instance.target);
+
+        
+
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(Ladder), nameof(Ladder.MaxCoolDown), MethodType.Getter)]
+class LadderCoolDownPatch
+{
+    static bool Prefix(Ladder __instance, out float __result)
+    {
+        __result = Math.Max(0.01f, GeneralConfigurations.LadderCoolDownOption.GetFloat());
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(Ladder), nameof(Ladder.SetDestinationCooldown))]
+class LadderCoolDownUpdatePatch
+{
+    static bool Prefix(Ladder __instance)
+    {
+        float maxCoolDown = GeneralConfigurations.LadderCoolDownOption.GetFloat();
+        __instance.Destination.CoolDown = maxCoolDown;
+        __instance.CoolDown = maxCoolDown;
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(ZiplineConsole), nameof(ZiplineConsole.MaxCoolDown), MethodType.Getter)]
+class ZiplineCoolDownPatch
+{
+    static bool Prefix(ZiplineConsole __instance, out float __result)
+    {
+        __result = Math.Max(0.01f, GeneralConfigurations.ZiplineCoolDownOption.GetFloat());
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(ZiplineConsole), nameof(ZiplineConsole.SetDestinationCooldown))]
+class ZiplineCoolDownUpdatePatch
+{
+    static bool Prefix(ZiplineConsole __instance)
+    {
+        float maxCoolDown = GeneralConfigurations.ZiplineCoolDownOption.GetFloat();
+        __instance.destination.CoolDown = maxCoolDown;
+        __instance.CoolDown = maxCoolDown;
+        return false;
+
     }
 }
