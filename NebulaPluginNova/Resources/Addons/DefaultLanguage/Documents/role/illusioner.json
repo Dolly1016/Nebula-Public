@@ -1,0 +1,42 @@
+﻿{
+	"Contents" : [
+		{
+			"Document" : {
+				"Id" : "templates.roleName",
+				"Arguments" : {
+					"roleName" : "illusioner"
+				}
+			}
+		},
+		{
+			"TranslationKey" : "role.illusioner.doc.main"
+		},
+		{
+			"Document" : {
+				"Id" : "templates.buttonContent",
+				"Arguments" : {
+					"buttonName" : "SampleButton",
+					"textKey" : "role.illusioner.doc.sampleButton"
+				}
+			}
+		},
+		{
+			"Document" : {
+				"Id" : "templates.buttonContent",
+				"Arguments" : {
+					"buttonName" : "MorphButton",
+					"textKey" : "role.illusioner.doc.morphButton"
+				}
+			}
+		},
+		{
+			"Document" : {
+				"Id" : "templates.buttonContent",
+				"Arguments" : {
+					"buttonName" : "MorphButton",
+					"textKey" : "role.illusioner.doc.paintButton"
+				}
+			}
+		}
+	]
+}

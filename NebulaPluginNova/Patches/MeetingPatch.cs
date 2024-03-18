@@ -8,6 +8,7 @@ using static MeetingHud;
 using Steamworks;
 using System.Reflection;
 using Nebula.Map;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 namespace Nebula.Patches;
 
@@ -23,12 +24,12 @@ public static class MeetingModRpc
         var reporter = NebulaGameManager.Instance?.GetModPlayerInfo(message.reporter);
         var reported = NebulaGameManager.Instance?.GetModPlayerInfo(message.reported);
 
-        NebulaGameManager.Instance?.AllAssignableAction(a => a.OnPreMeetingStart(reporter!, reported));
+        NebulaGameManager.Instance?.AllEntitiesAction(e => e.OnPreMeetingStart(reporter!, reported));
 
         if (reported != null) 
-            NebulaGameManager.Instance?.AllAssignableAction(a => a.OnReported(reporter!, reported));
+            NebulaGameManager.Instance?.AllEntitiesAction(e => e.OnReported(reporter!, reported));
         else
-            NebulaGameManager.Instance?.AllAssignableAction(a => a.OnEmergencyMeeting(reporter!));
+            NebulaGameManager.Instance?.AllEntitiesAction(e => e.OnEmergencyMeeting(reporter!));
     });
 
     public static readonly RemoteProcess<(List<VoterState> states, byte exiled, bool tie)> RpcModCompleteVoting = new("CompleteVoting", 
@@ -61,15 +62,33 @@ public static class MeetingModRpc
     private static void ForcelyVotingComplete(MeetingHud meetingHud, List<VoterState> states, byte exiled, bool tie)
     {
         var readonlyStates = states.ToArray();
-        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(a =>
+
+
+        var voted = Helpers.GetPlayer(((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255);
+        var votedIsExiled = (voted?.PlayerId ?? 255) == exiled && exiled != 255;
+
+        var myInfo = PlayerControl.LocalPlayer.GetModInfo();
+
+        Debug.Log("voted:" + (voted?.PlayerId.ToString() ?? "None") + "votedIsExiled:" + votedIsExiled);
+
+        if (votedIsExiled)
         {
-            a.OnVotedLocal(Helpers.GetPlayer(
-            ((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255));
+            var deathAchievement = NebulaGameManager.Instance?.GetAchievementToken<AchievementToken<int>>("challenge.death2");
+            if(deathAchievement != null)deathAchievement.Value = 1;
 
-            var votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => Helpers.GetPlayer(id)).Distinct().ToArray();
-            a.OnVotedForMeLocal(votedBy!);
 
-            a.OnDiscloseVotingLocal(readonlyStates);
+            var marchAchievement = NebulaGameManager.Instance?.GetAchievementToken<AchievementToken<int>>("graduation2");
+            if (marchAchievement != null) marchAchievement.Value++;
+        }
+
+        GameEntityManager.Instance?.AllEntities.Do(e =>
+        {
+            e.OnVotedLocal(voted, votedIsExiled);
+
+            PlayerControl[]? votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => Helpers.GetPlayer(id)!).Distinct().Where(p => p != null).ToArray();
+            e.OnVotedForMeLocal(votedBy ?? new PlayerControl[0]);
+
+            e.OnDiscloseVotingLocal(readonlyStates);
         });
 
         //追放者とタイ投票の結果だけは必ず書き換える
@@ -117,16 +136,6 @@ class ReportDeadBodyPatch
         //会議室が開くか否かのチェック
         if (AmongUsClient.Instance.IsGameOver || MeetingHud.Instance) return false;
         
-        //フェイクタスクでない緊急タスクがある場合ボタンは押せない
-        if (target == null &&
-            PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)
-            (task => PlayerTask.TaskIsEmergency(task) && 
-                (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.All(
-                    type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true))) != null)
-                return false;
-            
-        
-
         if (__instance.Data.IsDead) return false;
         MeetingRoomManager.Instance.AssignSelf(__instance, target);
         if (!AmongUsClient.Instance.AmHost) return false;
@@ -157,6 +166,16 @@ class GetDiscussionTimePatch
     }
 }
 
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.StartMeeting))]
+class StartMeetingPatch
+{
+    public static void Prefix()
+    {
+        //会議前の位置を共有する
+        PlayerModInfo.RpcSharePreMeetingPoint.Invoke((PlayerControl.LocalPlayer.PlayerId, PlayerControl.LocalPlayer.transform.position));
+    }
+}
 
 [HarmonyPatch(typeof(MeetingIntroAnimation), nameof(MeetingIntroAnimation.CoRun))]
 class MeetingIntroStartPatch
@@ -203,6 +222,9 @@ class MeetingStartPatch
 
         foreach(var p in MeetingHud.Instance.playerStates)
         {
+            p.PlayerIcon.cosmetics.hat.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            p.PlayerIcon.cosmetics.hat.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            p.PlayerIcon.cosmetics.visor.Image.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             p.PlayerIcon.cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             p.PlayerIcon.cosmetics.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         }
@@ -217,8 +239,7 @@ class MeetingStartPatch
         List<MeetingPlayerContent> allContents = new();
 
         __instance.transform.localPosition = new Vector3(0f, 0f, -25f);
-
-
+        
         //色の明暗を表示
         foreach (var player in __instance.playerStates)
         {
@@ -227,7 +248,11 @@ class MeetingStartPatch
             SpriteRenderer renderer = UnityHelper.CreateObject<SpriteRenderer>("Color", player.transform, new Vector3(1.2f, -0.18f, -1f));
             renderer.sprite = isLightColor ? LightColorSprite.GetSprite() : DarkColorSprite.GetSprite();
 
-            player.ColorBlindName.gameObject.SetActive(false);
+            //色テキストをプレイヤーアイコンそばに移動
+            var localPos = player.ColorBlindName.transform.localPosition;
+            localPos.x = -0.947f;
+            localPos.z -= 0.15f;
+            player.ColorBlindName.transform.localPosition = localPos;
 
             var roleText = GameObject.Instantiate(player.NameText, player.transform);
             roleText.transform.localPosition = new Vector3(0.3384f, -0.13f, -0.02f);
@@ -262,7 +287,11 @@ class MeetingClosePatch
 { 
     public static void Postfix(MeetingHud __instance)
     {
-        NebulaGameManager.Instance?.AllAssignableAction(r => r.OnStartExileCutScene());
+        //ベント内のプレイヤー情報をリセットしておく
+        VentilationSystem? ventilationSystem = ShipStatus.Instance.Systems[SystemTypes.Ventilation].TryCast<VentilationSystem>();
+        if (ventilationSystem != null) ventilationSystem.PlayersInsideVents.Clear();
+
+        NebulaGameManager.Instance?.AllEntitiesAction(e => e.OnStartExileCutScene());
         NebulaManager.Instance.CloseAllUI();
     }
 }
@@ -318,6 +347,8 @@ class VoteAreaPatch
 {
     public static void Postfix(PlayerVoteArea __instance)
     {
+        if (!MeetingHud.Instance) return;
+
         try
         {
             var maskParent = UnityHelper.CreateObject<SortingGroup>("MaskedObjects", __instance.transform, new Vector3(0, 0, -0.1f));
@@ -336,8 +367,11 @@ class VoteAreaPatch
             __instance.PlayerIcon.cosmetics.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
 
             __instance.PlayerIcon.cosmetics.hat.FrontLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
+            __instance.PlayerIcon.cosmetics.hat.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.hat.BackLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
+            __instance.PlayerIcon.cosmetics.hat.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.visor.Image.gameObject.AddComponent<ZOrderedSortingGroup>();
+            __instance.PlayerIcon.cosmetics.visor.Image.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.skin.layer.gameObject.AddComponent<ZOrderedSortingGroup>();
             __instance.PlayerIcon.cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.currentBodySprite.BodySprite.gameObject.AddComponent<ZOrderedSortingGroup>();
@@ -371,7 +405,8 @@ class CastVotePatch
         
         //CmdCastVote(Mod)
         int vote = 1;
-        NebulaGameManager.Instance?.GetModPlayerInfo(PlayerControl.LocalPlayer.PlayerId)?.AssignableAction((r) => r.OnCastVoteLocal(suspectStateIdx, ref vote));
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnCastVoteLocal(suspectStateIdx, ref vote));
+        
         __instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, suspectStateIdx, vote);
         return false;
     }
@@ -548,7 +583,7 @@ class PopulateResultPatch
     {
         Debug.Log("Called PopulateResults");
 
-        NebulaGameManager.Instance?.AllAssignableAction(r => r.OnEndVoting());
+        NebulaGameManager.Instance?.AllEntitiesAction(e => e.OnEndVoting());
 
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.MeetingVotingResults);
         foreach (var voteArea in __instance.playerStates)
@@ -584,5 +619,29 @@ class PopulateResultPatch
         }
 
         return false;
+    }
+}
+
+
+//死体の拾い漏れチェック
+[HarmonyPatch(typeof(MeetingIntroAnimation), nameof(MeetingIntroAnimation.Init))]
+class MeetingIntroAnimationPatch
+{
+    public static void Prefix(MeetingIntroAnimation __instance, [HarmonyArgument(1)] ref Il2CppReferenceArray<GameData.PlayerInfo> deadBodies)
+    {
+        List<GameData.PlayerInfo> dBodies = new List<GameData.PlayerInfo>();
+        //既に発見されている死体
+        foreach (var dBody in deadBodies) dBodies.Add(dBody);
+        
+        //遅れて発見された死体
+        foreach (var dBody in Helpers.AllDeadBodies())
+        {
+            dBodies.Add(GameData.Instance.GetPlayerById(dBody.ParentId));
+            GameObject.Destroy(dBody.gameObject);
+        }
+        deadBodies = new Il2CppReferenceArray<GameData.PlayerInfo>(dBodies.ToArray());
+
+        //生死を再確認
+        MeetingHud.Instance.ResetPlayerState();
     }
 }

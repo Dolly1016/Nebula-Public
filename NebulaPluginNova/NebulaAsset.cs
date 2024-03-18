@@ -40,6 +40,7 @@ public static class NebulaAsset
         StoreBackShader = AssetBundle.LoadAsset<Shader>("Sprites-StoreBackground").MarkDontUnload();
         GuageShader = AssetBundle.LoadAsset<Shader>("Sprites-Guage").MarkDontUnload();
         WhiteShader = AssetBundle.LoadAsset<Shader>("Sprites-White").MarkDontUnload();
+        ProgressShader = AssetBundle.LoadAsset<Shader>("Sprites-Progress").MarkDontUnload();
 
         DivMap[0] = AssetBundle.LoadAsset<GameObject>("SkeldDivMap").MarkDontUnload();
         DivMap[1] = AssetBundle.LoadAsset<GameObject>("MIRADivMap").MarkDontUnload();
@@ -125,6 +126,7 @@ public static class NebulaAsset
     static public Shader StoreBackShader { get; private set; } = null!;
     static public Shader GuageShader { get; private set; } = null!;
     static public Shader WhiteShader { get; private set; } = null!;
+    static public Shader ProgressShader { get; private set; } = null!;
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public GameObject PaparazzoShot { get; private set; } = null!;

@@ -106,19 +106,19 @@ public class ModUpdater
                 fileStream.Flush();
             }catch(Exception ex)
             {
-                NebulaPlugin.Log.Print(null, ex.GetType().Name + ex.Message + ex.StackTrace);
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, ex.GetType().Name + ex.Message + ex.StackTrace);
             }
         }
 
         public IEnumerator CoUpdateAndShowDialog()
         {
             var preWindow = MetaScreen.GenerateWindow(new Vector2(3f, 1.2f), null, new Vector3(0, 0, 0), true, true, true);
-            preWindow.SetContext(new MetaContextOld.Text(new(TextAttribute.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.waitFinishing" });
+            preWindow.SetWidget(new MetaWidgetOld.Text(new(TextAttributeOld.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.waitFinishing" });
             yield return UpdateAsync().WaitAsCoroutine();
             preWindow.CloseScreen();
 
             var postWindow = MetaScreen.GenerateWindow(new Vector2(3f, 1.2f), null, new Vector3(0, 0, 0), true, true, true);
-            postWindow.SetContext(new MetaContextOld.Text(new(TextAttribute.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.finishUpdate" });
+            postWindow.SetWidget(new MetaWidgetOld.Text(new(TextAttributeOld.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.finishUpdate" });
         }
     }
 
@@ -136,7 +136,7 @@ public class ModUpdater
 
             var tags = JsonStructure.Deserialize<List<ReleaseContent>>(json);
             if (tags != null) foreach (var tag in tags) if (tag.name != null) releases.Add(new(tag.name));
-            NebulaPlugin.Log.Print(null, releases.Count.ToString());
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, releases.Count.ToString() + " releases have got from GitHub.");
             if (tags == null || tags.Count < 100 || tags.Count == 0) break;
             page++;
         }

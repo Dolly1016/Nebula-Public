@@ -1,0 +1,24 @@
+﻿{
+	"Contents" : [
+		{
+			"Document" : {
+				"Id" : "templates.roleName",
+				"Arguments" : {
+					"roleName" : "chainShifter"
+				}
+			}
+		},
+		{
+			"TranslationKey" : "role.chainShifter.doc.main"
+		},
+		{
+			"Document" : {
+				"Id" : "templates.buttonContent",
+				"Arguments" : {
+					"buttonName" : "ChainShiftButton",
+					"textKey" : "role.chainShifter.doc.chainShiftButton"
+				}
+			}
+		}
+	]
+}

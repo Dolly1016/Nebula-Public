@@ -1,10 +1,11 @@
 ﻿using Nebula.Configuration;
 using Nebula.Modules;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Jester : ConfigurableStandardRole
+public class Jester : ConfigurableStandardRole, HasCitation
 {
     static public Jester MyRole = new Jester();
     static public Team MyTeam = new("teams.jester", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -13,6 +14,7 @@ public class Jester : ConfigurableStandardRole
 
     public override string LocalizedName => "jester";
     public override Color RoleColor => new Color(253f / 255f, 84f / 255f, 167f / 255f);
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
@@ -43,7 +45,7 @@ public class Jester : ConfigurableStandardRole
         }
     };
 
-    public class Instance : RoleInstance
+    public class Instance : RoleInstance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -71,7 +73,7 @@ public class Jester : ConfigurableStandardRole
             
         }
 
-        public override void OnDead()
+        void IGamePlayerEntity.OnDead()
         {
             draggable?.OnDead(this);
         }
@@ -86,7 +88,7 @@ public class Jester : ConfigurableStandardRole
 
 
         StaticAchievementToken? acTokenCommon = null;
-        public override void OnVotedForMeLocal(PlayerControl[] voters)
+        void IGameEntity.OnVotedForMeLocal(PlayerControl[] voters)
         {
             if(voters.Length > 0 && voters.Any(v=>!v.AmOwner))
                 acTokenCommon ??= new StaticAchievementToken("jester.common1");

@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Bait : ConfigurableStandardRole
+public class Bait : ConfigurableStandardRole, HasCitation
 {
     static public Bait MyRole = new Bait();
 
@@ -16,6 +17,7 @@ public class Bait : ConfigurableStandardRole
 
     public override string LocalizedName => "bait";
     public override Color RoleColor => new Color(0f / 255f, 247f / 255f, 255f / 255f);
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
@@ -37,7 +39,7 @@ public class Bait : ConfigurableStandardRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
@@ -53,7 +55,7 @@ public class Bait : ConfigurableStandardRole
             yield return new WaitForSeconds(t);
             murderer.CmdReportDeadBody(MyPlayer.MyControl.Data);
         }
-        public override void OnMurdered(PlayerControl murderer)
+        void IGamePlayerEntity.OnMurdered(GamePlayer murderer)
         {
             if (murderer.PlayerId == MyPlayer.PlayerId) return;
 
@@ -63,7 +65,7 @@ public class Bait : ConfigurableStandardRole
                 acTokenChallenge ??= new("bait.challenge", (false,true), (val,_) => val.cleared);
             }
 
-            if (PlayerControl.LocalPlayer.PlayerId == murderer.PlayerId) NebulaManager.Instance.StartCoroutine(CoReport(murderer).WrapToIl2Cpp());
+            if (PlayerControl.LocalPlayer.PlayerId == murderer.PlayerId) NebulaManager.Instance.StartCoroutine(CoReport(murderer.VanillaPlayer).WrapToIl2Cpp());
         }
 
         public override void OnEnterVent(PlayerControl player,Vent vent)
@@ -71,17 +73,18 @@ public class Bait : ConfigurableStandardRole
             if (AmOwner && MyRole.CanSeeVentFlashOption) AmongUsUtil.PlayQuickFlash(Role.RoleColor.AlphaMultiplied(0.3f));
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd()
         {
-            base.OnMeetingEnd();
-
             if (acTokenChallenge != null) acTokenChallenge.Value.triggered = false;
         }
 
-        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
         {
-            if ((acTokenChallenge?.Value.triggered ?? false) && exiled.PlayerId == (MyPlayer.MyKiller?.PlayerId ?? 255))
-                acTokenChallenge.Value.cleared = true;
+            if (AmOwner)
+            {
+                if ((acTokenChallenge?.Value.triggered ?? false) && exiled.PlayerId == (MyPlayer.MyKiller?.PlayerId ?? 255))
+                    acTokenChallenge.Value.cleared = true;
+            }
         }
     }
 }

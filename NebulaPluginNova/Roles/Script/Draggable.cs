@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 
 namespace Nebula.Roles.Scripts;
 
-public class Draggable : ScriptHolder
+public class Draggable : ComponentHolder
 {
     static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DragAndDropButton.png", 115f);
 

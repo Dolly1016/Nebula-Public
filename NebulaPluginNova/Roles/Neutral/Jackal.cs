@@ -1,27 +1,38 @@
 ﻿using Nebula.Configuration;
 using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
+using Steamworks;
 using Virial.Assignable;
+using Virial.Game;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
-public class Jackal : ConfigurableStandardRole
+public class Jackal : ConfigurableStandardRole, HasCitation
 {
     static public Jackal MyRole = new Jackal();
     static public Team MyTeam = new("teams.jackal", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
     public override RoleCategory Category => RoleCategory.NeutralRole;
-    public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return Sidekick.MyRole; }
+    public override IEnumerable<IAssignableBase> RelatedOnConfig() { if (Sidekick.MyRole.RoleConfig.IsShown) yield return Sidekick.MyRole; }
     public override string LocalizedName => "jackal";
     public override Color RoleColor => new Color(8f / 255f, 190f / 255f, 245f / 255f);
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Length >= 1 ? arguments[0] : player.PlayerId, arguments.Length >= 2 ? arguments[1] : MyRole.NumOfKillingToCreateSidekickOption.GetMappedInt());
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, 0), arguments.Get(2, 0));
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     public NebulaConfiguration CanCreateSidekickOption = null!;
     private NebulaConfiguration NumOfKillingToCreateSidekickOption = null!;
+    private NebulaConfiguration NumOfKillingToWinOption = null!;
 
+    public static bool IsJackal(PlayerModInfo player, int teamId)
+    {
+        if (player.Role is Instance j) return j.JackalTeamId == teamId;
+        if(player.Role is Sidekick.Instance s) return s.JackalTeamId == teamId;
+        return player.GetModifiers<SidekickModifier.Instance>().Any(m => m.JackalTeamId == teamId);
+    }
 
     protected override void LoadOptions()
     {
@@ -30,32 +41,39 @@ public class Jackal : ConfigurableStandardRole
         KillCoolDownOption = new(RoleConfig, "killCoolDown",KillCoolDownConfiguration.KillCoolDownType.Relative, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 25f, -5f, 1f);
         CanCreateSidekickOption = new NebulaConfiguration(RoleConfig, "canCreateSidekick", null, false, false);
         NumOfKillingToCreateSidekickOption = new NebulaConfiguration(RoleConfig, "numOfKillingToCreateSidekick", null, 10, 2, 2);
+        NumOfKillingToWinOption = new NebulaConfiguration(RoleConfig, "numOfKillingToWin", null, 10, 2, 2);
     }
 
 
-    public class Instance : RoleInstance
+    public class Instance : RoleInstance, IGamePlayerEntity
     {
         private ModAbilityButton? killButton = null;
         private ModAbilityButton? sidekickButton = null;
         public override AbstractRole Role => MyRole;
         public int JackalTeamId;
-        private int leftKillingToCreateSidekick = MyRole.NumOfKillingToCreateSidekickOption.GetMappedInt();
-        public Instance(PlayerModInfo player,int jackalTeamId, int needToCreateSidekick) : base(player)
+        private int killingTotal = 0;
+        private int myKillingTotal = 0;
+
+        private int LeftKillingToCreateSidekick => Math.Max(0, MyRole.NumOfKillingToCreateSidekickOption.GetMappedInt() - myKillingTotal);
+        public Instance(PlayerModInfo player,int jackalTeamId, int totalKilling, int myTotalKilling) : base(player)
         {
             JackalTeamId = jackalTeamId;
-            leftKillingToCreateSidekick = needToCreateSidekick;
+            killingTotal = totalKilling;
+            myKillingTotal = myTotalKilling;
         }
 
         static private ISpriteLoader sidekickButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SidekickButton.png", 115f);
 
-        private bool IsMySidekick(PlayerModInfo? player)
+        public override int[]? GetRoleArgument() => [JackalTeamId, killingTotal, myKillingTotal];
+        public bool CanWinDueToKilling => killingTotal >= MyRole.NumOfKillingToWinOption;
+        public bool IsMySidekick(PlayerModInfo? player)
         {
             if (player == null) return false;
             if (player.Role is Sidekick.Instance sidekick && sidekick.JackalTeamId == JackalTeamId) return true;
             if (player.AllModifiers.Any(m => m is SidekickModifier.Instance sidekick && sidekick.JackalTeamId == JackalTeamId)) return true;
             return false;
         }
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin;
+        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId));
 
         public override void OnActivated()
         {
@@ -75,23 +93,23 @@ public class Jackal : ConfigurableStandardRole
                 {
                     sidekickButton = Bind(new ModAbilityButton(true)).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
 
-                    if (leftKillingToCreateSidekick > 0)
+                    if (LeftKillingToCreateSidekick > 0)
                     {
                         lockSprite = sidekickButton.VanillaButton.AddLockedOverlay();
                         leftText = sidekickButton.ShowUsesIcon(3);
-                        leftText.text = leftKillingToCreateSidekick.ToString();
+                        leftText.text = LeftKillingToCreateSidekick.ToString();
                     }
                     sidekickButton.SetSprite(sidekickButtonSprite.GetSprite());
-                    sidekickButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove && leftKillingToCreateSidekick <= 0;
+                    sidekickButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove && LeftKillingToCreateSidekick <= 0;
                     sidekickButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && !hasSidekick;
                     sidekickButton.OnClick = (button) =>
                     {
                         button.StartCoolDown();
 
                         if (Sidekick.MyRole.IsModifierOption)
-                            myTracker.CurrentTarget.GetModInfo()?.RpcInvokerSetModifier(SidekickModifier.MyRole, new int[] { JackalTeamId }).InvokeSingle();
+                            myTracker.CurrentTarget.GetModInfo()?.RpcInvokerSetModifier(SidekickModifier.MyRole, [JackalTeamId]).InvokeSingle();
                         else
-                            myTracker.CurrentTarget.GetModInfo()?.RpcInvokerSetRole(Sidekick.MyRole, new int[] { JackalTeamId }).InvokeSingle();
+                            myTracker.CurrentTarget.GetModInfo()?.RpcInvokerSetRole(Sidekick.MyRole, [JackalTeamId]).InvokeSingle();
                         hasSidekick = true;
 
                         new StaticAchievementToken("jackal.common1");
@@ -109,8 +127,7 @@ public class Jackal : ConfigurableStandardRole
                     MyPlayer.MyControl.ModKill(myTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
                     button.StartCoolDown();
 
-                    leftKillingToCreateSidekick--;
-                    if (leftKillingToCreateSidekick == 0)
+                    if (LeftKillingToCreateSidekick == 0)
                     {
                         if (lockSprite) GameObject.Destroy(lockSprite!.gameObject);
                         if (leftText) GameObject.Destroy(leftText!.transform.parent.gameObject);
@@ -119,7 +136,7 @@ public class Jackal : ConfigurableStandardRole
                     }
                     else
                     {
-                        if(leftText)leftText!.text = leftKillingToCreateSidekick.ToString();
+                        if(leftText)leftText!.text = LeftKillingToCreateSidekick.ToString();
                     }
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
@@ -127,19 +144,32 @@ public class Jackal : ConfigurableStandardRole
                 killButton.SetLabel("kill");
 
                 if (GeneralConfigurations.JackalRadioOption)
-                {
-                    VoiceChatRadio jackalRadio = new(IsMySidekick, Language.Translate("voiceChat.info.jackalRadio"), MyRole.RoleColor);
-                    Bind(new NebulaGameScript()
-                    {
-                        OnActivatedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.AddRadio(jackalRadio),
-                        OnReleasedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.RemoveRadio(jackalRadio)
-                    });
-                }
+                    Bind(VoiceChatManager.GenerateBindableRadioScript(IsMySidekick, "voiceChat.info.jackalRadio", MyRole.RoleColor));
+                
             }
         }
 
+        void IGamePlayerEntity.OnKillPlayer(Virial.Game.Player target)
+        {
+            myKillingTotal++;
+            killingTotal++;
+        }
+
+        //勝利条件を失ったらどうすればいいのか？
+        /*
+        void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
+        {
+            if(AmOwner && !MyPlayer.IsDead)
+            {
+                int aliveElse = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && !p.AmOwner);
+                if (killingTotal + aliveElse < MyRole.NumOfKillingToWinOption) MyPlayer.MyControl.ModFlexibleKill(MyPlayer.MyControl, false, PlayerStates.Suicide, EventDetail.Kill, true);
+            }
+        }
+        */
+
         public override void OnGameStart()
         {
+            base.OnGameStart();
             JackalTeamId = MyPlayer.PlayerId;
         }
 
@@ -155,12 +185,12 @@ public class Jackal : ConfigurableStandardRole
 
         }
 
-        public override void OnDead()
+        void IGamePlayerEntity.OnDead()
         {
             foreach (var player in NebulaGameManager.Instance!.AllPlayerInfo())
             {
                 if (player.IsDead) continue;
-                if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, new int[] { JackalTeamId }).InvokeSingle();
+                if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, [JackalTeamId, killingTotal]).InvokeSingle();
 
             }
         }
@@ -179,7 +209,7 @@ public class Jackal : ConfigurableStandardRole
             if (endState.EndCondition != NebulaGameEnd.JackalWin) return;
             if (!endState.CheckWin(MyPlayer.PlayerId)) return;
 
-            if (endState.EndReason != NebulaEndReason.Situation) return;
+            if (endState.EndReason != GameEndReason.Situation) return;
 
             var lastDead = NebulaGameManager.Instance!.AllPlayerInfo().MaxBy(p => p.DeathTimeStamp ?? 0f);
             if (lastDead == null || lastDead.MyKiller == null || !lastDead.MyKiller.AmOwner) return;
@@ -205,7 +235,7 @@ file static class SidekickAchievementChecker
     }
 }
 
-public class Sidekick : ConfigurableRole
+public class Sidekick : ConfigurableRole, HasCitation
 {
     static public Sidekick MyRole = new Sidekick();
 
@@ -216,10 +246,11 @@ public class Sidekick : ConfigurableRole
     public override string LocalizedName => "sidekick";
     
     public override Color RoleColor => Jackal.MyRole.RoleColor;
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Jackal.MyTeam;
 
     public override int RoleCount => 0;
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Length == 1 ? arguments[0] : 0);
+    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
 
     public NebulaConfiguration IsModifierOption = null!;
     public NebulaConfiguration SidekickCanKillOption = null!;
@@ -254,7 +285,9 @@ public class Sidekick : ConfigurableRole
         {
             JackalTeamId=jackalTeamId;
         }
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin;
+
+        public override int[]? GetRoleArgument() => [JackalTeamId];
+        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId));
         public override void OnActivated()
         {
             //サイドキック除去
@@ -266,7 +299,7 @@ public class Sidekick : ConfigurableRole
 
                 if (MyRole.SidekickCanKillOption)
                 {
-                    var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
+                    var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
 
                     killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                     killButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
@@ -281,33 +314,27 @@ public class Sidekick : ConfigurableRole
                 }
 
                 if (GeneralConfigurations.JackalRadioOption)
-                {
-                    VoiceChatRadio jackalRadio = new((p)=>p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, Language.Translate("voiceChat.info.jackalRadio"), MyRole.RoleColor);
-                    Bind(new NebulaGameScript()
-                    {
-                        OnActivatedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.AddRadio(jackalRadio),
-                        OnReleasedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.RemoveRadio(jackalRadio)
-                    });
-                }
+                    Bind(VoiceChatManager.GenerateBindableRadioScript((p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.RoleColor));
             }
         }
     }
 }
 
-public class SidekickModifier : AbstractModifier
+public class SidekickModifier : AbstractModifier, HasCitation
 {
     static public SidekickModifier MyRole = new SidekickModifier();
 
     public override string LocalizedName => "sidekick";
     public override Color RoleColor => Jackal.MyRole.RoleColor;
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Length == 1 ? arguments[0] : 0);
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments.Get(0,0));
 
     public class Instance : ModifierInstance
     {
         public override AbstractModifier Role => MyRole;
         public int JackalTeamId;
 
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin;
+        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId));
 
         public Instance(PlayerModInfo player, int jackalTeamId) : base(player)
         {
@@ -326,14 +353,7 @@ public class SidekickModifier : AbstractModifier
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
                 if (GeneralConfigurations.JackalRadioOption)
-                {
-                    VoiceChatRadio jackalRadio = new((p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, Language.Translate("voiceChat.info.jackalRadio"), MyRole.RoleColor);
-                    Bind(new NebulaGameScript()
-                    {
-                        OnActivatedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.AddRadio(jackalRadio),
-                        OnReleasedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.RemoveRadio(jackalRadio)
-                    });
-                }
+                    Bind(VoiceChatManager.GenerateBindableRadioScript((p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.RoleColor));                
 
                 if (MyPlayer.Role.Role.Category == RoleCategory.ImpostorRole && MyPlayer.TryGetModifier<Lover.Instance>(out _))
                     new StaticAchievementToken("threeRoles");

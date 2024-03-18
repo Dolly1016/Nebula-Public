@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
@@ -33,7 +34,7 @@ public class Jailer : ConfigurableStandardRole
         CanIdentifyImpostorsOption = new NebulaConfiguration(RoleConfig, "canIdentifyImpostors", null, false, false);
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
         public Instance(PlayerModInfo player) : base(player)
@@ -43,22 +44,38 @@ public class Jailer : ConfigurableStandardRole
         AchievementToken<bool>? acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
 
-        public override void OnOpenSabotageMap()
+        void IGameEntity.OnOpenNormalMap()
         {
-            MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
-            MapBehaviour.Instance.countOverlay.SetModOption(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, false, Palette.ImpostorRed);
-            MapBehaviour.Instance.countOverlay.SetOptions(true, true);
-            ConsoleTimer.MarkAsNonConsoleMinigame();
+            if (AmOwner)
+            {
+                MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
+                MapBehaviour.Instance.countOverlay.SetModOption(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, false);
+                MapBehaviour.Instance.countOverlay.SetOptions(true, true);
+                ConsoleTimer.MarkAsNonConsoleMinigame();
 
-            MapBehaviour.Instance.taskOverlay.Hide();
-
-            MapBehaviour.Instance.countOverlayAllowsMovement = MyRole.CanMoveWithMapWatchingOption;
-            if (!MapBehaviour.Instance.countOverlayAllowsMovement) PlayerControl.LocalPlayer.NetTransform.Halt();
-
-            acTokenCommon ??= new("jailer.common1", false, (val, _) => val);
+                MapBehaviour.Instance.taskOverlay.Hide();
+            }
         }
 
-        public override void OnKillPlayer(PlayerControl target)
+        void IGameEntity.OnOpenSabotageMap()
+        {
+            if (AmOwner)
+            {
+                MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
+                MapBehaviour.Instance.countOverlay.SetModOption(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, false, Palette.ImpostorRed);
+                MapBehaviour.Instance.countOverlay.SetOptions(true, true);
+                ConsoleTimer.MarkAsNonConsoleMinigame();
+
+                MapBehaviour.Instance.taskOverlay.Hide();
+
+                MapBehaviour.Instance.countOverlayAllowsMovement = MyRole.CanMoveWithMapWatchingOption;
+                if (!MapBehaviour.Instance.countOverlayAllowsMovement) PlayerControl.LocalPlayer.NetTransform.Halt();
+
+                acTokenCommon ??= new("jailer.common1", false, (val, _) => val);
+            }
+        }
+
+        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
         {
             if (AmOwner)
             {
@@ -108,15 +125,17 @@ public class Jailer : ConfigurableStandardRole
             }
         }
 
-        public override void OnMapInstantiated()
+        void IGameEntity.OnMapInstantiated()
         {
-            Transform roomNames;
-            if (AmongUsUtil.CurrentMapId == 0) roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames (1)");
-            else roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames");
+            if (AmOwner)
+            {
+                Transform roomNames;
+                if (AmongUsUtil.CurrentMapId == 0) roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames (1)");
+                else roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames");
 
-            OptimizeMap(roomNames, MapBehaviour.Instance.countOverlay, MapBehaviour.Instance.infectedOverlay);
+                OptimizeMap(roomNames, MapBehaviour.Instance.countOverlay, MapBehaviour.Instance.infectedOverlay);
+            }
         }
-
     }
 
     public static void OptimizeMap(Transform roomNames, MapCountOverlay countOverlay, InfectedOverlay infectedOverlay)

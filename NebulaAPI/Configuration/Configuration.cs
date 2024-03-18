@@ -42,6 +42,20 @@ public interface ValueConfiguration
     string CurrentValue { get; }
 
     /// <summary>
+    /// 現在の値を実数型で取得します。
+    /// 実数型のオプションでない場合、取得に失敗し、例外が発生します。
+    /// </summary>
+    /// <returns>設定値</returns>
+    float AsFloat();
+
+    /// <summary>
+    /// 現在の値を整数型で取得します。
+    /// 整数型のオプションでない場合、取得に失敗し、例外が発生します。
+    /// </summary>
+    /// <returns>設定値</returns>
+    int AsInt();
+
+    /// <summary>
     /// 値を整数で指定します。ホストのみ使用可能です。
     /// </summary>
     /// <param name="value">新たな設定値</param>

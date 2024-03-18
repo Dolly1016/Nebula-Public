@@ -4,6 +4,7 @@ using Il2CppSystem.Runtime.Remoting.Messaging;
 using JetBrains.Annotations;
 using MS.Internal.Xml.XPath;
 using Nebula.Modules;
+using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
 using Nebula.Roles.Assignment;
 using System;
@@ -17,6 +18,7 @@ using TMPro;
 using UnityEngine;
 using Virial.Assignable;
 using Virial.Configuration;
+using static Il2CppMono.Security.X509.X520;
 using static Il2CppSystem.Linq.Expressions.Interpreter.NullableMethodCallInstruction;
 
 namespace Nebula.Configuration;
@@ -374,17 +376,17 @@ public class ConfigurationHolder
         return this;
     }
 
-    public IMetaContextOld GetContext()
+    public IMetaParallelPlacableOld GetWidget()
     {
-        MetaContextOld context = new();
+        MetaWidgetOld widget = new();
         foreach(var config in myConfigurations)
         {
             if (!config.IsShown) continue;
 
             var editor = config.GetEditor();
-            if (editor != null) context.Append(editor);
+            if (editor != null) widget.Append(editor);
         }
-        return context;
+        return widget;
     }
 
     public int TabMask { get => tabMask; set => tabMask = value; }
@@ -454,7 +456,7 @@ public class NebulaConfiguration : ValueConfiguration
     public Func<object?, string>? Decorator { get; set; } = null;
     public Func<int, object?>? Mapper { get; set; } = null;
     public Func<bool>? Predicate { get; set; } = null;
-    public Func<IMetaContextOld?>? Editor { get; set; } = null;
+    public Func<IMetaWidgetOld?>? Editor { get; set; } = null;
     public Func<string?>? Shower { get; set; }
     public bool LoopAtBothEnds { get; set; } = true;
     public int MaxValue { get; private init; }
@@ -466,46 +468,46 @@ public class NebulaConfiguration : ValueConfiguration
 
     public static List<NebulaConfiguration> AllConfigurations = new();
 
-    public static IMetaContextOld? GetDetailContext(string detailId) {
-        var context = DocumentManager.GetDocument(detailId)?.Build(null, false);
+    public static GUIWidget? GetDetailWidget(string detailId) {
+        var widget = DocumentManager.GetDocument(detailId)?.Build(null, false);
 
-        if (context == null)
+        if (widget == null)
         {
             string? display = Language.Find(detailId);
-            if (display != null) context = new MetaContextOld.VariableText(TextAttribute.ContentAttr) { Alignment = IMetaContextOld.AlignmentOption.Left, RawText = display };
+            if (display != null) widget = new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentStandard), new RawTextComponent(display));
         }
 
-        return context;
+        return widget;
     }
 
     public void TitlePostBuild(TextMeshPro text, string? detailId)
     {
-        IMetaContextOld? context = null;
+        GUIWidget? widget = null;
 
         detailId ??= Id;
         detailId += ".detail";
 
-        context = GetDetailContext(detailId);
+        widget = GetDetailWidget(detailId);
 
-        if (context == null) return;
+        if (widget == null) return;
 
         var buttonArea = UnityHelper.CreateObject<BoxCollider2D>("DetailArea", text.transform, Vector3.zero);
         var button = buttonArea.gameObject.SetUpButton();
         buttonArea.size = text.rectTransform.sizeDelta;
         buttonArea.isTrigger = true;
-        button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpContext(button, context));
-        button.OnMouseOut.AddListener(()=>NebulaManager.Instance.HideHelpContext());
+        button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, widget));
+        button.OnMouseOut.AddListener(()=>NebulaManager.Instance.HideHelpWidget());
     }
-    public IMetaContextOld? GetEditor()
+    public IMetaWidgetOld? GetEditor()
     {
         if (Editor != null)
             return Editor.Invoke();
-        return new CombinedContextOld(0.55f, IMetaContextOld.AlignmentOption.Center,
-            new MetaContextOld.Text(OptionTitleAttr) { RawText = Title.GetString(), PostBuilder = (text) => TitlePostBuild(text, null) },
+        return new CombinedWidgetOld(0.55f, IMetaWidgetOld.AlignmentOption.Center,
+            new MetaWidgetOld.Text(OptionTitleAttr) { RawText = Title.GetString(), PostBuilder = (text) => TitlePostBuild(text, null) },
             OptionTextColon,
-            OptionButtonContext(() => ChangeValue(false), "<<"),
-            new MetaContextOld.Text(OptionValueAttr) { RawText = ToDisplayString()},
-            OptionButtonContext(() => ChangeValue(true), ">>")
+            OptionButtonWidget(() => ChangeValue(false), "<<"),
+            new MetaWidgetOld.Text(OptionValueAttr) { RawText = ToDisplayString()},
+            OptionButtonWidget(() => ChangeValue(true), ">>")
             );
     }
 
@@ -515,26 +517,26 @@ public class NebulaConfiguration : ValueConfiguration
             return Shower?.Invoke() ?? null;
         }catch
         {
-            NebulaPlugin.Log.Print(null, Id + " is not printable.");
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Warning, null, Id + " is not printable.");
             return null;
         }
     }
 
-    static public TextAttribute GetOptionBoldAttr(float width, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.Center) => new(TextAttribute.BoldAttr)
+    static public TextAttributeOld GetOptionBoldAttr(float width, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.Center) => new(TextAttributeOld.BoldAttr)
     {
         FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
         Size = new Vector2(width, 0.4f),
         Alignment = alignment
     };
-    static public TextAttribute OptionTitleAttr = GetOptionBoldAttr(4f,TMPro.TextAlignmentOptions.Left);
-    static public TextAttribute OptionValueAttr = GetOptionBoldAttr(1.1f);
-    static public TextAttribute OptionShortValueAttr = GetOptionBoldAttr(0.7f);
-    static public TextAttribute OptionButtonAttr = new(TextAttribute.BoldAttr) {
+    static public TextAttributeOld OptionTitleAttr = GetOptionBoldAttr(4f,TMPro.TextAlignmentOptions.Left);
+    static public TextAttributeOld OptionValueAttr = GetOptionBoldAttr(1.1f);
+    static public TextAttributeOld OptionShortValueAttr = GetOptionBoldAttr(0.7f);
+    static public TextAttributeOld OptionButtonAttr = new(TextAttributeOld.BoldAttr) {
         FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
         Size = new Vector2(0.32f, 0.22f) 
     };
-    static public MetaContextOld.Button OptionButtonContext(Action clickAction,string rawText,float? width = null) {
-        return new MetaContextOld.Button(() =>
+    static public MetaWidgetOld.Button OptionButtonWidget(Action clickAction,string rawText,float? width = null) {
+        return new MetaWidgetOld.Button(() =>
         {
             clickAction();
             if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage();
@@ -544,20 +546,20 @@ public class NebulaConfiguration : ValueConfiguration
             PostBuilder = (button, renderer, text) => { renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; }
         };
     }
-    static public IMetaParallelPlacableOld OptionTranslatedText(string translationKey, float width) => new MetaContextOld.Text(new(OptionTitleAttr) { Size = new Vector2(width, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center }) { TranslationKey = translationKey };
-    static public IMetaParallelPlacableOld OptionRawText(string text, float width) => new MetaContextOld.Text(new(OptionTitleAttr) { Size = new Vector2(width, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = text };
+    static public IMetaParallelPlacableOld OptionTranslatedText(string translationKey, float width) => new MetaWidgetOld.Text(new(OptionTitleAttr) { Size = new Vector2(width, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center }) { TranslationKey = translationKey };
+    static public IMetaParallelPlacableOld OptionRawText(string text, float width) => new MetaWidgetOld.Text(new(OptionTitleAttr) { Size = new Vector2(width, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = text };
     static public IMetaParallelPlacableOld OptionTextColon => OptionRawText(":",0.2f);
 
 
     static public Func<object?, string> PercentageDecorator = (mapped) => mapped + Language.Translate("options.percentage");
     static public Func<object?, string> OddsDecorator = (mapped) => mapped + Language.Translate("options.cross");
     static public Func<object?, string> SecDecorator = (mapped) => mapped + Language.Translate("options.sec");
-    static public Func<IMetaContextOld?> EmptyEditor = () => null;
+    static public Func<IMetaWidgetOld?> EmptyEditor = () => null;
 
     public string DefaultShowerString => Title.GetString() + " : " + ToDisplayString();
     
 
-    public NebulaConfiguration(ConfigurationHolder? holder, Func<IMetaContextOld?> editor)
+    public NebulaConfiguration(ConfigurationHolder? holder, Func<IMetaWidgetOld?> editor, Func<string?>? shower = null)
     {
         MyHolder = holder;
         MyHolder?.RegisterOption(this);
@@ -566,9 +568,16 @@ public class NebulaConfiguration : ValueConfiguration
         entry = null;
         Title = new RawTextComponent("Undefined");
 
-        Shower = null;
+        Shower = shower;
 
         AllConfigurations.Add(this);
+    }
+
+    public NebulaConfiguration ReplaceTitle(string translationKey, bool withHolderPrefix = true)
+    {
+        if (withHolderPrefix) translationKey = MyHolder.Id + "." + translationKey;
+        Title = new TranslateTextComponent(translationKey);
+        return this;
     }
 
     public NebulaConfiguration(ConfigurationHolder? holder, string id, Virial.Text.TextComponent? title, int maxValue,int defaultValue,int invalidatedValue)
@@ -687,7 +696,8 @@ public class NebulaConfiguration : ValueConfiguration
     public int CurrentValue => (IsShown && entry != null) ? entry.CurrentValue : InvalidatedValue;
 
     string ValueConfiguration.CurrentValue => GetString();
-
+    float ValueConfiguration.AsFloat() => GetFloat();
+    int ValueConfiguration.AsInt() => GetMappedInt();
     public object? GetMapped() => GetMapped(CurrentValue);
 
     private object? GetMapped(int currentValue)

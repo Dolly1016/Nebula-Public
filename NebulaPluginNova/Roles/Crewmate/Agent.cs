@@ -1,4 +1,5 @@
 ﻿using Il2CppSystem.Text.Json;
+using Mono.CSharp;
 using Nebula.Configuration;
 using Nebula.Modules.ScriptComponents;
 using System;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -24,6 +26,7 @@ public class Agent : ConfigurableStandardRole
 
     private NebulaConfiguration NumOfExemptedTasksOption = null!;
     private NebulaConfiguration NumOfExtraTasksOption = null!;
+    private NebulaConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = null!;
     private new VentConfiguration VentConfiguration = null!;
 
     protected override void LoadOptions()
@@ -32,13 +35,12 @@ public class Agent : ConfigurableStandardRole
 
         VentConfiguration = new(RoleConfig, (0, 16, 3), null, (2.5f, 30f, 10f));
         NumOfExemptedTasksOption = new(RoleConfig, "numOfExemptedTasks", null, 1, 8, 3, 3);
-        NumOfExtraTasksOption = new(RoleConfig, "numOfExtraTasks", null, 1, 8, 3, 3);
+        NumOfExtraTasksOption = new(RoleConfig, "numOfExtraTasks", null, 0, 8, 3, 3);
+        SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = new(RoleConfig, "suicideIfSomeoneElseCompletesTasksBeforeAgent", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
-        private ModAbilityButton? taskButton = null;
-
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
         public override AbstractRole Role => MyRole;
         public override bool CanUseVent => leftVent > 0;
@@ -53,6 +55,21 @@ public class Agent : ConfigurableStandardRole
         }
 
         public override int[]? GetRoleArgument() => new int[] { leftVent };
+
+        void IGameEntity.OnTaskUpdated(GamePlayer player)
+        {
+            if (AmOwner)
+            {
+                int tasks = AmongUsUtil.NumOfAllTasks;
+                if (player.AmOwner) return;
+                var unboxed = player.Unbox();
+                if (MyRole.SuicideIfSomeoneElseCompletesTasksBeforeAgentOption && unboxed.Tasks.IsCrewmateTask && unboxed.Tasks.TotalTasks >= tasks && unboxed.Tasks.IsCompletedTotalTasks)
+                {
+                    MyPlayer.MyControl.ModSuicide(false, PlayerState.Suicide, EventDetail.Layoff);
+                    new StaticAchievementToken("agent.another1");
+                }
+            }
+        }
 
         public override void OnEnterVent(Vent vent)
         {
@@ -77,15 +94,18 @@ public class Agent : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                taskButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
-                taskButton.SetSprite(buttonSprite.GetSprite());
-                taskButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyPlayer.Tasks.IsCompletedCurrentTasks;
-                taskButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
-                taskButton.OnClick = (button) => {
-                    MyPlayer.Tasks.GainExtraTasksAndRecompute(MyRole.NumOfExtraTasksOption, 0, 0, false);
-                };
-                taskButton.SetLabel("agent");
-
+                if (MyRole.NumOfExtraTasksOption.GetMappedInt() > 0)
+                {
+                    var taskButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
+                    taskButton.SetSprite(buttonSprite.GetSprite());
+                    taskButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyPlayer.Tasks.IsCompletedCurrentTasks;
+                    taskButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                    taskButton.OnClick = (button) =>
+                    {
+                        MyPlayer.Tasks.GainExtraTasksAndRecompute(MyRole.NumOfExtraTasksOption, 0, 0, false);
+                    };
+                    taskButton.SetLabel("agent");
+                }
 
                 Bind(new GameObjectBinding(HudManager.Instance.ImpostorVentButton.ShowUsesIcon(3, out UsesText)));
                 UsesText.text = leftVent.ToString();

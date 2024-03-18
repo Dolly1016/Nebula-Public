@@ -31,7 +31,7 @@ public class TranslatableTag : CommunicableTextTag
         TranslateKey = translateKey;
 
         if (NebulaPreLoad.FinishedLoading)
-            NebulaPlugin.Log.Print(null, "Pre-loading has been finished. Translatable tag \"" + TranslateKey + "\" is invalid on current process.");
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, "Pre-loading has been finished. Translatable tag \"" + TranslateKey + "\" is invalid on current process.");
         else
             AllTag.Add(this);
         

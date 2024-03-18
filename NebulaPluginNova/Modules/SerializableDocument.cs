@@ -1,6 +1,7 @@
 ﻿using Il2CppSystem.Text.Json;
 using Nebula.Behaviour;
-using Nebula.Modules.MetaContext;
+using Nebula.Modules.MetaWidget;
+using Nebula.Roles;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,11 @@ using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using Virial.Assignable;
+using Virial.Compat;
+using Virial.Media;
+using Virial.Text;
+using static Nebula.Modules.MetaWidgetOld;
 
 namespace Nebula.Modules;
 
@@ -106,10 +112,10 @@ public class SerializableDocument
 
     public static void Load()
     {
-        TextStyle["Standard"] = new TextAttribute(TextAttribute.NormalAttr).EditFontSize(1.2f, 0.6f, 1.2f);
-        TextStyle["Bold"] = new TextAttribute(TextAttribute.BoldAttr).EditFontSize(1.2f, 0.6f, 1.2f);
-        TextStyle["Content"] = new TextAttribute(TextAttribute.ContentAttr).EditFontSize(1.2f, 0.6f, 1.2f);
-        TextStyle["Title"] = new TextAttribute(TextAttribute.TitleAttr).EditFontSize(2.2f, 0.6f, 2.2f);
+        TextStyle["Standard"] = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
+        TextStyle["Bold"] = GUI.API.GetAttribute(AttributeAsset.DocumentBold);
+        TextStyle["Content"] = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
+        TextStyle["Title"] = GUI.API.GetAttribute(AttributeAsset.DocumentTitle);
     }
 
     public IEnumerable<SerializableDocument> AllConents()
@@ -171,6 +177,10 @@ public class SerializableDocument
     [JsonSerializableField(true)]
     public float? Width = null;
 
+    //縦幅
+    [JsonSerializableField(true)]
+    public float? Height = null;
+
     //縦方向余白
     [JsonSerializableField(true)]
     public float? VSpace = null;
@@ -179,43 +189,70 @@ public class SerializableDocument
     [JsonSerializableField(true)]
     public float? HSpace = null;
 
+    //引用
+    [JsonSerializableField(true)]
+    public string? Citation = null;
+
     //ドキュメント参照
     [JsonSerializableField(true)]
     public DocumentReference? Document = null;
 
-    //アラインメント(非推奨)
+    //アラインメント
     [JsonSerializableField(true)]
     public string? Alignment = null;
-    public IMetaContextOld.AlignmentOption GetAlignment()
+
+    public IMetaWidgetOld.AlignmentOption GetAlignmentOld()
     {
-        if (Alignment == null) return IMetaContextOld.AlignmentOption.Left;
+        if (Alignment == null) return IMetaWidgetOld.AlignmentOption.Left;
 
         switch (Alignment)
         {
             case "Center":
-                return IMetaContextOld.AlignmentOption.Center;
+                return IMetaWidgetOld.AlignmentOption.Center;
             case "Left":
-                return IMetaContextOld.AlignmentOption.Left;
+                return IMetaWidgetOld.AlignmentOption.Left;
             case "Right":
-                return IMetaContextOld.AlignmentOption.Right;
+                return IMetaWidgetOld.AlignmentOption.Right;
         }
-        return IMetaContextOld.AlignmentOption.Left;
+        return IMetaWidgetOld.AlignmentOption.Left;
     }
 
-    public TMPro.TextAlignmentOptions GetTextAlignment()
+    public GUIAlignment GetAlignment()
     {
-        if (Alignment == null) return TextAlignmentOptions.Left;
+        if (Alignment == null) return GUIAlignment.Left;
 
         switch (Alignment)
         {
             case "Center":
-                return TextAlignmentOptions.Center;
+                return GUIAlignment.Center;
             case "Left":
-                return TextAlignmentOptions.Left;
+                return GUIAlignment.Left;
             case "Right":
-                return TextAlignmentOptions.Right;
+                return GUIAlignment.Right;
+            case "Top":
+                return GUIAlignment.Top;
+            case "Bottom":
+                return GUIAlignment.Bottom;
         }
-        return TextAlignmentOptions.Left;
+        return GUIAlignment.Left;
+    }
+
+    public Virial.Text.TextAlignment GetTextAlignment()
+    {
+        if (Alignment == null) return Virial.Text.TextAlignment.Left;
+
+        switch (Alignment)
+        {
+            case "Center":
+            case "Bottom":
+            case "Top":
+                return Virial.Text.TextAlignment.Center;
+            case "Left":
+                return Virial.Text.TextAlignment.Left;
+            case "Right":
+                return Virial.Text.TextAlignment.Right;
+        }
+        return Virial.Text.TextAlignment.Left;
     }
 
     public INameSpace? RelatedNamespace = null;
@@ -253,12 +290,11 @@ public class SerializableDocument
 
     private const int MaxNesting = 32;
 
-    public IMetaContextOld? BuildForDev(Action<PassiveButton,SerializableDocument, SerializableDocument?> editorBuilder, SerializableDocument? parent = null, INameSpace? nameSpace = null)
+    public GUIWidget? BuildForDev(Action<PassiveButton,SerializableDocument, SerializableDocument?> editorBuilder, SerializableDocument? parent = null, INameSpace? nameSpace = null)
     {
-        var context = BuildInternal(nameSpace ?? RelatedNamespace, null, null, c => c.BuildForDev(editorBuilder, this, nameSpace ?? RelatedNamespace), false, true, MaxNesting);
+        var widget = BuildInternal(nameSpace ?? RelatedNamespace, null, null, c => c.BuildForDev(editorBuilder, this, nameSpace ?? RelatedNamespace), false, true, MaxNesting);
 
-        if (context != null) context = new MetaContextOld.FramedContext(context, new Vector2(0.15f, 0.15f)) { 
-            HighlightColor = UnityEngine.Color.cyan.AlphaMultiplied(0.25f), 
+        if (widget != null) widget = new NoSGUIFramed(GetAlignment(), widget, new(0.15f, 0.15f)) { 
             PostBuilder = renderer =>
             {
                 renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
@@ -267,70 +303,47 @@ public class SerializableDocument
                 collider.size = renderer.size;
                 editorBuilder.Invoke(button,this,parent);
             } };
-
-        return context;
+        
+        return widget;
     }
 
-    public IMetaContextOld? Build(Reference<MetaContextOld.ScrollView.InnerScreen>? myScreen, bool useMaskedMaterial = true, int leftNesting = MaxNesting, INameSpace? nameSpace = null) => BuildInternal(nameSpace ?? RelatedNamespace, null, myScreen, c => c.Build(myScreen, useMaskedMaterial, leftNesting, nameSpace ?? RelatedNamespace), true, useMaskedMaterial, leftNesting);
-    public IMetaContextOld? BuildReference(FunctionalEnvironment? table, INameSpace? nameSpace, Reference<MetaContextOld.ScrollView.InnerScreen>? myScreen, bool buildHyperLink, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, buildHyperLink, leftNesting), buildHyperLink, true, leftNesting);
+    public GUIWidget? Build(Artifact<GUIScreen>? myScreen, bool useMaskedMaterial = true, int leftNesting = MaxNesting, INameSpace? nameSpace = null) => BuildInternal(nameSpace ?? RelatedNamespace, null, myScreen, c => c.Build(myScreen, useMaskedMaterial, leftNesting, nameSpace ?? RelatedNamespace), true, useMaskedMaterial, leftNesting);
+    public GUIWidget? BuildReference(FunctionalEnvironment? table, INameSpace? nameSpace, Artifact<GUIScreen>? myScreen, bool buildHyperLink, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, buildHyperLink, leftNesting), buildHyperLink, true, leftNesting);
 
 
-    public IMetaContextOld? BuildInternal(INameSpace? nameSpace, FunctionalEnvironment? arguments, Reference<MetaContextOld.ScrollView.InnerScreen>? myScreen, Func<SerializableDocument, IMetaContextOld?> builder, bool buildHyperLink,bool useMaskedMaterial, int leftNesting)
+    public GUIWidget? BuildInternal(INameSpace? nameSpace, FunctionalEnvironment? arguments, Artifact<GUIScreen>? myScreen, Func<SerializableDocument, GUIWidget?> builder, bool buildHyperLink,bool useMaskedMaterial, int leftNesting)
     {
         if(Predicate != null && Predicate.Length > 0)
         {
             if (!(arguments?.GetValue(Predicate[0] is '#' ? Predicate.Substring(1) : Predicate).AsBool() ?? true))
-                return new MetaContextOld();
+                return new NoSGUIMargin(GetAlignment(), new(0f,0f));
         }
 
         string ConsiderArgumentAsStr(string str) => arguments.GetString(str);
+        IFunctionalVariable ConsiderArgument(string str) => arguments.GetValueOrRaw(str);
 
         if (Contents != null)
-        {
-            MetaContextOld context = new();
-            context.MaxWidth = Width;
-
-            foreach(var c in Contents)
-            {
-                var subContext = builder.Invoke(c);
-                if (subContext != null) context.Append(subContext);
-            }
-            return context;
-        }
+            return new VerticalWidgetsHolder(GetAlignment(), Contents.Select(c => builder.Invoke(c)).Where(c => c != null)) { FixedWidth = Width };
+        
 
         if(Aligned != null)
-        {
-            List<IMetaParallelPlacableOld> list = new();
-            foreach (var c in Aligned)
-            {
-                var tem = builder.Invoke(c);
-                if (!(tem is IMetaParallelPlacableOld mpp))
-                {
-                    NebulaPlugin.Log.Print(NebulaLog.LogCategory.Document,"Document contains an unalignable content.");
-                    continue;
-                }
-                list.Add(mpp);
-            }
-            return new CombinedContextOld(list.ToArray()) { Alignment = GetAlignment() };
-        }
+            return new HorizontalWidgetsHolder(GetAlignment(), Aligned.Select(c => builder.Invoke(c)).Where(c => c != null)) { FixedHeight = Height };
+
 
         if(TranslationKey != null || RawText != null)
         {
-            string text = TranslationKey != null ? Language.Translate(ConsiderArgumentAsStr(TranslationKey!)) : ConsiderArgumentAsStr(RawText!);
+            TextComponent text = TranslationKey != null ? new TranslateTextComponent(ConsiderArgumentAsStr(TranslationKey!)) : new RawTextComponent(ConsiderArgumentAsStr(RawText!));
 
             TextAttribute? attr = null;
             if(Style == null || !TextStyle.TryGetValue(ConsiderArgumentAsStr(Style), out attr)) attr = (IsVariable ?? false) ? TextStyle["Content"] : TextStyle["Standard"];
 
-            float fontSize = FontSize.HasValue ? FontSize.Value : attr.FontSize;
+            float fontSize = FontSize.HasValue ? FontSize.Value : attr.FontSize.FontSizeDefault;
             attr = new(attr) {
-                FontSize = fontSize,
-                FontMinSize = Mathf.Min(fontSize, attr.FontMinSize),
-                FontMaxSize = Mathf.Max(fontSize, attr.FontMaxSize),
-                Color = Color?.AsColor(arguments) ?? UnityEngine.Color.white,
-                Styles = IsBold.HasValue ? (IsBold.Value ? TMPro.FontStyles.Bold : TMPro.FontStyles.Normal) : attr.Styles,
+                FontSize = new Virial.Text.FontSize(fontSize, Mathf.Min(fontSize, attr.FontSize.FontSizeMin), Mathf.Max(fontSize, attr.FontSize.FontSizeMax)),
+                Color = new(Color?.AsColor(arguments) ?? UnityEngine.Color.white),
+                Style = IsBold.HasValue ? (IsBold.Value ? Virial.Text.FontStyle.Bold : Virial.Text.FontStyle.Normal) : attr.Style,
                 Alignment = GetTextAlignment(),
-                FontMaterial = useMaskedMaterial ? VanillaAsset.StandardMaskedFontMaterial : null
-               
+                IsFlexible = IsVariable ?? true
             };
 
             void PostBuilder(TMPro.TextMeshPro text) {
@@ -346,7 +359,7 @@ public class SerializableDocument
                         }
                     }
 
-                    var collider = UnityHelper.CreateObject<BoxCollider2D>("TextCollider", text.transform.parent, text.transform.localPosition);
+                    var collider = UnityHelper.CreateObject<BoxCollider2D>("TextCollider", text.transform, UnityEngine.Vector3.zero);
                     collider.size = text.rectTransform.sizeDelta;
                     var button = collider.gameObject.SetUpButton();
                     button.OnClick.AddListener(() =>
@@ -364,29 +377,23 @@ public class SerializableDocument
                         switch (args[0])
                         {
                             case "to":
-                                myScreen?.Value?.SetContext(DocumentManager.GetDocument(args[1])?.Build(myScreen) ?? null);
+                                myScreen?.Do(screen => screen.SetWidget(DocumentManager.GetDocument(args[1])?.Build(myScreen) ?? null, out _));
                                 break;
                             default:
-                                NebulaPlugin.Log.Print(NebulaLog.LogCategory.Document, $"Unknown link action \"{args[0]}\" is triggered.");
+                                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Document, $"Unknown link action \"{args[0]}\" is triggered.");
                                 break;
                         }
                     });
                 }
             }
 
-            if (IsVariable ?? false)
-            {
-                return new MetaContextOld.VariableText(attr) { RawText = text, Alignment = GetAlignment(), PostBuilder =  PostBuilder };
-            }
-            else
-            {
-                return new MetaContextOld.Text(attr) { RawText = text, Alignment = GetAlignment(), PostBuilder = PostBuilder };
-            }
+            return new NoSGUIText(GetAlignment(), attr, text) { PostBuilder = PostBuilder };            
         }
 
         if(Image != null)
         {
             string image = ConsiderArgumentAsStr(Image);
+
             if (imageLoader == null || image != lastImagePath)
             {
                 if (image.Contains("::"))
@@ -407,38 +414,60 @@ public class SerializableDocument
                 sprite = imageLoader?.GetSprite()!;
             }
             catch { }
+
+
+
             if (sprite)
-                return new MetaContextOld.Image(sprite) { Width = Width ?? 1f, PostBuilder = image => image.maskInteraction = useMaskedMaterial ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None, Alignment = GetAlignment() };
+                return new NoSGUIImage(GetAlignment(), imageLoader!, new(Width, Height));
             else
-                return new MetaContextOld.VariableText(new TextAttribute(TextAttribute.BoldAttrLeft) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(1.4f)) { RawText = lastImagePath.Color(UnityEngine.Color.gray), Alignment = GetAlignment() };
+                return new NoSGUIText(GetAlignment(), GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), new RawTextComponent(lastImagePath.Color(UnityEngine.Color.gray)));
         }
 
-        if (HSpace != null) return new MetaContextOld.HorizonalMargin(HSpace.Value);
-        if (VSpace != null) return new MetaContextOld.VerticalMargin(VSpace.Value);
+        if (HSpace != null || VSpace != null) return new NoSGUIMargin(GetAlignment(), new(HSpace ?? 0f, VSpace ?? 0f));
 
         if(Document != null)
         {
             if (leftNesting == 0)
-            {
-                return new MetaContextOld.VariableText(new TextAttribute(TextAttribute.BoldAttrLeft) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(1f)) { MyText = NebulaGUIContextEngine.Instance.TextComponent(UnityEngine.Color.red, "ui.document.tooLongNesting"), Alignment = IMetaContextOld.AlignmentOption.Left };
-            }
+                return new NoSGUIText(GetAlignment(), GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), GUI.Instance.TextComponent(UnityEngine.Color.red, "ui.document.tooLongNesting"));
             else
             {
                 SerializableDocument? doc = null;
 
+                string docId = ConsiderArgumentAsStr(Document.Id);
                 if (nameSpace is DevAddon addon)
                 {
-                    string path = "Documents/" + Document.Id + ".json";
+                    string path = "Documents/" + docId + ".json";
                     var stream = nameSpace?.OpenRead(path);
                     if (stream != null) {
                         doc = JsonStructure.Deserialize<SerializableDocument>(new StreamReader(stream).ReadToEnd());
                     }
                 }
-                doc ??= DocumentManager.GetDocument(ConsiderArgumentAsStr(Document.Id));
-                return doc?.BuildReference(new FunctionalEnvironment(Document.Arguments, arguments), nameSpace, myScreen, buildHyperLink, leftNesting - 1) ?? new MetaContextOld();
+                doc ??= DocumentManager.GetDocument(docId);
+                return doc?.BuildReference(new FunctionalEnvironment(Document.Arguments, arguments), nameSpace, myScreen, buildHyperLink, leftNesting - 1) ?? new NoSGUIMargin(GetAlignment(), UnityEngine.Vector2.zero);
             }
         }
+
+        if(Citation != null)
+        {
+            var citation = ConsiderArgument(Citation).AsObject<Citation>();
+            if (citation == null) Virial.Assignable.Citation.TryGetCitation(ConsiderArgumentAsStr(Citation), out citation);
+
+            if(citation == null) return new NoSGUIMargin(GetAlignment(), UnityEngine.Vector2.zero);
+
+            GUIClickableAction? onClick = (buildHyperLink && citation.RelatedUrl != null) ? _ => Application.OpenURL(citation.RelatedUrl) : null;
+            var overlay = (buildHyperLink && citation.RelatedUrl != null) ? GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), "ui.citation.openUrl") : null;
+
+            if (citation?.LogoImage != null) return GUI.Instance.Image(GetAlignment(), citation.LogoImage, new(1.5f, 0.37f), onClick, overlay);
+
+            return new NoSGUIText(GetAlignment(), GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), citation!.Name) {
+                OverlayWidget = overlay,
+                OnClickText = onClick != null ? (() => onClick?.Invoke(null!), false) : null
+            };
+            
+        }
+
         //無効なコンテンツ
         return null;
     }
+
 }

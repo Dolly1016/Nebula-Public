@@ -294,8 +294,8 @@ public class TextField : MonoBehaviour
         UpdateTextMesh();
     }
 
-    private TextAttribute GenerateAttribute(Vector2 size, float fontSize, TextAlignmentOptions alignment)
-    => new TextAttribute()
+    private TextAttributeOld GenerateAttribute(Vector2 size, float fontSize, TextAlignmentOptions alignment)
+    => new TextAttributeOld()
     {
         Alignment = alignment,
         AllowAutoSizing = false,

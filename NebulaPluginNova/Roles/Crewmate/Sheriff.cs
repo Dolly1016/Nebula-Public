@@ -5,7 +5,7 @@ using Virial.Assignable;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Sheriff : ConfigurableStandardRole
+public class Sheriff : ConfigurableStandardRole, HasCitation
 {
     static public Sheriff MyRole = new Sheriff();
 
@@ -13,6 +13,7 @@ public class Sheriff : ConfigurableStandardRole
 
     public override string LocalizedName => "sheriff";
     public override Color RoleColor => new Color(240f / 255f, 191f / 255f, 0f);
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Crewmate.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
@@ -51,6 +52,7 @@ public class Sheriff : ConfigurableStandardRole
 
         public override void OnGameStart()
         {
+            base.OnGameStart();
             if (AmOwner) {
                 int impostors = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.Role.Role.Category == RoleCategory.ImpostorRole) ?? 0;
                 if(impostors > 0) acTokenChallenge = new("sheriff.challenge", impostors, (val, _) => val == 0);

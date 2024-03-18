@@ -20,7 +20,7 @@ public class ConsoleTimer : MonoBehaviour
     {
         timerText = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, transform);
         timerText.name = "TimerText";
-        TextAttribute.BoldAttr.Reflect(timerText);
+        TextAttributeOld.BoldAttr.Reflect(timerText);
 
         timerText.text = "";
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualBasic;
+﻿using Innersloth.IO;
+using Microsoft.VisualBasic;
 using Mono.CSharp;
 using System;
 using System.Collections.Generic;
@@ -127,5 +128,37 @@ static public class Commands
             return CoExecute();
         })
         , "property");
+
+        CommandManager.RegisterCommand(new Command((bubble, args, result) =>
+        {
+            IEnumerator CoExecute()
+            {
+                if (args.Length != 1)
+                {
+                    bubble.PushResponse("output <target>".Color(invalidColor));
+                    yield break;
+                }
+
+                var str = args[0].GetString(bubble);
+
+                switch (str)
+                {
+                    case "options":
+                        //coll.Add(FileIO.GetDataPathTo(DataSaver.ToDataSaverPath("Config")));
+                        break;
+                    case "log":
+                        //coll.Add(System.IO.Path.GetFullPath("BepInEx" + Path.DirectorySeparatorChar + "LogOutput.log"));
+                        //if (File.Exists("BepInEx" + Path.DirectorySeparatorChar + "ErrorLog.log")) coll.Add(System.IO.Path.GetFullPath("BepInEx" + Path.DirectorySeparatorChar + "ErrorLog.log"));
+                        break;
+                    default:
+                        bubble.PushResponse($"Unknown target \"{ str ?? "Non-Text" }\"".Color(invalidColor));
+                        break;
+                }
+
+                yield break;
+            }
+            return CoExecute();
+        })
+        , "output");
     }
 }

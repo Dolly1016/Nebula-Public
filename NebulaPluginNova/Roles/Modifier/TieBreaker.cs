@@ -3,21 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
 
 
-public class TieBreaker : ConfigurableStandardModifier
+public class TieBreaker : ConfigurableStandardModifier, HasCitation
 {
     static public TieBreaker MyRole = new TieBreaker();
     public override string LocalizedName => "tieBreaker";
     public override string CodeName => "TBR";
     public override Color RoleColor => new Color(239f / 255f, 175f / 255f, 135f / 255f);
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
-    public class Instance : ModifierInstance
+    public class Instance : ModifierInstance, IGamePlayerEntity
     {
         public override AbstractModifier Role => MyRole;
 
@@ -38,7 +41,7 @@ public class TieBreaker : ConfigurableStandardModifier
             }
         }
 
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
             if (acTokenChallenge != null) acTokenChallenge.Value.lastTieVoted = 255;
         }

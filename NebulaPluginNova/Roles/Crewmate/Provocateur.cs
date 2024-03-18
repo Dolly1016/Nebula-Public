@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -53,7 +54,7 @@ public class Provocateur : ConfigurableStandardRole
         EmbroilDurationOption = new(RoleConfig, "embroilDuration", null, 1f, 20f, 1f, 5f, 5f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
         public Instance(PlayerModInfo player) : base(player){}
@@ -83,20 +84,21 @@ public class Provocateur : ConfigurableStandardRole
             }
         }
 
-        public override void OnMurdered(PlayerControl murderer)
+        void IGamePlayerEntity.OnMurdered(GamePlayer murderer)
         {
             if (murderer.PlayerId == MyPlayer.PlayerId) return;
 
-            if (AmOwner && embroilButton.EffectActive && !murderer.Data.IsDead)
+            if (AmOwner && embroilButton.EffectActive && !murderer.VanillaPlayer.Data.IsDead)
             {
-                MyPlayer.MyControl.ModKill(murderer,false,PlayerState.Embroiled,EventDetail.Embroil);
-                
-                var murdererRole = murderer.GetModInfo()?.Role.Role;
-                if (murdererRole is Sniper or Raider && murderer.GetTruePosition().Distance(MyPlayer.MyControl.GetTruePosition()) > 10f) new StaticAchievementToken("provocateur.challenge");
+                MyPlayer.MyControl.ModKill(murderer.VanillaPlayer,false,PlayerState.Embroiled,EventDetail.Embroil);
+                new StaticAchievementToken("provocateur.common2");
+
+                var murdererRole = murderer.Unbox()?.Role.Role;
+                if (murdererRole is Sniper or Raider && murderer.VanillaPlayer.GetTruePosition().Distance(MyPlayer.MyControl.GetTruePosition()) > 10f) new StaticAchievementToken("provocateur.challenge");
             }
         }
 
-        public override void OnExiled()
+        void IGamePlayerEntity.OnExiled()
         {
             if (!AmOwner) return;
 

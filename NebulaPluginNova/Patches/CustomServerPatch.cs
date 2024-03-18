@@ -63,14 +63,14 @@ public static class RegionMenuOpenPatch
         if (!ipField)
         {
             Reference<TextField> ipRef = new();
-            var context = new MetaContextOld.TextInput(1, 2f, new(2.8f, 0.3f))
+            var widget = new MetaWidgetOld.TextInput(1, 2f, new(2.8f, 0.3f))
             {
                 TextFieldRef = ipRef,
                 TextPredicate = (c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') || c is '?' or '!' or ',' or '.' or '/' or ':',
                 Hint = "Server IP".Color(Color.gray),
                 DefaultText = SaveIp.Value
             };
-            context.Generate(__instance.gameObject, new Vector3(0f, -1.2f, -100f),out _);
+            widget.Generate(__instance.gameObject, new Vector3(0f, -1.2f, -100f),out _);
 
             ipField = ipRef.Value!;
             ipField.LostFocusAction = (text) =>
@@ -86,14 +86,14 @@ public static class RegionMenuOpenPatch
         if (!portField)
         {
             Reference<TextField> portRef = new();
-            var context = new MetaContextOld.TextInput(1, 2f, new(2.8f, 0.3f))
+            var widget = new MetaWidgetOld.TextInput(1, 2f, new(2.8f, 0.3f))
             {
                 TextFieldRef = portRef,
                 TextPredicate = (c) => '0' <= c && c <= '9',
                 Hint = "Server Port".Color(Color.gray),
                 DefaultText = SavePort.Value.ToString()
             };
-            context.Generate(__instance.gameObject, new Vector3(0f, -1.8f, -100f), out _);
+            widget.Generate(__instance.gameObject, new Vector3(0f, -1.8f, -100f), out _);
 
             portField = portRef.Value!;
             portField.LostFocusAction = (text) =>

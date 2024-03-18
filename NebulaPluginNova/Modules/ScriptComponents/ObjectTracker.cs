@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Bson;
+using Virial.Game;
 using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -14,11 +15,12 @@ public static class ObjectTrackers
     static private Func<DeadBody, Vector2> DefaultDeadBodyPosConverter = (d) => d.TruePosition;
     static private Func<DeadBody, SpriteRenderer> DefaultDeadBodyRendererConverter = (d) => d.bodyRenderers[0];
 
+    static public Predicate<PlayerControl> StandardPredicate = p => !p.AmOwner && !p.Data.IsDead;
     public static ObjectTracker<PlayerControl> ForPlayer(float? distance, PlayerControl tracker, Predicate<PlayerControl>? candidatePredicate, bool canTrackInVent = false)
     {
         distance ??= AmongUsUtil.VanillaKillDistance;
         return new ObjectTracker<PlayerControl>(distance.Value, tracker, PlayerSupplier,
-            (p) => (canTrackInVent || !p.inVent) && (candidatePredicate?.Invoke(p) ?? true) && !(p.GetModInfo()?.HasAttribute(Virial.Game.PlayerAttribute.Invisible) ?? false) && !p.Data.IsDead,
+            (p) => (canTrackInVent || !p.inVent) && (candidatePredicate?.Invoke(p) ?? true) && !(p.GetModInfo()?.IsInvisible ?? false) && !p.Data.IsDead,
             DefaultPlayerPosConverter, DefaultPlayerRendererConverter);
     }
 
@@ -29,7 +31,7 @@ public static class ObjectTrackers
     }
 }
 
-public class ObjectTracker<T> : INebulaScriptComponent where T : MonoBehaviour 
+public class ObjectTracker<T> : INebulaScriptComponent, IGameEntity where T : MonoBehaviour 
 {
     public T? CurrentTarget { get; private set; }
     private PlayerControl tracker;
@@ -41,8 +43,6 @@ public class ObjectTracker<T> : INebulaScriptComponent where T : MonoBehaviour
     private bool UpdateTarget { get; set; } = true;
     private float MaxDistance { get; set; } = 1f;
     public bool IgnoreColliders { get; set; } = false;
-
-    public override bool UpdateWithMyPlayer => true;
 
     public ObjectTracker(float distance, PlayerControl tracker, Func<IEnumerable<T>> enumerableSupplier, Predicate<T>? candidatePredicate, Func<T, Vector2> positionConverter, Func<T, SpriteRenderer> rendererConverter)
     {
@@ -67,7 +67,7 @@ public class ObjectTracker<T> : INebulaScriptComponent where T : MonoBehaviour
         }
     }
 
-    public override void Update()
+    void IGameEntity.HudUpdate()
     {
         if (!UpdateTarget)
         {

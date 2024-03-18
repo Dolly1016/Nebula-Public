@@ -8,7 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Virial;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
@@ -122,13 +124,30 @@ public class PaparazzoShot : MonoBehaviour
         int playerNum = 0;
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
         {
-            if (p.Data.IsDead || p.inVent || (p.GetModInfo()?.HasAttribute(Virial.Game.PlayerAttribute.Invisible) ?? false)) continue;
+            if (p.Data.IsDead || !p.Visible || (p.GetModInfo()?.IsInvisible ?? false)) continue;
             if (p.AmOwner) continue;
 
             if (collider.OverlapPoint(p.transform.position))
             {
                 playerMask |= 1 << p.PlayerId;
                 playerNum++;
+
+                var anim = p.MyPhysics.Animations.Animator.m_currAnim;
+                if (anim == p.MyPhysics.Animations.group.EnterVentAnim || anim == p.MyPhysics.Animations.group.ExitVentAnim)
+                    new StaticAchievementToken("paparazzo.common3");
+            }
+        }
+
+        foreach(var body in Helpers.AllDeadBodies())
+        {
+            if (collider.OverlapPoint(body.transform.position))
+            {
+                var info = NebulaGameManager.Instance!.GetModPlayerInfo(body.ParentId);
+                if (info?.MyKiller != null && (playerMask & (1 << info.MyKiller.PlayerId)) != 0)
+                {
+                    //死体とそのキラーが映っているならば
+                    new StaticAchievementToken("paparazzo.common4");
+                }
             }
         }
 
@@ -232,7 +251,7 @@ public class Paparazzo : ConfigurableStandardRole
         RequiredDisclosedOption = new NebulaConfiguration(RoleConfig, "requiredDisclosed", null, 1, 15, 3, 3);
     }
 
-    public class Instance : RoleInstance
+    public class Instance : RoleInstance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
 
@@ -322,7 +341,7 @@ public class Paparazzo : ConfigurableStandardRole
                 acTokenChallenge = new("paparazzo.challenge",(false,null),(val,_)=>val.cleared);
 
                 shotsHolder = HudContent.InstantiateContent("Pictures", true, true, false, true);
-                Bind(shotsHolder.gameObject);
+                this.Bind(shotsHolder.gameObject);
 
                 shotButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 shotButton.SetSprite(cameraButtonSprite.GetSprite());
@@ -360,7 +379,7 @@ public class Paparazzo : ConfigurableStandardRole
 
             if (MyFinder != null && (MeetingHud.Instance || ExileController.Instance || MyPlayer.IsDead))
             {
-                MyFinder?.Release();
+                MyFinder.ReleaseIt();
                 MyFinder = null;
             }
         }
@@ -410,7 +429,7 @@ public class Paparazzo : ConfigurableStandardRole
         }
 
         static private SpriteLoader hourGlassSprite = SpriteLoader.FromResource("Nebula.Resources.Hourglass.png", 100f);
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
             if (AmOwner && !MyPlayer.IsDead)
             {
@@ -480,10 +499,8 @@ public class Paparazzo : ConfigurableStandardRole
             }
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd()
         {
-            base.OnMeetingEnd();
-
             if (acTokenChallenge != null)
             {
                 acTokenChallenge.Value.cleared |= acTokenChallenge.Value.lastAlive - NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead) >= 4;

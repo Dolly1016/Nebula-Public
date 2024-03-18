@@ -8,16 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
 using Il2CppSystem.Net.NetworkInformation;
+using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Morphing : ConfigurableStandardRole
+public class Morphing : ConfigurableStandardRole, HasCitation
 {
     static public Morphing MyRole = new Morphing();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "morphing";
     public override Color RoleColor => Palette.ImpostorRed;
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[]? arguments) => new Instance(player);
@@ -36,7 +38,7 @@ public class Morphing : ConfigurableStandardRole
         LoseSampleOnMeetingOption = new NebulaConfiguration(RoleConfig, "loseSampleOnMeeting", null, false, false);
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
@@ -65,7 +67,7 @@ public class Morphing : ConfigurableStandardRole
                 acTokenChallenge = new("morphing.challenge", (false, false), (val, _) => val.kill && val.exile);
 
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
 
                 sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 sampleButton.SetSprite(SampleButtonSprite.GetSprite());
@@ -132,22 +134,23 @@ public class Morphing : ConfigurableStandardRole
             }
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd()
         {
-            base.OnMeetingEnd();
-
             if (MyRole.LoseSampleOnMeetingOption) sample = null;
         }
 
-        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
         {
-            if (acTokenChallenge != null && exiled.GetModInfo()!.DefaultOutfit.ColorId == (sample?.ColorId ?? -1))
-                acTokenChallenge.Value.exile = true;
+            if (AmOwner)
+            {
+                if (acTokenChallenge != null && exiled.Unbox()!.DefaultOutfit.ColorId == (sample?.ColorId ?? -1))
+                    acTokenChallenge.Value.exile = true;
+            }
         }
 
-        public override void OnKillPlayer(PlayerControl target)
+        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
         {
-            var targetId = target.GetModInfo()?.GetOutfit(75).ColorId;
+            var targetId = target.Unbox()?.GetOutfit(75).ColorId;
             var sampleId = sample?.ColorId;
             if (targetId.HasValue && sampleId.HasValue && targetId.Value == sampleId.Value)
                 acTokenAnother1 ??= new("morphing.another1");

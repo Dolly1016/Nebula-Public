@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Complex;
 
@@ -121,10 +122,9 @@ public class Trapper : ConfigurableStandardRole
     static public NebulaConfiguration CostOfKillTrapOption = null!;
     static public NebulaConfiguration CostOfCommTrapOption = null!;
 
-    private NebulaConfiguration? CommonEditorOption;
 
     [NebulaPreLoad]
-    public class Trap : NebulaSyncStandardObject
+    public class Trap : NebulaSyncStandardObject, IGameEntity
     {
         public static string MyGlobalTag = "TrapGlobal";
         public static string MyLocalTag = "TrapLocal";
@@ -168,7 +168,7 @@ public class Trapper : ConfigurableStandardRole
             Color = Color.white;
         }
 
-        public override void Update()
+        void IGameEntity.Update()
         {
             if(TypeId < 2 && !(Color.a < 1f))
             {
@@ -188,6 +188,17 @@ public class Trapper : ConfigurableStandardRole
         IsEvil = isEvil;
     }
 
+    private static NebulaConfiguration GenerateCommonEditor(ConfigurationHolder holder)
+    {
+        var commonOptions = new NebulaConfiguration[] { PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption };
+        foreach (var option in commonOptions) option.Title = new CombinedComponent(new TranslateTextComponent("role.general.common"), new RawTextComponent(" "), new TranslateTextComponent(option.Id));
+
+        return new NebulaConfiguration(holder, () => {
+            MetaWidgetOld widget = new();
+            foreach (var option in commonOptions) widget.Append(option.GetEditor()!);
+            return widget;
+        }, () => Language.Translate("options.commonSetting") + "\n" + string.Join("\n", commonOptions.Select(option => option.GetShownString())));
+    }
     protected override void LoadOptions()
     {
         base.LoadOptions();
@@ -213,17 +224,10 @@ public class Trapper : ConfigurableStandardRole
             CommTrapSizeOption ??= new NebulaConfiguration(RoleConfig, "commTrapSize", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
         }
 
-        var commonOptions = new NebulaConfiguration[] { PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption };
-        foreach (var option in commonOptions) option.Title = new CombinedComponent(new TranslateTextComponent("role.general.common"), new RawTextComponent(" "), new TranslateTextComponent(option.Id));
-
-        CommonEditorOption = new NebulaConfiguration(RoleConfig, () => {
-            MetaContextOld context = new();
-            foreach (var option in commonOptions) context.Append(option.GetEditor()!);
-            return context;
-        });
+        GenerateCommonEditor(RoleConfig, PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption);
     }
 
-    public class NiceInstance : Crewmate.Crewmate.Instance
+    public class NiceInstance : Crewmate.Crewmate.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyNiceRole;
         private int leftCharge = NumOfChargesOption;
@@ -243,7 +247,7 @@ public class Trapper : ConfigurableStandardRole
             }
         }
 
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
             if (AmOwner)
             {
@@ -264,7 +268,7 @@ public class Trapper : ConfigurableStandardRole
                 foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                 {
                     if (p.AmOwner) continue;
-                    if (p.IsDead || p.HasAttribute(Virial.Game.PlayerAttribute.Invisible)) continue;
+                    if (p.IsDead || p.IsInvisible) continue;
                     if (p.MyControl.transform.position.Distance(commTrap.Position) < CommTrapSizeOption.GetFloat() * 0.35f)
                     {
                         //直前にトラップを踏んでいるプレイヤーは無視する
@@ -287,7 +291,7 @@ public class Trapper : ConfigurableStandardRole
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance
+    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyEvilRole;
         private int leftCharge = NumOfChargesOption;
@@ -308,7 +312,7 @@ public class Trapper : ConfigurableStandardRole
             }
         }
 
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
             if (AmOwner) TrapperSystem.OnMeetingStart(localTraps,killTraps);
         }

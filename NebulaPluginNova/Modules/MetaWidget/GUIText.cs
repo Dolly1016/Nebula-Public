@@ -1,15 +1,21 @@
 ﻿using Nebula.Compat;
+using TMPro;
 using Virial.Compat;
 using Virial.Media;
 using Virial.Text;
 
-namespace Nebula.Modules.MetaContext;
+namespace Nebula.Modules.MetaWidget;
 
-public class NoSGUIText : AbstractGUIContext
+
+public class NoSGUIText : AbstractGUIWidget
 {
     protected Virial.Text.TextAttribute Attr;
     protected TextComponent? Text;
-    public Virial.Media.GUIContext? OverlayContext { get; init; } = null;
+    public GUIWidgetSupplier? OverlayWidget { get; init; } = null;
+    public (Action action, bool reopenOverlay)? OnClickText { get; init; } = null;
+    virtual protected bool AllowGenerateCollider => true;
+    public Action<TextMeshPro>? PostBuilder = null;
+    
     public NoSGUIText(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent? text) : base(alignment)
     {
         Attr = attribute;
@@ -36,7 +42,7 @@ public class NoSGUIText : AbstractGUIContext
         }
     }
 
-    public override GameObject? Instantiate(Size size, out Size actualSize)
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
         if(Text == null)
         {
@@ -62,15 +68,33 @@ public class NoSGUIText : AbstractGUIContext
             text.ForceMeshUpdate();
         }
 
-        if(OverlayContext != null)
+        if (AllowGenerateCollider && (OverlayWidget != null || OnClickText != null))
         {
-            var button = text.gameObject.SetUpButton(false, null);
+            var button = text.gameObject.SetUpButton(false);
             var collider = text.gameObject.AddComponent<BoxCollider2D>();
             collider.isTrigger = true;
             collider.size = text.rectTransform.sizeDelta;
-            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpContext(button, OverlayContext));
-            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpContextIf(button));
+
+            if (OverlayWidget != null)
+            {
+                button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, OverlayWidget()));
+                button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+            }
+            if (OnClickText != null)
+            {
+                button.OnClick.AddListener(() =>
+                {
+                    OnClickText.Value.action.Invoke();
+                    if (OnClickText.Value.reopenOverlay)
+                    {
+                        button.OnMouseOut.Invoke();
+                        button.OnMouseOver.Invoke();
+                    }
+                });
+            }
         }
+
+        PostBuilder?.Invoke(text);
 
         actualSize = new Size(text.rectTransform.sizeDelta);
         return text.gameObject;

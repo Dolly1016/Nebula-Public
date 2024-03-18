@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles;
 
@@ -31,9 +32,14 @@ public class AddonRole : ConfigurableStandardRole
     {
         MyDef = roleDef;
     }
+
+    public override IEnumerable<IAssignableBase> RelatedOnConfig()
+    {
+        foreach (var assignable in MyDef.RelatedAssignable()) if (assignable is IAssignableBase iab) yield return iab;
+    }
 }
 
-public class AddonRoleInstance : RoleInstance, IBinderLifespan
+public class AddonRoleInstance : RoleInstance, IBinderLifespan, IGamePlayerEntity
 {
     public AddonRole MyAddonRole { get; private set; }
     private AbstractRoleInstanceCommon? MyRoleInstance { get; set; }
@@ -53,9 +59,8 @@ public class AddonRoleInstance : RoleInstance, IBinderLifespan
 
     private bool isActiveRole = true;
     bool ILifespan.IsDeadObject => !isActiveRole;
-    public override void Release()
+    void IGameEntity.OnReleased()
     {
-        base.Release();
         isActiveRole = false;
     }
 
@@ -67,7 +72,7 @@ public class AddonRoleInstance : RoleInstance, IBinderLifespan
         if(AmOwner) MyRoleInstance?.OnLocalActivated();
     }
 
-    public override void Update()
+    void IGameEntity.Update()
     {
         MyRoleInstance?.OnUpdate();
         if (AmOwner) MyRoleInstance?.OnLocalUpdate();

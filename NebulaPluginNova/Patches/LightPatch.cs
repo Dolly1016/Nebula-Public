@@ -1,5 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using HarmonyLib;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Rewired.Utils.Platforms.Windows;
 using System;
 using System.Collections.Generic;
@@ -50,5 +51,43 @@ public class LightPatch
         __result = radiusRate * range * rate;
 
         return false;
+    }
+}
+
+//影貫通
+
+[HarmonyPatch(typeof(LightSourceGpuRenderer), nameof(LightSourceGpuRenderer.GPUShadows))]
+public static class LightSourceGpuRendererPatch
+{
+    static Il2CppReferenceArray<Collider2D> origArray = null!;
+    static Il2CppReferenceArray<Collider2D> zeroArray = new(0);
+
+    public static void Prefix(LightSourceGpuRenderer __instance)
+    {
+        origArray = __instance.hits;
+        if (NebulaGameManager.Instance?.IgnoreWalls ?? false) __instance.hits = zeroArray;
+    }
+
+    public static void Postfix(LightSourceGpuRenderer __instance)
+    {
+        if (__instance.hits != origArray) __instance.hits = origArray;
+    }
+}
+
+[HarmonyPatch(typeof(LightSourceRaycastRenderer), nameof(LightSourceRaycastRenderer.RaycastShadows))]
+public static class LightSourceRaycastRendererPatch
+{
+    static Il2CppReferenceArray<Collider2D> origArray = null!;
+    static Il2CppReferenceArray<Collider2D> zeroArray = new(0);
+
+    public static void Prefix(LightSourceRaycastRenderer __instance)
+    {
+        origArray = __instance.hits;
+        if (NebulaGameManager.Instance?.IgnoreWalls ?? false) __instance.hits = zeroArray;
+    }
+
+    public static void Postfix(LightSourceGpuRenderer __instance)
+    {
+        if (__instance.hits != origArray) __instance.hits = origArray;
     }
 }

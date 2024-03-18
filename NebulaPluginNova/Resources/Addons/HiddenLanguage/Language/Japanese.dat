@@ -2,6 +2,10 @@
 "achievement.agent.common1.goal" : "代行タスクをこなして勝利する。"
 "achievement.agent.common1.cond" : "タスク免除数: 3以下+タスク総量: 8以上"
 
+"achievement.agent.another1.title" : "レイオフ"
+"achievement.agent.another1.goal" : "タスクを先んじて完遂され、自滅する。"
+"achievement.agent.another1.cond" : ""
+
 "achievement.agent.challenge.title" : "パーフェクトクルーメイト"
 "achievement.agent.challenge.goal" : "代行タスクを5つ以上こなしてタスク勝利する。"
 "achievement.agent.challenge.cond" : "タスク免除数: 3以下"
@@ -34,6 +38,10 @@
 "achievement.comet.common2.goal" : "透明化能力を使用する。"
 "achievement.comet.common2.cond" : "MIRA HQ, Polus あるいは The Fungle 限定"
 
+"achievement.comet.common3.title" : "スピードスター"
+"achievement.comet.common3.goal" : "透明化能力を使用して、直線距離で45m以上移動する。"
+"achievement.comet.common3.cond" : "加速時間: 15秒以下+加速倍率: 2.5x以下"
+
 "achievement.comet.challenge.title" : "不可視の目撃者"
 "achievement.comet.challenge.goal" : "透明化能力の使用中、間近にキル現場を目撃する。"
 "achievement.comet.challenge.cond" : ""
@@ -54,7 +62,7 @@
 "achievement.madmate.another1.goal" : "インポスターにキルされて死亡する。"
 "achievement.madmate.another1.cond" : ""
 
-"achievement.madmate.challenge.title" : "狂いに満ちた結論"
+"achievement.madmate.challenge.title" : "狂いに満ちた結末"
 "achievement.madmate.challenge.goal" : "インポスターが全員生存している状態でインポスター勝利する。"
 "achievement.madmate.challenge.cond" : ""
 
@@ -102,6 +110,10 @@
 "achievement.provocateur.common1.goal" : "会議でプレイヤーを道連れにする。"
 "achievement.provocateur.common1.cond" : ""
 
+"achievement.provocateur.common2.title" : "死なばもろとも"
+"achievement.provocateur.common2.goal" : "巻き込み能力でキラーを道連れにする。"
+"achievement.provocateur.common2.cond" : ""
+
 "achievement.provocateur.challenge.title" : "第六感の解放"
 "achievement.provocateur.challenge.goal" : "10m以上離れたRaiderもしくはSniperを巻き込んで死亡する。"
 "achievement.provocateur.challenge.cond" : ""
@@ -110,9 +122,9 @@
 "achievement.seer.common1.goal" : "幽霊を間近に目撃する。"
 "achievement.seer.common1.cond" : ""
 
-"achievement.seer.challenge.title" : "真理を見る者"
-"achievement.seer.challenge.goal" : "全ての投票で非クルーメイト陣営に票を投じる。"
-"achievement.seer.challenge.cond" : "スキップ票および白票投票をした場合クリア不可+投票回数: 3回以上"
+"achievement.seer.challenge2.title" : "真理を見る者"
+"achievement.seer.challenge2.goal" : "全ての投票で非クルーメイト陣営に票を投じる。"
+"achievement.seer.challenge2.cond" : "スキップ票および白票投票をした場合クリア不可+投票回数: 3回以上"
 
 "achievement.sheriff.common1.title" : "保安官の使命"
 "achievement.sheriff.common1.goal" : "インポスターを撃ち抜く。"
@@ -125,6 +137,18 @@
 "achievement.sheriff.challenge.title" : "正義の執行者"
 "achievement.sheriff.challenge.goal" : "インポスター全員を自身の手で始末する。"
 "achievement.sheriff.challenge.cond" : "インポスター: 2人以上"
+
+"achievement.ubiquitous.common1.title" : "ドアハッカー"
+"achievement.ubiquitous.common1.goal" : "ドローンを使ってゲーム中に合計5回ドアを開く。"
+"achievement.ubiquitous.common1.cond" : ""
+
+"achievement.ubiquitous.common2.title" : "無礙"
+"achievement.ubiquitous.common2.goal" : "ドローンを使って通算20個のドアを開く。"
+"achievement.ubiquitous.common2.cond" : ""
+
+"achievement.ubiquitous.challenge.title" : "ユビキタスネットワーク"
+"achievement.ubiquitous.challenge.goal" : "マップ上で全生存者の位置を同時に確認する。"
+"achievement.ubiquitous.challenge.cond" : "自身を除く生存者: 10人以上+検出範囲: 3m未満"
 
 "achievement.bountyHunter.common1.title" : "欲深き凶行"
 "achievement.bountyHunter.common1.goal" : "賞金首をキルする。"
@@ -153,6 +177,18 @@
 "achievement.cleaner.challenge.title" : "その死に意味は無い"
 "achievement.cleaner.challenge.goal" : "2つ以上の死体を消した上でボタンによる緊急会議が始まる。"
 "achievement.cleaner.challenge.cond" : ""
+
+"achievement.evilTracker.common1.title" : "監視者"
+"achievement.evilTracker.common1.goal" : "プレイヤーのタスクを一度追跡する。"
+"achievement.evilTracker.common1.cond" : ""
+
+"achievement.evilTracker.another1.title" : "音信不通"
+"achievement.evilTracker.another1.goal" : "自身が生存している間に、追跡対象のプレイヤーが死亡する。"
+"achievement.evilTracker.another1.cond" : ""
+
+"achievement.evilTracker.challenge.title" : "陰湿な追跡"
+"achievement.evilTracker.challenge.goal" : "3つ以下のタスクを追跡したプレイヤーを、そのタスクの周辺でキルする。"
+"achievement.evilTracker.challenge.cond" : ""
 
 "achievement.evilTrapper.common1.title" : "妨害"
 "achievement.evilTrapper.common1.goal" : "減速トラップを設置する。"
@@ -314,6 +350,14 @@
 "achievement.paparazzo.common2.goal" : "一枚の写真に4人以上のプレイヤーを写す。"
 "achievement.paparazzo.common2.cond" : ""
 
+"achievement.paparazzo.common3.title" : "見逃せない一枚"
+"achievement.paparazzo.common3.goal" : "ベントに出入りする瞬間を撮影する。"
+"achievement.paparazzo.common3.cond" : ""
+
+"achievement.paparazzo.common4.title" : "決定的証拠"
+"achievement.paparazzo.common4.goal" : "死体とそのキルの犯人を一枚に収める。"
+"achievement.paparazzo.common4.cond" : ""
+
 "achievement.paparazzo.challenge.title" : "揺れる輿論"
 "achievement.paparazzo.challenge.goal" : "写真を公開した会議内で、何らかの理由で4人以上死亡する。"
 "achievement.paparazzo.challenge.cond" : "自身がその会議で死亡してしまった場合は無効"
@@ -342,6 +386,22 @@
 "achievement.bloody.challenge.goal" : "自身の能力によって効果「血の足跡」を付与された相手が<br>直後の会議で追放される。"
 "achievement.bloody.challenge.cond" : ""
 
+"achievement.damned.common1.title" : "伝播する邪悪"
+"achievement.damned.common1.goal" : "呪詛によってクルーメイト陣営からインポスター陣営に変化する。"
+"achievement.damned.common1.cond" : ""
+
+"achievement.damned.common2.title" : "呪われし者"
+"achievement.damned.common2.goal" : "呪詛によってインポスター役職 Damnedに変化する。"
+"achievement.damned.common2.cond" : ""
+
+"achievement.damned.common3.title" : "赤色のリバーシ"
+"achievement.damned.common3.goal" : "呪詛によって第三陣営からインポスター陣営に変化する。"
+"achievement.damned.common3.cond" : ""
+
+"achievement.damned.challenge.title" : "縁切りの呪詛"
+"achievement.damned.challenge.goal" : "呪詛によってインポスター陣営からクルーメイト陣営に寝返り、<br>クルーメイト勝利する。"
+"achievement.damned.challenge.cond" : ""
+
 "achievement.lover.common1.title" : "それはときに盲目"
 "achievement.lover.common1.goal" : "ラバーズ単独勝利する。"
 "achievement.lover.common1.cond" : ""
@@ -354,13 +414,49 @@
 "achievement.lover.challenge.goal" : "インポスターが2人生存しており、<br>自身はインポスターではない状態でラバーズ単独勝利する。"
 "achievement.lover.challenge.cond" : ""
 
-"achievement.tieBreaker.common1.title" : "革命家"
-"achievement.tieBreaker.common1.goal" : "追加投票を決める。"
-"achievement.tieBreaker.common1.cond" : ""
+"achievement.avenger.common1.title" : "報復"
+"achievement.avenger.common1.goal" : "復讐対象をキルする。"
+"achievement.avenger.common1.cond" : ""
 
-"achievement.tieBreaker.challenge.title" : "執念の一票"
-"achievement.tieBreaker.challenge.goal" : "自身の追加票によって敵を追放させる。"
-"achievement.tieBreaker.challenge.cond" : ""
+"achievement.avenger.common2.title" : "孤独は愛より強し"
+"achievement.avenger.common2.goal" : "復讐対象になったうえでAvengerをキルする。"
+"achievement.avenger.common2.cond" : ""
+
+"achievement.avenger.another1.title" : "果たせぬ誓い"
+"achievement.avenger.another1.goal" : "復讐対象にキルされる。"
+"achievement.avenger.another1.cond" : ""
+
+"achievement.avenger.another2.title" : "愛に死ぬ"
+"achievement.avenger.another2.goal" : "復讐対象をキルした上で死亡する。"
+"achievement.avenger.another2.cond" : ""
+
+"achievement.avenger.challenge.title" : "アベンジャーズ"
+"achievement.avenger.challenge.goal" : "相方と自身がともにAvengerになったうえで、Avenger勝利する。"
+"achievement.avenger.challenge.cond" : ""
+
+"achievement.obsessional.common1.title" : "あなたを見ている"
+"achievement.obsessional.common1.goal" : "執着対象とともに勝利する。"
+"achievement.obsessional.common1.cond" : ""
+
+"achievement.obsessional.another1.title" : "執念は地の果てまで"
+"achievement.obsessional.another1.goal" : "執着対象の死亡によって後追い自殺する。"
+"achievement.obsessional.another1.cond" : ""
+
+"achievement.obsessional.another2.title" : "望まれぬ展開"
+"achievement.obsessional.another2.goal" : "インポスターでObsessionalになり、インポスター勝利によって敗北する。"
+"achievement.obsessional.another2.cond" : ""
+
+"achievement.obsessional.lover1.title" : "傍惚れのファンタジア"
+"achievement.obsessional.lover1.goal" : "執着対象がLovers単独勝利で勝利し、自身もともに勝利する。"
+"achievement.obsessional.lover1.cond" : ""
+
+"achievement.obsessional.lover2.title" : "バウムクーヘンエンド"
+"achievement.obsessional.lover2.goal" : "執着対象がLovers追加勝利で勝利し、自身は勝利を逃す。"
+"achievement.obsessional.lover2.cond" : ""
+
+"achievement.obsessional.challenge.title" : "もう君しか映らない"
+"achievement.obsessional.challenge.goal" : "執着対象と2人だけで勝利する。"
+"achievement.obsessional.challenge.cond" : ""
 
 "achievement.secret.common1.title" : "覚醒"
 "achievement.secret.common1.goal" : "キルやタスクによって元の役職を覚醒させる。"
@@ -370,13 +466,33 @@
 "achievement.secret.another1.goal" : "覚醒せずに勝利する。"
 "achievement.secret.another1.cond" : ""
 
-"achievement.secret.challenge.title" : "ローマ、一日にして成れり"
+"achievement.secret.challenge.title" : "ローマは一日にして成れり"
 "achievement.secret.challenge.goal" : "覚醒後に役職のチャレンジ実績を達成する。"
 "achievement.secret.challenge.cond" : ""
+
+"achievement.tieBreaker.common1.title" : "革命家"
+"achievement.tieBreaker.common1.goal" : "追加投票を決める。"
+"achievement.tieBreaker.common1.cond" : ""
+
+"achievement.tieBreaker.challenge.title" : "執念の一票"
+"achievement.tieBreaker.challenge.goal" : "自身の追加票によって敵を追放させる。"
+"achievement.tieBreaker.challenge.cond" : ""
 
 "achievement.firstKill.title" : "ヴァニタスに描く生命"
 "achievement.firstKill.goal" : "通算で10回初手キルされる。"
 "achievement.firstKill.cond" : ""
+
+"achievement.setsubun.title" : "笑門来福"
+"achievement.setsubun.goal" : "タスクをすべてこなし、最後まで生き残った上で<br>インポスターを全員追放し、勝利する。"
+"achievement.setsubun.cond" : "2月限定"
+
+"achievement.graduation2.title" : "別れの季節"
+"achievement.graduation2.goal" : "自身の票によって3人のプレイヤーを追放する。"
+"achievement.graduation2.cond" : "3月限定"
+
+"achievement.sakura.title" : "すすめ！桜前線"
+"achievement.sakura.goal" : "ゲーム中に黄緑色から桜色に変化して開花する。"
+"achievement.sakura.cond" : "4月限定"
 
 "achievement.christmas.title" : "末永くご爆発下さい"
 "achievement.christmas.goal" : "ラバーズで追放される。"
@@ -386,9 +502,25 @@
 "achievement.challenge.impostor.goal" : "仲間が全員生存している状態で自身のキルによって<br>インポスターとして勝利する。"
 "achievement.challenge.impostor.cond" : "自身の手によって2人以上キルすること"
 
-"achievement.challenge.crewmate.title" : "無疵"
+"achievement.challenge.lastCrewmate.title" : "峻嶺"
+"achievement.challenge.lastCrewmate.goal" : "最後のクルーメイトとして生存したままクルーメイト勝利する。"
+"achievement.challenge.lastCrewmate.cond" : "マッドメイトはクルーメイト陣営にカウントしない"
+
+"achievement.challenge.death2.title" : "あの手この手"
+"achievement.challenge.death2.goal" : "4種類以上の死因でプレイヤーを死に追いやる。"
+"achievement.challenge.death2.cond" : "自身の死、及び自身が関与していない死を除く+自身の投票が与した追放を含む"
+
+"achievement.noCrewmate.title" : "タイムリミット"
+"achievement.noCrewmate.goal" : "クルーメイトが全員死亡した状態で、タスク勝利する。"
+"achievement.noCrewmate.cond" : "自身がクルーメイト陣営に属していること+マッドメイトはクルーメイト陣営にカウントしない"
+
+"achievement.challenge.crewmate.title" : "穏やかな航行"
 "achievement.challenge.crewmate.goal" : "誰も死んでいない状態でタスク勝利する。"
 "achievement.challenge.crewmate.cond" : ""
+
+"achievement.speedAttribute.title" : "良いのか悪いのか"
+"achievement.speedAttribute.goal" : "移動速度上昇と移動速度低下の効果を同時に受ける。"
+"achievement.speedAttribute.cond" : ""
 
 "achievement.threeRoles.title" : "三つ巴"
 "achievement.threeRoles.goal" : "インポスター陣営でLoverとSidekickのモディファイアを付与される。"
@@ -397,3 +529,15 @@
 "achievement.doTaskEvenDead.title" : "死出の旅"
 "achievement.doTaskEvenDead.goal" : "死亡した状態で全てのタスクをこなす。"
 "achievement.doTaskEvenDead.cond" : "タスク総量: 8以上"
+
+"achievement.extraVictim.title" : "その安堵も束の間"
+"achievement.extraVictim.goal" : "会議の追加追放で死亡する。"
+"achievement.extraVictim.cond" : ""
+
+"achievement.allWayKill.title" : "死のマエストロ"
+"achievement.allWayKill.goal" : "全ての死因でプレイヤーを死に追いやる。"
+"achievement.allWayKill.cond" : ""
+
+"achievement.allWayDeath.title" : "奈落に吹く風"
+"achievement.allWayDeath.goal" : "全ての死因による死を経験する。"
+"achievement.allWayDeath.cond" : ""

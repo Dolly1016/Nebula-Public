@@ -8,9 +8,18 @@ namespace Virial.Game;
 
 public interface GameEnd
 {
+    internal int Priority { get; }
 }
 
-public static class NebulaGameEnd
+public enum GameEndReason
+{
+    Task,
+    Situation,
+    Special,
+    Sabotage
+}
+
+public static class NebulaGameEnds
 {
     public static GameEnd CrewmateGameEnd { get; internal set; } = null!;
     public static GameEnd ImpostorGameEnd { get; internal set; } = null!;

@@ -59,7 +59,7 @@ public class Painter : ConfigurableStandardRole
 
                 GameData.PlayerOutfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
 
                 sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 sampleButton.SetSprite(sampleButtonSprite.GetSprite());

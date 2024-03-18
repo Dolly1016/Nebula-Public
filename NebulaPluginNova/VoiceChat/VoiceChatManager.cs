@@ -23,6 +23,27 @@ using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstr
 
 namespace Nebula.VoiceChat;
 
+public interface IVoiceComponent
+{
+    //可聴範囲 (リスナーとして)
+    public float Radious { get; }
+
+    //音声に掛ける倍率 (スピーカーとして)
+    public float Volume { get; }
+
+    public Vector2 Position { get; }
+
+    //指定のマイクからの音声を再生できるかどうか falseの場合再生できない
+    public bool CanPlaySoundFrom(IVoiceComponent mic);
+
+    public float CanCatch(Vector2 speaker)
+    {
+        float dis = speaker.Distance(Position);
+        if (dis < Radious) return dis / Radious;
+        return 0f;
+    }
+}
+
 public enum VoiceType
 {
     Normal,
@@ -54,9 +75,21 @@ public class VoiceChatRadio
     }
 }
 
+public enum VCFilteringMode
+{
+    All,
+    AliveOnly,
+    DeadOnly,
+    OutOfRange,
+}
+
 [NebulaRPCHolder]
 public class VoiceChatManager : IDisposable
 {
+    //リスナー(クライアント本人)の死亡判定
+    public static bool ListenerIsPerfectlyDead => GeneralConfigurations.IsolateGhostsStrictlyOption ? (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) : (PlayerControl.LocalPlayer?.Data?.IsDead ?? false);
+    public static bool ListenerIsDead => PlayerControl.LocalPlayer?.Data?.IsDead ?? false;
+
     public static DataSaver VCSaver = new("VoiceChat");
 
     TcpListener? myListener = null;
@@ -69,9 +102,17 @@ public class VoiceChatManager : IDisposable
     public VoiceChatInfo InfoShower;
 
     public bool IsMuting;
+    public VCFilteringMode FilteringMode = VCFilteringMode.All;
     public int RadioMask;
 
     Dictionary<byte, VCClient> allClients = new();
+    List<IVoiceComponent> allSpeakers = new();
+    List<IVoiceComponent> allMics = new();
+    public IEnumerable<IVoiceComponent> AllSpeakers() => allSpeakers;
+    public IEnumerable<IVoiceComponent> AllMics() => allMics;
+    public void AddSpeaker(IVoiceComponent speaker) => allSpeakers.Add(speaker);
+    public void AddMicrophone(IVoiceComponent mic) => allMics.Add(mic);
+
     List<VoiceChatRadio> allRadios= new();
     VoiceChatRadio? currentRadio = null;
 
@@ -88,28 +129,29 @@ public class VoiceChatManager : IDisposable
         allRadios.Remove(radio);
         if (radio == currentRadio) currentRadio = null;
     }
-    
-    static public bool CanListenGhostVoice
+
+    static public bool CanListenGhostVoice(PlayerModInfo? ghost)
     {
-        get {
-            if (PlayerControl.LocalPlayer.Data == null) return false;
+        if (MeetingHud.Instance || ExileController.Instance) return false;
 
-            if (PlayerControl.LocalPlayer.Data.IsDead) return false;
+        if (PlayerControl.LocalPlayer.Data == null) return false;
 
-            var killerHearDead = GeneralConfigurations.KillersHearDeadOption.CurrentValue;
-            if (killerHearDead == 0) return false;
-            var localInfo = PlayerControl.LocalPlayer.GetModInfo();
-            if (localInfo == null) return false;
+        if (PlayerControl.LocalPlayer.Data.IsDead) return false;
 
-            if (localInfo.Role.Role.Category == RoleCategory.ImpostorRole) return true;
-            if (killerHearDead != 2) return false;
+        var killerHearDead = GeneralConfigurations.KillersHearDeadOption.CurrentValue;
+        if (killerHearDead == 0) return false;
 
-            if (localInfo.Role.Role == Roles.Neutral.Jackal.MyRole) return true;
-            if (Roles.Neutral.Sidekick.MyRole.SidekickCanKillOption && localInfo.Role.Role == Roles.Neutral.Sidekick.MyRole) return true;
+        var localInfo = PlayerControl.LocalPlayer.GetModInfo();
+        if (localInfo == null) return false;
 
-            return false;
-        }
-        }
+        if (killerHearDead == 2)
+            return localInfo.Role.Role.Category == RoleCategory.ImpostorRole;
+
+        if (killerHearDead == 1)
+            return ghost?.MyKiller == NebulaGameManager.Instance?.LocalPlayerInfo;
+
+        return false;
+    }
     static public bool IsInDiscussion => (MeetingHud.Instance || ExileController.Instance) && !Minigame.Instance;
     public VoiceChatManager()
     {
@@ -127,15 +169,16 @@ public class VoiceChatManager : IDisposable
             BufferedWaveProvider reverbProvider = new(format) { ReadFully = true, BufferLength = 1 << 19 };
             
             MixingSampleProvider remixer = new(format) { ReadFully = true };
-            remixer.AddMixerInput(new ReverbSampleProvider(routeGhost));
+            //remixer.AddMixerInput(new ReverbSampleProvider(routeGhost));
+            remixer.AddMixerInput(routeGhost);
             remixer.AddMixerInput(reverbProvider);
 
-            SampleFunctionalProvider resampler = new(remixer, (ary, count) =>
+            SampleFunctionalProvider resampler = new(remixer, (ary, offset, count) =>
             {
                 byte[] byteArray = new byte[count * 4];
                 for (int i = 0; i < count; i++)
                 {
-                    Unsafe.As<byte, float>(ref byteArray[i * 4]) = (float)(ary[i] * 0.55f);
+                    Unsafe.As<byte, float>(ref byteArray[i * 4]) = (float)(ary[offset + i] * 0.42f);
                 }
                 reverbProvider.AddSamples(byteArray, 0, byteArray.Length);
             });
@@ -163,7 +206,7 @@ public class VoiceChatManager : IDisposable
         myPlayer.Init(routeMixer);
         myPlayer.Play();
 
-        if (NebulaPlugin.MyPlugin.IsPreferential) myCoroutine = NebulaManager.Instance.StartCoroutine(CoCommunicate().WrapToIl2Cpp());
+        if (NebulaPlugin.MyPlugin.IsPreferential) Rejoin();
 
         InfoShower = UnityHelper.CreateObject<VoiceChatInfo>("VCInfoShower", HudManager.Instance.transform, new Vector3(0f, 4f, -25f));
     }
@@ -222,21 +265,39 @@ public class VoiceChatManager : IDisposable
 
         if (!usingMic) return;
 
-        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDown) IsMuting = !IsMuting;
+        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDown)
+        {
+            IsMuting = !IsMuting;
+            InfoShower.SetMute(IsMuting);
+        }
 
-        InfoShower.SetMute(IsMuting);
+        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.VCFilter).KeyDown)
+        {
+            FilteringMode++;
+            if (FilteringMode >= VCFilteringMode.OutOfRange) FilteringMode = VCFilteringMode.All;
 
-        if (currentRadio != null && (PlayerControl.LocalPlayer.Data?.IsDead ?? false))
+            //生存中はフィルタ変更不可
+            if (!ListenerIsPerfectlyDead) FilteringMode = VCFilteringMode.All;
+
+            InfoShower.ShowWidget();
+        }
+
+        //生存中はフィルタ変更不可
+        if (!ListenerIsPerfectlyDead) FilteringMode = VCFilteringMode.All;
+
+
+        //ひとまず死んだらラジオリセット
+        if (currentRadio != null && ListenerIsDead)
         {
             currentRadio = null;
-            InfoShower.UnsetRadioContext();
+            InfoShower.UnsetRadioWidget();
         }
         else
         {
             if (Input.GetKeyDown((KeyCode)(KeyCode.Alpha1)))
             {
                 currentRadio = null;
-                InfoShower.UnsetRadioContext();
+                InfoShower.UnsetRadioWidget();
             }
             else
             {
@@ -245,7 +306,7 @@ public class VoiceChatManager : IDisposable
                     if (Input.GetKeyDown((KeyCode)(KeyCode.Alpha1 + i + 1)))
                     {
                         currentRadio = allRadios[i];
-                        InfoShower.SetRadioContext(currentRadio.DisplayRadioName, currentRadio.Color);
+                        InfoShower.SetRadioWidget(currentRadio.DisplayRadioName, currentRadio.Color);
                         break;
                     }
                 }
@@ -268,31 +329,38 @@ public class VoiceChatManager : IDisposable
 
     public void Rejoin()
     {
-        myCoroutine = NebulaManager.Instance.StartCoroutine(CoCommunicate().WrapToIl2Cpp());
+        try
+        {
+            if (myCoroutine != null) NebulaManager.Instance?.StopCoroutine(myCoroutine);
+        }
+        catch { }
+
+        myCoroutine = NebulaManager.Instance?.StartCoroutine(CoCommunicate().WrapToIl2Cpp()) ?? null;
     }
 
     private IEnumerator CoCommunicate()
     {
-        if (myCoroutine != null) NebulaManager.Instance?.StopCoroutine(myCoroutine);
-        myCoroutine = null;
-
-        childProcess?.Kill();
-        childProcess = null;
+        try
+        {
+            childProcess?.Kill();
+            childProcess = null;
+        }
+        catch { }
 
         if (!AllowedUsingMic /*&& !AmongUsClient.Instance.AmHost*/)
         {
             var screen = MetaScreen.GenerateWindow(new(2.4f, 1f), HudManager.Instance.transform, Vector3.zero, true, true, false);
 
-            MetaContextOld context = new();
+            MetaWidgetOld widget = new();
 
-            context.Append(new MetaContextOld.Text(TextAttribute.BoldAttr) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "voiceChat.dialog.confirm" });
-            context.Append(new MetaContextOld.VerticalMargin(0.15f));
-            context.Append(new CombinedContextOld(0.45f,
-                new MetaContextOld.Button(() => { AllowedUsingMic = true; screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.42f, 0.2f) }) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "ui.dialog.yes" },
-                new MetaContextOld.HorizonalMargin(0.1f),
-                new MetaContextOld.Button(() => { AllowedUsingMic = false; screen.CloseScreen(); }, new(TextAttribute.BoldAttr) { Size = new(0.42f, 0.2f) }) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = "ui.dialog.no" }));
+            widget.Append(new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = "voiceChat.dialog.confirm" });
+            widget.Append(new MetaWidgetOld.VerticalMargin(0.15f));
+            widget.Append(new CombinedWidgetOld(0.45f,
+                new MetaWidgetOld.Button(() => { AllowedUsingMic = true; screen.CloseScreen(); }, new(TextAttributeOld.BoldAttr) { Size = new(0.42f, 0.2f) }) { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = "ui.dialog.yes" },
+                new MetaWidgetOld.HorizonalMargin(0.1f),
+                new MetaWidgetOld.Button(() => { AllowedUsingMic = false; screen.CloseScreen(); }, new(TextAttributeOld.BoldAttr) { Size = new(0.42f, 0.2f) }) { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = "ui.dialog.no" }));
 
-            screen.SetContext(context);
+            screen.SetWidget(widget);
 
             while (screen) yield return null;
 
@@ -310,7 +378,7 @@ public class VoiceChatManager : IDisposable
 
         if (task.IsFaulted)
         {
-            NebulaPlugin.Log.Print(null,"Failed to connect.");
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Failed to connect.");
             yield break;
         }
 
@@ -320,6 +388,8 @@ public class VoiceChatManager : IDisposable
         myListener.Stop();
 
         usingMic = true;
+
+        while (PlayerControl.LocalPlayer) { yield return new WaitForSeconds(0.5f); }
 
         int resSize;
         byte[] headRes = new byte[2];
@@ -347,6 +417,9 @@ public class VoiceChatManager : IDisposable
             }
 
             if (IsMuting) continue;
+
+            //実際には死んでいるが、まだ復活の余地があるプレイヤーは声を誰にも届けられない
+            if (ListenerIsDead && !ListenerIsPerfectlyDead) continue;
 
             RpcSendAudio.Invoke((PlayerControl.LocalPlayer.PlayerId, sId++, currentRadio != null, currentRadio?.RadioMask ?? 0, resSize, res));
         }
@@ -394,12 +467,12 @@ public class VoiceChatManager : IDisposable
     {
         var screen = MetaScreen.GenerateWindow(new Vector2(7f,3.2f), HudManager.Instance.transform, Vector3.zero, true, false, true);
 
-        MetaContextOld context = new();
+        MetaWidgetOld widget = new();
 
 
-        context.Append(allClients.Values.Where(v=>!v.MyPlayer.AmOwner), (client) => {
+        widget.Append(allClients.Values.Where(v=>!v.MyPlayer.AmOwner), (client) => {
 
-        return new MetaContextOld.Text(TextAttribute.BoldAttr)
+        return new MetaWidgetOld.Text(TextAttributeOld.BoldAttr)
         {
             RawText = client.MyPlayer.name,
             PostBuilder = (text) =>
@@ -426,7 +499,17 @@ public class VoiceChatManager : IDisposable
         }, 4, -1, 0, 0.65f);
         
 
-        screen.SetContext(context);
+        screen.SetWidget(widget);
+    }
+
+    static public NebulaGameScript GenerateBindableRadioScript(Predicate<PlayerModInfo> predicate, string translationKey, Color color)
+    {
+        VoiceChatRadio radio = new(predicate, Language.Translate(translationKey), color);
+        return new NebulaGameScript()
+        {
+            OnActivatedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.AddRadio(radio),
+            OnReleasedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.RemoveRadio(radio)
+        };
     }
 }
 
@@ -437,9 +520,10 @@ public class SampleFunctionalProvider : ISampleProvider
     public int Read(float[] buffer, int offset, int count)
     {
         int num = sourceProvider.Read(buffer, offset, count);
-        if (OnReadArray != null) OnReadArray(buffer, count);
-        if(OnRead != null) for(int i = 0; i < num; i++) buffer[i] = OnRead(buffer[i]);
-
+        //for (int i = num; i < count; i++) buffer[offset + i] = 0f;
+        if (OnReadArray != null) OnReadArray(buffer, offset, num);
+        if(OnRead != null) for(int i = 0; i < num; i++) buffer[offset + i] = OnRead(buffer[offset + i]);
+        
         return num;
     }
 
@@ -449,14 +533,14 @@ public class SampleFunctionalProvider : ISampleProvider
         OnRead = onRead;
     }
 
-    public SampleFunctionalProvider(ISampleProvider sourceProvider, Action<float[],int>? onRead)
+    public SampleFunctionalProvider(ISampleProvider sourceProvider, Action<float[],int, int>? onRead)
     {
         this.sourceProvider = sourceProvider;
         OnReadArray = onRead;
     }
 
     public Func<float, float>? OnRead = null;
-    public Action<float[], int>? OnReadArray = null;
+    public Action<float[], int, int>? OnReadArray = null;
 }
 
 public class VolumeMeter : ISampleProvider
@@ -729,17 +813,17 @@ public class ReverbSampleProvider : ISampleProvider
 
     public int Read(float[] buffer, int offset, int count)
     {
-        Array.Clear(buffer, 0, count);
         int num = sourceProvider.Read(buffer,offset,count);
-        reverb.AddSamples(buffer, offset, count);
+        reverb.AddSamples(buffer, offset, num);
 
-        float[] reverbBuffer = new float[count];
+        float[] reverbBuffer = new float[num];
         for (int n = 0; n < 7; n++)
         {
-            reverb.Peek(reverbBuffer, 0, count, -1100 * (n + 1));
-            for (int i = 0; i < count; i++) buffer[i + offset] += reverbBuffer[i] * (float)Math.Pow(0.985f, (float)(n + 1.2f));
+            Array.Clear(reverbBuffer);
+            reverb.Peek(reverbBuffer, 0, num, -1100 * (n + 1));
+            for (int i = 0; i < num; i++) buffer[i + offset] += reverbBuffer[i] * (float)Math.Pow(0.985f, (float)(n + 1.2f));
         }
-        reverb.Read(reverbBuffer, 0, count);
+        reverb.Read(reverbBuffer, 0, num);
         return num;
     }
 

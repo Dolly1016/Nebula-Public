@@ -1,6 +1,6 @@
 ﻿using Nebula.Compat;
 using Nebula.Events;
-using Nebula.Modules.MetaContext;
+using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Media;
 using Virial.Text;
 
@@ -25,13 +26,13 @@ public class NebulaImpl : INebula
 
     public List<AbstractRoleDef> AllRoles = new();
 
-    public string APIVersion => "1.1.1";
+    public string APIVersion => typeof(NebulaAPI).Assembly.GetName().Version?.ToString() ?? "Undefined";
 
     public Virial.Assets.INameSpace NebulaAsset => NameSpaceManager.DefaultNameSpace;
 
     public Virial.Assets.INameSpace InnerslothAsset => NameSpaceManager.InnerslothNameSpace;
 
-    public Virial.Media.GUI GUILibrary => NebulaGUIContextEngine.Instance;
+    public Virial.Media.GUI GUILibrary => NebulaGUIWidgetEngine.Instance;
 
     public CommunicableTextTag RegisterCommunicableText(string translationKey)
     {
@@ -82,8 +83,30 @@ public class NebulaImpl : INebula
 
     public Virial.Game.Player? LocalPlayer => PlayerControl.LocalPlayer ? PlayerControl.LocalPlayer.GetModInfo() : null;
 
+    Virial.Game.Game? INebula.CurrentGame => NebulaGameManager.Instance;
+
     public DefinedRole? GetRole(string roleId) => Roles.Roles.AllRoles.FirstOrDefault(r => r.LocalizedName == roleId);
     
     public DefinedModifier? GetModifier(string modifierId) => Roles.Roles.AllModifiers.FirstOrDefault(m => m.LocalizedName == modifierId);
     
+}
+
+public static class UnboxExtension
+{
+    public static PlayerModInfo Unbox(this Virial.Game.Player player) => (PlayerModInfo)player;
+    public static RoleInstance Unbox(this RuntimeRole role) => (RoleInstance)role;
+    public static ModifierInstance Unbox(this RuntimeModifier modifier) => (ModifierInstance)modifier;
+    public static AbstractRole Unbox(this DefinedRole role) => (AbstractRole)role;
+    public static AbstractModifier Unbox(this DefinedModifier role) => (AbstractModifier)role;
+    public static ModAbilityButton Unbox(this Virial.Components.AbilityButton button) => (ModAbilityButton)button;
+    public static CustomEndCondition Unbox(this Virial.Game.GameEnd end) => (CustomEndCondition)end;
+}
+
+public static class ComponentHolderHelper
+{
+    static public GameObject Bind(this ComponentHolder holder, GameObject gameObject)
+    {
+        holder.BindComponent(new GameObjectBinding(gameObject));
+        return gameObject;
+    }
 }

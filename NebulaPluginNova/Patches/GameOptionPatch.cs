@@ -70,7 +70,7 @@ public class GameSettingMenuStartPatch
             int copiedIndex = i;
             button.OnClick.AddListener(() =>
             {
-                SoundManager.Instance.PlaySound(VanillaAsset.SelectClip, false, 0.8f);
+                VanillaAsset.PlaySelectSE();
 
                 foreach (var setting in settingObj) setting.SetActive(false);
                 foreach (var highlight in highlights) highlight.enabled = false;

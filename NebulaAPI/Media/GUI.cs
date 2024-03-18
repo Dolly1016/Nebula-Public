@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
@@ -74,19 +75,50 @@ public interface GUIScreen
     /// <summary>
     /// スクリーン上の表示を更新します。
     /// </summary>
-    /// <param name="context">表示するコンテキスト定義</param>
+    /// <param name="Widget">表示するウィジェット定義</param>
     /// <param name="actualSize">生成された画面の大きさ</param>
-    void SetContext(GUIContext context, out Size actualSize);
+    void SetWidget(GUIWidget? Widget, out Size actualSize);
 }
+
+public delegate GUIWidget GUIWidgetSupplier();
+public delegate void GUIClickableAction(GUIClickable clickable);
 
 /// <summary>
 /// GUI上に表示できるオブジェクトの定義を表します。
 /// </summary>
-public interface GUIContext
+public abstract class GUIWidget
 {
-    internal GUIAlignment Alignment { get; }
-    internal GameObject? Instantiate(Size size, out Size actualSize);
-    internal GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize);
+    internal abstract GUIAlignment Alignment { get; init; }
+    internal abstract GameObject? Instantiate(Size size, out Size actualSize);
+    internal abstract GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize);
+
+    /// <summary>
+    /// GUIWidgetをSupplierの形式に変換します。
+    /// </summary>
+    /// <param name="widget"></param>
+    public static implicit operator GUIWidgetSupplier(GUIWidget? widget) => () => widget ?? NebulaAPI.GUI.EmptyWidget;
+}
+
+/// <summary>
+/// GUI上のクリック可能なオブジェクトを表します。
+/// </summary>
+public class GUIClickable
+{
+    internal PassiveUiElement uiElement { get; init; }
+
+    internal GUIClickable(PassiveUiElement uiElement)
+    {
+        this.uiElement = uiElement;
+    }
+}
+
+/// <summary>
+/// 更新可能なテキスト
+/// </summary>
+public interface GUIUpdatableText
+{
+    void UpdateText(string rawText);
+    void UpdateText(TextComponent text);
 }
 
 /// <summary>
@@ -95,39 +127,50 @@ public interface GUIContext
 public interface GUI
 {
     /// <summary>
-    /// 生文字列のコンテキストです。
+    /// 何も表示しないウィジェットです。
+    /// </summary>
+    GUIWidget EmptyWidget { get; }
+
+    /// <summary>
+    /// 生文字列のウィジェットです。
     /// Textメソッドの呼び出しを簡素化した冗長なメソッドです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
+    /// <param name="alignment">ウィジェットの配置位置</param>
     /// <param name="attribute">テキストの属性</param>
     /// <param name="rawText">表示する文字列</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext RawText(GUIAlignment alignment, TextAttribute attribute, string rawText);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget RawText(GUIAlignment alignment, TextAttribute attribute, string rawText);
 
     /// <summary>
-    /// 翻訳キーに対応する文字列のコンテキストです。
+    /// 翻訳キーに対応する文字列のウィジェットです。
     /// Textメソッドの呼び出しを簡素化した冗長なメソッドです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
+    /// <param name="alignment">ウィジェットの配置位置</param>
     /// <param name="attribute">テキストの属性</param>
     /// <param name="translationKey">翻訳キー</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext LocalizedText(GUIAlignment alignment, TextAttribute attribute, string translationKey);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget LocalizedText(GUIAlignment alignment, TextAttribute attribute, string translationKey);
 
     /// <summary>
-    /// 文字列のコンテキストです。
+    /// 文字列のウィジェットです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
+    /// <param name="alignment">ウィジェットの配置位置</param>
     /// <param name="attribute">テキストの属性</param>
     /// <param name="text">テキストを表すコンポーネント</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext Text(GUIAlignment alignment, TextAttribute attribute, TextComponent text);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget Text(GUIAlignment alignment, TextAttribute attribute, TextComponent text);
+
+    /// <summary>
+    /// 変更可能なテキストのウィジェットです。
+    /// </summary>
+    /// <returns>生成されたウィジェット定義</returns>
+    //GUIWidget Text(GUIAlignment alignment, TextAttribute attribute, TextComponent defaultText,out Artifact<GUIUpdatableText> artifact);
 
     /// <summary>
     /// 翻訳テキストを表示するボタンです。
     /// Buttonメソッドの呼び出しを簡素化した冗長なメソッドです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
+    /// <param name="alignment">ウィジェットの配置位置</param>
     /// <param name="attribute">テキストの属性</param>
     /// <param name="translationKey">翻訳キー</param>
     /// <param name="onClick">クリックされた際に実行するアクション</param>
@@ -136,14 +179,14 @@ public interface GUI
     /// <param name="onRightClick">右クリックされた際に実行するアクション</param>
     /// <param name="color">ボタンの色</param>
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext LocalizedButton(GUIAlignment alignment, TextAttribute attribute, string translationKey, Action onClick, Action? onMouseOver = null, Action? onMouseOut = null, Action? onRightClick = null, Color? color = null, Color? selectedColor = null);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget LocalizedButton(GUIAlignment alignment, TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null);
 
     /// <summary>
     /// 生文字列を表示するボタンです。
     /// Buttonメソッドの呼び出しを簡素化した冗長なメソッドです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
+    /// <param name="alignment">ウィジェットの配置位置</param>
     /// <param name="attribute">テキストの属性</param>
     /// <param name="rawText">表示するテキスト</param>
     /// <param name="onClick">クリックされた際に実行するアクション</param>
@@ -152,13 +195,13 @@ public interface GUI
     /// <param name="onRightClick">右クリックされた際に実行するアクション</param>
     /// <param name="color">ボタンの色</param>
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext RawButton(GUIAlignment alignment, TextAttribute attribute, string rawText, Action onClick, Action? onMouseOver = null, Action? onMouseOut = null, Action? onRightClick = null, Color? color = null, Color? selectedColor = null);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget RawButton(GUIAlignment alignment, TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null);
 
     /// <summary>
     /// テキストを表示するボタンです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
+    /// <param name="alignment">ウィジェットの配置位置</param>
     /// <param name="attribute">テキストの属性</param>
     /// <param name="text">テキストを表すコンポーネント</param>
     /// <param name="onClick">クリックされた際に実行するアクション</param>
@@ -167,17 +210,17 @@ public interface GUI
     /// <param name="onRightClick">右クリックされた際に実行するアクション</param>
     /// <param name="color">ボタンの色</param>
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext Button(GUIAlignment alignment, TextAttribute attribute, TextComponent text, Action onClick, Action? onMouseOver = null, Action? onMouseOut = null, Action? onRightClick = null, Color? color = null, Color? selectedColor = null);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget Button(GUIAlignment alignment, TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null);
 
     /// <summary>
-    /// 画像を表示するコンテキストです。
+    /// 画像を表示するウィジェットです。
     /// </summary>
     /// <param name="alignment">画像の表示位置</param>
     /// <param name="image">画像</param>
     /// <param name="size">表示する大きさ</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext Image(GUIAlignment alignment, Image image, FuzzySize size);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidget? overlay = null);
 
     /// <summary>
     /// スクロールビューです。
@@ -185,89 +228,123 @@ public interface GUI
     /// <param name="alignment">ビューの配置位置</param>
     /// <param name="size">ビューの大きさ</param>
     /// <param name="scrollerTag">スクローラー位置を再現するためのタグ</param>
-    /// <param name="inner">ビュー内で表示するコンテキスト</param>
+    /// <param name="inner">ビュー内で表示するウィジェット</param>
     /// <param name="artifact">ビュー内に生成されるスクリーンへのアクセサ</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext ScrollView(GUIAlignment alignment, Size size, string? scrollerTag, GUIContext? inner, out Artifact<GUIScreen> artifact);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget ScrollView(GUIAlignment alignment, Size size, string? scrollerTag, GUIWidget? inner, out Artifact<GUIScreen> artifact);
 
     /// <summary>
-    /// 縦方向にコンテキストを並べます。
+    /// スクローラのないビューです。動的に表示内容を変更することができる、事前に占有された領域を表します。
+    /// 内部のウィジェット定義はいつでも書き換えることができます。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
-    /// <param name="innerReference">並べるコンテキスト　GUIScreen.SetContextの呼び出し時に評価されます</param>
-    /// <param name="fixedWidth">コンテキストの固定幅 nullの場合はフレキシブルに幅を設定します</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext VerticalHolder(GUIAlignment alignment, IEnumerable<GUIContext> innerReference, float? fixedWidth = null);
+    /// <param name="alignment">ビューの配置位置</param>
+    /// <param name="size">ビューの大きさ</param>
+    /// <param name="inner">ビュー内で表示するデフォルトのウィジェット</param>
+    /// <param name="artifact">ビュー内に生成されるスクリーンへのアクセサ</param>
+    /// <returns></returns>
+    //GUIWidget FixedView(GUIAlignment alignment, Size size, GUIWidget? inner, out Artifact<GUIScreen> artifact);
 
     /// <summary>
-    /// 横方向にコンテキストを並べます。
+    /// 縦方向にウィジェットを並べます。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
-    /// <param name="innerReference">並べるコンテキスト　GUIScreen.SetContextの呼び出し時に評価されます</param>
-    /// <param name="fixedHeight">コンテキストの固定長 nullの場合はフレキシブルに高さを設定します</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext HorizontalHolder(GUIAlignment alignment, IEnumerable<GUIContext> innerReference, float? fixedHeight = null);
+    /// <param name="alignment">ウィジェットの配置位置</param>
+    /// <param name="innerReference">並べるウィジェット　GUIScreen.SetWidgetの呼び出し時に評価されます</param>
+    /// <param name="fixedWidth">ウィジェットの固定幅 nullの場合はフレキシブルに幅を設定します</param>
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget VerticalHolder(GUIAlignment alignment, IEnumerable<GUIWidget?> innerReference, float? fixedWidth = null);
 
     /// <summary>
-    /// 縦方向にコンテキストを並べます。
+    /// 横方向にウィジェットを並べます。
+    /// </summary>
+    /// <param name="alignment">ウィジェットの配置位置</param>
+    /// <param name="innerReference">並べるウィジェット　GUIScreen.SetWidgetの呼び出し時に評価されます</param>
+    /// <param name="fixedHeight">ウィジェットの固定長 nullの場合はフレキシブルに高さを設定します</param>
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget HorizontalHolder(GUIAlignment alignment, IEnumerable<GUIWidget?> innerReference, float? fixedHeight = null);
+
+    /// <summary>
+    /// 縦方向にウィジェットを並べます。
     /// 呼び出しを簡素化するためのオーバーロードです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
-    /// <param name="fixedWidth">コンテキストの固定幅 nullの場合はフレキシブルに幅を設定します</param>
-    /// <param name="inner">並べるコンテキスト</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext VerticalHolder(GUIAlignment alignment, float fixedWidth, params GUIContext[] inner) => VerticalHolder(alignment, inner, null);
+    /// <param name="alignment">ウィジェットの配置位置</param>
+    /// <param name="fixedWidth">ウィジェットの固定幅 nullの場合はフレキシブルに幅を設定します</param>
+    /// <param name="inner">並べるウィジェット</param>
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget VerticalHolder(GUIAlignment alignment, float fixedWidth, params GUIWidget?[] inner) => VerticalHolder(alignment, inner, null);
 
     /// <summary>
-    /// 横方向にコンテキストを並べます。
+    /// 横方向にウィジェットを並べます。
     /// 呼び出しを簡素化するためのオーバーロードです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
-    /// <param name="fixedHeight">コンテキストの固定長 nullの場合はフレキシブルに高さを設定します</param>
-    /// <param name="inner">並べるコンテキスト</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext HorizontalHolder(GUIAlignment alignment, float fixedHeight, params GUIContext[] inner) => HorizontalHolder(alignment, inner, null);
+    /// <param name="alignment">ウィジェットの配置位置</param>
+    /// <param name="fixedHeight">ウィジェットの固定長 nullの場合はフレキシブルに高さを設定します</param>
+    /// <param name="inner">並べるウィジェット</param>
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget HorizontalHolder(GUIAlignment alignment, float fixedHeight, params GUIWidget?[] inner) => HorizontalHolder(alignment, inner, null);
 
     /// <summary>
-    /// 縦方向にコンテキストを並べます。
+    /// 縦方向にウィジェットを並べます。
     /// 呼び出しを簡素化するためのオーバーロードです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
-    /// <param name="inner">並べるコンテキスト</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext VerticalHolder(GUIAlignment alignment, params GUIContext[] inner) => VerticalHolder(alignment, inner, null);
+    /// <param name="alignment">ウィジェットの配置位置</param>
+    /// <param name="inner">並べるウィジェット</param>
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget VerticalHolder(GUIAlignment alignment, params GUIWidget?[] inner) => VerticalHolder(alignment, inner, null);
 
     /// <summary>
-    /// 横方向にコンテキストを並べます。
+    /// 横方向にウィジェットを並べます。
     /// 呼び出しを簡素化するためのオーバーロードです。
     /// </summary>
-    /// <param name="alignment">コンテキストの配置位置</param>
-    /// <param name="inner">並べるコンテキスト</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext HorizontalHolder(GUIAlignment alignment, params GUIContext[] inner) => HorizontalHolder(alignment, inner, null);
+    /// <param name="alignment">ウィジェットの配置位置</param>
+    /// <param name="inner">並べるウィジェット</param>
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget HorizontalHolder(GUIAlignment alignment, params GUIWidget?[] inner) => HorizontalHolder(alignment, inner, null);
     
     /// <summary>
-    /// 余白を表すコンテキストです。見た目を整えるために使用します。
+    /// 余白を表すウィジェットです。見た目を整えるために使用します。
     /// </summary>
     /// <param name="margin">余白の大きさ</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext Margin(FuzzySize margin);
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget Margin(FuzzySize margin);
 
     /// <summary>
-    /// 余白を表すコンテキストです。
+    /// 余白を表すウィジェットです。
     /// Marginの呼び出しを簡素化するための冗長なメソッドです。
     /// </summary>
     /// <param name="margin">縦方向の余白</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext VerticalMargin(float margin) => Margin(new(null, margin));
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget VerticalMargin(float margin) => Margin(new(null, margin));
 
     /// <summary>
-    /// 余白を表すコンテキストです。
+    /// 余白を表すウィジェットです。
     /// Marginの呼び出しを簡素化するための冗長なメソッドです。
     /// </summary>
     /// <param name="margin">横方向の余白</param>
-    /// <returns>生成されたコンテキスト定義</returns>
-    GUIContext HorizontalMargin(float margin) => Margin(new(margin, null));
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget HorizontalMargin(float margin) => Margin(new(margin, null));
+
+
+    /// <summary>
+    /// プレイヤーを表示するウィジェットです。
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns>生成されたウィジット定義</returns>
+    //GUIWidget PlayerDisplay(Game.Player player);
+
+    /// <summary>
+    /// プレイヤーアイコンを表示するウィジェットです。
+    /// </summary>
+    /// <param name="playerId">プレイヤーのID NoSの場合、色IDと同一</param>
+    /// <returns>生成されたウィジット定義</returns>
+
+    //GUIWidget PlayerIcon(byte playerId);
+
+    /// <summary>
+    /// 拡大・縮小するウィジットです。
+    /// </summary>
+    /// <param name="scale">拡大率</param>
+    /// <returns>生成されたウィジット定義</returns>
+    //GUIWidget Scaler(float scale);
 
     /// <summary>
     /// フォントを取得します。
@@ -334,4 +411,6 @@ public interface GUI
     /// <param name="component">テキストコンポーネント</param>
     /// <returns>色付きのテキストコンポーネント</returns>
     TextComponent ColorTextComponent(Virial.Color color, TextComponent component);
+
+    
 }

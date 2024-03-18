@@ -6,17 +6,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 using static Rewired.UnknownControllerHat;
 
 namespace Nebula.Roles.Impostor;
 
-public class Cleaner : ConfigurableStandardRole
+public class Cleaner : ConfigurableStandardRole, HasCitation
 {
     static public Cleaner MyRole = new Cleaner();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "cleaner";
     public override Color RoleColor => Palette.ImpostorRed;
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
@@ -31,7 +33,7 @@ public class Cleaner : ConfigurableStandardRole
         SyncKillAndCleanCoolDownOption = new NebulaConfiguration(RoleConfig, "syncKillAndCleanCoolDown", null, true, true);
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         private ModAbilityButton? cleanButton = null;
 
@@ -45,7 +47,7 @@ public class Cleaner : ConfigurableStandardRole
         {
         }
 
-        public override void OnKillPlayer(PlayerControl target)
+        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
         {
             if (AmOwner)
             {
@@ -81,12 +83,12 @@ public class Cleaner : ConfigurableStandardRole
         }
 
 
-        public override void OnEmergencyMeeting(PlayerModInfo reporter)
+        void IGameEntity.OnEmergencyMeeting(GamePlayer reporter)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value.cleared = acTokenChallenge.Value.removed >= 2;
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd()
         {
             if (acTokenChallenge != null) acTokenChallenge.Value.removed = 0;
         }

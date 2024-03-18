@@ -1,0 +1,15 @@
+﻿{
+	"Contents" : [
+		{
+			"Document" : {
+				"Id" : "templates.roleName",
+				"Arguments" : {
+					"roleName" : "damned"
+				}
+			}
+		},
+		{
+			"TranslationKey" : "role.damned.doc.main",
+		}
+	]
+}

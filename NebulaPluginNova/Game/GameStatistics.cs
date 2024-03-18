@@ -31,6 +31,7 @@ public static class EventDetail
     static public TranslatableTag Accident = new("statistics.events.accident");
     static public TranslatableTag FakeSabotage = new("statistics.events.fakeSabotage");
     static public TranslatableTag Curse = new("statistics.events.curse");
+    static public TranslatableTag Layoff = new("statistics.events.layoff");
 
     static public void Load()
     {
@@ -474,23 +475,23 @@ public class GameStatisticsViewer : MonoBehaviour
             button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
 
             button.OnMouseOver.AddListener(()=> {
-                MetaContextOld context = new();
+                MetaWidgetOld widget = new();
 
                 foreach (var near in statisticsEvent.Position)
                 {
                     if (near.Item2.Distance(pos.Item2) > 0.6f) continue;
 
-                    if (context.Count > 0) context.Append(new MetaContextOld.VerticalMargin(0.1f));
+                    if (widget.Count > 0) widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
                     var roleText = NebulaGameManager.Instance.RoleHistory.EachMoment(history => history.PlayerId == near.Item1 && !(history.Time > statisticsEvent.Time),
                         (role, modifiers) => RoleHistoryHelper.ConvertToRoleName(role, modifiers, false)).LastOrDefault();
-                    context.Append(new MetaContextOld.Text(Nebula.Utilities.TextAttribute.BoldAttrLeft) { RawText = NebulaGameManager.Instance.GetModPlayerInfo(near.Item1)!.DefaultName });
-                    context.Append(new MetaContextOld.VariableText(new Nebula.Utilities.TextAttribute(Nebula.Utilities.TextAttribute.BoldAttrLeft) { Alignment = TMPro.TextAlignmentOptions.TopLeft }.EditFontSize(1.35f)) { RawText = roleText ?? "" });
+                    widget.Append(new MetaWidgetOld.Text(Nebula.Utilities.TextAttributeOld.BoldAttrLeft) { RawText = NebulaGameManager.Instance.GetModPlayerInfo(near.Item1)!.DefaultName });
+                    widget.Append(new MetaWidgetOld.VariableText(new Nebula.Utilities.TextAttributeOld(Nebula.Utilities.TextAttributeOld.BoldAttrLeft) { Alignment = TMPro.TextAlignmentOptions.TopLeft }.EditFontSize(1.35f)) { RawText = roleText ?? "" });
 
                 }
 
-                NebulaManager.Instance.SetHelpContext(button, context);
+                NebulaManager.Instance.SetHelpWidget(button, widget);
             });
-            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpContextIf(button));
+            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
 
             p += 0.001f;
         }
@@ -507,7 +508,7 @@ public class GameStatisticsViewer : MonoBehaviour
 
             var collider = detail.AddComponent<BoxCollider2D>();
             collider.size = new Vector2(3.4f, 0.7f);
-            var button = detail.gameObject.SetUpButton(true, null);
+            var button = detail.gameObject.SetUpButton(true);
             button.OnClick.RemoveAllListeners();
             button.OnMouseOver.AddListener(() =>
             {

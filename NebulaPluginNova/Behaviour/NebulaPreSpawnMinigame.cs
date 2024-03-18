@@ -66,12 +66,12 @@ public class NebulaPreSpawnLocation
         },
         new NebulaPreSpawnLocation[0],
         new NebulaPreSpawnLocation[]{ 
-            new("Brig",0,140),
-            new("Engine",1,180),
-            new("Hallway",2,226),
-            new("Kitchen",3,140),
-            new("Record",4,173),
-            new("Storage",5,188),
+            new("Brig",0,140,new(-0.5f,8.5f)),
+            new("Engine",1,180,new(0f,-1f)),
+            new("Hallway",2,226, new(15.5f,0f)),
+            new("Kitchen",3,180,new(-7f,-11.5f)),
+            new("Record",4,173,new(19.8f,10.3f)),
+            new("Storage",5,188,new(33.5f,0f)),
             new("Armory", new Vector2(-10.141f, -6.3739f)),
             new("Cockpit", new Vector2(-23.5643f, -1.4405f)),
             new("Comms", new Vector2(-12.9433f, 1.4259f)),
@@ -114,6 +114,10 @@ public class NebulaPreSpawnLocation
         };
 
     public string LocationName { get; private init; }
+    public string GetDisplayName(byte mapId)
+    {
+        return "location." + MapName[mapId].HeadLower() + "." + LocationName.HeadLower();
+    }
     public string? AudioClip { get; private init; }
     public Vector2[]? Positions { get; set; }
     public Vector2? Position => Positions != null ? Positions[System.Random.Shared.Next(Positions.Length)] : null;
@@ -121,6 +125,7 @@ public class NebulaPreSpawnLocation
     public string AssetImagePath(byte mapId) => "assets/SpawnCandidates/" + MapName[mapId] + "/" + LocationName + ".png";
     public IDividedSpriteLoader GetSprite(byte mapId) => new DividedSpriteLoader(new AssetTextureLoader(AssetImagePath(mapId)), 115f, ImageSize, ImageSize, true) { Pivot = new(0.5f, 0f) };
     private int ImageSize { get; set; } = 200;
+    public NebulaConfiguration.NebulaByteConfiguration Configuration { get; set; }
     public NebulaPreSpawnLocation(string locationName,Vector2 pos,string? audioClip = null) { 
         this.LocationName = locationName;
         this.Positions = new Vector2[] { pos };
@@ -134,11 +139,12 @@ public class NebulaPreSpawnLocation
         this.AudioClip = audioClip;
     }
 
-    public NebulaPreSpawnLocation(string locationName, int vanillaIndex,int imageSize)
+    public NebulaPreSpawnLocation(string locationName, int vanillaIndex,int imageSize,Vector2 tempPosition)
     {
         this.LocationName= locationName;
         this.VanillaIndex= vanillaIndex;
         this.ImageSize = imageSize;
+        this.Positions = new Vector2[] { tempPosition };
     }
 }
 
@@ -164,6 +170,10 @@ public class NebulaPreSpawnMinigame : Minigame
             {
                 //Default
                 cand = cand.Where(l => l.VanillaIndex.HasValue).ToArray();
+            }
+            else
+            {
+                cand = cand.Where(l => l.Configuration.CurrentValue).ToArray();
             }
 
             return cand;
@@ -350,6 +360,9 @@ public class NebulaPreSpawnMinigame : Minigame
                 loc.Positions = new Vector2[] { minigamePrefab!.Locations[loc.VanillaIndex.Value].Location };
         }
 
+        //ランダムなスポーン先を適当に代入しておく
+        spawnAt = cand[rand[System.Random.Shared.Next(candidates)]].Position!.Value;
+
         for (int i = 0; i < candidates; i++){
             int copiedIndex = i;
 
@@ -369,7 +382,7 @@ public class NebulaPreSpawnMinigame : Minigame
             text.fontSize = 2.85f;
             text.fontSizeMax = 3f;
             text.fontSizeMin = 1f;
-            text.text = Language.Translate("location." + NebulaPreSpawnLocation.MapName[mapId].HeadLower()+"."+loc.LocationName.HeadLower());
+            text.text = Language.Translate(loc.GetDisplayName(mapId));
             text.font = VanillaAsset.PreSpawnFont;
             AudioClip hoverClip = VanillaAsset.HoverClip;
 

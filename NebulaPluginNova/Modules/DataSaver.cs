@@ -181,13 +181,15 @@ public class DataSaver
 
     public DataSaver(string filename)
     {
-        this.filename = "NebulaOnTheShip\\" + filename + ".dat";
+        this.filename = filename;
         Load();
     }
 
+    public static string ToDataSaverPath(string filename) => FileIO.GetDataPathTo(new string[] { "NebulaOnTheShip\\" + filename + ".dat" });
+
     public void Load()
     {
-        string dataPathTo = FileIO.GetDataPathTo(new string[] { filename });
+        string dataPathTo = ToDataSaverPath(filename);
 
         if (!FileIO.Exists(dataPathTo)) return;
         
@@ -207,6 +209,6 @@ public class DataSaver
         {
             strContents += entry.Key + ":" + entry.Value + "\n";
         }
-        FileIO.WriteAllText(FileIO.GetDataPathTo(new string[] { filename }), strContents);
+        FileIO.WriteAllText(ToDataSaverPath(filename), strContents);
     }
 }

@@ -1,0 +1,21 @@
+{
+	"Arguments" : [
+		"citation",
+	],
+	"Aligned" : [
+		{
+			"RawText" : "from",
+			"IsBold" : False,
+			"FontSize" : 1.4,
+			"IsVariable" : True,
+			"Alignment" : "Bottom"
+		},
+		{
+			"HSpace" : 0.12
+		},
+		{
+			"Citation" : "#citation",
+			"Alignment" : "Bottom"
+		},
+	]
+}

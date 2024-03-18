@@ -5,12 +5,13 @@ using Nebula.Commands;
 using Nebula.Game;
 using Nebula.Map;
 using Nebula.Modules;
-using Nebula.Modules.MetaContext;
+using Nebula.Modules.MetaWidget;
 using Nebula.Utilities;
 using Rewired.UI.ControlMapper;
 using System.Collections;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Virial.Media;
 
 namespace Nebula;
@@ -21,7 +22,7 @@ public class MouseOverPopup : MonoBehaviour
     private SpriteRenderer background = null!;
     private Vector2 screenSize;
     private PassiveUiElement? relatedButton;
-
+    private SpriteMask mask = null!;
     public PassiveUiElement? RelatedObject => relatedButton;
     static MouseOverPopup()
     {
@@ -36,8 +37,13 @@ public class MouseOverPopup : MonoBehaviour
         background.tileMode = SpriteTileMode.Continuous;
         background.color = new Color(0.14f, 0.14f, 0.14f, 1f);
 
+        var group = UnityHelper.CreateObject<SortingGroup>("Group", transform, Vector3.zero);
+        mask = UnityHelper.CreateObject<SpriteMask>("Mask", group.transform, Vector3.zero);
+        mask.sprite = VanillaAsset.FullScreenSprite;
+        mask.transform.localScale = new Vector3(1f, 1f);
+        
         screenSize = new Vector2(7f, 4f);
-        myScreen = MetaScreen.GenerateScreen(screenSize,transform,Vector3.zero,false,false,false);
+        myScreen = MetaScreen.GenerateScreen(screenSize,group.transform,Vector3.zero,false,false,false);
 
         gameObject.SetActive(false);
 
@@ -49,11 +55,11 @@ public class MouseOverPopup : MonoBehaviour
         relatedButton = null;
     }
 
-    public void SetContextOld(PassiveUiElement? related, IMetaContextOld? context)
+    public void SetWidgetOld(PassiveUiElement? related, IMetaWidgetOld? widget)
     {
-        myScreen.SetContext(null);
+        myScreen.SetWidget(null);
 
-        if (context == null) {
+        if (widget == null) {
             gameObject.SetActive(false);
             relatedButton = null;
             return;
@@ -67,7 +73,7 @@ public class MouseOverPopup : MonoBehaviour
         bool isLeft = Input.mousePosition.x < Screen.width / 2f;
         bool isLower = Input.mousePosition.y < Screen.height / 2f;
 
-        float height = myScreen.SetContext(context, out var width);
+        float height = myScreen.SetWidget(widget, out var width);
 
         if (width.min > width.max)
         {
@@ -106,18 +112,27 @@ public class MouseOverPopup : MonoBehaviour
             if (diff > 0f) transform.position -= new Vector3(0f, diff);
         }
 
-
-        background.transform.localPosition = new Vector3((width.min + width.max) / 2f, screenSize.y / 2f - height / 2f, 1f);
-        background.size = new Vector2((width.max - width.min) + 0.22f, height + 0.1f);
-
+        UpdateArea(new((width.min + width.max) / 2f, screenSize.y / 2f - height / 2f), new((width.max - width.min) + 0.22f, height + 0.1f));
         Update();
     }
 
-    public void SetContext(PassiveUiElement? related, Virial.Media.GUIContext? context)
+    void UpdateArea(Vector2 localPos, Vector2 localScale)
     {
-        myScreen.SetContext(null);
+        Vector3 localPos3 = localPos;
+        localPos3.z = 1f;
 
-        if (context == null)
+        background.transform.localPosition = localPos3;
+        background.size = localScale;
+
+        mask.transform.localPosition = localPos;
+        mask.transform.localScale = localScale;
+    }
+
+    public void SetWidget(PassiveUiElement? related, Virial.Media.GUIWidget? widget)
+    {
+        myScreen.SetWidget(null);
+
+        if (widget == null)
         {
             gameObject.SetActive(false);
             relatedButton = null;
@@ -132,7 +147,7 @@ public class MouseOverPopup : MonoBehaviour
         bool isLeft = Input.mousePosition.x < Screen.width / 2f;
         bool isLower = Input.mousePosition.y < Screen.height / 2f;
 
-        myScreen.SetContext(context, new Vector2(0.5f, 0.5f), out var size);
+        myScreen.SetWidget(widget, new Vector2(0.5f, 0.5f), out var size);
 
         
 
@@ -167,10 +182,7 @@ public class MouseOverPopup : MonoBehaviour
             if (diff > 0f) transform.position -= new Vector3(0f, diff);
         }
 
-
-        background.transform.localPosition = new Vector3(0f, 0f, 1f);
-        background.size = new Vector2(size.Width + 0.22f, size.Height + 0.1f);
-
+        UpdateArea(new(0f,0f),new(size.Width + 0.22f, size.Height + 0.1f));
         Update();
     }
 
@@ -178,7 +190,7 @@ public class MouseOverPopup : MonoBehaviour
     {
         if(relatedButton is not null && !relatedButton)
         {
-            SetContext(null, null);
+            SetWidget(null, null);
         }
 
     }
@@ -257,7 +269,7 @@ public class NebulaManager : MonoBehaviour
         { DefaultKeyInput = new(KeyCode.Return) });
 
         commands.Add(new("help.command.saveResult",
-            () => LastGameHistory.LastContext != null,
+            () => LastGameHistory.LastWidget != null,
             () => LastGameHistory.SaveResult(GetPicturePath(out string displayPath))
         )
         { DefaultKeyInput = new(KeyCode.F3) });
@@ -331,11 +343,6 @@ public class NebulaManager : MonoBehaviour
 
     public void Update()
     {
-        if (NebulaInput.GetKeyDown(KeyCode.T))
-        {
-            PlayerControl.LocalPlayer.GetModInfo()?.RpcTest(5);
-        }
-
         if (NebulaPlugin.FinishedPreload)
         {
             //スクリーンショット
@@ -346,8 +353,8 @@ public class NebulaManager : MonoBehaviour
                 //コマンド
                 if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyDown)
                 {
-                    MetaContextOld context = new();
-                    context.Append(new MetaContextOld.Text(new(TextAttribute.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = "help.command", Alignment = IMetaContextOld.AlignmentOption.Left });
+                    MetaWidgetOld widget = new();
+                    widget.Append(new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = "help.command", Alignment = IMetaWidgetOld.AlignmentOption.Left });
                     string commandsStr = "";
                     foreach (var command in commands)
                     {
@@ -358,16 +365,16 @@ public class NebulaManager : MonoBehaviour
 
                         commandsStr += " :" + Language.Translate(command.TranslationKey);
                     }
-                    context.Append(new MetaContextOld.VariableText(TextAttribute.ContentAttr) { RawText = commandsStr });
+                    widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { RawText = commandsStr });
 
-                    if (commandsStr.Length > 0) SetHelpContext(null, context);
+                    if (commandsStr.Length > 0) SetHelpWidget(null, widget);
 
                 }
 
                 //コマンド
                 if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyUp)
                 {
-                    if (HelpRelatedObject == null) HideHelpContext();
+                    if (HelpRelatedObject == null) HideHelpWidget();
                 }
 
                 //コマンド
@@ -380,7 +387,7 @@ public class NebulaManager : MonoBehaviour
                         if (!command.KeyInput!.KeyDown) continue;
 
                         command.CommandAction.Invoke();
-                        HideHelpContext();
+                        HideHelpWidget();
                         break;
                     }
                 }
@@ -410,13 +417,20 @@ public class NebulaManager : MonoBehaviour
         mouseOverPopup = UnityHelper.CreateObject<MouseOverPopup>("MouseOverPopup",transform,Vector3.zero);
     }
 
-    public void SetHelpContext(PassiveUiElement? related, IMetaContextOld? context) => mouseOverPopup.SetContextOld(related, context);
-    public void SetHelpContext(PassiveUiElement? related, Virial.Media.GUIContext? context) => mouseOverPopup.SetContext(related, context);
-
-    public void HideHelpContext() => mouseOverPopup.SetContext(null, null);
-    public void HideHelpContextIf(PassiveUiElement? related)
+    public void SetHelpWidget(PassiveUiElement? related, IMetaWidgetOld? widget) => mouseOverPopup.SetWidgetOld(related, widget);
+    public void SetHelpWidget(PassiveUiElement? related, Virial.Media.GUIWidget? widget) => mouseOverPopup.SetWidget(related, widget);
+    public void SetHelpWidget(PassiveUiElement? related, string? rawText)
     {
-        if(HelpRelatedObject == related) mouseOverPopup.SetContext(null, null);
+        if (rawText != null)
+        {
+            SetHelpWidget(related, new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, RawText = rawText });
+        }
+    }
+
+    public void HideHelpWidget() => mouseOverPopup.SetWidget(null, null);
+    public void HideHelpWidgetIf(PassiveUiElement? related)
+    {
+        if(HelpRelatedObject == related) mouseOverPopup.SetWidget(null, null);
     }
     public PassiveUiElement? HelpRelatedObject => mouseOverPopup.RelatedObject;
     public bool ShowingAnyHelpContent => mouseOverPopup.isActiveAndEnabled;

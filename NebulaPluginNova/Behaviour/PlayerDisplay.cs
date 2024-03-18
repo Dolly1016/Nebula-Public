@@ -65,7 +65,7 @@ public class PlayerDisplay : MonoBehaviour
     public void SetBodyType(PlayerBodyTypes bodyType)
     {
         Cosmetics.EnsureInitialized(bodyType);
-        Animations.SetBodyType(bodyType, Cosmetics.currentBodySprite.flippedCosmeticOffset);
+        Animations.SetBodyType(bodyType, Cosmetics.currentBodySprite.normalCosmeticOffset, Cosmetics.currentBodySprite.flippedCosmeticOffset);
         if (bodyType == PlayerBodyTypes.Normal) Cosmetics.normalBodySprite.Visible = true;
     }
 
