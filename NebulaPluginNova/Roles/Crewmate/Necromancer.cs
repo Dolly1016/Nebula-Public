@@ -1,6 +1,7 @@
 ﻿using Nebula.Configuration;
 using UnityEngine.AI;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -34,7 +35,7 @@ public class Necromancer : ConfigurableStandardRole
         ReviveMaxRangeOption = new NebulaConfiguration(RoleConfig, "reviveMaxRange", null, 10f, 30f, 2.5f, 17.5f, 17.5f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -95,7 +96,7 @@ public class Necromancer : ConfigurableStandardRole
             if (AmOwner)
             {
                 message = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, HudManager.Instance.transform);
-                new TextAttribute(TextAttribute.NormalAttr) { Size = new Vector2(5f, 0.9f) }.EditFontSize(2.7f, 2.7f, 2.7f).Reflect(message);
+                new TextAttributeOld(TextAttributeOld.NormalAttr) { Size = new Vector2(5f, 0.9f) }.EditFontSize(2.7f, 2.7f, 2.7f).Reflect(message);
                 message.transform.localPosition = new Vector3(0, -1.2f, -4f);
                 Bind(new GameObjectBinding(message.gameObject));
 
@@ -175,7 +176,7 @@ public class Necromancer : ConfigurableStandardRole
             }
         }
 
-        public override void OnDead()
+        void IGamePlayerEntity.OnDead()
         {
             draggable?.OnDead(this);
         }
@@ -185,9 +186,9 @@ public class Necromancer : ConfigurableStandardRole
             draggable?.OnInactivated(this);
         }
 
-        public override void OnAnyoneDeadLocal(PlayerControl dead)
+        void IGameEntity.OnPlayerDead(GamePlayer dead)
         {
-            resurrectionRoom?.Remove(dead.PlayerId);
+            if(AmOwner) resurrectionRoom?.Remove(dead.PlayerId);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Complex;
 
@@ -71,6 +72,7 @@ public class Secret : AbstractRole, DefinedAssignable
     public override int RoleCount => 0;
     public override float GetRoleChance(int count) => 0f;
 
+    public override bool CanBeGuessDefault => false;
 
     public Secret(bool isEvil)
     {
@@ -94,9 +96,10 @@ public class Secret : AbstractRole, DefinedAssignable
                     new NebulaRPCInvoker(() =>
                     {
                         player.Role.OnSetTaskLocal(ref tasks, out int unacquired);
-                        player.Tasks.ResetTasks(tasks);
-                        player.Tasks.GainExtraTasks(tasks.Count,false, unacquired);
+                        player.Tasks.ResetTasksLocal(tasks);
+                        player.Tasks.GainExtraTasks(tasks.Count,false, unacquired,false);
                     }).InvokeSingle();
+                    player.Tasks.RpcSync();
                 }
             }
         });
@@ -110,8 +113,8 @@ public class Secret : AbstractRole, DefinedAssignable
 
         new AchievementToken<int>("secret.challenge", 0, (_, achievement) =>
         {
-            return NebulaGameManager.Instance!.AllAchievementTokens.Any(a =>
-            a.Achievement.Category.type == AchievementType.Challenge && a.Achievement.Category.role != null && a.Achievement.Id != "secret.challenge" && a.UniteTo(false) != Achievement.ClearState.NotCleared);
+            return NebulaGameManager.Instance!.AllAchievementTokens.Any(r =>
+            r.Achievement is AbstractAchievement a && a.Category.type == AchievementType.Challenge && a.Category.role != null && a.Id != "secret.challenge" && r.UniteTo(false) != AbstractAchievement.ClearState.NotCleared);
         });
     }
     public class NiceInstance : Crewmate.Crewmate.Instance
@@ -169,7 +172,7 @@ public class Secret : AbstractRole, DefinedAssignable
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance
+    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyEvilRole;
         public EvilInstance(PlayerModInfo player, int[] savedArgs) : base(player)
@@ -183,9 +186,8 @@ public class Secret : AbstractRole, DefinedAssignable
         int[] savedArgs;
         AbstractRole savedRole;
         int leftKill = OptionRole.EvilConditionOption;
-        public override void OnKillPlayer(PlayerControl target)
+        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
         {
-            base.OnKillPlayer(target);
             leftKill--;
             if (leftKill <= 0 && AmOwner) ScheduleSendArousalRpc(MyPlayer, savedArgs);
         }

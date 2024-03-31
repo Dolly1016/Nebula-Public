@@ -121,6 +121,7 @@ public class Avenger : ConfigurableRole
             if (murder == target)
             {
                 if (murder.AmOwner) new StaticAchievementToken("avenger.common2");
+                if (AmOwner) new StaticAchievementToken("avenger.another1");
             }
         }
 

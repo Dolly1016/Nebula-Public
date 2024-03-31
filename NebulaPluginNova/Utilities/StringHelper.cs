@@ -16,6 +16,11 @@ static public class StringHelper
         return (byte)(f * 255);
     }
 
+    public static string Bold(this string original)
+    {
+        return "<b>" + original + "</b>";
+    }
+
     public static string Color(this string original,Color color)
     {
         return string.Format("<color=#{0:X2}{1:X2}{2:X2}{3:X2}>{4}</color>", ToByte(color.r), ToByte(color.g), ToByte(color.b), ToByte(color.a), original);

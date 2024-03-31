@@ -34,11 +34,11 @@ public abstract class LobbySlide
 
     public abstract void Reshare();
     public virtual void Abandon() { }
-    public abstract IMetaContextOld Show(out float height);
+    public abstract IMetaWidgetOld Show(out float height);
 
 
-    protected static TextAttribute TitleAttribute = new(TextAttribute.TitleAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(5f, 0.5f) };
-    protected static TextAttribute CaptionAttribute = new(TextAttribute.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(6f, 0.5f) };
+    protected static TextAttributeOld TitleAttribute = new(TextAttributeOld.TitleAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(5f, 0.5f) };
+    protected static TextAttributeOld CaptionAttribute = new(TextAttributeOld.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(6f, 0.5f) };
 }
 
 public abstract class LobbyImageSlide : LobbySlide
@@ -57,13 +57,13 @@ public abstract class LobbyImageSlide : LobbySlide
         if (mySlide && mySlide!.texture) GameObject.Destroy(mySlide!.texture);
     }
 
-    public override IMetaContextOld Show(out float height)
+    public override IMetaWidgetOld Show(out float height)
     {
         height = 1.4f;
 
-        MetaContextOld context = new();
+        MetaWidgetOld widget = new();
 
-        context.Append(new MetaContextOld.Text(TitleAttribute) { RawText = Title, Alignment = IMetaContextOld.AlignmentOption.Center });
+        widget.Append(new MetaWidgetOld.Text(TitleAttribute) { RawText = Title, Alignment = IMetaWidgetOld.AlignmentOption.Center });
 
         if (mySlide != null)
         {
@@ -71,15 +71,15 @@ public abstract class LobbyImageSlide : LobbySlide
             float width = Mathf.Min(5.4f, mySlide.bounds.size.x / mySlide.bounds.size.y * 2.9f);
             height += width / mySlide.bounds.size.x * mySlide.bounds.size.y;
 
-            context.Append(new MetaContextOld.Image(mySlide) { Alignment = IMetaContextOld.AlignmentOption.Center, Width = width });
+            widget.Append(new MetaWidgetOld.Image(mySlide) { Alignment = IMetaWidgetOld.AlignmentOption.Center, Width = width });
         }
 
-        context.Append(new MetaContextOld.VerticalMargin(0.2f));
+        widget.Append(new MetaWidgetOld.VerticalMargin(0.2f));
 
-        context.Append(new MetaContextOld.Text(CaptionAttribute) { RawText = Caption, Alignment = IMetaContextOld.AlignmentOption.Center });
+        widget.Append(new MetaWidgetOld.Text(CaptionAttribute) { RawText = Caption, Alignment = IMetaWidgetOld.AlignmentOption.Center });
 
 
-        return context;
+        return widget;
     }
 }
 
@@ -238,9 +238,9 @@ public class LobbySlideManager
                 myScreen = null;
             }
 
-            var context = slide.Show(out float height);
+            var widget = slide.Show(out float height);
             var screen = MetaScreen.GenerateWindow(new(6.2f, Mathf.Min(height, 4.3f)), HudManager.Instance.transform, new Vector3(0, 0, -100f), true, false);
-            screen.SetContext(context);
+            screen.SetWidget(widget);
 
             if (!detatched) myScreen = screen;
 

@@ -12,7 +12,27 @@ namespace Nebula.Utilities;
 [NebulaRPCHolder]
 public static class AmongUsUtil
 {
-    public static void SetCamTarget(MonoBehaviour? target = null) => HudManager.Instance.PlayerCam.Target = target ?? PlayerControl.LocalPlayer;
+    public static MonoBehaviour CurrentCamTarget => HudManager.Instance.PlayerCam.Target;
+    public static void SetCamTarget(MonoBehaviour? target = null)
+    {
+        if(CurrentCamTarget == PlayerControl.LocalPlayer) PlayerControl.LocalPlayer.NetTransform.Halt();
+
+        HudManager.Instance.PlayerCam.Target = target ?? PlayerControl.LocalPlayer;
+    }
+    public static void ToggleCamTarget(MonoBehaviour? target1 = null, MonoBehaviour? target2 = null)
+    {
+        target1 ??= PlayerControl.LocalPlayer;
+        target2 ??= PlayerControl.LocalPlayer;
+        SetCamTarget(CurrentCamTarget == target1 ? target2 : target1);
+    }
+
+    public static void ChangeShadowSize(float orthographicSize = 3f)
+    {
+        var shadowCollab = Camera.main.GetComponentInChildren<ShadowCollab>();
+        shadowCollab.ShadowCamera.orthographicSize = orthographicSize;
+        shadowCollab.ShadowQuad.transform.localScale = new Vector3(orthographicSize * Camera.main.aspect, orthographicSize) * 2f;
+    }
+
     public static UiElement CurrentUiElement => ControllerManager.Instance.CurrentUiState.CurrentSelection;
     public static bool InMeeting => MeetingHud.Instance == null && ExileController.Instance == null;
     public static byte CurrentMapId => GameOptionsManager.Instance.CurrentGameOptions.MapId;
@@ -36,7 +56,7 @@ public static class AmongUsUtil
         player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, true);
         player.ToggleName(false);
         player.SetNameColor(Color.white);
-
+        
         return player;
     }
 

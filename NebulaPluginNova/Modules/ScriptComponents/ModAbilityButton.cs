@@ -3,11 +3,12 @@ using Epic.OnlineServices.Lobby;
 using UnityEngine;
 using Virial.Compat;
 using Virial.Components;
+using Virial.Game;
 using Virial.Media;
 
 namespace Nebula.Modules.ScriptComponents;
 
-public class ModAbilityButton : INebulaScriptComponent, Virial.Components.AbilityButton
+public class ModAbilityButton : INebulaScriptComponent, Virial.Components.AbilityButton, IGameEntity
 {
 
     public ActionButton VanillaButton { get; private set; }
@@ -52,7 +53,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
 
     }
 
-    public override void OnReleased()
+    void IGameEntity.OnReleased()
     {
         if (VanillaButton) UnityEngine.Object.Destroy(VanillaButton.gameObject);
     }
@@ -67,12 +68,16 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         return false;
     }
 
-    public override void Update()
+    public bool IsVisible => Visibility?.Invoke(this) ?? true;
+    public bool IsAvailable => IsVisible && IsAvailableUnsafe;
+    private bool IsAvailableUnsafe => Availability?.Invoke(this) ?? true;
+
+    void IGameEntity.HudUpdate()
     {
         //表示・非表示切替
-        VanillaButton.gameObject.SetActive(Visibility?.Invoke(this) ?? true);
+        VanillaButton.gameObject.SetActive(IsVisible);
         //使用可能性切替
-        if (Availability?.Invoke(this) ?? true)
+        if (IsAvailableUnsafe)
             VanillaButton.SetEnabled();
         else
             VanillaButton.SetDisabled();
@@ -93,7 +98,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         
     }
 
-    public override void OnMeetingStart()
+    void IGameEntity.OnMeetingStart()
     {
         OnMeeting?.Invoke(this);
     }
@@ -134,12 +139,12 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
 
     public bool UseCoolDownSupport { get; set; } = true;
 
-    public override void OnGameReenabled() {
+    void IGameEntity.OnGameReenabled() {
         if (UseCoolDownSupport) StartCoolDown();
         OnStartTaskPhase?.Invoke(this);
     }
 
-    public override void OnGameStart() {
+    void IGameEntity.OnGameStart() {
         if (UseCoolDownSupport && CoolDownTimer != null) CoolDownTimer!.Start(Mathf.Min(CoolDownTimer!.Max, CoolDownOnGameStart));
         OnStartTaskPhase?.Invoke(this);
     }
@@ -149,7 +154,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         //効果中でなく、クールダウン中ならばなにもしない
         if (!EffectActive && (CoolDownTimer?.IsInProcess ?? false)) return this;
         //使用可能でないかを判定 (ボタン発火のタイミングと可視性更新のタイミングにずれが生じうるためここで再計算)
-        if (!(Visibility?.Invoke(this) ?? true) || !(Availability?.Invoke(this) ?? true)) return this;
+        if (!IsAvailable) return this;
 
         OnClick?.Invoke(this);
         return this;
@@ -322,6 +327,12 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         OnEffectEnd = button => StartCoolDown();
 
         return this;
+    }
+
+    public PoolablePlayer? GeneratePlayerIcon(PlayerModInfo? player)
+    {
+        if (player == null) return null;
+        return AmongUsUtil.GetPlayerIcon(player.DefaultOutfit, VanillaButton.transform, new UnityEngine.Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
     }
 }
 

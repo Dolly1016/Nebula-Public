@@ -8,6 +8,17 @@ using Virial.Configuration;
 namespace Virial.Assignable;
 
 /// <summary>
+/// 引用元を持つオブジェクトを表します。
+/// </summary>
+public interface HasCitation
+{
+    /// <summary>
+    /// 引用元を表します。
+    /// </summary>
+    Citation? Citaion { get; }
+}
+
+/// <summary>
 /// プレイヤーに割り当てられる役職および追加役職の定義を表します。
 /// </summary>
 public interface DefinedAssignable

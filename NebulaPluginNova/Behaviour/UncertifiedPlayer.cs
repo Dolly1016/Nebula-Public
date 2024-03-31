@@ -39,6 +39,13 @@ namespace Nebula.Behaviour
             }
             );
 
+        public static RemoteProcess<(byte playerId, string achievement)> RpcShareAchievement = new(
+            "ShareAchievement",
+            (message, _) =>
+            {
+                NebulaGameManager.Instance!.TitleMap[message.playerId] = Helpers.GetPlayer(message.playerId)?.GetTitleShower().SetAchievement(message.achievement);
+            });
+
         private static RemoteProcess RpcRequireHandshake = new(
             "RequireHandshake", (_) => Handshake()
             );
@@ -46,6 +53,7 @@ namespace Nebula.Behaviour
         private static void Handshake()
         {
             RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash));
+            RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaAchievementManager.MyTitle?.Id ?? "-"));
         }
 
         public static void RequireHandshake()
@@ -75,7 +83,7 @@ namespace Nebula.Behaviour
             State = UncertifiedReason.Waiting;
 
             myShower = UnityHelper.CreateObject("UncertifiedHolder",gameObject.transform,new Vector3(0,0,-20f), LayerExpansion.GetPlayersLayer());
-            (new MetaContextOld.Text(TextAttribute.BoldAttr) {
+            (new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) {
                 TranslationKey = ReasonToTranslationKey(UncertifiedReason.Uncertified),
                 PostBuilder = (text) => myText = text })
                 .Generate(myShower, Vector2.zero,out _);
@@ -88,9 +96,9 @@ namespace Nebula.Behaviour
             collider.size = new Vector2(0.6f, 0.2f);
             button.OnMouseOver.AddListener(() =>
             {
-                NebulaManager.Instance.SetHelpContext(button, new MetaContextOld.VariableText(TextAttribute.ContentAttr) { Alignment = IMetaContextOld.AlignmentOption.Left, TranslationKey = ReasonToTranslationKey(State) + ".detail" });
+                NebulaManager.Instance.SetHelpWidget(button, new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = ReasonToTranslationKey(State) + ".detail" });
             });
-            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpContextIf(button));
+            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
 
             IEnumerator CoWaitAndUpdate()
             {
@@ -109,14 +117,14 @@ namespace Nebula.Behaviour
             OnStateChanged();
 
             //MyControl?.OwnerId == AmongUsClient.Instance.HostId
-            if (MyControl?.AmOwner ?? false)
+            if (MyControl?.AmOwner ?? false && !AmongUsClient.Instance.AmHost)
             {
-                var screen = MetaScreen.GenerateWindow(new(3.2f,1.58f),HudManager.Instance.transform,Vector3.zero, true,false,true);
-                var context = new MetaContextOld();
-                context.Append(new MetaContextOld.Text(TextAttribute.BoldAttr) { Alignment = IMetaContextOld.AlignmentOption.Center, TranslationKey = ReasonToTranslationKey(State) });
-                context.Append(new MetaContextOld.Text(new TextAttribute(TextAttribute.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Top, Size = new(3f, 0.7f) }.EditFontSize(1.5f, 0.7f, 1.5f)) { TranslationKey = ReasonToTranslationKey(State) + ".client", Alignment = IMetaContextOld.AlignmentOption.Center });
-                context.Append(new MetaContextOld.Button(() => AmongUsClient.Instance.ExitGame(DisconnectReasons.ExitGame), TextAttribute.BoldAttr) { TranslationKey = "ui.dialog.exit", Alignment = IMetaContextOld.AlignmentOption.Center });
-                screen.SetContext(context);
+                var screen = MetaScreen.GenerateWindow(new(3.8f,1.78f),HudManager.Instance.transform,Vector3.zero, true,false,true);
+                var widget = new MetaWidgetOld();
+                widget.Append(new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = ReasonToTranslationKey(State) });
+                widget.Append(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Top, Size = new(3.7f, 0.9f) }.EditFontSize(1.5f, 0.7f, 1.5f)) { TranslationKey = ReasonToTranslationKey(State) + ".client", Alignment = IMetaWidgetOld.AlignmentOption.Center });
+                widget.Append(new MetaWidgetOld.Button(() => AmongUsClient.Instance.ExitGame(DisconnectReasons.ExitGame), new(TextAttributeOld.BoldAttr) { Size = new(1f,0.26f)}) { TranslationKey = "ui.dialog.exit", Alignment = IMetaWidgetOld.AlignmentOption.Center });
+                screen.SetWidget(widget);
             }
             
         }

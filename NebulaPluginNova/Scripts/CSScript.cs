@@ -5,6 +5,7 @@ using Nebula;
 using Nebula.Scripts;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
@@ -173,7 +174,12 @@ public static class AddonScriptManager
 {
     static Dictionary<NebulaAddon, CSScripting> scriptings = new();
 
-    static private CSScripting GetScripting(NebulaAddon addon)
+    static public bool TryGetScripting(NebulaAddon addon, [MaybeNullWhen(false)]  out CSScripting script)
+    {
+        return scriptings.TryGetValue(addon, out script);
+    }
+
+    static public CSScripting GetScripting(NebulaAddon addon)
     {
         if (!scriptings.TryGetValue(addon, out var scripting))
         {
@@ -193,7 +199,7 @@ public static class AddonScriptManager
     {
         using var reader = new StreamReader(program.Open());
         if (!scripting.Evaluate(reader.ReadToEnd(), out var error))
-            NebulaPlugin.Log.Print(null, "Error has occurred in " + program.Name + "\n" + error + "\n" + scripting.PopLogText());
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Error has occurred in " + program.Name + "\n" + error + "\n" + scripting.PopLogText());
     }
 
     public static void EvaluateScript(string phase)

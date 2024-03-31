@@ -273,7 +273,7 @@ public class Ubiquitous : ConfigurableStandardRole
     protected override void LoadOptions()
     {
         base.LoadOptions();
-        
+
         RoleConfig.AddTags(ConfigurationHolder.TagFunny, ConfigurationHolder.TagDifficult);
 
         droneMicrophoneRadiousOption = new(RoleConfig, "microphoneRadious", null, 0f, 5f, 0.25f, 2f, 2f) { Decorator = NebulaConfiguration.OddsDecorator };

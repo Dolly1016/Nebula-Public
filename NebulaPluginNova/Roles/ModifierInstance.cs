@@ -19,7 +19,16 @@ public abstract class ModifierInstance : AssignableInstance, RuntimeModifier
     {
     }
 
+    /// <summary>
+    /// クルーメイトタスクを持っていた場合、目に見えるように無効化する
+    /// </summary>
     public virtual bool InvalidateCrewmateTask => false;
+
+    /// <summary>
+    /// クルーメイトタスクを持っていたとしても、クルーメイトタスクの総数に計上されない場合はtrue
+    /// </summary>
+    public virtual bool MyCrewmateTaskIsIgnored => false;
+
     public virtual string? IntroText => null;
 
 }

@@ -122,10 +122,8 @@ public static class NebulaExileWrapUp
         yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform.parent, GameStatistics.EventVariation.MeetingEnd, EventDetail.MeetingEnd);
 
 
-        
 
-        NebulaGameManager.Instance?.AllAssignableAction(r=>r.OnGameReenabled());
-        NebulaGameManager.Instance?.AllScriptAction(s=>s.OnGameReenabled());
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnGameReenabled());
 
         __instance.ReEnableGameplay();
         GameObject.Destroy(__instance.gameObject);

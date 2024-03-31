@@ -1,4 +1,7 @@
-﻿namespace Nebula.Patches;
+﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppInterop.Runtime.Runtime;
+
+namespace Nebula.Patches;
 
 
 [HarmonyPatch(typeof(Minigame), nameof(Minigame.Begin))]
@@ -49,8 +52,10 @@ public class MinigameBeginPatch
         {
             if (MapBehaviour.Instance) MapBehaviour.Instance.Close();
             
+            
             //タスクに吸い寄せられるのを阻止
             PlayerControl.LocalPlayer.NetTransform.HaltSmoothly();
+            
         }
         __instance.StartCoroutine(__instance.CoAnimateOpen());
         return false;
@@ -161,5 +166,109 @@ class DoorMushroomPatch
                 }
             }
         }
+    }
+}
+
+//配線タスクの順番ランダム化
+[HarmonyPatch(typeof(NormalPlayerTask), nameof(NormalPlayerTask.PickRandomConsoles),typeof(TaskTypes),typeof(Il2CppStructArray<byte>))]
+public static class RandomTaskPatch
+{
+    static public bool Prefix(NormalPlayerTask __instance, ref Il2CppSystem.Collections.Generic.List<Console> __result, [HarmonyArgument(0)] TaskTypes taskType, [HarmonyArgument(1)] Il2CppStructArray<byte> consoleIds)
+    {
+        List<Console> orgList = ShipStatus.Instance.AllConsoles.Where((t) => { return t.TaskTypes.Contains(taskType); }).ToList<Console>();
+        List<Console> list = new List<Console>(orgList);
+        List<Console> result = new List<Console>();
+
+        //返り値を作成する
+        __result = new();
+        foreach (var console in orgList) __result.Add(console);
+
+        for (int i = 0; i < consoleIds.Length; i++)
+        {
+            //候補が全て上がってしまったらリセット
+            if (list.Count == 0) list = new List<Console>(orgList);
+            int index = System.Random.Shared.Next(list.Count);
+            result.Add(list[index]);
+            list.RemoveAt(index);
+        }
+
+        if (!GeneralConfigurations.RandomizedWiringOption) result.Sort((console1, console2) => { return console1.ConsoleId - console2.ConsoleId; });
+
+        //得られた並び順を返す
+        for (int i = 0; i < consoleIds.Length; i++) consoleIds[i] = (byte)result[i].ConsoleId;
+
+        return false;
+    }
+}
+
+//タスクのステップ数改変
+[HarmonyPatch(typeof(NormalPlayerTask), nameof(NormalPlayerTask.Initialize))]
+public static class TaskStepPatch
+{
+    public static void Prefix(NormalPlayerTask __instance)
+    {
+        if (__instance.TaskType == TaskTypes.FixWiring && AmongUsUtil.CurrentMapId != 5) __instance.MaxStep = GeneralConfigurations.StepsOfWiringGameOption.GetMappedInt();
+    }
+}
+
+//緊急会議ボタン
+[HarmonyPatch(typeof(EmergencyMinigame), nameof(EmergencyMinigame.Update))]
+public static class EmergencyUpdatePatch
+{
+    private static void WaitingButtonUpdate(EmergencyMinigame __instance, float leftTime)
+    {
+        //int num = Mathf.CeilToInt(15f - ShipStatus.Instance.Timer);
+        //num = Mathf.Max(Mathf.CeilToInt(ShipStatus.Instance.EmergencyCooldown), num);
+        int num = Mathf.CeilToInt(leftTime);
+        __instance.ButtonActive = false;
+        __instance.StatusText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.EmergencyNotReady);
+        __instance.NumberText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.SecondsAbbv, num);
+        __instance.ClosedLid.gameObject.SetActive(true);
+        __instance.OpenLid.gameObject.SetActive(false);
+        __instance.state = 0;
+    }
+    private static void OpenedButtonUpdate(EmergencyMinigame __instance) {
+        if (__instance.state == 1) return;
+        __instance.state = 1;
+        int remainingEmergencies = PlayerControl.LocalPlayer.RemainingEmergencies;
+        __instance.StatusText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.EmergencyCount, PlayerControl.LocalPlayer.Data.PlayerName);
+        __instance.NumberText.text = remainingEmergencies.ToString();
+        __instance.ButtonActive = (remainingEmergencies > 0);
+        __instance.ClosedLid.gameObject.SetActive(!__instance.ButtonActive);
+        __instance.OpenLid.gameObject.SetActive(__instance.ButtonActive);
+    }
+
+    private static void ClosedButtonUpdate(EmergencyMinigame __instance) {
+        if (__instance.state == 2) return;
+        __instance.state = 2;
+        __instance.ButtonActive = false;
+        __instance.StatusText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.EmergencyDuringCrisis);
+        __instance.NumberText.text = string.Empty;
+        __instance.ClosedLid.gameObject.SetActive(true);
+        __instance.OpenLid.gameObject.SetActive(false);
+    }
+
+    public static bool Prefix(EmergencyMinigame __instance)
+    {
+        //ゲーム開始直ぐはボタンを押せない
+        if (ShipStatus.Instance.Timer < 15f)
+            WaitingButtonUpdate(__instance, 15f - ShipStatus.Instance.Timer);
+        //クールダウン中はボタンを押せない
+        else if (ShipStatus.Instance.EmergencyCooldown > 0f)
+            WaitingButtonUpdate(__instance, ShipStatus.Instance.EmergencyCooldown);
+        //緊急サボタージュが発生している場合はボタンを押せない
+        else if (PlayerControl.LocalPlayer.myTasks.GetFastEnumerator().Any(PlayerTask.TaskIsEmergency))
+        {
+            ClosedButtonUpdate(__instance);
+        }
+        //フェイクタスクでない緊急タスクがある場合ボタンは押せない
+        else if (PlayerControl.LocalPlayer.myTasks.GetFastEnumerator().Any(task => PlayerTask.TaskIsEmergency(task) &&
+                (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.All(
+                    type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true)))
+            ClosedButtonUpdate(__instance);
+        else
+            OpenedButtonUpdate(__instance);
+
+        return false;
     }
 }

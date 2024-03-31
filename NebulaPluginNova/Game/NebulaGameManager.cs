@@ -345,6 +345,8 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
 
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) p.onLadder = false;
 
+        foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) p.onLadder = false;
+
         ConsoleRestriction?.OnMeetingEnd();
         Scheduler.Execute(RPCScheduler.RPCTrigger.AfterMeeting);
 

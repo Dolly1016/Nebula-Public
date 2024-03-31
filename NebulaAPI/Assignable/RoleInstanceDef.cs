@@ -54,7 +54,18 @@ public abstract class AbstractRoleInstanceCommon : IBinderLifespan
     /// </summary>
     /// <param name="gameEnd">ゲームの終了理由</param>
     /// <returns>勝利している場合はtrue</returns>
-    public virtual bool CheckWin(GameEnd gameEnd) { return false; }
+    public virtual bool CheckWin(GameEnd gameEnd) {
+        if (RuntimeRole.Role.Team == NebulaTeams.CrewmateTeam)
+        {
+            return gameEnd == NebulaGameEnds.CrewmateGameEnd;
+        }
+        else if (RuntimeRole.Role.Team == NebulaTeams.ImpostorTeam)
+        {
+            return gameEnd == NebulaGameEnds.ImpostorGameEnd;
+        }
+
+        return false; 
+    }
 }
 
 /// <summary>
@@ -80,10 +91,10 @@ public abstract class AbstractRoleInstance<T> : AbstractRoleInstanceCommon where
     {
         if(MyRole.Team == NebulaTeams.CrewmateTeam)
         {
-            return gameEnd == NebulaGameEnd.CrewmateGameEnd;
+            return gameEnd == NebulaGameEnds.CrewmateGameEnd;
         }else if(MyRole.Team == NebulaTeams.ImpostorTeam)
         {
-            return gameEnd == NebulaGameEnd.ImpostorGameEnd;
+            return gameEnd == NebulaGameEnds.ImpostorGameEnd;
         }
 
         return false;

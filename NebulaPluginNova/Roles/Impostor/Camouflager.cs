@@ -5,17 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Camouflager : ConfigurableStandardRole
+public class Camouflager : ConfigurableStandardRole, HasCitation
 {
     static public Camouflager MyRole = new Camouflager();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "camouflager";
     public override Color RoleColor => Palette.ImpostorRed;
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
@@ -32,7 +34,7 @@ public class Camouflager : ConfigurableStandardRole
         CamoDurationOption = new NebulaConfiguration(RoleConfig, "camoDuration", null, 5f, 60f, 5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         private ModAbilityButton? camouflageButton = null;
 
@@ -86,9 +88,9 @@ public class Camouflager : ConfigurableStandardRole
             }
         }
 
-        public override void OnAnyoneMurderedLocal(PlayerControl dead, PlayerControl murderer)
+        void IGameEntity.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
         {
-            if (acTokenChallenge != null) acTokenChallenge.Value.killed++;
+            if (AmOwner && acTokenChallenge != null) acTokenChallenge.Value.killed++;
         }
 
     }

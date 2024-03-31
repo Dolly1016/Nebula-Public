@@ -20,6 +20,7 @@ public class PlayerTaskState
     public bool IsCrewmateTask { get; private set; } = true;
 
     public bool IsCompletedCurrentTasks => CurrentCompleted >= CurrentTasks;
+    public bool IsCompletedTotalTasks => TotalCompleted >= TotalTasks;
     public bool HasExecutableTasks => CurrentTasks > 0;
 
     AchievementToken<bool>? acTokenGhostTask = null;
@@ -102,16 +103,20 @@ public class PlayerTaskState
         RpcSyncTaskState.Invoke(this);
     }
 
-    public void GainExtraTasks(int tasks, bool addQuota = false, int unacquired = 0)
+    public void GainExtraTasks(int tasks, bool addQuota = false, int unacquired = 0, bool sync = true)
     {
         TotalTasks += tasks;
         CurrentTasks = tasks;
         CurrentCompleted = 0;
         if (addQuota) Quota += tasks;
         if (unacquired > 0) Quota += unacquired;
-        RpcSyncTaskState.Invoke(this);
+        if(sync) RpcSyncTaskState.Invoke(this);
     }
 
+    public void RpcSync()
+    {
+        RpcSyncTaskState.Invoke(this);
+    }
     public void ReleaseAllTaskState()
     {
         TotalCompleted = 0;
@@ -132,7 +137,7 @@ public class PlayerTaskState
         }));
     }
 
-    public void ResetTasks(List<GameData.TaskInfo> tasks)
+    public void ResetTasksLocal(List<GameData.TaskInfo> tasks)
     {
         RemoveAllTasks();
 
@@ -227,7 +232,7 @@ public class PlayerTaskState
             }
             return task!;
         },
-        (message, isCalledByMe) => NebulaGameManager.Instance?.OnTaskUpdated()
+        (message, isCalledByMe) => NebulaGameManager.Instance?.OnTaskUpdated(message.player.GetModInfo()!)
         );
 
     private enum TaskUpdateMessage
@@ -241,7 +246,9 @@ public class PlayerTaskState
     private static RemoteProcess<(byte playerId, TaskUpdateMessage type)> RpcUpdateTaskState = new(
         "UpdateTaskState",
         (message, isCalledByMe) => {
-            var task = NebulaGameManager.Instance?.GetModPlayerInfo(message.playerId)?.Tasks;
+            var player = NebulaGameManager.Instance?.GetModPlayerInfo(message.playerId);
+            if (player == null) return;
+            var task = player!.Tasks;
             if (task != null)
             {
                 switch (message.type)
@@ -261,7 +268,7 @@ public class PlayerTaskState
                         break;
                 }
             }
-            NebulaGameManager.Instance?.OnTaskUpdated();
+            NebulaGameManager.Instance?.OnTaskUpdated(player);
         }
         );
 }

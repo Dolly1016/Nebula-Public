@@ -45,6 +45,17 @@ public abstract class AbstractRoleDef
     abstract public RoleTeam Team { get; }
     
     virtual internal Type? RoleInstanceType { get => null; }
+
+    /// <summary>
+    /// 引用元情報
+    /// </summary>
+    virtual public Citation? Citation { get => null; }
+
+    /// <summary>
+    /// 関連のある役職を返します。関連のある役職は設定画面にて右上にショートカットが現れます。
+    /// </summary>
+    /// <returns></returns>
+    virtual public IEnumerable<DefinedAssignable> RelatedAssignable() { yield break; }
 }
 
 /// <summary>

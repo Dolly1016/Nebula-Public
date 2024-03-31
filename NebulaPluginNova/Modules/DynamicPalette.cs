@@ -488,7 +488,9 @@ public class DynamicPalette
 
     public static bool IsLightColor(Color color)
     {
-        return (color.r + color.g + color.b) > 1.2f;
+        var max = Mathf.Max(color.r, color.g, color.b);
+        var sum = color.r + color.g + color.b;
+        return max > 0.8f || sum > 2.1f;
     }
 
     public static SpriteLoader colorFullButtonSprite = SpriteLoader.FromResource("Nebula.Resources.ColorButton.png", 100f);
@@ -499,24 +501,24 @@ public class DynamicPalette
         var screen = MetaScreen.GenerateWindow(new Vector2(6.7f, 4.2f), PlayerCustomizationMenu.Instance.transform, new Vector3(0f, 0f, 0f), true, false, true);
         screen.transform.parent.FindChild("Background").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.85f);
 
-        MetaContextOld context = new();
+        MetaWidgetOld widget = new();
 
-        context.Append(new CombinedContextOld(
-            new MetaContextOld.Button(() => { screen.CloseScreen(); OpenCatalogue(TargetRenderer, ShownColor, true); }, TextAttribute.BoldAttr) { RawText = "Body Color" },
-            new MetaContextOld.HorizonalMargin(0.15f),
-            new MetaContextOld.Button(() => { screen.CloseScreen(); OpenCatalogue(TargetRenderer, ShownColor, false); }, TextAttribute.BoldAttr) { RawText = "Visor Color" }
+        widget.Append(new CombinedWidgetOld(
+            new MetaWidgetOld.Button(() => { screen.CloseScreen(); OpenCatalogue(TargetRenderer, ShownColor, true); }, TextAttributeOld.BoldAttr) { RawText = "Body Color" },
+            new MetaWidgetOld.HorizonalMargin(0.15f),
+            new MetaWidgetOld.Button(() => { screen.CloseScreen(); OpenCatalogue(TargetRenderer, ShownColor, false); }, TextAttributeOld.BoldAttr) { RawText = "Visor Color" }
             ));
-        context.Append(new MetaContextOld.VerticalMargin(0.05f));
+        widget.Append(new MetaWidgetOld.VerticalMargin(0.05f));
 
-        MetaContextOld inner = new();
+        MetaWidgetOld inner = new();
 
-        MetaContextOld.ScrollView scrollView = new(new(6.7f, 3.55f), inner, true);
+        MetaWidgetOld.ScrollView scrollView = new(new(6.7f, 3.55f), inner, true);
         
         foreach(var category in (isBodyColor ? ColorCatalogue : VisorColorCatalogue))
         {
-            inner.Append(new MetaContextOld.Text(new(TextAttribute.BoldAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial}) { TranslationKey = "inventory.catalogue." + category.Key });
+            inner.Append(new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial}) { TranslationKey = "inventory.catalogue." + category.Key });
             inner.Append(category.Value, (col) =>
-                new MetaContextOld.Image(colorButtonSprite.GetSprite())
+                new MetaWidgetOld.Image(colorButtonSprite.GetSprite())
                 {
                     Width = 0.96f,
                     PostBuilder = (renderer) =>
@@ -561,25 +563,25 @@ public class DynamicPalette
                         });
                         button.OnMouseOver.AddListener(() =>
                         {
-                            MetaContextOld context = new();
-                            context.Append(new MetaContextOld.VariableText(new(TextAttribute.BoldAttr) { Alignment = TextAlignmentOptions.Left }) { RawText = col.DisplayName });
+                            MetaWidgetOld widget = new();
+                            widget.Append(new MetaWidgetOld.VariableText(new(TextAttributeOld.BoldAttr) { Alignment = TextAlignmentOptions.Left }) { RawText = col.DisplayName });
                             if(col.TranslationKey != null)
                             {
                                 var detail = Language.Find(col.TranslationKey + ".detail");
-                                if (detail != null) context.Append(new MetaContextOld.VariableText(TextAttribute.ContentAttr) { RawText = detail });
+                                if (detail != null) widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { RawText = detail });
                             }
-                            NebulaManager.Instance.SetHelpContext(button,context);
+                            NebulaManager.Instance.SetHelpWidget(button,widget);
                         });
-                        button.OnMouseOut.AddListener(NebulaManager.Instance.HideHelpContext);
+                        button.OnMouseOut.AddListener(NebulaManager.Instance.HideHelpWidget);
                     },
-                    Alignment = IMetaContextOld.AlignmentOption.Left
+                    Alignment = IMetaWidgetOld.AlignmentOption.Left
                 }
             , 6, -1, 0, 0.65f);
         }
 
-        context.Append(scrollView);
+        widget.Append(scrollView);
 
-        screen.SetContext(context);
+        screen.SetWidget(widget);
     }
 }
 
@@ -616,7 +618,7 @@ public class NebulaPlayerTab : MonoBehaviour
     static private SpriteLoader saveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.ColorSave.png", 100f);
     public void Start()
     {
-        new MetaContextOld.Button(() => DynamicPalette.OpenCatalogue(TargetRenderer, () => PreviewColor(null, null, null)), TextAttribute.BoldAttr) { TranslationKey = "inventory.palette.catalogue" }.Generate(gameObject, new Vector2(2.9f, 2.25f),out _);
+        new MetaWidgetOld.Button(() => DynamicPalette.OpenCatalogue(TargetRenderer, () => PreviewColor(null, null, null)), TextAttributeOld.BoldAttr) { TranslationKey = "inventory.palette.catalogue" }.Generate(gameObject, new Vector2(2.9f, 2.25f),out _);
 
         DynamicPaletteRenderer = UnityHelper.CreateObject<SpriteRenderer>("DynamicPalette",transform, new Vector3(0.4f, -0.1f, -80f));
         DynamicPaletteRenderer.sprite = spritePalette.GetSprite();
@@ -851,6 +853,14 @@ public class NebulaPlayerTab : MonoBehaviour
 
     static public readonly byte PreviewColorId = 15;
 
+    //SetColorの複製をしない版
+    private static void SetSharedColors(int colorId, Renderer renderer)
+    {
+        renderer.sharedMaterial.SetColor(PlayerMaterial.BackColor, Palette.ShadowColors[colorId]);
+        renderer.sharedMaterial.SetColor(PlayerMaterial.BodyColor, Palette.PlayerColors[colorId]);
+        renderer.sharedMaterial.SetColor(PlayerMaterial.VisorColor, DynamicPalette.VisorColors[PreviewColorId]);
+    }
+
     private void AfterPreviewColor(byte concernedHue, byte concernedDistance,string? displayName = null)
     {
         try
@@ -861,12 +871,23 @@ public class NebulaPlayerTab : MonoBehaviour
             else
                 colorName = Language.Translate(ColorNamePatch.ToTranslationKey(concernedHue, concernedDistance));
             PlayerCustomizationMenu.Instance.SetItemName(colorName);
+            
+            if (playerTab.PlayerPreview.ColorId != PreviewColorId)
+            {
+                //複製を伴う色更新
+                playerTab.PlayerPreview.SetBodyColor(PreviewColorId);
+                playerTab.PlayerPreview.SetPetColor(PreviewColorId);
+            }
+            else
+            {
+                //複製を伴わない色更新
+                if (playerTab.PlayerPreview.cosmetics.currentBodySprite != null)
+                    SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.currentBodySprite.BodySprite);
+            }
 
-
-            playerTab.PlayerPreview.SetBodyColor(PreviewColorId);
-            playerTab.PlayerPreview.SetPetColor(PreviewColorId);
             if (playerTab.currentColor != PreviewColorId)
             {
+                //複製を伴う色更新
                 playerTab.currentColor = PreviewColorId;
                 playerTab.PlayerPreview.SetSkin(DataManager.Player.Customization.Skin, PreviewColorId);
                 playerTab.PlayerPreview.SetHat(DataManager.Player.Customization.Hat, PreviewColorId);
@@ -874,9 +895,11 @@ public class NebulaPlayerTab : MonoBehaviour
             }
             else
             {
-                playerTab.PlayerPreview.cosmetics.skin.UpdateMaterial();
-                playerTab.PlayerPreview.cosmetics.hat.UpdateMaterial();
-                playerTab.PlayerPreview.cosmetics.visor.UpdateMaterial();
+                //複製を伴わない色更新
+                SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.visor.Image);
+                SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.skin.layer);
+                SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.hat.FrontLayer);
+                if(playerTab.PlayerPreview.cosmetics.hat.BackLayer) SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.hat.BackLayer);
             }
         }
         catch { }

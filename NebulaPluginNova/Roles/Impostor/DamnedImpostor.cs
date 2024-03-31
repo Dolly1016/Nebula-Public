@@ -27,5 +27,12 @@ public class DamnedImpostor : AbstractRole
     {
         public override AbstractRole Role => MyRole;
         public Instance(PlayerModInfo player) : base(player){}
+
+        public override void OnActivated()
+        {
+            base.OnActivated();
+
+            if (AmOwner) new StaticAchievementToken("damned.common2");
+        }
     }
 }

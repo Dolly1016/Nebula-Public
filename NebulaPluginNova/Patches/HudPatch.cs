@@ -3,6 +3,7 @@ using Nebula.Behaviour;
 using Nebula.Game;
 using System;
 using System.Collections;
+using static Nebula.Modules.HelpScreen;
 
 namespace Nebula.Patches;
 
@@ -34,7 +35,7 @@ public static class HudManagerUpdatePatch
 
         if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDown && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
         {
-            HelpScreen.OpenHelpScreen();
+            HelpScreen.TryOpenHelpScreen(HelpTab.MyInfo);
         }
     }
 }
@@ -62,6 +63,8 @@ public static class HudManagerCoStartGamePatch
             HudManager.Instance.KillButton.SetCoolDown(10f, AmongUsUtil.VanillaKillCoolDown);
 
             ShipStatus.Instance.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>().SetInitialSabotageCooldown();
+            if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Doors, out var door)) door.TryCast<IDoorSystem>()?.SetInitialSabotageCooldown();
+
             PlayerControl.LocalPlayer.AdjustLighting();
             yield return __instance.CoFadeFullScreen(Color.black, Color.clear, 0.2f, false);
             __instance.FullScreen.transform.localPosition = new Vector3(0f, 0f, -500f);

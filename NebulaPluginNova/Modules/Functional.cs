@@ -1,9 +1,8 @@
 ﻿using Nebula.Behaviour;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Nebula.Roles;
 using System.Text;
-using System.Threading.Tasks;
+using Virial.Assignable;
+using static Nebula.Modules.IFunctionalVariable;
 
 namespace Nebula.Modules;
 
@@ -11,19 +10,19 @@ public interface IFunctionalVariable
 {
     public class EnumeratorView<T> where T : class
     {
-        IEnumerator<T> myEnumerator;
+        IEnumerator<T>? myEnumerator;
         T? storedVal;
         EnumeratorView<T>? prev, next;
         bool isValid;
 
-        public EnumeratorView(IEnumerator<T> myEnumerator) : this(myEnumerator, null) { }
+        public EnumeratorView(IEnumerator<T>? myEnumerator) : this(myEnumerator, null) { }
 
-        private EnumeratorView(IEnumerator<T> myEnumerator, EnumeratorView<T>? prev)
+        private EnumeratorView(IEnumerator<T>? myEnumerator, EnumeratorView<T>? prev)
         {
             this.myEnumerator = myEnumerator;
             this.prev = prev;
-            isValid = myEnumerator.MoveNext();
-            storedVal = isValid ? myEnumerator.Current : null;
+            isValid = myEnumerator?.MoveNext() ?? false;
+            storedVal = isValid ? myEnumerator!.Current : null;
         }
 
         public EnumeratorView<T>? GetPrev() => prev;
@@ -44,6 +43,7 @@ public interface IFunctionalVariable
     public EnumeratorView<string>? AsStringEnumerator() => null;
     public IEnumerable<string>? AsStringEnumerable() => null;
     public bool Equals(IFunctionalVariable variable) => AsString().Equals(variable.AsString());
+    public T? AsObject<T>() where T : class => null;
 
     public class FunctionalVariableString : IFunctionalVariable
     {
@@ -76,7 +76,8 @@ public interface IFunctionalVariable
     {
         private EnumeratorView<string> val;
         public FunctionalVariableStringEnumerator(EnumeratorView<string> val) { this.val = val; }
-        public string AsString() => "Enumerator";
+        public string AsString() => val.Get() ?? "INVALID";
+        public bool AsBool() => val.IsValid;
         public EnumeratorView<string>? AsStringEnumerator() => val;
     }
 
@@ -84,8 +85,25 @@ public interface IFunctionalVariable
     {
         private IEnumerable<string> val;
         public FunctionalVariableStringEnumerable(IEnumerable<string> val) { this.val = val; }
-        public string AsString() => "Enumerator";
+        public string AsString() => "Enumerable";
         public IEnumerable<string>? AsStringEnumerable() => val;
+    }
+
+    public class FunctionalObjectWrapping<Obj> : IFunctionalVariable where Obj : class
+    {
+        private Obj? val;
+        public string AsString() => "WrappedObj";
+        public bool AsBool() => val != null;
+        public T? AsObject<T>() where T : class
+        {
+            if (typeof(T) == typeof(Obj)) return val as T;
+            return null;
+        }
+
+        public FunctionalObjectWrapping(Obj? val)
+        {
+            this.val = val;
+        }
     }
 
     public static IFunctionalVariable Generate(string val) => new FunctionalVariableString(val);
@@ -94,6 +112,7 @@ public interface IFunctionalVariable
     public static IFunctionalVariable Generate(bool val) => new FunctionalVariableBool(val);
     public static IFunctionalVariable Generate(EnumeratorView<string> val) => new FunctionalVariableStringEnumerator(val);
     public static IFunctionalVariable Generate(IEnumerable<string> val) => new FunctionalVariableStringEnumerable(val);
+    public static IFunctionalVariable GenerateWrapped<T>(T? val) where T : class => new FunctionalObjectWrapping<T>(val);
 }
 public class TextFunction
 {
@@ -332,6 +351,24 @@ public class FunctionalSpace
 
         //比較
         DefaultSpace.LoadFunction("Equal", new(2, (args) => IFunctionalVariable.Generate(args[0].Equals(args[1]))));
+
+        //列挙型
+        DefaultSpace.LoadFunction("GetIterator", new(1, (args) => IFunctionalVariable.Generate(new EnumeratorView<string>(args[1].AsStringEnumerable()!.GetEnumerator()))));
+        DefaultSpace.LoadFunction("GetNext", new(1, (args) => IFunctionalVariable.Generate(args[1].AsStringEnumerator()!.GetNext()!)));
+        DefaultSpace.LoadFunction("GetPrev", new(1, (args) => IFunctionalVariable.Generate(args[1].AsStringEnumerator()!.GetPrev()!)));
+
+        //オブジェクト
+        DefaultSpace.LoadFunction("GetRole", new(1, args => GenerateWrapped(Roles.Roles.AllAsignables().FirstOrDefault(r => r.LocalizedName == args[0].AsString()))));
+        DefaultSpace.LoadFunction("GetCitation", new(1, (args) =>
+        {
+            Citation? citation = null;
+            if (args[0] is FunctionalObjectWrapping<IAssignableBase> w)
+                citation = (w.AsObject<IAssignableBase>() as HasCitation)?.Citaion;
+            if (Citation.TryGetCitation(args[0].AsString(), out var temp))
+                citation = temp;
+            
+            return GenerateWrapped(citation);
+        }));
 
     }
 

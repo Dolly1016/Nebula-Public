@@ -5,6 +5,7 @@ using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Reflection.Internal;
 using Il2CppSystem.Text.RegularExpressions;
 using Innersloth.Assets;
+using Mono.CSharp;
 using PowerTools;
 using Rewired.Utils.Platforms.Windows;
 using Sentry;
@@ -98,7 +99,7 @@ public class CustomCosmicItem : CustomItemGrouped
                     message = "Missed Directory";
                 if (ex is FileNotFoundException)
                     message = "Missed File";
-                NebulaPlugin.Log.Print(NebulaLog.LogCategory.MoreCosmic, "Failed to load images. ( \"" + image.Address + "\" in \"" + Name + "\" )\nReason: " + (message ?? "Others (" + ex.Message + ")"));
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Warning , NebulaLog.LogCategory.MoreCosmic, "Failed to load images. ( \"" + image.Address + "\" in \"" + Name + "\" )\nReason: " + (message ?? "Others (" + ex.Message + ")"));
             });
             
             try
@@ -250,7 +251,8 @@ public class CosmicHat : CustomCosmicItem
         MyHat.PreviewCrewmateColor = Adaptive;
         MyHat.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0) ?? Back?.GetSprite(0) ?? Move?.GetSprite(0);
 
-        if (Adaptive) MyView.AltShader = MoreCosmic.AdaptiveShader;
+        //if (Adaptive) MyView.AltShader = MoreCosmic.AdaptiveShader;
+        MyView.MatchPlayerColor = Adaptive;
 
         MyHat.CreateAddressableAsset();
 
@@ -343,7 +345,8 @@ public class CosmicVisor : CustomCosmicItem
         MyVisor.PreviewCrewmateColor = Adaptive;
         MyVisor.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0);
 
-        if (Adaptive) MyView.AltShader = MoreCosmic.AdaptiveShader;
+        //if (Adaptive) MyView.AltShader = MoreCosmic.AdaptiveShader;
+        MyView.MatchPlayerColor = Adaptive;
 
         MyVisor.CreateAddressableAsset();
 
@@ -528,7 +531,7 @@ public class CustomItemBundle
         {
             string hash = System.BitConverter.ToString(CustomItemBundle.MD5.ComputeHash(responseStream)).Replace("-", "").ToLowerInvariant();
 
-            NebulaPlugin.Log.Print(NebulaLog.LogCategory.MoreCosmic,$"Hash: {hash} ({category}/{address})");
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic,$"Hash: {hash} ({category}/{address})");
         }
 
     }
@@ -889,29 +892,53 @@ public class HatLateUpdatePatch
     }
 }
 
-[HarmonyPatch(typeof(VisorLayer), nameof(VisorLayer.SetVisor), new Type[] { typeof(VisorData), typeof(int) })]
-public class SetVisorPatch
+[HarmonyPatch(typeof(HatParent), nameof(HatParent.SetHat),  typeof(int) )]
+public class SetHatPatch
 {
-    public static bool Prefix(VisorLayer __instance,[HarmonyArgument(0)] VisorData data,[HarmonyArgument(1)] int colorId)
+    public static bool Prefix(HatParent __instance, [HarmonyArgument(0)] int color)
     {
-        if (!MoreCosmic.AllVisors.TryGetValue(data.ProductId, out var value)) return true;
+        if (!__instance.Hat || !MoreCosmic.AllHats.TryGetValue(__instance.Hat.ProductId, out var value)) return true;
 
-        __instance.currentVisor = data;
+        __instance.SetMaterialColor(color);
         __instance.UnloadAsset();
 
-        var asset = new WrappedVisorAsset();
+        var asset = new WrappedHatAsset();
         asset.viewData = value.MyView;
-        __instance.viewAsset = asset.Cast<AddressableAsset<VisorViewData>>();
 
-        __instance.LoadAssetAsync(__instance.viewAsset, (Il2CppSystem.Action)(()=>
+        __instance.viewAsset = asset;
+        __instance.LoadAssetAsync(__instance.viewAsset, (Il2CppSystem.Action)(() =>
         {
-            if (__instance.viewAsset.GetAsset() == null) return;
-            if (__instance.IsDestroyedOrNull() || __instance.gameObject.IsDestroyedOrNull()) return;
-            __instance.SetVisor(__instance.currentVisor, __instance.viewAsset.GetAsset(), colorId);
+            __instance.PopulateFromViewData();
         }), null);
         return false;
     }
 }
+
+
+[HarmonyPatch(typeof(VisorLayer), nameof(VisorLayer.SetVisor), new Type[] { typeof(VisorData), typeof(int) })]
+public class SetVisorPatch
+{
+    public static bool Prefix(VisorLayer __instance,[HarmonyArgument(0)] VisorData data,[HarmonyArgument(1)] int color)
+    {
+        if (!MoreCosmic.AllVisors.TryGetValue(data.ProductId, out var value)) return true;
+
+        if (data == null || data != __instance.visorData)__instance.Image.sprite = null;
+
+        __instance.visorData = data;
+        __instance.SetMaterialColor(color);
+        __instance.UnloadAsset();
+        var asset = new WrappedVisorAsset();
+        asset.viewData = value.MyView;
+
+        __instance.viewAsset = asset;
+        __instance.LoadAssetAsync(__instance.viewAsset, (Il2CppSystem.Action)(()=>
+        {
+            __instance.PopulateFromViewData();
+        }), null);
+        return false;
+    }
+}
+
 
 [HarmonyPatch(typeof(VisorData), nameof(VisorData.CoLoadIcon))]
 public class CoLoadIconPatch
@@ -967,7 +994,7 @@ public class ClimbVisorPatch
         
         try
         {
-            if (!MoreCosmic.AllVisors.TryGetValue(__instance.myPlayer.cosmetics.visor.currentVisor.ProductId, out var value)) return;
+            if (!MoreCosmic.AllVisors.TryGetValue(__instance.myPlayer.cosmetics.visor.visorData.ProductId, out var value)) return;
 
             if(down ? value.HasClimbDownImage : value.HasClimbUpImage) __instance.myPlayer.cosmetics.ToggleVisor(true);
         }
@@ -1068,10 +1095,10 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 MoreCosmic.AllHats.TryGetValue(MyLayer.hat.Hat.ProductId, out CurrentModHat);
                 HatFrontIndex = HatBackIndex = 0;
             }
-            if (MyLayer.visor != null && CurrentVisor != MyLayer.visor.currentVisor)
+            if (MyLayer.visor != null && CurrentVisor != MyLayer.visor.visorData)
             {
-                CurrentVisor = MyLayer.visor.currentVisor;
-                MoreCosmic.AllVisors.TryGetValue(MyLayer.visor.currentVisor.ProductId, out CurrentModVisor);
+                CurrentVisor = MyLayer.visor.visorData;
+                MoreCosmic.AllVisors.TryGetValue(MyLayer.visor.visorData.ProductId, out CurrentModVisor);
                 VisorIndex = 0;
             }
 
@@ -1214,7 +1241,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             }
             else
             {
-                MyLayer.visor!.Image.transform.SetLocalZ(MyLayer.zIndexSpacing * (MyLayer.visor.currentVisor.behindHats ? -2f : -4f));
+                MyLayer.visor!.Image.transform.SetLocalZ(MyLayer.zIndexSpacing * (MyLayer.visor.visorData.behindHats ? -2f : -4f));
             }
         }
         catch { }
@@ -1330,6 +1357,12 @@ public static class TabEnablePatch
                 colorChip.Tag = vanillaItem;
                 colorChip.SelectionHighlight.gameObject.SetActive(false);
                 __instance.ColorChips.Add(colorChip);
+
+                try
+                {
+                    colorChip.Inner.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                    colorChip.Inner.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                }catch(Exception e) { }
 
                 index++;
             }

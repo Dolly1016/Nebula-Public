@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
+using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
 
 [NebulaRPCHolder]
-public abstract class NebulaSyncObject : INebulaScriptComponent
+public abstract class NebulaSyncObject : INebulaScriptComponent, IGameEntity
 {
     static private Dictionary<int, Func<float[], NebulaSyncObject>> instantiaters = new();
     static private Dictionary<int, NebulaSyncObject> allObjects = new();
@@ -15,7 +18,7 @@ public abstract class NebulaSyncObject : INebulaScriptComponent
     static protected void RegisterInstantiater(string tag, Func<float[], NebulaSyncObject> instantiater)
     {
         int hash = tag.ComputeConstantHash();
-        if (instantiaters.ContainsKey(hash)) NebulaPlugin.Log.Print(null, $"Duplicated Instantiater Error ({tag})");
+        if (instantiaters.ContainsKey(hash)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, $"Duplicated Instantiater Error ({tag})");
         instantiaters[hash] = instantiater;
     }
 
@@ -38,9 +41,10 @@ public abstract class NebulaSyncObject : INebulaScriptComponent
     {
     }
 
-    public override void OnReleased() { 
+    public virtual void OnReleased() { 
         allObjects.Remove(ObjectId);
     }
+    void IGameEntity.OnReleased() => OnReleased();
 
     static private byte OwnerIdFromObjectId(int objId) => (byte)(objId >>= 16);
 
@@ -62,7 +66,7 @@ public abstract class NebulaSyncObject : INebulaScriptComponent
     static private RemoteProcess<int> RpcDestroyDef = new("DestroyObj",
        (message, _) =>
        {
-           if (allObjects.TryGetValue(message, out var obj)) obj?.Release();
+           if (allObjects.TryGetValue(message, out var obj)) obj.ReleaseIt();
        });
 
     static public NebulaSyncObject? RpcInstantiate(string tag, float[]? arguments)
@@ -107,7 +111,7 @@ public abstract class NebulaSyncObject : INebulaScriptComponent
     }
 }
 
-public class NebulaSyncStandardObject : NebulaSyncObject
+public class NebulaSyncStandardObject : NebulaSyncObject, IReleasable
 {
     public enum ZOption
     {
@@ -180,8 +184,6 @@ public class NebulaSyncStandardObject : NebulaSyncObject
         get => MyRenderer.color;
         set => MyRenderer.color = value;
     }
-
-    public override void Update() {}
 
     public override void OnReleased()
     {

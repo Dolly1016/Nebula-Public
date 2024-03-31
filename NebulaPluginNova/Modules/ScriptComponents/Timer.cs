@@ -3,6 +3,7 @@ using Rewired.Libraries.SharpDX.RawInput;
 using Rewired.Utils.Platforms.Windows;
 using System.ComponentModel.DataAnnotations;
 using Virial.Components;
+using Virial.Game;
 using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -20,7 +21,7 @@ class PlayerIsKillTimerEnabledPatch
     }
 }
 
-public class Timer : INebulaScriptComponent, GameTimer
+public class Timer : INebulaScriptComponent, GameTimer, IGameEntity
 {
     private Func<bool>? predicate = null;
     private bool isActive;
@@ -79,7 +80,7 @@ public class Timer : INebulaScriptComponent, GameTimer
     public virtual float Percentage { get => max > min ? (currentTime - min) / (max - min) : 0f; }
     public bool IsInProcess => CurrentTime > min;
 
-    public override void Update()
+    void IGameEntity.Update()
     {
         if (isActive && (predicate?.Invoke() ?? true))
             currentTime = Mathf.Clamp(currentTime - Time.deltaTime, min, max);
@@ -89,7 +90,6 @@ public class Timer : INebulaScriptComponent, GameTimer
 
     public Timer(float min, float max)
     {
-        NebulaGameManager.Instance?.RegisterComponent(this);
         SetRange(min, max);
         Reset();
         Pause();
@@ -101,10 +101,7 @@ public class Timer : INebulaScriptComponent, GameTimer
         return this;
     }
 
-    public void Abandon()
-    {
-        NebulaGameManager.Instance?.ReleaseComponent(this);
-    }
+    public Func<bool>? Predicate => this.predicate;
 
     public Timer SetAsKillCoolDown()
     {

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Bson;
+using Virial.Game;
 using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -32,7 +33,7 @@ public static class ObjectTrackers
     }
 }
 
-public class ObjectTracker<T> : INebulaScriptComponent where T : MonoBehaviour 
+public class ObjectTracker<T> : INebulaScriptComponent, IGameEntity where T : MonoBehaviour 
 {
     public T? CurrentTarget { get; private set; }
     private PlayerControl tracker;
@@ -72,7 +73,7 @@ public class ObjectTracker<T> : INebulaScriptComponent where T : MonoBehaviour
         }
     }
 
-    public override void Update()
+    void IGameEntity.HudUpdate()
     {
         if (!UpdateTarget)
         {

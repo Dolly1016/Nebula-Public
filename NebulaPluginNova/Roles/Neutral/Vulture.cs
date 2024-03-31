@@ -1,8 +1,10 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Vulture : ConfigurableStandardRole
+public class Vulture : ConfigurableStandardRole, HasCitation
 {
     static public Vulture MyRole = new Vulture();
     static public Team MyTeam = new("teams.vulture", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -11,6 +13,7 @@ public class Vulture : ConfigurableStandardRole
 
     public override string LocalizedName => "vulture";
     public override Color RoleColor => new Color(140f / 255f, 70f / 255f, 18f / 255f);
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
@@ -29,7 +32,7 @@ public class Vulture : ConfigurableStandardRole
     }
 
 
-    public class Instance : RoleInstance
+    public class Instance : RoleInstance, IGamePlayerEntity
     {
         private ModAbilityButton? eatButton = null;
 
@@ -54,7 +57,7 @@ public class Vulture : ConfigurableStandardRole
         public override int[]? GetRoleArgument() => new int[] { leftEaten };
 
         private List<(DeadBody deadBody, Arrow arrow)> AllArrows = new();
-        public override void OnDeadBodyGenerated(DeadBody deadBody)
+        void IGameEntity.OnDeadBodyGenerated(DeadBody deadBody)
         {
             if(AmOwner) AllArrows.Add((deadBody, Bind(new Arrow(null) { TargetPos = deadBody.TruePosition }.SetColor(Color.blue))));
         }
@@ -70,13 +73,13 @@ public class Vulture : ConfigurableStandardRole
                 }
                 else
                 {
-                    tuple.arrow.Release();
+                    tuple.arrow.ReleaseIt();
                     return true;
                 }
             });
         }
 
-        public override void OnReported(PlayerModInfo reporter, PlayerModInfo reported)
+        void IGameEntity.OnReported(GamePlayer reporter, GamePlayer reported)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value = false;
         }

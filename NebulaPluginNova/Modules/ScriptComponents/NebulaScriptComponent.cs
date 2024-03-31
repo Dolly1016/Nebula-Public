@@ -1,45 +1,34 @@
 ﻿using Nebula.Events;
+using Rewired.Data.Mapping;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial;
+using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
 
-public abstract class INebulaBindableComponent : IReleasable
-{
-    public INebulaBindableComponent()
-    {
-    }
 
-    public virtual void Release() { }
-}
-
-public abstract class INebulaScriptComponent : INebulaBindableComponent, ILifespan
+public abstract class INebulaScriptComponent : IGameEntity, ILifespan, IReleasable
 {
     public INebulaScriptComponent()
     {
-        NebulaGameManager.Instance?.RegisterComponent(this);
+        this.Register(this);
     }
 
-    public abstract void Update();
-    public virtual void OnMeetingStart() { }
-    public virtual void OnReleased() { }
-    public virtual void OnGameReenabled() { }
-    public virtual void OnGameStart() { }
-    public override void Release()
+    void IReleasable.Release()
     {
         MarkedRelease = true;
     }
+
     public bool MarkedRelease { get; private set; } = false;
-    public virtual bool UpdateWithMyPlayer { get => false; }
 
     bool ILifespan.IsDeadObject => MarkedRelease;
 }
 
-public class GameObjectBinding : INebulaScriptComponent
+public class GameObjectBinding : INebulaScriptComponent, IGameEntity
 {
     public GameObject? MyObject { get; private set; }
 
@@ -53,14 +42,13 @@ public class GameObjectBinding : INebulaScriptComponent
         MyObject = null;
     }
 
-    public override void Update() { }
-    public override void OnReleased() {
+    void IGameEntity.OnReleased() {
         if (MyObject) GameObject.Destroy(MyObject);
         MyObject = null;
     }
 }
 
-public class ComponentBinding<T> : INebulaScriptComponent where T : MonoBehaviour 
+public class ComponentBinding<T> : INebulaScriptComponent, IGameEntity where T : MonoBehaviour 
 {
     public T? MyObject { get; private set; }
 
@@ -73,45 +61,13 @@ public class ComponentBinding<T> : INebulaScriptComponent where T : MonoBehaviou
     {
         MyObject = null;
     }
-
-    public override void Update() { }
-    public override void OnReleased()
+    void IGameEntity.OnReleased()
     {
         if (MyObject) GameObject.Destroy(MyObject!.gameObject);
     }
 }
 
-public class ScriptHolder : INebulaBindableComponent, IBinder
-{
-
-    private List<IReleasable> myComponent { get; init; } = new();
-    public T Bind<T>(T component) where T : IReleasable
-    {
-        BindComponent(component);
-        return component;
-    }
-
-    public GameObject Bind(GameObject gameObject)
-    {
-        BindComponent(new GameObjectBinding(gameObject));
-        return gameObject;
-    }
-
-    public void BindComponent(IReleasable component) => myComponent.Add(component);
-
-    protected void ReleaseComponents()
-    {
-        foreach (INebulaBindableComponent component in myComponent) component.Release();
-        myComponent.Clear();
-    }
-
-    public override void Release()
-    {
-        ReleaseComponents();
-    }
-}
-
-public class NebulaGameScript : INebulaScriptComponent
+public class NebulaGameScript : INebulaScriptComponent, IGameEntity
 {
     public Action? OnActivatedEvent = null;
     public Action? OnMeetingStartEvent = null;
@@ -119,11 +75,11 @@ public class NebulaGameScript : INebulaScriptComponent
     public Action? OnGameReenabledEvent = null;
     public Action? OnGameStartEvent = null;
 
-    public override void OnMeetingStart() => OnMeetingStartEvent?.Invoke();
-    public override void OnReleased() => OnReleasedEvent?.Invoke();
-    public override void OnGameReenabled() => OnGameReenabledEvent?.Invoke();
-    public override void OnGameStart() => OnGameStartEvent?.Invoke();
-    public override void Update()
+    void IGameEntity.OnReleased() => OnReleasedEvent?.Invoke();
+    void IGameEntity.OnMeetingStart() => OnMeetingStartEvent?.Invoke();
+    void IGameEntity.OnGameReenabled() => OnGameReenabledEvent?.Invoke();
+    void IGameEntity.OnGameStart() => OnGameStartEvent?.Invoke();
+    void IGameEntity.Update()
     {
         if (OnActivatedEvent != null)
         {

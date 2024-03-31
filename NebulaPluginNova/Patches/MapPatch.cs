@@ -81,7 +81,6 @@ public static class CountOverlayUpdatePatch
         {
             if (ShipStatus.Instance.FastRooms.TryGetValue(counterArea.RoomType, out var plainShipRoom) && plainShipRoom.roomArea)
             {
-                int num = plainShipRoom.roomArea.OverlapCollider(__instance.filter, __instance.buffer);
                 int counter = 0;
                 int deadBodies = 0, impostors = 0;
 
@@ -90,8 +89,12 @@ public static class CountOverlayUpdatePatch
                     //会議中のアドミン (PreMeetingPointを参照する)
                     foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                     {
+<<<<<<< HEAD
                         if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.PreMeetingPoint) && !AlreadyAdded(p.PlayerId)) {
                             AddToMask(p.PlayerId);
+=======
+                        if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.PreMeetingPoint) && hashSet.Add(p.PlayerId)) {
+>>>>>>> e3cfea74317fbe8ad757cab9ca2e6a5f54ce2bde
                             counter++;
                             if (p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
                         }
@@ -100,6 +103,7 @@ public static class CountOverlayUpdatePatch
                 else
                 {
                     //タスクターン中のアドミン
+<<<<<<< HEAD
                     foreach(var p in admin.Players)
                     {
                         if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetModPlayerInfo(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
@@ -114,6 +118,29 @@ public static class CountOverlayUpdatePatch
                             if (p.isImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
 
                             AddToMask(p.playerId);
+=======
+                    int num = plainShipRoom.roomArea.OverlapCollider(__instance.filter, __instance.buffer);
+                    for (int j = 0; j < num; j++)
+                    {
+                        Collider2D collider2D = __instance.buffer[j];
+                        if (collider2D.CompareTag("DeadBody") && __instance.includeDeadBodies)
+                        {
+                            DeadBody component = collider2D.GetComponent<DeadBody>();
+                            if (component != null && hashSet.Add((int)component.ParentId))
+                            {
+                                counter++;
+                                if (MapBehaviourExtension.CanIdentifyDeadBodies) deadBodies++;
+                            }
+                        }
+                        else if (!collider2D.isTrigger)
+                        {
+                            PlayerControl component2 = collider2D.GetComponent<PlayerControl>();
+                            if (component2 && component2.Data != null && !component2.Data.Disconnected && !component2.Data.IsDead && (__instance.showLivePlayerPosition || !component2.AmOwner) && hashSet.Add((int)component2.PlayerId))
+                            {
+                                counter++;
+                                if (component2.Data.Role.IsImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
+                            }
+>>>>>>> e3cfea74317fbe8ad757cab9ca2e6a5f54ce2bde
                         }
                     }
                 }
@@ -129,30 +156,60 @@ public static class CountOverlayUpdatePatch
 [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.ShowNormalMap))]
 public static class OpenNormalMapPatch
 {
-
-    static void Postfix(MapCountOverlay __instance)
+    //CanMoveのチェックを排除
+    static bool Prefix(MapBehaviour __instance)
     {
-        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r=>r.OnOpenNormalMap());
+        if (__instance.IsOpen)
+        {
+            __instance.Close();
+            return false;
+        }
+        
+        PlayerControl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
+        __instance.GenericShow();
+        __instance.taskOverlay.Show();
+        __instance.ColorControl.SetColor(new Color(0.05f, 0.2f, 1f, 1f));
+        DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
+
+        GameEntityManager.Instance?.AllEntities.Do(e=>e.OnOpenNormalMap());
+        return false;
     }
 }
 
 [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.ShowSabotageMap))]
 public static class OpenSabotageMapPatch
 {
-
-    static void Postfix(MapCountOverlay __instance)
+    //CanMoveのチェックを排除
+    static bool Prefix(MapBehaviour __instance)
     {
-        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnOpenSabotageMap());
+        if (__instance.IsOpen)
+        {
+            __instance.Close();
+            return false;
+        }
+        if (__instance.specialInputHandler != null) __instance.specialInputHandler.disableVirtualCursor = true;
+        
+        PlayerControl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
+        __instance.GenericShow();
+        __instance.infectedOverlay.gameObject.SetActive(true);
+        __instance.ColorControl.SetColor(Palette.ImpostorRed);
+        __instance.taskOverlay.Show();
+        DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
+        ConsoleJoystick.SetMode_Sabotage();
+
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnOpenSabotageMap());
+        return false;
     }
 }
 
 [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.ShowCountOverlay))]
 public static class OpenAdminMapPatch
 {
+    //CanMoveのチェックは元より入ってない
 
     static void Postfix(MapCountOverlay __instance)
     {
-        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnOpenAdminMap());
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnOpenAdminMap());
     }
 }
 
@@ -161,7 +218,7 @@ public static class InitMapPatch
 {
     static void Postfix(MapBehaviour __instance)
     {
-        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => r.OnMapInstantiated());
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnMapInstantiated());
     }
 }
 
@@ -172,4 +229,50 @@ static class MapBehaviourGenericShowPatch
     {
         __instance.transform.localPosition = new Vector3(0, 0, -30f);
     }
+}
+
+[HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.Show))]
+class MapBehaviourShowNormalMapPatch
+{
+    static bool Prefix(MapBehaviour __instance, [HarmonyArgument(0)] MapOptions opts)
+    {
+        if (__instance.IsOpen)
+        {
+            __instance.Close();
+            return false;
+        }
+
+        if (ExileController.Instance || Minigame.Instance) return false;
+
+
+
+        if (!PlayerControl.LocalPlayer.CanMove && !MeetingHud.Instance) {
+            //会議中でなく動けないとき
+
+            if (GeneralConfigurations.CanOpenMapWhileUsingUtilityOption) {
+                //何れかのユーティリティを使用してなければ開けない
+                if(!PlayerControl.LocalPlayer.inVent && !PlayerControl.LocalPlayer.inMovingPlat && !PlayerControl.LocalPlayer.walkingToVent && !PlayerControl.LocalPlayer.onLadder) return false; 
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+
+        switch (opts.Mode)
+        {
+            case MapOptions.Modes.Normal:
+                __instance.ShowNormalMap();
+                return false;
+            case MapOptions.Modes.CountOverlay:
+                __instance.ShowCountOverlay(opts.AllowMovementWhileMapOpen, opts.ShowLivePlayerPosition, opts.IncludeDeadBodies);
+                return false;
+            case MapOptions.Modes.Sabotage:
+                __instance.ShowSabotageMap();
+                return false;
+        }
+        return false;
+    }
+
 }

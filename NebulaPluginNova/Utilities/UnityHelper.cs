@@ -68,7 +68,11 @@ public static class UnityHelper
         return FindCamera(cameraLayer)?.WorldToScreenPoint(worldPos) ?? Vector3.zero;
     }
 
-    public static PassiveButton SetUpButton(this GameObject gameObject, bool withSound = false, SpriteRenderer? buttonRenderer = null, Color? defaultColor = null, Color? selectedColor = null) {
+
+    public static PassiveButton SetUpButton(this GameObject gameObject, bool withSound = false, SpriteRenderer? buttonRenderer = null, Color? defaultColor = null, Color? selectedColor = null)
+        => SetUpButton(gameObject, withSound, buttonRenderer != null ? [buttonRenderer] : [], defaultColor, selectedColor);
+
+    public static PassiveButton SetUpButton(this GameObject gameObject, bool withSound, SpriteRenderer[] buttonRenderers, Color? defaultColor = null, Color? selectedColor = null) {
         var button = gameObject.AddComponent<PassiveButton>();
         button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         button.OnMouseOut = new UnityEngine.Events.UnityEvent();
@@ -76,16 +80,16 @@ public static class UnityHelper
 
         if (withSound)
         {
-            button.OnClick.AddListener(() => SoundManager.Instance.PlaySound(VanillaAsset.SelectClip, false, 0.8f));
-            button.OnMouseOver.AddListener(() => SoundManager.Instance.PlaySound(VanillaAsset.HoverClip, false, 0.8f));
+            button.OnClick.AddListener(VanillaAsset.PlaySelectSE);
+            button.OnMouseOver.AddListener(VanillaAsset.PlayHoverSE);
         }
-        if (buttonRenderer != null)
+        if (buttonRenderers.Length > 0)
         {
-            button.OnMouseOut.AddListener(() => buttonRenderer!.color = defaultColor ?? Color.white);
-            button.OnMouseOver.AddListener(() => buttonRenderer!.color = selectedColor ?? Color.green);
+            button.OnMouseOut.AddListener(() => { foreach (var r in buttonRenderers) r.color = defaultColor ?? Color.white; });
+            button.OnMouseOver.AddListener(() => { foreach (var r in buttonRenderers) r.color = selectedColor ?? Color.green; });
         }
 
-        if (buttonRenderer != null) buttonRenderer.color = defaultColor ?? Color.white;
+        if (buttonRenderers.Length > 0) foreach(var r in buttonRenderers)r.color = defaultColor ?? Color.white;
         
         return button;
     }
@@ -148,6 +152,13 @@ public static class UnityHelper
             todo.Invoke(obj);
             obj.ForEachAllChildren(todo);
         }));
+    }
+
+    public static Vector3 AsVector3(this Vector2 vec,float z)
+    {
+        Vector3 result = vec;
+        result.z = z;
+        return result;
     }
 }
 

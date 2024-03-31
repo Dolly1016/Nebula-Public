@@ -14,7 +14,13 @@ public class ShipStatusPatch
 {
     static public void Postfix(ShipStatus __instance)
     {
+        ModifyEarlier();
         __instance.StartCoroutine(Effects.Sequence(Effects.Wait(0.1f),ManagedEffects.Action(Modify).WrapToIl2Cpp()));
+    }
+
+    static private void ModifyEarlier()
+    {
+        ShipExtension.PatchEarlierModification(AmongUsUtil.CurrentMapId);
     }
 
     static private void Modify() { 
