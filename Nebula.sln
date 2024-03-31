@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NebulaAPI", "NebulaAPI\Nebu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NebulaBuilder", "NebulaBuilder\NebulaBuilder.csproj", "{DACDCF63-1B74-4F6F-8845-77A17FFDDFE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NebulaBuilder", "NebulaBuilder\NebulaBuilder.csproj", "{DACDCF63-1B74-4F6F-8845-77A17FFDDFE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -677,6 +677,13 @@
 "configuration.tag.funny" : "この役職は独特で面白い能力を持っています。<br>一味違うゲームを楽しみたい方にお勧めです。"
 "configuration.tag.difficult" : "この役職は特殊で難しい操作が求められます。<br>フリープレイなどで一度確認してみることをお勧めします。"
 
+# Tag
+
+"configuration.tag.chaotic" : "この役職は闇鍋向きです。"
+"configuration.tag.beginner" : "この役職は操作が簡単で、初心者にもおすすめです。"
+"configuration.tag.funny" : "この役職は独特で面白い能力を持っています。<br>一味違うゲームを楽しみたい方にお勧めです。"
+"configuration.tag.difficult" : "この役職は特殊で難しい操作が求められます。<br>フリープレイなどで一度確認してみることをお勧めします。"
+
 # Documents
 
 "options.map.silentVents.detail" : "オンに設定することで視界外のベントの開閉が見えなくなります。"
