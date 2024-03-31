@@ -1,0 +1,34 @@
+﻿{
+	"Contents" : [
+		{
+			"Document" : {
+				"Id" : "templates.roleName",
+				"Arguments" : {
+					"roleName" : "evilTracker"
+				}
+			}
+		},
+		{
+			"TranslationKey" : "role.evilTracker.doc.main",
+			"IsVariable" : True
+		},
+		{
+			"Document" : {
+				"Id" : "templates.buttonContent",
+				"Arguments" : {
+					"buttonName" : "TrackButton",
+					"textKey" : "role.evilTracker.doc.trackButton"
+				}
+			}
+		},
+		{
+			"Document" : {
+				"Id" : "templates.imageContent",
+				"Arguments" : {
+					"imageName" : "TrackIcon",
+					"textKey" : "role.evilTracker.doc.track"
+				}
+			}
+		}
+	]
+}

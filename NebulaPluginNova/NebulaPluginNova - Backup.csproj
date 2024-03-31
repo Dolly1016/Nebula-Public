@@ -1,0 +1,101 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>Nebula</RootNamespace>
+		<AssemblyName>Nebula</AssemblyName>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
+		<DebugSymbols>false</DebugSymbols>
+		<DebugType>none</DebugType>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+	</PropertyGroup>
+	
+	
+	
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<WarningLevel>4</WarningLevel>
+		<DefineConstants>$(DefineConstants);STEAM</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+		<Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+	  <WarningLevel>4</WarningLevel>
+	  <DefineConstants>$(DefineConstants);STEAM</DefineConstants>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+	  <WarningLevel>4</WarningLevel>
+	  <DefineConstants>$(DefineConstants);STEAM</DefineConstants>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<WarningLevel>4</WarningLevel>
+		<DefineConstants>STEAM</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+		<Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<WarningLevel>4</WarningLevel>
+		<DefineConstants>STEAM</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+		<Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+		<WarningLevel>4</WarningLevel>
+		<DefineConstants>STEAM</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+		<Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="..\..\Among Us\BepInEx\core\*.dll" />
+		<Reference Include="..\..\Among Us\BepInEx\interop\*.dll" />
+		<Compile Remove="Resources\**" />
+		<Reference Include="libs\Mono.CSharp.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\*\*.*" />
+		<EmbeddedResource Include="Resources\*.*" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="ILRepack" Version="2.0.18" />
+	  <PackageReference Include="NAudio.Core" Version="2.2.1" />
+	  <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+	  <PackageReference Include="OpusDotNet" Version="1.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\NebulaAPI\NebulaAPI.csproj" />
+	</ItemGroup>
+
+	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+		<Message Text="Second occurrence" />
+		<Exec Command="tools\ILRepack.exe /wildcards /target:library /lib:references /lib:%22..\..\Among Us\BepInEx\core%22 /lib:%22..\..\Among Us\BepInEx\interop%22 /internalize /out:bin\x86\Release\net6\Nebula.dll %22bin\x86\Release\net6\Nebula.dll%22 %22libs\*.dll%22" />
+		<Copy SourceFiles="bin\x86\Release\net6\Nebula.dll" DestinationFolder="$(AmongUsRelease)\" />
+		<Copy SourceFiles="bin\x86\Release\net6\Nebula.dll" DestinationFolder="$(AmongUsRelease)\Nebula\BepInEx\plugins\" />
+		<Exec Command="%22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula.zip $(AmongUsRelease)\Nebula" />
+		<Copy SourceFiles="bin\x86\Release\net6\Nebula.dll" DestinationFolder="$(AmongUsPlugins)\" />
+	</Target>
+
+</Project>

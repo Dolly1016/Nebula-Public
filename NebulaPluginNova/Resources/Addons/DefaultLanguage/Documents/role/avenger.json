@@ -1,0 +1,15 @@
+﻿{
+	"Contents" : [
+		{
+			"Document" : {
+				"Id" : "templates.roleName",
+				"Arguments" : {
+					"roleName" : "avenger"
+				}
+			}
+		},
+		{
+			"TranslationKey" : "role.avenger.doc.main"
+		}
+	]
+}

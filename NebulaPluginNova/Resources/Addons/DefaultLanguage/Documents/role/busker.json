@@ -1,0 +1,33 @@
+﻿{
+	"Contents" : [
+		{
+			"Document" : {
+				"Id" : "templates.roleName",
+				"Arguments" : {
+					"roleName" : "busker"
+				}
+			}
+		},
+		{
+			"TranslationKey" : "role.busker.doc.main"
+		},
+		{
+			"Document" : {
+				"Id" : "templates.buttonContent",
+				"Arguments" : {
+					"buttonName" : "BuskPseudocideButton",
+					"textKey" : "role.busker.doc.pseudocideButton"
+				}
+			}
+		},
+		{
+			"Document" : {
+				"Id" : "templates.buttonContent",
+				"Arguments" : {
+					"buttonName" : "BuskReviveButton",
+					"textKey" : "role.busker.doc.reviveButton"
+				}
+			}
+		}
+	]
+}
