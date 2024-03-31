@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
 using Nebula.Utilities;
 using System;
@@ -252,7 +253,7 @@ public static class GeneralConfigurations
                         button.OnMouseOver.AddListener(() =>
                         {
                             MetaWidgetOld widget = new();
-                            widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = c.configuration.Id }).Append(new MetaWidgetOld.WrappedWidget(NebulaConfiguration.GetDetailWidget(c.configuration.Id + ".detail")));
+                            widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = c.configuration.Id }).Append(new MetaWidgetOld.WrappedWidget(NebulaConfiguration.GetDetailWidget(c.configuration.Id + ".detail") ?? new GUIEmptyWidget()));
                             NebulaManager.Instance.SetHelpWidget(button, widget);
                         });
                         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));

@@ -189,6 +189,26 @@ public class AbstractAchievement : ProgressRecord {
 
         List<Virial.Media.GUIWidget> list = new();
 
+        list.Add(new NoSGUIText(GUIAlignment.Left, DetailContentAttribute, GetHeaderComponent()));
+
+        List<Virial.Media.GUIWidget> titleList = new();
+        if (showTorophy)
+        {
+            titleList.Add(new NoSGUIMargin(GUIAlignment.Left, new(-0.04f, 0.2f)));
+            titleList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => TrophySprite.GetSprite(Trophy)), new(0.3f, 0.3f)));
+            titleList.Add(new NoSGUIMargin(GUIAlignment.Left, new(0.05f, 0.2f)));
+        }
+
+        titleList.Add(new NoSGUIText(GUIAlignment.Left, DetailTitleAttribute, GetTitleComponent(hiddenNotClearedAchievement ? AbstractAchievement.HiddenDescriptiveComponent : null)));
+        if (showCleared && IsCleared)
+        {
+            titleList.Add(new NoSGUIMargin(GUIAlignment.Left, new(0.2f, 0.2f)));
+            titleList.Add(new NoSGUIText(GUIAlignment.Left, DetailContentAttribute, gui.TextComponent(new(1f, 1f, 0f), "achievement.ui.cleared")));
+        }
+        list.Add(new HorizontalWidgetsHolder(GUIAlignment.Left, titleList));
+
+        list.Add(new NoSGUIText(GUIAlignment.Left, DetailContentAttribute, GetDetailComponent()));
+
         if (showFlavor)
         {
             var flavor = GetFlavorComponent();

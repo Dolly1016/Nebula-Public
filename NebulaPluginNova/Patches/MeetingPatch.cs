@@ -8,6 +8,7 @@ using static MeetingHud;
 using Steamworks;
 using System.Reflection;
 using Nebula.Map;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 namespace Nebula.Patches;
 
@@ -61,12 +62,12 @@ public static class MeetingModRpc
         var reporter = NebulaGameManager.Instance?.GetModPlayerInfo(message.reporter);
         var reported = NebulaGameManager.Instance?.GetModPlayerInfo(message.reported);
 
-        NebulaGameManager.Instance?.AllAssignableAction(a => a.OnPreMeetingStart(reporter!, reported));
+        GameEntityManager.Instance?.AllEntities.Do(a => a.OnPreMeetingStart(reporter!, reported));
 
-        if (reported != null) 
-            NebulaGameManager.Instance?.AllAssignableAction(a => a.OnReported(reporter!, reported));
+        if (reported != null)
+            GameEntityManager.Instance?.AllEntities.Do(a => a.OnReported(reporter!, reported));
         else
-            NebulaGameManager.Instance?.AllAssignableAction(a => a.OnEmergencyMeeting(reporter!));
+            GameEntityManager.Instance?.AllEntities.Do(a => a.OnEmergencyMeeting(reporter!));
     });
 
     public static readonly RemoteProcess<(List<VoterState> states, byte exiled, byte[] exiledAll,  bool tie)> RpcModCompleteVoting = new("CompleteVoting", 
@@ -100,15 +101,18 @@ public static class MeetingModRpc
     private static void ForcelyVotingComplete(MeetingHud meetingHud, List<VoterState> states, byte exiled, byte[] exiledAll, bool tie)
     {
         var readonlyStates = states.ToArray();
-        PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(a =>
+
+        GameEntityManager.Instance?.GetPlayerEntities(PlayerControl.LocalPlayer.PlayerId).Do(e =>
         {
-            a.OnVotedLocal(Helpers.GetPlayer(
-            ((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255));
+            var voted = Helpers.GetPlayer(
+            ((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255);
+
+            e.OnVotedLocal(voted, exiledAll.Contains(voted?.PlayerId ?? 255));
 
             var votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => Helpers.GetPlayer(id)).Distinct().ToArray();
-            a.OnVotedForMeLocal(votedBy!);
+            e.OnVotedForMeLocal(votedBy!);
 
-            a.OnDiscloseVotingLocal(readonlyStates);
+            e.OnDiscloseVotingLocal(readonlyStates);
         });
 
         //追放者とタイ投票の結果だけは必ず書き換える
@@ -405,7 +409,7 @@ class MeetingClosePatch
 { 
     public static void Postfix(MeetingHud __instance)
     {
-        NebulaGameManager.Instance?.AllAssignableAction(r => r.OnStartExileCutScene());
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnStartExileCutScene());
         NebulaManager.Instance.CloseAllUI();
     }
 }
@@ -461,6 +465,8 @@ class VoteAreaPatch
 {
     public static void Postfix(PlayerVoteArea __instance)
     {
+        if (!MeetingHud.Instance) return;
+
         try
         {
             var maskParent = UnityHelper.CreateObject<SortingGroup>("MaskedObjects", __instance.transform, new Vector3(0, 0, -0.1f));
@@ -514,7 +520,7 @@ class CastVotePatch
         
         //CmdCastVote(Mod)
         int vote = 1;
-        NebulaGameManager.Instance?.GetModPlayerInfo(PlayerControl.LocalPlayer.PlayerId)?.AssignableAction((r) => r.OnCastVoteLocal(suspectStateIdx, ref vote));
+        GameEntityManager.Instance.GetPlayerEntities(PlayerControl.LocalPlayer.PlayerId).Do(r => r.OnCastVoteLocal(suspectStateIdx, ref vote));
         __instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, suspectStateIdx, vote);
         return false;
     }
@@ -700,7 +706,7 @@ class PopulateResultPatch
     {
         Debug.Log("Called PopulateResults");
 
-        NebulaGameManager.Instance?.AllAssignableAction(r => r.OnEndVoting());
+        GameEntityManager.Instance?.AllEntities.Do(r => r.OnEndVoting());
 
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.MeetingVotingResults);
         foreach (var voteArea in __instance.playerStates)

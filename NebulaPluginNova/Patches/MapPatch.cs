@@ -89,12 +89,8 @@ public static class CountOverlayUpdatePatch
                     //会議中のアドミン (PreMeetingPointを参照する)
                     foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                     {
-<<<<<<< HEAD
                         if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.PreMeetingPoint) && !AlreadyAdded(p.PlayerId)) {
                             AddToMask(p.PlayerId);
-=======
-                        if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.PreMeetingPoint) && hashSet.Add(p.PlayerId)) {
->>>>>>> e3cfea74317fbe8ad757cab9ca2e6a5f54ce2bde
                             counter++;
                             if (p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
                         }
@@ -103,7 +99,6 @@ public static class CountOverlayUpdatePatch
                 else
                 {
                     //タスクターン中のアドミン
-<<<<<<< HEAD
                     foreach(var p in admin.Players)
                     {
                         if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetModPlayerInfo(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
@@ -118,29 +113,6 @@ public static class CountOverlayUpdatePatch
                             if (p.isImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
 
                             AddToMask(p.playerId);
-=======
-                    int num = plainShipRoom.roomArea.OverlapCollider(__instance.filter, __instance.buffer);
-                    for (int j = 0; j < num; j++)
-                    {
-                        Collider2D collider2D = __instance.buffer[j];
-                        if (collider2D.CompareTag("DeadBody") && __instance.includeDeadBodies)
-                        {
-                            DeadBody component = collider2D.GetComponent<DeadBody>();
-                            if (component != null && hashSet.Add((int)component.ParentId))
-                            {
-                                counter++;
-                                if (MapBehaviourExtension.CanIdentifyDeadBodies) deadBodies++;
-                            }
-                        }
-                        else if (!collider2D.isTrigger)
-                        {
-                            PlayerControl component2 = collider2D.GetComponent<PlayerControl>();
-                            if (component2 && component2.Data != null && !component2.Data.Disconnected && !component2.Data.IsDead && (__instance.showLivePlayerPosition || !component2.AmOwner) && hashSet.Add((int)component2.PlayerId))
-                            {
-                                counter++;
-                                if (component2.Data.Role.IsImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
-                            }
->>>>>>> e3cfea74317fbe8ad757cab9ca2e6a5f54ce2bde
                         }
                     }
                 }
