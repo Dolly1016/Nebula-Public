@@ -28,7 +28,7 @@ public static class HelpScreen
 
     public record HelpTabInfo(HelpTab Tab,string TranslateKey)
     {
-        public MetaWidgetOld.Button GetButton(MetaScreen screen, HelpTab currentTab, HelpTab validTabs) => new(() => ShowScreen(screen, Tab, validTabs), TabButtonAttr) { Color = currentTab == Tab ? Color.white : Color.gray, TranslationKey = TranslateKey };
+        public MetaContextOld.Button GetButton(MetaScreen screen, HelpTab currentTab, HelpTab validTabs) => new(() => ShowScreen(screen, Tab, validTabs), TabButtonAttr) { Color = currentTab == Tab ? Color.white : Color.gray, TranslationKey = TranslateKey };
         
     }
 
@@ -43,50 +43,44 @@ public static class HelpScreen
 
     private static float HelpHeight = 4.1f;
 
-    private static MetaScreen? lastHelpScreen = null;
-    public static void TryOpenHelpScreen(HelpTab tab = HelpTab.Roles)
-    {
-        if (!lastHelpScreen) lastHelpScreen = OpenHelpScreen(tab);
-    }
-
-    private static MetaScreen OpenHelpScreen(HelpTab tab)
+    public static MetaScreen OpenHelpScreen()
     {
         var screen = MetaScreen.GenerateWindow(new(7.8f, HelpHeight + 0.6f), HudManager.Instance.transform, new Vector3(0, 0, 0), true, false);
 
+        HelpTab tab = HelpTab.Roles;
         HelpTab validTabs = HelpTab.Roles | HelpTab.Modifiers | HelpTab.Options | HelpTab.Achievements;
 
-        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) validTabs |= HelpTab.MyInfo;
-        
+        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
+            validTabs |= HelpTab.MyInfo;
+            tab = HelpTab.MyInfo;
+        }
         if (AmongUsClient.Instance.AmHost && (NebulaGameManager.Instance?.LobbySlideManager.IsValid ?? false)) validTabs |= HelpTab.Slides;
-
-        //開こうとしているタブが存在しない場合は、ロール一覧を開く
-        if ((tab & validTabs) == (HelpTab)0) tab = HelpTab.Roles;
 
         ShowScreen(screen,tab,validTabs);
 
         return screen;
     }
 
-    private static TextAttributeOld TabButtonAttr = new(TextAttributeOld.BoldAttr) { Size = new(1.15f, 0.26f) };
-    private static IMetaWidgetOld GetTabsWidget(MetaScreen screen, HelpTab tab, HelpTab validTabs)
+    private static TextAttribute TabButtonAttr = new(TextAttribute.BoldAttr) { Size = new(1.15f, 0.26f) };
+    private static IMetaContextOld GetTabsContext(MetaScreen screen, HelpTab tab, HelpTab validTabs)
     {
         List<IMetaParallelPlacableOld> tabs = new();
 
         foreach (var info in AllHelpTabInfo) if ((validTabs & info.Tab) != 0) tabs.Add(info.GetButton(screen, tab, validTabs));
 
-        return new CombinedWidgetOld(0.5f,tabs.ToArray());
+        return new CombinedContextOld(0.5f,tabs.ToArray());
     }
     private static void ShowScreen(MetaScreen screen, HelpTab tab,HelpTab validTabs)
     {
-        MetaWidgetOld widget = new();
+        MetaContextOld context = new();
 
-        widget.Append(GetTabsWidget(screen, tab, validTabs));
-        widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
+        context.Append(GetTabsContext(screen, tab, validTabs));
+        context.Append(new MetaContextOld.VerticalMargin(0.1f));
 
         switch (tab)
         {
             case HelpTab.MyInfo:
-                widget.Append(ShowMyRolesSrceen());
+                context.Append(ShowMyRolesSrceen());
                 break;
             case HelpTab.Roles:
                 widget.Append(ShowAssignableScreen<AbstractRole>(
@@ -99,22 +93,24 @@ public static class HelpScreen
                 widget.Append(ShowAssignableScreen(Roles.Roles.AllModifiers.Where(m => (m as DefinedAssignable).ShowOnHelpScreen)));
                 break;
             case HelpTab.Options:
-                widget.Append(ShowOptionsScreen());
+                context.Append(ShowOptionsScreen());
                 break;
             case HelpTab.Slides:
-                widget.Append(ShowSlidesScreen());
+                context.Append(ShowSlidesScreen());
                 break;
             case HelpTab.Achievements:
-                widget.Append(ShowAchievementsScreen());
+                context.Append(ShowAchievementsScreen());
                 break;
         }
 
-        screen.SetWidget(widget);
+        screen.SetContext(context);
     }
 
-    static private void ShowSerializableDocumentScreen(SerializableDocument doc)
+    private static TextAttribute RoleTitleAttr = new TextAttribute(TextAttribute.BoldAttr) { Size = new Vector2(1.4f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
+    private static TextAttribute RoleTitleAttrUnmasked = new TextAttribute(TextAttribute.BoldAttr) { Size = new Vector2(1.4f, 0.29f) };
+    private static IMetaContextOld ShowAssignableScreen<Assignable>(IEnumerable<Assignable> allAssignable) where Assignable : Roles.IAssignableBase
     {
-        var screen = MetaScreen.GenerateWindow(new(7f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, true, true);
+        MetaContextOld inner = new();
 
         Virial.Compat.Artifact<GUIScreen>? inner = null;
         var scrollView = new GUIScrollView(Virial.Media.GUIAlignment.Left, new(7f, 4.5f), () => doc.Build(inner) ?? GUIEmptyWidget.Default);
@@ -190,30 +186,30 @@ public static class HelpScreen
         => ShowAssignableScreen([(allAssignable, null)]);
 
 
-    private static TextAttributeOld SlideTitleAttr = new(TextAttributeOld.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Left, Size = new(3.6f, 0.28f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
-    private static TextAttributeOld SlideButtonAttr = new(TextAttributeOld.BoldAttr) { Size = new(0.8f, 0.25f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
-    private static IMetaWidgetOld ShowSlidesScreen()
+    private static TextAttribute SlideTitleAttr = new(TextAttribute.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Left, Size = new(3.6f, 0.28f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
+    private static TextAttribute SlideButtonAttr = new(TextAttribute.BoldAttr) { Size = new(0.8f, 0.25f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
+    private static IMetaContextOld ShowSlidesScreen()
     {
-        MetaWidgetOld inner = new();
+        MetaContextOld inner = new();
 
         foreach (var temp in LobbySlideManager.AllTemplates)
         {
             var copiedTemp = temp;
-            inner.Append(new CombinedWidgetOld(
+            inner.Append(new CombinedContextOld(
                 0.5f,
-                new MetaWidgetOld.Text(SlideTitleAttr) { RawText = temp.Title },
-                new MetaWidgetOld.HorizonalMargin(0.2f),
-                new MetaWidgetOld.Button(()=> NebulaGameManager.Instance?.LobbySlideManager.TryRegisterAndShow(copiedTemp?.Generate()), SlideButtonAttr) { TranslationKey = "help.slides.share", PostBuilder = (_,renderer,_)=>renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }
+                new MetaContextOld.Text(SlideTitleAttr) { RawText = temp.Title },
+                new MetaContextOld.HorizonalMargin(0.2f),
+                new MetaContextOld.Button(()=> NebulaGameManager.Instance?.LobbySlideManager.TryRegisterAndShow(copiedTemp?.Generate()), SlideButtonAttr) { TranslationKey = "help.slides.share", PostBuilder = (_,renderer,_)=>renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }
                 ));
         }
 
-        return new MetaWidgetOld.ScrollView(new(7.4f, HelpHeight), inner) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
+        return new MetaContextOld.ScrollView(new(7.4f, HelpHeight), inner) { Alignment = IMetaContextOld.AlignmentOption.Center };
     }
 
-    private static TextAttributeOld OptionsAttr = new(TextAttributeOld.BoldAttr) { FontSize = 1.6f, FontMaxSize = 1.6f, FontMinSize = 1.6f, Size = new(4f, 10f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial, Alignment = TMPro.TextAlignmentOptions.TopLeft };
-    private static IMetaWidgetOld ShowOptionsScreen()
+    private static TextAttribute OptionsAttr = new(TextAttribute.BoldAttr) { FontSize = 1.6f, FontMaxSize = 1.6f, FontMinSize = 1.6f, Size = new(4f, 10f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial, Alignment = TMPro.TextAlignmentOptions.TopLeft };
+    private static IMetaContextOld ShowOptionsScreen()
     {
-        MetaWidgetOld inner = new();
+        MetaContextOld inner = new();
 
         StringBuilder builder = new();
         foreach (var holder in ConfigurationHolder.AllHolders)
@@ -224,43 +220,41 @@ public static class HelpScreen
             holder.GetShownString(ref builder);
         }
 
-        inner.Append(new MetaWidgetOld.VariableText(OptionsAttr) { RawText = builder.ToString(), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+        inner.Append(new MetaContextOld.VariableText(OptionsAttr) { RawText = builder.ToString(), Alignment = IMetaContextOld.AlignmentOption.Center });
 
-        return new MetaWidgetOld.ScrollView(new(7.4f, HelpHeight), inner) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
+        return new MetaContextOld.ScrollView(new(7.4f, HelpHeight), inner) { Alignment = IMetaContextOld.AlignmentOption.Center };
     }
 
-    private static IMetaWidgetOld ShowMyRolesSrceen()
+    private static IMetaContextOld ShowMyRolesSrceen()
     {
-        MetaWidgetOld widget = new();
+        MetaContextOld context = new();
+        Reference<MetaContextOld.ScrollView.InnerScreen> innerRef = new();
 
-        Virial.Compat.Artifact<GUIScreen> inner = null!;
-
-        widget.Append(PlayerControl.LocalPlayer.GetModInfo()!.AllAssigned().Where(a => a.CanBeAwareAssignment),
-            (role) => new MetaWidgetOld.Button(() =>
+        context.Append(PlayerControl.LocalPlayer.GetModInfo()!.AllAssigned().Where(a => a.CanBeAwareAssignment),
+            (role) => new MetaContextOld.Button(() =>
             {
                 var doc = DocumentManager.GetDocument("role." + role.AssignableBase.InternalName);
                 if (doc == null) return;
 
-                inner.Do(screen => screen.SetWidget(doc.Build(inner), out _));
+                innerRef.Value!.SetContext(doc.Build(innerRef));
             }, RoleTitleAttrUnmasked)
             {
                 RawText = role.AssignableBase.DisplayName.Color(role.AssignableBase.RoleColor),
-                Alignment = IMetaWidgetOld.AlignmentOption.Center
+                Alignment = IMetaContextOld.AlignmentOption.Center
             }, 128, -1, 0, 0.6f);
 
-        var scrollView = new GUIScrollView(GUIAlignment.Left, new(7.4f, HelpHeight - 0.7f), () =>
-        {
-            var doc = DocumentManager.GetDocument("role." + PlayerControl.LocalPlayer.GetModInfo()!.Role.AssignableBase.InternalName);
-            return doc?.Build(inner) ?? GUIEmptyWidget.Default;
+        context.Append(new MetaContextOld.ScrollView(new(7.4f, HelpHeight - 0.7f), new MetaContextOld()) { Alignment = IMetaContextOld.AlignmentOption.Center, InnerRef = innerRef,
+        PostBuilder = ()=> {
+            innerRef.Value!.SetContext(DocumentManager.GetDocument("role." + PlayerControl.LocalPlayer.GetModInfo()!.Role.AssignableBase.InternalName)?.Build(innerRef));
+        }
         });
-
-        widget.Append(new MetaWidgetOld.WrappedWidget(scrollView));
         
-        return widget;
+
+        return context;
     }
 
-    private static IMetaWidgetOld ShowAchievementsScreen()
+    private static IMetaContextOld ShowAchievementsScreen()
     {
-        return new MetaWidgetOld.WrappedWidget(AchievementViewer.GenerateWidget(3.15f, 7.8f));
+        return new MetaContextOld.WrappedContext(AchievementViewer.GenerateContext(3.15f, 7.8f));
     }
 }

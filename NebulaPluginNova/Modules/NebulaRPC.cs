@@ -28,6 +28,12 @@ public class NebulaRPCHolder : Attribute
 
 }
 
+[AttributeUsage(AttributeTargets.Method)]
+public class NebulaRPC : Attribute
+{
+
+}
+
 
 public class NebulaRPCInvoker
 {
@@ -62,8 +68,8 @@ public class NebulaRPCInvoker
 
     public void InvokeSingle()
     {
-        if (IsDummy)
-            RPCRouter.SendDummy(localBodyProcess);
+        if(IsDummy)
+            localBodyProcess.Invoke();
         else
             RPCRouter.SendRpc("Invoker", hash, (writer) => sender.Invoke(writer), () => localBodyProcess.Invoke());
     }
@@ -109,16 +115,6 @@ public static class RPCRouter
 
     static RPCSection? currentSection = null;
     static List<NebulaRPCInvoker> evacuateds = new();
-
-    public static void SendDummy(Action localProcess)
-    {
-        if (currentSection == null) localProcess.Invoke();
-        else
-        {
-            evacuateds.Add(new(localProcess));
-        }
-    }
-
     public static void SendRpc(string name, int hash, Action<MessageWriter> sender, Action localBodyProcess) {
         if(currentSection == null)
         {
@@ -165,10 +161,23 @@ public class RemoteProcessBase
         Hash = name.ComputeConstantHash();
         Name = name;
 
-        if (AllNebulaProcess.ContainsKey(Hash)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, NebulaLog.LogCategory.System, name + " is duplicated. (" + Hash + ")");
-        else NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.System, name + " is registered. (" + Hash + ")");
+        if (AllNebulaProcess.ContainsKey(Hash)) NebulaPlugin.Log.Print(null, name + " is duplicated. (" + Hash + ")");
+        else NebulaPlugin.Log.Print(null, name + " is registered. (" + Hash + ")");
 
         AllNebulaProcess[Hash] = this;
+    }
+
+    static private void SwapMethodPointer(MethodInfo method0, MethodInfo method1)
+    {
+        unsafe
+        {
+            var functionPointer0 = method0.MethodHandle.Value.ToPointer();
+            var functionPointer1 = method1.MethodHandle.Value.ToPointer();
+            var functionShiftedPointer0 = *((int*)new IntPtr(((int*)functionPointer0 + 1)).ToPointer());
+            var functionShiftedPointer1 = *((int*)new IntPtr(((int*)functionPointer1 + 1)).ToPointer());
+            *((int*)new IntPtr(((int*)functionPointer0 + 1)).ToPointer()) = functionShiftedPointer1;
+            *((int*)new IntPtr(((int*)functionPointer1 + 1)).ToPointer()) = functionShiftedPointer0;
+        }
     }
 
     static Dictionary<string, RemoteProcess<object[]>> harmonyRpcMap = new();
@@ -186,7 +195,7 @@ public class RemoteProcessBase
         if (!method.IsStatic) processList.Add(RemoteProcessAsset.GetProcess(method.DeclaringType!));
         processList.AddRange(parameters.Select(p => RemoteProcessAsset.GetProcess(p.ParameterType)));
         
-        RemoteProcess<object[]> rpc = new(method.DeclaringType!.FullName + "." + method.Name,
+        RemoteProcess<object[]> rpc = new(method.Name,
             (writer, args) =>
             {
                 for (int i = 0; i < processList.Count; i++) processList[i].writer(writer, args[i]);
@@ -225,24 +234,6 @@ public class RemoteProcessBase
         {
             System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
             foreach(var method in type.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC)))) WrapRpcMethod(NebulaPlugin.MyPlugin.Harmony, method);
-        }
-
-        //全アドオンに対してRPCをセットアップ
-        foreach(var addon in NebulaAddon.AllAddons)
-        {
-            if(AddonScriptManager.TryGetScripting(addon, out var script))
-            {
-                foreach(var t in script.Assembly.GetTypes())
-                {
-                    System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle);
-                    foreach (var method in t.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC))))
-                    {
-                        //RPCを持つならハンドシェイクが必要
-                        addon.MarkAsNeedingHandshake();
-                        WrapRpcMethod(NebulaPlugin.MyPlugin.Harmony, method);
-                    }
-                }
-            }
         }
     }
 
@@ -301,7 +292,7 @@ public static class RemoteProcessAsset
             (writer, obj) =>
             {
                 var mod = (AttributeModulator)obj;
-                writer.Write(mod.Attribute.Id);
+                writer.Write((int)mod.Attribute);
                 writer.Write(mod.Timer);
                 writer.Write(mod.CanPassMeeting);
                 writer.Write(mod.Priority);
@@ -416,7 +407,8 @@ public class RemoteProcess<Parameter> : RemoteProcessBase
         Sender = sender;
         Receiver = receiver;
     }
-    
+
+
     public void Invoke(Parameter parameter)
     {
         RPCRouter.SendRpc(Name,Hash,(writer)=>Sender(writer,parameter),()=>Body.Invoke(parameter,true));
@@ -464,19 +456,7 @@ public class CombinedRemoteProcess : RemoteProcessBase
     public override void Receive(MessageReader reader)
     {
         int num = reader.ReadInt32();
-
-        for (int i = 0; i < num; i++)
-        {
-            int id = reader.ReadInt32();
-            if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id,out var rpc)){
-                rpc.Receive(reader);
-            }
-            else
-            {
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "RPC NotFound ID Error. id: " + id + " ,index: " + i + " ,length: " + num);
-                throw new Exception("Combined RPC Error");
-            }
-        }
+        for (int i = 0; i < num; i++) RemoteProcessBase.AllNebulaProcess[reader.ReadInt32()].Receive(reader);
     }
 
     public void Invoke(params NebulaRPCInvoker[] invokers)
@@ -583,18 +563,6 @@ public class DivisibleRemoteProcess<Parameter, DividedParameter> : RemoteProcess
         {
             Debug.LogError($"Error in RPC(Received: {Name})" + ex.Message);
         }
-    }
-}
-
-public static class QueryRPC
-{
-    public static RemoteProcess<QueryParameter> Generate<QueryParameter, AnswerParameter>(string name, Predicate<QueryParameter> predicate, Func<QueryParameter, AnswerParameter> onAsked, RemoteProcess<AnswerParameter>.Process process)
-    {
-        var answerRpc = new RemoteProcess<AnswerParameter>(name + "Answer", process);
-        return new RemoteProcess<QueryParameter>(name, (q, _) =>
-        {
-            if (predicate.Invoke(q)) answerRpc.Invoke(onAsked.Invoke(q));
-        });        
     }
 }
 
@@ -754,15 +722,6 @@ class NebulaRPCHandlerPatch
     {
         if (callId != 64) return;
 
-        int id = reader.ReadInt32();
-        if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id,out var rpc))
-        {
-            rpc.Receive(reader);
-        }
-        else
-        {
-            NebulaPlugin.Log.Print("RPC NotFound Error. id: " + id);
-            throw new Exception("RPC Error Occurred.");
-        }
+        RemoteProcessBase.AllNebulaProcess[reader.ReadInt32()].Receive(reader);
     }
 }
