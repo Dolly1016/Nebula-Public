@@ -23,6 +23,11 @@ public interface DefinedAssignable
     /// 役職の翻訳用の名称です。
     /// </summary>
     string LocalizedName { get; }
+
+    /// <summary>
+    /// ヘルプ画面上で表示するかどうか設定できます。
+    /// </summary>
+    bool ShowOnHelpScreen { get => true; }
 }
 
 /// <summary>

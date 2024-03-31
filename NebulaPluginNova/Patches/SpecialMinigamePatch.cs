@@ -7,32 +7,6 @@ using System.Threading.Tasks;
 
 namespace Nebula.Patches;
 
-//Vitals
-[HarmonyPatch(typeof(VitalsMinigame), nameof(VitalsMinigame.Begin))]
-class VitalsMinigameStartPatch
-{
-    static void Postfix(VitalsMinigame __instance)
-    {
-        NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Vitals, __instance.transform, new Vector3(3.4f, 2f, -50f));
-    }
-}
-
-[HarmonyPatch(typeof(VitalsMinigame), nameof(VitalsMinigame.Update))]
-class VitalsMinigameUpdatePatch
-{
-    static bool Prefix(VitalsMinigame __instance)
-    {
-        if (ConsoleTimer.IsOpenedByAvailableWay()) return true;
-
-        __instance.SabText.gameObject.SetActive(true);
-        __instance.SabText.text = Language.Translate("console.notAvailable");
-
-        foreach (var panel in __instance.vitals) panel.gameObject.SetActive(false);
-
-        return false;
-    }
-}
-
 //Camera (Skeld)
 [HarmonyPatch(typeof(SurveillanceMinigame), nameof(SurveillanceMinigame.Begin))]
 class SurveillanceMinigameBeginPatch

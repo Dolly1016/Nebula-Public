@@ -32,6 +32,8 @@ public class Phosphorus : ConfigurableStandardRole
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagFunny);
+
         NumOfLampsOption = new NebulaConfiguration(RoleConfig, "numOfLamps", null, 1, 10, 2, 2);
         PlaceCoolDownOption = new NebulaConfiguration(RoleConfig, "placeCoolDown", null, 5f, 60f, 5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
         LampCoolDownOption = new NebulaConfiguration(RoleConfig, "lampCoolDown", null, 5f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
@@ -152,7 +154,7 @@ public class Phosphorus : ConfigurableStandardRole
 
     }
 
-    public static RemoteProcess<int> RpcLantern = RemotePrimitiveProcess.OfInteger(
+    public static RemoteProcess<int> RpcLantern = new(
       "Lantern",
       (message, _) =>
       {

@@ -18,7 +18,8 @@ public class ClientOption
     {
         OutputCosmicHash,
         UseNoiseReduction,
-        ProcessorAffinity
+        ProcessorAffinity,
+        ForceSkeldMeetingSE
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
@@ -56,6 +57,7 @@ public class ClientOption
         "config.client.processorAffinity.dualCore",
         "config.client.processorAffinity.singleCore"}, 0)
         { OnValueChanged = ReflectProcessorAffinity };
+        new ClientOption(ClientOptionType.ForceSkeldMeetingSE, "forceSkeldMeetingSE", new string[] { "options.switch.off", "options.switch.on" }, 0);
 
         ReflectProcessorAffinity();
     }

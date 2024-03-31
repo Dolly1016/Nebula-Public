@@ -22,6 +22,8 @@ public class Damned : ConfigurableStandardModifier
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagFunny);
+
         TakeOverRoleOfKillerOption = new NebulaConfiguration(RoleConfig, "takeOverRoleOfKiller", null, true, true);
         DamnedMurderMyKillerOption = new NebulaConfiguration(RoleConfig, "damnedMurderMyKiller", null, true, true);
         KillDelayOption = new NebulaConfiguration(RoleConfig, "killDelay", null, 0f, 20f, 2.5f, 0f, 0f) { Decorator = NebulaConfiguration.SecDecorator, Predicate = () => DamnedMurderMyKillerOption };

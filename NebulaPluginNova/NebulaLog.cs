@@ -65,14 +65,67 @@ public class NebulaLog
         static public LogCategory Document = new("Documentation");
         static public LogCategory Preset = new("Preset");
         static public LogCategory Scripting = new("Scripting");
+        static public LogCategory Role = new("Role");
+        static public LogCategory System = new("System");
     }
 
-    public void Print(LogCategory? category,string message)
+    public class LogLevel
+    {
+        public string? Level;
+        public int LevelMask;
+        public LogLevel(string? level, int mask)
+        {
+            this.Level = level;
+            this.LevelMask = mask;
+        }
+
+        static public LogLevel Log = new("Log", 0x0001);
+        static public LogLevel Warning = new("Warning", 0x0002);
+        static public LogLevel Error = new("Error", 0x0004);
+        static public LogLevel FatalError = new("FatalError", 0x0008);
+
+        static public LogLevel AllLevel = new(null, 0xFFFF);
+
+        static public int ToMask(params LogLevel[] level)
+        {
+            int mask = 0;
+            foreach (var l in level) mask |= l.LevelMask;
+            return mask;
+        }
+    }
+
+    public void Print(string message) => Print(LogLevel.Log, null, message);
+    public void Print(LogCategory category, string message) => Print(LogLevel.Log, category, message);
+    public void Print(LogLevel level, string message) => Print(level, null, message);
+    public void PrintWithBepInEx(LogLevel level, LogCategory? category, string message)
+    {
+        Print(level, category, message);
+        string rawMessage = "[NoS]" + ToRawMessage(level, category, message);
+        if (level == LogLevel.Log)
+            Debug.Log(rawMessage);
+        else if (level == LogLevel.Warning)
+            Debug.LogWarning(rawMessage);
+        else
+            Debug.LogError(rawMessage);
+    }
+
+    public void Print(LogLevel level, LogCategory? category, string message)
     {
         message = message.Replace("\n", "\n    ");
+        string header = (category?.Category ?? "Generic");
+        if (level.Level != null) header = level.Level + " | " + header;
+
         lock (writer)
         {
-            writer.WriteLine("[" + (category?.Category ?? "Generic") + "] " + message);
+            writer.WriteLine("[" + header + "] " + message);
         }
+    }
+
+    string ToRawMessage(LogLevel level, LogCategory? category, string message)
+    {
+        message = message.Replace("\n", "\n    ");
+        string header = (category?.Category ?? "Generic");
+        if (level.Level != null) header = level.Level + " | " + header;
+        return "[" + header + "]" + message;
     }
 }

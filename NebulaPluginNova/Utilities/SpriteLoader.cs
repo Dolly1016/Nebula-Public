@@ -26,6 +26,7 @@ public interface ISpriteLoader : Image
 public interface IDividedSpriteLoader
 {
     Sprite GetSprite(int index);
+    ISpriteLoader AsLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
     int Length { get; }
 }
 

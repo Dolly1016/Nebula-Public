@@ -345,7 +345,7 @@ public class Trapper : ConfigurableStandardRole
 
     }
 
-    static private RemoteProcess<int> RpcTrapKill = RemotePrimitiveProcess.OfInteger(
+    static private RemoteProcess<int> RpcTrapKill = new(
         "UseKillTrap",
         (message, _) =>
         {

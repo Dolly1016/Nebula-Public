@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AmongUs.GameOptions;
-using BepInEx.Unity.IL2CPP.Utils;
-using Epic.OnlineServices.Presence;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Il2CppSystem.Reflection;
-using MS.Internal.Xml.XPath;
+﻿using BepInEx.Unity.IL2CPP.Utils;
+using Nebula.Behaviour;
 using Nebula.Events;
-using Nebula.Modules;
-using Nebula.Utilities;
-using UnityEngine.Networking.PlayerConnection;
 using Virial.Events.Player;
 using Virial.Text;
 
@@ -142,6 +130,7 @@ public static class PlayerExtension
 
 
            var targetInfo = target.GetModInfo();
+
            var killerInfo = killer?.GetModInfo();
 
            if (targetInfo != null)
@@ -149,13 +138,20 @@ public static class PlayerExtension
                targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
                targetInfo.MyKiller = killerInfo;
                targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
+               
+               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.MyState!.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.MyState!.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
+
                targetInfo.MyControl.Data.IsDead = true;
-               targetInfo.AssignableAction(role =>
+
+               //Entityイベント発火
+               GameEntityManager.Instance?.GetPlayerEntities(message.targetId).Do(e =>
                {
-                   role.OnMurdered(killer!);
-                   role.OnDead();
+                   if (killerInfo != null) e.OnMurdered(killerInfo);
+                   e.OnDead();
                });
 
+               //APIイベント発火
                if (killerInfo != null) EventManager.HandleEvent(new PlayerMurderEvent(targetInfo, killerInfo));
                else EventManager.HandleEvent(new PlayerDeadEvent(targetInfo));
 
@@ -164,16 +160,21 @@ public static class PlayerExtension
                    new StaticAchievementToken("firstKill");
 
            }
-           if (killerInfo != null) killerInfo.AssignableAction(r => r.OnKillPlayer(target));
 
-           PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r => {
-               r.OnAnyoneDeadLocal(target);
-               if (killer != null) r.OnAnyoneMurderedLocal(target, killer);
-           });
+           //Entityイベント発火
+           if (targetInfo != null)
+           {
+               GameEntityManager.Instance?.GetPlayerEntities(message.killerId).Do(e => e.OnKillPlayer(targetInfo));
+               GameEntityManager.Instance?.AllEntities.Do(e =>
+               {
+                   if (killerInfo != null) e.OnPlayerMurdered(targetInfo, killerInfo);
+                   e.OnPlayerDead(targetInfo);
+               });
+           }
        }
        );
 
-    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, bool showOverlay)> RpcMeetingKill = new(
+    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, bool showOverlay, bool playSE)> RpcMeetingKill = new(
         "NonPhysicalKill",
        (message, _) =>
        {
@@ -186,14 +187,14 @@ public static class PlayerExtension
 
            if (target == null) return;
 
-           if (!target.AmOwner) if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(target.KillSfx, false, 0.8f, null);
+           if (!target.AmOwner && message.playSE && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(target.KillSfx, false, 0.8f, null);
 
            target.Die(DeathReason.Exile, false);
 
            if (target.AmOwner)
            {
-               DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
-               NebulaGameManager.Instance!.CanSeeAllInfo = true;
+               if(message.showOverlay) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
+               NebulaGameManager.Instance!.ChangeToSpectator();
            }
 
 
@@ -209,23 +210,28 @@ public static class PlayerExtension
                targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
                targetInfo.MyKiller = killerInfo;
                targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
-               targetInfo.AssignableAction(role =>
+               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.MyState!.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.MyState!.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
+
+               //Entityイベント発火
+               GameEntityManager.Instance?.GetPlayerEntities(message.targetId).Do(e =>
                {
-                   role.OnMurdered(killer!);
-                   role.OnDead();
+                   if (killerInfo != null) e.OnMurdered(killerInfo);
+                   e.OnDead();
                });
 
+               //APIイベント
                if (killerInfo != null) EventManager.HandleEvent(new PlayerMurderEvent(targetInfo, killerInfo));
                EventManager.HandleEvent(new PlayerDeadEvent(targetInfo));
 
-           }
-           if (killerInfo != null) killerInfo.AssignableAction(r => r.OnKillPlayer(target));
+               if (killerInfo != null) killerInfo.RelatedEntities()?.Do(e => e.OnKillPlayer(targetInfo));
 
-           PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r =>
-           {
-               r.OnAnyoneDeadLocal(target);
-               if (killer != null) r.OnAnyoneMurderedLocal(target, killer);
-           });
+               //Entityイベント発火
+               GameEntityManager.Instance?.AllEntities.Do(e => {
+                   if (killerInfo != null) e.OnPlayerMurdered(targetInfo, killerInfo);
+                   e.OnPlayerDead(targetInfo);
+               });
+           }
 
            if (MeetingHud.Instance)
            {
@@ -233,8 +239,8 @@ public static class PlayerExtension
                {
                    for(int i = 0; i < 10; i++)
                    {
-                       MeetingHud.Instance!.discussionTimer -= 1f;
-                       MeetingHud.Instance!.lastSecond = 10;
+                       MeetingHudExtension.VotingTimer += 1f;
+                       MeetingHud.Instance!.lastSecond = 11;
                        yield return new WaitForSeconds(0.1f);
                    }
                }
@@ -250,11 +256,11 @@ public static class PlayerExtension
 
     static public KillResult ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay)
     {
-        var isMeetingKill = MeetingHud.Instance;
+        bool isMeetingKill = MeetingHud.Instance;
         if (CheckKill(null, target, playerState, recordState, isMeetingKill, out var result))
         {
             if (MeetingHud.Instance)
-                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay));
+                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay, true));
             else
                 RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
         }
@@ -291,10 +297,10 @@ public static class PlayerExtension
         return result;
     }
 
-    static public KillResult ModMeetingKill(this PlayerControl killer, PlayerControl target, bool showOverlay, CommunicableTextTag playerState, CommunicableTextTag? recordState)
+    static public KillResult ModMeetingKill(this PlayerControl killer, PlayerControl target, bool showOverlay, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool playSE = true)
     {
         if (CheckKill(killer, target, playerState, recordState, true, out var result))
-            RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay));
+            RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay,playSE));
         return result;
     }
 
@@ -340,7 +346,7 @@ public static class PlayerExtension
         (message, _) =>
         {
             var killer = NebulaGameManager.Instance?.GetModPlayerInfo(message.killerId)!;
-            NebulaGameManager.Instance?.GetModPlayerInfo(message.targetId)?.AssignableAction(a=>a.OnGuard(killer!));
+            NebulaGameManager.Instance?.GetModPlayerInfo(message.targetId)?.RelatedEntities()?.Do(e=>e.OnGuard(killer!));
 
             if (message.killerId == PlayerControl.LocalPlayer.PlayerId || (message.targetCanSeeGuard && message.targetId == PlayerControl.LocalPlayer.PlayerId))
             {
@@ -358,5 +364,15 @@ public static class PlayerExtension
     static public void ModRevive(this PlayerControl player, PlayerControl healer, Vector2 pos, bool cleanDeadBody)
     {
         RpcRivive.Invoke((healer.PlayerId, player.PlayerId, pos, cleanDeadBody, true));
+    }
+
+    static public ModTitleShower GetTitleShower(this PlayerControl player)
+    {
+        if (player.TryGetComponent<ModTitleShower>(out var result))
+            return result;
+        else
+        {
+            return player.gameObject.AddComponent<ModTitleShower>();
+        }
     }
 }

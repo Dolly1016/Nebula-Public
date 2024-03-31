@@ -11,7 +11,7 @@ using static Il2CppMono.Security.X509.X520;
 namespace Nebula.Roles;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-public class NebulaRoleHoler : Attribute
+public class NebulaRoleHolder : Attribute
 {
 
 }

@@ -113,7 +113,7 @@ public class HudContent : MonoBehaviour
     public Vector2 CurrentPos { get; set; }
 
     //Priorityの大きいものから配置される
-    public int Priority { get => OccupiesLine ? 20000 : onKillButtonPos ? 10000 : priority; }
+    public int Priority { get => Math.Max(0, (OccupiesLine ? 20000 : onKillButtonPos ? 10000 : 0) + priority); }
     private int priority;
     private bool onKillButtonPos;
     private bool isLeftSide;
@@ -127,10 +127,10 @@ public class HudContent : MonoBehaviour
     {
         onKillButtonPos = mark;
     }
-    public void SetPriority(int priority)
+    public HudContent SetPriority(int priority)
     {
         this.priority = priority;
-        if (this.priority < 0) this.priority = 0;
+        return this;
     }
     public void SetSide(bool asLeftSide)
     {

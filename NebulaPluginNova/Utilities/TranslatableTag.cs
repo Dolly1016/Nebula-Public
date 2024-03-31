@@ -8,7 +8,7 @@ using Virial.Text;
 
 namespace Nebula.Utilities;
 
-[NebulaPreLoad(NebulaPreLoad.FinalizerType.LoadOnly)]
+[NebulaPreLoad(true)]
 public class TranslatableTag : CommunicableTextTag
 {
     static public List<TranslatableTag> AllTag = new();

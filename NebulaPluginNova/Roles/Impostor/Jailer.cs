@@ -1,11 +1,13 @@
 ﻿using Nebula.Behaviour;
 using Nebula.Configuration;
+using Nebula.Roles.Abilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
@@ -20,20 +22,24 @@ public class Jailer : ConfigurableStandardRole
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration CanMoveWithMapWatchingOption = null!;
-    private NebulaConfiguration CanIdentifyDeadBodiesOption = null!;
-    private NebulaConfiguration CanIdentifyImpostorsOption = null!;
+    public NebulaConfiguration CanMoveWithMapWatchingOption = null!;
+    public NebulaConfiguration CanIdentifyDeadBodiesOption = null!;
+    public NebulaConfiguration CanIdentifyImpostorsOption = null!;
+    public NebulaConfiguration InheritAbilityOnDyingOption = null!;
 
     protected override void LoadOptions()
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
+
         CanMoveWithMapWatchingOption = new NebulaConfiguration(RoleConfig, "canMoveWithMapWatching", null, false, false);
         CanIdentifyDeadBodiesOption = new NebulaConfiguration(RoleConfig, "canIdentifyDeadBodies", null, false, false);
         CanIdentifyImpostorsOption = new NebulaConfiguration(RoleConfig, "canIdentifyImpostors", null, false, false);
+        InheritAbilityOnDyingOption = new NebulaConfiguration(RoleConfig, "inheritAbilityOnDying", null, false, false);
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
         public Instance(PlayerModInfo player) : base(player)
@@ -43,22 +49,15 @@ public class Jailer : ConfigurableStandardRole
         AchievementToken<bool>? acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
 
-        public override void OnOpenSabotageMap()
+        void IGameEntity.OnOpenSabotageMap()
         {
-            MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
-            MapBehaviour.Instance.countOverlay.SetModOption(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, false, Palette.ImpostorRed);
-            MapBehaviour.Instance.countOverlay.SetOptions(true, true);
-            ConsoleTimer.MarkAsNonConsoleMinigame();
-
-            MapBehaviour.Instance.taskOverlay.Hide();
-
-            MapBehaviour.Instance.countOverlayAllowsMovement = MyRole.CanMoveWithMapWatchingOption;
-            if (!MapBehaviour.Instance.countOverlayAllowsMovement) PlayerControl.LocalPlayer.NetTransform.Halt();
-
-            acTokenCommon ??= new("jailer.common1", false, (val, _) => val);
+            if (AmOwner)
+            {
+                acTokenCommon ??= new("jailer.common1", false, (val, _) => val);
+            }
         }
 
-        public override void OnKillPlayer(PlayerControl target)
+        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
         {
             if (AmOwner)
             {
@@ -86,14 +85,6 @@ public class Jailer : ConfigurableStandardRole
                     }
                 }
             }
-
-        }
-        protected override void OnInactivated()
-        {
-            if (AmOwner)
-            {
-                if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
-            }
         }
 
         public override void OnActivated()
@@ -102,128 +93,26 @@ public class Jailer : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
-
-                acTokenChallenge = new("jailer.challenge", 0, (val, _) => val >= 2);
+                //JailerAbilityを獲得していなければ登録
+                if (GameEntityManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false)
+                {
+                    new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
+                }
             }
         }
 
-        public override void OnMapInstantiated()
+        void IGamePlayerEntity.OnDead()
         {
-            Transform roomNames;
-            if (AmongUsUtil.CurrentMapId == 0) roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames (1)");
-            else roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames");
+            var localPlayer = Virial.NebulaAPI.CurrentGame?.LocalPlayer;
 
-            OptimizeMap(roomNames, MapBehaviour.Instance.countOverlay, MapBehaviour.Instance.infectedOverlay);
+            if (localPlayer == null) return;
+
+            //継承ジェイラーの対象で、JailerAbilityを獲得していなければ登録
+            if (!localPlayer.IsDead && localPlayer.IsImpostor && (GameEntityManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
+            {
+                new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
+            }
+
         }
-
-    }
-
-    public static void OptimizeMap(Transform roomNames, MapCountOverlay countOverlay, InfectedOverlay infectedOverlay)
-    {
-        for (int i = 0; i < infectedOverlay.transform.childCount; i++) infectedOverlay.transform.GetChild(i).transform.localScale *= 0.8f;
-        foreach (var c in countOverlay.CountAreas) c.YOffset *= -1f;
-
-        switch (AmongUsUtil.CurrentMapId)
-        {
-            case 0:
-                OptimizeMapSkeld(roomNames, countOverlay, infectedOverlay);
-                break;
-            case 1:
-                OptimizeMapMira(roomNames, countOverlay, infectedOverlay);
-                break;
-            case 2:
-                OptimizeMapPolus(roomNames, countOverlay, infectedOverlay);
-                break;
-            case 4:
-                OptimizeMapAirship(roomNames, countOverlay, infectedOverlay);
-                break;
-        }
-    }
-
-    private static void OptimizeMapSkeld(Transform roomNames, MapCountOverlay countOverlay, InfectedOverlay infectedOverlay)
-    {
-        roomNames.GetChild(13).localPosition += new Vector3(0f, 0.1f, 0f);
-
-        infectedOverlay.transform.GetChild(4).localPosition += new Vector3(0.07f, 0.2f, 0f);
-
-        countOverlay.transform.GetChild(0).localPosition += new Vector3(0f, -0.75f, 0f);
-        countOverlay.transform.GetChild(1).localPosition += new Vector3(0f, -0.75f, 0f);
-        countOverlay.transform.GetChild(2).localPosition += new Vector3(0f, -0.75f, 0f);
-        countOverlay.transform.GetChild(3).localPosition += new Vector3(0f, -0.75f, 0f);
-        countOverlay.transform.GetChild(4).localPosition += new Vector3(0f, -0.75f, 0f);
-        countOverlay.transform.GetChild(5).localPosition += new Vector3(0f, -0.75f, 0f);
-        countOverlay.transform.GetChild(9).localPosition += new Vector3(0f, -0.55f, 0f);
-        countOverlay.transform.GetChild(10).localPosition += new Vector3(0f, -0.75f, 0f);
-        countOverlay.transform.GetChild(12).localPosition += new Vector3(0f, -0.75f, 0f);
-        countOverlay.transform.GetChild(13).localPosition += new Vector3(0f, -0.42f, 0f);
-    }
-
-    private static void OptimizeMapMira(Transform roomNames, MapCountOverlay countOverlay, InfectedOverlay infectedOverlay)
-    {
-        roomNames.GetChild(2).localPosition += new Vector3(0f, 0.15f, 0f);
-        roomNames.GetChild(7).localPosition += new Vector3(0f, 0.15f, 0f);
-
-        infectedOverlay.transform.GetChild(0).localPosition += new Vector3(0f, 0.24f, 0f);
-        infectedOverlay.transform.GetChild(1).localPosition += new Vector3(0.45f, 0.5f, 0f);
-        infectedOverlay.transform.GetChild(2).localPosition += new Vector3(-0.1f, 0.43f, 0f);
-        infectedOverlay.transform.GetChild(3).localPosition += new Vector3(0.6f, 0.25f, 0f);
-
-        countOverlay.transform.GetChild(3).localPosition += new Vector3(0f, -0.2f, 0f);
-        countOverlay.transform.GetChild(5).localPosition += new Vector3(0f, -0.6f, 0f);
-        countOverlay.transform.GetChild(9).localPosition += new Vector3(0f, -0.45f, 0f);
-        countOverlay.transform.GetChild(10).localPosition += new Vector3(0.05f, -0.3f, 0f);
-    }
-
-    private static void OptimizeMapPolus(Transform romeNames, MapCountOverlay countOverlay, InfectedOverlay infectedOverlay)
-    {
-        romeNames.GetChild(1).localPosition += new Vector3(0f, 0.35f, 0f);
-        romeNames.GetChild(3).localPosition += new Vector3(0f, 0.35f, 0f);
-        romeNames.GetChild(7).localPosition += new Vector3(0f, 0.35f, 0f);
-
-        infectedOverlay.transform.GetChild(0).localPosition += new Vector3(0f, 0.4f, 0f);
-        infectedOverlay.transform.GetChild(1).localPosition += new Vector3(-1f, 0.4f, 0f);
-        infectedOverlay.transform.GetChild(3).localPosition += new Vector3(0.6f, 0.3f, 0f);
-        infectedOverlay.transform.GetChild(4).localPosition += new Vector3(-0.5f, 0.3f, 0f);
-        infectedOverlay.transform.GetChild(5).localPosition += new Vector3(0f, 0.28f, 0f);
-        infectedOverlay.transform.GetChild(6).localPosition += new Vector3(0f, 0.4f, 0f);
-
-        countOverlay.transform.GetChild(0).localPosition += new Vector3(0f, 0.1f, 0f);
-        countOverlay.transform.GetChild(1).localPosition += new Vector3(0.55f, -0.9f, 0f);
-        countOverlay.transform.GetChild(2).localPosition += new Vector3(0f, -0.1f, 0f);
-        countOverlay.transform.GetChild(3).localPosition += new Vector3(0f, -0.2f, 0f);
-        countOverlay.transform.GetChild(4).localPosition += new Vector3(0.0f, 0f, 0f);
-        countOverlay.transform.GetChild(5).localPosition += new Vector3(0.0f, -0.15f, 0f);
-        countOverlay.transform.GetChild(6).localPosition += new Vector3(0.0f, -0.15f, 0f);
-        countOverlay.transform.GetChild(7).localPosition += new Vector3(0.0f, 0f, 0f);
-        countOverlay.transform.GetChild(8).localPosition += new Vector3(0.0f, -0.15f, 0f);
-        countOverlay.transform.GetChild(9).localPosition += new Vector3(0f, 0.1f, 0f);
-        countOverlay.transform.GetChild(10).localPosition += new Vector3(0f, -0.1f, 0f);
-    }
-
-    private static void OptimizeMapAirship(Transform romeNames, MapCountOverlay countOverlay, InfectedOverlay infectedOverlay)
-    {
-        romeNames.GetChild(0).localPosition += new Vector3(0f, 0.2f, 0f);
-        romeNames.GetChild(2).localPosition += new Vector3(0f, 0.2f, 0f);
-        romeNames.GetChild(3).localPosition += new Vector3(0f, 0.25f, 0f);
-        romeNames.GetChild(8).localPosition += new Vector3(0f, 0.3f, 0f);
-        romeNames.GetChild(11).localPosition += new Vector3(0f, 0.1f, 0f);
-        romeNames.GetChild(15).localPosition += new Vector3(0f, 0.1f, 0f);
-
-        infectedOverlay.transform.GetChild(0).localPosition += new Vector3(0f, -0.15f, 0f);
-        infectedOverlay.transform.GetChild(1).localPosition += new Vector3(-0.12f, 0.35f, 0f);
-        infectedOverlay.transform.GetChild(2).localPosition += new Vector3(0f, 0.15f, 0f);
-        infectedOverlay.transform.GetChild(3).localPosition += new Vector3(0f, 0.15f, 0f);
-        infectedOverlay.transform.GetChild(4).localPosition += new Vector3(0.02f, 0.3f, 0f);
-        infectedOverlay.transform.GetChild(5).localPosition += new Vector3(0.06f, 0.12f, 0f);
-        infectedOverlay.transform.GetChild(6).localPosition += new Vector3(0f, 0.35f, 0f);
-        infectedOverlay.transform.GetChild(7).localPosition += new Vector3(0f, 0.25f, 0f);
-
-        countOverlay.transform.GetChild(2).localPosition += new Vector3(-0.2f, -0.4f, 0f);
-        countOverlay.transform.GetChild(3).localPosition += new Vector3(0.05f, -0.2f, 0f);
-        countOverlay.transform.GetChild(5).localPosition += new Vector3(0.06f, -0.25f, 0f);
-        countOverlay.transform.GetChild(6).localPosition += new Vector3(0f, -0.28f, 0f);
-        countOverlay.transform.GetChild(16).localPosition += new Vector3(0.15f, -0.3f, 0f);
-        countOverlay.transform.GetChild(17).localPosition += new Vector3(-0.1f, -0.5f, 0f);
     }
 }

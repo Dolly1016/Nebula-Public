@@ -29,6 +29,8 @@ public class Stirrer : ConfigurableStandardRole
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagFunny);
+
         StirCoolDownOption = new NebulaConfiguration(RoleConfig, "stirCoolDown", null, 0f, 60f, 5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
         SabotageChargeOption = new NebulaConfiguration(RoleConfig, "sabotageCharge", null, 1, 10, 3, 3);
         SabotageMaxChargeOption = new NebulaConfiguration(RoleConfig, "sabotageMaxCharge", null, 1, 20, 5, 5);

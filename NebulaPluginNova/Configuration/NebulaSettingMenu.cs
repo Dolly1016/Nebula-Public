@@ -128,6 +128,8 @@ public class NebulaSettingMenu : MonoBehaviour
             Alignment = TMPro.TextAlignmentOptions.BottomRight
         };
 
+        widget.Append(new MetaWidgetOld.VerticalMargin(0.12f));
+
         foreach (var holder in ConfigurationHolder.AllHolders)
         {
             var copiedHolder = holder;
@@ -139,6 +141,8 @@ public class NebulaSettingMenu : MonoBehaviour
                 RawText = holder.Title.GetString(),
                 PostBuilder = (button, renderer, text) => { 
                     renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                    renderer.sortingOrder = 10;
+
                     text.transform.localPosition += new Vector3(0.03f, -0.03f, 0f);
 
                     var subTxt = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, renderer.transform);
@@ -146,6 +150,25 @@ public class NebulaSettingMenu : MonoBehaviour
                     subTxt.text = Language.Translate(holder.Id + ".detail");
                     subTxt.transform.localPosition = new Vector3(0f, -0.15f, -0.5f);
                     subTxt.sortingOrder = 30;
+
+                    int tagCount = 0;
+                    foreach(var tag in holder.Tags)
+                    {
+                        var tagRenderer = UnityHelper.CreateObject<SpriteRenderer>("Tag", renderer.transform, new(-1.62f + tagCount * 0.25f, 0.4f, -1f));
+                        tagRenderer.transform.localScale = new(0.7f, 0.7f, 1f);
+                        tagRenderer.sprite = tag.Image.GetSprite();
+                        tagRenderer.sortingOrder = 15;
+                        tagRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+
+                        var tagButton = tagRenderer.gameObject.SetUpButton();
+                        tagButton.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(tagButton));
+                        tagButton.OnMouseOver.AddListener(() => { VanillaAsset.PlayHoverSE(); NebulaManager.Instance.SetHelpWidget(tagButton, tag.Overlay.Invoke()); });
+                        var collider = tagButton.gameObject.AddComponent<BoxCollider2D>();
+                        collider.isTrigger = true;
+                        collider.size = new(0.27f, 0.27f);
+
+                        tagCount++;
+                    }
 
                     button.OnMouseOver.AddListener(() =>
                     {

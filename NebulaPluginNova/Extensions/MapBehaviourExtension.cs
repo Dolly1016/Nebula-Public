@@ -12,20 +12,23 @@ public static class MapBehaviourExtension
     public static bool CanIdentifyImpostors = false;
     public static bool CanIdentifyDeadBodies = false;
     public static bool AffectedByCommSab = true;
+    public static bool AffectedByFakeAdmin = true;
     public static Color? MapColor = null;
     public static void InitializeModOption(this MapCountOverlay overlay)
     {
         CanIdentifyImpostors = false;
         CanIdentifyDeadBodies = false;
         AffectedByCommSab = true;
+        AffectedByFakeAdmin = true;
         MapColor = null;
     }
 
-    public static void SetModOption(this MapCountOverlay overlay, bool? canIdentifyImpostors = null, bool? canIdentifyDeadBodies = null, bool? affectedByCommSab = null, Color? mapColor = null, bool? isOpenedByMapConsole = null)
+    public static void SetModOption(this MapCountOverlay overlay, bool? canIdentifyImpostors = null, bool? canIdentifyDeadBodies = null, bool? affectedByCommSab = null, bool? affectedByFakeAdmin = null, Color ? mapColor = null)
     {
         if (canIdentifyImpostors.HasValue) CanIdentifyImpostors = canIdentifyImpostors.Value;
         if (canIdentifyDeadBodies.HasValue) CanIdentifyDeadBodies = canIdentifyDeadBodies.Value;
         if (affectedByCommSab.HasValue) AffectedByCommSab = affectedByCommSab.Value;
+        if (affectedByFakeAdmin.HasValue) AffectedByFakeAdmin = affectedByFakeAdmin.Value;
         if (mapColor.HasValue)
         {
             MapColor = mapColor.Value;

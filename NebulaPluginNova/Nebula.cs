@@ -12,8 +12,10 @@ global using System.Collections;
 global using HarmonyLib;
 global using Timer = Nebula.Modules.ScriptComponents.Timer;
 global using Color = UnityEngine.Color;
-global using GUIContext = Virial.Media.GUIContext;
-global using GUI = Nebula.Modules.MetaContext.NebulaGUIContextEngine;
+global using GUIWidget = Virial.Media.GUIWidget;
+global using GUI = Nebula.Modules.MetaWidget.NebulaGUIWidgetEngine;
+global using Image = Virial.Media.Image;
+global using GamePlayer = Virial.Game.Player;
 
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
@@ -22,6 +24,8 @@ using UnityEngine.SceneManagement;
 using System.Reflection;
 using Cpp2IL.Core.Extensions;
 using Virial;
+using Unity.IO.LowLevel.Unsafe;
+using LibCpp2IL.PE;
 
 namespace Nebula;
 
@@ -59,15 +63,16 @@ public class NebulaPlugin : BasePlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.1.1";
+    public const string PluginVersion = "2.2.3.1";
 
-    //public const string VisualVersion = "v2.1.1";
-    public const string VisualVersion = "Snapshot 23.12.30a";
-    //public const string VisualVersion = "Mayor Debug";
+    //public const string VisualVersion = "v2.3";
+    public const string VisualVersion = "Snapshot 24.03.29a";
+    //public const string VisualVersion = "RPC Debug 2";
 
-    public const int PluginEpoch = 102;
-    public const int PluginBuildNum = 1062;
-    
+    public const int PluginEpoch = 103;
+    public const int PluginBuildNum = 1097;
+    public const bool GuardVanillaLangData = true;
+
     static public HttpClient HttpClient
     {
         get
@@ -114,36 +119,81 @@ public class NebulaPlugin : BasePlugin
             LastException ??= (exception,type);
         }
 
+        Patches.LoadPatch.LoadingText = "Checking Component Dependencies";
+        yield return null;
+
         var types = Assembly.GetAssembly(typeof(RemoteProcessBase))?.GetTypes().Where((type) => type.IsDefined(typeof(NebulaPreLoad)));
         if (types != null)
         {
-            List<Type> PostLoad = new();
-            HashSet<Type> Loaded = new();
+            Dictionary<Type, (int leftPreLoad, HashSet<Type> postLoad, bool isFinalizer)> dependencyMap = new();
 
-            IEnumerator Preload(Type type, bool isFinalize)
-            {
-                if (Loaded.Contains(type)) yield break;
+            foreach (var type in types) dependencyMap[type] = (0, new(), type.GetCustomAttribute<NebulaPreLoad>()!.IsFinalizer);
 
-                if (type.IsDefined(typeof(NebulaPreLoad)))
+            //有向グラフを作る
+            foreach (var type in types) {
+                var myAttr = type.GetCustomAttribute<NebulaPreLoad>()!;
+                dependencyMap.TryGetValue(type, out var myInfo);
+
+                foreach (var pre in myAttr.PreLoadTypes)
                 {
-                    var myPreType = type.GetCustomAttribute<NebulaPreLoad>()!;
-                    var preTypes = myPreType.PreLoadType;
-                    foreach (var pretype in preTypes) yield return Preload(pretype, isFinalize);
-                    if (!isFinalize && myPreType.MyFinalizerType != NebulaPreLoad.FinalizerType.NotFinalizer)
+                    if (dependencyMap.TryGetValue(pre, out var preInfo))
                     {
-                        if (myPreType.MyFinalizerType == NebulaPreLoad.FinalizerType.LoadOnly)
-                        {
-                            UnityEngine.Debug.Log("Preload (static constructor) " + type.Name);
-                            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-                        }
-
-                        PostLoad.Add(type);
-                        yield break;
+                        //NebulaPreLoadの対象の場合は順番を考慮する
+                        if (preInfo.postLoad.Add(type)) myInfo.leftPreLoad++;
+                    }
+                    else
+                    {
+                        //NebulaPreLoadの対象でない場合はそのまま読み込む
+                        System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(pre.TypeHandle);
                     }
                 }
 
-                UnityEngine.Debug.Log("Preload " + type.Name);
+                foreach(var post in myAttr.PostLoadTypes)
+                {
+                    if (dependencyMap.TryGetValue(post, out var postInfo))
+                    {
+                        //NebulaPreLoadの対象の場合は順番を考慮する
+                        if (myInfo.postLoad.Add(type)) postInfo.leftPreLoad++;
+                    }
+                    //NebulaPreLoadの対象でない場合はなにもしない
+                }
+            }
 
+            Queue<Type> waitingList = new(dependencyMap.Where(tuple => tuple.Value.leftPreLoad == 0 && !tuple.Value.isFinalizer).Select(t => t.Key));
+            Queue<Type> waitingFinalizerList = new(dependencyMap.Where(tuple => tuple.Value.leftPreLoad == 0 && tuple.Value.isFinalizer).Select(t => t.Key));
+
+            //読み込み順リスト
+            List<Type> loadList = new();
+
+            while (waitingList.Count > 0 || waitingFinalizerList.Count > 0)
+            {
+                var type = (waitingList.Count > 0 ? waitingList : waitingFinalizerList).Dequeue();
+
+                loadList.Add(type);
+                foreach(var post in dependencyMap[type].postLoad)
+                {
+                    if(dependencyMap.TryGetValue(post, out var postInfo))
+                    {
+                        postInfo.leftPreLoad--;
+                        if (postInfo.leftPreLoad == 0) (postInfo.isFinalizer ? waitingFinalizerList : waitingList).Enqueue(post);
+                    }
+                }
+            }
+
+            //解決状況を出力
+            var stringList = loadList.Join(t => "  -" + t.FullName, "\n");
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, "Dependencies resolved sequentially.\n" + stringList);
+
+            if(loadList.Count < dependencyMap.Count)
+            {
+                var errorStringList = dependencyMap.Where(d => d.Value.leftPreLoad > 0).Join(t => "  -" + t.Key.FullName, "\n");
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Components that could not be resolved.\n" + errorStringList);
+
+                throw new Exception("Failed to resolve dependencies.");
+            }
+
+            IEnumerator Preload(Type type)
+            {
                 System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 
                 var loadMethod = type.GetMethod("Load");
@@ -152,12 +202,11 @@ public class NebulaPlugin : BasePlugin
                     try
                     {
                         loadMethod.Invoke(null, null);
-                        UnityEngine.Debug.Log("Preloaded type " + type.Name + " has Load()");
                     }
                     catch(Exception e)
                     {
                         OnRaisedExcep(e,type);
-                        //UnityEngine.Debug.Log("Preloaded type " + type.Name + " has Load with unregulated parameters.");
+                        NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "Preloaded type " + type.Name + " has Load with unregulated parameters.");
                     }
                 }
 
@@ -168,21 +217,17 @@ public class NebulaPlugin : BasePlugin
                     try
                     {
                         coload = (IEnumerator)coloadMethod.Invoke(null, null)!;
-                        UnityEngine.Debug.Log("Preloaded type " + type.Name + " has CoLoad");
                     }
                     catch (Exception e)
                     {
                         OnRaisedExcep(e, type);
-                        //UnityEngine.Debug.Log("Preloaded type " + type.Name + " has CoLoad with unregulated parameters.");
+                        NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "Preloaded type " + type.Name + " has CoLoad with unregulated parameters.");
                     }
                     if (coload != null) yield return coload.HandleException((e)=>OnRaisedExcep(e,type));
                 }
-
-                Loaded.Add(type);
             }
 
-            foreach (var type in types) yield return Preload(type, false);
-            foreach (var type in PostLoad) yield return Preload(type, true);
+            foreach (var type in loadList) yield return Preload(type);
         }
         FinishedPreload = true;
     }
@@ -232,31 +277,17 @@ public static class AmongUsClientAwakePatch
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public class NebulaPreLoad : Attribute
 {
-    public Type[] PreLoadType { get; private set; }
-    public FinalizerType MyFinalizerType { get; private set; }
-    public NebulaPreLoad(params Type[] preLoadType)
-    {
-        PreLoadType = preLoadType;
-        MyFinalizerType = FinalizerType.NotFinalizer;
-    }
+    public Type[] PreLoadTypes { get; private set; }
+    public Type[] PostLoadTypes { get; private set; }
+    public bool IsFinalizer { get; private set; }
+    public NebulaPreLoad(params Type[] preLoadType) : this(false, preLoadType, []) { }
+    public NebulaPreLoad(bool isFinalizer, params Type[] preLoadType) :this(isFinalizer, preLoadType, []){ }
 
-    public NebulaPreLoad(bool isFinalizer, params Type[] preLoadType)
+    public NebulaPreLoad(bool isFinalizer, Type[] preLoad, Type[] postLoad)
     {
-        PreLoadType = preLoadType;
-        MyFinalizerType = isFinalizer ? FinalizerType.StaticConstAndLoad : FinalizerType.NotFinalizer;
-    }
-
-    public enum FinalizerType
-    {
-        LoadOnly,
-        StaticConstAndLoad,
-        NotFinalizer
-    }
-
-    public NebulaPreLoad(FinalizerType finalizerType, params Type[] preLoadType)
-    {
-        PreLoadType = preLoadType;
-        MyFinalizerType = finalizerType;
+        PreLoadTypes = preLoad ?? [];
+        PostLoadTypes = postLoad ?? [];
+        IsFinalizer = isFinalizer;
     }
 
     static public bool FinishedLoading => NebulaPlugin.FinishedPreload;

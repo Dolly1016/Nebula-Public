@@ -1,9 +1,11 @@
 ﻿using Nebula.Behaviour;
+using Rewired.Utils.Platforms.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Game;
 
 namespace Nebula.Patches;
 
@@ -69,7 +71,12 @@ public static class CountOverlayUpdatePatch
             return false;
         }
 
-        HashSet<int> hashSet = new HashSet<int>();
+        int mask = 0;
+        bool AlreadyAdded(byte playerId) => (mask & (1 << playerId)) != 0;
+        void AddToMask(byte playerId) => mask |= (1 << playerId);
+
+        FakeAdmin admin = MapBehaviourExtension.AffectedByFakeAdmin ? FakeInformation.Instance!.CurrentAdmin : FakeInformation.AdminFromActuals;
+
         foreach (var counterArea in __instance.CountAreas)
         {
             if (ShipStatus.Instance.FastRooms.TryGetValue(counterArea.RoomType, out var plainShipRoom) && plainShipRoom.roomArea)
@@ -77,28 +84,40 @@ public static class CountOverlayUpdatePatch
                 int num = plainShipRoom.roomArea.OverlapCollider(__instance.filter, __instance.buffer);
                 int counter = 0;
                 int deadBodies = 0, impostors = 0;
-                for (int j = 0; j < num; j++)
+
+                if (MeetingHud.Instance)
                 {
-                    Collider2D collider2D = __instance.buffer[j];
-                    if (collider2D.CompareTag("DeadBody") && __instance.includeDeadBodies)
+                    //会議中のアドミン (PreMeetingPointを参照する)
+                    foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                     {
-                        DeadBody component = collider2D.GetComponent<DeadBody>();
-                        if (component != null && hashSet.Add((int)component.ParentId))
-                        {
+                        if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.PreMeetingPoint) && !AlreadyAdded(p.PlayerId)) {
+                            AddToMask(p.PlayerId);
                             counter++;
-                            if (MapBehaviourExtension.CanIdentifyDeadBodies) deadBodies++;
-                        }
-                    }
-                    else if (!collider2D.isTrigger)
-                    {
-                        PlayerControl component2 = collider2D.GetComponent<PlayerControl>();
-                        if (component2 && component2.Data != null && !component2.Data.Disconnected && !component2.Data.IsDead && (__instance.showLivePlayerPosition || !component2.AmOwner) && hashSet.Add((int)component2.PlayerId))
-                        {
-                            counter++;
-                            if (component2.Data.Role.IsImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
+                            if (p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
                         }
                     }
                 }
+                else
+                {
+                    //タスクターン中のアドミン
+                    foreach(var p in admin.Players)
+                    {
+                        if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetModPlayerInfo(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
+
+                        if (AlreadyAdded(p.playerId)) continue;
+
+                        if (plainShipRoom.roomArea.OverlapPoint(p.position))
+                        {
+                            counter++;
+
+                            if (p.isDead && MapBehaviourExtension.CanIdentifyDeadBodies) deadBodies++;
+                            if (p.isImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
+
+                            AddToMask(p.playerId);
+                        }
+                    }
+                }
+
                 counterArea.UpdateCount(counter, impostors, deadBodies);
             }
         }

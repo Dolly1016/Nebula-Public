@@ -19,10 +19,13 @@ public class Bloody : ConfigurableStandardModifier
     protected override void LoadOptions()
     {
         base.LoadOptions();
+
+        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
+
         CurseDurationOption = new NebulaConfiguration(RoleConfig, "curseDuration", null, 2.5f, 30f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
     }
     public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance
+    public class Instance : ModifierInstance, IGamePlayerEntity
     {
         public override AbstractModifier Role => MyRole;
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
@@ -35,30 +38,30 @@ public class Bloody : ConfigurableStandardModifier
             if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " †".Color(MyRole.RoleColor);
         }
 
-        public override void OnMurdered(PlayerControl murder)
+        void IGamePlayerEntity.OnMurdered(GamePlayer murder)
         {
             if (AmOwner && !murder.AmOwner)
             {
-                PlayerModInfo.RpcAttrModulator.Invoke((murder.PlayerId, new AttributeModulator(PlayerAttribute.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1)));
+                PlayerModInfo.RpcAttrModulator.Invoke((murder.PlayerId, new AttributeModulator(PlayerAttributes.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1)));
                 new StaticAchievementToken("bloody.common1");
                 acTokenChallenge = new("bloody.challenge",(false,true),(val,_)=>val.cleared);
             }
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
         {
-            base.OnMeetingEnd();
-
             if (acTokenChallenge?.Value.triggered ?? false)
                 acTokenChallenge.Value.triggered = false;
         }
 
-        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
         {
-            base.OnAnyoneExiledLocal(exiled);
+            if (AmOwner)
+            {
 
-            if (acTokenChallenge?.Value.triggered ?? false)
-                acTokenChallenge.Value.cleared = exiled.PlayerId == (MyPlayer.MyKiller?.PlayerId ?? 255);
+                if (acTokenChallenge?.Value.triggered ?? false)
+                    acTokenChallenge.Value.cleared = exiled.PlayerId == (MyPlayer.MyKiller?.PlayerId ?? 255);
+            }
         }
 
 

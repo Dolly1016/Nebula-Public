@@ -1,5 +1,6 @@
 ﻿using Nebula.Behaviour;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
@@ -24,6 +25,8 @@ public class Marionette : ConfigurableStandardRole
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagFunny, ConfigurationHolder.TagDifficult);
+
         PlaceCoolDownOption = new(RoleConfig, "placeCoolDown", null, 5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
         SwapCoolDownOption = new(RoleConfig, "swapCoolDown", null, 2.5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
         DecoyDurationOption = new(RoleConfig, "decoyDuration", null, 5f, 180f, 5f, 40f, 40f) { Decorator = NebulaConfiguration.SecDecorator };
@@ -43,18 +46,13 @@ public class Marionette : ConfigurableStandardRole
         public bool Flipped { get => MyRenderer.flipX; set => MyRenderer.flipX = value; }
         public EmptyBehaviour MyBehaviour = null!;
 
-        public override void Update()
-        {
-            
-        }
-
         public static void Load()
         {
             NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new Decoy(new Vector2(args[0], args[1]), args[2] < 0f));
         }
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? destroyButton = null;
@@ -81,7 +79,7 @@ public class Marionette : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                acTokenAnother = Achievement.GenerateSimpleTriggerToken("marionette.another1");
+                acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("marionette.another1");
                 acTokenCommon2 = new("marionette.common2", (false,-100f),(val,_) => val.cleared);
                 acTokenChallenge = new("marionette.challenge", (false,-100f),(val,_)=>val.cleared);
 
@@ -161,11 +159,7 @@ public class Marionette : ConfigurableStandardRole
                 monitorButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy != null;
                 monitorButton.OnClick = (button) =>
                 {
-                    MyPlayer.MyControl.NetTransform.Halt();
-                    if (HudManager.Instance.PlayerCam.Target == MyDecoy!.MyBehaviour)
-                        AmongUsUtil.SetCamTarget();
-                    else
-                        AmongUsUtil.SetCamTarget(MyDecoy!.MyBehaviour);
+                    AmongUsUtil.ToggleCamTarget(MyDecoy!.MyBehaviour, null);
                 };
                 monitorButton.OnSubAction = (button) =>
                 {
@@ -183,7 +177,7 @@ public class Marionette : ConfigurableStandardRole
         public override void LocalUpdate()
         {
         }
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
             if (AmOwner)
             {
@@ -194,21 +188,20 @@ public class Marionette : ConfigurableStandardRole
             }
         }
 
-        public override void OnDead()
+        void IGamePlayerEntity.OnDead()
         {
             if (acTokenAnother != null && (MyPlayer.MyState == PlayerState.Guessed || MyPlayer.MyState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
         {
-            base.OnMeetingEnd();
 
             if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
         }
 
-        public override void OnKillPlayer(PlayerControl target)
+        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
         {
-            if (acTokenChallenge != null) acTokenChallenge.Value.killTime = NebulaGameManager.Instance!.CurrentTime;
+            if (AmOwner && acTokenChallenge != null) acTokenChallenge.Value.killTime = NebulaGameManager.Instance!.CurrentTime;
         }
 
     }

@@ -1,190 +1,135 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Mono.CSharp;
 using Nebula.Behaviour;
+using Nebula.Commands.Tokens;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using Virial.Command;
+using Virial.Compat;
 
 namespace Nebula.Commands;
 
-public class ConsoleBubble
+public class CommandLogText : ICommandLogText
 {
-    public string Executed { get; private set; }
-    private Stack<string> responseStack = new();
-    private string? responseText = null;
-    public string PeekResponse() => responseStack.Peek();
-    public string PopResponse()
+    readonly static public Color InvalidColor = Color.Lerp(Color.red, Color.white, 0.4f);
+    readonly static public Color WarningColor = Color.Lerp(new(1f,0.75f,0f), Color.white, 0.4f);
+
+    public bool IsDirty{ get; set; }
+
+    string currentText;
+    string ICommandLogText.CurrentText { get => currentText.Color(logLevel switch
+            {
+                CommandLogLevel.Error => InvalidColor,
+                CommandLogLevel.Warning => InvalidColor,
+                _ => Color.white
+            });
+    }
+
+    CommandLogLevel logLevel;
+    CommandLogLevel ICommandLogText.LogLevel { get => logLevel; set { logLevel = value; IsDirty = true; } }
+
+    void ICommandLogText.UpdateText(string newText)
     {
+        currentText = newText;
         IsDirty = true;
-        return responseStack.Pop();
-    }
-    public void PushResponse(string response)
-    {
-        IsDirty = true;
-        responseStack.Push(response);
-    }
-    public void UpdateResponse(string response)
-    {
-        PopResponse();
-        PushResponse(response);
-    }
-    public bool IsDirty { get => responseText == null; set => responseText = null; }
-    
-    public string Response { get { 
-            responseText ??= responseStack.Reverse().Join(null, "\n");
-            return responseText;
-        }
     }
 
-    public ConsoleBubble(string executed)
+    public CommandLogText(CommandLogLevel level, string text)
     {
-        this.Executed = executed;
+        this.logLevel = level;
+        this.currentText = text;
+        this.IsDirty = true;
     }
 }
 
-public interface ICommandArgument
+public class NebulaCommandLogger : ICommandLogger
 {
-    string? GetString(ConsoleBubble log);
-    int? GetInteger(ConsoleBubble log);
-    IEnumerable<string> GetStringEnumerator(ConsoleBubble log) { yield break; }
-    IEnumerable<int> GetIntegerEnumerator(ConsoleBubble log) { yield break; }
+    private bool isNew = true;
+    public bool IsDirty => isNew || allTexts.Any(t => t.IsDirty);
+    public void MarkUpdated()
+    {
+        AllTexts.Do(t => t.IsDirty = false);
+        isNew = false;
+    }
 
-    //引数を評価するコルーチンを返します。評価済みの引数は各種の値を正しく取得することができます。
-    IEnumerator Evaluate(ConsoleBubble log);
+    public string ExecutedCommand { get; private init; }
+    List<ICommandLogText> allTexts = new();
+    IEnumerable<ICommandLogText> AllTexts => allTexts;
+
+    ICommandLogText ICommandLogger.Push(CommandLogLevel logLevel, string message)
+    {
+        CommandLogText text = new(logLevel, message);
+        allTexts.Add(text);
+        return text;
+    }
+
+    void ICommandLogger.Remove(ICommandLogText text)
+    {
+        allTexts.Remove(text);
+    }
+
+    string ICommandLogger.ToLogString(CommandLogLevel logLevelMask)
+    {
+        return allTexts.Where(t => (int)(t.LogLevel & logLevelMask) != 0).Join(t => t.CurrentText, "\n");
+    }
+
+    public string Executed => ExecutedCommand;
+    public NebulaCommandLogger(string executed)
+    {
+        ExecutedCommand = executed;
+    }
 }
 
-public class EmptyCommandArgument : ICommandArgument
+/// <summary>
+/// コマンドを実行するトークンです
+/// </summary>
+public class StatementCommandToken : ICommandToken
 {
-    public string? GetString(ConsoleBubble log) => null;
-    public int? GetInteger(ConsoleBubble log) => null;
-    public IEnumerable<string> GetStringEnumerator(ConsoleBubble log) { yield break; }
-    public IEnumerable<int> GetIntegerEnumerator(ConsoleBubble log) { yield break; }
-    public IEnumerator Evaluate(ConsoleBubble log) { yield break; }
-}
+    private IReadOnlyArray<ICommandToken> tokens { get; init; }
 
-public class StaticCommandArgument : ICommandArgument
-{
-    string myStr;
-
-    public string? GetString(ConsoleBubble log) => myStr;
-    public int? GetInteger(ConsoleBubble log) => int.TryParse(myStr,out int val) ? val : null;
-    public IEnumerable<string> GetStringEnumerator(ConsoleBubble log) { yield return myStr; }
-    public IEnumerable<int> GetIntegerEnumerator(ConsoleBubble log) { int? val = GetInteger(log); if (val.HasValue) yield return val.Value; }
-    public StaticCommandArgument(string text)
+    public StatementCommandToken(IReadOnlyArray<ICommandToken> arguments)
     {
-        myStr = text;
+        this.tokens = arguments;
     }
 
-    public IEnumerator Evaluate(ConsoleBubble log)
+    CoTask<ICommandToken> ICommandToken.EvaluateHere(ICommandLogger logger, ICommandExecutor executor, ICommandModifier argumentTable)
     {
-        yield break;
-    }
-}
-
-public class InnerCommandArgument : ICommandArgument
-{
-    ICommandArgument[] expr;
-    ICommandArgument? result = null;
-
-    public string? GetString(ConsoleBubble log) => result?.GetString(log);
-    public int? GetInteger(ConsoleBubble log) => result?.GetInteger(log);
-    public IEnumerable<string> GetStringEnumerator(ConsoleBubble log) => (result ?? new EmptyCommandArgument()).GetStringEnumerator(log);
-    public IEnumerable<int> GetIntegerEnumerator(ConsoleBubble log) => (result ?? new EmptyCommandArgument()).GetIntegerEnumerator(log);
-    public InnerCommandArgument(ICommandArgument[] expr)
-    {
-        this.expr = expr;
+        return CommandManager.CoExecute(tokens, argumentTable, executor, logger);
+        
     }
 
-    public IEnumerator Evaluate(ConsoleBubble log)
+    CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(ICommandLogger logger, ICommandExecutor executor, ICommandModifier argumentTable)
     {
-        if (result != null) yield break;
-        Reference<ICommandArgument> reference = new();
-        yield return CommandManager.Execute(log, expr, reference);
-        result = reference.Value;
+        var commandTask = CommandManager.CoExecute(tokens, argumentTable, executor, logger);
+        return new CoChainedTask<IEnumerable<ICommandToken>, ICommandToken>(commandTask, result => result.AsEnumerable(logger, executor, argumentTable));
+    }
+
+    CoTask<T> ICommandToken.AsValue<T>(ICommandLogger logger, ICommandExecutor executor, ICommandModifier argumentTable)
+    {
+        var commandTask = CommandManager.CoExecute(tokens, argumentTable, executor, logger);
+        return new CoChainedTask<T, ICommandToken>(commandTask, result => result.AsValue<T>(logger, executor, argumentTable));
     }
 }
 
-public class EnumerableCommandArgument : ICommandArgument
-{
-    ICommandArgument[] expr;
-
-    public string? GetString(ConsoleBubble log) => null;
-    public int? GetInteger(ConsoleBubble log) => null;
-    public IEnumerable<string> GetStringEnumerator(ConsoleBubble log)
-    {
-        foreach(var arg in expr) foreach (var val in arg.GetStringEnumerator(log)) yield return val;
-    }
-    public IEnumerable<int> GetIntegerEnumerator(ConsoleBubble log)
-    {
-        foreach (var arg in expr) foreach (var val in arg.GetIntegerEnumerator(log)) yield return val;
-    }
-    public EnumerableCommandArgument(ICommandArgument[] expr)
-    {
-        this.expr = expr;
-    }
-
-    public IEnumerator Evaluate(ConsoleBubble log)
-    {
-        yield return Effects.All(expr.Select(a => a.Evaluate(log).WrapToIl2Cpp()).ToArray());
-    }
-}
-
-public class BuiltInCommandArgument : ICommandArgument
-{
-    public IEnumerable<int>? IntegerEnumerator = null;
-    public IEnumerable<string>? StringEnumerator = null;
-    public BuiltInCommandArgument() { }
-
-    public string? GetString(ConsoleBubble log) => null;
-    public int? GetInteger(ConsoleBubble log) => null;
-    public IEnumerable<string> GetStringEnumerator(ConsoleBubble log)
-    {
-        foreach(var val in StringEnumerator ?? IntegerEnumerator?.Select(v=>v.ToString()) ?? Array.Empty<string>())
-            yield return val;
-    }
-    public IEnumerable<int> GetIntegerEnumerator(ConsoleBubble log) {
-        foreach (var val in IntegerEnumerator ?? Array.Empty<int>())
-            yield return val;
-    }
-
-    public IEnumerator Evaluate(ConsoleBubble log) { yield break; }
-}
-
-public class Command
-{
-    //出力先バブルと引数、返り値の格納先を渡して評価の手続きを返す
-    Func<ConsoleBubble, ICommandArgument[], Reference<ICommandArgument>, IEnumerator> Executor;
-
-    public Command(Func<ConsoleBubble, ICommandArgument[], Reference<ICommandArgument>, IEnumerator> executor)
-    {
-        Executor = executor;
-    }
-
-    public IEnumerator Execute(ConsoleBubble bubble, ICommandArgument[] args, Reference<ICommandArgument> reference)
-    {
-        //引数を評価する
-        yield return Effects.All(args.Select(a => a.Evaluate(bubble).WrapToIl2Cpp()).ToArray());
-        yield return Executor.Invoke(bubble, args, reference);
-    }
-}
 
 [NebulaPreLoad]
 public class CommandManager
 {
-    readonly static public Color InvalidColor = Color.Lerp(Color.red, Color.white, 0.4f);
 
-    static private Dictionary<string, Command> commandMap = new();
-
-    static public void RegisterCommand(Command command,params string[] name)
+    static private Dictionary<string, ICommand> commandMap = new();
+    static public bool TryGetCommand(string label, [MaybeNullWhen(false)] out ICommand command) => commandMap.TryGetValue(label, out command);
+    static public void RegisterCommand(ICommand command,params string[] name)
     {
         foreach(var n in name) commandMap[n] = command;
     }
 
-    static private ICommandArgument[] ParseCommand(Stack<string> args)
+    static private IReadOnlyArray<ICommandToken> ParseCommand(Stack<string> args)
     {
         string ParseTextToken()
         {
@@ -204,101 +149,119 @@ public class CommandManager
             return sb.Join(null," ").Replace(" ( ", "(").Replace(" ) ", ")").Replace(" [ ", "[").Replace(" ] ", "]");
         }
 
-        List<ICommandArgument> result = new();
+        List<ICommandToken> result = new();
         while (args.Count > 0)
         {
             var arg = args.Pop();
             if (arg == "(")
-                result.Add(new InnerCommandArgument(ParseCommand(args)));
+                result.Add(new StatementCommandToken(ParseCommand(args)));
             else if (arg == "[")
-                result.Add(new EnumerableCommandArgument(ParseCommand(args)));
+                result.Add(new ArrayCommandToken(ParseCommand(args)));
             else if(arg is ")" or "]")
-                return result.ToArray();
+                return new ReadOnlyArray<ICommandToken>(result.ToArray());
             else if(arg.StartsWith("\""))
             {
                 args.Push(arg.Substring(1));
-                result.Add(new StaticCommandArgument(ParseTextToken()));
+                result.Add(new StringCommandToken(ParseTextToken(), false));
             }
             else
                 result.Add(
                     arg switch
                     {
-                        "@a" => new BuiltInCommandArgument() { IntegerEnumerator = PlayerControl.AllPlayerControls.GetFastEnumerator().Select(p => (int)p.PlayerId) },
-                        _ => new StaticCommandArgument(arg)
+                        "@a" => new ArrayCommandToken(new ReadOnlyArray<ICommandToken>(NebulaGameManager.Instance?.AllPlayerInfo().Select(p => new PlayerCommandToken(p)))),
+                        _ => new StringCommandToken(arg)
                     }
                     );
         }
-        return result.ToArray();
+        return new ReadOnlyArray<ICommandToken>(result.ToArray());
     }
-    static public IEnumerator Execute(ConsoleBubble bubble, string[] args, Reference<ICommandArgument> result)
+    static public CoTask<ICommandToken> CoExecute(string[] args, ICommandModifier modifier, ICommandExecutor executor, ICommandLogger logger)
     {
         var argStack = new Stack<string>(args.Reverse());
-        yield return Execute(bubble, ParseCommand(argStack), result);
+        return CoExecute(ParseCommand(argStack),  modifier, executor, logger);
     }
 
-    static public IEnumerator Execute(ConsoleBubble bubble, ICommandArgument[] args, Reference<ICommandArgument> result)
+    static public CoTask<ICommandToken> CoExecute(IReadOnlyArray<ICommandToken> args, ICommandModifier argumentTable, ICommandExecutor executor, ICommandLogger logger)
     {
-        if (args.Length == 0)
+        if (args.Count == 0)
         {
-            bubble.PushResponse("Invalid input".Color(InvalidColor));
-            yield break;
+            logger.PushError("Invalid input (Length: 0)");
+            return new CoImmediateErrorTask<ICommandToken>(logger);
         }
         else
         {
-            //ヘッダーのみ評価する
-            yield return args[0].Evaluate(bubble);
-            string? key = args[0].GetString(bubble);
+            IEnumerator CoExecuteCommand(CoBuiltInTask<ICommandToken> task)
+            {
+                var header = args[0].AsValue<string>(logger, executor, argumentTable);
+                yield return header.CoWait();
 
-            if (key != null && commandMap.TryGetValue(key!, out var command))
-            {
-                //引数の評価は内部で行われる
-                yield return command.Execute(bubble, args.Skip(1).ToArray(), result);
-            }
-            else
-            {
-                if (key != null)
-                    bubble.PushResponse($"No such command found \"{key!}\".".Color(InvalidColor));
+                if (header.IsFailed)
+                {
+                    logger.PushError($"Unevaluable header.");
+                    yield break;
+                }
+
+                if (TryGetCommand(header.Result, out var command))
+                {
+                    var commandTask = command.Evaluate(header.Result, args.Skip(1), argumentTable, executor, logger);
+                    yield return commandTask.CoWait();
+                    if (commandTask.IsFailed)
+                    {
+                        logger.PushError($"An error occurred while executing the command.");
+                    }
+                    else
+                    {
+                        task.Result = commandTask.Result;
+                    }
+                    yield break;
+                }
                 else
-                    bubble.PushResponse($"Header must be not null.".Color(InvalidColor));
-
-                yield break;
+                {
+                    logger.PushError($"No such command found \"{header.Result}\".");
+                    yield break;
+                }
             }
+            CoBuiltInTask<ICommandToken> result = new(CoExecuteCommand);
+
+            return result;
         }
     }
 }
 
 public class ConsoleShower : MonoBehaviour
 {
-    record Bubble(GameObject holder, SpriteRenderer background, TextMeshPro text, Reference<ConsoleBubble> reference);
+    record Bubble(GameObject Holder, SpriteRenderer Background, TextMeshPro Text)
+    {
+        public ICommandLogger Logger { get; set; }
+    }
 
     Queue<Bubble> activeBubbles = new();
     Stack<Bubble> unusedBubblePool = new();
 
     static ConsoleShower() => ClassInjector.RegisterTypeInIl2Cpp<ConsoleShower>();
 
-    public void PushBubble(ConsoleBubble bubble)
+    public void Push(ICommandLogger logger)
     {
         Bubble newBubble = null!;
         if (unusedBubblePool.Count > 0)
             newBubble = unusedBubblePool.Pop();
         else
         {
-            var holder = UnityHelper.CreateObject("Bubble", transform, Vector3.zero);
-            var background = UnityHelper.CreateObject<SpriteRenderer>("Background", holder.transform, Vector3.zero);
+            var holder = UnityHelper.CreateObject("Bubble", transform, UnityEngine.Vector3.zero);
+            var background = UnityHelper.CreateObject<SpriteRenderer>("Background", holder.transform, UnityEngine.Vector3.zero);
             background.sprite = NebulaAsset.SharpWindowBackgroundSprite.GetSprite();
             background.drawMode = SpriteDrawMode.Sliced;
             background.tileMode = SpriteTileMode.Continuous;
             background.color = Color.white.RGBMultiplied(0.13f);
 
             TextMeshPro text = null!;
-            new MetaContextOld.Text(new(TextAttribute.NormalAttrLeft) { Font = VanillaAsset.VersionFont, Size = new(6f, 4f), FontSize = 1.5f, AllowAutoSizing = false }) { PostBuilder = t => text = t }.Generate(holder, Vector3.zero, out _);
+            new MetaWidgetOld.Text(new(TextAttributeOld.NormalAttrLeft) { Font = VanillaAsset.VersionFont, Size = new(6f, 4f), FontSize = 1.5f, AllowAutoSizing = false }) { PostBuilder = t => text = t }.Generate(holder, UnityEngine.Vector3.zero, out _);
 
-            newBubble = new(holder, background, text, new());
+            newBubble = new(holder, background, text);
         }
 
 
-        newBubble.reference.Value = bubble;
-        bubble.IsDirty = true;
+        newBubble.Logger = logger;
         activeBubbles.Enqueue(newBubble);
     }
 
@@ -309,21 +272,24 @@ public class ConsoleShower : MonoBehaviour
 
         foreach (var bubble in activeBubbles.Reverse())
         {
-            bubble.holder.SetActive(true);
+            bubble.Holder.SetActive(true);
 
-            var consoleBubble = bubble.reference.Value!;
-            if (consoleBubble.IsDirty)
+            var logger = bubble.Logger;
+            if (logger.IsDirty)
             {
-                bubble.text.text = "<size=80%>" + consoleBubble.Executed.Color(Color.white.RGBMultiplied(0.78f)) + "</size>" + ("\n" + consoleBubble.Response).Replace("\n", "\n ");
-                bubble.text.ForceMeshUpdate();
+                bubble.Text.text = "<size=80%>" + logger.Executed.Color(Color.white.RGBMultiplied(0.78f)) + "</size>" + ("\n" + logger.ToLogString(CommandLogLevel.AllLevel)).Replace("\n", "\n ");
+
+                bubble.Text.ForceMeshUpdate();
+
+                logger.MarkUpdated();
             }
 
-            float myHeight = bubble.text.preferredHeight + 0.2f;
-            float myWidth = bubble.text.preferredWidth + 0.2f;
+            float myHeight = bubble.Text.preferredHeight + 0.2f;
+            float myWidth = bubble.Text.preferredWidth + 0.2f;
 
-            bubble.holder.transform.localPosition = new Vector3(0f, height + myHeight * 0.5f);
-            bubble.background.transform.localPosition = new Vector3((bubble.text.preferredWidth - bubble.text.rectTransform.sizeDelta.x) * 0.5f, 0f, 0f);
-            bubble.background.size = new Vector2(myWidth - 0.06f, myHeight - 0.06f);
+            bubble.Holder.transform.localPosition = new UnityEngine.Vector3(0f, height + myHeight * 0.5f);
+            bubble.Background.transform.localPosition = new UnityEngine.Vector3((bubble.Text.preferredWidth - bubble.Text.rectTransform.sizeDelta.x) * 0.5f, 0f, 0f);
+            bubble.Background.size = new UnityEngine.Vector2(myWidth - 0.06f, myHeight - 0.06f);
             height += myHeight;
 
             num++;
@@ -333,6 +299,6 @@ public class ConsoleShower : MonoBehaviour
 
         while (activeBubbles.Count > num) unusedBubblePool.Push(activeBubbles.Dequeue());
 
-        foreach (var b in unusedBubblePool) b.holder.gameObject.SetActive(false);
+        foreach (var b in unusedBubblePool) b.Holder.gameObject.SetActive(false);
     }
 }

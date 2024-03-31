@@ -59,8 +59,7 @@ public abstract class NebulaSyncObject : INebulaScriptComponent
             allObjects.Add(obj.ObjectId, obj);
         });
 
-    static private RemoteProcess<int> RpcDestroyDef = RemotePrimitiveProcess.OfInteger(
-       "DestroyObj",
+    static private RemoteProcess<int> RpcDestroyDef = new("DestroyObj",
        (message, _) =>
        {
            if (allObjects.TryGetValue(message, out var obj)) obj?.Release();

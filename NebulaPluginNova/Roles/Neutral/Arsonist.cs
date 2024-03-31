@@ -8,10 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Arsonist : ConfigurableStandardRole
+public class Arsonist : ConfigurableStandardRole, HasCitation
 {
     static public Arsonist MyRole = new Arsonist();
     static public Team MyTeam = new("teams.arsonist", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -20,6 +21,7 @@ public class Arsonist : ConfigurableStandardRole
 
     public override string LocalizedName => "arsonist";
     public override Color RoleColor => new Color(229f / 255f, 93f / 255f, 0f / 255f);
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
@@ -36,7 +38,7 @@ public class Arsonist : ConfigurableStandardRole
         DouseDurationOption = new NebulaConfiguration(RoleConfig, "douseDuration", null, 1f, 10f, 0.5f, 3f, 3f);
     }
 
-    public class Instance : RoleInstance
+    public class Instance : RoleInstance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
 
@@ -92,7 +94,7 @@ public class Arsonist : ConfigurableStandardRole
             if (AmOwner)
             {
                 var IconsHolder = HudContent.InstantiateContent("ArsonistIcons", true, true, false, true);
-                Bind(IconsHolder.gameObject);
+                this.Bind(IconsHolder.gameObject);
 
                 var ajust = UnityHelper.CreateObject<ScriptBehaviour>("Ajust", IconsHolder.transform, Vector3.zero);
                 ajust.UpdateHandler += () =>
@@ -172,7 +174,7 @@ public class Arsonist : ConfigurableStandardRole
             UpdateIcons();
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
         {
             if (!AmOwner) return;
             playerIcons.RemoveAll(tuple =>
@@ -188,10 +190,8 @@ public class Arsonist : ConfigurableStandardRole
         }
 
         StaticAchievementToken? acTokenCommon;
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
-            base.OnMeetingStart();
-
             if (AmOwner)
             {
                 if (acTokenCommon == null && playerIcons.Count(icon => CheckDoused(icon) && ((!NebulaGameManager.Instance?.GetModPlayerInfo(icon.playerId)?.IsDead) ?? false)) >= 3)
@@ -200,11 +200,14 @@ public class Arsonist : ConfigurableStandardRole
         }
 
         AchievementToken<bool>? acTokenChallenge;
-        public override void OnAnyoneExiledLocal(PlayerControl exiled)
+        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
         {
-            var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon));
-            if (notDoused.Count == 1 && notDoused[0].playerId == exiled.PlayerId)
-                acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
+            if (AmOwner)
+            {
+                var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon));
+                if (notDoused.Count == 1 && notDoused[0].playerId == exiled.PlayerId)
+                    acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
+            }
         }
 
         public override void OnGameEnd(NebulaEndState endState)

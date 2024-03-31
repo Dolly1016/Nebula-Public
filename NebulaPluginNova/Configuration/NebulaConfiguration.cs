@@ -348,6 +348,12 @@ public class ConfigurationHolder
     private List<NebulaConfiguration> myConfigurations = new();
     public IEnumerable<NebulaConfiguration> MyConfigurations => myConfigurations;
     public IAssignableBase? RelatedAssignable = null;
+
+    private List<ConfigurationTag> myTags = new();
+    public IEnumerable<ConfigurationTag> Tags => myTags;
+    
+    public ConfigurationHolder AddTags(params ConfigurationTag[] tags) { myTags.AddRange(tags); return this; }
+
     public Func<bool>? IsActivated { get; set; } = null;
 
     internal void RegisterOption(NebulaConfiguration config) => myConfigurations.Add(config);
@@ -413,6 +419,15 @@ public class ConfigurationHolder
             builder.AppendLine();
         }
     }
+
+    static private IDividedSpriteLoader TagSprite = DividedSpriteLoader.FromResource("Nebula.Resources.ConfigurationTag.png", 100f, 42, 42, true);
+
+    static private GUIWidget GetTagTextWidget(string translationKey) => new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), new TranslateTextComponent("configuration.tag." + translationKey));
+    static public ConfigurationTag TagChaotic { get; private set; } = new(TagSprite.AsLoader(0), GetTagTextWidget("chaotic"));
+    static public ConfigurationTag TagBeginner { get; private set; } = new(TagSprite.AsLoader(1), GetTagTextWidget("beginner"));
+    static public ConfigurationTag TagFunny { get; private set; } = new(TagSprite.AsLoader(4), GetTagTextWidget("funny"));
+    static public ConfigurationTag TagDifficult { get; private set; } = new(TagSprite.AsLoader(5), GetTagTextWidget("difficult"));
+    static public ConfigurationTag TagSNR { get; private set; } = new(TagSprite.AsLoader(2), GetTagTextWidget("superNewRoles"));
 }
 
 

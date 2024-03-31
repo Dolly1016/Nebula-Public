@@ -1,10 +1,12 @@
 ﻿using Nebula.Map;
+using Nebula.Roles.Modifier;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -23,16 +25,21 @@ public class Busker : ConfigurableStandardRole
 
     private NebulaConfiguration PseudocideCoolDownOption = null!;
     private NebulaConfiguration PseudocideDurationOption = null!;
+    private NebulaConfiguration HidePseudocideFromVitalsOption = null!;
 
+    public override bool CanLoadDefault(IntroAssignableModifier modifier) => modifier is not Lover;
     protected override void LoadOptions()
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagFunny);
+
         PseudocideCoolDownOption = new(RoleConfig, "pseudocideCoolDown", null, 5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
         PseudocideDurationOption = new(RoleConfig, "pseudocideDuration", null, 5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
+        HidePseudocideFromVitalsOption = new(RoleConfig, "hidePseudocideFromVitals", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, IGameEntity
     {
         static private ISpriteLoader pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
         static private ISpriteLoader reviveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskReviveButton.png", 115f);
@@ -42,6 +49,11 @@ public class Busker : ConfigurableStandardRole
         public override AbstractRole Role => MyRole;
         public Instance(PlayerModInfo player) : base(player)
         {
+        }
+
+        protected override void OnInactivated()
+        {
+            if(AmOwner) PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
         }
 
         public override void OnActivated()
@@ -57,7 +69,11 @@ public class Busker : ConfigurableStandardRole
                 pseudocideButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PseudocideCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 pseudocideButton.OnClick = (button) => {
                     NebulaManager.Instance.ScheduleDelayAction(() => {
-                        MyPlayer.MyControl.ModKill(MyPlayer.MyControl, false, PlayerState.Suicide, null, false);
+                        using (RPCRouter.CreateSection("BuskerPseudocide"))
+                        {
+                            if(MyRole.HidePseudocideFromVitalsOption) PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.BuskerEffect, 10000f, false, 0)));
+                            MyPlayer.MyControl.ModKill(MyPlayer.MyControl, false, PlayerState.Pseudocide, null, false);
+                        }
                         reviveButon.ActivateEffect();
                     });
                 };
@@ -70,7 +86,9 @@ public class Busker : ConfigurableStandardRole
                 reviveButon.Visibility = (button) => button.EffectActive && Helpers.AllDeadBodies().Any(deadBody => deadBody.ParentId == MyPlayer.PlayerId);
                 reviveButon.EffectTimer = Bind(new Timer(0f, MyRole.PseudocideDurationOption.GetFloat()));
                 reviveButon.OnClick = (button) => {
-                    using (RPCRouter.CreateSection("ReviveBusker")) {
+                    using (RPCRouter.CreateSection("ReviveBusker"))
+                    {
+                        PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
                         MyPlayer.MyControl.ModRevive(MyPlayer.MyControl.transform.position, true, false);
                         MyPlayer.MyControl.ModDive(false);
                     }
@@ -84,6 +102,7 @@ public class Busker : ConfigurableStandardRole
                 {
                     if (MyPlayer.IsDead)
                     {
+                        PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
                         NebulaGameManager.Instance!.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Accident, null, 1 << MyPlayer.PlayerId);
                         new StaticAchievementToken("busker.another1");
                     }
@@ -95,11 +114,14 @@ public class Busker : ConfigurableStandardRole
 
         private void CheckChallengeAchievement(PlayerModInfo reporter)
         {
-            if (acTokenChallenge != null && !reporter.AmOwner) acTokenChallenge.Value.isCleared |= NebulaGameManager.Instance!.CurrentTime - acTokenChallenge.Value.lastRevive < 2f;
+            if (AmOwner)
+            {
+                if (acTokenChallenge != null && !reporter.AmOwner) acTokenChallenge.Value.isCleared |= NebulaGameManager.Instance!.CurrentTime - acTokenChallenge.Value.lastRevive < 2f;
+            }
         }
 
-        public override void OnReported(PlayerModInfo reporter, PlayerModInfo reported) => CheckChallengeAchievement(reporter);
-        public override void OnEmergencyMeeting(PlayerModInfo reporter) => CheckChallengeAchievement(reporter);
+        void IGameEntity.OnReported(GamePlayer reporter, GamePlayer reported) => CheckChallengeAchievement(reporter.Unbox());
+        void IGameEntity.OnEmergencyMeeting(GamePlayer reporter) => CheckChallengeAchievement(reporter.Unbox());
         
     }
 }

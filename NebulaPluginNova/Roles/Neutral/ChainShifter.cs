@@ -6,11 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.Profiling;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
 // if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, new int[] { JackalTeamId }).InvokeSingle();
-public class ChainShifter : ConfigurableStandardRole
+public class ChainShifter : ConfigurableStandardRole, HasCitation
 {
     static public ChainShifter MyRole = new ChainShifter();
     static public Team MyTeam = new("teams.chainShifter", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -20,11 +21,12 @@ public class ChainShifter : ConfigurableStandardRole
     public override string LocalizedName => "chainShifter";
     public override Color RoleColor => new Color(115f / 255f, 115f / 255f, 115f / 255f);
     public override RoleTeam Team => MyTeam;
-
+    Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
     private new VentConfiguration VentConfiguration = null!;
     private NebulaConfiguration ShiftCoolDown = null!;
+    private NebulaConfiguration CanCallEmergencyMeetingOption = null!;
 
     protected override void LoadOptions()
     {
@@ -32,12 +34,13 @@ public class ChainShifter : ConfigurableStandardRole
 
         VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
         ShiftCoolDown = new(RoleConfig, "shiftCoolDown", null, 5f, 60f, 5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
+        CanCallEmergencyMeetingOption = new(RoleConfig, "canCallEmergencyMeeting", null, true, true);
     }
 
-    public override bool CanBeGuess => false;
+    public override bool CanBeGuessDefault => false;
 
 
-    public class Instance : RoleInstance
+    public class Instance : RoleInstance, IGamePlayerEntity
     {
         private ModAbilityButton? chainShiftButton = null;
 
@@ -65,7 +68,7 @@ public class ChainShifter : ConfigurableStandardRole
             {
                 PoolablePlayer? shiftIcon = null;
 
-                var playerTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead));
+                var playerTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
 
                 chainShiftButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 chainShiftButton.SetSprite(buttonSprite.GetSprite());
@@ -73,7 +76,7 @@ public class ChainShifter : ConfigurableStandardRole
                 chainShiftButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
                 chainShiftButton.OnClick = (button) => {
                     shiftTarget = playerTracker.CurrentTarget;
-                    shiftIcon = AmongUsUtil.GetPlayerIcon(shiftTarget.GetModInfo()!.DefaultOutfit, chainShiftButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    shiftIcon = chainShiftButton.GeneratePlayerIcon(shiftTarget.GetModInfo());
                 };
                 chainShiftButton.OnMeeting = (button) =>
                 {
@@ -86,7 +89,7 @@ public class ChainShifter : ConfigurableStandardRole
         }
 
         //会議開始時に生きていればシフトは実行されうる
-        public override void OnMeetingStart()
+        void IGameEntity.OnMeetingStart()
         {
             canExecuteShift = !MyPlayer.IsDead;
         }
@@ -113,15 +116,8 @@ public class ChainShifter : ConfigurableStandardRole
 
             using (RPCRouter.CreateSection("ChainShift"))
             {
-                player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
-                MyPlayer.RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
-
-                if (targetGuess != -1) player.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
-                if (myGuess != -1) MyPlayer.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
-
-                if (myGuess != -1) player.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { myGuess }).InvokeSingle();
-                if (targetGuess != -1) MyPlayer.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
-
+                Debug.Log("Test1");
+                //タスクに関する書き換え
                 int leftCrewmateTask = 0;
                 if (player.Tasks.IsCrewmateTask && player.Tasks.HasExecutableTasks)
                 {
@@ -147,6 +143,18 @@ public class ChainShifter : ConfigurableStandardRole
                 {
                     MyPlayer.Tasks.ReleaseAllTaskState();
                 }
+                
+                //タスクを整えたうえで役職を変更する
+                player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
+                MyPlayer.RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
+                
+                if (targetGuess != -1) player.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
+                if (myGuess != -1) MyPlayer.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
+
+                if (myGuess != -1) player.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { myGuess }).InvokeSingle();
+                if (targetGuess != -1) MyPlayer.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
+
+                
             }
 
             //会議終了からすぐにゲームが終了すればよい
@@ -157,15 +165,14 @@ public class ChainShifter : ConfigurableStandardRole
             yield break;
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
         {
             shiftTarget = null;
         }
 
 
-        public override void OnMurdered(PlayerControl murder)
+        void IGamePlayerEntity.OnMurdered(GamePlayer murder)
         {
-            base.OnMurdered(murder);
             if (murder.AmOwner) new StaticAchievementToken("chainShifter.common1");
         }
 
@@ -173,5 +180,7 @@ public class ChainShifter : ConfigurableStandardRole
         {
             if (AmOwner) new StaticAchievementToken("chainShifter.another1");
         }
+
+        public override bool CanCallEmergencyMeeting => MyRole.CanCallEmergencyMeetingOption;
     }
 }

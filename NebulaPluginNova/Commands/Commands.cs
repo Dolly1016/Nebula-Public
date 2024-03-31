@@ -1,5 +1,7 @@
-﻿using Microsoft.VisualBasic;
+﻿using Innersloth.IO;
+using Microsoft.VisualBasic;
 using Mono.CSharp;
+using Nebula.Commands.Variations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +15,11 @@ static public class Commands
 {
     static public void Load()
     {
-        /*
-         var name = args[index + 1].GetString(bubble);
-                        player = PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.name == name))?.PlayerId;
-         */
-        Color invalidColor = CommandManager.InvalidColor;
+        CommandManager.RegisterCommand(new LetCommand(), "let");
+        CommandManager.RegisterCommand(new LetsCommand(), "lets", "scope");
+        CommandManager.RegisterCommand(new EchoCommand(), "echo");
 
+        /*
         CommandManager.RegisterCommand(new Command((bubble, args, result) =>
         {
             IEnumerator CoExecute()
@@ -29,7 +30,11 @@ static public class Commands
                     yield break;
                 }
 
+                yield return args[0].Evaluate(bubble);
                 result.Value = args[0];
+
+                foreach (var a in args[0].GetStringEnumerator(bubble)) bubble.PushResponse(a);
+
                 yield break;
             }
             return CoExecute();
@@ -127,5 +132,6 @@ static public class Commands
             return CoExecute();
         })
         , "property");
+        */
     }
 }

@@ -1,17 +1,7 @@
-﻿using HarmonyLib;
-using Nebula.Behaviour;
-using Nebula.Configuration;
+﻿using Nebula.Behaviour;
 using Nebula.Events;
-using Nebula.Game;
-using System;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TMPro;
 using Virial.Events.Meeting;
 using Virial.Events.Player;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Patches;
 
@@ -39,43 +29,55 @@ public static class NebulaExileWrapUp
 {
     static public IEnumerator WrapUpAndSpawn(ExileController __instance)
     {
-        PlayerControl? @object = null;
-        if (__instance.exiled != null)
+        if ((MeetingHudExtension.ExiledAll?.Length ?? 0) > 0)
         {
-            @object = __instance.exiled.Object;
-            if (@object) @object.Exiled();
-            __instance.exiled.IsDead = true;
-            NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Exile, null, 1 << __instance.exiled.PlayerId, GameStatisticsGatherTag.Spawn) { RelatedTag = EventDetail.Exiled });
-
-            var info = @object.GetModInfo();
-            if (info != null)
+            using (RPCRouter.CreateSection("ExilePlayer"))
             {
-                info.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-                info.MyState = PlayerState.Exiled;
-
-                using (RPCRouter.CreateSection("ExilePlayer"))
+                foreach (var exiled in MeetingHudExtension.ExiledAll!)
                 {
-                    info.AssignableAction(role =>
+                    if (exiled)
                     {
-                        role.OnExiled();
-                        role.OnDead();
-                    });
-                    EventManager.HandleEvent(new PlayerDeadEvent(info));
+                        exiled.Exiled();
+                        exiled.Data.IsDead = true;
+                    }
 
-                    PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r =>
+                    NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Exile, null, 1 << exiled.PlayerId, GameStatisticsGatherTag.Spawn) { RelatedTag = EventDetail.Exiled });
+
+                    var info = exiled.GetModInfo();
+
+                    if (info != null)
                     {
-                        r.OnAnyoneDeadLocal(@object);
-                        r.OnAnyoneExiledLocal(@object);
-                    });
+                        info.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+                        info.MyState = PlayerState.Exiled;
+                        if (info.AmOwner && NebulaAchievementManager.GetRecord("death." + info.MyState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
 
-                    var checkEvent = EventManager.HandleEvent(new CheckExtraVictimEvent(info));
-                    foreach (var victim in checkEvent.ExtraVictim) victim.victim.VanillaPlayer.ModMarkAsExtraVictim(victim.killer?.VanillaPlayer, victim.reason, victim.eventDetail);
 
-                    NebulaGameManager.Instance.Syncronizer.SendSync(SynchronizeTag.CheckExtraVictims);
+                        //Entityイベント発火
+                        GameEntityManager.Instance?.GetPlayerEntities(info.PlayerId).Do(e =>
+                        {
+                            e.OnExiled();
+                            e.OnDead();
+                        });
+
+                        //APIイベント発火
+                        EventManager.HandleEvent(new PlayerDeadEvent(info));
+
+                        //Entityイベント発火
+                        GameEntityManager.Instance?.AllEntities.Do(e =>
+                        {
+                            e.OnPlayerExiled(info);
+                            e.OnPlayerDead(info);
+                        });
+
+                        var checkEvent = EventManager.HandleEvent(new CheckExtraVictimEvent(info));
+                        foreach (var victim in checkEvent.ExtraVictim) victim.victim.VanillaPlayer.ModMarkAsExtraVictim(victim.killer?.VanillaPlayer, victim.reason, victim.eventDetail);
+                    }
                 }
 
-                yield return NebulaGameManager.Instance.Syncronizer.CoSyncAndReset(Modules.SynchronizeTag.CheckExtraVictims, true, true, false);
+                NebulaGameManager.Instance?.Syncronizer.SendSync(SynchronizeTag.CheckExtraVictims);
             }
+
+            yield return NebulaGameManager.Instance!.Syncronizer.CoSyncAndReset(Modules.SynchronizeTag.CheckExtraVictims, true, true, false);
 
             bool extraExile = MeetingHudExtension.ExtraVictims.Count > 0;
             MeetingHudExtension.ExileExtraVictims();
@@ -113,8 +115,9 @@ public static class NebulaExileWrapUp
         NebulaGameManager.Instance!.Syncronizer.SendSync(SynchronizeTag.PostMeeting);
         yield return NebulaGameManager.Instance!.Syncronizer.CoSyncAndReset(Modules.SynchronizeTag.PostMeeting, true, true, false);
 
-        NebulaGameManager.Instance?.OnMeetingEnd(__instance.exiled?.Object);
-        NebulaGameManager.Instance?.AllAssignableAction(r=>r.OnMeetingEnd());
+        NebulaGameManager.Instance?.OnMeetingEnd(MeetingHudExtension.ExiledAll);
+        GamePlayer[] exiledArray = MeetingHudExtension.ExiledAll?.Select(p => p.GetModInfo()!).ToArray() ?? new GamePlayer[0];
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnMeetingEnd(exiledArray));
 
         yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform.parent, GameStatistics.EventVariation.MeetingEnd, EventDetail.MeetingEnd);
 
@@ -146,5 +149,29 @@ public static class AirshipExileWrapUpPatch
     {
         __result = NebulaExileWrapUp.WrapUpAndSpawn(__instance).WrapToIl2Cpp();
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(ExileController), nameof(ExileController.Begin))]
+class ExileControllerBeginPatch
+{
+
+    public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref GameData.PlayerInfo exiled, [HarmonyArgument(1)] bool tie)
+    {
+        if (exiled == null) return;
+
+        if((MeetingHudExtension.ExiledAll?.Length ?? 0) > 1)
+        {
+            __instance.completeString = Language.Translate("game.meeting.multiple");
+        }
+        else if (GeneralConfigurations.ShowRoleOfExiled)
+        {
+            var role = NebulaGameManager.Instance.GetModPlayerInfo(exiled.PlayerId)?.Role;
+            if (role != null)
+            {
+                __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", exiled.PlayerName).Replace("%ROLE%", role.Role.DisplayName);
+                if (role.Role == Roles.Neutral.Jester.MyRole) __instance.ImpostorText.text = Language.Translate("game.meeting.roleJesterText");
+            }
+        }
     }
 }

@@ -175,7 +175,7 @@ public class EndGameManagerSetUpPatch
         MetaContextOld context = new();
         string text = "";
 
-        NebulaGameManager.Instance!.CanSeeAllInfo = true;
+        NebulaGameManager.Instance?.ChangeToSpectator();
 
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
         {
@@ -313,7 +313,8 @@ public class EndGameManagerSetUpPatch
         LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
 
         //Achievements
-        if (GeneralConfigurations.CurrentGameMode == CustomGameMode.Standard && endCondition != NebulaGameEnd.NoGame)
+        //標準ゲームモードで廃村でない、かつOP権限が誰にも付与されていないゲームの場合
+        if (GeneralConfigurations.CurrentGameMode == CustomGameMode.Standard && endCondition != NebulaGameEnd.NoGame && !GeneralConfigurations.AssignOpToHostOption)
         {
             NebulaManager.Instance.StartCoroutine(NebulaAchievementManager.CoShowAchievements(NebulaManager.Instance, NebulaAchievementManager.UniteAll()).WrapToIl2Cpp());
         }

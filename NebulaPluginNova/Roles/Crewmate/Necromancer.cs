@@ -25,6 +25,8 @@ public class Necromancer : ConfigurableStandardRole
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagFunny, ConfigurationHolder.TagDifficult);
+
         ReviveCoolDownOption = new NebulaConfiguration(RoleConfig, "reviveCoolDown", null, 5f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
         ReviveDurationOption = new NebulaConfiguration(RoleConfig, "reviveDuration", null, 0.5f, 10f, 0.5f, 3f, 3f) { Decorator = NebulaConfiguration.SecDecorator };
         DetectedRangeOption = new NebulaConfiguration(RoleConfig, "detectedRange", null, 2.5f, 30f, 2.5f, 7.5f, 7.5f) { Decorator = NebulaConfiguration.OddsDecorator };

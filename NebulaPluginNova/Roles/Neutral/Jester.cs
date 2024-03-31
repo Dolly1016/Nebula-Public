@@ -1,4 +1,5 @@
-﻿using Nebula.Configuration;
+﻿using Hazel;
+using Nebula.Configuration;
 using Nebula.Modules;
 using Virial.Assignable;
 
@@ -24,6 +25,8 @@ public class Jester : ConfigurableStandardRole
     protected override void LoadOptions()
     {
         base.LoadOptions();
+        
+        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
 
         VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
         CanDragDeadBodyOption = new NebulaConfiguration(RoleConfig, "canDragDeadBody", null, true, true);
@@ -88,10 +91,13 @@ public class Jester : ConfigurableStandardRole
         StaticAchievementToken? acTokenCommon = null;
         public override void OnVotedForMeLocal(PlayerControl[] voters)
         {
-            if(voters.Length > 0 && voters.Any(v=>!v.AmOwner))
-                acTokenCommon ??= new StaticAchievementToken("jester.common1");
-            if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || voters.Any(v => v.PlayerId == p.PlayerId)) ?? false)
-                new StaticAchievementToken("jester.challenge");
+            if (AmOwner)
+            {
+                if (voters.Length > 0 && voters.Any(v => !v.AmOwner))
+                    acTokenCommon ??= new StaticAchievementToken("jester.common1");
+                if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || voters.Any(v => v.PlayerId == p.PlayerId)) ?? false)
+                    new StaticAchievementToken("jester.challenge");
+            }
         }
     }
 }

@@ -35,7 +35,6 @@ public class ShownSecret : ConfigurableStandardModifier
 
     public override Color RoleColor => Color.white.RGBMultiplied(0.82f);
     public override string CodeName => "SCR";
-
     override protected void AssignToTable(IRoleAllocator.RoleTable roleTable, byte playerId)
     {
         var tuple = roleTable.roles.Find(r => r.playerId == playerId);
@@ -51,7 +50,7 @@ public class ShownSecret : ConfigurableStandardModifier
     }
 }
 
-public class Secret : AbstractRole
+public class Secret : AbstractRole, DefinedAssignable
 {
     static public ShownSecret OptionRole = new ShownSecret();
     static public Secret MyNiceRole = new(false);
@@ -67,8 +66,8 @@ public class Secret : AbstractRole
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return IsEvil ? MyNiceRole : MyEvilRole; }
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
+    bool DefinedAssignable.ShowOnHelpScreen => false;
 
-    
     public override int RoleCount => 0;
     public override float GetRoleChance(int count) => 0f;
 

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine.EventSystems;
 using Virial;
 using Virial.Attributes;
+using static Mono.CSharp.Parameter;
 
 namespace Nebula.Roles;
 
@@ -15,9 +16,9 @@ namespace Nebula.Roles;
 public class Roles
 {
     static public IReadOnlyList<AbstractRole> AllRoles { get; private set; } = null!;
-
     static public IReadOnlyList<AbstractModifier> AllModifiers { get; private set; } = null!;
-    
+    static public IReadOnlyList<Perk> AllPerks { get; private set; } = null!;
+
     static public IEnumerable<IAssignableBase> AllAsignables()
     {
         foreach(var r in AllRoles) yield return r;
@@ -34,16 +35,33 @@ public class Roles
     static private List<AbstractRole>? allRoles = new();
     static private List<AbstractModifier>? allModifiers = new();
     static private List<Team>? allTeams = new();
+    static private List<Perk>? allPerks = new();
 
     static public void Register(AbstractRole role) {
-        allRoles?.Add(role);
+        if(allRoles == null)
+            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register role \"{role.LocalizedName}\".\nRole registration is only possible at load phase.");
+        else
+            allRoles?.Add(role);
     }
     static public void Register(AbstractModifier role)
     {
-        allModifiers?.Add(role);
+        if(allModifiers == null)
+            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register modifier \"{role.LocalizedName}\".\nModifier registration is only possible at load phase.");
+        else
+            allModifiers?.Add(role);
     }
     static public void Register(Team team) {
-        allTeams?.Add(team);
+        if(allTeams == null)
+            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register team \"{team.TranslationKey}\".\nTeam registration is only possible at load phase.");
+        else
+            allTeams.Add(team);
+    }
+    static public void Register(Perk perk)
+    {
+        if (allPerks == null)
+            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register perk \"{perk.TranslationKey}\".\nPerk registration is only possible at load phase.");
+        else
+            allPerks.Add(perk);
     }
 
     static private void SetNebulaTeams()
@@ -65,7 +83,7 @@ public class Roles
         yield return null;
 
         var iroleType = typeof(AbstractRole);
-        var types = Assembly.GetAssembly(typeof(AbstractRole))?.GetTypes().Where((type) => type.IsAssignableTo(typeof(IAssignableBase)) || type.IsDefined(typeof(NebulaRoleHoler)));
+        var types = Assembly.GetAssembly(typeof(AbstractRole))?.GetTypes().Where((type) => type.IsAssignableTo(typeof(IAssignableBase)) || type.IsAssignableTo(typeof(PerkInstance)) || type.IsDefined(typeof(NebulaRoleHolder)));
         if (types == null) yield break;
 
         foreach (var type in types)
@@ -96,13 +114,16 @@ public class Roles
         });
 
         allTeams!.Sort((team1, team2) => team1.TranslationKey.CompareTo(team2.TranslationKey));
+        allPerks!.Sort((perk1, perk2) => perk1.TranslationKey.CompareTo(perk2.TranslationKey));
 
         for (int i = 0; i < allRoles!.Count; i++) allRoles![i].Id = i; 
         for (int i = 0; i < allModifiers!.Count; i++) allModifiers![i].Id = i;
+        for (int i = 0; i < allPerks!.Count; i++) allPerks![i].Id = i;
 
         AllRoles = allRoles!.AsReadOnly();
         AllModifiers = allModifiers!.AsReadOnly();
         AllTeams = allTeams!.AsReadOnly();
+        AllPerks = allPerks!.AsReadOnly();
 
         foreach (var role in allRoles) role.Load();
         foreach (var modifier in allModifiers) modifier.Load();
@@ -110,5 +131,6 @@ public class Roles
         allRoles = null;
         allModifiers = null;
         allTeams = null;
+        allPerks = null;
     }
 }

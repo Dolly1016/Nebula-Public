@@ -75,7 +75,7 @@
     <Message Text="Second occurrence" />
     <Copy SourceFiles="bin\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\" />
     <Copy SourceFiles="bin\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\Nebula\BepInEx\plugins\" />
-	<Copy SourceFiles="bin\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsPlugins)\" />
+	<Copy SourceFiles="bin\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsMod)\BepInEx\plugins\" />
   </Target>
 
 </Project>

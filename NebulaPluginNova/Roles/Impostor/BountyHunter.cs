@@ -1,22 +1,25 @@
 ﻿using AmongUs.GameOptions;
 using Nebula.Configuration;
 using Nebula.Modules.ScriptComponents;
+using Nebula.Roles.Modifier;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class BountyHunter : ConfigurableStandardRole
+public class BountyHunter : ConfigurableStandardRole, HasCitation
 {
     static public BountyHunter MyRole = new BountyHunter();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "bountyHunter";
     public override Color RoleColor => Palette.ImpostorRed;
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
@@ -39,7 +42,7 @@ public class BountyHunter : ConfigurableStandardRole
 
     float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CurrentCoolDown, OthersKillCoolDownOption.CurrentCoolDown, AmongUsUtil.VanillaKillCoolDown);
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         private ModAbilityButton? killButton = null;
 
@@ -60,10 +63,13 @@ public class BountyHunter : ConfigurableStandardRole
         Timer bountyTimer = null!;
         Timer arrowTimer = null!;
         Arrow bountyArrow = null!;
-        bool CanBeBounty(PlayerControl target) => !target.Data.Role.IsImpostor;
+        bool CanBeBounty(PlayerControl target, PlayerModInfo? myLover) => !target.Data.Role.IsImpostor && myLover != target.GetModInfo();
         void ChangeBounty()
         {
-            var arr = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && !p.Data.IsDead && CanBeBounty(p)).ToArray();
+            PlayerModInfo? myLover = null;
+            if (MyPlayer.TryGetModifier<Lover.Instance>(out var lover)) myLover = lover.MyLover;
+
+            var arr = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && !p.Data.IsDead && CanBeBounty(p, myLover)).ToArray();
             if (arr.Length == 0) currentBounty = byte.MaxValue;
             else currentBounty = arr[System.Random.Shared.Next(arr.Length)].PlayerId;
 
@@ -157,7 +163,7 @@ public class BountyHunter : ConfigurableStandardRole
                 killButton.SetLabel("kill");
 
                 var iconHolder = HudContent.InstantiateContent("BountyHolder",true);
-                Bind(iconHolder.gameObject);
+                this.Bind(iconHolder.gameObject);
                 bountyIcon = AmongUsUtil.GetPlayerIcon(MyPlayer.DefaultOutfit, iconHolder.transform, Vector3.zero, Vector3.one * 0.5f);
                 bountyIcon.ToggleName(true);
                 bountyIcon.SetName("", Vector3.one * 4f, Color.white, -1f);
@@ -173,12 +179,13 @@ public class BountyHunter : ConfigurableStandardRole
             UpdateTimer();
         }
 
-        public override void OnMeetingEnd()
+        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
         {
-            if (!AmOwner) return;
-
-            //死亡しているプレイヤーであれば切り替える
-            if (NebulaGameManager.Instance?.GetModPlayerInfo(currentBounty)?.IsDead ?? true) ChangeBounty();
+            if (AmOwner)
+            {
+                //死亡しているプレイヤーであれば切り替える
+                if (NebulaGameManager.Instance?.GetModPlayerInfo(currentBounty)?.IsDead ?? true) ChangeBounty();
+            }
         } 
     }
 }

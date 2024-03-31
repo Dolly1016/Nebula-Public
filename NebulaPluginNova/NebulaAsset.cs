@@ -20,7 +20,10 @@ public enum NebulaAudioClip {
     Trapper3s,
     TrapperKillTrap,
     Camera,
-    FakeSabo
+    FakeSabo,
+    Destroyer1,
+    Destroyer2,
+    Destroyer3,
 }
 
 [NebulaPreLoad]
@@ -56,6 +59,9 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.TrapperKillTrap] = AssetBundle.LoadAsset<AudioClip>("PlaceKillTrap.wav").MarkDontUnload();
         audioMap[NebulaAudioClip.Camera] = AssetBundle.LoadAsset<AudioClip>("Camera.mp3").MarkDontUnload();
         audioMap[NebulaAudioClip.FakeSabo] = AssetBundle.LoadAsset<AudioClip>("FakeSabo.ogg").MarkDontUnload();
+        audioMap[NebulaAudioClip.Destroyer1] = AssetBundle.LoadAsset<AudioClip>("Destroyer1.ogg").MarkDontUnload();
+        audioMap[NebulaAudioClip.Destroyer2] = AssetBundle.LoadAsset<AudioClip>("Destroyer2.ogg").MarkDontUnload();
+        audioMap[NebulaAudioClip.Destroyer3] = AssetBundle.LoadAsset<AudioClip>("Destroyer3.ogg").MarkDontUnload();
 
         PaparazzoShot = AssetBundle.LoadAsset<GameObject>("PhotoObject").MarkDontUnload();
     }
@@ -153,7 +159,9 @@ public static class NebulaAsset
         SoundManager.Instance.PlaySound(audioMap[clip],false,0.8f);
     }
 
-    public static void PlaySE(NebulaAudioClip clip,Vector2 pos,float minDistance,float maxDistance)
+    public static void PlaySE(NebulaAudioClip clip, Vector2 pos, float minDistance, float maxDistance, float volume = 1f) => PlaySE(audioMap[clip], pos, minDistance, maxDistance);
+
+    public static void PlaySE(AudioClip clip,Vector2 pos,float minDistance,float maxDistance, float volume = 1f)
     {
         var audioSource = UnityHelper.CreateObject<AudioSource>("SEPlayer", null, pos);
 
@@ -161,12 +169,12 @@ public static class NebulaAsset
         v = 1f - v;
         v = v * v;
         v = 1f - v;
-        audioSource.volume = v;
+        audioSource.volume = v * volume;
 
         audioSource.transform.position = pos;
         audioSource.priority = 0;
         audioSource.spatialBlend = 1;
-        audioSource.clip = audioMap[clip];
+        audioSource.clip = clip;
         audioSource.loop = false;
         audioSource.playOnAwake = false;
         audioSource.maxDistance = maxDistance;

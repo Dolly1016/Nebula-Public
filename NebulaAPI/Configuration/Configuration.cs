@@ -4,8 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Media;
 
 namespace Virial.Configuration;
+
+public class ConfigurationTag
+{
+    public Media.Image Image { get; private init; }
+    public GUIWidgetSupplier Overlay { get; private init; }
+
+    public ConfigurationTag(Image image, GUIWidgetSupplier overlay)
+    {
+        Image = image;
+        Overlay = overlay;
+    }
+    
+}
 
 public interface Configuration
 {

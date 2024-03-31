@@ -26,6 +26,8 @@ public class Sheriff : ConfigurableStandardRole
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
+
         KillCoolDownOption = new(RoleConfig, "killCoolDown", KillCoolDownConfiguration.KillCoolDownType.Relative, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 25f, -5f, 1f);
         NumOfShotsOption = new(RoleConfig, "numOfShots", null, 1, 15, 3, 3);
         CanKillMadmateOption = new(RoleConfig, "canKillMadmate", null, false, false);

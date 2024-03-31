@@ -12,10 +12,6 @@ using UnityEngine;
 
 namespace Nebula.Modules;
 
-public class MyInteraction : InteractiveBase
-{
-}
-
 public class CommandConsole
 {
     TextField myInput;
@@ -43,19 +39,15 @@ public class CommandConsole
                 return true;
             }
 
-            var bubble = new ConsoleBubble(text);
-            log.PushBubble(bubble);
+            var myLogger = new NebulaCommandLogger(text);
+            log.Push(myLogger);
             var args = text
             .Replace("(", " ( ").Replace(")", " ) ")
             .Replace("[", " [ ").Replace("]", " ] ").Split(' ').Where(str => str.Length != 0);
             
             IEnumerator CoExecute()
             {
-                Reference<ICommandArgument> reference = new();
-                yield return CommandManager.Execute(bubble!, args!.ToArray(),reference);
-                yield return reference.Value?.Evaluate(bubble);
-                var result = reference.Value?.GetStringEnumerator(bubble!);
-                foreach (var r in result ?? Array.Empty<string>()) bubble?.PushResponse(r);
+                yield return CommandManager.CoExecute(args!.ToArray(), ThroughCommandModifier.Modifier, null, myLogger).CoWait();
             }
             NebulaManager.Instance.StartCoroutine(CoExecute().WrapToIl2Cpp());
 

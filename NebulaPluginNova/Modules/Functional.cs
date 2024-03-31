@@ -155,6 +155,11 @@ public class FunctionalEnvironment
             Arguments[baseTable.GetValueOrRaw(entry.Key).AsString()] = baseTable.GetValueOrRaw(entry.Value);
         }
     }
+
+    public void TryRegister(string name, Func<IFunctionalVariable> variable)
+    {
+        if (!Arguments.ContainsKey(name)) Arguments[name] = variable.Invoke();
+    }
 }
 
 static public class ArgumentTableHelper
