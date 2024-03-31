@@ -8,11 +8,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPUAffinityEditor", "CPUAff
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NebulaPluginNova", "NebulaPluginNova\NebulaPluginNova.csproj", "{2412DC6B-C621-45B1-AB38-DDD784712818}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NebulaAPI", "NebulaAPI\NebulaAPI.csproj", "{1FFF1FD1-FED0-430C-BAEB-13D64B28B6C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NebulaAPI", "NebulaAPI\NebulaAPI.csproj", "{1FFF1FD1-FED0-430C-BAEB-13D64B28B6C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NebulaBuilder", "NebulaBuilder\NebulaBuilder.csproj", "{DACDCF63-1B74-4F6F-8845-77A17FFDDFE8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NebulaBuilder", "NebulaBuilder\NebulaBuilder.csproj", "{DACDCF63-1B74-4F6F-8845-77A17FFDDFE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NebulaBuilder", "NebulaBuilder\NebulaBuilder.csproj", "{DACDCF63-1B74-4F6F-8845-77A17FFDDFE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
