@@ -18,6 +18,10 @@ static public class Commands
         CommandManager.RegisterCommand(new LetCommand(), "let");
         CommandManager.RegisterCommand(new LetsCommand(), "lets", "scope");
         CommandManager.RegisterCommand(new EchoCommand(), "echo");
+        CommandManager.RegisterCommand(new KillCommand(), "kill");
+        CommandManager.RegisterCommand(new ReviveCommand(), "revive");
+        CommandManager.RegisterCommand(new EntityCommand(), "entity");
+        CommandManager.RegisterCommand(new DebugCommand(), "debug");
 
         /*
         CommandManager.RegisterCommand(new Command((bubble, args, result) =>

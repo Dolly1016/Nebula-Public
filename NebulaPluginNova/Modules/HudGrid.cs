@@ -58,7 +58,12 @@ public class HudGrid : MonoBehaviour
         {
             Contents[i].RemoveAll(c => !c.Value);
 
-            Contents[i].Sort((c1, c2) => c2.Value.Priority - c1.Value.Priority);
+            Contents[i].Sort((c1, c2) => { 
+                int num = c2.Value.Priority - c1.Value.Priority;
+                if (num == 0) num = c1.Value.SubPriority - c2.Value.SubPriority;
+                return num;
+            });
+
 
             if (Contents[i].Count == 0) continue;
 
@@ -101,6 +106,9 @@ public class HudGrid : MonoBehaviour
 
         if (content.Value.IsStaticContent) content.Value.transform.SetParent(NebulaGameManager.Instance!.HudGrid.StaticButtonsHolder);
     }
+
+    private int availableSubPriority = 0;
+    public int AvailableSubPriority { get { return availableSubPriority++; } }
 }
 
 public class HudContent : MonoBehaviour
@@ -114,7 +122,9 @@ public class HudContent : MonoBehaviour
 
     //Priorityの大きいものから配置される
     public int Priority { get => Math.Max(0, (OccupiesLine ? 20000 : onKillButtonPos ? 10000 : 0) + priority); }
+    public int SubPriority => subPriority;
     private int priority;
+    private int subPriority;
     private bool onKillButtonPos;
     private bool isLeftSide;
     private bool isDirty = true;
@@ -132,6 +142,12 @@ public class HudContent : MonoBehaviour
         this.priority = priority;
         return this;
     }
+    public HudContent UpdateSubPriority()
+    {
+        this.subPriority = NebulaGameManager.Instance?.HudGrid.AvailableSubPriority ?? 0;
+        return this;
+    }
+
     public void SetSide(bool asLeftSide)
     {
         isLeftSide = asLeftSide;
@@ -171,6 +187,8 @@ public class HudContent : MonoBehaviour
         obj.IsStaticContent = isStaticContent;
 
         NebulaGameManager.Instance?.HudGrid.RegisterContent(obj,isLeftSide);
+        obj.UpdateSubPriority();
+
         return obj;
     }
 }

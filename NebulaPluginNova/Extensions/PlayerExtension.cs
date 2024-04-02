@@ -316,7 +316,7 @@ public static class PlayerExtension
     }
 
     static RemoteProcess<(byte sourceId, byte targetId, Vector2 revivePos, bool cleanDeadBody,bool recordEvent)> RpcRivive = new(
-        "Rivive",
+        "Revive",
         (message, _) =>
         {
             var player = Helpers.GetPlayer(message.targetId);

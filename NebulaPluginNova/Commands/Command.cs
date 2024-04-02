@@ -98,23 +98,24 @@ public class StatementCommandToken : ICommandToken
         this.tokens = arguments;
     }
 
-    CoTask<ICommandToken> ICommandToken.EvaluateHere(ICommandLogger logger, ICommandExecutor executor, ICommandModifier argumentTable)
+    CoTask<ICommandToken> ICommandToken.EvaluateHere(CommandEnvironment env)
     {
-        return CommandManager.CoExecute(tokens, argumentTable, executor, logger);
-        
+        return new CoImmediateTask<ICommandToken>(new StatementCommandToken(new ReadOnlyArray<ICommandToken>(tokens.Select(t => env.ArgumentTable.ApplyTo(t)))));
     }
 
-    CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(ICommandLogger logger, ICommandExecutor executor, ICommandModifier argumentTable)
+    CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(CommandEnvironment env)
     {
-        var commandTask = CommandManager.CoExecute(tokens, argumentTable, executor, logger);
-        return new CoChainedTask<IEnumerable<ICommandToken>, ICommandToken>(commandTask, result => result.AsEnumerable(logger, executor, argumentTable));
+        var commandTask = CommandManager.CoExecute(tokens, env);
+        return new CoChainedTask<IEnumerable<ICommandToken>, ICommandToken>(commandTask, result => result.AsEnumerable(env));
     }
 
-    CoTask<T> ICommandToken.AsValue<T>(ICommandLogger logger, ICommandExecutor executor, ICommandModifier argumentTable)
+    CoTask<T> ICommandToken.AsValue<T>(CommandEnvironment env)
     {
-        var commandTask = CommandManager.CoExecute(tokens, argumentTable, executor, logger);
-        return new CoChainedTask<T, ICommandToken>(commandTask, result => result.AsValue<T>(logger, executor, argumentTable));
+        var commandTask = CommandManager.CoExecute(tokens, env);
+        return new CoChainedTask<T, ICommandToken>(commandTask, result => result.AsValue<T>(env));
     }
+
+    IExecutable? ICommandToken.ToExecutable(CommandEnvironment env) => new CommandExecutable(this, env);
 }
 
 
@@ -129,8 +130,46 @@ public class CommandManager
         foreach(var n in name) commandMap[n] = command;
     }
 
-    static private IReadOnlyArray<ICommandToken> ParseCommand(Stack<string> args)
+
+    static private IReadOnlyArray<ICommandToken> ParseCommand(Stack<string> args, ICommandLogger logger)
     {
+        string ReplaceSpacedCharacter(string str, params char[] character)
+        {
+            foreach (char c in character)
+                str = str.Replace(" " + c + " ", c.ToString());
+            return str;
+        }
+
+        IReadOnlyArray<(ICommandToken label, ICommandToken value)> ParseStructElements(Stack<string> args)
+        {
+            IReadOnlyArray<ICommandToken>? storedLabel = null;
+            List<(ICommandToken label, ICommandToken value)> members = new();
+            while (args.Count > 0)
+            {
+                var val = ParseCommand(args, logger);
+                if (val.Count == 0) break;
+                if (val.Count != 1)
+                {
+                    logger.Push(CommandLogLevel.Error, "Tokens in struct tokens must be value.");
+                }
+
+                var delimiter = args.Pop();
+                if (delimiter is ":")
+                    storedLabel = val;
+                else if (delimiter is "," or "}")
+                {
+                    if (storedLabel != null)
+                    {
+                        members.Add((storedLabel[0], val[0]));
+                        storedLabel = null;
+                    }
+                }
+
+                if (delimiter is "}") break;
+            }
+            return new ReadOnlyArray<(ICommandToken label, ICommandToken value)>(members.ToArray());
+        }
+
         string ParseTextToken()
         {
             List<string> sb = new();
@@ -146,7 +185,9 @@ public class CommandManager
                 else
                     sb.Add(str);
             }
-            return sb.Join(null," ").Replace(" ( ", "(").Replace(" ) ", ")").Replace(" [ ", "[").Replace(" ] ", "]");
+
+            
+            return ReplaceSpacedCharacter(sb.Join(null," "),'(',')', '[', ']', '{', '}', ':', ',');
         }
 
         List<ICommandToken> result = new();
@@ -154,15 +195,22 @@ public class CommandManager
         {
             var arg = args.Pop();
             if (arg == "(")
-                result.Add(new StatementCommandToken(ParseCommand(args)));
+                result.Add(new StatementCommandToken(ParseCommand(args, logger)));
             else if (arg == "[")
-                result.Add(new ArrayCommandToken(ParseCommand(args)));
-            else if(arg is ")" or "]")
+                result.Add(new ArrayCommandToken(ParseCommand(args, logger)));
+            else if (arg == "{")
+                result.Add(new StructCommandToken(ParseStructElements(args)));
+            else if (arg is ")" or "]")
                 return new ReadOnlyArray<ICommandToken>(result.ToArray());
+            else if (arg is "," or ":" or "}")
+            {
+                args.Push(arg);
+                return new ReadOnlyArray<ICommandToken>(result.ToArray());
+            }
             else if(arg.StartsWith("\""))
             {
                 args.Push(arg.Substring(1));
-                result.Add(new StringCommandToken(ParseTextToken(), false));
+                break;
             }
             else
                 result.Add(
@@ -175,39 +223,39 @@ public class CommandManager
         }
         return new ReadOnlyArray<ICommandToken>(result.ToArray());
     }
-    static public CoTask<ICommandToken> CoExecute(string[] args, ICommandModifier modifier, ICommandExecutor executor, ICommandLogger logger)
+    static public CoTask<ICommandToken> CoExecute(string[] args, CommandEnvironment env)
     {
         var argStack = new Stack<string>(args.Reverse());
-        return CoExecute(ParseCommand(argStack),  modifier, executor, logger);
+        return CoExecute(ParseCommand(argStack, env.Logger),  env);
     }
 
-    static public CoTask<ICommandToken> CoExecute(IReadOnlyArray<ICommandToken> args, ICommandModifier argumentTable, ICommandExecutor executor, ICommandLogger logger)
+    static public CoTask<ICommandToken> CoExecute(IReadOnlyArray<ICommandToken> args, CommandEnvironment env)
     {
         if (args.Count == 0)
         {
-            logger.PushError("Invalid input (Length: 0)");
-            return new CoImmediateErrorTask<ICommandToken>(logger);
+            env.Logger.PushError("Invalid input (Length: 0)");
+            return new CoImmediateErrorTask<ICommandToken>(env.Logger);
         }
         else
         {
             IEnumerator CoExecuteCommand(CoBuiltInTask<ICommandToken> task)
             {
-                var header = args[0].AsValue<string>(logger, executor, argumentTable);
+                var header = args[0].AsValue<string>(env);
                 yield return header.CoWait();
 
                 if (header.IsFailed)
                 {
-                    logger.PushError($"Unevaluable header.");
+                    env.Logger.PushError($"Unevaluable header.");
                     yield break;
                 }
 
                 if (TryGetCommand(header.Result, out var command))
                 {
-                    var commandTask = command.Evaluate(header.Result, args.Skip(1), argumentTable, executor, logger);
+                    var commandTask = command.Evaluate(header.Result, args.Skip(1), env);
                     yield return commandTask.CoWait();
                     if (commandTask.IsFailed)
                     {
-                        logger.PushError($"An error occurred while executing the command.");
+                        env.Logger.PushError($"An error occurred while executing the command.");
                     }
                     else
                     {
@@ -217,7 +265,7 @@ public class CommandManager
                 }
                 else
                 {
-                    logger.PushError($"No such command found \"{header.Result}\".");
+                    env.Logger.PushError($"No such command found \"{header.Result}\".");
                     yield break;
                 }
             }

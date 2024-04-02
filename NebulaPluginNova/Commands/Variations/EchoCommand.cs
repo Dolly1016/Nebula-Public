@@ -15,13 +15,13 @@ public class EchoCommand : ICommand
         return [];
     }
 
-    CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, ICommandModifier argumentTable, ICommandExecutor executor, ICommandLogger logger)
+    CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
     {
         if (arguments.Count != 1)
-            return new CoImmediateErrorTask<ICommandToken>(logger, label + " <value>");
+            return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " <value>");
 
-        return argumentTable.ApplyTo(arguments[0])
-            .AsEnumerable(logger, executor, argumentTable).As<string>(logger, argumentTable, executor)
-            .Do(str => logger.Push(str));
+        return arguments[0]
+            .AsEnumerable(env).As<string>(env)
+            .Do(str => env.Logger.Push(str));
     }
 }

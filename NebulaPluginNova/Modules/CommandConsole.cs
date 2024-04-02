@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -41,13 +42,15 @@ public class CommandConsole
 
             var myLogger = new NebulaCommandLogger(text);
             log.Push(myLogger);
-            var args = text
-            .Replace("(", " ( ").Replace(")", " ) ")
-            .Replace("[", " [ ").Replace("]", " ] ").Split(' ').Where(str => str.Length != 0);
             
+            var args = Regex.Replace(text, "(?<=[^:]):(?=[^:])", " : ").Replace(",", " , ")
+            .Replace("(", " ( ").Replace(")", " ) ")
+            .Replace("[", " [ ").Replace("]", " ] ")
+            .Replace("{", " { ").Replace("}", " } ").Split(' ').Where(str => str.Length != 0);
+
             IEnumerator CoExecute()
             {
-                yield return CommandManager.CoExecute(args!.ToArray(), ThroughCommandModifier.Modifier, null, myLogger).CoWait();
+                yield return CommandManager.CoExecute(args!.ToArray(), new (null!, ThroughCommandModifier.Modifier, myLogger)).CoWait();
             }
             NebulaManager.Instance.StartCoroutine(CoExecute().WrapToIl2Cpp());
 

@@ -17,23 +17,23 @@ public class LetCommand : ICommand
         return [];
     }
 
-    CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, ICommandModifier argumentTable, ICommandExecutor executor, ICommandLogger logger)
+    CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
     {
         if(arguments.Count < 3)
-            return new CoImmediateErrorTask<ICommandToken>(logger, label + " <argument> <value> <expression>");
+            return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " <argument> <value> <expression>");
         
-        return arguments[0].AsValue<string>(logger, executor, argumentTable)
+        return arguments[0].AsValue<string>(env)
             .Chain(argument =>
             {
                 //引数の値を評価
-                var value = argumentTable.ApplyTo(arguments[1]);
+                var value = env.ArgumentTable.ApplyTo(arguments[1]);
 
                 //新たな環境を生成
-                var letModifier = new LetCommandModifier(argument, value, argumentTable);
+                var letModifier = new LetCommandModifier(argument, value, env.ArgumentTable);
 
                 //新たな環境下で中のコマンドを実行
-                return CommandManager.CoExecute(arguments.Skip(2), letModifier, executor, logger);
-            }, () => logger.PushError("Uninterpretable variable name error."));
+                return CommandManager.CoExecute(arguments.Skip(2), env.SwitchArgumentTable(letModifier));
+            }, () => env.Logger.PushError("Uninterpretable variable name error."));
     }
 }
 
@@ -44,10 +44,10 @@ public class LetsCommand : ICommand
         return [];
     }
 
-    CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, ICommandModifier argumentTable, ICommandExecutor executor, ICommandLogger logger)
+    CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
     {
         if (arguments.Count % 2 == 0)
-            return new CoImmediateErrorTask<ICommandToken>(logger, label + " <argument1> <value1> ... <argumentN> <valueN> ( <expression> )");
+            return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " <argument1> <value1> ... <argumentN> <valueN> ( <expression> )");
 
         IEnumerator CoExecute(CoBuiltInTask<ICommandToken> myResult)
         {
@@ -55,21 +55,21 @@ public class LetsCommand : ICommand
             List<(string argument, ICommandToken token)> args = new();
             while (i + 1 < arguments.Count)
             {
-                var task = arguments[i].AsValue<string>(logger, executor, argumentTable);
+                var task = arguments[i].AsValue<string>(env);
                 yield return task.CoWait();
                 if (task.IsFailed)
                 {
-                    logger.PushError("Uninterpretable variable name error.");
+                    env.Logger.PushError("Uninterpretable variable name error.");
                     myResult.IsFailed = true;
                     yield break;
                 }
-                args.Add((task.Result, argumentTable.ApplyTo(arguments[i + 1])));
+                args.Add((task.Result, env.ArgumentTable.ApplyTo(arguments[i + 1])));
 
                 i += 2;
             }
 
-            var letModifier = new LetsCommandModifier(args, argumentTable);
-            var letTask = arguments[arguments.Count - 1].EvaluateHere(logger, executor, letModifier);
+            var letModifier = new LetsCommandModifier(args, env.ArgumentTable);
+            var letTask = arguments[arguments.Count - 1].EvaluateHere(env.SwitchArgumentTable(letModifier));
             yield return letTask.CoWait();
             if (letTask.IsFailed)
             {

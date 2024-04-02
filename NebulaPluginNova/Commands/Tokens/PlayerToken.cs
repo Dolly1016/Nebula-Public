@@ -15,20 +15,16 @@ public class PlayerCommandToken : ICommandToken
 {
     private GamePlayer player;
 
-    /// <summary>
-    /// 配列トークンを生成します。
-    /// </summary>
-    /// <param name="text"></param>
     public PlayerCommandToken(GamePlayer player)
     {
         this.player = player;
     }
 
-    CoTask<T> ICommandToken.AsValue<T>(ICommandLogger logger, ICommandExecutor executor, ICommandModifier argumentTable)
+    CoTask<T> ICommandToken.AsValue<T>(CommandEnvironment env)
     {
         var type = typeof(T);
 
-        if(type == typeof(GamePlayer) || type == typeof(PlayerModInfo))
+        if(type == typeof(GamePlayer))
         {
             return new CoImmediateTask<T>(Unsafe.As<GamePlayer, T>(ref player));
         }else if(type == typeof(string))
@@ -42,6 +38,6 @@ public class PlayerCommandToken : ICommandToken
             return new CoImmediateTask<T>(Unsafe.As<byte, T>(ref id));
         }
 
-        return new CoImmediateErrorTask<T>(logger);
+        return new CoImmediateErrorTask<T>(env.Logger);
     }
 }

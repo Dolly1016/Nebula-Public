@@ -29,8 +29,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<Reference Include="..\..\Among Us\BepInEx\core\*.dll" />
-	<Reference Include="..\..\Among Us\BepInEx\interop\*.dll" />
+	<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
+	<Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
   </ItemGroup>
 	
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">

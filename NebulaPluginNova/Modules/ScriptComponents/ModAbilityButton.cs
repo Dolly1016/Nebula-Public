@@ -1,15 +1,51 @@
 ﻿using AmongUs.GameOptions;
 using Epic.OnlineServices.Lobby;
+using Nebula.Commands.Variations;
+using System.Reflection.Emit;
 using UnityEngine;
+using Virial.Command;
 using Virial.Compat;
 using Virial.Components;
 using Virial.Game;
 using Virial.Media;
+using Virial.Text;
 
 namespace Nebula.Modules.ScriptComponents;
 
+[NebulaPreLoad]
 public class ModAbilityButton : INebulaScriptComponent, Virial.Components.AbilityButton, IGameEntity
 {
+    public class AbilityButtonStructure
+    {
+        public bool isLeftSide = false; 
+        public bool showAlways = false;
+        public bool arrangedAsKillButton = false;
+        public int priority = 0;
+        public IExecutable? onClick = null;
+        public IExecutable? onSubClick = null;
+        public TextComponent? label = null;
+    }
+    public static void Load()
+    {
+        EntityCommand.RegisterEntityDefinition("button", EntityCommand.GenerateDefinition(
+            new Virial.Command.CommandStructureConverter<AbilityButtonStructure>()
+            .Add<bool>("isLeftSide", (structure, val) => structure.isLeftSide = val)
+            .Add<bool>("isRightSide", (structure, val) => structure.isLeftSide = !val)
+            .Add<bool>("always", (structure, val) => structure.showAlways = val)
+            .Add<bool>("asKillButton", (structure, val) => structure.arrangedAsKillButton = val)
+            .Add<int>("priority", (structure, val) => structure.priority = Mathf.Clamp(val, 0, 9999))
+            .Add<string>("rawLabel", (structure, val) => structure.label = new RawTextComponent(val))
+            .Add<string>("localizedLabel", (structure, val) => structure.label = new TranslateTextComponent(val))
+            .Add<IExecutable>("action", (structure, val) => structure.onClick = val)
+            .Add<IExecutable>("aidAction", (structure, val) => structure.onSubClick = val)
+            , () => new AbilityButtonStructure(), val =>
+            {
+                var button = new ModAbilityButton(val.isLeftSide, val.arrangedAsKillButton, val.priority, val.showAlways);
+                if(val.onClick != null) button.OnClick = b => NebulaManager.Instance.StartCoroutine(val.onClick!.CoExecute([]).CoWait().WrapToIl2Cpp());
+                if(val.onSubClick != null) button.OnSubAction = b => NebulaManager.Instance.StartCoroutine(val.onSubClick!.CoExecute([]).CoWait().WrapToIl2Cpp());
+                button.SetRawLabel(val.label?.GetString() ?? "button");
+            }));
+    }
 
     public ActionButton VanillaButton { get; private set; }
 
@@ -32,7 +68,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
     private VirtualInput? keyCode { get; set; } = null;
     private VirtualInput? subKeyCode { get; set; } = null;
 
-    internal ModAbilityButton(bool isLeftSideButton = false, bool isArrangedAsKillButton = false,int priority = 0)
+    internal ModAbilityButton(bool isLeftSideButton = false, bool isArrangedAsKillButton = false,int priority = 0, bool alwaysShow = false)
     {
 
         VanillaButton = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton, HudManager.Instance.KillButton.transform.parent);
@@ -45,8 +81,10 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         passiveButton.OnClick.AddListener(() => DoClick());
 
         var gridContent = VanillaButton.gameObject.GetComponent<HudContent>();
+        gridContent.UpdateSubPriority();
         gridContent.MarkAsKillButtonContent(isArrangedAsKillButton);
         gridContent.SetPriority(priority);
+        gridContent.IsStaticContent = alwaysShow;
         NebulaGameManager.Instance?.HudGrid.RegisterContent(gridContent, isLeftSideButton);
 
         SetLabelType(Virial.Components.AbilityButton.LabelType.Standard);
@@ -176,9 +214,11 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         return this;
     }
 
-    public ModAbilityButton SetLabel(string translationKey)
+    public ModAbilityButton SetLabel(string translationKey) => SetRawLabel(Language.Translate("button.label." + translationKey));
+    
+    public ModAbilityButton SetRawLabel(string rawText)
     {
-        VanillaButton.buttonLabelText.text = Language.Translate("button.label." + translationKey);
+        VanillaButton.buttonLabelText.text = rawText;
         return this;
     }
 

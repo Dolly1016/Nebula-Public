@@ -43,6 +43,14 @@ public static class ManagedEffects
         yield return Effects.All(coroutines);
     }
 
+    static public void BlockForWaiting(this IEnumerator enumerator)
+    {
+        while (enumerator.MoveNext())
+        {
+            if (enumerator.Current is IEnumerator) BlockForWaiting((enumerator.Current as IEnumerator)!);
+        }
+    }
+
     static public IEnumerator Smooth(this Transform transform, Vector3 goalLocalPosition, float duration)
     {
         float p = 0f;

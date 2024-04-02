@@ -7,8 +7,87 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using Steamworks;
 using Virial.Compat;
+using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
 
 namespace Virial.Command;
+
+public class CommandStructure
+{
+    private Dictionary<string, ICommandToken> members;
+
+    internal CommandStructure(Dictionary<string, ICommandToken>? members = null) { this.members = members ?? new(); }
+
+    public ICommandToken this[string label] { get => members[label]; }
+
+    public bool TryGetValue(string label, [MaybeNullWhen(false)] out ICommandToken value) => members.TryGetValue(label, out value);
+    public IEnumerable<string> Labels => members.Keys;
+}
+
+public static class CommandStructureHelper
+{
+    public static CoTask<T> ConvertTo<T>(this CoTask<CommandStructure> task, CommandStructureConverter<T> converter, T target, CommandEnvironment env)
+    {
+        return converter.ChainConverterTo(task, target, env);
+    }
+}
+
+public class CommandStructureConverter<T>
+{
+    List<Func<T,CommandEnvironment, CommandStructure, CoTask<ICommandToken>>> suppliers = new();
+
+    /// <summary>
+    /// 親クラスの変換器の定義をそのまま継承します。
+    /// </summary>
+    /// <typeparam name="V">親クラス</typeparam>
+    /// <param name="converter"></param>
+    /// <returns></returns>
+    public CommandStructureConverter<T> Inherit<V>(CommandStructureConverter<V> converter)
+    {
+        //親の型でないなら無視する
+        if (typeof(T).IsAssignableTo(typeof(V)))
+        {
+            suppliers.Add((t, env, structure) =>
+                converter.ChainConverterTo(new CoImmediateTask<CommandStructure>(structure), Unsafe.As<T, V>(ref t), env).Discard<ICommandToken, V>());
+        }
+
+        return this;
+    }
+
+    public CommandStructureConverter<T> Add<V>(string label, Action<T,V> setter)
+    {
+        suppliers.Add((t, env, structure) =>
+        {
+            if (structure.TryGetValue(label, out var token))
+            {
+                if (typeof(V) == typeof(IExecutable))
+                {
+                    var executable = token.ToExecutable(env);
+                    if(executable != null)
+                        return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token).Action(_ => setter.Invoke(t, Unsafe.As<IExecutable, V>(ref executable)));
+                    return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token);
+                }
+                return token.AsValue<V>(env).Action(v => setter.Invoke(t, v));
+            }
+            else
+                return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token);
+        });
+        return this;
+    }
+
+    public CoTask<T> ChainConverterTo(CoTask<CommandStructure> task, T target, CommandEnvironment env)
+    {
+        return task.DoParallel(suppliers
+            .Select<Func<T, CommandEnvironment, CommandStructure, CoTask<ICommandToken>>, Func<CommandStructure, CoTask<ICommandToken>>>
+            (s => (CommandStructure structure) => s.Invoke(target, env, structure)).ToArray())
+            .ChainFast(_ => target);
+    }
+}
+
+public record CommandEnvironment(ICommandExecutor Executor, ICommandModifier ArgumentTable, ICommandLogger Logger)
+{
+    public CommandEnvironment SwitchArgumentTable(ICommandModifier newTable) => new CommandEnvironment(Executor, newTable, Logger);
+}
 
 /// <summary>
 /// コマンドの実行者を表します。
@@ -119,7 +198,7 @@ public interface ICommand
     /// <param name="argumentTable">与えられた引数テーブル</param>
     /// <param name="executor">コマンドの実行者</param>
     /// <returns></returns>
-    CoTask<ICommandToken> Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, ICommandModifier argumentTable, ICommandExecutor executor, ICommandLogger logger);
+    CoTask<ICommandToken> Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env);
 
     /// <summary>
     /// 入力中の文字を補完する候補を返します。
@@ -131,6 +210,14 @@ public interface ICommand
     /// <returns></returns>
     IEnumerable<CommandComplement> Complement(string label, IReadOnlyArray<ICommandToken> arguments, string? last, ICommandExecutor executor);
 }
+
+/// <summary>
+/// コマンド文節の定義です。
+/// </summary>
+/// <param name="label"></param>
+/// <param name="length"></param>
+/// <param name="processor"></param>
+public record CommandClause(string label, int length, TaskSupplier<bool, IReadOnlyArray<ICommandToken>> processor);
 
 /// <summary>
 /// コマンドに関するコーディングをサポートする関数を提供します。
@@ -148,4 +235,44 @@ public static class NebulaCommandHelper
     /// </summary>
     public static IEnumerable<CommandComplement> PlayersNameComplement(Predicate<Game.Player>? predicate = null) =>
         NebulaAPI.CurrentGame?.GetAllPlayers().Where(p => predicate?.Invoke(p) ?? true).Select(p => new CommandComplement(p.Name, p.Name.Contains(' '))) ?? Enumerable.Empty<CommandComplement>();
+
+    public static CoTask<bool> InterpretClause(IReadOnlyArray<ICommandToken> tokens, IEnumerable<CommandClause> clauses, CommandEnvironment env)
+    {
+        IEnumerator CoExecute(CoBuiltInTask<bool> myTask)
+        {
+            myTask.Result = true;
+            for (int i= 0;i<tokens.Count;i++)
+            {
+                var token = tokens[i];
+                var labelTask = token.AsValue<string>(env);
+                yield return labelTask.CoWait();
+                if (labelTask.IsFailed)
+                {
+                    env.Logger.PushError("Unknown label was received at " + i + ".");
+                    myTask.IsFailed = true;
+                    break;
+                }
+                var clause = clauses.FirstOrDefault(c => c.label == labelTask.Result);
+
+                if(clause == null)
+                {
+                    env.Logger.PushError($"Unresolvable label \"{labelTask.Result}\".");
+                    myTask.IsFailed = true;
+                    break;
+                }
+
+                if(clause.length > tokens.Count - i)
+                {
+                    env.Logger.PushError($"Clause \"{labelTask.Result}\" requires {clause.length} tokens.");
+                    myTask.IsFailed = true;
+                    break;
+                }
+
+                var processTask = clause.processor.Invoke(tokens.Slice(i + 1, clause.length));
+                i += clause.length;
+                yield return processTask.CoWait();
+            }
+        }
+        return new CoBuiltInTask<bool>(CoExecute);
+    }
 }

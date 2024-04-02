@@ -201,6 +201,10 @@
 "role.general.ventUses.short" : "Uses"
 "role.general.common" : "#"
 
+"role.category.crewmate" : "Crewmate Roles"
+"role.category.impostor" : "Impostor Roles"
+"role.category.neutral" : "Neutral Roles"
+
 # Complex Roles
 
 "role.guesser.numOfGuess" : "Num Of Guess"

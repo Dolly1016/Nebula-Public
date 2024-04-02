@@ -267,6 +267,9 @@ class MeetingStartPatch
 
         foreach(var p in MeetingHud.Instance.playerStates)
         {
+            p.PlayerIcon.cosmetics.hat.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            p.PlayerIcon.cosmetics.hat.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            p.PlayerIcon.cosmetics.visor.Image.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             p.PlayerIcon.cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             p.PlayerIcon.cosmetics.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             p.XMark.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
@@ -295,9 +298,15 @@ class MeetingStartPatch
 
             player.ColorBlindName.gameObject.SetActive(false);
 
+            //色テキストをプレイヤーアイコンそばに移動
+            var localPos = player.ColorBlindName.transform.localPosition;
+            localPos.x = -0.947f;
+            localPos.z -= 0.15f;
+            player.ColorBlindName.transform.localPosition = localPos;
+
             var roleText = GameObject.Instantiate(player.NameText, player.transform);
             roleText.transform.localPosition = new Vector3(0.3384f, -0.13f, -0.02f);
-            roleText.transform.localScale = new Vector3(0.57f,0.57f);
+            roleText.transform.localScale = new Vector3(0.57f, 0.57f);
             roleText.rectTransform.sizeDelta += new Vector2(0.35f, 0f);
 
             allContents.Add(new() { Player = NebulaGameManager.Instance!.GetModPlayerInfo(player.TargetPlayerId)!, NameText = player.NameText, RoleText = roleText });
@@ -333,7 +342,6 @@ class MeetingStartPatch
         __instance.StartCoroutine(CoUpdate().WrapToIl2Cpp());
     }
 }
-
 
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Update))]
@@ -409,6 +417,10 @@ class MeetingClosePatch
 { 
     public static void Postfix(MeetingHud __instance)
     {
+        //ベント内のプレイヤー情報をリセットしておく
+        VentilationSystem? ventilationSystem = ShipStatus.Instance.Systems[SystemTypes.Ventilation].TryCast<VentilationSystem>();
+        if (ventilationSystem != null) ventilationSystem.PlayersInsideVents.Clear();
+
         GameEntityManager.Instance?.AllEntities.Do(e => e.OnStartExileCutScene());
         NebulaManager.Instance.CloseAllUI();
     }
@@ -485,8 +497,11 @@ class VoteAreaPatch
             __instance.PlayerIcon.cosmetics.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
 
             __instance.PlayerIcon.cosmetics.hat.FrontLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
+            __instance.PlayerIcon.cosmetics.hat.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.hat.BackLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
+            __instance.PlayerIcon.cosmetics.hat.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.visor.Image.gameObject.AddComponent<ZOrderedSortingGroup>();
+            __instance.PlayerIcon.cosmetics.visor.Image.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.skin.layer.gameObject.AddComponent<ZOrderedSortingGroup>();
             __instance.PlayerIcon.cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             __instance.PlayerIcon.cosmetics.currentBodySprite.BodySprite.gameObject.AddComponent<ZOrderedSortingGroup>();

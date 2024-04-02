@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Il2CppSystem.CodeDom.Compiler;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 
 namespace Virial.Command;
 
@@ -31,6 +32,8 @@ public interface CoTask<T>
 /// <returns></returns>
 public delegate CoTask<T> TaskSupplier<T, V>(V input);
 
+public delegate CoTask<T> CoTaskChainer<T, V>(CoTask<V> input, CommandEnvironment env);
+
 public class CoImmediateTask<T> : CoTask<T>
 {
     public IEnumerator CoWait() { yield break; }
@@ -43,20 +46,35 @@ public class CoImmediateTask<T> : CoTask<T>
         Result = result;
     }
 }
+
+public class CoActionTask<T> : CoTask<T>
+{
+    public IEnumerator CoWait() { Result = myAction.Invoke(); yield break; }
+    public bool IsCompleted => true;
+    public bool IsFailed => false;
+    private Func<T> myAction;
+    public T Result { get; private set; }
+
+    public CoActionTask(Func<T> action)
+    {
+        myAction = action;
+    }
+}
+
 public class CoImmediateErrorTask<T> : CoTask<T>
 {
-    ICommandLogger logger;
+    ICommandLogger? logger;
     string? errorMessage;
     public IEnumerator CoWait()
     {
-        if (errorMessage != null) logger.PushError(errorMessage);
+        if (errorMessage != null) logger?.PushError(errorMessage);
         yield break;
     }
     public bool IsCompleted => true;
     public bool IsFailed => true;
     public T Result { get => throw new Exception("It is failed task."); }
 
-    public CoImmediateErrorTask(ICommandLogger logger, string? errorMessage = null)
+    public CoImmediateErrorTask(ICommandLogger? logger = null, string? errorMessage = null)
     {
         this.logger = logger;
         this.errorMessage = errorMessage;
@@ -145,6 +163,23 @@ public static class CoChainedTasksHelper
         return new CoChainedTask<T, S>(precedeTask, result => followerSupplier(result), onFailed);
     }
 
+    public static CoTask<T> ChainFast<T, S>(this CoTask<S> precedeTask, Func<S, T> followerSupplier, Action? onFailed = null)
+    {
+        return new CoChainedTask<T, S>(precedeTask, result => new CoImmediateTask<T>(followerSupplier.Invoke(result)), onFailed);
+    }
+
+    public static CoTask<T> ChainIf<T, S>(this CoTask<S> precedeTask, Dictionary<S,Func<CoTask<T>>> followers, Func<CoTask<T>>? defaultFollower = null, Action? onFailed = null)
+    {
+        return new CoChainedTask<T, S>(precedeTask, result =>
+        {
+            if (followers.TryGetValue(result, out var supplier))
+                return supplier.Invoke();
+            else
+                return defaultFollower?.Invoke() ?? new CoImmediateErrorTask<T>();
+            
+        }, onFailed);
+    }
+
     /// <summary>
     /// 直前のタスクの実行結果をもとに変換をするタスクです。
     /// 変数の適用を自前でしなければならない点に注意してください。
@@ -175,7 +210,25 @@ public static class CoChainedTasksHelper
         }, onFailed);
     }
 
-    public static CoTask<IEnumerable<T>> As<T>(this CoTask<IEnumerable<ICommandToken>> precedeTask, ICommandLogger logger, ICommandModifier argumentTable, ICommandExecutor executor, Action? onFailed = null) => precedeTask.Select(token => token.AsValue<T>(logger, executor, argumentTable), onFailed);
+    public static CoTask<IEnumerable<T>> SelectParallel<T, V>(this CoTask<IEnumerable<V>> precedeTask, TaskSupplier<T, V> supplier, Action? onFailed = null)
+    {
+        return new CoChainedTask<IEnumerable<T>, IEnumerable<V>>(precedeTask, result =>
+        {
+            IEnumerator CoExecute(CoBuiltInTask<IEnumerable<T>> myResult)
+            {
+                var tasks = result.ToArray().Select(r => supplier.Invoke(r));
+                yield return Effects.All(tasks.Select(t => t.CoWait().WrapToIl2Cpp()).ToArray());
+
+                myResult.Result = tasks.Where(t => !t.IsFailed).Select(t => t.Result);
+            }
+            return new CoBuiltInTask<IEnumerable<T>>(CoExecute);
+        }, onFailed);
+    }
+
+    public static CoTask<IEnumerable<T>> As<T>(this CoTask<IEnumerable<ICommandToken>> precedeTask, CommandEnvironment env, Action? onFailed = null) => precedeTask.Select(token => token.AsValue<T>(env), onFailed);
+    public static CoTask<IEnumerable<T>> AsValues<T>(this ICommandToken token, CommandEnvironment env, Action? onFailed = null) => token.AsEnumerable(env).As<T>(env, onFailed);
+    public static CoTask<IEnumerable<T>> AsValues<T>(this CoTask<ICommandToken> precedeTask, CommandEnvironment env, Action? onFailed = null) => precedeTask.Chain(token => token.AsValues<T>(env));
+    public static CoTask<IEnumerable<T>> AsParallel<T>(this CoTask<IEnumerable<ICommandToken>> precedeTask, CommandEnvironment env, Action? onFailed = null) => precedeTask.SelectParallel(token => token.AsValue<T>(env), onFailed);
 
     /// <summary>
     /// 条件に沿った値のみを抽出します。
@@ -199,5 +252,64 @@ public static class CoChainedTasksHelper
             foreach (var v in result) consumer.Invoke(v);
             return new CoImmediateTask<ICommandToken>(new EmptyCommandToken());
         }, onFailed);
+    }
+
+    public static CoTask<ICommandToken> Do<T>(this CoTask<IEnumerable<T>> task, Func<T, CoTask<ICommandToken>> consumer, Action? onFailed = null)
+    {
+        IEnumerator CoExecute(CoBuiltInTask<ICommandToken> myTask)
+        {
+            foreach(var v in task.Result)
+            {
+                var elementTask = consumer.Invoke(v);
+
+                yield return elementTask.CoWait();
+            }
+            myTask.Result = new EmptyCommandToken();
+        }
+        return new CoChainedTask<ICommandToken, IEnumerable<T>>(task, val => new CoBuiltInTask<ICommandToken>(myTask => CoExecute(myTask)));
+    }
+
+    public static CoTask<ICommandToken> DoParallel<T>(this CoTask<IEnumerable<T>> task, Func<T, CoTask<ICommandToken>> consumer, Action? onFailed = null)
+    {
+        IEnumerator CoExecute(CoBuiltInTask<ICommandToken> myTask)
+        {
+            var tasks = task.Result.Select(v => consumer(v).CoWait().WrapToIl2Cpp());
+            yield return Effects.All(tasks.ToArray());
+        }
+        return new CoChainedTask<ICommandToken, IEnumerable<T>>(task, val => new CoBuiltInTask<ICommandToken>(myTask => CoExecute(myTask)));
+    }
+
+    public static CoTask<ICommandToken> Do<T>(this CoTask<T> task, Func<T, CoTask<ICommandToken>>[] consumers, Action? onFailed = null)
+    {
+        IEnumerator CoExecute(CoBuiltInTask<ICommandToken> myTask)
+        {
+            foreach (var c in consumers)
+            {
+                var elementTask = c.Invoke(task.Result);
+                yield return elementTask.CoWait();
+            }
+            myTask.Result = new EmptyCommandToken();
+        }
+        return new CoChainedTask<ICommandToken, T>(task, val => new CoBuiltInTask<ICommandToken>(myTask => CoExecute(myTask)));
+    }
+
+    public static CoTask<ICommandToken> DoParallel<T>(this CoTask<T> task, Func<T, CoTask<ICommandToken>>[] consumers, Action? onFailed = null)
+    {
+        IEnumerator CoExecute(CoBuiltInTask<ICommandToken> myTask)
+        {
+            var tasks = consumers.Select(c => c.Invoke(task.Result).CoWait().WrapToIl2Cpp());
+            yield return Effects.All(tasks.ToArray());
+        }
+        return new CoChainedTask<ICommandToken, T>(task, val => new CoBuiltInTask<ICommandToken>(myTask => CoExecute(myTask)));
+    }
+
+    public static CoTask<ICommandToken> Action<T>(this CoTask<T> task, Action<T> action, Action? onFailed = null)
+        => task.Do([val => { action.Invoke(val); return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token); }], onFailed);
+
+    public static CoTask<T> Discard<T, S>(this CoTask<S> task)
+    {
+        if (typeof(T) == typeof(ICommandToken))
+            task.ChainFast(_ => EmptyCommandToken.Token);
+        return task.ChainFast(_ => default(T)!);
     }
 }
