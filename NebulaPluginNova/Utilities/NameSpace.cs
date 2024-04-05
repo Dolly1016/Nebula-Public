@@ -9,6 +9,7 @@ using Virial.Media;
 
 namespace Nebula.Utilities;
 
+/*
 public interface INameSpace : Virial.Assets.INameSpace
 {
     ISpriteLoader? GetSprite(string innerAddress, float pixelsPerUnit = 100f)
@@ -79,3 +80,5 @@ public class NameSpaceManager
 
     public static INameSpace ResolveOrGetDefault(string name) => Resolve(name) ?? DefaultNameSpace;
 }
+
+*/

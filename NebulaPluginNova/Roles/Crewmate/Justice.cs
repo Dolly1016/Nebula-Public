@@ -12,7 +12,7 @@ namespace Nebula.Roles.Crewmate;
 
 public class Justice : ConfigurableStandardRole, HasCitation
 {
-    static public Justice MyRole = null!;//new Justice();
+    static public Justice MyRole = null;//new Justice();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 

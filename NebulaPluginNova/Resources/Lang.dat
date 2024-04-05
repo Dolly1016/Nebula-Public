@@ -434,6 +434,7 @@
 "options.role.destroyer.destroyCoolDown" : "Kill Cool Down"
 "options.role.destroyer.phasesOfDestroying" : "Phases Of Destroying"
 "options.role.destroyer.killSEStrength" : "Kill SE Strength"
+"options.role.destroyer.leaveKillEvidence" : "Leave Kill Evidence"
 
 "role.effacer.name" : "Effacer"
 "role.effacer.short" : "E"

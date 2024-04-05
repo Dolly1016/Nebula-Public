@@ -28,9 +28,9 @@ public class NebulaImpl : INebula
 
     public string APIVersion => typeof(NebulaAPI).Assembly.GetName().Version?.ToString() ?? "Undefined";
 
-    public Virial.Assets.INameSpace NebulaAsset => NameSpaceManager.DefaultNameSpace;
+    public Virial.Media.IResourceAllocator NebulaAsset => NebulaResourceManager.NebulaNamespace;
 
-    public Virial.Assets.INameSpace InnerslothAsset => NameSpaceManager.InnerslothNameSpace;
+    public Virial.Media.IResourceAllocator InnerslothAsset => NebulaResourceManager.InnerslothNamespace;
 
     public Virial.Media.GUI GUILibrary => NebulaGUIWidgetEngine.Instance;
 
@@ -70,9 +70,9 @@ public class NebulaImpl : INebula
         return new Timer(min, max);
     }
 
-    public Virial.Assets.INameSpace GetAddon(string addonId)
+    public Virial.Media.IResourceAllocator? GetAddonResource(string addonId)
     {
-        return NameSpaceManager.ResolveOrGetDefault(addonId);
+        return NebulaAddon.GetAddon(addonId);
     }
 
     public IEnumerable<Virial.Game.Player> GetPlayers()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mono.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,20 +36,6 @@ public static class ManagedEffects
     {
         while (!task.IsCompleted) yield return null;
         yield break;
-    }
-
-    static public IEnumerator WaitAll(this IEnumerable<IEnumerator?> enumerators)
-    {
-        var coroutines = enumerators.Where(e => e != null).Select(e=>e.WrapToIl2Cpp()).ToArray();
-        yield return Effects.All(coroutines);
-    }
-
-    static public void BlockForWaiting(this IEnumerator enumerator)
-    {
-        while (enumerator.MoveNext())
-        {
-            if (enumerator.Current is IEnumerator) BlockForWaiting((enumerator.Current as IEnumerator)!);
-        }
     }
 
     static public IEnumerator Smooth(this Transform transform, Vector3 goalLocalPosition, float duration)

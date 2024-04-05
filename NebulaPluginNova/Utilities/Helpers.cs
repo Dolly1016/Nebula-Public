@@ -22,6 +22,12 @@ public class Reference<T>
         return this;
     }
 
+    public Reference<T> Update(Func<T?,T?> update)
+    {
+        Value = update.Invoke(Value);
+        return this;
+    }
+
     public IEnumerator Wait()
     {
         while (Value == null) yield return null;

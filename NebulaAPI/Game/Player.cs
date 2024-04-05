@@ -7,6 +7,7 @@ public interface IPlayerAttribute
 {
     internal int Id { get; }
     internal int ImageId { get; }
+    internal string Name { get; }
     internal IPlayerAttribute CategorizedAttribute { get; }
 
     /// <summary>
@@ -45,8 +46,6 @@ public interface Player
 
     public RuntimeRole Role { get; }
     public IEnumerable<RuntimeModifier> Modifiers { get; }
-
-    public bool IsOp { get; }
 
     public bool IsImpostor => Role.Role.Category == RoleCategory.ImpostorRole;
 }

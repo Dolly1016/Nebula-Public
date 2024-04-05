@@ -18,6 +18,8 @@ using static Nebula.Modules.MetaWidgetOld;
 using Nebula.Modules.MetaWidget;
 using Virial.Text;
 using Virial.Media;
+using MS.Internal.Xml.XPath;
+using AsmResolver.PE.Win32Resources;
 
 namespace Nebula.Behaviour;
 
@@ -363,7 +365,7 @@ public class DevStudio : MonoBehaviour
                     int num = 0;
                     string newText = "";
                     var myLang = new Language();
-                    myLang.Deserialize(addon.OpenRead(fPath));
+                    myLang.Deserialize((addon as IResourceAllocator).GetResource(Virial.Compat.IReadOnlyArray<string>.Empty(), fPath)?.AsStream());
                     using var defaultStream = Language.OpenDefaultLangStream();
                     HashSet<string> keys = new(myLang.translationMap.Keys);
                     Language.Deserialize(defaultStream, (key, text) => {
@@ -1220,7 +1222,7 @@ public class DevStudio : MonoBehaviour
         {
             Directory.CreateDirectory(addon.FolderPath + "/MoreCosmic");
 
-            using Stream? stream = addon.OpenRead("MoreCosmic/Contents.json");
+            using Stream? stream = (addon as IResourceAllocator)?.GetResource("MoreCosmic/Contents.json")?.AsStream();
 
             if (stream != null)
             {
@@ -1443,7 +1445,7 @@ public class DevStudio : MonoBehaviour
     }
 }
 
-public class DevAddon : INameSpace
+public class DevAddon : IResourceAllocator
 {
     public string Name { get; private set; }
     public string FolderPath { get; private set; }
@@ -1530,33 +1532,25 @@ public class DevAddon : INameSpace
         return result.ToArray();
     }
 
-    private Stream? OpenRead(string folder, string innerAddress)
+    INebulaResource? IResourceAllocator.GetResource(Virial.Compat.IReadOnlyArray<string> namespaceArray, string name)
     {
-        if (File.Exists(folder + "/" + innerAddress)) return File.OpenRead(folder + "/" + innerAddress);
+        if (namespaceArray.Count > 0) return null;
 
+        string folderPath = FolderPath;
+        string leftPath = name.Replace('/','.');
 
-        foreach (var dir in Directory.GetDirectories(folder))
-        {
-            string lowestDir = dir.Substring(folder.Length + 1);
-            if (innerAddress.Length > (lowestDir.Length) && innerAddress[lowestDir.Length] is '.' && innerAddress.StartsWith(lowestDir))
+        while (true) {
+            if (File.Exists(folderPath + "/" + leftPath)) return new StreamResource(() => File.OpenRead(folderPath + "/" + leftPath));
+
+            foreach (var dir in Directory.GetDirectories(folderPath))
             {
-                var stream = OpenRead(dir, innerAddress.Substring(lowestDir.Length + 1));
-                if (stream != null) return stream;
+                string lowestDir = dir.Substring(folderPath.Length + 1);
+                if (leftPath.Length > lowestDir.Length && leftPath[lowestDir.Length] is '.' && leftPath.StartsWith(lowestDir))
+                {
+                    folderPath += "/" + lowestDir;
+                    leftPath = leftPath.Substring(lowestDir.Length + 1);
+                }
             }
-        }
-
-        return null;
-    }
-
-    public Stream? OpenRead(string innerAddress)
-    {
-        try
-        {
-            return OpenRead(FolderPath, innerAddress);
-        }
-        catch
-        {
-            return null;
         }
     }
 

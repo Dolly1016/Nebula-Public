@@ -73,6 +73,7 @@ public class HudGrid : MonoBehaviour
             foreach(var c in Contents[i])
             {
                 if (!c.Value.gameObject.activeSelf) continue;
+                if (MeetingHud.Instance && !c.Value.gameObject.active) continue;
 
                 if(!killButtonPosArranged && c.Value.MarkedAsKillButtonContent)
                 {

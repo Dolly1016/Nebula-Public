@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Il2CppSystem.CodeDom.Compiler;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using Virial.Helpers;
 
 namespace Virial.Command;
 
@@ -196,7 +197,6 @@ public static class CoChainedTasksHelper
         {
             IEnumerator CoExecute(CoBuiltInTask<IEnumerable<T>> myResult) {
                 List<T> list = new();
-                myResult.Result = list;
 
                 foreach (var v in result ?? [])
                 {
@@ -204,6 +204,7 @@ public static class CoChainedTasksHelper
                     yield return task.CoWait();
                     if (!task.IsFailed) list.Add(task.Result);
                 }
+                myResult.Result = list;
                 yield break;
             }
             return new CoBuiltInTask<IEnumerable<T>>(CoExecute);
@@ -216,10 +217,16 @@ public static class CoChainedTasksHelper
         {
             IEnumerator CoExecute(CoBuiltInTask<IEnumerable<T>> myResult)
             {
-                var tasks = result.ToArray().Select(r => supplier.Invoke(r));
-                yield return Effects.All(tasks.Select(t => t.CoWait().WrapToIl2Cpp()).ToArray());
-
-                myResult.Result = tasks.Where(t => !t.IsFailed).Select(t => t.Result);
+                var tasks = result.Select(r => supplier.Invoke(r)).ToArray();
+                if (tasks.Length > 0)
+                {
+                    yield return tasks.Select(t => t.CoWait().HighSpeedEnumerator()).WaitAll();
+                    myResult.Result = tasks.Where(t => !t.IsFailed).Select(t => t.Result);
+                }
+                else
+                {
+                    myResult.Result = [];
+                }
             }
             return new CoBuiltInTask<IEnumerable<T>>(CoExecute);
         }, onFailed);
@@ -273,8 +280,7 @@ public static class CoChainedTasksHelper
     {
         IEnumerator CoExecute(CoBuiltInTask<ICommandToken> myTask)
         {
-            var tasks = task.Result.Select(v => consumer(v).CoWait().WrapToIl2Cpp());
-            yield return Effects.All(tasks.ToArray());
+            yield return task.Result.Select(v => consumer(v).CoWait().HighSpeedEnumerator()).WaitAll();
         }
         return new CoChainedTask<ICommandToken, IEnumerable<T>>(task, val => new CoBuiltInTask<ICommandToken>(myTask => CoExecute(myTask)));
     }
@@ -297,8 +303,8 @@ public static class CoChainedTasksHelper
     {
         IEnumerator CoExecute(CoBuiltInTask<ICommandToken> myTask)
         {
-            var tasks = consumers.Select(c => c.Invoke(task.Result).CoWait().WrapToIl2Cpp());
-            yield return Effects.All(tasks.ToArray());
+            var tasks = consumers.Select(c => c.Invoke(task.Result).CoWait().HighSpeedEnumerator()).ToArray();
+            if(tasks.Length > 0) yield return tasks.WaitAll();
         }
         return new CoChainedTask<ICommandToken, T>(task, val => new CoBuiltInTask<ICommandToken>(myTask => CoExecute(myTask)));
     }

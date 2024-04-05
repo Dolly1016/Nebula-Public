@@ -113,11 +113,16 @@ public class SerializableDocument
 
     public static void Load()
     {
-        TextStyle["Standard"] = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
-        TextStyle["Bold"] = GUI.API.GetAttribute(AttributeAsset.DocumentBold);
-        TextStyle["Content"] = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
-        TextStyle["Title"] = GUI.API.GetAttribute(AttributeAsset.DocumentTitle);
+        TextStyle["standard"] = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
+        TextStyle["bold"] = GUI.API.GetAttribute(AttributeAsset.DocumentBold);
+        TextStyle["content"] = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
+        TextStyle["title"] = GUI.API.GetAttribute(AttributeAsset.DocumentTitle);
+        TextStyle["button"] = GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed);
+        TextStyle["buttonlarge"] = GUI.API.GetAttribute(AttributeAsset.StandardLargeWideMasked);
+        TextStyle["buttonmedium"] = GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked);
     }
+
+    public static TextAttribute GetAttribute(string style) => TextStyle.TryGetValue(style.ToLower(), out var result) ? result : TextStyle["standard"];
 
     public IEnumerable<SerializableDocument> AllConents()
     {
@@ -257,9 +262,9 @@ public class SerializableDocument
         return Virial.Text.TextAlignment.Left;
     }
 
-    public INameSpace? RelatedNamespace = null;
+    public IResourceAllocator? RelatedNamespace = null;
 
-    private ISpriteLoader? imageLoader = null;
+    private Image? imageLoader = null;
     private string? lastImagePath;
 
     public List<SerializableDocument>? MyContainer => Contents ?? Aligned;
@@ -292,7 +297,7 @@ public class SerializableDocument
 
     private const int MaxNesting = 32;
 
-    public GUIWidget? BuildForDev(Action<PassiveButton,SerializableDocument, SerializableDocument?> editorBuilder, SerializableDocument? parent = null, INameSpace? nameSpace = null)
+    public GUIWidget? BuildForDev(Action<PassiveButton,SerializableDocument, SerializableDocument?> editorBuilder, SerializableDocument? parent = null, IResourceAllocator? nameSpace = null)
     {
         var widget = BuildInternal(nameSpace ?? RelatedNamespace, null, null, c => c.BuildForDev(editorBuilder, this, nameSpace ?? RelatedNamespace), false, true, MaxNesting);
 
@@ -309,11 +314,11 @@ public class SerializableDocument
         return widget;
     }
 
-    public GUIWidget? Build(Artifact<GUIScreen>? myScreen, bool useMaskedMaterial = true, int leftNesting = MaxNesting, INameSpace? nameSpace = null) => BuildInternal(nameSpace ?? RelatedNamespace, null, myScreen, c => c.Build(myScreen, useMaskedMaterial, leftNesting, nameSpace ?? RelatedNamespace), true, useMaskedMaterial, leftNesting);
-    public GUIWidget? BuildReference(FunctionalEnvironment? table, INameSpace? nameSpace, Artifact<GUIScreen>? myScreen, bool buildHyperLink, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, buildHyperLink, leftNesting), buildHyperLink, true, leftNesting);
+    public GUIWidget? Build(Artifact<GUIScreen>? myScreen, bool useMaskedMaterial = true, int leftNesting = MaxNesting, IResourceAllocator? nameSpace = null) => BuildInternal(nameSpace ?? RelatedNamespace, null, myScreen, c => c.Build(myScreen, useMaskedMaterial, leftNesting, nameSpace ?? RelatedNamespace), true, useMaskedMaterial, leftNesting);
+    public GUIWidget? BuildReference(FunctionalEnvironment? table, IResourceAllocator? nameSpace, Artifact<GUIScreen>? myScreen, bool buildHyperLink, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, buildHyperLink, leftNesting), buildHyperLink, true, leftNesting);
 
 
-    public GUIWidget? BuildInternal(INameSpace? nameSpace, FunctionalEnvironment? arguments, Artifact<GUIScreen>? myScreen, Func<SerializableDocument, GUIWidget?> builder, bool buildHyperLink,bool useMaskedMaterial, int leftNesting)
+    public GUIWidget? BuildInternal(IResourceAllocator? nameSpace, FunctionalEnvironment? arguments, Artifact<GUIScreen>? myScreen, Func<SerializableDocument, GUIWidget?> builder, bool buildHyperLink,bool useMaskedMaterial, int leftNesting)
     {
         arguments ??= new();
         arguments.TryRegister("documentId", () => IFunctionalVariable.Generate(DocumentId));
@@ -339,8 +344,7 @@ public class SerializableDocument
         {
             TextComponent text = TranslationKey != null ? new TranslateTextComponent(ConsiderArgumentAsStr(TranslationKey!)) : new RawTextComponent(ConsiderArgumentAsStr(RawText!));
 
-            TextAttribute? attr = null;
-            if(Style == null || !TextStyle.TryGetValue(ConsiderArgumentAsStr(Style), out attr)) attr = (IsVariable ?? false) ? TextStyle["Content"] : TextStyle["Standard"];
+            TextAttribute? attr = GetAttribute(ConsiderArgumentAsStr(Style ?? ""));
 
             float fontSize = FontSize.HasValue ? FontSize.Value : attr.FontSize.FontSizeDefault;
             attr = new(attr) {
@@ -401,15 +405,7 @@ public class SerializableDocument
 
             if (imageLoader == null || image != lastImagePath)
             {
-                if (image.Contains("::"))
-                {
-                    var splitted = image.Split("::", 2);
-                    imageLoader = NameSpaceManager.ResolveOrGetDefault(splitted[0]).GetSprite(splitted[1], 100f);
-                }
-                else
-                {
-                    imageLoader = (nameSpace ?? NameSpaceManager.DefaultNameSpace).GetSprite(image, 100f);
-                }
+                imageLoader = NebulaResourceManager.GetResource(image, nameSpace)?.AsImage();
                 lastImagePath = image;
             }
 
@@ -442,7 +438,7 @@ public class SerializableDocument
                 if (nameSpace is DevAddon addon)
                 {
                     string path = "Documents/" + docId + ".json";
-                    var stream = nameSpace?.OpenRead(path);
+                    var stream = nameSpace.GetResource(new ReadOnlyArray<string>(Array.Empty<string>()), path)?.AsStream();
                     if (stream != null) {
                         doc = JsonStructure.Deserialize<SerializableDocument>(new StreamReader(stream).ReadToEnd());
                     }

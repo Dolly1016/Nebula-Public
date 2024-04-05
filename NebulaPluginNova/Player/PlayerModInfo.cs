@@ -2,6 +2,8 @@
 using Nebula.Roles;
 using Nebula.Roles.Complex;
 using Virial.Assignable;
+using Virial.Command;
+using Virial.Common;
 using Virial.Game;
 using Virial.Text;
 using static Mono.CSharp.Parameter;
@@ -50,6 +52,7 @@ public static class PlayerState
 public class PlayerAttributeImpl : IPlayerAttribute
 {
     public int Id { get; init; }
+    public string Name { get; init; }
     public int ImageId { get; init; }
     public Predicate<GamePlayer>? Cognizable { get; init; }
     public bool CanCognize(GamePlayer player) => Cognizable?.Invoke(player) ?? true;
@@ -63,22 +66,23 @@ public class PlayerAttributeImpl : IPlayerAttribute
     static public IPlayerAttribute GetAttributeById(int id) => allAttributes[id];
 
 
-    public PlayerAttributeImpl(int imageId)
+    public PlayerAttributeImpl(int imageId, string name)
     {
         this.Id = allAttributes.Count;
         this.ImageId = imageId;
         allAttributes.Add(this);
+        Name = name;
     }
 
     public static void Load()
     {
-        PlayerAttributes.Accel = new PlayerAttributeImpl(0);
-        PlayerAttributes.Decel = new PlayerAttributeImpl(1);
-        PlayerAttributes.Invisible = new PlayerAttributeImpl(2);
-        PlayerAttributes.InvisibleElseImpostor = new PlayerAttributeImpl(2) { Cognizable = p => p.Role.Role.Category == RoleCategory.ImpostorRole, IdenticalAttribute = PlayerAttributes.Invisible };
-        PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3);
-        PlayerAttributes.Isolation = new PlayerAttributeImpl(4) { Cognizable = p => p.Role.Role.Category == RoleCategory.ImpostorRole };
-        PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4) { Cognizable = _ => false };
+        PlayerAttributes.Accel = new PlayerAttributeImpl(0, "$accel");
+        PlayerAttributes.Decel = new PlayerAttributeImpl(1, "$decel");
+        PlayerAttributes.Invisible = new PlayerAttributeImpl(2, "invisible");
+        PlayerAttributes.InvisibleElseImpostor = new PlayerAttributeImpl(2, "$invisible") { Cognizable = p => p.Role.Role.Category == RoleCategory.ImpostorRole, IdenticalAttribute = PlayerAttributes.Invisible };
+        PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody");
+        PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation") { Cognizable = p => p.Role.Role.Category == RoleCategory.ImpostorRole };
+        PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4, "busker") { Cognizable = _ => false };
     }
 }
 
@@ -149,8 +153,10 @@ public class AttributeModulator : TimeLimitedModulator
 }
 
 [NebulaRPCHolder]
-public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
+public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, ICommandExecutor, IPermissionHolder
 {
+    public static Permission OpPermission = new Permission();
+
     public class OutfitCandidate
     {
         public string Tag { get; private set; }
@@ -178,7 +184,6 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
     
     public byte? HoldingDeadBodyId { get; private set; } = null;
     public bool HoldingAnyDeadBody => HoldingDeadBodyId != null;
-    public bool IsOp { get; set; } = false;
     public bool AmHost => MyControl.AmHost();
     private DeadBody? deadBodyCache { get; set; } = null;
     private List<SpeedModulator> speedModulators = new();
@@ -231,6 +236,9 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player
             return hasCrewmateTasks;
         }
     }
+
+    public VariablePermissionHolder PermissionHolder = new([]);
+    bool IPermissionHolder.Test(Virial.Common.Permission permission) => PermissionHolder.Test(permission);
 
     //各種収集データ
     public PlayerModInfo? MyKiller = null;

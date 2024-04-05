@@ -258,7 +258,7 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
         var info = new PlayerModInfo(player);
         allModPlayers.Add(player.PlayerId, info);
 
-        if (player.AmHost() && GeneralConfigurations.AssignOpToHostOption) info.IsOp = true;
+        if (player.AmHost() && (GeneralConfigurations.AssignOpToHostOption) || GeneralConfigurations.CurrentGameMode == CustomGameMode.FreePlay) info.PermissionHolder.AddPermission(PlayerModInfo.OpPermission);
 
         return info;
     }

@@ -11,6 +11,8 @@ public interface IReadOnlyArray<T> : IEnumerable<T>, IReadOnlyList<T>
 {
     IReadOnlyArray<T> Skip(int skipped);
     IReadOnlyArray<T> Slice(int start, int length);
+
+    public static IReadOnlyArray<T> Empty() => new ReadOnlyArray<T>(Array.Empty<T>());
 } 
 
 public class ReadOnlyArray<T> : IReadOnlyArray<T>

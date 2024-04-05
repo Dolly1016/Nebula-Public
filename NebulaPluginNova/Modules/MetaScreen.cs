@@ -1181,7 +1181,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         return screen;
     }
 
-    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen,bool closeOnClickOutside,bool withCloseButton = true)
+    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen,bool closeOnClickOutside,bool withCloseButton = true, bool withMask = false)
     {
         var screen = GenerateScreen(size, parent, localPos, true, withBlackScreen, true);
         
@@ -1208,6 +1208,16 @@ public class MetaScreen : MonoBehaviour, GUIScreen
             myCollider.isTrigger = false;
             myCollider.size = size;
             myCollider.gameObject.SetUpButton();
+        }
+
+        if (withMask)
+        {
+            var group = UnityHelper.CreateObject<SortingGroup>("Group", obj.transform, Vector3.zero);
+            var mask = UnityHelper.CreateObject<SpriteMask>("Mask", group.transform, Vector3.zero);
+            mask.sprite = VanillaAsset.FullScreenSprite;
+            mask.transform.localScale = size;
+
+            obj.transform.FindChild("Screen").SetParent(group.transform);
         }
 
         return screen;

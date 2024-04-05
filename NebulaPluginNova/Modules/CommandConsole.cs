@@ -10,11 +10,20 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
+using Virial.Command;
+using Virial.Common;
+using Virial.Helpers;
 
 namespace Nebula.Modules;
 
+
 public class CommandConsole
 {
+    private class GuestExecutor : ICommandExecutor, IPermissionHolder
+    {
+        bool IPermissionHolder.Test(Virial.Common.Permission permission) => false;
+    }
+
     TextField myInput;
     GameObject consoleObject;
 
@@ -22,10 +31,14 @@ public class CommandConsole
 
     public bool IsShown { get => consoleObject.active; set => consoleObject.SetActive(value); }
 
+    static private ICommandExecutor Guest = new GuestExecutor();
     public CommandConsole()
     {
-        consoleObject = UnityHelper.CreateObject("CommandConsole", UnityHelper.FindCamera(LayerExpansion.GetUILayer())!.transform, new Vector3(-2.15f, -2.8f, -800f), LayerExpansion.GetUILayer());
-        log = UnityHelper.CreateObject<ConsoleShower>("ConsoleLog", consoleObject.transform, new Vector3(0.05f, 0.3f, 0f));
+        var uiCamTransform = UnityHelper.FindCamera(LayerExpansion.GetUILayer())!.transform;
+        consoleObject = UnityHelper.CreateObject("CommandConsole", uiCamTransform, new Vector3(-2.15f, -2.8f, -800f), LayerExpansion.GetUILayer());
+        
+        log = UnityHelper.CreateObject<ConsoleShower>("ConsoleLog", uiCamTransform, new Vector3(-2.15f, -2.8f, -800f) + new Vector3(0.05f, 0.3f, 0f));
+        log.ConsoleInputHolder = consoleObject;
 
         Vector2 size = new Vector2(6f, 0.225f);
 
@@ -50,7 +63,8 @@ public class CommandConsole
 
             IEnumerator CoExecute()
             {
-                yield return CommandManager.CoExecute(args!.ToArray(), new (null!, ThroughCommandModifier.Modifier, myLogger)).CoWait();
+                IsShown = false;
+                yield return CommandManager.CoExecute(args!.ToArray(), new(NebulaGameManager.Instance?.LocalPlayerInfo ?? Guest, ThroughCommandModifier.Modifier, myLogger)).CoWait().HighSpeedEnumerator();
             }
             NebulaManager.Instance.StartCoroutine(CoExecute().WrapToIl2Cpp());
 

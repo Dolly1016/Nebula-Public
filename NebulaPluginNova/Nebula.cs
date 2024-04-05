@@ -66,11 +66,11 @@ public class NebulaPlugin : BasePlugin
     public const string PluginVersion = "2.2.3.1";
 
     //public const string VisualVersion = "v2.3";
-    public const string VisualVersion = "Snapshot 24.03.31a";
+    public const string VisualVersion = "Snapshot 24.04.04a";
     //public const string VisualVersion = "RPC Debug 2";
 
     public const int PluginEpoch = 103;
-    public const int PluginBuildNum = 1098;
+    public const int PluginBuildNum = 1099;
     public const bool GuardVanillaLangData = true;
 
     static public HttpClient HttpClient
@@ -125,9 +125,9 @@ public class NebulaPlugin : BasePlugin
         var types = Assembly.GetAssembly(typeof(RemoteProcessBase))?.GetTypes().Where((type) => type.IsDefined(typeof(NebulaPreLoad)));
         if (types != null)
         {
-            Dictionary<Type, (int leftPreLoad, HashSet<Type> postLoad, bool isFinalizer)> dependencyMap = new();
+            Dictionary<Type, (Reference<int> leftPreLoad, HashSet<Type> postLoad, bool isFinalizer)> dependencyMap = new();
 
-            foreach (var type in types) dependencyMap[type] = (0, new(), type.GetCustomAttribute<NebulaPreLoad>()!.IsFinalizer);
+            foreach (var type in types) dependencyMap[type] = (new Reference<int>().Set(0), new(), type.GetCustomAttribute<NebulaPreLoad>()!.IsFinalizer);
 
             //有向グラフを作る
             foreach (var type in types) {
@@ -139,7 +139,10 @@ public class NebulaPlugin : BasePlugin
                     if (dependencyMap.TryGetValue(pre, out var preInfo))
                     {
                         //NebulaPreLoadの対象の場合は順番を考慮する
-                        if (preInfo.postLoad.Add(type)) myInfo.leftPreLoad++;
+                        if (preInfo.postLoad.Add(type))
+                        {
+                            myInfo.leftPreLoad.Update(v => v + 1);
+                        }
                     }
                     else
                     {
@@ -153,14 +156,14 @@ public class NebulaPlugin : BasePlugin
                     if (dependencyMap.TryGetValue(post, out var postInfo))
                     {
                         //NebulaPreLoadの対象の場合は順番を考慮する
-                        if (myInfo.postLoad.Add(type)) postInfo.leftPreLoad++;
+                        if (myInfo.postLoad.Add(type)) postInfo.leftPreLoad.Update(v => v + 1);
                     }
                     //NebulaPreLoadの対象でない場合はなにもしない
                 }
             }
 
-            Queue<Type> waitingList = new(dependencyMap.Where(tuple => tuple.Value.leftPreLoad == 0 && !tuple.Value.isFinalizer).Select(t => t.Key));
-            Queue<Type> waitingFinalizerList = new(dependencyMap.Where(tuple => tuple.Value.leftPreLoad == 0 && tuple.Value.isFinalizer).Select(t => t.Key));
+            Queue<Type> waitingList = new(dependencyMap.Where(tuple => tuple.Value.leftPreLoad.Value == 0 && !tuple.Value.isFinalizer).Select(t => t.Key));
+            Queue<Type> waitingFinalizerList = new(dependencyMap.Where(tuple => tuple.Value.leftPreLoad.Value == 0 && tuple.Value.isFinalizer).Select(t => t.Key));
 
             //読み込み順リスト
             List<Type> loadList = new();
@@ -174,8 +177,8 @@ public class NebulaPlugin : BasePlugin
                 {
                     if(dependencyMap.TryGetValue(post, out var postInfo))
                     {
-                        postInfo.leftPreLoad--;
-                        if (postInfo.leftPreLoad == 0) (postInfo.isFinalizer ? waitingFinalizerList : waitingList).Enqueue(post);
+                        postInfo.leftPreLoad.Update(v => v - 1);
+                        if (postInfo.leftPreLoad.Value == 0) (postInfo.isFinalizer ? waitingFinalizerList : waitingList).Enqueue(post);
                     }
                 }
             }
@@ -186,7 +189,7 @@ public class NebulaPlugin : BasePlugin
 
             if(loadList.Count < dependencyMap.Count)
             {
-                var errorStringList = dependencyMap.Where(d => d.Value.leftPreLoad > 0).Join(t => "  -" + t.Key.FullName, "\n");
+                var errorStringList = dependencyMap.Where(d => d.Value.leftPreLoad.Value > 0).Join(t => "  -" + t.Key.FullName, "\n");
                 NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Components that could not be resolved.\n" + errorStringList);
 
                 throw new Exception("Failed to resolve dependencies.");

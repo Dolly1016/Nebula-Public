@@ -96,7 +96,11 @@ public class StringCommandToken : ICommandToken
 
         var type = typeof(T);
 
-        if (type == typeof(int))
+        if(type == typeof(ICommandToken))
+        {
+            return new CoImmediateTask<T>(Unsafe.As<ICommandToken, T>(ref substituted));
+        }
+        else if (type == typeof(int))
         {
             if (int.TryParse(myStr, out var val)) return new CoImmediateTask<T>(Unsafe.As<int, T>(ref val));
             if (float.TryParse(myStr, out var valFloat))
@@ -129,6 +133,14 @@ public class StringCommandToken : ICommandToken
 
         return new CoImmediateErrorTask<T>(env.Logger);
     }
+
+    IExecutable? ICommandToken.ToExecutable(CommandEnvironment env)
+    {
+        var substituted = env.ArgumentTable.ApplyTo(this);
+        if (substituted != this) return substituted.ToExecutable(env);
+
+        return null;
+    }
 }
 
 /// <summary>
@@ -149,8 +161,14 @@ public class ArrayCommandToken : ICommandToken
 
     CoTask<ICommandToken> ICommandToken.EvaluateHere(CommandEnvironment env)
     {
-        return new CoImmediateTask<IEnumerable<ICommandToken>>(tokens).Select(token => token.EvaluateHere(env))
-            .Chain(result => new CoImmediateTask<ICommandToken>(new ArrayCommandToken(new ReadOnlyArray<ICommandToken>(result))));
+        return new CoImmediateTask<IEnumerable<ICommandToken>>(tokens).SelectParallel(token =>
+        {
+            return token.EvaluateHere(env);
+        })
+            .Chain(result =>
+            {
+                return new CoImmediateTask<ICommandToken>(new ArrayCommandToken(new ReadOnlyArray<ICommandToken>(result)));
+            });
     }
 
     CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(CommandEnvironment env)
@@ -160,7 +178,7 @@ public class ArrayCommandToken : ICommandToken
             .Chain(result =>
             {
                 List<ICommandToken> list = new();
-                foreach (var r in result) list.AddRange(r);
+                foreach (var r in result) if(r != null) list.AddRange(r);
                 return new CoImmediateTask<IEnumerable<ICommandToken>>(list);
             });
     }
@@ -215,7 +233,7 @@ public class StructCommandToken : ICommandToken
     CoTask<ICommandToken> ICommandToken.EvaluateHere(CommandEnvironment env)
     {
         return new CoImmediateTask<IEnumerable<(ICommandToken label, ICommandToken value)>>(members)
-            .Select(val => new CoBuiltInTask<(ICommandToken label, ICommandToken value)>(task => CoEvaluate(val,task, env)))
+            .SelectParallel(val => new CoBuiltInTask<(ICommandToken label, ICommandToken value)>(task => CoEvaluate(val,task, env)))
             .Chain(val => new CoImmediateTask<ICommandToken>(new StructCommandToken(new ReadOnlyArray<(ICommandToken label,ICommandToken value)>(val))));
     }
 
@@ -265,6 +283,7 @@ public class EmptyCommandToken : ICommandToken
 
     CoTask<T> ICommandToken.AsValue<T>(CommandEnvironment env)
     {
+        if (typeof(T) == typeof(ICommandToken)) return new CoImmediateTask<T>(Unsafe.As<ICommandToken,T>(ref Token));
         return new CoImmediateErrorTask<T>(env.Logger);
     }
 }

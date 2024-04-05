@@ -32,7 +32,12 @@ public class PlayerCommandToken : ICommandToken
             string name = player.Name;
             return new CoImmediateTask<T>(Unsafe.As<string, T>(ref name));
         }
-        else if (type == typeof(int) || type == typeof(byte))
+        else if (type == typeof(int))
+        {
+            int id = player.PlayerId;
+            return new CoImmediateTask<T>(Unsafe.As<int, T>(ref id));
+        }
+        else if (type == typeof(byte))
         {
             byte id = player.PlayerId;
             return new CoImmediateTask<T>(Unsafe.As<byte, T>(ref id));

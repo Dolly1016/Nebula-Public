@@ -9,11 +9,13 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Compat;
+using Virial.Media;
 
 namespace Nebula.Modules;
 
 [NebulaPreLoad]
-public class NebulaAddon : IDisposable, INameSpace
+public class NebulaAddon : IDisposable, IResourceAllocator
 {
     public class AddonMeta
     {
@@ -132,6 +134,9 @@ public class NebulaAddon : IDisposable, INameSpace
             IsHidden = meta.Hidden;
 
             InZipPath = entry.FullName.Substring(0, entry.FullName.Length - MetaFileName.Length);
+
+            NebulaResourceManager.RegisterNamespace(Id ,this);
+
             break;
         }
 
@@ -161,10 +166,10 @@ public class NebulaAddon : IDisposable, INameSpace
     public Stream? OpenRead(string innerAddress)
     {
         innerAddress = (InZipPath + innerAddress).Replace('/', '.');
-        Debug.Log(innerAddress);
+        
         foreach (var entry in Archive.Entries)
         {
-            if (entry.FullName.Replace('/', '.') == innerAddress) return entry.Open();
+            if (entry.FullName.Replace('/', '.').ToLower() == innerAddress.ToLower()) return entry.Open();
         }
         return null;
     }
@@ -199,5 +204,12 @@ public class NebulaAddon : IDisposable, INameSpace
             }
             return val;
         }
+    }
+
+    INebulaResource? IResourceAllocator.GetResource(IReadOnlyArray<string> namespaceArray, string name)
+    {
+        if (namespaceArray.Count > 0) return null;
+
+        return new StreamResource(() => OpenRead(name));
     }
 }

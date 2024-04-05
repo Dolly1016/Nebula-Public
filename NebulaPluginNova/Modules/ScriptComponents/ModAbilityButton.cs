@@ -7,6 +7,7 @@ using Virial.Command;
 using Virial.Compat;
 using Virial.Components;
 using Virial.Game;
+using Virial.Helpers;
 using Virial.Media;
 using Virial.Text;
 
@@ -24,6 +25,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         public IExecutable? onClick = null;
         public IExecutable? onSubClick = null;
         public TextComponent? label = null;
+        public Image? image = null;
     }
     public static void Load()
     {
@@ -38,12 +40,15 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
             .Add<string>("localizedLabel", (structure, val) => structure.label = new TranslateTextComponent(val))
             .Add<IExecutable>("action", (structure, val) => structure.onClick = val)
             .Add<IExecutable>("aidAction", (structure, val) => structure.onSubClick = val)
+            .Add<string>("icon", (structure, val) => structure.image = NebulaResourceManager.GetResource(val)?.AsImage(115f))
             , () => new AbilityButtonStructure(), val =>
             {
                 var button = new ModAbilityButton(val.isLeftSide, val.arrangedAsKillButton, val.priority, val.showAlways);
-                if(val.onClick != null) button.OnClick = b => NebulaManager.Instance.StartCoroutine(val.onClick!.CoExecute([]).CoWait().WrapToIl2Cpp());
-                if(val.onSubClick != null) button.OnSubAction = b => NebulaManager.Instance.StartCoroutine(val.onSubClick!.CoExecute([]).CoWait().WrapToIl2Cpp());
+                if(val.onClick != null) button.OnClick = b => NebulaManager.Instance.StartCoroutine(val.onClick!.CoExecute([]).CoWait().HighSpeedEnumerator().WrapToIl2Cpp());
+                if(val.onSubClick != null) button.OnSubAction = b => NebulaManager.Instance.StartCoroutine(val.onSubClick!.CoExecute([]).CoWait().HighSpeedEnumerator().WrapToIl2Cpp());
                 button.SetRawLabel(val.label?.GetString() ?? "button");
+                if(val.image != null)button.SetSprite(val.image.GetSprite());
+                return button;
             }));
     }
 

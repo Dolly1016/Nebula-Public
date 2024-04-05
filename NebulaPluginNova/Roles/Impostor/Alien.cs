@@ -10,7 +10,7 @@ namespace Nebula.Roles.Impostor;
 
 public class Alien : ConfigurableStandardRole, HasCitation
 {
-    static public Alien MyRole = null!;//new Alien();
+    static public Alien MyRole = null;//new Alien();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "alien";

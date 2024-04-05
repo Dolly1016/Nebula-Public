@@ -69,7 +69,7 @@ public class LetsCommand : ICommand
             }
 
             var letModifier = new LetsCommandModifier(args, env.ArgumentTable);
-            var letTask = arguments[arguments.Count - 1].EvaluateHere(env.SwitchArgumentTable(letModifier));
+            var letTask = arguments[arguments.Count - 1].ToExecutable(env.SwitchArgumentTable(letModifier))?.CoExecute([]) ?? new CoImmediateErrorTask<ICommandToken>();
             yield return letTask.CoWait();
             if (letTask.IsFailed)
             {

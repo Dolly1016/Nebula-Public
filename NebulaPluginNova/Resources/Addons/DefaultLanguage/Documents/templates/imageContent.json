@@ -10,7 +10,7 @@
 		{
 			"Aligned" : [
 				{
-					"Image" : "#Concat('Nebula::',imageName)",
+					"Image" : "#Concat('Nebula::',imageName,'.png')",
 					"Width" : 0.4
 				},
 				{

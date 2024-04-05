@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Nebula.Commands.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial.Command;
 using Virial.Compat;
+using Virial.Game;
 
 namespace Nebula.Commands.Variations;
 
@@ -22,12 +24,12 @@ public class EntityCommand : ICommand
         }
     }
 
-    static public EntityCommandDefinition GenerateDefinition<T>(CommandStructureConverter<T> converter, Func<T> constructor, Action<T> entityGenerater)
+    static public EntityCommandDefinition GenerateDefinition<T>(CommandStructureConverter<T> converter, Func<T> constructor, Func<T, IGameEntity> entityGenerater)
     {
         return new(
             (task, env) =>
             {
-                return converter.ChainConverterTo(task, constructor.Invoke(), env).Action(t => entityGenerater.Invoke(t));
+                return converter.ChainConverterTo(task, constructor.Invoke(), env).ChainFast<ICommandToken, T>(t => new ObjectCommandToken<IGameEntity>(entityGenerater.Invoke(t)));
             }
             );
     }
@@ -45,6 +47,8 @@ public class EntityCommand : ICommand
 
     CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
     {
+        if (CommandHelper.DenyByPermission(env, PlayerModInfo.OpPermission, out var p)) return p;
+
         if (arguments.Count < 2)
             return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " add|remove ...");
 

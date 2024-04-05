@@ -42,6 +42,7 @@ public class Destroyer : ConfigurableStandardRole
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     private NebulaConfiguration KillSEStrengthOption = null!;
     private NebulaConfiguration PhasesOfDestroyingOption = null!;
+    private NebulaConfiguration LeaveKillEvidenceOption = null!;
 
     protected override void LoadOptions()
     {
@@ -50,8 +51,9 @@ public class Destroyer : ConfigurableStandardRole
         RoleConfig.AddTags(ConfigurationHolder.TagBeginner, ConfigurationHolder.TagFunny);
 
         KillCoolDownOption = new (RoleConfig, "destroyCoolDown",KillCoolDownConfiguration.KillCoolDownType.Immediate, 2.5f,10f,60f,-30f,30f,0.125f,0.5f,5f,35f,10f,1.5f);
-        PhasesOfDestroyingOption = new NebulaConfiguration(RoleConfig, "phasesOfDestroying", null, 3, 10, 3, 3);
+        PhasesOfDestroyingOption = new NebulaConfiguration(RoleConfig, "phasesOfDestroying", null, 1, 10, 3, 3);
         KillSEStrengthOption = new NebulaConfiguration(RoleConfig, "killSEStrength", null, 1f, 20f, 0.5f, 3.5f, 3.5f) { Decorator = NebulaConfiguration.OddsDecorator };
+        LeaveKillEvidenceOption = new NebulaConfiguration(RoleConfig, "leaveKillEvidence", null, true, true);
     }
 
     [NebulaRPCHolder]
@@ -232,6 +234,7 @@ public class Destroyer : ConfigurableStandardRole
             }
 
             int phases = MyRole.PhasesOfDestroyingOption.GetMappedInt() - 1;
+
             for (int i = 0;i < phases; i++)
             {
                 yield return CoScale(
@@ -241,7 +244,7 @@ public class Destroyer : ConfigurableStandardRole
                 yield return new WaitForSeconds(0.7f);
             }
             
-            yield return CoScale(0.6f, 0f, 3.2f, NebulaAudioClip.Destroyer3, true);
+            yield return CoScale(phases == 0 ? 1f : 0.6f, 0f, 3.2f, NebulaAudioClip.Destroyer3, true);
 
             if (myPlayer.AmOwner && !target.Data.IsDead)
             {
@@ -249,10 +252,13 @@ public class Destroyer : ConfigurableStandardRole
             }
             NebulaManager.Instance.StopCoroutine(monitorMeetingCoroutine);
 
-            var bloodRenderer = UnityHelper.CreateObject<SpriteRenderer>("DestroyerBlood", null, (targetPos + new Vector3(0f,0.1f,0f)).AsWorldPos(true));
-            bloodRenderer.sprite = spriteBloodPuddle.GetSprite();
-            bloodRenderer.color = Palette.PlayerColors[target.CurrentOutfit.ColorId];
-            bloodRenderer.transform.localScale = new(0.45f,0.45f,1f);
+            if (MyRole.LeaveKillEvidenceOption)
+            {
+                var bloodRenderer = UnityHelper.CreateObject<SpriteRenderer>("DestroyerBlood", null, (targetPos + new Vector3(0f, 0.1f, 0f)).AsWorldPos(true));
+                bloodRenderer.sprite = spriteBloodPuddle.GetSprite();
+                bloodRenderer.color = Palette.PlayerColors[target.CurrentOutfit.ColorId];
+                bloodRenderer.transform.localScale = new(0.45f, 0.45f, 1f);
+            }
 
             GameObject.Destroy(handRenderer.gameObject);
             if(deadBody) GameObject.Destroy(deadBody.gameObject);

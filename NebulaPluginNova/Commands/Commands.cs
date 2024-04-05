@@ -10,18 +10,28 @@ using System.Threading.Tasks;
 
 namespace Nebula.Commands;
 
-[NebulaPreLoad]
+[NebulaPreLoad(typeof(NebulaResourceManager))]
 static public class Commands
 {
     static public void Load()
     {
-        CommandManager.RegisterCommand(new LetCommand(), "let");
-        CommandManager.RegisterCommand(new LetsCommand(), "lets", "scope");
-        CommandManager.RegisterCommand(new EchoCommand(), "echo");
-        CommandManager.RegisterCommand(new KillCommand(), "kill");
-        CommandManager.RegisterCommand(new ReviveCommand(), "revive");
-        CommandManager.RegisterCommand(new EntityCommand(), "entity");
-        CommandManager.RegisterCommand(new DebugCommand(), "debug");
+        CommandManager.RegisterCommand(new LetCommand(), "nebula::let");
+        CommandManager.RegisterCommand(new LetsCommand(), "nebula::lets", "nebula::scope");
+        CommandManager.RegisterCommand(new EchoCommand(), "nebula::echo");
+        CommandManager.RegisterCommand(new KillCommand(), "nebula::kill");
+        CommandManager.RegisterCommand(new ReviveCommand(), "nebula::revive");
+        CommandManager.RegisterCommand(new EntityCommand(), "nebula::entity");
+        CommandManager.RegisterCommand(new ColCommand(), "nebula::col");
+        CommandManager.RegisterCommand(new DoCommand(), "nebula::do");
+        CommandManager.RegisterCommand(new DoParallelCommand(), "nebula::parallel");
+        CommandManager.RegisterCommand(new WaitCommand(), "nebula::wait");
+        CommandManager.RegisterCommand(new RandomCommand(), "nebula::random");
+        CommandManager.RegisterCommand(new ShowCommand(), "nebula::show");
+        CommandManager.RegisterCommand(new EffectCommand(), "nebula::effect");
+        CommandManager.RegisterCommand(new GuiHolderCommand(), "gui::holder");
+        CommandManager.RegisterCommand(new GuiTextCommand(), "gui::text");
+        CommandManager.RegisterCommand(new GuiButtonCommand(), "gui::button");
+        CommandManager.RegisterCommand(new GuiArrayerCommand(), "gui::arrayer");
 
         /*
         CommandManager.RegisterCommand(new Command((bubble, args, result) =>

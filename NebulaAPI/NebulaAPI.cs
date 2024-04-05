@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using UnityEngine;
-using Virial.Assets;
 using Virial.Assignable;
 using Virial.Attributes;
 using Virial.Components;
@@ -22,9 +21,9 @@ internal interface INebula
     Virial.Components.AbilityButton CreateAbilityButton();
     Virial.Components.GameTimer CreateTimer(float max, float min);
     string APIVersion { get; }
-    INameSpace NebulaAsset { get; }
-    INameSpace InnerslothAsset { get; }
-    INameSpace GetAddon(string addonId);
+    IResourceAllocator NebulaAsset { get; }
+    IResourceAllocator InnerslothAsset { get; }
+    IResourceAllocator? GetAddonResource(string addonId);
     IEnumerable<Player> GetPlayers();
     Player? LocalPlayer { get; }
     Media.GUI GUILibrary { get; }
@@ -51,9 +50,9 @@ public static class NebulaAPI
     static public Virial.Components.AbilityButton CreateAbilityButton() => instance.CreateAbilityButton();
     static public Virial.Components.GameTimer CreateTimer(float max, float min = 0f) => instance.CreateTimer(max, min);
 
-    static public INameSpace NebulaAsset => instance.NebulaAsset;
-    static public INameSpace InnerslothAsset => instance.InnerslothAsset;
-    static public INameSpace GetAddon(string addonId) => instance.GetAddon(addonId);
+    static public IResourceAllocator NebulaAsset => instance.NebulaAsset;
+    static public IResourceAllocator InnerslothAsset => instance.InnerslothAsset;
+    static public IResourceAllocator? GetAddon(string addonId) => instance.GetAddonResource(addonId);
     static public void RegisterEventHandler(ILifespan lifespan, object handler) => instance.RegisterEventHandler(lifespan, handler);
 
     /// <summary>

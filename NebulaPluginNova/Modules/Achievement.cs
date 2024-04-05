@@ -394,7 +394,7 @@ public class CompleteAchievement : SumUpAchievement
     }
 }
 
-[NebulaPreLoad(typeof(Roles.Roles))]
+[NebulaPreLoad(typeof(Roles.Roles), typeof(NebulaResourceManager))]
 static public class NebulaAchievementManager
 {
     static public DataSaver AchievementDataSaver = new("Progress");
@@ -479,7 +479,7 @@ static public class NebulaAchievementManager
         }.Select(tag => new DisplayProgressRecord("death." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
 
         //読み込み
-        using var reader = new StreamReader(NameSpaceManager.DefaultNameSpace.OpenRead("Achievements.dat")!);
+        using var reader = new StreamReader(NebulaResourceManager.NebulaNamespace.GetResource("Achievements.dat")!.AsStream()!);
 
         List<ProgressRecord> recordsList = new();
 

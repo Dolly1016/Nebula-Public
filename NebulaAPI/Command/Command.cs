@@ -9,6 +9,7 @@ using Steamworks;
 using Virial.Compat;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
+using Virial.Common;
 
 namespace Virial.Command;
 
@@ -75,6 +76,32 @@ public class CommandStructureConverter<T>
         return this;
     }
 
+    public CommandStructureConverter<T> AddCollection<V>(string label, Action<T, IEnumerable<V>> setter)
+    {
+        suppliers.Add((t, env, structure) =>
+        {
+            if (structure.TryGetValue(label, out var token))
+                return token.AsEnumerable(env).Select(token => token.AsValue<V>(env)).Action(v => setter.Invoke(t, v));
+            else
+                return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token);
+        });
+        return this;
+    }
+
+    public CommandStructureConverter<T> AddStructure<V>(string label, CommandStructureConverter<V> converter, Func<V> constructor, Action<T,V> setter)
+    {
+        suppliers.Add((t, env, structure) =>
+        {
+            if (structure.TryGetValue(label, out var token))
+            {
+                return converter.ChainConverterTo(token.AsStructure(env), constructor.Invoke(), env).Action(val => setter.Invoke(t, val));
+            }
+            else
+                return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token);
+        });
+        return this;
+    }
+
     public CoTask<T> ChainConverterTo(CoTask<CommandStructure> task, T target, CommandEnvironment env)
     {
         return task.DoParallel(suppliers
@@ -92,9 +119,8 @@ public record CommandEnvironment(ICommandExecutor Executor, ICommandModifier Arg
 /// <summary>
 /// コマンドの実行者を表します。
 /// </summary>
-public interface ICommandExecutor
+public interface ICommandExecutor : IPermissionHolder
 {
-    bool IsOp { get; }
 }
 
 /// <summary>

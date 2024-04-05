@@ -14,7 +14,7 @@ namespace Nebula.Roles.Crewmate;
 
 public class Collator : ConfigurableStandardRole, HasCitation
 {
-    static public Collator MyRole = null!;// new Collator();
+    static public Collator MyRole = null;//new Collator();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 

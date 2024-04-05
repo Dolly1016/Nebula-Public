@@ -70,6 +70,9 @@
 		<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
 		<Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
 		<Compile Remove="Resources\**" />
+		<Compile Remove="Roles\Perks\**" />
+		<EmbeddedResource Remove="Roles\Perks\**" />
+		<None Remove="Roles\Perks\**" />
 		<Reference Include="libs\Mono.CSharp.dll" />
 	</ItemGroup>
 
@@ -86,10 +89,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\NebulaAPI\NebulaAPI.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Roles\Perks\" />
 	</ItemGroup>
 
 	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">

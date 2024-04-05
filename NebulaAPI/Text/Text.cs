@@ -99,9 +99,14 @@ public enum AttributeAsset
     StandardLargeWideMasked,
 
     /// <summary>
-    /// 中揃えの小見出しや注目を浴びるテキスト、ボタン向けの可変サイズテキスト属性です。
+    /// 中揃えの小見出しや注目を浴びるテキスト向けの可変サイズテキスト属性です。
     /// </summary>
     CenteredBold,
+
+    /// <summary>
+    /// 中揃えの小見出しやボタン向けの固定サイズテキスト属性です。
+    /// </summary>
+    CenteredBoldFixed,
 
     /// <summary>
     /// 主にオーバーレイ向けの見出し用可変サイズテキスト属性です。

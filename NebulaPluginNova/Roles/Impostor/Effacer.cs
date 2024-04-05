@@ -12,7 +12,7 @@ namespace Nebula.Roles.Impostor;
 
 public class Effacer : ConfigurableStandardRole, HasCitation
 {
-    static public Effacer MyRole = null!;//new Effacer();
+    static public Effacer MyRole = null;// new Effacer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
     public override string LocalizedName => "effacer";

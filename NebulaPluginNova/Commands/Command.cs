@@ -11,10 +11,25 @@ using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using Virial.Command;
+using Virial.Common;
 using Virial.Compat;
+using Virial.Media;
 
 namespace Nebula.Commands;
 
+public static class CommandHelper
+{
+    static public bool DenyByPermission(CommandEnvironment env, Permission required, [MaybeNullWhen(false)]out CoTask<ICommandToken> task)
+    {
+        task = null;
+        if (env.Executor.Test(required)) return false;
+
+        env.Logger.PushError("You don't have the necessary permission to execute.");
+        task = new CoImmediateErrorTask<ICommandToken>();
+        return true;
+
+    }
+}
 public class CommandLogText : ICommandLogText
 {
     readonly static public Color InvalidColor = Color.Lerp(Color.red, Color.white, 0.4f);
@@ -100,7 +115,7 @@ public class StatementCommandToken : ICommandToken
 
     CoTask<ICommandToken> ICommandToken.EvaluateHere(CommandEnvironment env)
     {
-        return new CoImmediateTask<ICommandToken>(new StatementCommandToken(new ReadOnlyArray<ICommandToken>(tokens.Select(t => env.ArgumentTable.ApplyTo(t)))));
+        return new CoImmediateTask<IEnumerable<ICommandToken>>(this.tokens).SelectParallel(t => t.EvaluateHere(env)).ChainFast<ICommandToken,IEnumerable<ICommandToken>>(col => new StatementCommandToken(new ReadOnlyArray<ICommandToken>(col)));
     }
 
     CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(CommandEnvironment env)
@@ -118,16 +133,28 @@ public class StatementCommandToken : ICommandToken
     IExecutable? ICommandToken.ToExecutable(CommandEnvironment env) => new CommandExecutable(this, env);
 }
 
+public class CommandResource : INebulaResource
+{
+    ICommand command;
+    public CommandResource(ICommand command)
+    {
+        this.command = command;
+    }
+
+    ICommand? INebulaResource.AsCommand() => command;
+}
 
 [NebulaPreLoad]
 public class CommandManager
 {
-
-    static private Dictionary<string, ICommand> commandMap = new();
-    static public bool TryGetCommand(string label, [MaybeNullWhen(false)] out ICommand command) => commandMap.TryGetValue(label, out command);
-    static public void RegisterCommand(ICommand command,params string[] name)
+    static public bool TryGetCommand(string label, [MaybeNullWhen(false)] out ICommand command) => TryGetCommand(label, null, out command);
+    static public bool TryGetCommand(string label, IResourceAllocator? defaultAllocator, [MaybeNullWhen(false)] out ICommand command) {
+        command = NebulaResourceManager.GetResource(label, defaultAllocator ?? NebulaResourceManager.NebulaNamespace)?.AsCommand();
+        return command != null;
+    }
+    static public void RegisterCommand(ICommand command, params string[] name)
     {
-        foreach(var n in name) commandMap[n] = command;
+        foreach(var n in name) Debug.Log("Command Register:" + NebulaResourceManager.RegisterResource(n, new CommandResource(command)));
     }
 
 
@@ -210,13 +237,13 @@ public class CommandManager
             else if(arg.StartsWith("\""))
             {
                 args.Push(arg.Substring(1));
-                break;
+                result.Add(new StringCommandToken(ParseTextToken())); 
             }
             else
                 result.Add(
                     arg switch
                     {
-                        "@a" => new ArrayCommandToken(new ReadOnlyArray<ICommandToken>(NebulaGameManager.Instance?.AllPlayerInfo().Select(p => new PlayerCommandToken(p)))),
+                        "@a" => new ArrayCommandToken(new ReadOnlyArray<ICommandToken>(NebulaGameManager.Instance?.AllPlayerInfo().OrderBy(p => p.PlayerId).Select(p => new PlayerCommandToken(p)))),
                         _ => new StringCommandToken(arg)
                     }
                     );
@@ -281,10 +308,13 @@ public class ConsoleShower : MonoBehaviour
     record Bubble(GameObject Holder, SpriteRenderer Background, TextMeshPro Text)
     {
         public ICommandLogger Logger { get; set; }
+        public float Timer { get; set; } = 5f;
+        public float Alpha { get; set; } = 1f;
     }
 
     Queue<Bubble> activeBubbles = new();
     Stack<Bubble> unusedBubblePool = new();
+    public GameObject ConsoleInputHolder;
 
     static ConsoleShower() => ClassInjector.RegisterTypeInIl2Cpp<ConsoleShower>();
 
@@ -310,11 +340,15 @@ public class ConsoleShower : MonoBehaviour
 
 
         newBubble.Logger = logger;
+        newBubble.Alpha = 1f;
+        newBubble.Timer = 5f;
+
         activeBubbles.Enqueue(newBubble);
     }
 
     public void LateUpdate()
     {
+
         float height = 0f;
         int num = 0;
 
@@ -348,5 +382,16 @@ public class ConsoleShower : MonoBehaviour
         while (activeBubbles.Count > num) unusedBubblePool.Push(activeBubbles.Dequeue());
 
         foreach (var b in unusedBubblePool) b.Holder.gameObject.SetActive(false);
+
+        foreach (var bubble in activeBubbles)
+        {
+            if (bubble.Timer > 0f) { bubble.Timer -= Time.deltaTime; }
+            else if (bubble.Alpha > 0f) bubble.Alpha = Mathf.Clamp01(bubble.Alpha - Time.deltaTime * 0.7f);
+
+            UnityEngine.Color alphaColor = new(1f, 1f, 1f, ConsoleInputHolder.active ? 1f : bubble.Alpha);
+
+            bubble.Text.color = alphaColor;
+            bubble.Background.color = alphaColor.RGBMultiplied(0.13f);
+        }
     }
 }
