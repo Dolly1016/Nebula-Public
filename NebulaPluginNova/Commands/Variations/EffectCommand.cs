@@ -21,7 +21,7 @@ public class EffectCommand : ICommand
         public static CommandStructureConverter<EffectStructure> Converter = new CommandStructureConverter<EffectStructure>()
             .Add<float>("duration", (structure, val) => structure.duration = Mathf.Max(val, 0))
             .Add<bool>("infinity", (structure, val) => structure.duration = val ? 10000f : structure.duration)
-            .Add<float>("ratio", (structure, val) => structure.ratio = Mathf.Max(val, 0))
+            .Add<float>("ratio", (structure, val) => structure.ratio = /*Mathf.Max(val, 0)*/ val)
             .Add<bool>("canPassMeeting", (structure, val) => structure.canPassMeeting = val);
 
     }
@@ -36,7 +36,7 @@ public class EffectCommand : ICommand
         if (CommandHelper.DenyByPermission(env, PlayerModInfo.OpPermission, out var p)) return p;
 
         if (arguments.Count != 3)
-            return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " <type> <target> {structure}");
+            return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " <type> <target> <structure>");
 
         string id = "";
         IEnumerable<GamePlayer> targets = [];

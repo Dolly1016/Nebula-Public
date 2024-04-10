@@ -15,6 +15,8 @@ static public class Commands
 {
     static public void Load()
     {
+        CommandManager.RegisterCommand(new FormulaCommand(), "nebula::formula", "nebula::f");
+        CommandManager.RegisterCommand(new IfCommand(), "nebula::if");
         CommandManager.RegisterCommand(new LetCommand(), "nebula::let");
         CommandManager.RegisterCommand(new LetsCommand(), "nebula::lets", "nebula::scope");
         CommandManager.RegisterCommand(new EchoCommand(), "nebula::echo");

@@ -136,7 +136,7 @@ namespace Nebula.Behaviour
 
         public void Update()
         {
-            myShower.SetActive(AmongUsClient.Instance.AmHost && State != UncertifiedReason.Waiting);
+            myShower.SetActive(AmongUsClient.Instance.AmHost && State != UncertifiedReason.Waiting && !GeneralConfigurations.CurrentGameMode.AllowWithoutNoS);
         }
 
         public void OnDestroy()

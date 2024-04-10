@@ -471,6 +471,7 @@ public class NebulaConfiguration : ValueConfiguration
     public Func<object?, string>? Decorator { get; set; } = null;
     public Func<int, object?>? Mapper { get; set; } = null;
     public Func<bool>? Predicate { get; set; } = null;
+    public int GameModeMask { get; set; } = CustomGameMode.AllGameModeMask;
     public Func<IMetaWidgetOld?>? Editor { get; set; } = null;
     public Func<string?>? Shower { get; set; }
     public bool LoopAtBothEnds { get; set; } = true;
@@ -478,7 +479,7 @@ public class NebulaConfiguration : ValueConfiguration
     private int InvalidatedValue { get; init; }
     public Virial.Text.TextComponent Title { get; set; }
     public string Id => entry?.Name ?? "Undefined";
-    public bool IsShown => (MyHolder?.IsShown ?? true) && (Predicate?.Invoke() ?? true);
+    public bool IsShown => (MyHolder?.IsShown ?? true) && ((GeneralConfigurations.CurrentGameMode & GameModeMask) != 0) && (Predicate?.Invoke() ?? true);
     public Action? OnValueChanged = null;
 
     public static List<NebulaConfiguration> AllConfigurations = new();
@@ -710,6 +711,9 @@ public class NebulaConfiguration : ValueConfiguration
 
     public int CurrentValue => (IsShown && entry != null) ? entry.CurrentValue : InvalidatedValue;
 
+    //各種Predicateを通さず、設定の生の値を取得します。
+    public int CurrentUncheckedValue => entry?.CurrentValue ?? -1;
+
     string ValueConfiguration.CurrentValue => GetString();
     float ValueConfiguration.AsFloat() => GetFloat();
     int ValueConfiguration.AsInt() => GetMappedInt();
@@ -814,8 +818,16 @@ public class CustomGameMode
         .AddEndCriteria(NebulaEndCriteria.CrewmateAliveCriteria)
         .AddEndCriteria(NebulaEndCriteria.CrewmateTaskCriteria)
         .AddEndCriteria(NebulaEndCriteria.JackalKillCriteria);
-    public static CustomGameMode FreePlay = new CustomGameMode(0x02, "gamemode.freeplay", new FreePlayRoleAllocator(), 0);
-    public static int AllGameModeMask = Standard | FreePlay;
+    public static CustomGameMode HostMode = new CustomGameMode(0x04, "gamemode.hostMode", new StandardRoleAllocator(), 4, true) { AllowSpecialEnd = true, AllowWithoutNoS = true }
+        .AddEndCriteria(NebulaEndCriteria.SabotageCriteria)
+        .AddEndCriteria(NebulaEndCriteria.ImpostorKillCriteria)
+        .AddEndCriteria(NebulaEndCriteria.CrewmateAliveCriteria)
+        .AddEndCriteria(NebulaEndCriteria.CrewmateTaskCriteria)
+        .AddEndCriteria(NebulaEndCriteria.JackalKillCriteria);
+    public static CustomGameMode FreePlay = new CustomGameMode(0x02, "gamemode.freeplay", new FreePlayRoleAllocator(), 0) { AllowWithoutNoS = false/*true*/ };
+    public static int AllGameModeMask = Standard | HostMode | FreePlay;
+    public static int AllNormalGameModeMask = Standard | HostMode;
+    public static int AllClientGameModeMask = Standard | FreePlay;
 
     private int bitFlag;
     public string TranslateKey { get; private init; }
@@ -823,11 +835,12 @@ public class CustomGameMode
     public List<NebulaEndCriteria> GameModeCriteria { get; private init; } = new();
     public int MinPlayers { get; private init; }
     public bool AllowSpecialEnd { get; private init; } = false;
-    public CustomGameMode(int bitFlag,string translateKey, IRoleAllocator roleAllocator, int minPlayers)
+    public bool AllowWithoutNoS { get; private init; } = false;
+    public CustomGameMode(int bitFlag,string translateKey, IRoleAllocator roleAllocator, int minPlayers, bool skip = false)
     {
         this.bitFlag = bitFlag;
         this.RoleAllocator = roleAllocator;
-        allGameMode.Add(this);
+        if(!skip) allGameMode.Add(this);
         this.TranslateKey = translateKey;
         MinPlayers = minPlayers;
     }

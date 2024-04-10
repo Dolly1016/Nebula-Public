@@ -37,32 +37,33 @@ public class Synchronizer
         RpcSync.Invoke((tag,PlayerControl.LocalPlayer.PlayerId));
     }
     
-    public IEnumerator CoSync(SynchronizeTag tag, bool withSurviver = true,bool withGhost = false,bool withBot = false)
+    public IEnumerator CoSync(SynchronizeTag tag, bool withSurviver = true,bool withGhost = false,bool withBot = false, bool withVanilla = false)
     {
         if (!sync.ContainsKey(tag)) sync[tag] = 0;
 
         while (true)
         {
-            if (TestSync(tag, withSurviver, withGhost, withBot)) yield break;
+            if (TestSync(tag, withSurviver, withGhost, withBot, withVanilla)) yield break;
 
             yield return null;
         }        
     }
 
-    public IEnumerator CoSyncAndReset(SynchronizeTag tag, bool withSurviver = true, bool withGhost = false, bool withBot = false)
+    public IEnumerator CoSyncAndReset(SynchronizeTag tag, bool withSurviver = true, bool withGhost = false, bool withBot = false, bool withVanilla = false)
     {
-        yield return CoSync(tag, withSurviver, withGhost, withBot);
+        yield return CoSync(tag, withSurviver, withGhost, withBot, withVanilla);
         ResetSync(tag);
         yield break;
     }
 
-    public bool TestSync(SynchronizeTag tag, bool withSurviver = true, bool withGhost = false, bool withBot = false)
+    public bool TestSync(SynchronizeTag tag, bool withSurviver = true, bool withGhost = false, bool withBot = false, bool withVanilla = false)
     {
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
         {
             if (!withSurviver && !p.Data.IsDead) continue;
             if (!withGhost && p.Data.IsDead) continue;
             if (!withBot && p.isDummy) continue;
+            if (!withVanilla && (!p.GetModInfo()?.WithNoS ?? false)) continue;
 
             if ((sync[tag] & (1 << p.PlayerId)) == 0) return false;
         }

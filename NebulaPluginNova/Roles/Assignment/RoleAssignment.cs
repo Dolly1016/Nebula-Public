@@ -1,4 +1,6 @@
-﻿using Il2CppSystem.Text.Json;
+﻿using Hazel;
+using Il2CppSystem.Text.Json;
+using InnerNet;
 using Nebula.Configuration;
 using Nebula.Modules;
 using System;
@@ -59,6 +61,27 @@ public abstract class IRoleAllocator
             allInvokers.Add(NebulaGameManager.RpcStartGame.GetInvoker());
 
             CombinedRemoteProcess.CombinedRPC.Invoke(allInvokers.ToArray());
+
+
+            foreach (var sendTo in NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.WithNoS))
+            {
+                //MessageWriter messageWriter = MessageWriter.Get(SendOption.Reliable);
+                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                {
+                    
+                    var messageWriter = AmongUsClient.Instance.StartRpcImmediately(p.MyControl.NetId, 44, SendOption.Reliable, (int)sendTo.MyControl.OwnerId);
+                    messageWriter.Write((ushort)AmongUs.GameOptions.RoleTypes.Crewmate);
+
+                    AmongUsClient.Instance.FinishRpcImmediately(messageWriter);
+
+                    Debug.Log("Send Vanilla RPC");
+                    //messageWriter.EndMessage();
+                    //messageWriter.EndMessage();
+                }
+                //AmongUsClient.Instance.SendOrDisconnect(messageWriter);
+                //messageWriter.Recycle();
+            }
+
         }
 
         public IEnumerable<(byte playerId,AbstractRole role)> GetPlayers(RoleCategory category)

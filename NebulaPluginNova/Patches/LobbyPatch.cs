@@ -57,7 +57,7 @@ public class GameStartManagerUpdatePatch
 
         bool canStart = __instance.LastPlayerCount >= __instance.MinPlayers;
 
-        canStart &= PlayerControl.AllPlayerControls.GetFastEnumerator().All(p => !p.gameObject.TryGetComponent<UncertifiedPlayer>(out _));
+        canStart &= GeneralConfigurations.CurrentGameMode.AllowWithoutNoS || PlayerControl.AllPlayerControls.GetFastEnumerator().All(p => !p.gameObject.TryGetComponent<UncertifiedPlayer>(out _));
 
         LastChecked = canStart;
         __instance.StartButton.color = canStart ? Palette.EnabledColor : Palette.DisabledClear;

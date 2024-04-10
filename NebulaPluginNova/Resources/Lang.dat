@@ -52,6 +52,7 @@
 # Game Mode
 
 "gamemode.standard" : "Standard"
+"gamemode.hostMode" : "Host Mode"
 "gamemode.freeplay" : "Free Play"
 
 # Options

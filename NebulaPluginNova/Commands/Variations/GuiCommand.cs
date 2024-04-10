@@ -54,7 +54,7 @@ public class GuiHolderCommand : ICommand
     CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
     {
         if (arguments.Count != 1)
-            return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " {structure}");
+            return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " <structure>");
 
         return arguments[0].AsStructure(env).ConvertTo<GUIHolderStructure>(GUIHolderStructure.Converter, new(), env).ChainFast<ICommandToken, GUIHolderStructure>(
             structure => new ObjectCommandToken<GUIWidget>(structure.isVertical ? GUI.API.VerticalHolder(structure.alignment, structure.inner ?? []) : GUI.API.HorizontalHolder(structure.alignment, structure.inner ?? []))

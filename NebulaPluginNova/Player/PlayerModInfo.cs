@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using Nebula.Behaviour;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
 using Virial.Assignable;
@@ -176,6 +177,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     public PlayerControl MyControl { get; private set; }
     public byte PlayerId { get; private set; }
     public bool AmOwner { get; private set; }
+    public bool WithNoS { get; private set; }
     public bool IsDisconnected { get; set; } = false;
     public bool IsDead => IsDisconnected || MyControl.Data.IsDead;
     public float MouseAngle { get; private set; }
@@ -287,6 +289,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         this.Tasks = new PlayerTaskState(myPlayer);
         PlayerId = myPlayer.PlayerId;
         AmOwner = myPlayer.AmOwner;
+        WithNoS = !myPlayer.gameObject.TryGetComponent<UncertifiedPlayer>(out var up); 
         DefaultOutfit = myPlayer.Data.DefaultOutfit;
         roleText = GameObject.Instantiate(myPlayer.cosmetics.nameText, myPlayer.cosmetics.nameText.transform);
         roleText.transform.localPosition = new Vector3(0,0.185f,-0.01f);

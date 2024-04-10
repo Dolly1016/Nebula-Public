@@ -25,7 +25,7 @@ public static class GeneralConfigurations
         Light = 4,
     }
 
-    static public NebulaConfiguration GameModeOption = new(null, "options.gamemode", null, CustomGameMode.AllGameMode.Count - 1, 0, 0);
+    static public NebulaConfiguration GameModeOption = new(null, "options.gamemode", null, CustomGameMode.AllGameMode.Count - 1, 0, 0) { GameModeMask = 0x7FFFFFFF };
 
     public class MapCustomization
     {
@@ -45,17 +45,17 @@ public static class GeneralConfigurations
         new(),
     };
 
-    static public ConfigurationHolder AssignmentOptions = new("options.assignment", null, ConfigurationTab.Settings, CustomGameMode.Standard);
+    static public ConfigurationHolder AssignmentOptions = new("options.assignment", null, ConfigurationTab.Settings, CustomGameMode.AllNormalGameModeMask);
     static private Func<object?, string> AssignmentDecorator = (obj) => (int)obj! == -1 ? Language.Translate("options.assignment.unlimited") : obj.ToString()!;
     static public NebulaConfiguration AssignmentCrewmateOption = new NebulaConfiguration(AssignmentOptions, "crewmate", null, -1, 15, -1, -1) { Decorator = AssignmentDecorator };
     static public NebulaConfiguration AssignmentImpostorOption = new NebulaConfiguration(AssignmentOptions, "impostor", null, -1, 3, -1, -1) { Decorator = AssignmentDecorator };
     static public NebulaConfiguration AssignmentNeutralOption = new NebulaConfiguration(AssignmentOptions, "neutral", null, -1, 15, 0, 0) { Decorator = AssignmentDecorator };
-    static public NebulaConfiguration AssignOpToHostOption = new NebulaConfiguration(AssignmentOptions, "assignOpToHost", null, false, false);
+    static public NebulaConfiguration AssignOpToHostOption = new NebulaConfiguration(AssignmentOptions, "assignOpToHost", null, false, false) { GameModeMask = CustomGameMode.Standard };
 
     static public ConfigurationHolder SoloFreePlayOptions = new("options.soloFreePlay", null, ConfigurationTab.Settings, CustomGameMode.FreePlay);
     static public NebulaConfiguration NumOfDummiesOption = new NebulaConfiguration(SoloFreePlayOptions, "numOfDummies", null, 0, 14, 0, 0);
 
-    static public ConfigurationHolder MapOptions = new("options.map", null, ConfigurationTab.Settings, CustomGameMode.Standard | CustomGameMode.FreePlay);
+    static public ConfigurationHolder MapOptions = new("options.map", null, ConfigurationTab.Settings, CustomGameMode.AllClientGameModeMask);
     static public NebulaConfiguration SpawnMethodOption = new(MapOptions, "spawnMethod", null,
         new string[] { "options.map.spawnMethod.default", "options.map.spawnMethod.selective", "options.map.spawnMethod.random" }, 0, 0);
     static public NebulaConfiguration SpawnCandidatesOption = new NebulaConfiguration(MapOptions, "spawnCandidates", null, 1, 8, 1, 1) { Predicate = () => (SpawnMethodOption.GetString()?.Equals("options.map.spawnMethod.selective")) ?? false };
@@ -170,16 +170,16 @@ public static class GeneralConfigurations
     static public NebulaConfiguration FungleReactorDurationOption = GenerateMapCustomization(5, new(22.4f, -6.8f), new(MapOptions, "customization.fungle.reactorDurationReworked", null, SabotageSelections().ToArray(), 60f, 60f) { Decorator = NebulaConfiguration.SecDecorator }).ReplaceTitle("customization.fungle.reactorDuration");
 
 
-    static public ConfigurationHolder MeetingOptions = new("options.meeting", null, ConfigurationTab.Settings, CustomGameMode.Standard | CustomGameMode.FreePlay);
-    static public NebulaConfiguration DeathPenaltyOption = new(MeetingOptions, "deathPenalty", null, 0f, 20f, 0.5f, 0f, 0f) { Decorator = NebulaConfiguration.SecDecorator };
-    static public NebulaConfiguration NoticeExtraVictimsOption = new NebulaConfiguration(MeetingOptions, "noticeExtraVictims", null, false, false);
+    static public ConfigurationHolder MeetingOptions = new("options.meeting", null, ConfigurationTab.Settings, CustomGameMode.AllGameModeMask);
+    static public NebulaConfiguration DeathPenaltyOption = new(MeetingOptions, "deathPenalty", null, 0f, 20f, 0.5f, 0f, 0f) { Decorator = NebulaConfiguration.SecDecorator, GameModeMask = CustomGameMode.AllClientGameModeMask };
+    static public NebulaConfiguration NoticeExtraVictimsOption = new NebulaConfiguration(MeetingOptions, "noticeExtraVictims", null, false, false) { GameModeMask = CustomGameMode.AllClientGameModeMask };
     static public NebulaConfiguration NumOfMeetingsOption = new(MeetingOptions, "numOfMeeting", null, 0, 15, 10, 10);
-    static public NebulaConfiguration ShowRoleOfExiled = new NebulaConfiguration(MeetingOptions, "showRoleOfExiled", null, false, false) { Predicate = () => GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor };
+    static public NebulaConfiguration ShowRoleOfExiled = new NebulaConfiguration(MeetingOptions, "showRoleOfExiled", null, false, false) { Predicate = () => GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor, GameModeMask = CustomGameMode.AllClientGameModeMask };
 
-    static public ConfigurationHolder ExclusiveAssignmentOptions = new("options.exclusiveAssignment", null, ConfigurationTab.Settings, CustomGameMode.Standard | CustomGameMode.FreePlay);
+    static public ConfigurationHolder ExclusiveAssignmentOptions = new("options.exclusiveAssignment", null, ConfigurationTab.Settings, CustomGameMode.AllNormalGameModeMask);
     static public ExclusiveAssignmentConfiguration ExclusiveOptionBody = new(ExclusiveAssignmentOptions, 10);
 
-    static public ConfigurationHolder VoiceChatOptions = new("options.voiceChat", null, ConfigurationTab.Settings, CustomGameMode.Standard | CustomGameMode.FreePlay);
+    static public ConfigurationHolder VoiceChatOptions = new("options.voiceChat", null, ConfigurationTab.Settings, CustomGameMode.AllClientGameModeMask);
     static public NebulaConfiguration UseVoiceChatOption = new NebulaConfiguration(VoiceChatOptions, "useVoiceChat", null, false, false);
     static public NebulaConfiguration WallsBlockAudioOption = new NebulaConfiguration(VoiceChatOptions, "wallsBlockAudio", null, false, false) { Predicate = () => UseVoiceChatOption };
     static public NebulaConfiguration KillersHearDeadOption = new(VoiceChatOptions, "killersHearDead", null,
@@ -330,7 +330,7 @@ public static class GeneralConfigurations
     static public NebulaConfiguration CameraRestrictionOption = new NebulaConfiguration(ConsoleRestrictionOptions, "cameraRestriction", null, RestrictionSelections().ToArray(), null, null, RestrictionDecorator);
 
 
-    static public CustomGameMode CurrentGameMode => CustomGameMode.AllGameMode[GameModeOption.CurrentValue];
+    static public CustomGameMode CurrentGameMode => CustomGameMode.AllGameMode[GameModeOption.CurrentUncheckedValue];
 
     public class ExclusiveAssignmentConfiguration
     {
