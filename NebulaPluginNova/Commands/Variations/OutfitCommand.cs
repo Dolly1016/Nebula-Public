@@ -1,0 +1,69 @@
+﻿using Nebula.Commands.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Virial.Command;
+using Virial.Compat;
+
+namespace Nebula.Commands.Variations;
+
+public class OutfitCommand : ICommand
+{
+    IEnumerable<CommandComplement> ICommand.Complement(string label, IReadOnlyArray<ICommandToken> arguments, string? last, ICommandExecutor executor)
+    {
+        return [];
+    }
+
+    CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
+    {
+        if (CommandHelper.DenyByPermission(env, PlayerModInfo.OpPermission, out var p)) return p;
+
+        if (arguments.Count < 2)
+            return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " get|set <target> ...");
+
+        IEnumerable<GamePlayer> targets = [];
+        int priority = 50;
+        bool selfAware = true;
+        bool isSet = false;
+        return arguments[0].AsValue<string>(env).Action(val => isSet = val == "set")
+            .Chain(_ => arguments[1].AsEnumerable(env).As<GamePlayer>(env).Action(p => targets = p))
+            .Chain(_ =>
+            {
+                CoTask<ICommandToken> task = new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token);
+
+                if (isSet)
+                {
+                    if (arguments.Count < 3)
+                        return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " set <target> <outfit> [<priority>] [<selfAware>]");
+
+                    GameData.PlayerOutfit? outfit = null;
+                    task = task.Chain(_ => arguments[2].AsValue<GameData.PlayerOutfit>(env).Action(val => outfit = val));
+                    if (arguments.Count >= 4) task = task.Chain(_ => arguments[3].AsValue<int>(env).Action(val => priority = val));
+                    if (arguments.Count == 5) task = task.Chain(_ => arguments[4].AsValue<bool>(env).Action(val => selfAware = val));
+
+                    if(outfit == null)
+                        return new CoImmediateErrorTask<ICommandToken>(env.Logger, "The given outfitis invalid.");
+
+                    return task.Action(_ =>
+                    {
+                        using (RPCRouter.CreateSection("CommandOutfit"))
+                        {
+                            targets.Do(p => PlayerModInfo.RpcAddOutfit.Invoke((p.PlayerId, new Virial.Game.OutfitCandidate("", priority, selfAware, outfit))));
+                        }
+                    });
+                }
+                else
+                {
+                    if (arguments.Count == 3) task = task.Chain(_ => arguments[2].AsValue<int>(env).Action(val => priority = val));
+                    
+                    if(targets.Count() == 0)
+                        return new CoImmediateErrorTask<ICommandToken>(env.Logger, "No player specified.");
+
+                    return task.ChainFast(_ => (ICommandToken) new ObjectCommandToken<GameData.PlayerOutfit>(targets.First().Unbox().GetOutfit(priority)));
+                }
+            });
+    }
+}
+

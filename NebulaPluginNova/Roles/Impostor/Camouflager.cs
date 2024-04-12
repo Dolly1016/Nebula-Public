@@ -101,7 +101,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
         "Camouflage",
         (message, _) =>
         {
-            PlayerModInfo.OutfitCandidate outfit = new("Camo" + message.camouflagerId, 100, true, CamouflagerOutfit);
+            OutfitCandidate outfit = new("Camo" + message.camouflagerId, 100, true, CamouflagerOutfit);
             foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
                 if (message.on)

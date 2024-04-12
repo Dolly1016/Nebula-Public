@@ -27,7 +27,13 @@ public class PlayerCommandToken : ICommandToken
         if(type == typeof(GamePlayer))
         {
             return new CoImmediateTask<T>(Unsafe.As<GamePlayer, T>(ref player));
-        }else if(type == typeof(string))
+        }
+        else if (type == typeof(GameData.PlayerOutfit))
+        {
+            var outfit = player.Unbox().DefaultOutfit;
+            return new CoImmediateTask<T>(Unsafe.As<GameData.PlayerOutfit, T>(ref outfit));
+        }
+        else if(type == typeof(string))
         {
             string name = player.Name;
             return new CoImmediateTask<T>(Unsafe.As<string, T>(ref name));
