@@ -92,22 +92,6 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 {
     public static Permission OpPermission = new Permission();
 
-    public class OutfitCandidate
-    {
-        public string Tag { get; private set; }
-        public int Priority { get; private set; }
-        public bool SelfAware { get; private set; }
-        public GameData.PlayerOutfit outfit { get; private set; }
-
-        public OutfitCandidate(string tag, int priority, bool selfAware, GameData.PlayerOutfit outfit)
-        {
-            this.Tag = tag;
-            this.Priority = priority;
-            this.SelfAware = selfAware;
-            this.outfit = outfit;
-        }
-    }
-
     public PlayerControl MyControl { get; private set; }
     public byte PlayerId { get; private set; }
     public bool AmOwner { get; private set; }

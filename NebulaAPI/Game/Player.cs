@@ -29,6 +29,22 @@ public static class PlayerAttributes
     static public IPlayerAttribute BuskerEffect { get; internal set; }
 }
 
+public class OutfitCandidate
+{
+    public string Tag { get; private set; }
+    public int Priority { get; private set; }
+    public bool SelfAware { get; private set; }
+    internal GameData.PlayerOutfit outfit { get; private set; }
+
+    internal OutfitCandidate(string tag, int priority, bool selfAware, GameData.PlayerOutfit outfit)
+    {
+        this.Tag = tag;
+        this.Priority = priority;
+        this.SelfAware = selfAware;
+        this.outfit = outfit;
+    }
+}
+
 public interface Player
 {
     internal PlayerControl VanillaPlayer { get; }

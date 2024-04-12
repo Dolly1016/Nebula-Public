@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Virial.Attributes;
+using Virial.Game;
 using Virial.Text;
 using static Nebula.Player.PlayerModInfo;
 
