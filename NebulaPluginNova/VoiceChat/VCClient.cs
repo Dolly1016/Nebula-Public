@@ -99,7 +99,7 @@ public class VCClient : IDisposable
                 yield return new WaitForSeconds(1f);
                 yield return PropertyRPC.CoGetProperty<string>(player.PlayerId, "myPuid", result => puid = result, null);
             }
-            Debug.Log($"Gain PUID of {player.name} ({player.PlayerId} : {puid}");
+            Debug.Log($"Gain PUID of {player.name} ({player.PlayerId} : {puid})");
             if (puid.Length == 0) puid = player.name;
             volumeEntry = new FloatDataEntry(puid, VoiceChatManager.VCSaver, 1f);
         }
@@ -176,7 +176,7 @@ public class VCClient : IDisposable
             }
 
             //ラジオ
-            if (!relatedControl.Data.IsDead && InputtedVoiceType == VoiceType.Radio)
+            if (!(relatedControl.Data?.IsDead ?? false) && InputtedVoiceType == VoiceType.Radio)
             {
                 volumeFilter.Volume = ((1 << PlayerControl.LocalPlayer.PlayerId) & radioMask) == 0 ? 0f : 1f;
                 panningFilter.Pan = 0f;
@@ -207,7 +207,7 @@ public class VCClient : IDisposable
         CheckCanHear(out volume, out pan, relatedControl.transform.position);
         
         //普通に話している生存者
-        if(InputtedVoiceType == VoiceType.Normal && !relatedControl.Data.IsDead)
+        if(InputtedVoiceType == VoiceType.Normal && !(relatedControl.Data?.IsDead ?? false))
         {
             foreach (var mic in NebulaGameManager.Instance!.VoiceChatManager!.AllMics())
             {

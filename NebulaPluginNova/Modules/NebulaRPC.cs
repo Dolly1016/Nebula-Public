@@ -310,7 +310,7 @@ public static class RemoteProcessAsset
                 writer.Write(mod.Priority);
                 writer.Write(mod.DuplicateTag);
             },
-            (reader) => new SpeedModulator(reader.ReadSingle(), reader.ReadBoolean(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadInt32(), reader.ReadInt32())
+            (reader) => new SpeedModulator(reader.ReadSingle(), reader.ReadBoolean(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadInt32(), reader.ReadString())
         );
         defaultProcessDic[typeof(AttributeModulator)] = (
             (writer, obj) =>
@@ -323,7 +323,7 @@ public static class RemoteProcessAsset
                 writer.Write(mod.DuplicateTag);
                 writer.Write(mod.CanBeAware);
             },
-            (reader) => new AttributeModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadBoolean())
+            (reader) => new AttributeModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadInt32(), reader.ReadString(), reader.ReadBoolean())
         );
         defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj).Id), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
         defaultProcessDic[typeof(CommunicableTextTag)] = defaultProcessDic[typeof(TranslatableTag)];

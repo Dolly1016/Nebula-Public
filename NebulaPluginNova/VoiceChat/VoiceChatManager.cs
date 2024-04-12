@@ -389,11 +389,12 @@ public class VoiceChatManager : IDisposable
 
         usingMic = true;
 
-        while (PlayerControl.LocalPlayer) { yield return new WaitForSeconds(0.5f); }
+        while (!PlayerControl.LocalPlayer) { yield return new WaitForSeconds(0.5f); }
 
         int resSize;
         byte[] headRes = new byte[2];
         uint sId = GetClient(PlayerControl.LocalPlayer.PlayerId)?.sId ?? 0;
+
         while (true)
         {
             //ヘッダーを受信 (長さのみ)

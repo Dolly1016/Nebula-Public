@@ -8,11 +8,12 @@ namespace Nebula.Player;
 
 public class AttributeShower
 {
-    class AttributeIcon
+    public class AttributeIcon
     {
         private static ISpriteLoader guageSprite = SpriteLoader.FromResource("Nebula.Resources.AttributeGuage.png", 100f);
         private static IDividedSpriteLoader imageSprites = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.AttributeIcon.png", 100f, 33, true);
-
+        private static ISpriteLoader[] imageLoaders = Helpers.Sequential(imageSprites.Length).Select(i => imageSprites.AsLoader(i)).ToArray();
+        public static ISpriteLoader GetIconSprite(int index) => imageLoaders[index + 2];
         public Virial.Game.IPlayerAttribute Attribute { get; private set; }
         public Transform MyTransform { get; private set; }
 
@@ -28,7 +29,7 @@ public class AttributeShower
             renderer.sprite = imageSprites.GetSprite(0);
 
             var iconRenderer = UnityHelper.CreateObject<SpriteRenderer>("AttrIconTop", MyTransform, new Vector3(0f, 0f, -0.1f));
-            iconRenderer.sprite = imageSprites.GetSprite(attribute.ImageId + 2);
+            iconRenderer.sprite = attribute.Image.GetSprite();
 
             guageRenderer = UnityHelper.CreateObject<SpriteRenderer>("Guage", MyTransform, new Vector3(0f, 0f, -0.2f));
             guageRenderer.sprite = guageSprite.GetSprite();

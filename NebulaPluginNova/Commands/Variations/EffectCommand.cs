@@ -17,11 +17,13 @@ public class EffectCommand : ICommand
         public float duration = 10f;
         public float ratio = 1f;
         public bool canPassMeeting = false;
+        public string? tag = null;
 
         public static CommandStructureConverter<EffectStructure> Converter = new CommandStructureConverter<EffectStructure>()
             .Add<float>("duration", (structure, val) => structure.duration = Mathf.Max(val, 0))
             .Add<bool>("infinity", (structure, val) => structure.duration = val ? 10000f : structure.duration)
-            .Add<float>("ratio", (structure, val) => structure.ratio = /*Mathf.Max(val, 0)*/ val)
+            .Add<float>("ratio", (structure, val) => structure.ratio = val)
+            .Add<string>("tag", (structure, val) => structure.tag = val)
             .Add<bool>("canPassMeeting", (structure, val) => structure.canPassMeeting = val);
 
     }
@@ -49,7 +51,7 @@ public class EffectCommand : ICommand
                 {
                     using (RPCRouter.CreateSection("SpeedModulator"))
                     {
-                        foreach (var p in targets) PlayerModInfo.RpcSpeedModulator.Invoke((p.PlayerId, new(structure.ratio, true, structure.duration, structure.canPassMeeting, 0, 0)));
+                        foreach (var p in targets) PlayerModInfo.RpcSpeedModulator.Invoke((p.PlayerId, new(structure.ratio, true, structure.duration, structure.canPassMeeting, 0, structure.tag)));
                     }
                     return EmptyCommandToken.Token;
                 }
@@ -63,7 +65,7 @@ public class EffectCommand : ICommand
 
                 using (RPCRouter.CreateSection("AttributeModulator"))
                 {
-                    foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new(attr, structure.duration, structure.canPassMeeting, 0, 0, true)));
+                    foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new(attr, structure.duration, structure.canPassMeeting, 0, structure.tag, true)));
                 }
                 return EmptyCommandToken.Token;
             }

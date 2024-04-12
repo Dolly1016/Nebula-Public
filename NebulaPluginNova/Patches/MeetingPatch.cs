@@ -296,8 +296,6 @@ class MeetingStartPatch
             SpriteRenderer renderer = UnityHelper.CreateObject<SpriteRenderer>("Color", player.transform, new Vector3(1.2f, -0.18f, -1f));
             renderer.sprite = isLightColor ? LightColorSprite.GetSprite() : DarkColorSprite.GetSprite();
 
-            player.ColorBlindName.gameObject.SetActive(false);
-
             //色テキストをプレイヤーアイコンそばに移動
             var localPos = player.ColorBlindName.transform.localPosition;
             localPos.x = -0.947f;
@@ -371,6 +369,7 @@ class MeetingHudUpdatePatch
                 __instance.state = MeetingHud.VoteStates.NotVoted;
                 bool active = MeetingHudExtension.VotingTimer > 0;
                 __instance.TimerText.gameObject.SetActive(active);
+
                 MeetingHud.Instance!.lastSecond = 11;
 
                 MeetingHudExtension.ReflectVotingMask();

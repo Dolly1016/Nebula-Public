@@ -8,6 +8,7 @@ using Virial.Common;
 using Virial.Game;
 using Virial.Text;
 using static Mono.CSharp.Parameter;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Player;
 
@@ -54,7 +55,7 @@ public class PlayerAttributeImpl : IPlayerAttribute
 {
     public int Id { get; init; }
     public string Name { get; init; }
-    public int ImageId { get; init; }
+    public Virial.Media.Image Image { get; private init; }
     public Predicate<GamePlayer>? Cognizable { get; init; }
     public bool CanCognize(GamePlayer player) => Cognizable?.Invoke(player) ?? true;
     public IPlayerAttribute? IdenticalAttribute { get; init; } = null;
@@ -70,7 +71,7 @@ public class PlayerAttributeImpl : IPlayerAttribute
     public PlayerAttributeImpl(int imageId, string name)
     {
         this.Id = allAttributes.Count;
-        this.ImageId = imageId;
+        this.Image = AttributeShower.AttributeIcon.GetIconSprite(imageId);
         allAttributes.Add(this);
         Name = name;
     }
@@ -79,6 +80,8 @@ public class PlayerAttributeImpl : IPlayerAttribute
     {
         PlayerAttributes.Accel = new PlayerAttributeImpl(0, "$accel");
         PlayerAttributes.Decel = new PlayerAttributeImpl(1, "$decel");
+        PlayerAttributes.Drunk = new PlayerAttributeImpl(5, "$inverse");
+        PlayerAttributes.Size = new PlayerAttributeImpl(6, "$size");
         PlayerAttributes.Invisible = new PlayerAttributeImpl(2, "invisible");
         PlayerAttributes.InvisibleElseImpostor = new PlayerAttributeImpl(2, "$invisible") { Cognizable = p => p.Role.Role.Category == RoleCategory.ImpostorRole, IdenticalAttribute = PlayerAttributes.Invisible };
         PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody");
@@ -422,9 +425,8 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
             NebulaManager.Instance.StartCoroutine(CoCurseUpdate().WrapToIl2Cpp());
         }
     }
-    public void OnUnsetAttribute(IPlayerAttribute attribute) { }
 
-    public bool HasAttribute(IPlayerAttribute attribute) => AttributeModulators.Any(m => m.Attribute == attribute);
+    public bool HasAttribute(IPlayerAttribute attribute) => timeLimitedModulators.Any(m => m.HasAttribute(attribute));
 
     public NebulaRPCInvoker RpcInvokerSetRole(AbstractRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), true));
     public NebulaRPCInvoker RpcInvokerSetModifier(AbstractModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), false));
@@ -521,14 +523,12 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
        {
            var player = NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId)!;
            var modulators = player.timeLimitedModulators;
-           if (message.modulator.DuplicateTag != 0)
-           {
-               modulators.RemoveAll(m => m is SpeedModulator && m.DuplicateTag == message.modulator.DuplicateTag);
-           }
+           if (message.modulator.DuplicateTag.Length > 0) modulators.RemoveAll(m => m.DuplicateTag == message.modulator.DuplicateTag);
+
            modulators.Add(message.modulator);
            modulators.Sort((m1, m2) => m2.Priority - m1.Priority);
 
-           if (player.AmOwner && player.SpeedModulators.Any(m => m.IsAccelModulator) && player.SpeedModulators.Any(m => m.IsDecelModulator)) new StaticAchievementToken("speedAttribute");
+           if (player.AmOwner && modulators.Any(m => m.HasAttribute(PlayerAttributes.Accel)) && modulators.Any(m => m.HasAttribute(PlayerAttributes.Decel))) new StaticAchievementToken("speedAttribute");
        }
        );
 
@@ -541,14 +541,11 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
            var modulators = playerInfo!.timeLimitedModulators;
 
            //新たな属性が付与されたとき
-           if (!playerInfo.AttributeModulators.Any(m => m.Attribute == message.modulator.Attribute)) playerInfo!.OnSetAttribute(message.modulator.Attribute);
+           if (!playerInfo.AttributeModulators.Any(m => m.HasAttribute(message.modulator.Attribute))) playerInfo!.OnSetAttribute(message.modulator.Attribute);
+
+           if (message.modulator.DuplicateTag.Length > 0) modulators.RemoveAll(m => m.DuplicateTag == message.modulator.DuplicateTag);
 
            modulators.Add(message.modulator);
-
-           if (message.modulator.DuplicateTag != 0)
-               modulators.RemoveAll(m => m.DuplicateTag == message.modulator.DuplicateTag && m != message.modulator);
-           
-
            modulators.Sort((m1, m2) => m2.Priority - m1.Priority);
        }
        );
@@ -561,7 +558,8 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
            var modulators = playerInfo!.timeLimitedModulators;
 
-           modulators.RemoveAll(p => p is AttributeModulator am && am.Attribute.Id == message.attributeId);
+           var attr = PlayerAttributeImpl.GetAttributeById(message.attributeId);
+           modulators.RemoveAll(p => p.HasAttribute(attr));
        }
        );
 
@@ -682,60 +680,10 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
         //Speed Modulator
         MyControl.MyPhysics.Speed = CalcSpeed();
-
-        //Attribute Modulator
-
-        //Size Modulator
-
     }
-
-    /*
-    private void UpdateSpeedModulators()
-    {
-        foreach(var m in speedModulators) m.Update();
-        speedModulators.RemoveAll(m => m.IsBroken);
-        MyControl.MyPhysics.Speed = CalcSpeed();
-    }
-
-    private void UpdateAttributeModulators()
-    {
-        ulong maskBefore = 0, maskAfter = 0;
-        foreach (var m in attributeModulators)
-        {
-            m.Update();
-            maskBefore |= 1ul << (int)m.Attribute.Id;
-        }
-        attributeModulators.RemoveAll(m => m.IsBroken);
-        foreach (var m in attributeModulators) maskAfter |= 1ul << (int)m.Attribute.Id;
-
-        ulong mask = maskBefore ^ maskAfter;
-        foreach(var a in PlayerAttributeImpl.AllAttributes)
-        {
-            if ((mask & (1ul << a.Id)) != 0) OnUnsetAttribute(a);
-        }
-    }
-    */
 
     public IEnumerable<(IPlayerAttribute attribute, float percentage)> GetValidAttributes()
     {
-        float accelMax = 0f, accelCurrent = 0f;
-        float decelMax = 0f, decelCurrent = 0f;
-        foreach (var mod in SpeedModulators)
-        {
-            if(mod.IsAccelModulator)
-            {
-                if (accelMax < mod.MaxTime) accelMax = mod.MaxTime;
-                if (accelCurrent < mod.Timer) accelCurrent = mod.Timer;
-            }
-            else if (mod.IsDecelModulator)
-            {
-                if (decelMax < mod.MaxTime) decelMax = mod.MaxTime;
-                if (decelCurrent < mod.Timer) decelCurrent = mod.Timer;
-            }
-        }
-        if (accelMax > 0f && accelCurrent > 0f) yield return (PlayerAttributes.Accel, accelCurrent / accelMax);
-        if (decelMax > 0f && decelCurrent > 0f) yield return (PlayerAttributes.Decel, decelCurrent / decelMax);
-
         foreach(var a in PlayerAttributeImpl.AllAttributes)
         {
             //自認できない属性
@@ -743,7 +691,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
             float max = 0f, current = 0f;
             bool isPermanent = false;
-            foreach(var attribute in AttributeModulators.Where(attr => attr.Attribute.CategorizedAttribute == a && attr.Attribute.CanCognize(this) && attr.CanBeAware))
+            foreach(var attribute in timeLimitedModulators.Where(attr => attr.HasCategorizedAttribute(a, this)))
             {
                 if (max < attribute.MaxTime) max = attribute.MaxTime;
                 if (current < attribute.Timer) current = attribute.Timer;
@@ -898,16 +846,16 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         MyControl.ModFlexibleKill(MyControl,false,playerState,eventDetail,showKillOverlay);
     }
 
-    void Virial.Game.Player.GainAttribute(IPlayerAttribute attribute, float duration, bool canPassMeeting, int priority, int? duplicateTag)
+    void Virial.Game.Player.GainAttribute(IPlayerAttribute attribute, float duration, bool canPassMeeting, int priority, string? duplicateTag)
     {
         if (attribute == PlayerAttributes.Accel || attribute == PlayerAttributes.Decel) return;
 
-        RpcAttrModulator.Invoke(new(PlayerId, new(attribute, duration, canPassMeeting, priority, duplicateTag ?? 0)));
+        RpcAttrModulator.Invoke(new(PlayerId, new(attribute, duration, canPassMeeting, priority, duplicateTag)));
     }
 
-    void Virial.Game.Player.GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, int? duplicateTag)
+    void Virial.Game.Player.GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag)
     {
-        RpcSpeedModulator.Invoke(new(PlayerId, new(speedRate, true, duration, canPassMeeting, priority, duplicateTag ?? 0)));
+        RpcSpeedModulator.Invoke(new(PlayerId, new(speedRate, true, duration, canPassMeeting, priority, duplicateTag ?? "")));
         
     }
 
