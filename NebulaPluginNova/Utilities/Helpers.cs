@@ -39,6 +39,29 @@ public static class Helpers
 {
     public static bool AmHost(this PlayerControl player) => AmongUsClient.Instance.HostId == player.OwnerId;
 
+    public static float Delta(this float val, float speed, float threshold)
+    {
+        var smooth = val* Mathf.Clamp01(Time.deltaTime * speed);
+
+        if (val < 0f)
+            return val < -threshold ? smooth : val;
+        else
+            return val > threshold ? smooth : val;
+    }
+
+    public static Vector2 Delta(this Vector2 vec, float speed, float threshold)
+        => new(
+            vec.x.Delta(speed, threshold),
+            vec.y.Delta(speed, threshold)
+            );
+
+    public static Vector3 Delta(this Vector3 vec, float speed, float threshold)
+        => new(
+            vec.x.Delta(speed, threshold),
+            vec.y.Delta(speed, threshold),
+            vec.z.Delta(speed, threshold)
+            );
+
     public static Vector3 AsWorldPos(this Vector3 vec, bool isBack)
     {
         Vector3 result = vec;

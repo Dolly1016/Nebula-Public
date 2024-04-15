@@ -157,6 +157,11 @@ public class CommandManager
                         members.Add((storedLabel[0], val[0]));
                         storedLabel = null;
                     }
+                    else
+                    {
+                        //値が省略されている場合、trueとして扱う
+                        members.Add((val[0], new BooleanCommandToken(true)));
+                    }
                 }
 
                 if (delimiter is "}") break;

@@ -300,31 +300,66 @@ public static class RemoteProcessAsset
                 return new OutfitCandidate(reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean(), outfit);
             }
         );
-        defaultProcessDic[typeof(SpeedModulator)] = (
+        defaultProcessDic[typeof(TimeLimitedModulator)] = (
             (writer, obj) =>
             {
-                var mod = (SpeedModulator)obj;
-                writer.Write(mod.Num);
-                writer.Write(mod.IsMultiplier);
+                var mod = (TimeLimitedModulator)obj;
                 writer.Write(mod.Timer);
                 writer.Write(mod.CanPassMeeting);
                 writer.Write(mod.Priority);
                 writer.Write(mod.DuplicateTag);
+
+                if (mod is SpeedModulator sm)
+                {
+                    writer.Write(1);
+                    writer.Write(sm.Num);
+                    writer.Write(sm.DirectionalNum.x);
+                    writer.Write(sm.DirectionalNum.y);
+                    writer.Write(sm.IsMultiplier);
+                }
+                else if (mod is SizeModulator sim)
+                {
+                    writer.Write(2);
+                    writer.Write(sim.Size.x);
+                    writer.Write(sim.Size.y);
+                    writer.Write(sim.CanBeAware);
+                    writer.Write(sim.Smooth);
+                }
+                else if (mod is FloatModulator fm)
+                {
+                    writer.Write(4);
+                    writer.Write(fm.Attribute.Id);
+                    writer.Write(fm.Num);
+                    writer.Write(fm.CanBeAware);
+                }
+                else if (mod is AttributeModulator am)
+                {
+                    writer.Write(3);
+                    writer.Write(am.Attribute.Id);
+                    writer.Write(am.CanBeAware);
+                }
+                
+
             },
-            (reader) => new SpeedModulator(reader.ReadSingle(), reader.ReadBoolean(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadInt32(), reader.ReadString())
-        );
-        defaultProcessDic[typeof(AttributeModulator)] = (
-            (writer, obj) =>
+            (reader) =>
             {
-                var mod = (AttributeModulator)obj;
-                writer.Write(mod.Attribute.Id);
-                writer.Write(mod.Timer);
-                writer.Write(mod.CanPassMeeting);
-                writer.Write(mod.Priority);
-                writer.Write(mod.DuplicateTag);
-                writer.Write(mod.CanBeAware);
-            },
-            (reader) => new AttributeModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadInt32(), reader.ReadString(), reader.ReadBoolean())
+                float timer = reader.ReadSingle();
+                bool canPassMeeting = reader.ReadBoolean();
+                int priority = reader.ReadInt32();
+                string dupTag = reader.ReadString();
+                int type = reader.ReadInt32();
+
+                if (type == 1)
+                    return new SpeedModulator(reader.ReadSingle(), new(reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag);
+                else if (type == 2)
+                    return new SizeModulator(new(reader.ReadSingle(), reader.ReadSingle()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean(), reader.ReadBoolean());
+                else if (type == 3)
+                    return new AttributeModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
+                else if (type == 4)
+                    return new FloatModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), reader.ReadSingle(), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
+
+                return null!;
+            }
         );
         defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj).Id), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
         defaultProcessDic[typeof(CommunicableTextTag)] = defaultProcessDic[typeof(TranslatableTag)];

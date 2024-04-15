@@ -87,7 +87,6 @@ public class SpectatorsAbility : IGameEntity
             RefreshTarget();
             OnChangeTarget();
 
-            NebulaGameManager.Instance?.WideCamera.Activate();
             NebulaGameManager.Instance?.WideCamera.SetDrawShadow(false);
             if (isFirst)
             {
@@ -137,7 +136,11 @@ public class SpectatorsAbility : IGameEntity
             if (!spectatorsMode) SetSpectatorMode(true);
             ChangeTarget(true);
         };
-        spectatorChangeButton.OnSubAction = (button) => ChangeTarget(false);
+        spectatorChangeButton.OnSubAction = (button) =>
+        {
+            if (!spectatorsMode) SetSpectatorMode(true);
+            ChangeTarget(false);
+        };
         spectatorChangeButton.SetLabel("spectatorChange");
     }
 

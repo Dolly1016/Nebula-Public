@@ -43,25 +43,25 @@ public class OutfitCommand : ICommand
                     if (arguments.Count >= 4) task = task.Chain(_ => arguments[3].AsValue<int>(env).Action(val => priority = val));
                     if (arguments.Count == 5) task = task.Chain(_ => arguments[4].AsValue<bool>(env).Action(val => selfAware = val));
 
-                    if(outfit == null)
-                        return new CoImmediateErrorTask<ICommandToken>(env.Logger, "The given outfitis invalid.");
-
                     return task.Action(_ =>
                     {
-                        using (RPCRouter.CreateSection("CommandOutfit"))
+                        if (outfit == null)
+                            env.Logger.PushError("The given outfit is invalid.");
+                        else
                         {
-                            targets.Do(p => PlayerModInfo.RpcAddOutfit.Invoke((p.PlayerId, new Virial.Game.OutfitCandidate("", priority, selfAware, outfit))));
+                            using (RPCRouter.CreateSection("CommandOutfit"))
+                            {
+                                targets.Do(p => PlayerModInfo.RpcAddOutfit.Invoke((p.PlayerId, new Virial.Game.OutfitCandidate("", priority, selfAware, outfit))));
+                            }
                         }
                     });
                 }
                 else
                 {
                     if (arguments.Count == 3) task = task.Chain(_ => arguments[2].AsValue<int>(env).Action(val => priority = val));
-                    
-                    if(targets.Count() == 0)
-                        return new CoImmediateErrorTask<ICommandToken>(env.Logger, "No player specified.");
 
-                    return task.ChainFast(_ => (ICommandToken) new ObjectCommandToken<GameData.PlayerOutfit>(targets.First().Unbox().GetOutfit(priority)));
+                    return task.ChainFast(_ => (targets.Count() == 0 ? EmptyCommandToken.Token
+                    : new ObjectCommandToken<GameData.PlayerOutfit>(targets.First().Unbox().GetOutfit(priority))));
                 }
             });
     }

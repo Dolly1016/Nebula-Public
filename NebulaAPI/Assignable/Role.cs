@@ -63,6 +63,8 @@ public interface DefinedRole : DefinedAssignable
     /// 役職の色
     /// </summary>
     Virial.Color RoleColor { get; }
+
+    internal int Id { get; }
 }
 
 /// <summary>

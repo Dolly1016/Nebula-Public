@@ -46,7 +46,7 @@ file static class TrapperSystem
         {
             pos = myRole.MyPlayer.MyControl.GetTruePosition() + new Vector2(0f, 0.085f);
             float duration = Trapper.PlaceDurationOption.GetFloat();
-            PlayerModInfo.RpcSpeedModulator.Invoke((myRole.MyPlayer.PlayerId, new SpeedModulator(0f, true, duration, false, 10)));
+            PlayerModInfo.RpcAttrModulator.Invoke((myRole.MyPlayer.PlayerId, new SpeedModulator(0f, Vector2.one, true, duration, false, 10)));
         };
         placeButton.OnEffectEnd = (button) => 
         {
@@ -176,8 +176,8 @@ public class Trapper : ConfigurableStandardRole
 
                 if (Position.Distance(PlayerControl.LocalPlayer.transform.position) < Trapper.SpeedTrapSizeOption.GetFloat()*0.35f)
                 {
-                    PlayerModInfo.RpcSpeedModulator.Invoke((PlayerControl.LocalPlayer.PlayerId,
-                        new SpeedModulator(TypeId == 0 ? Trapper.AccelRateOption.GetFloat() : Trapper.DecelRateOption.GetFloat(), true, Trapper.SpeedTrapDurationOption.GetFloat(), false, 50, "nebula.trap" + TypeId)));
+                    PlayerModInfo.RpcAttrModulator.Invoke((PlayerControl.LocalPlayer.PlayerId,
+                        new SpeedModulator(TypeId == 0 ? Trapper.AccelRateOption.GetFloat() : Trapper.DecelRateOption.GetFloat(), Vector2.one, true, Trapper.SpeedTrapDurationOption.GetFloat(), false, 50, "nebula.trap" + TypeId)));
                 }
             }
         }

@@ -88,6 +88,18 @@ public class StringCommandToken : ICommandToken
             var temp = NebulaAPI.CurrentGame?.GetAllPlayers().FirstOrDefault(p => p.Name == myStr)?.Unbox().DefaultOutfit;
             if (temp != null) return new CoImmediateTask<T>(Unsafe.As<GameData.PlayerOutfit, T>(ref temp));
         }
+        else if (type == typeof(Virial.Assignable.DefinedRole))
+        {
+            Virial.Assignable.DefinedRole? role = Roles.Roles.AllRoles.FirstOrDefault(r => r.LocalizedName == myStr);
+            if(role != null) return new CoImmediateTask<T>(Unsafe.As<Virial.Assignable.DefinedRole, T>(ref role));
+            return new CoImmediateErrorTask<T>();
+        }
+        else if (type == typeof(Virial.Assignable.DefinedModifier))
+        {
+            Virial.Assignable.DefinedModifier? role = Roles.Roles.AllModifiers.FirstOrDefault(r => r.LocalizedName == myStr);
+            if (role != null) return new CoImmediateTask<T>(Unsafe.As<Virial.Assignable.DefinedModifier, T>(ref role));
+            return new CoImmediateErrorTask<T>();
+        }
 
         return new CoImmediateErrorTask<T>(env.Logger);
     }

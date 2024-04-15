@@ -282,6 +282,7 @@
 "options.role.comet.blazeSpeed" : "Blaze Speed"
 "options.role.comet.blazeDuration" : "Blaze Duration"
 "options.role.comet.blazeVisionRate" : "Blaze Vision Rate"
+"options.role.comet.blazeScreenRate" : "Blaze Screen Rate"
 
 "role.doctor.name" : "Doctor"
 "role.doctor.short" : "D"

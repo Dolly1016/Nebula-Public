@@ -7,7 +7,7 @@ using Virial.Text;
 
 namespace Nebula.Game;
 
-[NebulaPreLoad(typeof(TranslatableTag))]
+[NebulaPreLoad]
 public static class EventDetail
 {
     static public TranslatableTag Kill = new("statistics.events.kill");

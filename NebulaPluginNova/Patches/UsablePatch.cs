@@ -236,8 +236,11 @@ public static class ArrowUpdatePatch
 {
     public static bool Prefix(ArrowBehaviour __instance)
     {
+        __instance.gameObject.layer = LayerExpansion.GetArrowLayer();
+        __instance.image.sortingOrder = 10;
+
         //表示するのはUIカメラ
-        Camera main = UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
+        Camera main = NebulaGameManager.Instance?.WideCamera.Camera ?? UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
         //距離を測るのは表示用のカメラ
         Camera worldCam = (NebulaGameManager.Instance?.WideCamera.IsShown ?? false) ? NebulaGameManager.Instance.WideCamera.Camera : Camera.main;
 
@@ -264,7 +267,10 @@ public static class ArrowUpdatePatch
 
         __instance.transform.LookAt2d(__instance.target);
 
-        
+        //Zの位置を調整
+        var localPos = __instance.transform.localPosition;
+        localPos.z = -50f;
+        __instance.transform.localPosition = localPos;
 
         return false;
     }

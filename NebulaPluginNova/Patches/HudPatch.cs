@@ -22,6 +22,8 @@ public static class HudManagerStartPatch
         renderer.sprite = VanillaAsset.FullScreenSprite;
         renderer.material.shader = NebulaAsset.StoreBackShader;
         renderer.color = Color.clear;
+
+        __instance.TaskPanel.transform.localPosition = new(0, 0, 0);
     }
 }
 

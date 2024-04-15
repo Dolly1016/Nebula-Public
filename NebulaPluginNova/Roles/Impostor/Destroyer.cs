@@ -83,7 +83,7 @@ public class Destroyer : ConfigurableStandardRole
 
         static private IDividedSpriteLoader spriteModBlood = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.DestroyerBlood.png",136f,6);
         static private ISpriteLoader spriteBloodPuddle = SpriteLoader.FromResource("Nebula.Resources.BloodPuddle.png",130f);
-
+        private const string destroyerAttrTag = "nebula::destroyer";
         static private IEnumerator CoDestroyKill(PlayerControl myPlayer, PlayerControl target, Vector3 targetPos, bool moveToLeft)
         {
             myPlayer.moveable = false;
@@ -135,6 +135,8 @@ public class Destroyer : ConfigurableStandardRole
                 }
             }
 
+            SizeModulator sizeModulator = new(Vector2.one, 10000f, false, 100, destroyerAttrTag, false, false);
+            PlayerModInfo.RpcAttrModulator.LocalInvoke((target.PlayerId, sizeModulator));
 
             Coroutine? monitorMeetingCoroutine = null;
             monitorMeetingCoroutine = NebulaManager.Instance.StartCoroutine(CoMonitorMeeting().WrapToIl2Cpp());
@@ -192,7 +194,7 @@ public class Destroyer : ConfigurableStandardRole
                 {
                     scale = startScale + (goalScale - startScale) * p;
                     handRenderer.transform.localPosition = targetPos + new Vector3(randomX + (moveToLeft ? -0.15f : 0.15f), scale * 0.55f + 0.4f, -1f);
-                    if(!targetModInfo.IsDead)targetModInfo.PlayerScaler.transform.localScale = new(1f, scale, 1f);
+                    if(!targetModInfo.IsDead) sizeModulator.Size.y = scale;
 
                     randomTimer -= Time.deltaTime;
                     if(randomTimer < 0f)
@@ -227,7 +229,7 @@ public class Destroyer : ConfigurableStandardRole
                     yield return null;
                 }
 
-                targetModInfo.PlayerScaler.transform.localScale = new(1f, goalScale, 1f);
+                sizeModulator.Size.y = goalScale;
                 handRenderer.transform.localPosition = targetPos + new Vector3(moveToLeft ? -0.12f : 0.12f, startScale * 0.55f + 0.21f, -1f);
                 handRenderer.sprite = DestroyerAssets.HandSprite[2].GetSprite();
 
@@ -269,7 +271,8 @@ public class Destroyer : ConfigurableStandardRole
             //こちらの目線で死ぬまで待つ
             while (!targetModInfo.IsDead) yield return null;
             yield return new WaitForSeconds(0.2f);
-            targetModInfo.PlayerScaler.localScale = new(1f, 1f, 1f);
+
+            PlayerModInfo.RpcRemoveAttrByTag.LocalInvoke((targetModInfo.PlayerId, destroyerAttrTag));
 
             //血しぶきを片付ける
             yield return new WaitForSeconds(0.5f);

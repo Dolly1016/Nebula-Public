@@ -138,7 +138,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
                         poolablePlayer = trackButton.GeneratePlayerIcon(trackingTarget);
 
                         if (arrowAbility != null) arrowAbility.ReleaseIt();
-                        arrowAbility = Bind(new TrackingArrowAbility(trackingTarget, MyRole.UpdateArrowIntervalOption.GetFloat(), Color.white)).Register();
+                        arrowAbility = Bind(new TrackingArrowAbility(trackingTarget, MyRole.UpdateArrowIntervalOption.GetFloat(), Palette.PlayerColors[trackingTarget.PlayerId])).Register();
                     }
                 };
                 trackButton.CoolDownTimer = Bind(new Timer(MyRole.TrackCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());

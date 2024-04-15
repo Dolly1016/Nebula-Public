@@ -75,6 +75,7 @@ public class Avenger : ConfigurableRole
             target = NebulaGameManager.Instance?.GetModPlayerInfo(targetId);
         }
 
+        public override int[]? GetRoleArgument() => [target?.PlayerId ?? 255];
         public override void OnActivated()
         {
             base.OnActivated();
@@ -135,6 +136,14 @@ public class Avenger : ConfigurableRole
             if(AmOwner && target == this.target) new StaticAchievementToken("avenger.common1");
         }
 
+        void IGameEntity.OnPlayerExiled(Virial.Game.Player exiled)
+        {
+            if (AmOwner && target == exiled)
+            {
+                MyPlayer.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+            }
+
+        }
         public override void OnGameEnd(NebulaEndState endState)
         {
             if(endState.EndCondition == NebulaGameEnd.AvengerWin && endState.CheckWin(MyPlayer.PlayerId))

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Game;
 
 namespace Nebula.Patches;
 
@@ -46,9 +47,10 @@ public class LightPatch
         float range = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(hasImpostorVision ? FloatOptionNames.ImpostorLightMod : FloatOptionNames.CrewLightMod);
         float rate = 1f;
         info?.AssignableAction(r=>r.EditLightRange(ref rate));
-        rate = Mathf.Lerp(lastRange, rate, 0.7f * Time.deltaTime);
-        lastRange = rate;
-        __result = radiusRate * range * rate;
+        rate *= NebulaGameManager.Instance?.LocalPlayerInfo?.CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
+
+        lastRange -= (lastRange - rate).Delta(0.7f, 0.005f);
+        __result = radiusRate * range * lastRange;
 
         return false;
     }

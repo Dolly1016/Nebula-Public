@@ -284,12 +284,8 @@ public static class PlayerExtension
     }
 
     static public KillResult ModSuicide(this PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
-    {
-        if(CheckKill(null, target, playerState, recordState, false,out var result))
-            RpcKill.Invoke((byte.MaxValue, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
-        return result;
-    }
-
+    => ModFlexibleKill(target,target,showBlink, playerState, recordState, showOverlay);
+    
     static public KillResult ModKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
     {
         if (CheckKill(killer, target, playerState, recordState, false, out var result))

@@ -83,10 +83,22 @@ public class SizeModulator : AttributeModulator
     }
 }
 
+public class FloatModulator : AttributeModulator
+{
+    public float Num;
+
+    public FloatModulator(IPlayerAttribute attribute, float num, float timer, bool canPassMeeting, int priority, string? duplicateTag = null, bool canBeAware = true) : base(attribute, timer, canPassMeeting, priority, duplicateTag, canBeAware)
+    {
+        Num = num;
+    }
+}
+
 public class SpeedModulator : TimeLimitedModulator
 {
     public float Num { get; private set; }
     public float AbsNum { get; private set; }
+    public Vector2 DirectionalNum { get; private set; }
+    public Vector2 AbsDirectionalNum { get; private set; }
     public bool IsMultiplier { get; private set; }
     public override bool CanBeAware => true;
 
@@ -101,23 +113,27 @@ public class SpeedModulator : TimeLimitedModulator
         return false;
     }
 
-    public void Calc(ref float speed)
+    public void Calc(ref Vector2 directionalPlayerSpeed, ref float speed)
     {
         if (IsMultiplier)
             speed *= Num;
         else
             speed += Num;
+
+        directionalPlayerSpeed *= this.DirectionalNum;
     }
 
 
-    public SpeedModulator(float? num, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null) : base(timer, canPassMeeting, priority, duplicateTag)
+    public SpeedModulator(float? num, Vector2 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null) : base(timer, canPassMeeting, priority, duplicateTag)
     {
         this.Num = num ?? 10000f;
         this.AbsNum = Mathf.Abs(this.Num);
+        this.DirectionalNum = dirNum;
+        this.AbsDirectionalNum = new(Mathf.Abs(dirNum.x), Mathf.Abs(dirNum.y));
         this.IsMultiplier = isMultiplier;
     }
 
-    public bool IsAccelModulator => IsMultiplier ? AbsNum > 1f : AbsNum > 0f;
-    public bool IsDecelModulator => IsMultiplier ? AbsNum < 1f : AbsNum < 0f;
-    public bool IsInverseModulator => IsMultiplier ? Num < 0f : false;
+    public bool IsAccelModulator => (IsMultiplier ? AbsNum > 1f : AbsNum > 0f) || AbsDirectionalNum.x > 1f || AbsDirectionalNum.y > 1f;
+    public bool IsDecelModulator => (IsMultiplier ? AbsNum < 1f : AbsNum < 0f) || AbsDirectionalNum.x < 1f || AbsDirectionalNum.y < 1f;
+    public bool IsInverseModulator => (IsMultiplier ? Num < 0f : false) || DirectionalNum.x < 0f || DirectionalNum.y < 0f;
 }

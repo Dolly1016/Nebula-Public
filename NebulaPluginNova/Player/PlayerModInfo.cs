@@ -12,7 +12,7 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Player;
 
-[NebulaPreLoad(typeof(TranslatableTag))]
+[NebulaPreLoad]
 public static class PlayerState
 {
     public static TranslatableTag Alive = new("state.alive");
@@ -87,6 +87,14 @@ public class PlayerAttributeImpl : IPlayerAttribute
         PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody");
         PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation") { Cognizable = p => p.Role.Role.Category == RoleCategory.ImpostorRole };
         PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4, "busker") { Cognizable = _ => false };
+
+        PlayerAttributes.FlipXY = new PlayerAttributeImpl(7, "$flip");
+        PlayerAttributes.FlipX = new PlayerAttributeImpl(7, "$flipX") { IdenticalAttribute = PlayerAttributes.FlipXY };
+        PlayerAttributes.FlipY = new PlayerAttributeImpl(7, "$flipY") { IdenticalAttribute = PlayerAttributes.FlipXY };
+
+        PlayerAttributes.ScreenSize = new PlayerAttributeImpl(8, "$screenSize");
+        PlayerAttributes.Eyesight = new PlayerAttributeImpl(9, "$eyesight");
+        PlayerAttributes.Roughening = new PlayerAttributeImpl(10, "$rough");
     }
 }
 
@@ -110,11 +118,6 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     public bool AmHost => MyControl.AmHost();
     private DeadBody? deadBodyCache { get; set; } = null;
 
-    private IEnumerable<SpeedModulator> SpeedModulators => timeLimitedModulators.Select(m => m as SpeedModulator).Where(m => m != null)!;
-    private IEnumerable<AttributeModulator> AttributeModulators => timeLimitedModulators.Select(m => m as AttributeModulator).Where(m => m != null)!;
-
-    private List<TimeLimitedModulator> timeLimitedModulators = new();
-
     public RoleInstance Role => myRole;
     private RoleInstance myRole = null!;
     private List<ModifierInstance> myModifiers = new();
@@ -122,9 +125,9 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     IEnumerable<RuntimeModifier> Virial.Game.Player.Modifiers => myModifiers;
     public Vector2 PreMeetingPoint { get; private set; } = Vector2.zero;
 
-    private List<OutfitCandidate> outfits = new List<OutfitCandidate>();
+    private List<Virial.Game.OutfitCandidate> outfits = new();
     private TMPro.TextMeshPro roleText;
-    public Transform PlayerScaler;
+    
 
     public FakeSabotageStatus FakeSabotage { get; private set; } = new();
     public Vector2? GoalPos = null;
@@ -379,39 +382,6 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true));
     }
 
-    public void OnSetAttribute(IPlayerAttribute attribute) {
-        if (attribute == PlayerAttributes.CurseOfBloody)
-        {
-            IEnumerator CoCurseUpdate()
-            {
-                bool isLeft = false;
-
-                while (true)
-                {
-                    yield return new WaitForSeconds(0.24f);
-                    if (!HasAttribute(attribute)) yield break;
-
-                    if (!MyControl.inVent && !MyControl.Data.IsDead)
-                    {
-                        if (MyControl.MyPhysics.Velocity.magnitude > 0)
-                        {
-                            var vec = MyControl.MyPhysics.Velocity.normalized * 0.08f * (isLeft ? 1f : -1f);
-                            AmongUsUtil.GenerateFootprint(MyControl.transform.position + new Vector3(-vec.y, vec.x - 0.22f), Roles.Modifier.Bloody.MyRole.RoleColor, 5f);
-                            isLeft = !isLeft;
-                        }
-                        else
-                        {
-                            AmongUsUtil.GenerateFootprint(MyControl.transform.position + new Vector3(0f, -0.22f), Roles.Modifier.Bloody.MyRole.RoleColor, 5f);
-                        }
-                    }
-                }
-            }
-            NebulaManager.Instance.StartCoroutine(CoCurseUpdate().WrapToIl2Cpp());
-        }
-    }
-
-    public bool HasAttribute(IPlayerAttribute attribute) => timeLimitedModulators.Any(m => m.HasAttribute(attribute));
-
     public NebulaRPCInvoker RpcInvokerSetRole(AbstractRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), true));
     public NebulaRPCInvoker RpcInvokerSetModifier(AbstractModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), false));
     public NebulaRPCInvoker RpcInvokerUnsetModifier(AbstractModifier modifier) => RpcRemoveModifier.GetInvoker(new(PlayerId, modifier.Id));
@@ -494,59 +464,16 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
        "RemoveOutfit", (message, _) => NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId)?.RemoveOutfit(message.tag)
        );
 
-    public readonly static RemoteProcess<(byte playerId, float angle)> RpcUpdateAngle = new(
-       "UpdateAngle", (message, _) => NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId)!.MouseAngle = message.angle
-       );
-
     public readonly static RemoteProcess<(byte playerId, Vector2 position)> RpcSharePreMeetingPoint = new(
        "SharePreMeetingPoint", (message, _) => NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId)!.PreMeetingPoint = message.position
        );
 
-    public readonly static RemoteProcess<(byte playerId, SpeedModulator modulator)> RpcSpeedModulator = new(
-       "AddSpeedModulator", (message, _) =>
-       {
-           var player = NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId)!;
-           var modulators = player.timeLimitedModulators;
-           if (message.modulator.DuplicateTag.Length > 0) modulators.RemoveAll(m => m.DuplicateTag == message.modulator.DuplicateTag);
-
-           modulators.Add(message.modulator);
-           modulators.Sort((m1, m2) => m2.Priority - m1.Priority);
-
-           if (player.AmOwner && modulators.Any(m => m.HasAttribute(PlayerAttributes.Accel)) && modulators.Any(m => m.HasAttribute(PlayerAttributes.Decel))) new StaticAchievementToken("speedAttribute");
-       }
-       );
-
-    public readonly static RemoteProcess<(byte playerId, AttributeModulator modulator)> RpcAttrModulator = new(
-       "AddAttributeModulator", (message, _) =>
-       {
-           var playerInfo = NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId);
-           if (playerInfo == null) return;
-
-           var modulators = playerInfo!.timeLimitedModulators;
-
-           //新たな属性が付与されたとき
-           if (!playerInfo.AttributeModulators.Any(m => m.HasAttribute(message.modulator.Attribute))) playerInfo!.OnSetAttribute(message.modulator.Attribute);
-
-           if (message.modulator.DuplicateTag.Length > 0) modulators.RemoveAll(m => m.DuplicateTag == message.modulator.DuplicateTag);
-
-           modulators.Add(message.modulator);
-           modulators.Sort((m1, m2) => m2.Priority - m1.Priority);
-       }
-       );
-
-    public readonly static RemoteProcess<(byte playerId, int attributeId)> RpcRemoveAttr = new(
-       "RemoveAttribute", (message, _) =>
-       {
-           var playerInfo = NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId);
-           if (playerInfo == null) return;
-
-           var modulators = playerInfo!.timeLimitedModulators;
-
-           var attr = PlayerAttributeImpl.GetAttributeById(message.attributeId);
-           modulators.RemoveAll(p => p.HasAttribute(attr));
-       }
-       );
-
+    //////////////////////////////////////////
+    //                                      //
+    //             死体掴み関連             //
+    //                                      //
+    //////////////////////////////////////////
+    
     private void UpdateHoldingDeadBody()
     {
         if (!HoldingDeadBodyId.HasValue) return;
@@ -637,6 +564,13 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
       }
       );
 
+
+    //////////////////////////////////////////
+    //                                      //
+    //         マウス位置の情報更新         //
+    //                                      //
+    //////////////////////////////////////////
+
     static public (float angle,float distance) LocalMouseInfo { get
         {
             Vector2 vec = (Vector2)Input.mousePosition - new Vector2(Screen.width / 2, Screen.height / 2);
@@ -657,13 +591,36 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         requiredUpdateMouseAngle = false;
     }
 
+
+    public readonly static RemoteProcess<(byte playerId, float angle)> RpcUpdateAngle = new(
+       "UpdateAngle", (message, _) => NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId)!.MouseAngle = message.angle
+       );
+
+    //////////////////////////////////////////
+    //                                      //
+    //           モジュレータ関連           //
+    //                                      //
+    //////////////////////////////////////////
+
+    private IEnumerable<SpeedModulator> SpeedModulators => timeLimitedModulators.Select(m => m as SpeedModulator).Where(m => m != null)!;
+    private IEnumerable<AttributeModulator> AttributeModulators => timeLimitedModulators.Select(m => m as AttributeModulator).Where(m => m != null)!;
+    private List<TimeLimitedModulator> timeLimitedModulators = new();
+    private Vector2 smoothPlayerSize = Vector2.one;
+    public Transform PlayerScaler;
+    private Vector2 directionalPlayerSpeed = Vector2.one;
+    public Vector2 DirectionalPlayerSpeed => directionalPlayerSpeed;
     private void UpdateModulators()
     {
         foreach (var m in timeLimitedModulators) m.Update();
         timeLimitedModulators.RemoveAll(m => m.IsBroken);
 
         //Speed Modulator
-        MyControl.MyPhysics.Speed = CalcSpeed();
+        directionalPlayerSpeed.x = 1f;
+        directionalPlayerSpeed.y = 1f;
+        MyControl.MyPhysics.Speed = CalcSpeed(ref directionalPlayerSpeed);
+
+        //Size Modulator
+        CalcSize();
     }
 
     public IEnumerable<(IPlayerAttribute attribute, float percentage)> GetValidAttributes()
@@ -686,6 +643,155 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         }
 
     }
+
+    public void OnSetAttribute(IPlayerAttribute attribute)
+    {
+        if (attribute == PlayerAttributes.CurseOfBloody)
+        {
+            IEnumerator CoCurseUpdate()
+            {
+                bool isLeft = false;
+
+                while (true)
+                {
+                    yield return new WaitForSeconds(0.24f);
+                    if (!HasAttribute(attribute)) yield break;
+
+                    if (!MyControl.inVent && !MyControl.Data.IsDead)
+                    {
+                        if (MyControl.MyPhysics.Velocity.magnitude > 0)
+                        {
+                            var vec = MyControl.MyPhysics.Velocity.normalized * 0.08f * (isLeft ? 1f : -1f);
+                            AmongUsUtil.GenerateFootprint(MyControl.transform.position + new Vector3(-vec.y, vec.x - 0.22f), Roles.Modifier.Bloody.MyRole.RoleColor, 5f);
+                            isLeft = !isLeft;
+                        }
+                        else
+                        {
+                            AmongUsUtil.GenerateFootprint(MyControl.transform.position + new Vector3(0f, -0.22f), Roles.Modifier.Bloody.MyRole.RoleColor, 5f);
+                        }
+                    }
+                }
+            }
+            NebulaManager.Instance.StartCoroutine(CoCurseUpdate().WrapToIl2Cpp());
+        }
+    }
+
+    public bool HasAttribute(IPlayerAttribute attribute) => timeLimitedModulators.Any(m => m.HasAttribute(attribute));
+    public int CountAttribute(IPlayerAttribute attribute) => timeLimitedModulators.Count(m => m.HasAttribute(attribute));
+
+    public readonly static RemoteProcess<(byte playerId, TimeLimitedModulator modulator)> RpcAttrModulator = new(
+       "AddAttributeModulator", (message, _) =>
+       {
+           var playerInfo = NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId);
+           if (playerInfo == null) return;
+
+           var modulators = playerInfo!.timeLimitedModulators;
+
+           if (message.modulator is AttributeModulator am)
+           {
+               //新たな属性が付与されたとき
+               if (!playerInfo.AttributeModulators.Any(m => m.HasAttribute(am.Attribute))) playerInfo!.OnSetAttribute(am.Attribute);
+           }
+
+           if(message.modulator is SpeedModulator)
+           {
+               if (playerInfo.AmOwner && modulators.Any(m => m.HasAttribute(PlayerAttributes.Accel)) && modulators.Any(m => m.HasAttribute(PlayerAttributes.Decel))) new StaticAchievementToken("speedAttribute");
+           }
+
+           if (message.modulator.DuplicateTag.Length > 0) modulators.RemoveAll(m => m.DuplicateTag == message.modulator.DuplicateTag);
+
+           modulators.Add(message.modulator);
+           modulators.Sort((m1, m2) => m2.Priority - m1.Priority);
+       }
+       );
+
+    public readonly static RemoteProcess<(byte playerId, int attributeId)> RpcRemoveAttr = new(
+       "RemoveAttribute", (message, _) =>
+       {
+           var playerInfo = NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId);
+           if (playerInfo == null) return;
+
+           var modulators = playerInfo!.timeLimitedModulators;
+
+           var attr = PlayerAttributeImpl.GetAttributeById(message.attributeId);
+           modulators.RemoveAll(p => p.HasAttribute(attr));
+       }
+       );
+
+    public readonly static RemoteProcess<(byte playerId, string tag)> RpcRemoveAttrByTag = new(
+       "RemoveAttributeByTag", (message, _) =>
+       {
+           var playerInfo = NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId);
+           if (playerInfo == null) return;
+
+           var modulators = playerInfo!.timeLimitedModulators;
+
+           modulators.RemoveAll(p => p.DuplicateTag == message.tag);
+       }
+       );
+
+    //////////////////////////////////////////
+    //                                      //
+    //              速度の計算              //
+    //                                      //
+    //////////////////////////////////////////
+
+    public void CalcSpeed(ref Vector2 directionalPlayerSpeed, ref float speed)
+    {
+        foreach (var m in SpeedModulators) m.Calc(ref directionalPlayerSpeed, ref speed);
+    }
+
+    public float CalcSpeed(ref Vector2 directionalPlayerSpeed)
+    {
+        float speed = 2.5f;
+        CalcSpeed(ref directionalPlayerSpeed, ref speed);
+        return speed;
+    }
+
+    //////////////////////////////////////////
+    //                                      //
+    //             サイズの計算             //
+    //                                      //
+    //////////////////////////////////////////
+
+    public void CalcSize()
+    {
+        Vector2 targetSize = Vector2.one;
+        Vector2 nonSmoothSize = Vector2.one;
+        foreach(var m in timeLimitedModulators.Select(m => m as SizeModulator).Where(m => m != null))
+        {
+            if(m.Smooth)
+                targetSize *= m.Size;
+            else
+                nonSmoothSize *= m.Size;
+        }
+
+        var diff = smoothPlayerSize - targetSize;
+        smoothPlayerSize -= diff * Mathf.Clamp01(Time.deltaTime * 2f);
+
+        PlayerScaler.transform.localScale = (smoothPlayerSize * nonSmoothSize).AsVector3(0.001f);
+    }
+
+    public float CalcAttributeVal(IPlayerAttribute attribute, bool isMultiplier = true)
+    {
+        float num = isMultiplier ? 1 : 0;
+        foreach(var m in timeLimitedModulators.Select(m => m as FloatModulator).Where(m => m?.HasAttribute(attribute) ?? false)!)
+        {
+            if (isMultiplier)
+                num *= m!.Num;
+            else
+                num += m!.Num;
+        }
+
+        return num;
+    }
+
+
+    //////////////////////////////////////////
+    //                                      //
+    //        プレイヤーの可視性関連        //
+    //                                      //
+    //////////////////////////////////////////
 
     private int visibilityCache = 0;
     public bool IsInvisible => visibilityCache == 2;
@@ -774,10 +880,25 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         if (MyControl.cosmetics.visor != null) MyControl.cosmetics.visor.Image.color = color;
     }
 
+
+
+    //////////////////////////////////////////
+    //                                      //
+    //              情報の更新              //
+    //                                      //
+    //////////////////////////////////////////
+
     public void Update()
     {
         UpdateNameText(MyControl.cosmetics.nameText, false, NebulaGameManager.Instance?.CanSeeAllInfo ?? false);
         UpdateRoleText(roleText);
+
+        var viewerScale = NebulaGameManager.Instance!.WideCamera.ViewerTransform.localScale;
+        var textScale = new Vector3(viewerScale.x < 0f ? -1f : 1f, viewerScale.y < 0f ? -1f : 1f, 1f);
+        var textAngle = -NebulaGameManager.Instance!.WideCamera.ViewerTransform.localEulerAngles * (textScale.x * textScale.y);
+        MyControl.cosmetics.nameText.transform.parent.localEulerAngles = textAngle;
+        MyControl.cosmetics.nameText.transform.parent.localScale = textScale;
+
         UpdateHoldingDeadBody();
         UpdateMouseAngle();
         UpdateModulators();
@@ -808,18 +929,6 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         FakeSabotage.OnMeetingStart();
     }
 
-    public void CalcSpeed(ref float speed)
-    {
-        foreach (var m in SpeedModulators) m.Calc(ref speed);
-    }
-
-    public float CalcSpeed()
-    {
-        float speed = 2.5f;
-        CalcSpeed(ref speed);
-        return speed;
-    }
-
     void Virial.Game.Player.MurderPlayer(Virial.Game.Player player, CommunicableTextTag playerState, CommunicableTextTag eventDetail, bool showBlink, bool showKillOverlay)
     {
         MyControl.ModFlexibleKill(player.VanillaPlayer, showBlink, playerState, eventDetail, showKillOverlay);
@@ -834,16 +943,15 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     {
         if (attribute == PlayerAttributes.Accel || attribute == PlayerAttributes.Decel) return;
 
-        RpcAttrModulator.Invoke(new(PlayerId, new(attribute, duration, canPassMeeting, priority, duplicateTag)));
+        RpcAttrModulator.Invoke(new(PlayerId, new AttributeModulator(attribute, duration, canPassMeeting, priority, duplicateTag)));
     }
 
     void Virial.Game.Player.GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag)
     {
-        RpcSpeedModulator.Invoke(new(PlayerId, new(speedRate, true, duration, canPassMeeting, priority, duplicateTag ?? "")));
+        RpcAttrModulator.Invoke(new(PlayerId, new SpeedModulator(speedRate, Vector2.one, true, duration, canPassMeeting, priority, duplicateTag ?? "")));
         
     }
 
-    //Virial
 
     string Virial.Game.Player.Name => DefaultName;
     PlayerControl Virial.Game.Player.VanillaPlayer => MyControl;

@@ -35,6 +35,7 @@ public class Lover : ConfigurableModifier, HasCitation
         float chanceImpostor = ChanceOfAssigningImpostorsOption.GetFloat() / 100f;
         (byte playerId, AbstractRole role)? first,second;
 
+        int assigned = 0;
         for (int i = 0; i < maxPairs; i++)
         {
             float chance = RoleChanceOption.GetFloat() / 100f;
@@ -45,8 +46,10 @@ public class Lover : ConfigurableModifier, HasCitation
                 first = others[othersIndex++];
                 second = (impostorsIndex < impostors.Length && (float)System.Random.Shared.NextDouble() < chanceImpostor) ? impostors[impostorsIndex++] : second = others[othersIndex++];
 
-                roleTable.SetModifier(first.Value.playerId, this, new int[] { i });
-                roleTable.SetModifier(second.Value.playerId, this, new int[] { i });
+                roleTable.SetModifier(first.Value.playerId, this, new int[] { assigned });
+                roleTable.SetModifier(second.Value.playerId, this, new int[] { assigned });
+
+                assigned++;
             }
             catch
             {

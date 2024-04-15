@@ -26,6 +26,11 @@ public static class AmongUsUtil
         SetCamTarget(CurrentCamTarget == target1 ? target2 : target1);
     }
 
+    public static float GetShadowSize()
+    {
+        var shadowCollab = Camera.main.GetComponentInChildren<ShadowCollab>();
+        return shadowCollab.ShadowCamera.orthographicSize;
+    }
     public static void ChangeShadowSize(float orthographicSize = 3f)
     {
         var shadowCollab = Camera.main.GetComponentInChildren<ShadowCollab>();

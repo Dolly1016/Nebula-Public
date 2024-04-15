@@ -1535,6 +1535,7 @@ public class DevAddon : IResourceAllocator
     INebulaResource? IResourceAllocator.GetResource(Virial.Compat.IReadOnlyArray<string> namespaceArray, string name)
     {
         if (namespaceArray.Count > 0) return null;
+        if (name.Length == 0) return null;
 
         string folderPath = FolderPath;
         string leftPath = name.Replace('/','.');
@@ -1542,13 +1543,16 @@ public class DevAddon : IResourceAllocator
         while (true) {
             if (File.Exists(folderPath + "/" + leftPath)) return new StreamResource(() => File.OpenRead(folderPath + "/" + leftPath));
 
-            foreach (var dir in Directory.GetDirectories(folderPath))
+            var dirs = Directory.GetDirectories(folderPath);
+            if (dirs.Length == 0) return null;
+            foreach (var dir in dirs)
             {
                 string lowestDir = dir.Substring(folderPath.Length + 1);
-                if (leftPath.Length > lowestDir.Length && leftPath[lowestDir.Length] is '.' && leftPath.StartsWith(lowestDir))
+                if (leftPath.Length > lowestDir.Length + 1 && leftPath[lowestDir.Length] is '.' && leftPath.StartsWith(lowestDir))
                 {
                     folderPath += "/" + lowestDir;
                     leftPath = leftPath.Substring(lowestDir.Length + 1);
+                    break;
                 }
             }
         }

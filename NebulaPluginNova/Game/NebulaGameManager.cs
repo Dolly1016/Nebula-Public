@@ -196,10 +196,11 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
     public bool CanSeeAllInfo { get; private set; }
     public void ChangeToSpectator()
     {
-        if (!HudManager.InstanceExists) return;
-
         if (CanSeeAllInfo) return;
         CanSeeAllInfo = true;
+
+        if (!HudManager.InstanceExists) return;
+
         new SpectatorsAbility().Register(this);
     }
 

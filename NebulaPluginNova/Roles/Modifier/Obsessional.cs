@@ -95,23 +95,29 @@ public class Obsessional : ConfigurableStandardModifier
 
         void IGameEntity.OnPlayerExiled(GamePlayer exiled)
         {
-            if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
-
-            if (exiled.PlayerId == (obsession?.PlayerId ?? 255) && !MyPlayer.IsDead)
+            if (AmOwner)
             {
-                MyPlayer.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
-                new StaticAchievementToken("obsessional.another1");
+                if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
+
+                if (exiled.PlayerId == (obsession?.PlayerId ?? 255) && !MyPlayer.IsDead)
+                {
+                    MyPlayer.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+                    new StaticAchievementToken("obsessional.another1");
+                }
             }
         }
 
         void IGameEntity.OnPlayerDead(GamePlayer dead)
         {
-            if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
-
-            if (dead.PlayerId == (obsession?.PlayerId ?? 255) && !MeetingHudExtension.MarkedAsExtraVictims(MyPlayer.PlayerId) && !MyPlayer.IsDead)
+            if (AmOwner)
             {
-                MyPlayer.MyControl.ModSuicide(false, PlayerState.Suicide, EventDetail.Kill);
-                new StaticAchievementToken("obsessional.another1");
+                if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
+
+                if (dead.PlayerId == (obsession?.PlayerId ?? 255) && !MeetingHudExtension.MarkedAsExtraVictims(MyPlayer.PlayerId) && !MyPlayer.IsDead)
+                {
+                    MyPlayer.MyControl.ModSuicide(false, PlayerState.Suicide, EventDetail.Kill);
+                    new StaticAchievementToken("obsessional.another1");
+                }
             }
         }
 

@@ -72,6 +72,17 @@ public class Alien : ConfigurableStandardRole, HasCitation
                         FakeInformation.RpcFakeVitals.Invoke((FakeInformation.Instance!.CurrentVitals.Players, MyRole.EMIDurationOption.GetFloat()));
                     }
 
+                    IEnumerator CoNoise()
+                    {
+                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 4, 0.21f, false, 0, "nebula::alien", false)));
+                        yield return Effects.Wait(0.45f);
+                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 20, 0.5f, false, 0, "nebula::alien", false)));
+                        yield return Effects.Wait(0.55f);
+                        
+                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 4, MyRole.EMIDurationOption.GetFloat() - 1f, false, 0, "nebula::alien", false)));
+                    }
+                    NebulaManager.Instance.StartCoroutine(CoNoise().WrapToIl2Cpp());
+
                 };
                 emiButton.OnEffectEnd = (button) =>
                 {

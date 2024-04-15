@@ -24,6 +24,7 @@ static public class Commands
         CommandManager.RegisterCommand(new ReviveCommand(), "nebula::revive");
         CommandManager.RegisterCommand(new EntityCommand(), "nebula::entity");
         CommandManager.RegisterCommand(new OutfitCommand(), "nebula::outfit");
+        CommandManager.RegisterCommand(new RoleCommand(), "nebula::role");
         CommandManager.RegisterCommand(new ColCommand(), "nebula::col");
         CommandManager.RegisterCommand(new DoCommand(), "nebula::do");
         CommandManager.RegisterCommand(new DoParallelCommand(), "nebula::parallel");

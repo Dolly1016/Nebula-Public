@@ -1,6 +1,7 @@
 ﻿using AmongUs.Data.Player;
 using Epic.OnlineServices.Presence;
 using HarmonyLib;
+using Mono.CSharp;
 using Nebula.Behaviour;
 using Nebula.Configuration;
 using Nebula.Game;
@@ -277,19 +278,35 @@ class WalkPatch
         var info = __instance.myPlayer.GetModInfo();
         if (info == null) return;
 
-        __result = Effects.Sequence(
-            Effects.Action((Il2CppSystem.Action)(() =>
+        var orig = __result;
+        Vector2 temp = Vector2.zero;
+        IEnumerator CoWalk()
+        {
+            while (true)
             {
-                float speed = info.CalcSpeed();
+                float speed = info.CalcSpeed(ref temp);
                 if (speed < 0f) speed *= -1f;
                 __instance.Speed = speed;
-            })),
-            __result,
-            Effects.Action((Il2CppSystem.Action)(() =>
-            {
-                __instance.Speed = info.CalcSpeed();
-            }))
-            );
+
+                if (!orig.MoveNext()) break;
+
+                yield return null;
+            }
+
+            __instance.Speed = info.CalcSpeed(ref temp);
+        }
+
+        __result = CoWalk().WrapToIl2Cpp();
+    }
+}
+
+//指定位置への移動
+[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.SetNormalizedVelocity))]
+class VelocityPatch
+{
+    public static void Postfix(PlayerPhysics __instance)
+    {
+        if (__instance.AmOwner) __instance.body.velocity *= NebulaGameManager.Instance?.LocalPlayerInfo?.DirectionalPlayerSpeed ?? Vector2.one;
     }
 }
 

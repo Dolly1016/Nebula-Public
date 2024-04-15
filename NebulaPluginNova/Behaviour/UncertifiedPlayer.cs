@@ -96,7 +96,7 @@ namespace Nebula.Behaviour
             collider.size = new Vector2(0.6f, 0.2f);
             button.OnMouseOver.AddListener(() =>
             {
-                NebulaManager.Instance.SetHelpWidget(button, new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = ReasonToTranslationKey(State) + ".detail" });
+                NebulaManager.Instance.SetHelpWidget(button, new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = ReasonToTranslationKey(State) + (AmongUsClient.Instance.AmHost ? ".detail" : ".client") });
             });
             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
 
@@ -136,7 +136,7 @@ namespace Nebula.Behaviour
 
         public void Update()
         {
-            myShower.SetActive(AmongUsClient.Instance.AmHost && State != UncertifiedReason.Waiting && !GeneralConfigurations.CurrentGameMode.AllowWithoutNoS);
+            myShower.SetActive((AmongUsClient.Instance.AmHost || (MyControl?.AmOwner ?? false)) && State != UncertifiedReason.Waiting && !GeneralConfigurations.CurrentGameMode.AllowWithoutNoS);
         }
 
         public void OnDestroy()

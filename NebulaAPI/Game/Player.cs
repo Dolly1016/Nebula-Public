@@ -72,6 +72,37 @@ public static class PlayerAttributes
     /// Buskerの偽装死を隠蔽する効果を表します。効果は偽装死に限らず適用されます。
     /// </summary>
     static public IPlayerAttribute BuskerEffect { get; internal set; }
+
+    /// <summary>
+    /// 左右反転効果を表します。
+    /// </summary>
+
+    static public IPlayerAttribute FlipX { get; internal set; }
+
+    /// <summary>
+    /// 上下反転効果を表します。
+    /// </summary>
+    static public IPlayerAttribute FlipY { get; internal set; }
+
+    /// <summary>
+    /// 左右上下反転効果を表します。実際の効果は180度回転です。
+    /// </summary>
+    static public IPlayerAttribute FlipXY { get; internal set; }
+
+    /// <summary>
+    /// 画面拡大/縮小効果を表します。
+    /// </summary>
+    static public IPlayerAttribute ScreenSize { get; internal set; }
+
+    /// <summary>
+    /// 視野拡大/縮小効果を表します。
+    /// </summary>
+    static public IPlayerAttribute Eyesight { get; internal set; }
+
+    /// <summary>
+    /// モザイク効果を表します。
+    /// </summary>
+    static public IPlayerAttribute Roughening { get; internal set; }
 }
 
 public class OutfitCandidate

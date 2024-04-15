@@ -209,6 +209,7 @@ public class NebulaAddon : IDisposable, IResourceAllocator
     INebulaResource? IResourceAllocator.GetResource(IReadOnlyArray<string> namespaceArray, string name)
     {
         if (namespaceArray.Count > 0) return null;
+        if (name.Length == 0) return null;
 
         return new StreamResource(() => OpenRead(name));
     }

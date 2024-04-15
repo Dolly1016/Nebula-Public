@@ -23,7 +23,7 @@ public class Arrow : INebulaScriptComponent, IGameEntity
 
     public Arrow(Sprite? sprite = null, bool usePlayerMaterial = true)
     {
-        arrowRenderer = UnityHelper.CreateObject<SpriteRenderer>("Arrow", HudManager.Instance.transform, new Vector3(0, 0, -10f), LayerExpansion.GetUILayer());
+        arrowRenderer = UnityHelper.CreateObject<SpriteRenderer>("Arrow", HudManager.Instance.transform, new Vector3(0, 0, -10f), LayerExpansion.GetArrowLayer());
         arrowRenderer.sprite = sprite ?? arrowSprite.GetSprite();
         arrowRenderer.sharedMaterial = usePlayerMaterial ? HatManager.Instance.PlayerMaterial : HatManager.Instance.DefaultShader;
         if (usePlayerMaterial) SetColor(Color.white, Color.gray);

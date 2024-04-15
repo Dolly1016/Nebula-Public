@@ -26,6 +26,7 @@ public class Comet : ConfigurableStandardRole
     private NebulaConfiguration BlazeSpeedOption = null!;
     private NebulaConfiguration BlazeDurationOption = null!;
     private NebulaConfiguration BlazeVisionOption = null!;
+    private NebulaConfiguration BlazeScreenOption = null!;
 
     protected override void LoadOptions()
     {
@@ -37,6 +38,7 @@ public class Comet : ConfigurableStandardRole
         BlazeSpeedOption = new(RoleConfig, "blazeSpeed", null, 0.5f, 3f, 0.125f, 1.5f, 1.5f) { Decorator = NebulaConfiguration.OddsDecorator };
         BlazeDurationOption = new(RoleConfig, "blazeDuration", null, 5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
         BlazeVisionOption = new(RoleConfig, "blazeVisionRate", null, 1f, 3f, 0.125f, 1.5f, 1.5f) { Decorator = NebulaConfiguration.OddsDecorator };
+        BlazeScreenOption = new(RoleConfig, "blazeScreenRate", null, 1f, 2f, 0.125f, 1.125f, 1.125f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
     public class Instance : Crewmate.Instance, IGamePlayerEntity
@@ -65,8 +67,11 @@ public class Comet : ConfigurableStandardRole
                 boostButton.OnEffectStart = (button) => {
                     using (RPCRouter.CreateSection("CometBlaze"))
                     {
-                        PlayerModInfo.RpcSpeedModulator.Invoke(new(MyPlayer.PlayerId, new(MyRole.BlazeSpeedOption.GetFloat(), true, MyRole.BlazeDurationOption.GetFloat(), false, 100)));
-                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new(PlayerAttributes.Invisible, MyRole.BlazeDurationOption.GetFloat(), false, 100)));
+                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new SpeedModulator(MyRole.BlazeSpeedOption.GetFloat(), Vector2.one, true, MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet::speed")));
+                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.Invisible, MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet::invisible")));
+                        if (MyRole.BlazeVisionOption.GetFloat() > 1f) PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Eyesight, MyRole.BlazeVisionOption.GetFloat(), MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet::eyesight")));
+                        if(MyRole.BlazeScreenOption.GetFloat() > 1f) PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.ScreenSize, MyRole.BlazeScreenOption.GetFloat(), MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet::screen")));
+
                     }
                     acTokenCommon.Value = true;
                     if(acTokenCommon2 != null) acTokenCommon2.Value.pos = MyPlayer.MyControl.GetTruePosition();
@@ -86,11 +91,6 @@ public class Comet : ConfigurableStandardRole
         }
 
         public override bool IgnoreBlackout => true;
-
-        public override void EditLightRange(ref float range)
-        {
-            if(boostButton?.EffectActive ?? false) range *= MyRole.BlazeVisionOption.GetFloat();
-        }
 
         void IGameEntity.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
         {

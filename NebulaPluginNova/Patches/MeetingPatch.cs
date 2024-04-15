@@ -370,6 +370,8 @@ class MeetingHudUpdatePatch
                 bool active = MeetingHudExtension.VotingTimer > 0;
                 __instance.TimerText.gameObject.SetActive(active);
 
+                __instance.discussionTimer = (float)GameManager.Instance.LogicOptions.CastFast<LogicOptionsNormal>().GetDiscussionTime();
+
                 MeetingHud.Instance!.lastSecond = 11;
 
                 MeetingHudExtension.ReflectVotingMask();
