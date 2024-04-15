@@ -194,6 +194,7 @@ public static class PlayerExtension
            if (target.AmOwner)
            {
                if(message.showOverlay) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
+
                NebulaGameManager.Instance!.ChangeToSpectator();
            }
 
@@ -321,6 +322,7 @@ public static class PlayerExtension
             player!.Revive();
             player.NetTransform.SnapTo(message.revivePos);
             player.GetModInfo()!.MyState = PlayerState.Revived;
+
             if (message.cleanDeadBody) foreach (var d in Helpers.AllDeadBodies()) if (d.ParentId == player.PlayerId) GameObject.Destroy(d.gameObject);
 
             if(message.recordEvent)NebulaGameManager.Instance?.GameStatistics.RecordEvent(new(GameStatistics.EventVariation.Revive, message.sourceId != byte.MaxValue ? message.sourceId : null, 1 << message.targetId) { RelatedTag = EventDetail.Revive });

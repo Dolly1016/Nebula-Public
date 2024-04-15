@@ -44,9 +44,9 @@ public static class Helpers
         var smooth = val* Mathf.Clamp01(Time.deltaTime * speed);
 
         if (val < 0f)
-            return val < -threshold ? smooth : val;
+            return smooth < -threshold ? smooth : Mathf.Max(val, -threshold);
         else
-            return val > threshold ? smooth : val;
+            return smooth > threshold ? smooth : Mathf.Min(val, threshold);
     }
 
     public static Vector2 Delta(this Vector2 vec, float speed, float threshold)

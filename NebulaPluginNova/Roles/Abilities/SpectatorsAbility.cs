@@ -87,7 +87,8 @@ public class SpectatorsAbility : IGameEntity
             RefreshTarget();
             OnChangeTarget();
 
-            NebulaGameManager.Instance?.WideCamera.SetDrawShadow(false);
+            //NebulaGameManager.Instance?.WideCamera.SetDrawShadow(false);
+
             if (isFirst)
             {
                 NebulaGameManager.Instance!.WideCamera.TargetRate = 1.5f;
