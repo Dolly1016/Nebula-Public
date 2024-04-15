@@ -121,7 +121,7 @@ public class CommandManager
     }
     static public void RegisterCommand(ICommand command, params string[] name)
     {
-        foreach(var n in name) Debug.Log("Command Register:" + NebulaResourceManager.RegisterResource(n, new CommandResource(command)));
+        foreach(var n in name) NebulaResourceManager.RegisterResource(n, new CommandResource(command));
     }
 
 
