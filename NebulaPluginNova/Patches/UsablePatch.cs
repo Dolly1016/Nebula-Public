@@ -120,6 +120,10 @@ public static class VentUsePatch
 {
     public static bool Prefix(Vent __instance)
     {
+        foreach (var b in __instance.Buttons) {
+            b.spriteRenderer.gameObject.layer = LayerExpansion.GetArrowLayer();
+            b.spriteRenderer.sortingOrder = 10;
+        }
         __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
         if (!flag) return false;
 

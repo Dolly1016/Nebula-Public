@@ -24,7 +24,8 @@ public class StatementCommandToken : ICommandToken
 
     CoTask<ICommandToken> ICommandToken.EvaluateHere(CommandEnvironment env)
     {
-        return new CoImmediateTask<IEnumerable<ICommandToken>>(this.tokens).SelectParallel(t => t.EvaluateHere(env)).ChainFast<ICommandToken, IEnumerable<ICommandToken>>(col => new StatementCommandToken(new ReadOnlyArray<ICommandToken>(col)));
+        //return new CoImmediateTask<IEnumerable<ICommandToken>>(this.tokens).SelectParallel(t => t.EvaluateHere(env)).ChainFast<ICommandToken, IEnumerable<ICommandToken>>(col => new StatementCommandToken(new ReadOnlyArray<ICommandToken>(col)));
+        return (this as ICommandToken)?.ToExecutable(env)?.CoExecute([]) ?? new CoImmediateErrorTask<ICommandToken>();
     }
 
     CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(CommandEnvironment env)

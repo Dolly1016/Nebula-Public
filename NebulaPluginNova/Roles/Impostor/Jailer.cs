@@ -94,7 +94,7 @@ public class Jailer : ConfigurableStandardRole
             if (AmOwner)
             {
                 //JailerAbilityを獲得していなければ登録
-                if (MyRole.InheritAbilityOnDyingOption && (GameEntityManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
+                if ((GameEntityManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
                 {
                     new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
                 }

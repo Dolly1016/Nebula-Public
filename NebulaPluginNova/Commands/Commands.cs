@@ -28,6 +28,7 @@ static public class Commands
         CommandManager.RegisterCommand(new ColCommand(), "nebula::col");
         CommandManager.RegisterCommand(new DoCommand(), "nebula::do");
         CommandManager.RegisterCommand(new CastCommand(), "nebula::cast");
+        CommandManager.RegisterCommand(new CommandCommand(), "nebula::command");
         CommandManager.RegisterCommand(new DoParallelCommand(), "nebula::parallel");
         CommandManager.RegisterCommand(new WaitCommand(), "nebula::wait");
         CommandManager.RegisterCommand(new RandomCommand(), "nebula::random");

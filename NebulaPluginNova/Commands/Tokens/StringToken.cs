@@ -34,7 +34,9 @@ public class StringCommandToken : ICommandToken
 
     CoTask<ICommandToken> ICommandToken.EvaluateHere(CommandEnvironment env)
     {
-        return new CoImmediateTask<ICommandToken>(env.ArgumentTable.ApplyTo(this));
+        var applied = env.ArgumentTable.ApplyTo(this);
+        if (applied == this) return new CoImmediateTask<ICommandToken>(applied);
+        else return applied.EvaluateHere(env);
     }
 
     CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(CommandEnvironment env)
@@ -98,6 +100,12 @@ public class StringCommandToken : ICommandToken
         {
             Virial.Assignable.DefinedModifier? role = Roles.Roles.AllModifiers.FirstOrDefault(r => r.LocalizedName == myStr);
             if (role != null) return new CoImmediateTask<T>(Unsafe.As<Virial.Assignable.DefinedModifier, T>(ref role));
+            return new CoImmediateErrorTask<T>();
+        }
+        else if(type == typeof(ICommand))
+        {
+            if(CommandManager.TryGetCommand(myStr, out var command))
+                return new CoImmediateTask<T>(Unsafe.As<ICommand, T>(ref command));
             return new CoImmediateErrorTask<T>();
         }
 

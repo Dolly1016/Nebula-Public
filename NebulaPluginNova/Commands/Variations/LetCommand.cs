@@ -25,6 +25,13 @@ public class LetCommand : ICommand
         return arguments[0].AsValue<string>(env)
             .Chain(argument =>
             {
+                return arguments[1].EvaluateHere(env).Chain(val =>
+                {
+                    var letModifier = new LetCommandModifier(argument, val, env.ArgumentTable);
+                    return CommandManager.CoExecute(arguments.Skip(2), env.SwitchArgumentTable(letModifier));
+                });
+
+                /*
                 //引数の値を評価
                 var value = env.ArgumentTable.ApplyTo(arguments[1]);
 
@@ -33,6 +40,7 @@ public class LetCommand : ICommand
 
                 //新たな環境下で中のコマンドを実行
                 return CommandManager.CoExecute(arguments.Skip(2), env.SwitchArgumentTable(letModifier));
+                */
             }, () => env.Logger.PushError("Uninterpretable variable name error."));
     }
 }
@@ -63,7 +71,17 @@ public class LetsCommand : ICommand
                     myResult.IsFailed = true;
                     yield break;
                 }
-                args.Add((task.Result, env.ArgumentTable.ApplyTo(arguments[i + 1])));
+
+                var valTask = arguments[i + 1].EvaluateHere(env);
+                yield return valTask.CoWait();
+                if (valTask.IsFailed)
+                {
+                    env.Logger.PushError("The error occured during evaluating value.");
+                    myResult.IsFailed = true;
+                    yield break;
+                }
+
+                args.Add((task.Result, valTask.Result));
 
                 i += 2;
             }

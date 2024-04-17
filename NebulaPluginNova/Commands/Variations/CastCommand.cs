@@ -40,6 +40,7 @@ public class CastCommand : ICommand
                 "integer" => arguments[1].AsValue<int>(env).ChainFast(v => (ICommandToken) new IntegerCommandToken(v)),
                 "float" => arguments[1].AsValue<float>(env).ChainFast(v => (ICommandToken) new FloatCommandToken(v)),
                 "boolean" => arguments[1].AsValue<bool>(env).ChainFast(v => (ICommandToken) new BooleanCommandToken(v)),
+                "player" => arguments[1].AsValue<GamePlayer>(env).ChainFast(v => (ICommandToken)new PlayerCommandToken(v)),
                 var t => objectDics.TryGetValue(t,out var func) ? func.Invoke(arguments[1], env) : new CoImmediateErrorTask<ICommandToken>(env.Logger, $"Invalid type name \"{t}\" is received.")
             };
         });

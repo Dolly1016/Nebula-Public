@@ -115,10 +115,12 @@ public class CommandResource : INebulaResource
 public class CommandManager
 {
     static public bool TryGetCommand(string label, [MaybeNullWhen(false)] out ICommand command) => TryGetCommand(label, null, out command);
+    
     static public bool TryGetCommand(string label, IResourceAllocator? defaultAllocator, [MaybeNullWhen(false)] out ICommand command) {
         command = NebulaResourceManager.GetResource(label, defaultAllocator ?? NebulaResourceManager.NebulaNamespace)?.AsCommand();
         return command != null;
     }
+
     static public void RegisterCommand(ICommand command, params string[] name)
     {
         foreach(var n in name) NebulaResourceManager.RegisterResource(n, new CommandResource(command));
@@ -239,34 +241,33 @@ public class CommandManager
         {
             IEnumerator CoExecuteCommand(CoBuiltInTask<ICommandToken> task)
             {
-                var header = args[0].AsValue<string>(env);
+                var header = args[0].AsValue<ICommand>(env);
+
+
+                var headerTxt = "?";
+                if (args[0] is StringCommandToken sct) headerTxt = sct.Token;
+
                 yield return header.CoWait();
 
                 if (header.IsFailed)
                 {
-                    env.Logger.PushError($"Unevaluable header.");
+                    env.Logger.PushError($"Unevaluable command \"{headerTxt}\".");
                     yield break;
                 }
 
-                if (TryGetCommand(header.Result, out var command))
+
+                var commandTask = header.Result.Evaluate(headerTxt, args.Skip(1), env);
+                yield return commandTask.CoWait();
+                if (commandTask.IsFailed)
                 {
-                    var commandTask = command.Evaluate(header.Result, args.Skip(1), env);
-                    yield return commandTask.CoWait();
-                    if (commandTask.IsFailed)
-                    {
-                        env.Logger.PushError($"An error occurred while executing the command.");
-                    }
-                    else
-                    {
-                        task.Result = commandTask.Result;
-                    }
-                    yield break;
+                    env.Logger.PushError($"An error occurred while executing the command.");
                 }
                 else
                 {
-                    env.Logger.PushError($"No such command found \"{header.Result}\".");
-                    yield break;
+                    task.Result = commandTask.Result;
                 }
+                yield break;
+
             }
             CoBuiltInTask<ICommandToken> result = new(CoExecuteCommand);
 

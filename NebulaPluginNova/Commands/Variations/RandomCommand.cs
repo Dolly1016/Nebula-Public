@@ -17,6 +17,15 @@ public class RandomCommand : ICommand
     }
     CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
     {
+        if(arguments.Count == 1)
+        {
+            return arguments[0].AsEnumerable(env).ChainFast(val =>
+            {
+                var array = val.ToArray();
+                return array.Length > 0 ? array.Random() : EmptyCommandToken.Token;
+            });
+        }
+
         if (arguments.Count != 3)
             return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " integer|float <min (included)> <max (not included)>");
 

@@ -21,7 +21,12 @@ public class BooleanCommandToken : ICommandToken
     {
         var type = typeof(T);
 
-        if (type == typeof(bool))
+        if (type == typeof(ICommandToken))
+        {
+            ICommandToken This = this;
+            return new CoImmediateTask<T>(Unsafe.As<ICommandToken, T>(ref This));
+        }
+        else if (type == typeof(bool))
             return new CoImmediateTask<T>(Unsafe.As<bool, T>(ref val));
         else if (type == typeof(string))
         {
@@ -46,7 +51,12 @@ public class IntegerCommandToken : ICommandToken
     {
         var type = typeof(T);
 
-        if (type == typeof(int))
+        if (type == typeof(ICommandToken))
+        {
+            ICommandToken This = this;
+            return new CoImmediateTask<T>(Unsafe.As<ICommandToken, T>(ref This));
+        }
+        else if (type == typeof(int))
             return new CoImmediateTask<T>(Unsafe.As<int, T>(ref val));
         else if (type == typeof(float))
         {
@@ -76,7 +86,12 @@ public class FloatCommandToken : ICommandToken
     {
         var type = typeof(T);
 
-        if (type == typeof(float))
+        if (type == typeof(ICommandToken))
+        {
+            ICommandToken This = this;
+            return new CoImmediateTask<T>(Unsafe.As<ICommandToken, T>(ref This));
+        }
+        else if (type == typeof(float))
             return new CoImmediateTask<T>(Unsafe.As<float, T>(ref val));
         else if (type == typeof(int))
         {

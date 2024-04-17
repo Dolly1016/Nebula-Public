@@ -23,7 +23,12 @@ public class ObjectCommandToken<T> : ICommandToken
         var myType = obj!.GetType();
         var type = typeof(V);
 
-        if (myType.IsAssignableTo(type))
+        if (type == typeof(ICommandToken))
+        {
+            ICommandToken This = this;
+            return new CoImmediateTask<V>(Unsafe.As<ICommandToken, V>(ref This));
+        }
+        else if (myType.IsAssignableTo(type))
         {
             return new CoImmediateTask<V>(Unsafe.As<T, V>(ref obj));
         }
