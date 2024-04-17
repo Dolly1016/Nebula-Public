@@ -50,10 +50,7 @@ public class WideCamera
 
         myCamera.gameObject.SetActive(false);
 
-        meshFilter = UnityHelper.CreateObject<MeshFilter>("mesh", myCamera.transform, Vector3.zero, LayerExpansion.GetUILayer());
-        meshRenderer = meshFilter.gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = new Material(Shader.Find("Unlit/Texture"));
-        meshFilter.mesh = new Mesh();
+        (meshRenderer, meshFilter) = UnityHelper.CreateMeshRenderer("mesh", myCamera.transform, Vector3.zero, LayerExpansion.GetUILayer());
     }
 
     private bool drawShadow = false;
@@ -157,14 +154,7 @@ public class WideCamera
                 myCamera.targetTexture = new RenderTexture(consideredWidth, consideredHeight, 32, RenderTextureFormat.ARGB32);
                 meshRenderer.material.mainTexture = myCamera.targetTexture;
 
-                var mesh = meshFilter.mesh;
-
-                float x = Camera.main.orthographicSize / Screen.height * Screen.width, y = Camera.main.orthographicSize;
-                mesh.SetVertices((Vector3[])[new(-x, -y), new(x, -y), new(-x, y), new(x, y)]);
-                mesh.SetTriangles((int[])[0, 2, 1, 2, 3, 1], 0);
-                mesh.SetUVs(0, (Vector2[])[new(0, 0), new(1, 0), new(0, 1), new(1, 1)]);
-                var white = new Color32(255, 255, 255, 255);
-                mesh.SetColors((Color32[])[white, white, white, white]);
+                meshFilter.CreateRectMesh(new(Camera.main.orthographicSize / Screen.height * Screen.width, Camera.main.orthographicSize), Color.white);
             }
 
             CheckPlayerState(out var goalScale, out var goalRotate);

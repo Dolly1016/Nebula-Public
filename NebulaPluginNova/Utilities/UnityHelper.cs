@@ -27,6 +27,40 @@ public static class UnityHelper
         return CreateObject(objName, parent, localPosition, layer).AddComponent<T>();
     }
 
+    public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer)
+    {
+        var meshFilter = UnityHelper.CreateObject<MeshFilter>("mesh", parent, localPosition, layer);
+        var meshRenderer = meshFilter.gameObject.AddComponent<MeshRenderer>();
+        meshRenderer.material = new Material(Shader.Find("Unlit/Texture"));
+        meshFilter.mesh = new Mesh();
+
+        return (meshRenderer, meshFilter);
+    }
+
+    //public static Camera CreateRenderingCamera(string objName, Transform? parent, Vector3 localPosition, int layerMask, Vector2 size) {
+    //}
+
+    public static MeshFilter CreateRectMesh(this MeshFilter filter, Vector2 size, Color? color = null, Vector3? center = null)
+    {
+        center ??= Vector3.zero;
+
+        var mesh = filter.mesh;
+
+        float x = size.x * 0.5f;
+        float y = size.y * 0.5f;
+        mesh.SetVertices((Vector3[])[
+            new Vector3(-x , -y) + center.Value,
+            new Vector3(x, -y) + center.Value,
+            new Vector3(-x, y) + center.Value,
+            new Vector3(x, y) + center.Value]);
+        mesh.SetTriangles((int[])[0, 2, 1, 2, 3, 1], 0);
+        mesh.SetUVs(0, (Vector2[])[new(0, 0), new(1, 0), new(0, 1), new(1, 1)]);
+        color ??= new Color(1f, 1f, 1f, 1f);
+        mesh.SetColors((Color32[])[color.Value, color.Value, color.Value, color.Value]);
+
+        return filter;
+    }
+
     public static LineRenderer SetUpLineRenderer(string objName,Transform? parent,Vector3 localPosition,int? layer = null,float width = 0.2f)
     {
         var line = UnityHelper.CreateObject<LineRenderer>(objName, parent, localPosition, layer);
