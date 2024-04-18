@@ -332,16 +332,46 @@ public class Ubiquitous : ConfigurableStandardRole
         {
             if (AmOwner)
             {
+                int currentSize = 1;
+                var cameraObj = HudContent.InstantiateContent("UbiquitousCamera", true, true, false, true);
+                this.Bind(cameraObj.gameObject);
+
+                var mesh = UnityHelper.CreateMeshRenderer("MeshRenderer", cameraObj.transform, new(0, -0.08f, -1), LayerExpansion.GetUILayer());
+                mesh.filter.CreateRectMesh(new(1.34f, 0.78f), new(0.35f, 0f, 0f));
+                Camera droneCam = null!;
+
+                var backMesh = UnityHelper.CreateMeshRenderer("MeshBackRenderer", mesh.renderer.transform, new(0, 0, 0.1f), LayerExpansion.GetUILayer(), MyRole.RoleColor);
+                backMesh.filter.CreateRectMesh(new(1.34f + 0.05f, 0.78f + 0.05f), new(0.35f, 0f, 0f));
+
                 ModAbilityButton callBackButton = null!;
                 ModAbilityButton droneButton;
 
                 droneButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 droneButton.SetSprite(droneButtonSprite.GetSprite());
                 droneButton.Availability = (button) => MyPlayer.MyControl.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
-                droneButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                droneButton.Visibility = (button) =>
+                {
+                    cameraObj.gameObject.SetActive(myDrone && AmongUsUtil.CurrentCamTarget != myDrone && !MeetingHud.Instance);
+                    if (cameraObj.gameObject.active)
+                    {
+                        int level = Mathf.Min(4,(int)MyPlayer.MyControl.transform.position.Distance(myDrone!.transform.position) / 6);
+                        if(currentSize != 1 << level)
+                        {
+                            currentSize = 1 << level;
+                            mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134 / currentSize, 78 / currentSize);
+                        }
+                    }
+                    return !MyPlayer.MyControl.Data.IsDead;
+                };
                 droneButton.OnClick = (button) =>
                 {
-                    if (!myDrone) myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.MyControl.GetTruePosition());
+                    if (!myDrone)
+                    {
+                        myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.MyControl.GetTruePosition());
+
+                        droneCam = UnityHelper.CreateRenderingCamera("Camera", myDrone.transform, Vector3.zero, 0.95f);
+                        mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134, 78);
+                    }
                     AmongUsUtil.ToggleCamTarget(myDrone, null);
                 };
                 droneButton.CoolDownTimer = Bind(new Timer(0f).SetAsAbilityCoolDown().Start());

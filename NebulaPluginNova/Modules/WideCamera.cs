@@ -149,12 +149,9 @@ public class WideCamera
                 //割り切れないときは再設定
                 if(Screen.width % roughness != 0 || Screen.height % roughness != 0) Roughness = roughness;
 
-                if(myCamera.targetTexture) GameObject.Destroy(myCamera.targetTexture);
+                meshRenderer.sharedMaterial.mainTexture = myCamera.SetCameraRenderTexture(consideredWidth, consideredHeight);
 
-                myCamera.targetTexture = new RenderTexture(consideredWidth, consideredHeight, 32, RenderTextureFormat.ARGB32);
-                meshRenderer.material.mainTexture = myCamera.targetTexture;
-
-                meshFilter.CreateRectMesh(new(Camera.main.orthographicSize / Screen.height * Screen.width, Camera.main.orthographicSize), Color.white);
+                meshFilter.CreateRectMesh(new(Camera.main.orthographicSize / Screen.height * Screen.width * 2f, Camera.main.orthographicSize * 2f));
             }
 
             CheckPlayerState(out var goalScale, out var goalRotate);

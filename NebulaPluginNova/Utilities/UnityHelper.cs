@@ -27,20 +27,41 @@ public static class UnityHelper
         return CreateObject(objName, parent, localPosition, layer).AddComponent<T>();
     }
 
-    public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer)
+    public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer,Color? color = null)
     {
         var meshFilter = UnityHelper.CreateObject<MeshFilter>("mesh", parent, localPosition, layer);
         var meshRenderer = meshFilter.gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = new Material(Shader.Find("Unlit/Texture"));
+        meshRenderer.material = new Material(Shader.Find(color.HasValue ? "Unlit/Color" : "Unlit/Texture"));
+        if(color.HasValue) meshRenderer.sharedMaterial.color = color.Value;
         meshFilter.mesh = new Mesh();
 
         return (meshRenderer, meshFilter);
     }
 
-    //public static Camera CreateRenderingCamera(string objName, Transform? parent, Vector3 localPosition, int layerMask, Vector2 size) {
-    //}
+    public static Camera CreateRenderingCamera(string objName, Transform? parent, Vector3 localPosition, float halfYSize, int layerMask = 31511) {
+        var camera = UnityHelper.CreateObject<Camera>(objName, parent, localPosition);
+        camera.backgroundColor = Color.black;
+        camera.allowHDR = false;
+        camera.allowMSAA = false;
+        camera.clearFlags = CameraClearFlags.SolidColor;
+        camera.depth = 5;
+        camera.nearClipPlane = -1000f;
+        camera.orthographic = true;
+        camera.orthographicSize = halfYSize;
+        camera.cullingMask = layerMask;
 
-    public static MeshFilter CreateRectMesh(this MeshFilter filter, Vector2 size, Color? color = null, Vector3? center = null)
+        return camera;
+    }
+
+    public static RenderTexture SetCameraRenderTexture(this Camera camera, int textureX, int textureY)
+    {
+        if (camera.targetTexture) GameObject.Destroy(camera.targetTexture);
+        camera.targetTexture = new RenderTexture(textureX, textureY, 32, RenderTextureFormat.ARGB32);
+
+        return camera.targetTexture;
+    }
+
+    public static MeshFilter CreateRectMesh(this MeshFilter filter, Vector2 size, Vector3? center = null)
     {
         center ??= Vector3.zero;
 
@@ -55,8 +76,8 @@ public static class UnityHelper
             new Vector3(x, y) + center.Value]);
         mesh.SetTriangles((int[])[0, 2, 1, 2, 3, 1], 0);
         mesh.SetUVs(0, (Vector2[])[new(0, 0), new(1, 0), new(0, 1), new(1, 1)]);
-        color ??= new Color(1f, 1f, 1f, 1f);
-        mesh.SetColors((Color32[])[color.Value, color.Value, color.Value, color.Value]);
+        var color = new Color32(255, 255, 255, 255);
+        mesh.SetColors((Color32[])[color, color, color, color]);
 
         return filter;
     }
