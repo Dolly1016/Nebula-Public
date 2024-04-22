@@ -74,6 +74,7 @@ public class NebulaGameScript : INebulaScriptComponent, IGameEntity
     public Action? OnReleasedEvent = null;
     public Action? OnGameReenabledEvent = null;
     public Action? OnGameStartEvent = null;
+    public Action? OnUpdateEvent = null;
 
     void IGameEntity.OnReleased() => OnReleasedEvent?.Invoke();
     void IGameEntity.OnMeetingStart() => OnMeetingStartEvent?.Invoke();
@@ -86,5 +87,7 @@ public class NebulaGameScript : INebulaScriptComponent, IGameEntity
             OnActivatedEvent.Invoke();
             OnActivatedEvent= null;
         }
+
+        OnUpdateEvent?.Invoke();
     }
 }

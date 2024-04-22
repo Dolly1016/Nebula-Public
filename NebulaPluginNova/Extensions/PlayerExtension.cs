@@ -83,7 +83,7 @@ public static class PlayerExtension
         catch { }
     }
 
-    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, bool blink,bool showOverlay)> RpcKill = new(
+    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, bool blink,bool showOverlay, bool assignGhostRole)> RpcKill = new(
         "Kill",
        (message, _) =>
        {
@@ -159,6 +159,8 @@ public static class PlayerExtension
                if (targetInfo.AmOwner && (NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0) == 1)
                    new StaticAchievementToken("firstKill");
 
+               if (message.assignGhostRole && targetInfo.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(targetInfo);
+
            }
 
            //Entityイベント発火
@@ -174,7 +176,7 @@ public static class PlayerExtension
        }
        );
 
-    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, bool showOverlay, bool playSE)> RpcMeetingKill = new(
+    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, bool showOverlay, bool playSE, bool assignGhostRole)> RpcMeetingKill = new(
         "NonPhysicalKill",
        (message, _) =>
        {
@@ -232,6 +234,8 @@ public static class PlayerExtension
                    if (killerInfo != null) e.OnPlayerMurdered(targetInfo, killerInfo);
                    e.OnPlayerDead(targetInfo);
                });
+
+               if (message.assignGhostRole && targetInfo.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(targetInfo);
            }
 
            if (MeetingHud.Instance)
@@ -255,15 +259,15 @@ public static class PlayerExtension
         (message, _) => MeetingHudExtension.ExtraVictims.Add(message)
         );
 
-    static public KillResult ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay)
+    static public KillResult ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay, bool assignGhostRole = true)
     {
         bool isMeetingKill = MeetingHud.Instance;
         if (CheckKill(null, target, playerState, recordState, isMeetingKill, out var result))
         {
             if (MeetingHud.Instance)
-                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay, true));
+                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay, true, assignGhostRole));
             else
-                RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay));
+                RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay, assignGhostRole));
         }
         return result;
 
@@ -284,20 +288,20 @@ public static class PlayerExtension
         return result == KillResult.Kill;
     }
 
-    static public KillResult ModSuicide(this PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
-    => ModFlexibleKill(target,target,showBlink, playerState, recordState, showOverlay);
+    static public KillResult ModSuicide(this PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true, bool assignGhostRole = true)
+    => ModFlexibleKill(target,target,showBlink, playerState, recordState, showOverlay, true);
     
-    static public KillResult ModKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true)
+    static public KillResult ModKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay = true, bool tryAssignGhostRole = true)
     {
         if (CheckKill(killer, target, playerState, recordState, false, out var result))
-            RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink,showOverlay));
+            RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink,showOverlay, tryAssignGhostRole));
         return result;
     }
 
     static public KillResult ModMeetingKill(this PlayerControl killer, PlayerControl target, bool showOverlay, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool playSE = true)
     {
         if (CheckKill(killer, target, playerState, recordState, true, out var result))
-            RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay,playSE));
+            RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay,playSE, true));
         return result;
     }
 

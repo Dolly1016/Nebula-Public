@@ -7,7 +7,7 @@ using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
-public class DamnedImpostor : AbstractRole
+public class DamnedImpostor : AbstractRole, DefinedAssignable
 {
     static public DamnedImpostor MyRole = new DamnedImpostor();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -22,6 +22,7 @@ public class DamnedImpostor : AbstractRole
     public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
 
     public override void Load(){}
+    bool DefinedAssignable.ShowOnHelpScreen => false;
 
     public class Instance : Impostor.Instance
     {

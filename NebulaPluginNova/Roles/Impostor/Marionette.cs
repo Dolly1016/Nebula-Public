@@ -126,7 +126,7 @@ public class Marionette : ConfigurableStandardRole
 
                 swapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 swapButton.SetSprite(swapButtonSprite.GetSprite());
-                swapButton.Availability = (button) => MyPlayer.MyControl.CanMove || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour;
+                swapButton.Availability = (button) => (MyPlayer.MyControl.CanMove || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour) && (!MyPlayer.MyControl.inVent && !MyPlayer.MyControl.onLadder && !MyPlayer.MyControl.inMovingPlat);
                 swapButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy != null;
                 swapButton.CoolDownTimer = Bind(new Timer(MyRole.SwapCoolDownOption.GetFloat()));
                 swapButton.OnClick = (button) =>

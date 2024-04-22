@@ -81,6 +81,9 @@
 "options.assignment.neutral" : "Neutral Role"
 "options.assignment.unlimited" : "Unlimited"
 "options.assignment.assignOpToHost" : "Assign Op To Host"
+"options.assignment.ghostAssignmentMethod" : "Ghost Assignment Method"
+"options.assignment.ghostAssignmentMethod.normal" : "Normal"
+"options.assignment.ghostAssignmentMethod.thrilling" : "Thrilling"
 
 "options.soloFreePlay" : "Solo Free Play Options"
 "options.soloFreePlay.detail" : "About dummies"
@@ -205,6 +208,7 @@
 "role.category.crewmate" : "Crewmate Roles"
 "role.category.impostor" : "Impostor Roles"
 "role.category.neutral" : "Neutral Roles"
+"role.category.ghost" : "Ghost Roles"
 
 # Complex Roles
 
@@ -463,6 +467,7 @@
 "options.role.evilTracker.updateArrowInterval" : "Update Arrow Interval"
 "options.role.evilTracker.canChangeTarget" : "Can Change Target"
 "options.role.evilTracker.trackImpostors" : "Track Impostors"
+"options.role.evilTracker.showTrackingTargetOnMap" : "Show Tracking Target On Map"
 
 "role.evilTrapper.name" : "Evil Trapper"
 "role.evilTrapper.short" : "Tp"
@@ -631,6 +636,19 @@
 "options.role.vulture.eatCoolDown" : "Eat Cool Down"
 "options.role.vulture.numOfTheEatenToWin" : "Num of the Eaten to Win"
 
+# Ghost Roles
+
+"role.lumine.name" : "Lumine"
+"role.lumine.short" : "L"
+"options.role.lumine.detail" : "Lumine can emit light once during the game."
+"options.role.lumine.lightSize" : "Light Size"
+"options.role.lumine.lightDuration" : "Light Duration"
+
+"role.poltergeist.name" : "Poltergeist"
+"role.poltergeist.short" : "P"
+"options.role.poltergeist.detail" : "Poltergeists can draw corpses close to them."
+"options.role.poltergeist.poltergeistCoolDown" : "Poltergeist Cool Down"
+
 # Modifiers
 
 "role.metaRole.ui.roles" : "Roles"
@@ -644,12 +662,21 @@
 "options.role.bloody.detail" : "When Bloody is murdered, the killer lefts bloody footprints for a while."
 "options.role.bloody.curseDuration" : "Curse Duration"
 
+"role.confused.name" : "Confused"
+"options.role.confused.detail" : "Every emergency meetings, the appearance of others changes."
+"options.role.confused.chanceOfShuffle" : "Chance Of Shuffle"
+"options.role.confused.numOfMaxShuffledPairs" : "Num Of Max Shuffled Pairs"
+
 "role.damned.name" : "Damned"
 "options.role.damned.detail" : "Damned is unconscious modifier.<br>The curse of Damned prevents one kill and has a dynamic effect for game."
 "role.damned.prefix" : "Damned"
 "options.role.damned.takeOverRoleOfKiller" : "Take Over Role Of Killer"
 "options.role.damned.damnedMurderMyKiller" : "Damned Murder My Killer"
 "options.role.damned.killDelay" : "Kill Delay"
+
+"role.extraMission.name" : "Extra Mission"
+"options.role.extraMission.detail" : "Your mission is to make certain players die.<br>Otherwise you won't win."
+"role.extraMission.taskText" : "[Extra Mission] Death of %PLAYER%."
 
 "role.tieBreaker.name" : "Tie Breaker"
 "options.role.tieBreaker.detail" : "When the vote results in a tie, Tie Breaker cast an additional vote."
@@ -680,6 +707,9 @@
 "role.secretInGame.short" : "?"
 "role.secretInGame.blurb" : "Wake Up!"
 "options.role.secret.detail" : "Secret hides your role.<br>Players do task or kill for arousal."
+"options.role.secret.impostorArousalMethod" : "Impostor Arousal Method"
+"options.role.secret.impostorArousalMethod.kill" : "Kill"
+"options.role.secret.impostorArousalMethod.death" : "Death Of Impostors"
 "options.role.secret.killingForArousal" : "Num Of Killing For Arousal"
 "options.role.secret.tasksForArousal" : "Num Of Tasks For Arousal"
 

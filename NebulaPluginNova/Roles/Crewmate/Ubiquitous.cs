@@ -17,7 +17,7 @@ file static class UbiquitousDroneAsset
     public static SpriteLoader droneShadeSprite = SpriteLoader.FromResource("Nebula.Resources.DroneShade.png", 150f);
 }
 
-public class UbiquitousDrone : MonoBehaviour
+public class UbiquitousDrone : MonoBehaviour, INoisedCamera
 {
     SpriteRenderer droneRenderer = null!;
     SpriteRenderer shadeRenderer = null!;
@@ -71,6 +71,8 @@ public class UbiquitousDrone : MonoBehaviour
     
     public Vector3 ColliderPosition => myRigidBody.transform.position;
 
+    public int CameraRoughness => 1 << Mathf.Min(5, (int)(PlayerControl.LocalPlayer.transform.position.Distance(transform.position) / 5.2f));
+
     void UpdateSprite()
     {
         imageIndex = (imageIndex + 1) % 2;
@@ -91,7 +93,7 @@ public class UbiquitousDrone : MonoBehaviour
     {
         bool isOperating = HudManager.Instance.PlayerCam.Target == this;
         if (isOperating)
-            myRigidBody.velocity = DestroyableSingleton<HudManager>.Instance.joystick.DeltaL * 3.5f;
+            myRigidBody.velocity = DestroyableSingleton<HudManager>.Instance.joystick.DeltaL * 3.5f * NebulaGameManager.Instance!.LocalPlayerInfo!.DirectionalPlayerSpeed;
         else
             myRigidBody.velocity = Vector2.zero;
 
@@ -354,11 +356,11 @@ public class Ubiquitous : ConfigurableStandardRole
                     cameraObj.gameObject.SetActive(myDrone && AmongUsUtil.CurrentCamTarget != myDrone && !MeetingHud.Instance);
                     if (cameraObj.gameObject.active)
                     {
-                        int level = Mathf.Min(4,(int)MyPlayer.MyControl.transform.position.Distance(myDrone!.transform.position) / 6);
-                        if(currentSize != 1 << level)
+                        int level = Mathf.Max(2, myDrone!.CameraRoughness);
+                        if(currentSize != level)
                         {
-                            currentSize = 1 << level;
-                            mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134 / currentSize, 78 / currentSize);
+                            currentSize = level;
+                            mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134 / currentSize * 2, 78 / currentSize * 2);
                         }
                     }
                     return !MyPlayer.MyControl.Data.IsDead;
@@ -369,7 +371,7 @@ public class Ubiquitous : ConfigurableStandardRole
                     {
                         myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.MyControl.GetTruePosition());
 
-                        droneCam = UnityHelper.CreateRenderingCamera("Camera", myDrone.transform, Vector3.zero, 0.95f);
+                        droneCam = UnityHelper.CreateRenderingCamera("Camera", myDrone.transform, Vector3.zero, 1.4f);
                         mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134, 78);
                     }
                     AmongUsUtil.ToggleCamTarget(myDrone, null);

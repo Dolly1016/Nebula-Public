@@ -214,7 +214,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
             var lastDead = NebulaGameManager.Instance!.AllPlayerInfo().MaxBy(p => p.DeathTimeStamp ?? 0f);
             if (lastDead == null || lastDead.MyKiller == null || !lastDead.MyKiller.AmOwner) return;
 
-            if ( /*インポスターが最後に死亡*/ lastDead.Role.Role.Category == RoleCategory.ImpostorRole &&
+            if ( /*インポスターが最後に死亡*/ (lastDead as GamePlayer).IsImpostor &&
                 /*一人だけ生き残る*/ NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead) == 1)
                 new StaticAchievementToken("jackal.challenge");
         }

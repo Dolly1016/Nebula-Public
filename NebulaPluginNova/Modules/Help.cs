@@ -90,10 +90,11 @@ public static class HelpScreen
                 widget.Append(ShowMyRolesSrceen());
                 break;
             case HelpTab.Roles:
-                widget.Append(ShowAssignableScreen<AbstractRole>(
+                widget.Append(ShowAssignableScreen(
                     (Roles.Roles.AllRoles.Where(r => r.Category == RoleCategory.ImpostorRole && (r as DefinedAssignable).ShowOnHelpScreen), new WrappedWidget(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentTitle), GUI.API.TextComponent(new(Palette.ImpostorRed), "role.category.impostor")))),
                     (Roles.Roles.AllRoles.Where(r => r.Category == RoleCategory.NeutralRole && (r as DefinedAssignable).ShowOnHelpScreen), new WrappedWidget(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentTitle), GUI.API.TextComponent(new(1f,0.7f,0f), "role.category.neutral")))),
-                    (Roles.Roles.AllRoles.Where(r => r.Category == RoleCategory.CrewmateRole && (r as DefinedAssignable).ShowOnHelpScreen), new WrappedWidget(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentTitle), GUI.API.TextComponent(new(Palette.CrewmateBlue), "role.category.crewmate"))))
+                    (Roles.Roles.AllRoles.Where(r => r.Category == RoleCategory.CrewmateRole && (r as DefinedAssignable).ShowOnHelpScreen), new WrappedWidget(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentTitle), GUI.API.TextComponent(new(Palette.CrewmateBlue), "role.category.crewmate")))),
+                    (Roles.Roles.AllGhostRoles.Where(r => (r as DefinedAssignable).ShowOnHelpScreen), new WrappedWidget(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentTitle), GUI.API.TextComponent(new(Color.gray), "role.category.ghost"))))
                     ));
                 break;
             case HelpTab.Modifiers:
@@ -128,7 +129,7 @@ public static class HelpScreen
     private static TextAttributeOld RoleTitleAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
     private static TextAttributeOld RoleTitleAttrUnmasked = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f) };
     
-    private static IMetaWidgetOld ShowAssignableScreen<Assignable>(params (IEnumerable<Assignable> assignable, IMetaWidgetOld? header)[] contents) where Assignable : Roles.IAssignableBase
+    private static IMetaWidgetOld ShowAssignableScreen(params (IEnumerable<Roles.IAssignableBase> assignable, IMetaWidgetOld? header)[] contents)
     {
         MetaWidgetOld inner = new();
 
@@ -187,7 +188,7 @@ public static class HelpScreen
         return new MetaWidgetOld.ScrollView(new(7.4f, HelpHeight), inner) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
     }
 
-    private static IMetaWidgetOld ShowAssignableScreen<Assignable>(IEnumerable<Assignable> allAssignable) where Assignable : Roles.IAssignableBase
+    private static IMetaWidgetOld ShowAssignableScreen(IEnumerable<Roles.IAssignableBase> allAssignable)
         => ShowAssignableScreen([(allAssignable, null)]);
 
 

@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using NAudio.CoreAudioApi;
 using Nebula.Behaviour;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
@@ -83,9 +84,9 @@ public class PlayerAttributeImpl : IPlayerAttribute
         PlayerAttributes.Drunk = new PlayerAttributeImpl(5, "$inverse");
         PlayerAttributes.Size = new PlayerAttributeImpl(6, "$size");
         PlayerAttributes.Invisible = new PlayerAttributeImpl(2, "invisible");
-        PlayerAttributes.InvisibleElseImpostor = new PlayerAttributeImpl(2, "$invisible") { Cognizable = p => p.Role.Role.Category == RoleCategory.ImpostorRole, IdenticalAttribute = PlayerAttributes.Invisible };
+        PlayerAttributes.InvisibleElseImpostor = new PlayerAttributeImpl(2, "$invisible") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Invisible };
         PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody");
-        PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation") { Cognizable = p => p.Role.Role.Category == RoleCategory.ImpostorRole };
+        PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation") { Cognizable = p => p.IsImpostor };
         PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4, "busker") { Cognizable = _ => false };
 
         PlayerAttributes.FlipXY = new PlayerAttributeImpl(7, "$flip");
@@ -120,6 +121,10 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
     public RoleInstance Role => myRole;
     private RoleInstance myRole = null!;
+
+    public GhostRoleInstance? GhostRole => myGhostRole;
+    private GhostRoleInstance? myGhostRole = null;
+
     private List<ModifierInstance> myModifiers = new();
     RuntimeRole Virial.Game.Player.Role => myRole;
     IEnumerable<RuntimeModifier> Virial.Game.Player.Modifiers => myModifiers;
@@ -235,7 +240,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
     private void UpdateOutfit()
     {
-        int lastColor = CurrentOutfit.ColorId;
+        int lastColor = MyControl.CurrentOutfit.ColorId;
 
         GameData.PlayerOutfit newOutfit = DefaultOutfit;
         if (outfits.Count > 0)
@@ -274,6 +279,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
             if (AmOwner && Helpers.CurrentMonth == 4 && ColorHelper.IsLightGreen(Palette.PlayerColors[lastColor]) && ColorHelper.IsPink(Palette.PlayerColors[currentColor]))
             {
+                Debug.Log("sakura");
                 new StaticAchievementToken("sakura");
             }
         }
@@ -324,7 +330,8 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
         if ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || AmOwner)
         {
-            text += myRole?.DisplayRoleName ?? "Undefined";
+            string? roleName = IsDead ? (myGhostRole?.DisplayRoleName ?? myRole?.DisplayRoleName) : myRole.DisplayRoleName;
+            text += roleName ?? "Undefined";
 
             AssignableAction(r => { var newName = r.OverrideRoleName(text, false); if (newName != null) text = newName; });
             AssignableAction(m => m.DecorateRoleName(ref text));
@@ -365,7 +372,21 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
             GameEntityManager.Instance?.AllEntities.Do(e => e.OnSetRole(this, myRole));
         }
 
-        NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myRole));
+        NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myRole, IsDead));
+    }
+
+    private void SetGhostRole(AbstractGhostRole role, int[] arguments)
+    {
+        myGhostRole?.Inactivate();
+
+        myGhostRole = role.CreateInstance(this, arguments);
+
+        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized)
+        {
+            myGhostRole.OnActivated(); myGhostRole.Register();
+        }
+
+        NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myGhostRole, IsDead));
     }
 
     private void SetModifier(AbstractModifier role, int[] arguments)
@@ -379,11 +400,12 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
             GameEntityManager.Instance?.AllEntities.Do(e => e.OnAddModifier(this, modifier));
         }
 
-        NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true));
+        NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true, IsDead));
     }
 
-    public NebulaRPCInvoker RpcInvokerSetRole(AbstractRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), true));
-    public NebulaRPCInvoker RpcInvokerSetModifier(AbstractModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), false));
+    public NebulaRPCInvoker RpcInvokerSetRole(AbstractRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Role));
+    public NebulaRPCInvoker RpcInvokerSetModifier(AbstractModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Modifier));
+    public NebulaRPCInvoker RpcInvokerSetGhostRole(AbstractGhostRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.GhostRole));
     public NebulaRPCInvoker RpcInvokerUnsetModifier(AbstractModifier modifier) => RpcRemoveModifier.GetInvoker(new(PlayerId, modifier.Id));
     public void UnsetModifierLocal(Predicate<ModifierInstance> predicate)
     {
@@ -395,7 +417,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
                 GameEntityManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnRemoveModifier(m));
                 GameEntityManager.Instance?.AllEntities.Do(e => e.OnRemoveModifier(this, m));
 
-                NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, m, false));
+                NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, m, false, IsDead));
                 return true;
             }
             return false;
@@ -434,13 +456,20 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         yield return PropertyRPC.CoGetProperty<int>(PlayerId, $"players.{PlayerId}.leftGuess", callback, () => callback.Invoke(-1));
     }
 
-    public readonly static RemoteProcess<(byte playerId, int assignableId, int[] arguments, bool isRole)> RpcSetAssignable = new(
+    public readonly static RemoteProcess<(byte playerId, int assignableId, int[] arguments, RoleType roleType)> RpcSetAssignable = new(
         "SetAssignable",
         (message, isCalledByMe) =>
         {
             var player = NebulaGameManager.Instance!.RegisterPlayer(PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.PlayerId == message.playerId)));
-            if (message.isRole)
+
+            if (message.roleType == RoleType.Role)
+            {
                 player.SetRole(Roles.Roles.AllRoles[message.assignableId], message.arguments);
+            }
+            else if(message.roleType == RoleType.GhostRole)
+            {
+                player.SetGhostRole(Roles.Roles.AllGhostRoles[message.assignableId], message.arguments);
+            }
             else
                 player.SetModifier(Roles.Roles.AllModifiers[message.assignableId], message.arguments);
 
@@ -574,7 +603,11 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     static public (float angle,float distance) LocalMouseInfo { get
         {
             Vector2 vec = (Vector2)Input.mousePosition - new Vector2(Screen.width / 2, Screen.height / 2);
-            float currentAngle = Mathf.Atan2(vec.y, vec.x);
+            var viewer = NebulaGameManager.Instance!.WideCamera.ViewerTransform;
+            if (viewer.localScale.x < 0f) vec.x *= -1;
+            if (viewer.localScale.y < 0f) vec.y *= -1;
+            
+            float currentAngle = Mathf.Atan2(vec.y, vec.x) - (viewer.localEulerAngles.z / 180f * Mathf.PI);
             float ratio = (Camera.main.orthographicSize * 2f) / (float)Screen.height;
             return (currentAngle, vec.magnitude * ratio);
         } 
@@ -679,7 +712,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     public bool HasAttribute(IPlayerAttribute attribute) => timeLimitedModulators.Any(m => m.HasAttribute(attribute));
     public int CountAttribute(IPlayerAttribute attribute) => timeLimitedModulators.Count(m => m.HasAttribute(attribute));
 
-    public readonly static RemoteProcess<(byte playerId, TimeLimitedModulator modulator)> RpcAttrModulator = new(
+    public readonly static RemoteProcess<(byte playerId, TimeLimitedModulator modulator, bool allowDuplicate)> RpcAttrModulator = new(
        "AddAttributeModulator", (message, _) =>
        {
            var playerInfo = NebulaGameManager.Instance!.GetModPlayerInfo(message.playerId);
@@ -698,7 +731,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
                if (playerInfo.AmOwner && modulators.Any(m => m.HasAttribute(PlayerAttributes.Accel)) && modulators.Any(m => m.HasAttribute(PlayerAttributes.Decel))) new StaticAchievementToken("speedAttribute");
            }
 
-           if (message.modulator.DuplicateTag.Length > 0) modulators.RemoveAll(m => m.DuplicateTag == message.modulator.DuplicateTag);
+           if (!message.allowDuplicate && message.modulator.DuplicateTag.Length > 0) modulators.RemoveAll(m => m.DuplicateTag == message.modulator.DuplicateTag);
 
            modulators.Add(message.modulator);
            modulators.Sort((m1, m2) => m2.Priority - m1.Priority);
@@ -943,12 +976,12 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     {
         if (attribute == PlayerAttributes.Accel || attribute == PlayerAttributes.Decel) return;
 
-        RpcAttrModulator.Invoke(new(PlayerId, new AttributeModulator(attribute, duration, canPassMeeting, priority, duplicateTag)));
+        RpcAttrModulator.Invoke(new(PlayerId, new AttributeModulator(attribute, duration, canPassMeeting, priority, duplicateTag), false));
     }
 
     void Virial.Game.Player.GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag)
     {
-        RpcAttrModulator.Invoke(new(PlayerId, new SpeedModulator(speedRate, Vector2.one, true, duration, canPassMeeting, priority, duplicateTag ?? "")));
+        RpcAttrModulator.Invoke(new(PlayerId, new SpeedModulator(speedRate, Vector2.one, true, duration, canPassMeeting, priority, duplicateTag ?? ""), false));
         
     }
 

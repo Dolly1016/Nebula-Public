@@ -42,7 +42,7 @@ public class Bloody : ConfigurableStandardModifier
         {
             if (AmOwner && !murder.AmOwner)
             {
-                PlayerModInfo.RpcAttrModulator.Invoke((murder.PlayerId, new AttributeModulator(PlayerAttributes.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1)));
+                PlayerModInfo.RpcAttrModulator.Invoke((murder.PlayerId, new AttributeModulator(PlayerAttributes.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1), true));
                 new StaticAchievementToken("bloody.common1");
                 acTokenChallenge = new("bloody.challenge",(false,true),(val,_)=>val.cleared);
             }

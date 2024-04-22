@@ -29,6 +29,11 @@ public class PaparazzoShot : MonoBehaviour
 
     private bool focus;
 
+    public void SetLayer(int layer)
+    {
+        gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => obj.layer = layer));
+    }
+
     public void Awake()
     {
         frameRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
@@ -39,7 +44,7 @@ public class PaparazzoShot : MonoBehaviour
         collider.isTrigger = true;
         collider.size = frameRenderer.size;
 
-        gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => obj.layer = LayerExpansion.GetUILayer()));
+        SetLayer(LayerExpansion.GetDefaultLayer());
 
         focus = true;
     }
@@ -57,7 +62,7 @@ public class PaparazzoShot : MonoBehaviour
             var mouseInfo = PlayerModInfo.LocalMouseInfo;
             var dis = Mathf.Min(mouseInfo.distance, 2.4f + Mathf.Abs(Mathf.Cos(mouseInfo.angle)) * 1.7f);
             var targetPos = PlayerControl.LocalPlayer.transform.localPosition + new Vector3(Mathf.Cos(mouseInfo.angle), Mathf.Sin(mouseInfo.angle)) * dis;
-            targetPos.z = -5f;
+            targetPos.z = -10f;
 
             transform.localPosition -= (transform.localPosition - targetPos) * Time.deltaTime * 8.6f;
             var scale = transform.localScale.x;
@@ -109,7 +114,7 @@ public class PaparazzoShot : MonoBehaviour
         cam.targetTexture = null;
         RenderTexture.active = null;
         GameObject.Destroy(rt);
-        GameObject.Destroy(cam);
+        GameObject.Destroy(camObj);
 
         centerRenderer.transform.localPosition = new(0f, 0f, 0.1f);
         centerRenderer.transform.localScale = new(1f / scale.x, 1f / scale.y, 0.1f);
@@ -118,8 +123,7 @@ public class PaparazzoShot : MonoBehaviour
 
         NebulaAsset.PlaySE(NebulaAudioClip.Camera);
 
-        transform.SetParent(HudManager.Instance.transform, true);
-
+        //映っているプレイヤーを調べる
         int playerMask = 0;
         int playerNum = 0;
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
@@ -151,6 +155,28 @@ public class PaparazzoShot : MonoBehaviour
             }
         }
 
+        //UIレイヤー上の表示に変換
+        SetLayer(LayerExpansion.GetUILayer());
+
+        var pictureScaler = UnityHelper.CreateObject("PictureScaler", HudManager.Instance.transform, Vector3.zero);
+        transform.SetParent(pictureScaler.transform, true);
+        pictureScaler.transform.localScale = NebulaGameManager.Instance!.WideCamera.ViewerTransform.localScale;
+        pictureScaler.transform.localEulerAngles = NebulaGameManager.Instance!.WideCamera.ViewerTransform.localEulerAngles;
+
+        //UI変換後のスケーラ
+        IEnumerator CoScale()
+        {
+            float t = 5f;
+            while (t > 0f)
+            {
+                pictureScaler.transform.localScale -= (pictureScaler.transform.localScale - Vector3.one).Delta(2f, 0.02f);
+                pictureScaler.transform.localEulerAngles -= (pictureScaler.transform.localEulerAngles - Vector3.zero).Delta(2f, 0.2f);
+                transform.localPosition -= (transform.localPosition - new Vector3(0f, 0f, -10f)).Delta(3f, 0.02f);
+                t -= Time.deltaTime;
+                yield return null;
+            }
+        }
+
         IEnumerator CoFlash()
         {
             flashRenderer.color = Color.white;
@@ -178,22 +204,27 @@ public class PaparazzoShot : MonoBehaviour
                     yield return null;
                 }
                 GameObject.Destroy(gameObject);
+                GameObject.Destroy(pictureScaler);
             }
             else
             {
                 //成功時
                 callback?.Invoke(true);
 
-                var t = UnityHelper.CreateObject("Picture", transform.parent, transform.localPosition);
-                transform.SetParent(t.transform, true);
-                shots.Add((t.transform, this,playerMask));
+                NebulaManager.Instance.StartCoroutine(CoScale().WrapToIl2Cpp());
 
-                GameObject players = UnityHelper.CreateObject("Players", transform.parent, transform.localPosition);
+                shots.Add((pictureScaler.transform, this,playerMask));
+
+                GameObject players = UnityHelper.CreateObject("Players", pictureScaler.transform, Vector3.zero);
+                players.transform.localEulerAngles = Vector3.zero;
+                players.transform.localPosition = new(0, 0, -15f);
+
                 int num = 0;
                 foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) {
                     if (((1 << p.PlayerId) & playerMask) == 0) continue;
 
                     var icon = AmongUsUtil.GetPlayerIcon(p.GetModInfo()!.CurrentOutfit, players.transform, new Vector3((float)(-(playerNum - 1) + num * 2) * 0.075f, -0.3f, -0.2f), Vector3.one * 0.1f);
+                    icon.transform.localEulerAngles = Vector3.zero;
                     var script = icon.gameObject.AddComponent<ScriptBehaviour>();
                     var paparazzo = (PlayerControl.LocalPlayer.GetModInfo()!.Role as Paparazzo.Instance)!;
                     script.UpdateHandler += () =>
@@ -206,6 +237,8 @@ public class PaparazzoShot : MonoBehaviour
                 if (num >= 4) new StaticAchievementToken("paparazzo.common2");
 
                 players.transform.localScale = new Vector3(0f, 0f, 1f);
+
+                yield return Effects.Wait(2f);
                 var playersScale = 0f;
                 while (playersScale < 0.995f)
                 {
@@ -359,7 +392,7 @@ public class Paparazzo : ConfigurableStandardRole
                 shotButton.OnSubAction= (button) => MyFinder?.MyObject!.ToggleDirection();
                 shotButton.CoolDownTimer = Bind(new Timer(0f, MyRole.ShotCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 shotButton.SetLabel("shot");
-                shotButton.SetCanUseByMouseClick(true);
+                shotButton.SetCanUseByMouseClick();
             }
 
         }
@@ -376,7 +409,7 @@ public class Paparazzo : ConfigurableStandardRole
                 pos.z = -10f;
                 shot.transform.localPosition = pos;
 
-                shot.SetUpButton(() => shotButton.DoClick());
+                //shot.SetUpButton(() => shotButton.DoClick());
             }
 
             if (MyFinder != null && (MeetingHud.Instance || ExileController.Instance || MyPlayer.IsDead))

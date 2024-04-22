@@ -82,6 +82,9 @@ public class Avenger : ConfigurableRole
 
             if (AmOwner)
             {
+                NebulaGameManager.Instance?.TitleShower.SetText("You became AVENGER.", MyRole.RoleColor, 5.5f, true);
+                AmongUsUtil.PlayCustomFlash(MyRole.RoleColor, 0f, 0.8f, 0.7f);
+
                 var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
 
                 var killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
@@ -92,6 +95,8 @@ public class Avenger : ConfigurableRole
                     killButton.StartCoolDown();
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
+                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
+                killButton.SetLabel("kill");
 
                 if (target != null) Bind(new TrackingArrowAbility(target, MyRole.NotificationForAvengerIntervalOption.GetFloat(), MyRole.RoleColor)).Register();
             }
@@ -154,7 +159,7 @@ public class Avenger : ConfigurableRole
 
         void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
         {
-            if (AmOwner && !CheckKillCondition && dead == target)
+            if (AmOwner && !CheckKillCondition && dead == target && !MyPlayer.IsDead)
             {
                 MyPlayer.MyControl.ModSuicide(false, PlayerState.Suicide, EventDetail.Kill);
                 new StaticAchievementToken("avenger.another1");

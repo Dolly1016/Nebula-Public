@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using Nebula.Utilities;
 using Nebula.Behaviour;
 using Virial.Game;
+using Nebula.Roles.Modifier;
 
 namespace Nebula.Game;
 
@@ -187,6 +188,8 @@ public class EndGameManagerSetUpPatch
         {
             //Name Text
             string nameText = p.DefaultName.Color((NebulaGameManager.Instance.EndState!.WinnersMask & (1 << p.PlayerId)) != 0 ? Color.yellow : Color.white);
+            if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.DefaultName ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.RoleColor);
+
             string stateText = p.MyState?.Text ?? "";
             if (p.IsDead && p.MyKiller != null) stateText += "<color=#FF6666><size=75%> by " + (p.MyKiller?.DefaultName ?? "ERROR") + "</size></color>";
             string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $" ({p.Tasks.ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
@@ -194,7 +197,7 @@ public class EndGameManagerSetUpPatch
             //Role Text
             string roleText = "";
             var entries = NebulaGameManager.Instance.RoleHistory.EachMoment(history => history.PlayerId == p.PlayerId,
-                (role, modifiers) => (RoleHistoryHelper.ConvertToRoleName(role, modifiers, true), RoleHistoryHelper.ConvertToRoleName(role, modifiers, false))).ToArray();
+                (role, ghostRole, modifiers) => (RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, true), RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, false))).ToArray();
 
             if (entries.Length < 8)
             {
@@ -212,7 +215,7 @@ public class EndGameManagerSetUpPatch
             if (roleText.Length > 0) roleText += " → ";
             roleText += entries[entries.Length - 1].Item2;
 
-            text += $"{nameText}<indent=15px>{taskText}</indent><indent=24px>{stateText}</indent><indent=45px>{roleText}</indent>\n";
+            text += $"{nameText}<indent=21px>{taskText}</indent><indent=24px>{stateText}</indent><indent=39px>{roleText}</indent>\n";
         }
 
         widget.Append(new MetaWidgetOld.VariableText(new TextAttributeOld(TextAttributeOld.BoldAttr) { Font = font, Size = new(6f, 4.2f), Alignment = TMPro.TextAlignmentOptions.Left }.EditFontSize(1.4f, 1f, 1.4f))

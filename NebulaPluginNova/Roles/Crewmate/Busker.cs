@@ -71,8 +71,8 @@ public class Busker : ConfigurableStandardRole
                     NebulaManager.Instance.ScheduleDelayAction(() => {
                         using (RPCRouter.CreateSection("BuskerPseudocide"))
                         {
-                            if(MyRole.HidePseudocideFromVitalsOption) PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.BuskerEffect, 10000f, false, 0)));
-                            MyPlayer.MyControl.ModKill(MyPlayer.MyControl, false, PlayerState.Pseudocide, null, false);
+                            if(MyRole.HidePseudocideFromVitalsOption) PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.BuskerEffect, 10000f, false, 0), true));
+                            MyPlayer.MyControl.ModKill(MyPlayer.MyControl, false, PlayerState.Pseudocide, null, false, false);
                         }
                         reviveButon.ActivateEffect();
                     });
@@ -105,6 +105,7 @@ public class Busker : ConfigurableStandardRole
                         PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
                         NebulaGameManager.Instance!.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Accident, null, 1 << MyPlayer.PlayerId);
                         new StaticAchievementToken("busker.another1");
+                        NebulaGameManager.RpcTryAssignGhostRole.Invoke(MyPlayer);
                     }
                 };
                 reviveButon.SetLabel("revive");

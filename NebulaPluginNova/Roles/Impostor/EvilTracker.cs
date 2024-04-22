@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Mono.CSharp;
 using Nebula.Roles.Abilities;
+using Nebula.Roles.Crewmate;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,16 @@ using System.Threading.Tasks;
 using Virial;
 using Virial.Assignable;
 using Virial.Game;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Impostor;
 
 
-public class TrackerMapLayer : MonoBehaviour
+public class TrackerTaskMapLayer : MonoBehaviour
 {
     ObjectPool<PooledMapIcon> iconPool = null!;
 
-    static TrackerMapLayer() => ClassInjector.RegisterTypeInIl2Cpp<TrackerMapLayer>();
+    static TrackerTaskMapLayer() => ClassInjector.RegisterTypeInIl2Cpp<TrackerTaskMapLayer>();
 
 
     public void Awake()
@@ -43,6 +45,42 @@ public class TrackerMapLayer : MonoBehaviour
         }
     }
 }
+
+public class TrackerPlayerMapLayer : MonoBehaviour
+{
+    ObjectPool<SpriteRenderer> iconPool = null!;
+    public PlayerModInfo? Target = null;
+
+    static TrackerPlayerMapLayer() => ClassInjector.RegisterTypeInIl2Cpp<TrackerPlayerMapLayer>();
+
+    public void Awake()
+    {
+        iconPool = new(ShipStatus.Instance.MapPrefab.HerePoint, transform);
+        iconPool.OnInstantiated = icon => PlayerMaterial.SetColors(Target?.PlayerId ?? 0, icon);
+    }
+
+    public void ClearPool()
+    {
+        iconPool.DestroyAll();
+    }
+    public void Update()
+    {
+        if (Target == null) return;
+        iconPool.RemoveAll();
+
+        var center = VanillaAsset.GetMapCenter(AmongUsUtil.CurrentMapId);
+        var scale = VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+
+
+        if (!Target!.IsDead && !MeetingHud.Instance)
+        {
+            var icon = iconPool.Instantiate();
+            icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(Target.MyControl.transform.position, center, scale);
+        }
+
+    }
+}
+
 public class EvilTracker : ConfigurableStandardRole, HasCitation
 {
     static public EvilTracker MyRole = new EvilTracker();
@@ -61,6 +99,8 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
     private NebulaConfiguration CanChangeTargetOption = null!;
     private NebulaConfiguration UpdateArrowIntervalOption = null!;
     private NebulaConfiguration TrackImpostorsOption = null!;
+    private NebulaConfiguration ShowTrackingTargetOnMapOption = null!;
+    //private NebulaConfiguration ShowRoomWhereTrackingTargetIsOption = null!;
 
     protected override void LoadOptions()
     {
@@ -72,6 +112,8 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
         CanChangeTargetOption = new NebulaConfiguration(RoleConfig, "canChangeTarget", null, false, false);
         UpdateArrowIntervalOption = new NebulaConfiguration(RoleConfig, "updateArrowInterval", null, 0f, 30f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
         TrackImpostorsOption = new NebulaConfiguration(RoleConfig, "trackImpostors", null, false, false);
+        ShowTrackingTargetOnMapOption = new NebulaConfiguration(RoleConfig, "showTrackingTargetOnMap", null, false, false);
+        //ShowRoomWhereTrackingTargetIsOption = new NebulaConfiguration(RoleConfig, "showRoomWhereTrackingTargetIs", null, false, false);
     }
 
     [NebulaRPCHolder]
@@ -150,7 +192,8 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
 
         static private SpriteLoader trackSprite = SpriteLoader.FromResource("Nebula.Resources.TrackIcon.png", 115f);
 
-        TrackerMapLayer? mapLayer = null;
+        TrackerTaskMapLayer? mapLayer = null;
+        TrackerPlayerMapLayer? playerMapLayer = null;
 
         void IGameEntity.OnMeetingStart()
         {
@@ -199,7 +242,28 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
         void IGameEntity.OnOpenNormalMap()
         {
             if (AmOwner && mapLayer) mapLayer!.gameObject.SetActive(false);
+            if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
         }
+
+        void IGameEntity.OnOpenAdminMap() {
+            if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
+        }
+        void IGameEntity.OnOpenSabotageMap()
+        {
+            if (MyRole.ShowTrackingTargetOnMapOption)
+            {
+                if (!playerMapLayer)
+                {
+                    playerMapLayer = UnityHelper.CreateObject<TrackerPlayerMapLayer>("TrackerPlayerLayer", MapBehaviour.Instance.transform, new(0f, 0f, -1f));
+                    this.Bind(playerMapLayer.gameObject);
+                }
+
+                playerMapLayer!.ClearPool();
+                playerMapLayer!.Target = trackingTarget;
+                playerMapLayer!.gameObject.SetActive(trackingTarget != null);
+            }
+        }
+
 
         void IGamePlayerEntity.OnKillPlayer(Virial.Game.Player target)
         {
@@ -239,7 +303,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
                     {
                         if (!eTracker.mapLayer)
                         {
-                            eTracker.mapLayer = UnityHelper.CreateObject<TrackerMapLayer>("TrackerLayer", MapBehaviour.Instance.taskOverlay.transform.parent, Vector3.zero);
+                            eTracker.mapLayer = UnityHelper.CreateObject<TrackerTaskMapLayer>("TrackerLayer", MapBehaviour.Instance.taskOverlay.transform.parent, Vector3.zero);
                             eTracker.Bind(eTracker.mapLayer.gameObject);
                         }
                         eTracker.mapLayer!.gameObject.SetActive(true);

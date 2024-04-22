@@ -18,6 +18,11 @@ public interface IConfiguableAssignable
     ConfigurationHolder RoleConfig { get; }
 }
 
+public interface ICodeName
+{
+    string CodeName { get; }
+}
+
 public interface IAssignableBase : DefinedAssignable
 {
     public ConfigurationHolder? RelatedConfig { get; }

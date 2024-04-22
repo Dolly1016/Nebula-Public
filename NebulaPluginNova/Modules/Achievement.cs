@@ -548,7 +548,7 @@ static public class NebulaAchievementManager
             if(nameSplitted.Length > 1)
             {
                 nameSplitted[0] = nameSplitted[0].Replace('-', '.');
-                var cand = Roles.Roles.AllAsignables().Where(a => a.LocalizedName == nameSplitted[0]).ToArray();
+                var cand = Roles.Roles.AllAssignables().Where(a => a.LocalizedName == nameSplitted[0]).ToArray();
                 if(cand.Length >= 1)
                 {
                     relatedRole = cand[0];

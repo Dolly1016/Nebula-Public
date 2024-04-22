@@ -35,13 +35,11 @@ public enum FilterAction
 
 public interface ModifierFilter : Configuration
 {
-    void Filter(FilterAction filterAction, params DefinedModifier[] modifiers);
     bool Test(DefinedModifier modifier);
 }
 
 public interface RoleFilter : Configuration
 {
-    void Filter(FilterAction filterAction, params DefinedRole[] roles);
     bool Test(DefinedRole role);
 }
 

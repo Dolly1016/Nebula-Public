@@ -94,7 +94,7 @@ public class AddonRoleInstance : RoleInstance, IBinderLifespan, IGamePlayerEntit
     {
         if (Role.Category == RoleCategory.ImpostorRole)
         {
-            if (PlayerControl.LocalPlayer.GetModInfo()?.Role.Role.Category == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
+            if ((PlayerControl.LocalPlayer.GetModInfo() as GamePlayer)?.IsImpostor ?? false) color = Palette.ImpostorRed;
         }
     }
 }

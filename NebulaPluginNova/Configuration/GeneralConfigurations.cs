@@ -51,6 +51,7 @@ public static class GeneralConfigurations
     static public NebulaConfiguration AssignmentImpostorOption = new NebulaConfiguration(AssignmentOptions, "impostor", null, -1, 3, -1, -1) { Decorator = AssignmentDecorator };
     static public NebulaConfiguration AssignmentNeutralOption = new NebulaConfiguration(AssignmentOptions, "neutral", null, -1, 15, 0, 0) { Decorator = AssignmentDecorator };
     static public NebulaConfiguration AssignOpToHostOption = new NebulaConfiguration(AssignmentOptions, "assignOpToHost", null, false, false) { GameModeMask = CustomGameMode.Standard };
+    static public NebulaConfiguration GhostAssignmentOption = new NebulaConfiguration(AssignmentOptions, "ghostAssignmentMethod", null, ["options.assignment.ghostAssignmentMethod.normal", "options.assignment.ghostAssignmentMethod.thrilling"], 0, 0) { GameModeMask = CustomGameMode.Standard };
 
     static public ConfigurationHolder SoloFreePlayOptions = new("options.soloFreePlay", null, ConfigurationTab.Settings, CustomGameMode.FreePlay);
     static public NebulaConfiguration NumOfDummiesOption = new NebulaConfiguration(SoloFreePlayOptions, "numOfDummies", null, 0, 14, 0, 0);

@@ -139,5 +139,5 @@ public interface Player
     public RuntimeRole Role { get; }
     public IEnumerable<RuntimeModifier> Modifiers { get; }
 
-    public bool IsImpostor => Role.Role.Category == RoleCategory.ImpostorRole;
+    public bool IsImpostor => Role.Role.Category is RoleCategory.ImpostorRole;
 }

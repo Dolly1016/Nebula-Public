@@ -343,6 +343,7 @@ public class NebulaManager : MonoBehaviour
 
     public void Update()
     {
+
         if (NebulaPlugin.FinishedPreload)
         {
             //スクリーンショット
@@ -407,6 +408,10 @@ public class NebulaManager : MonoBehaviour
             allModUi[allModUi.Count - 1].Item2?.OnClick.Invoke();
 
         MoreCosmic.Update();
+    }
+    public void LateUpdate()
+    {
+        NebulaGameManager.Instance?.LateUpdate();
     }
 
     public void Awake()

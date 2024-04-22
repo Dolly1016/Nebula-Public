@@ -84,6 +84,7 @@ public static class PlayerUpdatePatch
         }
     }
 
+    
     static void Postfix(PlayerControl __instance)
     {
         if (NebulaGameManager.Instance == null) return;
@@ -91,7 +92,10 @@ public static class PlayerUpdatePatch
 
         NebulaGameManager.Instance.GetModPlayerInfo(__instance.PlayerId)?.Update();
 
-        if (__instance.AmOwner) NebulaGameManager.Instance.OnFixedUpdate();
+        if (__instance.AmOwner)
+        {
+            NebulaGameManager.Instance.OnFixedUpdate();
+        }
 
         if(__instance.cosmetics.transform.localScale.z < 100f)
         {

@@ -319,4 +319,6 @@ public static class AmongUsUtil
     static public int NumOfCommonTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumCommonTasks);
     static public int NumOfLongTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumLongTasks);
     static public int NumOfAllTasks => NumOfShortTasks + NumOfLongTasks + NumOfCommonTasks;
+
+    public static bool IsInGameScene => HudManager.InstanceExists;
 }

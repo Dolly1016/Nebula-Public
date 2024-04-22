@@ -51,6 +51,24 @@ public abstract class RoleInstance : AssignableInstance, IRuntimePropertyHolder,
         return false;
     }
 
-    public virtual bool CanSeeOthersFakeSabotage { get => Role.Category == RoleCategory.ImpostorRole; }
+    public virtual bool CanSeeOthersFakeSabotage { get => (MyPlayer as GamePlayer).IsImpostor; }
+
+}
+
+public abstract class GhostRoleInstance : AssignableInstance
+{
+    public override IAssignableBase AssignableBase => Role;
+    public abstract AbstractGhostRole Role { get; }
+    
+    public GhostRoleInstance(PlayerModInfo player) : base(player)
+    {
+    }
+
+    public virtual int[]? GetRoleArgument() => null;
+    public virtual string DisplayRoleName => Role.DisplayName.Color(Role.RoleColor);
+    
+
+    //役職履歴に追加される直前に呼び出されます。
+    public override void OnActivated() { }
 
 }

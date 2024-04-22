@@ -10,6 +10,7 @@ using Virial.Compat;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using Virial.Common;
+using Epic.OnlineServices.Inventory;
 
 namespace Virial.Command;
 
@@ -57,6 +58,8 @@ public class CommandStructureConverter<T>
 
     public CommandStructureConverter<T> Add<V>(string label, Action<T,V> setter)
     {
+        bool isBool = typeof(V) == typeof(bool);
+
         suppliers.Add((t, env, structure) =>
         {
             if (structure.TryGetValue(label, out var token))
@@ -69,6 +72,13 @@ public class CommandStructureConverter<T>
                     return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token);
                 }
                 return token.AsValue<V>(env).Action(v => setter.Invoke(t, v));
+            }
+            else if(isBool && structure.TryGetValue("~" + label, out var invToken))
+            {
+                return invToken.AsValue<bool>(env).Action(v => {
+                    v = !v;
+                    setter.Invoke(t, Unsafe.As<bool, V>(ref v));
+                });
             }
             else
                 return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token);

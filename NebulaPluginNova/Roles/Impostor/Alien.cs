@@ -74,12 +74,12 @@ public class Alien : ConfigurableStandardRole, HasCitation
 
                     IEnumerator CoNoise()
                     {
-                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 4, 0.21f, false, 0, "nebula::alien", false)));
+                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 4, 0.21f, false, 0, "nebula::alien", false),true));
                         yield return Effects.Wait(0.45f);
-                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 20, 0.5f, false, 0, "nebula::alien", false)));
+                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 20, 0.5f, false, 0, "nebula::alien", false), true));
                         yield return Effects.Wait(0.55f);
                         
-                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 4, MyRole.EMIDurationOption.GetFloat() - 1f, false, 0, "nebula::alien", false)));
+                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 4, MyRole.EMIDurationOption.GetFloat() - 1f, false, 0, "nebula::alien", false), true));
                     }
                     NebulaManager.Instance.StartCoroutine(CoNoise().WrapToIl2Cpp());
 
@@ -108,7 +108,7 @@ public class Alien : ConfigurableStandardRole, HasCitation
                     icon.text = left.ToString();
                     invalidateButton.OnClick = (button) =>
                     {
-                        PlayerModInfo.RpcAttrModulator.Invoke((invalidateTracker.CurrentTarget!.PlayerId, new AttributeModulator(PlayerAttributes.Isolation, 100000f, true, 0, canBeAware: invalidateTracker.CurrentTarget.Data.Role.IsImpostor)));
+                        PlayerModInfo.RpcAttrModulator.Invoke((invalidateTracker.CurrentTarget!.PlayerId, new AttributeModulator(PlayerAttributes.Isolation, 100000f, true, 0, canBeAware: invalidateTracker.CurrentTarget.Data.Role.IsImpostor), true));
                         left--;
                         icon.text = left.ToString();
 

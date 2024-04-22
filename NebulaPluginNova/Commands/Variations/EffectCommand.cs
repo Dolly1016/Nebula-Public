@@ -17,9 +17,10 @@ public class EffectCommand : ICommand
         public float duration = 10f;
         public float ratio = 1f;
         public UnityEngine.Vector2 ratioVec = UnityEngine.Vector2.one;
-        public bool canPassMeeting = false;
+        public bool canPassMeeting = true;
         public string? tag = null;
         public bool flipX, flipY, rotate;
+        public bool allowDuplicate = false;
 
         public static CommandStructureConverter<EffectStructure> Converter = new CommandStructureConverter<EffectStructure>()
             .Add<float>("duration", (structure, val) => structure.duration = Mathf.Max(val, 0))
@@ -31,7 +32,8 @@ public class EffectCommand : ICommand
             .Add<bool>("canPassMeeting", (structure, val) => structure.canPassMeeting = val)
             .Add<bool>("flipX", (structure, val) => structure.flipX = val)
             .Add<bool>("flipY", (structure, val) => structure.flipY = val)
-            .Add<bool>("rotate", (structure, val) => structure.rotate = val);
+            .Add<bool>("rotate", (structure, val) => structure.rotate = val)
+            .Add<bool>("allowDuplicate", (structure, val) => structure.allowDuplicate = val);
 
     }
 
@@ -54,11 +56,27 @@ public class EffectCommand : ICommand
             .Chain(_ => arguments[2].AsStructure(env)).ConvertTo<EffectStructure>(EffectStructure.Converter, new(), env).ChainFast<ICommandToken, EffectStructure>(
             structure =>
             {
-                if(id == "speed")
+                if (id == "clear")
+                {
+                    if (structure.tag == null)
+                    {
+                        env.Logger.PushError($"Please specify the tag.");
+                    }
+                    else
+                    {
+                        using (RPCRouter.CreateSection("ClearModulator"))
+                        {
+                            foreach (var p in targets) PlayerModInfo.RpcRemoveAttrByTag.Invoke((p.PlayerId, structure.tag!));
+                        }
+                    }
+                    return EmptyCommandToken.Token;
+                }
+
+                if (id == "speed")
                 {
                     using (RPCRouter.CreateSection("SpeedModulator"))
                     {
-                        foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new SpeedModulator(structure.ratio, structure.ratioVec, true, structure.duration, structure.canPassMeeting, 0, structure.tag)));
+                        foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new SpeedModulator(structure.ratio, structure.ratioVec, true, structure.duration, structure.canPassMeeting, 0, structure.tag), structure.allowDuplicate));
                     }
                     return EmptyCommandToken.Token;
                 }
@@ -67,7 +85,7 @@ public class EffectCommand : ICommand
                 {
                     using (RPCRouter.CreateSection("SizeModulator"))
                     {
-                        foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new SizeModulator(structure.ratioVec * structure.ratio, structure.duration, structure.canPassMeeting, 0, structure.tag)));
+                        foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new SizeModulator(structure.ratioVec * structure.ratio, structure.duration, structure.canPassMeeting, 0, structure.tag), structure.allowDuplicate));
                     }
                     return EmptyCommandToken.Token;
                 }
@@ -78,7 +96,7 @@ public class EffectCommand : ICommand
                     {
                         using (RPCRouter.CreateSection("Modulator"))
                         {
-                            foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new FloatModulator(attribute, structure.ratio, structure.duration, structure.canPassMeeting, 0, structure.tag)));
+                            foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new FloatModulator(attribute, structure.ratio, structure.duration, structure.canPassMeeting, 0, structure.tag), structure.allowDuplicate));
                         }
                         return true;
                     }
@@ -95,9 +113,9 @@ public class EffectCommand : ICommand
                 {
                     using (RPCRouter.CreateSection("AttributeModulator"))
                     {
-                        if (structure.flipX) foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new AttributeModulator(PlayerAttributes.FlipX, structure.duration, structure.canPassMeeting, 0, structure.tag, true)));
-                        if (structure.flipY) foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new AttributeModulator(PlayerAttributes.FlipY, structure.duration, structure.canPassMeeting, 0, structure.tag, true)));
-                        if (structure.rotate) foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new AttributeModulator(PlayerAttributes.FlipXY, structure.duration, structure.canPassMeeting, 0, structure.tag, true)));
+                        if (structure.flipX) foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new AttributeModulator(PlayerAttributes.FlipX, structure.duration, structure.canPassMeeting, 0, structure.tag, true), structure.allowDuplicate));
+                        if (structure.flipY) foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new AttributeModulator(PlayerAttributes.FlipY, structure.duration, structure.canPassMeeting, 0, structure.tag, true), structure.allowDuplicate));
+                        if (structure.rotate) foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new AttributeModulator(PlayerAttributes.FlipXY, structure.duration, structure.canPassMeeting, 0, structure.tag, true), structure.allowDuplicate));
                     }
                     return EmptyCommandToken.Token;
                 }
@@ -111,7 +129,7 @@ public class EffectCommand : ICommand
 
                 using (RPCRouter.CreateSection("AttributeModulator"))
                 {
-                    foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new AttributeModulator(attr, structure.duration, structure.canPassMeeting, 0, structure.tag, true)));
+                    foreach (var p in targets) PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new AttributeModulator(attr, structure.duration, structure.canPassMeeting, 0, structure.tag, true), structure.allowDuplicate));
                 }
                 return EmptyCommandToken.Token;
             }

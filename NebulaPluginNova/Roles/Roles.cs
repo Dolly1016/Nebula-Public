@@ -17,11 +17,13 @@ public class Roles
 {
     static public IReadOnlyList<AbstractRole> AllRoles { get; private set; } = null!;
     static public IReadOnlyList<AbstractModifier> AllModifiers { get; private set; } = null!;
+    static public IReadOnlyList<AbstractGhostRole> AllGhostRoles { get; private set; } = null!;
     static public IReadOnlyList<Perk> AllPerks { get; private set; } = null!;
 
-    static public IEnumerable<IAssignableBase> AllAsignables()
+    static public IEnumerable<IAssignableBase> AllAssignables()
     {
         foreach(var r in AllRoles) yield return r;
+        foreach (var r in AllGhostRoles) yield return r;
         foreach (var m in AllModifiers) yield return m;
     }
 
@@ -33,6 +35,7 @@ public class Roles
     static public IReadOnlyList<Team> AllTeams { get; private set; } = null!;
 
     static private List<AbstractRole>? allRoles = new();
+    static private List<AbstractGhostRole>? allGhostRoles = new();
     static private List<AbstractModifier>? allModifiers = new();
     static private List<Team>? allTeams = new();
     static private List<Perk>? allPerks = new();
@@ -42,6 +45,13 @@ public class Roles
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register role \"{role.LocalizedName}\".\nRole registration is only possible at load phase.");
         else
             allRoles?.Add(role);
+    }
+    static public void Register(AbstractGhostRole role)
+    {
+        if (allRoles == null)
+            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register role \"{role.LocalizedName}\".\nRole registration is only possible at load phase.");
+        else
+            allGhostRoles?.Add(role);
     }
     static public void Register(AbstractModifier role)
     {
@@ -109,6 +119,13 @@ public class Roles
             return role1.InternalName.CompareTo(role2.InternalName);
         });
 
+        allGhostRoles!.Sort((role1, role2) => {
+            int diff = (int)role1.Category - (int)role2.Category;
+            if (diff != 0) return diff;
+            return role1.InternalName.CompareTo(role2.InternalName);
+        });
+
+
         allModifiers!.Sort((role1, role2) => {
             return role1.InternalName.CompareTo(role2.InternalName);
         });
@@ -116,16 +133,19 @@ public class Roles
         allTeams!.Sort((team1, team2) => team1.TranslationKey.CompareTo(team2.TranslationKey));
         allPerks!.Sort((perk1, perk2) => perk1.TranslationKey.CompareTo(perk2.TranslationKey));
 
-        for (int i = 0; i < allRoles!.Count; i++) allRoles![i].Id = i; 
+        for (int i = 0; i < allRoles!.Count; i++) allRoles![i].Id = i;
+        for (int i = 0; i < allGhostRoles!.Count; i++) allGhostRoles![i].Id = i;
         for (int i = 0; i < allModifiers!.Count; i++) allModifiers![i].Id = i;
         for (int i = 0; i < allPerks!.Count; i++) allPerks![i].Id = i;
 
         AllRoles = allRoles!.AsReadOnly();
+        AllGhostRoles = allGhostRoles!.AsReadOnly();
         AllModifiers = allModifiers!.AsReadOnly();
         AllTeams = allTeams!.AsReadOnly();
         AllPerks = allPerks!.AsReadOnly();
 
         foreach (var role in allRoles) role.Load();
+        foreach (var role in allGhostRoles) role.Load();
         foreach (var modifier in allModifiers) modifier.Load();
 
         //Can Be Guessedのオプション
@@ -133,6 +153,7 @@ public class Roles
         
 
         allRoles = null;
+        allGhostRoles = null;
         allModifiers = null;
         allTeams = null;
         allPerks = null;

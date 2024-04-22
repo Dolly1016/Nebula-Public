@@ -2,6 +2,11 @@
 
 namespace Nebula.Modules;
 
+public interface INoisedCamera
+{
+    int CameraRoughness { get; }
+}
+
 public class WideCamera
 {
     private Camera myCamera;
@@ -107,7 +112,7 @@ public class WideCamera
     
     private int roughness = 1;
     private int lastCommandRoughness = 1;
-    public int Roughness { get => roughness; set
+    public int Roughness { get => roughness * (int)((AmongUsUtil.CurrentCamTarget as INoisedCamera)?.CameraRoughness ?? 1f); set
         {
 
             int max = gcd(Screen.height, Screen.width);
@@ -119,10 +124,10 @@ public class WideCamera
         }
     } 
 
-    private int consideredWidth => (Screen.width / roughness);
-    private int consideredHeight => (Screen.height / roughness);
+    private int consideredWidth => (Screen.width / Roughness);
+    private int consideredHeight => (Screen.height / Roughness);
 
-    private void CheckPlayerState(out Vector3 localScale, out float localRotateZ)
+    public void CheckPlayerState(out Vector3 localScale, out float localRotateZ)
     {
         localScale = new(1f, 1f, 1f);
 
@@ -138,13 +143,60 @@ public class WideCamera
         localRotateZ = 180f * p.Unbox().CountAttribute(PlayerAttributes.FlipXY);
     }
 
+    //カメラ上の位置を表すワールド座標を計算します。
+    public Vector3 ConvertToWideCameraPos(Vector3 worldPosition)
+    {
+        var localPos = (worldPosition - Camera.transform.position);
+        localPos.x *= ViewerTransform.localScale.x;
+        localPos.y *= ViewerTransform.localScale.y;
+        return Camera.transform.position + localPos.RotateZ(ViewerTransform.localEulerAngles.z);
+    }
 
+    private void FixVentArrow()
+    {
+        if (PlayerControl.LocalPlayer && ShipStatus.Instance)
+        {
+            var playerPos = PlayerControl.LocalPlayer.transform.position;
+            var vent = ShipStatus.Instance.AllVents.MinBy(v => v.transform.position.Distance(playerPos));
+            if (vent)
+            {
+                var myVentPos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(vent!.transform.position);
+
+                int length = vent.NearbyVents.Length;
+                for (int i = 0; i < length; i++)
+                {
+                    var targetVent = vent.NearbyVents[i];
+                    if (targetVent)
+                    {
+                        var targetVentPos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(targetVent.transform.position);
+
+                        var diff = (targetVentPos - myVentPos).normalized;
+                        diff *= 0.7f + vent.spreadShift;
+                        var pos = (myVentPos + diff);
+                        pos.z = -10f;
+                        var transform = vent.Buttons[i].transform;
+                        transform.position = pos;
+                        transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x) / Mathf.PI * 180f);
+
+                    }
+                }
+            }
+        }
+    }
+
+    public void LateUpdate()
+    {
+        if (myCamera.gameObject.active)
+        {
+            FixVentArrow();
+        }
+    }
 
     public void Update()
     {
         if (myCamera.gameObject.active) {
-            
-            if(!myCamera.targetTexture || myCamera.targetTexture.width != consideredWidth || myCamera.targetTexture.height != consideredHeight)
+
+            if (!myCamera.targetTexture || myCamera.targetTexture.width != consideredWidth || myCamera.targetTexture.height != consideredHeight)
             {
                 //割り切れないときは再設定
                 if(Screen.width % roughness != 0 || Screen.height % roughness != 0) Roughness = roughness;

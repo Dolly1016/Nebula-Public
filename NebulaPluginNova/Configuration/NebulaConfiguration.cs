@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
@@ -195,17 +196,17 @@ public class NebulaStringConfigEntry : INebulaConfigEntry
     }
 }
 
-public class NebulaModifierFilterConfigEntry : ModifierFilter
+public class NebulaAssignableFilterConfigEntry<T> where T : class, IAssignableBase, ICodeName
 {
     class FilterEntry : INebulaConfigEntry
     {
-        NebulaModifierFilterConfigEntry myConfig { get; init; }
+        NebulaAssignableFilterConfigEntry<T> myConfig { get; init; }
         public int CurrentValue { get; protected set; }
         public int Id { get; set; } = -1;
         public string Name { get; set; }
         public int Index { get; private set; }
 
-        public FilterEntry(NebulaModifierFilterConfigEntry config, int index)
+        public FilterEntry(NebulaAssignableFilterConfigEntry<T> config, int index)
         {
             myConfig = config;
             Index = index;
@@ -228,60 +229,63 @@ public class NebulaModifierFilterConfigEntry : ModifierFilter
     }
 
     private StringArrayDataEntry dataEntry;
-    private HashSet<IntroAssignableModifier> modifiers = new();
+    private HashSet<T> assignables = new();
     private FilterEntry[] sharingEntry;
 
     public string Id { get; private set; }
-    public NebulaModifierFilterConfigEntry(string id, string[] defaultValue)
+    public NebulaAssignableFilterConfigEntry(string id, string[] defaultValue)
     {
         Id = id;
         dataEntry = new StringArrayDataEntry(id, NebulaConfigEntryManager.ConfigData, defaultValue);
-        modifiers = new HashSet<IntroAssignableModifier>();
+        assignables = new();
+
+        T[] allAssignable = Roles.Roles.AllAssignables().Select(m => m as T).Where(m => m != null).ToArray()!;
+
         foreach (var name in dataEntry.Value)
         {
-            var modifier = (IntroAssignableModifier?)Roles.Roles.AllModifiers.FirstOrDefault(m => m is IntroAssignableModifier iam && iam.CodeName == name);
-            if(modifier != null) modifiers.Add(modifier);
+            var r = allAssignable.FirstOrDefault(e => e.CodeName == name);
+            if(r != null) assignables.Add(r);
         }
 
-        sharingEntry = new FilterEntry[Roles.Roles.AllModifiers.Count / 30 + 1];
+        sharingEntry = new FilterEntry[allAssignable.Length / 30 + 1];
         for (int i = 0; i < sharingEntry.Length; i++) sharingEntry[i] = new(this, i);
 
     }
 
     private void Save()
     {
-        dataEntry.Value = modifiers.Select(m => m.CodeName).ToArray();
+        dataEntry.Value = assignables.Select(m => m.CodeName).ToArray();
     }
 
     public void SaveValue(int index, int value)
     {
         //該当要素を全削除
-        modifiers.RemoveWhere(m => (index * 30) <= m.Id && m.Id < (index + 1) * 30);
+        assignables.RemoveWhere(m => (index * 30) <= m.Id && m.Id < (index + 1) * 30);
 
         for (int i = 0; i < 30; i++)
         {
             //追加するべき役職
-            if (((1 << i) & value) != 0) modifiers.Add((Roles.Roles.AllModifiers[i + index * 30] as IntroAssignableModifier)!);
+            if (((1 << i) & value) != 0 && !assignables.Any(a => a.Id == (i + index * 30))) assignables.Add((Roles.Roles.AllAssignables().FirstOrDefault(a => a is T && a.Id == (i+index*30)) as T)!);
         }
 
         Save();
     }
-    public bool Contains(IntroAssignableModifier modifier) => modifiers.Contains(modifier);
+    public bool Contains(T assignable) => assignables.Contains(assignable);
 
     public int LoadValue(int index)
     {
         int value = 0;
-        foreach(var m in modifiers)
+        foreach(var m in assignables)
             if ((index * 30) <= m.Id && m.Id < (index + 1) * 30) value |= 1 << m.Id - (index * 30);
         return value;
     }
 
-    public void ToggleAndShare(IntroAssignableModifier modifier)
+    public void ToggleAndShare(T assignable)
     {
-        if (modifiers.Contains(modifier))
-            modifiers.Remove(modifier);
+        if (assignables.Contains(assignable))
+            assignables.Remove(assignable);
         else
-            modifiers.Add(modifier);
+            assignables.Add(assignable);
 
         foreach (INebulaConfigEntry config in sharingEntry)
         {
@@ -292,40 +296,27 @@ public class NebulaModifierFilterConfigEntry : ModifierFilter
         Save();
     }
 
-    public void Filter(FilterAction filterAction, params DefinedModifier[] modifiers)
+
+    public bool Test(T? assignable)
     {
-        if (!AmongUsClient.Instance.AmHost) throw new Virial.NonHostPlayerException("Only host can edit modifier filter.");
-        switch (filterAction)
-        {
-            case FilterAction.And:
-                foreach(var iam in Roles.Roles.AllIntroAssignableModifiers()) if(!modifiers.Contains(iam)) this.modifiers.Add(iam);
-                break;
-            case FilterAction.Or:
-                this.modifiers.RemoveWhere(m=>modifiers.Contains(m));
-                break;
-            case FilterAction.Set:
-                this.modifiers.Clear();
-                foreach (var iam in Roles.Roles.AllIntroAssignableModifiers()) if (!modifiers.Contains(iam)) this.modifiers.Add(iam);
-                break;
-        }
-
-        foreach (INebulaConfigEntry config in sharingEntry)
-        {
-            config.LoadFromSaveData();
-            config.Share();
-        }
-
-        Save();
-    }
-
-    public bool Test(DefinedModifier modifier)
-    {
-        if (modifier is IntroAssignableModifier iam)
-            return !Contains(iam);
+        if(assignable != null) return !Contains(assignable);
         return false;
     }
 }
 
+public class NebulaModifierFilterConfigEntry : NebulaAssignableFilterConfigEntry<IntroAssignableModifier>, ModifierFilter
+{
+    public NebulaModifierFilterConfigEntry(string id, string[] defaultValue) : base(id,defaultValue) { }
+
+    bool ModifierFilter.Test(DefinedModifier modifier) => Test(modifier as IntroAssignableModifier);
+}
+
+public class NebulaGhostRoleFilterConfigEntry : NebulaAssignableFilterConfigEntry<AbstractGhostRole>
+{
+    public NebulaGhostRoleFilterConfigEntry(string id, string[] defaultValue) : base(id, defaultValue) { }
+
+    //bool GhostRoleFilter.Test(DefinedGhostRole role) => Test(role as AbstractGhostRole);
+}
 
 
 public class ConfigurationHolder
@@ -812,31 +803,31 @@ public class NebulaConfiguration : ValueConfiguration
 public class CustomGameMode
 {
     public static List<CustomGameMode> allGameMode = new List<CustomGameMode>();
-    public static CustomGameMode Standard = new CustomGameMode(0x01, "gamemode.standard", new StandardRoleAllocator(), 4) { AllowSpecialEnd = true }
+    public static CustomGameMode Standard = new CustomGameMode(0x01, "gamemode.standard", () => new StandardRoleAllocator(), 4) { AllowSpecialEnd = true }
         .AddEndCriteria(NebulaEndCriteria.SabotageCriteria)
         .AddEndCriteria(NebulaEndCriteria.ImpostorKillCriteria)
         .AddEndCriteria(NebulaEndCriteria.CrewmateAliveCriteria)
         .AddEndCriteria(NebulaEndCriteria.CrewmateTaskCriteria)
         .AddEndCriteria(NebulaEndCriteria.JackalKillCriteria);
-    public static CustomGameMode HostMode = new CustomGameMode(0x04, "gamemode.hostMode", new StandardRoleAllocator(), 4, true) { AllowSpecialEnd = true, AllowWithoutNoS = true }
+    public static CustomGameMode HostMode = new CustomGameMode(0x04, "gamemode.hostMode", () => new StandardRoleAllocator(), 4, true) { AllowSpecialEnd = true, AllowWithoutNoS = true }
         .AddEndCriteria(NebulaEndCriteria.SabotageCriteria)
         .AddEndCriteria(NebulaEndCriteria.ImpostorKillCriteria)
         .AddEndCriteria(NebulaEndCriteria.CrewmateAliveCriteria)
         .AddEndCriteria(NebulaEndCriteria.CrewmateTaskCriteria)
         .AddEndCriteria(NebulaEndCriteria.JackalKillCriteria);
-    public static CustomGameMode FreePlay = new CustomGameMode(0x02, "gamemode.freeplay", new FreePlayRoleAllocator(), 0) { AllowWithoutNoS = false/*true*/ };
+    public static CustomGameMode FreePlay = new CustomGameMode(0x02, "gamemode.freeplay", () => new FreePlayRoleAllocator(), 0) { AllowWithoutNoS = false/*true*/ };
     public static int AllGameModeMask = Standard | HostMode | FreePlay;
     public static int AllNormalGameModeMask = Standard | HostMode;
     public static int AllClientGameModeMask = Standard | FreePlay;
 
     private int bitFlag;
     public string TranslateKey { get; private init; }
-    public IRoleAllocator RoleAllocator { get; private init; }
+    public Func<IRoleAllocator> RoleAllocator { get; private init; }
     public List<NebulaEndCriteria> GameModeCriteria { get; private init; } = new();
     public int MinPlayers { get; private init; }
     public bool AllowSpecialEnd { get; private init; } = false;
     public bool AllowWithoutNoS { get; private init; } = false;
-    public CustomGameMode(int bitFlag,string translateKey, IRoleAllocator roleAllocator, int minPlayers, bool skip = false)
+    public CustomGameMode(int bitFlag,string translateKey, Func<IRoleAllocator> roleAllocator, int minPlayers, bool skip = false)
     {
         this.bitFlag = bitFlag;
         this.RoleAllocator = roleAllocator;
@@ -862,7 +853,8 @@ public class ConfigurationTab
     public static ConfigurationTab CrewmateRoles = new ConfigurationTab(0x02, "options.tab.crewmate", Palette.CrewmateBlue);
     public static ConfigurationTab ImpostorRoles = new ConfigurationTab(0x04, "options.tab.impostor", Palette.ImpostorRed);
     public static ConfigurationTab NeutralRoles = new ConfigurationTab(0x08, "options.tab.neutral", new Color(244f / 255f, 211f / 255f, 53f / 255f));
-    public static ConfigurationTab Modifiers = new ConfigurationTab(0x10, "options.tab.modifier", new Color(255f / 255f, 255f / 255f, 243f / 255f));
+    public static ConfigurationTab GhostRoles = new ConfigurationTab(0x10, "options.tab.ghost", new Color(150f / 255f, 150f / 255f, 150f / 255f));
+    public static ConfigurationTab Modifiers = new ConfigurationTab(0x20, "options.tab.modifier", new Color(255f / 255f, 255f / 255f, 243f / 255f));    
 
     private int bitFlag;
     private string translateKey { get; init; }

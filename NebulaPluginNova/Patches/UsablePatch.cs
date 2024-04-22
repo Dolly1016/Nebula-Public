@@ -115,15 +115,28 @@ public static class ExitVentPatch
     }
 }
 
+[HarmonyPatch(typeof(Vent), nameof(Vent.Start))]
+public static class VentStartPatch
+{
+    public static void Postfix(Vent __instance)
+    {
+        foreach (var b in __instance.Buttons)
+        {
+            b.spriteRenderer.gameObject.layer = LayerExpansion.GetUILayer();
+            b.spriteRenderer.sortingOrder = 10;
+        }
+        var scale = __instance.transform.localScale;
+        scale.z = 1f;
+        __instance.transform.localScale = scale;
+    }
+}
+
+
 [HarmonyPatch(typeof(Vent), nameof(Vent.Use))]
 public static class VentUsePatch
 {
     public static bool Prefix(Vent __instance)
     {
-        foreach (var b in __instance.Buttons) {
-            b.spriteRenderer.gameObject.layer = LayerExpansion.GetArrowLayer();
-            b.spriteRenderer.sortingOrder = 10;
-        }
         __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
         if (!flag) return false;
 

@@ -89,10 +89,10 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
                 killButton.OnClick = (button) => {
                     if (CanKill(killTracker.CurrentTarget!))
                     {
-                        MyPlayer.MyControl.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
-
                         acTokenShot!.Value = true;
                         if (acTokenChallenge != null && killTracker.CurrentTarget.GetModInfo()?.Role.Role.Category == RoleCategory.ImpostorRole) acTokenChallenge!.Value--;
+
+                        MyPlayer.MyControl.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
                     }
                     else
                     {

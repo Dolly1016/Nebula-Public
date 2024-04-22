@@ -46,7 +46,7 @@ public interface IGameEntity
     public void OnStartExileCutScene() { }
 
     /// <summary>
-    /// 会議終了時に呼び出されます。
+    /// 会議終了時に呼び出されます。プレイヤーは既に追放されています。
     /// </summary>
     public void OnMeetingEnd(Player[] exiled) { }
 

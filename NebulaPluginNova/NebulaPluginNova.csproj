@@ -91,6 +91,10 @@
 	  <ProjectReference Include="..\NebulaAPI\NebulaAPI.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Roles\Ghost\Impostor\" />
+	</ItemGroup>
+
 	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
 		<Message Text="Second occurrence" />
 		<Exec Command="tools\ILRepack.exe /wildcards /target:library /lib:references /lib:%22..\..\Among Us\BepInEx\core%22 /lib:%22..\..\Among Us\BepInEx\interop%22 /internalize /out:bin\x86\Release\net6\Nebula.dll %22bin\x86\Release\net6\Nebula.dll%22 %22libs\*.dll%22 %22$(AmongUsRelease)\NebulaAPI.dll%22 " />

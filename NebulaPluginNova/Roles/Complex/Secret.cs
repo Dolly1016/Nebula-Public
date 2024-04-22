@@ -15,6 +15,7 @@ public class ShownSecret : ConfigurableStandardModifier
 {
     public override int AssignPriority => 100;
 
+    public NebulaConfiguration EvilConditionTypeOption = null!;
     public NebulaConfiguration EvilConditionOption = null!;
     public NebulaConfiguration NiceConditionOption = null!;
 
@@ -23,7 +24,8 @@ public class ShownSecret : ConfigurableStandardModifier
         base.LoadOptions();
 
         NeutralRoleCountOption.Predicate = () => false;
-        EvilConditionOption = new NebulaConfiguration(RoleConfig, "killingForArousal", null, 1, 10, 2, 2);
+        EvilConditionTypeOption = new NebulaConfiguration(RoleConfig, "impostorArousalMethod", null, ["options.role.secret.impostorArousalMethod.kill", "options.role.secret.impostorArousalMethod.death"], 0, 0);
+        EvilConditionOption = new NebulaConfiguration(RoleConfig, "killingForArousal", null, 1, 10, 2, 2) { Predicate = () => EvilConditionTypeOption.CurrentValue == 0 };
         NiceConditionOption = new NebulaConfiguration(RoleConfig, "tasksForArousal", null, 1, 10, 3, 3);
     }
 
@@ -81,7 +83,7 @@ public class Secret : AbstractRole, DefinedAssignable
 
     public override void Load(){}
 
-    //Localで呼び出すこと(タスク置き換えの都合上)
+    //クルーメイトの場合はLocalで呼び出すこと(タスク置き換えの都合上)
     private static void ScheduleSendArousalRpc(PlayerModInfo player, int[] savedArgs,List<GameData.TaskInfo>? tasks = null)
     {
         NebulaManager.Instance.ScheduleDelayAction(() =>
@@ -181,6 +183,7 @@ public class Secret : AbstractRole, DefinedAssignable
             this.savedRole = Roles.AllRoles.First(r => r.Id == savedArgs[0]);
         }
 
+        public override bool HasVanillaKillButton => OptionRole.EvilConditionTypeOption.CurrentValue == 0;
         public override int[]? GetRoleArgument() => savedArgs;
 
         int[] savedArgs;
@@ -206,6 +209,20 @@ public class Secret : AbstractRole, DefinedAssignable
         {
             base.OnActivated();
             if (AmOwner) SetUpChallengeAchievement(MyPlayer);
+        }
+
+        void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
+        {
+            //Covertモードはホストが割り当てを管理する
+            if (AmongUsClient.Instance.AmHost && OptionRole.EvilConditionTypeOption.CurrentValue == 1)
+            {
+                //死者、非インポスター、シークレットしかいないとき
+                if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || p.Role.Role.Category != RoleCategory.ImpostorRole || p.Role.Role == MyEvilRole) ?? false)
+                {
+                    var selected = NebulaGameManager.Instance?.AllPlayerInfo().Where(p => p.Role.Role == MyEvilRole).ToArray().Random();
+                    if(selected != null && selected.Role is EvilInstance ei) ScheduleSendArousalRpc(selected, ei.savedArgs);
+                }
+            }
         }
 
     }

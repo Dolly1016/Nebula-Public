@@ -16,6 +16,13 @@ public class NebulaRoleHolder : Attribute
 
 }
 
+public enum RoleType
+{
+    Role,
+    Modifier,
+    GhostRole,
+}
+
 public abstract class AbstractRole : IAssignableBase, DefinedRole
 {
     public abstract RoleCategory Category { get; }
@@ -36,19 +43,22 @@ public abstract class AbstractRole : IAssignableBase, DefinedRole
     public abstract RoleTeam Team { get; }
 
     //追加付与ロールに役職プールの占有性があるか(追加付与ロールが無い場合、無意味)
-    public virtual bool HasAdditionalRoleOccupancy { get => true; }
+    public virtual bool AdditionalRolesConsumeRolePool { get => true; }
     public virtual AbstractRole[]? AdditionalRole { get => null; }
 
     public NebulaConfiguration? CanBeGuessOption { get; set; } = null;
 
     //For Config
     public virtual NebulaModifierFilterConfigEntry? ModifierFilter { get => null; }
-    
+    public virtual NebulaGhostRoleFilterConfigEntry? GhostRoleFilter { get => null; }
+
     public virtual IEnumerable<IAssignableBase> RelatedOnConfig() { yield break; }
     public virtual ConfigurationHolder? RelatedConfig { get => null; }
 
     public virtual bool CanLoadDefault(IntroAssignableModifier modifier) => true;
+    public virtual bool CanLoadDefault(AbstractGhostRole role) => Category == role.Category;
     public virtual bool CanLoad(IntroAssignableModifier modifier)=> CanLoadDefault(modifier);
+    public virtual bool CanLoad(AbstractGhostRole role) => CanLoadDefault(role);
 
     public virtual bool CanBeGuessDefault { get => true; }
     public virtual bool CanBeGuess => CanBeGuessDefault && (CanBeGuessOption?.GetBool() ?? true);
@@ -292,8 +302,12 @@ public abstract class ConfigurableStandardRole : ConfigurableRole
     protected NebulaConfiguration RoleCountOption { get; private set; } = null!;
     protected NebulaConfiguration RoleChanceOption { get; private set; } = null!;
     protected NebulaConfiguration RoleSecondaryChanceOption { get; private set; } = null!;
+
     private NebulaModifierFilterConfigEntry modifierFilter = null!;
     public override NebulaModifierFilterConfigEntry? ModifierFilter { get => modifierFilter; }
+
+    private NebulaGhostRoleFilterConfigEntry ghostRoleFilter = null!;
+    public override NebulaGhostRoleFilterConfigEntry? GhostRoleFilter { get => ghostRoleFilter; }
 
     public ConfigurableStandardRole(int TabMask):base(TabMask){ }
     public ConfigurableStandardRole() : base() { }
@@ -305,11 +319,13 @@ public abstract class ConfigurableStandardRole : ConfigurableRole
             return RoleSecondaryChanceOption.GetFloat();
         return RoleChanceOption.GetFloat();
     }
+    
     public override bool CanLoad(IntroAssignableModifier modifier) => CanLoadDefault(modifier) && !modifierFilter.Contains(modifier);
+    public override bool CanLoad(AbstractGhostRole role) => CanLoadDefault(role) && !ghostRoleFilter.Contains(role);
 
-    protected static TranslateTextComponent CountOptionText = new("options.role.count");
-    protected static TranslateTextComponent ChanceOptionText = new("options.role.chance");
-    protected static TranslateTextComponent SecondaryChanceOptionText = new("options.role.secondaryChance");
+    public static TranslateTextComponent CountOptionText = new("options.role.count");
+    public static TranslateTextComponent ChanceOptionText = new("options.role.chance");
+    public static TranslateTextComponent SecondaryChanceOptionText = new("options.role.secondaryChance");
     protected override void LoadOptions() {
         RoleCountOption = new(RoleConfig, "count", CountOptionText, 15, 0, 0);
         RoleConfig.IsActivated = () => RoleCountOption > 0;
@@ -368,6 +384,7 @@ public abstract class ConfigurableStandardRole : ConfigurableRole
         RoleSecondaryChanceOption.Shower = null;
 
         modifierFilter = new NebulaModifierFilterConfigEntry(RoleConfig.Id + ".modifierFilter", Array.Empty<string>());
+        ghostRoleFilter = new NebulaGhostRoleFilterConfigEntry(RoleConfig.Id + ".ghostFilter", Array.Empty<string>());
     }
 
     public override bool IsSpawnable { get => RoleCountOption.CurrentValue > 0; }
@@ -381,5 +398,81 @@ public abstract class ConfigurableStandardRole : ConfigurableRole
             foreach (var option in commonOptions) widget.Append(option.GetEditor()!);
             return widget;
         }, () => Language.Translate("options.commonSetting") + "\n" + string.Join("\n", commonOptions.Select(option => option.GetShownString())));
+    }
+}
+
+public abstract class AbstractGhostRole : IAssignableBase, ICodeName
+{
+    public abstract RoleCategory Category { get; }
+    //内部用の名称。AllRolesのソートに用いる
+    public virtual string InternalName { get => LocalizedName; }
+    //翻訳キー用の名称。
+    public abstract string LocalizedName { get; }
+    public virtual string DisplayName { get => Language.Translate("role." + LocalizedName + ".name"); }
+    public virtual string ShortName { get => Language.Translate("role." + LocalizedName + ".short"); }
+    public abstract string CodeName { get; }
+    public abstract Color RoleColor { get; }
+    public abstract GhostRoleInstance CreateInstance(PlayerModInfo player, int[] arguments);
+    public int Id { get; set; }
+    public abstract int RoleCount { get; }
+    public abstract float GetRoleChance(int count);
+
+    public virtual IEnumerable<IAssignableBase> RelatedOnConfig() { yield break; }
+    public virtual ConfigurationHolder? RelatedConfig { get => null; }
+
+    public abstract void Load();
+
+    public AbstractGhostRole()
+    {
+        Roles.Register(this);
+    }
+}
+
+
+public abstract class ConfigurableGhostRole : AbstractGhostRole, IConfiguableAssignable {
+    public ConfigurationHolder RoleConfig { get; private set; } = null!;
+    public override ConfigurationHolder? RelatedConfig { get => RoleConfig; }
+
+    public RoleFilter? GhostRoleFilter { get; protected set; }
+
+    protected virtual void LoadOptions() { }
+
+    public override sealed void Load()
+    {
+        SerializableDocument.RegisterColor("role." + InternalName, RoleColor);
+        RoleConfig = new ConfigurationHolder("options.role." + InternalName, new ColorTextComponent(RoleColor, new TranslateTextComponent("role." + LocalizedName + ".name")), ConfigurationTab.GhostRoles, CustomGameMode.AllGameModeMask);
+        RoleConfig.Priority = 1;
+        RoleConfig.RelatedAssignable = this;
+        LoadOptions();
+    }
+}
+
+public abstract class ConfigurableStandardGhostRole : ConfigurableGhostRole
+{
+    protected NebulaConfiguration RoleCountOption { get; private set; } = null!;
+    protected NebulaConfiguration RoleChanceOption { get; private set; } = null!;
+
+    protected override void LoadOptions()
+    {
+        RoleCountOption = new(RoleConfig, "count", ConfigurableStandardRole.CountOptionText, 15, 0, 0);
+        RoleConfig.IsActivated = () => RoleCountOption > 0;
+
+        RoleChanceOption = new(RoleConfig, "chance", ConfigurableStandardRole.ChanceOptionText, 10f, 100f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
+        RoleChanceOption.Editor = () =>
+        {
+            return new CombinedWidgetOld(0.55f, IMetaWidgetOld.AlignmentOption.Center,
+            new MetaWidgetOld.Text(NebulaConfiguration.GetOptionBoldAttr(1.8f)) { RawText = ConfigurableStandardRole.ChanceOptionText.GetString() },
+            NebulaConfiguration.OptionTextColon,
+            NebulaConfiguration.OptionButtonWidget(() => RoleChanceOption.ChangeValue(false), "<<"),
+            new MetaWidgetOld.Text(NebulaConfiguration.GetOptionBoldAttr(0.8f)) { RawText = RoleChanceOption.ToDisplayString() },
+            NebulaConfiguration.OptionButtonWidget(() => RoleChanceOption.ChangeValue(true), ">>")
+            );
+        };
+    }
+
+    public override int RoleCount => RoleCountOption.CurrentValue;
+    public override float GetRoleChance(int count)
+    {
+        return RoleChanceOption.GetFloat();
     }
 }

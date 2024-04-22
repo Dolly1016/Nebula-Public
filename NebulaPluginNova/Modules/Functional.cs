@@ -358,7 +358,7 @@ public class FunctionalSpace
         DefaultSpace.LoadFunction("GetPrev", new(1, (args) => IFunctionalVariable.Generate(args[1].AsStringEnumerator()!.GetPrev()!)));
 
         //オブジェクト
-        DefaultSpace.LoadFunction("GetRole", new(1, args => GenerateWrapped(Roles.Roles.AllAsignables().FirstOrDefault(r => r.LocalizedName == args[0].AsString()))));
+        DefaultSpace.LoadFunction("GetRole", new(1, args => GenerateWrapped(Roles.Roles.AllAssignables().FirstOrDefault(r => r.LocalizedName == args[0].AsString()))));
         DefaultSpace.LoadFunction("GetCitation", new(1, (args) =>
         {
             Citation? citation = null;

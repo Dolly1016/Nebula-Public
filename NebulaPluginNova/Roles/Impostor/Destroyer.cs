@@ -108,7 +108,11 @@ public class Destroyer : ConfigurableStandardRole
 
             var targetCoroutine = NebulaManager.Instance.StartCoroutine(targetAnim);
             yield return myAnim;
-            NebulaManager.Instance.StopCoroutine(targetCoroutine);
+            try
+            {
+                NebulaManager.Instance.StopCoroutine(targetCoroutine);
+            }
+            catch { }
             
             target.NetTransform.SnapTo((Vector2)targetPos - target.Collider.offset);
             myPlayer.MyPhysics.body.velocity = Vector2.zero;
@@ -136,10 +140,9 @@ public class Destroyer : ConfigurableStandardRole
             }
 
             SizeModulator sizeModulator = new(Vector2.one, 10000f, false, 100, destroyerAttrTag, false, false);
-            PlayerModInfo.RpcAttrModulator.LocalInvoke((target.PlayerId, sizeModulator));
+            PlayerModInfo.RpcAttrModulator.LocalInvoke((target.PlayerId, sizeModulator, true));
 
-            Coroutine? monitorMeetingCoroutine = null;
-            monitorMeetingCoroutine = NebulaManager.Instance.StartCoroutine(CoMonitorMeeting().WrapToIl2Cpp());
+            Coroutine monitorMeetingCoroutine = NebulaManager.Instance.StartCoroutine(CoMonitorMeeting().WrapToIl2Cpp());
 
             if (myPlayer.AmOwner)
             {

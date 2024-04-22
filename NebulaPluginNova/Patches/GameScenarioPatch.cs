@@ -32,7 +32,9 @@ public static class InitializeRolePatch
             else
                 others.Add(players[i]);
 
-        GeneralConfigurations.CurrentGameMode.RoleAllocator.Assign(impostors, others);
+        NebulaGameManager.Instance!.RoleAllocator = GeneralConfigurations.CurrentGameMode.RoleAllocator.Invoke();
+        NebulaGameManager.Instance.RoleAllocator.Assign(impostors, others);
+        
 
         return false;
     }

@@ -67,10 +67,10 @@ public class Comet : ConfigurableStandardRole
                 boostButton.OnEffectStart = (button) => {
                     using (RPCRouter.CreateSection("CometBlaze"))
                     {
-                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new SpeedModulator(MyRole.BlazeSpeedOption.GetFloat(), Vector2.one, true, MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet::speed")));
-                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.Invisible, MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet::invisible")));
-                        if (MyRole.BlazeVisionOption.GetFloat() > 1f) PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Eyesight, MyRole.BlazeVisionOption.GetFloat(), MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet::eyesight")));
-                        if(MyRole.BlazeScreenOption.GetFloat() > 1f) PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.ScreenSize, MyRole.BlazeScreenOption.GetFloat(), MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet::screen")));
+                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new SpeedModulator(MyRole.BlazeSpeedOption.GetFloat(), Vector2.one, true, MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet"), true));
+                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.Invisible, MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet"), true));
+                        if (MyRole.BlazeVisionOption.GetFloat() > 1f) PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Eyesight, MyRole.BlazeVisionOption.GetFloat(), MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet"), true));
+                        if(MyRole.BlazeScreenOption.GetFloat() > 1f) PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.ScreenSize, MyRole.BlazeScreenOption.GetFloat(), MyRole.BlazeDurationOption.GetFloat(), false, 100, "nebula::comet"), true));
 
                     }
                     acTokenCommon.Value = true;

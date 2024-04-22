@@ -43,6 +43,12 @@ public class FormulaCommand : ICommand
         SOr,
         SAnd,
         SNot,
+        SLessThan,
+        SMoreThan,
+        SLessThanOrEqual,
+        SMoreThanOrEqual,
+        SEqual,
+        SNotEqual,
 
         // 数値 or 真偽値
         Number,
@@ -121,6 +127,13 @@ public class FormulaCommand : ICommand
         AddRule(FTokenType.ATerm, [FTokenType.ATerm, FTokenType.SCross, FTokenType.AFactor], BinaryFunc<float, float>((v1, v2) => new FloatCommandToken(v1 * v2)));
         AddRule(FTokenType.ATerm, [FTokenType.ATerm, FTokenType.SDivide, FTokenType.AFactor], BinaryFunc<float, float>((v1, v2) => new FloatCommandToken(Mathf.Abs(v2) > 0 ? v1 / v2 : 0f)));
 
+        AddRule(FTokenType.LFactor, [FTokenType.AExpr, FTokenType.SLessThan, FTokenType.AExpr], BinaryFunc<float, float>((v1, v2) => new BooleanCommandToken(v1 < v2)));
+        AddRule(FTokenType.LFactor, [FTokenType.AExpr, FTokenType.SMoreThan, FTokenType.AExpr], BinaryFunc<float, float>((v1, v2) => new BooleanCommandToken(v1 > v2)));
+        AddRule(FTokenType.LFactor, [FTokenType.AExpr, FTokenType.SMoreThanOrEqual, FTokenType.AExpr], BinaryFunc<int, int>((v1, v2) => new BooleanCommandToken(v1 <= v2)));
+        AddRule(FTokenType.LFactor, [FTokenType.AExpr, FTokenType.SMoreThanOrEqual, FTokenType.AExpr], BinaryFunc<int, int>((v1, v2) => new BooleanCommandToken(v1 <= v2)));
+        AddRule(FTokenType.LFactor, [FTokenType.AExpr, FTokenType.SEqual, FTokenType.AExpr], BinaryFunc<int, int>((v1, v2) => new BooleanCommandToken(v1 == v2)));
+        AddRule(FTokenType.LFactor, [FTokenType.AExpr, FTokenType.SNotEqual, FTokenType.AExpr], BinaryFunc<int, int>((v1, v2) => new BooleanCommandToken(v1 != v2)));
+
         AddRule(FTokenType.LFactor, [FTokenType.SNot, FTokenType.LFactor], MonoFunc<bool>((v) => new BooleanCommandToken(!v)));
         AddRule(FTokenType.LXorTerm, [FTokenType.LXorTerm, FTokenType.SXor, FTokenType.LOrTerm], BinaryFunc<bool, bool>((v1, v2) => new BooleanCommandToken(v1 ^ v2)));
         AddRule(FTokenType.LOrTerm, [FTokenType.LOrTerm, FTokenType.SOr, FTokenType.LTerm], BinaryFunc<bool, bool>((v1, v2) => new BooleanCommandToken(v1 || v2)));
@@ -198,6 +211,12 @@ public class FormulaCommand : ICommand
                     "and" => new(FTokenType.SAnd),
                     "xor" => new(FTokenType.SXor),
                     "~" => new(FTokenType.SNot),
+                    "<" => new(FTokenType.SLessThan),
+                    ">" => new(FTokenType.SMoreThan),
+                    "<=" => new(FTokenType.SLessThanOrEqual),
+                    ">=" => new(FTokenType.SMoreThanOrEqual),
+                    "==" => new(FTokenType.SEqual),
+                    "!=" => new(FTokenType.SNotEqual),
                     _ => null
                 };
                 if (result != null) return result;
@@ -209,7 +228,7 @@ public class FormulaCommand : ICommand
 
     FToken? TestRule(FTokenType required, FRule rule, FTokenType[] followerTypes, IReadOnlyArray<FToken> tokens, FToken? firstToken, CommandEnvironment env, out IReadOnlyArray<FToken> follower, out FToken[] tokensOnRule)
     {
-        Debug.Log("TryRule: [" + rule.rule.Join(r => r.ToString(), ", ") + "]");
+        //Debug.Log("TryRule: [" + rule.rule.Join(r => r.ToString(), ", ") + "]");
 
         //各ルールごとに最後まで到達できるかどうか試す
         follower = tokens;
@@ -256,7 +275,7 @@ public class FormulaCommand : ICommand
             //自身をそのまま還元してよいとき
             if (followerTypes.Contains(follower[0].TokenType))
             {
-                Debug.Log("Reduce: " + required.ToString() + ", Left: [" + follower.Join(l => l.TokenType.ToString()) + "]");
+                //Debug.Log("Reduce: " + required.ToString() + ", Left: [" + follower.Join(l => l.TokenType.ToString()) + "]");
                 return myToken;
             }
         }

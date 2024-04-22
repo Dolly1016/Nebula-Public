@@ -1,6 +1,7 @@
 ﻿using Hazel;
 using Il2CppSystem.Text.Json;
 using InnerNet;
+using Mono.CSharp.Linq;
 using Nebula.Configuration;
 using Nebula.Modules;
 using System;
@@ -11,19 +12,6 @@ using System.Threading.Tasks;
 using Virial.Assignable;
 
 namespace Nebula.Roles.Assignment;
-
-public class RoleAssignChance
-{
-    public AbstractRole Role;
-    public float Probability;
-
-    public RoleAssignChance(AbstractRole role, float probability)
-    {
-        this.Role = role;
-        this.Probability = probability;
-    }
-}
-
 
 public abstract class IRoleAllocator
 {
@@ -55,8 +43,8 @@ public abstract class IRoleAllocator
         public void Determine()
         {
             List<NebulaRPCInvoker> allInvokers = new();
-            foreach (var role in roles) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((role.playerId, role.role.Id, role.arguments, true )));
-            foreach (var modifier in modifiers) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((modifier.playerId, modifier.modifier.Id, modifier.arguments, false)));
+            foreach (var role in roles) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((role.playerId, role.role.Id, role.arguments, RoleType.Role )));
+            foreach (var modifier in modifiers) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((modifier.playerId, modifier.modifier.Id, modifier.arguments, RoleType.Modifier)));
 
             allInvokers.Add(NebulaGameManager.RpcStartGame.GetInvoker());
 
@@ -91,6 +79,7 @@ public abstract class IRoleAllocator
     }
 
     public abstract void Assign(List<PlayerControl> impostors, List<PlayerControl> others);
+    public virtual AbstractGhostRole? AssignToGhost(PlayerModInfo player) => null;
 }
 
 public class FreePlayRoleAllocator : IRoleAllocator
@@ -110,103 +99,105 @@ public class FreePlayRoleAllocator : IRoleAllocator
 
 public class StandardRoleAllocator : IRoleAllocator
 {
-    private void OnSetRole(AbstractRole role,List<RoleAssignChance> pool)
+
+    private record GhostRoleChance(AbstractGhostRole role) { public int count; public int left; }
+    private record RoleChance(AbstractRole role) { public int count; public int left; public int cost; public int otherCost; }
+
+    private List<GhostRoleChance> ghostRolePool;
+
+    public StandardRoleAllocator()
     {
-        foreach (var remove in GeneralConfigurations.ExclusiveOptionBody.OnAssigned(role)) pool.RemoveAll(r => r.Role == remove);
+        ghostRolePool = new(Roles.AllGhostRoles.Where(r => r.RoleCount > 0).Select<AbstractGhostRole, GhostRoleChance>(r => new(r) { count = r.RoleCount, left = r.RoleCount }));
     }
 
-    private void OnSetRole(AbstractRole role, List<AbstractRole> allRoles)
+    private void OnSetRole(AbstractRole role,params List<RoleChance>[] pool)
     {
-        foreach (var remove in GeneralConfigurations.ExclusiveOptionBody.OnAssigned(role)) allRoles.Remove(remove);
+        foreach (var remove in GeneralConfigurations.ExclusiveOptionBody.OnAssigned(role)) foreach(var p in pool) p.RemoveAll(r => r.role == remove);
     }
 
-    private void CategoryAssign(RoleTable table, RoleCategory category,int left,List<PlayerControl> main, List<PlayerControl> others,List<AbstractRole> allRoles)
+
+    private void CategoryAssign(RoleTable table, int left,List<PlayerControl> main, List<PlayerControl> others, List<RoleChance> rolePool, params List<RoleChance>[] allRolePool)
     {
         if (left < 0) left = 15;
 
-        List<RoleAssignChance> rolePool = new(), preferentialPool = new();
-        foreach (var r in allRoles)
+        void OnSelected(RoleChance selected)
         {
-            if (r.Category != category) continue;
-            for (int i = 0; i < r.RoleCount; i++)
-            {
-                float prob = r.GetRoleChance(i);
-                if (prob < 100f)
-                    rolePool.Add(new(r, prob));
-                else
-                    preferentialPool.Add(new(r, 100f));
-            }
+            table.SetRole(main[0], selected.role);
+            main.RemoveAt(0);
+            left -= selected.cost;
+
+            //割り当て済み役職を排除
+            selected.left--;
+            if (selected.left == 0) rolePool.Remove(selected);
+
+            //排他的割り当てを考慮
+            OnSetRole(selected.role, allRolePool);
         }
 
-        List<RoleAssignChance> currentPool = preferentialPool;
+        bool left100Roles = true;
         while (main.Count > 0 && left > 0)
         {
-            currentPool.RemoveAll(c =>
+            //コスト超過によって割り当てられない役職を弾く
+            rolePool.RemoveAll(c =>
             {
-                int cost = c.Role.AdditionalRole?.Length ?? 0;
-                if (c.Role.HasAdditionalRoleOccupancy && cost > left + 1) return true;
-                if (main == others || c.Role.HasAdditionalRoleOccupancy) cost++;
-                return cost > (c.Role.HasAdditionalRoleOccupancy ? main.Count : others.Count);
+                if (main == others)
+                    return c.cost + c.otherCost > left && c.cost + c.otherCost > main.Count;
+                else
+                    return c.cost > left && c.cost > main.Count && c.otherCost > others.Count;
             });
-            if (currentPool.Count == 0)
+
+            //100%割り当て役職が残っている場合
+            if (left100Roles)
             {
-                if (currentPool == rolePool) break;
-                currentPool = rolePool;
-                continue;
+                var roles100 = rolePool.Where(r => r.role.GetRoleChance(r.count - r.left) == 100f);
+                if (roles100.Any(r => true))
+                {
+                    //役職を選択する
+                    OnSelected(roles100.ToArray().Random());
+                    continue;
+                }
+                else
+                {
+                    left100Roles = false;
+                }
             }
 
+            //100%役職がもう残っていない場合
 
-            float sum = currentPool.Sum(c => c.Probability);
-            float val = System.Random.Shared.NextSingle() * sum;
-            RoleAssignChance? selected = null;
-            foreach (var r in currentPool)
+            var sum = rolePool.Sum(r => r.role.GetRoleChance(r.count - r.left));
+            var random = System.Random.Shared.NextSingle() * sum;
+            foreach(var r in rolePool)
             {
-                val -= r.Probability;
-                if (val < 0)
+                random -= r.role.GetRoleChance(r.count - r.left);
+                if(random < 0f)
                 {
-                    selected = r;
+                    //役職を選択する
+                    OnSelected(r);
                     break;
                 }
             }
-            selected ??= currentPool[currentPool.Count - 1];
-
-            table.SetRole(main[0], selected!.Role);
-            OnSetRole(selected!.Role, rolePool);
-            OnSetRole(selected!.Role, preferentialPool);
-            OnSetRole(selected!.Role, allRoles);
-
-            left--;
-            main.RemoveAt(0);
-
-            if (selected.Role.AdditionalRole != null)
-            {
-                var playerList = selected.Role.HasAdditionalRoleOccupancy ? main : others;
-                foreach (var r in selected.Role.AdditionalRole)
-                {
-                    table.SetRole(playerList[0], r);
-                    OnSetRole(r, rolePool);
-                    OnSetRole(r, preferentialPool);
-                    OnSetRole(r, allRoles);
-
-                    if (selected.Role.HasAdditionalRoleOccupancy) left--;
-                    playerList.RemoveAt(0);
-                }
-            }
-
-            currentPool.Remove(selected!);
         }
-
-
     }
 
     public override void Assign(List<PlayerControl> impostors, List<PlayerControl> others)
     {
         RoleTable table = new();
 
-        List<AbstractRole> allRoles = new(Roles.AllRoles);
-        CategoryAssign(table, RoleCategory.ImpostorRole, GeneralConfigurations.AssignmentImpostorOption, impostors, others, allRoles);
-        CategoryAssign(table, RoleCategory.NeutralRole, GeneralConfigurations.AssignmentNeutralOption, others, others, allRoles);
-        CategoryAssign(table, RoleCategory.CrewmateRole, GeneralConfigurations.AssignmentCrewmateOption, others, others, allRoles);
+        //ロールプールを作る
+        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && r.RoleCount > 0).Select(r =>
+        new RoleChance(r) { count = r.RoleCount, left = r.RoleCount,
+            cost = 1 + (r.AdditionalRolesConsumeRolePool ? (r.AdditionalRole?.Length ?? 0) : 0),
+            otherCost = r.AdditionalRolesConsumeRolePool ? 0 : (r.AdditionalRole?.Length ?? 0)
+        }));
+
+        List<RoleChance> crewmateRoles = GetRolePool(RoleCategory.CrewmateRole);
+        List<RoleChance> impostorRoles = GetRolePool(RoleCategory.ImpostorRole);
+        List<RoleChance> neutralRoles = GetRolePool(RoleCategory.NeutralRole);
+        List<RoleChance>[] allRoles = [crewmateRoles, impostorRoles, neutralRoles];
+
+        CategoryAssign(table, GeneralConfigurations.AssignmentImpostorOption, impostors, others, impostorRoles, allRoles);
+        CategoryAssign(table, GeneralConfigurations.AssignmentNeutralOption, others, others, neutralRoles, allRoles);
+        CategoryAssign(table, GeneralConfigurations.AssignmentCrewmateOption, others, others, crewmateRoles, allRoles);
 
         foreach (var p in impostors) table.SetRole(p, Impostor.Impostor.MyRole);
         foreach (var p in others) table.SetRole(p, Crewmate.Crewmate.MyRole);
@@ -214,6 +205,47 @@ public class StandardRoleAllocator : IRoleAllocator
         foreach (var m in Roles.AllIntroAssignableModifiers().OrderBy(im => im.AssignPriority)) m.Assign(table);
 
         table.Determine();
+    }
+
+    public override AbstractGhostRole? AssignToGhost(PlayerModInfo player)
+    {
+        var pool = ghostRolePool.Where(g => g.role.Category == player.Role.Role.Category).ToArray();
+
+        //まずは100%割り当て役職を抽出
+        var cand = pool.Where(g => g.role.GetRoleChance(g.count - g.left) == 100f).ToArray();
+        //100%割り当て役職がいなければ
+        if (cand.Length == 0)
+        {
+            //Normal
+            if(GeneralConfigurations.GhostAssignmentOption.CurrentValue == 0) {
+                float sum = pool.Sum(g => g.role.GetRoleChance(g.count - g.left));
+                foreach(var p in pool)
+                {
+                    sum -= p.role.GetRoleChance(p.count - p.left);
+                    if(sum < 0f)
+                    {
+                        p.left--;
+                        if (p.left == 0) ghostRolePool.Remove(p);
+                        return p.role;
+                    }
+                }
+
+                return null;
+            }
+
+            //Thrilling
+            cand = pool.Where(g => System.Random.Shared.NextSingle() * 100f < g.role.GetRoleChance(g.count - g.left)).ToArray();
+        }
+
+        if (cand.Length > 0)
+        {
+            var selected = cand.Random();
+            selected.count--;
+            if (selected.left == 0) ghostRolePool.Remove(selected);
+            return selected.role;
+        }
+
+        return null;
     }
 
 }

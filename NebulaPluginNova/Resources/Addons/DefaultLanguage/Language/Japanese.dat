@@ -77,7 +77,7 @@
 "options.assignment.detail" : "ロールの割り当てに関する設定"
 "options.assignment.crewmate" : "クルーメイトロール"
 "options.assignment.impostor" : "インポスターロール"
-"options.assignment.neutral" : "ニュートラルロール"
+"options.assignment.neutral" : "第三陣営ロール"
 "options.assignment.unlimited" : "無制限"
 
 "options.soloFreePlay" : "ソロフリープレイオプション"
@@ -165,7 +165,7 @@
 "options.modifier.chance" : "割り当て確率"
 "options.role.crewmateCount" : "クルーメイト割り当て"
 "options.role.impostorCount" : "インポスター割り当て"
-"options.role.neutralCount" : "ニュートラル割り当て"
+"options.role.neutralCount" : "第三陣営割り当て"
 "options.role.definiteCount" : "確定"
 "options.role.randomCount" : "ランダム"
 

@@ -10,8 +10,10 @@ using Nebula.Roles;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Assignment;
 using Nebula.Roles.Crewmate;
+using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking.Types;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -71,32 +73,47 @@ public record RoleHistory
     public byte PlayerId;
     public bool IsModifier;
     public bool IsSet;
+    public bool Dead;
     public AssignableInstance Assignable;
 
-    public RoleHistory(byte playerId, ModifierInstance modifier, bool isSet)
+    public RoleHistory(byte playerId, ModifierInstance modifier, bool isSet, bool dead)
     {
         Time = NebulaGameManager.Instance!.CurrentTime;
         PlayerId = playerId;
         IsModifier = true;
         IsSet = isSet;
         Assignable = modifier;
+        Dead = dead;
     }
 
-    public RoleHistory(byte playerId, RoleInstance role)
+    public RoleHistory(byte playerId, RoleInstance role, bool dead)
     {
         Time = NebulaGameManager.Instance!.CurrentTime;
         PlayerId = playerId;
         IsModifier = false;
         IsSet = true;
         Assignable = role;
+        Dead = dead;
+    }
+
+    public RoleHistory(byte playerId, GhostRoleInstance role, bool dead)
+    {
+        Time = NebulaGameManager.Instance!.CurrentTime;
+        PlayerId = playerId;
+        IsModifier = false;
+        IsSet = true;
+        Assignable = role;
+        Dead = dead;
     }
 }
 
 public static class RoleHistoryHelper { 
-    static public IEnumerable<T> EachMoment<T>(this List<RoleHistory> history, Predicate<RoleHistory> predicate, Func<RoleInstance, List<AssignableInstance>, T> converter)
+    static public IEnumerable<T> EachMoment<T>(this List<RoleHistory> history, Predicate<RoleHistory> predicate, Func<RoleInstance, GhostRoleInstance?, List<AssignableInstance>, T> converter)
     {
         RoleInstance? role = null;
+        GhostRoleInstance? ghostRole = null;
         List<AssignableInstance> modifiers = new();
+        bool isDead = false;
 
         float lastTime = history[0].Time;
         foreach(var h in history.Append(null))
@@ -105,33 +122,130 @@ public static class RoleHistoryHelper {
 
             if(h == null || lastTime + 1f < h.Time)
             {
-                if(role != null) yield return converter.Invoke(role, modifiers);
+                if(role != null) yield return converter.Invoke(role, isDead ? ghostRole : null, modifiers);
 
                 if (h == null) break;
 
                 lastTime = h.Time;
             }
 
+            isDead = true;
             if (!h.IsModifier && h.Assignable is RoleInstance ri) role = ri;
+            if (!h.IsModifier && h.Assignable is GhostRoleInstance gri) ghostRole = gri;
             else if (h.IsSet) modifiers.Add(h.Assignable);
             else modifiers.Remove(h.Assignable);
         }
     }
 
-    static public string ConvertToRoleName(RoleInstance role, List<AssignableInstance> modifier, bool isShort)
+    static public string ConvertToRoleName(RoleInstance role, GhostRoleInstance? ghostRole, List<AssignableInstance> modifier, bool isShort)
     {
-        string result = isShort ? role.Role.ShortName : role.Role.DisplayName;
+        string result;
+        if (ghostRole != null) result = isShort ? ghostRole.Role.ShortName : ghostRole.Role.DisplayName;
+        else result = isShort ? role.Role.ShortName : role.Role.DisplayName;
+
         foreach (var m in modifier)
         {
             var newName = m.OverrideRoleName(result, isShort);
-            if(newName != null) result = newName;
+            if (newName != null) result = newName;
         }
         Color color = role.Role.RoleColor;
         foreach (var m in modifier) m.DecoratePlayerName(ref result, ref color);
         foreach (var m in modifier) m.DecorateRoleName(ref result);
-        return result.Replace(" ","").Color(color);
+        return result.Replace(" ", "").Color(color);
     }
 }
+
+
+public class TitleShower
+{
+    TextMeshPro mainText, shadowText;
+    Transform textHolder;
+
+    public TitleShower()
+    {
+        var holder = UnityHelper.CreateObject("TitleShower", HudManager.Instance.transform, new(0f, 0f, -100f), LayerExpansion.GetUILayer());
+        mainText = GameObject.Instantiate(HudManager.Instance.IntroPrefab.ImpostorTitle, holder.transform);
+        mainText!.GetComponent<TextTranslatorTMP>().enabled = false;
+        mainText.transform.localPosition = new(0f, 0f, 0f);
+        mainText.rectTransform.pivot = new(0.5f, 0.5f);
+        mainText.rectTransform.localScale = new(3f, 3f, 1f);
+        mainText.rectTransform.sizeDelta = new(2.4f, 1.8f);
+        mainText.outlineColor = Color.clear;
+        mainText.color = Color.white;
+
+        mainText.text = "";
+
+        shadowText = GameObject.Instantiate(mainText, holder.transform);
+        shadowText.transform.localPosition = new(0.05f, -0.05f, 1f);
+        shadowText.color = Color.black.AlphaMultiplied(0.6f);
+
+        textHolder = holder.transform;
+
+        SetPivot(new(0.5f, 0.5f));
+    }
+
+    public TitleShower SetPivot(Vector2 pivot)
+    {
+        mainText.rectTransform.pivot = pivot;
+        shadowText.rectTransform.pivot = pivot;
+        return this;
+    }
+
+    public TitleShower SetText(string text, Color color, float duration, bool shake = false)
+    {
+        mainText.text = text;
+        shadowText.text = text;
+        textColor = color;
+
+        Update();
+
+        alpha = 1f;
+        timer = duration;
+
+        this.shake = shake;
+
+        return this;
+    }
+
+    float alpha = 1f;
+    float timer = 0f;
+    Color textColor = Color.white;
+    bool shake = false;
+    float shakeTimer = 0f;
+    public void Update()
+    {
+        if (shake)
+        {
+            shakeTimer -= Time.deltaTime;
+            if(shakeTimer < 0f)
+            {
+                shakeTimer = 0.08f;
+                textHolder.localPosition = new(
+                    ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.06f,
+                    ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.06f, -100f);
+            }
+        }
+        else
+        {
+            textHolder.localPosition = new(0f, 0f, -100f);
+        }
+
+        if(timer > 0f)
+        {
+            timer -= Time.deltaTime;
+            alpha = 1f;
+        }
+        else
+        {
+            alpha -= Time.deltaTime * 0.5f;
+        }
+        alpha = Mathf.Clamp01(alpha);
+
+        mainText.color = textColor.AlphaMultiplied(alpha);
+        shadowText.color = Color.black.AlphaMultiplied(0.6f * alpha);
+    }
+}
+
 
 [NebulaRPCHolder]
 public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Virial.Game.HUD
@@ -172,8 +286,10 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
     public RPCScheduler Scheduler { get; private set; } = new();
     public FakeSabotageStatus? LocalFakeSabotage => PlayerControl.LocalPlayer.GetModInfo()?.FakeSabotage;
     public MeetingPlayerButtonManager MeetingPlayerButtonManager { get; private set; } = null!;
+    public TitleShower TitleShower { get; private init; } = new TitleShower();
     internal MeetingOverlayHolder MeetingOverlay { get; private init; }
     internal FakeInformation FakeInformation { get; private init; }
+    public IRoleAllocator? RoleAllocator { get; internal set; } = null;
 
     public bool IgnoreWalls => LocalPlayerInfo?.Role?.EyesightIgnoreWalls ?? false;
     public Dictionary<byte, AbstractAchievement?> TitleMap = new();
@@ -200,6 +316,8 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
         CanSeeAllInfo = true;
 
         if (!HudManager.InstanceExists) return;
+
+        RpcTryAssignGhostRole.Invoke(LocalPlayerInfo);
 
         new SpectatorsAbility().Register(this);
     }
@@ -362,9 +480,15 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
         }
     }
 
+    public void LateUpdate()
+    {
+        if(HudManager.InstanceExists) WideCamera.LateUpdate();
+    }
+
     public void OnUpdate() {
         CurrentTime += Time.deltaTime;
 
+        TitleShower.Update();
         WideCamera.Update();
         GameEntityManager.Update();
 
@@ -447,7 +571,44 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
 
         //実績
         new AchievementToken<int>("challenge.death2", 0, (exileAnyone, _) => (NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.IsDead && p.MyKiller == LocalPlayerInfo && p != LocalPlayerInfo).Select(p => p.MyState).Distinct().Count() + exileAnyone) >= 4);
-        new AchievementToken<int>("graduation2", 0, (exileAnyone, _) => exileAnyone >= 3 && Helpers.CurrentMonth == 3);
+        if (Helpers.CurrentMonth == 3) new AchievementToken<int>("graduation2", 0, (exileAnyone, _) => exileAnyone >= 3);
+
+        if (Helpers.CurrentMonth == 5 && (AmongUsUtil.CurrentMapId is 1 or 4))
+        {
+            if (LocalPlayerInfo.TryGetModifier<Lover.Instance>(out var lover)) {
+                var myLover = lover.MyLover;
+                float time = 0f;
+                bool isCleared = false;
+                new NebulaGameScript() {
+                    OnUpdateEvent = () =>
+                    {
+                        if (isCleared) return;
+
+                        if (!lover.IsDeadObject && !LocalPlayerInfo.IsDead && !myLover!.IsDead)
+                        {
+                            if (
+                                LocalPlayerInfo.HasAttribute(PlayerAttributes.Accel) &&
+                                myLover.HasAttribute(PlayerAttributes.Accel) &&
+                                LocalPlayerInfo.MyControl.MyPhysics.Velocity.magnitude > 0f &&
+                                LocalPlayerInfo.MyControl.transform.position.Distance(myLover.MyControl.transform.position) < 2f
+                            )
+                            {
+                                time += Time.deltaTime;
+                                if (time > 5f)
+                                {
+                                    new StaticAchievementToken("koinobori");
+                                    isCleared = true;
+                                }
+                            }
+                            else
+                            {
+                                time = 0f;
+                            }
+                        }
+                    }
+                };
+            }
+        }
     }
 
     public void OnGameEnd()
@@ -459,12 +620,12 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
         //自身が勝利している場合
         if (EndState!.CheckWin(PlayerControl.LocalPlayer.PlayerId)) {
             //生存しているマッドメイト除くクルー陣営
-            var aliveCrewmate = allModPlayers.Values.Where(p => !p.IsDead && p.Role.Role.Category == Virial.Assignable.RoleCategory.CrewmateRole && p.Role.Role != Madmate.MyRole);
+            var aliveCrewmate = allModPlayers.Values.Where(p => !p.IsDead && p.Role.Role.Category == RoleCategory.CrewmateRole && p.Role.Role != Madmate.MyRole);
             int aliveCrewmateCount = aliveCrewmate?.Count() ?? 0;
             if (EndState!.EndReason == GameEndReason.Task)
             {
                 if(allModPlayers.Values.All(p => !p.IsDead)) new StaticAchievementToken("challenge.crewmate");
-                if (aliveCrewmateCount == 0 && NebulaGameManager.Instance!.LocalPlayerInfo.Role.Role.Category == Virial.Assignable.RoleCategory.CrewmateRole) new StaticAchievementToken("noCrewmate");
+                if (aliveCrewmateCount == 0 && NebulaGameManager.Instance!.LocalPlayerInfo.Role.Role.Category == RoleCategory.CrewmateRole) new StaticAchievementToken("noCrewmate");
             }
             if(EndState!.EndCondition == NebulaGameEnd.CrewmateWin && aliveCrewmateCount == 1 && aliveCrewmate!.First().AmOwner) new StaticAchievementToken("lastCrewmate");
             
@@ -616,6 +777,16 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
     Virial.Game.HUD Virial.Game.Game.CurrentHud => this;
 
     bool Virial.ILifespan.IsDeadObject => NebulaGameManager.Instance != this;
+
+    public readonly static RemoteProcess<PlayerModInfo> RpcTryAssignGhostRole = new(
+        "TryAssignGhostRole",
+        (message, _) =>
+        {
+            if (!AmongUsClient.Instance.AmHost) return;
+            var role = Instance?.RoleAllocator?.AssignToGhost(message);
+            if (role != null) message.RpcInvokerSetGhostRole(role, null).InvokeSingle();
+        }
+        );
 }
 
 public static class NebulaGameManagerExpansion

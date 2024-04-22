@@ -494,6 +494,10 @@
 "achievement.sakura.goal" : "ゲーム中に黄緑色から桜色に変化して開花する。"
 "achievement.sakura.cond" : "4月限定"
 
+"achievement.koinobori.title" : "空泳ぐ恋のぼり"
+"achievement.koinobori.goal" : "天空にて、Loversの二人で並んで悠々と走る。"
+"achievement.koinobori.cond" : "5月限定+Loversで二人とも<br>加速効果</br>が付与されていること+<br>5秒間</br>、移動しながら近くにいつづけること+MIRA HQ, Airship限定"
+
 "achievement.christmas.title" : "末永くご爆発下さい"
 "achievement.christmas.goal" : "ラバーズで追放される。"
 "achievement.christmas.cond" : "12月限定"

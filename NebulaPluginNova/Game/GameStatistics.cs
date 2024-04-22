@@ -484,7 +484,7 @@ public class GameStatisticsViewer : MonoBehaviour
 
                     if (widget.Count > 0) widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
                     var roleText = NebulaGameManager.Instance.RoleHistory.EachMoment(history => history.PlayerId == near.Item1 && !(history.Time > statisticsEvent.Time),
-                        (role, modifiers) => RoleHistoryHelper.ConvertToRoleName(role, modifiers, false)).LastOrDefault();
+                        (role, ghostRole, modifiers) => RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, false)).LastOrDefault();
                     widget.Append(new MetaWidgetOld.Text(Nebula.Utilities.TextAttributeOld.BoldAttrLeft) { RawText = NebulaGameManager.Instance.GetModPlayerInfo(near.Item1)!.DefaultName });
                     widget.Append(new MetaWidgetOld.VariableText(new Nebula.Utilities.TextAttributeOld(Nebula.Utilities.TextAttributeOld.BoldAttrLeft) { Alignment = TMPro.TextAlignmentOptions.TopLeft }.EditFontSize(1.35f)) { RawText = roleText ?? "" });
 

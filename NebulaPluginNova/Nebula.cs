@@ -34,13 +34,17 @@ public static class ToolsInstaller
 {
     public static IEnumerator CoLoad()
     {
-        Patches.LoadPatch.LoadingText = "Installing Tools";
-        yield return null;
+        if (NebulaPlugin.Log.IsPreferential)
+        {
+            Patches.LoadPatch.LoadingText = "Installing Tools";
+            yield return null;
 
-        InstallTool("VoiceChatSupport.exe");
-        InstallTool("CPUAffinityEditor.exe");
-        InstallTool("opus.dll");
+            InstallTool("VoiceChatSupport.exe");
+            InstallTool("CPUAffinityEditor.exe");
+            InstallTool("opus.dll");
+        }
     }
+
     private static void InstallTool(string name)
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
@@ -66,11 +70,11 @@ public class NebulaPlugin : BasePlugin
     public const string PluginVersion = "2.2.3.1";
 
     //public const string VisualVersion = "v2.3";
-    public const string VisualVersion = "Snapshot 24.04.17a";
+    public const string VisualVersion = "Snapshot 24.04.21b";
     //public const string VisualVersion = "RPC Debug 2";
 
     public const int PluginEpoch = 103;
-    public const int PluginBuildNum = 1102;
+    public const int PluginBuildNum = 1106;
     public const bool GuardVanillaLangData = true;
 
     static public HttpClient HttpClient

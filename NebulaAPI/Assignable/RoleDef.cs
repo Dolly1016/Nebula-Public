@@ -18,7 +18,7 @@ public enum RoleCategory
     /// <summary>
     /// クルーメイト役職
     /// </summary>
-    CrewmateRole = 0x04
+    CrewmateRole = 0x04,
 }
 
 /// <summary>

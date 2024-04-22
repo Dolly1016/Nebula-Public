@@ -36,35 +36,13 @@ public abstract class AbstractModifier : IAssignableBase, DefinedModifier
     RoleFilter? DefinedModifier.RoleFilter => null;
 }
 
-public abstract class IntroAssignableModifier : AbstractModifier, DefinedModifier, RoleFilter
+public abstract class IntroAssignableModifier : AbstractModifier, DefinedModifier, RoleFilter, ICodeName
 {
     public virtual void Assign(IRoleAllocator.RoleTable roleTable) { }
     public abstract string CodeName { get; }
     public virtual int AssignPriority { get => 0; }
 
     RoleFilter? DefinedModifier.RoleFilter => this;
-
-
-    void RoleFilter.Filter(FilterAction filterAction, params DefinedRole[] roles)
-    {
-        if (!AmongUsClient.Instance.AmHost) throw new Virial.NonHostPlayerException("Only host can edit role filter.");
-
-        switch (filterAction)
-        {
-            case FilterAction.And:
-                foreach(var r in Roles.AllRoles)
-                    if (!(r.ModifierFilter?.Contains(this) ?? true) && roles.Contains(r)) r.ModifierFilter!.ToggleAndShare(this);
-                break;
-            case FilterAction.Or:
-                foreach (var r in Roles.AllRoles)
-                    if ((r.ModifierFilter?.Contains(this) ?? false) && roles.Contains(r)) r.ModifierFilter!.ToggleAndShare(this);
-                break;
-            case FilterAction.Set:
-                foreach (var r in Roles.AllRoles)
-                    if (r.ModifierFilter != null && r.ModifierFilter.Contains(this) == roles.Contains(r)) r.ModifierFilter!.ToggleAndShare(this);
-                break;
-        }
-    }
 
     bool RoleFilter.Test(DefinedRole role)
     {

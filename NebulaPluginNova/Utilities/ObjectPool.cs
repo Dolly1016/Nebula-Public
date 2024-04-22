@@ -19,6 +19,14 @@ public class ObjectPool<T> where T : Component
         this.parent = parent;
     }
 
+    public void DestroyAll()
+    {
+        foreach (var obj in activatedObjects) GameObject.Destroy(obj.gameObject);
+        foreach (var obj in inactivatedObjects) GameObject.Destroy(obj.gameObject);
+        activatedObjects.Clear();
+        inactivatedObjects.Clear();
+    }
+
     public T Instantiate()
     {
         if(inactivatedObjects.Count > 0)
