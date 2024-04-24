@@ -9,7 +9,7 @@ using UnityEngine;
 using Virial.Compat;
 using Virial.Media;
 
-namespace Nebula.Modules.MetaWidget;
+namespace Nebula.Modules.GUIWidget;
 
 public class GUIScrollView : AbstractGUIWidget
 {
@@ -42,7 +42,7 @@ public class GUIScrollView : AbstractGUIWidget
             this.myAnchor = new(new(0f, 1f), new(-innerSize.Width * 0.5f, innerSize.Height * 0.5f, -0.01f));
         }
 
-        public void SetWidget(GUIWidget? widget, out Size actualSize)
+        public void SetWidget(Virial.Media.GUIWidget? widget, out Size actualSize)
         {
             screen.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => GameObject.Destroy(obj)));
 

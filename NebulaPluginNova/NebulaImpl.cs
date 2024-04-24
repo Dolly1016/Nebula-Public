@@ -1,6 +1,6 @@
 ﻿using Nebula.Compat;
 using Nebula.Events;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using System;
 using System.Collections.Generic;

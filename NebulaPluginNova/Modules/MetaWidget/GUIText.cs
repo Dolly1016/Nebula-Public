@@ -4,7 +4,7 @@ using Virial.Compat;
 using Virial.Media;
 using Virial.Text;
 
-namespace Nebula.Modules.MetaWidget;
+namespace Nebula.Modules.GUIWidget;
 
 
 public class NoSGUIText : AbstractGUIWidget
@@ -22,23 +22,24 @@ public class NoSGUIText : AbstractGUIWidget
         Text = text;
     }
 
-    private void ReflectMyAttribute(TMPro.TextMeshPro text, float width)
+    protected void ReflectMyAttribute(TMPro.TextMeshPro text, float width) => ReflectAttribute(Attr, text, width);
+    static public void ReflectAttribute(TextAttribute attr, TMPro.TextMeshPro text, float width)
     {
-        text.color = Attr.Color.ToUnityColor();
-        text.alignment = (TMPro.TextAlignmentOptions)Attr.Alignment;
-        text.fontStyle = (TMPro.FontStyles)Attr.Style;
-        text.fontSize = Attr.FontSize.FontSizeDefault;
-        text.fontSizeMin = Attr.FontSize.FontSizeMin;
-        text.fontSizeMax = Attr.FontSize.FontSizeMax;
-        text.enableAutoSizing = Attr.FontSize.AllowAutoSizing;
-        text.rectTransform.sizeDelta = new(Math.Min(width, Attr.Size.Width), Attr.Size.Height);
+        text.color = attr.Color.ToUnityColor();
+        text.alignment = (TMPro.TextAlignmentOptions)attr.Alignment;
+        text.fontStyle = (TMPro.FontStyles)attr.Style;
+        text.fontSize = attr.FontSize.FontSizeDefault;
+        text.fontSizeMin = attr.FontSize.FontSizeMin;
+        text.fontSizeMax = attr.FontSize.FontSizeMax;
+        text.enableAutoSizing = attr.FontSize.AllowAutoSizing;
+        text.rectTransform.sizeDelta = new(Math.Min(width, attr.Size.Width), attr.Size.Height);
         text.rectTransform.anchorMin = new UnityEngine.Vector2(0.5f, 0.5f);
         text.rectTransform.anchorMax = new UnityEngine.Vector2(0.5f, 0.5f);
         text.rectTransform.pivot = new UnityEngine.Vector2(0.5f, 0.5f);
-        if (Attr.Font != null)
+        if (attr.Font != null)
         {
-            text.font = Attr.Font.Font;
-            if (Attr.Font.FontMaterial != null) text.fontMaterial = Attr.Font.FontMaterial;
+            text.font = attr.Font.Font;
+            if (attr.Font.FontMaterial != null) text.fontMaterial = attr.Font.FontMaterial;
         }
     }
 
@@ -98,5 +99,67 @@ public class NoSGUIText : AbstractGUIWidget
 
         actualSize = new Size(text.rectTransform.sizeDelta);
         return text.gameObject;
+    }
+}
+
+public class NoSGUICheckbox : AbstractGUIWidget
+{
+    internal ListArtifact<Func<bool>> Artifact = new();
+    private bool defaultValue;
+    public Action<bool>? OnValueChanged = null;
+    public NoSGUICheckbox(GUIAlignment alignment, bool defaultValue) : base(alignment)
+    {
+        this.defaultValue = defaultValue;
+    }
+
+
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
+    {
+        bool currentValue = defaultValue;
+
+        var backText = UnityEngine.Object.Instantiate(VanillaAsset.StandardTextPrefab, null);
+        backText.transform.localPosition = new UnityEngine.Vector3(0f, 0f, 0f);
+
+        var text = UnityEngine.Object.Instantiate(VanillaAsset.StandardTextPrefab, backText.transform);
+        text.transform.localPosition = new UnityEngine.Vector3(0f, 0f, -0.1f);
+
+
+        NoSGUIText.ReflectAttribute(GUI.API.GetAttribute(AttributeAsset.CenteredBold), backText, size.Width);
+        NoSGUIText.ReflectAttribute(GUI.API.GetAttribute(AttributeAsset.CenteredBold), text, size.Width);
+        backText.sortingOrder = 10;
+        backText.color = Color.white;
+        text.sortingOrder = 11;
+        text.color = Color.green;
+
+        void UpdateText() => text.text = currentValue ? "✓" : "";
+
+        backText.text = "□";
+        text.text = "✓";
+
+        backText.ForceMeshUpdate();
+        text.ForceMeshUpdate();
+
+        backText.rectTransform.sizeDelta = new(backText.preferredWidth, backText.preferredHeight);
+        text.rectTransform.sizeDelta = new(text.preferredWidth, text.preferredHeight);
+
+        UpdateText();
+
+        backText.ForceMeshUpdate();
+        text.ForceMeshUpdate();
+        
+
+        var button = text.gameObject.SetUpButton(true);
+        var collider = text.gameObject.AddComponent<BoxCollider2D>();
+        collider.isTrigger = true;
+        collider.size = text.rectTransform.sizeDelta;
+        
+        button.OnMouseOver.AddListener(() => backText.color = Color.green);
+        button.OnMouseOut.AddListener(() => backText.color = Color.white);
+        button.OnClick.AddListener(() => { currentValue = !currentValue; UpdateText(); OnValueChanged?.Invoke(currentValue); });
+
+        Artifact.Values.Add(() => currentValue);
+
+        actualSize = new Size(text.rectTransform.sizeDelta);
+        return backText.gameObject;
     }
 }

@@ -50,17 +50,10 @@ public static class Helpers
     }
 
     public static Vector2 Delta(this Vector2 vec, float speed, float threshold)
-        => new(
-            vec.x.Delta(speed, threshold),
-            vec.y.Delta(speed, threshold)
-            );
+        => vec * vec.magnitude.Delta(speed, threshold);
 
     public static Vector3 Delta(this Vector3 vec, float speed, float threshold)
-        => new(
-            vec.x.Delta(speed, threshold),
-            vec.y.Delta(speed, threshold),
-            vec.z.Delta(speed, threshold)
-            );
+        => vec * vec.magnitude.Delta(speed, threshold);
 
     public static Vector3 AsWorldPos(this Vector3 vec, bool isBack)
     {

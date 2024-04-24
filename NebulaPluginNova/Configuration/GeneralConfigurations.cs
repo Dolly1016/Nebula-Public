@@ -1,5 +1,5 @@
 ﻿using Nebula.Behaviour;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using Nebula.Utilities;
 using System;

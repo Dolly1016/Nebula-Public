@@ -482,7 +482,7 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
 
     public void LateUpdate()
     {
-        if(HudManager.InstanceExists) WideCamera.LateUpdate();
+        if(HudManager.InstanceExists && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) WideCamera.LateUpdate();
     }
 
     public void OnUpdate() {

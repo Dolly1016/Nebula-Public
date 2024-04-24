@@ -7,7 +7,7 @@ using UnityEngine;
 using Virial.Compat;
 using Virial.Media;
 
-namespace Nebula.Modules.MetaWidget;
+namespace Nebula.Modules.GUIWidget;
 
 public class NoSGUIFramed : AbstractGUIWidget
 {
@@ -26,7 +26,7 @@ public class NoSGUIFramed : AbstractGUIWidget
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
         var frame = UnityHelper.CreateObject("SizedFrame", null, new(0f, 0f, -0.8f));
-        GUIWidget? innerWidget = Inner?.Invoke();
+        Virial.Media.GUIWidget? innerWidget = Inner?.Invoke();
         actualSize = new(0f, 0f);
         if (innerWidget != null)
         {

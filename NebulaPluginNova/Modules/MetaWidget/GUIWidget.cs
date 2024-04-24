@@ -3,9 +3,9 @@ using Virial.Compat;
 using Virial.Media;
 using Virial.Text;
 
-namespace Nebula.Modules.MetaWidget;
+namespace Nebula.Modules.GUIWidget;
 
-public abstract class AbstractGUIWidget : GUIWidget
+public abstract class AbstractGUIWidget : Virial.Media.GUIWidget
 {
     internal override GUIAlignment Alignment { get; init; }
     internal override GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize)
@@ -53,9 +53,9 @@ public abstract class AbstractGUIWidget : GUIWidget
 
 public abstract class WidgetsHolder : AbstractGUIWidget
 {
-    protected IEnumerable<GUIWidget> widgets;
+    protected IEnumerable<Virial.Media.GUIWidget> widgets;
 
-    public WidgetsHolder(GUIAlignment alignment, IEnumerable<GUIWidget?> widgets) : base(alignment)
+    public WidgetsHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> widgets) : base(alignment)
     {
         this.widgets = widgets.Where(w => w != null)!;
     }
@@ -63,8 +63,8 @@ public abstract class WidgetsHolder : AbstractGUIWidget
 
 public class VerticalWidgetsHolder : WidgetsHolder {
 
-    public VerticalWidgetsHolder(GUIAlignment alignment, IEnumerable<GUIWidget?> widgets) : base(alignment, widgets) { }
-    public VerticalWidgetsHolder(GUIAlignment alignment, params GUIWidget?[] widgets) : base(alignment, widgets) { }
+    public VerticalWidgetsHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> widgets) : base(alignment, widgets) { }
+    public VerticalWidgetsHolder(GUIAlignment alignment, params Virial.Media.GUIWidget?[] widgets) : base(alignment, widgets) { }
     public float? FixedWidth { get; init; } = null;
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
@@ -94,8 +94,8 @@ public class VerticalWidgetsHolder : WidgetsHolder {
 public class HorizontalWidgetsHolder : WidgetsHolder
 {
 
-    public HorizontalWidgetsHolder(GUIAlignment alignment, IEnumerable<GUIWidget?> widgets) : base(alignment, widgets) { }
-    public HorizontalWidgetsHolder(GUIAlignment alignment, params GUIWidget?[] widgets) : base(alignment, widgets) { }
+    public HorizontalWidgetsHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> widgets) : base(alignment, widgets) { }
+    public HorizontalWidgetsHolder(GUIAlignment alignment, params Virial.Media.GUIWidget?[] widgets) : base(alignment, widgets) { }
     public float? FixedHeight { get; init; } = null;
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)
@@ -189,7 +189,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
 
     private Dictionary<AttributeParams, Virial.Text.TextAttribute> allAttr = new();
     private Dictionary<AttributeAsset, Virial.Text.TextAttribute> allAttrAsset = new();
-    public GUIWidget EmptyWidget => GUIEmptyWidget.Default;
+    public Virial.Media.GUIWidget EmptyWidget => GUIEmptyWidget.Default;
     public Virial.Text.TextAttribute GetAttribute(AttributeParams attribute)
     {
         if (allAttr.TryGetValue(attribute, out var attr))
@@ -269,34 +269,34 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
         };
     }
 
-    public GUIWidget HorizontalHolder(GUIAlignment alignment, IEnumerable<GUIWidget?> inner, float? fixedHeight = null) => new HorizontalWidgetsHolder(alignment, inner) { FixedHeight = fixedHeight };
+    public Virial.Media.GUIWidget HorizontalHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, float? fixedHeight = null) => new HorizontalWidgetsHolder(alignment, inner) { FixedHeight = fixedHeight };
 
-    public GUIWidget VerticalHolder(GUIAlignment alignment, IEnumerable<GUIWidget?> inner, float? fixedWidth = null) => new VerticalWidgetsHolder(alignment, inner) { FixedWidth = fixedWidth };
+    public Virial.Media.GUIWidget VerticalHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, float? fixedWidth = null) => new VerticalWidgetsHolder(alignment, inner) { FixedWidth = fixedWidth };
 
-    public GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidget? overlay = null) => new NoSGUIImage(alignment, image, size, null, onClick, overlay);
+    public Virial.Media.GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, Virial.Media.GUIWidget? overlay = null) => new NoSGUIImage(alignment, image, size, null, onClick, overlay);
 
-    public GUIWidget ScrollView(GUIAlignment alignment, Size size, string? scrollerTag, GUIWidget? inner, out Artifact<GUIScreen> artifact) {
+    public Virial.Media.GUIWidget ScrollView(GUIAlignment alignment, Size size, string? scrollerTag, Virial.Media.GUIWidget? inner, out Artifact<GUIScreen> artifact) {
         var result = new GUIScrollView(alignment, size.ToUnityVector(), inner) { ScrollerTag = scrollerTag, WithMask = true };
         artifact = result.Artifact;
         return result;
     }
 
-    public GUIWidget LocalizedButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
+    public Virial.Media.GUIWidget LocalizedButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
         => new GUIButton(alignment, attribute, new TranslateTextComponent(translationKey)) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor() };
-    public GUIWidget RawButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
+    public Virial.Media.GUIWidget RawButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
         => new GUIButton(alignment, attribute, new RawTextComponent(rawText)) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor() };
-    public GUIWidget Button(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
+    public Virial.Media.GUIWidget Button(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
         => new GUIButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor() };
 
 
-    public GUIWidget LocalizedText(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string translationKey) => new NoSGUIText(alignment, attribute, new TranslateTextComponent(translationKey));
+    public Virial.Media.GUIWidget LocalizedText(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string translationKey) => new NoSGUIText(alignment, attribute, new TranslateTextComponent(translationKey));
     
-    public GUIWidget RawText(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string rawText) => new NoSGUIText(alignment, attribute, new RawTextComponent(rawText));
+    public Virial.Media.GUIWidget RawText(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string rawText) => new NoSGUIText(alignment, attribute, new RawTextComponent(rawText));
     
-    public GUIWidget Text(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text) => new NoSGUIText(alignment, attribute, text);
+    public Virial.Media.GUIWidget Text(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text) => new NoSGUIText(alignment, attribute, text);
     
 
-    public GUIWidget Margin(FuzzySize margin) => new NoSGUIMargin(GUIAlignment.Center, new(margin.Width ?? 0f, margin.Height ?? 0f));
+    public Virial.Media.GUIWidget Margin(FuzzySize margin) => new NoSGUIMargin(GUIAlignment.Center, new(margin.Width ?? 0f, margin.Height ?? 0f));
 
     public TextComponent TextComponent(Virial.Color color, string transrationKey) => TextComponent(color.ToUnityColor(), transrationKey);
     public TextComponent TextComponent(Color color, string transrationKey) => new ColorTextComponent(color, new TranslateTextComponent(transrationKey));
@@ -319,7 +319,7 @@ public class GUIScreenImpl : GUIScreen
         this.myScreen = UnityHelper.CreateObject("Screen", parent, localPos, LayerExpansion.GetUILayer());
     }
 
-    public void SetWidget(GUIWidget? widget, out Size actualSize)
+    public void SetWidget(Virial.Media.GUIWidget? widget, out Size actualSize)
     {
         myScreen.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => GameObject.Destroy(obj)));
 

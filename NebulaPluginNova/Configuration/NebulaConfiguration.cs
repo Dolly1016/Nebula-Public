@@ -4,7 +4,7 @@ using Il2CppSystem.Runtime.Remoting.Messaging;
 using JetBrains.Annotations;
 using MS.Internal.Xml.XPath;
 using Nebula.Modules;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using Nebula.Roles.Assignment;
 using System;

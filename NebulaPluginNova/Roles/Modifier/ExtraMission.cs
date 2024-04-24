@@ -52,6 +52,34 @@ public class ExtraMission : ConfigurableStandardModifier
             return !(target?.IsDead ?? true);
         }
 
+        void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
+        {
+            if(AmOwner && dead == target)
+            {
+                new StaticAchievementToken(MyPlayer.IsDead ? "extraMission.another1" : "extraMission.common1");
+            }
+        }
+
+        void IGameEntity.OnPlayerExiled(Virial.Game.Player exiled)
+        {
+            if (AmOwner && MyPlayer.Role.Role.IsCrewmateRole && exiled.Role.Role.Unbox().IsCrewmateRole && exiled == target && MeetingHudExtension.LastVotedForMap.TryGetValue(MyPlayer.PlayerId, out var votedFor) && votedFor == exiled.PlayerId)
+            {
+                new StaticAchievementToken("extraMission.common3");
+            }
+        }
+
+        public override void OnGameEnd(NebulaEndState endState)
+        {
+            if (AmOwner)
+            {
+                if(!(target?.IsDead ?? true)) new StaticAchievementToken("extraMission.another2");
+            }
+            if ((target?.AmOwner ?? false) && !target.IsDead)
+            {
+                if (target.TryGetModifier<Instance>(out var targetMission) && (targetMission.target?.IsDead ?? false) && endState.CheckWin(target.PlayerId)) new StaticAchievementToken("extraMission.challenge");
+                new StaticAchievementToken("extraMission.common2");
+            }
+        }
         public override string? GetExtraTaskText() => Language.Translate("role.extraMission.taskText").Replace("%PLAYER%", target?.DefaultName ?? "Undefined").Color((target?.IsDead ?? false) ? Color.green : MyRole.RoleColor);
         
     }

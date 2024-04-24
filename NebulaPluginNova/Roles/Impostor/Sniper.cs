@@ -165,9 +165,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
 
                     if(MyRifle != null)
                     {
-                        var circle = UnityHelper.CreateObject<EffectCircle>("Circle", PlayerControl.LocalPlayer.transform, Vector3.zero, LayerExpansion.GetDefaultLayer());
-                        circle.Color = Palette.ImpostorRed;
-                        circle.OuterRadius = () => MyRole.ShotNoticeRangeOption.GetFloat();
+                        var circle = EffectCircle.SpawnEffectCircle(PlayerControl.LocalPlayer.transform, Vector3.zero, Palette.ImpostorRed, MyRole.ShotNoticeRangeOption.GetFloat(), null, true);
                         var script = circle.gameObject.AddComponent<ScriptBehaviour>();
                         script.UpdateHandler += () =>
                         {

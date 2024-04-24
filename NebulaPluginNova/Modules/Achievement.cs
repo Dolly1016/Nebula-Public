@@ -1,7 +1,7 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Nebula.Player;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
@@ -183,7 +183,7 @@ public class AbstractAchievement : ProgressRecord {
     static public TextAttribute DetailTitleAttribute { get; private set; } = GUI.API.GetAttribute(AttributeAsset.OverlayTitle);
     static private TextAttribute DetailContentAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayContent);
 
-    virtual public GUIWidget GetOverlayWidget(bool hiddenNotClearedAchievement = true, bool showCleared = false, bool showTitleInfo = false, bool showTorophy = false, bool showFlavor = false)
+    virtual public Virial.Media.GUIWidget GetOverlayWidget(bool hiddenNotClearedAchievement = true, bool showCleared = false, bool showTitleInfo = false, bool showTorophy = false, bool showFlavor = false)
     {
         var gui = NebulaImpl.Instance.GUILibrary;
 
@@ -292,7 +292,7 @@ public class AbstractAchievement : ProgressRecord {
         return new RawTextComponent($"<color=#e7e5ca><size=78%><i>{text}</i></size></color>");
     }
 
-    virtual public GUIWidget? GetDetailWidget() => null;
+    virtual public Virial.Media.GUIWidget? GetDetailWidget() => null;
 
     public AbstractAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, (Roles.IAssignableBase? role, AchievementType? type) category, int trophy) : base(key, goal, canClearOnce) 
     {
@@ -329,7 +329,7 @@ public class SumUpAchievement : AbstractAchievement
 
     static private TextAttribute OblongAttribute = new(GUI.Instance.GetAttribute(AttributeParams.Oblong)) { FontSize = new(1.6f), Size = new(0.6f, 0.2f), Color = new(163,204,220) };
     protected virtual void OnWidgetGenerated(GameObject obj) { }
-    public override GUIWidget? GetDetailWidget()
+    public override Virial.Media.GUIWidget? GetDetailWidget()
     {
         //クリア済みなら何も出さない
         if (IsCleared) return null;

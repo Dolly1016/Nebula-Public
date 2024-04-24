@@ -1,6 +1,6 @@
 ﻿using Hazel;
 using Nebula.Behaviour;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using System;
 using System.Collections.Generic;
 using System.Linq;

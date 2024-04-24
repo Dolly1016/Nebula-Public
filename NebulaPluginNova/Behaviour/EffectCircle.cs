@@ -11,6 +11,7 @@ public class EffectCircle : MonoBehaviour
 {
     SpriteRenderer? outerCircle, innerCircle;
     public Func<float>? OuterRadius, InnerRadius;
+    public Vector2? TargetLocalPos = null;
     private Color color;
     public Color Color { get => color; set
         {
@@ -27,8 +28,14 @@ public class EffectCircle : MonoBehaviour
 
     public void Update()
     {
+        if (!isActive && TargetLocalPos.HasValue) transform.localPosition = TargetLocalPos.Value.AsVector3(transform.localPosition.z);
         if (isActive)
         {
+            if (TargetLocalPos.HasValue)
+            {
+                transform.localPosition -= ((Vector2)transform.localPosition - TargetLocalPos.Value).Delta(5.2f,0.015f).AsVector3(0f);
+            }
+
             if (OuterRadius == null)
             {
                 if (outerCircle)
@@ -102,4 +109,13 @@ public class EffectCircle : MonoBehaviour
         StartCoroutine(CoDisappear().WrapToIl2Cpp());
     }
 
+    static public EffectCircle SpawnEffectCircle(Transform? parent, Vector3 localPos, Color color, float? outerRadious, float? innerRadious, bool ignoreShadow)
+    {
+        var circle = UnityHelper.CreateObject<EffectCircle>("Circle", parent, localPos, ignoreShadow ? LayerExpansion.GetDefaultLayer() : LayerExpansion.GetDefaultLayer());
+        circle.Color = color;
+        if(outerRadious != null) circle.OuterRadius = () => outerRadious.Value;
+        if (innerRadious != null) circle.InnerRadius = () => innerRadious.Value;
+        var script = circle.gameObject.AddComponent<ScriptBehaviour>();
+        return circle;
+    }
 }

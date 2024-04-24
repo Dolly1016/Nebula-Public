@@ -5,7 +5,7 @@ using Nebula.Commands;
 using Nebula.Game;
 using Nebula.Map;
 using Nebula.Modules;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Nebula.Utilities;
 using Rewired.UI.ControlMapper;
 using System.Collections;

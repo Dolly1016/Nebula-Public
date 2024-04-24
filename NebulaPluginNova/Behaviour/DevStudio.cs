@@ -15,7 +15,7 @@ using static Rewired.Controller;
 using UnityEngine.Rendering;
 using TMPro;
 using static Nebula.Modules.MetaWidgetOld;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Virial.Text;
 using Virial.Media;
 using MS.Internal.Xml.XPath;

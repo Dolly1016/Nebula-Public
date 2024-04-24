@@ -145,8 +145,8 @@ public class GuiArrayerCommand : ICommand
         if (arguments.Count != 1)
             return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " {structure}");
 
-        return arguments[0].AsStructure(env).ConvertTo<GuiArrayerStructure>(GuiArrayerStructure.Converter, new(), env).ChainFast<ICommandToken, GuiArrayerStructure>(
-            structure =>
+        return arguments[0].AsStructure(env).ConvertTo(GuiArrayerStructure.Converter, new(), env).ChainFast(
+            (Func<GuiArrayerStructure, ICommandToken>)(            structure =>
             {
                 List<GUIWidget> widgets = new();
                 List<GUIWidget> holders = new();
@@ -161,7 +161,7 @@ public class GuiArrayerCommand : ICommand
                 }
                 if (widgets.Count > 0) holders.Add(GUI.API.HorizontalHolder(structure.alignment, widgets.ToArray()));
                 return new ObjectCommandToken<GUIWidget>(GUI.Instance.VerticalHolder(structure.alignment, holders));
-            }
+            })
             );
     }
 }

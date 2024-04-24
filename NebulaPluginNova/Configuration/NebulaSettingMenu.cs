@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Nebula.Roles;
 using Nebula.Behaviour;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Virial.Media;
 
 namespace Nebula.Configuration;

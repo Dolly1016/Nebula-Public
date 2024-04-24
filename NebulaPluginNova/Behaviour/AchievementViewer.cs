@@ -1,5 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using UnityEngine;
 using Virial.Media;
 using Virial.Text;
@@ -62,7 +62,7 @@ internal class AchievementViewer : MonoBehaviour
                 );
             inner.Add(aContenxt);
         }
-        var scroller = new Nebula.Modules.MetaWidget.GUIScrollView(GUIAlignment.Center, new(4.7f, scrollerHeight), holder) { ScrollerTag = "Achievements" };
+        var scroller = new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(4.7f, scrollerHeight), holder) { ScrollerTag = "Achievements" };
 
         var cul = NebulaAchievementManager.Aggregate();
         List<GUIWidget> footerList = new();
@@ -88,7 +88,7 @@ internal class AchievementViewer : MonoBehaviour
         var title = new NoSGUIText(GUIAlignment.Left, gui.GetAttribute(Virial.Text.AttributeAsset.OblongHeader), new TranslateTextComponent("achievement.ui.title"));
 
         gameObject.SetActive(true);
-        myScreen.SetWidget(new Modules.MetaWidget.VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, title, GenerateWidget(4f, 9f)), out _);
+        myScreen.SetWidget(new Modules.GUIWidget.VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, title, GenerateWidget(4f, 9f)), out _);
 
     }
 

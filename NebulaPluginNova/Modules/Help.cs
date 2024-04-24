@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Nebula.Behaviour;
 using Nebula.Roles.Complex;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Virial.Media;
 using Nebula.Roles;
 using Virial.Assignable;
@@ -150,13 +150,13 @@ public static class HelpScreen
             }, RoleTitleAttr)
             {
                 RawText = role.DisplayName.Color(role.RoleColor),
-                PostBuilder = (button, renderer, text) =>
+                PostBuilder = (PassiveButton button, SpriteRenderer renderer, TMPro.TextMeshPro text) =>
                 {
                     renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                     button.OnMouseOver.AddListener(() => {
                         if (role is IConfiguableAssignable ica)
                         {
-                            List<GUIWidget> widgets = new();
+                            List<Virial.Media.GUIWidget> widgets = new();
 
                             widgets.Add(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), new RawTextComponent(role.DisplayName.Color(role.RoleColor))));
                             widgets.Add(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), new TranslateTextComponent(ica.RoleConfig.Id + ".detail")));

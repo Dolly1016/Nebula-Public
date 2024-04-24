@@ -1,4 +1,4 @@
-﻿using Nebula.Modules.MetaWidget;
+﻿using Nebula.Modules.GUIWidget;
 using Nebula.Roles.Abilities;
 using Steamworks;
 using System;

@@ -1,6 +1,6 @@
 ﻿using Il2CppSystem.Text.Json;
 using Nebula.Behaviour;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using Steamworks;
 using System;
@@ -297,7 +297,7 @@ public class SerializableDocument
 
     private const int MaxNesting = 32;
 
-    public GUIWidget? BuildForDev(Action<PassiveButton,SerializableDocument, SerializableDocument?> editorBuilder, SerializableDocument? parent = null, IResourceAllocator? nameSpace = null)
+    public Virial.Media.GUIWidget? BuildForDev(Action<PassiveButton,SerializableDocument, SerializableDocument?> editorBuilder, SerializableDocument? parent = null, IResourceAllocator? nameSpace = null)
     {
         var widget = BuildInternal(nameSpace ?? RelatedNamespace, null, null, c => c.BuildForDev(editorBuilder, this, nameSpace ?? RelatedNamespace), false, true, MaxNesting);
 
@@ -314,11 +314,11 @@ public class SerializableDocument
         return widget;
     }
 
-    public GUIWidget? Build(Artifact<GUIScreen>? myScreen, bool useMaskedMaterial = true, int leftNesting = MaxNesting, IResourceAllocator? nameSpace = null) => BuildInternal(nameSpace ?? RelatedNamespace, null, myScreen, c => c.Build(myScreen, useMaskedMaterial, leftNesting, nameSpace ?? RelatedNamespace), true, useMaskedMaterial, leftNesting);
-    public GUIWidget? BuildReference(FunctionalEnvironment? table, IResourceAllocator? nameSpace, Artifact<GUIScreen>? myScreen, bool buildHyperLink, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, buildHyperLink, leftNesting), buildHyperLink, true, leftNesting);
+    public Virial.Media.GUIWidget? Build(Artifact<GUIScreen>? myScreen, bool useMaskedMaterial = true, int leftNesting = MaxNesting, IResourceAllocator? nameSpace = null) => BuildInternal(nameSpace ?? RelatedNamespace, null, myScreen, c => c.Build(myScreen, useMaskedMaterial, leftNesting, nameSpace ?? RelatedNamespace), true, useMaskedMaterial, leftNesting);
+    public Virial.Media.GUIWidget? BuildReference(FunctionalEnvironment? table, IResourceAllocator? nameSpace, Artifact<GUIScreen>? myScreen, bool buildHyperLink, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, buildHyperLink, leftNesting), buildHyperLink, true, leftNesting);
 
 
-    public GUIWidget? BuildInternal(IResourceAllocator? nameSpace, FunctionalEnvironment? arguments, Artifact<GUIScreen>? myScreen, Func<SerializableDocument, GUIWidget?> builder, bool buildHyperLink,bool useMaskedMaterial, int leftNesting)
+    public Virial.Media.GUIWidget? BuildInternal(IResourceAllocator? nameSpace, FunctionalEnvironment? arguments, Artifact<GUIScreen>? myScreen, Func<SerializableDocument, Virial.Media.GUIWidget?> builder, bool buildHyperLink,bool useMaskedMaterial, int leftNesting)
     {
         arguments ??= new();
         arguments.TryRegister("documentId", () => IFunctionalVariable.Generate(DocumentId));

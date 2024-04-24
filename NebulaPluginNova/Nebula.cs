@@ -13,7 +13,7 @@ global using HarmonyLib;
 global using Timer = Nebula.Modules.ScriptComponents.Timer;
 global using Color = UnityEngine.Color;
 global using GUIWidget = Virial.Media.GUIWidget;
-global using GUI = Nebula.Modules.MetaWidget.NebulaGUIWidgetEngine;
+global using GUI = Nebula.Modules.GUIWidget.NebulaGUIWidgetEngine;
 global using Image = Virial.Media.Image;
 global using GamePlayer = Virial.Game.Player;
 
@@ -70,11 +70,11 @@ public class NebulaPlugin : BasePlugin
     public const string PluginVersion = "2.2.3.1";
 
     //public const string VisualVersion = "v2.3";
-    public const string VisualVersion = "Snapshot 24.04.21b";
+    public const string VisualVersion = "Snapshot 24.04.24a";
     //public const string VisualVersion = "RPC Debug 2";
 
     public const int PluginEpoch = 103;
-    public const int PluginBuildNum = 1106;
+    public const int PluginBuildNum = 1108;
     public const bool GuardVanillaLangData = true;
 
     static public HttpClient HttpClient

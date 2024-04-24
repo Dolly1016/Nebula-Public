@@ -38,14 +38,14 @@ file static class TrapperSystem
         usesText.text = leftCost.ToString();
         placeButton.OnClick = (button) =>
         {
-            float duration = Trapper.PlaceDurationOption.GetFloat();
-            NebulaAsset.PlaySE(duration < 3f ? NebulaAudioClip.Trapper2s : NebulaAudioClip.Trapper3s);
             button.ActivateEffect();
         };
         placeButton.OnEffectStart = (button) =>
         {
-            pos = myRole.MyPlayer.MyControl.GetTruePosition() + new Vector2(0f, 0.085f);
             float duration = Trapper.PlaceDurationOption.GetFloat();
+            NebulaAsset.PlaySE(duration < 3f ? NebulaAudioClip.Trapper2s : NebulaAudioClip.Trapper3s);
+
+            pos = myRole.MyPlayer.MyControl.GetTruePosition() + new Vector2(0f, 0.085f);
             PlayerModInfo.RpcAttrModulator.Invoke((myRole.MyPlayer.PlayerId, new SpeedModulator(0f, Vector2.one, true, duration, false, 10), true));
         };
         placeButton.OnEffectEnd = (button) => 

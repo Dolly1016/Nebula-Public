@@ -36,6 +36,13 @@
 "ui.citation.openUrl" : "Click to open the link."
 "ui.meeting.leftClick" : "LeftClick: Use Ability"
 "ui.meeting.rightClick": "RightClick: Change Ability"
+"ui.discordWebhook.title" : "Discord Webhook"
+"ui.discordWebhook.current" : "Current URL"
+"ui.discordWebhook.urlFromClipboard" : "Paste URL"
+"ui.discordWebhook.failedPasteUrl" : "Failed to paste Webhook URL."
+"ui.discordWebhook.autoSend" : "Send automatically"
+"ui.discordWebhook.determine" : "Determine"
+"ui.discordWebhook.send" : "Send"
 
 # Versions
 
@@ -442,6 +449,16 @@
 "options.role.destroyer.killSEStrength" : "Kill SE Strength"
 "options.role.destroyer.leaveKillEvidence" : "Leave Kill Evidence"
 
+"role.disturber.name" : "Disturber"
+"role.disturber.short" : "Di"
+"role.disturber.blurb" : "Block The Way"
+"options.role.disturber.detail" : "Disturber can place a pole to create barriers between poles.<br>The barriers prevent players movement."
+"options.role.disturber.placeCoolDown" : "Place Cool Down"
+"options.role.disturber.disturbCoolDown" : "Disturb Cool Down"
+"options.role.disturber.disturbDuration" : "Disturb Duration"
+"options.role.disturber.maxNumOfPoles" : "Max Num Of Poles"
+"options.role.disturber.maxDistanceBetweenPoles" : "Max Distance Between Poles"
+
 "role.effacer.name" : "Effacer"
 "role.effacer.short" : "E"
 "role.effacer.blurb" : "Death That No One Remember"
@@ -824,6 +841,7 @@
 "button.label.clean" : "clean"
 "button.label.collatorSample" : "sample"
 "button.label.destroy" : "destroy"
+"button.label.disturb" : "disturb"
 "button.label.doorHack" : "door hack"
 "button.label.douse" : "douse"
 "button.label.drag" : "drag"
@@ -1021,6 +1039,7 @@
 "config.client.processorAffinity.dualCore" : "Dual Core"
 "config.client.processorAffinity.singleCore" : "Single Core"
 "config.client.forceSkeldMeetingSE" : "Force The Skeld SE"
+"config.client.webhook" : "Discord Webhook"
 
 # Preset
 

@@ -11,6 +11,7 @@ using Nebula.Utilities;
 using Nebula.Behaviour;
 using Virial.Game;
 using Nebula.Roles.Modifier;
+using static Il2CppSystem.Globalization.CultureInfo;
 
 namespace Nebula.Game;
 
@@ -176,7 +177,27 @@ public class LastGameHistory
 [HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.SetEverythingUp))]
 public class EndGameManagerSetUpPatch
 {
+    static private bool SendDiscordWebhook(byte[] pngImage)
+    {
+        try
+        {
+            using MultipartFormDataContent content = new();
+            content.Add(new FormUrlEncodedContent([new("content", "テスト")]));
+            content.Add(new ByteArrayContent(pngImage), "file", "image.png");
+            var awaiter = NebulaPlugin.HttpClient.PostAsync(ClientOption.WebhookOption.url, content).GetAwaiter();
+            awaiter.GetResult();
+            return true;
+        }catch(Exception e)
+        {
+            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "Failed to send webhook. \n" + e.ToString());
+            return false;
+        }
+    }
+
+
     static SpriteLoader InfoButtonSprite = SpriteLoader.FromResource("Nebula.Resources.InformationButton.png", 100f);
+    static SpriteLoader DiscordButtonSprite = SpriteLoader.FromResource("Nebula.Resources.DiscordIcon.png", 100f);
+
     private static IMetaWidgetOld GetRoleContent(TMPro.TMP_FontAsset font)
     {
         MetaWidgetOld widget = new();
@@ -215,7 +236,7 @@ public class EndGameManagerSetUpPatch
             if (roleText.Length > 0) roleText += " → ";
             roleText += entries[entries.Length - 1].Item2;
 
-            text += $"{nameText}<indent=21px>{taskText}</indent><indent=24px>{stateText}</indent><indent=39px>{roleText}</indent>\n";
+            text += $"{nameText}<indent=20px>{taskText}</indent><indent=29px>{stateText}</indent><indent=47px>{roleText}</indent>\n";
         }
 
         widget.Append(new MetaWidgetOld.VariableText(new TextAttributeOld(TextAttributeOld.BoldAttr) { Font = font, Size = new(6f, 4.2f), Alignment = TMPro.TextAlignmentOptions.Left }.EditFontSize(1.4f, 1f, 1.4f))
@@ -230,16 +251,16 @@ public class EndGameManagerSetUpPatch
         var endState = NebulaGameManager.Instance.EndState;
         var endCondition = endState?.EndCondition;
 
-        if(endState==null) return;
+        if (endState == null) return;
 
         //元の勝利チームを削除する
         foreach (PoolablePlayer pb in __instance.transform.GetComponentsInChildren<PoolablePlayer>()) UnityEngine.Object.Destroy(pb.gameObject);
 
-        
+
         //勝利メンバーを載せる
         List<byte> winners = new List<byte>();
         bool amWin = false;
-        for (byte i= 0;i < 32; i++)
+        for (byte i = 0; i < 32; i++)
         {
             if ((endState.WinnersMask & (1 << i)) != 0)
             {
@@ -303,12 +324,14 @@ public class EndGameManagerSetUpPatch
         __instance.WinText.text = DestroyableSingleton<TranslationController>.Instance.GetString(amWin ? StringNames.Victory : StringNames.Defeat);
         __instance.WinText.color = amWin ? new Color(0f, 0.549f, 1f, 1f) : Color.red;
 
+        LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
+
         GameStatisticsViewer? viewer;
 
         IEnumerator CoShowStatistics()
         {
             yield return new WaitForSeconds(0.4f);
-            viewer = UnityHelper.CreateObject<GameStatisticsViewer>("Statistics", __instance.transform, new Vector3(0f, 2.5f, -20f),LayerExpansion.GetUILayer());
+            viewer = UnityHelper.CreateObject<GameStatisticsViewer>("Statistics", __instance.transform, new Vector3(0f, 2.5f, -20f), LayerExpansion.GetUILayer());
             viewer.PlayerPrefab = __instance.PlayerPrefab;
             viewer.GameEndText = __instance.WinText;
         }
@@ -321,7 +344,25 @@ public class EndGameManagerSetUpPatch
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
         button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
 
-        LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
+
+        if (!AmongUsClient.Instance.AmHost || ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !ClientOption.WebhookOption.autoSendEntry.Value)
+        {
+            var discordButtonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebhookButton", __instance.transform, new Vector3(-3.4f, 2.5f, -50f), LayerExpansion.GetUILayer());
+            discordButtonRenderer.sprite = DiscordButtonSprite.GetSprite();
+            var discordButton = discordButtonRenderer.gameObject.SetUpButton(true, discordButtonRenderer);
+            discordButton.OnClick.AddListener(() =>
+            {
+                var data = LastGameHistory.GenerateTexture().EncodeToPNG();
+                if (ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !SendDiscordWebhook(data))
+                    ClientOption.ShowWebhookSetting(() => SendDiscordWebhook(data));
+            });
+            discordButton.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked = () => ClientOption.ShowWebhookSetting(() => SendDiscordWebhook(LastGameHistory.GenerateTexture().EncodeToPNG()));
+            discordButton.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+        }
+        else
+        {
+            SendDiscordWebhook(LastGameHistory.GenerateTexture().EncodeToPNG());
+        }    
 
         //Achievements
         //標準ゲームモードで廃村でない、かつOP権限が誰にも付与されていないゲームの場合
@@ -347,3 +388,4 @@ public class EndGamePatch
         return false;
     }
 }
+

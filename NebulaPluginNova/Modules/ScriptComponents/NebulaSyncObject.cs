@@ -41,25 +41,31 @@ public abstract class NebulaSyncObject : INebulaScriptComponent, IGameEntity
     {
     }
 
+    public virtual void OnInstantiated() { }
     public virtual void OnReleased() { 
         allObjects.Remove(ObjectId);
     }
-    void IGameEntity.OnReleased() => OnReleased();
+
+    private float[] argumentsCache;
 
     static private byte OwnerIdFromObjectId(int objId) => (byte)(objId >>= 16);
 
-    static private RemoteProcess<(int id,int tagHash, float[] arguments)> RpcInstantiateDef = new(
+    static private RemoteProcess<(int id,int tagHash, float[] arguments, bool skipLocal)> RpcInstantiateDef = new(
         "InstantiateObj",
-        (message,_) =>
+        (message,local) =>
         {
+            if (local && message.skipLocal) return;
+
             var obj = instantiaters[message.tagHash]?.Invoke(message.arguments);
 
             if (obj == null) return;
 
+            obj.argumentsCache = message.arguments;
             obj.ObjectId = message.id;
             obj.Owner = NebulaGameManager.Instance!.GetModPlayerInfo(OwnerIdFromObjectId(obj.ObjectId))!;
             obj.TagHash = message.tagHash;
             if (allObjects.ContainsKey(obj.ObjectId)) throw new Exception("[NebulaSyncObject] Duplicated Key Error");
+            obj.OnInstantiated();
             allObjects.Add(obj.ObjectId, obj);
         });
 
@@ -72,15 +78,21 @@ public abstract class NebulaSyncObject : INebulaScriptComponent, IGameEntity
     static public NebulaSyncObject? RpcInstantiate(string tag, float[]? arguments)
     {
         int id = AvailableId(PlayerControl.LocalPlayer.PlayerId);
-        RpcInstantiateDef.Invoke(new(id, tag.ComputeConstantHash(), arguments ?? Array.Empty<float>()));
+        RpcInstantiateDef.Invoke(new(id, tag.ComputeConstantHash(), arguments ?? Array.Empty<float>(), false));
         return allObjects[id];
     }
 
     static public NebulaSyncObject? LocalInstantiate(string tag, float[]? arguments)
     {
         int id = AvailableId(PlayerControl.LocalPlayer.PlayerId);
-        RpcInstantiateDef.LocalInvoke(new(id, tag.ComputeConstantHash(), arguments ?? Array.Empty<float>()));
+        RpcInstantiateDef.LocalInvoke(new(id, tag.ComputeConstantHash(), arguments ?? Array.Empty<float>(), false));
         return allObjects[id];
+    }
+
+    //ローカルでの生成を全体に反映させます。
+    public void ReflectInstantiationGlobally()
+    {
+        RpcInstantiateDef.Invoke(new(ObjectId, TagHash, argumentsCache, true));
     }
 
     static public void RpcDestroy(int id)

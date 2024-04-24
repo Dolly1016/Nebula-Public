@@ -3,6 +3,7 @@ using Epic.OnlineServices;
 using Il2CppSystem.Reflection.Metadata.Ecma335;
 using Nebula.Configuration;
 using Nebula.Modules;
+using Nebula.Roles.Crewmate;
 using Nebula.Utilities;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -65,6 +66,9 @@ public abstract class AbstractRole : IAssignableBase, DefinedRole
     public virtual bool IsSpawnable { get => true; }
 
     ModifierFilter? DefinedRole.ModifierFilter => ModifierFilter;
+
+    public bool IsCrewmateRole => Category == RoleCategory.CrewmateRole && this != Madmate.MyRole;
+    public bool IsImpostorRole => Category == RoleCategory.ImpostorRole;
 
     public abstract void Load();
 

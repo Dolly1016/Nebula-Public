@@ -8,7 +8,7 @@ using Virial.Compat;
 using Virial.Media;
 using Virial.Text;
 
-namespace Nebula.Modules.MetaWidget;
+namespace Nebula.Modules.GUIWidget;
 public class GUIButton : NoSGUIText
 {
     public GUIClickableAction? OnClick { get; init; }

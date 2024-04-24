@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behaviour;
+using Nebula.Modules.GUIWidget;
 using Rewired.UI.ControlMapper;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 
 namespace Nebula.Modules;
 
@@ -28,6 +30,58 @@ public class ClientOption
     string id;
     string[] selections;
     ClientOptionType type;
+
+    private static string DiscordWebhookPrefix = "https://discord.com/api/webhooks/";
+    public record DiscordWebhookOption(StringDataEntry urlEntry, BooleanDataEntry autoSendEntry) { 
+        public string url => DiscordWebhookPrefix + urlEntry.Value; 
+        public string urlShorten => urlEntry.Value.Length == 0 ? "    -    ".Color(Color.gray) : urlEntry.Value.Substring(0,3) + " ... " + urlEntry.Value.Substring(urlEntry.Value.Length - 4);
+
+    };
+    static public DiscordWebhookOption WebhookOption { get; private set; } = new(new("discordUrl", ClientOptionSaver, ""), new("discordAutoSend", ClientOptionSaver, false));
+
+    
+
+    static public void ShowWebhookSetting(Action? onDetermine = null)
+    {
+        var window = MetaScreen.GenerateWindow(new(4.2f, 2.3f), HudManager.InstanceExists ? HudManager.Instance.transform : null, Vector3.zero, true, true, true, true);
+
+        string GetCurrentWebhookString() => (Language.Translate("ui.discordWebhook.current") + ": ").Bold() + WebhookOption.urlShorten;
+        bool SetWebhookStringFromClipboard() {
+            string copied = Helpers.GetClipboardString();
+            if (!copied.StartsWith(DiscordWebhookPrefix)) return false; //先頭がおかしい場合
+            if (copied.Length < DiscordWebhookPrefix.Length + 8) return false; //短すぎる場合
+            WebhookOption.urlEntry.Value = copied.Substring(DiscordWebhookPrefix.Length);
+
+            return true;
+        }
+
+        TextMeshPro? currentText = null;
+        var currentDisplay = new NoSGUIText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), new RawTextComponent(GetCurrentWebhookString())) { PostBuilder = t => currentText = t };
+        var checkBox = new NoSGUICheckbox(Virial.Media.GUIAlignment.Center, WebhookOption.autoSendEntry.Value) { OnValueChanged = val => WebhookOption.autoSendEntry.Value = val };
+        
+        
+        window.SetWidget(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
+            GUI.API.Text(Virial.Media.GUIAlignment.Left,GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentTitle), new TranslateTextComponent("ui.discordWebhook.title")),
+            GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,
+                currentDisplay,
+                new NoSGUIMargin(Virial.Media.GUIAlignment.Center, new(0.1f, 0f)),
+                GUI.API.Button(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.StandardMediumMasked), new TranslateTextComponent("ui.discordWebhook.urlFromClipboard"), _ => currentText.text = SetWebhookStringFromClipboard() ? GetCurrentWebhookString() : Language.Translate("ui.discordWebhook.failedPasteUrl").Color(Color.red))
+            ),
+            GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,
+                checkBox,
+                new NoSGUIMargin(Virial.Media.GUIAlignment.Center, new(0.1f,0f)),
+                new NoSGUIText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), new TranslateTextComponent("ui.discordWebhook.autoSend"))
+            ),
+            new NoSGUIMargin(Virial.Media.GUIAlignment.Center, new(0f, 0.12f)),
+            GUI.API.Button(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed), new TranslateTextComponent(onDetermine != null ? "ui.discordWebhook.send" : "ui.discordWebhook.determine"), _ =>
+            {
+                onDetermine?.Invoke();
+                window.CloseScreen();
+            })
+        ),new(0.5f,0.5f), out _);
+
+        
+    }
 
     public ClientOption(ClientOptionType type,string name,string[] selections,int defaultValue)
     {
@@ -106,7 +160,9 @@ public static class StartOptionMenuPatch
 {
     public static void Postfix(OptionsMenuBehaviour __instance)
     {
-        foreach(var button in __instance.GetComponentsInChildren<CustomButton>(true))
+        __instance.transform.localPosition = new(0, 0, -300);
+
+        foreach (var button in __instance.GetComponentsInChildren<CustomButton>(true))
         {
             if (button.name != "DoneButton") continue;
 
@@ -164,6 +220,11 @@ public static class StartOptionMenuPatch
                 { TranslationKey = "config.client.vcRejoin", Alignment = IMetaWidgetOld.AlignmentOption.Center });
             }
 
+            nebulaWidget.Append(new MetaWidgetOld.Button(() =>
+            {
+                ClientOption.ShowWebhookSetting();
+            }, buttonAttr)
+            { TranslationKey = "config.client.webhook", Alignment = IMetaWidgetOld.AlignmentOption.Center });
 
             nebulaScreen.SetWidget(nebulaWidget);
         }

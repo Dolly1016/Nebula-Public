@@ -3,7 +3,7 @@ using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Net.NetworkInformation;
 using JetBrains.Annotations;
 using Nebula.Behaviour;
-using Nebula.Modules.MetaWidget;
+using Nebula.Modules.GUIWidget;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Virial.Media;
@@ -582,9 +582,9 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
     public class WrappedWidget : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public AlignmentOption Alignment => Widget.Alignment switch { GUIAlignment.Left => AlignmentOption.Left, GUIAlignment.Right => AlignmentOption.Right, _ => AlignmentOption.Center };
-        public GUIWidget? Widget;
+        public Virial.Media.GUIWidget? Widget;
 
-        public WrappedWidget(GUIWidget? widget)
+        public WrappedWidget(Virial.Media.GUIWidget? widget)
         {
             Widget = widget;
         }
@@ -1228,8 +1228,8 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         this.border = border;
     }
 
-    public void SetWidget(GUIWidget widget, out Virial.Compat.Size actualSize) => SetWidget(widget, new(0f, 1f), out actualSize);
-    public void SetWidget(GUIWidget widget, UnityEngine.Vector2 anchor, out Virial.Compat.Size actualSize)
+    public void SetWidget(Virial.Media.GUIWidget widget, out Virial.Compat.Size actualSize) => SetWidget(widget, new(0f, 1f), out actualSize);
+    public void SetWidget(Virial.Media.GUIWidget widget, UnityEngine.Vector2 anchor, out Virial.Compat.Size actualSize)
     {
         ClearWidget();
 
