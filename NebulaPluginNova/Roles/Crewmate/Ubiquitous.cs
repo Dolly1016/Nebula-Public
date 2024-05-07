@@ -17,7 +17,7 @@ file static class UbiquitousDroneAsset
     public static SpriteLoader droneShadeSprite = SpriteLoader.FromResource("Nebula.Resources.DroneShade.png", 150f);
 }
 
-public class UbiquitousDrone : MonoBehaviour, INoisedCamera
+public class UbiquitousDrone : MonoBehaviour
 {
     SpriteRenderer droneRenderer = null!;
     SpriteRenderer shadeRenderer = null!;
@@ -271,12 +271,17 @@ public class Ubiquitous : ConfigurableStandardRole
     public NebulaConfiguration droneDetectionRadiousOption = null!;
     public NebulaConfiguration doorHackCoolDownOption = null!;
     public NebulaConfiguration doorHackRadiousOption = null!;
+    public NebulaConfiguration droneCoolDownOption = null!;
+    public NebulaConfiguration droneDurationOption = null!;
 
     protected override void LoadOptions()
     {
         base.LoadOptions();
 
         RoleConfig.AddTags(ConfigurationHolder.TagFunny, ConfigurationHolder.TagDifficult);
+
+        droneCoolDownOption = new(RoleConfig, "droneCoolDown", null, 5f, 120f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
+        droneDurationOption = new(RoleConfig, "droneDuration", null, 5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
 
         droneMicrophoneRadiousOption = new(RoleConfig, "microphoneRadious", null, 0f, 5f, 0.25f, 2f, 2f) { Decorator = NebulaConfiguration.OddsDecorator };
         droneDetectionRadiousOption = new(RoleConfig, "detectionRadious", null, 0f, 10f, 0.25f, 2f, 2f) { Decorator = NebulaConfiguration.OddsDecorator };
@@ -367,16 +372,27 @@ public class Ubiquitous : ConfigurableStandardRole
                 };
                 droneButton.OnClick = (button) =>
                 {
-                    if (!myDrone)
-                    {
-                        myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.MyControl.GetTruePosition());
+                    droneButton.ActivateEffect();
 
-                        droneCam = UnityHelper.CreateRenderingCamera("Camera", myDrone.transform, Vector3.zero, 1.4f);
-                        mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134, 78);
+                    if (droneButton.EffectActive)
+                    {
+                        if (!myDrone)
+                        {
+                            myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.MyControl.GetTruePosition());
+
+                            droneCam = UnityHelper.CreateRenderingCamera("Camera", myDrone.transform, Vector3.zero, 1.4f);
+                            mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134, 78);
+                        }
+                        AmongUsUtil.ToggleCamTarget(myDrone, null);
                     }
-                    AmongUsUtil.ToggleCamTarget(myDrone, null);
                 };
-                droneButton.CoolDownTimer = Bind(new Timer(0f).SetAsAbilityCoolDown().Start());
+                droneButton.OnEffectEnd = (button) =>
+                {
+                    AmongUsUtil.SetCamTarget(null);
+                    droneButton.StartCoolDown();
+                };
+                droneButton.CoolDownTimer = Bind(new Timer(MyRole.droneCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                droneButton.EffectTimer = Bind(new Timer(MyRole.droneDurationOption.GetFloat()).Start());
                 droneButton.SetLabel("drone");
                 droneButton.OnSubAction = (button) =>
                 {
@@ -401,6 +417,8 @@ public class Ubiquitous : ConfigurableStandardRole
                     AmongUsUtil.SetCamTarget();
                     myDrone!.CallBack();
                     myDrone = null;
+
+                    if (droneButton.EffectActive) droneButton.InactivateEffect();
                 };
                 callBackButton.CoolDownTimer = Bind(new Timer(0f).SetAsAbilityCoolDown().Start());
                 callBackButton.SetLabel("callBack");

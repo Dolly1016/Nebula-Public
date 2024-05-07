@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Modules.GUIWidget;
+using System.Linq;
 using UnityEngine;
 using Virial.Media;
 using Virial.Text;
@@ -27,8 +28,10 @@ internal class AchievementViewer : MonoBehaviour
         TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, () => { obj.OnShown(); });
     }
 
-    static public GUIWidget GenerateWidget(float scrollerHeight,float width)
+    static public GUIWidget GenerateWidget(float scrollerHeight,float width, string? scrollerTag = null, bool showTrophySum = true, Predicate<AbstractAchievement>? predicate = null)
     {
+        scrollerTag ??= "Achievements";
+
         var gui = NebulaImpl.Instance.GUILibrary;
 
         List<GUIWidget> inner = new();
@@ -38,7 +41,7 @@ internal class AchievementViewer : MonoBehaviour
         var detailTitleAttr = new Virial.Text.TextAttribute(gui.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f) };
         var detailDetailAttr = new Virial.Text.TextAttribute(gui.GetAttribute(AttributeParams.StandardBaredLeft)) { FontSize = new(1.5f), Size = new(5f, 6f) };
 
-        foreach (var a in NebulaAchievementManager.AllAchievements)
+        foreach (var a in NebulaAchievementManager.AllAchievements.Where(a => predicate?.Invoke(a) ?? true))
         {
             if (a.IsHidden) continue;
 
@@ -53,7 +56,8 @@ internal class AchievementViewer : MonoBehaviour
             var progress = a.GetDetailWidget();
             if (progress != null) widgets.Add(progress);
 
-            var achievementContent = new VerticalWidgetsHolder(GUIAlignment.Center,widgets);
+            var achievementContent = new VerticalWidgetsHolder(GUIAlignment.Center, widgets);
+
 
             var aContenxt = new HorizontalWidgetsHolder(GUIAlignment.Left,
                 new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(a.Trophy)), new(0.38f, 0.38f), a.IsCleared ? Color.white : new UnityEngine.Color(0.2f, 0.2f, 0.2f)) { IsMasked = true },
@@ -62,24 +66,33 @@ internal class AchievementViewer : MonoBehaviour
                 );
             inner.Add(aContenxt);
         }
-        var scroller = new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(4.7f, scrollerHeight), holder) { ScrollerTag = "Achievements" };
 
-        var cul = NebulaAchievementManager.Aggregate();
-        List<GUIWidget> footerList = new();
-        for (int i = 0; i < cul.Length; i++)
+        var scroller = new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(4.7f, scrollerHeight), holder) { ScrollerTag = scrollerTag };
+
+        if (showTrophySum)
         {
-            int copiedIndex = i;
-            if (footerList.Count != 0) footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.2f, 0f)));
+            var cul = NebulaAchievementManager.Aggregate(predicate);
+            List<GUIWidget> footerList = new();
+            for (int i = 0; i < cul.Length; i++)
+            {
+                int copiedIndex = i;
+                if (footerList.Count != 0) footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.2f, 0f)));
 
-            footerList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(copiedIndex)), new(0.5f, 0.5f)));
-            footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.05f, 0f)));
-            footerList.Add(new NoSGUIText(GUIAlignment.Left, detailDetailAttr, new RawTextComponent(cul[i].num + "/" + cul[i].max)));
+                footerList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(copiedIndex)), new(0.5f, 0.5f)));
+                footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.05f, 0f)));
+                footerList.Add(new NoSGUIText(GUIAlignment.Left, detailDetailAttr, new RawTextComponent(cul[i].num + "/" + cul[i].max)));
+            }
+            var footer = new HorizontalWidgetsHolder(GUIAlignment.Center, footerList.ToArray());
+
+
+            return new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, scroller, new NoSGUIMargin(GUIAlignment.Center, new(0f, 0.15f)), footer,
+                new NoSGUIText(GUIAlignment.Center, detailDetailAttr, new RawTextComponent(Language.Translate(predicate != null ? "achievement.ui.shown" : "achievement.ui.allAchievements") + ": " + cul.Sum(c => c.num) + "/" + cul.Sum(c => c.max))))
+            { FixedWidth = width };
         }
-        var footer = new HorizontalWidgetsHolder(GUIAlignment.Center, footerList.ToArray());
-
-        return new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, scroller, new NoSGUIMargin(GUIAlignment.Center, new(0f, 0.15f)), footer,
-            new NoSGUIText(GUIAlignment.Center, detailDetailAttr, new RawTextComponent(Language.Translate("achievement.ui.allAchievements") + ": " + cul.Sum(c => c.num) + "/" + cul.Sum(c => c.max))))
-        { FixedWidth = width };
+        else
+        {
+            return scroller;
+        }
     }
 
     public void OnShown() {

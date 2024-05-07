@@ -33,6 +33,13 @@ public interface Game : ILifespan
     internal void RegisterEntity(IGameEntity entity, ILifespan lifespan);
 
     /// <summary>
+    /// モジュールを取得します。
+    /// </summary>
+    /// <typeparam name="GameModule">モジュールの型</typeparam>
+    /// <returns></returns>
+    //GameModule GetModule<GameModule>() where GameModule : IGameModule<Game>;
+
+    /// <summary>
     /// 現在のHUD。
     /// </summary>
     HUD CurrentHud { get; }

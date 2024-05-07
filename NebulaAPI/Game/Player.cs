@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using AmongUs.Data.Player;
+using Virial.Assignable;
 using Virial.Text;
 
 namespace Virial.Game;
@@ -103,6 +104,45 @@ public static class PlayerAttributes
     /// モザイク効果を表します。
     /// </summary>
     static public IPlayerAttribute Roughening { get; internal set; }
+}
+
+public class Outfit
+{
+    internal GameData.PlayerOutfit outfit { get; private set; }
+
+    internal Outfit(GameData.PlayerOutfit outfit, bool clone = false)
+    {
+        if (clone)
+        {
+            this.outfit = new();
+            this.outfit.HatId = outfit.HatId;
+            this.outfit.VisorId = outfit.VisorId;
+            this.outfit.SkinId = outfit.SkinId;
+            this.outfit.ColorId = outfit.ColorId;
+            this.outfit.PlayerName = outfit.PlayerName;
+            this.outfit.NamePlateId = outfit.NamePlateId;
+        }
+        else
+        {
+            this.outfit = outfit;
+        }
+    }
+
+    public override bool Equals(object? obj)
+    {
+        GameData.PlayerOutfit? outfit = null;
+        if (obj is Outfit o) outfit = o.outfit;
+        else if (obj is GameData.PlayerOutfit po) outfit = po;
+
+        if(outfit != null){
+            return 
+                outfit.HatId == this.outfit.HatId &&
+                outfit.SkinId == this.outfit.SkinId &&
+                outfit.VisorId == this.outfit.VisorId &&
+                outfit.ColorId == this.outfit.ColorId;
+        }
+        return false;
+    }
 }
 
 public class OutfitCandidate

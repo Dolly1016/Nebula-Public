@@ -9,6 +9,17 @@ namespace Nebula.Utilities;
 
 public static class StreamHelper
 {
+    public static string ReadToEnd(this Stream stream, bool closeStream = true)
+    {
+        string result;
+        using(var reader = new StreamReader(stream))
+        {
+             result = reader.ReadToEnd();
+        }
+        if (closeStream) stream.Dispose();
+        return result;
+    }
+
     public static Stream? OpenFromResource(string path)
     {
         try

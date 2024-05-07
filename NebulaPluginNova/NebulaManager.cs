@@ -313,30 +313,13 @@ public class NebulaManager : MonoBehaviour
         return dir + "\\" + currentTime + ".png";
     }
 
-    static public IEnumerator CaptureAndSave(bool fillBackColor)
+    static public IEnumerator CaptureAndSave()
     {
         yield return new WaitForEndOfFrame();
 
-
-        var tex = ScreenCapture.CaptureScreenshotAsTexture();
-
-        if (fillBackColor)
-        {
-            var backColor = Camera.main.backgroundColor;
-            var pixels = tex.GetPixels();
-
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                Color c = pixels[i] * pixels[i].a + backColor * (1f - pixels[i].a);
-                c.a = 1f;
-                pixels[i] = c;
-
-                if (i % 10000 == 0) yield return null;
-            }
-
-            tex.SetPixels(pixels);
-            tex.Apply();
-        }
+        var tex = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+        tex.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+        tex.Apply();
 
         File.WriteAllBytesAsync(GetPicturePath(out string displayPath), tex.EncodeToPNG());
     }
@@ -344,10 +327,10 @@ public class NebulaManager : MonoBehaviour
     public void Update()
     {
 
-        if (NebulaPlugin.FinishedPreload)
+        if (PreloadManager.FinishedPreload)
         {
             //スクリーンショット
-            if (!TextField.AnyoneValid && NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDown) StartCoroutine(CaptureAndSave(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyState).WrapToIl2Cpp());
+            if (!TextField.AnyoneValid && NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDown) StartCoroutine(CaptureAndSave().WrapToIl2Cpp());
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {

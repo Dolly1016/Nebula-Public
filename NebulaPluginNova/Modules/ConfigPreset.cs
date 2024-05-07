@@ -57,7 +57,7 @@ public class ScriptPreset : IConfigPreset{
     }
     
 }
-[NebulaPreLoad]
+[NebulaPreLoad(typeof(NebulaAddon))]
 public class ConfigPreset : IConfigPreset
 {
 

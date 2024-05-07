@@ -30,6 +30,10 @@ public class NebulaOptionHolder : Attribute
 }
 
 
+/// <summary>
+/// ゲーム中では、オプションの値を共有するために一意なIDが必要になります。
+/// アドオン等によって追加された全オプションにIDを割り振り、クライアント間でのオプション値の共有を担います。
+/// </summary>
 [NebulaPreLoad(typeof(Roles.Roles))]
 [NebulaRPCHolder]
 public class NebulaConfigEntryManager
@@ -505,7 +509,7 @@ public class NebulaConfiguration : ValueConfiguration
         button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, widget));
         button.OnMouseOut.AddListener(()=>NebulaManager.Instance.HideHelpWidget());
     }
-    public IMetaWidgetOld? GetEditor()
+    internal IMetaWidgetOld? GetEditor()
     {
         if (Editor != null)
             return Editor.Invoke();
@@ -518,7 +522,7 @@ public class NebulaConfiguration : ValueConfiguration
             );
     }
 
-    public string? GetShownString() {
+    internal string? GetShownString() {
         try
         {
             return Shower?.Invoke() ?? null;
@@ -528,6 +532,8 @@ public class NebulaConfiguration : ValueConfiguration
             return null;
         }
     }
+
+    string? IConfigurationEntry.GetDisplayText() => GetShownString();
 
     static public TextAttributeOld GetOptionBoldAttr(float width, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.Center) => new(TextAttributeOld.BoldAttr)
     {
@@ -565,6 +571,10 @@ public class NebulaConfiguration : ValueConfiguration
 
     public string DefaultShowerString => Title.GetString() + " : " + ToDisplayString();
     
+    public NebulaConfiguration(ConfigurationHolder? holder, Func<NebulaConfiguration> referTo)
+    {
+
+    }
 
     public NebulaConfiguration(ConfigurationHolder? holder, Func<IMetaWidgetOld?> editor, Func<string?>? shower = null)
     {

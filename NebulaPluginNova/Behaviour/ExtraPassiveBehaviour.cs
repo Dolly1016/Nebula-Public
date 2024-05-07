@@ -23,7 +23,7 @@ public class ExtraPassiveBehaviour : MonoBehaviour
         if(myElement && PassiveButtonManager.Instance.currentOver == myElement)
         {
             OnPiled?.Invoke();
-
+            
             if (Input.GetKeyUp(KeyCode.Mouse1)) OnRightClicked?.Invoke();
         }
     }

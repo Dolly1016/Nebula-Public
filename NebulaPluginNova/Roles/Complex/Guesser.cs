@@ -1,16 +1,5 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
-using Nebula.Configuration;
-using Nebula.Game;
-using Nebula.Roles.Neutral;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Game;
-using static Mono.CSharp.Parameter;
 
 namespace Nebula.Roles.Complex;
 

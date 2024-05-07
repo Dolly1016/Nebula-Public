@@ -117,7 +117,7 @@ public class NebulaInput
         modInput[Virial.Compat.VirtualKeyInput.Command] = new(GetModKeyCodeGetter("command", KeyCode.LeftControl));
         modInput[Virial.Compat.VirtualKeyInput.Screenshot] = new(GetModKeyCodeGetter("screenshot", KeyCode.P));
         modInput[Virial.Compat.VirtualKeyInput.Mute] = new(GetModKeyCodeGetter("mute", KeyCode.M));
-        modInput[Virial.Compat.VirtualKeyInput.VCFilter] = new(GetModKeyCodeGetter("vcFilter", KeyCode.M));
+        modInput[Virial.Compat.VirtualKeyInput.VCFilter] = new(GetModKeyCodeGetter("vcFilter", KeyCode.B));
         modInput[Virial.Compat.VirtualKeyInput.Help] = new(GetModKeyCodeGetter("help", KeyCode.H));
         modInput[Virial.Compat.VirtualKeyInput.Spectator] = new(GetModKeyCodeGetter("spectator", KeyCode.C));
         modInput[Virial.Compat.VirtualKeyInput.SpectatorRight] = new(GetModKeyCodeGetter("spectatorRight", KeyCode.Period));

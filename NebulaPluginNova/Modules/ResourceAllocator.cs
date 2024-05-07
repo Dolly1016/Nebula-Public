@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Nebula.Commands;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Command;
 using Virial.Compat;
 using Virial.Media;
 

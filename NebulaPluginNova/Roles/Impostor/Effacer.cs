@@ -43,7 +43,7 @@ public class Effacer : ConfigurableStandardRole, HasCitation
         {
         }
 
-        AchievementToken<BitMask<GamePlayer>>? achChallengeToken = null;
+        AchievementToken<EditableBitMask<GamePlayer>>? achChallengeToken = null;
         public override void OnActivated()
         {
             base.OnActivated();

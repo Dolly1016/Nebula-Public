@@ -24,6 +24,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
 
     private NebulaConfiguration CamoCoolDownOption = null!;
     private NebulaConfiguration CamoDurationOption = null!;
+    private NebulaConfiguration CanInvokeCamoAfterDeathOption = null!;
     protected override void LoadOptions()
     {
         base.LoadOptions();
@@ -32,6 +33,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
 
         CamoCoolDownOption = new NebulaConfiguration(RoleConfig, "camoCoolDown", null, 5f, 60f, 5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
         CamoDurationOption = new NebulaConfiguration(RoleConfig, "camoDuration", null, 5f, 60f, 5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
+        CanInvokeCamoAfterDeathOption = new NebulaConfiguration(RoleConfig, "canInvokeCamoAfterDeath", null, false, false);
     }
 
     public class Instance : Impostor.Instance, IGamePlayerEntity
@@ -59,7 +61,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
                 camouflageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 camouflageButton.SetSprite(buttonSprite.GetSprite());
                 camouflageButton.Availability = (button) =>MyPlayer.MyControl.CanMove;
-                camouflageButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                camouflageButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead || MyRole.CanInvokeCamoAfterDeathOption;
                 camouflageButton.OnClick = (button) => {
                     button.ActivateEffect();
                 };

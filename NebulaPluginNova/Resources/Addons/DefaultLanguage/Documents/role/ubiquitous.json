@@ -47,8 +47,8 @@
 					"Document" : {
 						"Id" : "templates.captionedImage",
 						"Arguments" : {
-							"imageFullName" : "Images.Drone0",
-							"textKey" : "role.ubiquitous.doc.dronePhase1.png"
+							"imageFullName" : "Images.Drone0.png",
+							"textKey" : "role.ubiquitous.doc.dronePhase1"
 						}
 					}
 				},
@@ -65,8 +65,8 @@
 					"Document" : {
 						"Id" : "templates.captionedImage",
 						"Arguments" : {
-							"imageFullName" : "Images.Drone1",
-							"textKey" : "role.ubiquitous.doc.dronePhase2.png"
+							"imageFullName" : "Images.Drone1.png",
+							"textKey" : "role.ubiquitous.doc.dronePhase2"
 						}
 					}
 				},

@@ -1,4 +1,5 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
+using Il2CppSystem.Threading.Tasks;
 using Nebula.Behaviour;
 using System;
 using System.Collections.Generic;
@@ -82,6 +83,8 @@ public class Disturber : ConfigurableStandardRole
     {
         base.LoadOptions();
 
+        RoleConfig.AddTags(ConfigurationHolder.TagDifficult, ConfigurationHolder.TagFunny);
+
         PlaceCoolDownOption = new NebulaConfiguration(RoleConfig, "placeCoolDown", null, 0f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
         DisturbCoolDownOption = new NebulaConfiguration(RoleConfig, "disturbCoolDown", null, 10f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
         DisturbDurationOption = new NebulaConfiguration(RoleConfig, "disturbDuration", null, 5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
@@ -90,13 +93,11 @@ public class Disturber : ConfigurableStandardRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, IGameEntity
     {
         static float PoleDistanceMin = 0.8f;
         static float PoleDistanceMax => MyRole.MaxDistanceBetweenPolesOption.GetFloat();
 
-        private ModAbilityButton? placeButton = null;
-        private ModAbilityButton? disturbButton = null;
 
         static public ISpriteLoader placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ElecPolePlaceButton.png", 115f);
         static public ISpriteLoader disturbButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DisturbButton.png", 115f);
@@ -109,12 +110,66 @@ public class Disturber : ConfigurableStandardRole
         {
         }
 
+        void IGameEntity.OnAddSystemTask(PlayerTask task)
+        {
+            if (AmOwner && acTokenChallenge != null)
+            {
+                acTokenChallenge.Value.cmTask = task.TryCast<IHudOverrideTask>();
+                acTokenChallenge.Value.elTask = task.TryCast<ElectricTask>();
+                acTokenChallenge.Value.time = NebulaGameManager.Instance?.CurrentTime ?? 0f;
+                acTokenChallenge.Value.dead = 0;
+                acTokenChallenge.Value.ability = disturbButton?.EffectActive ?? false;
+            }
+        }
+
+        void IGameEntity.OnRemoveTask(PlayerTask task)
+        {
+            if(acTokenChallenge != null)
+            {
+                CheckChallengeAchievement();
+                if (acTokenChallenge.Value.cmTask == task.TryCast<IHudOverrideTask>()) acTokenChallenge.Value.cmTask = null;
+                if (acTokenChallenge.Value.elTask == task.TryCast<ElectricTask>()) acTokenChallenge.Value.elTask = null;
+            }
+        }
+
+        void IGameEntity.OnMeetingStart()
+        {
+            if (AmOwner && acTokenChallenge != null)
+            {
+                CheckChallengeAchievement();
+                acTokenChallenge.Value.cmTask = null;
+                acTokenChallenge.Value.elTask = null;
+                acTokenChallenge.Value.dead = 0;
+                acTokenChallenge.Value.ability = false;
+            }
+        }
+
+        void IGameEntity.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
+        {
+            if(AmOwner && acTokenChallenge != null)
+            {
+                acTokenChallenge.Value.dead++;
+                CheckChallengeAchievement();
+            }
+        }
+
+        void CheckChallengeAchievement()
+        {
+            if (AmOwner && acTokenChallenge != null && acTokenChallenge.Value.dead >= 3 && acTokenChallenge.Value.time + 40f < (NebulaGameManager.Instance?.CurrentTime ?? 0f) && (acTokenChallenge.Value.elTask != null || acTokenChallenge.Value.cmTask != null) && acTokenChallenge.Value.ability) acTokenChallenge.Value.isCleared = true;
+        }
+
+
+        private AchievementToken<(IHudOverrideTask? cmTask, ElectricTask? elTask, float time, int dead, bool ability, bool isCleared)>? acTokenChallenge = null;
+        private ModAbilityButton? disturbButton = null;
+
         public override void OnActivated()
         {
             base.OnActivated();
 
             if (AmOwner)
             {
+                acTokenChallenge = new("disturber.challenge", (null, null, 0f, 0, false, false), (val, _) => val.isCleared);
+
                 List<DisturbPole> newPoles = new();
                 List<DisturbPole> poles = new();
                 
@@ -162,7 +217,7 @@ public class Disturber : ConfigurableStandardRole
                 polesText = placeButton.ShowUsesIcon(0);
                 polesText.text = GetNumOfLeftPoles().ToString();
 
-                var disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 disturbButton.SetSprite(disturbButtonSprite.GetSprite());
                 disturbButton.Availability = (button) => poles.Count >= 2;
                 disturbButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
@@ -171,7 +226,13 @@ public class Disturber : ConfigurableStandardRole
                 };
                 disturbButton.OnEffectStart = (button) =>
                 {
+                    new StaticAchievementToken("disturber.common1");
+                    if (poles.Count >= 6) new StaticAchievementToken("disturber.common2");
+
                     RpcDisturb.Invoke(poles.Select(p => p.Position).ToArray());
+
+                    if (acTokenChallenge != null) acTokenChallenge.Value.ability = true;
+                    CheckChallengeAchievement();
                 };
                 disturbButton.OnEffectEnd = (button) =>
                 {
@@ -186,6 +247,7 @@ public class Disturber : ConfigurableStandardRole
                         effectCircle = null;
                     }
                 };
+                
                 disturbButton.CoolDownTimer = Bind(new Timer(MyRole.DisturbCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 disturbButton.EffectTimer = Bind(new Timer(MyRole.DisturbDurationOption.GetFloat()));
                 disturbButton.SetLabel("disturb");
@@ -212,7 +274,7 @@ public class Disturber : ConfigurableStandardRole
             var obj = new GameObject("ElecBarrior");
             var meshFilter = obj.AddComponent<MeshFilter>();
             var meshRenderer = obj.AddComponent<MeshRenderer>();
-            var colliderObj = UnityHelper.CreateObject("Collider", obj.transform, Vector3.zero, LayerExpansion.GetDefaultLayer());
+            var colliderObj = UnityHelper.CreateObject("Collider", obj.transform, Vector3.zero, LayerExpansion.GetShipLayer());
             var collider = colliderObj.AddComponent<EdgeCollider2D>();
 
             //UV座標を更新

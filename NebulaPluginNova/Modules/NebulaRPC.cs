@@ -229,19 +229,16 @@ public class RemoteProcessBase
         }
 
         //全アドオンに対してRPCをセットアップ
-        foreach(var addon in NebulaAddon.AllAddons)
+        foreach (var script in AddonScriptManager.ScriptAssemblies)
         {
-            if(AddonScriptManager.TryGetScripting(addon, out var script))
+            foreach (var t in script.Assembly.GetTypes())
             {
-                foreach(var t in script.Assembly.GetTypes())
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle);
+                foreach (var method in t.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC))))
                 {
-                    System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle);
-                    foreach (var method in t.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC))))
-                    {
-                        //RPCを持つならハンドシェイクが必要
-                        addon.MarkAsNeedingHandshake();
-                        WrapRpcMethod(NebulaPlugin.MyPlugin.Harmony, method);
-                    }
+                    //RPCを持つならハンドシェイクが必要
+                    script.Addon.MarkAsNeedingHandshake();
+                    WrapRpcMethod(NebulaPlugin.MyPlugin.Harmony, method);
                 }
             }
         }

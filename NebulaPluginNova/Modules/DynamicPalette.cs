@@ -593,6 +593,8 @@ public class NebulaPlayerTab : MonoBehaviour
     static ISpriteLoader spriteBrPalette = SpriteLoader.FromResource("Nebula.Resources.PaletteBrightness.png", 100f);
     static ISpriteLoader spriteBrTarget = SpriteLoader.FromResource("Nebula.Resources.PaletteKnob.png", 100f);
 
+    static XOnlyDividedSpriteLoader spriteColorIcons = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.ColorIcon.png", 100f, 50, true);
+
     static XOnlyDividedSpriteLoader spriteSwitches = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.PaletteSwitches.png", 100f, 2);
     static NebulaPlayerTab()
     {
@@ -609,6 +611,7 @@ public class NebulaPlayerTab : MonoBehaviour
     SpriteRenderer BrightnessRenderer = null!;
     SpriteRenderer BrightnessTargetRenderer = null!;
     UIKnob BrTargetKnob = null!;
+    ObjectPool<SpriteRenderer> ColorIcons = null!;
 
     public PlayerTab playerTab = null!;
 
@@ -616,13 +619,26 @@ public class NebulaPlayerTab : MonoBehaviour
     static private float ToBrightness(float y) => Mathf.Clamp01((y + BrightnessHeight * 0.5f) / BrightnessHeight);
 
     static private SpriteLoader saveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.ColorSave.png", 100f);
+
+
     public void Start()
     {
+        ColorIcons = new(parent =>
+        {
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("ColorIcon", parent, new(5f, 1.73f, -50f), LayerExpansion.GetUILayer());
+            var button = renderer.gameObject.SetUpButton(false, renderer);
+            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+            var collider = button.gameObject.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            collider.size = new(0.46f, 0.46f);
+
+            return renderer;
+        }, transform);
+
         new MetaWidgetOld.Button(() => DynamicPalette.OpenCatalogue(TargetRenderer, () => PreviewColor(null, null, null)), TextAttributeOld.BoldAttr) { TranslationKey = "inventory.palette.catalogue" }.Generate(gameObject, new Vector2(2.9f, 2.25f),out _);
 
-        DynamicPaletteRenderer = UnityHelper.CreateObject<SpriteRenderer>("DynamicPalette",transform, new Vector3(0.4f, -0.1f, -80f));
+        DynamicPaletteRenderer = UnityHelper.CreateObject<SpriteRenderer>("DynamicPalette",transform, new Vector3(0.4f, -0.1f, -80f), LayerExpansion.GetUILayer());
         DynamicPaletteRenderer.sprite = spritePalette.GetSprite();
-        DynamicPaletteRenderer.gameObject.layer = LayerExpansion.GetUILayer();
         var PaletteCollider = DynamicPaletteRenderer.gameObject.AddComponent<CircleCollider2D>();
         PaletteCollider.radius = 2.1f;
         PaletteCollider.isTrigger = true;
@@ -861,6 +877,17 @@ public class NebulaPlayerTab : MonoBehaviour
         renderer.sharedMaterial.SetColor(PlayerMaterial.VisorColor, DynamicPalette.VisorColors[PreviewColorId]);
     }
 
+    void AddIcon(int imageId, string translationKey)
+    {
+        int numOfIcons = ColorIcons.Count;
+        var s = ColorIcons.Instantiate();
+        s.sprite = spriteColorIcons.GetSprite(imageId);
+        s.transform.localPosition = new(7f + 0.6f * numOfIcons, 1.25f, -50f);
+        var button = s.gameObject.GetComponent<PassiveButton>();
+        button.OnMouseOver.RemoveAllListeners();
+        button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate(translationKey)));
+    }
+
     private void AfterPreviewColor(byte concernedHue, byte concernedDistance,string? displayName = null)
     {
         try
@@ -900,6 +927,15 @@ public class NebulaPlayerTab : MonoBehaviour
                 SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.skin.layer);
                 SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.hat.FrontLayer);
                 if(playerTab.PlayerPreview.cosmetics.hat.BackLayer) SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.hat.BackLayer);
+            }
+
+            //色に関する追加情報
+            ColorIcons.RemoveAll();
+            
+            if (Helpers.CurrentMonth == 4)
+            {
+                if (ColorHelper.IsLightGreen(Palette.PlayerColors[PreviewColorId])) AddIcon(0, "help.color.icon.april0");
+                else if (ColorHelper.IsPink(Palette.PlayerColors[PreviewColorId])) AddIcon(1, "help.color.icon.april1");
             }
         }
         catch { }

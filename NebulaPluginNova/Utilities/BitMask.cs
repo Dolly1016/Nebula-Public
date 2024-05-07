@@ -9,8 +9,6 @@ namespace Nebula.Utilities;
 
 public interface BitMask<T>
 {
-    BitMask<T> Add(T value);
-
     bool Test(T? value);
 
     bool TestAll(params T?[] values);
@@ -18,7 +16,13 @@ public interface BitMask<T>
     bool TestAll(IEnumerable<T?> values);
 }
 
-file class BitMask32<T> : BitMask<T>
+public interface EditableBitMask<T> : BitMask<T>
+{
+    EditableBitMask<T> Add(T value);
+    EditableBitMask<T> Clear();
+}
+
+file class BitMask32<T> : EditableBitMask<T>
 {
     private Func<T, int> converter;
     private int bitMask = 0;
@@ -29,10 +33,16 @@ file class BitMask32<T> : BitMask<T>
         this.bitMask = bitMask;
     }
 
-    BitMask<T> BitMask<T>.Add(T? value)
+    EditableBitMask<T> EditableBitMask<T>.Add(T? value)
     {
         if (value == null) return this;
         bitMask |= converter.Invoke(value);
+        return this;
+    }
+
+    EditableBitMask<T> EditableBitMask<T>.Clear()
+    {
+        bitMask = 0;
         return this;
     }
 
@@ -48,12 +58,36 @@ file class BitMask32<T> : BitMask<T>
     {
         return values.All(v => Test(v));
     }
+}
 
-    
+public class FunctionalMask<T> : BitMask<T>
+{
+    Predicate<T?> predicate;
+
+    public FunctionalMask(Predicate<T?> predicate)
+    {
+        this.predicate = predicate;
+    }
+
+    bool BitMask<T>.Test(T? value)
+    {
+        return predicate(value);
+    }
+
+    bool BitMask<T>.TestAll(params T?[] values)
+    {
+        return values.All(p => predicate(p));
+    }
+
+    bool BitMask<T>.TestAll(IEnumerable<T?> values)
+    {
+        return values.All(p => predicate(p));
+    }
 }
 
 public static class BitMasks
 {
     private static Func<GamePlayer, int> gamePlayerConverter = p => 1 << p.PlayerId;
-    public static BitMask<GamePlayer> AsPlayer(int bitMask = 0) => new BitMask32<GamePlayer>(gamePlayerConverter, bitMask);
+    public static EditableBitMask<GamePlayer> AsPlayer(int bitMask = 0) => new BitMask32<GamePlayer>(gamePlayerConverter, bitMask);
+    public static EditableBitMask<PlayerControl> AsPlayerControl(int bitMask = 0) => new BitMask32<PlayerControl>(p => 1 << p.PlayerId, bitMask);
 }

@@ -26,7 +26,7 @@ public static class LoadPatch
         logo.sprite = logoSprite.GetSprite();
         logoGlow.sprite = logoGlowSprite.GetSprite();
 
-        StackfullCoroutine coloadRoutine = new(NebulaPlugin.MyPlugin.CoLoad());
+        StackfullCoroutine coloadRoutine = new(PreloadManager.CoLoad());
 
         
 
@@ -53,9 +53,9 @@ public static class LoadPatch
 
         while (coloadRoutine.MoveNext())
         {
-            if(NebulaPlugin.LastException != null)
+            if(PreloadManager.LastException != null)
             {
-                (var excep, var type) = NebulaPlugin.LastException.Value;
+                (var excep, var type) = PreloadManager.LastException.Value;
 
                 string errorText = $"[{excep.GetType().Name}] {excep.Message}\n on {type.FullName}\n{excep.StackTrace}";
                 {

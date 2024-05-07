@@ -143,7 +143,7 @@ public class Avenger : ConfigurableRole
 
         void IGameEntity.OnPlayerExiled(Virial.Game.Player exiled)
         {
-            if (AmOwner && target == exiled)
+            if (AmOwner && target == exiled && !MyPlayer.IsDead)
             {
                 MyPlayer.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
             }
@@ -161,7 +161,7 @@ public class Avenger : ConfigurableRole
         {
             if (AmOwner && !CheckKillCondition && dead == target && !MyPlayer.IsDead)
             {
-                MyPlayer.MyControl.ModSuicide(false, PlayerState.Suicide, EventDetail.Kill);
+                MyPlayer.MyControl.ModFlexibleKill(MyPlayer.MyControl, false, PlayerState.Suicide, EventDetail.Kill, false);
                 new StaticAchievementToken("avenger.another1");
             }
         }

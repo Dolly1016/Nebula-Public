@@ -1,18 +1,132 @@
-﻿using Discord;
+﻿using Cpp2IL.Core.Extensions;
+using Discord;
+using Iced.Intel;
 using Il2CppInterop.Runtime.Attributes;
-using Mono.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Nebula;
-using Nebula.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.ProBuilder;
 using Virial.Attributes;
+
+namespace Nebula.Scripts;
+
+internal class AddonAssembly
+{
+
+}
+
+internal record AddonScript(Assembly Assembly, NebulaAddon Addon, MetadataReference reference);
+
+
+[NebulaPreLoad(typeof(NebulaAddon))]
+internal static class AddonScriptManagerLoader
+{
+    static public IEnumerator CoLoad()
+    {
+        Patches.LoadPatch.LoadingText = "Compiling Addon Scripts";
+        yield return null;
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Collections.Immutable.dll")!.ReadBytes());
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Reflection.Metadata.dll")!.ReadBytes());
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.dll")!.ReadBytes());
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.CSharp.dll")!.ReadBytes());
+
+        //System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Collections.Immutable.dll")!);
+        //System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Reflection.Metadata.dll")!);
+        //System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.dll")!);
+        //System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.CSharp.dll")!);
+
+        yield return AddonScriptManager.CoLoad(assemblies);
+    }
+}
+
+
+internal static class AddonScriptManager
+{
+    static private MetadataReference[] ReferenceAssemblies = [];
+    static public IEnumerable<AddonScript> ScriptAssemblies => scriptAssemblies;
+    static private List<AddonScript> scriptAssemblies = new();
+    static public IEnumerator CoLoad(Assembly[] assemblies)
+    {
+        //参照可能なアセンブリを抽出する
+        ReferenceAssemblies = assemblies.Where(a => { try { return (a.Location?.Length ?? 0) > 0; } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray();
+        
+        var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp12);
+        var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic").WithWarningLevel(0);
+        
+
+        foreach (var addon in NebulaAddon.AllAddons)
+        {
+            string prefix = addon.InZipPath + "Scripts/";
+
+            List<SyntaxTree> trees = new();
+            foreach(var entry in addon.Archive.Entries)
+            {
+                if (!entry.FullName.StartsWith(prefix)) continue;
+
+                //解析木をつくる
+                trees.Add(CSharpSyntaxTree.ParseText(entry.Open().ReadToEnd(), parseOptions, entry.FullName.Substring(prefix.Length), Encoding.UTF8));
+            }
+            
+            //解析木が一つも無ければコンパイルは不要
+            if (trees.Count == 0) continue;
+
+            Patches.LoadPatch.LoadingText = "Compiling Addon Scripts\n" + addon.Id;
+            yield return null;
+
+            var compilation = CSharpCompilation.Create("Script." + addon.Id.HeadUpper(), trees, ReferenceAssemblies, compilationOptions.WithModuleName("Script." + addon.Id.HeadUpper()))
+                .AddReferences(scriptAssemblies.Where(a => addon.Dependency.Contains(a.Addon)).Select(a => a.reference));
+            
+            Assembly? assembly = null;
+            using (var stream = new MemoryStream())
+            {
+                var emitResult = compilation.Emit(stream);
+
+                if (emitResult.Diagnostics.Length > 0) {
+                    string log = "Compile Log:";
+                    foreach (var diagnostic in emitResult.Diagnostics)
+                    {
+                        var pos = diagnostic.Location.GetLineSpan();
+                        var location = "(" + pos.Path + " at line " + (pos.StartLinePosition.Line + 1) + ", character" + (pos.StartLinePosition.Character + 1) + ")";
+
+                        log += $"\n[{diagnostic.Severity}, {location}] {diagnostic.Id}, {diagnostic.GetMessage()}";
+                    }
+                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.Scripting, log);
+                }
+
+                if (emitResult.Success)
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                    assembly = AssemblyLoadContext.Default.LoadFromStream(stream);
+                }
+                else
+                {
+                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Scripting, "Compile Error! Scripts is ignored (Addon: " + addon.Id + ")");
+                }
+            }
+            
+            if (assembly != null) scriptAssemblies.Add(new(assembly, addon, compilation.ToMetadataReference()));
+
+            assembly?.GetType("TestClass")?.GetMethod("Func")?.Invoke(null, []);
+        }
+
+        yield break;
+    }
+}
+
+/*
 
 namespace Nebula.Scripts
 {
@@ -237,3 +351,4 @@ public static class AddonScriptManager
         }
     }
 }
+*/

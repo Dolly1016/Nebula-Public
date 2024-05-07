@@ -109,8 +109,9 @@ public static class MeetingModRpc
 
             e.OnVotedLocal(voted, exiledAll.Contains(voted?.PlayerId ?? 255));
 
-            var votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => Helpers.GetPlayer(id)).Distinct().ToArray();
-            e.OnVotedForMeLocal(votedBy!);
+            var votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => Helpers.GetPlayer(id)).Where(p => p != null).ToArray();
+
+            e.OnVotedForMeLocal((votedBy ?? [])!);
 
             e.OnDiscloseVotingLocal(readonlyStates);
         });
@@ -459,7 +460,7 @@ class VoteAreaVCPatch
                     var script = frame.gameObject.AddComponent<ScriptBehaviour>();
                     script.UpdateHandler += () =>
                     {
-                        if (client.Level > 0.09f)
+                        if (client.IsSpeaking)
                             alpha = Mathf.Clamp(alpha + Time.deltaTime * 4f, 0f, 1f);
                         else
                             alpha = Mathf.Clamp(alpha - Time.deltaTime * 4f, 0f, 1f);

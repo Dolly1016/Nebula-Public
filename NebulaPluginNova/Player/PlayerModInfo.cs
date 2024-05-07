@@ -3,13 +3,12 @@ using NAudio.CoreAudioApi;
 using Nebula.Behaviour;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
+using Nebula.VoiceChat;
 using Virial.Assignable;
 using Virial.Command;
 using Virial.Common;
 using Virial.Game;
 using Virial.Text;
-using static Mono.CSharp.Parameter;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Player;
 
@@ -126,6 +125,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     private GhostRoleInstance? myGhostRole = null;
 
     private List<ModifierInstance> myModifiers = new();
+
     RuntimeRole Virial.Game.Player.Role => myRole;
     IEnumerable<RuntimeModifier> Virial.Game.Player.Modifiers => myModifiers;
     public Vector2 PreMeetingPoint { get; private set; } = Vector2.zero;
@@ -163,7 +163,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     {
         get
         {
-            if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) return HasCrewmateTasks;
+            if (NebulaGameManager.Instance?.CanBeSpectator ?? false) return HasCrewmateTasks;
 
             bool hasCrewmateTasks = Role.HasCrewmateTasks;
             ModifierAction((modifier) => { hasCrewmateTasks &= !modifier.InvalidateCrewmateTask; });
@@ -240,12 +240,12 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
     private void UpdateOutfit()
     {
-        int lastColor = MyControl.CurrentOutfit.ColorId;
+        int lastColor = MyControl.cosmetics.ColorId;
 
         GameData.PlayerOutfit newOutfit = DefaultOutfit;
         if (outfits.Count > 0)
         {
-            outfits.Sort((o1, o2) => o2.Priority - o1.Priority);
+            outfits = outfits.OrderBy(o => -o.Priority).ToList();
             newOutfit = outfits[0].outfit;
         }
 
@@ -264,6 +264,9 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
                 MyControl.MyPhysics.ResetAnimState();
                 MyControl.cosmetics.StopAllAnimations();
             }
+
+            var o = new Outfit(newOutfit);
+            NebulaGameManager.Instance?.AllEntitiesAction(e => e.OnOutfitChanged(this, o));
         }
         catch (Exception e) {
             Debug.LogError("Outfit Error: Error occurred on changing " + DefaultName + " 's outfit");
@@ -272,6 +275,14 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         }
 
         int currentColor = newOutfit.ColorId;
+
+        /*
+        Debug.Log("Last: " + lastColor);
+        Debug.Log("Current: " + currentColor);
+        Debug.Log("LastIsLightGreen: " + ColorHelper.IsLightGreen(Palette.PlayerColors[lastColor]));
+        Debug.Log("CurrnetIsPink: " + ColorHelper.IsPink(Palette.PlayerColors[currentColor]));
+        Debug.Log("Month: " + Helpers.CurrentMonth);
+        */
 
         if (lastColor != currentColor)
         {
@@ -288,7 +299,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     public void AddOutfit(OutfitCandidate outfit)
     {
         if (!outfit.SelfAware && MyControl.AmOwner) return;
-        outfits.Add(outfit);
+        outfits.Insert(0, outfit);
         UpdateOutfit();
     }
 
@@ -315,10 +326,12 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         if (showDefaultName && !CurrentOutfit.PlayerName.Equals(DefaultName))
             text += (" (" + DefaultName + ")").Color(Color.gray);
 
+        if (NebulaGameManager.Instance.VoiceChatManager?.GetClient(PlayerId)?.IsSpeaking ?? false) text += "🔈";
 
         nameText.text = text;
         nameText.color = color;
 
+        
 
     }
 
@@ -856,11 +869,20 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         visibilityCache = invisibleLevel;
 
         //情報が開示済みの場合、あるいは自分自身を見る場合は半透明までにしかならない
-        if (AmOwner || NebulaGameManager.Instance!.CanSeeAllInfo) invisibleLevel = Math.Min(1, invisibleLevel);
+        if (AmOwner || NebulaGameManager.Instance!.CanBeSpectator) invisibleLevel = Math.Min(1, invisibleLevel);
 
         MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(!MyControl.inVent && (invisibleLevel < 2));
 
-        if (IsDead) return;
+        if (IsDead)
+        {
+            if (!MyControl.AmOwner && MyControl.cosmetics.currentPet)
+            {
+                foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = Color.clear;
+                foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = Color.clear;
+            }
+
+            return;
+        }
 
         float alpha = MyControl.cosmetics.currentBodySprite.BodySprite.color.a;
         if (update)

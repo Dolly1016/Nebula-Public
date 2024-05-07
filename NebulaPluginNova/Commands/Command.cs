@@ -1,5 +1,4 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Mono.CSharp;
 using Nebula.Behaviour;
 using Nebula.Commands.Tokens;
 using Steamworks;
@@ -8,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TMPro;
 using Virial.Command;
@@ -111,9 +111,111 @@ public class CommandResource : INebulaResource
     ICommand? INebulaResource.AsCommand() => command;
 }
 
-[NebulaPreLoad]
+[NebulaPreLoad(typeof(NebulaAddon))]
 public class CommandManager
 {
+    private class AddonCommand : ICommand, INebulaResource
+    {
+        public AddonCommand(string[] arguments, ICommandToken[] commands)
+        {
+            this.commands = commands;
+            this.arguments = arguments;
+        }
+
+        ICommandToken[] commands;
+        string[] arguments;
+
+        IEnumerable<CommandComplement> ICommand.Complement(string label, IReadOnlyArray<ICommandToken> arguments, string? last, ICommandExecutor executor)
+        {
+            return [];
+        }
+        CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
+        {
+            if (arguments.Count != this.arguments.Length)
+                return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " command requires " + this.arguments.Length + " argument(s).");
+
+            return new CoImmediateTask<IEnumerable<(string, ICommandToken)>>(Helpers.Sequential(arguments.Count).Select(i => (this.arguments[i], arguments[i])))
+                .SelectParallel(val => val.Item2.EvaluateHere(env).ChainFast(evaluated => (val.Item1, evaluated)))
+                .Chain(args =>
+                {
+                    var newEnv = env.SwitchArgumentTable(new LetsCommandModifier(args, new ThroughCommandModifier()));
+                    return new CoImmediateTask<IEnumerable<ICommandToken>>(commands).Do(c => c.ToExecutable(newEnv)?.CoExecute([]) ?? new CoImmediateErrorTask<ICommandToken>(env.Logger, "This command is broken. The execution was interrupted."));
+                });
+        }
+
+        /// <summary>
+        /// コマンドとして取得します。
+        /// </summary>
+        /// <returns></returns>
+        ICommand? INebulaResource.AsCommand() => this;
+    }
+
+    public static IEnumerator CoLoad()
+    {
+        Patches.LoadPatch.LoadingText = "Loading Commands";
+        yield return null;
+
+        foreach (var addon in NebulaAddon.AllAddons)
+        {
+            string Prefix = addon.InZipPath + "Commands/";
+            foreach (var entry in addon.Archive.Entries)
+            {
+                if (entry.FullName.StartsWith(Prefix) && entry.FullName.EndsWith(".command"))
+                {
+                    string path = System.IO.Path.GetFileNameWithoutExtension(entry.FullName.Substring(Prefix.Length));
+                    var splittedPath = path.Split("/");
+
+                    IResourceAllocator? allocator = addon;
+
+                    string namespacePath = addon.Id.HeadLower();
+
+                    if (splittedPath.Length > 1)
+                    {
+                        string childPath = splittedPath.Take(splittedPath.Length - 1).Join(null, "::");
+                        allocator = (addon as IResourceAllocator).GetChildAllocator(childPath);
+                        namespacePath += "::" + childPath;
+                    }
+                    var varAllocator = (allocator as IVariableResourceAllocator);
+
+                    if (varAllocator == null) {
+                        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, null, "Invalid namespace was specified. (command: " + splittedPath[splittedPath.Length - 1] + ")" );
+                        continue;
+                    }
+
+                    string[] arguments = [];
+                    List<ICommandToken> commands = new();
+
+                    using (var reader = new StreamReader(entry.Open()))
+                    {
+                        bool isFirst = true;
+
+                        while (true)
+                        {
+                            var str = reader.ReadLine();
+                            if (str == null) break;
+
+                            if (isFirst && str.StartsWith("*"))
+                            {
+                                arguments = str.Substring(1).Trim().Split(' ').Where(s => s.Length > 0).ToArray();
+                            }
+                            else
+                            {
+                                commands.Add(new StatementCommandToken(CommandManager.ParseCommand(CommandManager.ParseRawCommand(str))));
+                            }
+
+                            isFirst = false;
+                        }
+                    }
+
+                    varAllocator.Register(splittedPath[splittedPath.Length - 1], new AddonCommand(arguments, commands.ToArray()));
+                    NebulaPlugin.Log.Print("Registered Command: " + splittedPath[splittedPath.Length - 1] + " at " + namespacePath);
+
+                }
+            }
+        }
+ 
+    }
+
     static public bool TryGetCommand(string label, [MaybeNullWhen(false)] out ICommand command) => TryGetCommand(label, null, out command);
     
     static public bool TryGetCommand(string label, IResourceAllocator? defaultAllocator, [MaybeNullWhen(false)] out ICommand command) {
@@ -126,8 +228,17 @@ public class CommandManager
         foreach(var n in name) NebulaResourceManager.RegisterResource(n, new CommandResource(command));
     }
 
+    static public string[] ParseRawCommand(string input)
+    {
+        return Regex.Replace(input, "(?<=[^:]):(?=[^:])", " : ").Replace(",", " , ")
+            .Replace("(", " ( ").Replace(")", " ) ")
+            .Replace("[", " [ ").Replace("]", " ] ")
+            .Replace("{", " { ").Replace("}", " } ").Split(' ').Where(str => str.Length != 0).ToArray();
+    }
 
-    static private IReadOnlyArray<ICommandToken> ParseCommand(Stack<string> args, ICommandLogger logger)
+    static public IReadOnlyArray<ICommandToken> ParseCommand(string[] args, ICommandLogger? logger = null) => ParseCommand(new Stack<string>(args.Reverse()), logger);
+
+    static private IReadOnlyArray<ICommandToken> ParseCommand(Stack<string> args, ICommandLogger? logger)
     {
         string ReplaceSpacedCharacter(string str, params char[] character)
         {
@@ -146,7 +257,7 @@ public class CommandManager
                 if (val.Count == 0) break;
                 if (val.Count != 1)
                 {
-                    logger.Push(CommandLogLevel.Error, "Tokens in struct tokens must be value.");
+                    logger?.Push(CommandLogLevel.Error, "Tokens in struct tokens must be value.");
                 }
 
                 var delimiter = args.Pop();
@@ -226,8 +337,7 @@ public class CommandManager
     }
     static public CoTask<ICommandToken> CoExecute(string[] args, CommandEnvironment env)
     {
-        var argStack = new Stack<string>(args.Reverse());
-        return CoExecute(ParseCommand(argStack, env.Logger),  env);
+        return CoExecute(ParseCommand(args, env.Logger),  env);
     }
 
     static public CoTask<ICommandToken> CoExecute(IReadOnlyArray<ICommandToken> args, CommandEnvironment env)

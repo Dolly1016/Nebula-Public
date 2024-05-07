@@ -40,9 +40,10 @@
 "ui.discordWebhook.current" : "Current URL"
 "ui.discordWebhook.urlFromClipboard" : "Paste URL"
 "ui.discordWebhook.failedPasteUrl" : "Failed to paste Webhook URL."
-"ui.discordWebhook.autoSend" : "Send automatically"
+"ui.discordWebhook.autoSend" : "Send automatically (Host Only)"
 "ui.discordWebhook.determine" : "Determine"
 "ui.discordWebhook.send" : "Send"
+"ui.dragAndDrop" : "Drag & Drop The File Here"
 
 # Versions
 
@@ -160,6 +161,7 @@
 "options.voiceChat" : "Voice Chat Options"
 "options.voiceChat.detail" : "Let's play while talking with nearby players!"
 "options.voiceChat.useVoiceChat" : "Use Voice Chat"
+"options.voiceChat.canTalkInWandaringPhase" : "Can Talk In Wandaring Phase"
 "options.voiceChat.wallsBlockAudio" : "Walls Block Audio"
 "options.voiceChat.killersHearDead" : "Killers Hear Dead"
 "options.voiceChat.killersHearDead.onlyMyKiller" : "Only My Killer"
@@ -395,6 +397,8 @@
 "role.ubiquitous.blurb" : "Anytime, Anywhere"
 "options.role.ubiquitous.detail" : "Ubiquitous can operate drones. After the meeting,<br>the used drone will display the location of nearby players on the map."
 "options.role.ubiquitous.microphoneRadious" : "Microphone Radious"
+"options.role.ubiquitous.droneCoolDown" : "Drone Cool Down"
+"options.role.ubiquitous.droneDuration" : "Drone Duration"
 "options.role.ubiquitous.detectionRadious" : "Detection Radious"
 "options.role.ubiquitous.doorHackCoolDown" : "Door Hacking Cool Down"
 "options.role.ubiquitous.doorHackRadious" : "Door Hacking Radious"
@@ -432,6 +436,7 @@
 "options.role.camouflager.detail" : "Camouflager prevents players from identify each other."
 "options.role.camouflager.camoCoolDown" : "Camo. Cool Down"
 "options.role.camouflager.camoDuration" : "Camo. Duration"
+"options.role.camouflager.canInvokeCamoAfterDeath" : "Can Invoke Camo. After Death"
 
 "role.cleaner.name" : "Cleaner"
 "role.cleaner.short" : "Cl"
@@ -685,6 +690,7 @@
 "options.role.confused.numOfMaxShuffledPairs" : "Num Of Max Shuffled Pairs"
 
 "role.damned.name" : "Damned"
+"role.damned.short" : "Da"
 "options.role.damned.detail" : "Damned is unconscious modifier.<br>The curse of Damned prevents one kill and has a dynamic effect for game."
 "role.damned.prefix" : "Damned"
 "options.role.damned.takeOverRoleOfKiller" : "Take Over Role Of Killer"
@@ -888,6 +894,7 @@
 "game.prespawn.waiting" : "Wait For Other Players..."
 "game.prespawn.spawnIn" : "You Spawn In"
 
+"game.meeting.cannotUseEmergencyButton" : "Emergency Button is LOCKED."
 "game.meeting.someoneDisappeared" : "Someone disappeared too."
 "game.meeting.roleText" : "%PLAYER% is %ROLE%."
 "game.meeting.roleJesterText" : "Hahaha..."
@@ -981,6 +988,11 @@
 "voiceChat.info.jackalRadio" : "Jackal Radio"
 "voiceChat.info.loversRadio" : "Lovers Radio"
 "voiceChat.info.roomHostRadio" : "Room Host Radio"
+"voiceChat.settings.inputDevice" : "Input Device"
+"voiceChat.settings.noiseGate" : "Noise Gate"
+"voiceChat.settings.outputDevice" : "Output Device"
+"voiceChat.settings.outputVolume" : "Output Volume"
+"voiceChat.settings.device.default" : "Default"
 
 # Console
 
@@ -1039,6 +1051,7 @@
 "config.client.processorAffinity.dualCore" : "Dual Core"
 "config.client.processorAffinity.singleCore" : "Single Core"
 "config.client.forceSkeldMeetingSE" : "Force The Skeld SE"
+"config.client.spoilerAfterDeath" : "Spoiler After Death"
 "config.client.webhook" : "Discord Webhook"
 
 # Preset
@@ -1074,6 +1087,7 @@
 "devStudio.ui.common.confirmSaving" : "Are you sure to save?"
 "devStudio.ui.common.confirmDeletingAddon" : "Are you sure to delete add-on?"
 "devStudio.ui.common.confirmDeleting" : "Are you sure to delete?"
+"devStudio.ui.common.outputAsGlobal" : "Output global costume successfully."
 "devStudio.ui.main.title" : "My Add-ons"
 "devStudio.ui.addon.build" : "Export Addon"
 "devStudio.ui.addon.document" : "Documents"
@@ -1107,6 +1121,9 @@
 "devStudio.ui.cosmetics.visors" : "Visors"
 "devStudio.ui.cosmetics.nameplates" : "Nameplates"
 "devStudio.ui.cosmetics.packages" : "Packages"
+"devStudio.ui.cosmetics.action.edit" : "Edit"
+"devStudio.ui.cosmetics.action.output" : "Output Single
+"devStudio.ui.cosmetics.action.delete" : "Delete"
 "devStudio.ui.cosmetics.contents.main" : "Main"
 "devStudio.ui.cosmetics.contents.back" : "Back"
 "devStudio.ui.cosmetics.contents.flipped" : "Flipped"
@@ -1123,6 +1140,7 @@
 "devStudio.ui.cosmetics.anim.enterVent" : "Enter Vent"
 "devStudio.ui.cosmetics.anim.exitVent" : "Exit Vent"
 "devStudio.ui.cosmetics.anim.jump" : "Jump"
+"devStudio.ui.cosmetics.anim.flip" : "Flip"
 "devStudio.ui.cosmetics.attributes.id" : "ID"
 "devStudio.ui.cosmetics.attributes.format" : "Format"
 "devStudio.ui.cosmetics.attributes.image" : "Image"
@@ -1142,6 +1160,7 @@
 "devStudio.ui.cosmetics.attributes.behindHat" : "Behind Hat"
 "devStudio.ui.cosmetics.hint.needToSetTitle" : "Enter the costume's name!"
 "devStudio.ui.cosmetics.failedToCopy" : "Failed to copy the file."
+"devStudio.ui.cosmetics.confirmOverwrite" : "A file with the same name already exists.<br>Are you sure you want to overwrite it?"
 "devStudio.ui.language.newFile" : "Generate Language File"
 "devStudio.ui.language.newFile.confirm" : "Generate a file successfully."
 "devStudio.ui.language.editFile" : "Edit Language File"
@@ -1155,6 +1174,7 @@
 "achievement.ui.title" : "Achievements"
 "achievement.ui.cond" : "[Constraint]"
 "achievement.ui.allAchievements" : "All"
+"achievement.ui.shown" : "Shown"
 "achievement.ui.cleared" : "[Cleared]"
 "achievement.ui.equipped" : "[Equipped]"
 "achievement.ui.setTitle" : "CLICK To Set This Title."
@@ -1166,6 +1186,16 @@
 "achievement.type.challenge" : "Challenge"
 "achievement.type.secret" : "Secret"
 "achievement.type.seasonal" : "Seasonal"
+
+"achievement.filter.all" : "All"
+"achievement.filter.achieved" : "Cleared"
+"achievement.filter.notAchieved" : "Not Cleared"
+"achievement.filter.myRole" : "My Role"
+
+# Help
+
+"help.color.icon.april0" : "This color is eligible for the April achievement."
+"help.color.icon.april1" : "This color is eligible for the April achievement."
 
 # Tag
 

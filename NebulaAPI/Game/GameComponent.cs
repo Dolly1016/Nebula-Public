@@ -190,6 +190,25 @@ public interface IGameEntity
     /// <param name="player"></param>
     /// <param name="modifier"></param>
     public void OnRemoveModifier(Player player, RuntimeModifier modifier) { }
+
+    /// <summary>
+    /// サボタージュタスクが追加されたときに呼び出されます。
+    /// </summary>
+    /// <param name="task"></param>
+    public void OnAddSystemTask(PlayerTask task) { }
+
+    /// <summary>
+    /// 各種タスクが削除されたときに呼び出されます。
+    /// </summary>
+    /// <param name="task"></param>
+    public void OnRemoveTask(PlayerTask task) { }
+
+    /// <summary>
+    /// プレイヤーの見た目が変わったときに呼び出されます。
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="outfit"></param>
+    public void OnOutfitChanged(Player player, Outfit outfit) { }
 }
 
 /// <summary>

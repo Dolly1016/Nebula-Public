@@ -221,6 +221,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.DocumentStandard => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardLeft)) { FontSize = new(1.2f, 0.6f, 1.2f), Size = new(7f, 6f) },
                 AttributeAsset.DocumentBold => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBoldLeft)) { FontSize = new(1.2f, 0.6f, 1.2f), Size = new(5f, 6f) },
                 AttributeAsset.DocumentTitle => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBoldLeft)) { FontSize = new(2.2f, 0.6f, 2.2f), Size = new(5f, 6f) },
+                AttributeAsset.DeviceButton => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(2.05f, 0.28f), new(255, 255, 255), false),
                 _ => null!
             };
         }

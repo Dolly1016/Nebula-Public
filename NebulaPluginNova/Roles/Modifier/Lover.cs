@@ -138,13 +138,23 @@ public class Lover : ConfigurableModifier, HasCitation
                 if (MyRole.AvengerModeOption)
                     myLover.RpcInvokerSetRole(Avenger.MyRole, [murder.PlayerId]).InvokeSingle();
                 else
-                    myLover.MyControl.ModSuicide( false,PlayerState.Suicide,EventDetail.Kill);
+                    myLover.MyControl.ModFlexibleKill(myLover.MyControl, false, PlayerState.Suicide, EventDetail.Kill, true);
+            }
+        }
+
+        void IGamePlayerEntity.OnExtraExiled()
+        {
+            if (AmOwner && !(MyLover?.IsDead ?? false))
+            {
+                MyLover?.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+
+                if (Helpers.CurrentMonth == 12) new StaticAchievementToken("christmas");
             }
         }
 
         void IGamePlayerEntity.OnExiled()
         {
-            if (AmOwner)
+            if (AmOwner && !(MyLover?.IsDead ?? false))
             {
                 MyLover?.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
 
@@ -171,7 +181,7 @@ public class Lover : ConfigurableModifier, HasCitation
 
             var myLover = MyLover;
             if (myLover == null) return false;
-            if (myLover.IsDead) return false;
+            if (myLover.IsDead && myLover.Role.Role != Jester.MyRole) return false;
             if ((myLover.PlayerId & winnersMask) == 0) return false;
 
             extraWinMask |= NebulaGameEnd.ExtraLoversWin.ExtraWinMask;

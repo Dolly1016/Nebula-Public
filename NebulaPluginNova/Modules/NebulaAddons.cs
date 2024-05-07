@@ -1,8 +1,5 @@
-﻿using Epic.OnlineServices.PlayerDataStorage;
-using Mono.CSharp;
-using NAudio.MediaFoundation;
-using System;
-using System.Collections.Generic;
+﻿using HarmonyLib;
+using System.Collections.Immutable;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +12,7 @@ using Virial.Media;
 namespace Nebula.Modules;
 
 [NebulaPreLoad]
-public class NebulaAddon : IDisposable, IResourceAllocator
+public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllocator
 {
     public class AddonMeta
     {
@@ -32,7 +29,7 @@ public class NebulaAddon : IDisposable, IResourceAllocator
         [JsonSerializableField]
         public int Build = 0;
         [JsonSerializableField]
-        public int Priority = 0;
+        public List<string> Dependency = [];
 
         [JsonSerializableField]
         public bool Hidden = false;
@@ -67,7 +64,8 @@ public class NebulaAddon : IDisposable, IResourceAllocator
 
         //組込アドオンの読み込み
         Assembly assembly = Assembly.GetExecutingAssembly();
-        foreach (var file in assembly.GetManifestResourceNames().Where(name => name.StartsWith("Nebula.Resources.Addons.") && name.EndsWith(".zip")))
+        string prefix = "Nebula.Resources.Addons.";
+        foreach (var file in assembly.GetManifestResourceNames().Where(name => name.StartsWith(prefix) && name.EndsWith(".zip")))
         {
             try
             {
@@ -75,7 +73,7 @@ public class NebulaAddon : IDisposable, IResourceAllocator
                 if (stream == null) continue;
                 var zip = new ZipArchive(stream);
 
-                var addon = new NebulaAddon(zip, file) { Priority = -100 };
+                var addon = new NebulaAddon(zip, file.Substring(prefix.Length)) { IsBuiltIn = true };
                 allAddons.Add(addon.Id, addon);
 
                 addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(assembly.GetManifestResourceStream(file)!)).ComputeConstantHash();
@@ -107,9 +105,35 @@ public class NebulaAddon : IDisposable, IResourceAllocator
             }
         }
 
-        allOrderedAddons = new List<NebulaAddon>(allAddons.Values.OrderBy(addon => addon.Priority));
+        allOrderedAddons = new();
 
-        AddonScriptManager.EvaluateScript("Initializers");
+        List<NebulaAddon> leftAddons = new(allAddons.Values);
+        void ResolveOrder(NebulaAddon a)
+        {
+            leftAddons.Remove(a);
+            leftAddons.Do(l => l.UnsolvedDependency.Remove(a.Id));
+            allOrderedAddons.Add(a);
+        }
+
+        //組み込みアドオン
+        leftAddons.Where(a => a.IsBuiltIn).ToArray().Do(ResolveOrder);
+
+        //依存関係が解決したアドオンから順に追加する
+        int left = leftAddons.Count;
+        while (left > 0)
+        {
+            leftAddons.Where(a => a.UnsolvedDependency.Count == 0).ToArray().Do(ResolveOrder);
+            if (leftAddons.Count == left) break;
+            left = leftAddons.Count;
+        }
+        
+        //未解決のアドオン
+        foreach(var l in leftAddons)
+        {
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Could not resolve dependencies. Excluded addon: \"" + l.AddonName + " (" + l.Id + ")\"");
+        }
+
+        AllAddons.Do(a => a.Dependency = a.IdDependencyCache.Select(id => GetAddon(id)).ToArray()!);
     }
 
     static private string MetaFileName = "addon.meta";
@@ -130,7 +154,8 @@ public class NebulaAddon : IDisposable, IResourceAllocator
             Build = Mathf.Max(0, meta.Build);
             Description = meta.Description;
             Version = meta.Version;
-            Priority = meta.Priority;
+            IdDependencyCache = meta.Dependency.ToArray();
+            UnsolvedDependency = new(meta.Dependency);
             IsHidden = meta.Hidden;
 
             InZipPath = entry.FullName.Substring(0, entry.FullName.Length - MetaFileName.Length);
@@ -181,7 +206,10 @@ public class NebulaAddon : IDisposable, IResourceAllocator
     public string Version { get; private set; } = "";
     public int Build { get; private set; } = 0;
     public string AddonName { get; private set; } = "";
-    public int Priority { get; private set; } = 0;
+    public bool IsBuiltIn { get; private set; } = false;
+    public string[] IdDependencyCache { get; private set; } = [];
+    public NebulaAddon[] Dependency { get; private set; } = [];
+    public HashSet<string> UnsolvedDependency { get; private set; } = [];
     public bool IsHidden { get; private set; } = false;
     public Sprite? Icon { get; private set; } = null;
     public ZipArchive Archive { get; private set; }
@@ -208,9 +236,13 @@ public class NebulaAddon : IDisposable, IResourceAllocator
 
     INebulaResource? IResourceAllocator.GetResource(IReadOnlyArray<string> namespaceArray, string name)
     {
+        var baseResult = base.GetResource(namespaceArray, name);
+        if (baseResult != null) return baseResult;
+
         if (namespaceArray.Count > 0) return null;
         if (name.Length == 0) return null;
 
-        return new StreamResource(() => OpenRead(name));
+        return new StreamResource(() => OpenRead("Resources." + name));
     }
 }
+

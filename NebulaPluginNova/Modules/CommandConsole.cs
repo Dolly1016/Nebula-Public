@@ -1,8 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.UnityEngine;
-using Mono.CSharp;
 using Nebula.Behaviour;
 using Nebula.Commands;
-using Nebula.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,16 +53,11 @@ public class CommandConsole
 
             var myLogger = new NebulaCommandLogger(text);
             log.Push(myLogger);
-            
-            var args = Regex.Replace(text, "(?<=[^:]):(?=[^:])", " : ").Replace(",", " , ")
-            .Replace("(", " ( ").Replace(")", " ) ")
-            .Replace("[", " [ ").Replace("]", " ] ")
-            .Replace("{", " { ").Replace("}", " } ").Split(' ').Where(str => str.Length != 0);
 
             IEnumerator CoExecute()
             {
                 IsShown = false;
-                yield return CommandManager.CoExecute(args!.ToArray(), new(NebulaGameManager.Instance?.LocalPlayerInfo ?? Guest, ThroughCommandModifier.Modifier, myLogger)).CoWait().HighSpeedEnumerator();
+                yield return CommandManager.CoExecute(CommandManager.ParseRawCommand(text), new(NebulaGameManager.Instance?.LocalPlayerInfo ?? Guest, ThroughCommandModifier.Modifier, myLogger)).CoWait().HighSpeedEnumerator();
             }
             NebulaManager.Instance.StartCoroutine(CoExecute().WrapToIl2Cpp());
 

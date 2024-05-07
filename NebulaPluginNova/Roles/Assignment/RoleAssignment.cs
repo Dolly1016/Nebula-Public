@@ -1,14 +1,4 @@
 ﻿using Hazel;
-using Il2CppSystem.Text.Json;
-using InnerNet;
-using Mono.CSharp.Linq;
-using Nebula.Configuration;
-using Nebula.Modules;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.Assignable;
 
 namespace Nebula.Roles.Assignment;
@@ -135,7 +125,7 @@ public class StandardRoleAllocator : IRoleAllocator
         }
 
         bool left100Roles = true;
-        while (main.Count > 0 && left > 0)
+        while (main.Count > 0 && left > 0 && rolePool.Count > 0)
         {
             //コスト超過によって割り当てられない役職を弾く
             rolePool.RemoveAll(c =>

@@ -10,12 +10,10 @@ public interface INoisedCamera
 public class WideCamera
 {
     private Camera myCamera;
-    //myCameraがアクティブかどうかではなく、カメラを有効化されているか否か
-    private bool isActive = false;
+
     private float targetRate = 1f; // エフェクト効果に依らない目標拡大率 Wideカメラを有効にしている時のみ掛け合わせられる。
 
     public bool IsShown => myCamera.gameObject.active;
-    public bool IsActivated => isActive;
     public float TargetRate { get => targetRate; set => targetRate = value; }
     public Camera Camera => myCamera;
     private MeshRenderer meshRenderer;
@@ -65,34 +63,6 @@ public class WideCamera
         myCamera.cullingMask |= 1 << 29;
 
         this.drawShadow = drawShadow;
-    }
-
-    public void Activate()
-    {
-        if (isActive) return;
-
-        isActive = true;
-
-        if (!myCamera.gameObject.active)
-        {
-            myCamera.orthographicSize = 3f;
-            myCamera.gameObject.SetActive(true);
-        }
-    }
-
-    public void Inactivate(bool immediately = false)
-    {
-        if (!isActive) return;
-
-        isActive = false;
-    }
-
-    public void ToggleCamera()
-    {
-        if (isActive)
-            Inactivate(false);
-        else
-            Activate();
     }
 
     public void OnGameStart()
@@ -218,7 +188,7 @@ public class WideCamera
             float targetRateByEffect = NebulaGameManager.Instance?.LocalPlayerInfo?.CalcAttributeVal(PlayerAttributes.ScreenSize, true) ?? 1f;
 
             float currentOrth = myCamera.orthographicSize;
-            float targetOrth = (isActive ? targetRate : 1f) * targetRateByEffect * 3f;
+            float targetOrth = targetRate * targetRateByEffect * 3f;
             float diff = currentOrth - targetOrth;
             bool reached = Mathf.Abs(diff) < 0.001f;
 
@@ -227,12 +197,7 @@ public class WideCamera
             else
                 currentOrth -= (currentOrth - targetOrth) * Time.deltaTime * 5f;
 
-            if (reached && !isActive)
-            {
-                //
-            }
-            else
-                myCamera.orthographicSize = currentOrth;
+            myCamera.orthographicSize = currentOrth;
 
             if (drawShadow)
             {

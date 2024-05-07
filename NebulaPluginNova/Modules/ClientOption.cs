@@ -21,7 +21,8 @@ public class ClientOption
         OutputCosmicHash,
         UseNoiseReduction,
         ProcessorAffinity,
-        ForceSkeldMeetingSE
+        ForceSkeldMeetingSE,
+        SpoilerAfterDeath
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
@@ -104,7 +105,7 @@ public class ClientOption
     static public void Load()
     {
         new ClientOption(ClientOptionType.OutputCosmicHash, "outputHash", new string[] { "options.switch.off", "options.switch.on" }, 0);
-        new ClientOption(ClientOptionType.UseNoiseReduction, "noiseReduction", new string[] { "options.switch.off", "options.switch.on" }, 0);
+        //new ClientOption(ClientOptionType.UseNoiseReduction, "noiseReduction", new string[] { "options.switch.off", "options.switch.on" }, 0);
         new ClientOption(ClientOptionType.ProcessorAffinity, "processorAffinity", new string[] {
         "config.client.processorAffinity.dontCare",
         "config.client.processorAffinity.dualCoreHT",
@@ -112,6 +113,7 @@ public class ClientOption
         "config.client.processorAffinity.singleCore"}, 0)
         { OnValueChanged = ReflectProcessorAffinity };
         new ClientOption(ClientOptionType.ForceSkeldMeetingSE, "forceSkeldMeetingSE", new string[] { "options.switch.off", "options.switch.on" }, 0);
+        new ClientOption(ClientOptionType.SpoilerAfterDeath, "spoilerAfterDeath", new string[] { "options.switch.off", "options.switch.on" }, 1);
 
         ReflectProcessorAffinity();
     }
@@ -208,7 +210,7 @@ public static class StartOptionMenuPatch
             {
                 nebulaWidget.Append(new MetaWidgetOld.Button(() =>
                 {
-                    __instance.Close();
+                    //__instance.Close();
                     NebulaGameManager.Instance?.VoiceChatManager?.OpenSettingScreen(__instance);
                 }, buttonAttr)
                 { TranslationKey = "config.client.vcSettings", Alignment = IMetaWidgetOld.AlignmentOption.Center });

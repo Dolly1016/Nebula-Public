@@ -253,6 +253,13 @@ public class EndGameManagerSetUpPatch
 
         if (endState == null) return;
 
+        /*
+        foreach(var h in NebulaGameManager.Instance.RoleHistory)
+        {
+            NebulaPlugin.Log.Print("ID: " + h.PlayerId + ", " + h.Assignable.GetType().Name + ", Dead: " + h.Dead + ", IsModifier: " + h.IsModifier + ", IsSet: " + h.IsSet + ", Time: " + h.Time);
+        }
+        */
+
         //元の勝利チームを削除する
         foreach (PoolablePlayer pb in __instance.transform.GetComponentsInChildren<PoolablePlayer>()) UnityEngine.Object.Destroy(pb.gameObject);
 

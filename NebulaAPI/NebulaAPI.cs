@@ -1,10 +1,12 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 using UnityEngine;
 using Virial.Assignable;
 using Virial.Attributes;
 using Virial.Components;
 using Virial.Game;
 using Virial.Media;
+using Virial.Runtime;
 using Virial.Text;
 
 [assembly: InternalsVisibleTo("Nebula")]
@@ -13,7 +15,6 @@ namespace Virial;
 
 internal interface INebula
 {
-    void RegisterRole(AbstractRoleDef roleDef);
     void RegisterPreset(string id, string name,string? detail, string? relatedHolder, Action onLoad);
     RoleTeam CreateTeam(string translationKey, Color color, TeamRevealType revealType);
     void RegisterEventHandler(ILifespan lifespan, object handler);
@@ -21,9 +22,11 @@ internal interface INebula
     Virial.Components.AbilityButton CreateAbilityButton();
     Virial.Components.GameTimer CreateTimer(float max, float min);
     string APIVersion { get; }
+    
     IResourceAllocator NebulaAsset { get; }
     IResourceAllocator InnerslothAsset { get; }
     IResourceAllocator? GetAddonResource(string addonId);
+
     IEnumerable<Player> GetPlayers();
     Player? LocalPlayer { get; }
     Media.GUI GUILibrary { get; }
@@ -32,14 +35,14 @@ internal interface INebula
     DefinedRole? GetRole(string roleId);
     DefinedModifier? GetModifier(string modifierId);
 
+    //bool RegisterGameModule<T>(GameModuleFactory<T> factory, GameModuleInstantiationRule rule);
 }
 
 public static class NebulaAPI
 {
     static internal INebula instance = null!;
+    static internal NebulaPreprocessor? preprocessor = null;
 
-    [RequiringHandshake]
-    static public void RegisterRole(AbstractRoleDef roleDef) => instance.RegisterRole(roleDef);
     static public void RegisterPreset(string id, string displayName, string? detail, string? relatedHolder, Action onLoad) => instance.RegisterPreset(id,displayName,detail,relatedHolder,onLoad);
     static public RoleTeam CreateTeam(string translationKey, Color color, TeamRevealType revealType) => instance.CreateTeam(translationKey, color, revealType);
 
@@ -55,28 +58,21 @@ public static class NebulaAPI
     static public IResourceAllocator? GetAddon(string addonId) => instance.GetAddonResource(addonId);
     static public void RegisterEventHandler(ILifespan lifespan, object handler) => instance.RegisterEventHandler(lifespan, handler);
 
-    /// <summary>
-    /// ゲーム中の全プレイヤーを取得します。
-    /// 代わりに<see cref="Game.Game.GetAllPlayers"/>を使用してください。
-    /// </summary>
-    /// <returns>ゲーム中の全プレイヤー</returns>
-    [Obsolete]
-    static public IEnumerable<Player> GetPlayers() => instance.GetPlayers();
-
-    /// <summary>
-    /// 自身の操作しているプレイヤーを取得します。
-    /// 代わりに<see cref="Game.Game.LocalPlayer"/>を使用してください。
-    /// </summary>
-    [Obsolete]
-    static public Player? LocalPlayer => instance.LocalPlayer;
-
     static public Media.GUI GUI => instance.GUILibrary;
 
     static public DefinedRole? GetRole(string roleId) => instance.GetRole(roleId);
     static public DefinedModifier? GetModifier(string modifierId) => instance.GetModifier(modifierId);
 
+    //static public bool RegisterGameModule<T>(GameModuleFactory<T> factory, GameModuleInstantiationRule instantiationRule) => instance.RegisterGameModule(factory, instantiationRule);
+
     /// <summary>
     /// 現在のゲームを取得します。
     /// </summary>
     static public Game.Game? CurrentGame => instance.CurrentGame;
+
+    /// <summary>
+    /// プリプロセッサを取得します。
+    /// プリプロセス終了後はnullが返ります。
+    /// </summary>
+    static public NebulaPreprocessor? Preprocessor => preprocessor;
 }

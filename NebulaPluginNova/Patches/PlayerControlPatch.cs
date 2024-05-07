@@ -1,13 +1,6 @@
 ﻿using AmongUs.Data.Player;
-using Epic.OnlineServices.Presence;
-using HarmonyLib;
-using Mono.CSharp;
 using Nebula.Behaviour;
-using Nebula.Configuration;
-using Nebula.Game;
-using Nebula.Modules;
 using PowerTools;
-using static UnityEngine.RemoteConfigSettingsHelper;
 
 namespace Nebula.Patches;
 
@@ -115,6 +108,27 @@ public class PlayerControlSetAlphaPatch
         if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted) return;
 
         NebulaGameManager.Instance.GetModPlayerInfo(__instance.PlayerId)?.UpdateVisibility(false);
+    }
+}
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.AddSystemTask))]
+public static class PlayerAddSystemTaskPatch
+{
+    static void Postfix(PlayerControl __instance)
+    {
+        if (!__instance.AmOwner) return;
+
+        var task = __instance.myTasks[__instance.myTasks.Count - 1];
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnAddSystemTask(task));
+    }
+}
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RemoveTask))]
+public static class PlayerRemoveTaskPatch
+{
+    static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerTask task)
+    {
+        GameEntityManager.Instance?.AllEntities.Do(e => e.OnRemoveTask(task));
     }
 }
 

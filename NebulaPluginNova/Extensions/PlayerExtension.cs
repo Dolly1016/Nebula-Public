@@ -265,7 +265,7 @@ public static class PlayerExtension
         if (CheckKill(null, target, playerState, recordState, isMeetingKill, out var result))
         {
             if (MeetingHud.Instance)
-                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay, true, assignGhostRole));
+                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay, false, assignGhostRole));
             else
                 RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay, assignGhostRole));
         }

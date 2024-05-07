@@ -11,11 +11,17 @@ public class ObjectPool<T> where T : Component
     List<T> activatedObjects = new();
     List<T> inactivatedObjects = new();
     public Action<T>? OnInstantiated { get; set; }
-    T original;
+    Func<T> generator;
     Transform parent;
 
     public ObjectPool(T original, Transform parent){
-        this.original = original;
+        this.generator = () => GameObject.Instantiate(original, this.parent);
+        this.parent = parent;
+    }
+
+    public ObjectPool(Func<Transform,T> generator, Transform parent)
+    {
+        this.generator = () => generator.Invoke(this.parent!);
         this.parent = parent;
     }
 
@@ -40,7 +46,7 @@ public class ObjectPool<T> where T : Component
         }
         else
         {
-            T result = GameObject.Instantiate(original, parent);
+            T result = generator.Invoke();
             OnInstantiated?.Invoke(result);
             activatedObjects.Add(result);
             return result;
@@ -63,4 +69,6 @@ public class ObjectPool<T> where T : Component
         inactivatedObjects.Add(obj);
         obj.gameObject.SetActive(false);
     }
+
+    public int Count => activatedObjects.Count;
 }

@@ -51,6 +51,7 @@ public class Poltergeist : ConfigurableStandardGhostRole
                 poltergeistButton.OnClick = (button) =>
                 {
                     RpcPoltergeist.Invoke((deadBodyTracker.CurrentTarget!.ParentId, MyPlayer.MyControl.GetTruePosition()));
+                    new StaticAchievementToken("poltergeist.common1");
                     poltergeistButton.StartCoolDown();
                 };
                 poltergeistButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PoltergeistCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());

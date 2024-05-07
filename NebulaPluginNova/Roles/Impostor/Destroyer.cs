@@ -54,6 +54,15 @@ public class Destroyer : ConfigurableStandardRole
         PhasesOfDestroyingOption = new NebulaConfiguration(RoleConfig, "phasesOfDestroying", null, 1, 10, 3, 3);
         KillSEStrengthOption = new NebulaConfiguration(RoleConfig, "killSEStrength", null, 1f, 20f, 0.5f, 3.5f, 3.5f) { Decorator = NebulaConfiguration.OddsDecorator };
         LeaveKillEvidenceOption = new NebulaConfiguration(RoleConfig, "leaveKillEvidence", null, true, true);
+
+        PhasesOfDestroyingOption.Shower = () =>
+         {
+             return PhasesOfDestroyingOption.DefaultShowerString
+                 + StringExtensions.Color(
+                     " (" +
+                     (3.2f + (2.05f * PhasesOfDestroyingOption.CurrentValue)).ToString()
+                     + "s)", Color.gray);
+         };
     }
 
     [NebulaRPCHolder]
@@ -188,7 +197,7 @@ public class Destroyer : ConfigurableStandardRole
                 float randomX = 0f;
                 float randomTimer = 0f;
 
-                if (!MeetingHud.Instance) NebulaAsset.PlaySE(audioClip, target.transform.position, 1f, MyRole.KillSEStrengthOption.GetFloat(), 0.46f);
+                if (!MeetingHud.Instance) NebulaAsset.PlaySE(audioClip, target.transform.position, 0.8f, MyRole.KillSEStrengthOption.GetFloat(), 0.46f);
 
                 int sePhase = 0;
                 float[] seTime = [0.45f, 0.62f, 0.98f];
@@ -222,7 +231,7 @@ public class Destroyer : ConfigurableStandardRole
                                 modSplatter.PlayOneShot(spriteModBlood, 12f,true);
                             }
 
-                            NebulaAsset.PlaySE(target.KillSfx, target.transform.position + new Vector3(((float)System.Random.Shared.NextDouble() - 0.5f) * 0.05f, ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.05f, 0f), 1f, 1.8f, 0.45f);
+                            NebulaAsset.PlaySE(target.KillSfx, target.transform.position + new Vector3(((float)System.Random.Shared.NextDouble() - 0.5f) * 0.05f, ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.05f, 0f), 0.6f, 1.4f, 0.45f);
                             sePhase++;
                         }
                     }

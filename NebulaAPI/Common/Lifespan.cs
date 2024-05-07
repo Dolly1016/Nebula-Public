@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,7 +70,8 @@ public static class IReleasableExtension
 /// </summary>
 public interface IBinder
 {
-    T Bind<T>(T obj) where T : IReleasable;
+    [return: NotNullIfNotNull("obj")]
+    T? Bind<T>(T? obj) where T : class, IReleasable;
 }
 
 internal interface IBinderLifespan : ILifespan, IBinder { }
@@ -79,8 +81,12 @@ public class ComponentHolder : IBinder, IReleasable, ILifespan
     public bool IsDeadObject { get; private set; } = false;
     private List<IReleasable> myComponent { get; init; } = new();
 
-    public T Bind<T>(T component) where T : IReleasable
+
+    [return: NotNullIfNotNull("component")]
+    public T? Bind<T>(T? component) where T : class, IReleasable
     {
+        if (component == null) return null;
+
         BindComponent(component);
         return component;
     }

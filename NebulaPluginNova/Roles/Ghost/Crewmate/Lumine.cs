@@ -53,6 +53,13 @@ public class Lumine : ConfigurableStandardGhostRole
                 lumineButton.OnClick = (button) =>
                 {
                     RpcLumineLight.Invoke(MyPlayer.MyControl.transform.position);
+
+                    var near = Helpers.AllDeadBodies().Where(db => db.transform.position.Distance(MyPlayer.MyControl.transform.position) < 2f).ToArray();
+                    if (near.Length > 0)
+                        new StaticAchievementToken("lumine.common1");
+                    if (near.Any(db => db.ParentId == MyPlayer.PlayerId))
+                        new StaticAchievementToken("lumine.another1");
+
                     lumineButton.ReleaseIt();
                 };
                 lumineButton.ShowUsesIcon(3).text = "1";

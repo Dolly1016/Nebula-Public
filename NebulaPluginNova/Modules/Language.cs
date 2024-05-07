@@ -164,6 +164,7 @@ public class Language
         using (var reader = new StreamReader(stream, Encoding.GetEncoding("utf-8"))) {
             string? line;
             string[] strings;
+            int pairs = 0;
 
             while ((line = reader.ReadLine()) != null)
             {
@@ -203,6 +204,7 @@ public class Language
                 }
 
                 pairAction.Invoke(strings[0], strings[1]);
+                pairs++;
             }
         }
     }

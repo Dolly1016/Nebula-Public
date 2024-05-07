@@ -70,7 +70,8 @@ public class PaparazzoShot : MonoBehaviour
             scale -= (scale - targetScale) * Time.deltaTime * 5.4f;
             transform.localScale = Vector3.one * scale;
 
-            transform.eulerAngles = new Vector3(0, 0, mouseInfo.angle * 180f / Mathf.PI + (IsVert ? 90f : 0f));
+            if(!Input.GetMouseButton(1))
+                transform.eulerAngles = new Vector3(0, 0, mouseInfo.angle * 180f / Mathf.PI + (IsVert ? 90f : 0f));
         }
     }
 

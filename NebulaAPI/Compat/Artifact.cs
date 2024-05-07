@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace Virial.Compat;
 
+public interface Reference<T>
+{
+    T Value { get; }
+}
+
 public interface Artifact<T> : IEnumerable<T>
 {
     void Do(Action<T> action);

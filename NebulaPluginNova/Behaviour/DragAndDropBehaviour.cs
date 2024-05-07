@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using System.Text;
 using System.Runtime.InteropServices;
+using UnityEngine.Rendering;
 
 namespace Nebula.Behaviour;
 
@@ -474,10 +475,18 @@ public class DragAndDropBehaviour : MonoBehaviour
 
         var background = UnityHelper.CreateObject<SpriteRenderer>("BlackScreen", transform, new Vector3(0, 0, 0.2f));
         background.sprite = VanillaAsset.FullScreenSprite;
-        background.color = new Color(0, 0, 0, 0.4226f);
+        background.color = new Color(0, 0, 0.14f, 0.5226f);
         background.transform.localScale = new Vector3(100f, 100f);
         background.gameObject.layer = LayerExpansion.GetUILayer();
-       
+
+        var sortingGroup = UnityHelper.CreateObject<SortingGroup>("SortingGroup", transform, new Vector3(0, 0, -50f));
+
+        var text = GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeParams.StandardBaredBold), "ui.dragAndDrop").Instantiate(new(7f, 4f), out var _);
+        text?.transform.SetParent(sortingGroup.transform);
+        text!.transform.localScale = new(1.7f, 1.7f);
+        text!.transform.localPosition = new(0,0,-10f);
+        text!.layer = LayerExpansion.GetUILayer();
+
         var collider = background.gameObject.AddComponent<BoxCollider2D>();
         collider.size = new Vector2(100f, 100f);
         background.gameObject.SetUpButton().OnClick.AddListener(() => GameObject.Destroy(gameObject));

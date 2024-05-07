@@ -564,6 +564,13 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             ContentGenerator = generator;
         }
 
+        public CustomWidget(Vector2 size, AlignmentOption alignment, Action<Transform> generator) : this(size, alignment, 
+            (parent, center) =>
+            {
+                var holder = UnityHelper.CreateObject("CustomHolder", parent, center);
+                generator.Invoke(holder.transform);
+            }) { }
+
         public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
         {
             width = CalcWidth(Alignment, cursor, size, Size.x);

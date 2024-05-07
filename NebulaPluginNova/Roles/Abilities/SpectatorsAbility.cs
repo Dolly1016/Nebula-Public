@@ -13,20 +13,14 @@ public class SpectatorsAbility : IGameEntity
     static ISpriteLoader spectatorChangeSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorChangeButton.png", 115f);
 
     GamePlayer? currentTarget = null;
-    bool spectatorsMode = false;
-    bool isFirst = true;
 
     GamePlayer[] AvailableTargets => NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead || p.AmOwner).OrderBy(p => p.AmOwner ? -1 : p.PlayerId).ToArray();
     
     void OnChangeTarget()
     {
-        if (!spectatorsMode) return;
         var target = currentTarget?.Unbox().MyControl;
 
-        if (target != null)
-            AmongUsUtil.SetCamTarget(target);
-        else
-            SetSpectatorMode(false);
+        AmongUsUtil.SetCamTarget(target);
     }
 
     void RefreshTarget()
@@ -74,58 +68,43 @@ public class SpectatorsAbility : IGameEntity
         OnChangeTarget();
     }
 
-    void SwitchSpectatorMode() => SetSpectatorMode(!spectatorsMode);
-
     void SetSpectatorMode(bool on)
     {
-        if (spectatorsMode == on) return;
-
-        spectatorsMode = on;
         if (on)
         {
             if (AvailableTargets.Length == 0) SetSpectatorMode(false);
             RefreshTarget();
             OnChangeTarget();
-
-            //NebulaGameManager.Instance?.WideCamera.SetDrawShadow(false);
-
-            if (isFirst)
-            {
-                NebulaGameManager.Instance!.WideCamera.TargetRate = 1.5f;
-                isFirst = false;
-            }
         }
         else
         {
             AmongUsUtil.SetCamTarget();
-            NebulaGameManager.Instance?.WideCamera.Inactivate();
         }
         
     }
 
     void IGameEntity.HudUpdate()
     {
-        if (spectatorsMode)
-        {
-            float axis = Input.GetAxis("Mouse ScrollWheel");
+        float axis = Input.GetAxis("Mouse ScrollWheel");
 
-            float rate = NebulaGameManager.Instance!.WideCamera.TargetRate;
-            if (axis < 0f) rate -= 0.25f;
-            if (axis > 0f) rate += 0.25f;
-            rate = Mathf.Clamp(rate, 1f, 6f);
+        float rate = NebulaGameManager.Instance!.WideCamera.TargetRate;
+        if (axis < 0f) rate -= 0.25f;
+        if (axis > 0f) rate += 0.25f;
+        rate = Mathf.Clamp(rate, 1f, 6f);
 
-            NebulaGameManager.Instance!.WideCamera.TargetRate = rate;
-        }
+        NebulaGameManager.Instance!.WideCamera.TargetRate = rate;
     }
 
     public SpectatorsAbility()
     {
+        /*
         var spectatorButton = new ModAbilityButton(true).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Spectator));
         spectatorButton.SetSprite(spectatorSprite.GetSprite());
         spectatorButton.Availability = button => true;
         spectatorButton.Visibility = button => true;
         spectatorButton.OnClick = (button) => SwitchSpectatorMode();
         spectatorButton.SetLabel("spectator");
+        */
 
         var spectatorChangeButton = new ModAbilityButton(true)
             .KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.SpectatorRight)).SubKeyBind(Virial.Compat.VirtualKeyInput.SpectatorLeft);
@@ -134,21 +113,21 @@ public class SpectatorsAbility : IGameEntity
         spectatorChangeButton.Visibility = button => !(NebulaGameManager.Instance?.LocalPlayerInfo.Tasks.IsCrewmateTask ?? false) || (NebulaGameManager.Instance?.LocalPlayerInfo.Tasks.IsCompletedCurrentTasks ?? true);
         spectatorChangeButton.OnClick = (button) =>
         {
-            if (!spectatorsMode) SetSpectatorMode(true);
             ChangeTarget(true);
         };
         spectatorChangeButton.OnSubAction = (button) =>
         {
-            if (!spectatorsMode) SetSpectatorMode(true);
             ChangeTarget(false);
         };
         spectatorChangeButton.SetLabel("spectatorChange");
+
+        SetSpectatorMode(true);
     }
 
     //プレイヤーの死亡時、そのプレイヤーを観戦していたら近くのプレイヤーに視点を変える
     void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
     {
-        if(spectatorsMode && currentTarget == dead)
+        if(currentTarget == dead)
         {
             var nearest = AvailableTargets.OrderBy(p => p.VanillaPlayer.transform.position.Distance(dead.VanillaPlayer.transform.position));
             currentTarget = nearest.FirstOrDefault();
@@ -158,10 +137,7 @@ public class SpectatorsAbility : IGameEntity
 
     void IGameEntity.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
     {
-        if (spectatorsMode)
-        {
-            if (currentTarget == dead) new StaticAchievementToken("spectator.dead");
-            if (currentTarget == murderer) new StaticAchievementToken("spectator.murderer");
-        }
+        if (currentTarget == dead) new StaticAchievementToken("spectator.dead");
+        if (currentTarget == murderer) new StaticAchievementToken("spectator.murderer");
     }
 }

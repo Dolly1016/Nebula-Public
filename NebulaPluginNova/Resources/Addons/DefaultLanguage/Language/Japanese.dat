@@ -74,18 +74,18 @@
 "options.tab.modifier" : "[モディファイア]"
 
 "options.assignment" : "割り当てオプション"
-"options.assignment.detail" : "ロールの割り当てに関する設定"
+"options.assignment.detail" : "役職の割り当て数に関する設定です。"
 "options.assignment.crewmate" : "クルーメイトロール"
 "options.assignment.impostor" : "インポスターロール"
 "options.assignment.neutral" : "第三陣営ロール"
 "options.assignment.unlimited" : "無制限"
 
 "options.soloFreePlay" : "ソロフリープレイオプション"
-"options.soloFreePlay.detail" : "ダミーに関する設定"
+"options.soloFreePlay.detail" : "フリープレイのダミーに関する設定です。"
 "options.soloFreePlay.numOfDummies" : "ダミーのスポーン数"
 
 "options.map" : "マップオプション"
-"options.map.detail" : "マップに関する設定"
+"options.map.detail" : "スポーン方法や、マップのカスタマイズに関する設定ができます。"
 "options.map.spawnMethod" : "スポーンメソッド"
 "options.map.spawnMethod.default" : "標準"
 "options.map.spawnMethod.selective" : "選択式"
@@ -131,14 +131,14 @@
 "options.map.customization.fungle.reactorDuration" : "リアクターサボ"
 
 "options.meeting" : "緊急会議オプション"
-"options.meeting.detail" : "緊急会議に関する設定"
+"options.meeting.detail" : "緊急会議に関する設定です。"
 "options.meeting.noticeExtraVictims" : "追加追放者の通知"
 "options.meeting.deathPenalty" : "死者一人当たりの会議時間減少"
-"options.meeting.numOfMeeting" : "全体の緊急ボタン回数"
+"options.meeting.numOfMeeting" : "ゲーム全体の緊急ボタンの最大回数"
 "options.meeting.showRoleOfExiled" : "追放者の役職開示"
 
 "options.consoleRestriction" : "情報端末制限"
-"options.consoleRestriction.detail" : "アドミンやバイタルの使用制限"
+"options.consoleRestriction.detail" : "アドミンやバイタルの使用時間に制限をかけることができます。"
 "options.consoleRestriction.unlimited" : "無制限"
 "options.consoleRestriction.adminRestriction" : "アドミン"
 "options.consoleRestriction.vitalsRestriction" : "バイタル"
@@ -146,7 +146,7 @@
 "options.consoleRestriction.resetRestrictions" : "会議ごとの制限リセット"
 
 "options.voiceChat" : "ボイスチャットオプション"
-"options.voiceChat.detail" : "ゲーム内VCの設定"
+"options.voiceChat.detail" : "通話しながら遊ぼう！ゲーム内VCの設定です。"
 "options.voiceChat.useVoiceChat" : "ゲーム内VC"
 "options.voiceChat.wallsBlockAudio" : "壁による声の遮蔽"
 "options.voiceChat.killersHearDead" : "幽霊の語り掛け"
@@ -174,7 +174,7 @@
 "options.killCoolDown.type.ratio" : "比率"
 
 "options.exclusiveAssignment" : "排他的割り当て"
-"options.exclusiveAssignment.detail" : "排他的なロール割り当て"
+"options.exclusiveAssignment.detail" : "役職を排他的(≒二者択一的に)に割り当てさせることができます。"
 "options.exclusiveAssignment.category.0" : "カテゴリ 1"
 "options.exclusiveAssignment.category.1" : "カテゴリ 2"
 "options.exclusiveAssignment.category.2" : "カテゴリ 3"
@@ -233,7 +233,9 @@
 "role.agent.blurb" : "タスクをこなせ"
 "options.role.agent.detail" : "ノルマとして課されている以上のタスクをこなすことができます。<br>追加のタスクは他のクルーメイトのタスクを肩代わりします。"
 "options.role.agent.numOfExemptedTasks" : "タスクの免除数"
+"options.role.agent.numOfExemptedTasks.detail" : "指定した数だけ、Agentの総タスク数が少なくなります。<br>総タスクが少なくなれば、追加タスクを手に入れるのにかかる時間は短縮します。"
 "options.role.agent.numOfExtraTasks" : "追加タスク数"
+"options.role.agent.numOfExtraTasks.detail" : "一度のタスク代行で手に入れられるタスクの数を設定します。<br>死亡後はタスク代行による<b>さらなる</b>タスクの入手はできません。"
 "options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent" : "先んじてタスクを完遂されると自殺する"
 
 "role.bait.name" : "ベイト"
@@ -1051,6 +1053,11 @@
 "achievement.type.challenge" : "チャレンジ"
 "achievement.type.secret" : "シークレット"
 "achievement.type.seasonal" : "期間限定"
+
+# Help
+
+"help.color.icon.april0" : "この色は4月限定実績の対象色(黄緑)です。"
+"help.color.icon.april1" : "この色は4月限定実績の対象色(桜色)です。"
 
 # Tag
 

@@ -25,7 +25,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     public NebulaConfiguration CanCreateSidekickOption = null!;
     private NebulaConfiguration NumOfKillingToCreateSidekickOption = null!;
-    private NebulaConfiguration NumOfKillingToWinOption = null!;
+    //private NebulaConfiguration NumOfKillingToWinOption = null!;
 
     public static bool IsJackal(PlayerModInfo player, int teamId)
     {
@@ -41,7 +41,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
         KillCoolDownOption = new(RoleConfig, "killCoolDown",KillCoolDownConfiguration.KillCoolDownType.Relative, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 25f, -5f, 1f);
         CanCreateSidekickOption = new NebulaConfiguration(RoleConfig, "canCreateSidekick", null, false, false);
         NumOfKillingToCreateSidekickOption = new NebulaConfiguration(RoleConfig, "numOfKillingToCreateSidekick", null, 10, 2, 2);
-        NumOfKillingToWinOption = new NebulaConfiguration(RoleConfig, "numOfKillingToWin", null, 10, 2, 2);
+        //NumOfKillingToWinOption = new NebulaConfiguration(RoleConfig, "numOfKillingToWin", null, 10, 2, 2);
     }
 
 
@@ -65,7 +65,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
         static private ISpriteLoader sidekickButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SidekickButton.png", 115f);
 
         public override int[]? GetRoleArgument() => [JackalTeamId, killingTotal, myKillingTotal];
-        public bool CanWinDueToKilling => killingTotal >= MyRole.NumOfKillingToWinOption;
+        public bool CanWinDueToKilling => /*killingTotal >= MyRole.NumOfKillingToWinOption*/ true;
         public bool IsMySidekick(PlayerModInfo? player)
         {
             if (player == null) return false;

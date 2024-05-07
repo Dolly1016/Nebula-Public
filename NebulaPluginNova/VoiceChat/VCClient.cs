@@ -32,15 +32,25 @@ public class VCClient : IDisposable
     public MixingSampleProvider? myRoute = null;
     private float wallRatio = 1f;
     private int radioMask;
-    private DataEntry<float>? volumeEntry;
+    private DataEntry<float>? volumeEntry = null;
     public uint sId = 0;
 
+    //PUIDがわからない相手のボリュームを一時保存する
+    private static Dictionary<string, float> lowLevelVolumeSaver = new();
 
-    public float Level => volumeMeter.Level;
-    public float Volume { get => volumeEntry?.Value ?? 1f; }
-    public void SetVolume(float val, bool withSave) {
-        if (volumeEntry == null) { return; }
-        if (withSave) volumeEntry.Value = val; else volumeEntry.SetValueWithoutSave(val); 
+
+    public float level = 0f;
+    public float Level => level;
+    public bool IsSpeaking => Level > 0.045f;
+
+    public float Volume { get => volumeEntry?.Value ?? (lowLevelVolumeSaver.TryGetValue(relatedControl.name, out var val) ? val : 4f); }
+    public void SetVolume(float val) {
+        if (volumeEntry == null)
+        {
+            lowLevelVolumeSaver[relatedControl.name] = val;
+        }
+        else
+            volumeEntry.Value = val;
     }
 
     public PlayerControl MyPlayer => relatedControl;
@@ -101,7 +111,7 @@ public class VCClient : IDisposable
             }
             Debug.Log($"Gain PUID of {player.name} ({player.PlayerId} : {puid})");
             if (puid.Length == 0) puid = player.name;
-            volumeEntry = new FloatDataEntry(puid, VoiceChatManager.VCSaver, 1f);
+            volumeEntry = new FloatDataEntry(puid, VoiceChatManager.VCSaver, 2f);
         }
 
         NebulaManager.Instance.StartCoroutine(CoSetVolumeEntry().WrapToIl2Cpp());
@@ -157,7 +167,7 @@ public class VCClient : IDisposable
         //常に出来る限り普通に聞こうとするものとする
         SetListenAsVoiceType(VoiceType.Normal);
 
-       //幽霊として語りかけていないとき
+        //幽霊として語りかけていないとき
         if (InputtedVoiceType != VoiceType.Ghost)
         {
             if (!atLobby && !CanHear)
@@ -209,27 +219,36 @@ public class VCClient : IDisposable
         //普通に話している生存者
         if(InputtedVoiceType == VoiceType.Normal && !(relatedControl.Data?.IsDead ?? false))
         {
-            foreach (var mic in NebulaGameManager.Instance!.VoiceChatManager!.AllMics())
+            if (GeneralConfigurations.CanTalkInWandaringPhaseOption)
             {
-                float micVolume = mic.CanCatch(relatedControl.transform.position);
-                if (!(micVolume > 0f)) continue;
-
-                foreach (var speaker in NebulaGameManager.Instance!.VoiceChatManager!.AllSpeakers())
+                foreach (var mic in NebulaGameManager.Instance!.VoiceChatManager!.AllMics())
                 {
-                    if (!speaker.CanPlaySoundFrom(mic)) continue;
+                    float micVolume = mic.CanCatch(relatedControl.transform.position);
+                    if (!(micVolume > 0f)) continue;
 
-                    CheckCanHear(out var speakerVol, out var speakerPan, speaker.Position);
-                    speakerVol *= micVolume;
-
-                    if(speakerVol > volume)
+                    foreach (var speaker in NebulaGameManager.Instance!.VoiceChatManager!.AllSpeakers())
                     {
-                        volume = speakerVol;
-                        pan = speakerPan;
+                        if (!speaker.CanPlaySoundFrom(mic)) continue;
 
-                        //ラジオの声を採用
-                        SetListenAsVoiceType(VoiceType.Radio);
+                        CheckCanHear(out var speakerVol, out var speakerPan, speaker.Position);
+                        speakerVol *= micVolume;
+
+                        if (speakerVol > volume)
+                        {
+                            volume = speakerVol;
+                            pan = speakerPan;
+
+                            //ラジオの声を採用
+                            SetListenAsVoiceType(VoiceType.Radio);
+                        }
                     }
                 }
+            }
+            else
+            {
+                //タスクフェイズ中の通話機能が無効になっている場合
+                volume = 0f;
+                pan = 0f;
             }
         }
 
@@ -241,13 +260,24 @@ public class VCClient : IDisposable
     {
         UpdateAudio();
         volumeFilter.Volume *= Volume;
+        
+        level -= Time.deltaTime * 1.4f;
+        level = Mathf.Max(level, volumeMeter.Level);
 
-        stock.RemoveAll(s => s.sId >= this.sId);
-        while (stock.Count > 0 && stock[stock.Count - 1].sId == this.sId + 1)
+        stock.RemoveAll(s => s.sId <= this.sId);
+        while (stock.Count > 0)
         {
-            var message = stock[stock.Count - 1];
-            PushData(message.sId,message.isRadio,message.radioMask,message.data);
-            stock.RemoveAt(stock.Count - 1);
+            var lastCount = stock.Count;
+            for(int i = 0; i < stock.Count; i++)
+            {
+                if(stock[i].sId == this.sId + 1)
+                {
+                    PushData(stock[i].sId, stock[i].isRadio, stock[i].radioMask, stock[i].data);
+                    stock.RemoveAt(i);
+                    break;
+                }
+            }
+            if (lastCount == stock.Count) break;
         }
     }
 
@@ -289,6 +319,7 @@ public class VCClient : IDisposable
         {
             if (bufferedProvider!.BufferedBytes == 0)
                 bufferedProvider!.AddSamples(new byte[1024], 0, 1024);
+            
 
             bufferedProvider!.AddSamples(rawAudioData, 0, rawSize);
         }
@@ -311,7 +342,7 @@ public class VCClient : IDisposable
     {
         if (sId < this.sId) return;
 
-        if (sId == this.sId + 1) PushData(sId, isRadio, radioMask, data);
+        if (sId == this.sId + 1 || sId > this.sId + 10) PushData(sId, isRadio, radioMask, data);
         else KeepData(sId, isRadio, radioMask, data);
         
     }

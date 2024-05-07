@@ -276,9 +276,15 @@ public static class ArrowUpdatePatch
         __instance.target = pos;
 
         if (__instance.Between(vector.x, 0f, 1f) && __instance.Between(vector.y, 0f, 1f))
-            __instance.CloseBehaviour(del, num);
+        {
+            Vector2 temp = worldCam.transform.position + (__instance.target - worldCam.transform.position) * (worldCam.orthographicSize / Camera.main.orthographicSize);
+            __instance.transform.position = temp - del.normalized * 0.6f;
+            __instance.transform.localScale = Vector3.one * Mathf.Clamp(num, 0f, 1f);
+        }
         else
             __instance.DistancedBehaviour(vector, del, num, main);
+
+        __instance.transform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
 
         __instance.target = tempTarget;
 

@@ -21,24 +21,22 @@ public class ConfigurationTag
     
 }
 
-public interface Configuration
+public interface IConfigurationEntry
 {
-
+    //GUIWidgetSupplier GetEditor();
+    string? GetDisplayText();
 }
 
-public enum FilterAction
+public interface IConfigurationHolder : IConfigurationEntry
 {
-    And,
-    Or,
-    Set
 }
 
-public interface ModifierFilter : Configuration
+public interface ModifierFilter
 {
     bool Test(DefinedModifier modifier);
 }
 
-public interface RoleFilter : Configuration
+public interface RoleFilter
 {
     bool Test(DefinedRole role);
 }
@@ -46,7 +44,7 @@ public interface RoleFilter : Configuration
 /// <summary>
 /// 値を持つオプションです。
 /// </summary>
-public interface ValueConfiguration
+public interface ValueConfiguration : IConfigurationEntry
 {
     /// <summary>
     /// 現在の値を文字列で取得します。

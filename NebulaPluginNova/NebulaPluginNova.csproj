@@ -2,18 +2,19 @@
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFramework>net6</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>Nebula</RootNamespace>
 		<AssemblyName>Nebula</AssemblyName>
 		<LangVersion>latest</LangVersion>
-		<Nullable>enable</Nullable>
+		<Nullable>disable</Nullable>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
 		<DebugSymbols>false</DebugSymbols>
 		<DebugType>none</DebugType>
 		<Platforms>AnyCPU;x86;x64</Platforms>
+		<NeutralLanguage>en-US</NeutralLanguage>
 	</PropertyGroup>
 	
 	
@@ -82,9 +83,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
 	  <PackageReference Include="NAudio.Core" Version="2.2.1" />
 	  <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+	  <PackageReference Include="NAudio.WinMM" Version="2.2.1" />
 	  <PackageReference Include="OpusDotNet" Version="1.0.3" />
+	  <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
+	  <PackageReference Include="System.Reflection.Metadata" Version="8.0.0" />
+	  <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -97,11 +103,11 @@
 
 	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
 		<Message Text="Second occurrence" />
-		<Exec Command="tools\ILRepack.exe /wildcards /target:library /lib:references /lib:%22..\..\Among Us\BepInEx\core%22 /lib:%22..\..\Among Us\BepInEx\interop%22 /internalize /out:bin\x86\Release\net6\Nebula.dll %22bin\x86\Release\net6\Nebula.dll%22 %22libs\*.dll%22 %22$(AmongUsRelease)\NebulaAPI.dll%22 " />
-		<Copy SourceFiles="bin\x86\Release\net6\Nebula.dll" DestinationFolder="$(AmongUsRelease)\" />
-		<Copy SourceFiles="bin\x86\Release\net6\Nebula.dll" DestinationFolder="$(AmongUsRelease)\Nebula\BepInEx\plugins\" />
+		<Exec Command="tools\ILRepack.exe /wildcards /target:library /lib:references /lib:%22..\..\Among Us\BepInEx\core%22 /lib:%22..\..\Among Us\BepInEx\interop%22 /internalize /out:bin\x86\Release\net6.0\Nebula.dll %22bin\x86\Release\net6.0\Nebula.dll%22 %22libs\*.dll%22 %22$(AmongUsRelease)\NebulaAPI.dll%22 " />
+		<Copy SourceFiles="bin\x86\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\" />
+		<Copy SourceFiles="bin\x86\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\Nebula\BepInEx\plugins\" />
 		<Exec Command="%22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula.zip $(AmongUsRelease)\Nebula" />
-		<Copy SourceFiles="bin\x86\Release\net6\Nebula.dll" DestinationFolder="$(AmongUsMod)\BepInEx\plugins\" />
+		<Copy SourceFiles="bin\x86\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsMod)\BepInEx\plugins\" />
 	</Target>
 
 </Project>

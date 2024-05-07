@@ -204,7 +204,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         {
             if (AmOwner)
             {
-                var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon));
+                var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon) && (!(NebulaGameManager.Instance?.GetModPlayerInfo(icon.playerId)?.IsDead ?? true) || exiled.PlayerId == icon.playerId));
                 if (notDoused.Count == 1 && notDoused[0].playerId == exiled.PlayerId)
                     acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
             }

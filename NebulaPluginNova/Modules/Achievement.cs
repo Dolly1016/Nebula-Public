@@ -427,11 +427,11 @@ static public class NebulaAchievementManager
             MyTitle = achievement;
     }
 
-    static public (int num,int max, int hidden)[] Aggregate()
+    static public (int num,int max, int hidden)[] Aggregate(Predicate<AbstractAchievement>? predicate)
     {
         (int num, int max, int hidden)[] result = new (int num, int max, int hidden)[3];
         for (int i = 0; i < result.Length; i++) result[i] = (0, 0, 0);
-        return AllAchievements.Aggregate(result,
+        return AllAchievements.Where(a => predicate?.Invoke(a) ?? true).Aggregate(result,
             (ac,achievement) => {
                 if (!achievement.IsHidden)
                 {

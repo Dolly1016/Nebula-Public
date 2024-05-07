@@ -1,14 +1,5 @@
-﻿using Nebula.Modules;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.EventSystems;
-using Virial;
+﻿using System.Reflection;
 using Virial.Attributes;
-using static Mono.CSharp.Parameter;
 
 namespace Nebula.Roles;
 
@@ -18,7 +9,6 @@ public class Roles
     static public IReadOnlyList<AbstractRole> AllRoles { get; private set; } = null!;
     static public IReadOnlyList<AbstractModifier> AllModifiers { get; private set; } = null!;
     static public IReadOnlyList<AbstractGhostRole> AllGhostRoles { get; private set; } = null!;
-    static public IReadOnlyList<Perk> AllPerks { get; private set; } = null!;
 
     static public IEnumerable<IAssignableBase> AllAssignables()
     {
@@ -38,7 +28,6 @@ public class Roles
     static private List<AbstractGhostRole>? allGhostRoles = new();
     static private List<AbstractModifier>? allModifiers = new();
     static private List<Team>? allTeams = new();
-    static private List<Perk>? allPerks = new();
 
     static public void Register(AbstractRole role) {
         if(allRoles == null)
@@ -66,13 +55,7 @@ public class Roles
         else
             allTeams.Add(team);
     }
-    static public void Register(Perk perk)
-    {
-        if (allPerks == null)
-            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register perk \"{perk.TranslationKey}\".\nPerk registration is only possible at load phase.");
-        else
-            allPerks.Add(perk);
-    }
+
 
     static private void SetNebulaTeams()
     {
@@ -101,12 +84,6 @@ public class Roles
 
         SetNebulaTeams();
 
-        AddonScriptManager.ExecuteEvent(CallingEvent.PreRoles);
-        AddonScriptManager.EvaluateScript("Roles");
-        AddonScriptManager.ExecuteEvent(CallingEvent.PostRoles);
-
-        foreach (var addonRole in NebulaImpl.Instance.AllRoles) new AddonRole(addonRole);
-
         allRoles!.Sort((role1, role2) => {
             int diff;
             
@@ -131,18 +108,15 @@ public class Roles
         });
 
         allTeams!.Sort((team1, team2) => team1.TranslationKey.CompareTo(team2.TranslationKey));
-        allPerks!.Sort((perk1, perk2) => perk1.TranslationKey.CompareTo(perk2.TranslationKey));
 
         for (int i = 0; i < allRoles!.Count; i++) allRoles![i].Id = i;
         for (int i = 0; i < allGhostRoles!.Count; i++) allGhostRoles![i].Id = i;
         for (int i = 0; i < allModifiers!.Count; i++) allModifiers![i].Id = i;
-        for (int i = 0; i < allPerks!.Count; i++) allPerks![i].Id = i;
 
         AllRoles = allRoles!.AsReadOnly();
         AllGhostRoles = allGhostRoles!.AsReadOnly();
         AllModifiers = allModifiers!.AsReadOnly();
         AllTeams = allTeams!.AsReadOnly();
-        AllPerks = allPerks!.AsReadOnly();
 
         foreach (var role in allRoles) role.Load();
         foreach (var role in allGhostRoles) role.Load();
@@ -156,6 +130,5 @@ public class Roles
         allGhostRoles = null;
         allModifiers = null;
         allTeams = null;
-        allPerks = null;
     }
 }

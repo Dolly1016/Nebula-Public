@@ -1,13 +1,5 @@
-﻿using Il2CppSystem.Reflection.Internal;
-using Mono.CSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
+﻿using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 
 namespace Nebula.Utilities;
@@ -92,10 +84,10 @@ public static class Helpers
         return AllDeadBodies().FirstOrDefault((p) => p.ParentId == id);
     }
 
-    public static int ComputeConstantHash(this string str)
+    public static int ComputeConstantOldHash(this string str)
     {
         const long MulPrime = 467;
-        const int SurPrime = 9670057;
+        const long SurPrime = 9670057;
 
         long val = 0;
         foreach (char c in str)
@@ -107,14 +99,64 @@ public static class Helpers
         return (int)(val % SurPrime);
     }
 
+    public static int ComputeConstantHash(this string str)
+    {
+        const long MulPrime = 467;
+        const long SurPrime = 2147283659;
+
+        long val = 0;
+        foreach (char c in str)
+        {
+            val *= MulPrime;
+            val += c;
+            val %= SurPrime;
+        }
+        return (int)(val % SurPrime);
+    }
+
+    public static long ComputeConstantLongHash(this string str)
+    {
+        const long MulPrime = 467;
+        const long SurPrime = 531206959292021;
+
+        long val = 0;
+        foreach (char c in str)
+        {
+            val *= MulPrime;
+            val += c;
+            val %= SurPrime;
+        }
+        return (val % SurPrime);
+    }
+
+    //ハッシュ化した文字列に使用するテキスト
+    private static char[] HashCharacters = [
+        ..Helpers.Sequential(26).Select(i => (char)('a' + i)),
+        ..Helpers.Sequential(26).Select(i => (char)('A' + i)),
+        ..Helpers.Sequential(10).Select(i => (char)('0' + i))];
+
     public static string ComputeConstantHashAsString(this string str)
     {
-        var val = str.ComputeConstantHash();
+        var val = str.ComputeConstantOldHash();
         StringBuilder builder = new StringBuilder();
-        while(val > 0)
+
+        while (val > 0)
         {
             builder.Append((char)('a' + (val % 26)));
             val /= 26;
+        }
+        return builder.ToString();
+    }
+
+    public static string ComputeConstantHashAsStringLong(this string str)
+    {
+        var val = str.ComputeConstantLongHash();
+        StringBuilder builder = new StringBuilder();
+
+        while(val > 0)
+        {
+            builder.Append(HashCharacters[val % HashCharacters.Length]);
+            val /= HashCharacters.Length;
         }
         return builder.ToString();
     }

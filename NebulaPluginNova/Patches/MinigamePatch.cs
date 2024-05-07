@@ -43,22 +43,7 @@ public class MinigameBeginPatch
     {
         if (!SabotagePrefix(__instance, task)) return false;
 
-        Minigame.Instance = __instance;
-
-        __instance.MyTask = task;
-        __instance.MyNormTask = task ? task.TryCast<NormalPlayerTask>() : null;
-        __instance.timeOpened = Time.realtimeSinceStartup;
-        if (PlayerControl.LocalPlayer)
-        {
-            if (MapBehaviour.Instance) MapBehaviour.Instance.Close();
-            
-            
-            //タスクに吸い寄せられるのを阻止
-            PlayerControl.LocalPlayer.NetTransform.HaltSmoothly();
-            
-        }
-        __instance.StartCoroutine(__instance.CoAnimateOpen());
-        return false;
+        return true;
     }
 }
 
@@ -248,9 +233,20 @@ public static class EmergencyUpdatePatch
         __instance.OpenLid.gameObject.SetActive(false);
     }
 
+    private static void ClosedForModOptionButtonUpdate(EmergencyMinigame __instance)
+    {
+        if (__instance.state == 3) return;
+        __instance.state = 3;
+        __instance.ButtonActive = false;
+        __instance.StatusText.text = Language.Translate("game.meeting.cannotUseEmergencyButton");
+        __instance.NumberText.text = string.Empty;
+        __instance.ClosedLid.gameObject.SetActive(true);
+        __instance.OpenLid.gameObject.SetActive(false);
+    }
+
     public static bool Prefix(EmergencyMinigame __instance)
     {
-        //ゲーム開始直ぐはボタンを押せない
+        //ゲーム開始直ぐはボタンを押せない →スポーン直後に緊急会議クールをいじりたい
         if (ShipStatus.Instance.Timer < 15f)
             WaitingButtonUpdate(__instance, 15f - ShipStatus.Instance.Timer);
         //クールダウン中はボタンを押せない

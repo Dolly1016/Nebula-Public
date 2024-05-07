@@ -24,8 +24,6 @@ public class NebulaImpl : INebula
         Instance = this;
     }
 
-    public List<AbstractRoleDef> AllRoles = new();
-
     public string APIVersion => typeof(NebulaAPI).Assembly.GetName().Version?.ToString() ?? "Undefined";
 
     public Virial.Media.IResourceAllocator NebulaAsset => NebulaResourceManager.NebulaNamespace;
@@ -37,12 +35,6 @@ public class NebulaImpl : INebula
     public CommunicableTextTag RegisterCommunicableText(string translationKey)
     {
         return new TranslatableTag(translationKey);
-    }
-
-    public void RegisterRole(AbstractRoleDef roleDef)
-    {
-        AddonScriptManager.GetScriptingByAssembly(roleDef.GetType().Assembly)?.Addon.MarkAsNeedingHandshake();
-        AllRoles.Add(roleDef);
     }
 
     public void RegisterPreset(string id, string name, string? detail, string? relatedHolder, Action onLoad)

@@ -1,14 +1,5 @@
-﻿using JetBrains.Annotations;
-using Mono.CSharp;
-using Nebula.Roles.Crewmate;
-using Rewired.UI.ControlMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Roles.Crewmate;
 using Virial.Game;
-using Virial.Text;
 
 namespace Nebula.Roles.Modifier;
 

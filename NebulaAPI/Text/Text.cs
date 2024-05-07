@@ -132,6 +132,11 @@ public enum AttributeAsset
     /// SerializableDocumentのTextStyle"Title"で提供されているテキスト属性です。
     /// </summary>
     DocumentTitle,
+
+    /// <summary>
+    /// VC Settingsのデバイス設定で使用している横長のボタンです。
+    /// </summary>
+    DeviceButton,
 }
 
 [Flags]

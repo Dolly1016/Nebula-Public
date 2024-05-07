@@ -1,6 +1,7 @@
 ﻿using Nebula;
 using Octokit;
 using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Windows.Forms;
@@ -13,6 +14,8 @@ var githubClient = new GitHubClient(new ProductHeaderValue("lr")) { Credentials 
 
 bool exit = false;
 string? githubReleaseUrl = null;
+
+AllProcess.Add(Process.Start(GenerateShortcut() + "\\Among Us.exe"));
 
 while (!exit)
 {

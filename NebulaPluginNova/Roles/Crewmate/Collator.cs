@@ -186,7 +186,7 @@ public class Collator : ConfigurableStandardRole, HasCitation
             tube.transform.localScale = Vector3.one;
         }
 
-        AchievementToken<BitMask<GamePlayer>>? acTokenChallenge = null;
+        AchievementToken<EditableBitMask<GamePlayer>>? acTokenChallenge = null;
         AchievementToken<(GamePlayer? player, float time, bool clear)>? acTokenAnother1 = null;
 
         public override void OnActivated()

@@ -5,7 +5,6 @@ using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Reflection.Internal;
 using Il2CppSystem.Text.RegularExpressions;
 using Innersloth.Assets;
-using Mono.CSharp;
 using PowerTools;
 using Rewired.Utils.Platforms.Windows;
 using Sentry;
@@ -135,7 +134,12 @@ public class CosmicImage
     [JsonSerializableField(true)]
     public int? Length = null;
 
-    public int GetLength() => Length ?? 1;
+    [JsonSerializableField(true)]
+    public int? X = null;
+    [JsonSerializableField(true)]
+    public int? Y = null;
+
+    public int GetLength() => (X ?? Length ?? 1) * (Y ?? 1);
 
     public float PixelsPerUnit = 100f;
     public Vector2 Pivot = new Vector2(0.5f, 0.5f);
@@ -147,7 +151,7 @@ public class CosmicImage
     public bool TryLoadImage(ITextureLoader textureLoader)
     {
         int length = GetLength();
-        this.spriteLoader = new XOnlyDividedSpriteLoader(textureLoader, PixelsPerUnit, length) { Pivot = Pivot };
+        this.spriteLoader = new DividedSpriteLoader(textureLoader, PixelsPerUnit, X ?? Length ?? 1, Y ?? 1) { Pivot = Pivot };
         for (int i = 0; i < length; i++) if (!spriteLoader.GetSprite(i)) return false;
         return true;
     }

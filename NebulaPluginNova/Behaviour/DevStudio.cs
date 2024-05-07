@@ -964,7 +964,7 @@ public class DevStudio : MonoBehaviour
         widget.Append(new CombinedWidgetOld(
             new MetaWidgetOld.StateButton() { OnChanged = (flag) => display.Value!.Cosmetics.SetFlipX(flag) },
             new MetaWidgetOld.HorizonalMargin(0.15f),
-            new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttrLeft) { Size = new(0.8f, 0.12f) }) { TranslationKey = "flip" }
+            new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttrLeft) { Size = new(0.8f, 0.12f) }) { TranslationKey = "devStudio.ui.cosmetics.anim.flip" }
             ));
 
         return (widget, display);
@@ -1001,27 +1001,41 @@ public class DevStudio : MonoBehaviour
                 Directory.CreateDirectory(destPath);
                 string title = costumeNameRef.Value!.Text.ToByteString();
                 if (title.Length == 0) title = "Undefined";
-                destPath += "/" + title;
-                Directory.CreateDirectory(destPath);
-                destPath += "/" + fieldName + ".png";
-                try
+                destPath += "/" + title + "_" + fieldName + ".png";
+
+                void Copy()
                 {
-                    File.Copy(path[0], destPath, true);
+                    try
+                    {
+                        File.Copy(path[0], destPath, true);
 
-                    var image = new CosmicImage() { Address = costumeNameRef.Value!.Text.ToByteString() + "/" + fieldName + ".png" };
-                    costume.GetType().GetField(fieldName)?.SetValue(costume, image);
-                    costume.MyBundle = addon.MyBundle!;
-                    new StackfullCoroutine(costume.Activate()).Wait();
-                    updateAction?.Invoke();
-                    myButton!.Color = myRenderer!.color = Color.white;
+                        var image = new CosmicImage() { Address = costumeNameRef.Value!.Text.ToByteString() + "/" + fieldName + ".png" };
+                        costume.GetType().GetField(fieldName)?.SetValue(costume, image);
+                        costume.MyBundle = addon.MyBundle!;
+                        new StackfullCoroutine(costume.Activate(false)).Wait();
+                        updateAction?.Invoke();
+                        myButton!.Color = myRenderer!.color = Color.white;
 
-                    using Stream hashStream = File.OpenRead(destPath);
-                    image.Hash = CosmicImage.ComputeImageHash(hashStream);
-                    hashStream.Close();
+                        using Stream hashStream = File.OpenRead(destPath);
+                        image.Hash = CosmicImage.ComputeImageHash(hashStream);
+                        hashStream.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, e.ToString());
+                        MetaUI.ShowConfirmDialog(null, new TranslateTextComponent("devStudio.ui.cosmetics.failedToCopy"));
+                    }
                 }
-                catch {
-                    MetaUI.ShowConfirmDialog(null,new TranslateTextComponent("devStudio.ui.cosmetics.failedToCopy"));
+
+                if (File.Exists(destPath))
+                {
+                    MetaUI.ShowYesOrNoDialog(null, Copy, () => { }, Language.Translate("devStudio.ui.cosmetics.confirmOverwrite"), false);
                 }
+                else
+                {
+                    Copy();
+                }
+
             });
         }, new(TextAttributeOld.BoldAttr) { Size = new(0.85f, 0.23f) })
         { Color = costume.GetType().GetField(fieldName)!.GetValue(costume) == null ? disabledColor : Color.white, TranslationKey = translationKey, Alignment = IMetaWidgetOld.AlignmentOption.Center, PostBuilder = (_, renderer, _) => myRenderer = renderer };
@@ -1154,13 +1168,11 @@ public class DevStudio : MonoBehaviour
             {
                 hat.MyHat.NoBounce = !hat.Bounce;
                 hat.MyView.MatchPlayerColor = hat.Adaptive;
-                //visor.MyView.AltShader = hat.Adaptive ? MoreCosmic.AdaptiveShader : HatManager.Instance.DefaultShader;
                 displayRef?.Value?.Cosmetics.SetHat(hat.MyHat, NebulaPlayerTab.PreviewColorId);
             }
             else if (costume is CosmicVisor visor)
             {
                 visor.MyView.MatchPlayerColor = visor.Adaptive;
-                //visor.MyView.AltShader = visor.Adaptive ? MoreCosmic.AdaptiveShader : HatManager.Instance.DefaultShader;
                 displayRef?.Value?.Cosmetics.SetVisor(visor.MyVisor, NebulaPlayerTab.PreviewColorId);
             }
         }
@@ -1222,7 +1234,7 @@ public class DevStudio : MonoBehaviour
         {
             Directory.CreateDirectory(addon.FolderPath + "/MoreCosmic");
 
-            using Stream? stream = (addon as IResourceAllocator)?.GetResource("MoreCosmic/Contents.json")?.AsStream();
+            using Stream? stream = addon.OpenStream("MoreCosmic/Contents.json");
 
             if (stream != null)
             {
@@ -1306,16 +1318,79 @@ public class DevStudio : MonoBehaviour
             ));
         void OpenPackageEditor(CosmicPackage package) => OpenScreen(() => ShowPackageEditorScreen(addon, package));
 
-        void SetUpRightClickAction<Costume>(PassiveButton button, List<Costume> costumeList, Costume costume) where Costume : CustomItemGrouped
+        void SetUpRightClickAction<Costume>(PassiveButton button, List<Costume> costumeList, Costume costume, Action editAction) where Costume : CustomItemGrouped
         {
             string name = "";
             if(costume is CustomCosmicItem item)
                 name = item.UnescapedName;
             else if(costume is CosmicPackage package)
                 name = package.DisplayName;
-            
-            button.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked += () => MetaUI.ShowYesOrNoDialog(transform, () => { costumeList.Remove(costume); ReopenScreen(); }, () => { },
+
+            Action<MetaScreen> deleteAction = screen => MetaUI.ShowYesOrNoDialog(transform, () => { screen.CloseScreen(); costumeList.Remove(costume); ReopenScreen(); }, () => { },
                 Language.Translate("devStudio.ui.common.confirmDeleting") + $"<br>\"{name}\"");
+            Action<MetaScreen>? outputAction = costume is CosmicPackage ? null : screen =>
+            {
+                var item = costume as CustomCosmicItem;
+                if (item == null) return;
+
+                screen.CloseScreen();
+
+                ZipArchiveEntry CreateEntryFromStream(ZipArchive zip, string path,Stream stream) {
+                    var entry = zip.CreateEntry(path, System.IO.Compression.CompressionLevel.Optimal);
+                    using (var entryStream = entry.Open())
+                    {
+                        stream.CopyTo(entryStream);
+                    }
+                    return entry;
+                }
+
+                ZipArchiveEntry CreateEntryFromString(ZipArchive zip, string path, string rawText)
+                {
+                    var entry = zip.CreateEntry(path, System.IO.Compression.CompressionLevel.Optimal);
+                    using (var writer = new StreamWriter(entry.Open()))
+                    {
+                        writer.Write(rawText);
+                    }
+                    return entry;
+                }
+
+                Directory.CreateDirectory("GlobalCosOutputs");
+                using (var zip = ZipFile.Open(@"GlobalCosOutputs/" + item.Name + ".zip", ZipArchiveMode.Create))
+                {
+                    //パスを修正しながら画像をコピーする
+                    var copiedItem = JsonStructure.Deserialize(costume.Serialize(), costume.GetType()) as CustomCosmicItem;
+                    if (copiedItem != null)
+                    {
+                        foreach (var image in copiedItem.AllImage())
+                        {
+                            try
+                            {
+                                using var stream = File.OpenRead(addon.FolderPath + "/MoreCosmic/" + copiedItem.Category + "/" + image.Address);
+                                var fileName = Path.GetFileName(image.Address);
+
+                                image.Address = copiedItem.Name + "_" + fileName;
+                                CreateEntryFromStream(zip, image.Address, stream);
+                            }
+                            catch { }
+                        }
+                        CreateEntryFromString(zip, "Contents.json", copiedItem.Serialize());
+                    }
+                }
+
+                MetaUI.ShowConfirmDialog(null, new TranslateTextComponent("devStudio.ui.common.outputAsGlobal"));
+            };
+
+            button.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked += () =>
+            {
+                var confirmWindow = MetaScreen.GenerateWindow(new Vector2(2f, 2.7f), null, Vector3.zero, true, true, true, true);
+                confirmWindow.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center,
+                    GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBold), name),
+                    GUI.API.VerticalMargin(0.4f),
+                    GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.cosmetics.action.edit", _ => editAction.Invoke()),
+                    outputAction != null ? GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.cosmetics.action.output", _ => outputAction!.Invoke(confirmWindow)) : null,
+                    GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.cosmetics.action.delete", _ => deleteAction.Invoke(confirmWindow))
+                    ), new(0.5f, 0.5f), out var _);
+            };
         }
 
         var categories = new (string translationKey, Func<IMetaWidgetOld> widgetProvider, Action contentCreator)[]
@@ -1328,7 +1403,7 @@ public class DevStudio : MonoBehaviour
                     {
                         RawText = hat.UnescapedName,
                         PostBuilder = (button,renderer,text) => {
-                            SetUpRightClickAction(button,addon.MyBundle.Hats,hat);
+                            SetUpRightClickAction(button,addon.MyBundle.Hats,hat,()=>OpenHatEditor(hat));
 
                             renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                             text.transform.localPosition += new Vector3(0.35f,0f,0f);
@@ -1354,7 +1429,7 @@ public class DevStudio : MonoBehaviour
                     {
                         RawText = visor.UnescapedName,
                         PostBuilder = (button,renderer,text) => {
-                            SetUpRightClickAction(button,addon.MyBundle.Visors,visor);
+                            SetUpRightClickAction(button,addon.MyBundle.Visors,visor,()=>OpenVisorEditor(visor));
 
                             renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                             text.transform.localPosition += new Vector3(0.35f,0f,0f);
@@ -1380,7 +1455,7 @@ public class DevStudio : MonoBehaviour
                     {
                         RawText = nameplate.UnescapedName,
                         PostBuilder = (button,renderer,text) => {
-                            SetUpRightClickAction(button,addon.MyBundle.Nameplates,nameplate);
+                            SetUpRightClickAction(button,addon.MyBundle.Nameplates,nameplate,()=>OpenNameplateEditor(nameplate));
 
                             renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                             text.transform.localPosition += new Vector3(0.46f,0f,0f);
@@ -1404,7 +1479,7 @@ public class DevStudio : MonoBehaviour
                 widget.Append(addon.MyBundle.Packages, package=>{
                     return new MetaWidgetOld.Button(()=>OpenPackageEditor(package), new(TextAttributeOld.BoldAttrLeft){ Size = new(3.2f,0.42f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial})
                     { RawText = package.DisplayName, PostBuilder = (button,renderer,_)=>{
-                        SetUpRightClickAction(button,addon.MyBundle.Packages,package);
+                        SetUpRightClickAction(button,addon.MyBundle.Packages,package,()=>OpenPackageEditor(package));
                         renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                     } };
                 },2,-1,0,0.65f);
@@ -1537,7 +1612,7 @@ public class DevAddon : IResourceAllocator
         if (namespaceArray.Count > 0) return null;
         if (name.Length == 0) return null;
 
-        string folderPath = FolderPath;
+        string folderPath = FolderPath + "/Resources";
         string leftPath = name.Replace('/','.');
 
         while (true) {
@@ -1577,6 +1652,18 @@ public class DevAddon : IResourceAllocator
         catch
         {
             return false;
+        }
+    }
+
+    internal Stream? OpenStream(string path)
+    {
+        try
+        {
+            return File.Open(FolderPath + "/" + path, FileMode.Open);
+        }
+        catch
+        {
+            return null;
         }
     }
 }

@@ -8,6 +8,27 @@ using Virial.Configuration;
 namespace Virial.Assignable;
 
 /// <summary>
+/// 役職の種別を表します。
+/// 割り当て時に使用されます。
+/// </summary>
+[Flags]
+public enum RoleCategory
+{
+    /// <summary>
+    /// インポスター役職
+    /// </summary>
+    ImpostorRole = 0x01,
+    /// <summary>
+    /// 第三陣営役職
+    /// </summary>
+    NeutralRole = 0x02,
+    /// <summary>
+    /// クルーメイト役職
+    /// </summary>
+    CrewmateRole = 0x04,
+}
+
+/// <summary>
 /// 引用元を持つオブジェクトを表します。
 /// </summary>
 public interface HasCitation

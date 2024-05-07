@@ -74,6 +74,7 @@ public record RoleHistory
     public bool IsModifier;
     public bool IsSet;
     public bool Dead;
+
     public AssignableInstance Assignable;
 
     public RoleHistory(byte playerId, ModifierInstance modifier, bool isSet, bool dead)
@@ -116,24 +117,33 @@ public static class RoleHistoryHelper {
         bool isDead = false;
 
         float lastTime = history[0].Time;
+        T last;
+        
+        bool isFirst = true;
         foreach(var h in history.Append(null))
         {
             if (h != null && !predicate(h)) continue;
 
-            if(h == null || lastTime + 1f < h.Time)
+            //情報の更新前に直前の様子を記録
+            if (role != null)
             {
-                if(role != null) yield return converter.Invoke(role, isDead ? ghostRole : null, modifiers);
-
-                if (h == null) break;
-
-                lastTime = h.Time;
+                last = converter.Invoke(role, isDead ? ghostRole : null, modifiers);
+                if (h == null || (lastTime + 1f < h.Time && !isFirst)) yield return last;
             }
+            
+                
+
+
+            if (h == null) break;
+            lastTime = h.Time;
 
             isDead = true;
             if (!h.IsModifier && h.Assignable is RoleInstance ri) role = ri;
-            if (!h.IsModifier && h.Assignable is GhostRoleInstance gri) ghostRole = gri;
+            else if (!h.IsModifier && h.Assignable is GhostRoleInstance gri) ghostRole = gri;
             else if (h.IsSet) modifiers.Add(h.Assignable);
             else modifiers.Remove(h.Assignable);
+
+            isFirst = false;
         }
     }
 
@@ -280,7 +290,7 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
     public CriteriaManager CriteriaManager { get; private set; } = new();
     public Synchronizer Syncronizer { get; private set; } = new();
     public LobbySlideManager LobbySlideManager { get; private set; } = new();
-    public VoiceChatManager? VoiceChatManager { get; set; } = GeneralConfigurations.UseVoiceChatOption ? new() : null;
+    public VoiceChatManager? VoiceChatManager { get; set; }
     public ConsoleRestriction ConsoleRestriction { get; private set; } = new();
     public AttributeShower AttributeShower { get; private set; } = new();
     public RPCScheduler Scheduler { get; private set; } = new();
@@ -290,6 +300,7 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
     internal MeetingOverlayHolder MeetingOverlay { get; private init; }
     internal FakeInformation FakeInformation { get; private init; }
     public IRoleAllocator? RoleAllocator { get; internal set; } = null;
+    public PerkHolder? PerkHolder { get; internal set; } = null;
 
     public bool IgnoreWalls => LocalPlayerInfo?.Role?.EyesightIgnoreWalls ?? false;
     public Dictionary<byte, AbstractAchievement?> TitleMap = new();
@@ -309,11 +320,12 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
     public int EmergencyCalls = 0;
 
     //天界視点フラグ
-    public bool CanSeeAllInfo { get; private set; }
+    public bool CanBeSpectator { get; private set; }
+    public bool CanSeeAllInfo => CanBeSpectator && (ClientOption.AllOptions[ClientOption.ClientOptionType.SpoilerAfterDeath].Value == 1 || !HudManager.InstanceExists);
     public void ChangeToSpectator()
     {
-        if (CanSeeAllInfo) return;
-        CanSeeAllInfo = true;
+        if (CanBeSpectator) return;
+        CanBeSpectator = true;
 
         if (!HudManager.InstanceExists) return;
 
@@ -342,6 +354,9 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
 
         MeetingOverlay = new MeetingOverlayHolder().Register(this);
         FakeInformation = new FakeInformation().Register(this);
+        PerkHolder = new PerkHolder().Register(this);
+
+        VoiceChatManager = GeneralConfigurations.UseVoiceChatOption ? new() : null;
     }
 
 

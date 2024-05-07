@@ -43,4 +43,3 @@ public class WrappedExecutable : IExecutable
         return executable.CoExecute(this.arguments.Select(a => a.Invoke()).ToArray());
     }
 }
-    

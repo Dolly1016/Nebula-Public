@@ -1,16 +1,8 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Mono.CSharp;
 using Nebula.Roles.Abilities;
-using Nebula.Roles.Crewmate;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial;
 using Virial.Assignable;
 using Virial.Game;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Impostor;
 

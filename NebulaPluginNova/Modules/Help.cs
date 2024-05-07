@@ -11,6 +11,8 @@ using Nebula.Roles;
 using Virial.Assignable;
 using static Nebula.Modules.MetaWidgetOld;
 using Virial.Text;
+using NAudio.CoreAudioApi;
+using Nebula.Modules.MetaWidget;
 
 namespace Nebula.Modules;
 
@@ -255,6 +257,7 @@ public static class HelpScreen
             var doc = DocumentManager.GetDocument("role." + PlayerControl.LocalPlayer.GetModInfo()!.Role.AssignableBase.InternalName);
             return doc?.Build(inner) ?? GUIEmptyWidget.Default;
         });
+        inner = scrollView.Artifact;
 
         widget.Append(new MetaWidgetOld.WrappedWidget(scrollView));
         
@@ -263,6 +266,22 @@ public static class HelpScreen
 
     private static IMetaWidgetOld ShowAchievementsScreen()
     {
-        return new MetaWidgetOld.WrappedWidget(AchievementViewer.GenerateWidget(3.15f, 7.8f));
+        Virial.Media.GUIWidget GenerateWidget(string? scrollerTag = null, Predicate<AbstractAchievement>? predicate = null) => AchievementViewer.GenerateWidget(3.15f, 6.2f, scrollerTag, true, predicate);
+        Virial.Compat.Artifact<GUIScreen> artifact = null!;
+        List<Virial.Media.GUIWidget> buttons = new([
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed), new TranslateTextComponent("achievement.filter.all")){ OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget(), out var _))},
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed), new TranslateTextComponent("achievement.filter.achieved")){ OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget("AchievementAchieved", a => a.IsCleared), out var _))},
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed), new TranslateTextComponent("achievement.filter.notAchieved")){ OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget("AchievementDontAchieved", a => !a.IsCleared), out var _))}
+            ]);
+
+        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized)
+        {
+            buttons.Add(new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed), new TranslateTextComponent("achievement.filter.myRole")) { OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget("AchievementMyRole", a => NebulaGameManager.Instance.LocalPlayerInfo.AllAssigned().Any(r => r.AssignableBase == a.Category.role)), out var _)) });
+        }
+
+        var sidebar = new VerticalWidgetsHolder(GUIAlignment.Top, buttons);
+        var screen = new GUIFixedView(GUIAlignment.Top, new(5.7f, 3.8f), GenerateWidget()) { WithMask = false };
+        artifact = screen.Artifact;
+        return new MetaWidgetOld.WrappedWidget(new HorizontalWidgetsHolder(GUIAlignment.Center, screen, sidebar));
     }
 }

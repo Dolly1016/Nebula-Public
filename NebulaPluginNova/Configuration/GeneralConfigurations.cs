@@ -182,14 +182,15 @@ public static class GeneralConfigurations
 
     static public ConfigurationHolder VoiceChatOptions = new("options.voiceChat", null, ConfigurationTab.Settings, CustomGameMode.AllClientGameModeMask);
     static public NebulaConfiguration UseVoiceChatOption = new NebulaConfiguration(VoiceChatOptions, "useVoiceChat", null, false, false);
-    static public NebulaConfiguration WallsBlockAudioOption = new NebulaConfiguration(VoiceChatOptions, "wallsBlockAudio", null, false, false) { Predicate = () => UseVoiceChatOption };
+    static public NebulaConfiguration CanTalkInWandaringPhaseOption = new NebulaConfiguration(VoiceChatOptions, "canTalkInWandaringPhase", null, true, true) { Predicate = () => UseVoiceChatOption };
+    static public NebulaConfiguration WallsBlockAudioOption = new NebulaConfiguration(VoiceChatOptions, "wallsBlockAudio", null, true, true) { Predicate = () => CanTalkInWandaringPhaseOption };
     static public NebulaConfiguration KillersHearDeadOption = new(VoiceChatOptions, "killersHearDead", null,
     new string[] { "options.switch.off", "options.voiceChat.killersHearDead.onlyMyKiller", "options.voiceChat.killersHearDead.onlyImpostors" }, 0, 0)
     { Predicate = () => UseVoiceChatOption };
     static public NebulaConfiguration ImpostorsRadioOption = new NebulaConfiguration(VoiceChatOptions, "impostorsRadio", null, false, false) { Predicate = () => UseVoiceChatOption };
     static public NebulaConfiguration JackalRadioOption = new NebulaConfiguration(VoiceChatOptions, "jackalRadio", null, false, false) { Predicate = () => UseVoiceChatOption };
     static public NebulaConfiguration LoversRadioOption = new NebulaConfiguration(VoiceChatOptions, "loversRadio", null, false, false) { Predicate = () => UseVoiceChatOption };
-    static public NebulaConfiguration AffectedByCommsSabOption = new NebulaConfiguration(VoiceChatOptions, "affectedByCommsSab", null, false, false) { Predicate = () => UseVoiceChatOption };
+    static public NebulaConfiguration AffectedByCommsSabOption = new NebulaConfiguration(VoiceChatOptions, "affectedByCommsSab", null, false, false) { Predicate = () => CanTalkInWandaringPhaseOption };
     static public NebulaConfiguration IsolateGhostsStrictlyOption = new NebulaConfiguration(VoiceChatOptions, "isolateGhostsStrictly", null, false, false) { Predicate = () => UseVoiceChatOption };
 
     static private XOnlyDividedSpriteLoader mapCustomizationSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.MapCustomizations.png", 100f, 50, true);

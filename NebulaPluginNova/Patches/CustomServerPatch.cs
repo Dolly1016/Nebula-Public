@@ -24,6 +24,8 @@ public static class RegionMenuOpenPatch
     public static IRegionInfo[] defaultRegions = null!;
 
     private static DataSaver customServerData = new DataSaver("CustomServer");
+    private static StaticHttpRegionInfo CustomRegion = null!;
+
     public static void UpdateRegions()
     {
         ServerManager serverManager = DestroyableSingleton<ServerManager>.Instance;
@@ -31,12 +33,13 @@ public static class RegionMenuOpenPatch
 
         //var CustomRegion = new DnsRegionInfo(SaveIp.Value, "Custom", StringNames.NoTranslation, SaveIp.Value, (ushort)SavePort.Value, false);
         
-        var CustomRegion = new StaticHttpRegionInfo("Custom", StringNames.NoTranslation, SaveIp.Value,
+        CustomRegion = new StaticHttpRegionInfo("Custom", StringNames.NoTranslation, SaveIp.Value,
             new ServerInfo[] { new ServerInfo("Custom", SaveIp.Value, (ushort)SavePort.Value, false) });
         
         regions = regions.Concat(new IRegionInfo[] { CustomRegion.Cast<IRegionInfo>() }).ToArray();
+        //マージ時、DefaultRegionsに含まれている要素のほうが優先される(重複時に生き残る方)
         ServerManager.DefaultRegions = regions;
-        serverManager.AvailableRegions = regions;
+        serverManager.LoadServers();
 
     }
 
@@ -79,7 +82,7 @@ public static class RegionMenuOpenPatch
                 ipField.SetText(text);
                 SaveIp.Value = text;
                 UpdateRegions();
-                ChooseOption(__instance, ServerManager.DefaultRegions[ServerManager.DefaultRegions.Length - 1]);
+                ChooseOption(__instance, CustomRegion.Cast<IRegionInfo>());
             };
         }
 
@@ -100,7 +103,7 @@ public static class RegionMenuOpenPatch
             {
                 SavePort.Value = ushort.TryParse(text, out var port) ? port : (ushort)22023;
                 UpdateRegions();
-                ChooseOption(__instance, ServerManager.DefaultRegions[ServerManager.DefaultRegions.Length - 1]);
+                ChooseOption(__instance, CustomRegion.Cast<IRegionInfo>());
             };
         }
     }
@@ -120,7 +123,7 @@ public static class RegionMenuOnEnablePatch
                 //入力中のカスタムサーバーの情報を確定させたうえでサーバーを選択する
                 TextField.ChangeFocus(null);
 
-                var region = ServerManager.DefaultRegions.FirstOrDefault(region => region.Name.Equals(serverButton.textTranslator.defaultStr));
+                var region = ServerManager.Instance.AvailableRegions.FirstOrDefault(region => region.Name.Equals(serverButton.textTranslator.defaultStr));
                 if (region != null) __instance.ChooseOption(region);
             }));
 
