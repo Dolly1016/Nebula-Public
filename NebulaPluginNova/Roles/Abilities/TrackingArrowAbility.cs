@@ -12,13 +12,13 @@ public class TrackingArrowAbility : ComponentHolder, IGameEntity
 {
     public GamePlayer MyPlayer => target;
 
-    PlayerModInfo target;
+    GamePlayer target;
     float interval;
     float timer;
     Arrow arrow = null!;
     Color color;
 
-    public TrackingArrowAbility(PlayerModInfo target, float interval, Color color)
+    public TrackingArrowAbility(GamePlayer target, float interval, Color color)
     {
         this.target = target;
         this.interval = interval;
@@ -44,7 +44,7 @@ public class TrackingArrowAbility : ComponentHolder, IGameEntity
                     arrow.SetColor(color);
                 }
 
-                arrow.TargetPos = target.MyControl.transform.position;
+                arrow.TargetPos = target.Position;
 
                 timer = interval;
             }

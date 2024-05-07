@@ -72,7 +72,7 @@ public class VoiceChatRadio
         } 
     }
 
-    public VoiceChatRadio(Predicate<PlayerModInfo> listenable,string displayName, Color radioColor)
+    public VoiceChatRadio(Predicate<GamePlayer> listenable,string displayName, Color radioColor)
     {
         predicate = listenable;
         this.DisplayRadioName = displayName;
@@ -137,7 +137,7 @@ public class VoiceChatManager : IDisposable
         if (radio == currentRadio) currentRadio = null;
     }
 
-    static public bool CanListenGhostVoice(PlayerModInfo? ghost)
+    static public bool CanListenGhostVoice(GamePlayer? ghost)
     {
         if (MeetingHud.Instance || ExileController.Instance) return false;
 
@@ -630,7 +630,7 @@ public class VoiceChatManager : IDisposable
         screen.SetWidget(widget);
     }
 
-    static public NebulaGameScript GenerateBindableRadioScript(Predicate<PlayerModInfo> predicate, string translationKey, Color color)
+    static public NebulaGameScript GenerateBindableRadioScript(Predicate<GamePlayer> predicate, string translationKey, Color color)
     {
         VoiceChatRadio radio = new(predicate, Language.Translate(translationKey), color);
         return new NebulaGameScript()

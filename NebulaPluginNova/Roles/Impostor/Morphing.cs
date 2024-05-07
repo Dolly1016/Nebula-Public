@@ -22,7 +22,7 @@ public class Morphing : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[]? arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
     private NebulaConfiguration SampleCoolDownOption = null!;
     private NebulaConfiguration MorphCoolDownOption = null!;
@@ -52,7 +52,7 @@ public class Morphing : ConfigurableStandardRole, HasCitation
         StaticAchievementToken? acTokenAnother2 = null;
         AchievementToken<(bool kill,bool exile)>? acTokenChallenge = null;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -67,14 +67,14 @@ public class Morphing : ConfigurableStandardRole, HasCitation
                 acTokenChallenge = new("morphing.challenge", (false, false), (val, _) => val.kill && val.exile);
 
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
                 sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 sampleButton.SetSprite(SampleButtonSprite.GetSprite());
-                sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                sampleButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
+                sampleButton.Visibility = (button) => !MyPlayer.IsDead;
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker!.CurrentTarget!.GetModInfo()?.GetOutfit(75);
+                    sample = sampleTracker!.CurrentTarget!.Unbox().GetOutfit(75);
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
@@ -85,8 +85,8 @@ public class Morphing : ConfigurableStandardRole, HasCitation
 
                 morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 morphButton.SetSprite(MorphButtonSprite.GetSprite());
-                morphButton.Availability = (button) => MyPlayer.MyControl.CanMove && sample != null;
-                morphButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                morphButton.Availability = (button) => MyPlayer.CanMove && sample != null;
+                morphButton.Visibility = (button) => !MyPlayer.IsDead;
                 morphButton.OnClick = (button) => {
                     button.ToggleEffect();
                 };
@@ -105,12 +105,12 @@ public class Morphing : ConfigurableStandardRole, HasCitation
                     //すれ違いチェック
                     if (button.EffectActive && acTokenAnother2 == null)
                     {
-                        int colorId = MyPlayer.GetOutfit(75).ColorId;
+                        int colorId = MyPlayer.GetOutfit(75).outfit.ColorId;
                         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                         {
                             if (p.AmOwner) continue;
                             if (p.CurrentOutfit.ColorId != colorId) continue;
-                            if (p.MyControl.GetTruePosition().Distance(MyPlayer.MyControl.GetTruePosition()) < 0.8f)
+                            if (p.MyControl.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) < 0.8f)
                             {
                                 acTokenAnother2 ??= new("morphing.another2");
                                 break;

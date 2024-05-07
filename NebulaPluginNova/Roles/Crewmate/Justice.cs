@@ -15,7 +15,7 @@ public class Justice : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration PutJusticeOnTheBalanceOption = null!;
     protected override void LoadOptions()
@@ -30,7 +30,7 @@ public class Justice : ConfigurableStandardRole, HasCitation
     public class Instance : Crewmate.Instance, IGameEntity
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player) { }
+        public Instance(GamePlayer player) : base(player) { }
 
         static private SpriteLoader meetingSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeIcon.png", 115f);
 

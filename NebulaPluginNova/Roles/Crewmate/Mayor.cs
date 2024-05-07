@@ -21,7 +21,7 @@ public class Mayor : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
     private NebulaConfiguration MinVoteOption = null!;
     private NebulaConfiguration MaxVoteOption = null!;
@@ -47,7 +47,7 @@ public class Mayor : ConfigurableStandardRole, HasCitation
     public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player, int[] arguments) : base(player)
+        public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if(arguments.Length >= 1) myVote = arguments[0];
         }

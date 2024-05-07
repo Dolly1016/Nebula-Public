@@ -14,7 +14,7 @@ public class Marionette : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration PlaceCoolDownOption = null!;
     private NebulaConfiguration SwapCoolDownOption = null!;
@@ -65,7 +65,7 @@ public class Marionette : ConfigurableStandardRole
         static private ISpriteLoader monitorButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMonitorButton.png", 115f);
         public override AbstractRole Role => MyRole;
         public Decoy? MyDecoy = null;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -85,8 +85,8 @@ public class Marionette : ConfigurableStandardRole
 
                 placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
-                placeButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                placeButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy == null;
+                placeButton.Availability = (button) => MyPlayer.CanMove;
+                placeButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy == null;
                 placeButton.CoolDownTimer = Bind(new Timer(MyRole.PlaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 placeButton.OnClick = (button) =>
                 {
@@ -108,8 +108,8 @@ public class Marionette : ConfigurableStandardRole
 
                 destroyButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 destroyButton.SetSprite(destroyButtonSprite.GetSprite());
-                destroyButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                destroyButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy != null;
+                destroyButton.Availability = (button) => MyPlayer.CanMove;
+                destroyButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
                 destroyButton.EffectTimer = Bind(new Timer(MyRole.DecoyDurationOption.GetFloat()));
                 destroyButton.OnClick = (button) =>
                 {
@@ -126,8 +126,8 @@ public class Marionette : ConfigurableStandardRole
 
                 swapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 swapButton.SetSprite(swapButtonSprite.GetSprite());
-                swapButton.Availability = (button) => (MyPlayer.MyControl.CanMove || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour) && (!MyPlayer.MyControl.inVent && !MyPlayer.MyControl.onLadder && !MyPlayer.MyControl.inMovingPlat);
-                swapButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy != null;
+                swapButton.Availability = (button) => (MyPlayer.CanMove || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour) && (!MyPlayer.VanillaPlayer.inVent && !MyPlayer.VanillaPlayer.onLadder && !MyPlayer.VanillaPlayer.inMovingPlat);
+                swapButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
                 swapButton.CoolDownTimer = Bind(new Timer(MyRole.SwapCoolDownOption.GetFloat()));
                 swapButton.OnClick = (button) =>
                 {
@@ -139,7 +139,7 @@ public class Marionette : ConfigurableStandardRole
                     acTokenCommon2.Value.cleared |= currentTime - acTokenCommon2.Value.swapTime < 10f;
                     acTokenCommon2.Value.swapTime = currentTime;
                     acTokenAnother!.Value.triggered = true;
-                    if (currentTime - acTokenChallenge.Value.killTime < 1f && MyPlayer.MyControl.GetTruePosition().Distance(MyDecoy!.Position) > 30f)
+                    if (currentTime - acTokenChallenge.Value.killTime < 1f && MyPlayer.VanillaPlayer.GetTruePosition().Distance(MyDecoy!.Position) > 30f)
                         acTokenChallenge.Value.cleared = true;
                 };
                 swapButton.OnSubAction = (button) =>
@@ -156,7 +156,7 @@ public class Marionette : ConfigurableStandardRole
                 monitorButton = Bind(new ModAbilityButton());
                 monitorButton.SetSprite(monitorButtonSprite.GetSprite());
                 monitorButton.Availability = (button) => true;
-                monitorButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && MyDecoy != null;
+                monitorButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
                 monitorButton.OnClick = (button) =>
                 {
                     AmongUsUtil.ToggleCamTarget(MyDecoy!.MyBehaviour, null);
@@ -190,7 +190,7 @@ public class Marionette : ConfigurableStandardRole
 
         void IGamePlayerEntity.OnDead()
         {
-            if (acTokenAnother != null && (MyPlayer.MyState == PlayerState.Guessed || MyPlayer.MyState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
+            if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
         void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)

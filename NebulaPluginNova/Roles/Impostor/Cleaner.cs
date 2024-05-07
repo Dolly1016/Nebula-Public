@@ -21,7 +21,7 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration CleanCoolDownOption = null!;
     private NebulaConfiguration SyncKillAndCleanCoolDownOption = null!;
@@ -43,7 +43,7 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<(bool cleared, int removed)>? acTokenChallenge = null;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -63,12 +63,12 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
             {
                 acTokenChallenge = new("cleaner.challenge",(false,0),(val,_)=>val.cleared);
 
-                var cleanTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.MyControl, (d) => true));
+                var cleanTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.VanillaPlayer, (d) => true));
 
                 cleanButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 cleanButton.SetSprite(buttonSprite.GetSprite());
-                cleanButton.Availability = (button) => cleanTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                cleanButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                cleanButton.Availability = (button) => cleanTracker.CurrentTarget != null && MyPlayer.VanillaPlayer.CanMove;
+                cleanButton.Visibility = (button) => !MyPlayer.IsDead;
                 cleanButton.OnClick = (button) => {
                     AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.ParentId,MyPlayer.PlayerId,EventDetail.Clean);
                     if (MyRole.SyncKillAndCleanCoolDownOption) PlayerControl.LocalPlayer.killTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);

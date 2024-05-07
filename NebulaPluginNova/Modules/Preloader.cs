@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.DI;
 
 namespace Nebula.Modules;
 
@@ -48,6 +49,10 @@ public static class PreloadManager
     public static (Exception, Type)? LastException = null;
     static private IEnumerator Preload()
     {
+        DIManager diManager = new DIManager();
+        diManager.RegisterContainer<Virial.Game.Game>(()=>new NebulaGameManager());
+        diManager.RegisterContainer<Virial.Game.Player>(() => new PlayerModInfo(null!));
+
         void OnRaisedExcep(Exception exception, Type type)
         {
             LastException ??= (exception, type);

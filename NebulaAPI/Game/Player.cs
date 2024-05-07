@@ -1,8 +1,16 @@
 ﻿using AmongUs.Data.Player;
 using Virial.Assignable;
+using Virial.DI;
 using Virial.Text;
 
 namespace Virial.Game;
+
+public enum KillResult
+{
+    Kill,
+    Guard,
+    ObviousGuard
+}
 
 public interface IPlayerAttribute
 {
@@ -119,6 +127,7 @@ public class Outfit
             this.outfit.VisorId = outfit.VisorId;
             this.outfit.SkinId = outfit.SkinId;
             this.outfit.ColorId = outfit.ColorId;
+            this.outfit.PetId = outfit.PetId;
             this.outfit.PlayerName = outfit.PlayerName;
             this.outfit.NamePlateId = outfit.NamePlateId;
         }
@@ -161,23 +170,184 @@ public class OutfitCandidate
     }
 }
 
-public interface Player
+public interface Player : IModuleContainer<Player>
 {
-    internal PlayerControl VanillaPlayer { get; }
+    // Internal
 
+    internal PlayerControl VanillaPlayer { get; }
+    internal DeadBody? RelatedDeadBody { get; }
+
+
+    // PlayerAPI
+
+    /// <summary>
+    /// プレイヤーの名前です。
+    /// </summary>
     public string Name { get; }
+
+    /// <summary>
+    /// ゲーム内でプレイヤーを識別するIDです。１ゲームの中で変わることはありません。
+    /// </summary>
     public byte PlayerId { get; }
+
+    /// <summary>
+    /// 死亡しているとき、Trueを返します。
+    /// </summary>
     public bool IsDead { get; }
+
+    /// <summary>
+    /// 自身がこのプレイヤーの本来の操作主である場合、Trueを返します。
+    /// </summary>
     public bool AmOwner { get; }
+
+    /// <summary>
+    /// 自身がこのゲームのホストである場合、Trueを返します。
+    /// </summary>
     public bool AmHost { get; }
-    public void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag eventDetail, bool showBlink, bool showKillOverlay);
-    public void Suicide(CommunicableTextTag playerState, CommunicableTextTag eventDetail,bool showKillOverlay);
+
+    /// <summary>
+    /// 梯子を使うなどの理由で操作不能な状態になっていない場合、Trueを返します。
+    /// </summary>
+    public bool CanMove { get; }
+
+    /// <summary>
+    /// プレイヤーの足元の座標を返します。
+    /// </summary>
+    public Compat.Vector2 TruePosition { get; }
+
+    /// <summary>
+    /// プレイヤーの座標を返します。足元よりは上寄りです。
+    /// </summary>
+    public Compat.Vector2 Position { get; }
+
+    /// <summary>
+    /// プレイヤーの現在の状態を表すタグです。
+    /// </summary>
+    public CommunicableTextTag PlayerState { get; }
+
+
+
+
+    // HoldingAPI
+
+    /// <summary>
+    /// いま掴んでいるプレイヤーを返します。
+    /// </summary>
+    public Player? HoldingPlayer { get; }
+    public bool HoldingAnyPlayer { get; }
+
+    /// <summary>
+    /// いま掴んでいる死体を返します。
+    /// </summary>
+    public Player? HoldingDeadBody { get; }
+    public bool HoldingAnyDeadBody { get; }
+
+    /// <summary>
+    /// 死体を掴みます。
+    /// </summary>
+    /// <param name="deadBody"></param>
+    public void HoldDeadBody(Player? deadBody);
+    internal void HoldDeadBodyFast(DeadBody? deadBody);
+
+    /// <summary>
+    /// 掴んでいる死体を放します。
+    /// </summary>
+    public void ReleaseDeadBody();
+
+    /// <summary>
+    /// プレイヤーを掴みます。
+    /// </summary>
+    /// <param name="player"></param>
+    public void HoldPlayer(Player? player);
+
+    /// <summary>
+    /// 掴んでいるプレイヤーを放します。
+    /// </summary>
+    public void ReleaseHoldingPlayer();
+
+
+
+
+    // MurderAPI
+
+    public KillResult MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool showBlink = true, bool showKillOverlay = true);
+    public KillResult Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail,bool showKillOverlay = true, bool assignGhostRole = true);
+    public void Revive(Player? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent = true);
+    public Player? MyKiller { get; }
+
+
+
+
+    // AttributeAPI
+
+    /// <summary>
+    /// アトリビュートを付与します。
+    /// </summary>
+    /// <param name="attribute">付与するアトリビュート</param>
+    /// <param name="duration">効果時間</param>
+    /// <param name="canPassMeeting">会議を超えて効果が持続するかどうか</param>
+    /// <param name="priority">優先度</param>
+    /// <param name="duplicateTag">重複チェック用タグ</param>
     public void GainAttribute(IPlayerAttribute attribute, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
+    
+    /// <summary>
+    /// 加減速アトリビュートを付与します。
+    /// </summary>
+    /// <param name="speedRate">加減速の倍率</param>
+    /// <param name="duration">効果時間</param>
+    /// <param name="canPassMeeting">会議を超えて高価が持続するかどうか</param>
+    /// <param name="priority">優先度</param>
+    /// <param name="duplicateTag">重複チェック用タグ</param>
     public void GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
+    
+    /// <summary>
+    /// アトリビュートを獲得しているかどうか調べます。
+    /// </summary>
+    /// <param name="attribute">調べる対象のアトリビュート</param>
+    /// <returns></returns>
     public bool HasAttribute(IPlayerAttribute attribute);
+
+    /// <summary>
+    /// 現在有効化されているアトリビュートを列挙します。
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<(IPlayerAttribute attribute, float percentage)> GetAttributes();
+
+
+
+
+    // AssignableAPI
 
     public RuntimeRole Role { get; }
     public IEnumerable<RuntimeModifier> Modifiers { get; }
 
+
+
+
+    // PlayerRoleCategoryAPI
+
     public bool IsImpostor => Role.Role.Category is RoleCategory.ImpostorRole;
+    public bool IsCrewmate => Role.Role.Category is RoleCategory.CrewmateRole;
+
+
+
+
+    // OutfitAPI
+
+    /// <summary>
+    /// プレイヤーの見た目を取得します。
+    /// </summary>
+    /// <param name="maxPriority">優先度の最大値</param>
+    /// <returns></returns>
+    public Outfit GetOutfit(int maxPriority);
+
+    /// <summary>
+    /// プレイヤーの現在の見た目を取得します。
+    /// </summary>
+    public Outfit CurrentOutfit { get; }
+
+    /// <summary>
+    /// プレイヤーの本来の見た目を取得します。
+    /// </summary>
+    public Outfit DefaultOutfit { get; }
 }

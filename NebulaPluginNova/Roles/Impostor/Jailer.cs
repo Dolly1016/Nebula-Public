@@ -20,7 +20,7 @@ public class Jailer : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public NebulaConfiguration CanMoveWithMapWatchingOption = null!;
     public NebulaConfiguration CanIdentifyDeadBodiesOption = null!;
@@ -42,7 +42,7 @@ public class Jailer : ConfigurableStandardRole
     public class Instance : Impostor.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 

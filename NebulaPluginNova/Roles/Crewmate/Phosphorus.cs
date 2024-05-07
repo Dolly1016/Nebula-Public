@@ -21,7 +21,7 @@ public class Phosphorus : ConfigurableStandardRole
     public override Color RoleColor => new Color(249f / 255f, 188f / 255f, 81f / 255f);
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration NumOfLampsOption = null!;
     private NebulaConfiguration PlaceCoolDownOption = null!;
@@ -68,7 +68,7 @@ public class Phosphorus : ConfigurableStandardRole
 
         public override AbstractRole Role => MyRole;
         
-        public Instance(PlayerModInfo player, int[] arguments) : base(player)
+        public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if (arguments.Length > 0) globalLanterns = arguments;
         }
@@ -87,8 +87,8 @@ public class Phosphorus : ConfigurableStandardRole
 
                 lanternButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 lanternButton.SetSprite(lanternButtonSprite.GetSprite());
-                lanternButton.Availability = (button) => MyPlayer.MyControl.CanMove ;
-                lanternButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && globalLanterns != null;
+                lanternButton.Availability = (button) => MyPlayer.CanMove ;
+                lanternButton.Visibility = (button) => !MyPlayer.IsDead && globalLanterns != null;
                 lanternButton.OnClick = (button) => {
                     button.ActivateEffect();
                 };
@@ -113,8 +113,8 @@ public class Phosphorus : ConfigurableStandardRole
                 placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 var usesText = placeButton.ShowUsesIcon(3);
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
-                placeButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                placeButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && globalLanterns == null && left > 0;
+                placeButton.Availability = (button) => MyPlayer.CanMove;
+                placeButton.Visibility = (button) => !MyPlayer.IsDead && globalLanterns == null && left > 0;
                 placeButton.OnClick = (button) => {
                     var pos = PlayerControl.LocalPlayer.GetTruePosition();
                     localLanterns.Add(Bind<NebulaSyncStandardObject>((NebulaSyncObject.LocalInstantiate(Lantern.MyLocalTag, new float[] { pos.x, pos.y }) as NebulaSyncStandardObject)!));

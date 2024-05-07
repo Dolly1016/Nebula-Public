@@ -55,6 +55,16 @@ public struct Vector2
         this.x = x;
         this.y = y;
     }
+
+    internal Vector2(UnityEngine.Vector2 v)
+    {
+        this.x = v.x;
+        this.y = v.y;
+    }
+
+    internal UnityEngine.Vector2 ToUnityVector() => new(x, y);
+
+    static public implicit operator UnityEngine.Vector2(Vector2 v) => v.ToUnityVector();
 }
 
 
@@ -76,8 +86,14 @@ public struct Vector3
         this.z = z;
     }
 
-    internal UnityEngine.Vector3 ToUnityVector()
+    public Vector3(UnityEngine.Vector3 v)
     {
-        return new UnityEngine.Vector3(x, y, z);
+        this.x = v.x;
+        this.y = v.y;
+        this.z = v.z;
     }
+
+    internal UnityEngine.Vector3 ToUnityVector() => new UnityEngine.Vector3(x, y, z);
+
+    static public implicit operator UnityEngine.Vector3(Vector3 v) => v.ToUnityVector();
 }

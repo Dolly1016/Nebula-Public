@@ -24,12 +24,12 @@ public class Bloody : ConfigurableStandardModifier
 
         CurseDurationOption = new NebulaConfiguration(RoleConfig, "curseDuration", null, 2.5f, 30f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
     }
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     public class Instance : ModifierInstance, IGamePlayerEntity
     {
         public override AbstractModifier Role => MyRole;
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 

@@ -14,7 +14,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration EmbroilVotersOnExileOption = null!;
     private NebulaConfiguration LimitEmbroiledPlayersToVotersOption = null!;
@@ -87,7 +87,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
         List<byte> impostors = new();
 
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -103,8 +103,8 @@ public class Madmate : ConfigurableStandardRole, HasCitation
 
                 using (RPCRouter.CreateSection("MadmateTask"))
                 {
-                    MyPlayer.Tasks.ReplaceTasksAndRecompute(max, 0, 0);
-                    MyPlayer.Tasks.BecomeToOutsider();
+                    MyPlayer.Unbox().Tasks.ReplaceTasksAndRecompute(max, 0, 0);
+                    MyPlayer.Unbox().Tasks.BecomeToOutsider();
                 }
             }
         }
@@ -128,7 +128,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
         private void IdentifyImpostors()
         {
             //インポスター判別のチャンスだけ繰り返す
-            while (MyRole.CanIdentifyImpostorsOption.GetMappedInt() > impostors.Count && MyPlayer.Tasks.CurrentCompleted >= MyRole.NumOfTasksToIdentifyImpostorsOptions[impostors.Count].GetMappedInt())
+            while (MyRole.CanIdentifyImpostorsOption.GetMappedInt() > impostors.Count && MyPlayer.Unbox().Tasks.CurrentCompleted >= MyRole.NumOfTasksToIdentifyImpostorsOptions[impostors.Count].GetMappedInt())
             {
                 var pool = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole && !impostors.Contains(p.PlayerId)).ToArray();
                 //候補が残っていなければ何もしない
@@ -142,7 +142,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
             IdentifyImpostors();
         }
 
-        public override void DecorateOtherPlayerName(PlayerModInfo player, ref string text, ref Color color)
+        public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
         {
             if (impostors.Contains(player.PlayerId) && player.Role.Role.Category == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
         }
@@ -157,11 +157,11 @@ public class Madmate : ConfigurableStandardRole, HasCitation
             if (!MyRole.EmbroilVotersOnExileOption) return;
 
             if (MyRole.LimitEmbroiledPlayersToVotersOption)
-                ExtraExileRoleSystem.MarkExtraVictim(MyPlayer, false, true);
+                ExtraExileRoleSystem.MarkExtraVictim(MyPlayer.Unbox(), false, true);
             else
             {
                 var voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && p.Role.Role.Category != RoleCategory.ImpostorRole).ToArray();
-                if (voters.Length > 0) voters.Random().MyControl.ModMarkAsExtraVictim(MyPlayer.MyControl, PlayerState.Embroiled, EventDetail.Embroil);
+                if (voters.Length > 0) voters.Random().MyControl.ModMarkAsExtraVictim(MyPlayer.VanillaPlayer, PlayerState.Embroiled, EventDetail.Embroil);
             }
 
             

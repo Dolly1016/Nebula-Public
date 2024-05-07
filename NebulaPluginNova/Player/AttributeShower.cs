@@ -45,9 +45,9 @@ public class AttributeShower
     private List<AttributeIcon> allIcons = new();
     private Transform myTransform;
 
-    public void Update(PlayerModInfo player)
+    public void Update(GamePlayer player)
     {
-        var attributes = player.GetValidAttributes().ToArray();
+        var attributes = player.GetAttributes().ToArray();
         allIcons.RemoveAll(icon =>
         {
             if (!attributes.Any(a => a.attribute == icon.Attribute))

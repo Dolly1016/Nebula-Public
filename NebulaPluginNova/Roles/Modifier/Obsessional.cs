@@ -29,20 +29,20 @@ public class Obsessional : ConfigurableStandardModifier
                 "options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate"}, 0, 0);
     }
 
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
     public class Instance : ModifierInstance, IGamePlayerEntity
     {
         public override AbstractModifier Role => MyRole;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
-        PlayerModInfo? obsession = null;
+        GamePlayer? obsession = null;
 
-        public override void DecorateOtherPlayerName(PlayerModInfo player, ref string text, ref Color color)
+        public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
         {
             if(player.PlayerId == (obsession?.PlayerId ?? 255)) text += " #".Color(Role.RoleColor);
         }
@@ -53,7 +53,7 @@ public class Obsessional : ConfigurableStandardModifier
             {
                 text += " $".Color(Role.RoleColor);
                 if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
-                    text += $" <size=60%>({obsession?.DefaultName ?? "ERROR" })</size>";
+                    text += $" <size=60%>({obsession?.Name ?? "ERROR" })</size>";
             }
         }
     
@@ -92,7 +92,7 @@ public class Obsessional : ConfigurableStandardModifier
 
                 if (exiled.PlayerId == (obsession?.PlayerId ?? 255) && !MyPlayer.IsDead)
                 {
-                    MyPlayer.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+                    MyPlayer.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
                     new StaticAchievementToken("obsessional.another1");
                 }
             }
@@ -106,7 +106,7 @@ public class Obsessional : ConfigurableStandardModifier
 
                 if (dead.PlayerId == (obsession?.PlayerId ?? 255) && !MeetingHudExtension.MarkedAsExtraVictims(MyPlayer.PlayerId) && !MyPlayer.IsDead)
                 {
-                    MyPlayer.MyControl.ModSuicide(false, PlayerState.Suicide, EventDetail.Kill);
+                    MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill);
                     new StaticAchievementToken("obsessional.another1");
                 }
             }
@@ -132,7 +132,7 @@ public class Obsessional : ConfigurableStandardModifier
             return false;
         }
 
-        public override string? IntroText => Language.Translate("role.obsessional.blurb").Replace("%NAME%", (obsession?.DefaultName ?? "ERROR").Color(MyRole.RoleColor));
+        public override string? IntroText => Language.Translate("role.obsessional.blurb").Replace("%NAME%", (obsession?.Name ?? "ERROR").Color(MyRole.RoleColor));
 
         static RemoteProcess<(byte playerId, byte targetId)> RpcSetObsessionalTarget = new("SetObsessionalTarget",
         (message, _) =>
@@ -151,10 +151,10 @@ public class Obsessional : ConfigurableStandardModifier
 
                     new StaticAchievementToken("obsessional.common1");
 
-                    if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota >= 5)
+                    if (MyPlayer.Unbox().Tasks.TotalCompleted - MyPlayer.Unbox().Tasks.Quota >= 5)
                         new StaticAchievementToken("agent.challenge");
 
-                    if(endState.EndCondition == NebulaGameEnd.LoversWin && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
+                    if(endState.EndCondition == NebulaGameEnd.LoversWin && (obsession?.Unbox().TryGetModifier<Lover.Instance>(out _) ?? false))
                         new StaticAchievementToken("obsessional.lover1");
 
                     //勝者に自身と執着対象しかいない場合
@@ -168,7 +168,7 @@ public class Obsessional : ConfigurableStandardModifier
                     if(MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && endState.EndCondition == NebulaGameEnd.ImpostorWin)
                         new StaticAchievementToken("obsessional.another2");
 
-                    if(endState.CheckWin(obsession?.PlayerId ?? 255) && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
+                    if(endState.CheckWin(obsession?.PlayerId ?? 255) && (obsession?.Unbox().TryGetModifier<Lover.Instance>(out _) ?? false))
                         new StaticAchievementToken("obsessional.lover2");
                 }
             }

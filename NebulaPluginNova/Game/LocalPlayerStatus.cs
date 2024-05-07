@@ -36,7 +36,7 @@ public class FakeSabotageStatus
         return lastCount != fictitiousTasks.Count;
     }
 
-    public static void RpcPushFakeSabotage(PlayerModInfo player, SystemTypes fakeTask)
+    public static void RpcPushFakeSabotage(GamePlayer player, SystemTypes fakeTask)
     {
         RpcPushTaskToPlayer.Invoke((player.PlayerId, fakeTask));
     }

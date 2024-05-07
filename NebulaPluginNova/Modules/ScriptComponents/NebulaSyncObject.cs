@@ -23,7 +23,7 @@ public abstract class NebulaSyncObject : INebulaScriptComponent, IGameEntity
     }
 
     public int ObjectId { get; private set; }
-    public PlayerModInfo Owner { get; private set; } = null!;
+    public GamePlayer Owner { get; private set; } = null!;
     public bool AmOwner => Owner.AmOwner;
     private int TagHash { get; set; }
 

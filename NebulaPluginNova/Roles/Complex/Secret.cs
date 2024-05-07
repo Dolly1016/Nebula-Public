@@ -29,7 +29,7 @@ public class ShownSecret : ConfigurableStandardModifier
         NiceConditionOption = new NebulaConfiguration(RoleConfig, "tasksForArousal", null, 1, 10, 3, 3);
     }
 
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments)
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments)
     {
         throw new NotImplementedException();
     }
@@ -68,7 +68,7 @@ public class Secret : AbstractRole, DefinedAssignable
     public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return IsEvil ? MyNiceRole : MyEvilRole; }
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
     bool DefinedAssignable.ShowOnHelpScreen => false;
 
     public override int RoleCount => 0;
@@ -84,24 +84,24 @@ public class Secret : AbstractRole, DefinedAssignable
     public override void Load(){}
 
     //クルーメイトの場合はLocalで呼び出すこと(タスク置き換えの都合上)
-    private static void ScheduleSendArousalRpc(PlayerModInfo player, int[] savedArgs,List<GameData.TaskInfo>? tasks = null)
+    private static void ScheduleSendArousalRpc(GamePlayer player, int[] savedArgs,List<GameData.TaskInfo>? tasks = null)
     {
         NebulaManager.Instance.ScheduleDelayAction(() =>
         {
             using (RPCRouter.CreateSection("ArousalSecretRole"))
             {
-                player.RpcInvokerSetRole(Roles.AllRoles.First(r => r.Id == savedArgs[0]), savedArgs.Skip(2).ToArray()).InvokeSingle();
-                if ((savedArgs[1] & 0b1) != 0) player.RpcInvokerSetModifier(GuesserModifier.MyRole, null).InvokeSingle();
+                player.Unbox().RpcInvokerSetRole(Roles.AllRoles.First(r => r.Id == savedArgs[0]), savedArgs.Skip(2).ToArray()).InvokeSingle();
+                if ((savedArgs[1] & 0b1) != 0) player.Unbox().RpcInvokerSetModifier(GuesserModifier.MyRole, null).InvokeSingle();
 
                 if (tasks != null)
                 {
                     new NebulaRPCInvoker(() =>
                     {
-                        player.Role.OnSetTaskLocal(ref tasks, out int unacquired);
-                        player.Tasks.ResetTasksLocal(tasks);
-                        player.Tasks.GainExtraTasks(tasks.Count,false, unacquired,false);
+                        player.Role.Unbox().OnSetTaskLocal(ref tasks, out int unacquired);
+                        player.Unbox().Tasks.ResetTasksLocal(tasks);
+                        player.Unbox().Tasks.GainExtraTasks(tasks.Count,false, unacquired,false);
                     }).InvokeSingle();
-                    player.Tasks.RpcSync();
+                    player.Unbox().Tasks.RpcSync();
                 }
             }
         });
@@ -109,7 +109,7 @@ public class Secret : AbstractRole, DefinedAssignable
         new StaticAchievementToken("secret.common1");
     }
 
-    private static void SetUpChallengeAchievement(PlayerModInfo player)
+    private static void SetUpChallengeAchievement(GamePlayer player)
     {
         new AchievementToken<int>("secret.another1", 0, (_, _) => (NebulaGameManager.Instance?.EndState?.CheckWin(player.PlayerId) ?? false) && player.Role.Role != MyNiceRole && player.Role.Role != MyEvilRole);
 
@@ -123,7 +123,7 @@ public class Secret : AbstractRole, DefinedAssignable
     {
         public override AbstractRole Role => MyNiceRole;
 
-        public NiceInstance(PlayerModInfo player, int[] savedArgs) : base(player)
+        public NiceInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
             this.savedArgs = savedArgs;
             this.savedRole = Roles.AllRoles.First(r => r.Id == savedArgs[0]);
@@ -151,9 +151,9 @@ public class Secret : AbstractRole, DefinedAssignable
 
         public override void OnTaskCompleteLocal()
         {
-            if (MyPlayer.Tasks.IsCompletedCurrentTasks)
+            if (MyPlayer.Unbox().Tasks.IsCompletedCurrentTasks)
             {
-                ScheduleSendArousalRpc(MyPlayer, savedArgs, savedTasks);
+                ScheduleSendArousalRpc(MyPlayer.Unbox(), savedArgs, savedTasks);
             }
         }
 
@@ -177,7 +177,7 @@ public class Secret : AbstractRole, DefinedAssignable
     public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyEvilRole;
-        public EvilInstance(PlayerModInfo player, int[] savedArgs) : base(player)
+        public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
             this.savedArgs = savedArgs;
             this.savedRole = Roles.AllRoles.First(r => r.Id == savedArgs[0]);

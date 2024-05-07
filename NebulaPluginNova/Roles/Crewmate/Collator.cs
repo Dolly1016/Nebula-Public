@@ -23,7 +23,7 @@ public class Collator : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     NebulaConfiguration SampleCoolDownOption = null!;
     NebulaConfiguration SelectiveCollatingOption = null!;
@@ -60,9 +60,9 @@ public class Collator : ConfigurableStandardRole, HasCitation
         static private IDividedSpriteLoader tubeSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CollatorTube.png", 125f, 2, 1);
         public override AbstractRole Role => MyRole;
 
-        public Instance(PlayerModInfo player, int[] arguments) : base(player){}
+        public Instance(GamePlayer player, int[] arguments) : base(player){}
 
-        private List<(PlayerModInfo player, RoleTeam team)> sampledPlayers = new();
+        private List<(GamePlayer player, RoleTeam team)> sampledPlayers = new();
         private (SpriteRenderer tube, SpriteRenderer sample)[] allSamples = null!;
 
         private int trials = MyRole.MaxTrialsOption.GetMappedInt();
@@ -70,7 +70,7 @@ public class Collator : ConfigurableStandardRole, HasCitation
         {
             for(int i = 0; i < allSamples.Length; i++)
             {
-                PlayerModInfo? player = sampledPlayers.Count > i ? sampledPlayers[i].player : null;
+                GamePlayer? player = sampledPlayers.Count > i ? sampledPlayers[i].player : null;
                 if (player != null)
                 {
                     allSamples[i].sample.gameObject.SetActive(true);
@@ -154,7 +154,7 @@ public class Collator : ConfigurableStandardRole, HasCitation
             }
         }
 
-        private RoleTeam CheckTeam(PlayerModInfo p)
+        private RoleTeam CheckTeam(GamePlayer p)
         {
             switch (p.Role.Role.Category)
             {
@@ -217,17 +217,17 @@ public class Collator : ConfigurableStandardRole, HasCitation
 
                 UpdateSamples();
 
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead && !sampledPlayers.Any(s => s.player.PlayerId == p.PlayerId), false));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.AmOwner && !p.IsDead && !sampledPlayers.Any(s => s.player.PlayerId == p.PlayerId)));
                 var sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
 
                 AchievementToken<int> achCommon1Token = new("collator.common1", 0, (val, _) => val >= 5);
                 AchievementToken<int> achCommon2Token = new("collator.common2", 0, (val, _) => val);
 
                 sampleButton.SetSprite(buttonSprite.GetSprite());
-                sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove && sampledPlayers.Count < allSamples.Length;
-                sampleButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && trials > 0;
+                sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove && sampledPlayers.Count < allSamples.Length;
+                sampleButton.Visibility = (button) => !MyPlayer.IsDead && trials > 0;
                 sampleButton.OnClick = (button) => {
-                    var p = sampleTracker.CurrentTarget.GetModInfo()!;
+                    var p = sampleTracker.CurrentTarget;
                     sampledPlayers.Add((p,CheckTeam(p)));
                     NebulaManager.Instance.StartCoroutine(CoShakeTube(sampledPlayers.Count - 1).WrapToIl2Cpp());
                     UpdateSamples();

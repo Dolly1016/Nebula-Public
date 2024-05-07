@@ -31,7 +31,7 @@ public class Damned : ConfigurableStandardModifier
         KillDelayOption = new NebulaConfiguration(RoleConfig, "killDelay", null, 0f, 20f, 2.5f, 0f, 0f) { Decorator = NebulaConfiguration.SecDecorator, Predicate = () => DamnedMurderMyKillerOption };
     }
 
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     public class Instance : ModifierInstance, IGamePlayerEntity
     {
         public override AbstractModifier Role => MyRole;
@@ -39,7 +39,7 @@ public class Damned : ConfigurableStandardModifier
         private bool hasGuard = true;
         AbstractRole? nextRole = null;
         public override bool CanBeAwareAssignment => NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -48,7 +48,7 @@ public class Damned : ConfigurableStandardModifier
             if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) text = Language.Translate("role.damned.prefix").Color(MyRole.RoleColor) + "<space=0.5em>" + text; 
         }
 
-        public override KillResult CheckKill(PlayerModInfo killer, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool isMeetingKill)
+        public override KillResult CheckKill(GamePlayer killer, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool isMeetingKill)
         {
             //Damnedが反射するように発動することは無い
             if (isMeetingKill || eventDetail == EventDetail.Curse) return KillResult.Kill;
@@ -92,10 +92,10 @@ public class Damned : ConfigurableStandardModifier
 
                     using (RPCRouter.CreateSection("DamedAction"))
                     {
-                        if (MyPlayer.MyControl.ModFlexibleKill(killer.VanillaPlayer, false, PlayerState.Cursed, EventDetail.Curse, true) == KillResult.Kill)
+                        if (MyPlayer.MurderPlayer(killer, PlayerState.Cursed, EventDetail.Curse,false, true) == KillResult.Kill)
                         {
-                            MyPlayer.RpcInvokerUnsetModifier(Role).InvokeSingle();
-                            MyPlayer.RpcInvokerSetRole(myNextRole, null).InvokeSingle();
+                            MyPlayer.Unbox().RpcInvokerUnsetModifier(Role).InvokeSingle();
+                            MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, null).InvokeSingle();
                         }
                     }
                 }
@@ -116,8 +116,8 @@ public class Damned : ConfigurableStandardModifier
 
                     using (RPCRouter.CreateSection("DamnedAction"))
                     {
-                        MyPlayer.RpcInvokerUnsetModifier(Role).InvokeSingle();
-                        MyPlayer.RpcInvokerSetRole(myNextRole, null).InvokeSingle();
+                        MyPlayer.Unbox().RpcInvokerUnsetModifier(Role).InvokeSingle();
+                        MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, null).InvokeSingle();
                     }
                 });
             }

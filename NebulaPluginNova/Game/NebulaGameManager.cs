@@ -20,6 +20,8 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
+using Virial.DI;
 using Virial.Events.Meeting;
 using Virial.Game;
 using static Rewired.UI.ControlMapper.ControlMapper;
@@ -258,7 +260,7 @@ public class TitleShower
 
 
 [NebulaRPCHolder]
-public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Virial.Game.HUD
+internal class NebulaGameManager : AbstractModuleContainer<Virial.Game.Game>, IRuntimePropertyHolder, Virial.Game.Game, Virial.Game.HUD
 {
     static private NebulaGameManager? instance = null;
     static public NebulaGameManager? Instance { get => instance; }
@@ -316,7 +318,7 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
     public WideCamera WideCamera { get; init; } = new();
 
     //自身のキルボタン用トラッカー
-    private ObjectTracker<PlayerControl> KillButtonTracker = null!;
+    private ObjectTracker<GamePlayer> KillButtonTracker = null!;
     public int EmergencyCalls = 0;
 
     //天界視点フラグ
@@ -553,9 +555,9 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
 
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
         {
-            KillButtonTracker ??= ObjectTrackers.ForPlayer(null, PlayerControl.LocalPlayer, (p) => ObjectTrackers.ImpostorKillPredicate(p) && HudManager.Instance.KillButton.gameObject.active, Roles.Impostor.Impostor.MyRole.CanKillHidingPlayerOption);
+            KillButtonTracker ??= ObjectTrackers.ForPlayer(null, NebulaGameManager.Instance!.LocalPlayerInfo, p => !p.AmOwner && !p.IsDead && !p.IsImpostor && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.MyRole.CanKillHidingPlayerOption);
             (KillButtonTracker as IGameEntity).HudUpdate();
-            HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget);
+            HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
         }
 
     }
@@ -605,7 +607,7 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
                                 LocalPlayerInfo.HasAttribute(PlayerAttributes.Accel) &&
                                 myLover.HasAttribute(PlayerAttributes.Accel) &&
                                 LocalPlayerInfo.MyControl.MyPhysics.Velocity.magnitude > 0f &&
-                                LocalPlayerInfo.MyControl.transform.position.Distance(myLover.MyControl.transform.position) < 2f
+                                LocalPlayerInfo.MyControl.transform.position.Distance(myLover.VanillaPlayer.transform.position) < 2f
                             )
                             {
                                 time += Time.deltaTime;
@@ -804,9 +806,9 @@ public class NebulaGameManager : IRuntimePropertyHolder, Virial.Game.Game, Viria
         );
 }
 
-public static class NebulaGameManagerExpansion
+internal static class NebulaGameManagerExpansion
 {
-    static public PlayerModInfo? GetModInfo(this PlayerControl? player)
+    static internal PlayerModInfo? GetModInfo(this PlayerControl? player)
     {
         if (!player) return null;
         return NebulaGameManager.Instance?.GetModPlayerInfo(player!.PlayerId);

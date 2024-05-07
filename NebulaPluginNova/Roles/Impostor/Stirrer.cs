@@ -12,7 +12,7 @@ public class Stirrer : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[]? arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
     private NebulaConfiguration StirCoolDownOption = null!;
     private NebulaConfiguration SabotageChargeOption = null!;
@@ -40,7 +40,7 @@ public class Stirrer : ConfigurableStandardRole
         static public ISpriteLoader StirButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.StirButton.png", 115f);
         static public ISpriteLoader SabotageButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FakeSaboButton.png", 115f);
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -54,12 +54,12 @@ public class Stirrer : ConfigurableStandardRole
 
             if (AmOwner)
             {
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead && !p.Data.Role.IsImpostor));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => p.PlayerId != MyPlayer.PlayerId && !p.IsDead && !p.IsImpostor));
 
                 stirButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 stirButton.SetSprite(StirButtonSprite.GetSprite());
-                stirButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId,out int charge) || charge < MyRole.SabotageMaxChargeOption.GetMappedInt());
-                stirButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                stirButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId,out int charge) || charge < MyRole.SabotageMaxChargeOption.GetMappedInt());
+                stirButton.Visibility = (button) => !MyPlayer.IsDead;
                 stirButton.OnClick = (button) => {
                     int charge = 0;
                     if (sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget!.PlayerId, out var v)) charge = v;
@@ -72,8 +72,8 @@ public class Stirrer : ConfigurableStandardRole
 
                 sabotageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 sabotageButton.SetSprite(SabotageButtonSprite.GetSprite());
-                sabotageButton.Availability = (button) => MyPlayer.MyControl.CanMove && sabotageChargeMap.Any(entry => entry.Value > 0) && PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null;
-                sabotageButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                sabotageButton.Availability = (button) => MyPlayer.CanMove && sabotageChargeMap.Any(entry => entry.Value > 0) && PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null;
+                sabotageButton.Visibility = (button) => !MyPlayer.IsDead;
                 sabotageButton.OnClick = (button) => {
                     int count = 0;
                     foreach (var entry in sabotageChargeMap)
@@ -104,11 +104,11 @@ public class Stirrer : ConfigurableStandardRole
             }
         }
 
-        public override void DecorateOtherPlayerName(PlayerModInfo player, ref string text, ref Color color)
+        public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
         {
             if(sabotageChargeMap.TryGetValue(player.PlayerId,out int val))
             {
-                if (player.Role.Role.Category == RoleCategory.ImpostorRole) return;
+                if (player.IsImpostor) return;
                 if (val <= 0) return;
                 text += StringExtensions.Color(" (" + val + ")", Color.gray);
             }

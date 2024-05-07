@@ -15,7 +15,7 @@ public abstract class ModifierInstance : AssignableInstance, RuntimeModifier
     Virial.Game.Player RuntimeAssignable.MyPlayer => MyPlayer;
     
 
-    public ModifierInstance(PlayerModInfo player) : base(player)
+    public ModifierInstance(GamePlayer player) : base(player)
     {
     }
 

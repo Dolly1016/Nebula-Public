@@ -37,7 +37,7 @@ public abstract class AbstractRole : IAssignableBase, DefinedRole
     public abstract Color RoleColor { get; }
     Virial.Color DefinedRole.RoleColor => new Virial.Color(RoleColor);
     public virtual bool IsDefaultRole { get => false; }
-    public abstract RoleInstance CreateInstance(PlayerModInfo player, int[] arguments);
+    public abstract RoleInstance CreateInstance(GamePlayer player, int[] arguments);
     public int Id { get; set; }
     public abstract int RoleCount { get; }
     public abstract float GetRoleChance(int count);
@@ -416,7 +416,7 @@ public abstract class AbstractGhostRole : IAssignableBase, ICodeName
     public virtual string ShortName { get => Language.Translate("role." + LocalizedName + ".short"); }
     public abstract string CodeName { get; }
     public abstract Color RoleColor { get; }
-    public abstract GhostRoleInstance CreateInstance(PlayerModInfo player, int[] arguments);
+    public abstract GhostRoleInstance CreateInstance(GamePlayer player, int[] arguments);
     public int Id { get; set; }
     public abstract int RoleCount { get; }
     public abstract float GetRoleChance(int count);

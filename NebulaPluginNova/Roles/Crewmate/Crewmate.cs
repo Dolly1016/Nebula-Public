@@ -19,12 +19,12 @@ public class Crewmate : ConfigurableStandardRole
     public override bool IsDefaultRole => true;
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : RoleInstance
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 

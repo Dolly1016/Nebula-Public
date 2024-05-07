@@ -155,7 +155,7 @@ public static class AmongUsUtil
         RpcCleanDeadBodyDef.Invoke(new() { TargetId = bodyId, SourceId = sourceId, RelatedTag = relatedTag });
     }
 
-    public static PlayerModInfo? GetHolder(this DeadBody body)
+    internal static PlayerModInfo? GetHolder(this DeadBody body)
     {
         return NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault((p) => p.HoldingDeadBodyId.HasValue && p.HoldingDeadBodyId.Value == body.ParentId);
     }

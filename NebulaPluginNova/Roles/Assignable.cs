@@ -55,11 +55,11 @@ public enum ExtraWinCheckPhase
 public abstract class AssignableInstance : ComponentHolder, Virial.IBinderLifespan, IGamePlayerEntity
 {
     public virtual IAssignableBase AssignableBase { get; } = null!;
-    public PlayerModInfo MyPlayer { get; private init; }
-    Virial.Game.Player IGamePlayerEntity.MyPlayer => MyPlayer;
+    public GamePlayer MyPlayer { get; private init; }
+    GamePlayer IGamePlayerEntity.MyPlayer => MyPlayer;
     public bool AmOwner => MyPlayer.AmOwner;
 
-    public AssignableInstance(PlayerModInfo player)
+    public AssignableInstance(GamePlayer player)
     {
         this.MyPlayer = player;
     }
@@ -83,7 +83,7 @@ public abstract class AssignableInstance : ComponentHolder, Virial.IBinderLifesp
     protected virtual void OnInactivated() { }
     public virtual string? OverrideRoleName(string lastRoleName,bool isShort) => null;
     public virtual void DecoratePlayerName(ref string text, ref Color color) { }
-    public virtual void DecorateOtherPlayerName(PlayerModInfo player,ref string text, ref Color color) { }
+    public virtual void DecorateOtherPlayerName(GamePlayer player,ref string text, ref Color color) { }
     public virtual void DecorateRoleName(ref string text) { }
 
     public virtual void EditLightRange(ref float range) { }
@@ -98,5 +98,5 @@ public abstract class AssignableInstance : ComponentHolder, Virial.IBinderLifesp
     public virtual bool CanCallEmergencyMeeting { get => true; }
 
 
-    public virtual KillResult CheckKill(PlayerModInfo killer, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool isMeetingKill) { return KillResult.Kill; }
+    public virtual KillResult CheckKill(GamePlayer killer, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool isMeetingKill) { return KillResult.Kill; }
 }

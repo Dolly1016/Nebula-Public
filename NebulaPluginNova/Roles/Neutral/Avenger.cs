@@ -26,7 +26,7 @@ public class Avenger : ConfigurableRole
 
     public override int RoleCount => 0;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, -1));
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, -1));
 
     public NebulaConfiguration CanKnowExistanceOfAvengerOption = null!;
     private NebulaConfiguration TargetCanKnowAvengerOption = null!;
@@ -68,9 +68,9 @@ public class Avenger : ConfigurableRole
 
         public override AbstractRole Role => MyRole;
 
-        private PlayerModInfo? target;
-        public PlayerModInfo? AvengerTarget => target;
-        public Instance(PlayerModInfo player,byte targetId) : base(player)
+        private GamePlayer? target;
+        public GamePlayer? AvengerTarget => target;
+        public Instance(GamePlayer player,byte targetId) : base(player)
         {
             target = NebulaGameManager.Instance?.GetModPlayerInfo(targetId);
         }
@@ -85,13 +85,13 @@ public class Avenger : ConfigurableRole
                 NebulaGameManager.Instance?.TitleShower.SetText("You became AVENGER.", MyRole.RoleColor, 5.5f, true);
                 AmongUsUtil.PlayCustomFlash(MyRole.RoleColor, 0f, 0.8f, 0.7f);
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
                 var killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
+                killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) => {
-                    MyPlayer.MyControl.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
+                    MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill);
                     killButton.StartCoolDown();
                 };
                 killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
@@ -145,7 +145,7 @@ public class Avenger : ConfigurableRole
         {
             if (AmOwner && target == exiled && !MyPlayer.IsDead)
             {
-                MyPlayer.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+                MyPlayer.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
             }
 
         }
@@ -153,7 +153,7 @@ public class Avenger : ConfigurableRole
         {
             if(endState.EndCondition == NebulaGameEnd.AvengerWin && endState.CheckWin(MyPlayer.PlayerId))
             {
-                if(MyPlayer.GetModifiers<Lover.Instance>().Any(l => l.MyLover?.Role.Role is Avenger)) new StaticAchievementToken("avenger.challenge");
+                if(MyPlayer.Unbox().GetModifiers<Lover.Instance>().Any(l => l.MyLover?.Role.Role is Avenger)) new StaticAchievementToken("avenger.challenge");
             }
         }
 
@@ -161,7 +161,7 @@ public class Avenger : ConfigurableRole
         {
             if (AmOwner && !CheckKillCondition && dead == target && !MyPlayer.IsDead)
             {
-                MyPlayer.MyControl.ModFlexibleKill(MyPlayer.MyControl, false, PlayerState.Suicide, EventDetail.Kill, false);
+                MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, false);
                 new StaticAchievementToken("avenger.another1");
             }
         }

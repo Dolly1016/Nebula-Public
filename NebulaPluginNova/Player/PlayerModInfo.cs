@@ -7,6 +7,7 @@ using Nebula.VoiceChat;
 using Virial.Assignable;
 using Virial.Command;
 using Virial.Common;
+using Virial.DI;
 using Virial.Game;
 using Virial.Text;
 
@@ -99,7 +100,7 @@ public class PlayerAttributeImpl : IPlayerAttribute
 }
 
 [NebulaRPCHolder]
-public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, ICommandExecutor, IPermissionHolder
+internal class PlayerModInfo : AbstractModuleContainer<Virial.Game.Player>, IRuntimePropertyHolder, Virial.Game.Player, ICommandExecutor, IPermissionHolder
 {
     public static Permission OpPermission = new Permission();
 
@@ -116,7 +117,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     public byte? HoldingDeadBodyId { get; private set; } = null;
     public bool HoldingAnyDeadBody => HoldingDeadBodyId != null;
     public bool AmHost => MyControl.AmHost();
-    private DeadBody? deadBodyCache { get; set; } = null;
+    private DeadBody? holdingDeadBodyCache { get; set; } = null;
 
     public RoleInstance Role => myRole;
     private RoleInstance myRole = null!;
@@ -132,7 +133,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
     private List<Virial.Game.OutfitCandidate> outfits = new();
     private TMPro.TextMeshPro roleText;
-    
+
 
     public FakeSabotageStatus FakeSabotage { get; private set; } = new();
     public Vector2? GoalPos = null;
@@ -331,7 +332,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         nameText.text = text;
         nameText.color = color;
 
-        
+
 
     }
 
@@ -479,7 +480,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
             {
                 player.SetRole(Roles.Roles.AllRoles[message.assignableId], message.arguments);
             }
-            else if(message.roleType == RoleType.GhostRole)
+            else if (message.roleType == RoleType.GhostRole)
             {
                 player.SetGhostRole(Roles.Roles.AllGhostRoles[message.assignableId], message.arguments);
             }
@@ -515,7 +516,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     //             死体掴み関連             //
     //                                      //
     //////////////////////////////////////////
-    
+
     private void UpdateHoldingDeadBody()
     {
         if (!HoldingDeadBodyId.HasValue) return;
@@ -523,37 +524,37 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         //同じ死体を持つプレイヤーがいる
         if (NebulaGameManager.Instance?.AllPlayerInfo().Any(p => p.PlayerId < PlayerId && p.HoldingDeadBodyId.HasValue && p.HoldingDeadBodyId.Value == HoldingDeadBodyId.Value) ?? false)
         {
-            deadBodyCache = null;
+            holdingDeadBodyCache = null;
             if (AmOwner) ReleaseDeadBody();
             return;
         }
 
 
-        if (!deadBodyCache || deadBodyCache!.ParentId != HoldingDeadBodyId.Value)
+        if (!holdingDeadBodyCache || holdingDeadBodyCache!.ParentId != HoldingDeadBodyId.Value)
         {
-            deadBodyCache = Helpers.AllDeadBodies().FirstOrDefault((d) => d.ParentId == HoldingDeadBodyId.Value);
-            if (!deadBodyCache)
+            holdingDeadBodyCache = Helpers.AllDeadBodies().FirstOrDefault((d) => d.ParentId == HoldingDeadBodyId.Value);
+            if (!holdingDeadBodyCache)
             {
-                deadBodyCache = null;
+                holdingDeadBodyCache = null;
                 if (AmOwner) ReleaseDeadBody();
                 return;
             }
         }
 
         //ベント中の死体
-        deadBodyCache!.Reported = MyControl.inVent;
-        foreach (var r in deadBodyCache!.bodyRenderers) r.enabled = !MyControl.inVent;
+        holdingDeadBodyCache!.Reported = MyControl.inVent;
+        foreach (var r in holdingDeadBodyCache!.bodyRenderers) r.enabled = !MyControl.inVent;
 
         var targetPosition = MyControl.transform.position + new Vector3(-0.1f, -0.1f);
 
-        if (MyControl.transform.position.Distance(deadBodyCache!.transform.position) < 1.8f)
-            deadBodyCache!.transform.position += (targetPosition - deadBodyCache!.transform.position) * 0.15f;
+        if (MyControl.transform.position.Distance(holdingDeadBodyCache!.transform.position) < 1.8f)
+            holdingDeadBodyCache!.transform.position += (targetPosition - holdingDeadBodyCache!.transform.position) * 0.15f;
         else
-            deadBodyCache!.transform.position = targetPosition;
+            holdingDeadBodyCache!.transform.position = targetPosition;
 
 
         Vector3 playerPos = MyControl.GetTruePosition();
-        Vector3 deadBodyPos = deadBodyCache!.TruePosition;
+        Vector3 deadBodyPos = holdingDeadBodyCache!.TruePosition;
         Vector3 diff = (deadBodyPos - playerPos);
         float d = diff.magnitude;
         if (PhysicsHelpers.AnythingBetween(playerPos, deadBodyPos, Constants.ShipAndAllObjectsMask, false))
@@ -567,21 +568,22 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
             d -= 0.15f;
             if (d < 0f) d = 0f;
 
-            deadBodyCache!.transform.localPosition = playerPos + diff.normalized * d;
+            holdingDeadBodyCache!.transform.localPosition = playerPos + diff.normalized * d;
         }
         else
         {
-            deadBodyCache!.transform.localPosition = deadBodyCache!.transform.position;
+            holdingDeadBodyCache!.transform.localPosition = holdingDeadBodyCache!.transform.position;
         }
 
     }
 
     public void ReleaseDeadBody() {
-        RpcHoldDeadBody.Invoke(new(PlayerId, byte.MaxValue, (deadBodyCache ? deadBodyCache?.transform.localPosition : null) ?? new Vector2(10000, 10000)));
+        RpcHoldDeadBody.Invoke(new(PlayerId, byte.MaxValue, (holdingDeadBodyCache ? holdingDeadBodyCache?.transform.localPosition : null) ?? new Vector2(10000, 10000)));
     }
 
-    public void HoldDeadBody(DeadBody deadBody) {
-        RpcHoldDeadBody.Invoke(new(PlayerId, deadBody.ParentId, deadBody.transform.position));
+    public void HoldDeadBody(DeadBody? deadBody) {
+        if (deadBody == null) ReleaseDeadBody();
+        else RpcHoldDeadBody.Invoke(new(PlayerId, deadBody.ParentId, deadBody.transform.position));
     }
 
     readonly static RemoteProcess<(byte holderId, byte bodyId, Vector2 pos)> RpcHoldDeadBody = new(
@@ -593,14 +595,14 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
           if (message.bodyId == byte.MaxValue)
           {
-              if(info.deadBodyCache && message.pos.magnitude < 10000) info.deadBodyCache!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
+              if (info.holdingDeadBodyCache && message.pos.magnitude < 10000) info.holdingDeadBodyCache!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
               info.HoldingDeadBodyId = null;
           }
           else
           {
               info.HoldingDeadBodyId = message.bodyId;
               var deadBody = Helpers.AllDeadBodies().FirstOrDefault(d => d.ParentId == message.bodyId);
-              info.deadBodyCache = deadBody;
+              info.holdingDeadBodyCache = deadBody;
               if (deadBody && message.pos.magnitude < 10000) deadBody!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
           }
       }
@@ -613,17 +615,17 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     //                                      //
     //////////////////////////////////////////
 
-    static public (float angle,float distance) LocalMouseInfo { get
+    static public (float angle, float distance) LocalMouseInfo { get
         {
             Vector2 vec = (Vector2)Input.mousePosition - new Vector2(Screen.width / 2, Screen.height / 2);
             var viewer = NebulaGameManager.Instance!.WideCamera.ViewerTransform;
             if (viewer.localScale.x < 0f) vec.x *= -1;
             if (viewer.localScale.y < 0f) vec.y *= -1;
-            
+
             float currentAngle = Mathf.Atan2(vec.y, vec.x) - (viewer.localEulerAngles.z / 180f * Mathf.PI);
             float ratio = (Camera.main.orthographicSize * 2f) / (float)Screen.height;
             return (currentAngle, vec.magnitude * ratio);
-        } 
+        }
     }
 
     private void UpdateMouseAngle()
@@ -671,14 +673,14 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
     public IEnumerable<(IPlayerAttribute attribute, float percentage)> GetValidAttributes()
     {
-        foreach(var a in PlayerAttributeImpl.AllAttributes)
+        foreach (var a in PlayerAttributeImpl.AllAttributes)
         {
             //自認できない属性
             if (!a.CanCognize(this)) continue;
 
             float max = 0f, current = 0f;
             bool isPermanent = false;
-            foreach(var attribute in timeLimitedModulators.Where(attr => attr.HasCategorizedAttribute(a, this)))
+            foreach (var attribute in timeLimitedModulators.Where(attr => attr.HasCategorizedAttribute(a, this)))
             {
                 if (max < attribute.MaxTime) max = attribute.MaxTime;
                 if (current < attribute.Timer) current = attribute.Timer;
@@ -739,7 +741,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
                if (!playerInfo.AttributeModulators.Any(m => m.HasAttribute(am.Attribute))) playerInfo!.OnSetAttribute(am.Attribute);
            }
 
-           if(message.modulator is SpeedModulator)
+           if (message.modulator is SpeedModulator)
            {
                if (playerInfo.AmOwner && modulators.Any(m => m.HasAttribute(PlayerAttributes.Accel)) && modulators.Any(m => m.HasAttribute(PlayerAttributes.Decel))) new StaticAchievementToken("speedAttribute");
            }
@@ -804,9 +806,9 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     {
         Vector2 targetSize = Vector2.one;
         Vector2 nonSmoothSize = Vector2.one;
-        foreach(var m in timeLimitedModulators.Select(m => m as SizeModulator).Where(m => m != null))
+        foreach (var m in timeLimitedModulators.Select(m => m as SizeModulator).Where(m => m != null))
         {
-            if(m.Smooth)
+            if (m.Smooth)
                 targetSize *= m.Size;
             else
                 nonSmoothSize *= m.Size;
@@ -821,7 +823,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
     public float CalcAttributeVal(IPlayerAttribute attribute, bool isMultiplier = true)
     {
         float num = isMultiplier ? 1 : 0;
-        foreach(var m in timeLimitedModulators.Select(m => m as FloatModulator).Where(m => m?.HasAttribute(attribute) ?? false)!)
+        foreach (var m in timeLimitedModulators.Select(m => m as FloatModulator).Where(m => m?.HasAttribute(attribute) ?? false)!)
         {
             if (isMultiplier)
                 num *= m!.Num;
@@ -854,7 +856,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
             {
                 if (localInfo.Role.Role.Category == RoleCategory.ImpostorRole)
                     invisibleLevel = Math.Max(invisibleLevel, 1);
-                else if(!AmOwner)
+                else if (!AmOwner)
                     invisibleLevel = Math.Max(invisibleLevel, 2);
             }
 
@@ -914,7 +916,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
 
         var color = new Color(1f, 1f, 1f, alpha);
-        
+
 
         if (MyControl.cosmetics.currentBodySprite.BodySprite != null) MyControl.cosmetics.currentBodySprite.BodySprite.color = color;
 
@@ -972,7 +974,7 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
 
     public void OnGameStart()
     {
-        if(AmOwner)UpdateTaskState();
+        if (AmOwner) UpdateTaskState();
 
         UpdateOutfit();
     }
@@ -984,30 +986,61 @@ public class PlayerModInfo : IRuntimePropertyHolder, Virial.Game.Player, IComman
         FakeSabotage.OnMeetingStart();
     }
 
-    void Virial.Game.Player.MurderPlayer(Virial.Game.Player player, CommunicableTextTag playerState, CommunicableTextTag eventDetail, bool showBlink, bool showKillOverlay)
-    {
-        MyControl.ModFlexibleKill(player.VanillaPlayer, showBlink, playerState, eventDetail, showKillOverlay);
-    }
+    //////////////////////////////////////////
+    //                                      //
+    //              Virial API              //
+    //                                      //
+    //////////////////////////////////////////
 
-    void Virial.Game.Player.Suicide(CommunicableTextTag playerState, CommunicableTextTag eventDetail, bool showKillOverlay)
-    {
-        MyControl.ModFlexibleKill(MyControl,false,playerState,eventDetail,showKillOverlay);
-    }
 
-    void Virial.Game.Player.GainAttribute(IPlayerAttribute attribute, float duration, bool canPassMeeting, int priority, string? duplicateTag)
+    // Virial::MurderAPI
+
+    KillResult GamePlayer.MurderPlayer(GamePlayer player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool showBlink, bool showKillOverlay) => MyControl.ModFlexibleKill(player.VanillaPlayer, showBlink, playerState, eventDetail, showKillOverlay);
+    KillResult GamePlayer.Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool showKillOverlay, bool assignGhostRole) => MyControl.ModFlexibleKill(MyControl, false, playerState, eventDetail, showKillOverlay, assignGhostRole);
+    void GamePlayer.Revive(GamePlayer? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent) => MyControl.ModRevive(healer.VanillaPlayer, new(position.x, position.y), eraseDeadBody, recordEvent);
+    GamePlayer? GamePlayer.MyKiller => MyKiller;
+
+    // Virial::HoldingAPI
+
+    GamePlayer? GamePlayer.HoldingDeadBody => NebulaGameManager.Instance?.GetModPlayerInfo(HoldingDeadBodyId ?? 255);
+    bool GamePlayer.HoldingAnyDeadBody => HoldingAnyDeadBody;
+    void GamePlayer.HoldDeadBody(Virial.Game.Player? deadBody) => HoldDeadBody(deadBody?.RelatedDeadBody);
+    void GamePlayer.HoldDeadBodyFast(DeadBody? deadBody) => HoldDeadBody(deadBody);
+    void GamePlayer.ReleaseDeadBody() => ReleaseDeadBody();
+
+    GamePlayer? GamePlayer.HoldingPlayer => null;
+    bool GamePlayer.HoldingAnyPlayer => false;
+    void GamePlayer.HoldPlayer(Virial.Game.Player? player) { }
+    void GamePlayer.ReleaseHoldingPlayer() { }
+
+
+    //Virial::PlayerAPI
+
+    string GamePlayer.Name => DefaultName;
+    Virial.Compat.Vector2 GamePlayer.Position => new(MyControl.transform.position);
+    Virial.Compat.Vector2 GamePlayer.TruePosition => new(MyControl.GetTruePosition());
+    bool GamePlayer.CanMove => MyControl.CanMove;
+    CommunicableTextTag GamePlayer.PlayerState => MyState ?? PlayerState.Alive;
+
+    // Virial::AttributeAPI
+
+    void GamePlayer.GainAttribute(IPlayerAttribute attribute, float duration, bool canPassMeeting, int priority, string? duplicateTag)
     {
         if (attribute == PlayerAttributes.Accel || attribute == PlayerAttributes.Decel) return;
-
         RpcAttrModulator.Invoke(new(PlayerId, new AttributeModulator(attribute, duration, canPassMeeting, priority, duplicateTag), false));
     }
+    void GamePlayer.GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag) => RpcAttrModulator.Invoke(new(PlayerId, new SpeedModulator(speedRate, Vector2.one, true, duration, canPassMeeting, priority, duplicateTag ?? ""), false));
+    IEnumerable<(IPlayerAttribute attribute, float percentage)> GamePlayer.GetAttributes() => GetValidAttributes();
 
-    void Virial.Game.Player.GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag)
-    {
-        RpcAttrModulator.Invoke(new(PlayerId, new SpeedModulator(speedRate, Vector2.one, true, duration, canPassMeeting, priority, duplicateTag ?? ""), false));
-        
-    }
+    // Virial::OutfitAPI
 
+    Virial.Game.Outfit GamePlayer.GetOutfit(int maxPriority) => new(GetOutfit(maxPriority));
+    Virial.Game.Outfit GamePlayer.CurrentOutfit => new(CurrentOutfit);
+    Virial.Game.Outfit GamePlayer.DefaultOutfit => new(DefaultOutfit);
 
-    string Virial.Game.Player.Name => DefaultName;
-    PlayerControl Virial.Game.Player.VanillaPlayer => MyControl;
+    // Virial::Internal
+
+    PlayerControl GamePlayer.VanillaPlayer => MyControl;
+    DeadBody? GamePlayer.RelatedDeadBody { get { if (!relatedDeadBodyCache) relatedDeadBodyCache = null; return relatedDeadBodyCache; } }
+    internal DeadBody? relatedDeadBodyCache;
 }

@@ -71,7 +71,7 @@ public class Disturber : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration PlaceCoolDownOption = null!;
     private NebulaConfiguration DisturbCoolDownOption = null!;
@@ -106,7 +106,7 @@ public class Disturber : ConfigurableStandardRole
         static private ISpriteLoader elecAnimVSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnimSub.png", 100f);
 
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -184,12 +184,12 @@ public class Disturber : ConfigurableStandardRole
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) =>
                 {
-                    var distance = (GetLastPole()?.Position.Distance(MyPlayer.MyControl.transform.position) ?? (PoleDistanceMin + 0.1f));
-                    return MyPlayer.MyControl.CanMove && newPoles.Count + poles.Count < MyRole.MaxNumOfPolesOption && distance > PoleDistanceMin && distance < PoleDistanceMax;
+                    var distance = (GetLastPole()?.Position.Distance(MyPlayer.Position.ToUnityVector()) ?? (PoleDistanceMin + 0.1f));
+                    return MyPlayer.CanMove && newPoles.Count + poles.Count < MyRole.MaxNumOfPolesOption && distance > PoleDistanceMin && distance < PoleDistanceMax;
                 };
-                placeButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                placeButton.Visibility = (button) => !MyPlayer.IsDead;
                 placeButton.OnClick = (button) => {
-                    var pole = DisturbPole.GeneratePole(MyPlayer.MyControl.transform.position);
+                    var pole = DisturbPole.GeneratePole(MyPlayer.Position.ToUnityVector());
                     pole.Color = new(1f, 1f, 1f, 0.5f);
                     newPoles.Add(pole);
                     polesText.text = GetNumOfLeftPoles().ToString();
@@ -220,7 +220,7 @@ public class Disturber : ConfigurableStandardRole
                 disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 disturbButton.SetSprite(disturbButtonSprite.GetSprite());
                 disturbButton.Availability = (button) => poles.Count >= 2;
-                disturbButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                disturbButton.Visibility = (button) => !MyPlayer.IsDead;
                 disturbButton.OnClick = (button) => {
                     button.ActivateEffect();
                 };

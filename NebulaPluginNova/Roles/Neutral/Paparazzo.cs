@@ -269,7 +269,7 @@ public class Paparazzo : ConfigurableStandardRole
     public override Color RoleColor => new Color(202f / 255f, 118f / 255f, 140f / 255f);
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration ShotCoolDownOption = null!;
     private NebulaConfiguration RequiredSubjectsOption = null!;
@@ -303,7 +303,7 @@ public class Paparazzo : ConfigurableStandardRole
 
         AchievementToken<(bool cleared, int? lastAlive)>? acTokenChallenge = null;
 
-        public Instance(PlayerModInfo player, int[] arguments) : base(player)
+        public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if(arguments.Length == 2)
             {
@@ -381,8 +381,8 @@ public class Paparazzo : ConfigurableStandardRole
 
                 shotButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 shotButton.SetSprite(cameraButtonSprite.GetSprite());
-                shotButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyFinder != null;
-                shotButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                shotButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && MyFinder != null;
+                shotButton.Visibility = (button) => !MyPlayer.IsDead;
                 shotButton.OnClick = (button) => {
                     GameObject.Destroy(MyFinder?.MyObject?.GetComponent<PassiveButton>());
                     MyFinder?.MyObject?.TakePicture(shots, success => acTokenCommon.Value += success ? 1 : 0);
@@ -406,7 +406,7 @@ public class Paparazzo : ConfigurableStandardRole
                 var shot = MyFinder.MyObject!;
                 shot.gameObject.layer = LayerExpansion.GetUILayer();
                 shot.transform.localScale = Vector3.zero;
-                var pos = MyPlayer.MyControl.transform.localPosition;
+                var pos = MyPlayer.VanillaPlayer.transform.localPosition;
                 pos.z = -10f;
                 shot.transform.localPosition = pos;
 

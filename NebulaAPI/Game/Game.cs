@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.DI;
 
 namespace Virial.Game;
 
 /// <summary>
 /// 現在プレイ中のゲームを表します。
 /// </summary>
-public interface Game : ILifespan
+public interface Game : IModuleContainer<Game>, ILifespan
 {
     /// <summary>
     /// プレイヤーを取得します。
@@ -31,13 +32,6 @@ public interface Game : ILifespan
     IEnumerable<Player> GetAllPlayers();
 
     internal void RegisterEntity(IGameEntity entity, ILifespan lifespan);
-
-    /// <summary>
-    /// モジュールを取得します。
-    /// </summary>
-    /// <typeparam name="GameModule">モジュールの型</typeparam>
-    /// <returns></returns>
-    //GameModule GetModule<GameModule>() where GameModule : IGameModule<Game>;
 
     /// <summary>
     /// 現在のHUD。

@@ -20,7 +20,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration CamoCoolDownOption = null!;
     private NebulaConfiguration CamoDurationOption = null!;
@@ -45,7 +45,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
 
         private AchievementToken<bool>? acTokenCommon;
         private AchievementToken<(bool cleared, int killed)>? acTokenChallenge;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -60,8 +60,8 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
 
                 camouflageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 camouflageButton.SetSprite(buttonSprite.GetSprite());
-                camouflageButton.Availability = (button) =>MyPlayer.MyControl.CanMove;
-                camouflageButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead || MyRole.CanInvokeCamoAfterDeathOption;
+                camouflageButton.Availability = (button) =>MyPlayer.CanMove;
+                camouflageButton.Visibility = (button) => !MyPlayer.IsDead || MyRole.CanInvokeCamoAfterDeathOption;
                 camouflageButton.OnClick = (button) => {
                     button.ActivateEffect();
                 };

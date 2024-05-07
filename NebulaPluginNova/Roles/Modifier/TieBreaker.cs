@@ -17,7 +17,7 @@ public class TieBreaker : ConfigurableStandardModifier, HasCitation
     public override string CodeName => "TBR";
     public override Color RoleColor => new Color(239f / 255f, 175f / 255f, 135f / 255f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
     public class Instance : ModifierInstance, IGamePlayerEntity
@@ -27,7 +27,7 @@ public class TieBreaker : ConfigurableStandardModifier, HasCitation
         AchievementToken<bool>? acTokenCommon;
         AchievementToken<(bool cleared, byte lastTieVoted)>? acTokenChallenge;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 

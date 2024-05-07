@@ -17,7 +17,7 @@ public class Painter : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration SampleCoolDownOption = null!;
     private NebulaConfiguration PaintCoolDownOption = null!;
@@ -42,7 +42,7 @@ public class Painter : ConfigurableStandardRole
         static public ISpriteLoader sampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
         static public ISpriteLoader paintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -59,14 +59,14 @@ public class Painter : ConfigurableStandardRole
 
                 GameData.PlayerOutfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
                 sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 sampleButton.SetSprite(sampleButtonSprite.GetSprite());
-                sampleButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                sampleButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                sampleButton.Availability = (button) => MyPlayer.CanMove;
+                sampleButton.Visibility = (button) => !MyPlayer.IsDead;
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker.CurrentTarget?.GetModInfo()?.GetOutfit(75) ?? null;
+                    sample = sampleTracker.CurrentTarget?.Unbox()?.GetOutfit(75) ?? null;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
@@ -77,13 +77,13 @@ public class Painter : ConfigurableStandardRole
                 
                 paintButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 paintButton.SetSprite(paintButtonSprite.GetSprite());
-                paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                paintButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
+                paintButton.Visibility = (button) => !MyPlayer.IsDead;
                 paintButton.OnClick = (button) => {
-                    var outfit = sample ?? MyPlayer.GetOutfit(75);
+                    var outfit = sample ?? MyPlayer.Unbox().GetOutfit(75);
 
                     acTokenCommon ??= new("painter.common1");
-                    if (sampleTracker.CurrentTarget!.GetModInfo()!.GetOutfit(75).ColorId != outfit.ColorId)
+                    if (sampleTracker.CurrentTarget!.Unbox()!.GetOutfit(75).ColorId != outfit.ColorId)
                         acTokenChallenge.Value[sampleTracker.CurrentTarget!.PlayerId]++;
 
                     var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, outfit)));

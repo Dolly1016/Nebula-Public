@@ -2,16 +2,10 @@
 using Nebula.Behaviour;
 using Nebula.Events;
 using Virial.Events.Player;
+using Virial.Game;
 using Virial.Text;
 
 namespace Nebula.Extensions;
-
-public enum KillResult
-{
-    Kill,
-    Guard,
-    ObviousGuard
-}
 
 [NebulaRPCHolder]
 public static class PlayerExtension
@@ -363,9 +357,9 @@ public static class PlayerExtension
         RpcRivive.Invoke((byte.MaxValue, player.PlayerId, pos, cleanDeadBody,recordEvent));
     }
 
-    static public void ModRevive(this PlayerControl player, PlayerControl healer, Vector2 pos, bool cleanDeadBody)
+    static public void ModRevive(this PlayerControl player, PlayerControl? healer, Vector2 pos, bool cleanDeadBody, bool recordEvent = true)
     {
-        RpcRivive.Invoke((healer.PlayerId, player.PlayerId, pos, cleanDeadBody, true));
+        RpcRivive.Invoke((healer?.PlayerId ?? byte.MaxValue, player.PlayerId, pos, cleanDeadBody, recordEvent));
     }
 
     static public ModTitleShower GetTitleShower(this PlayerControl player)

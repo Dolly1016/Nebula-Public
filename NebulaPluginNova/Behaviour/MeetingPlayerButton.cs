@@ -14,13 +14,13 @@ public record MeetingPlayerAction(Image icon, Action<MeetingPlayerButtonState> b
 
 public class MeetingPlayerButtonManager : IGameEntity
 {
-    public record MeetingPlayerButton(GameObject gameObject, SpriteRenderer renderer, PlayerModInfo player, Reference<MeetingPlayerButtonState> state);
+    public record MeetingPlayerButton(GameObject gameObject, SpriteRenderer renderer, GamePlayer player, Reference<MeetingPlayerButtonState> state);
 
     public class MeetingPlayerButtonState
     {
         public MeetingPlayerButton MyButton { get; init; } = null!;
 
-        public PlayerModInfo MyPlayer => MyButton.player;
+        public GamePlayer MyPlayer => MyButton.player;
         public bool IsSelected { get; private set; } = false;
 
         public void SetSelect(bool select)

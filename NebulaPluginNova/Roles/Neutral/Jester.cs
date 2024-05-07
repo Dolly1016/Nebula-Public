@@ -18,7 +18,7 @@ public class Jester : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration CanDragDeadBodyOption = null!;
     private NebulaConfiguration CanFixLightOption = null!;
@@ -60,7 +60,7 @@ public class Jester : ConfigurableStandardRole, HasCitation
         public override bool CanUseVent => canUseVent;
 
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
             if (MyRole.CanDragDeadBodyOption) draggable = Bind(new Scripts.Draggable());
         }

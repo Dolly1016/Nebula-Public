@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.DI;
 using Virial.Text;
 
 namespace Virial.Runtime;
@@ -35,6 +36,8 @@ public interface NebulaPreprocessor
     /// </summary>
     /// <param name="assignable"></param>
     void RegisterAssignable(DefinedAssignable assignable);
+
+    DIManager DIManager { get; }
 }
 
 public interface NebulaRuntime

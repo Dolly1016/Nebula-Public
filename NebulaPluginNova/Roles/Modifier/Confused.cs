@@ -24,13 +24,13 @@ public class Confused : ConfigurableStandardModifier
         ChanceOfShuffleOption = new NebulaConfiguration(RoleConfig, "chanceOfShuffle", null, 10f,100f,10f,60f,60f) { Decorator = NebulaConfiguration.PercentageDecorator };
         NumOfMaxShuffledPairsOption = new NebulaConfiguration(RoleConfig, "numOfMaxShuffledPairs", null, 1, 7, 3, 3);
     }
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     public class Instance : ModifierInstance, IGamePlayerEntity
     {
         public override AbstractModifier Role => MyRole;
         public override bool CanBeAwareAssignment => NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 

@@ -18,21 +18,21 @@ public class Draggable : ComponentHolder
         if (role.MyPlayer.AmOwner)
         {
             //不可視の死体はつかめる対象から外す
-            ObjectTracker<DeadBody> deadBodyTracker = Bind(ObjectTrackers.ForDeadBody(null, role.MyPlayer.MyControl, (d) => d.bodyRenderers.Any(r => r.enabled) && d.GetHolder() == null));
+            var deadBodyTracker = Bind(ObjectTrackers.ForDeadBody(null, role.MyPlayer, d => d.RelatedDeadBody?.GetHolder() == null));
 
             var dragButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
             dragButton.SetSprite(buttonSprite.GetSprite());
             dragButton.Availability = (button) =>
             {
-                return (deadBodyTracker.CurrentTarget != null || role.MyPlayer.HoldingDeadBodyId.HasValue) && role.MyPlayer.MyControl.CanMove;
+                return (deadBodyTracker.CurrentTarget != null || role.MyPlayer.HoldingAnyDeadBody) && role.MyPlayer.CanMove;
             };
-            dragButton.Visibility = (button) => !role.MyPlayer.MyControl.Data.IsDead;
+            dragButton.Visibility = (button) => !role.MyPlayer.IsDead;
             dragButton.OnClick = (button) =>
             {
-                if (!role.MyPlayer.HoldingDeadBodyId.HasValue)
+                if (!role.MyPlayer.HoldingAnyDeadBody)
                 {
                     role.MyPlayer.HoldDeadBody(deadBodyTracker.CurrentTarget!);
-                    OnHoldingDeadBody?.Invoke(deadBodyTracker.CurrentTarget!);
+                    OnHoldingDeadBody?.Invoke(deadBodyTracker.CurrentTarget!.RelatedDeadBody!);
                 }
                 else
                     role.MyPlayer.ReleaseDeadBody();

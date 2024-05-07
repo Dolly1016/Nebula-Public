@@ -20,7 +20,7 @@ public class Doctor : ConfigurableStandardRole
     public override Color RoleColor => new Color(128f / 255f, 255f / 255f, 221f / 255f);
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration PortableVitalsChargeOption = null!;
     private NebulaConfiguration MaxPortableVitalsChargeOption = null!;
@@ -41,7 +41,7 @@ public class Doctor : ConfigurableStandardRole
         public override AbstractRole Role => MyRole;
         private float vitalTimer = MyRole.PortableVitalsChargeOption.GetFloat();
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -59,8 +59,8 @@ public class Doctor : ConfigurableStandardRole
             {
                 vitalButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 vitalButton.SetSprite(HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image);
-                vitalButton.Availability = (button) => MyPlayer.MyControl.CanMove && vitalTimer > 0f;
-                vitalButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                vitalButton.Availability = (button) => MyPlayer.CanMove && vitalTimer > 0f;
+                vitalButton.Visibility = (button) => !MyPlayer.IsDead;
                 vitalButton.OnClick = (button) =>
                 {
                     VitalsMinigame? vitalsMinigame = null;

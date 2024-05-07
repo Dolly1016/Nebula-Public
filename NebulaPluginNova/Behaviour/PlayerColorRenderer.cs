@@ -12,7 +12,7 @@ public class PlayerColorRenderer : MonoBehaviour
 {
     static PlayerColorRenderer() => ClassInjector.RegisterTypeInIl2Cpp<PlayerColorRenderer>();
 
-    private PlayerModInfo? player = null;
+    private GamePlayer? player = null;
     private int lastColorId = -1;
     private SpriteRenderer renderer = null!;
 
@@ -22,7 +22,7 @@ public class PlayerColorRenderer : MonoBehaviour
         renderer.material = HatManager.Instance.PlayerMaterial;
     }
 
-    public void SetPlayer(PlayerModInfo? player)
+    public void SetPlayer(GamePlayer? player)
     {
         this.player = player;
         lastColorId = -1;
@@ -32,9 +32,9 @@ public class PlayerColorRenderer : MonoBehaviour
     {
         if (player == null) return;
 
-        if(player.CurrentOutfit.ColorId != lastColorId)
+        if(player.Unbox().CurrentOutfit.ColorId != lastColorId)
         {
-            lastColorId = player.CurrentOutfit.ColorId;
+            lastColorId = player.Unbox().CurrentOutfit.ColorId;
 
             PlayerMaterial.SetColors(lastColorId, renderer.sharedMaterial);
         }

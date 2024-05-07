@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Game;
 
 namespace Nebula.Roles.Complex;
@@ -56,9 +57,9 @@ static file class GuesserSystem
                     if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
 
                     if (p?.Role.Role == r)
-                        PlayerControl.LocalPlayer.ModMeetingKill(p!.MyControl, true, PlayerState.Guessed, EventDetail.Guess);
+                        NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, false);
                     else
-                        PlayerControl.LocalPlayer.ModMeetingKill(PlayerControl.LocalPlayer, true, PlayerState.Misguessed, EventDetail.Missed);
+                        NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, false);
 
                     //のこり推察数を減らす
                     guessDecrementer.Invoke();
@@ -128,7 +129,7 @@ static file class GuesserSystem
         LastGuesserWindow = null!;
     }
 
-    static public void OnGameEnd(PlayerModInfo myInfo)
+    static public void OnGameEnd(GamePlayer myInfo)
     {
         var guessKills = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.MyState == PlayerState.Guessed && p.MyKiller == myInfo) ?? 0;
         if (guessKills >= 1) new StaticAchievementToken("guesser.common1");
@@ -149,7 +150,7 @@ public class Guesser : ConfigurableStandardRole, HasCitation
     public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if(MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; yield return GuesserModifier.MyRole; }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
 
     static public NebulaConfiguration NumOfGuessOption = null!;
     static public NebulaConfiguration NumOfGuessPerMeetingOption = null!;
@@ -199,7 +200,7 @@ public class Guesser : ConfigurableStandardRole, HasCitation
     {
         public override AbstractRole Role => MyNiceRole;
         private int leftGuess = NumOfGuessOption;
-        public NiceInstance(PlayerModInfo player, int[] arguments) : base(player)
+        public NiceInstance(GamePlayer player, int[] arguments) : base(player)
         {
             if(arguments.Length>=1)leftGuess = arguments[0];
         }
@@ -226,7 +227,7 @@ public class Guesser : ConfigurableStandardRole, HasCitation
     {
         public override AbstractRole Role => MyEvilRole;
         private int leftGuess = NumOfGuessOption;
-        public EvilInstance(PlayerModInfo player, int[] arguments) : base(player)
+        public EvilInstance(GamePlayer player, int[] arguments) : base(player)
         {
             if (arguments.Length >= 1) leftGuess = arguments[0];
         }
@@ -259,7 +260,7 @@ public class GuesserModifier : ConfigurableStandardModifier, HasCitation
     public override Color RoleColor => Guesser.MyNiceRole.RoleColor;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return Guesser.MyNiceRole; yield return Guesser.MyEvilRole; }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     protected override void LoadOptions()
     {
@@ -275,7 +276,7 @@ public class GuesserModifier : ConfigurableStandardModifier, HasCitation
         public override AbstractModifier Role => MyRole;
         public int LeftGuess = Guesser.NumOfGuessOption;
 
-        public Instance(PlayerModInfo player,int[] arguments) : base(player){
+        public Instance(GamePlayer player,int[] arguments) : base(player){
             if (arguments.Length > 0)LeftGuess = arguments[0];
         }
 

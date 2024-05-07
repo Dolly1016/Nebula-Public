@@ -18,7 +18,7 @@ public class Alien : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration EMICoolDownOption = null!;
     private NebulaConfiguration EMIDurationOption = null!;
@@ -42,7 +42,7 @@ public class Alien : ConfigurableStandardRole, HasCitation
         static private ISpriteLoader invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
         public override AbstractRole Role => MyRole;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -59,8 +59,8 @@ public class Alien : ConfigurableStandardRole, HasCitation
 
                 emiButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 emiButton.SetSprite(buttonSprite.GetSprite());
-                emiButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                emiButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                emiButton.Availability = (button) => MyPlayer.CanMove;
+                emiButton.Visibility = (button) => !MyPlayer.IsDead;
                 emiButton.OnClick = (button) => {
                     button.ActivateEffect();
                 };
@@ -99,11 +99,11 @@ public class Alien : ConfigurableStandardRole, HasCitation
 
                     int left = MyRole.NumOfInvalidationsOption.GetMappedInt();
 
-                    var invalidateTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, p => ObjectTrackers.StandardPredicate(p)));
+                    var invalidateTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p)));
                     var invalidateButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                     invalidateButton.SetSprite(invalidateButtonSprite.GetSprite());
-                    invalidateButton.Availability = (button) => MyPlayer.MyControl.CanMove && invalidateTracker.CurrentTarget != null;
-                    invalidateButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && left > 0;
+                    invalidateButton.Availability = (button) => MyPlayer.CanMove && invalidateTracker.CurrentTarget != null;
+                    invalidateButton.Visibility = (button) => !MyPlayer.IsDead && left > 0;
                     var icon = invalidateButton.ShowUsesIcon(0);
                     icon.text = left.ToString();
                     invalidateButton.OnClick = (button) =>

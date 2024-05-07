@@ -69,7 +69,7 @@ public abstract class IRoleAllocator
     }
 
     public abstract void Assign(List<PlayerControl> impostors, List<PlayerControl> others);
-    public virtual AbstractGhostRole? AssignToGhost(PlayerModInfo player) => null;
+    public virtual AbstractGhostRole? AssignToGhost(GamePlayer player) => null;
 }
 
 public class FreePlayRoleAllocator : IRoleAllocator
@@ -197,7 +197,7 @@ public class StandardRoleAllocator : IRoleAllocator
         table.Determine();
     }
 
-    public override AbstractGhostRole? AssignToGhost(PlayerModInfo player)
+    public override AbstractGhostRole? AssignToGhost(GamePlayer player)
     {
         var pool = ghostRolePool.Where(g => g.role.Category == player.Role.Role.Category).ToArray();
 

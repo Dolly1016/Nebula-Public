@@ -83,15 +83,15 @@ public class NebulaImpl : INebula
     
 }
 
-public static class UnboxExtension
+internal static class UnboxExtension
 {
-    public static PlayerModInfo Unbox(this Virial.Game.Player player) => (PlayerModInfo)player;
-    public static RoleInstance Unbox(this RuntimeRole role) => (RoleInstance)role;
-    public static ModifierInstance Unbox(this RuntimeModifier modifier) => (ModifierInstance)modifier;
-    public static AbstractRole Unbox(this DefinedRole role) => (AbstractRole)role;
-    public static AbstractModifier Unbox(this DefinedModifier role) => (AbstractModifier)role;
-    public static ModAbilityButton Unbox(this Virial.Components.AbilityButton button) => (ModAbilityButton)button;
-    public static CustomEndCondition Unbox(this Virial.Game.GameEnd end) => (CustomEndCondition)end;
+    internal static PlayerModInfo Unbox(this Virial.Game.Player player) => (PlayerModInfo)player;
+    internal static RoleInstance Unbox(this RuntimeRole role) => (RoleInstance)role;
+    internal static ModifierInstance Unbox(this RuntimeModifier modifier) => (ModifierInstance)modifier;
+    internal static AbstractRole Unbox(this DefinedRole role) => (AbstractRole)role;
+    internal static AbstractModifier Unbox(this DefinedModifier role) => (AbstractModifier)role;
+    internal static ModAbilityButton Unbox(this Virial.Components.AbilityButton button) => (ModAbilityButton)button;
+    internal static CustomEndCondition Unbox(this Virial.Game.GameEnd end) => (CustomEndCondition)end;
 }
 
 public static class ComponentHolderHelper

@@ -24,7 +24,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
     private NebulaConfiguration DouseCoolDownOption = null!;
     private NebulaConfiguration DouseDurationOption = null!;
@@ -49,7 +49,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         public override Timer? VentDuration => ventDuration;
         public override bool CanUseVent => canUseVent;
         private int initialDousedMask = 0;
-        public Instance(PlayerModInfo player, int[] arguments) : base(player)
+        public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if (arguments.Length == 1) initialDousedMask = arguments[0];
         }
@@ -128,12 +128,12 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
                     CheckIgnitable();
                 }
 
-                var douseTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)));
+                var douseTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)));
 
                 douseButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 douseButton.SetSprite(douseButtonSprite.GetSprite());
-                douseButton.Availability = (button) => MyPlayer.MyControl.CanMove && douseTracker.CurrentTarget != null;
-                douseButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && !canIgnite;
+                douseButton.Availability = (button) => MyPlayer.CanMove && douseTracker.CurrentTarget != null;
+                douseButton.Visibility = (button) => !MyPlayer.IsDead && !canIgnite;
                 douseButton.OnClick = (button) => {
                     button.ActivateEffect();
                 };
@@ -158,8 +158,8 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
                 bool won = false;
                 igniteButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 igniteButton.SetSprite(IgniteButtonSprite.GetSprite());
-                igniteButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                igniteButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && canIgnite && !won;
+                igniteButton.Availability = (button) => MyPlayer.CanMove;
+                igniteButton.Visibility = (button) => !MyPlayer.IsDead && canIgnite && !won;
                 igniteButton.OnClick = (button) => {
                     NebulaGameManager.Instance.RpcInvokeSpecialWin(NebulaGameEnd.ArsonistWin, 1 << MyPlayer.PlayerId);
                     won = true;

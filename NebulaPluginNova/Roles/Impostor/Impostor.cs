@@ -20,7 +20,7 @@ public class Impostor : ConfigurableStandardRole
     public override RoleTeam Team => Impostor.MyTeam;
     public override bool IsDefaultRole => true;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public NebulaConfiguration CanKillHidingPlayerOption = null!;
 
@@ -34,7 +34,7 @@ public class Impostor : ConfigurableStandardRole
     public class Instance : RoleInstance
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 

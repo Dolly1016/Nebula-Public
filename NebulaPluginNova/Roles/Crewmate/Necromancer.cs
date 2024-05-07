@@ -1,5 +1,6 @@
 ﻿using Nebula.Configuration;
 using UnityEngine.AI;
+using Virial;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -15,7 +16,7 @@ public class Necromancer : ConfigurableStandardRole
     public override Color RoleColor => new Color(108f / 255f, 50f / 255f, 160f / 255f);
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration ReviveCoolDownOption = null!;
     private NebulaConfiguration ReviveDurationOption = null!;
@@ -48,7 +49,7 @@ public class Necromancer : ConfigurableStandardRole
 
         private Dictionary<byte, SystemTypes> resurrectionRoom = new();
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
             draggable = Bind(new Scripts.Draggable());
 
@@ -63,7 +64,8 @@ public class Necromancer : ConfigurableStandardRole
 
         public override void LocalUpdate()
         {
-            bool flag = MyPlayer.HoldingDeadBodyId.HasValue;
+            bool flag = MyPlayer.HoldingAnyDeadBody;
+
             if (myArrow != null) myArrow.IsActive = flag;
             message.gameObject.SetActive(flag);
             if (flag) message.color = MyRole.RoleColor.AlphaMultiplied(MathF.Sin(Time.time * 2.4f) * 0.2f + 0.8f);
@@ -71,12 +73,13 @@ public class Necromancer : ConfigurableStandardRole
             if (fullScreen)
             {
                 bool detected = false;
-                var myPos = MyPlayer.MyControl.GetTruePosition();
+                var myPos = MyPlayer.VanillaPlayer.GetTruePosition();
                 float maxDis = MyRole.DetectedRangeOption.GetFloat();
 
+                byte currentHolding = MyPlayer.HoldingDeadBody?.PlayerId ?? byte.MaxValue;
                 foreach (var deadbody in Helpers.AllDeadBodies())
                 {
-                    if (MyPlayer.HoldingDeadBodyId == deadbody.ParentId) continue;
+                    if (currentHolding == deadbody.ParentId) continue;
                     if ((deadbody.TruePosition - myPos).magnitude > maxDis) continue;
 
                     detected = true;
@@ -104,7 +107,7 @@ public class Necromancer : ConfigurableStandardRole
 
                 bool canReviveHere()
                 {
-                    return !(!currentTargetRoom.HasValue || !MyPlayer.HoldingDeadBodyId.HasValue || !ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.OverlapPoint(MyPlayer.MyControl.GetTruePosition()));
+                    return currentTargetRoom.HasValue && MyPlayer.HoldingAnyDeadBody && ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.OverlapPoint(MyPlayer.TruePosition);
                 }
 
                 myArrow = Bind(new Arrow());
@@ -121,7 +124,7 @@ public class Necromancer : ConfigurableStandardRole
                         {
                             if (entry.Key == SystemTypes.Ventilation) continue;
 
-                            float d = entry.Value.roomArea.Distance(MyPlayer.MyControl.Collider).distance;
+                            float d = entry.Value.roomArea.Distance(MyPlayer.VanillaPlayer.Collider).distance;
                             if (d < MyRole.ReviveMinRangeOption.GetFloat()) continue;
 
                             cand.Add(new(d, entry.Value));
@@ -147,18 +150,20 @@ public class Necromancer : ConfigurableStandardRole
 
                 reviveButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 reviveButton.SetSprite(buttonSprite.GetSprite());
-                reviveButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyPlayer.HoldingDeadBodyId.HasValue && canReviveHere();
-                reviveButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                reviveButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && MyPlayer.HoldingAnyDeadBody && canReviveHere();
+                reviveButton.Visibility = (button) => !MyPlayer.IsDead;
                 reviveButton.OnClick = (button) => button.ActivateEffect();
                 reviveButton.OnEffectEnd = (button) =>
                 {
                     if (!button.EffectTimer!.IsInProcess)
                     {
-                        acTokenCommon ??= new("necromancer.common1");
-                        acTokenChalenge.Value.cleared |= (acTokenChalenge.Value.bitFlag & (1 << MyPlayer.HoldingDeadBodyId!.Value)) != 0;
-                        acTokenChalenge.Value.bitFlag |= 1 << MyPlayer.HoldingDeadBodyId!.Value;
+                        var currentHolding = MyPlayer.HoldingDeadBody!;
 
-                        Helpers.GetPlayer(MyPlayer.HoldingDeadBodyId)?.ModRevive(MyPlayer.MyControl, MyPlayer.MyControl.transform.position, true);
+                        acTokenCommon ??= new("necromancer.common1");
+                        acTokenChalenge.Value.cleared |= (acTokenChalenge.Value.bitFlag & (1 << currentHolding.PlayerId)) != 0;
+                        acTokenChalenge.Value.bitFlag |= 1 << currentHolding.PlayerId;
+
+                        currentHolding.Revive(MyPlayer, new(MyPlayer.VanillaPlayer.transform.position), true);
                         button.CoolDownTimer!.Start();
                     }
                 };

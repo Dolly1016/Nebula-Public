@@ -20,12 +20,12 @@ public class ExtraMission : ConfigurableStandardModifier
         base.LoadOptions();
     }
 
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     public class Instance : ModifierInstance, IGamePlayerEntity
     {
         public override AbstractModifier Role => MyRole;
-        public PlayerModInfo? target { get; set; } = null!;
-        public Instance(PlayerModInfo player) : base(player)
+        public GamePlayer? target { get; set; } = null!;
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -39,10 +39,10 @@ public class ExtraMission : ConfigurableStandardModifier
 
         public override void DecoratePlayerName(ref string text, ref Color color)
         {
-            if (AmongUsUtil.IsInGameScene && (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) && !AmOwner) text += $" ({ (target?.DefaultName ?? "Undefined") })".Color(MyRole.RoleColor);
+            if (AmongUsUtil.IsInGameScene && (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) && !AmOwner) text += $" ({ (target?.Name ?? "Undefined") })".Color(MyRole.RoleColor);
         }
 
-        public override void DecorateOtherPlayerName(PlayerModInfo player, ref string text, ref Color color)
+        public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
         {
             if (player == target) color = MyRole.RoleColor;
         }
@@ -62,7 +62,7 @@ public class ExtraMission : ConfigurableStandardModifier
 
         void IGameEntity.OnPlayerExiled(Virial.Game.Player exiled)
         {
-            if (AmOwner && MyPlayer.Role.Role.IsCrewmateRole && exiled.Role.Role.Unbox().IsCrewmateRole && exiled == target && MeetingHudExtension.LastVotedForMap.TryGetValue(MyPlayer.PlayerId, out var votedFor) && votedFor == exiled.PlayerId)
+            if (AmOwner && MyPlayer.IsCrewmate && exiled.Role.Role.Unbox().IsCrewmateRole && exiled == target && MeetingHudExtension.LastVotedForMap.TryGetValue(MyPlayer.PlayerId, out var votedFor) && votedFor == exiled.PlayerId)
             {
                 new StaticAchievementToken("extraMission.common3");
             }
@@ -76,11 +76,11 @@ public class ExtraMission : ConfigurableStandardModifier
             }
             if ((target?.AmOwner ?? false) && !target.IsDead)
             {
-                if (target.TryGetModifier<Instance>(out var targetMission) && (targetMission.target?.IsDead ?? false) && endState.CheckWin(target.PlayerId)) new StaticAchievementToken("extraMission.challenge");
+                if (target.Unbox().TryGetModifier<Instance>(out var targetMission) && (targetMission.target?.IsDead ?? false) && endState.CheckWin(target.PlayerId)) new StaticAchievementToken("extraMission.challenge");
                 new StaticAchievementToken("extraMission.common2");
             }
         }
-        public override string? GetExtraTaskText() => Language.Translate("role.extraMission.taskText").Replace("%PLAYER%", target?.DefaultName ?? "Undefined").Color((target?.IsDead ?? false) ? Color.green : MyRole.RoleColor);
+        public override string? GetExtraTaskText() => Language.Translate("role.extraMission.taskText").Replace("%PLAYER%", target?.Name ?? "Undefined").Color((target?.IsDead ?? false) ? Color.green : MyRole.RoleColor);
         
     }
 

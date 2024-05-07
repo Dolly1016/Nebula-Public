@@ -20,7 +20,7 @@ public class Comet : ConfigurableStandardRole
     public override Color RoleColor => new Color(121f / 255f, 175f / 255f, 206f / 255f);
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration BlazeCoolDownOption = null!;
     private NebulaConfiguration BlazeSpeedOption = null!;
@@ -44,7 +44,7 @@ public class Comet : ConfigurableStandardRole
     public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player) { }
+        public Instance(GamePlayer player) : base(player) { }
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BoostButton.png", 115f);
         private ModAbilityButton? boostButton = null;
@@ -61,8 +61,8 @@ public class Comet : ConfigurableStandardRole
 
                 boostButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 boostButton.SetSprite(buttonSprite.GetSprite());
-                boostButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                boostButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                boostButton.Availability = (button) => MyPlayer.CanMove;
+                boostButton.Visibility = (button) => !MyPlayer.IsDead;
                 boostButton.OnClick = (button) => button.ActivateEffect();
                 boostButton.OnEffectStart = (button) => {
                     using (RPCRouter.CreateSection("CometBlaze"))
@@ -74,7 +74,7 @@ public class Comet : ConfigurableStandardRole
 
                     }
                     acTokenCommon.Value = true;
-                    if(acTokenCommon2 != null) acTokenCommon2.Value.pos = MyPlayer.MyControl.GetTruePosition();
+                    if(acTokenCommon2 != null) acTokenCommon2.Value.pos = MyPlayer.VanillaPlayer.GetTruePosition();
                 };
                 boostButton.OnEffectEnd = (button) =>
                 {
@@ -82,7 +82,7 @@ public class Comet : ConfigurableStandardRole
 
                     //緊急会議招集による移動は除外
                     if(!MeetingHud.Instance && acTokenCommon2 != null)
-                        acTokenCommon2.Value.cleared |= MyPlayer.MyControl.GetTruePosition().Distance(acTokenCommon2.Value.pos) > 45f;
+                        acTokenCommon2.Value.cleared |= MyPlayer.VanillaPlayer.GetTruePosition().Distance(acTokenCommon2.Value.pos) > 45f;
                 };
                 boostButton.CoolDownTimer = Bind(new Timer(0f, MyRole.BlazeCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 boostButton.EffectTimer = Bind(new Timer(0f, MyRole.BlazeDurationOption.GetFloat()));
@@ -98,7 +98,7 @@ public class Comet : ConfigurableStandardRole
             {
                 if (MyPlayer.HasAttribute(PlayerAttributes.Invisible))
                 {
-                    if (!Helpers.AnyNonTriggersBetween(MyPlayer.MyControl.GetTruePosition(), dead.VanillaPlayer.GetTruePosition(), out var vec) &&
+                    if (!Helpers.AnyNonTriggersBetween(MyPlayer.VanillaPlayer.GetTruePosition(), dead.VanillaPlayer.GetTruePosition(), out var vec) &&
                         vec.magnitude < MyRole.BlazeVisionOption.GetFloat() * 0.75f)
                         new StaticAchievementToken("comet.challenge");
                 }

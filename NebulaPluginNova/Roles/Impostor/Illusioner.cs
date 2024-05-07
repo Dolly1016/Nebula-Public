@@ -16,7 +16,7 @@ public class Illusioner : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[]? arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
     private NebulaConfiguration SampleCoolDownOption = null!;
     private NebulaConfiguration MorphCoolDownOption = null!;
@@ -51,7 +51,7 @@ public class Illusioner : ConfigurableStandardRole
         AchievementToken<int>? acTokenChallenge = null;
 
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -70,14 +70,14 @@ public class Illusioner : ConfigurableStandardRole
 
                 GameData.PlayerOutfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
                 sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 sampleButton.SetSprite(Morphing.Instance.SampleButtonSprite.GetSprite());
-                sampleButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                sampleButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                sampleButton.Availability = (button) => MyPlayer.CanMove;
+                sampleButton.Visibility = (button) => !MyPlayer.IsDead;
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker.CurrentTarget?.GetModInfo()?.GetOutfit(MyRole.SampleOriginalLookOption ? 35 : 75) ?? null;
+                    sample = sampleTracker.CurrentTarget?.Unbox().GetOutfit(MyRole.SampleOriginalLookOption ? 35 : 75) ?? null;
                     if (sample != null) acTokenChallenge.Value |= 1 << sample.ColorId;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
@@ -89,8 +89,8 @@ public class Illusioner : ConfigurableStandardRole
 
                 morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 morphButton.SetSprite(Morphing.Instance.MorphButtonSprite.GetSprite());
-                morphButton.Availability = (button) => MyPlayer.MyControl.CanMove && sample != null;
-                morphButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                morphButton.Availability = (button) => MyPlayer.CanMove && sample != null;
+                morphButton.Visibility = (button) => !MyPlayer.IsDead;
                 morphButton.OnClick = (button) => {
                     button.ToggleEffect();
                 };
@@ -132,10 +132,10 @@ public class Illusioner : ConfigurableStandardRole
 
                 paintButton = Bind(new ModAbilityButton());
                 paintButton.SetSprite(Morphing.Instance.MorphButtonSprite.GetSprite());
-                paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                paintButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
+                paintButton.Visibility = (button) => !MyPlayer.IsDead;
                 paintButton.OnClick = (button) => {
-                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, sample ?? MyPlayer.GetOutfit(75))));
+                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, sample ?? MyPlayer.Unbox().GetOutfit(75))));
                     if (MyRole.TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else

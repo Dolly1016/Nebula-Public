@@ -24,7 +24,7 @@ public class Raider : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private KillCoolDownConfiguration ThrowCoolDownOption = null!;
     private NebulaConfiguration AxeSizeOption = null!;
@@ -67,9 +67,9 @@ public class Raider : ConfigurableStandardRole
         {
             if (state == 0)
             {
-                if (AmOwner) Owner.RequireUpdateMouseAngle();
+                if (AmOwner) Owner.Unbox().RequireUpdateMouseAngle();
                 MyRenderer.transform.localEulerAngles = new Vector3(0, 0, Owner.MouseAngle * 180f / Mathf.PI);
-                var pos = Owner.MyControl.transform.position + new Vector3(Mathf.Cos(Owner.MouseAngle), Mathf.Sin(Owner.MouseAngle), -1f) * 0.67f;
+                var pos = Owner.MyCon.transform.position + new Vector3(Mathf.Cos(Owner.MouseAngle), Mathf.Sin(Owner.MouseAngle), -1f) * 0.67f;
                 var diff = (pos - MyRenderer.transform.position) * Time.deltaTime * 7.5f;
                 Position += (Vector2)diff;
                 MyRenderer.flipY = Mathf.Cos(Owner.MouseAngle) < 0f;
@@ -169,7 +169,7 @@ public class Raider : ConfigurableStandardRole
         public override AbstractRole Role => MyRole;
         public RaiderAxe? MyAxe = null;
         public override bool HasVanillaKillButton => false;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -186,8 +186,8 @@ public class Raider : ConfigurableStandardRole
 
                 equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 equipButton.SetSprite(buttonSprite.GetSprite());
-                equipButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                equipButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                equipButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove;
+                equipButton.Visibility = (button) => !MyPlayer.IsDead;
                 equipButton.OnClick = (button) =>
                 {
                     if (MyAxe == null)
@@ -200,13 +200,13 @@ public class Raider : ConfigurableStandardRole
                 equipButton.SetLabel("equip");
 
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                killButton.Availability = (button) => MyAxe != null && MyPlayer.MyControl.CanMove && MyAxe.MyRenderer.color.b > 0.5f;
-                killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                killButton.Availability = (button) => MyAxe != null && MyPlayer.CanMove && MyAxe.MyRenderer.color.b > 0.5f;
+                killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) =>
                 {
                     if (MyAxe != null)
                     {
-                        RpcThrow.Invoke((MyAxe!.ObjectId, MyAxe!.Position, MyPlayer.MouseAngle));
+                        RpcThrow.Invoke((MyAxe!.ObjectId, MyAxe!.Position, MyPlayer.Unbox().MouseAngle));
                         NebulaAsset.PlaySE(NebulaAudioClip.ThrowAxe);
                     }
                     MyAxe = null;
@@ -232,12 +232,12 @@ public class Raider : ConfigurableStandardRole
         {
             if (AmOwner && MyAxe != null) UnequipAxe();
 
-            if (acTokenAnother != null && (MyPlayer.MyState == PlayerState.Guessed || MyPlayer.MyState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
+            if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
         void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
         {
-            if(AmOwner && target.Unbox()?.MyState == PlayerState.Beaten)
+            if(AmOwner && target.PlayerState == PlayerState.Beaten)
                 acTokenCommon ??= new("raider.common1");
             
         }

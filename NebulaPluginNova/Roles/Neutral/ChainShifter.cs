@@ -22,7 +22,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
     public override Color RoleColor => new Color(115f / 255f, 115f / 255f, 115f / 255f);
     public override RoleTeam Team => MyTeam;
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private new VentConfiguration VentConfiguration = null!;
     private NebulaConfiguration ShiftCoolDown = null!;
@@ -55,11 +55,11 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
         public override Timer? VentDuration => ventDuration;
         public override bool CanUseVent => canUseVent;
         
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
-        private PlayerControl? shiftTarget = null;
+        private GamePlayer? shiftTarget = null;
         private bool canExecuteShift = false;
 
         public override void OnActivated()
@@ -68,15 +68,15 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
             {
                 PoolablePlayer? shiftIcon = null;
 
-                var playerTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, ObjectTrackers.StandardPredicate));
+                var playerTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
                 chainShiftButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 chainShiftButton.SetSprite(buttonSprite.GetSprite());
-                chainShiftButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove && shiftTarget == null;
-                chainShiftButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                chainShiftButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.CanMove && shiftTarget == null;
+                chainShiftButton.Visibility = (button) => !MyPlayer.IsDead;
                 chainShiftButton.OnClick = (button) => {
                     shiftTarget = playerTracker.CurrentTarget;
-                    shiftIcon = chainShiftButton.GeneratePlayerIcon(shiftTarget.GetModInfo());
+                    shiftIcon = chainShiftButton.GeneratePlayerIcon(shiftTarget);
                 };
                 chainShiftButton.OnMeeting = (button) =>
                 {
@@ -100,8 +100,8 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
 
             if (!canExecuteShift) yield break;
             if (shiftTarget == null) yield break;
-            if(!shiftTarget) yield break;
-            var player = shiftTarget.GetModInfo();
+            if(!(shiftTarget.VanillaPlayer)) yield break;
+            var player = shiftTarget.Unbox();
 
             //会議終了時に死亡している相手とはシフトできない
             if(player == null || player.IsDead) yield break;
@@ -112,7 +112,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
             yield return player.CoGetRoleArgument((args) => targetArgument = args);
             yield return player.CoGetLeftGuess((guess) => targetGuess = guess);
 
-            int myGuess = MyPlayer.TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1;
+            int myGuess = MyPlayer.Unbox().TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1;
 
             using (RPCRouter.CreateSection("ChainShift"))
             {
@@ -136,23 +136,23 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
                     int actualLongTasks = (int)((float)System.Random.Shared.NextDouble() * longWeight * leftCrewmateTask);
                     int actualcommonTasks = (int)((float)System.Random.Shared.NextDouble() * commonWeight * leftCrewmateTask);
 
-                    MyPlayer.Tasks.ReplaceTasksAndRecompute(leftCrewmateTask - actualLongTasks - actualcommonTasks, actualLongTasks, actualcommonTasks);
-                    MyPlayer.Tasks.BecomeToCrewmate();
+                    MyPlayer.Unbox().Tasks.ReplaceTasksAndRecompute(leftCrewmateTask - actualLongTasks - actualcommonTasks, actualLongTasks, actualcommonTasks);
+                    MyPlayer.Unbox().Tasks.BecomeToCrewmate();
                 }
                 else
                 {
-                    MyPlayer.Tasks.ReleaseAllTaskState();
+                    MyPlayer.Unbox().Tasks.ReleaseAllTaskState();
                 }
                 
                 //タスクを整えたうえで役職を変更する
                 player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
-                MyPlayer.RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
+                MyPlayer.Unbox().RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
                 
                 if (targetGuess != -1) player.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
-                if (myGuess != -1) MyPlayer.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
+                if (myGuess != -1) MyPlayer.Unbox().RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
 
                 if (myGuess != -1) player.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { myGuess }).InvokeSingle();
-                if (targetGuess != -1) MyPlayer.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
+                if (targetGuess != -1) MyPlayer.Unbox().RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
 
                 
             }

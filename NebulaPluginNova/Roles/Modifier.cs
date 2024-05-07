@@ -19,7 +19,7 @@ public abstract class AbstractModifier : IAssignableBase, DefinedModifier
     public abstract string LocalizedName { get; }
     public virtual string DisplayName { get => Language.Translate("role." + LocalizedName + ".name"); }
     public abstract Color RoleColor { get; }
-    public abstract ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments);
+    public abstract ModifierInstance CreateInstance(GamePlayer player, int[] arguments);
     public int Id { get; set; }
 
     public virtual void Load() { }

@@ -40,6 +40,7 @@ public static class KillAnimationExtension
         }
 
         GameEntityManager.Instance?.AllEntities.Do(e => e.OnDeadBodyGenerated(deadBody));
+        target.GetModInfo()!.relatedDeadBodyCache = deadBody;
 
         target.Die(DeathReason.Kill, false);
         yield return source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);

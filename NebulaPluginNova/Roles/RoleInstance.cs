@@ -10,7 +10,7 @@ public abstract class RoleInstance : AssignableInstance, IRuntimePropertyHolder,
     public abstract AbstractRole Role { get; }
     DefinedRole RuntimeRole.Role => Role;
     Virial.Game.Player RuntimeAssignable.MyPlayer => MyPlayer;
-    public RoleInstance(PlayerModInfo player):base(player)
+    public RoleInstance(GamePlayer player):base(player)
     {
     }
 
@@ -60,7 +60,7 @@ public abstract class GhostRoleInstance : AssignableInstance
     public override IAssignableBase AssignableBase => Role;
     public abstract AbstractGhostRole Role { get; }
     
-    public GhostRoleInstance(PlayerModInfo player) : base(player)
+    public GhostRoleInstance(GamePlayer player) : base(player)
     {
     }
 

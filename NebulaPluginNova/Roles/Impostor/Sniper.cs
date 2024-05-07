@@ -17,7 +17,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private KillCoolDownConfiguration SnipeCoolDownOption = null!;
     private NebulaConfiguration ShotSizeOption = null!;
@@ -51,13 +51,13 @@ public class Sniper : ConfigurableStandardRole, HasCitation
     [NebulaRPCHolder]
     public class SniperRifle : INebulaScriptComponent, IGameEntity
     {
-        public PlayerModInfo Owner { get; private set; }
+        public GamePlayer Owner { get; private set; }
         public SpriteRenderer Renderer { get; private set; }
         private static SpriteLoader rifleSprite = SpriteLoader.FromResource("Nebula.Resources.SniperRifle.png", 100f);
-        public SniperRifle(PlayerModInfo owner) : base()
+        public SniperRifle(GamePlayer owner) : base()
         {
             Owner = owner;
-            Renderer = UnityHelper.CreateObject<SpriteRenderer>("SniperRifle", null, owner.MyControl.transform.position, LayerExpansion.GetObjectsLayer());
+            Renderer = UnityHelper.CreateObject<SpriteRenderer>("SniperRifle", null, owner.VanillaPlayer.transform.position, LayerExpansion.GetObjectsLayer());
             Renderer.sprite = rifleSprite.GetSprite();
             Renderer.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
             Renderer.gameObject.layer = MyRole.CanSeeRifleInShadowOption ? LayerExpansion.GetObjectsLayer() : LayerExpansion.GetDefaultLayer();
@@ -65,12 +65,13 @@ public class Sniper : ConfigurableStandardRole, HasCitation
 
         void IGameEntity.HudUpdate()
         {
-            if (Owner.AmOwner) Owner.RequireUpdateMouseAngle();
-            Renderer.transform.localEulerAngles = new Vector3(0, 0, Owner.MouseAngle * 180f / Mathf.PI);
-            var pos = Owner.MyControl.transform.position + new Vector3(Mathf.Cos(Owner.MouseAngle), Mathf.Sin(Owner.MouseAngle), -1f) * 0.87f;
+            var o = Owner.Unbox();
+            if (Owner.AmOwner) o.RequireUpdateMouseAngle();
+            Renderer.transform.localEulerAngles = new Vector3(0, 0, o.MouseAngle * 180f / Mathf.PI);
+            var pos = Owner.VanillaPlayer.transform.position + new Vector3(Mathf.Cos(o.MouseAngle), Mathf.Sin(o.MouseAngle), -1f) * 0.87f;
             var diff = (pos - Renderer.transform.position) * Time.deltaTime * 7.5f;
             Renderer.transform.position += diff;
-            Renderer.flipY = Mathf.Cos(Owner.MouseAngle) < 0f;
+            Renderer.flipY = Mathf.Cos(o.MouseAngle) < 0f;
         }
 
         void IGameEntity.OnReleased()
@@ -79,10 +80,10 @@ public class Sniper : ConfigurableStandardRole, HasCitation
             Renderer = null!;
         }
 
-        public PlayerModInfo? GetTarget(float width,float maxLength)
+        public GamePlayer? GetTarget(float width,float maxLength)
         {
             float minLength = maxLength;
-            PlayerModInfo? result = null;
+            GamePlayer? result = null;
 
             foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
@@ -125,7 +126,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
         AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
         StaticAchievementToken? acTokenCommon = null;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -133,7 +134,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
         {
             if (MyRifle != null && MyRole.StoreRifleOnUsingUtilityOption)
             {
-                var p = MyPlayer.MyControl;
+                var p = MyPlayer.VanillaPlayer;
                 if (p.onLadder || p.inMovingPlat || p.inVent) RpcEquip.Invoke((MyPlayer.PlayerId, false));
             }
         }
@@ -149,8 +150,8 @@ public class Sniper : ConfigurableStandardRole, HasCitation
 
                 equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 equipButton.SetSprite(buttonSprite.GetSprite());
-                equipButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                equipButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                equipButton.Availability = (button) => MyPlayer.CanMove;
+                equipButton.Visibility = (button) => !MyPlayer.IsDead;
                 equipButton.OnClick = (button) =>
                 {
                     if (MyRifle == null)
@@ -177,24 +178,24 @@ public class Sniper : ConfigurableStandardRole, HasCitation
                 equipButton.SetLabel("equip");
 
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                killButton.Availability = (button) => MyRifle != null && MyPlayer.MyControl.CanMove;
-                killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                killButton.Availability = (button) => MyRifle != null && MyPlayer.CanMove;
+                killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) =>
                 {
                     NebulaAsset.PlaySE(NebulaAudioClip.SniperShot);
                     var target = MyRifle?.GetTarget(MyRole.ShotSizeOption.GetFloat(), MyRole.ShotEffectiveRangeOption.GetFloat());
                     if (target != null)
                     {
-                        MyPlayer.MyControl.ModKill(target!.MyControl, false, PlayerState.Sniped, EventDetail.Kill);
+                        MyPlayer.MurderPlayer(target, PlayerState.Sniped, EventDetail.Kill, false);
 
                         acTokenCommon ??= new("sniper.common1");
-                        if (MyPlayer.MyControl.GetTruePosition().Distance(target!.MyControl.GetTruePosition()) > 20f) acTokenChallenge.Value++;
+                        if (MyPlayer.VanillaPlayer.GetTruePosition().Distance(target!.VanillaPlayer.GetTruePosition()) > 20f) acTokenChallenge.Value++;
                     }
                     else
                     {
-                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Missed, MyPlayer.MyControl, 0);
+                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Missed, MyPlayer.VanillaPlayer, 0);
                     }
-                    Sniper.RpcShowNotice.Invoke(MyPlayer.MyControl.GetTruePosition());
+                    Sniper.RpcShowNotice.Invoke(MyPlayer.VanillaPlayer.GetTruePosition());
 
                     button.StartCoolDown();
 
@@ -214,7 +215,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
         {
             if (AmOwner && MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
 
-            if (acTokenAnother != null && (MyPlayer.MyState == PlayerState.Guessed || MyPlayer.MyState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
+            if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
         void IGameEntity.OnMeetingStart()

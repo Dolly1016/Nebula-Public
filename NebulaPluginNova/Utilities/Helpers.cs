@@ -161,13 +161,11 @@ public static class Helpers
         return builder.ToString();
     }
 
-    public static DeadBody[] AllDeadBodies()
+    public static IEnumerable<DeadBody> AllDeadBodies()
     {
         //Componentで探すよりタグで探す方が相当はやい
         var bodies = GameObject.FindGameObjectsWithTag("DeadBody");
-        DeadBody[] deadBodies = new DeadBody[bodies.Count];
-        for (int i = 0; i < bodies.Count; i++) deadBodies[i] = bodies[i].GetComponent<DeadBody>();
-        return deadBodies;
+        for (int i = 0; i < bodies.Count; i++) yield return bodies[i].GetComponent<DeadBody>();
     }
 
     public static int[] GetRandomArray(int length)

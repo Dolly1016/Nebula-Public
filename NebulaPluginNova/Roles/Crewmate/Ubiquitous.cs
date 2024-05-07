@@ -264,7 +264,7 @@ public class Ubiquitous : ConfigurableStandardRole
     public override Color RoleColor => new Color(56f / 255f, 155f / 255f, 223f / 255f);
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
 
     public NebulaConfiguration droneMicrophoneRadiousOption = null!;
@@ -293,7 +293,7 @@ public class Ubiquitous : ConfigurableStandardRole
     public class Instance : Crewmate.Instance, IGamePlayerEntity
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -355,7 +355,7 @@ public class Ubiquitous : ConfigurableStandardRole
 
                 droneButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 droneButton.SetSprite(droneButtonSprite.GetSprite());
-                droneButton.Availability = (button) => MyPlayer.MyControl.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
+                droneButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
                 droneButton.Visibility = (button) =>
                 {
                     cameraObj.gameObject.SetActive(myDrone && AmongUsUtil.CurrentCamTarget != myDrone && !MeetingHud.Instance);
@@ -368,7 +368,7 @@ public class Ubiquitous : ConfigurableStandardRole
                             mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134 / currentSize * 2, 78 / currentSize * 2);
                         }
                     }
-                    return !MyPlayer.MyControl.Data.IsDead;
+                    return !MyPlayer.IsDead;
                 };
                 droneButton.OnClick = (button) =>
                 {
@@ -378,7 +378,7 @@ public class Ubiquitous : ConfigurableStandardRole
                     {
                         if (!myDrone)
                         {
-                            myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.MyControl.GetTruePosition());
+                            myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.TruePosition.ToUnityVector());
 
                             droneCam = UnityHelper.CreateRenderingCamera("Camera", myDrone.transform, Vector3.zero, 1.4f);
                             mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134, 78);
@@ -409,8 +409,8 @@ public class Ubiquitous : ConfigurableStandardRole
 
                 callBackButton = Bind(new ModAbilityButton());
                 callBackButton.SetSprite(callBackButtonSprite.GetSprite());
-                callBackButton.Availability = (button) => MyPlayer.MyControl.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
-                callBackButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && myDrone;
+                callBackButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
+                callBackButton.Visibility = (button) => !MyPlayer.IsDead && myDrone;
                 callBackButton.OnClick = (button) =>
                 {
                     callBackButton.DoSubClick();
@@ -437,8 +437,8 @@ public class Ubiquitous : ConfigurableStandardRole
 
                 var hackButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
                 hackButton.SetSprite(hackButtonSprite.GetSprite());
-                hackButton.Availability = (button) => MyPlayer.MyControl.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
-                hackButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && myDrone;
+                hackButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
+                hackButton.Visibility = (button) => !MyPlayer.IsDead && myDrone;
                 hackButton.OnClick = (button) =>
                 {
                     float distance = MyRole.doorHackRadiousOption.GetFloat();

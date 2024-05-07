@@ -24,7 +24,7 @@ public class Lumine : ConfigurableStandardGhostRole
     private NebulaConfiguration LightSizeOption = null!;
     private NebulaConfiguration LightDurationOption = null!;
 
-    public override GhostRoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override GhostRoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     protected override void LoadOptions()
     {
@@ -36,7 +36,7 @@ public class Lumine : ConfigurableStandardGhostRole
     public class Instance : GhostRoleInstance
     {
         public override AbstractGhostRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -48,13 +48,13 @@ public class Lumine : ConfigurableStandardGhostRole
             {
                 var lumineButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 lumineButton.SetSprite(buttonSprite.GetSprite());
-                lumineButton.Availability = (button) => MyPlayer.MyControl.CanMove;
-                lumineButton.Visibility = (button) => MyPlayer.MyControl.Data.IsDead;
+                lumineButton.Availability = (button) => MyPlayer.CanMove;
+                lumineButton.Visibility = (button) => MyPlayer.IsDead;
                 lumineButton.OnClick = (button) =>
                 {
-                    RpcLumineLight.Invoke(MyPlayer.MyControl.transform.position);
+                    RpcLumineLight.Invoke(MyPlayer.VanillaPlayer.transform.position);
 
-                    var near = Helpers.AllDeadBodies().Where(db => db.transform.position.Distance(MyPlayer.MyControl.transform.position) < 2f).ToArray();
+                    var near = Helpers.AllDeadBodies().Where(db => db.transform.position.Distance(MyPlayer.VanillaPlayer.transform.position) < 2f).ToArray();
                     if (near.Length > 0)
                         new StaticAchievementToken("lumine.common1");
                     if (near.Any(db => db.ParentId == MyPlayer.PlayerId))

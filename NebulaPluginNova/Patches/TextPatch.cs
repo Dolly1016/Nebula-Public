@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+// TextTranslatorTMPを通してMODテキストの翻訳をさせるためのパッチ
+
+
 namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(TextTranslatorTMP),nameof(TextTranslatorTMP.ResetText))]

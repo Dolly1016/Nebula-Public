@@ -22,7 +22,7 @@ public static class MeetingModRpc
         return MeetingHud.Instance.VoteOrigin + new Vector3(MeetingHud.Instance.VoteButtonOffsets.x * (float)x, MeetingHud.Instance.VoteButtonOffsets.y * (float)y, -0.9f - (float)y * 0.01f);
     }
 
-    public static void SortVotingArea(this MeetingHud __instance, Func<PlayerModInfo, int> rank)
+    public static void SortVotingArea(this MeetingHud __instance, Func<GamePlayer, int> rank)
     {
         var ordered = __instance.playerStates.OrderBy(p => p.TargetPlayerId + 32 * rank.Invoke(NebulaGameManager.Instance!.GetModPlayerInfo(p.TargetPlayerId)!)).ToArray();
 

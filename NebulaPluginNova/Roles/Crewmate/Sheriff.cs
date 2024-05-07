@@ -16,7 +16,7 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player,arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     private NebulaConfiguration NumOfShotsOption = null!;
@@ -42,7 +42,7 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SheriffKillButton.png", 100f);
         public override AbstractRole Role => MyRole;
         private int leftShots = MyRole.NumOfShotsOption;
-        public Instance(PlayerModInfo player, int[] arguments) : base(player)
+        public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if(arguments.Length >= 1) leftShots = arguments[0];
         }
@@ -61,12 +61,10 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
             }
         }
 
-        private bool CanKill(PlayerControl target)
+        private bool CanKill(GamePlayer target)
         {
-            var info = target.GetModInfo();
-            if (info == null) return true;
-            if (info.Role.Role == Madmate.MyRole) return Sheriff.MyRole.CanKillMadmateOption;
-            if (info.Role.Role.Category == RoleCategory.CrewmateRole) return false;
+            if (target.Role.Role == Madmate.MyRole) return Sheriff.MyRole.CanKillMadmateOption;
+            if (target.Role.Role.Category == RoleCategory.CrewmateRole) return false;
             return true;
         }
 
@@ -77,27 +75,27 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
                 acTokenShot = new("sheriff.common1",false,(val,_)=>val);
                 acTokenMisshot = new("sheriff.another1", false, (val, _) => val);
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => p.PlayerId != MyPlayer.PlayerId && !p.Data.IsDead, MyRole.CanKillHidingPlayerOption));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.AmOwner && !p.IsDead, null, MyRole.CanKillHidingPlayerOption));
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
 
                 var leftText = killButton.ShowUsesIcon(3);
                 leftText.text = leftShots.ToString();
 
                 killButton.SetSprite(buttonSprite.GetSprite());
-                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && leftShots > 0;
+                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
+                killButton.Visibility = (button) => !MyPlayer.IsDead && leftShots > 0;
                 killButton.OnClick = (button) => {
                     if (CanKill(killTracker.CurrentTarget!))
                     {
                         acTokenShot!.Value = true;
-                        if (acTokenChallenge != null && killTracker.CurrentTarget.GetModInfo()?.Role.Role.Category == RoleCategory.ImpostorRole) acTokenChallenge!.Value--;
+                        if (acTokenChallenge != null && killTracker.CurrentTarget!.IsImpostor) acTokenChallenge!.Value--;
 
-                        MyPlayer.MyControl.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
+                        MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill);
                     }
                     else
                     {
-                        MyPlayer.MyControl.ModSuicide(false, PlayerState.Misfired, null);
-                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.MyControl, killTracker.CurrentTarget!);
+                        MyPlayer.Suicide(PlayerState.Misfired, null);
+                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.VanillaPlayer, killTracker.CurrentTarget!.VanillaPlayer);
 
                         acTokenMisshot!.Value = true;
                     }

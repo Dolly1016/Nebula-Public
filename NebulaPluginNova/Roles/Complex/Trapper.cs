@@ -32,8 +32,8 @@ file static class TrapperSystem
         int leftCost = Trapper.NumOfChargesOption;
         var placeButton = myRole.Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
         placeButton.SetSprite(buttonSprites[buttonVariation[0].id]?.GetSprite());
-        placeButton.Availability = (button) => myRole.MyPlayer.MyControl.CanMove && leftCost >= buttonVariation[buttonIndex].cost;
-        placeButton.Visibility = (button) => !myRole.MyPlayer.MyControl.Data.IsDead && leftCost > 0;
+        placeButton.Availability = (button) => myRole.MyPlayer.CanMove && leftCost >= buttonVariation[buttonIndex].cost;
+        placeButton.Visibility = (button) => !myRole.MyPlayer.IsDead && leftCost > 0;
         var usesText = placeButton.ShowUsesIcon(myRole.Role.Category == RoleCategory.ImpostorRole ? 0 : 3);
         usesText.text = leftCost.ToString();
         placeButton.OnClick = (button) =>
@@ -45,7 +45,7 @@ file static class TrapperSystem
             float duration = Trapper.PlaceDurationOption.GetFloat();
             NebulaAsset.PlaySE(duration < 3f ? NebulaAudioClip.Trapper2s : NebulaAudioClip.Trapper3s);
 
-            pos = myRole.MyPlayer.MyControl.GetTruePosition() + new Vector2(0f, 0.085f);
+            pos = myRole.MyPlayer.TruePosition + new Vector2(0f, 0.085f);
             PlayerModInfo.RpcAttrModulator.Invoke((myRole.MyPlayer.PlayerId, new SpeedModulator(0f, Vector2.one, true, duration, false, 10), true));
         };
         placeButton.OnEffectEnd = (button) => 
@@ -104,7 +104,7 @@ public class Trapper : ConfigurableStandardRole
     public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if (MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; }
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => IsEvil ? new EvilInstance(player) : new NiceInstance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player) : new NiceInstance(player);
 
     static public NebulaConfiguration NumOfChargesOption = null!;
     static public NebulaConfiguration PlaceCoolDownOption = null!;
@@ -234,7 +234,7 @@ public class Trapper : ConfigurableStandardRole
         private List<Trap> localTraps = new(), commTraps = new();
 
         AchievementToken<(bool cleared, int playerMask)>? acTokenChallenge = null;
-        public NiceInstance(PlayerModInfo player) : base(player)
+        public NiceInstance(GamePlayer player) : base(player)
         {
         }
 
@@ -296,7 +296,7 @@ public class Trapper : ConfigurableStandardRole
         public override AbstractRole Role => MyEvilRole;
         private int leftCharge = NumOfChargesOption;
         private List<Trap> localTraps = new(), killTraps = new();
-        public EvilInstance(PlayerModInfo player) : base(player)
+        public EvilInstance(GamePlayer player) : base(player)
         {
         }
 

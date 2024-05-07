@@ -21,7 +21,7 @@ public class Poltergeist : ConfigurableStandardGhostRole
 
     private NebulaConfiguration PoltergeistCoolDownOption = null!;
 
-    public override GhostRoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override GhostRoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     protected override void LoadOptions()
     {
@@ -32,7 +32,7 @@ public class Poltergeist : ConfigurableStandardGhostRole
     public class Instance : GhostRoleInstance
     {
         public override AbstractGhostRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -42,15 +42,15 @@ public class Poltergeist : ConfigurableStandardGhostRole
         {
             if (AmOwner)
             {
-                var deadBodyTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.MyControl, (d) => d.GetHolder() == null));
+                var deadBodyTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => d.RelatedDeadBody?.GetHolder() == null));
 
                 var poltergeistButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 poltergeistButton.SetSprite(buttonSprite.GetSprite());
-                poltergeistButton.Availability = (button) => MyPlayer.MyControl.CanMove && deadBodyTracker.CurrentTarget != null;
-                poltergeistButton.Visibility = (button) => MyPlayer.MyControl.Data.IsDead;
+                poltergeistButton.Availability = (button) => MyPlayer.CanMove && deadBodyTracker.CurrentTarget != null;
+                poltergeistButton.Visibility = (button) => MyPlayer.IsDead;
                 poltergeistButton.OnClick = (button) =>
                 {
-                    RpcPoltergeist.Invoke((deadBodyTracker.CurrentTarget!.ParentId, MyPlayer.MyControl.GetTruePosition()));
+                    RpcPoltergeist.Invoke((deadBodyTracker.CurrentTarget!.PlayerId, MyPlayer.VanillaPlayer.GetTruePosition()));
                     new StaticAchievementToken("poltergeist.common1");
                     poltergeistButton.StartCoolDown();
                 };

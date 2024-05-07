@@ -20,7 +20,7 @@ public class Lover : ConfigurableModifier, HasCitation
     private NebulaConfiguration ChanceOfAssigningImpostorsOption = null!;
     private NebulaConfiguration AllowExtraWinOption = null!;
     public NebulaConfiguration AvengerModeOption = null!;
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments[0]);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments[0]);
 
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if (Avenger.MyRole.RoleConfig.IsShown) yield return Avenger.MyRole; }
 
@@ -83,7 +83,7 @@ public class Lover : ConfigurableModifier, HasCitation
         (Color)new Color32(8, 255, 10, 255) ,
         (Color)new Color32(132, 3, 254, 255) };
         private int loversId; 
-        public Instance(PlayerModInfo player,int loversId) : base(player)
+        public Instance(GamePlayer player,int loversId) : base(player)
         {
             this.loversId = loversId;
         }
@@ -125,7 +125,7 @@ public class Lover : ConfigurableModifier, HasCitation
         }
         void IGamePlayerEntity.OnDead()
         {
-            if (AmOwner && MyPlayer.MyState == PlayerState.Suicide) new StaticAchievementToken("lover.another1");
+            if (AmOwner && MyPlayer.PlayerState == PlayerState.Suicide) new StaticAchievementToken("lover.another1");
         }
 
         void IGamePlayerEntity.OnMurdered(GamePlayer murder)
@@ -136,9 +136,9 @@ public class Lover : ConfigurableModifier, HasCitation
                 if (myLover?.IsDead ?? true) return;
 
                 if (MyRole.AvengerModeOption)
-                    myLover.RpcInvokerSetRole(Avenger.MyRole, [murder.PlayerId]).InvokeSingle();
+                    myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [murder.PlayerId]).InvokeSingle();
                 else
-                    myLover.MyControl.ModFlexibleKill(myLover.MyControl, false, PlayerState.Suicide, EventDetail.Kill, true);
+                    myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, true);
             }
         }
 
@@ -146,7 +146,7 @@ public class Lover : ConfigurableModifier, HasCitation
         {
             if (AmOwner && !(MyLover?.IsDead ?? false))
             {
-                MyLover?.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+                MyLover?.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
 
                 if (Helpers.CurrentMonth == 12) new StaticAchievementToken("christmas");
             }
@@ -156,7 +156,7 @@ public class Lover : ConfigurableModifier, HasCitation
         {
             if (AmOwner && !(MyLover?.IsDead ?? false))
             {
-                MyLover?.MyControl.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+                MyLover?.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
 
                 if(Helpers.CurrentMonth == 12) new StaticAchievementToken("christmas");
             }
@@ -188,8 +188,8 @@ public class Lover : ConfigurableModifier, HasCitation
             return true;
         }
 
-        public PlayerModInfo? MyLover => NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault(p => p.PlayerId != MyPlayer.PlayerId && p.AllModifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId));
-        public override string? IntroText => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover?.DefaultName ?? "ERROR").Color(MyRole.RoleColor));
+        public GamePlayer? MyLover => NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault(p => p.PlayerId != MyPlayer.PlayerId && p.AllModifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId));
+        public override string? IntroText => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover?.Name ?? "ERROR").Color(MyRole.RoleColor));
         public override bool InvalidateCrewmateTask => true;
     }
 }

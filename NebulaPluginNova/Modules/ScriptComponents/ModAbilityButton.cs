@@ -374,10 +374,10 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         return this;
     }
 
-    public PoolablePlayer? GeneratePlayerIcon(PlayerModInfo? player)
+    public PoolablePlayer? GeneratePlayerIcon(GamePlayer? player)
     {
         if (player == null) return null;
-        return AmongUsUtil.GetPlayerIcon(player.DefaultOutfit, VanillaButton.transform, new UnityEngine.Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+        return AmongUsUtil.GetPlayerIcon(player.DefaultOutfit.outfit, VanillaButton.transform, new UnityEngine.Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
     }
 }
 

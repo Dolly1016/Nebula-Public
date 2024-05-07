@@ -20,7 +20,7 @@ public class Effacer : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration EffaceCoolDownOption = null!;
     private NebulaConfiguration EffaceDurationOption = null!;
@@ -39,7 +39,7 @@ public class Effacer : ConfigurableStandardRole, HasCitation
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
         public override AbstractRole Role => MyRole;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -58,27 +58,27 @@ public class Effacer : ConfigurableStandardRole, HasCitation
                 Bind(achChallengeToken);
                 
 
-                var effaceTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, p => ObjectTrackers.StandardPredicate(p) && (p.GetModInfo()?.VisibilityLevel ?? 2) == 0));
+                var effaceTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p) && (p.Unbox()?.VisibilityLevel ?? 2) == 0));
 
                 var effaceButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 effaceButton.SetSprite(buttonSprite.GetSprite());
-                effaceButton.Availability = (button) => effaceTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                effaceButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                effaceButton.Availability = (button) => effaceTracker.CurrentTarget != null && MyPlayer.CanMove;
+                effaceButton.Visibility = (button) => !MyPlayer.IsDead;
                 effaceButton.OnClick = (button) => {
-                    (effaceTracker.CurrentTarget.GetModInfo() as GamePlayer)?.GainAttribute(PlayerAttributes.InvisibleElseImpostor, MyRole.EffaceDurationOption.GetFloat(), false, 0);
+                    effaceTracker.CurrentTarget!.GainAttribute(PlayerAttributes.InvisibleElseImpostor, MyRole.EffaceDurationOption.GetFloat(), false, 0);
                     effaceButton.StartCoolDown();
 
                     new StaticAchievementToken("effacer.common1");
-                    if((effaceTracker.CurrentTarget.GetModInfo() as GamePlayer)?.IsImpostor ?? false) new StaticAchievementToken("effacer.common2");
+                    if(effaceTracker.CurrentTarget!.IsImpostor) new StaticAchievementToken("effacer.common2");
 
-                    achChallengeToken.Value.Add(effaceTracker.CurrentTarget.GetModInfo()!);
+                    achChallengeToken.Value.Add(effaceTracker.CurrentTarget);
                 };
                 effaceButton.CoolDownTimer = Bind(new Timer(MyRole.EffaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
                 effaceButton.SetLabel("efface");
             }
         }
 
-        void IGameEntity.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
+        void IGameEntity.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
         {
             if (AmOwner && !murderer.AmOwner && murderer.IsImpostor && dead.HasAttribute(PlayerAttributes.InvisibleElseImpostor))
             {

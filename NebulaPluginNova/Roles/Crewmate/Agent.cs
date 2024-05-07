@@ -13,7 +13,7 @@ public class Agent : ConfigurableStandardRole
     public override Color RoleColor => new Color(166f / 255f, 183f / 255f, 144f / 255f);
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration NumOfExemptedTasksOption = null!;
     private NebulaConfiguration NumOfExtraTasksOption = null!;
@@ -42,7 +42,7 @@ public class Agent : ConfigurableStandardRole
         private TMPro.TextMeshPro UsesText = null!;
 
         public override Timer? VentDuration => ventDuration;
-        public Instance(PlayerModInfo player, int[] argument) : base(player)
+        public Instance(GamePlayer player, int[] argument) : base(player)
         {
             if (argument.Length >= 1) leftVent = argument[0];
         }
@@ -58,7 +58,7 @@ public class Agent : ConfigurableStandardRole
                 var unboxed = player.Unbox();
                 if (!unboxed.IsDead && MyRole.SuicideIfSomeoneElseCompletesTasksBeforeAgentOption && unboxed.Tasks.IsCrewmateTask && unboxed.Tasks.TotalTasks >= tasks && unboxed.Tasks.IsCompletedTotalTasks)
                 {
-                    MyPlayer.MyControl.ModSuicide(false, PlayerState.Suicide, EventDetail.Layoff);
+                    MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Layoff);
                     new StaticAchievementToken("agent.another1");
                 }
             }
@@ -91,11 +91,11 @@ public class Agent : ConfigurableStandardRole
                 {
                     var taskButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
                     taskButton.SetSprite(buttonSprite.GetSprite());
-                    taskButton.Availability = (button) => MyPlayer.MyControl.CanMove && MyPlayer.Tasks.IsCompletedCurrentTasks;
-                    taskButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                    taskButton.Availability = (button) => MyPlayer.CanMove && MyPlayer.Unbox().Tasks.IsCompletedCurrentTasks;
+                    taskButton.Visibility = (button) => !MyPlayer.IsDead;
                     taskButton.OnClick = (button) =>
                     {
-                        MyPlayer.Tasks.GainExtraTasksAndRecompute(MyRole.NumOfExtraTasksOption, 0, 0, false);
+                        MyPlayer.Unbox().Tasks.GainExtraTasksAndRecompute(MyRole.NumOfExtraTasksOption, 0, 0, false);
                     };
                     taskButton.SetLabel("agent");
                 }
@@ -109,12 +109,12 @@ public class Agent : ConfigurableStandardRole
         {
             if (AmOwner)
             {
-                if (endState.CheckWin(MyPlayer.PlayerId) && MyPlayer.Tasks.TotalTasks > 0 && MyRole.NumOfExemptedTasksOption <= 3)
+                if (endState.CheckWin(MyPlayer.PlayerId) && MyPlayer.Unbox().Tasks.TotalTasks > 0 && MyRole.NumOfExemptedTasksOption <= 3)
                 {
-                    if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota > 0 && AmongUsUtil.NumOfAllTasks >= 8)
+                    if (MyPlayer.Unbox().Tasks.TotalCompleted - MyPlayer.Unbox().Tasks.Quota > 0 && AmongUsUtil.NumOfAllTasks >= 8)
                         new StaticAchievementToken("agent.common1");
 
-                    if(MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota >= 5)
+                    if(MyPlayer.Unbox().Tasks.TotalCompleted - MyPlayer.Unbox().Tasks.Quota >= 5)
                         new StaticAchievementToken("agent.challenge");
                 }
             }

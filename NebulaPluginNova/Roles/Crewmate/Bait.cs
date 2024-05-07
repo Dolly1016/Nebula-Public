@@ -20,7 +20,7 @@ public class Bait : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Crewmate.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration ShowKillFlashOption = null!;
     private NebulaConfiguration ReportDelayOption = null!;
@@ -43,7 +43,7 @@ public class Bait : ConfigurableStandardRole, HasCitation
     {
         public override AbstractRole Role => MyRole;
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -53,7 +53,7 @@ public class Bait : ConfigurableStandardRole, HasCitation
 
             float t = Mathf.Max(0.1f, MyRole.ReportDelayOption.GetFloat()) + MyRole.ReportDelayDispersionOption.GetFloat() * (float)System.Random.Shared.NextDouble();
             yield return new WaitForSeconds(t);
-            murderer.CmdReportDeadBody(MyPlayer.MyControl.Data);
+            murderer.CmdReportDeadBody(MyPlayer.VanillaPlayer.Data);
         }
         void IGamePlayerEntity.OnMurdered(GamePlayer murderer)
         {

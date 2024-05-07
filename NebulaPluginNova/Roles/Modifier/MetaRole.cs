@@ -14,12 +14,12 @@ public class MetaRole : AbstractModifier
     public override string LocalizedName => "metaRole";
     public override Color RoleColor => Color.white;
 
-    public override ModifierInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : ModifierInstance
     {
         public override AbstractModifier Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -51,7 +51,7 @@ public class MetaRole : AbstractModifier
             MetaWidgetOld scrollInnner = new();
             MetaWidgetOld.ScrollView scrollView = new(new(7.4f, 4f), scrollInnner);
             scrollInnner.Append(Roles.AllRoles, (role) => new MetaWidgetOld.Button(() => { 
-                MyPlayer.RpcInvokerSetRole(role, null).InvokeSingle();
+                MyPlayer.Unbox().RpcInvokerSetRole(role, null).InvokeSingle();
                 window.CloseScreen();
             }, roleTitleAttr)
             {

@@ -20,7 +20,7 @@ public class Reaper : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private new VentConfiguration VentConfiguration = null!;
     protected override void LoadOptions()
@@ -44,7 +44,7 @@ public class Reaper : ConfigurableStandardRole
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
             draggable = Bind(new Scripts.Draggable());
         }

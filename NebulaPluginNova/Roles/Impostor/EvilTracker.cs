@@ -41,7 +41,7 @@ public class TrackerTaskMapLayer : MonoBehaviour
 public class TrackerPlayerMapLayer : MonoBehaviour
 {
     ObjectPool<SpriteRenderer> iconPool = null!;
-    public PlayerModInfo? Target = null;
+    public GamePlayer? Target = null;
 
     static TrackerPlayerMapLayer() => ClassInjector.RegisterTypeInIl2Cpp<TrackerPlayerMapLayer>();
 
@@ -67,7 +67,7 @@ public class TrackerPlayerMapLayer : MonoBehaviour
         if (!Target!.IsDead && !MeetingHud.Instance)
         {
             var icon = iconPool.Instantiate();
-            icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(Target.MyControl.transform.position, center, scale);
+            icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(Target.Position, center, scale);
         }
 
     }
@@ -83,7 +83,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGMH;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration ShowKillFlashOption = null!;
     private NebulaConfiguration TaskTrackingOption = null!;
@@ -116,11 +116,11 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TrackButton.png", 115f);
         public override AbstractRole Role => MyRole;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
-        PlayerModInfo? trackingTarget = null;
+        GamePlayer? trackingTarget = null;
 
         TrackingArrowAbility? arrowAbility = null;
 
@@ -154,15 +154,15 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
                 if (MyRole.TrackImpostorsOption) NebulaGameManager.Instance?.AllPlayerInfo().Where(p => !p.AmOwner && p.Role.Role.Category == RoleCategory.ImpostorRole).Do(p => TryRegisterArrow(p));
 
                 PoolablePlayer? poolablePlayer = null;
-                var trackTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, p => ObjectTrackers.StandardPredicate(p)));
+                var trackTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p)));
 
                 trackButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 trackButton.SetSprite(buttonSprite.GetSprite());
-                trackButton.Availability = (button) => trackTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                trackButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead && (MyRole.CanChangeTargetOption || trackingTarget == null);
+                trackButton.Availability = (button) => trackTracker.CurrentTarget != null && MyPlayer.CanMove;
+                trackButton.Visibility = (button) => !MyPlayer.IsDead && (MyRole.CanChangeTargetOption || trackingTarget == null);
                 trackButton.OnClick = (button) =>
                 {
-                    trackingTarget = trackTracker.CurrentTarget?.GetModInfo();
+                    trackingTarget = trackTracker.CurrentTarget;
                     trackButton.StartCoolDown();
 
                     
@@ -194,7 +194,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
                 int optionValue = MyRole.TaskTrackingOption.CurrentValue;
                 if (optionValue > 0)
                 {
-                    PlayerModInfo? isChecked = null;
+                    GamePlayer? isChecked = null;
                     NebulaGameManager.Instance?.MeetingPlayerButtonManager.RegisterMeetingAction(new Behaviour.MeetingPlayerAction(
                         trackSprite,
                         p =>

@@ -22,7 +22,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private KillCoolDownConfiguration BountyKillCoolDownOption = null!;
     private KillCoolDownConfiguration OthersKillCoolDownOption = null!;
@@ -53,7 +53,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
         private AchievementToken<bool>? acTokenKillNonBounty;
         private AchievementToken<(bool cleared,Queue<float> history)>? acTokenChallenge;
 
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -63,11 +63,11 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
         Timer bountyTimer = null!;
         Timer arrowTimer = null!;
         Arrow bountyArrow = null!;
-        bool CanBeBounty(PlayerControl target, PlayerModInfo? myLover) => !target.Data.Role.IsImpostor && myLover != target.GetModInfo();
+        bool CanBeBounty(PlayerControl target, GamePlayer? myLover) => !target.Data.Role.IsImpostor && myLover != target.GetModInfo();
         void ChangeBounty()
         {
-            PlayerModInfo? myLover = null;
-            if (MyPlayer.TryGetModifier<Lover.Instance>(out var lover)) myLover = lover.MyLover;
+            GamePlayer? myLover = null;
+            if (MyPlayer.Unbox().TryGetModifier<Lover.Instance>(out var lover)) myLover = lover.MyLover;
 
             var arr = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && !p.Data.IsDead && CanBeBounty(p, myLover)).ToArray();
             if (arr.Length == 0) currentBounty = byte.MaxValue;
@@ -129,13 +129,13 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
                 bountyTimer = Bind(new Timer(MyRole.ChangeBountyIntervalOption.GetFloat())).Start();
                 arrowTimer = Bind(new Timer(MyRole.ArrowUpdateIntervalOption.GetFloat())).Start();
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl, (p) => !p.Data.Role.IsImpostor && !p.Data.IsDead, Impostor.MyRole.CanKillHidingPlayerOption));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.IsImpostor && !p.IsDead, null, Impostor.MyRole.CanKillHidingPlayerOption));
 
                 killButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                killButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
+                killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) => {
-                    PlayerControl.LocalPlayer.ModKill(killTracker.CurrentTarget!, true, PlayerState.Dead, EventDetail.Kill);
+                    MyPlayer.MurderPlayer(killTracker.CurrentTarget!,PlayerState.Dead, EventDetail.Kill);
 
                     if(killTracker.CurrentTarget!.PlayerId == currentBounty)
                     {
@@ -164,7 +164,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
 
                 var iconHolder = HudContent.InstantiateContent("BountyHolder",true);
                 this.Bind(iconHolder.gameObject);
-                bountyIcon = AmongUsUtil.GetPlayerIcon(MyPlayer.DefaultOutfit, iconHolder.transform, Vector3.zero, Vector3.one * 0.5f);
+                bountyIcon = AmongUsUtil.GetPlayerIcon(MyPlayer.Unbox().DefaultOutfit, iconHolder.transform, Vector3.zero, Vector3.one * 0.5f);
                 bountyIcon.ToggleName(true);
                 bountyIcon.SetName("", Vector3.one * 4f, Color.white, -1f);
 

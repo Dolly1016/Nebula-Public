@@ -16,7 +16,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player, arguments);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     private KillCoolDownConfiguration EatCoolDownOption = null!;
     private NebulaConfiguration NumOfEatenToWinOption = null!;
@@ -50,7 +50,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
 
         AchievementToken<bool>? acTokenChallenge;
 
-        public Instance(PlayerModInfo player, int[] arguments) : base(player)
+        public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if (arguments.Length >= 1) leftEaten = arguments[0];
         }
@@ -92,15 +92,15 @@ public class Vulture : ConfigurableStandardRole, HasCitation
 
                 StaticAchievementToken? acTokenCommon = null;
 
-                var eatTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.MyControl, (d) => true));
+                var eatTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => true));
 
                 eatButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 var usesIcon = eatButton.ShowUsesIcon(2);
                 eatButton.SetSprite(buttonSprite.GetSprite());
-                eatButton.Availability = (button) => eatTracker.CurrentTarget != null && MyPlayer.MyControl.CanMove;
-                eatButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                eatButton.Availability = (button) => eatTracker.CurrentTarget != null && MyPlayer.CanMove;
+                eatButton.Visibility = (button) => !MyPlayer.IsDead;
                 eatButton.OnClick = (button) => {
-                    AmongUsUtil.RpcCleanDeadBody(eatTracker.CurrentTarget!.ParentId,MyPlayer.PlayerId,EventDetail.Eat);
+                    AmongUsUtil.RpcCleanDeadBody(eatTracker.CurrentTarget!.PlayerId, MyPlayer.PlayerId,EventDetail.Eat);
                     leftEaten--;
                     usesIcon.text=leftEaten.ToString();
                     eatButton.StartCoolDown();

@@ -37,7 +37,7 @@ public class Destroyer : ConfigurableStandardRole
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     private NebulaConfiguration KillSEStrengthOption = null!;
@@ -71,7 +71,7 @@ public class Destroyer : ConfigurableStandardRole
         private ModAbilityButton? destroyButton = null;
         public override AbstractRole Role => MyRole;
         public override bool HasVanillaKillButton => false;
-        public Instance(PlayerModInfo player) : base(player)
+        public Instance(GamePlayer player) : base(player)
         {
         }
 
@@ -291,7 +291,7 @@ public class Destroyer : ConfigurableStandardRole
             GameObject.Destroy(modSplatter.gameObject);
         }
 
-        private PlayerModInfo? lastKilling = null;
+        private GamePlayer? lastKilling = null;
 
         public override void OnActivated()
         {
@@ -301,23 +301,23 @@ public class Destroyer : ConfigurableStandardRole
             {
                 AchievementToken<int> achChallengeToken = new("destroyer.challenge", 0, (val, _) => val >= 3 && (NebulaGameManager.Instance?.EndState?.CheckWin(MyPlayer.PlayerId) ?? false));
 
-                ObjectTracker<PlayerControl> killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer.MyControl,ObjectTrackers.ImpostorKillPredicate, p => CheckDestroyKill(MyPlayer.MyControl, p.transform.position)));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer,ObjectTrackers.ImpostorKillPredicate, p => CheckDestroyKill(MyPlayer.VanillaPlayer, p.VanillaPlayer.transform.position), null));
                 destroyButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                destroyButton.Availability = (button) => MyPlayer.MyControl.CanMove && killTracker.CurrentTarget != null;
-                destroyButton.Visibility = (button) => !MyPlayer.MyControl.Data.IsDead;
+                destroyButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && killTracker.CurrentTarget != null;
+                destroyButton.Visibility = (button) => !MyPlayer.VanillaPlayer.Data.IsDead;
                 destroyButton.OnClick = (button) => {
                     //左右どちらでキルすればよいか考える
-                    var targetTruePos = killTracker.CurrentTarget!.GetTruePosition();
-                    var targetPos = killTracker.CurrentTarget!.transform.position;
-                    var canMoveToLeft = CheckCanMove(MyPlayer.MyControl, GetDestroyKillPosition(targetPos, true), out var leftDis);
-                    var canMoveToRight = CheckCanMove(MyPlayer.MyControl, GetDestroyKillPosition(targetPos, false), out var rightDis);
+                    var targetTruePos = killTracker.CurrentTarget!.VanillaPlayer.GetTruePosition();
+                    var targetPos = killTracker.CurrentTarget!.VanillaPlayer.transform.position;
+                    var canMoveToLeft = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, true), out var leftDis);
+                    var canMoveToRight = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, false), out var rightDis);
                     bool moveToLeft = false;
                     if (canMoveToLeft && canMoveToRight && leftDis < rightDis) moveToLeft = true;
                     else if (!canMoveToRight) moveToLeft = true;
 
-                    lastKilling = killTracker.CurrentTarget.GetModInfo();
+                    lastKilling = killTracker.CurrentTarget;
 
-                    RpcCoDestroyKill.Invoke((MyPlayer, killTracker.CurrentTarget!.GetModInfo()!, targetTruePos, moveToLeft));
+                    RpcCoDestroyKill.Invoke((MyPlayer, killTracker.CurrentTarget!, targetTruePos, moveToLeft));
 
                     new StaticAchievementToken("destroyer.common1");
                     new StaticAchievementToken("destroyer.common2");
@@ -337,11 +337,11 @@ public class Destroyer : ConfigurableStandardRole
             if (AmOwner && lastKilling != null && reported == lastKilling) new StaticAchievementToken("destroyer.another1");
         }
 
-        static public RemoteProcess<(PlayerModInfo player, PlayerModInfo target, Vector2 targetPosition, bool moveToLeft)> RpcCoDestroyKill = new(
+        static public RemoteProcess<(GamePlayer player, GamePlayer target, Vector2 targetPosition, bool moveToLeft)> RpcCoDestroyKill = new(
             "DestroyerKill",
             (message, _) =>
             {
-                NebulaManager.Instance.StartCoroutine(CoDestroyKill(message.player.MyControl, message.target.MyControl,message.targetPosition,message.moveToLeft).WrapToIl2Cpp());
+                NebulaManager.Instance.StartCoroutine(CoDestroyKill(message.player.VanillaPlayer, message.target.VanillaPlayer,message.targetPosition,message.moveToLeft).WrapToIl2Cpp());
             }
             );
     }

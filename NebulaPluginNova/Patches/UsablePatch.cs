@@ -9,7 +9,11 @@ using NAudio.MediaFoundation;
 using Nebula.Events;
 using Nebula.Player;
 
+// 各種使用可能なオブジェクトに関するパッチ
+
 namespace Nebula.Patches;
+
+
 
 [HarmonyPatch(typeof(KeyboardJoystick),nameof(KeyboardJoystick.HandleHud))]
 public static class KeyboardInputPatch

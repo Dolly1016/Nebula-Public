@@ -19,7 +19,7 @@ public class DamnedImpostor : AbstractRole, DefinedAssignable
     public override int RoleCount => 0;
     public override float GetRoleChance(int count) => 0f;
 
-    public override RoleInstance CreateInstance(PlayerModInfo player, int[] arguments) => new Instance(player);
+    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public override void Load(){}
     bool DefinedAssignable.ShowOnHelpScreen => false;
@@ -27,7 +27,7 @@ public class DamnedImpostor : AbstractRole, DefinedAssignable
     public class Instance : Impostor.Instance
     {
         public override AbstractRole Role => MyRole;
-        public Instance(PlayerModInfo player) : base(player){}
+        public Instance(GamePlayer player) : base(player){}
 
         public override void OnActivated()
         {
