@@ -28,7 +28,8 @@ public class RequiringHandshake : Attribute
 
 /// <summary>
 /// プリプロセスメソッドを実装しているクラスにこの属性を付加します。
-/// 静的な公開メソッドPreprocess(INebulaPreprocessor)を実装している必要があります。
+/// 静的な公開メソッドPreprocess(INebulaPreprocessor)を実装していると記述された処理が実行されます。
+/// そうでない場合でも静的コンストラクタが走ります。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public class NebulaPreprocess : Attribute
