@@ -36,6 +36,14 @@
 "ui.citation.openUrl" : "クリックでリンクを開きます。"
 "ui.meeting.leftClick" : "左クリック: 能力の使用"
 "ui.meeting.rightClick": "右クリック: 別の能力に変更"
+"ui.discordWebhook.title" : "Discord ウェブフック"
+"ui.discordWebhook.current" : "設定中のURL"
+"ui.discordWebhook.urlFromClipboard" : "クリップボードから設定"
+"ui.discordWebhook.failedPasteUrl" : "クリップボードからの読出しに失敗しました。<br>ウェブフックのURLをコピーしてから設定してください。"
+"ui.discordWebhook.autoSend" : "自動送信 (ホスト時のみ有効)"
+"ui.discordWebhook.determine" : "保存"
+"ui.discordWebhook.send" : "送信"
+"ui.dragAndDrop" : "ドラッグ&ドロップで画像を選択"
 
 # Versions
 
@@ -52,6 +60,7 @@
 # Game Mode
 
 "gamemode.standard" : "標準"
+"gamemode.hostMode" : "Host Mode"
 "gamemode.freeplay" : "フリープレイ"
 
 # Options
@@ -67,18 +76,22 @@
 "options.gamemode" : "ゲームモード"
 
 "options.tab.setting" : "各種[設定]"
-"options.tab.crewmate" : "[クルーメイト] ロール"
-"options.tab.impostor" : "[インポスター] ロール"
-"options.tab.neutral" : "[第三陣営] ロール"
-"options.tab.ghost" : "[ゴースト] ロール"
+"options.tab.crewmate" : "[クルーメイト] 役職"
+"options.tab.impostor" : "[インポスター] 役職"
+"options.tab.neutral" : "[第三陣営] 役職"
+"options.tab.ghost" : "[幽霊] 役職"
 "options.tab.modifier" : "[モディファイア]"
 
 "options.assignment" : "割り当てオプション"
 "options.assignment.detail" : "役職の割り当て数に関する設定です。"
-"options.assignment.crewmate" : "クルーメイトロール"
-"options.assignment.impostor" : "インポスターロール"
-"options.assignment.neutral" : "第三陣営ロール"
+"options.assignment.crewmate" : "クルーメイト役職"
+"options.assignment.impostor" : "インポスター役職"
+"options.assignment.neutral" : "第三陣営役職"
 "options.assignment.unlimited" : "無制限"
+"options.assignment.assignOpToHost" : "ホストにOP権限を付与"
+"options.assignment.ghostAssignmentMethod" : "幽霊役職の割り当てタイプ"
+"options.assignment.ghostAssignmentMethod.normal" : "標準"
+"options.assignment.ghostAssignmentMethod.thrilling" : "スリリング"
 
 "options.soloFreePlay" : "ソロフリープレイオプション"
 "options.soloFreePlay.detail" : "フリープレイのダミーに関する設定です。"
@@ -148,6 +161,7 @@
 "options.voiceChat" : "ボイスチャットオプション"
 "options.voiceChat.detail" : "通話しながら遊ぼう！ゲーム内VCの設定です。"
 "options.voiceChat.useVoiceChat" : "ゲーム内VC"
+"options.voiceChat.canTalkInWandaringPhase" : "近くのプレイヤーとの通話"
 "options.voiceChat.wallsBlockAudio" : "壁による声の遮蔽"
 "options.voiceChat.killersHearDead" : "幽霊の語り掛け"
 "options.voiceChat.killersHearDead.onlyMyKiller" : "対自身のキラーのみ"
@@ -200,6 +214,11 @@
 "role.general.ventUses.short" : "使用"
 "role.general.common" : "#"
 
+"role.category.crewmate" : "クルーメイト役職"
+"role.category.impostor" : "インポスター役職"
+"role.category.neutral" : "第三陣営役職"
+"role.category.ghost" : "幽霊役職"
+
 # Complex Roles
 
 "role.guesser.numOfGuess" : "推察可能回数"
@@ -233,9 +252,7 @@
 "role.agent.blurb" : "タスクをこなせ"
 "options.role.agent.detail" : "ノルマとして課されている以上のタスクをこなすことができます。<br>追加のタスクは他のクルーメイトのタスクを肩代わりします。"
 "options.role.agent.numOfExemptedTasks" : "タスクの免除数"
-"options.role.agent.numOfExemptedTasks.detail" : "指定した数だけ、Agentの総タスク数が少なくなります。<br>総タスクが少なくなれば、追加タスクを手に入れるのにかかる時間は短縮します。"
 "options.role.agent.numOfExtraTasks" : "追加タスク数"
-"options.role.agent.numOfExtraTasks.detail" : "一度のタスク代行で手に入れられるタスクの数を設定します。<br>死亡後はタスク代行による<b>さらなる</b>タスクの入手はできません。"
 "options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent" : "先んじてタスクを完遂されると自殺する"
 
 "role.bait.name" : "ベイト"
@@ -243,11 +260,8 @@
 "role.bait.blurb" : "その命に代えても"
 "options.role.bait.detail" : "キルされると、あなたのキラーは即座にその死体をレポートします。"
 "options.role.bait.showKillFlash" : "キルフラッシュの表示"
-"options.role.bait.showKillFlash.detail" : "オンに設定すると、キラーがベイトをキルしたとき、キラーの画面で水色のフラッシュが光ります。"
 "options.role.bait.reportDelay" : "通報までの遅延"
-"options.role.bait.reportDelay.detail" : "通報までの遅延を設けることで、キルとレポートの時間差によるベイトレポートの判断が難しくなります。"
 "options.role.bait.reportDelayDispersion" : "通報までの遅延のばらつき"
-"options.role.bait.reportDelayDispersion.detail" : "通報までの遅延にばらつきを設けることで、キルとレポートの時間差によるベイトレポートの判断がより難しくなります。"
 "options.role.bait.canSeeVentFlash" : "ベントフラッシュの表示"
 
 "role.busker.name" : "バスカー"
@@ -256,6 +270,22 @@
 "options.role.busker.detail" : "バスカーは<b>偽装死</b>によって少しの間幽霊になったまま移動することができます。<br>しかし、<b>復活</b>しないまましばらく経つと、本当に死んでしまいます。"
 "options.role.busker.pseudocideCoolDown" : "偽装死クールダウン"
 "options.role.busker.pseudocideDuration" : "偽装死の有効時間"
+"options.role.busker.hidePseudocideFromVitals" : "バイタル上での偽装死の隠蔽"
+
+"role.collator.name" : "コレイタ―"
+"role.collator.short" : "C"
+"role.collator.blurb" : "実験の時間"
+"options.role.collator.detail" : "コレイタ―はプレイヤーからサンプルを採取し、比較できます。<br>比較結果を推理に役立てることができます。"
+"options.role.collator.sampleCoolDown" : "採取クールダウン"
+"options.role.collator.selectiveCollating" : "選択式の比較"
+"options.role.collator.maxTrials" : "最大比較回数"
+"options.role.collator.maxTrialsPerMeeting" : "会議ごとの最大比較回数"
+"options.role.collator.numOfTubes" : "試験管の本数"
+"options.role.collator.carringOverSamples" : "会議を跨いだ未使用サンプルの持越し"
+"options.role.collator.strictClassificationForNeutralRoles" : "第三陣営の厳密な区別"
+"options.role.collator.madmateIsClassifiedAs" : "マッドメイトのサンプル"
+"options.role.collator.madmateIsClassifiedAs.impostor" : "インポスター"
+"options.role.collator.madmateIsClassifiedAs.crewmate" : "クルーメイト"
 
 "role.comet.name" : "コメット"
 "role.comet.short" : "C"
@@ -264,7 +294,8 @@
 "options.role.comet.blazeCoolDown" : "ブーストクールダウン"
 "options.role.comet.blazeSpeed" : "ブースト速度"
 "options.role.comet.blazeDuration" : "ブースト効果時間"
-"options.role.comet.blazeVisionRate" : "ブースト中の視界"
+"options.role.comet.blazeVisionRate" : "ブースト中の視界倍率"
+"options.role.comet.blazeScreenRate" : "ブースト中の画面倍率"
 
 "role.doctor.name" : "ドクター"
 "role.doctor.short" : "D"
@@ -275,19 +306,21 @@
 "options.role.doctor.chargesPerTasks" : "タスクによる使用可能時間チャージ" 
 "role.doctor.gadgetLeft" : "%SECOND%s"
 
+"role.justice.name" : "ジャスティス"
+"role.justice.short" : "J"
+"role.justice.blurb" : "審判の時間"
+"options.role.justice.detail" : "ジャスティスは二人のプレイヤーを投票の対象に吊し上げ<br>いずれか、あるいは両方を追放するよう仕向けることができます。"
+"options.role.justice.putJusticeOnTheBalance" : "ジャスティス自身を審判に掛ける"
+
 "role.necromancer.name" : "ネクロマンサー"
 "role.necromancer.short" : "N"
 "role.necromancer.blurb" : "死霊を喚びさませ"
 "options.role.necromancer.detail" : "ネクロマンサーは死体を運び、復活させることができます。<br>復活のためには、死体を指定された部屋まで運ぶ必要があります。"
 "options.role.necromancer.reviveCoolDown" : "復活クールダウン"
 "options.role.necromancer.reviveDuration" : "復活所要時間"
-"options.role.necromancer.reviveDuration.detail" : "復活部屋内で復活ボタンを押してから<br>死者が蘇生するまでにかかる時間です。"
 "options.role.necromancer.detectedRange" : "死体探知可能範囲"
-"options.role.necromancer.detectedRange.detail" : "ネクロマンサーは、死体にある程度近づくと画面が少し紫がかります。<br>これによって、ネクロマンサーは近くの死体の存在に気づくことができます。"
 "options.role.necromancer.reviveMinRange" : "復活部屋までの最小距離"
-"options.role.necromancer.reviveMinRange.detail" : "復活部屋は死体の発生位置に基づいて決定されます。<br>この設定では復活部屋と死体の発生位置の最小距離を指定できます。"
 "options.role.necromancer.reviveMaxRange" : "復活部屋までの最大距離"
-"options.role.necromancer.reviveMaxRange.detail" : "復活部屋は死体の発生位置に基づいて決定されます。<br>この設定では復活部屋と死体の発生位置の最大距離を指定できます。"
 "role.necromancer.phantomMessage" : "%ROOM%に連れて行って..."
 
 "role.niceGuesser.name" : "ナイスゲッサー"
@@ -308,9 +341,7 @@
 "options.role.madmate.detail" : "インポスターの勝利のために場を乱す狂人です。"
 "options.role.madmate.canIdentifyImpostors" : "狂信者設定"
 "options.role.madmate.embroilPlayersOnExile" : "追放時のプレイヤーの巻き込み"
-"options.role.madmate.limitEmbroiledPlayersToVoters,detail" : "追放時に他の生存者を一人、巻き込むことができます。<br>巻き込み対象は非インポスターに限られます。"
 "options.role.madmate.limitEmbroiledPlayersToVoters" : "巻き込み対象を投票者に限定"
-"options.role.madmate.limitEmbroiledPlayersToVoters,detail" : "オンに設定することで、巻き込み対象を<br>自身に票を投じた非インポスターに限定することができます。"
 "options.role.madmate.canFixLight" : "停電を修理可能"
 "options.role.madmate.canFixComms" : "通信障害を修理可能"
 "options.role.madmate.hasImpostorVision" : "インポスター視界"
@@ -322,15 +353,10 @@
 "role.mayor.blurb" : "恐怖政治のはじまり"
 "options.role.mayor.detail" : "メイヤーは自身の票を会議を跨いで貯めることができます。<br>蓄えられた票は好きなタイミングで複数投じることができます。"
 "options.role.mayor.fixedVotes" : "固定票メイヤー化"
-"options.role.mayor.fixedVotes.detail" : "会議ごとに固定の票数を投じるメイヤーとして活用できるよう、<br>オプションを最適化します。"
 "options.role.mayor.minVote" : "最小投票数"
-"options.role.mayor.minVote.detail" : "会議ごとに投じることができる最小の票数です。"
 "options.role.mayor.maxVote" : "最大投票数"
-"options.role.mayor.minVote.detail" : "会議ごとに投じることができる最大の票数です。"
 "options.role.mayor.maxVotesStock" : "投票ストック数"
-"options.role.mayor.maxVotesStock.detail" : "メイヤーはストックされた票を消費して投票します。<br>この設定によってメイヤーがストックできる最大の票数を変更できます。"
 "options.role.mayor.voteAssignment" : "会議ごとの票の割り当て数"
-"options.role.mayor.voteAssignment.detail" : "メイヤーは会議が始まるたびに票のストックを獲得します。<br>この設定によってメイヤーが会議ごとに手に入れる票数を変更できます。"
 
 "role.phosphorus.name" : "ホスフォラス"
 "role.phosphorus.short" : "P"
@@ -348,7 +374,6 @@
 "options.role.provocateur.detail" : "死亡時にキラーや票を投じたプレイヤーを一人巻き添えにします。<br>キラーの巻き添えは能力発動時のみ有効です。"
 "options.role.provocateur.embroilCoolDown" : "巻き込みクールダウン"
 "options.role.provocateur.embroilAdditionalCoolDown" : "巻き込みの追加クールダウン"
-"options.role.provocateur.embroilAdditionalCoolDown.detail" : "巻き込み能力の効果時間中に巻き込みが発生しない場合があります。<br>この設定によって、巻き込みが不発に終わるたびに能力クールダウンをさらに引き延ばすことができます。<br>追加クールダウンが長くなるほど、プレイヤーは能力の使いどきをより見極める必要に迫られます。"
 "options.role.provocateur.embroilDuration" : "巻き込み有効時間"
 
 "role.seer.name" : "シア"
@@ -357,7 +382,6 @@
 "options.role.seer.detail" : "シアはプレイヤーの死亡時にフラッシュや、<br>死亡地点に現れるゴーストを見ることができます。"
 "options.role.seer.ghostDuration" : "ゴーストの出現時間"
 "options.role.seer.canSeeGhostsInShadow" : "視界外の幽霊を視認可能"
-"options.role.seer.canSeeGhostsInShadow.detail" : "オンに設定することで、視界外(影の部分)の幽霊も見えるようになります。"
 
 "role.sheriff.name" : "シェリフ"
 "role.sheriff.short" : "S"
@@ -373,6 +397,8 @@
 "role.ubiquitous.blurb" : "遍在する監視網"
 "options.role.ubiquitous.detail" : "ユビキタスはドローンを操作し、周囲の様子を確認したり、ドアを開けることができます。<br>会議を挟むと、ドローンはデタッチされ、自身のマップ上に情報を映します。"
 "options.role.ubiquitous.microphoneRadious" : "マイク可聴範囲"
+"options.role.ubiquitous.droneCoolDown" : "ドローン操作クールダウン"
+"options.role.ubiquitous.droneDuration" : "ドローン操作時間"
 "options.role.ubiquitous.detectionRadious" : "デタッチ後のプレイヤー探知範囲"
 "options.role.ubiquitous.doorHackCoolDown" : "ドアハッキングクールダウン"
 "options.role.ubiquitous.doorHackRadious" : "ドアハッキングの有効範囲"
@@ -384,6 +410,15 @@
 "role.impostor.blurb" : "妨害し、キルせよ"
 "options.role.impostor.detail" : "特殊な能力を持たない素のインポスターです。<br>割り当てる役職が他に無い場合にもこれが割り当てられます。"
 "options.role.impostor.canKillHidingPlayer" : "隠れているプレイヤーをキル可能"
+
+"role.alien.name" : "エイリアン"
+"role.alien.short" : "A"
+"role.alien.blurb" : "人智の超越"
+"options.role.alien.detail" : "エイリアンはE.M.I.によってアドミンやバイタルの情報の更新を妨害することができます。<br>異星の技術で情報端末上から存在を消し去ってしまうこともできます。"
+"options.role.alien.emiCoolDown" : "E.M.I.クールダウン"
+"options.role.alien.emiDuration" : "E.M.I.効果時間"
+"options.role.alien.invalidateCoolDown" : "無効化クールダウン"
+"options.role.alien.numOfInvalidations" : "無効化使用可能回数"
 
 "role.bountyHunter.name" : "バウンティハンター"
 "role.bountyHunter.short" : "B"
@@ -401,6 +436,7 @@
 "options.role.camouflager.detail" : "カモフラージュによってプレイヤーは互いを識別できなくなります。"
 "options.role.camouflager.camoCoolDown" : "カモフラージュクールダウン"
 "options.role.camouflager.camoDuration" : "カモフラージュ効果時間"
+"options.role.camouflager.canInvokeCamoAfterDeath" : "死亡後のカモフラージュ能力の発動"
 
 "role.cleaner.name" : "クリーナー"
 "role.cleaner.short" : "Cl"
@@ -408,14 +444,32 @@
 "options.role.cleaner.detail" : "クリーナーは死体を消し去ることができます。<br>消去能力のクールダウンはキルクールダウンと同期します。"
 "options.role.cleaner.cleanCoolDown" : "消去クールダウン"
 "options.role.cleaner.syncKillAndCleanCoolDown" : "キルと能力クールダウンの同期"
-"options.role.cleaner.syncKillAndCleanCoolDown.detail" : "オンに設定すると、キル時・能力使用時にキルクールダウンと能力クールダウンが共々リセットされます。"
+
+"role.destroyer.name" : "デストロイヤー"
+"role.destroyer.short" : "De"
+"role.destroyer.blurb" : "圧し潰せ"
+"options.role.destroyer.detail" : "デストロイヤーはプレイヤーを押し潰し、死体を残さないキルができます。<br>しかし、キルには少し時間がかかるので注意！"
+"options.role.destroyer.destroyCoolDown" : "キルクールダウン"
+"options.role.destroyer.phasesOfDestroying" : "キル所要時間の長さ"
+"options.role.destroyer.killSEStrength" : "キルSEの可聴範囲"
+"options.role.destroyer.leaveKillEvidence" : "血痕の残存"
+
+"role.disturber.name" : "ディスターバー"
+"role.disturber.short" : "Di"
+"role.disturber.blurb" : "行く手を阻め"
+"options.role.disturber.detail" : "ディスターバーは障壁を発生させるポールを置くことができます。<br>ポール間に障壁が張られると、プレイヤーはその間を移動できなくなります。"
+"options.role.disturber.placeCoolDown" : "設置クールダウン"
+"options.role.disturber.disturbCoolDown" : "妨害クールダウン"
+"options.role.disturber.disturbDuration" : "妨害効果時間"
+"options.role.disturber.maxNumOfPoles" : "ポールの最大設置数"
+"options.role.disturber.maxDistanceBetweenPoles" : "ポール間の最大距離"
 
 "role.effacer.name" : "イフェイサー"
 "role.effacer.short" : "E"
-"role.effacer.blurb" : "Effacer Blurb"
-"options.role.effacer.detail" : "Effacer Detail"
-"options.role.effacer.effaceCoolDown" : "Efface Cool Down"
-"options.role.effacer.effaceDuration" : "Efface Duration"
+"role.effacer.blurb" : "その死は、誰の記憶にも残らない"
+"options.role.effacer.detail" : "イフェイサーは仲間や他のプレイヤーに透明化能力を与えることができます。<br>視認がとりづらくなり、会議に混乱をもたらします。"
+"options.role.effacer.effaceCoolDown" : "透明化クールダウン"
+"options.role.effacer.effaceDuration" : "透明化効果時間"
 
 "role.evilGuesser.name" : "イビルゲッサー"
 "role.evilGuesser.short" : "G"
@@ -434,6 +488,8 @@
 "options.role.evilTracker.taskTracking.on" : "オン"
 "options.role.evilTracker.updateArrowInterval" : "追跡対象の位置の更新間隔"
 "options.role.evilTracker.canChangeTarget" : "追跡対象の変更"
+"options.role.evilTracker.trackImpostors" : "インポスターの追跡"
+"options.role.evilTracker.showTrackingTargetOnMap" : "マップ上での追跡対象の表示"
 
 "role.evilTrapper.name" : "イビルトラッパー"
 "role.evilTrapper.short" : "Tp"
@@ -462,6 +518,7 @@
 "options.role.jailer.canMoveWithMapWatching" : "アドミンマップを開きながらの移動"
 "options.role.jailer.canIdentifyDeadBodies" : "アドミン上での死体の識別"
 "options.role.jailer.canIdentifyImpostors" : "アドミン上でのインポスターの識別"
+"options.role.jailer.inheritAbilityOnDying" : "仲間へのジェイラー能力の継承"
 
 "role.marionette.name" : "マリオネット"
 "role.marionette.short" : "Ma"
@@ -556,6 +613,7 @@
 "role.chainShifter.blurb" : "厄災が襲い来る"
 "options.role.chainShifter.detail" : "チェインシフターはそのままでは勝利できません。<br>役職を交換することで勝利条件を獲得できます。"
 "options.role.chainShifter.shiftCoolDown" : "シフトクールダウン"
+"options.role.chainShifter.canCallEmergencyMeeting" : "緊急ボタンを使用可能"
 
 "role.jackal.name" : "ジャッカル"
 "role.jackal.short" : "J"
@@ -600,6 +658,19 @@
 "options.role.vulture.eatCoolDown" : "捕食クールダウン"
 "options.role.vulture.numOfTheEatenToWin" : "勝利に必要な死体の捕食数"
 
+# Ghost Roles
+
+"role.lumine.name" : "ルーミン"
+"role.lumine.short" : "L"
+"options.role.lumine.detail" : "ルーミンはゲーム中一度だけ、明かりを灯すことができます。"
+"options.role.lumine.lightSize" : "光の大きさ"
+"options.role.lumine.lightDuration" : "光の有効時間"
+
+"role.poltergeist.name" : "ポルターガイスト"
+"role.poltergeist.short" : "P"
+"options.role.poltergeist.detail" : "ポルターガイストは死体を引き寄せるように動かすことができます。"
+"options.role.poltergeist.poltergeistCoolDown" : "ポルターガイストクールダウン"
+
 # Modifiers
 
 "role.metaRole.ui.roles" : "役職"
@@ -613,12 +684,22 @@
 "options.role.bloody.detail" : "あなたをキルした相手はしばらくの間、血の足跡を残すようになります。"
 "options.role.bloody.curseDuration" : "血の足跡の効果時間"
 
+"role.confused.name" : "コンフューズド"
+"options.role.confused.detail" : "コンフューズドは自覚できないモディファイアです。<br>会議のたびに周りのプレイヤーの見た目が入れ替わってしまいます。"
+"options.role.confused.chanceOfShuffle" : "見た目のシャッフル確率"
+"options.role.confused.numOfMaxShuffledPairs" : "会議ごとの最大シャッフル回数"
+
 "role.damned.name" : "ダムド"
+"role.damned.short" : "Da"
 "options.role.damned.detail" : "ダムドは自覚できないモディファイアです。<br>キルを一度だけ防ぐことができ、<b>呪い</b>が設定によって様々な効果をもたらします。"
 "role.damned.prefix" : "ダムド"
 "options.role.damned.takeOverRoleOfKiller" : "キラーの役職を乗っ取る"
 "options.role.damned.damnedMurderMyKiller" : "呪いがキラーをキルする"
 "options.role.damned.killDelay" : "呪いによるキルの遅延"
+
+"role.extraMission.name" : "追加ミッション"
+"options.role.extraMission.detail" : "プレイヤーに他人の死亡を仕向けさせる追加のミッションを課します。<br>ミッションが完遂できなければ、勝利はありません。"
+"role.extraMission.taskText" : "[追加ミッション] %PLAYER%の死亡"
 
 "role.tieBreaker.name" : "タイブレイカー"
 "options.role.tieBreaker.detail" : "タイ投票が発生すると、タイブレイカーは追加の票を投じます。"
@@ -649,6 +730,9 @@
 "role.secretInGame.short" : "?"
 "role.secretInGame.blurb" : "目を覚ませ！"
 "options.role.secret.detail" : "シークレットは本来の役職を隠してしまいます。<br>タスクやキルをすることによって元の役職が覚醒します。"
+"options.role.secret.impostorArousalMethod" : "インポスターの覚醒条件"
+"options.role.secret.impostorArousalMethod.kill" : "キル"
+"options.role.secret.impostorArousalMethod.death" : "仲間の死亡"
 "options.role.secret.killingForArousal" : "覚醒に必要なキル数"
 "options.role.secret.tasksForArousal" : "覚醒に必要なタスク数"
 
@@ -762,12 +846,12 @@
 "button.label.camo" : "カモ"
 "button.label.clean" : "消去"
 "button.label.destroy" : "破壊"
+"button.label.disturb" : "障壁"
 "button.label.doorHack" : "ドアハック"
 "button.label.douse" : "塗る"
 "button.label.drag" : "掴む"
 "button.label.drone" : "ドローン"
 "button.label.eat" : "捕食"
-"button.label.efface" : "efface"
 "button.label.embroil" : "巻き込み"
 "button.label.equip" : "装備"
 "button.label.fakeSabotage" : "偽サボタージュ"
@@ -794,6 +878,13 @@
 "button.label.track" : "追跡"
 "button.label.unequip" : "収納"
 "button.label.vital" : "バイタル"
+"button.label.efface" : "透明化"
+"button.label.emi" : "e.m.i."
+"button.label.invalidate" : "無効化"
+"button.label.collatorSample" : "採取"
+"button.label.destroyerKill" : "キル"
+"button.label.spectator" : "観戦"
+"button.label.spectatorChange" : "視点変更"
 
 # Game
 
@@ -801,9 +892,11 @@
 "game.prespawn.waiting" : "ほかのプレイヤーを待機中..."
 "game.prespawn.spawnIn" : "スポーンします"
 
+"game.meeting.cannotUseEmergencyButton" : "緊急会議はロックされている"
 "game.meeting.someoneDisappeared" : "誰かが船を去ったようだ"
 "game.meeting.roleText" : "%PLAYER%は%ROLE%だった"
 "game.meeting.roleJesterText" : "残念だったな"
+"game.meeting.multiple" : "どちらも追放された。"
 
 # Statistics
 
@@ -827,6 +920,8 @@
 "statistics.events.fakeSabotage" : "偽サボタージュ"
 "statistics.events.curse" : "呪詛"
 "statistics.events.layoff" : "解雇"
+"statistics.events.destroy" : "クラッシュキル"
+"statistics.events.accident" : "復活失敗"
 
 # States
 
@@ -845,6 +940,7 @@
 "state.deranged" : "幻惑死"
 "state.pseudocide" : "偽装死"
 "state.cursed" : "呪殺"
+"state.crushed" : "圧死"
 
 # Endings
 
@@ -890,6 +986,11 @@
 "voiceChat.info.jackalRadio" : "ジャッカルラジオ"
 "voiceChat.info.loversRadio" : "ラバーズラジオ"
 "voiceChat.info.roomHostRadio" : "部屋主ラジオ"
+"voiceChat.settings.inputDevice" : "入力デバイス"
+"voiceChat.settings.noiseGate" : "ノイズゲート設定"
+"voiceChat.settings.outputDevice" : "出力デバイス"
+"voiceChat.settings.outputVolume" : "出力音量"
+"voiceChat.settings.device.default" : "既定"
 
 # Console
 
@@ -930,6 +1031,9 @@
 "input.mute" : "ミュート"
 "input.vcFilter" : "VCフィルタリング"
 "input.help" : "ヘルプ"
+"input.spectator" : "観戦"
+"input.spectatorRight" : "視点変更 (左)"
+"input.spectatorLeft" : "視点変更 (右)"
 "input.recording" : "キー入力待ち"
 
 # Client Configurations
@@ -944,6 +1048,9 @@
 "config.client.processorAffinity.dualCoreHT" : "2コア (HT)"
 "config.client.processorAffinity.dualCore" : "2コア"
 "config.client.processorAffinity.singleCore" : "1コア"
+"config.client.forceSkeldMeetingSE" : "スケルド会議SEの使用"
+"config.client.spoilerAfterDeath" : "死後の役職開示"
+"config.client.webhook" : "Discord ウェブフック"
 
 # Preset
 
@@ -978,6 +1085,7 @@
 "devStudio.ui.common.confirmSaving" : "保存してもよろしいですか？"
 "devStudio.ui.common.confirmDeletingAddon" : "アドオンを削除してもよろしいですか？"
 "devStudio.ui.common.confirmDeleting" : "削除してもよろしいですか？"
+"devStudio.ui.common.outputAsGlobal" : "単体コスチュームが正常に出力されました。"
 "devStudio.ui.main.title" : "マイアドオン"
 "devStudio.ui.addon.build" : "アドオン出力"
 "devStudio.ui.addon.document" : "ドキュメント"
@@ -1011,6 +1119,9 @@
 "devStudio.ui.cosmetics.visors" : "バイザー"
 "devStudio.ui.cosmetics.nameplates" : "ネームプレート"
 "devStudio.ui.cosmetics.packages" : "パッケージ"
+"devStudio.ui.cosmetics.action.edit" : "編集"
+"devStudio.ui.cosmetics.action.output" : "単体出力
+"devStudio.ui.cosmetics.action.delete" : "消去"
 "devStudio.ui.cosmetics.contents.main" : "通常前面"
 "devStudio.ui.cosmetics.contents.back" : "通常背面"
 "devStudio.ui.cosmetics.contents.flipped" : "反転前面"
@@ -1027,6 +1138,7 @@
 "devStudio.ui.cosmetics.anim.enterVent" : "ベント進入"
 "devStudio.ui.cosmetics.anim.exitVent" : "ベント退出"
 "devStudio.ui.cosmetics.anim.jump" : "ジャンプ"
+"devStudio.ui.cosmetics.anim.flip" : "反転"
 "devStudio.ui.cosmetics.attributes.id" : "ID"
 "devStudio.ui.cosmetics.attributes.format" : "フォーマット"
 "devStudio.ui.cosmetics.attributes.image" : "画像"
@@ -1046,6 +1158,7 @@
 "devStudio.ui.cosmetics.attributes.behindHat" : "ハット背面に表示"
 "devStudio.ui.cosmetics.hint.needToSetTitle" : "コスチューム名を入力してください！"
 "devStudio.ui.cosmetics.failedToCopy" : "ファイルのコピーに失敗しました。"
+"devStudio.ui.cosmetics.confirmOverwrite" : "同名のファイルが存在します。<br>上書きしてもよろしいですか？"
 "devStudio.ui.language.newFile" : "言語ファイルを生成"
 "devStudio.ui.language.newFile.confirm" : "言語ファイルの生成が完了しました。"
 "devStudio.ui.language.editFile" : "言語ファイルの編集"
@@ -1059,6 +1172,7 @@
 "achievement.ui.title" : "Achievements"
 "achievement.ui.cond" : "[制約]"
 "achievement.ui.allAchievements" : "全実績"
+"achievement.ui.shown" : "表示中"
 "achievement.ui.cleared" : "[クリア済]"
 "achievement.ui.equipped" : "[装着中]"
 "achievement.ui.setTitle" : "クリックで称号を装着します。"
@@ -1070,6 +1184,11 @@
 "achievement.type.challenge" : "チャレンジ"
 "achievement.type.secret" : "シークレット"
 "achievement.type.seasonal" : "期間限定"
+
+"achievement.filter.all" : "全実績"
+"achievement.filter.achieved" : "達成済"
+"achievement.filter.notAchieved" : "未達成"
+"achievement.filter.myRole" : "自役職"
 
 # Help
 
@@ -1085,8 +1204,30 @@
 
 # Documents
 
+"options.assignment.ghostAssignmentMethod.detail" : "幽霊役職の割り当て方法を変更できます。<br> -<b>標準</b>: 死亡者には割り当てられる役職の何れかが必ず割り当てられます。<br> -<b>スリリング</b>: 割当確率が役職を割り当てられるか否かにまで影響を及ぼします。"
 "options.map.spawnMethod.detail" : "プレイヤーがスポーンする際のスポーン方法を設定できます。<br> -<b>標準</b>: マップそれぞれの従来のスポーン方法です。<br> -<b>選択式</b>: Airshipのように複数のスポーン場所からスポーン先を選びます。<br> -<b>ランダム</b>: 各プレイヤーはそれぞれに選ばれたランダムな場所でスポーンします。"
 "options.map.silentVents.detail" : "オンに設定することで視界外のベントの開閉が見えなくなります。"
+
+"options.role.agent.numOfExemptedTasks.detail" : "指定した数だけ、Agentの総タスク数が少なくなります。<br>総タスクが少なくなれば、追加タスクを手に入れるのにかかる時間は短縮します。"
+"options.role.agent.numOfExtraTasks.detail" : "一度のタスク代行で手に入れられるタスクの数を設定します。<br>死亡後はタスク代行による<b>さらなる</b>タスクの入手はできません。"
+"options.role.bait.showKillFlash.detail" : "オンに設定すると、キラーがベイトをキルしたとき、キラーの画面で水色のフラッシュが光ります。"
+"options.role.bait.reportDelay.detail" : "通報までの遅延を設けることで、キルとレポートの時間差によるベイトレポートの判断が難しくなります。"
+"options.role.bait.reportDelayDispersion.detail" : "通報までの遅延にばらつきを設けることで、キルとレポートの時間差によるベイトレポートの判断がより難しくなります。"
+"options.role.necromancer.reviveDuration.detail" : "復活部屋内で復活ボタンを押してから<br>死者が蘇生するまでにかかる時間です。"
+"options.role.necromancer.detectedRange.detail" : "ネクロマンサーは、死体にある程度近づくと画面が少し紫がかります。<br>これによって、ネクロマンサーは近くの死体の存在に気づくことができます。"
+"options.role.necromancer.reviveMinRange.detail" : "復活部屋は死体の発生位置に基づいて決定されます。<br>この設定では復活部屋と死体の発生位置の最小距離を指定できます。"
+"options.role.necromancer.reviveMaxRange.detail" : "復活部屋は死体の発生位置に基づいて決定されます。<br>この設定では復活部屋と死体の発生位置の最大距離を指定できます。"
+"options.role.madmate.limitEmbroiledPlayersToVoters,detail" : "追放時に他の生存者を一人、巻き込むことができます。<br>巻き込み対象は非インポスターに限られます。"
+"options.role.madmate.limitEmbroiledPlayersToVoters,detail" : "オンに設定することで、巻き込み対象を<br>自身に票を投じた非インポスターに限定することができます。"
+"options.role.mayor.fixedVotes.detail" : "会議ごとに固定の票数を投じるメイヤーとして活用できるよう、<br>オプションを最適化します。"
+"options.role.mayor.minVote.detail" : "会議ごとに投じることができる最小の票数です。"
+"options.role.mayor.minVote.detail" : "会議ごとに投じることができる最大の票数です。"
+"options.role.mayor.maxVotesStock.detail" : "メイヤーはストックされた票を消費して投票します。<br>この設定によってメイヤーがストックできる最大の票数を変更できます。"
+"options.role.mayor.voteAssignment.detail" : "メイヤーは会議が始まるたびに票のストックを獲得します。<br>この設定によってメイヤーが会議ごとに手に入れる票数を変更できます。"
+"options.role.provocateur.embroilAdditionalCoolDown.detail" : "巻き込み能力の効果時間中に巻き込みが発生しない場合があります。<br>この設定によって、巻き込みが不発に終わるたびに能力クールダウンをさらに引き延ばすことができます。<br>追加クールダウンが長くなるほど、プレイヤーは能力の使いどきをより見極める必要に迫られます。"
+"options.role.seer.canSeeGhostsInShadow.detail" : "オンに設定することで、視界外(影の部分)の幽霊も見えるようになります。"
+"options.role.cleaner.syncKillAndCleanCoolDown.detail" : "オンに設定すると、キル時・能力使用時にキルクールダウンと能力クールダウンが共々リセットされます。"
+"options.role.jailer.inheritAbilityOnDying.detail" : "オンに設定することで、ジェイラーの死亡時に仲間のインポスターに<br>ジェイラーの能力を継承させることができます。"
 
 "role.guesser.doc.main" : "会議中に役職を<b>推察</b>することができます。推察された相手はキルされます。<br>ただし、推察に失敗すると<b>自身が死んでしまいます。</b>"
 "role.guesser.doc.guess" : "プレイヤーの上に表示されるアイコンをクリックすると推察画面が開きます。<br>表示された役職を選択することで<b>推察</b>を行います。"
