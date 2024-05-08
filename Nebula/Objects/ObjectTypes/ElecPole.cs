@@ -1,8 +1,4 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
-using Nebula.Utilities;
-using UnityEngine;
-
-namespace Nebula.Objects.ObjectTypes;
+﻿namespace Nebula.Objects.ObjectTypes;
 
 public class ElecPole : DelayedObject
 {

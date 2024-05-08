@@ -1,5 +1,4 @@
-﻿using Il2CppSystem.Data;
-using Nebula.Roles.Assignment;
+﻿using Nebula.Roles.Assignment;
 using Nebula.Roles.Neutral;
 using Nebula.VoiceChat;
 using Virial.Assignable;
@@ -188,7 +187,7 @@ public class Lover : ConfigurableModifier, HasCitation
             return true;
         }
 
-        public GamePlayer? MyLover => NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault(p => p.PlayerId != MyPlayer.PlayerId && p.AllModifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId));
+        public GamePlayer? MyLover => NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault(p => p.PlayerId != MyPlayer.PlayerId && p.Modifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId));
         public override string? IntroText => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover?.Name ?? "ERROR").Color(MyRole.RoleColor));
         public override bool InvalidateCrewmateTask => true;
     }

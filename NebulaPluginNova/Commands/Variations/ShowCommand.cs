@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Virial;
 using Virial.Command;
 using Virial.Compat;
-using Virial.Media;
 
 namespace Nebula.Commands.Variations;
 
@@ -71,7 +66,7 @@ public class ShowCommand : ICommand
                     .Action(text =>
                     {
                         if(subString.Length > 0) text += "<br><size=40%>" + subString + "</size>";
-                        NebulaGameManager.Instance?.TitleShower.SetPivot(new(0.5f,0.5f)).SetText(text, color, duration);
+                        NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetPivot(new(0.5f,0.5f)).SetText(text, color, duration);
                     });
                 }}
             });

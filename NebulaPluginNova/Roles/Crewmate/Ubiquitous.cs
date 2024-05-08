@@ -1,11 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.VoiceChat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -93,7 +87,7 @@ public class UbiquitousDrone : MonoBehaviour
     {
         bool isOperating = HudManager.Instance.PlayerCam.Target == this;
         if (isOperating)
-            myRigidBody.velocity = DestroyableSingleton<HudManager>.Instance.joystick.DeltaL * 3.5f * NebulaGameManager.Instance!.LocalPlayerInfo!.DirectionalPlayerSpeed;
+            myRigidBody.velocity = DestroyableSingleton<HudManager>.Instance.joystick.DeltaL * 3.5f * NebulaGameManager.Instance!.LocalPlayerInfo!.Unbox().DirectionalPlayerSpeed;
         else
             myRigidBody.velocity = Vector2.zero;
 
@@ -236,15 +230,15 @@ public class UbiquitousMapLayer : MonoBehaviour
             alive++;
 
             //不可視のプレイヤーは何もしない
-            if(p.IsInvisible || p.MyControl.inVent) continue;
+            if(p.Unbox().IsInvisible || p.VanillaPlayer.inVent) continue;
 
             foreach (var pos in dronePos)
             {
-                float d = pos.Distance(p.MyControl.transform.position);
+                float d = pos.Distance(p.VanillaPlayer.transform.position);
                 if(d < Ubiquitous.MyRole.droneDetectionRadiousOption.GetFloat())
                 {
                     var icon = (DynamicPalette.IsLightColor(Palette.PlayerColors[p.PlayerId]) ? lightIconPool : darkIconPool).Instantiate();
-                    icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.MyControl.transform.position, center, scale);
+                    icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.VanillaPlayer.transform.position, center, scale);
                     shown++;
                     if (alive >= 10 && alive == shown) challengeToken.Value = true;
                     break;

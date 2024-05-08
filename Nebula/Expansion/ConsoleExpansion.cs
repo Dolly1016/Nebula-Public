@@ -1,13 +1,4 @@
-﻿using Il2CppSystem.Net;
-using Il2CppSystem.Security.AccessControl;
-using JetBrains.Annotations;
-using MS.Internal.Xml.XPath;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
-
-namespace Nebula.Expansion;
+﻿namespace Nebula.Expansion;
 
 public static class ConsoleExpansion
 {

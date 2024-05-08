@@ -1,5 +1,4 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using System.Text;
 using System.Runtime.InteropServices;
 using UnityEngine.Rendering;
 

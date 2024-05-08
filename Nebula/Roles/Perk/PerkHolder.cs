@@ -1,7 +1,5 @@
-﻿using Iced.Intel;
-using LibCpp2IL;
+﻿using LibCpp2IL;
 using Nebula.Expansion;
-using Nebula.Objects;
 
 namespace Nebula.Roles.Perk;
 

@@ -1,6 +1,4 @@
 ﻿using Nebula.Patches;
-using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.HnSImpostorRoles;
 

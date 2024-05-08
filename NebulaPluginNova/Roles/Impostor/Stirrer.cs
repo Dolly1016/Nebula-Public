@@ -80,7 +80,7 @@ public class Stirrer : ConfigurableStandardRole
                     {
                         if (entry.Value > 0)
                         {
-                            var p = NebulaGameManager.Instance!.GetModPlayerInfo(entry.Key);
+                            var p = NebulaGameManager.Instance!.GetPlayer(entry.Key);
                             if (p?.Role.Role.Category == RoleCategory.ImpostorRole) continue;
 
                             if (!(p?.IsDead ?? false))

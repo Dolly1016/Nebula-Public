@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
@@ -47,7 +42,7 @@ public class TieBreaker : ConfigurableStandardModifier, HasCitation
         }
 
         static public RemoteProcess<(byte playerId, byte votedFor)> RpcNoticeTieBreak = new("NoticeTieBreak", (message, _) => {
-            if(message.playerId == PlayerControl.LocalPlayer.PlayerId && (NebulaGameManager.Instance?.GetModPlayerInfo(message.playerId)?.TryGetModifier<Instance>(out var role) ?? false)) { 
+            if(message.playerId == PlayerControl.LocalPlayer.PlayerId && (NebulaGameManager.Instance?.GetPlayer(message.playerId)?.TryGetModifier<Instance>(out var role) ?? false)) { 
                 if (role.acTokenCommon != null) role.acTokenCommon.Value = true;
                 if (role.acTokenChallenge != null) role.acTokenChallenge.Value.lastTieVoted = message.votedFor;
             }

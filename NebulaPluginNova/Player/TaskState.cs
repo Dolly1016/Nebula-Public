@@ -1,17 +1,13 @@
-﻿using AmongUs.Data.Player;
-using AmongUs.GameOptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static GameData;
+﻿using AmongUs.GameOptions;
+using Virial.DI;
+using Virial.Game;
 
 namespace Nebula.Player;
 
 [NebulaRPCHolder]
-public class PlayerTaskState
+public class PlayerTaskState : AbstractModule<GamePlayer>, IInjectable, PlayerTasks
 {
+    //Virial.TasksAPIの実装を兼ねています。
     public int CurrentTasks { get; private set; } = 0;
     public int CurrentCompleted { get; private set; } = 0;
     public int TotalTasks { get; private set; } = 0;
@@ -19,23 +15,16 @@ public class PlayerTaskState
     public int Quota { get; private set; } = 0;
     public bool IsCrewmateTask { get; private set; } = true;
 
-    public bool IsCompletedCurrentTasks => CurrentCompleted >= CurrentTasks;
-    public bool IsCompletedTotalTasks => TotalCompleted >= TotalTasks;
-    public bool HasExecutableTasks => CurrentTasks > 0;
-
     AchievementToken<bool>? acTokenGhostTask = null;
 
-    private PlayerControl player { get; init; }
 
-    public PlayerTaskState(PlayerControl player)
+    public PlayerTaskState()
     {
-        this.player = player;
-
         GetTasks(out int shortTasks, out int longTasks, out int commonTasks);
         int sum = shortTasks + longTasks + commonTasks;
         Quota = TotalTasks = CurrentTasks = sum;
 
-        if (player.AmOwner) acTokenGhostTask = new("doTaskEvenDead", true, (val, _) => val && Quota >= 8 && TotalCompleted >= Quota);
+        acTokenGhostTask = new("doTaskEvenDead", true, (val, _) => MyContainer.AmOwner && val && Quota >= 8 && TotalCompleted >= Quota);
     }
 
     public string ToString(bool canSee)
@@ -52,19 +41,19 @@ public class PlayerTaskState
 
     public void OnCompleteTask()
     {
-        RpcUpdateTaskState.Invoke((player.PlayerId, TaskUpdateMessage.CompleteTask));
+        RpcUpdateTaskState.Invoke((MyContainer.PlayerId, TaskUpdateMessage.CompleteTask));
 
-        if (acTokenGhostTask != null) acTokenGhostTask.Value &= player.Data.IsDead;
+        if (acTokenGhostTask != null) acTokenGhostTask.Value &= MyContainer.IsDead;
     }
 
     public void BecomeToOutsider()
     {
-        RpcUpdateTaskState.Invoke((player.PlayerId, TaskUpdateMessage.BecomeToOutsider));
+        RpcUpdateTaskState.Invoke((MyContainer.PlayerId, TaskUpdateMessage.BecomeToOutsider));
     }
 
     public void BecomeToCrewmate()
     {
-        RpcUpdateTaskState.Invoke((player.PlayerId, TaskUpdateMessage.BecomeToCrewmate));
+        RpcUpdateTaskState.Invoke((MyContainer.PlayerId, TaskUpdateMessage.BecomeToCrewmate));
     }
 
     public void WaiveAndBecomeToCrewmate()
@@ -130,7 +119,7 @@ public class PlayerTaskState
 
     private void RemoveAllTasks()
     {
-        player.myTasks.RemoveAll((Il2CppSystem.Predicate<PlayerTask>)((task) => {
+        MyContainer.VanillaPlayer.myTasks.RemoveAll((Il2CppSystem.Predicate<PlayerTask>)((task) => {
             if (ShipStatus.Instance.SpecialTasks.Any(t => t.TaskType == task.TaskType)) return false;
             GameObject.Destroy(task.gameObject);
             return true;
@@ -150,7 +139,7 @@ public class PlayerTaskState
             t.Owner = PlayerControl.LocalPlayer;
             t.Initialize();
             return t;
-        })) player.myTasks.Add(t);
+        })) MyContainer.VanillaPlayer.myTasks.Add(t);
     }
 
     private void RecomputeTasks(int shortTasks, int longTasks, int commonTasks)
@@ -175,21 +164,21 @@ public class PlayerTaskState
         num = 0; foreach (var t in ShipStatus.Instance.ShortTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
         ShipStatus.Instance.AddTasksFromList(ref num, shortTasks, newTaskIdList, hashSet, taskCandidates);
 
-        player.Data.Tasks = new(newTaskIdList.Count);
+        MyContainer.VanillaPlayer.Data.Tasks = new(newTaskIdList.Count);
         for (int i = 0; i < newTaskIdList.Count; i++)
         {
-            player.Data.Tasks.Add(new GameData.TaskInfo(newTaskIdList[i], (uint)i));
-            player.Data.Tasks[i].Id = (uint)i;
+            MyContainer.VanillaPlayer.Data.Tasks.Add(new GameData.TaskInfo(newTaskIdList[i], (uint)i));
+            MyContainer.VanillaPlayer.Data.Tasks[i].Id = (uint)i;
         }
 
-        for (int i = 0; i < player.Data.Tasks.Count; i++)
+        for (int i = 0; i < MyContainer.VanillaPlayer.Data.Tasks.Count; i++)
         {
-            GameData.TaskInfo taskInfo = player.Data.Tasks[i];
-            NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), player.transform);
+            GameData.TaskInfo taskInfo = MyContainer.VanillaPlayer.Data.Tasks[i];
+            NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), MyContainer.VanillaPlayer.transform);
             normalPlayerTask.Id = taskInfo.Id;
-            normalPlayerTask.Owner = player;
+            normalPlayerTask.Owner = MyContainer.VanillaPlayer;
             normalPlayerTask.Initialize();
-            player.myTasks.Add(normalPlayerTask);
+            MyContainer.VanillaPlayer.myTasks.Add(normalPlayerTask);
         }
     }
 
@@ -210,7 +199,7 @@ public class PlayerTaskState
         "SyncTaskState",
         (writer, message) =>
         {
-            writer.Write(message.player.PlayerId);
+            writer.Write(message.MyContainer.PlayerId);
             writer.Write(message.CurrentTasks);
             writer.Write(message.CurrentCompleted);
             writer.Write(message.TotalTasks);
@@ -220,7 +209,7 @@ public class PlayerTaskState
         },
         (reader) =>
         {
-            var task = NebulaGameManager.Instance?.GetModPlayerInfo(reader.ReadByte())?.Tasks;
+            var task = NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())?.Tasks.Unbox();
             if (task != null)
             {
                 task.CurrentTasks = reader.ReadInt32();
@@ -232,7 +221,7 @@ public class PlayerTaskState
             }
             return task!;
         },
-        (message, isCalledByMe) => NebulaGameManager.Instance?.OnTaskUpdated(message.player.GetModInfo()!)
+        (message, isCalledByMe) => NebulaGameManager.Instance?.OnTaskUpdated(message.MyContainer)
         );
 
     private enum TaskUpdateMessage
@@ -246,9 +235,9 @@ public class PlayerTaskState
     private static RemoteProcess<(byte playerId, TaskUpdateMessage type)> RpcUpdateTaskState = new(
         "UpdateTaskState",
         (message, isCalledByMe) => {
-            var player = NebulaGameManager.Instance?.GetModPlayerInfo(message.playerId);
+            var player = NebulaGameManager.Instance?.GetPlayer(message.playerId);
             if (player == null) return;
-            var task = player!.Tasks;
+            var task = player!.Tasks.Unbox();
             if (task != null)
             {
                 switch (message.type)

@@ -137,8 +137,8 @@ public class Obsessional : ConfigurableStandardModifier
         static RemoteProcess<(byte playerId, byte targetId)> RpcSetObsessionalTarget = new("SetObsessionalTarget",
         (message, _) =>
         {
-            if (NebulaGameManager.Instance?.GetModPlayerInfo(message.playerId)?.TryGetModifier<Obsessional.Instance>(out var instance) ?? false)
-                instance.obsession = NebulaGameManager.Instance.GetModPlayerInfo(message.targetId);
+            if (NebulaGameManager.Instance?.GetPlayer(message.playerId)?.TryGetModifier<Obsessional.Instance>(out var instance) ?? false)
+                instance.obsession = NebulaGameManager.Instance.GetPlayer(message.targetId);
         });
 
         public override void OnGameEnd(NebulaEndState endState)
@@ -151,10 +151,10 @@ public class Obsessional : ConfigurableStandardModifier
 
                     new StaticAchievementToken("obsessional.common1");
 
-                    if (MyPlayer.Unbox().Tasks.TotalCompleted - MyPlayer.Unbox().Tasks.Quota >= 5)
+                    if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota >= 5)
                         new StaticAchievementToken("agent.challenge");
 
-                    if(endState.EndCondition == NebulaGameEnd.LoversWin && (obsession?.Unbox().TryGetModifier<Lover.Instance>(out _) ?? false))
+                    if(endState.EndCondition == NebulaGameEnd.LoversWin && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
                         new StaticAchievementToken("obsessional.lover1");
 
                     //勝者に自身と執着対象しかいない場合
@@ -168,7 +168,7 @@ public class Obsessional : ConfigurableStandardModifier
                     if(MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && endState.EndCondition == NebulaGameEnd.ImpostorWin)
                         new StaticAchievementToken("obsessional.another2");
 
-                    if(endState.CheckWin(obsession?.PlayerId ?? 255) && (obsession?.Unbox().TryGetModifier<Lover.Instance>(out _) ?? false))
+                    if(endState.CheckWin(obsession?.PlayerId ?? 255) && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
                         new StaticAchievementToken("obsessional.lover2");
                 }
             }

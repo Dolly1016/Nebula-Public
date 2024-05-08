@@ -2,18 +2,13 @@
 using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
 using Rewired.UI.ControlMapper;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
 
 namespace Nebula.Modules;
 
 
-[NebulaPreLoad]
+[NebulaPreLoad(typeof(ToolsInstaller))]
 public class ClientOption
 {
     public enum ClientOptionType

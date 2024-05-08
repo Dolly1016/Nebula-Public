@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using static Il2CppSystem.Globalization.CultureInfo;
-using static UnityEngine.GraphicsBuffer;
-
-namespace Nebula.Roles.Impostor;
+﻿namespace Nebula.Roles.Impostor;
 
 public class Executioner : Role
 {

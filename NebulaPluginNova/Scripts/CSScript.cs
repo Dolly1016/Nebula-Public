@@ -1,22 +1,9 @@
 ﻿using Cpp2IL.Core.Extensions;
-using Discord;
-using Iced.Intel;
-using Il2CppInterop.Runtime.Attributes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Nebula;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.ProBuilder;
-using Virial.Attributes;
 
 namespace Nebula.Scripts;
 

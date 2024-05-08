@@ -4,9 +4,6 @@ using System.Text;
 using Nebula.Patches;
 using System.IO.Compression;
 using TMPro;
-using Nebula.Module;
-using UnityEngine;
-using static Il2CppSystem.Globalization.CultureInfo;
 
 namespace Nebula;
 

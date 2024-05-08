@@ -1,12 +1,4 @@
-﻿using Il2CppInterop.Generator.Passes;
-using Il2CppSystem.Data;
-using Nebula.Module;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Module;
 using static Nebula.Roles.Perk.PerkHolder;
 
 namespace Nebula.Roles.Perk;

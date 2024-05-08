@@ -1,5 +1,4 @@
-﻿using Nebula.Patches;
-using Nebula.Roles.RoleSystem;
+﻿using Nebula.Roles.RoleSystem;
 
 namespace Nebula.Roles.Impostor;
 

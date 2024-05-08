@@ -1,7 +1,5 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Nebula.Behaviour;
-using Nebula.Events;
-using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
 
@@ -129,14 +127,14 @@ public static class PlayerExtension
 
            if (targetInfo != null)
            {
-               targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-               targetInfo.MyKiller = killerInfo;
-               targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
+               targetInfo.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+               targetInfo.Unbox().MyKiller = killerInfo;
+               targetInfo.Unbox().MyState = TranslatableTag.ValueOf(message.stateId);
                
-               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.MyState!.TranslationKey, out var rec)) new StaticAchievementToken(rec);
-               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.MyState!.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
+               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
 
-               targetInfo.MyControl.Data.IsDead = true;
+               targetInfo.VanillaPlayer.Data.IsDead = true;
 
                //Entityイベント発火
                GameEntityManager.Instance?.GetPlayerEntities(message.targetId).Do(e =>
@@ -144,10 +142,6 @@ public static class PlayerExtension
                    if (killerInfo != null) e.OnMurdered(killerInfo);
                    e.OnDead();
                });
-
-               //APIイベント発火
-               if (killerInfo != null) EventManager.HandleEvent(new PlayerMurderEvent(targetInfo, killerInfo));
-               else EventManager.HandleEvent(new PlayerDeadEvent(targetInfo));
 
                //1ずつ加算するのでこれで十分
                if (targetInfo.AmOwner && (NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0) == 1)
@@ -204,11 +198,11 @@ public static class PlayerExtension
 
            if (targetInfo != null)
            {
-               targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-               targetInfo.MyKiller = killerInfo;
-               targetInfo.MyState = TranslatableTag.ValueOf(message.stateId);
-               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.MyState!.TranslationKey, out var rec)) new StaticAchievementToken(rec);
-               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.MyState!.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
+               targetInfo.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+               targetInfo.Unbox().MyKiller = killerInfo;
+               targetInfo.Unbox().MyState = TranslatableTag.ValueOf(message.stateId);
+               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
 
                //Entityイベント発火
                GameEntityManager.Instance?.GetPlayerEntities(message.targetId).Do(e =>
@@ -216,10 +210,6 @@ public static class PlayerExtension
                    if (killerInfo != null) e.OnMurdered(killerInfo);
                    e.OnDead();
                });
-
-               //APIイベント
-               if (killerInfo != null) EventManager.HandleEvent(new PlayerMurderEvent(targetInfo, killerInfo));
-               EventManager.HandleEvent(new PlayerDeadEvent(targetInfo));
 
                if (killerInfo != null) killerInfo.RelatedEntities()?.Do(e => e.OnKillPlayer(targetInfo));
 
@@ -272,7 +262,7 @@ public static class PlayerExtension
         var targetInfo = target.GetModInfo()!;
         var killerInfo = killer?.GetModInfo() ?? targetInfo;
         var localResult = KillResult.Kill;
-        targetInfo.AssignableAction(r => { if (localResult == KillResult.Kill) localResult = r.CheckKill(killerInfo, playerState, recordState, isMeetingKill); });
+        targetInfo.Unbox().AssignableAction(r => { if (localResult == KillResult.Kill) localResult = r.Unbox().CheckKill(killerInfo, playerState, recordState, isMeetingKill); });
         result = localResult;
            
         if (result != KillResult.Kill) RpcOnGuard.Invoke((killerInfo.PlayerId, targetInfo.PlayerId, result == KillResult.ObviousGuard));
@@ -319,7 +309,7 @@ public static class PlayerExtension
 
             player!.Revive();
             player.NetTransform.SnapTo(message.revivePos);
-            player.GetModInfo()!.MyState = PlayerState.Revived;
+            player.GetModInfo()!.Unbox().MyState = PlayerState.Revived;
 
             if (message.cleanDeadBody) foreach (var d in Helpers.AllDeadBodies()) if (d.ParentId == player.PlayerId) GameObject.Destroy(d.gameObject);
 
@@ -341,8 +331,8 @@ public static class PlayerExtension
         "Guard",
         (message, _) =>
         {
-            var killer = NebulaGameManager.Instance?.GetModPlayerInfo(message.killerId)!;
-            NebulaGameManager.Instance?.GetModPlayerInfo(message.targetId)?.RelatedEntities()?.Do(e=>e.OnGuard(killer!));
+            var killer = NebulaGameManager.Instance?.GetPlayer(message.killerId)!;
+            NebulaGameManager.Instance?.GetPlayer(message.targetId)?.RelatedEntities()?.Do(e=>e.OnGuard(killer!));
 
             if (message.killerId == PlayerControl.LocalPlayer.PlayerId || (message.targetCanSeeGuard && message.targetId == PlayerControl.LocalPlayer.PlayerId))
             {

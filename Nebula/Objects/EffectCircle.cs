@@ -1,9 +1,4 @@
-﻿using Epic.OnlineServices.P2P;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Nebula.Objects
+﻿namespace Nebula.Objects
 {
     public class EffectCircle
     {

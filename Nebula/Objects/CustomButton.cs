@@ -1,11 +1,4 @@
-﻿using AmongUs.Data.Player;
-using Nebula.Patches;
-using Sentry.Unity.NativeUtils;
-using Steamworks;
-using System.Reflection.Metadata.Ecma335;
-using UnityEngine.TextCore;
-using UnityEngine.UI;
-using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
+﻿using UnityEngine.UI;
 
 namespace Nebula.Objects;
 

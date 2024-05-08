@@ -1,10 +1,4 @@
 ﻿using Nebula.Roles.Complex;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.Profiling;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -119,9 +113,9 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
                 Debug.Log("Test1");
                 //タスクに関する書き換え
                 int leftCrewmateTask = 0;
-                if (player.Tasks.IsCrewmateTask && player.Tasks.HasExecutableTasks)
+                if (shiftTarget.Tasks.IsCrewmateTask && shiftTarget.Tasks.HasExecutableTasks)
                 {
-                    leftCrewmateTask = Mathf.Max(0, player.Tasks.Quota - player.Tasks.TotalCompleted);
+                    leftCrewmateTask = Mathf.Max(0, shiftTarget.Tasks.Quota - shiftTarget.Tasks.TotalCompleted);
 
                 }
 
@@ -136,12 +130,12 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
                     int actualLongTasks = (int)((float)System.Random.Shared.NextDouble() * longWeight * leftCrewmateTask);
                     int actualcommonTasks = (int)((float)System.Random.Shared.NextDouble() * commonWeight * leftCrewmateTask);
 
-                    MyPlayer.Unbox().Tasks.ReplaceTasksAndRecompute(leftCrewmateTask - actualLongTasks - actualcommonTasks, actualLongTasks, actualcommonTasks);
-                    MyPlayer.Unbox().Tasks.BecomeToCrewmate();
+                    MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(leftCrewmateTask - actualLongTasks - actualcommonTasks, actualLongTasks, actualcommonTasks);
+                    MyPlayer.Tasks.Unbox().BecomeToCrewmate();
                 }
                 else
                 {
-                    MyPlayer.Unbox().Tasks.ReleaseAllTaskState();
+                    MyPlayer.Tasks.Unbox().ReleaseAllTaskState();
                 }
                 
                 //タスクを整えたうえで役職を変更する

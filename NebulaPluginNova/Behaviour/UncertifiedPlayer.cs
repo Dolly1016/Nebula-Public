@@ -1,12 +1,4 @@
-﻿using Hazel.Dtls;
-using Il2CppInterop.Runtime.Injection;
-using JetBrains.Annotations;
-using Sentry.Unity.NativeUtils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Il2CppInterop.Runtime.Injection;
 
 namespace Nebula.Behaviour
 {

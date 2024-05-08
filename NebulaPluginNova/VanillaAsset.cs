@@ -1,18 +1,6 @@
-﻿using AmongUs.GameOptions;
-using Il2CppSystem.Runtime.Remoting.Messaging;
-using Il2CppSystem.Runtime.Serialization;
-using Il2CppSystem.Web.Util;
-using MonoMod.Utils;
-using Nebula.Behaviour;
-using System;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Behaviour;
 using TMPro;
 using Twitch;
-using UnityEngine;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Nebula;
 

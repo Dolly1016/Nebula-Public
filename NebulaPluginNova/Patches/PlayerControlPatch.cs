@@ -83,7 +83,7 @@ public static class PlayerUpdatePatch
         if (NebulaGameManager.Instance == null) return;
         if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted) return;
 
-        NebulaGameManager.Instance.GetModPlayerInfo(__instance.PlayerId)?.Update();
+        NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().Update();
 
         if (__instance.AmOwner)
         {
@@ -107,7 +107,7 @@ public class PlayerControlSetAlphaPatch
         if (NebulaGameManager.Instance == null) return;
         if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted) return;
 
-        NebulaGameManager.Instance.GetModPlayerInfo(__instance.PlayerId)?.UpdateVisibility(false);
+        NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().UpdateVisibility(false);
     }
 }
 
@@ -139,8 +139,8 @@ public static class PlayerCompleteTaskPatch
     {
         if (!__instance.AmOwner) return;
 
-        __instance.GetModInfo()?.Tasks.OnCompleteTask();
-        __instance.GetModInfo()?.AssignableAction((r)=>r.OnTaskCompleteLocal());
+        __instance.GetModInfo()?.Tasks.Unbox().OnCompleteTask();
+        __instance.GetModInfo()?.AllAssigned().Do((r)=>r.Unbox().OnTaskCompleteLocal());
     }
 }
 
@@ -156,7 +156,7 @@ public static class PlayerStartMeetingPatch
             var targetInfo = Helpers.GetPlayer(info.PlayerId)!.GetModInfo();
 
             //ベイトレポートチェック
-            if (targetInfo?.Role.Role is Roles.Crewmate.Bait && ((targetInfo.MyKiller?.PlayerId ?? byte.MaxValue) == __instance.PlayerId) && (targetInfo.DeathTimeStamp.HasValue && NebulaGameManager.Instance!.CurrentTime - targetInfo.DeathTimeStamp.Value < 3f))
+            if (targetInfo?.Role.Role is Roles.Crewmate.Bait && ((targetInfo.MyKiller?.PlayerId ?? byte.MaxValue) == __instance.PlayerId) && (targetInfo.Unbox().DeathTimeStamp.HasValue && NebulaGameManager.Instance!.CurrentTime - targetInfo.Unbox().DeathTimeStamp!.Value < 3f))
                 tag = EventDetail.BaitReport;
         }
 
@@ -172,7 +172,7 @@ class CurrentOutfitPatch
 {
     public static bool Prefix(PlayerControl __instance, ref GameData.PlayerOutfit __result)
     {
-        __result = __instance.GetModInfo()?.CurrentOutfit!;
+        __result = __instance.GetModInfo()?.Unbox().CurrentOutfit!;
         return __result == null;
     }
 }
@@ -184,7 +184,7 @@ class OverlayKillAnimationPatch
     {
         if (__instance.killerParts)
         {
-            GameData.PlayerOutfit? currentOutfit = NebulaGameManager.Instance?.GetModPlayerInfo(kInfo.PlayerId)?.CurrentOutfit;
+            GameData.PlayerOutfit? currentOutfit = NebulaGameManager.Instance?.GetPlayer(kInfo.PlayerId)?.Unbox().CurrentOutfit;
             if (currentOutfit != null)
             {
                 __instance.killerParts.SetBodyType(PlayerBodyTypes.Normal);
@@ -196,7 +196,7 @@ class OverlayKillAnimationPatch
         }
         if (vInfo != null && __instance.victimParts)
         {
-            GameData.PlayerOutfit? defaultOutfit = NebulaGameManager.Instance?.GetModPlayerInfo(vInfo.PlayerId)?.DefaultOutfit;
+            GameData.PlayerOutfit? defaultOutfit = NebulaGameManager.Instance?.GetPlayer(vInfo.PlayerId)?.Unbox().DefaultOutfit;
             if (defaultOutfit != null)
             {
                 __instance.victimHat = defaultOutfit.HatId;
@@ -222,8 +222,8 @@ class SetTaskPAtch
         int num = tasksList.Count;
         var info = __instance.GetModInfo();
         int extra = 0;
-        info?.AssignableAction((r) => { r.OnSetTaskLocal(ref tasksList, out var unacquired); extra += unacquired; });
-        if (num != tasksList.Count || extra > 0) info?.Tasks.ReplaceTasks(tasksList.Count, extra);
+        info?.AllAssigned().Do((r) => { r.Unbox().OnSetTaskLocal(ref tasksList, out var unacquired); extra += unacquired; });
+        if (num != tasksList.Count || extra > 0) info?.Tasks.Unbox().ReplaceTasks(tasksList.Count, extra);
 
         __instance.StartCoroutine(CoSetTasks().WrapToIl2Cpp());
 
@@ -260,7 +260,7 @@ class PlayerDisconnectPatch
     {
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.NotStarted) return;
 
-        player.GetModInfo()!.IsDisconnected = true;
+        player.GetModInfo()!.Unbox().IsDisconnected = true;
 
         NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Disconnect, player.PlayerId, 0){ RelatedTag = EventDetail.Disconnect }) ;
     }
@@ -293,7 +293,7 @@ class WalkPatch
 {
     public static void Postfix(PlayerPhysics __instance,ref Il2CppSystem.Collections.IEnumerator __result)
     {
-        var info = __instance.myPlayer.GetModInfo();
+        var info = __instance.myPlayer.GetModInfo()?.Unbox();
         if (info == null) return;
 
         var orig = __result;
@@ -324,7 +324,7 @@ class VelocityPatch
 {
     public static void Postfix(PlayerPhysics __instance)
     {
-        if (__instance.AmOwner) __instance.body.velocity *= NebulaGameManager.Instance?.LocalPlayerInfo?.DirectionalPlayerSpeed ?? Vector2.one;
+        if (__instance.AmOwner) __instance.body.velocity *= NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().DirectionalPlayerSpeed ?? Vector2.one;
     }
 }
 
@@ -458,7 +458,7 @@ public static class UsePlatformPatch
     {
         try
         {
-            target.GetModInfo()!.GoalPos = __instance.transform.parent.TransformPoint((!__instance.IsLeft) ? __instance.LeftUsePosition : __instance.RightUsePosition);
+            target.GetModInfo()!.Unbox().GoalPos = __instance.transform.parent.TransformPoint((!__instance.IsLeft) ? __instance.LeftUsePosition : __instance.RightUsePosition);
         }
         catch {
             Debug.Log($"Skipped presetting goal position on use MovingPlatform. (for {target.name})");
@@ -475,7 +475,7 @@ public static class UseLadderPatch
         {
             Vector2 pos = source.Destination.transform.position;
             if (source.Destination.IsTop) pos += new Vector2(0f, 1.2f);
-            __instance.myPlayer.GetModInfo()!.GoalPos = pos;
+            __instance.myPlayer.GetModInfo()!.Unbox().GoalPos = pos;
         }
         catch
         {
@@ -491,7 +491,7 @@ public static class UseZiplinePatch
     {
         try
         {
-            player.GetModInfo()!.GoalPos = fromTop ? __instance.landingPositionBottom.position : __instance.landingPositionTop.position;
+            player.GetModInfo()!.Unbox().GoalPos = fromTop ? __instance.landingPositionBottom.position : __instance.landingPositionTop.position;
         }
         catch
         {

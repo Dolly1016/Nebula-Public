@@ -1,10 +1,4 @@
-﻿using Nebula.Expansion;
-using Rewired;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Nebula.Roles.Impostor
+﻿namespace Nebula.Roles.Impostor
 {
     public class Ninja : Role
     {

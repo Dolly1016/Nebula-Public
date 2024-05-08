@@ -1,11 +1,4 @@
-﻿using HarmonyLib;
-using Nebula.Game;
-using Nebula.Modules;
-using System;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Compat;
 
 namespace Nebula.Patches;
 
@@ -59,7 +52,7 @@ public static class ShowIntroPatch
         GameObject.Destroy(__instance.gameObject);
     }
 
-    static IEnumerator CoShowTeam(IntroCutscene __instance, PlayerModInfo myInfo, PlayerControl[] shownPlayers, float duration)
+    static IEnumerator CoShowTeam(IntroCutscene __instance, GamePlayer myInfo, PlayerControl[] shownPlayers, float duration)
     {
         if (__instance.overlayHandle == null)
         {
@@ -130,23 +123,23 @@ public static class ShowIntroPatch
         yield break;
     }
 
-    static IEnumerator CoShowRole(IntroCutscene __instance, PlayerModInfo myInfo)
+    static IEnumerator CoShowRole(IntroCutscene __instance, GamePlayer myInfo)
     {
         var role = myInfo.Role.Role;
-        __instance.RoleText.text = role.DisplayName;
-        __instance.RoleBlurbText.text = role.IntroBlurb;
+        __instance.RoleText.text = role.Unbox().DisplayName;
+        __instance.RoleBlurbText.text = role.Unbox().IntroBlurb;
         __instance.RoleBlurbText.transform.localPosition = new(0.0965f, -2.12f, -36f);
         __instance.RoleBlurbText.rectTransform.sizeDelta = new(12.8673f, 0.7f);
         __instance.RoleBlurbText.alignment = TMPro.TextAlignmentOptions.Top;
 
-        foreach(var m in myInfo.AllModifiers)
+        foreach(var m in myInfo.Modifiers)
         {
-            string? mBlurb = m.IntroText;
+            string? mBlurb = m.Unbox().IntroText;
             if (mBlurb != null) __instance.RoleBlurbText.text += "\n" + mBlurb;
         }
-        __instance.RoleText.color = role.RoleColor;
-        __instance.YouAreText.color = role.RoleColor;
-        __instance.RoleBlurbText.color = role.RoleColor;
+        __instance.RoleText.color = role.RoleColor.ToUnityColor();
+        __instance.YouAreText.color = role.RoleColor.ToUnityColor();
+        __instance.RoleBlurbText.color = role.RoleColor.ToUnityColor();
         SoundManager.Instance.PlaySound(PlayerControl.LocalPlayer.Data.Role.IntroSound, false, 1f, null);
         __instance.YouAreText.gameObject.SetActive(true);
         __instance.RoleText.gameObject.SetActive(true);

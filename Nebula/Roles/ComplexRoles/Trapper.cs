@@ -1,5 +1,4 @@
 ﻿using Nebula.Game;
-using Rewired.Utils.Platforms.Windows;
 
 namespace Nebula.Roles.ComplexRoles;
 

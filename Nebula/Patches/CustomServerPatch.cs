@@ -1,7 +1,4 @@
 ﻿using BepInEx.Configuration;
-using UnityEngine.UI;
-using UnityEngine.Events;
-using Discord;
 
 namespace Nebula.Patches;
 

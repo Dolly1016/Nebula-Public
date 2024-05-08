@@ -1,17 +1,4 @@
-﻿using HarmonyLib;
-using Il2CppSystem.Runtime.Remoting.Messaging;
-using Il2CppSystem.Security.Cryptography;
-using Nebula.Configuration;
-using Nebula.Modules;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using static UnityEngine.RemoteConfigSettingsHelper;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(GameSettingMenu), nameof(GameSettingMenu.Start))]
 public class GameSettingMenuStartPatch

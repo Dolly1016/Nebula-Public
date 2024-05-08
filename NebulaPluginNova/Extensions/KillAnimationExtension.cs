@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Nebula.Extensions;
+﻿namespace Nebula.Extensions;
 
 public static class KillAnimationExtension
 {
@@ -24,7 +18,7 @@ public static class KillAnimationExtension
 
         //死体の発生場所を決定 (移動中は移動後の位置に発生)
         Vector2 deadBodyPlayerPos = target.transform.position;
-        if(target.inMovingPlat || target.onLadder) deadBodyPlayerPos = target.GetModInfo()?.GoalPos ?? deadBodyPlayerPos;
+        if(target.inMovingPlat || target.onLadder) deadBodyPlayerPos = target.GetModInfo()?.Unbox().GoalPos ?? deadBodyPlayerPos;
 
         Vector3 vector = (Vector3)deadBodyPlayerPos + killAnim.BodyOffset;
         vector.z = vector.y / 1000f;
@@ -40,7 +34,7 @@ public static class KillAnimationExtension
         }
 
         GameEntityManager.Instance?.AllEntities.Do(e => e.OnDeadBodyGenerated(deadBody));
-        target.GetModInfo()!.relatedDeadBodyCache = deadBody;
+        target.GetModInfo()!.Unbox().relatedDeadBodyCache = deadBody;
 
         target.Die(DeathReason.Kill, false);
         yield return source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);

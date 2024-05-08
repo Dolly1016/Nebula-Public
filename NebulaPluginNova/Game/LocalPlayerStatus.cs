@@ -1,11 +1,4 @@
-﻿using Nebula.Map;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Nebula.Game;
+﻿namespace Nebula.Game;
 
 [NebulaRPCHolder]
 public class FakeSabotageStatus
@@ -57,13 +50,13 @@ public class FakeSabotageStatus
         (message, _) =>
         {
 
-            var player = NebulaGameManager.Instance?.GetModPlayerInfo(message.target);
+            var player = NebulaGameManager.Instance?.GetPlayer(message.target);
             if (player == null) return;
 
             if (message.task == SystemTypes.Comms && player.AllAssigned().Any(a => !a.CanFixComm)) return;
             if (message.task == SystemTypes.Electrical && player.AllAssigned().Any(a => !a.CanFixLight)) return;
 
-            player?.FakeSabotage.PushFakeSabotage(message.task);
+            player?.Unbox().FakeSabotage.PushFakeSabotage(message.task);
 
             if (message.target == PlayerControl.LocalPlayer.PlayerId)
             {
@@ -99,7 +92,7 @@ public class FakeSabotageStatus
         "PopFakeTask",
         (message, _) =>
         {
-            NebulaGameManager.Instance?.GetModPlayerInfo(message.target)?.FakeSabotage.RemoveFakeSabotage(message.task);
+            NebulaGameManager.Instance?.GetPlayer(message.target)?.Unbox().FakeSabotage.RemoveFakeSabotage(message.task);
         }
         );
 }

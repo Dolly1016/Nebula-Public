@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Virial.Command;
+﻿namespace Virial.Command;
 
 /// <summary>
 /// 実行可能な対象を表します。

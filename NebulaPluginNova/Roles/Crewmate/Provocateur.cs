@@ -1,10 +1,4 @@
-﻿using Nebula.Configuration;
-using Nebula.Roles.Impostor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Roles.Impostor;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -16,7 +10,7 @@ public static class ExtraExileRoleSystem
     {
         var voters = MeetingHudExtension.LastVotedForMap
                 .Where(entry => entry.Value == player.PlayerId && entry.Key != player.PlayerId)
-                .Select(entry => NebulaGameManager.Instance!.GetModPlayerInfo(entry.Key))
+                .Select(entry => NebulaGameManager.Instance!.GetPlayer(entry.Key))
                 .Where(p => !p!.IsDead && (includeImpostors || p.Role.Role.Category != RoleCategory.ImpostorRole))
                 .ToArray();
         
@@ -25,7 +19,7 @@ public static class ExtraExileRoleSystem
             voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && (includeImpostors || p.Role.Role.Category != RoleCategory.ImpostorRole)).ToArray();
         }
         if (voters.Length == 0) return;
-        voters[System.Random.Shared.Next(voters.Length)]!.MyControl.ModMarkAsExtraVictim(player.VanillaPlayer, PlayerState.Embroiled, EventDetail.Embroil);
+        voters[System.Random.Shared.Next(voters.Length)]!.VanillaPlayer.ModMarkAsExtraVictim(player.VanillaPlayer, PlayerState.Embroiled, EventDetail.Embroil);
     }
 }
 

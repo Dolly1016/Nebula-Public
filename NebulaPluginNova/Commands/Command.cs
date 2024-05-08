@@ -1,14 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Behaviour;
 using Nebula.Commands.Tokens;
-using Steamworks;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using TMPro;
 using Virial.Command;
 using Virial.Common;

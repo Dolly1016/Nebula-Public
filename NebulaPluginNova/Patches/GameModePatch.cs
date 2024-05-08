@@ -1,6 +1,4 @@
-﻿using HarmonyLib;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(CreateOptionsPicker), nameof(CreateOptionsPicker.Start))]
 public static class OnlineGameModePatch

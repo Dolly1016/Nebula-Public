@@ -1,11 +1,6 @@
-﻿using HarmonyLib;
-using System.Collections.Immutable;
-using System.IO.Compression;
-using System.Linq;
+﻿using System.IO.Compression;
 using System.Reflection;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.Compat;
 using Virial.Media;
 

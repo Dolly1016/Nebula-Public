@@ -1,7 +1,4 @@
 ﻿using Nebula.Patches;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Nebula.Roles.NeutralRoles
 {

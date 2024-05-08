@@ -1,5 +1,6 @@
-﻿using AmongUs.Data.Player;
+﻿using System.Diagnostics.CodeAnalysis;
 using Virial.Assignable;
+using Virial.Command;
 using Virial.DI;
 using Virial.Text;
 
@@ -170,7 +171,7 @@ public class OutfitCandidate
     }
 }
 
-public interface Player : IModuleContainer<Player>
+public interface Player : IModuleContainer, ICommandExecutor
 {
     // Internal
 
@@ -194,6 +195,16 @@ public interface Player : IModuleContainer<Player>
     /// 死亡しているとき、Trueを返します。
     /// </summary>
     public bool IsDead { get; }
+
+    /// <summary>
+    /// 死亡時刻をゲーム開始からの経過時間で返します。
+    /// </summary>
+    public float? DeathTime { get; }
+
+    /// <summary>
+    /// 切断されているとき、Trueを返します。切断されている場合は死亡しているものとして扱われます。
+    /// </summary>
+    bool IsDisconnected { get; }
 
     /// <summary>
     /// 自身がこのプレイヤーの本来の操作主である場合、Trueを返します。
@@ -320,6 +331,8 @@ public interface Player : IModuleContainer<Player>
 
     public RuntimeRole Role { get; }
     public IEnumerable<RuntimeModifier> Modifiers { get; }
+    public IEnumerable<RuntimeAssignable> AllAssigned();
+    public bool TryGetModifier<Modifier>([MaybeNullWhen(false)] out Modifier modifier) where Modifier : class, RuntimeModifier;
 
 
 
@@ -350,4 +363,13 @@ public interface Player : IModuleContainer<Player>
     /// プレイヤーの本来の見た目を取得します。
     /// </summary>
     public Outfit DefaultOutfit { get; }
+
+
+
+    // TasksAPI
+
+    /// <summary>
+    /// プレイヤーのタスク進捗を取得します。
+    /// </summary>
+    public PlayerTasks Tasks => GetModule<PlayerTasks>()!;
 }

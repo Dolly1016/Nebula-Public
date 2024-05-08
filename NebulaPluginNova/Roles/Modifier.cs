@@ -1,15 +1,6 @@
-﻿using Il2CppSystem.Reflection.Metadata.Ecma335;
-using Nebula.Configuration;
-using Nebula.Roles.Assignment;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Roles.Assignment;
 using Virial.Assignable;
 using Virial.Configuration;
-using static Il2CppMono.Security.X509.X520;
-using static Nebula.Roles.Assignment.IRoleAllocator;
 
 namespace Nebula.Roles;
 

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static PlayerMaterial;
-using static Rewired.Data.Mapping.CustomCalculation_Accelerometer;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 public class PlayerDisplay : MonoBehaviour
 {

@@ -1,11 +1,4 @@
-﻿using Nebula.Modules;
-using Nebula.Roles.Assignment;
-using Nebula.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Roles.Assignment;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -98,10 +91,10 @@ public class Secret : AbstractRole, DefinedAssignable
                     new NebulaRPCInvoker(() =>
                     {
                         player.Role.Unbox().OnSetTaskLocal(ref tasks, out int unacquired);
-                        player.Unbox().Tasks.ResetTasksLocal(tasks);
-                        player.Unbox().Tasks.GainExtraTasks(tasks.Count,false, unacquired,false);
+                        player.Tasks.Unbox().ResetTasksLocal(tasks);
+                        player.Tasks.Unbox().GainExtraTasks(tasks.Count,false, unacquired,false);
                     }).InvokeSingle();
-                    player.Unbox().Tasks.RpcSync();
+                    player.Tasks.Unbox().RpcSync();
                 }
             }
         });
@@ -151,7 +144,7 @@ public class Secret : AbstractRole, DefinedAssignable
 
         public override void OnTaskCompleteLocal()
         {
-            if (MyPlayer.Unbox().Tasks.IsCompletedCurrentTasks)
+            if (MyPlayer.Tasks.IsCompletedCurrentTasks)
             {
                 ScheduleSendArousalRpc(MyPlayer.Unbox(), savedArgs, savedTasks);
             }

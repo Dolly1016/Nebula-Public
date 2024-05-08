@@ -1,16 +1,5 @@
-﻿using Nebula.Configuration;
-using Nebula.Player;
-using Sentry.Unity.NativeUtils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Game;
-using static Nebula.Roles.Crewmate.Phosphorus;
-using static UnityEngine.UI.GridLayoutGroup;
 
 namespace Nebula.Roles.Impostor;
 
@@ -68,11 +57,11 @@ public class Raider : ConfigurableStandardRole
             if (state == 0)
             {
                 if (AmOwner) Owner.Unbox().RequireUpdateMouseAngle();
-                MyRenderer.transform.localEulerAngles = new Vector3(0, 0, Owner.MouseAngle * 180f / Mathf.PI);
-                var pos = Owner.MyCon.transform.position + new Vector3(Mathf.Cos(Owner.MouseAngle), Mathf.Sin(Owner.MouseAngle), -1f) * 0.67f;
+                MyRenderer.transform.localEulerAngles = new Vector3(0, 0, Owner.Unbox().MouseAngle * 180f / Mathf.PI);
+                var pos = Owner.VanillaPlayer.transform.position + new Vector3(Mathf.Cos(Owner.Unbox().MouseAngle), Mathf.Sin(Owner.Unbox().MouseAngle), -1f) * 0.67f;
                 var diff = (pos - MyRenderer.transform.position) * Time.deltaTime * 7.5f;
                 Position += (Vector2)diff;
-                MyRenderer.flipY = Mathf.Cos(Owner.MouseAngle) < 0f;
+                MyRenderer.flipY = Mathf.Cos(Owner.Unbox().MouseAngle) < 0f;
 
                 if (AmOwner)
                 {
@@ -102,7 +91,7 @@ public class Raider : ConfigurableStandardRole
                             if (!Helpers.AnyNonTriggersBetween(p.GetTruePosition(),pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
-                                if (p.GetModInfo()?.IsInvisible ?? false) continue;
+                                if (p.GetModInfo()?.Unbox().IsInvisible ?? false) continue;
 
                                 if (PlayerControl.LocalPlayer.ModKill(p, false, PlayerState.Beaten, EventDetail.Kill) == KillResult.Kill)
                                 {

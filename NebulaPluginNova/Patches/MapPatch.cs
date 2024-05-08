@@ -1,10 +1,4 @@
 ﻿using Nebula.Behaviour;
-using Rewired.Utils.Platforms.Windows;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.Game;
 
 namespace Nebula.Patches;
@@ -89,7 +83,7 @@ public static class CountOverlayUpdatePatch
                     //会議中のアドミン (PreMeetingPointを参照する)
                     foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                     {
-                        if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.PreMeetingPoint) && !AlreadyAdded(p.PlayerId)) {
+                        if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.Unbox().PreMeetingPoint) && !AlreadyAdded(p.PlayerId)) {
                             AddToMask(p.PlayerId);
                             counter++;
                             if (p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
@@ -101,7 +95,7 @@ public static class CountOverlayUpdatePatch
                     //タスクターン中のアドミン
                     foreach(var p in admin.Players)
                     {
-                        if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetModPlayerInfo(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
+                        if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetPlayer(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
 
                         if (AlreadyAdded(p.playerId)) continue;
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial;
+﻿using Virial;
 
 namespace Nebula.Roles.Scripts;
 
@@ -37,7 +32,7 @@ public class Draggable : ComponentHolder
                 else
                     role.MyPlayer.ReleaseDeadBody();
             };
-            dragButton.OnUpdate = (button) => dragButton.SetLabel(role.MyPlayer.HoldingDeadBodyId.HasValue ? "release" : "drag");
+            dragButton.OnUpdate = (button) => dragButton.SetLabel(role.MyPlayer.HoldingAnyDeadBody ? "release" : "drag");
             dragButton.SetLabel("drag");
         }
     }

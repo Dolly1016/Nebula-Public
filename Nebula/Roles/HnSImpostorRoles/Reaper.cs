@@ -1,6 +1,4 @@
 ﻿using Nebula.Game;
-using static Il2CppSystem.Globalization.CultureInfo;
-using static Rewired.Controller;
 
 namespace Nebula.Roles.HnSImpostorRoles;
 

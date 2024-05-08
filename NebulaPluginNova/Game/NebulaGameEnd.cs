@@ -1,17 +1,6 @@
-﻿using HarmonyLib;
-using Hazel;
-using System.Collections;
-using InnerNet;
-using Nebula.Modules;
-using UnityEngine;
-using UnityEngine.TextCore;
-using System.Drawing;
-using UnityEngine.UI;
-using Nebula.Utilities;
-using Nebula.Behaviour;
+﻿using Nebula.Behaviour;
 using Virial.Game;
 using Nebula.Roles.Modifier;
-using static Il2CppSystem.Globalization.CultureInfo;
 
 namespace Nebula.Game;
 
@@ -98,7 +87,7 @@ public class NebulaGameEnd
            {
                NebulaGameManager.Instance.EndState ??= new NebulaEndState(message.conditionId,message.winnersMask,message.extraWinMask, message.endReason);
                NebulaGameManager.Instance.OnGameEnd();
-               NebulaGameManager.Instance.AllAssignableAction(a => a.OnGameEnd(NebulaGameManager.Instance.EndState));
+               NebulaGameManager.Instance.AllAssignableAction(a => a.Unbox().OnGameEnd(NebulaGameManager.Instance.EndState));
                NebulaGameManager.Instance.ToGameEnd();
            }
        }
@@ -208,12 +197,12 @@ public class EndGameManagerSetUpPatch
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
         {
             //Name Text
-            string nameText = p.DefaultName.Color((NebulaGameManager.Instance.EndState!.WinnersMask & (1 << p.PlayerId)) != 0 ? Color.yellow : Color.white);
-            if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.DefaultName ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.RoleColor);
+            string nameText = p.Name.Color((NebulaGameManager.Instance.EndState!.WinnersMask & (1 << p.PlayerId)) != 0 ? Color.yellow : Color.white);
+            if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.Name ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.RoleColor);
 
-            string stateText = p.MyState?.Text ?? "";
-            if (p.IsDead && p.MyKiller != null) stateText += "<color=#FF6666><size=75%> by " + (p.MyKiller?.DefaultName ?? "ERROR") + "</size></color>";
-            string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $" ({p.Tasks.ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
+            string stateText = p.PlayerState.Text;
+            if (p.IsDead && p.MyKiller != null) stateText += "<color=#FF6666><size=75%> by " + (p.MyKiller?.Name ?? "ERROR") + "</size></color>";
+            string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $" ({p.Tasks.Unbox().ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
 
             //Role Text
             string roleText = "";
@@ -271,7 +260,7 @@ public class EndGameManagerSetUpPatch
         {
             if ((endState.WinnersMask & (1 << i)) != 0)
             {
-                if (NebulaGameManager.Instance.GetModPlayerInfo(i)?.AmOwner ?? false)
+                if (NebulaGameManager.Instance.GetPlayer(i)?.AmOwner ?? false)
                 {
                     amWin = true;
                     winners.Insert(0, i);
@@ -295,7 +284,7 @@ public class EndGameManagerSetUpPatch
             Vector3 vector = new Vector3(num7, num7, 1f);
             poolablePlayer.transform.localScale = vector;
 
-            var player = NebulaGameManager.Instance.GetModPlayerInfo(winners[i])!;
+            var player = NebulaGameManager.Instance.GetPlayer(winners[i])!;
 
             if (player.IsDead)//死んでいる場合
             {
@@ -306,9 +295,9 @@ public class EndGameManagerSetUpPatch
             {
                 poolablePlayer.SetFlipX(i % 2 == 0);
             }
-            poolablePlayer.UpdateFromPlayerOutfit(player.DefaultOutfit, PlayerMaterial.MaskType.None, player.IsDead, true);
+            poolablePlayer.UpdateFromPlayerOutfit(player.Unbox().DefaultOutfit, PlayerMaterial.MaskType.None, player.IsDead, true);
 
-            poolablePlayer.SetName(player.DefaultName, new Vector3(1f / vector.x, 1f / vector.y, 1f / vector.z), Color.white, -15f); ;
+            poolablePlayer.SetName(player.Name, new Vector3(1f / vector.x, 1f / vector.y, 1f / vector.z), Color.white, -15f); ;
             poolablePlayer.SetNamePosition(new Vector3(0f, -1.31f, -0.5f));
 
             poolablePlayer.gameObject.AddComponent<ModTitleShower>();

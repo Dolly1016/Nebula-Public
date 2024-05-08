@@ -1,13 +1,4 @@
-﻿using Nebula.Configuration;
-using Nebula.Roles.Impostor;
-using Nebula.Roles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
-using Il2CppSystem.Net.NetworkInformation;
+﻿using Virial.Assignable;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -109,8 +100,8 @@ public class Morphing : ConfigurableStandardRole, HasCitation
                         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                         {
                             if (p.AmOwner) continue;
-                            if (p.CurrentOutfit.ColorId != colorId) continue;
-                            if (p.MyControl.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) < 0.8f)
+                            if (p.Unbox().CurrentOutfit.ColorId != colorId) continue;
+                            if (p.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) < 0.8f)
                             {
                                 acTokenAnother2 ??= new("morphing.another2");
                                 break;

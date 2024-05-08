@@ -1,5 +1,4 @@
-﻿using BepInEx.Configuration;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace Nebula.Patches;
 

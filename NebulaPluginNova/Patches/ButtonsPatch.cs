@@ -1,14 +1,4 @@
-﻿using AmongUs.GameOptions;
-using HarmonyLib;
-using Nebula.Game;
-using Nebula.Roles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(SabotageButton), nameof(SabotageButton.Refresh))]
 public static class SabotageButtonPatch
@@ -101,7 +91,7 @@ public static class VentClickPatch
 {
     static bool Prefix(VentButton __instance)
     {
-        if ((!PlayerControl.LocalPlayer.inVent) && (PlayerControl.LocalPlayer?.GetModInfo()?.Role?.VentCoolDown?.IsInProcess ?? false))
+        if ((!PlayerControl.LocalPlayer.inVent) && (PlayerControl.LocalPlayer?.GetModInfo()?.Unbox().Role?.VentCoolDown?.IsInProcess ?? false))
             return false;
 
         if (__instance.currentTarget != null)

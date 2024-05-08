@@ -1,11 +1,5 @@
 ﻿using System.Text;
 using System.Reflection;
-using Hazel;
-using BepInEx.Configuration;
-using AmongUs.GameOptions;
-using UnityEngine;
-using static Nebula.Module.CustomOption;
-using JetBrains.Annotations;
 
 namespace Nebula.Module;
 

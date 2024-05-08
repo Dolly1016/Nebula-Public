@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Behaviour;
+using Virial;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -48,7 +49,7 @@ static file class GuesserSystem
     {
         int leftGuessPerMeeting = Guesser.NumOfGuessPerMeetingOption.GetMappedInt();
 
-        NebulaGameManager.Instance?.MeetingPlayerButtonManager.RegisterMeetingAction(new(targetSprite,
+        NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new(targetSprite,
             state => {
                 var p = state.MyPlayer;
                 LastGuesserWindow = OpenGuessWindow(leftGuessPerMeeting, leftGuess, (r) =>
@@ -131,7 +132,7 @@ static file class GuesserSystem
 
     static public void OnGameEnd(GamePlayer myInfo)
     {
-        var guessKills = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.MyState == PlayerState.Guessed && p.MyKiller == myInfo) ?? 0;
+        var guessKills = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.PlayerState == PlayerState.Guessed && p.MyKiller == myInfo) ?? 0;
         if (guessKills >= 1) new StaticAchievementToken("guesser.common1");
         if (guessKills >= 3) new StaticAchievementToken("guesser.challenge");
     }

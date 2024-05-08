@@ -1,30 +1,15 @@
 ﻿using NAudio.CoreAudioApi;
-using NAudio.Dmo.Effect;
 using NAudio.Dsp;
-using NAudio.Utils;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Nebula.Behaviour;
-using Nebula.Configuration;
 using Nebula.Modules.GUIWidget;
 using OpusDotNet;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.UIElements;
 using Virial.Assignable;
 using Virial.Game;
 using Virial.Media;
-using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 using static Nebula.Modules.MetaWidgetOld;
-using static UnityEngine.UIElements.UIR.Utility;
 
 namespace Nebula.VoiceChat;
 
@@ -59,7 +44,7 @@ public enum VoiceType
 
 public class VoiceChatRadio
 {
-    private Predicate<PlayerModInfo> predicate;
+    private Predicate<GamePlayer> predicate;
     public string DisplayRadioName { get; private set; }
     public Color Color { get; private set; }
     public int RadioMask

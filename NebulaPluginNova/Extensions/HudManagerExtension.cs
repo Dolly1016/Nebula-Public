@@ -1,11 +1,5 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Nebula.Game;
 using Nebula.Roles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nebula.Extensions;
 
@@ -27,7 +21,7 @@ public static class HudManagerExtension
         }
 
         bool flag = PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.IsDead;
-        RoleInstance? modRole = PlayerControl.LocalPlayer.GetModInfo()?.Role;
+        RoleInstance? modRole = PlayerControl.LocalPlayer.GetModInfo()?.Unbox().Role;
 
         manager.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && GameManager.Instance.CanReportBodies() && ShipStatus.Instance != null);
         manager.KillButton.ToggleVisible((modRole?.HasVanillaKillButton ?? false) && !flag);

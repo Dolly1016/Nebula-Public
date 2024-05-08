@@ -1,9 +1,4 @@
-﻿using JetBrains.Annotations;
-using Nebula.Roles.Perk;
-using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
-
-namespace Nebula.Objects;
+﻿namespace Nebula.Objects;
 
 public class ArrowDisplay : MonoBehaviour
 {

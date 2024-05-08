@@ -1,13 +1,4 @@
-﻿using HarmonyLib;
-using Nebula.Modules;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-// TextTranslatorTMPを通してMODテキストの翻訳をさせるためのパッチ
-
+﻿// TextTranslatorTMPを通してMODテキストの翻訳をさせるためのパッチ
 
 namespace Nebula.Patches;
 

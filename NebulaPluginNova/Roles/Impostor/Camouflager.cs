@@ -1,10 +1,4 @@
-﻿using Nebula.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -107,9 +101,9 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
             foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
                 if (message.on)
-                    p.AddOutfit(outfit);
+                    p.Unbox().AddOutfit(outfit);
                 else
-                    p.RemoveOutfit(outfit.Tag);
+                    p.Unbox().RemoveOutfit(outfit.Tag);
             }
         }
         );

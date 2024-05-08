@@ -2,21 +2,10 @@
 using Nebula.Game;
 using Nebula.Map;
 using Nebula.Module;
-using Nebula.Roles;
 using Nebula.Roles.Perk;
-using Nebula.Utilities;
-using PowerTools;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine.Events;
-using UnityEngine.Purchasing;
 using static Nebula.Roles.Perk.PerkHolder;
-using static Rewired.Data.Mapping.CustomCalculation_Accelerometer;
 
 namespace Nebula.Patches;
 

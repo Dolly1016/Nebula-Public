@@ -1,10 +1,4 @@
-﻿using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Nebula.Behaviour;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Behaviour;
 using Virial.Game;
 
 namespace Nebula.Patches;
@@ -43,7 +37,7 @@ class VitalsMinigameUpdatePatch
         {
             var myInfo = vitals.Players.FirstOrDefault(p => p.playerId == v.PlayerInfo.PlayerId);
 
-            var modInfo = NebulaGameManager.Instance?.GetModPlayerInfo(v.PlayerInfo.PlayerId);
+            var modInfo = NebulaGameManager.Instance?.GetPlayer(v.PlayerInfo.PlayerId);
 
             if (myInfo.state == VitalsState.Disconnected || (modInfo?.HasAttribute(PlayerAttributes.Isolation) ?? false))
             {

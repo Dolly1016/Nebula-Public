@@ -1,15 +1,4 @@
-﻿using Nebula.Modules.GUIWidget;
-using Nebula.Roles.Abilities;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
-using Virial.Game;
-
-namespace Nebula.Roles.Neutral;
+﻿namespace Nebula.Roles.Neutral;
 
 /*
 public class Dancer : ConfigurableStandardRole

@@ -1,5 +1,4 @@
-﻿using Nebula.Objects;
-using Hazel;
+﻿using Hazel;
 
 namespace Nebula.Roles.ComplexRoles;
 

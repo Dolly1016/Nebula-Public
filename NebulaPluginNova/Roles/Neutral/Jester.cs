@@ -1,7 +1,4 @@
-﻿using Hazel;
-using Nebula.Configuration;
-using Nebula.Modules;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;

@@ -1,6 +1,4 @@
-﻿using Il2CppSystem.Threading.Tasks;
-
-namespace Nebula.Roles.Perk.CrewmatePerks;
+﻿namespace Nebula.Roles.Perk.CrewmatePerks;
 
 public class Patience : Perk
 {

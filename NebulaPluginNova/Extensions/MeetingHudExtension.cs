@@ -1,16 +1,4 @@
-﻿using Epic.OnlineServices.Presence;
-using Il2CppSystem.Data;
-using Il2CppSystem.Reflection;
-using Nebula.Events;
-using Nebula.Patches;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TMPro;
-using Virial.Events.Player;
-using Virial.Text;
+﻿using Virial.Text;
 
 namespace Nebula.Extensions;
 
@@ -69,7 +57,7 @@ public static class MeetingHudExtension
     {
         foreach (PlayerVoteArea pva in meetingHud.playerStates)
         {
-            bool isDead = NebulaGameManager.Instance?.GetModPlayerInfo(pva.TargetPlayerId)?.IsDead ?? true;
+            bool isDead = NebulaGameManager.Instance?.GetPlayer(pva.TargetPlayerId)?.IsDead ?? true;
 
             if (pva.AmDead == isDead) continue;
 
@@ -90,7 +78,7 @@ public static class MeetingHudExtension
         {
             if (!voter.DidVote) continue;
 
-            var p = NebulaGameManager.Instance?.GetModPlayerInfo(voter.TargetPlayerId);
+            var p = NebulaGameManager.Instance?.GetPlayer(voter.TargetPlayerId);
             if (p?.AmOwner ?? false) meetingHud.ClearVote();
 
             voter.ThumbsDown.enabled = false;
@@ -125,21 +113,18 @@ public static class MeetingHudExtension
     {
         foreach(var victims in ExtraVictims)
         {
-            var player = NebulaGameManager.Instance?.GetModPlayerInfo(victims.exiledId);
+            var player = NebulaGameManager.Instance?.GetPlayer(victims.exiledId);
             if (player == null) continue;
 
-            var killer = NebulaGameManager.Instance?.GetModPlayerInfo(victims.sourceId);
+            var killer = NebulaGameManager.Instance?.GetPlayer(victims.sourceId);
 
-            player.MyControl.Exiled();
-            player.MyControl.Data.IsDead = true;
-            player.MyState = victims.playerState;
+            player.VanillaPlayer.Exiled();
+            player.VanillaPlayer.Data.IsDead = true;
+            player.Unbox().MyState = victims.playerState;
 
             if (killer != null) killer.RelatedEntities()?.Do(e => e.OnExtraExilePlayer(player));
             //Entityイベント発火
             GameEntityManager.Instance?.GetPlayerEntities(player.PlayerId).Do(e => { e.OnExtraExiled(); e.OnDead(); });
-            
-            //APIイベント発火
-            EventManager.HandleEvent(new PlayerDeadEvent(player));
 
             //Entityイベント発火
             GameEntityManager.Instance?.AllEntities.Do(e =>
@@ -147,8 +132,8 @@ public static class MeetingHudExtension
                 e.OnPlayerDead(player);
             });
 
-            if (player.AmOwner && NebulaAchievementManager.GetRecord("death." + player.MyState.TranslationKey, out var recDeath)) new StaticAchievementToken(recDeath);
-            if ((killer?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + player.MyState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
+            if (player.AmOwner && NebulaAchievementManager.GetRecord("death." + player.PlayerState.TranslationKey, out var recDeath)) new StaticAchievementToken(recDeath);
+            if ((killer?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + player.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
             if (player.AmOwner) new StaticAchievementToken("extraVictim");
 
             NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, victims.sourceId == byte.MaxValue ? null : victims.sourceId, 1 << victims.exiledId) { RelatedTag = victims.eventTag });

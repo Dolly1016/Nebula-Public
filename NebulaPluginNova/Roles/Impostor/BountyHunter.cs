@@ -1,12 +1,4 @@
-﻿using AmongUs.GameOptions;
-using Nebula.Configuration;
-using Nebula.Modules.ScriptComponents;
-using Nebula.Roles.Modifier;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Roles.Modifier;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -78,7 +70,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
             else
             {
                 bountyIcon.gameObject.SetActive(true);
-                bountyIcon.UpdateFromPlayerOutfit(NebulaGameManager.Instance!.GetModPlayerInfo(currentBounty)!.DefaultOutfit, PlayerMaterial.MaskType.None, false, true);
+                bountyIcon.UpdateFromPlayerOutfit(NebulaGameManager.Instance!.GetPlayer(currentBounty)!.Unbox().DefaultOutfit, PlayerMaterial.MaskType.None, false, true);
             }
 
             if (MyRole.ShowBountyArrowOption) UpdateArrow();
@@ -88,7 +80,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
 
         void UpdateArrow()
         {
-            var target = NebulaGameManager.Instance?.GetModPlayerInfo(currentBounty);
+            var target = NebulaGameManager.Instance?.GetPlayer(currentBounty);
             if (target==null)
             {
                 bountyArrow.IsActive= false;
@@ -96,7 +88,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
             else
             {
                 bountyArrow.IsActive= true;
-                bountyArrow.TargetPos = target.MyControl.transform.localPosition;
+                bountyArrow.TargetPos = target.VanillaPlayer.transform.localPosition;
             }
 
             arrowTimer.Start();
@@ -184,7 +176,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
             if (AmOwner)
             {
                 //死亡しているプレイヤーであれば切り替える
-                if (NebulaGameManager.Instance?.GetModPlayerInfo(currentBounty)?.IsDead ?? true) ChangeBounty();
+                if (NebulaGameManager.Instance?.GetPlayer(currentBounty)?.IsDead ?? true) ChangeBounty();
             }
         } 
     }

@@ -1,13 +1,9 @@
 ﻿using Nebula.Expansion;
-using ExtremeSkins.Core;
-using ExtremeSkins.Core.ExtremeHats;
-using ExtremeSkins.Core.ExtremeVisor;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine.Events;
 using static Nebula.Game.PlayerData;
 using static Nebula.Module.CustomDesignerSublist;
-using static Rewired.Controller;
 
 using ExHData = ExtremeSkins.Core.ExtremeHats.DataStructure;
 using ExVData = ExtremeSkins.Core.ExtremeVisor.DataStructure;

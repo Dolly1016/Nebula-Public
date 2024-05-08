@@ -1,7 +1,4 @@
-﻿using Nebula.Roles.Crewmate;
-using UnityEngine;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 [HarmonyPatch]
 class MeetingHudPatch

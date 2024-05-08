@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Game;
+﻿using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
@@ -88,9 +83,9 @@ public class ExtraMission : ConfigurableStandardModifier
         "ExtraMissionTarget",
         (message, _) =>
         {
-            if(NebulaGameManager.Instance?.GetModPlayerInfo(message.player)?.TryGetModifier<Instance>(out var extraMission) ?? false)
+            if(NebulaGameManager.Instance?.GetPlayer(message.player)?.TryGetModifier<Instance>(out var extraMission) ?? false)
             {
-                extraMission.target = NebulaGameManager.Instance!.GetModPlayerInfo(message.target)!;
+                extraMission.target = NebulaGameManager.Instance!.GetPlayer(message.target)!;
             }
         }
         );

@@ -1,14 +1,6 @@
-﻿using Nebula.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial;
+﻿using Virial;
 using Virial.Assignable;
 using Virial.Game;
-using static MeetingHud;
-using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace Nebula.Roles.Crewmate;
 

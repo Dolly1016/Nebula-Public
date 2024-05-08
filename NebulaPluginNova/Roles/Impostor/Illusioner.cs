@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -64,7 +59,7 @@ public class Illusioner : ConfigurableStandardRole
                 acTokenChallenge = new("illusioner.challenge", 0, (val, _) =>
                 {
                     return
-                    NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.MyState == PlayerState.Exiled && (val & (1 << p.PlayerId)) != 0).Count() > 0 &&
+                    NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.PlayerState == PlayerState.Exiled && (val & (1 << p.PlayerId)) != 0).Count() > 0 &&
                     NebulaGameManager.Instance!.AllPlayerInfo().Where(p => (p.MyKiller?.AmOwner ?? false) && (val & (1 << p.PlayerId)) != 0).Count() > 0;
                 });
 

@@ -1,5 +1,4 @@
-﻿using Il2CppSystem.Data;
-using Nebula.Patches;
+﻿using Nebula.Patches;
 
 namespace Nebula.Roles.ExtraRoles;
 

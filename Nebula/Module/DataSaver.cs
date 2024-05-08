@@ -1,10 +1,5 @@
-﻿using AmongUs.Data;
-using Innersloth.IO;
-using JetBrains.Annotations;
+﻿using Innersloth.IO;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Nebula.Module
 {

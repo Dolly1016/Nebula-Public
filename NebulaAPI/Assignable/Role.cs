@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Configuration;
+﻿using Virial.Configuration;
 
 namespace Virial.Assignable;
 
@@ -114,6 +109,28 @@ public interface RuntimeAssignable : IBinder, ILifespan
     /// 割当先のプレイヤー
     /// </summary>
     Virial.Game.Player MyPlayer { get; }
+
+    //AssignableAspectAPI
+
+    /// <summary>
+    /// 通信障害を修理できる場合Trueを返します。
+    /// </summary>
+    bool CanFixComm { get; }
+
+    /// <summary>
+    /// 通信障害を修理できる場合Trueを返します。
+    /// </summary>
+    bool CanFixLight { get; }
+
+    /// <summary>
+    /// 割り当てられていることを自覚できる場合Trueを返します。
+    /// </summary>
+    bool CanBeAwareAssignment { get; }
+
+    /// <summary>
+    /// 緊急ボタンを押すことができる場合Trueを返します。
+    /// </summary>
+    bool CanCallEmergencyMeeting { get; }
 }
 
 /// <summary>

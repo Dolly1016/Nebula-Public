@@ -1,12 +1,9 @@
 ﻿using LibCpp2IL;
 using Nebula.Patches;
-using Nebula.Utilities;
 using Newtonsoft.Json.Linq;
-using Sentry;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
-using static Rewired.Controller;
 
 namespace Nebula.Module;
 public abstract class CustomVariable

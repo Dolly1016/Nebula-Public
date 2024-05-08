@@ -1,10 +1,4 @@
-﻿using Newtonsoft.Json.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial;
+﻿using Virial;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -62,7 +56,7 @@ public abstract class NebulaSyncObject : INebulaScriptComponent, IGameEntity
 
             obj.argumentsCache = message.arguments;
             obj.ObjectId = message.id;
-            obj.Owner = NebulaGameManager.Instance!.GetModPlayerInfo(OwnerIdFromObjectId(obj.ObjectId))!;
+            obj.Owner = NebulaGameManager.Instance!.GetPlayer(OwnerIdFromObjectId(obj.ObjectId))!;
             obj.TagHash = message.tagHash;
             if (allObjects.ContainsKey(obj.ObjectId)) throw new Exception("[NebulaSyncObject] Duplicated Key Error");
             obj.OnInstantiated();

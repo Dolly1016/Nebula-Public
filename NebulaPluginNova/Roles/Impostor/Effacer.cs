@@ -1,10 +1,4 @@
-﻿using AmongUs.GameOptions;
-using Nebula.Roles.Crewmate;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Roles.Crewmate;
 using Virial.Assignable;
 using Virial.Game;
 

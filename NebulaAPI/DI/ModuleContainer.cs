@@ -1,54 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HarmonyLib;
 using static Il2CppSystem.Diagnostics.Tracing.TraceLoggingMetadataCollector;
 
 namespace Virial.DI;
 
+public interface IModuleContainer
+{
+    internal void AddModule(object module);
+    T? GetModule<T>() where T : class, IModule;
+}
 
 /// <summary>
-/// モジュールのコンテナを表します。
+/// モジュールを表します。
 /// </summary>
-/// <typeparam name="Impl">コンテナの公開インターフェース</typeparam>
-public interface IModuleContainer<Impl> where Impl : class
+public interface IModule
 {
-    T? GetModule<T>() where T : class, IModule<Impl>;
-
-    internal Impl MyImpl => (this as Impl)!;
-    internal void AddModule(IModule<Impl> module);
-
-
 }
 
 /// <summary>
 /// コンテナに属するモジュールを表します。
 /// </summary>
 /// <typeparam name="Container">注入先のコンテナ</typeparam>
-public interface IModule<Container>
+public interface IGenericModule<Container> : IModule
 {
     Container MyContainer { get; }
 }
 
-public abstract class AbstractModule<Container> : IModule<Container> where Container : class
+internal interface IInjectable
+{
+    void OnInjectTo(object container);
+}
+
+public abstract class AbstractModule<Container> : IGenericModule<Container>, IInjectable where Container : class
 {
     private Container container = null!;
     public Container MyContainer => container;
 
-    internal void OnInjected(Container container)
+    void IInjectable.OnInjectTo(object container)
     {
-        this.container = container;
+        this.container = (container as Container)!;
     }
 }
 
-internal abstract class AbstractModuleContainer<Impl> : IModuleContainer<Impl> where Impl : class
+internal abstract class AbstractModuleContainer : IModuleContainer
 {
-    private List<IModule<Impl>> allModules = new();
-    private Dictionary<Type, IModule<Impl>> fastModulesMap = new();
+    private List<object> allModules = new();
+    private Dictionary<Type, object> fastModulesMap = new();
 
-    T? IModuleContainer<Impl>.GetModule<T>() where T : class
+    T? IModuleContainer.GetModule<T>() where T : class
     {
         var type = typeof(T);
         
@@ -68,10 +66,10 @@ internal abstract class AbstractModuleContainer<Impl> : IModuleContainer<Impl> w
         return null;
     }
 
-    void IModuleContainer<Impl>.AddModule(IModule<Impl> module)
+    void IModuleContainer.AddModule(object module)
     {
         allModules.Add(module);
-        (module as AbstractModule<Impl>)?.OnInjected((this as IModuleContainer<Impl>).MyImpl);
+        (module as IInjectable)?.OnInjectTo(this);
     }
 }
 
@@ -80,42 +78,65 @@ internal abstract class AbstractModuleContainer<Impl> : IModuleContainer<Impl> w
 /// </summary>
 public class DIManager
 {
+    static internal DIManager Instance { get; private set; } = new();
+
     private record ContainerDefinition(Func<object> Supplier, List<Func<object>> ModuleSuppliers);
 
-    private Dictionary<Type, ContainerDefinition> allDefinitions = new();
+    private Dictionary<Type, Func<object>> allContainers = new();
+    private Dictionary<Type, List<Func<object>>> allInterfaces = new();
 
-    internal ContainerImpl? Instantiate<ContainerImpl>() where ContainerImpl : class
+    internal ContainerImpl? Instantiate<ContainerImpl>(Action<ContainerImpl>? preprocess = null) where ContainerImpl : class
     {
         var type = typeof(ContainerImpl);
 
-        if(allDefinitions.TryGetValue(type, out var def))
+        if (!allContainers.TryGetValue(type, out var def))
         {
-            var impl = (def.Supplier.Invoke() as ContainerImpl)!;
-
-            foreach (var m in def.ModuleSuppliers)
-                (impl as IModuleContainer<ContainerImpl>)?.AddModule((m.Invoke() as IModule<ContainerImpl>)!);
-
-            return impl;
+            var cand = allContainers.Where(e => type.IsAssignableFrom(e.Key)).ToArray();
+            if (cand.Length == 0) return null;
+            
+            // TODO: 複数の実装がある場合の処理を考える。
+            def = cand[0].Value;
         }
 
-        return null;
-    }
+        var impl = (def.Invoke() as ContainerImpl)!;
+        preprocess?.Invoke(impl);
 
-    public bool RegisterModule<ContainerImpl>(Func<IModule<ContainerImpl>> supplier) where ContainerImpl : class
-    {
-        var type = typeof(ContainerImpl);
+        var implAsContainer = (impl as IModuleContainer)!;
 
-        if (allDefinitions.TryGetValue(type, out var def))
+        HashSet<Type> types = new();
+        void InjectFromInterface(Type myType)
         {
-            def.ModuleSuppliers.Add(supplier);
-            return true;
+            foreach (var t in myType.GetInterfaces())
+            {
+                if (types.Contains(t) || t.GetGenericArguments().Length > 0) continue;
+                types.Add(t);
+                InjectFromInterface(t);
+
+                if (allInterfaces.TryGetValue(t, out var modules))
+                {
+                    foreach (var m in modules) implAsContainer.AddModule(m.Invoke());
+                }
+            }
         }
-        return false;
+
+        InjectFromInterface(impl.GetType());
+
+        return impl;
     }
 
-    internal void RegisterContainer<ContainerImpl>(Func<ContainerImpl> supplier) where ContainerImpl : class
+    public bool RegisterModule<Container>(Func<IGenericModule<Container>> supplier) 
+    {
+        var type = typeof(Container);
+
+        if (!allInterfaces.ContainsKey(type)) allInterfaces[type] = new();
+        allInterfaces[type].Add(supplier);
+        return true;
+    }
+
+    internal void RegisterContainer<ContainerImpl>(Func<ContainerImpl> supplier) where ContainerImpl : class, IModuleContainer
     {
         var type = typeof(ContainerImpl);
-        allDefinitions[type] = new(supplier, new());
+
+        allContainers[type] = supplier;
     }
 }

@@ -1,26 +1,12 @@
-﻿using Epic.OnlineServices;
-using Il2CppSystem.ComponentModel;
-using Il2CppSystem.Runtime.Remoting.Messaging;
-using JetBrains.Annotations;
-using MS.Internal.Xml.XPath;
-using Nebula.Modules;
-using Nebula.Modules.GUIWidget;
+﻿using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using Nebula.Roles.Assignment;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using TMPro;
-using UnityEngine;
 using Virial.Assignable;
 using Virial.Configuration;
-using static Il2CppMono.Security.X509.X520;
-using static Il2CppSystem.Linq.Expressions.Interpreter.NullableMethodCallInstruction;
 
 namespace Nebula.Configuration;
 

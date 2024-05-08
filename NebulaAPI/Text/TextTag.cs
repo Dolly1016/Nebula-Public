@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Virial.Text;
+﻿namespace Virial.Text;
 
 /// <summary>
 /// 翻訳キーに一意的な意味を与えるタグです。

@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace Nebula.Roles.Perk.CrewmatePerks;
+﻿namespace Nebula.Roles.Perk.CrewmatePerks;
 
 public class TheWounded : Perk
 {

@@ -1,6 +1,4 @@
-﻿using Hazel;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 public static class BeginHubHelper
 {

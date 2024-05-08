@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Virial.Attributes;
 
 namespace Nebula.Roles;
 

@@ -1,10 +1,7 @@
-﻿using Nebula.Configuration;
-using Nebula.Roles.Modifier;
+﻿using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
-using Steamworks;
 using Virial.Assignable;
 using Virial.Game;
-using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -190,7 +187,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
             foreach (var player in NebulaGameManager.Instance!.AllPlayerInfo())
             {
                 if (player.IsDead) continue;
-                if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, [JackalTeamId, killingTotal]).InvokeSingle();
+                if (IsMySidekick(player)) player.Unbox().RpcInvokerSetRole(Jackal.MyRole, [JackalTeamId, killingTotal]).InvokeSingle();
 
             }
         }
@@ -211,7 +208,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
 
             if (endState.EndReason != GameEndReason.Situation) return;
 
-            var lastDead = NebulaGameManager.Instance!.AllPlayerInfo().MaxBy(p => p.DeathTimeStamp ?? 0f);
+            var lastDead = NebulaGameManager.Instance!.AllPlayerInfo().MaxBy(p => p.DeathTime ?? 0f);
             if (lastDead == null || lastDead.MyKiller == null || !lastDead.MyKiller.AmOwner) return;
 
             if ( /*インポスターが最後に死亡*/ (lastDead as GamePlayer).IsImpostor &&

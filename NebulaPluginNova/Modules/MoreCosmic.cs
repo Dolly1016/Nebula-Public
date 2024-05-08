@@ -1,30 +1,14 @@
 ﻿using AmongUs.Data;
-using Cpp2IL.Core.Extensions;
-using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
-using Il2CppSystem.Reflection.Internal;
 using Il2CppSystem.Text.RegularExpressions;
 using Innersloth.Assets;
 using PowerTools;
-using Rewired.Utils.Platforms.Windows;
-using Sentry;
-using System;
-using System.Collections;
-using System.Drawing;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using Unity;
-using Unity.IL2CPP.CompilerServices;
-using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.XR;
-using static Il2CppSystem.Uri;
-using static Rewired.Controller;
 
 namespace Nebula.Modules;
 
@@ -1018,7 +1002,7 @@ public static class HatFixPatch
 
         try
         {
-            __instance.myPlayer.cosmetics.SetHatAndVisorIdle(__instance.myPlayer.GetModInfo()!.CurrentOutfit.ColorId);
+            __instance.myPlayer.cosmetics.SetHatAndVisorIdle(__instance.myPlayer.GetModInfo()!.Unbox().CurrentOutfit.ColorId);
         }
         catch { }
     }

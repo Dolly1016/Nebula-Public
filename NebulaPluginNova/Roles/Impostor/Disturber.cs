@@ -1,16 +1,8 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
-using Il2CppSystem.Threading.Tasks;
 using Nebula.Behaviour;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
-using UnityEngine;
 using Virial.Assignable;
 using Virial.Game;
-using static Nebula.Roles.Complex.Trapper;
 
 namespace Nebula.Roles.Impostor;
 

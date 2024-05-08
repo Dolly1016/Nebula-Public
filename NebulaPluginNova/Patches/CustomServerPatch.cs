@@ -1,12 +1,5 @@
-﻿using BepInEx.Configuration;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Il2CppSystem;
+﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behaviour;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine.Events;
 
 namespace Nebula.Patches;

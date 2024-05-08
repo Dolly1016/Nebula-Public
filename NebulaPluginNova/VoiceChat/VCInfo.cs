@@ -1,11 +1,4 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Behaviour;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nebula.VoiceChat;
 

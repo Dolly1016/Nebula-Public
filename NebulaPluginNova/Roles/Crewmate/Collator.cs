@@ -1,11 +1,6 @@
-﻿using Hazel;
-using Nebula.Behaviour;
+﻿using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Virial;
 using Virial.Assignable;
 using Virial.Game;
 using Virial.Text;
@@ -89,7 +84,7 @@ public class Collator : ConfigurableStandardRole, HasCitation
             if (!matched) new StaticAchievementToken("collator.common3");
             if (acTokenChallenge != null) acTokenChallenge.Value.Add(player1.player).Add(player2.player);
 
-            NebulaGameManager.Instance?.MeetingOverlay.RegisterOverlay(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
+            NebulaAPI.CurrentGame?.GetModule<MeetingOverlayHolder>()?.RegisterOverlay(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
                 new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), new TranslateTextComponent("role.collator.ui.title")),
                 new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), 
                 new RawTextComponent(
@@ -111,14 +106,16 @@ public class Collator : ConfigurableStandardRole, HasCitation
                     //選択式
 
                     int leftTest = MyRole.MaxTrialsPerMeetingOption;
-                    NebulaGameManager.Instance?.MeetingPlayerButtonManager.RegisterMeetingAction(new(meetingSprite,
+
+                    var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
+                    buttonManager?.RegisterMeetingAction(new(meetingSprite,
                     p =>
                     {
                         if(p.IsSelected)
                             p.SetSelect(false);
                         else
                         {
-                            var selected = NebulaGameManager.Instance?.MeetingPlayerButtonManager.AllStates.FirstOrDefault(p => p.IsSelected);
+                            var selected = buttonManager.AllStates.FirstOrDefault(p => p.IsSelected);
 
                             if (selected != null)
                             {
@@ -193,7 +190,7 @@ public class Collator : ConfigurableStandardRole, HasCitation
         {
             if (AmOwner)
             {
-                acTokenChallenge = new("collator.challenge", BitMasks.AsPlayer(), (value, _) => NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnds.CrewmateGameEnd && (NebulaGameManager.Instance?.AllPlayerInfo().Where(p => (p as GamePlayer).IsImpostor).All(p => p.MyState == PlayerStates.Exiled && value.Test(p)) ?? false));
+                acTokenChallenge = new("collator.challenge", BitMasks.AsPlayer(), (value, _) => NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnds.CrewmateGameEnd && (NebulaGameManager.Instance?.AllPlayerInfo().Where(p => (p as GamePlayer).IsImpostor).All(p => p.PlayerState == PlayerStates.Exiled && value.Test(p)) ?? false));
                 acTokenAnother1 = new("collator.another1", (null, 0f, false), (value, _) => value.clear);
 
                 //サンプル一覧の表示

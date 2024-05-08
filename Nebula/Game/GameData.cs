@@ -2,11 +2,7 @@
 
 using static GameData;
 using Hazel;
-using AmongUs.Data.Player;
 using Nebula.Map;
-using JetBrains.Annotations;
-using Nebula.Roles.Crewmate;
-using UnityEngine;
 using Nebula.Roles.HnSImpostorRoles;
 
 namespace Nebula.Game;

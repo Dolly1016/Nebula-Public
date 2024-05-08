@@ -1,14 +1,5 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
-using Cpp2IL.Core.Extensions;
-using Il2CppSystem.Linq;
-using Newtonsoft.Json.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Cpp2IL.Core.Extensions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Nebula;
 

@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Nebula.Objects.ObjectTypes;
+﻿namespace Nebula.Objects.ObjectTypes;
 
 public class VisibleTrap : DelayedObject
 {

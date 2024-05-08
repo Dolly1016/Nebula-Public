@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -108,7 +103,7 @@ public class Alien : ConfigurableStandardRole, HasCitation
                     icon.text = left.ToString();
                     invalidateButton.OnClick = (button) =>
                     {
-                        PlayerModInfo.RpcAttrModulator.Invoke((invalidateTracker.CurrentTarget!.PlayerId, new AttributeModulator(PlayerAttributes.Isolation, 100000f, true, 0, canBeAware: invalidateTracker.CurrentTarget.Data.Role.IsImpostor), true));
+                        PlayerModInfo.RpcAttrModulator.Invoke((invalidateTracker.CurrentTarget!.PlayerId, new AttributeModulator(PlayerAttributes.Isolation, 100000f, true, 0, canBeAware: invalidateTracker.CurrentTarget.IsImpostor), true));
                         left--;
                         icon.text = left.ToString();
 

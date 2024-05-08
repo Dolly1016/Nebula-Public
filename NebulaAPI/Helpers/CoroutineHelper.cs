@@ -1,9 +1,5 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
-using System;
 using System.Collections;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Virial.Helpers;
 

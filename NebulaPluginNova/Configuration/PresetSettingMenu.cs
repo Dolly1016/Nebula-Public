@@ -1,11 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.Media;
 
 namespace Nebula.Configuration;

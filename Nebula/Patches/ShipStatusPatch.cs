@@ -1,7 +1,4 @@
-﻿using AmongUs.GameOptions;
-using Discord;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(ShipStatus))]
 public class ShipStatusPatch

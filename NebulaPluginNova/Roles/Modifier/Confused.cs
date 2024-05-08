@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Game;
+﻿using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
@@ -64,11 +59,11 @@ public class Confused : ConfigurableStandardModifier
                 var outfit2 = player2.GetOutfit(50);
                 
                 //もともとのConfusedの見た目を競合防止のため削除
-                player1.RemoveOutfit("Confused");
-                player2.RemoveOutfit("Confused");
+                player1.Unbox().RemoveOutfit("Confused");
+                player2.Unbox().RemoveOutfit("Confused");
 
-                player1.AddOutfit(new("Confused", 20, false, outfit2));
-                player2.AddOutfit(new("Confused", 20, false, outfit1));
+                player1.Unbox().AddOutfit(new("Confused", 20, false, outfit2.outfit));
+                player2.Unbox().AddOutfit(new("Confused", 20, false, outfit1.outfit));
             }
 
             if (shuffled && !skipMeeting)

@@ -1,9 +1,4 @@
 ﻿using Nebula.Behaviour;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine.Rendering;
 using Virial.Game;
@@ -71,6 +66,7 @@ public class PlayersOverlay : IGameEntity
                         mask.sprite = iconSprite.GetSprite(1);
 
                         var player = AmongUsUtil.GetPlayerIcon(p.CurrentOutfit, mask.transform, new Vector3(0, -0.3f, -1f), Vector3.one);
+                        player.TogglePet(false);
                         player.cosmetics.SetMaskType(PlayerMaterial.MaskType.ComplexUI);
                         player.transform.localScale = new(0.65f, 0.65f, 0.65f);
                         obj.transform.localScale = new(0.4f, 0.4f, 0.4f);
@@ -90,18 +86,8 @@ public class PlayersOverlay : IGameEntity
             {
                 if(!(i.LastOutfit?.Equals(i.relatedControl.CurrentOutfit) ?? true) || !Palette.PlayerColors[i.LastOutfit!.outfit.ColorId].CompareRGB(i.LastColor))
                 {
-                    Debug.Log("LastColor: " + i.LastColor);
-                    Debug.Log("CurrentColor: " + Palette.PlayerColors[i.LastOutfit!.outfit.ColorId]);
-                    Debug.Log("LastHat: " + i.LastOutfit.outfit.HatId);
-                    Debug.Log("LastVisor: " + i.LastOutfit.outfit.VisorId);
-                    Debug.Log("LastColor: " + i.LastOutfit.outfit.ColorId);
-                    Debug.Log("LastSkin: " + i.LastOutfit.outfit.SkinId);
-                    Debug.Log("CurrentHat: " + i.relatedControl.CurrentOutfit.HatId);
-                    Debug.Log("CurrentVisor: " + i.relatedControl.CurrentOutfit.VisorId);
-                    Debug.Log("CurrentColor: " + i.relatedControl.CurrentOutfit.ColorId);
-                    Debug.Log("CurrentSkin: " + i.relatedControl.CurrentOutfit.SkinId);
-
                     i.display.UpdateFromPlayerOutfit(i.relatedControl.CurrentOutfit, PlayerMaterial.MaskType.ComplexUI, false, false);
+                    i.display.TogglePet(false);
                     i.LastOutfit = new(i.relatedControl.CurrentOutfit, true);
                     i.LastColor = Palette.PlayerColors[i.LastOutfit.outfit.ColorId];
                 }

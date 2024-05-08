@@ -1,17 +1,4 @@
-﻿using AmongUs.GameOptions;
-using HarmonyLib;
-using InnerNet;
-using Nebula.Configuration;
-using Nebula.Game;
-using Nebula.Player;
-using Nebula.Roles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
 public static class InitializeRolePatch

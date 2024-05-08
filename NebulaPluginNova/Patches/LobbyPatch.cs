@@ -1,14 +1,6 @@
-﻿using HarmonyLib;
-using Hazel;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
+﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using InnerNet;
 using Nebula.Behaviour;
-using Nebula.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nebula.Patches;
 

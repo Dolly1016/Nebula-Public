@@ -1,24 +1,10 @@
-﻿using HarmonyLib;
-using HarmonyLib.Public.Patching;
-using Hazel;
-using Il2CppSystem.CodeDom;
-using Il2CppSystem.Reflection.Internal;
-using InnerNet;
+﻿using Hazel;
 using Nebula.Scripts;
-using Nebula.Utilities;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Virial.Attributes;
 using Virial.Game;
 using Virial.Text;
-using static Nebula.Player.PlayerModInfo;
 
 namespace Nebula.Modules;
 
@@ -361,7 +347,8 @@ public static class RemoteProcessAsset
         );
         defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj).Id), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
         defaultProcessDic[typeof(CommunicableTextTag)] = defaultProcessDic[typeof(TranslatableTag)];
-        defaultProcessDic[typeof(PlayerModInfo)] = ((writer, obj) => writer.Write(((PlayerModInfo)obj).PlayerId), (reader) => NebulaGameManager.Instance?.GetModPlayerInfo(reader.ReadByte())!);
+        defaultProcessDic[typeof(PlayerModInfo)] = ((writer, obj) => writer.Write(((PlayerModInfo)obj).PlayerId), (reader) => NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())!);
+        defaultProcessDic[typeof(GamePlayer)] = defaultProcessDic[typeof(PlayerModInfo)];
     }
 
     static public (Action<MessageWriter, object>, Func<MessageReader, object>) GetProcess(Type type)

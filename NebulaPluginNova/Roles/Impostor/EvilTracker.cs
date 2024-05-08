@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Nebula.Behaviour;
 using Nebula.Roles.Abilities;
 using Virial;
 using Virial.Assignable;
@@ -195,7 +196,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
                 if (optionValue > 0)
                 {
                     GamePlayer? isChecked = null;
-                    NebulaGameManager.Instance?.MeetingPlayerButtonManager.RegisterMeetingAction(new Behaviour.MeetingPlayerAction(
+                    NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new Behaviour.MeetingPlayerAction(
                         trackSprite,
                         p =>
                         {

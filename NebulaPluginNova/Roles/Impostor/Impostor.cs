@@ -1,10 +1,4 @@
-﻿using Nebula.Configuration;
-using Nebula.VoiceChat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.VoiceChat;
 using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;

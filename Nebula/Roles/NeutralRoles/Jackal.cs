@@ -1,6 +1,4 @@
-﻿using static Il2CppSystem.Globalization.CultureInfo;
-
-namespace Nebula.Roles.NeutralRoles;
+﻿namespace Nebula.Roles.NeutralRoles;
 public class Jackal : Role
 {
     static public Color RoleColor = new Color(0f, 162f / 255f, 211f / 255f);

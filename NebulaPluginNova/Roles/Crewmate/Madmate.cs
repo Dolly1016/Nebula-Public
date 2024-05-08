@@ -103,8 +103,8 @@ public class Madmate : ConfigurableStandardRole, HasCitation
 
                 using (RPCRouter.CreateSection("MadmateTask"))
                 {
-                    MyPlayer.Unbox().Tasks.ReplaceTasksAndRecompute(max, 0, 0);
-                    MyPlayer.Unbox().Tasks.BecomeToOutsider();
+                    MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(max, 0, 0);
+                    MyPlayer.Tasks.Unbox().BecomeToOutsider();
                 }
             }
         }
@@ -128,7 +128,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
         private void IdentifyImpostors()
         {
             //インポスター判別のチャンスだけ繰り返す
-            while (MyRole.CanIdentifyImpostorsOption.GetMappedInt() > impostors.Count && MyPlayer.Unbox().Tasks.CurrentCompleted >= MyRole.NumOfTasksToIdentifyImpostorsOptions[impostors.Count].GetMappedInt())
+            while (MyRole.CanIdentifyImpostorsOption.GetMappedInt() > impostors.Count && MyPlayer.Tasks.CurrentCompleted >= MyRole.NumOfTasksToIdentifyImpostorsOptions[impostors.Count].GetMappedInt())
             {
                 var pool = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole && !impostors.Contains(p.PlayerId)).ToArray();
                 //候補が残っていなければ何もしない
@@ -161,7 +161,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
             else
             {
                 var voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && p.Role.Role.Category != RoleCategory.ImpostorRole).ToArray();
-                if (voters.Length > 0) voters.Random().MyControl.ModMarkAsExtraVictim(MyPlayer.VanillaPlayer, PlayerState.Embroiled, EventDetail.Embroil);
+                if (voters.Length > 0) voters.Random().VanillaPlayer.ModMarkAsExtraVictim(MyPlayer.VanillaPlayer, PlayerState.Embroiled, EventDetail.Embroil);
             }
 
             

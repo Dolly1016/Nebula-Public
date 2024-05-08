@@ -21,11 +21,7 @@ using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using System.Runtime.InteropServices;
 using UnityEngine.SceneManagement;
-using System.Reflection;
-using Cpp2IL.Core.Extensions;
 using Virial;
-using Unity.IO.LowLevel.Unsafe;
-using LibCpp2IL.PE;
 
 namespace Nebula;
 
@@ -39,11 +35,11 @@ public class NebulaPlugin : BasePlugin
     public const string PluginVersion = "2.2.3.1";
 
     //public const string VisualVersion = "v2.3";
-    public const string VisualVersion = "Snapshot 24.05.07a";
+    public const string VisualVersion = "Snapshot 24.05.08b";
     //public const string VisualVersion = "RPC Debug 2";
 
     public const int PluginEpoch = 103;
-    public const int PluginBuildNum = 1115;
+    public const int PluginBuildNum = 1117;
     public const bool GuardVanillaLangData = true;
 
     static public HttpClient HttpClient

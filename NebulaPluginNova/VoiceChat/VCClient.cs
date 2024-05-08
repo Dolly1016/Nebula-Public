@@ -1,13 +1,5 @@
-﻿using Il2CppSystem.Dynamic.Utils;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using Nebula.Configuration;
-using OpusDotNet;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nebula.VoiceChat;
 
@@ -28,7 +20,7 @@ public class VCClient : IDisposable
     private VolumeMeter volumeMeter;
     private PanningSampleProvider panningFilter;
     private PlayerControl relatedControl;
-    private PlayerModInfo? relatedInfo = null;
+    private GamePlayer? relatedInfo = null;
     public MixingSampleProvider? myRoute = null;
     private float wallRatio = 1f;
     private int radioMask;
@@ -119,7 +111,7 @@ public class VCClient : IDisposable
 
     public void OnGameStart()
     {
-        relatedInfo = NebulaGameManager.Instance!.GetModPlayerInfo(relatedControl.PlayerId);
+        relatedInfo = NebulaGameManager.Instance!.GetPlayer(relatedControl.PlayerId);
     }
 
     private void CheckCanHear(out float volume, out float pan, Vector2 speeker)

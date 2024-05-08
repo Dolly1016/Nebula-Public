@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Nebula.Roles.Crewmate;
+﻿namespace Nebula.Roles.Crewmate;
 
 public class Mayor : Role
 {

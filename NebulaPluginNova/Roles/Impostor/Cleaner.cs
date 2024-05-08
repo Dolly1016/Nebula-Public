@@ -1,13 +1,6 @@
 ﻿using AmongUs.GameOptions;
-using Nebula.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.Assignable;
 using Virial.Game;
-using static Rewired.UnknownControllerHat;
 
 namespace Nebula.Roles.Impostor;
 
@@ -63,14 +56,14 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
             {
                 acTokenChallenge = new("cleaner.challenge",(false,0),(val,_)=>val.cleared);
 
-                var cleanTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer.VanillaPlayer, (d) => true));
+                var cleanTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => true));
 
                 cleanButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 cleanButton.SetSprite(buttonSprite.GetSprite());
                 cleanButton.Availability = (button) => cleanTracker.CurrentTarget != null && MyPlayer.VanillaPlayer.CanMove;
                 cleanButton.Visibility = (button) => !MyPlayer.IsDead;
                 cleanButton.OnClick = (button) => {
-                    AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.ParentId,MyPlayer.PlayerId,EventDetail.Clean);
+                    AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.PlayerId,MyPlayer.PlayerId,EventDetail.Clean);
                     if (MyRole.SyncKillAndCleanCoolDownOption) PlayerControl.LocalPlayer.killTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
                     cleanButton.StartCoolDown();
 

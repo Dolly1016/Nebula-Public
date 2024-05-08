@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Virial;
+using Virial.DI;
 using Virial.Game;
 
 namespace Nebula.Modules;
@@ -31,12 +28,17 @@ public record FakeInformationEntry<T>(T Information) {
 }
 
 [NebulaRPCHolder]
-internal class FakeInformation : IGameEntity
+internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameEntity
 {
-    static public FakeInformation? Instance => NebulaGameManager.Instance?.FakeInformation;
+    static public FakeInformation? Instance => NebulaAPI.CurrentGame?.GetModule<FakeInformation>();
 
     FakeInformationEntry<FakeAdmin>? Admin;
     FakeInformationEntry<FakeVitals>? Vitals;
+
+    public FakeInformation()
+    {
+        this.Register(Virial.NebulaAPI.CurrentGame!);
+    }
 
     void IGameEntity.HudUpdate()
     {
@@ -49,7 +51,8 @@ internal class FakeInformation : IGameEntity
         "FakeAdmin",
         (message, _) =>
         {
-            if (Instance != null && (Instance?.Admin?.Time ?? 0f) < message.duration) Instance!.Admin = new(new(message.players)) { Time = message.duration };
+            var instance = Instance;
+            if (instance != null && (instance?.Admin?.Time ?? 0f) < message.duration) instance!.Admin = new(new(message.players)) { Time = message.duration };
         }
         );
 
@@ -57,7 +60,8 @@ internal class FakeInformation : IGameEntity
         "FakeVitals",
         (message, _) =>
         {
-            if (Instance != null && (Instance?.Vitals?.Time ?? 0f) < message.duration) Instance!.Vitals = new(new(message.players)) { Time = message.duration };
+            var instance = Instance;
+            if (instance != null && (instance?.Vitals?.Time ?? 0f) < message.duration) instance!.Vitals = new(new(message.players)) { Time = message.duration };
         }
         );
 
@@ -68,7 +72,7 @@ internal class FakeInformation : IGameEntity
         {
             List<FakeAdminParam> param = new();
             foreach(var d in Helpers.AllDeadBodies()) param.Add(new(d.ParentId, d.TruePosition, false, true));
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) if (!p.IsDead) param.Add(new(p.PlayerId, p.MyControl.GetTruePosition(), p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole, false));
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) if (!p.IsDead) param.Add(new(p.PlayerId, p.VanillaPlayer.GetTruePosition(), p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole, false));
             return new(param.ToArray());
         } }
 

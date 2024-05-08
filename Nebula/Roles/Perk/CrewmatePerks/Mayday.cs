@@ -1,6 +1,4 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
-
-namespace Nebula.Roles.Perk.CrewmatePerks;
+﻿namespace Nebula.Roles.Perk.CrewmatePerks;
 
 public class Mayday : Perk
 {

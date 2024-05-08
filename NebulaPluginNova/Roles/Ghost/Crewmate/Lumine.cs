@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using Virial;
+﻿using Virial;
 using Virial.Assignable;
-using static Nebula.Roles.Crewmate.Phosphorus;
 
 namespace Nebula.Roles.Ghost.Crewmate;
 

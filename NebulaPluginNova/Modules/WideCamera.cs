@@ -108,8 +108,8 @@ public class WideCamera
             return;
         }
 
-        if (p.CountAttribute(PlayerAttributes.FlipX) % 2 == 1) localScale.x = -1f;
-        if (p.CountAttribute(PlayerAttributes.FlipY) % 2 == 1) localScale.y = -1f;
+        if (p.Unbox().CountAttribute(PlayerAttributes.FlipX) % 2 == 1) localScale.x = -1f;
+        if (p.Unbox().CountAttribute(PlayerAttributes.FlipY) % 2 == 1) localScale.y = -1f;
         localRotateZ = 180f * p.Unbox().CountAttribute(PlayerAttributes.FlipXY);
     }
 
@@ -185,7 +185,7 @@ public class WideCamera
             meshTransform.localScale -= (meshTransform.localScale - goalScale).Delta(2.2f, 0.005f);
             meshTransform.localEulerAngles = new(0f, 0f, meshAngleZ);
 
-            float targetRateByEffect = NebulaGameManager.Instance?.LocalPlayerInfo?.CalcAttributeVal(PlayerAttributes.ScreenSize, true) ?? 1f;
+            float targetRateByEffect = NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.ScreenSize, true) ?? 1f;
 
             float currentOrth = myCamera.orthographicSize;
             float targetOrth = targetRate * targetRateByEffect * 3f;
@@ -210,7 +210,7 @@ public class WideCamera
             }
 
             //コマンドによるモザイクの設定値に変化が生じたら再計算する
-            int currentCommandRoughness =  Mathf.Max(1, (int?)NebulaGameManager.Instance?.LocalPlayerInfo?.CalcAttributeVal(PlayerAttributes.Roughening, true) ?? 1);
+            int currentCommandRoughness =  Mathf.Max(1, (int?)NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.Roughening, true) ?? 1);
             if(lastCommandRoughness != currentCommandRoughness)
             {
                 lastCommandRoughness = currentCommandRoughness;

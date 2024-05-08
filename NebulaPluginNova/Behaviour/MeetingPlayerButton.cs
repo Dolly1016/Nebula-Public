@@ -1,10 +1,6 @@
-﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Modules.GUIWidget;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Modules.GUIWidget;
+using Virial;
+using Virial.DI;
 using Virial.Game;
 using static Nebula.Behaviour.MeetingPlayerButtonManager;
 
@@ -12,7 +8,7 @@ namespace Nebula.Behaviour;
 
 public record MeetingPlayerAction(Image icon, Action<MeetingPlayerButtonState> buttonAction, Predicate<MeetingPlayerButtonState> predicate);
 
-public class MeetingPlayerButtonManager : IGameEntity
+public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGameEntity
 {
     public record MeetingPlayerButton(GameObject gameObject, SpriteRenderer renderer, GamePlayer player, Reference<MeetingPlayerButtonState> state);
 
@@ -39,6 +35,11 @@ public class MeetingPlayerButtonManager : IGameEntity
             IsSelected = false;
             Update();
         }
+    }
+
+    public MeetingPlayerButtonManager()
+    {
+        this.Register(NebulaAPI.CurrentGame!);
     }
 
     List<MeetingPlayerAction> allActions = new();
@@ -82,7 +83,7 @@ public class MeetingPlayerButtonManager : IGameEntity
 
         foreach (var playerVoteArea in MeetingHud.Instance.playerStates)
         {
-            var player = NebulaGameManager.Instance?.GetModPlayerInfo(playerVoteArea.TargetPlayerId);
+            var player = NebulaGameManager.Instance?.GetPlayer(playerVoteArea.TargetPlayerId);
             if (player == null) continue;
 
             GameObject template = playerVoteArea.Buttons.transform.Find("CancelButton").gameObject;

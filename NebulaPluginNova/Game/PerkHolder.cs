@@ -1,16 +1,11 @@
-﻿using JetBrains.Annotations;
-using Nebula.Roles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Roles;
 using Virial;
+using Virial.DI;
 using Virial.Game;
 
 namespace Nebula.Game;
 
-public class PerkHolder : IGameEntity
+public class PerkHolder : AbstractModule<Virial.Game.Game>, IGameEntity
 {
     
 
@@ -21,6 +16,8 @@ public class PerkHolder : IGameEntity
     public PerkHolder() {
         myHolder = HudContent.InstantiateContent("PerkHolder", true, true).gameObject;
         myHolder.transform.localScale = new Vector3(0.42f, 0.42f, 1f);
+
+        this.Register(NebulaAPI.CurrentGame!);
     }
 
     public PerkInstance RegisterPerk(PerkDefinition perk) {

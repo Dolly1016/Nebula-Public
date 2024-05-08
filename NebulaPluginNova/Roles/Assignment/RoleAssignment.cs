@@ -41,13 +41,13 @@ public abstract class IRoleAllocator
             CombinedRemoteProcess.CombinedRPC.Invoke(allInvokers.ToArray());
 
 
-            foreach (var sendTo in NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.WithNoS))
+            foreach (var sendTo in NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.Unbox().WithNoS))
             {
                 //MessageWriter messageWriter = MessageWriter.Get(SendOption.Reliable);
                 foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                 {
                     
-                    var messageWriter = AmongUsClient.Instance.StartRpcImmediately(p.MyControl.NetId, 44, SendOption.Reliable, (int)sendTo.MyControl.OwnerId);
+                    var messageWriter = AmongUsClient.Instance.StartRpcImmediately(p.VanillaPlayer.NetId, 44, SendOption.Reliable, (int)sendTo.VanillaPlayer.OwnerId);
                     messageWriter.Write((ushort)AmongUs.GameOptions.RoleTypes.Crewmate);
 
                     AmongUsClient.Instance.FinishRpcImmediately(messageWriter);

@@ -1,17 +1,11 @@
 ﻿using System.Text;
-using Nebula.Configuration;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
 using Nebula.Behaviour;
-using Nebula.Roles.Complex;
 using Nebula.Modules.GUIWidget;
 using Virial.Media;
 using Nebula.Roles;
 using Virial.Assignable;
 using static Nebula.Modules.MetaWidgetOld;
 using Virial.Text;
-using NAudio.CoreAudioApi;
 using Nebula.Modules.MetaWidget;
 
 namespace Nebula.Modules;
@@ -239,22 +233,22 @@ public static class HelpScreen
 
         Virial.Compat.Artifact<GUIScreen> inner = null!;
 
-        widget.Append(PlayerControl.LocalPlayer.GetModInfo()!.AllAssigned().Where(a => a.CanBeAwareAssignment),
+        widget.Append(PlayerControl.LocalPlayer.GetModInfo()!.AllAssigned().Where(a => a.Unbox().CanBeAwareAssignment),
             (role) => new MetaWidgetOld.Button(() =>
             {
-                var doc = DocumentManager.GetDocument("role." + role.AssignableBase.InternalName);
+                var doc = DocumentManager.GetDocument("role." + role.Unbox().AssignableBase.InternalName);
                 if (doc == null) return;
 
                 inner.Do(screen => screen.SetWidget(doc.Build(inner), out _));
             }, RoleTitleAttrUnmasked)
             {
-                RawText = role.AssignableBase.DisplayName.Color(role.AssignableBase.RoleColor),
+                RawText = role.Unbox().AssignableBase.DisplayName.Color(role.Unbox().AssignableBase.RoleColor),
                 Alignment = IMetaWidgetOld.AlignmentOption.Center
             }, 128, -1, 0, 0.6f);
 
         var scrollView = new GUIScrollView(GUIAlignment.Left, new(7.4f, HelpHeight - 0.7f), () =>
         {
-            var doc = DocumentManager.GetDocument("role." + PlayerControl.LocalPlayer.GetModInfo()!.Role.AssignableBase.InternalName);
+            var doc = DocumentManager.GetDocument("role." + PlayerControl.LocalPlayer.GetModInfo()!.Role.Unbox().AssignableBase.InternalName);
             return doc?.Build(inner) ?? GUIEmptyWidget.Default;
         });
         inner = scrollView.Artifact;
@@ -276,7 +270,7 @@ public static class HelpScreen
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized)
         {
-            buttons.Add(new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed), new TranslateTextComponent("achievement.filter.myRole")) { OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget("AchievementMyRole", a => NebulaGameManager.Instance.LocalPlayerInfo.AllAssigned().Any(r => r.AssignableBase == a.Category.role)), out var _)) });
+            buttons.Add(new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed), new TranslateTextComponent("achievement.filter.myRole")) { OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget("AchievementMyRole", a => NebulaGameManager.Instance.LocalPlayerInfo.AllAssigned().Any(r => r.Assignable == a.Category.role)), out var _)) });
         }
 
         var sidebar = new VerticalWidgetsHolder(GUIAlignment.Top, buttons);

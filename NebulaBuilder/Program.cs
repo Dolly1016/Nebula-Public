@@ -1,10 +1,6 @@
 ﻿using Nebula;
 using Octokit;
 using System.Diagnostics;
-using System.IO;
-using System.Text.Json;
-using System.Threading;
-using System.Windows.Forms;
 
 Console.WriteLine(GetDisplayVersion() + " ("+ GetTagVersion() +")");
 

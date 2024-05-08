@@ -1,8 +1,4 @@
-﻿
-
-using System.Runtime.CompilerServices;
-
-namespace Nebula.Tasks;
+﻿namespace Nebula.Tasks;
 
 [HarmonyPatch]
 public class NormalPlayerTaskPatch

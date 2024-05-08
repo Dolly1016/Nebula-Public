@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Il2CppSystem.Xml.Schema.XsdDuration;
-
-namespace Virial.Common;
+﻿namespace Virial.Common;
 
 [Flags]
 internal enum PermissionResult

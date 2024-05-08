@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Nebula.Behaviour;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.DI;
 
 namespace Nebula.Modules;
@@ -49,9 +45,19 @@ public static class PreloadManager
     public static (Exception, Type)? LastException = null;
     static private IEnumerator Preload()
     {
-        DIManager diManager = new DIManager();
-        diManager.RegisterContainer<Virial.Game.Game>(()=>new NebulaGameManager());
-        diManager.RegisterContainer<Virial.Game.Player>(() => new PlayerModInfo(null!));
+        DIManager.Instance.RegisterContainer(()=>new NebulaGameManager());
+        DIManager.Instance.RegisterContainer(() => new PlayerModInfo());
+
+        //IModule<Virial.Game.Game>
+        DIManager.Instance.RegisterModule(() => new Synchronizer());
+        DIManager.Instance.RegisterModule(() => new MeetingPlayerButtonManager());
+        DIManager.Instance.RegisterModule(() => new MeetingOverlayHolder());
+        DIManager.Instance.RegisterModule(() => new TitleShower());
+        DIManager.Instance.RegisterModule(() => new PerkHolder());
+        DIManager.Instance.RegisterModule(() => new FakeInformation());
+
+        //IModule<Virial.Game.Player>
+        DIManager.Instance.RegisterModule(() => new PlayerTaskState());
 
         void OnRaisedExcep(Exception exception, Type type)
         {

@@ -1,8 +1,4 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Events;
-using Nebula.Modules;
-using System.Collections;
-using Virial.Events.Statistics;
 using Virial.Text;
 
 namespace Nebula.Game;
@@ -160,11 +156,6 @@ public class GameStatistics
 
     public void RecordEvent(Event statisticsEvent)
     {
-        EventManager.HandleEvent(new StatisticsEvent(
-            NebulaGameManager.Instance!.GetModPlayerInfo(statisticsEvent.SourceId ?? 255), 
-            NebulaGameManager.Instance.AllPlayerInfo().Where(p => ((1 << p.PlayerId) & statisticsEvent.TargetIdMask) != 0).ToArray(),
-            statisticsEvent.RelatedTag));
-
         int index = allEvents.Count;
 
         if (statisticsEvent.Variation.CanCombine)
@@ -485,7 +476,7 @@ public class GameStatisticsViewer : MonoBehaviour
                     if (widget.Count > 0) widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
                     var roleText = NebulaGameManager.Instance.RoleHistory.EachMoment(history => history.PlayerId == near.Item1 && !(history.Time > statisticsEvent.Time),
                         (role, ghostRole, modifiers) => RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, false)).LastOrDefault();
-                    widget.Append(new MetaWidgetOld.Text(Nebula.Utilities.TextAttributeOld.BoldAttrLeft) { RawText = NebulaGameManager.Instance.GetModPlayerInfo(near.Item1)!.DefaultName });
+                    widget.Append(new MetaWidgetOld.Text(Nebula.Utilities.TextAttributeOld.BoldAttrLeft) { RawText = NebulaGameManager.Instance.GetPlayer(near.Item1)!.Name });
                     widget.Append(new MetaWidgetOld.VariableText(new Nebula.Utilities.TextAttributeOld(Nebula.Utilities.TextAttributeOld.BoldAttrLeft) { Alignment = TMPro.TextAlignmentOptions.TopLeft }.EditFontSize(1.35f)) { RawText = roleText ?? "" });
 
                 }
@@ -527,10 +518,10 @@ public class GameStatisticsViewer : MonoBehaviour
             Il2CppArgument<PoolablePlayer> GeneratePlayerView(byte id)
             {
                 PoolablePlayer player = GameObject.Instantiate(PlayerPrefab, detail.transform);
-                var info = NebulaGameManager.Instance?.GetModPlayerInfo(id);
-                player.UpdateFromPlayerOutfit(info?.DefaultOutfit!, PlayerMaterial.MaskType.None, false, true, null);
+                var info = NebulaGameManager.Instance?.GetPlayer(id);
+                player.UpdateFromPlayerOutfit(info?.Unbox().DefaultOutfit!, PlayerMaterial.MaskType.None, false, true, null);
                 player.ToggleName(true);
-                player.SetName(info?.DefaultName!, new Vector3(3.1f, 3.1f, 1f), Color.white, -15f);
+                player.SetName(info?.Name!, new Vector3(3.1f, 3.1f, 1f), Color.white, -15f);
                 player.transform.localScale = new Vector3(0.24f, 0.24f, 1f);
                 player.cosmetics.nameText.transform.parent.localPosition += new Vector3(0f, -1.05f, 0f);
                 return player;

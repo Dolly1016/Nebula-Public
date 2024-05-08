@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AmongUs.GameOptions;
-using HarmonyLib;
-using NAudio.MediaFoundation;
-using Nebula.Events;
-using Nebula.Player;
-
-// 各種使用可能なオブジェクトに関するパッチ
+﻿// 各種使用可能なオブジェクトに関するパッチ
 
 namespace Nebula.Patches;
 
@@ -46,7 +35,7 @@ public static class VentCanUsePatch
         
         float num = float.MaxValue;
         PlayerControl @object = pc.Object;
-        PlayerModInfo? modInfo = NebulaGameManager.Instance?.GetModPlayerInfo(pc.PlayerId);
+        GamePlayer? modInfo = NebulaGameManager.Instance?.GetPlayer(pc.PlayerId);
 
         if (@object.inVent && Vent.currentVent == __instance)
         {
@@ -54,8 +43,8 @@ public static class VentCanUsePatch
         }
         else {
             //ベント外にいる場合
-            couldUse &= (modInfo?.Role.CanUseVent ?? false) || @object.inVent || @object.walkingToVent;
-            if (modInfo?.Role.HasAnyTasks ?? false) couldUse &= !@object.MustCleanVent(__instance.Id);
+            couldUse &= (modInfo?.Role.Unbox().CanUseVent ?? false) || @object.inVent || @object.walkingToVent;
+            if (modInfo?.Role.Unbox().HasAnyTasks ?? false) couldUse &= !@object.MustCleanVent(__instance.Id);
             couldUse &= !pc.IsDead && @object.CanMove;
         }
 
@@ -84,7 +73,7 @@ public static class VentCanUsePatch
 public static class VentSetOutlinePatch
 {
     public static bool Prefix(Vent __instance, [HarmonyArgument(0)]bool on, [HarmonyArgument(1)]bool mainTarget) {
-        Color color = PlayerControl.LocalPlayer.GetModInfo()!.Role.Role.RoleColor;
+        Color color = PlayerControl.LocalPlayer.GetModInfo()!.Unbox().Role.Role.RoleColor;
         __instance.myRend.material.SetFloat("_Outline", (float)(on ? 1 : 0));
         __instance.myRend.material.SetColor("_OutlineColor", color);
         __instance.myRend.material.SetColor("_AddColor", mainTarget ? color : Color.clear);
@@ -98,11 +87,9 @@ public static class EnterVentPatch
 {
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
-        EventManager.HandleEvent(new Virial.Events.Player.PlayerExitVentEvent(pc.GetModInfo()!));
-
-        pc.GetModInfo()?.Role.OnEnterVent(__instance);
+        pc.GetModInfo()?.Role.Unbox().OnEnterVent(__instance);
         NebulaGameManager.Instance?.AllRoleAction(r => r.OnEnterVent(pc, __instance));
-        pc.GetModInfo()?.Role.VentDuration?.Start();
+        pc.GetModInfo()?.Role.Unbox().VentDuration?.Start();
     }
 }
 
@@ -111,11 +98,9 @@ public static class ExitVentPatch
 {
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
-        EventManager.HandleEvent(new Virial.Events.Player.PlayerEnterVentEvent(pc.GetModInfo()!));
-
-        pc.GetModInfo()?.Role.OnExitVent(__instance);
+        pc.GetModInfo()?.Role.Unbox().OnExitVent(__instance);
         NebulaGameManager.Instance?.AllRoleAction(r => r.OnExitVent(pc, __instance));
-        pc.GetModInfo()?.Role.VentCoolDown?.Start();
+        pc.GetModInfo()?.Role.Unbox().VentCoolDown?.Start();
     }
 }
 
@@ -151,7 +136,7 @@ public static class VentUsePatch
         if (!localPlayer.walkingToVent)
             localPlayer.MyPhysics.RpcEnterVent(__instance.Id);
 
-        __instance.SetButtons(!isNotEnter && localPlayer.GetModInfo()!.Role.CanMoveInVent);
+        __instance.SetButtons(!isNotEnter && localPlayer.GetModInfo()!.Role.Unbox().CanMoveInVent);
         return false;
     }
 }
@@ -163,14 +148,14 @@ public static class ConsoleCanUsePatch
     {
         canUse = couldUse = false;
 
-        var info = NebulaGameManager.Instance?.GetModPlayerInfo(PlayerControl.LocalPlayer.PlayerId);
+        var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
         if (info == null) return true;
 
         if (ShipStatus.Instance.SpecialTasks.Any((task) => __instance.TaskTypes.Contains(task.TaskType)))
         {
             if (
-                (__instance.TaskTypes.Contains(TaskTypes.FixLights) && info.AllAssigned().Any(assignable => !assignable.CanFixLight)) ||
-                (__instance.TaskTypes.Contains(TaskTypes.FixComms) && info.AllAssigned().Any(assignable => !assignable.CanFixComm))
+                (__instance.TaskTypes.Contains(TaskTypes.FixLights) && info.AllAssigned().Any(assignable => !assignable.Unbox().CanFixLight)) ||
+                (__instance.TaskTypes.Contains(TaskTypes.FixComms) && info.AllAssigned().Any(assignable => !assignable.Unbox().CanFixComm))
                 )
             {
                 __result = float.MaxValue;
@@ -180,7 +165,7 @@ public static class ConsoleCanUsePatch
 
         if (__instance.AllowImpostor) return true;
 
-        if (!info.Role.HasAnyTasks)
+        if (!info.Role.Unbox().HasAnyTasks)
         {
             __result = float.MaxValue;
             return false;
@@ -195,11 +180,11 @@ public static class SystemConsoleCanUsePatch
 {
     public static void Postfix(SystemConsole __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc, [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse)
     {
-        var info = NebulaGameManager.Instance?.GetModPlayerInfo(PlayerControl.LocalPlayer.PlayerId);
+        var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
         if (info == null) return;
 
         //緊急会議コンソールの使用をブロック
-        if(__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting))
+        if(__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.Unbox().CanCallEmergencyMeeting))
         {
             canUse = false;
             couldUse = false;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Nebula.Roles.Impostor
+﻿namespace Nebula.Roles.Impostor
 {
     public class Covert : Role
     {

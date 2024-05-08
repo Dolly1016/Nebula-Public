@@ -1,11 +1,4 @@
-﻿using Il2CppSystem.Runtime.CompilerServices;
-using Nebula.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial;
+﻿using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Game;
@@ -52,11 +45,10 @@ public enum ExtraWinCheckPhase
     ObsessionPhase = Phase0,
 }
 
-public abstract class AssignableInstance : ComponentHolder, Virial.IBinderLifespan, IGamePlayerEntity
+public abstract class AssignableInstance : ComponentHolder, RuntimeAssignable, Virial.IBinderLifespan, IGamePlayerEntity
 {
     public virtual IAssignableBase AssignableBase { get; } = null!;
     public GamePlayer MyPlayer { get; private init; }
-    GamePlayer IGamePlayerEntity.MyPlayer => MyPlayer;
     public bool AmOwner => MyPlayer.AmOwner;
 
     public AssignableInstance(GamePlayer player)
@@ -92,11 +84,30 @@ public abstract class AssignableInstance : ComponentHolder, Virial.IBinderLifesp
 
     public virtual string? GetExtraTaskText() => null;
 
+    public virtual KillResult CheckKill(GamePlayer killer, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool isMeetingKill) { return KillResult.Kill; }
+
+
+    //////////////////////////////////////////
+    //                                      //
+    //              Virial API              //
+    //                                      //
+    //////////////////////////////////////////
+
+
+    // Virial.AssignableAPI
+
+    DefinedAssignable RuntimeAssignable.Assignable => AssignableBase;
+
+    GamePlayer RuntimeAssignable.MyPlayer => MyPlayer;
+
+
+    // Virtial.GameEntityAPI
+    GamePlayer IGamePlayerEntity.MyPlayer => MyPlayer;
+
+    // Virial.AssignableAspectAPI
+
     public virtual bool CanFixLight { get => true; }
     public virtual bool CanFixComm { get => true; }
     public virtual bool CanBeAwareAssignment { get => true; }
     public virtual bool CanCallEmergencyMeeting { get => true; }
-
-
-    public virtual KillResult CheckKill(GamePlayer killer, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool isMeetingKill) { return KillResult.Kill; }
 }

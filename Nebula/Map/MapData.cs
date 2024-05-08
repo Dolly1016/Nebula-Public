@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using Nebula.Module;
+﻿using Nebula.Module;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 

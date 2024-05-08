@@ -1,12 +1,5 @@
 ﻿using AmongUs.GameOptions;
-using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Rewired.Utils.Platforms.Windows;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.Game;
 
 namespace Nebula.Patches;
@@ -38,16 +31,16 @@ public class LightPatch
         float t = (float)(switchSystem?.Value ?? 255f) / 255f;
 
         var info = PlayerControl.LocalPlayer.GetModInfo();
-        bool hasImpostorVision = info?.Role.HasImpostorVision ?? false;
-        bool ignoreBlackOut = info?.Role.IgnoreBlackout ?? true;
+        bool hasImpostorVision = info?.Unbox().Role.HasImpostorVision ?? false;
+        bool ignoreBlackOut = info?.Unbox().Role.IgnoreBlackout ?? true;
 
         if (ignoreBlackOut) t = 1f;
 
         float radiusRate = Mathf.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, t);
         float range = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(hasImpostorVision ? FloatOptionNames.ImpostorLightMod : FloatOptionNames.CrewLightMod);
         float rate = 1f;
-        info?.AssignableAction(r=>r.EditLightRange(ref rate));
-        rate *= NebulaGameManager.Instance?.LocalPlayerInfo?.CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
+        info?.Unbox().AssignableAction(r=>r.Unbox().EditLightRange(ref rate));
+        rate *= NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
 
         lastRange -= (lastRange - rate).Delta(0.7f, 0.005f);
         __result = radiusRate * range * lastRange;

@@ -1,7 +1,5 @@
 ﻿using Nebula.Behaviour;
-using Nebula.Events;
-using Virial.Events.Meeting;
-using Virial.Events.Player;
+using Virial;
 using Virial.Helpers;
 
 namespace Nebula.Patches;
@@ -14,8 +12,8 @@ public static class ModPreSpawnInPatch
         {
             NebulaPreSpawnMinigame spawnInMinigame = UnityHelper.CreateObject<NebulaPreSpawnMinigame>("PreSpawnInMinigame", minigameParent, new Vector3(0, 0, -600f), LayerExpansion.GetUILayer());
             spawnInMinigame.Begin(null!);
-            yield return NebulaGameManager.Instance?.Syncronizer.CoSync(Modules.SynchronizeTag.PreSpawnMinigame, true, false, false);
-            NebulaGameManager.Instance?.Syncronizer.ResetSync(Modules.SynchronizeTag.PreSpawnMinigame);
+            yield return NebulaAPI.CurrentGame.GetModule<Synchronizer>()?.CoSync(Modules.SynchronizeTag.PreSpawnMinigame, true, false, false);
+            NebulaAPI.CurrentGame.GetModule<Synchronizer>()?.ResetSync(Modules.SynchronizeTag.PreSpawnMinigame);
             spawnInMinigame.CloseSpawnInMinigame();
 
             NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(eventVariation, null, 0, GameStatisticsGatherTag.Spawn) { RelatedTag = tag });
@@ -48,9 +46,9 @@ public static class NebulaExileWrapUp
 
                     if (info != null)
                     {
-                        info.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-                        info.MyState = PlayerState.Exiled;
-                        if (info.AmOwner && NebulaAchievementManager.GetRecord("death." + info.MyState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+                        info.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+                        info.Unbox().MyState = PlayerState.Exiled;
+                        if (info.AmOwner && NebulaAchievementManager.GetRecord("death." + info.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
 
 
                         //Entityイベント発火
@@ -60,8 +58,6 @@ public static class NebulaExileWrapUp
                             e.OnDead();
                         });
 
-                        //APIイベント発火
-                        EventManager.HandleEvent(new PlayerDeadEvent(info));
 
                         //Entityイベント発火
                         GameEntityManager.Instance?.AllEntities.Do(e =>
@@ -69,16 +65,13 @@ public static class NebulaExileWrapUp
                             e.OnPlayerExiled(info);
                             e.OnPlayerDead(info);
                         });
-
-                        var checkEvent = EventManager.HandleEvent(new CheckExtraVictimEvent(info));
-                        foreach (var victim in checkEvent.ExtraVictim) victim.victim.VanillaPlayer.ModMarkAsExtraVictim(victim.killer?.VanillaPlayer, victim.reason, victim.eventDetail);
                     }
                 }
 
-                NebulaGameManager.Instance?.Syncronizer.SendSync(SynchronizeTag.CheckExtraVictims);
+                NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.SendSync(SynchronizeTag.CheckExtraVictims);
             }
 
-            yield return NebulaGameManager.Instance!.Syncronizer.CoSyncAndReset(Modules.SynchronizeTag.CheckExtraVictims, true, true, false);
+            yield return NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.CoSyncAndReset(Modules.SynchronizeTag.CheckExtraVictims, true, true, false);
 
             bool extraExile = MeetingHudExtension.ExtraVictims.Count > 0;
             MeetingHudExtension.ExileExtraVictims();
@@ -112,9 +105,9 @@ public static class NebulaExileWrapUp
             }
         }
 
-        yield return NebulaGameManager.Instance?.AllPlayerInfo().Select(p => p.Role?.CoMeetingEnd()).WaitAll();
-        NebulaGameManager.Instance!.Syncronizer.SendSync(SynchronizeTag.PostMeeting);
-        yield return NebulaGameManager.Instance!.Syncronizer.CoSyncAndReset(Modules.SynchronizeTag.PostMeeting, true, true, false);
+        yield return NebulaGameManager.Instance?.AllPlayerInfo().Select(p => p.Role?.Unbox().CoMeetingEnd()).WaitAll();
+        NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.SendSync(SynchronizeTag.PostMeeting);
+        yield return NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.CoSyncAndReset(Modules.SynchronizeTag.PostMeeting, true, true, false);
 
         NebulaGameManager.Instance?.OnMeetingEnd(MeetingHudExtension.ExiledAll);
         GamePlayer[] exiledArray = MeetingHudExtension.ExiledAll?.Select(p => p.GetModInfo()!).ToArray() ?? new GamePlayer[0];
@@ -165,10 +158,10 @@ class ExileControllerBeginPatch
         }
         else if (GeneralConfigurations.ShowRoleOfExiled)
         {
-            var role = NebulaGameManager.Instance.GetModPlayerInfo(exiled.PlayerId)?.Role;
+            var role = NebulaGameManager.Instance.GetPlayer(exiled.PlayerId)?.Role;
             if (role != null)
             {
-                __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", exiled.PlayerName).Replace("%ROLE%", role.Role.DisplayName);
+                __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", exiled.PlayerName).Replace("%ROLE%", role.Role.Unbox().DisplayName);
                 if (role.Role == Roles.Neutral.Jester.MyRole) __instance.ImpostorText.text = Language.Translate("game.meeting.roleJesterText");
             }
         }

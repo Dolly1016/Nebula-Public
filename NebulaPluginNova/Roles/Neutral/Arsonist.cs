@@ -1,12 +1,4 @@
 ﻿using Nebula.Behaviour;
-using Nebula.Configuration;
-using Nebula.Utilities;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -114,7 +106,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
                 {
                     if (p.AmOwner) continue;
 
-                    var icon = AmongUsUtil.GetPlayerIcon(p.DefaultOutfit, ajust.transform, Vector3.zero, Vector3.one * 0.31f);
+                    var icon = AmongUsUtil.GetPlayerIcon(p.Unbox().DefaultOutfit, ajust.transform, Vector3.zero, Vector3.one * 0.31f);
                     icon.ToggleName(false);
                     icon.SetAlpha(0.35f);
                     playerIcons.Add((p.PlayerId,icon));
@@ -179,7 +171,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
             if (!AmOwner) return;
             playerIcons.RemoveAll(tuple =>
             {
-                if (NebulaGameManager.Instance?.GetModPlayerInfo(tuple.playerId)?.IsDead ?? true)
+                if (NebulaGameManager.Instance?.GetPlayer(tuple.playerId)?.IsDead ?? true)
                 {
                     GameObject.Destroy(tuple.icon.gameObject);
                     return true;
@@ -194,7 +186,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         {
             if (AmOwner)
             {
-                if (acTokenCommon == null && playerIcons.Count(icon => CheckDoused(icon) && ((!NebulaGameManager.Instance?.GetModPlayerInfo(icon.playerId)?.IsDead) ?? false)) >= 3)
+                if (acTokenCommon == null && playerIcons.Count(icon => CheckDoused(icon) && ((!NebulaGameManager.Instance?.GetPlayer(icon.playerId)?.IsDead) ?? false)) >= 3)
                     acTokenCommon = new("arsonist.common1");
             }
         }
@@ -204,7 +196,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         {
             if (AmOwner)
             {
-                var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon) && (!(NebulaGameManager.Instance?.GetModPlayerInfo(icon.playerId)?.IsDead ?? true) || exiled.PlayerId == icon.playerId));
+                var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon) && (!(NebulaGameManager.Instance?.GetPlayer(icon.playerId)?.IsDead ?? true) || exiled.PlayerId == icon.playerId));
                 if (notDoused.Count == 1 && notDoused[0].playerId == exiled.PlayerId)
                     acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
             }

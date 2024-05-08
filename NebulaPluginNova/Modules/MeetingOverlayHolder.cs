@@ -1,17 +1,13 @@
 ﻿using Nebula.Compat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial;
 using Virial.Accessibility;
+using Virial.DI;
 using Virial.Game;
 using Virial.Media;
 
 namespace Nebula.Modules;
 
-internal class MeetingOverlayHolder : OverlayHolder, IGameEntity
+internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayHolder, IGameEntity
 {
     static IDividedSpriteLoader IconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.MeetingNotification.png", 100f, 4, 1);
     static ISpriteLoader NotificationSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingNotificationDot.png", 135f);
@@ -22,6 +18,11 @@ internal class MeetingOverlayHolder : OverlayHolder, IGameEntity
 
     //常駐エンティティ
     public bool IsDeadObject => false;
+
+    public MeetingOverlayHolder()
+    {
+        this.Register(NebulaAPI.CurrentGame!);
+    }
 
     public void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color)
     {

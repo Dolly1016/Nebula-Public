@@ -1,6 +1,4 @@
-﻿using Nebula.Game;
-
-namespace Nebula.Roles.Perk.CrewmatePerks;
+﻿namespace Nebula.Roles.Perk.CrewmatePerks;
 
 public class Lifeline : Perk
 {

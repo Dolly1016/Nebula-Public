@@ -1,16 +1,8 @@
 ﻿using Nebula.Compat;
-using Nebula.Events;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial;
 using Virial.Assignable;
-using Virial.Components;
-using Virial.Media;
 using Virial.Text;
 
 namespace Nebula;
@@ -45,11 +37,6 @@ public class NebulaImpl : INebula
     public RoleTeam CreateTeam(string translationKey, Virial.Color color, TeamRevealType revealType)
     {
         return new Team(translationKey,color.ToUnityColor(), revealType);
-    }
-
-    public void RegisterEventHandler(ILifespan lifespan,object handler)
-    {
-        EventManager.RegisterEvent(lifespan, handler);
     }
 
     public Virial.Components.AbilityButton CreateAbilityButton()
@@ -92,6 +79,8 @@ internal static class UnboxExtension
     internal static AbstractModifier Unbox(this DefinedModifier role) => (AbstractModifier)role;
     internal static ModAbilityButton Unbox(this Virial.Components.AbilityButton button) => (ModAbilityButton)button;
     internal static CustomEndCondition Unbox(this Virial.Game.GameEnd end) => (CustomEndCondition)end;
+    internal static AssignableInstance Unbox(this Virial.Assignable.RuntimeAssignable assignable) => (AssignableInstance)assignable;
+    internal static PlayerTaskState Unbox(this Virial.Game.PlayerTasks taskInfo) => (PlayerTaskState)taskInfo;
 }
 
 public static class ComponentHolderHelper

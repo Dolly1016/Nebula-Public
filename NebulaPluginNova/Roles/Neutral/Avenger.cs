@@ -1,11 +1,5 @@
-﻿using Nebula.Behaviour;
-using Nebula.Roles.Abilities;
+﻿using Nebula.Roles.Abilities;
 using Nebula.Roles.Modifier;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Virial;
 using Virial.Assignable;
 using Virial.Game;
@@ -72,7 +66,7 @@ public class Avenger : ConfigurableRole
         public GamePlayer? AvengerTarget => target;
         public Instance(GamePlayer player,byte targetId) : base(player)
         {
-            target = NebulaGameManager.Instance?.GetModPlayerInfo(targetId);
+            target = NebulaGameManager.Instance?.GetPlayer(targetId);
         }
 
         public override int[]? GetRoleArgument() => [target?.PlayerId ?? 255];
@@ -82,7 +76,7 @@ public class Avenger : ConfigurableRole
 
             if (AmOwner)
             {
-                NebulaGameManager.Instance?.TitleShower.SetText("You became AVENGER.", MyRole.RoleColor, 5.5f, true);
+                NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText("You became AVENGER.", MyRole.RoleColor, 5.5f, true);
                 AmongUsUtil.PlayCustomFlash(MyRole.RoleColor, 0f, 0.8f, 0.7f);
 
                 var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));

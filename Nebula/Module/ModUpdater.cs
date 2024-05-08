@@ -1,5 +1,4 @@
-﻿using BepInEx.Configuration;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 using System.Reflection;
 using System.Net;
 using System.Net.Http.Headers;

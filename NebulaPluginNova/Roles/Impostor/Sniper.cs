@@ -1,5 +1,4 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
-using Nebula.Behaviour;
+﻿using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
 using Virial.Game;
@@ -87,14 +86,14 @@ public class Sniper : ConfigurableStandardRole, HasCitation
 
             foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
-                if (p.IsDead || p.AmOwner || ((!MyRole.CanKillHidingPlayerOption) && p.MyControl.inVent)) continue;
+                if (p.IsDead || p.AmOwner || ((!MyRole.CanKillHidingPlayerOption) && p.VanillaPlayer.inVent)) continue;
 
                 //インポスターは無視
                 if (p.Role.Role.Category == RoleCategory.ImpostorRole) continue;
                 //不可視なプレイヤーは無視
-                if (p.IsInvisible) continue;
+                if (p.Unbox().IsInvisible) continue;
 
-                var pos = p.MyControl.GetTruePosition();
+                var pos = p.VanillaPlayer.GetTruePosition();
                 Vector2 diff = pos - (Vector2)Renderer.transform.position;
 
                 //移動と回転を施したベクトル
@@ -325,7 +324,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
         "EquipRifle",
         (message, _) =>
         {
-            var role = NebulaGameManager.Instance?.GetModPlayerInfo(message.playerId)?.Role;
+            var role = NebulaGameManager.Instance?.GetPlayer(message.playerId)?.Role;
             if (role is Sniper.Instance sniper)
             {
                 if (message.equip)

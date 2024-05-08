@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial;
+﻿using Virial;
 using Virial.Game;
 
 namespace Nebula.Roles;
@@ -14,7 +9,7 @@ public record PerkDefinition(string localizedName, Image backSprite, Image iconS
     public PerkDefinition(string localizedName, int backId, int iconId, Color perkColor) : this(localizedName, GetPerkBackIcon(backId), GetPerkIcon(iconId), perkColor) { }
     public PerkInstance? Instantiate(Virial.ILifespan? lifespan = null)
     {
-        var perk = NebulaGameManager.Instance?.PerkHolder?.RegisterPerk(this);
+        var perk = NebulaAPI.CurrentGame?.GetModule<PerkHolder>()?.RegisterPerk(this);
         if (lifespan != null) perk?.Register(lifespan);
         return perk;
     }

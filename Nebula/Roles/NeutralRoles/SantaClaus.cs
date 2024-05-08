@@ -1,7 +1,4 @@
-﻿using Nebula.Patches;
-using Nebula.Game;
-
-namespace Nebula.Roles.NeutralRoles;
+﻿namespace Nebula.Roles.NeutralRoles;
 
 /*
 public class SantaClaus : Role

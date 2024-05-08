@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Runtime;
-
-namespace Virial.Attributes;
+﻿namespace Virial.Attributes;
 
 /// <summary>
 /// メソッド呼び出しをRPC呼び出しに置き換える属性です。

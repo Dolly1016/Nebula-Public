@@ -1,10 +1,5 @@
-﻿using Nebula.Game;
-using Rewired.Libraries.SharpDX.RawInput;
-using Rewired.Utils.Platforms.Windows;
-using System.ComponentModel.DataAnnotations;
-using Virial.Components;
+﻿using Virial.Components;
 using Virial.Game;
-using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 
 namespace Nebula.Modules.ScriptComponents;
 

@@ -1,11 +1,4 @@
-﻿using NAudio.CoreAudioApi;
-using Nebula.Modules;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Game;
 
 namespace Nebula.Roles.Complex;
@@ -268,15 +261,15 @@ public class Trapper : ConfigurableStandardRole
                 foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                 {
                     if (p.AmOwner) continue;
-                    if (p.IsDead || p.IsInvisible) continue;
-                    if (p.MyControl.transform.position.Distance(commTrap.Position) < CommTrapSizeOption.GetFloat() * 0.35f)
+                    if (p.IsDead || p.Unbox().IsInvisible) continue;
+                    if (p.VanillaPlayer.transform.position.Distance(commTrap.Position) < CommTrapSizeOption.GetFloat() * 0.35f)
                     {
                         //直前にトラップを踏んでいるプレイヤーは無視する
                         commMask |= 1u << p.PlayerId;
                         if ((lastCommPlayersMask & (1u << p.PlayerId)) != 0) continue;
 
                         //Camo貫通(Morphingまで効果を受ける)
-                        var arrow = new Arrow().SetColorByOutfit(p.GetOutfit(75));
+                        var arrow = new Arrow().SetColorByOutfit(p.Unbox().GetOutfit(75));
                         arrow.TargetPos = commTrap.Position;
                         NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
 
@@ -328,13 +321,13 @@ public class Trapper : ConfigurableStandardRole
                 foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
                 {
                     if (p.AmOwner) continue;
-                    if (p.IsDead || p.MyControl.Data.Role.IsImpostor) continue;
+                    if (p.IsDead || p.VanillaPlayer.Data.Role.IsImpostor) continue;
 
-                    if (p.MyControl.transform.position.Distance(killTrap.Position) < KillTrapSizeOption.GetFloat() * 0.35f)
+                    if (p.VanillaPlayer.transform.position.Distance(killTrap.Position) < KillTrapSizeOption.GetFloat() * 0.35f)
                     {
                             using (RPCRouter.CreateSection("TrapKill"))
                             {
-                                PlayerControl.LocalPlayer.ModKill(p.MyControl,false,PlayerState.Trapped,EventDetail.Trap);
+                                PlayerControl.LocalPlayer.ModKill(p.VanillaPlayer,false,PlayerState.Trapped,EventDetail.Trap);
                                 RpcTrapKill.Invoke(killTrap.ObjectId);
                                 acTokenChallenge!.Value++;
                             }

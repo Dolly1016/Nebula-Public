@@ -1,6 +1,4 @@
-﻿using Nebula.Game;
-
-namespace Nebula.Roles.Perk.ImpostorPerks;
+﻿namespace Nebula.Roles.Perk.ImpostorPerks;
 
 public class DerelictCorpse : Perk
 {

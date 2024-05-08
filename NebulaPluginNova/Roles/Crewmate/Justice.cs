@@ -1,4 +1,6 @@
-﻿using Nebula.Patches;
+﻿using Nebula.Behaviour;
+using Nebula.Patches;
+using Virial;
 using Virial.Assignable;
 using Virial.Game;
 
@@ -50,7 +52,8 @@ public class Justice : ConfigurableStandardRole, HasCitation
 
             if (AmOwner && !usedBalance)
             {
-                NebulaGameManager.Instance?.MeetingPlayerButtonManager.RegisterMeetingAction(new(meetingSprite,
+                var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
+                buttonManager?.RegisterMeetingAction(new(meetingSprite,
                    p =>
                    {
                        if (MyRole.PutJusticeOnTheBalanceOption)
@@ -64,7 +67,7 @@ public class Justice : ConfigurableStandardRole, HasCitation
                                p.SetSelect(false);
                            else
                            {
-                               var selected = NebulaGameManager.Instance?.MeetingPlayerButtonManager.AllStates.FirstOrDefault(p => p.IsSelected);
+                               var selected = buttonManager.AllStates.FirstOrDefault(p => p.IsSelected);
 
                                if (selected != null)
                                {

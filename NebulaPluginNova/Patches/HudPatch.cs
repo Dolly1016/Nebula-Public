@@ -1,8 +1,5 @@
-﻿using HarmonyLib;
-using Nebula.Behaviour;
-using Nebula.Game;
-using System;
-using System.Collections;
+﻿using Nebula.Behaviour;
+using Virial.DI;
 using static Nebula.Modules.HelpScreen;
 
 namespace Nebula.Patches;
@@ -16,7 +13,7 @@ public static class HudManagerStartPatch
     }
     static void Postfix(HudManager __instance)
     {
-        new NebulaGameManager();
+        DIManager.Instance.Instantiate<Virial.Game.Game>();
 
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light(Dummy)", Camera.main.transform, new Vector3(0, 0, -1.5f), LayerExpansion.GetDrawShadowsLayer());
         renderer.sprite = VanillaAsset.FullScreenSprite;
@@ -89,9 +86,9 @@ class TaskTextPatch
         try
         {
             var text = __instance.taskText.text;
-            PlayerControl.LocalPlayer.GetModInfo()?.AssignableAction(r =>
+            PlayerControl.LocalPlayer.GetModInfo()?.AllAssigned().Do(r =>
             {
-                string? str = r.GetExtraTaskText();
+                string? str = r.Unbox().GetExtraTaskText();
                 if (str != null) text += "\n" + str;
             });
 

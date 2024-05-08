@@ -1,11 +1,4 @@
-﻿using Nebula.Events;
-using Rewired.Data.Mapping;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial;
+﻿using Virial;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;

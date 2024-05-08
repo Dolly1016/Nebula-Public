@@ -1,11 +1,5 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behaviour;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Nebula.Roles.Crewmate.Phosphorus;
 
 namespace Nebula.Extensions;
 

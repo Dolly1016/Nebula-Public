@@ -2,17 +2,9 @@
 using AmongUs.Data;
 using Assets.InnerNet;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Net.Http.Headers;
 using System.Net;
-using static Il2CppMono.Security.X509.X520;
-using static Il2CppSystem.Globalization.CultureInfo;
 
 namespace Nebula.Patches;
 

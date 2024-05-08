@@ -1,13 +1,4 @@
-﻿using HarmonyLib;
-using Nebula.Game;
-using Nebula.Modules;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(PlayerTab), nameof(PlayerTab.OnEnable))]
 public static class ColorTabEnablePatch

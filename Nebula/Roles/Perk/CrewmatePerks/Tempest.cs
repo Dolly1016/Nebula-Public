@@ -1,5 +1,4 @@
-﻿using Il2CppSystem.Threading.Tasks;
-using Nebula.Game;
+﻿using Nebula.Game;
 using Nebula.Roles.ComplexRoles;
 
 namespace Nebula.Roles.Perk.CrewmatePerks;

@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Linq;
-
+﻿using Virial;
+using Virial.DI;
 
 namespace Nebula.Modules;
 
@@ -12,7 +11,7 @@ public enum SynchronizeTag
 }
 
 [NebulaRPCHolder]
-public class Synchronizer
+public class Synchronizer : AbstractModule<Virial.Game.Game>
 {
     public Dictionary<SynchronizeTag, uint> sync = new();
     
@@ -29,7 +28,7 @@ public class Synchronizer
 
     static public RemoteProcess<(SynchronizeTag, byte)> RpcSync = new(
         "Syncronize",
-        (message, calledByMe) => NebulaGameManager.Instance?.Syncronizer.Sync(message.Item1,message.Item2)
+        (message, calledByMe) => NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.Sync(message.Item1,message.Item2)
         );
 
     public void SendSync(SynchronizeTag tag)
@@ -63,7 +62,7 @@ public class Synchronizer
             if (!withSurviver && !p.Data.IsDead) continue;
             if (!withGhost && p.Data.IsDead) continue;
             if (!withBot && p.isDummy) continue;
-            if (!withVanilla && (!p.GetModInfo()?.WithNoS ?? false)) continue;
+            if (!withVanilla && (!p.GetModInfo()?.Unbox().WithNoS ?? false)) continue;
 
             if ((sync[tag] & (1 << p.PlayerId)) == 0) return false;
         }

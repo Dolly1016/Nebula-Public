@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.DI;
+﻿using Virial.DI;
 
 namespace Virial.Game;
 
 /// <summary>
 /// 現在プレイ中のゲームを表します。
 /// </summary>
-public interface Game : IModuleContainer<Game>, ILifespan
+public interface Game : IModuleContainer, ILifespan
 {
     /// <summary>
     /// プレイヤーを取得します。

@@ -1,11 +1,5 @@
 ﻿using AmongUs.GameOptions;
 using Nebula.Behaviour;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 
 namespace Nebula.Utilities;
 
@@ -155,9 +149,9 @@ public static class AmongUsUtil
         RpcCleanDeadBodyDef.Invoke(new() { TargetId = bodyId, SourceId = sourceId, RelatedTag = relatedTag });
     }
 
-    internal static PlayerModInfo? GetHolder(this DeadBody body)
+    internal static GamePlayer? GetHolder(this DeadBody body)
     {
-        return NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault((p) => p.HoldingDeadBodyId.HasValue && p.HoldingDeadBodyId.Value == body.ParentId);
+        return NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault((p) => p.HoldingAnyDeadBody && p.HoldingDeadBody?.PlayerId == body.ParentId);
     }
 
 

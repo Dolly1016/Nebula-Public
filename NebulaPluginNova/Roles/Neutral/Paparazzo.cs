@@ -1,13 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using LibCpp2IL;
 using Nebula.Behaviour;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Virial;
 using Virial.Assignable;
 using Virial.Game;
@@ -129,7 +122,7 @@ public class PaparazzoShot : MonoBehaviour
         int playerNum = 0;
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
         {
-            if (p.Data.IsDead || !p.Visible || (p.GetModInfo()?.IsInvisible ?? false)) continue;
+            if (p.Data.IsDead || !p.Visible || (p.GetModInfo()?.Unbox().IsInvisible ?? false)) continue;
             if (p.AmOwner) continue;
 
             if (collider.OverlapPoint(p.transform.position))
@@ -147,7 +140,7 @@ public class PaparazzoShot : MonoBehaviour
         {
             if (collider.OverlapPoint(body.transform.position))
             {
-                var info = NebulaGameManager.Instance!.GetModPlayerInfo(body.ParentId);
+                var info = NebulaGameManager.Instance!.GetPlayer(body.ParentId);
                 if (info?.MyKiller != null && (playerMask & (1 << info.MyKiller.PlayerId)) != 0)
                 {
                     //死体とそのキラーが映っているならば
@@ -224,7 +217,7 @@ public class PaparazzoShot : MonoBehaviour
                 foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) {
                     if (((1 << p.PlayerId) & playerMask) == 0) continue;
 
-                    var icon = AmongUsUtil.GetPlayerIcon(p.GetModInfo()!.CurrentOutfit, players.transform, new Vector3((float)(-(playerNum - 1) + num * 2) * 0.075f, -0.3f, -0.2f), Vector3.one * 0.1f);
+                    var icon = AmongUsUtil.GetPlayerIcon(p.GetModInfo()!.Unbox().CurrentOutfit, players.transform, new Vector3((float)(-(playerNum - 1) + num * 2) * 0.075f, -0.3f, -0.2f), Vector3.one * 0.1f);
                     icon.transform.localEulerAngles = Vector3.zero;
                     var script = icon.gameObject.AddComponent<ScriptBehaviour>();
                     var paparazzo = (PlayerControl.LocalPlayer.GetModInfo()!.Role as Paparazzo.Instance)!;
@@ -638,7 +631,7 @@ public class Paparazzo : ConfigurableStandardRole
 
     public static RemoteProcess<(byte playerId, int subjectMask, int disclosedMask)> RpcShareState = new ("SharePaparazzo", (message,_) =>
     {
-        var role = NebulaGameManager.Instance?.GetModPlayerInfo(message.playerId)?.Role;
+        var role = NebulaGameManager.Instance?.GetPlayer(message.playerId)?.Role;
         if (role is Paparazzo.Instance paparazzo)
         {
             paparazzo.CapturedMask = message.subjectMask;

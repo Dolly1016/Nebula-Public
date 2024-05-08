@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace Nebula.Patches;
+﻿namespace Nebula.Patches;
 
 [HarmonyPatch]
 class LightPatch

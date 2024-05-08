@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Configuration;
 using Virial.DI;
 using Virial.Text;
@@ -36,6 +31,15 @@ public interface NebulaPreprocessor
     /// </summary>
     /// <param name="assignable"></param>
     void RegisterAssignable(DefinedAssignable assignable);
+
+    /// <summary>
+    /// 新たなロールチームを追加します。
+    /// </summary>
+    /// <param name="translationKey"></param>
+    /// <param name="color"></param>
+    /// <param name="revealType"></param>
+    /// <returns></returns>
+    RoleTeam CreateTeam(string translationKey, Color color, TeamRevealType revealType);
 
     DIManager DIManager { get; }
 }

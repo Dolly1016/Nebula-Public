@@ -1,10 +1,4 @@
-﻿using Nebula.Configuration;
-using System;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial.Assignable;
+﻿using Virial.Assignable;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;

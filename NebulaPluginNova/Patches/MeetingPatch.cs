@@ -1,13 +1,6 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
-using HarmonyLib;
-using System.Collections;
-using Nebula.Modules;
-using UnityEngine.Rendering;
+﻿using UnityEngine.Rendering;
 using Nebula.Behaviour;
 using static MeetingHud;
-using Steamworks;
-using System.Reflection;
-using Nebula.Map;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 namespace Nebula.Patches;
@@ -24,7 +17,7 @@ public static class MeetingModRpc
 
     public static void SortVotingArea(this MeetingHud __instance, Func<GamePlayer, int> rank)
     {
-        var ordered = __instance.playerStates.OrderBy(p => p.TargetPlayerId + 32 * rank.Invoke(NebulaGameManager.Instance!.GetModPlayerInfo(p.TargetPlayerId)!)).ToArray();
+        var ordered = __instance.playerStates.OrderBy(p => p.TargetPlayerId + 32 * rank.Invoke(NebulaGameManager.Instance!.GetPlayer(p.TargetPlayerId)!)).ToArray();
 
         for(int i = 0; i < ordered.Length; i++)
             __instance.StartCoroutine(ordered[i].transform.Smooth(ToVoteAreaPos(i), 1.5f).WrapToIl2Cpp());
@@ -59,8 +52,8 @@ public static class MeetingModRpc
     public static readonly RemoteProcess<(byte reporter,byte reported)> RpcNoticeStartMeeting = new("ModStartMeeting",
     (message,_) =>
     {
-        var reporter = NebulaGameManager.Instance?.GetModPlayerInfo(message.reporter);
-        var reported = NebulaGameManager.Instance?.GetModPlayerInfo(message.reported);
+        var reporter = NebulaGameManager.Instance?.GetPlayer(message.reporter);
+        var reported = NebulaGameManager.Instance?.GetPlayer(message.reported);
 
         GameEntityManager.Instance?.AllEntities.Do(a => a.OnPreMeetingStart(reporter!, reported));
 
@@ -248,7 +241,7 @@ class MeetingStartPatch
     class MeetingPlayerContent
     {
         public TMPro.TextMeshPro NameText = null!, RoleText = null!;
-        public PlayerModInfo Player = null!;
+        public GamePlayer Player = null!;
     }
 
     static private void Update(List<MeetingPlayerContent> meetingContent)
@@ -257,8 +250,8 @@ class MeetingStartPatch
         {
             try
             {
-                if (content.NameText) content.Player.UpdateNameText(content.NameText, true);
-                if (content.RoleText) content.Player.UpdateRoleText(content.RoleText);
+                if (content.NameText) content.Player.Unbox().UpdateNameText(content.NameText, true);
+                if (content.RoleText) content.Player.Unbox().UpdateRoleText(content.RoleText);
             }
             catch
             {
@@ -308,7 +301,7 @@ class MeetingStartPatch
             roleText.transform.localScale = new Vector3(0.57f, 0.57f);
             roleText.rectTransform.sizeDelta += new Vector2(0.35f, 0f);
 
-            allContents.Add(new() { Player = NebulaGameManager.Instance!.GetModPlayerInfo(player.TargetPlayerId)!, NameText = player.NameText, RoleText = roleText });
+            allContents.Add(new() { Player = NebulaGameManager.Instance!.GetPlayer(player.TargetPlayerId)!, NameText = player.NameText, RoleText = roleText });
 
             player.CancelButton.GetComponent<SpriteRenderer>().material = __instance.Glass.material;
             player.ConfirmButton.GetComponent<SpriteRenderer>().material = __instance.Glass.material;
@@ -607,8 +600,8 @@ static class CheckForEndVotingPatch
                 {
                     if (!state.DidVote) continue;
 
-                    var modInfo = NebulaGameManager.Instance?.GetModPlayerInfo(state.TargetPlayerId);
-                    modInfo?.AssignableAction(r=>r.OnTieVotes(ref extraVotes,state));
+                    var modInfo = NebulaGameManager.Instance?.GetPlayer(state.TargetPlayerId);
+                    modInfo?.Unbox().AssignableAction(r=>r.Unbox().OnTieVotes(ref extraVotes,state));
                 }
 
                 foreach (byte target in extraVotes) dictionary.AddValue(target, 1);

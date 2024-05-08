@@ -1,13 +1,5 @@
-﻿using Epic.OnlineServices.Auth;
-using Il2CppSystem.CodeDom.Compiler;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
+﻿using System.Collections;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Virial.Compat;
 
 namespace Virial.Command;

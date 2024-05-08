@@ -16,13 +16,9 @@ global using Il2CppInterop.Runtime.InteropTypes.Fields;
 global using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 using BepInEx;
-using System.Text;
 using System.Reflection;
 using BepInEx.Unity.IL2CPP;
-using Nebula.Patches;
 using UnityEngine.SceneManagement;
-using Il2CppSystem.Xml;
-using Nebula.Module;
 
 namespace Nebula;
 
