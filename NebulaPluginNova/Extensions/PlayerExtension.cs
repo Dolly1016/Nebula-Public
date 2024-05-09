@@ -137,7 +137,7 @@ public static class PlayerExtension
                targetInfo.VanillaPlayer.Data.IsDead = true;
 
                //Entityイベント発火
-               GameEntityManager.Instance?.GetPlayerEntities(message.targetId).Do(e =>
+               GameOperatorManager.Instance?.GetPlayerEntities(message.targetId).Do(e =>
                {
                    if (killerInfo != null) e.OnMurdered(killerInfo);
                    e.OnDead();
@@ -154,8 +154,8 @@ public static class PlayerExtension
            //Entityイベント発火
            if (targetInfo != null)
            {
-               GameEntityManager.Instance?.GetPlayerEntities(message.killerId).Do(e => e.OnKillPlayer(targetInfo));
-               GameEntityManager.Instance?.AllEntities.Do(e =>
+               GameOperatorManager.Instance?.GetPlayerEntities(message.killerId).Do(e => e.OnKillPlayer(targetInfo));
+               GameOperatorManager.Instance?.AllEntities.Do(e =>
                {
                    if (killerInfo != null) e.OnPlayerMurdered(targetInfo, killerInfo);
                    e.OnPlayerDead(targetInfo);
@@ -205,7 +205,7 @@ public static class PlayerExtension
                if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
 
                //Entityイベント発火
-               GameEntityManager.Instance?.GetPlayerEntities(message.targetId).Do(e =>
+               GameOperatorManager.Instance?.GetPlayerEntities(message.targetId).Do(e =>
                {
                    if (killerInfo != null) e.OnMurdered(killerInfo);
                    e.OnDead();
@@ -214,7 +214,7 @@ public static class PlayerExtension
                if (killerInfo != null) killerInfo.RelatedEntities()?.Do(e => e.OnKillPlayer(targetInfo));
 
                //Entityイベント発火
-               GameEntityManager.Instance?.AllEntities.Do(e => {
+               GameOperatorManager.Instance?.AllEntities.Do(e => {
                    if (killerInfo != null) e.OnPlayerMurdered(targetInfo, killerInfo);
                    e.OnPlayerDead(targetInfo);
                });

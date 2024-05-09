@@ -52,7 +52,7 @@ public static class NebulaExileWrapUp
 
 
                         //Entityイベント発火
-                        GameEntityManager.Instance?.GetPlayerEntities(info.PlayerId).Do(e =>
+                        GameOperatorManager.Instance?.GetPlayerEntities(info.PlayerId).Do(e =>
                         {
                             e.OnExiled();
                             e.OnDead();
@@ -60,7 +60,7 @@ public static class NebulaExileWrapUp
 
 
                         //Entityイベント発火
-                        GameEntityManager.Instance?.AllEntities.Do(e =>
+                        GameOperatorManager.Instance?.AllEntities.Do(e =>
                         {
                             e.OnPlayerExiled(info);
                             e.OnPlayerDead(info);
@@ -111,13 +111,13 @@ public static class NebulaExileWrapUp
 
         NebulaGameManager.Instance?.OnMeetingEnd(MeetingHudExtension.ExiledAll);
         GamePlayer[] exiledArray = MeetingHudExtension.ExiledAll?.Select(p => p.GetModInfo()!).ToArray() ?? new GamePlayer[0];
-        GameEntityManager.Instance?.AllEntities.Do(e => e.OnMeetingEnd(exiledArray));
+        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnMeetingEnd(exiledArray));
 
         yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform.parent, GameStatistics.EventVariation.MeetingEnd, EventDetail.MeetingEnd);
 
 
 
-        GameEntityManager.Instance?.AllEntities.Do(e => e.OnGameReenabled());
+        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnGameReenabled());
 
         __instance.ReEnableGameplay();
         GameObject.Destroy(__instance.gameObject);

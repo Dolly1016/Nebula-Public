@@ -274,7 +274,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public RuntimeGameAsset RuntimeAsset { get; private init; }
 
     //エンティティマネージャ
-    public GameEntityManager GameEntityManager { get; init; } = new();
+    public GameOperatorManager GameEntityManager { get; init; } = new();
 
     //各種モジュール
     public HudGrid HudGrid { get; private set; }
@@ -742,13 +742,13 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
                 r.Unbox().OnActivated(); (r as IGameEntity)?.Register(r);
                 if (r is RuntimeRole role)
                 {
-                    GameEntityManager.Instance?.GetPlayerEntities(r.MyPlayer).Do(e => e.OnSetRole(role));
-                    GameEntityManager.Instance?.AllEntities.Do(e => e.OnSetRole(r.MyPlayer, role));
+                    GameOperatorManager.Instance?.GetPlayerEntities(r.MyPlayer).Do(e => e.OnSetRole(role));
+                    GameOperatorManager.Instance?.AllEntities.Do(e => e.OnSetRole(r.MyPlayer, role));
                 }
                 if (r is RuntimeModifier modifier)
                 {
-                    GameEntityManager.Instance?.GetPlayerEntities(r.MyPlayer).Do(e => e.OnAddModifier(modifier));
-                    GameEntityManager.Instance?.AllEntities.Do(e => e.OnAddModifier(r.MyPlayer, modifier));
+                    GameOperatorManager.Instance?.GetPlayerEntities(r.MyPlayer).Do(e => e.OnAddModifier(modifier));
+                    GameOperatorManager.Instance?.AllEntities.Do(e => e.OnAddModifier(r.MyPlayer, modifier));
                 }
             });
         }

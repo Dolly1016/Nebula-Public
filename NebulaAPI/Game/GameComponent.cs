@@ -2,6 +2,8 @@
 
 namespace Virial.Game;
 
+
+
 /// <summary>
 /// ゲームに作用するEntityを表します。
 /// </summary>
@@ -10,10 +12,7 @@ public interface IGameEntity
     /// <summary>
     /// 紐づけられたLifespanの寿命が尽きたときに呼び出されます。この後Entityは削除されます。
     /// </summary>
-    public void OnReleased()
-    {
-
-    }
+    public void OnReleased(){}
 
     /// <summary>
     /// 毎ティック呼び出されます。
@@ -283,16 +282,6 @@ public interface IGamePlayerEntity : IGameEntity
     /// </summary>
     /// <param name="modifier"></param>
     public void OnRemoveModifier(RuntimeModifier modifier) { }
-}
-
-public class GamePlayerEntity : IGameEntity
-{
-    public Player MyPlayer { get; private init; }
-
-    public GamePlayerEntity(Player player)
-    {
-        MyPlayer = player;
-    }
 }
 
 public static class GameEntityExtension

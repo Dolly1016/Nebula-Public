@@ -29,3 +29,12 @@ public class NebulaPreprocess : Attribute
 {
 
 }
+
+/// <summary>
+/// GameOperatorに付与できる属性です。
+/// そのクラスに紐づけられたプレイヤーに関するイベントでのみ呼び出されるよう制限されます。
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class BindPlayer : Attribute
+{
+}

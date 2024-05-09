@@ -87,7 +87,7 @@ public class Jailer : ConfigurableStandardRole
             if (AmOwner)
             {
                 //JailerAbilityを獲得していなければ登録
-                if ((GameEntityManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
+                if ((GameOperatorManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
                 {
                     new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
                 }
@@ -101,7 +101,7 @@ public class Jailer : ConfigurableStandardRole
             if (localPlayer == null) return;
 
             //継承ジェイラーの対象で、JailerAbilityを獲得していなければ登録
-            if (MyRole.InheritAbilityOnDyingOption && !localPlayer.IsDead && localPlayer.IsImpostor && (GameEntityManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
+            if (MyRole.InheritAbilityOnDyingOption && !localPlayer.IsDead && localPlayer.IsImpostor && (GameOperatorManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
             {
                 new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
             }

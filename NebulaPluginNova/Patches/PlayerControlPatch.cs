@@ -119,7 +119,7 @@ public static class PlayerAddSystemTaskPatch
         if (!__instance.AmOwner) return;
 
         var task = __instance.myTasks[__instance.myTasks.Count - 1];
-        GameEntityManager.Instance?.AllEntities.Do(e => e.OnAddSystemTask(task));
+        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnAddSystemTask(task));
     }
 }
 
@@ -128,7 +128,7 @@ public static class PlayerRemoveTaskPatch
 {
     static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerTask task)
     {
-        GameEntityManager.Instance?.AllEntities.Do(e => e.OnRemoveTask(task));
+        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnRemoveTask(task));
     }
 }
 

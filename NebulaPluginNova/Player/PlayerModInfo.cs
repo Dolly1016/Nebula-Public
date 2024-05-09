@@ -384,8 +384,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
             myRole.OnActivated(); myRole.Register();
-            GameEntityManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnSetRole(myRole));
-            GameEntityManager.Instance?.AllEntities.Do(e => e.OnSetRole(this, myRole));
+            GameOperatorManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnSetRole(myRole));
+            GameOperatorManager.Instance?.AllEntities.Do(e => e.OnSetRole(this, myRole));
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myRole, IsDead));
@@ -412,8 +412,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
             modifier.OnActivated(); modifier.Register();
-            GameEntityManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnAddModifier(modifier));
-            GameEntityManager.Instance?.AllEntities.Do(e => e.OnAddModifier(this, modifier));
+            GameOperatorManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnAddModifier(modifier));
+            GameOperatorManager.Instance?.AllEntities.Do(e => e.OnAddModifier(this, modifier));
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true, IsDead));
@@ -430,8 +430,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             if (predicate.Invoke(m))
             {
                 m.Inactivate();
-                GameEntityManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnRemoveModifier(m));
-                GameEntityManager.Instance?.AllEntities.Do(e => e.OnRemoveModifier(this, m));
+                GameOperatorManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnRemoveModifier(m));
+                GameOperatorManager.Instance?.AllEntities.Do(e => e.OnRemoveModifier(this, m));
 
                 NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, m, false, IsDead));
                 return true;

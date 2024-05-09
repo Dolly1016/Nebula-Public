@@ -124,10 +124,10 @@ public static class MeetingHudExtension
 
             if (killer != null) killer.RelatedEntities()?.Do(e => e.OnExtraExilePlayer(player));
             //Entityイベント発火
-            GameEntityManager.Instance?.GetPlayerEntities(player.PlayerId).Do(e => { e.OnExtraExiled(); e.OnDead(); });
+            GameOperatorManager.Instance?.GetPlayerEntities(player.PlayerId).Do(e => { e.OnExtraExiled(); e.OnDead(); });
 
             //Entityイベント発火
-            GameEntityManager.Instance?.AllEntities.Do(e =>
+            GameOperatorManager.Instance?.AllEntities.Do(e =>
             {
                 e.OnPlayerDead(player);
             });

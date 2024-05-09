@@ -55,12 +55,12 @@ public static class MeetingModRpc
         var reporter = NebulaGameManager.Instance?.GetPlayer(message.reporter);
         var reported = NebulaGameManager.Instance?.GetPlayer(message.reported);
 
-        GameEntityManager.Instance?.AllEntities.Do(a => a.OnPreMeetingStart(reporter!, reported));
+        GameOperatorManager.Instance?.AllEntities.Do(a => a.OnPreMeetingStart(reporter!, reported));
 
         if (reported != null)
-            GameEntityManager.Instance?.AllEntities.Do(a => a.OnReported(reporter!, reported));
+            GameOperatorManager.Instance?.AllEntities.Do(a => a.OnReported(reporter!, reported));
         else
-            GameEntityManager.Instance?.AllEntities.Do(a => a.OnEmergencyMeeting(reporter!));
+            GameOperatorManager.Instance?.AllEntities.Do(a => a.OnEmergencyMeeting(reporter!));
     });
 
     public static readonly RemoteProcess<(List<VoterState> states, byte exiled, byte[] exiledAll,  bool tie)> RpcModCompleteVoting = new("CompleteVoting", 
@@ -95,7 +95,7 @@ public static class MeetingModRpc
     {
         var readonlyStates = states.ToArray();
 
-        GameEntityManager.Instance?.GetPlayerEntities(PlayerControl.LocalPlayer.PlayerId).Do(e =>
+        GameOperatorManager.Instance?.GetPlayerEntities(PlayerControl.LocalPlayer.PlayerId).Do(e =>
         {
             var voted = Helpers.GetPlayer(
             ((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255);
@@ -416,7 +416,7 @@ class MeetingClosePatch
         VentilationSystem? ventilationSystem = ShipStatus.Instance.Systems[SystemTypes.Ventilation].TryCast<VentilationSystem>();
         if (ventilationSystem != null) ventilationSystem.PlayersInsideVents.Clear();
 
-        GameEntityManager.Instance?.AllEntities.Do(e => e.OnStartExileCutScene());
+        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnStartExileCutScene());
         NebulaManager.Instance.CloseAllUI();
     }
 }
@@ -530,7 +530,7 @@ class CastVotePatch
         
         //CmdCastVote(Mod)
         int vote = 1;
-        GameEntityManager.Instance.GetPlayerEntities(PlayerControl.LocalPlayer.PlayerId).Do(r => r.OnCastVoteLocal(suspectStateIdx, ref vote));
+        GameOperatorManager.Instance.GetPlayerEntities(PlayerControl.LocalPlayer.PlayerId).Do(r => r.OnCastVoteLocal(suspectStateIdx, ref vote));
         __instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, suspectStateIdx, vote);
         return false;
     }
@@ -716,7 +716,7 @@ class PopulateResultPatch
     {
         Debug.Log("Called PopulateResults");
 
-        GameEntityManager.Instance?.AllEntities.Do(r => r.OnEndVoting());
+        GameOperatorManager.Instance?.AllEntities.Do(r => r.OnEndVoting());
 
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.MeetingVotingResults);
         foreach (var voteArea in __instance.playerStates)

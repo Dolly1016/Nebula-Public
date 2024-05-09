@@ -33,7 +33,7 @@ public static class KillAnimationExtension
             }
         }
 
-        GameEntityManager.Instance?.AllEntities.Do(e => e.OnDeadBodyGenerated(deadBody));
+        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnDeadBodyGenerated(deadBody));
         target.GetModInfo()!.Unbox().relatedDeadBodyCache = deadBody;
 
         target.Die(DeathReason.Kill, false);

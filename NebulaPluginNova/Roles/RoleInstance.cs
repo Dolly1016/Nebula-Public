@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Components;
 
 namespace Nebula.Roles;
 
@@ -18,8 +19,8 @@ public abstract class RoleInstance : AssignableInstance, IRuntimePropertyHolder,
     public virtual bool CanReport => true;
     public virtual bool CanUseVent => Role.Category != RoleCategory.CrewmateRole;
     public virtual bool CanMoveInVent => true;
-    public virtual Timer? VentCoolDown => null;
-    public virtual Timer? VentDuration => null;
+    public virtual GameTimer? VentCoolDown => null;
+    public virtual GameTimer? VentDuration => null;
     public virtual string DisplayRoleName => Role.DisplayName.Color(Role.RoleColor);
     public virtual bool HasCrewmateTasks => Role.Category == RoleCategory.CrewmateRole;
     public virtual bool HasAnyTasks => HasCrewmateTasks;
