@@ -16,7 +16,7 @@ public class ExtraMission : ConfigurableStandardModifier
     }
 
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IGamePlayerEntity
+    public class Instance : ModifierInstance, IGamePlayerOperator
     {
         public override AbstractModifier Role => MyRole;
         public GamePlayer? target { get; set; } = null!;
@@ -47,7 +47,7 @@ public class ExtraMission : ConfigurableStandardModifier
             return !(target?.IsDead ?? true);
         }
 
-        void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
+        void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
         {
             if(AmOwner && dead == target)
             {
@@ -55,7 +55,7 @@ public class ExtraMission : ConfigurableStandardModifier
             }
         }
 
-        void IGameEntity.OnPlayerExiled(Virial.Game.Player exiled)
+        void IGameOperator.OnPlayerExiled(Virial.Game.Player exiled)
         {
             if (AmOwner && MyPlayer.IsCrewmate && exiled.Role.Role.Unbox().IsCrewmateRole && exiled == target && MeetingHudExtension.LastVotedForMap.TryGetValue(MyPlayer.PlayerId, out var votedFor) && votedFor == exiled.PlayerId)
             {

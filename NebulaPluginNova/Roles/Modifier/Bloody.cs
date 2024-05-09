@@ -1,4 +1,5 @@
-﻿using Virial.Game;
+﻿using Virial.Events.Game.Meeting;
+using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
@@ -20,7 +21,7 @@ public class Bloody : ConfigurableStandardModifier
         CurseDurationOption = new NebulaConfiguration(RoleConfig, "curseDuration", null, 2.5f, 30f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
     }
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IGamePlayerEntity
+    public class Instance : ModifierInstance, IGamePlayerOperator
     {
         public override AbstractModifier Role => MyRole;
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
@@ -33,7 +34,7 @@ public class Bloody : ConfigurableStandardModifier
             if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " †".Color(MyRole.RoleColor);
         }
 
-        void IGamePlayerEntity.OnMurdered(GamePlayer murder)
+        void IGamePlayerOperator.OnMurdered(GamePlayer murder)
         {
             if (AmOwner && !murder.AmOwner)
             {
@@ -43,13 +44,14 @@ public class Bloody : ConfigurableStandardModifier
             }
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        [Local]
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
             if (acTokenChallenge?.Value.triggered ?? false)
                 acTokenChallenge.Value.triggered = false;
         }
 
-        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
+        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
         {
             if (AmOwner)
             {

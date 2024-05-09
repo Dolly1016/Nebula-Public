@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -29,7 +30,7 @@ public class Morphing : ConfigurableStandardRole, HasCitation
         LoseSampleOnMeetingOption = new NebulaConfiguration(RoleConfig, "loseSampleOnMeeting", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
@@ -125,12 +126,12 @@ public class Morphing : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
             if (MyRole.LoseSampleOnMeetingOption) sample = null;
         }
 
-        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
+        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
         {
             if (AmOwner)
             {
@@ -139,7 +140,7 @@ public class Morphing : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
+        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
         {
             var targetId = target.Unbox()?.GetOutfit(75).ColorId;
             var sampleId = sample?.ColorId;

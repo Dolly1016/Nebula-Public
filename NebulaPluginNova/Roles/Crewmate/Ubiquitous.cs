@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.VoiceChat;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -284,7 +285,7 @@ public class Ubiquitous : ConfigurableStandardRole
     }
 
 
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -299,7 +300,7 @@ public class Ubiquitous : ConfigurableStandardRole
         static private ISpriteLoader callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
         static private ISpriteLoader hackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneHackButton.png", 115f);
 
-        void IGameEntity.OnOpenNormalMap()
+        void IGameOperator.OnOpenNormalMap()
         {
             if (AmOwner)
             {
@@ -314,11 +315,11 @@ public class Ubiquitous : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnOpenAdminMap()
+        void IGameOperator.OnOpenAdminMap()
         {
             if (AmOwner && mapLayer) mapLayer?.gameObject.SetActive(false);
         }
-        void IGameEntity.OnMeetingStart()
+        void OnMeetingStart(MeetingStartEvent ev)
         {
             if (myDrone)
             {
@@ -466,7 +467,7 @@ public class Ubiquitous : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             //死亡時、元の視点に戻す
             if(AmOwner) AmongUsUtil.SetCamTarget();

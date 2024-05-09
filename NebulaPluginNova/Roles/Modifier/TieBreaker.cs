@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
@@ -15,7 +16,7 @@ public class TieBreaker : ConfigurableStandardModifier, HasCitation
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
-    public class Instance : ModifierInstance, IGamePlayerEntity
+    public class Instance : ModifierInstance, IGamePlayerOperator
     {
         public override AbstractModifier Role => MyRole;
 
@@ -36,7 +37,8 @@ public class TieBreaker : ConfigurableStandardModifier, HasCitation
             }
         }
 
-        void IGameEntity.OnMeetingStart()
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value.lastTieVoted = 255;
         }

@@ -1,9 +1,10 @@
 ﻿using Virial;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
 
-public class Arrow : INebulaScriptComponent, IGameEntity
+public class Arrow : INebulaScriptComponent, IGameOperator
 {
     private SpriteRenderer? arrowRenderer;
     public Vector2 TargetPos;
@@ -38,14 +39,14 @@ public class Arrow : INebulaScriptComponent, IGameEntity
 
     public Arrow SetColor(Color mainColor) => SetColor(mainColor, mainColor * 0.65f);
 
-    void IGameEntity.OnReleased()
+    void IGameOperator.OnReleased()
     {
         if (arrowRenderer) GameObject.Destroy(arrowRenderer!.gameObject);
         arrowRenderer = null;
     }
 
     private static float perc = 0.925f;
-    void IGameEntity.HudUpdate()
+    void HudUpdate(GameHudUpdateEvent ev)
     {
         if (!arrowRenderer) return;
 

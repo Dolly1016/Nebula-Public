@@ -3,7 +3,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Abilities;
 
-public class JailerAbility : IGameEntity
+public class JailerAbility : IGameOperator
 {
     bool canIdentifyImpostors, canIdentifyDeadBodies;
     bool canMoveWithMapWatching;
@@ -16,7 +16,7 @@ public class JailerAbility : IGameEntity
         if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
     }
 
-    void IGameEntity.OnOpenNormalMap()
+    void IGameOperator.OnOpenNormalMap()
     {
         MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
         MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false);
@@ -26,7 +26,7 @@ public class JailerAbility : IGameEntity
         MapBehaviour.Instance.taskOverlay.Hide();
     }
 
-    void IGameEntity.OnOpenSabotageMap()
+    void IGameOperator.OnOpenSabotageMap()
     {
         MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
         MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false, Palette.ImpostorRed);
@@ -39,12 +39,12 @@ public class JailerAbility : IGameEntity
         if (!MapBehaviour.Instance.countOverlayAllowsMovement) PlayerControl.LocalPlayer.NetTransform.Halt();
     }
 
-    void IGameEntity.OnReleased()
+    void IGameOperator.OnReleased()
     {
         if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
     }
 
-    void IGameEntity.OnMapInstantiated()
+    void IGameOperator.OnMapInstantiated()
     {
         Transform roomNames;
         if (AmongUsUtil.CurrentMapId == 0) roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames (1)");

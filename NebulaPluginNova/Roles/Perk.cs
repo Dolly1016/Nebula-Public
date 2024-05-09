@@ -1,4 +1,5 @@
 ﻿using Virial;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Roles;
@@ -18,7 +19,7 @@ public record PerkDefinition(string localizedName, Image backSprite, Image iconS
     static public ISpriteLoader GetPerkBackIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Back" + id + ".png", 100f);
 }
 
-public class PerkInstance : IGameEntity, ILifespan, IReleasable
+public class PerkInstance : IGameOperator, ILifespan, IReleasable
 {
     static private ISpriteLoader IconFrameBackSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.FrameBack.png", 100f);
     static private ISpriteLoader IconFrameSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Frame.png", 100f);
@@ -83,7 +84,7 @@ public class PerkInstance : IGameEntity, ILifespan, IReleasable
         return this;
     }
 
-    void IGameEntity.Update()
+    void Update(GameUpdateEvent ev)
     {
         if (MyTimer != null) SetCoolDown(MyTimer.Percentage);
     }

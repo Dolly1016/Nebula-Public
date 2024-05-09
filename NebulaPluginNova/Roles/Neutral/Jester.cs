@@ -45,7 +45,7 @@ public class Jester : ConfigurableStandardRole, HasCitation
         }
     };
 
-    public class Instance : RoleInstance, IGamePlayerEntity
+    public class Instance : RoleInstance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -73,7 +73,7 @@ public class Jester : ConfigurableStandardRole, HasCitation
             
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             draggable?.OnDead(this);
         }
@@ -88,7 +88,7 @@ public class Jester : ConfigurableStandardRole, HasCitation
 
 
         StaticAchievementToken? acTokenCommon = null;
-        void IGameEntity.OnVotedForMeLocal(PlayerControl[] voters)
+        void IGameOperator.OnVotedForMeLocal(PlayerControl[] voters)
         {
             if (AmOwner)
             {

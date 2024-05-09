@@ -48,7 +48,7 @@ public class Provocateur : ConfigurableStandardRole
         EmbroilDurationOption = new(RoleConfig, "embroilDuration", null, 1f, 20f, 1f, 5f, 5f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player){}
@@ -78,7 +78,7 @@ public class Provocateur : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerEntity.OnMurdered(GamePlayer murderer)
+        void IGamePlayerOperator.OnMurdered(GamePlayer murderer)
         {
             if (murderer.PlayerId == MyPlayer.PlayerId) return;
 
@@ -92,7 +92,7 @@ public class Provocateur : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerEntity.OnExiled()
+        void IGamePlayerOperator.OnExiled()
         {
             if (!AmOwner) return;
 

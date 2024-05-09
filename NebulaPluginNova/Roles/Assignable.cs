@@ -45,7 +45,7 @@ public enum ExtraWinCheckPhase
     ObsessionPhase = Phase0,
 }
 
-public abstract class AssignableInstance : ComponentHolder, RuntimeAssignable, Virial.IBinderLifespan, IGamePlayerEntity
+public abstract class AssignableInstance : ComponentHolder, RuntimeAssignable, Virial.IBinderLifespan, IGamePlayerOperator
 {
     public virtual IAssignableBase AssignableBase { get; } = null!;
     public GamePlayer MyPlayer { get; private init; }
@@ -102,7 +102,7 @@ public abstract class AssignableInstance : ComponentHolder, RuntimeAssignable, V
 
 
     // Virtial.GameEntityAPI
-    GamePlayer IGamePlayerEntity.MyPlayer => MyPlayer;
+    GamePlayer IGamePlayerOperator.MyPlayer => MyPlayer;
 
     // Virial.AssignableAspectAPI
 

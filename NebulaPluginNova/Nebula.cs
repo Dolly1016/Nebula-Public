@@ -10,6 +10,7 @@ global using UnityEngine;
 global using Nebula.Modules.ScriptComponents;
 global using System.Collections;
 global using HarmonyLib;
+global using Virial.Attributes;
 global using Timer = Nebula.Modules.ScriptComponents.Timer;
 global using Color = UnityEngine.Color;
 global using GUIWidget = Virial.Media.GUIWidget;

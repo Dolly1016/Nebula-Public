@@ -1,5 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -26,7 +27,7 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
         SyncKillAndCleanCoolDownOption = new NebulaConfiguration(RoleConfig, "syncKillAndCleanCoolDown", null, true, true);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? cleanButton = null;
 
@@ -40,7 +41,7 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
         {
         }
 
-        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
+        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
         {
             if (AmOwner)
             {
@@ -76,12 +77,12 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
         }
 
 
-        void IGameEntity.OnEmergencyMeeting(GamePlayer reporter)
+        void IGameOperator.OnEmergencyMeeting(GamePlayer reporter)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value.cleared = acTokenChallenge.Value.removed >= 2;
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value.removed = 0;
         }

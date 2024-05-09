@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -49,13 +50,11 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
         private AchievementToken<bool>? acTokenMisshot;
         private AchievementToken<int>? acTokenChallenge;
 
-        public override void OnGameStart()
+        [Local]
+        void OnGameStart(GameStartEvent ev)
         {
-            base.OnGameStart();
-            if (AmOwner) {
-                int impostors = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.Role.Role.Category == RoleCategory.ImpostorRole) ?? 0;
-                if(impostors > 0) acTokenChallenge = new("sheriff.challenge", impostors, (val, _) => val == 0);
-            }
+            int impostors = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.Role.Role.Category == RoleCategory.ImpostorRole) ?? 0;
+            if (impostors > 0) acTokenChallenge = new("sheriff.challenge", impostors, (val, _) => val == 0);
         }
 
         private bool CanKill(GamePlayer target)

@@ -56,7 +56,7 @@ public class Destroyer : ConfigurableStandardRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? destroyButton = null;
         public override AbstractRole Role => MyRole;
@@ -322,7 +322,7 @@ public class Destroyer : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnReported(Virial.Game.Player reporter, Virial.Game.Player reported)
+        void IGameOperator.OnReported(Virial.Game.Player reporter, Virial.Game.Player reported)
         {
             if (AmOwner && lastKilling != null && reported == lastKilling) new StaticAchievementToken("destroyer.another1");
         }

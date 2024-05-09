@@ -1,5 +1,7 @@
 ﻿using Nebula.Behaviour;
 using Virial;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Helpers;
 
 namespace Nebula.Patches;
@@ -111,13 +113,13 @@ public static class NebulaExileWrapUp
 
         NebulaGameManager.Instance?.OnMeetingEnd(MeetingHudExtension.ExiledAll);
         GamePlayer[] exiledArray = MeetingHudExtension.ExiledAll?.Select(p => p.GetModInfo()!).ToArray() ?? new GamePlayer[0];
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnMeetingEnd(exiledArray));
+        GameOperatorManager.Instance?.Run(new MeetingEndEvent(exiledArray));
 
         yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform.parent, GameStatistics.EventVariation.MeetingEnd, EventDetail.MeetingEnd);
 
 
 
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnGameReenabled());
+        GameOperatorManager.Instance?.Run(new TaskPhaseRestartEvent());
 
         __instance.ReEnableGameplay();
         GameObject.Destroy(__instance.gameObject);

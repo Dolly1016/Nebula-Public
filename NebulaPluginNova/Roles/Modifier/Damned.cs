@@ -1,4 +1,5 @@
-﻿using Virial.Game;
+﻿using Virial.Events.Game.Meeting;
+using Virial.Game;
 using Virial.Text;
 
 namespace Nebula.Roles.Modifier;
@@ -27,7 +28,7 @@ public class Damned : ConfigurableStandardModifier
     }
 
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IGamePlayerEntity
+    public class Instance : ModifierInstance, IGamePlayerOperator
     {
         public override AbstractModifier Role => MyRole;
 
@@ -70,7 +71,7 @@ public class Damned : ConfigurableStandardModifier
                 RpcNoticeCurse.Invoke((MyPlayer.PlayerId, 1));
         }
 
-        void IGamePlayerEntity.OnGuard(GamePlayer killer)
+        void IGamePlayerOperator.OnGuard(GamePlayer killer)
         {
             hasGuard = false;
             nextRole = killer.Unbox().Role.Role;
@@ -100,9 +101,10 @@ public class Damned : ConfigurableStandardModifier
             if(AmOwner) AmongUsUtil.PlayQuickFlash(Palette.ImpostorRed);
         }
 
-        void IGameEntity.OnPreMeetingStart(GamePlayer reporter, GamePlayer? reported)
+        [Local]
+        void OnPreMeetingStart(MeetingPreStartEvent ev)
         {
-            if(!hasGuard && !MyPlayer.IsDead && AmOwner && !MyRole.DamnedMurderMyKillerOption)
+            if(!hasGuard && !MyPlayer.IsDead && !MyRole.DamnedMurderMyKillerOption)
             {
                 NebulaManager.Instance.ScheduleDelayAction(() =>
                 {

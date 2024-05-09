@@ -1,6 +1,8 @@
 ﻿using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -48,7 +50,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class SniperRifle : INebulaScriptComponent, IGameEntity
+    public class SniperRifle : INebulaScriptComponent, IGameOperator
     {
         public GamePlayer Owner { get; private set; }
         public SpriteRenderer Renderer { get; private set; }
@@ -62,7 +64,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
             Renderer.gameObject.layer = MyRole.CanSeeRifleInShadowOption ? LayerExpansion.GetObjectsLayer() : LayerExpansion.GetDefaultLayer();
         }
 
-        void IGameEntity.HudUpdate()
+        void HudUpdate(GameHudUpdateEvent ev)
         {
             var o = Owner.Unbox();
             if (Owner.AmOwner) o.RequireUpdateMouseAngle();
@@ -73,7 +75,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
             Renderer.flipY = Mathf.Cos(o.MouseAngle) < 0f;
         }
 
-        void IGameEntity.OnReleased()
+        void IGameOperator.OnReleased()
         {
             if (Renderer) GameObject.Destroy(Renderer.gameObject);
             Renderer = null!;
@@ -111,7 +113,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
@@ -210,22 +212,21 @@ public class Sniper : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             if (AmOwner && MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
 
             if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
-        void IGameEntity.OnMeetingStart()
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (AmOwner)
-            {
-                if (MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
-                equipButton?.SetLabel("equip");
-            }
+            if (MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
+            equipButton?.SetLabel("equip");
         }
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+
+        void OnMeetingEnd(GamePlayer[] exiled)
         {
             if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
         }

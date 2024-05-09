@@ -2,6 +2,7 @@
 using Nebula.Behaviour;
 using TMPro;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -85,7 +86,7 @@ public class Disturber : ConfigurableStandardRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IGameEntity
+    public class Instance : Impostor.Instance, IGameOperator
     {
         static float PoleDistanceMin = 0.8f;
         static float PoleDistanceMax => MyRole.MaxDistanceBetweenPolesOption.GetFloat();
@@ -102,7 +103,7 @@ public class Disturber : ConfigurableStandardRole
         {
         }
 
-        void IGameEntity.OnAddSystemTask(PlayerTask task)
+        void IGameOperator.OnAddSystemTask(PlayerTask task)
         {
             if (AmOwner && acTokenChallenge != null)
             {
@@ -114,7 +115,7 @@ public class Disturber : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnRemoveTask(PlayerTask task)
+        void IGameOperator.OnRemoveTask(PlayerTask task)
         {
             if(acTokenChallenge != null)
             {
@@ -124,9 +125,10 @@ public class Disturber : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnMeetingStart()
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (AmOwner && acTokenChallenge != null)
+            if (acTokenChallenge != null)
             {
                 CheckChallengeAchievement();
                 acTokenChallenge.Value.cmTask = null;
@@ -136,7 +138,7 @@ public class Disturber : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
+        void IGameOperator.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
         {
             if(AmOwner && acTokenChallenge != null)
             {

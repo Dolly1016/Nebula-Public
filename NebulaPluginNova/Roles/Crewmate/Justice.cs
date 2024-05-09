@@ -2,6 +2,7 @@
 using Nebula.Patches;
 using Virial;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -29,7 +30,7 @@ public class Justice : ConfigurableStandardRole, HasCitation
         PutJusticeOnTheBalanceOption = new(RoleConfig, "putJusticeOnTheBalance", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance, IGameEntity
+    public class Instance : Crewmate.Instance, IGameOperator
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player) { }
@@ -40,7 +41,8 @@ public class Justice : ConfigurableStandardRole, HasCitation
         bool usedBalance = false;
         bool isMyJusticeMeeting = false;
 
-        void IGameEntity.OnMeetingStart()
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
             void StartJusticeMeeting(GamePlayer p1, GamePlayer p2)
             {
@@ -50,7 +52,7 @@ public class Justice : ConfigurableStandardRole, HasCitation
                 isMyJusticeMeeting = true;
             }
 
-            if (AmOwner && !usedBalance)
+            if (!usedBalance)
             {
                 var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
                 buttonManager?.RegisterMeetingAction(new(meetingSprite,
@@ -88,15 +90,16 @@ public class Justice : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnMeetingEnd(Virial.Game.Player[] exiled)
+        [Local]
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
-            if (AmOwner && isMyJusticeMeeting)
+            if (isMyJusticeMeeting)
             {
-                if (exiled.Any(e => e.AmOwner)) new StaticAchievementToken("justice.another1");
-                if(exiled.Length == 2)
+                if (ev.Exiled.Any(e => e.AmOwner)) new StaticAchievementToken("justice.another1");
+                if(ev.Exiled.Count() == 2)
                 {
                     new StaticAchievementToken("justice.common3");
-                    if(exiled.All(e => e.IsImpostor)) new StaticAchievementToken("justice.challenge");
+                    if(ev.Exiled.All(e => e.IsImpostor)) new StaticAchievementToken("justice.challenge");
                 }
 
                 isMyJusticeMeeting = false;

@@ -1,9 +1,10 @@
 ﻿using Virial.Game;
 using Virial;
+using Virial.Events.Game;
 
 namespace Nebula.Roles.Abilities;
 
-public class TrackingArrowAbility : ComponentHolder, IGameEntity
+public class TrackingArrowAbility : ComponentHolder, IGameOperator
 {
     public GamePlayer MyPlayer => target;
 
@@ -21,7 +22,7 @@ public class TrackingArrowAbility : ComponentHolder, IGameEntity
         this.color = color;
     }
 
-    void IGameEntity.Update()
+    void Update(GameUpdateEvent ev)
     {
         if (ExileController.Instance)
         {

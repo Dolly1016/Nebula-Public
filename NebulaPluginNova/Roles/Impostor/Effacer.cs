@@ -28,7 +28,7 @@ public class Effacer : ConfigurableStandardRole, HasCitation
         EffaceDurationOption = new NebulaConfiguration(RoleConfig, "effaceDuration", null, 5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
         public override AbstractRole Role => MyRole;
@@ -72,7 +72,7 @@ public class Effacer : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
+        void IGameOperator.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
         {
             if (AmOwner && !murderer.AmOwner && murderer.IsImpostor && dead.HasAttribute(PlayerAttributes.InvisibleElseImpostor))
             {

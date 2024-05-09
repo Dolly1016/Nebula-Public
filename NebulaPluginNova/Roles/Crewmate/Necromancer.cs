@@ -33,7 +33,7 @@ public class Necromancer : ConfigurableStandardRole
         ReviveMaxRangeOption = new NebulaConfiguration(RoleConfig, "reviveMaxRange", null, 10f, 30f, 2.5f, 17.5f, 17.5f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -178,7 +178,7 @@ public class Necromancer : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             draggable?.OnDead(this);
         }
@@ -188,7 +188,7 @@ public class Necromancer : ConfigurableStandardRole
             draggable?.OnInactivated(this);
         }
 
-        void IGameEntity.OnPlayerDead(GamePlayer dead)
+        void IGameOperator.OnPlayerDead(GamePlayer dead)
         {
             if(AmOwner) resurrectionRoom?.Remove(dead.PlayerId);
         }

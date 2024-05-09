@@ -1,13 +1,14 @@
 ﻿using Nebula.Behaviour;
 using TMPro;
 using UnityEngine.Rendering;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Modules;
 
 public record PlayerIcon(byte playerId, GameObject iconObj, PoolablePlayer display, PlayerControl relatedControl) { public Outfit? LastOutfit; public Color32 LastColor; }
 
-public class PlayersOverlay : IGameEntity
+public class PlayersOverlay : IGameOperator
 {
     static private IDividedSpriteLoader iconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.OverlayIcon.png", 100f, 2, 1);
 
@@ -26,7 +27,7 @@ public class PlayersOverlay : IGameEntity
         return this;
     }
 
-    void IGameEntity.HudUpdate()
+    void HudUpdate(GameHudUpdateEvent ev)
     {
         if((MeetingHud.Instance && !ExileController.Instance) || PlayerCustomizationMenu.Instance || GameSettingMenu.Instance)
         {
@@ -111,7 +112,7 @@ public class PlayersOverlay : IGameEntity
         }
     }
 
-    void IGameEntity.OnOutfitChanged(Virial.Game.Player player, Virial.Game.Outfit outfit)
+    void IGameOperator.OnOutfitChanged(Virial.Game.Player player, Virial.Game.Outfit outfit)
     {
         allIcons.FirstOrDefault(i => i.playerId == player.PlayerId)?.display.UpdateFromPlayerOutfit(outfit.outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
     } 

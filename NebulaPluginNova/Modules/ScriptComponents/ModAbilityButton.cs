@@ -3,6 +3,8 @@ using Nebula.Commands.Variations;
 using Virial.Command;
 using Virial.Compat;
 using Virial.Components;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 using Virial.Helpers;
 using Virial.Text;
@@ -10,7 +12,7 @@ using Virial.Text;
 namespace Nebula.Modules.ScriptComponents;
 
 [NebulaPreLoad]
-public class ModAbilityButton : INebulaScriptComponent, Virial.Components.AbilityButton, IGameEntity
+public class ModAbilityButton : INebulaScriptComponent, Virial.Components.AbilityButton, IGameOperator
 {
     public class AbilityButtonStructure
     {
@@ -92,7 +94,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
 
     }
 
-    void IGameEntity.OnReleased()
+    void IGameOperator.OnReleased()
     {
         if (VanillaButton) UnityEngine.Object.Destroy(VanillaButton.gameObject);
     }
@@ -111,7 +113,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
     public bool IsAvailable => IsVisible && IsAvailableUnsafe;
     private bool IsAvailableUnsafe => Availability?.Invoke(this) ?? true;
 
-    void IGameEntity.HudUpdate()
+    void HudUpdate(GameHudUpdateEvent ev)
     {
         //表示・非表示切替
         VanillaButton.gameObject.SetActive(IsVisible);
@@ -137,7 +139,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         
     }
 
-    void IGameEntity.OnMeetingStart()
+    void OnMeetingStart(MeetingStartEvent ev)
     {
         OnMeeting?.Invoke(this);
     }
@@ -178,12 +180,12 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
 
     public bool UseCoolDownSupport { get; set; } = true;
 
-    void IGameEntity.OnGameReenabled() {
+    void OnGameReenabled(TaskPhaseRestartEvent ev) {
         if (UseCoolDownSupport) StartCoolDown();
         OnStartTaskPhase?.Invoke(this);
     }
 
-    void IGameEntity.OnGameStart() {
+    public void OnGameStart(GameStartEvent ev) {
         if (UseCoolDownSupport && CoolDownTimer != null) CoolDownTimer!.Start(Mathf.Min(CoolDownTimer!.Max, CoolDownOnGameStart));
         OnStartTaskPhase?.Invoke(this);
     }

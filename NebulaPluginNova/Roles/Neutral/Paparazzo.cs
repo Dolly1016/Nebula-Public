@@ -3,6 +3,7 @@ using LibCpp2IL;
 using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -280,7 +281,7 @@ public class Paparazzo : ConfigurableStandardRole
         RequiredDisclosedOption = new NebulaConfiguration(RoleConfig, "requiredDisclosed", null, 1, 15, 3, 3);
     }
 
-    public class Instance : RoleInstance, IGamePlayerEntity
+    public class Instance : RoleInstance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
 
@@ -458,9 +459,11 @@ public class Paparazzo : ConfigurableStandardRole
         }
 
         static private SpriteLoader hourGlassSprite = SpriteLoader.FromResource("Nebula.Resources.Hourglass.png", 100f);
-        void IGameEntity.OnMeetingStart()
+        
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (AmOwner && !MyPlayer.IsDead)
+            if (!MyPlayer.IsDead)
             {
                 bool shareFlag = false;
                 float timer = 20f;
@@ -528,7 +531,8 @@ public class Paparazzo : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        [Local]
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
             if (acTokenChallenge != null)
             {

@@ -1,11 +1,12 @@
 ﻿using Nebula.Roles;
 using Virial;
 using Virial.DI;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Game;
 
-public class PerkHolder : AbstractModule<Virial.Game.Game>, IGameEntity
+public class PerkHolder : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     
 
@@ -37,7 +38,7 @@ public class PerkHolder : AbstractModule<Virial.Game.Game>, IGameEntity
 
 
 
-    void IGameEntity.HudUpdate()
+    void HudUpdate(GameHudUpdateEvent ev)
     {
         myPerks.RemoveAll(p => (p as ILifespan).IsDeadObject);
         

@@ -167,7 +167,7 @@ public class Secret : AbstractRole, DefinedAssignable
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerEntity
+    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyEvilRole;
         public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
@@ -182,7 +182,7 @@ public class Secret : AbstractRole, DefinedAssignable
         int[] savedArgs;
         AbstractRole savedRole;
         int leftKill = OptionRole.EvilConditionOption;
-        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
+        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
         {
             leftKill--;
             if (leftKill <= 0 && AmOwner) ScheduleSendArousalRpc(MyPlayer, savedArgs);
@@ -204,7 +204,7 @@ public class Secret : AbstractRole, DefinedAssignable
             if (AmOwner) SetUpChallengeAchievement(MyPlayer);
         }
 
-        void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
+        void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
         {
             //Covertモードはホストが割り当てを管理する
             if (AmongUsClient.Instance.AmHost && OptionRole.EvilConditionTypeOption.CurrentValue == 1)

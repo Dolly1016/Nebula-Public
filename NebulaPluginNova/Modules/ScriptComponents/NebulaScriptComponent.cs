@@ -1,10 +1,12 @@
 ﻿using Virial;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
 
 
-public abstract class INebulaScriptComponent : IGameEntity, ILifespan, IReleasable
+public abstract class INebulaScriptComponent : IGameOperator, ILifespan, IReleasable
 {
     public INebulaScriptComponent()
     {
@@ -21,7 +23,7 @@ public abstract class INebulaScriptComponent : IGameEntity, ILifespan, IReleasab
     bool ILifespan.IsDeadObject => MarkedRelease;
 }
 
-public class GameObjectBinding : INebulaScriptComponent, IGameEntity
+public class GameObjectBinding : INebulaScriptComponent, IGameOperator
 {
     public GameObject? MyObject { get; private set; }
 
@@ -35,13 +37,13 @@ public class GameObjectBinding : INebulaScriptComponent, IGameEntity
         MyObject = null;
     }
 
-    void IGameEntity.OnReleased() {
+    void IGameOperator.OnReleased() {
         if (MyObject) GameObject.Destroy(MyObject);
         MyObject = null;
     }
 }
 
-public class ComponentBinding<T> : INebulaScriptComponent, IGameEntity where T : MonoBehaviour 
+public class ComponentBinding<T> : INebulaScriptComponent, IGameOperator where T : MonoBehaviour 
 {
     public T? MyObject { get; private set; }
 
@@ -54,13 +56,13 @@ public class ComponentBinding<T> : INebulaScriptComponent, IGameEntity where T :
     {
         MyObject = null;
     }
-    void IGameEntity.OnReleased()
+    void IGameOperator.OnReleased()
     {
         if (MyObject) GameObject.Destroy(MyObject!.gameObject);
     }
 }
 
-public class NebulaGameScript : INebulaScriptComponent, IGameEntity
+public class NebulaGameScript : INebulaScriptComponent, IGameOperator
 {
     public Action? OnActivatedEvent = null;
     public Action? OnMeetingStartEvent = null;
@@ -69,11 +71,11 @@ public class NebulaGameScript : INebulaScriptComponent, IGameEntity
     public Action? OnGameStartEvent = null;
     public Action? OnUpdateEvent = null;
 
-    void IGameEntity.OnReleased() => OnReleasedEvent?.Invoke();
-    void IGameEntity.OnMeetingStart() => OnMeetingStartEvent?.Invoke();
-    void IGameEntity.OnGameReenabled() => OnGameReenabledEvent?.Invoke();
-    void IGameEntity.OnGameStart() => OnGameStartEvent?.Invoke();
-    void IGameEntity.Update()
+    void IGameOperator.OnReleased() => OnReleasedEvent?.Invoke();
+    void OnMeetingStart(MeetingStartEvent ev) => OnMeetingStartEvent?.Invoke();
+    void OnGameReenabled(TaskPhaseRestartEvent ev) => OnGameReenabledEvent?.Invoke();
+    void OnGameStart(GameStartEvent ev) => OnGameStartEvent?.Invoke();
+    void Update(GameUpdateEvent ev)
     {
         if (OnActivatedEvent != null)
         {

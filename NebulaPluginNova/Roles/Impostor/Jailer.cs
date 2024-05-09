@@ -32,7 +32,7 @@ public class Jailer : ConfigurableStandardRole
         InheritAbilityOnDyingOption = new NebulaConfiguration(RoleConfig, "inheritAbilityOnDying", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -42,7 +42,7 @@ public class Jailer : ConfigurableStandardRole
         AchievementToken<bool>? acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
 
-        void IGameEntity.OnOpenSabotageMap()
+        void IGameOperator.OnOpenSabotageMap()
         {
             if (AmOwner)
             {
@@ -50,7 +50,7 @@ public class Jailer : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
+        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
         {
             if (AmOwner)
             {
@@ -94,7 +94,7 @@ public class Jailer : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             var localPlayer = Virial.NebulaAPI.CurrentGame?.LocalPlayer;
 

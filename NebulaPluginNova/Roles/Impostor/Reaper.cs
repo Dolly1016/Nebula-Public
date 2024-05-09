@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -26,7 +27,7 @@ public class Reaper : ConfigurableStandardRole
         VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -176,15 +177,11 @@ public class Reaper : ConfigurableStandardRole
             }
         }
 
-        public override void OnGameStart()
-        {
-            base.OnGameStart();
+        [Local]
+        void EditVentInfoOnGameStart(GameStartEvent ev) => EditVentInfo(true);
 
-            //OnActivatedの少し後に追加ベントが生成されるので、回避策として
-            if(AmOwner) EditVentInfo(true);
-        }
-
-        void IGamePlayerEntity.OnDead()
+        
+        void IGamePlayerOperator.OnDead()
         {
             draggable?.OnDead(this);
         }
@@ -202,12 +199,12 @@ public class Reaper : ConfigurableStandardRole
         }
 
         //キルのたびに加算、発見されるたびに減算してレポートされていない死体を計上する
-        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
+        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
         {
             if (acTokenChallenge != null && !MeetingHud.Instance) acTokenChallenge.Value++;
         }
 
-        void IGameEntity.OnReported(GamePlayer reporter, GamePlayer reported)
+        void IGameOperator.OnReported(GamePlayer reporter, GamePlayer reported)
         {
             if(acTokenChallenge != null && AmOwner && (reported.Unbox()?.MyKiller?.AmOwner ?? false)) acTokenChallenge.Value--;
         }

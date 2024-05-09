@@ -1,4 +1,6 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -32,7 +34,7 @@ public class Agent : ConfigurableStandardRole
         SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = new(RoleConfig, "suicideIfSomeoneElseCompletesTasksBeforeAgent", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
         public override AbstractRole Role => MyRole;
@@ -49,13 +51,14 @@ public class Agent : ConfigurableStandardRole
 
         public override int[]? GetRoleArgument() => new int[] { leftVent };
 
-        void IGameEntity.OnTaskUpdated(GamePlayer player)
+        [Local]
+        void OnTaskUpdated(PlayerTaskUpdateEvent ev)
         {
-            if (AmOwner && !MyPlayer.IsDead)
+            if (!MyPlayer.IsDead)
             {
                 int tasks = AmongUsUtil.NumOfAllTasks;
-                if (player.AmOwner) return;
-                if (!player.IsDead && MyRole.SuicideIfSomeoneElseCompletesTasksBeforeAgentOption && player.Tasks.IsCrewmateTask && player.Tasks.TotalTasks >= tasks && player.Tasks.IsCompletedTotalTasks)
+                if (ev.Player.AmOwner) return;
+                if (!ev.Player.IsDead && MyRole.SuicideIfSomeoneElseCompletesTasksBeforeAgentOption && ev.Player.Tasks.IsCrewmateTask && ev.Player.Tasks.TotalTasks >= tasks && ev.Player.Tasks.IsCompletedTotalTasks)
                 {
                     MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Layoff);
                     new StaticAchievementToken("agent.another1");

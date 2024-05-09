@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -82,7 +83,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
         });
     }
     
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         List<byte> impostors = new();
 
@@ -117,10 +118,8 @@ public class Madmate : ConfigurableStandardRole, HasCitation
             if(AmOwner) IdentifyImpostors();
         }
 
-        public override void OnGameStart()
+        public void OnGameStart(GameStartEvent ev)
         {
-            base.OnGameStart();
-
             SetMadmateTask();
             if (AmOwner) IdentifyImpostors();
         }
@@ -147,7 +146,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
             if (impostors.Contains(player.PlayerId) && player.Role.Role.Category == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
         }
 
-        void IGamePlayerEntity.OnExiled()
+        void IGamePlayerOperator.OnExiled()
         {
             if (!AmOwner) return;
 
@@ -168,7 +167,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
 
         }
 
-        void IGamePlayerEntity.OnMurdered(GamePlayer murder)
+        void IGamePlayerOperator.OnMurdered(GamePlayer murder)
         {
             if(AmOwner && murder.Unbox()?.Role.Role.Category == RoleCategory.ImpostorRole)
                 new StaticAchievementToken("madmate.another1");

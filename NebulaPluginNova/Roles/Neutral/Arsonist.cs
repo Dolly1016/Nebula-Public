@@ -1,5 +1,6 @@
 ﻿using Nebula.Behaviour;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -30,7 +31,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         DouseDurationOption = new NebulaConfiguration(RoleConfig, "douseDuration", null, 1f, 10f, 0.5f, 3f, 3f);
     }
 
-    public class Instance : RoleInstance, IGamePlayerEntity
+    public class Instance : RoleInstance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
 
@@ -166,9 +167,9 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
             UpdateIcons();
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        [Local]
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
-            if (!AmOwner) return;
             playerIcons.RemoveAll(tuple =>
             {
                 if (NebulaGameManager.Instance?.GetPlayer(tuple.playerId)?.IsDead ?? true)
@@ -182,7 +183,9 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         }
 
         StaticAchievementToken? acTokenCommon;
-        void IGameEntity.OnMeetingStart()
+
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
             if (AmOwner)
             {
@@ -192,7 +195,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         }
 
         AchievementToken<bool>? acTokenChallenge;
-        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
+        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
         {
             if (AmOwner)
             {

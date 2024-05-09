@@ -51,7 +51,7 @@ public class Avenger : ConfigurableRole
 
     public override bool CanBeGuessDefault => false;
 
-    public class Instance : RoleInstance, IGamePlayerEntity
+    public class Instance : RoleInstance, IGamePlayerOperator
     {
         private Timer ventCoolDown = new Timer(MyRole.VentOption.CoolDown).SetAsAbilityCoolDown().Start();
         private Timer ventDuration = new(MyRole.VentOption.Duration);
@@ -104,7 +104,7 @@ public class Avenger : ConfigurableRole
 
         private bool KillCondition => (target?.IsDead ?? false) && target?.MyKiller == MyPlayer;
         private bool CheckKillCondition => KillCondition && !MyPlayer.IsDead;
-        (GameEnd end, GameEndReason reason)? IGameEntity.OnCheckGameEnd(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason gameEndReason)
+        (GameEnd end, GameEndReason reason)? IGameOperator.OnCheckGameEnd(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason gameEndReason)
         {
             //復讐対象が自身の手によって死亡、かつ自身は生存
             if (CheckKillCondition) return (NebulaGameEnd.AvengerWin, GameEndReason.Special);
@@ -116,7 +116,7 @@ public class Avenger : ConfigurableRole
             return endCondition == NebulaGameEnd.AvengerWin && CheckKillCondition;
         }
 
-        void IGamePlayerEntity.OnMurdered(Virial.Game.Player murder)
+        void IGamePlayerOperator.OnMurdered(Virial.Game.Player murder)
         {
             if (murder == target)
             {
@@ -125,17 +125,17 @@ public class Avenger : ConfigurableRole
             }
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             if(AmOwner && CheckKillCondition) new StaticAchievementToken("avenger.another2");
         }
 
-        void IGamePlayerEntity.OnKillPlayer(Virial.Game.Player target)
+        void IGamePlayerOperator.OnKillPlayer(Virial.Game.Player target)
         {
             if(AmOwner && target == this.target) new StaticAchievementToken("avenger.common1");
         }
 
-        void IGameEntity.OnPlayerExiled(Virial.Game.Player exiled)
+        void IGameOperator.OnPlayerExiled(Virial.Game.Player exiled)
         {
             if (AmOwner && target == exiled && !MyPlayer.IsDead)
             {
@@ -151,7 +151,7 @@ public class Avenger : ConfigurableRole
             }
         }
 
-        void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
+        void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
         {
             if (AmOwner && !CheckKillCondition && dead == target && !MyPlayer.IsDead)
             {

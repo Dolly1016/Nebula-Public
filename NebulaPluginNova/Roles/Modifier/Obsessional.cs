@@ -32,7 +32,7 @@ public class Obsessional : ConfigurableStandardModifier
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
-    public class Instance : ModifierInstance, IGamePlayerEntity
+    public class Instance : ModifierInstance, IGamePlayerOperator
     {
         public override AbstractModifier Role => MyRole;
 
@@ -84,7 +84,7 @@ public class Obsessional : ConfigurableStandardModifier
             }
         }
 
-        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
+        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
         {
             if (AmOwner)
             {
@@ -98,7 +98,7 @@ public class Obsessional : ConfigurableStandardModifier
             }
         }
 
-        void IGameEntity.OnPlayerDead(GamePlayer dead)
+        void IGameOperator.OnPlayerDead(GamePlayer dead)
         {
             if (AmOwner)
             {

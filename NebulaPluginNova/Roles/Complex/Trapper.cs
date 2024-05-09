@@ -1,4 +1,6 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Complex;
@@ -117,7 +119,7 @@ public class Trapper : ConfigurableStandardRole
 
 
     [NebulaPreLoad]
-    public class Trap : NebulaSyncStandardObject, IGameEntity
+    public class Trap : NebulaSyncStandardObject, IGameOperator
     {
         public static string MyGlobalTag = "TrapGlobal";
         public static string MyLocalTag = "TrapLocal";
@@ -161,7 +163,7 @@ public class Trapper : ConfigurableStandardRole
             Color = Color.white;
         }
 
-        void IGameEntity.Update()
+        void Update(GameUpdateEvent ev)
         {
             if(TypeId < 2 && !(Color.a < 1f))
             {
@@ -220,7 +222,7 @@ public class Trapper : ConfigurableStandardRole
         GenerateCommonEditor(RoleConfig, PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption);
     }
 
-    public class NiceInstance : Crewmate.Crewmate.Instance, IGamePlayerEntity
+    public class NiceInstance : Crewmate.Crewmate.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyNiceRole;
         private int leftCharge = NumOfChargesOption;
@@ -240,13 +242,11 @@ public class Trapper : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnMeetingStart()
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (AmOwner)
-            {
-                TrapperSystem.OnMeetingStart(localTraps, commTraps);
-                acTokenChallenge!.Value.playerMask = 0;
-            }
+            TrapperSystem.OnMeetingStart(localTraps, commTraps);
+            acTokenChallenge!.Value.playerMask = 0;
         }
 
         private uint lastCommPlayersMask = 0;
@@ -284,7 +284,7 @@ public class Trapper : ConfigurableStandardRole
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerEntity
+    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyEvilRole;
         private int leftCharge = NumOfChargesOption;
@@ -305,12 +305,9 @@ public class Trapper : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnMeetingStart()
-        {
-            if (AmOwner) TrapperSystem.OnMeetingStart(localTraps,killTraps);
-        }
-
-
+        [Local]
+        void OnMeetingStart() => TrapperSystem.OnMeetingStart(localTraps, killTraps);
+        
         public override void LocalUpdate()
         {
             //会議中はなにもしない

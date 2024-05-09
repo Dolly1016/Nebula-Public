@@ -35,6 +35,15 @@ public class NebulaPreprocess : Attribute
 /// そのクラスに紐づけられたプレイヤーに関するイベントでのみ呼び出されるよう制限されます。
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class BindPlayer : Attribute
+public class OnlyMyPlayer : Attribute
 {
+}
+
+/// <summary>
+/// ローカルでのみ呼び出される手続きを表します。
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class Local : Attribute
+{
+
 }

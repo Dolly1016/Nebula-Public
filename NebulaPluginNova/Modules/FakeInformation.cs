@@ -1,5 +1,6 @@
 ﻿using Virial;
 using Virial.DI;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Modules;
@@ -28,7 +29,7 @@ public record FakeInformationEntry<T>(T Information) {
 }
 
 [NebulaRPCHolder]
-internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameEntity
+internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     static public FakeInformation? Instance => NebulaAPI.CurrentGame?.GetModule<FakeInformation>();
 
@@ -40,7 +41,7 @@ internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameEntity
         this.Register(Virial.NebulaAPI.CurrentGame!);
     }
 
-    void IGameEntity.HudUpdate()
+    void HudUpdate(GameHudUpdateEvent ev)
     {
         if (Admin?.Update() ?? false) Admin = null;
         if (Vitals?.Update() ?? false) Vitals = null;

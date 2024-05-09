@@ -34,7 +34,7 @@ public class Busker : ConfigurableStandardRole
         HidePseudocideFromVitalsOption = new(RoleConfig, "hidePseudocideFromVitals", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance, IGameEntity
+    public class Instance : Crewmate.Instance, IGameOperator
     {
         static private ISpriteLoader pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
         static private ISpriteLoader reviveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskReviveButton.png", 115f);
@@ -116,8 +116,8 @@ public class Busker : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnReported(GamePlayer reporter, GamePlayer reported) => CheckChallengeAchievement(reporter.Unbox());
-        void IGameEntity.OnEmergencyMeeting(GamePlayer reporter) => CheckChallengeAchievement(reporter.Unbox());
+        void IGameOperator.OnReported(GamePlayer reporter, GamePlayer reported) => CheckChallengeAchievement(reporter.Unbox());
+        void IGameOperator.OnEmergencyMeeting(GamePlayer reporter) => CheckChallengeAchievement(reporter.Unbox());
         
     }
 }

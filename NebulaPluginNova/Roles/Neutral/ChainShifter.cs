@@ -1,5 +1,6 @@
 ﻿using Nebula.Roles.Complex;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -34,7 +35,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
     public override bool CanBeGuessDefault => false;
 
 
-    public class Instance : RoleInstance, IGamePlayerEntity
+    public class Instance : RoleInstance, IGamePlayerOperator
     {
         private ModAbilityButton? chainShiftButton = null;
 
@@ -83,7 +84,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
         }
 
         //会議開始時に生きていればシフトは実行されうる
-        void IGameEntity.OnMeetingStart()
+        void OnMeetingStart(MeetingStartEvent ev)
         {
             canExecuteShift = !MyPlayer.IsDead;
         }
@@ -159,13 +160,13 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
             yield break;
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
             shiftTarget = null;
         }
 
 
-        void IGamePlayerEntity.OnMurdered(GamePlayer murder)
+        void IGamePlayerOperator.OnMurdered(GamePlayer murder)
         {
             if (murder.AmOwner) new StaticAchievementToken("chainShifter.common1");
         }

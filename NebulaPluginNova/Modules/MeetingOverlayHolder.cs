@@ -2,12 +2,13 @@
 using Virial;
 using Virial.Accessibility;
 using Virial.DI;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 using Virial.Media;
 
 namespace Nebula.Modules;
 
-internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayHolder, IGameEntity
+internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayHolder, IGameOperator
 {
     static IDividedSpriteLoader IconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.MeetingNotification.png", 100f, 4, 1);
     static ISpriteLoader NotificationSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingNotificationDot.png", 135f);
@@ -78,7 +79,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
     }
 
-    void IGameEntity.OnMeetingStart()
+    void OnMeetingStart(MeetingStartEvent ev)
     {
         shower = UnityHelper.CreateObject("OverlayHolder", MeetingHud.Instance.transform, new(0f, 2.7f, -20f)).transform;
         for (int i = 0; i < icons.Count; i++) Generate(i);

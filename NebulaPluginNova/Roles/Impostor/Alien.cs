@@ -31,7 +31,7 @@ public class Alien : ConfigurableStandardRole, HasCitation
         NumOfInvalidationsOption = new NebulaConfiguration(RoleConfig, "numOfInvalidations", null, 10, 1, 1);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
         static private ISpriteLoader invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
@@ -120,13 +120,13 @@ public class Alien : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGamePlayerEntity.OnKillPlayer(Virial.Game.Player target)
+        void IGamePlayerOperator.OnKillPlayer(Virial.Game.Player target)
         {
             if (AmOwner && (emiButton?.EffectActive ?? false))
                 new StaticAchievementToken("alien.common1");
         }
 
-        void IGameEntity.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
+        void IGameOperator.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
         {
             if (AmOwner)
             {

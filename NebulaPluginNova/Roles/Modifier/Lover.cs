@@ -70,7 +70,7 @@ public class Lover : ConfigurableModifier, HasCitation
         AvengerModeOption = new(RoleConfig, "avengerMode", null, false, false);
     }
 
-    public class Instance : ModifierInstance, IGamePlayerEntity
+    public class Instance : ModifierInstance, IGamePlayerOperator
     {
         public override AbstractModifier Role => MyRole;
 
@@ -122,12 +122,12 @@ public class Lover : ConfigurableModifier, HasCitation
                 }
             }
         }
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             if (AmOwner && MyPlayer.PlayerState == PlayerState.Suicide) new StaticAchievementToken("lover.another1");
         }
 
-        void IGamePlayerEntity.OnMurdered(GamePlayer murder)
+        void IGamePlayerOperator.OnMurdered(GamePlayer murder)
         {
             if(AmOwner && murder.PlayerId != MyPlayer.PlayerId)
             {
@@ -141,7 +141,7 @@ public class Lover : ConfigurableModifier, HasCitation
             }
         }
 
-        void IGamePlayerEntity.OnExtraExiled()
+        void IGamePlayerOperator.OnExtraExiled()
         {
             if (AmOwner && !(MyLover?.IsDead ?? false))
             {
@@ -151,7 +151,7 @@ public class Lover : ConfigurableModifier, HasCitation
             }
         }
 
-        void IGamePlayerEntity.OnExiled()
+        void IGamePlayerOperator.OnExiled()
         {
             if (AmOwner && !(MyLover?.IsDead ?? false))
             {

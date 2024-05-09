@@ -1,5 +1,6 @@
 ﻿using Virial.Assignable;
 using Virial.Components;
+using Virial.Events.Game;
 
 namespace Nebula.Roles;
 
@@ -36,11 +37,12 @@ public abstract class RoleInstance : AssignableInstance, IRuntimePropertyHolder,
     public virtual void OnEnterVent(PlayerControl player,Vent vent) { }
     public virtual void OnExitVent(PlayerControl player, Vent vent) { }
 
-    public virtual void OnGameReenabled() => VentCoolDown?.Start();
+    void ResetVentCoolDownOnTaskPhaseRestart(TaskPhaseRestartEvent ev) => VentCoolDown?.Start();
 
     //役職履歴に追加される直前に呼び出されます。
     public override void OnActivated() => VentCoolDown?.Start();
-    public virtual void OnGameStart() => VentCoolDown?.Start();
+
+    void ResetVentCoolDownOnGameStart(GameStartEvent ev) => VentCoolDown?.Start();
 
     public virtual IEnumerator? CoMeetingEnd() => null;
 

@@ -1,6 +1,8 @@
 ﻿using Nebula.Modules.GUIWidget;
 using Virial;
 using Virial.DI;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 using static Nebula.Behaviour.MeetingPlayerButtonManager;
 
@@ -8,7 +10,7 @@ namespace Nebula.Behaviour;
 
 public record MeetingPlayerAction(Image icon, Action<MeetingPlayerButtonState> buttonAction, Predicate<MeetingPlayerButtonState> predicate);
 
-public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGameEntity
+public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     public record MeetingPlayerButton(GameObject gameObject, SpriteRenderer renderer, GamePlayer player, Reference<MeetingPlayerButtonState> state);
 
@@ -61,7 +63,7 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
         currentAction = null;
     }
 
-    void IGameEntity.OnPreMeetingStart(Virial.Game.Player reporter, Virial.Game.Player? reported) => ResetActions();
+    void OnPreMeetingStart(MeetingPreStartEvent ev) => ResetActions();
 
     void IncrementCurrentAction()
     {
@@ -77,7 +79,7 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
         UpdatePlayerState();
     }
 
-    void IGameEntity.OnMeetingStart()
+    void OnMeetingStart(MeetingStartEvent ev)
     {
         allButtons.Clear();
 
@@ -170,13 +172,13 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
         if (lastAction != nextAction) SetAction(nextAction);
     }
 
-    void IGameEntity.OnEndVoting()
+    void OnEndVoting(MeetingVoteEndEvent ev)
     {
         allButtons.Do(b => GameObject.Destroy(b.gameObject));
         allButtons.Clear();
     }
 
-    void IGameEntity.Update()
+    void Update(GameUpdateEvent ev)
     {
         if (!MeetingHud.Instance) return;
 

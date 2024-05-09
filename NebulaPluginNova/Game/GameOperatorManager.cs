@@ -1,4 +1,7 @@
-﻿using Virial;
+﻿using System.Reflection;
+using Virial;
+using Virial.Attributes;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Game;
@@ -17,7 +20,7 @@ internal class GameOperatorBuilder
     /// <summary>
     /// ゲーム作用素を登録します。
     /// </summary>
-    public void Register(Dictionary<Type, List<GameOperatorInstance>> runtimeOperators, ILifespan lifespan, IGameEntity operation)
+    public void Register(Dictionary<Type, List<GameOperatorInstance>> runtimeOperators, ILifespan lifespan, IGameOperator operation)
     {
         foreach(var action in allActions)
         {
@@ -35,7 +38,7 @@ internal class GameOperatorBuilder
     {
         List<(Type type, Func<object, Action<object>> action)> builderActions = new();
 
-        foreach(var method in entityType.GetMethods())
+        foreach(var method in entityType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
         {
             var parameters = method.GetParameters();
             if (parameters.Length != 1) continue;
@@ -43,7 +46,30 @@ internal class GameOperatorBuilder
             if (!parameters[0].ParameterType.IsAssignableTo(typeof(Virial.Events.Event))) continue;
 
             var eventType = parameters[0].ParameterType;
-            builderActions.Add((eventType, (instance) => (e) => { method.Invoke(instance, [e]); }));
+
+
+            Action<object, object> procedure = (instance, e) => method.Invoke(instance, [e]);
+
+
+            if (method.GetCustomAttribute<OnlyMyPlayer>() != null)
+            {
+                var lastAction = procedure;
+                procedure = (instance, e) =>
+                {
+                    if ((e as AbstractPlayerEvent)?.Player == (instance as IGamePlayerOperator)?.MyPlayer) lastAction.Invoke(instance, e);
+                };
+            }
+
+            if (method.GetCustomAttribute<Local>() != null)
+            {
+                var lastAction = procedure;
+                procedure = (instance, e) =>
+                {
+                    if ((instance as IGamePlayerOperator)?.AmOwner ?? false) lastAction.Invoke(instance, e);
+                };
+            }
+
+            builderActions.Add((eventType, (instance) => (e) => procedure.Invoke(instance,e)));
         }
 
         return new(builderActions);
@@ -128,9 +154,9 @@ public class GameOperatorManager
     }
 
     // 反復中に作用素が追加されないよう、一時的に退避する
-    private List<(IGameEntity entity, ILifespan lifespan)> newOperations = new();
+    private List<(IGameOperator entity, ILifespan lifespan)> newOperations = new();
 
-    private void RegisterEntity(IGameEntity operation, ILifespan lifespan)
+    private void RegisterEntity(IGameOperator operation, ILifespan lifespan)
     {
         onReleasedOperators.Add((lifespan, operation.OnReleased));
         var operationType = operation.GetType();
@@ -150,7 +176,7 @@ public class GameOperatorManager
         newOperations.Clear();
     }
 
-    public void Register(IGameEntity entity, ILifespan lifespan)
+    public void Register(IGameOperator entity, ILifespan lifespan)
     {
         newOperations.Add((entity, lifespan));
     }
@@ -159,4 +185,9 @@ public class GameOperatorManager
     {
         instance = this;
     }
+
+    //書き換えのための措置
+    public IEnumerable<IGameOperator> AllEntities => null;
+    public IEnumerable<IGamePlayerOperator> GetPlayerEntities(GamePlayer p) => null;
+    public IEnumerable<IGamePlayerOperator> GetPlayerEntities(byte p) => null;
 }

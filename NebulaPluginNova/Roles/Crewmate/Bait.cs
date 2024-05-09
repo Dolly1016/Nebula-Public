@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -33,7 +34,7 @@ public class Bait : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
@@ -49,7 +50,7 @@ public class Bait : ConfigurableStandardRole, HasCitation
             yield return new WaitForSeconds(t);
             murderer.CmdReportDeadBody(MyPlayer.VanillaPlayer.Data);
         }
-        void IGamePlayerEntity.OnMurdered(GamePlayer murderer)
+        void IGamePlayerOperator.OnMurdered(GamePlayer murderer)
         {
             if (murderer.PlayerId == MyPlayer.PlayerId) return;
 
@@ -67,12 +68,12 @@ public class Bait : ConfigurableStandardRole, HasCitation
             if (AmOwner && MyRole.CanSeeVentFlashOption) AmongUsUtil.PlayQuickFlash(Role.RoleColor.AlphaMultiplied(0.3f));
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value.triggered = false;
         }
 
-        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
+        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
         {
             if (AmOwner)
             {

@@ -1,4 +1,6 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -33,7 +35,7 @@ public class Raider : ConfigurableStandardRole
     }
 
     [NebulaPreLoad]
-    public class RaiderAxe : NebulaSyncStandardObject, IGameEntity
+    public class RaiderAxe : NebulaSyncStandardObject, IGameOperator
     {
         public static string MyTag = "RaiderAxe";
         
@@ -52,7 +54,7 @@ public class Raider : ConfigurableStandardRole
         {
         }
 
-        void IGameEntity.HudUpdate()
+        void HudUpdate(GameHudUpdateEvent ev)
         {
             if (state == 0)
             {
@@ -149,7 +151,7 @@ public class Raider : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
@@ -211,27 +213,28 @@ public class Raider : ConfigurableStandardRole
             }
         }
 
-        void IGameEntity.OnMeetingStart()
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
             UnequipAxe();
             equipButton?.SetLabel("equip");
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             if (AmOwner && MyAxe != null) UnequipAxe();
 
             if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
-        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
+        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
         {
             if(AmOwner && target.PlayerState == PlayerState.Beaten)
                 acTokenCommon ??= new("raider.common1");
             
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
             if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
         }

@@ -2,6 +2,7 @@
 using Nebula.Behaviour;
 using static MeetingHud;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Virial.Events.Game.Meeting;
 
 namespace Nebula.Patches;
 
@@ -55,7 +56,7 @@ public static class MeetingModRpc
         var reporter = NebulaGameManager.Instance?.GetPlayer(message.reporter);
         var reported = NebulaGameManager.Instance?.GetPlayer(message.reported);
 
-        GameOperatorManager.Instance?.AllEntities.Do(a => a.OnPreMeetingStart(reporter!, reported));
+        GameOperatorManager.Instance?.Run(new MeetingPreStartEvent(reporter!, reported));
 
         if (reported != null)
             GameOperatorManager.Instance?.AllEntities.Do(a => a.OnReported(reporter!, reported));
@@ -416,7 +417,8 @@ class MeetingClosePatch
         VentilationSystem? ventilationSystem = ShipStatus.Instance.Systems[SystemTypes.Ventilation].TryCast<VentilationSystem>();
         if (ventilationSystem != null) ventilationSystem.PlayersInsideVents.Clear();
 
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnStartExileCutScene());
+        GameOperatorManager.Instance?.Run(new ExileSceneStartEvent());
+
         NebulaManager.Instance.CloseAllUI();
     }
 }
@@ -716,7 +718,7 @@ class PopulateResultPatch
     {
         Debug.Log("Called PopulateResults");
 
-        GameOperatorManager.Instance?.AllEntities.Do(r => r.OnEndVoting());
+        GameOperatorManager.Instance?.Run(new MeetingVoteEndEvent());
 
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.MeetingVotingResults);
         foreach (var voteArea in __instance.playerStates)

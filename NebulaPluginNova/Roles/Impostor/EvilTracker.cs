@@ -3,6 +3,7 @@ using Nebula.Behaviour;
 using Nebula.Roles.Abilities;
 using Virial;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -110,7 +111,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? trackButton = null;
 
@@ -132,7 +133,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
         private void TryRegisterArrow(GamePlayer player) { if(!impostorArrows.Any(a => a.MyPlayer == player)) impostorArrows.Add(Bind(new TrackingArrowAbility(player.Unbox(), 0f, Palette.ImpostorRed)).Register()); }
 
         //役職変化に応じて矢印を付ける
-        void IGameEntity.OnSetRole(Virial.Game.Player player, Virial.Assignable.RuntimeRole role)
+        void IGameOperator.OnSetRole(Virial.Game.Player player, Virial.Assignable.RuntimeRole role)
         {
             if (MyRole.TrackImpostorsOption)
             {
@@ -188,60 +189,59 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
         TrackerTaskMapLayer? mapLayer = null;
         TrackerPlayerMapLayer? playerMapLayer = null;
 
-        void IGameEntity.OnMeetingStart()
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (AmOwner)
+            int optionValue = MyRole.TaskTrackingOption.CurrentValue;
+            if (optionValue > 0)
             {
-                int optionValue = MyRole.TaskTrackingOption.CurrentValue;
-                if (optionValue > 0)
-                {
-                    GamePlayer? isChecked = null;
-                    NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new Behaviour.MeetingPlayerAction(
-                        trackSprite,
-                        p =>
+                GamePlayer? isChecked = null;
+                NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new Behaviour.MeetingPlayerAction(
+                    trackSprite,
+                    p =>
+                    {
+                        if (isChecked == null)
                         {
-                            if (isChecked == null)
-                            {
-                                RpcShareTaskLoc.Invoke((MyPlayer.PlayerId, p.MyPlayer.PlayerId));
-                                isChecked = p.MyPlayer;
-                            }
-                            else if(mapLayer)
-                            {
-                                MapBehaviour.Instance.ShowNormalMap();
-                                MapBehaviour.Instance.taskOverlay.gameObject.SetActive(false);
-                                mapLayer!.gameObject.SetActive(true);
-                            }
-                        },
-                        p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && (optionValue == 2 || trackingTarget == p.MyPlayer) && (isChecked == null || isChecked == p.MyPlayer)
-                        ));
-                }
+                            RpcShareTaskLoc.Invoke((MyPlayer.PlayerId, p.MyPlayer.PlayerId));
+                            isChecked = p.MyPlayer;
+                        }
+                        else if (mapLayer)
+                        {
+                            MapBehaviour.Instance.ShowNormalMap();
+                            MapBehaviour.Instance.taskOverlay.gameObject.SetActive(false);
+                            mapLayer!.gameObject.SetActive(true);
+                        }
+                    },
+                    p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && (optionValue == 2 || trackingTarget == p.MyPlayer) && (isChecked == null || isChecked == p.MyPlayer)
+                    ));
             }
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        [Local]
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
-            if (AmOwner && mapLayer)
+            if (mapLayer)
             {
                 GameObject.Destroy(mapLayer!.gameObject);
                 mapLayer = null;
             }
         }
 
-        void IGameEntity.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
+        void IGameOperator.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
         {
             if(MyRole.ShowKillFlashOption && AmOwner && !murderer.AmOwner) AmongUsUtil.PlayQuickFlash(Palette.ImpostorRed);   
         }
 
-        void IGameEntity.OnOpenNormalMap()
+        void IGameOperator.OnOpenNormalMap()
         {
             if (AmOwner && mapLayer) mapLayer!.gameObject.SetActive(false);
             if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
         }
 
-        void IGameEntity.OnOpenAdminMap() {
+        void IGameOperator.OnOpenAdminMap() {
             if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
         }
-        void IGameEntity.OnOpenSabotageMap()
+        void IGameOperator.OnOpenSabotageMap()
         {
             if (MyRole.ShowTrackingTargetOnMapOption)
             {
@@ -258,7 +258,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
         }
 
 
-        void IGamePlayerEntity.OnKillPlayer(Virial.Game.Player target)
+        void IGamePlayerOperator.OnKillPlayer(Virial.Game.Player target)
         {
             //タスク周辺でキルしたらチャレンジ実績達成
             if(AmOwner && challengeToken != null && challengeToken.Value.locs != null && challengeToken.Value.target == target.PlayerId)
@@ -267,7 +267,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
+        void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
         {
             if (AmOwner && trackingTarget == dead) new StaticAchievementToken("evilTracker.another1");
         }

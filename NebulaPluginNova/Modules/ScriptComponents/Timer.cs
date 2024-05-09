@@ -1,4 +1,5 @@
 ﻿using Virial.Components;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -16,7 +17,7 @@ class PlayerIsKillTimerEnabledPatch
     }
 }
 
-public class Timer : INebulaScriptComponent, GameTimer, IGameEntity
+public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
 {
     private Func<bool>? predicate = null;
     private bool isActive;
@@ -75,7 +76,7 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameEntity
     public virtual float Percentage { get => max > min ? (currentTime - min) / (max - min) : 0f; }
     public bool IsInProcess => CurrentTime > min;
 
-    void IGameEntity.Update()
+    void Update(GameUpdateEvent ev)
     {
         if (isActive && (predicate?.Invoke() ?? true))
             currentTime = Mathf.Clamp(currentTime - Time.deltaTime, min, max);

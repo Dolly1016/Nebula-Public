@@ -1,4 +1,5 @@
 ﻿using Virial.Components;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -31,7 +32,7 @@ public static class ObjectTrackers
 
 
 
-public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker<V>, IGameEntity where T : MonoBehaviour where V : class
+public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker<V>, IGameOperator where T : MonoBehaviour where V : class
 {
     V? ObjectTracker<V>.CurrentTarget => currentTarget?.Item2;
     bool ObjectTracker<V>.IsLocked { get => isLocked; set => isLocked = value; }
@@ -73,7 +74,7 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
         renderer.material.SetColor("_OutlineColor", color);
     }
 
-    void IGameEntity.HudUpdate()
+    void HudUpdate(GameHudUpdateEvent ev)
     {
         if (isLocked)
         {

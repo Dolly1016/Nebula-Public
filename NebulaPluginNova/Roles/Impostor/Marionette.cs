@@ -1,5 +1,6 @@
 ﻿using Nebula.Behaviour;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -52,7 +53,7 @@ public class Marionette : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? destroyButton = null;
@@ -177,29 +178,27 @@ public class Marionette : ConfigurableStandardRole
         public override void LocalUpdate()
         {
         }
-        void IGameEntity.OnMeetingStart()
+
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (AmOwner)
-            {
                 if (MyDecoy != null) NebulaSyncObject.RpcDestroy(MyDecoy!.ObjectId);
                 MyDecoy = null;
 
                 monitorButton?.DoSubClick();
-            }
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
-
             if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
         }
 
-        void IGamePlayerEntity.OnKillPlayer(GamePlayer target)
+        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
         {
             if (AmOwner && acTokenChallenge != null) acTokenChallenge.Value.killTime = NebulaGameManager.Instance!.CurrentTime;
         }

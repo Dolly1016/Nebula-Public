@@ -26,7 +26,7 @@ public interface Game : IModuleContainer, ILifespan
     /// <returns>ゲーム中の全プレイヤー</returns>
     IEnumerable<Player> GetAllPlayers();
 
-    internal void RegisterEntity(IGameEntity entity, ILifespan lifespan);
+    internal void RegisterEntity(IGameOperator entity, ILifespan lifespan);
 
     /// <summary>
     /// 現在のHUD。

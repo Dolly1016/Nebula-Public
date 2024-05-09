@@ -384,8 +384,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
             myRole.OnActivated(); myRole.Register();
-            GameOperatorManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnSetRole(myRole));
-            GameOperatorManager.Instance?.AllEntities.Do(e => e.OnSetRole(this, myRole));
+            NebulaGameManager.Instance.AllPlayerEntitiesAction(e => e.OnSetRole(myRole));
+            NebulaGameManager.Instance.AllEntitiesAction(e => e.OnSetRole(this, myRole));
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myRole, IsDead));

@@ -1,8 +1,9 @@
-﻿using Virial.Game;
+﻿using Virial.Events.Game;
+using Virial.Game;
 
 namespace Nebula.Roles.Abilities;
 
-public class SpectatorsAbility : IGameEntity
+public class SpectatorsAbility : IGameOperator
 {
     static ISpriteLoader spectatorSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorButton.png", 115f);
     static ISpriteLoader spectatorChangeSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorChangeButton.png", 115f);
@@ -78,7 +79,7 @@ public class SpectatorsAbility : IGameEntity
         
     }
 
-    void IGameEntity.HudUpdate()
+    void HudUpdate(GameHudUpdateEvent ev)
     {
         float axis = Input.GetAxis("Mouse ScrollWheel");
 
@@ -120,7 +121,7 @@ public class SpectatorsAbility : IGameEntity
     }
 
     //プレイヤーの死亡時、そのプレイヤーを観戦していたら近くのプレイヤーに視点を変える
-    void IGameEntity.OnPlayerDead(Virial.Game.Player dead)
+    void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
     {
         if(currentTarget == dead)
         {
@@ -130,7 +131,7 @@ public class SpectatorsAbility : IGameEntity
         }
     }
 
-    void IGameEntity.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
+    void IGameOperator.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
     {
         if (currentTarget == dead) new StaticAchievementToken("spectator.dead");
         if (currentTarget == murderer) new StaticAchievementToken("spectator.murderer");

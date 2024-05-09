@@ -12,6 +12,9 @@ using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.DI;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Game;
@@ -155,7 +158,7 @@ public static class RoleHistoryHelper {
 }
 
 
-public class TitleShower : AbstractModule<Virial.Game.Game>, IGameEntity
+public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     TextMeshPro mainText, shadowText;
     Transform textHolder;
@@ -198,7 +201,7 @@ public class TitleShower : AbstractModule<Virial.Game.Game>, IGameEntity
         shadowText.text = text;
         textColor = color;
 
-        (this as IGameEntity).HudUpdate();
+        HudUpdate(null!);
 
         alpha = 1f;
         timer = duration;
@@ -214,7 +217,7 @@ public class TitleShower : AbstractModule<Virial.Game.Game>, IGameEntity
     bool shake = false;
     float shakeTimer = 0f;
 
-    void IGameEntity.HudUpdate()
+    void HudUpdate(GameHudUpdateEvent? ev)
     {
         if (shake)
         {
@@ -363,7 +366,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         VoiceChatManager = null;
     }
 
-    void Virial.Game.Game.RegisterEntity(IGameEntity entity, ILifespan lifespan) => GameEntityManager.Register(entity, lifespan);
+    void Virial.Game.Game.RegisterEntity(IGameOperator entity, ILifespan lifespan) => GameEntityManager.Register(entity, lifespan);
     
 
     public GamePlayer RegisterPlayer(PlayerControl player)
@@ -438,7 +441,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public void OnTaskUpdated(GamePlayer player)
     {
         CheckAndEndGame(CriteriaManager.OnTaskUpdated(), GameEndReason.Task);
-        AllEntitiesAction(e => e.OnTaskUpdated(player));
+
+        GameEntityManager.Run(new PlayerTaskUpdateEvent(player));
     }
 
     public void OnMeetingStart()
@@ -448,7 +452,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         foreach (var p in allModPlayers) p.Value.Unbox().OnMeetingStart();
 
-        AllEntitiesAction(e=>e.OnMeetingStart());
+        GameEntityManager.Run(new MeetingStartEvent());
 
         Scheduler.Execute(RPCScheduler.RPCTrigger.PreMeeting);
     }
@@ -489,7 +493,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         if (VoiceChatManager == null && GeneralConfigurations.UseVoiceChatOption) VoiceChatManager = new();
         VoiceChatManager?.Update();
 
-        AllEntitiesAction(e => e.HudUpdate());
+        GameEntityManager.Run(new GameHudUpdateEvent(this));
 
         if (!PlayerControl.LocalPlayer) return;
         //バニラボタンの更新
@@ -528,12 +532,11 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
 
     public void OnFixedUpdate() {
-        AllEntitiesAction(e => e.Update());
+        GameEntityManager.Run(new GameUpdateEvent(this));
 
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
         {
             KillButtonTracker ??= ObjectTrackers.ForPlayer(null, NebulaGameManager.Instance!.LocalPlayerInfo, p => !p.AmOwner && !p.IsDead && !p.IsImpostor && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.MyRole.CanKillHidingPlayerOption);
-            (KillButtonTracker as IGameEntity).HudUpdate();
             HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
         }
 
@@ -554,7 +557,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         foreach(var c in GeneralConfigurations.CurrentGameMode.GameModeCriteria)CriteriaManager.AddCriteria(c);
 
         foreach (var p in allModPlayers) p.Value.Unbox().OnGameStart();
-        GameEntityManager.AllEntities.Do(e => e.OnGameStart());
+        GameEntityManager.Run(new GameStartEvent(this));
+
         HudManager.Instance.UpdateHudContent();
 
         ConsoleRestriction?.OnGameStart();
@@ -687,8 +691,11 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
 
     public IEnumerable<GamePlayer> AllPlayerInfo() => allModPlayers.Values;
-    public void AllEntitiesAction(Action<IGameEntity> action) => GameEntityManager.AllEntities.Do(action);
-    
+
+    //書き換えのための措置
+    public void AllEntitiesAction(Action<IGameOperator> action) => GameEntityManager.AllEntities.Do(action);
+    public void AllPlayerEntitiesAction(Action<IGamePlayerOperator> action) => GameEntityManager.AllEntities.Do(action);
+
 
     public void AllAssignableAction(Action<RuntimeAssignable> action)
     {
@@ -739,7 +746,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         {
             NebulaGameManager.Instance?.CheckGameState();
             NebulaGameManager.Instance?.AllAssignableAction(r=> {
-                r.Unbox().OnActivated(); (r as IGameEntity)?.Register(r);
+                r.Unbox().OnActivated(); (r as IGameOperator)?.Register(r);
                 if (r is RuntimeRole role)
                 {
                     GameOperatorManager.Instance?.GetPlayerEntities(r.MyPlayer).Do(e => e.OnSetRole(role));

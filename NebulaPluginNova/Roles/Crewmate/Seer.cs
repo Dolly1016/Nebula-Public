@@ -1,11 +1,13 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
 [NebulaPreLoad]
-file class Ghost : INebulaScriptComponent, IGameEntity
+file class Ghost : INebulaScriptComponent, IGameOperator
 {
     SpriteRenderer renderer;
     static XOnlyDividedSpriteLoader ghostSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Ghost.png", 160f, 9);
@@ -23,7 +25,7 @@ file class Ghost : INebulaScriptComponent, IGameEntity
         renderer.sprite = ghostSprite.GetSprite(0);
     }
 
-    void IGameEntity.Update()
+    void Update(GameUpdateEvent ev)
     {
         if (commonToken != null && !commonToken.Value && !commonToken.Achievement.IsCleared)
         {
@@ -44,20 +46,20 @@ file class Ghost : INebulaScriptComponent, IGameEntity
         }
     }
 
-    void IGameEntity.OnReleased()
+    void IGameOperator.OnReleased()
     {
         if (renderer) GameObject.Destroy(renderer.gameObject);
     }
 }
 
-public class GhostAndFlashAbility : IGameEntity
+public class GhostAndFlashAbility : IGameOperator
 {
     public bool CanSeeGhostInShadow { get; set; } = true;
     public Color FlashColor { get; set; } = Color.white;
     public AchievementToken<bool>? CommonToken;
     public float GhostDuration { get; set; } = 60f;
 
-    void IGameEntity.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murder)
+    void IGameOperator.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murder)
     {
         if (MeetingHud.Instance || ExileController.Instance) return;
 
@@ -96,7 +98,7 @@ public class Seer : ConfigurableStandardRole, HasCitation
         CanSeeGhostsInShadowOption = new(RoleConfig, "canSeeGhostsInShadow", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -116,7 +118,7 @@ public class Seer : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnVotedLocal(PlayerControl? votedFor,bool isExiled)
+        void IGameOperator.OnVotedLocal(PlayerControl? votedFor,bool isExiled)
         {
             if (AmOwner)
             {
@@ -127,7 +129,7 @@ public class Seer : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
             if (acTokenChallenge != null && !MyPlayer.IsDead) acTokenChallenge.Value.meetings++;
         }

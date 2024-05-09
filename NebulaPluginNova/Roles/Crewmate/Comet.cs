@@ -35,7 +35,7 @@ public class Comet : ConfigurableStandardRole
         BlazeScreenOption = new(RoleConfig, "blazeScreenRate", null, 1f, 2f, 0.125f, 1.125f, 1.125f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player) { }
@@ -86,7 +86,7 @@ public class Comet : ConfigurableStandardRole
 
         public override bool IgnoreBlackout => true;
 
-        void IGameEntity.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
+        void IGameOperator.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
         {
             if (AmOwner)
             {

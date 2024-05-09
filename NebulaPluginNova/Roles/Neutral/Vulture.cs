@@ -32,7 +32,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
     }
 
 
-    public class Instance : RoleInstance, IGamePlayerEntity
+    public class Instance : RoleInstance, IGamePlayerOperator
     {
         private ModAbilityButton? eatButton = null;
 
@@ -57,7 +57,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
         public override int[]? GetRoleArgument() => new int[] { leftEaten };
 
         private List<(DeadBody deadBody, Arrow arrow)> AllArrows = new();
-        void IGameEntity.OnDeadBodyGenerated(DeadBody deadBody)
+        void IGameOperator.OnDeadBodyGenerated(DeadBody deadBody)
         {
             if(AmOwner) AllArrows.Add((deadBody, Bind(new Arrow(null) { TargetPos = deadBody.TruePosition }.SetColor(Color.blue))));
         }
@@ -79,7 +79,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
             });
         }
 
-        void IGameEntity.OnReported(GamePlayer reporter, GamePlayer reported)
+        void IGameOperator.OnReported(GamePlayer reporter, GamePlayer reported)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value = false;
         }

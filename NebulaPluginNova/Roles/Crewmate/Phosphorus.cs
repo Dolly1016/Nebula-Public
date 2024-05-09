@@ -1,5 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -52,7 +53,7 @@ public class Phosphorus : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? lanternButton = null;
@@ -130,8 +131,7 @@ public class Phosphorus : ConfigurableStandardRole
             }
         }
 
-
-        void IGameEntity.OnMeetingStart()
+        void OnMeetingStart(MeetingStartEvent ev)
         {
             //ランタンを全て設置していたら全員に公開する
             if(localLanterns != null && localLanterns.Count == MyRole.NumOfLampsOption)

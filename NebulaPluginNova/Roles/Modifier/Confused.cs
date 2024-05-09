@@ -1,4 +1,5 @@
-﻿using Virial.Game;
+﻿using Virial.Events.Game.Meeting;
+using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
@@ -20,7 +21,7 @@ public class Confused : ConfigurableStandardModifier
         NumOfMaxShuffledPairsOption = new NebulaConfiguration(RoleConfig, "numOfMaxShuffledPairs", null, 1, 7, 3, 3);
     }
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IGamePlayerEntity
+    public class Instance : ModifierInstance, IGamePlayerOperator
     {
         public override AbstractModifier Role => MyRole;
         public override bool CanBeAwareAssignment => NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
@@ -36,9 +37,10 @@ public class Confused : ConfigurableStandardModifier
 
 
         bool skipMeeting = false;
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        [Local]
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
-            if (!AmOwner || MyPlayer.IsDead) return;
+            if (MyPlayer.IsDead) return;
 
             var alives = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner).ToArray();
             var randomArray = Helpers.GetRandomArray(alives.Length);
@@ -74,7 +76,7 @@ public class Confused : ConfigurableStandardModifier
 
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             if (AmOwner && !skipMeeting) new StaticAchievementToken("confused.another1");
         }

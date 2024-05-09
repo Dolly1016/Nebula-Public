@@ -30,7 +30,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
         CanInvokeCamoAfterDeathOption = new NebulaConfiguration(RoleConfig, "canInvokeCamoAfterDeath", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? camouflageButton = null;
 
@@ -84,7 +84,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
+        void IGameOperator.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
         {
             if (AmOwner && acTokenChallenge != null) acTokenChallenge.Value.killed++;
         }

@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -37,7 +38,7 @@ public class Mayor : ConfigurableStandardRole, HasCitation
         VoteAssignmentOption = new(RoleConfig, "voteAssignment", null, 1, 20, 1, 1);
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerEntity
+    public class Instance : Crewmate.Instance, IGamePlayerOperator
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player, int[] arguments) : base(player)
@@ -69,15 +70,14 @@ public class Mayor : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnMeetingStart()
+        [Local]
+        void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (AmOwner)
-            {
-                acTokenCommon!.Value.triggered = false;
-                acTokenChallenge!.Value.triggered = false;
-            }
+            acTokenCommon!.Value.triggered = false;
+            acTokenChallenge!.Value.triggered = false;
+            
 
-            if (AmOwner && !MyPlayer.IsDead)
+            if (!MyPlayer.IsDead)
             {
                 if (acTokenAnother != null) acTokenAnother.Value.meetings++;
 
@@ -131,7 +131,7 @@ public class Mayor : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnCastVoteLocal(byte target, ref int vote)
+        void IGameOperator.OnCastVoteLocal(byte target, ref int vote)
         {
             if (AmOwner)
             {
@@ -142,12 +142,12 @@ public class Mayor : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnEndVoting()
+        void OnEndVoting(MeetingVoteEndEvent ev)
         {
             if (MeetingHud.Instance.playerStates.FirstOrDefault(v => v.TargetPlayerId == MyPlayer.PlayerId)?.DidVote ?? false) myVote -= currentVote;
         }
 
-        void IGameEntity.OnDiscloseVotingLocal(MeetingHud.VoterState[] result)
+        void IGameOperator.OnDiscloseVotingLocal(MeetingHud.VoterState[] result)
         {
             if (AmOwner)
             {
@@ -162,7 +162,7 @@ public class Mayor : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameEntity.OnPlayerExiled(GamePlayer exiled)
+        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
         {
             if (AmOwner)
             {

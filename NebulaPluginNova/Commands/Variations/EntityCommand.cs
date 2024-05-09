@@ -18,12 +18,12 @@ public class EntityCommand : ICommand
         }
     }
 
-    static public EntityCommandDefinition GenerateDefinition<T>(CommandStructureConverter<T> converter, Func<T> constructor, Func<T, IGameEntity> entityGenerater)
+    static public EntityCommandDefinition GenerateDefinition<T>(CommandStructureConverter<T> converter, Func<T> constructor, Func<T, IGameOperator> entityGenerater)
     {
         return new(
             (task, env) =>
             {
-                return converter.ChainConverterTo(task, constructor.Invoke(), env).ChainFast<ICommandToken, T>(t => new ObjectCommandToken<IGameEntity>(entityGenerater.Invoke(t)));
+                return converter.ChainConverterTo(task, constructor.Invoke(), env).ChainFast<ICommandToken, T>(t => new ObjectCommandToken<IGameOperator>(entityGenerater.Invoke(t)));
             }
             );
     }

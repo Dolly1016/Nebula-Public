@@ -1,5 +1,6 @@
 ﻿using Nebula.Roles.Modifier;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -34,7 +35,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
 
     float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CurrentCoolDown, OthersKillCoolDownOption.CurrentCoolDown, AmongUsUtil.VanillaKillCoolDown);
 
-    public class Instance : Impostor.Instance, IGamePlayerEntity
+    public class Instance : Impostor.Instance, IGamePlayerOperator
     {
         private ModAbilityButton? killButton = null;
 
@@ -171,13 +172,11 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
             UpdateTimer();
         }
 
-        void IGameEntity.OnMeetingEnd(GamePlayer[] exiled)
+        [Local]
+        void OnMeetingEnd(MeetingEndEvent ev)
         {
-            if (AmOwner)
-            {
-                //死亡しているプレイヤーであれば切り替える
-                if (NebulaGameManager.Instance?.GetPlayer(currentBounty)?.IsDead ?? true) ChangeBounty();
-            }
-        } 
+            //死亡しているプレイヤーであれば切り替える
+            if (NebulaGameManager.Instance?.GetPlayer(currentBounty)?.IsDead ?? true) ChangeBounty();
+        }
     }
 }

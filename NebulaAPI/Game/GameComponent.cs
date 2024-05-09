@@ -7,65 +7,14 @@ namespace Virial.Game;
 /// <summary>
 /// ゲームに作用するEntityを表します。
 /// </summary>
-public interface IGameEntity
+public interface IGameOperator
 {
     /// <summary>
     /// 紐づけられたLifespanの寿命が尽きたときに呼び出されます。この後Entityは削除されます。
     /// </summary>
     public void OnReleased(){}
 
-    /// <summary>
-    /// 毎ティック呼び出されます。
-    /// </summary>
-    public void Update() { }
 
-    /// <summary>
-    /// 毎ティック呼び出されます。
-    /// </summary>
-    public void HudUpdate() { }
-
-    /// <summary>
-    /// ゲーム開始時に呼び出されます。
-    /// </summary>
-    public void OnGameStart() { }
-
-    /// <summary>
-    /// 会議開始時に呼び出されます。
-    /// </summary>
-    public void OnMeetingStart() { }
-
-    /// <summary>
-    /// 追放シーン開始時に呼び出されます。
-    /// </summary>
-    public void OnStartExileCutScene() { }
-
-    /// <summary>
-    /// 会議終了時に呼び出されます。プレイヤーは既に追放されています。
-    /// </summary>
-    public void OnMeetingEnd(Player[] exiled) { }
-
-    /// <summary>
-    /// 投票終了時に呼び出されます。
-    /// </summary>
-    public void OnEndVoting() { }
-
-    /// <summary>
-    /// タスクフェイズ再開時に呼び出されます。
-    /// </summary>
-    public void OnGameReenabled() { }
-
-    /// <summary>
-    /// タスク状態が変化した際に呼び出されます。
-    /// </summary>
-    /// <param name="player"></param>
-    public void OnTaskUpdated(Player player) { }
-
-    /// <summary>
-    /// 会議が開始する少し前(=レポート発生時)に呼び出されます。
-    /// </summary>
-    /// <param name="reporter"></param>
-    /// <param name="reported"></param>
-    public void OnPreMeetingStart(Player reporter, Player? reported) { }
 
     /// <summary>
     /// 死体通報が発生した際に呼び出されます。OnPreMeetingStartに続いて呼び出されます。
@@ -208,7 +157,7 @@ public interface IGameEntity
 /// <summary>
 /// プレイヤーに紐づけられたEntityを表します。
 /// </summary>
-public interface IGamePlayerEntity : IGameEntity
+public interface IGamePlayerOperator : IGameOperator
 {
     /// <summary>
     /// このEntityを所有するプレイヤーを表します。
@@ -293,7 +242,7 @@ public static class GameEntityExtension
     /// <param name="gameEntity"></param>
     /// <param name="lifespan"></param>
     /// <returns></returns>
-    public static Entity Register<Entity>(this Entity gameEntity, ILifespan lifespan) where Entity : IGameEntity
+    public static Entity Register<Entity>(this Entity gameEntity, ILifespan lifespan) where Entity : IGameOperator
     {
         NebulaAPI.CurrentGame?.RegisterEntity(gameEntity, lifespan);
         return gameEntity;
@@ -305,7 +254,7 @@ public static class GameEntityExtension
     /// <typeparam name="Entity"></typeparam>
     /// <param name="gameEntity"></param>
     /// <returns></returns>
-    public static Entity Register<Entity>(this Entity gameEntity) where Entity : IGameEntity, ILifespan
+    public static Entity Register<Entity>(this Entity gameEntity) where Entity : IGameOperator, ILifespan
     {
         NebulaAPI.CurrentGame?.RegisterEntity(gameEntity, gameEntity);
         return gameEntity;

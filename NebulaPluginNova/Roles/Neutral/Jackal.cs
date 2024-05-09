@@ -1,6 +1,7 @@
 ﻿using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
 using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -42,7 +43,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
     }
 
 
-    public class Instance : RoleInstance, IGamePlayerEntity
+    public class Instance : RoleInstance, IGamePlayerOperator
     {
         private ModAbilityButton? killButton = null;
         private ModAbilityButton? sidekickButton = null;
@@ -146,7 +147,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGamePlayerEntity.OnKillPlayer(Virial.Game.Player target)
+        void IGamePlayerOperator.OnKillPlayer(Virial.Game.Player target)
         {
             myKillingTotal++;
             killingTotal++;
@@ -164,9 +165,8 @@ public class Jackal : ConfigurableStandardRole, HasCitation
         }
         */
 
-        public override void OnGameStart()
+        public void OnGameStart(GameStartEvent ev)
         {
-            base.OnGameStart();
             JackalTeamId = MyPlayer.PlayerId;
         }
 
@@ -182,7 +182,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
 
         }
 
-        void IGamePlayerEntity.OnDead()
+        void IGamePlayerOperator.OnDead()
         {
             foreach (var player in NebulaGameManager.Instance!.AllPlayerInfo())
             {

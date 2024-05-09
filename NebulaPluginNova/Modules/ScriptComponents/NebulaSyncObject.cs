@@ -4,7 +4,7 @@ using Virial.Game;
 namespace Nebula.Modules.ScriptComponents;
 
 [NebulaRPCHolder]
-public abstract class NebulaSyncObject : INebulaScriptComponent, IGameEntity
+public abstract class NebulaSyncObject : INebulaScriptComponent, IGameOperator
 {
     static private Dictionary<int, Func<float[], NebulaSyncObject>> instantiaters = new();
     static private Dictionary<int, NebulaSyncObject> allObjects = new();
