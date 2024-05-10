@@ -2,6 +2,7 @@
 using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -59,15 +60,14 @@ public class GhostAndFlashAbility : IGameOperator
     public AchievementToken<bool>? CommonToken;
     public float GhostDuration { get; set; } = 60f;
 
-    void IGameOperator.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murder)
+    void OnPlayerMurdered(PlayerMurderedEvent ev)
     {
         if (MeetingHud.Instance || ExileController.Instance) return;
 
-        var player = dead.Unbox();
-
-        if (!player.HasAttribute(PlayerAttributes.BuskerEffect))
+        
+        if (!ev.Dead.HasAttribute(PlayerAttributes.BuskerEffect))
         {
-            new Ghost(player.MyControl.transform.position, GhostDuration, CommonToken, CanSeeGhostInShadow);
+            new Ghost(ev.Dead.VanillaPlayer.transform.position, GhostDuration, CommonToken, CanSeeGhostInShadow);
             AmongUsUtil.PlayFlash(FlashColor);
         }
     }
@@ -98,7 +98,7 @@ public class Seer : ConfigurableStandardRole, HasCitation
         CanSeeGhostsInShadowOption = new(RoleConfig, "canSeeGhostsInShadow", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -118,15 +118,11 @@ public class Seer : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameOperator.OnVotedLocal(PlayerControl? votedFor,bool isExiled)
+        [OnlyMyPlayer]
+        void OnVotedLocal(PlayerVoteDisclosedLocalEvent ev)
         {
-            if (AmOwner)
-            {
-                if (acTokenChallenge != null)
-                {
-                    acTokenChallenge.Value.noMissFlag &= (votedFor?.GetModInfo()?.Role.Role.Category ?? RoleCategory.CrewmateRole) != RoleCategory.CrewmateRole;
-                }
-            }
+            if (acTokenChallenge != null)
+                acTokenChallenge.Value.noMissFlag &= (ev.VoteFor?.Role.Role.Category ?? RoleCategory.CrewmateRole) != RoleCategory.CrewmateRole;
         }
 
         void OnMeetingEnd(MeetingEndEvent ev)

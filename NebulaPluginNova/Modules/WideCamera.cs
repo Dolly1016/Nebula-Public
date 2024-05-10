@@ -179,10 +179,10 @@ public class WideCamera
             CheckPlayerState(out var goalScale, out var goalRotate);
             while (meshAngleZ - goalRotate > 360f) meshAngleZ -= 360f;
             while (meshAngleZ - goalRotate < -360f) meshAngleZ += 360f;
-            meshAngleZ -= (meshAngleZ - goalRotate).Delta(2.2f, 0.5f);
+            meshAngleZ -= (meshAngleZ - goalRotate).Delta(2.7f, 0.11f);
 
             var meshTransform = meshRenderer.transform;
-            meshTransform.localScale -= (meshTransform.localScale - goalScale).Delta(2.2f, 0.005f);
+            meshTransform.localScale -= (meshTransform.localScale - goalScale).Delta(2.4f, 0.003f);
             meshTransform.localEulerAngles = new(0f, 0f, meshAngleZ);
 
             float targetRateByEffect = NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.ScreenSize, true) ?? 1f;

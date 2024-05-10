@@ -1,4 +1,5 @@
-﻿using Virial.Game;
+﻿using Virial.Events.Player;
+using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
@@ -16,7 +17,7 @@ public class ExtraMission : ConfigurableStandardModifier
     }
 
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IGamePlayerOperator
+    public class Instance : ModifierInstance, IBindPlayer
     {
         public override AbstractModifier Role => MyRole;
         public GamePlayer? target { get; set; } = null!;
@@ -42,28 +43,27 @@ public class ExtraMission : ConfigurableStandardModifier
             if (player == target) color = MyRole.RoleColor;
         }
 
-        public override bool BlockWins(CustomEndCondition endCondition)
-        {
-            return !(target?.IsDead ?? true);
-        }
+        [OnlyMyPlayer]
+        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= !(target?.IsDead ?? true);
 
-        void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
+
+        [Local]
+        void OnPlayerDead(PlayerDieEvent ev)
         {
-            if(AmOwner && dead == target)
-            {
+            if(AmOwner && ev.Player == target)
                 new StaticAchievementToken(MyPlayer.IsDead ? "extraMission.another1" : "extraMission.common1");
-            }
         }
 
-        void IGameOperator.OnPlayerExiled(Virial.Game.Player exiled)
+        [Local]
+        void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (AmOwner && MyPlayer.IsCrewmate && exiled.Role.Role.Unbox().IsCrewmateRole && exiled == target && MeetingHudExtension.LastVotedForMap.TryGetValue(MyPlayer.PlayerId, out var votedFor) && votedFor == exiled.PlayerId)
+            if (MyPlayer.IsCrewmate && ev.Player.IsCrewmate && ev.Player == target && MeetingHudExtension.LastVotedForMap.TryGetValue(MyPlayer.PlayerId, out var votedFor) && votedFor == ev.Player.PlayerId)
             {
                 new StaticAchievementToken("extraMission.common3");
             }
         }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if (AmOwner)
             {

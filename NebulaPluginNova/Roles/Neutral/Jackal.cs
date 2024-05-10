@@ -2,6 +2,7 @@
 using Nebula.VoiceChat;
 using Virial.Assignable;
 using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -43,7 +44,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
     }
 
 
-    public class Instance : RoleInstance, IGamePlayerOperator
+    public class Instance : RoleInstance, IBindPlayer
     {
         private ModAbilityButton? killButton = null;
         private ModAbilityButton? sidekickButton = null;
@@ -71,7 +72,9 @@ public class Jackal : ConfigurableStandardRole, HasCitation
             if (player.Unbox().AllModifiers.Any(m => m is SidekickModifier.Instance sidekick && sidekick.JackalTeamId == JackalTeamId)) return true;
             return false;
         }
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId));
+
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
 
         public override void OnActivated()
         {
@@ -147,7 +150,8 @@ public class Jackal : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGamePlayerOperator.OnKillPlayer(Virial.Game.Player target)
+        [OnlyMyPlayer]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
             myKillingTotal++;
             killingTotal++;
@@ -182,7 +186,8 @@ public class Jackal : ConfigurableStandardRole, HasCitation
 
         }
 
-        void IGamePlayerOperator.OnDead()
+        [Local, OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev)
         {
             foreach (var player in NebulaGameManager.Instance!.AllPlayerInfo())
             {
@@ -200,7 +205,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
         public override bool HasImpostorVision => true;
         public override bool IgnoreBlackout => true;
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if (!AmOwner) return;
             if (endState.EndCondition != NebulaGameEnd.JackalWin) return;
@@ -226,7 +231,7 @@ file static class SidekickAchievementChecker
         if ((lastRole?.Assignable as RoleInstance)?.Role.Category == RoleCategory.ImpostorRole)
         {
             new AchievementToken<bool>("sidekick.challenge", default, (val, _) =>
-                NebulaEndState.CurrentEndState!.CheckWin(myPlayer.PlayerId) && NebulaEndState.CurrentEndState!.EndCondition == NebulaGameEnd.JackalWin);
+                NebulaGameManager.Instance!.EndState!.CheckWin(myPlayer.PlayerId) && NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.JackalWin);
         }
 
     }
@@ -284,7 +289,9 @@ public class Sidekick : ConfigurableRole, HasCitation
         }
 
         public override int[]? GetRoleArgument() => [JackalTeamId];
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId));
+
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
         public override void OnActivated()
         {
             //サイドキック除去
@@ -331,7 +338,8 @@ public class SidekickModifier : AbstractModifier, HasCitation
         public override AbstractModifier Role => MyRole;
         public int JackalTeamId;
 
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId));
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
 
         public Instance(GamePlayer player, int jackalTeamId) : base(player)
         {

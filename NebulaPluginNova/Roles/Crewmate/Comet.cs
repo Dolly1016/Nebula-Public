@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -35,7 +36,7 @@ public class Comet : ConfigurableStandardRole
         BlazeScreenOption = new(RoleConfig, "blazeScreenRate", null, 1f, 2f, 0.125f, 1.125f, 1.125f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player) { }
@@ -86,18 +87,15 @@ public class Comet : ConfigurableStandardRole
 
         public override bool IgnoreBlackout => true;
 
-        void IGameOperator.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
+        [Local]
+        void OnPlayerMurdered(PlayerMurderedEvent ev)
         {
-            if (AmOwner)
+            if (MyPlayer.HasAttribute(PlayerAttributes.Invisible))
             {
-                if (MyPlayer.HasAttribute(PlayerAttributes.Invisible))
-                {
-                    if (!Helpers.AnyNonTriggersBetween(MyPlayer.VanillaPlayer.GetTruePosition(), dead.VanillaPlayer.GetTruePosition(), out var vec) &&
-                        vec.magnitude < MyRole.BlazeVisionOption.GetFloat() * 0.75f)
-                        new StaticAchievementToken("comet.challenge");
-                }
+                if (!Helpers.AnyNonTriggersBetween(MyPlayer.VanillaPlayer.GetTruePosition(), ev.Dead.VanillaPlayer.GetTruePosition(), out var vec) &&
+                    vec.magnitude < MyRole.BlazeVisionOption.GetFloat() * 0.75f)
+                    new StaticAchievementToken("comet.challenge");
             }
-
         }
     }
 }

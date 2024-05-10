@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -30,7 +31,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
         CanInvokeCamoAfterDeathOption = new NebulaConfiguration(RoleConfig, "canInvokeCamoAfterDeath", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         private ModAbilityButton? camouflageButton = null;
 
@@ -84,7 +85,8 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameOperator.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
+        [Local]
+        void OnPlayerMurdered(PlayerMurderedEvent ev)
         {
             if (AmOwner && acTokenChallenge != null) acTokenChallenge.Value.killed++;
         }

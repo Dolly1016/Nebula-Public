@@ -1,5 +1,7 @@
 ﻿using Virial.Assignable;
 using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -27,7 +29,7 @@ public class Reaper : ConfigurableStandardRole
         VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -180,11 +182,10 @@ public class Reaper : ConfigurableStandardRole
         [Local]
         void EditVentInfoOnGameStart(GameStartEvent ev) => EditVentInfo(true);
 
+
+        [OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev) => draggable?.OnDead(this);
         
-        void IGamePlayerOperator.OnDead()
-        {
-            draggable?.OnDead(this);
-        }
 
         protected override void OnInactivated()
         {
@@ -199,14 +200,17 @@ public class Reaper : ConfigurableStandardRole
         }
 
         //キルのたびに加算、発見されるたびに減算してレポートされていない死体を計上する
-        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
+        [Local]
+        [OnlyMyPlayer]
+        void AddChallengeTokenOnKillPlayer(PlayerKillPlayerEvent ev)
         {
             if (acTokenChallenge != null && !MeetingHud.Instance) acTokenChallenge.Value++;
         }
 
-        void IGameOperator.OnReported(GamePlayer reporter, GamePlayer reported)
+        [Local]
+        void SubChallengeTokenOnReported(ReportDeadBodyEvent ev)
         {
-            if(acTokenChallenge != null && AmOwner && (reported.Unbox()?.MyKiller?.AmOwner ?? false)) acTokenChallenge.Value--;
+            if(acTokenChallenge != null && (ev.Reported?.MyKiller?.AmOwner ?? false)) acTokenChallenge.Value--;
         }
     }
 }

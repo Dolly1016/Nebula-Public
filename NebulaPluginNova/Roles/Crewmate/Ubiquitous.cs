@@ -1,7 +1,11 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Nebula.Patches;
 using Nebula.VoiceChat;
 using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Game.Minimap;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -285,7 +289,7 @@ public class Ubiquitous : ConfigurableStandardRole
     }
 
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -300,24 +304,23 @@ public class Ubiquitous : ConfigurableStandardRole
         static private ISpriteLoader callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
         static private ISpriteLoader hackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneHackButton.png", 115f);
 
-        void IGameOperator.OnOpenNormalMap()
+        [Local]
+        void OnOpenNormalMap(MapOpenNormalEvent ev)
         {
-            if (AmOwner)
+            if (mapLayer is null)
             {
-                if (mapLayer is null)
-                {
-                    mapLayer = UnityHelper.CreateObject<UbiquitousMapLayer>("UbiquitousLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
-                    mapLayer.ReferenceDronePos(dronePos);
-                    this.Bind(mapLayer.gameObject);
-                }
-
-                mapLayer.gameObject.SetActive(!MeetingHud.Instance);
+                mapLayer = UnityHelper.CreateObject<UbiquitousMapLayer>("UbiquitousLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
+                mapLayer.ReferenceDronePos(dronePos);
+                this.Bind(mapLayer.gameObject);
             }
+
+            mapLayer.gameObject.SetActive(!MeetingHud.Instance);
         }
 
-        void IGameOperator.OnOpenAdminMap()
+        [Local]
+        void OnOpenAdminMap(MapOpenAdminEvent ev)
         {
-            if (AmOwner && mapLayer) mapLayer?.gameObject.SetActive(false);
+            if (mapLayer) mapLayer?.gameObject.SetActive(false);
         }
         void OnMeetingStart(MeetingStartEvent ev)
         {
@@ -467,18 +470,22 @@ public class Ubiquitous : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerOperator.OnDead()
+        [Local]
+        [OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev)
         {
             //死亡時、元の視点に戻す
-            if(AmOwner) AmongUsUtil.SetCamTarget();
+            AmongUsUtil.SetCamTarget();
         }
 
         bool IsOperatingDrone => myDrone && AmongUsUtil.CurrentCamTarget == myDrone;
         //ドローン視点では壁を無視
         public override bool EyesightIgnoreWalls => IsOperatingDrone;
-        public override void EditLightRange(ref float range)
+
+        [Local]
+        public void EditLightRange(LightRangeUpdateEvent ev)
         {
-            if (IsOperatingDrone) range *= 1.8f;
+            if (IsOperatingDrone) ev.LightRange *= 1.8f;
         }
 
     }

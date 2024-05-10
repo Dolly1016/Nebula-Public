@@ -1,4 +1,6 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -45,7 +47,7 @@ public class Jester : ConfigurableStandardRole, HasCitation
         }
     };
 
-    public class Instance : RoleInstance, IGamePlayerOperator
+    public class Instance : RoleInstance, IBindPlayer, RuntimeAssignable
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -62,8 +64,6 @@ public class Jester : ConfigurableStandardRole, HasCitation
             if (MyRole.CanDragDeadBodyOption) draggable = Bind(new Scripts.Draggable());
         }
 
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => false;
-
 
         public override void OnActivated()
         {
@@ -73,30 +73,26 @@ public class Jester : ConfigurableStandardRole, HasCitation
             
         }
 
-        void IGamePlayerOperator.OnDead()
-        {
-            draggable?.OnDead(this);
-        }
+        [Local, OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev) => draggable?.OnDead(this);
+        
 
-        protected override void OnInactivated()
-        {
-            draggable?.OnInactivated(this);
-        }
+        void RuntimeAssignable.OnInactivated() => draggable?.OnInactivated(this);
+        
 
-        public override bool CanFixComm => MyRole.CanFixCommsOption;
-        public override bool CanFixLight => MyRole.CanFixLightOption;
+        bool RuntimeAssignable.CanFixComm => MyRole.CanFixCommsOption;
+        bool RuntimeAssignable.CanFixLight => MyRole.CanFixLightOption;
 
 
         StaticAchievementToken? acTokenCommon = null;
-        void IGameOperator.OnVotedForMeLocal(PlayerControl[] voters)
+        [OnlyMyPlayer]
+        void OnVotedForMeLocal(PlayerVotedLocalEvent ev)
         {
-            if (AmOwner)
-            {
-                if (voters.Length > 0 && voters.Any(v => !v.AmOwner))
-                    acTokenCommon ??= new StaticAchievementToken("jester.common1");
-                if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || voters.Any(v => v.PlayerId == p.PlayerId)) ?? false)
-                    new StaticAchievementToken("jester.challenge");
-            }
+            if (ev.Voters.Any(v => !(v.AmOwner)))
+                acTokenCommon ??= new StaticAchievementToken("jester.common1");
+            if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || ev.Voters.Any(v => v.PlayerId == p.PlayerId)) ?? false)
+                new StaticAchievementToken("jester.challenge");
+
         }
     }
 }

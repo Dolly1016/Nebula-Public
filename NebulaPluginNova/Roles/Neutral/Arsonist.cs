@@ -1,6 +1,8 @@
 ﻿using Nebula.Behaviour;
 using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -31,7 +33,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         DouseDurationOption = new NebulaConfiguration(RoleConfig, "douseDuration", null, 1f, 10f, 0.5f, 3f, 3f);
     }
 
-    public class Instance : RoleInstance, IGamePlayerOperator
+    public class Instance : RoleInstance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
 
@@ -71,8 +73,6 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
             canIgnite = playerIcons.All(CheckDoused);
             return canIgnite;
         }
-        
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => false;
 
         private void UpdateIcons()
         {
@@ -162,11 +162,9 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
 
         }
 
-        public override void LocalUpdate()
-        {
-            UpdateIcons();
-        }
-
+        [Local]
+        void LocalUpdate(GameUpdateEvent ev) => UpdateIcons();
+        
         [Local]
         void OnMeetingEnd(MeetingEndEvent ev)
         {
@@ -195,17 +193,15 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         }
 
         AchievementToken<bool>? acTokenChallenge;
-        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
+        [Local]
+        void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (AmOwner)
-            {
-                var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon) && (!(NebulaGameManager.Instance?.GetPlayer(icon.playerId)?.IsDead ?? true) || exiled.PlayerId == icon.playerId));
-                if (notDoused.Count == 1 && notDoused[0].playerId == exiled.PlayerId)
-                    acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
-            }
+            var notDoused = playerIcons.FindAll(icon => !CheckDoused(icon) && (!(NebulaGameManager.Instance?.GetPlayer(icon.playerId)?.IsDead ?? true) || ev.Player.PlayerId == icon.playerId));
+            if (notDoused.Count == 1 && notDoused[0].playerId == ev.Player.PlayerId)
+                acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
         }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value = endState.CheckWin(MyPlayer.PlayerId) && endState.EndCondition == NebulaGameEnd.ArsonistWin;
         }

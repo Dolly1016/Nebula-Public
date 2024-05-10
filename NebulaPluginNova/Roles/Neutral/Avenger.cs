@@ -2,6 +2,8 @@
 using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -51,7 +53,7 @@ public class Avenger : ConfigurableRole
 
     public override bool CanBeGuessDefault => false;
 
-    public class Instance : RoleInstance, IGamePlayerOperator
+    public class Instance : RoleInstance, IBindPlayer
     {
         private Timer ventCoolDown = new Timer(MyRole.VentOption.CoolDown).SetAsAbilityCoolDown().Start();
         private Timer ventDuration = new(MyRole.VentOption.Duration);
@@ -104,46 +106,45 @@ public class Avenger : ConfigurableRole
 
         private bool KillCondition => (target?.IsDead ?? false) && target?.MyKiller == MyPlayer;
         private bool CheckKillCondition => KillCondition && !MyPlayer.IsDead;
-        (GameEnd end, GameEndReason reason)? IGameOperator.OnCheckGameEnd(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason gameEndReason)
+        void OnCheckGameEnd(EndCriteriaMetEvent ev)
         {
-            //復讐対象が自身の手によって死亡、かつ自身は生存
-            if (CheckKillCondition) return (NebulaGameEnd.AvengerWin, GameEndReason.Special);
-            return null;
+            if (CheckKillCondition) ev.TryOverwriteEnd(NebulaGameEnd.AvengerWin, GameEndReason.Special);
         }
 
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong extraWinMask)
-        {
-            return endCondition == NebulaGameEnd.AvengerWin && CheckKillCondition;
-        }
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.AvengerWin && CheckKillCondition);
+        
 
-        void IGamePlayerOperator.OnMurdered(Virial.Game.Player murder)
+        [OnlyMyPlayer]
+        void OnMurdered(PlayerMurderedEvent ev)
         {
-            if (murder == target)
+            if (ev.Murderer == target)
             {
-                if (murder.AmOwner) new StaticAchievementToken("avenger.common2");
+                if (ev.Murderer.AmOwner) new StaticAchievementToken("avenger.common2");
                 if (AmOwner) new StaticAchievementToken("avenger.another1");
             }
         }
 
-        void IGamePlayerOperator.OnDead()
+        [Local, OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev)
         {
-            if(AmOwner && CheckKillCondition) new StaticAchievementToken("avenger.another2");
+            if(CheckKillCondition) new StaticAchievementToken("avenger.another2");
         }
 
-        void IGamePlayerOperator.OnKillPlayer(Virial.Game.Player target)
+        [Local, OnlyMyPlayer]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            if(AmOwner && target == this.target) new StaticAchievementToken("avenger.common1");
+            if(ev.Dead == this.target) new StaticAchievementToken("avenger.common1");
         }
 
-        void IGameOperator.OnPlayerExiled(Virial.Game.Player exiled)
+        [Local]
+        void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (AmOwner && target == exiled && !MyPlayer.IsDead)
-            {
+            if (target == ev.Player && !MyPlayer.IsDead)
                 MyPlayer.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
-            }
-
         }
-        public override void OnGameEnd(NebulaEndState endState)
+
+        public override void OnGameEnd(EndState endState)
         {
             if(endState.EndCondition == NebulaGameEnd.AvengerWin && endState.CheckWin(MyPlayer.PlayerId))
             {
@@ -151,9 +152,10 @@ public class Avenger : ConfigurableRole
             }
         }
 
-        void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
+        [Local]
+        void OnTargetDead(PlayerDieEvent ev)
         {
-            if (AmOwner && !CheckKillCondition && dead == target && !MyPlayer.IsDead)
+            if (!CheckKillCondition && ev.Player == target && !MyPlayer.IsDead)
             {
                 MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, false);
                 new StaticAchievementToken("avenger.another1");

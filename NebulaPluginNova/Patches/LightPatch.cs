@@ -1,5 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Patches;
@@ -38,8 +39,7 @@ public class LightPatch
 
         float radiusRate = Mathf.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, t);
         float range = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(hasImpostorVision ? FloatOptionNames.ImpostorLightMod : FloatOptionNames.CrewLightMod);
-        float rate = 1f;
-        info?.Unbox().AssignableAction(r=>r.Unbox().EditLightRange(ref rate));
+        float rate = GameOperatorManager.Instance?.Run(new LightRangeUpdateEvent(1f)).LightRange ?? 1f;
         rate *= NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
 
         lastRange -= (lastRange - rate).Delta(0.7f, 0.005f);

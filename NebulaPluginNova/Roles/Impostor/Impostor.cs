@@ -1,5 +1,6 @@
 ﻿using Nebula.VoiceChat;
 using Virial.Assignable;
+using Virial.Events.Player;
 
 namespace Nebula.Roles.Impostor;
 
@@ -46,7 +47,8 @@ public class Impostor : ConfigurableStandardRole
             }
         }
 
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.ImpostorWin;
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) =>ev.SetWin(ev.GameEnd == NebulaGameEnd.ImpostorWin);
 
         public override void DecoratePlayerName(ref string text, ref Color color)
         {

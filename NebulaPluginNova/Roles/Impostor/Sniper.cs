@@ -3,6 +3,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -113,7 +114,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
@@ -131,7 +132,8 @@ public class Sniper : ConfigurableStandardRole, HasCitation
         {
         }
 
-        public override void LocalUpdate()
+        [Local]
+        void LocalUpdate(GameUpdateEvent ev)
         {
             if (MyRifle != null && MyRole.StoreRifleOnUsingUtilityOption)
             {
@@ -212,9 +214,11 @@ public class Sniper : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGamePlayerOperator.OnDead()
+        [Local]
+        [OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev)
         {
-            if (AmOwner && MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
+            if (MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
 
             if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }

@@ -4,6 +4,8 @@ using Nebula.Roles.Abilities;
 using Virial;
 using Virial.Assignable;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Game.Minimap;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -111,7 +113,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         private ModAbilityButton? trackButton = null;
 
@@ -133,15 +135,15 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
         private void TryRegisterArrow(GamePlayer player) { if(!impostorArrows.Any(a => a.MyPlayer == player)) impostorArrows.Add(Bind(new TrackingArrowAbility(player.Unbox(), 0f, Palette.ImpostorRed)).Register()); }
 
         //役職変化に応じて矢印を付ける
-        void IGameOperator.OnSetRole(Virial.Game.Player player, Virial.Assignable.RuntimeRole role)
+        void OnSetRole(PlayerRoleSetEvent ev)
         {
             if (MyRole.TrackImpostorsOption)
             {
-                if (!role.MyPlayer.AmOwner && role.Role.Category == RoleCategory.ImpostorRole)
-                    TryRegisterArrow(player);
+                if (!ev.Player.AmOwner && ev.Player.IsImpostor)
+                    TryRegisterArrow(ev.Player);
                 else
                 {
-                    impostorArrows.RemoveAll(a => { if (a.MyPlayer == player) { a.ReleaseIt(); return true; } else return false; });
+                    impostorArrows.RemoveAll(a => { if (a.MyPlayer == ev.Player) { a.ReleaseIt(); return true; } else return false; });
                 }
             }
         }
@@ -227,21 +229,26 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameOperator.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
+        [Local]
+        void OnPlayerMurdered(PlayerMurderedEvent ev)
         {
-            if(MyRole.ShowKillFlashOption && AmOwner && !murderer.AmOwner) AmongUsUtil.PlayQuickFlash(Palette.ImpostorRed);   
+            if(MyRole.ShowKillFlashOption && !ev.Murderer.AmOwner) AmongUsUtil.PlayQuickFlash(Palette.ImpostorRed);   
         }
 
-        void IGameOperator.OnOpenNormalMap()
+        [Local]
+        void OnOpenNormalMap(MapOpenNormalEvent ev)
         {
             if (AmOwner && mapLayer) mapLayer!.gameObject.SetActive(false);
             if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
         }
 
-        void IGameOperator.OnOpenAdminMap() {
+        [Local]
+        void OnOpenAdminMap(MapOpenAdminEvent ev) {
             if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
         }
-        void IGameOperator.OnOpenSabotageMap()
+
+        [Local]
+        void OnOpenSabotageMap(MapOpenSabotageEvent ev)
         {
             if (MyRole.ShowTrackingTargetOnMapOption)
             {
@@ -258,18 +265,20 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
         }
 
 
-        void IGamePlayerOperator.OnKillPlayer(Virial.Game.Player target)
+        [OnlyMyPlayer, Local]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
             //タスク周辺でキルしたらチャレンジ実績達成
-            if(AmOwner && challengeToken != null && challengeToken.Value.locs != null && challengeToken.Value.target == target.PlayerId)
+            if (challengeToken != null && challengeToken.Value.locs != null && challengeToken.Value.target == ev.Dead.PlayerId)
             {
-                challengeToken.Value.cleared |= challengeToken.Value.locs.Any(l => l.Distance(target.VanillaPlayer.transform.position) < 3f);
+                challengeToken.Value.cleared |= challengeToken.Value.locs.Any(l => l.Distance(ev.Dead.VanillaPlayer.transform.position) < 3f);
             }
         }
 
-        void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
+        [Local]
+        void OnPlayerDead(PlayerDieEvent ev)
         {
-            if (AmOwner && trackingTarget == dead) new StaticAchievementToken("evilTracker.another1");
+            if (trackingTarget == ev.Player) new StaticAchievementToken("evilTracker.another1");
         }
 
         static private RemoteProcess<(byte myId, byte targetId)> RpcShareTaskLoc = QueryRPC.Generate<(byte myId, byte targetId), (byte myId, byte targetId, Vector2[] vec)>(

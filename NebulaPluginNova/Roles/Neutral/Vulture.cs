@@ -1,5 +1,7 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -32,7 +34,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
     }
 
 
-    public class Instance : RoleInstance, IGamePlayerOperator
+    public class Instance : RoleInstance, IBindPlayer
     {
         private ModAbilityButton? eatButton = null;
 
@@ -57,12 +59,15 @@ public class Vulture : ConfigurableStandardRole, HasCitation
         public override int[]? GetRoleArgument() => new int[] { leftEaten };
 
         private List<(DeadBody deadBody, Arrow arrow)> AllArrows = new();
-        void IGameOperator.OnDeadBodyGenerated(DeadBody deadBody)
+
+        [Local]
+        void OnDeadBodyGenerated(DeadBodyInstantiateEvent ev)
         {
-            if(AmOwner) AllArrows.Add((deadBody, Bind(new Arrow(null) { TargetPos = deadBody.TruePosition }.SetColor(Color.blue))));
+            AllArrows.Add((ev.DeadBody, Bind(new Arrow(null) { TargetPos = ev.DeadBody.TruePosition }.SetColor(Color.blue))));
         }
 
-        public override void LocalUpdate()
+        [Local]
+        void LocalUpdate(GameUpdateEvent ev)
         {
             AllArrows.RemoveAll((tuple) =>
             {
@@ -79,7 +84,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
             });
         }
 
-        void IGameOperator.OnReported(GamePlayer reporter, GamePlayer reported)
+        void OnReported(ReportDeadBodyEvent ev)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value = false;
         }
@@ -88,7 +93,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
         {
             if (AmOwner)
             {
-                acTokenChallenge = new("vulture.challenge", true, (val, _) =>  val && NebulaEndState.CurrentEndState!.EndCondition == NebulaGameEnd.VultureWin && NebulaEndState.CurrentEndState!.CheckWin(MyPlayer.PlayerId) );
+                acTokenChallenge = new("vulture.challenge", true, (val, _) =>  val && NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.VultureWin && NebulaGameManager.Instance!.EndState!.CheckWin(MyPlayer.PlayerId) );
 
                 StaticAchievementToken? acTokenCommon = null;
 

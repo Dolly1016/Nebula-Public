@@ -3,7 +3,9 @@ using LibCpp2IL;
 using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -281,7 +283,7 @@ public class Paparazzo : ConfigurableStandardRole
         RequiredDisclosedOption = new NebulaConfiguration(RoleConfig, "requiredDisclosed", null, 1, 15, 3, 3);
     }
 
-    public class Instance : RoleInstance, IGamePlayerOperator
+    public class Instance : RoleInstance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
 
@@ -324,10 +326,9 @@ public class Paparazzo : ConfigurableStandardRole
             return num;
         }
 
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong extraWinMask)
-        {
-            return endCondition == NebulaGameEnd.PaparazzoWin && canWin;
-        }
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.PaparazzoWin && canWin);
+        
 
         static NebulaEndCriteria PaparazzoCriteria = new() { 
             OnExiled = (_) =>
@@ -392,7 +393,8 @@ public class Paparazzo : ConfigurableStandardRole
 
         }
 
-        public override void LocalUpdate()
+        [Local]
+        void LocalUpdate(GameUpdateEvent ev)
         {
             if (!MyPlayer.IsDead && !(shotButton?.CoolDownTimer?.IsInProcess ?? true) && MyFinder == null && !MeetingHud.Instance && !ExileController.Instance)
             {
@@ -419,7 +421,8 @@ public class Paparazzo : ConfigurableStandardRole
             return !MyPlayer.IsDead && (GetActivatedBits(CapturedMask) >= MyRole.RequiredSubjectsOption && GetActivatedBits(DisclosedMask) >= MyRole.RequiredDisclosedOption);
         }
 
-        public override void LocalHudUpdate()
+        [Local]
+        void LocalHudUpdate(GameHudUpdateEvent ev)
         {
             if (shotsHolder != null) {
                 int num = 0;

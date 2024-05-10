@@ -1,4 +1,6 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -33,7 +35,7 @@ public class Necromancer : ConfigurableStandardRole
         ReviveMaxRangeOption = new NebulaConfiguration(RoleConfig, "reviveMaxRange", null, 10f, 30f, 2.5f, 17.5f, 17.5f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -59,7 +61,8 @@ public class Necromancer : ConfigurableStandardRole
             }
         }
 
-        public override void LocalUpdate()
+        [Local]
+        void LocalUpdate(GameUpdateEvent ev)
         {
             bool flag = MyPlayer.HoldingAnyDeadBody;
 
@@ -178,20 +181,17 @@ public class Necromancer : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerOperator.OnDead()
-        {
-            draggable?.OnDead(this);
-        }
+        [OnlyMyPlayer, Local]
+        void ReleaseDeadBodyOnNecromancerDead(PlayerDieEvent ev) => draggable?.OnDead(this);
+        
 
         protected override void OnInactivated()
         {
             draggable?.OnInactivated(this);
         }
 
-        void IGameOperator.OnPlayerDead(GamePlayer dead)
-        {
-            if(AmOwner) resurrectionRoom?.Remove(dead.PlayerId);
-        }
+        [Local]
+        void SearchResurrectionRoomOnPlayerDead(PlayerDieEvent ev) => resurrectionRoom?.Remove(ev.Player.PlayerId);
     }
 }
 

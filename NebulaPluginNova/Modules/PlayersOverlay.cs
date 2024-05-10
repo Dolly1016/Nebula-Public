@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine.Rendering;
 using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Modules;
@@ -112,8 +113,8 @@ public class PlayersOverlay : IGameOperator
         }
     }
 
-    void IGameOperator.OnOutfitChanged(Virial.Game.Player player, Virial.Game.Outfit outfit)
+    void OnOutfitChanged(PlayerOutfitChangeEvent ev)
     {
-        allIcons.FirstOrDefault(i => i.playerId == player.PlayerId)?.display.UpdateFromPlayerOutfit(outfit.outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
+        allIcons.FirstOrDefault(i => i.playerId == ev.Player.PlayerId)?.display.UpdateFromPlayerOutfit(ev.Outfit.outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
     } 
 }

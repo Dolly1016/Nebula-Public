@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -31,7 +32,7 @@ public class Alien : ConfigurableStandardRole, HasCitation
         NumOfInvalidationsOption = new NebulaConfiguration(RoleConfig, "numOfInvalidations", null, 10, 1, 1);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
         static private ISpriteLoader invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
@@ -120,29 +121,27 @@ public class Alien : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGamePlayerOperator.OnKillPlayer(Virial.Game.Player target)
+        [Local, OnlyMyPlayer]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            if (AmOwner && (emiButton?.EffectActive ?? false))
-                new StaticAchievementToken("alien.common1");
+            if (emiButton?.EffectActive ?? false) new StaticAchievementToken("alien.common1");
         }
 
-        void IGameOperator.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
+        [Local]
+        void OnPlayerMurdered(PlayerMurderedEvent ev)
         {
-            if (AmOwner)
+            if (achChallengeToken != null && (emiButton?.EffectActive ?? false))
             {
-                if (achChallengeToken != null && (emiButton?.EffectActive ?? false))
-                {
-                    achChallengeToken.Value.killTotal++;
-                    if(murderer.AmOwner) achChallengeToken.Value.killOnlyMe++;
-                }
+                achChallengeToken.Value.killTotal++;
+                if (ev.Murderer.AmOwner) achChallengeToken.Value.killOnlyMe++;
+            }
 
-                if (!murderer.AmOwner && murderer.Role.Role.Category == RoleCategory.ImpostorRole)
-                {
-                    if (emiButton?.EffectActive ?? false)
-                        new StaticAchievementToken("alien.common3");
-                    if (((achCommon4Token?.Value.playerMask ?? 0) & (1 << dead.PlayerId)) != 0)
-                        achCommon4Token!.Value.clear = true;
-                }
+            if (!ev.Murderer.AmOwner && ev.Murderer.IsImpostor)
+            {
+                if (emiButton?.EffectActive ?? false)
+                    new StaticAchievementToken("alien.common3");
+                if (((achCommon4Token?.Value.playerMask ?? 0) & (1 << ev.Dead.PlayerId)) != 0)
+                    achCommon4Token!.Value.clear = true;
             }
         }
     }

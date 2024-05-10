@@ -1,5 +1,6 @@
 ﻿using Virial.Assignable;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -38,7 +39,7 @@ public class Mayor : ConfigurableStandardRole, HasCitation
         VoteAssignmentOption = new(RoleConfig, "voteAssignment", null, 1, 20, 1, 1);
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player, int[] arguments) : base(player)
@@ -131,15 +132,13 @@ public class Mayor : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameOperator.OnCastVoteLocal(byte target, ref int vote)
+        [OnlyMyPlayer]
+        void OnCastVoteLocal(PlayerVoteCastLocalEvent ev)
         {
-            if (AmOwner)
-            {
-                vote = currentVote;
+            ev.Vote = currentVote;
 
-                if (acTokenAnother != null) acTokenAnother.Value.clearable &= currentVote == 0;
-                if (acTokenCommon != null) acTokenCommon.Value.triggered = currentVote >= 2;
-            }
+            if (acTokenAnother != null) acTokenAnother.Value.clearable &= currentVote == 0;
+            if (acTokenCommon != null) acTokenCommon.Value.triggered = currentVote >= 2;
         }
 
         void OnEndVoting(MeetingVoteEndEvent ev)
@@ -147,37 +146,33 @@ public class Mayor : ConfigurableStandardRole, HasCitation
             if (MeetingHud.Instance.playerStates.FirstOrDefault(v => v.TargetPlayerId == MyPlayer.PlayerId)?.DidVote ?? false) myVote -= currentVote;
         }
 
-        void IGameOperator.OnDiscloseVotingLocal(MeetingHud.VoterState[] result)
+        [Local]
+        void OnDiscloseVotingLocal(MeetingVoteDisclosedEvent ev)
         {
-            if (AmOwner)
-            {
-                var myVote = result.FirstOrDefault(v => v.VoterId == MyPlayer.PlayerId);
-                if (myVote.VoterId != MyPlayer.PlayerId) return;
+            var myVote = ev.VoteStates.FirstOrDefault(v => v.VoterId == MyPlayer.PlayerId);
+            if (myVote.VoterId != MyPlayer.PlayerId) return;
 
-                var myVotedFor = myVote.VotedForId;
-                acTokenCommon!.Value.myVotedFor = myVotedFor;
-                acTokenChallenge!.Value.myVotedFor = myVotedFor;
+            var myVotedFor = myVote.VotedForId;
+            acTokenCommon!.Value.myVotedFor = myVotedFor;
+            acTokenChallenge!.Value.myVotedFor = myVotedFor;
 
-                if (!result.Any(v => v.VoterId != MyPlayer.PlayerId && v.VotedForId == myVotedFor)) acTokenChallenge!.Value.triggered = true;
-            }
+            if (!ev.VoteStates.Any(v => v.VoterId != MyPlayer.PlayerId && v.VotedForId == myVotedFor)) acTokenChallenge!.Value.triggered = true;
         }
 
-        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
+        [Local]
+        void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (AmOwner)
+            if (acTokenCommon!.Value.triggered)
             {
-                if (acTokenCommon!.Value.triggered)
-                {
-                    acTokenCommon.Value.cleared |= exiled.PlayerId == acTokenCommon.Value.myVotedFor;
-                }
+                acTokenCommon.Value.cleared |= ev.Player.PlayerId == acTokenCommon.Value.myVotedFor;
+            }
 
-                if (acTokenChallenge!.Value.triggered && exiled.PlayerId == acTokenChallenge.Value.myVotedFor)
+            if (acTokenChallenge!.Value.triggered && ev.Player.PlayerId == acTokenChallenge.Value.myVotedFor)
+            {
+                var team = ev.Player?.Role.Role.Team;
+                if (team != NebulaTeams.JesterTeam && team != NebulaTeams.CrewmateTeam)
                 {
-                    var team = exiled.Unbox()?.Role.Role.Team;
-                    if (team != NebulaTeams.JesterTeam && team != NebulaTeams.CrewmateTeam)
-                    {
-                        acTokenChallenge.Value.cleared = true;
-                    }
+                    acTokenChallenge.Value.cleared = true;
                 }
             }
         }

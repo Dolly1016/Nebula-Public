@@ -1,6 +1,7 @@
 ﻿using AmongUs.GameOptions;
 using Nebula.Behaviour;
 using Virial.Assignable;
+using Virial.Events.Player;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -39,7 +40,7 @@ public class Doctor : ConfigurableStandardRole
         {
         }
 
-        public override void OnTaskCompleteLocal()
+        public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
             vitalTimer = Mathf.Min(MyRole.MaxPortableVitalsChargeOption.GetFloat(), vitalTimer + MyRole.ChargesPerTasksOption.GetFloat());
         }

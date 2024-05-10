@@ -56,12 +56,10 @@ public static class MeetingModRpc
         var reporter = NebulaGameManager.Instance?.GetPlayer(message.reporter);
         var reported = NebulaGameManager.Instance?.GetPlayer(message.reported);
 
-        GameOperatorManager.Instance?.Run(new MeetingPreStartEvent(reporter!, reported));
-
         if (reported != null)
-            GameOperatorManager.Instance?.AllEntities.Do(a => a.OnReported(reporter!, reported));
+            GameOperatorManager.Instance?.Run(new ReportDeadBodyEvent(reporter!, reported), true);
         else
-            GameOperatorManager.Instance?.AllEntities.Do(a => a.OnEmergencyMeeting(reporter!));
+            GameOperatorManager.Instance?.Run(new CalledEmergencyMeetingEvent(reporter!), true);
     });
 
     public static readonly RemoteProcess<(List<VoterState> states, byte exiled, byte[] exiledAll,  bool tie)> RpcModCompleteVoting = new("CompleteVoting", 
@@ -96,19 +94,13 @@ public static class MeetingModRpc
     {
         var readonlyStates = states.ToArray();
 
-        GameOperatorManager.Instance?.GetPlayerEntities(PlayerControl.LocalPlayer.PlayerId).Do(e =>
-        {
-            var voted = Helpers.GetPlayer(
-            ((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255);
+        var votedLocal = NebulaGameManager.Instance!.GetPlayer(((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255);
 
-            e.OnVotedLocal(voted, exiledAll.Contains(voted?.PlayerId ?? 255));
+        GameOperatorManager.Instance?.Run(new PlayerVoteDisclosedLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, votedLocal, exiledAll.Contains(votedLocal?.PlayerId ?? byte.MaxValue)));
+        GamePlayer[] votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => NebulaGameManager.Instance.GetPlayer(id)).Where(p => p != null).ToArray()!;
+        GameOperatorManager.Instance?.Run(new PlayerVotedLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, votedBy!));
+        GameOperatorManager.Instance?.Run(new MeetingVoteDisclosedEvent(readonlyStates));
 
-            var votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => Helpers.GetPlayer(id)).Where(p => p != null).ToArray();
-
-            e.OnVotedForMeLocal((votedBy ?? [])!);
-
-            e.OnDiscloseVotingLocal(readonlyStates);
-        });
 
         //追放者とタイ投票の結果だけは必ず書き換える
         meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
@@ -529,10 +521,9 @@ class CastVotePatch
         if (__instance.state != MeetingHud.VoteStates.NotVoted) return false;
         
         __instance.state = MeetingHud.VoteStates.Voted;
-        
+
         //CmdCastVote(Mod)
-        int vote = 1;
-        GameOperatorManager.Instance.GetPlayerEntities(PlayerControl.LocalPlayer.PlayerId).Do(r => r.OnCastVoteLocal(suspectStateIdx, ref vote));
+        int vote = GameOperatorManager.Instance?.Run(new PlayerVoteCastLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, NebulaGameManager.Instance!.GetPlayer(suspectStateIdx), 1)).Vote ?? 1;
         __instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, suspectStateIdx, vote);
         return false;
     }

@@ -1,5 +1,6 @@
 ﻿using Virial.Assignable;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -34,7 +35,7 @@ public class Bait : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
@@ -50,17 +51,20 @@ public class Bait : ConfigurableStandardRole, HasCitation
             yield return new WaitForSeconds(t);
             murderer.CmdReportDeadBody(MyPlayer.VanillaPlayer.Data);
         }
-        void IGamePlayerOperator.OnMurdered(GamePlayer murderer)
+
+        [Local, OnlyMyPlayer]
+        void OnMurdered(PlayerMurderedEvent ev)
         {
-            if (murderer.PlayerId == MyPlayer.PlayerId) return;
+            if (ev.Murderer.AmOwner) return; //自殺の場合は何もしない
 
-            if (AmOwner)
-            {
-                new StaticAchievementToken("bait.common1");
-                acTokenChallenge ??= new("bait.challenge", (false,true), (val,_) => val.cleared);
-            }
+            new StaticAchievementToken("bait.common1");
+            acTokenChallenge ??= new("bait.challenge", (false, true), (val, _) => val.cleared);
+        }
 
-            if (PlayerControl.LocalPlayer.PlayerId == murderer.PlayerId) NebulaManager.Instance.StartCoroutine(CoReport(murderer.VanillaPlayer).WrapToIl2Cpp());
+        [OnlyMyPlayer]
+        void BaitReportOnMurdered(PlayerMurderedEvent ev)
+        { 
+            if (ev.Murderer.AmOwner && !MyPlayer.AmOwner) NebulaManager.Instance.StartCoroutine(CoReport(ev.Murderer.VanillaPlayer).WrapToIl2Cpp());
         }
 
         public override void OnEnterVent(PlayerControl player,Vent vent)
@@ -73,13 +77,11 @@ public class Bait : ConfigurableStandardRole, HasCitation
             if (acTokenChallenge != null) acTokenChallenge.Value.triggered = false;
         }
 
-        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
+        [Local]
+        void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (AmOwner)
-            {
-                if ((acTokenChallenge?.Value.triggered ?? false) && exiled.PlayerId == (MyPlayer.MyKiller?.PlayerId ?? 255))
-                    acTokenChallenge.Value.cleared = true;
-            }
+            if ((acTokenChallenge?.Value.triggered ?? false) && ev.Player.PlayerId == (MyPlayer.MyKiller?.PlayerId ?? 255))
+                acTokenChallenge.Value.cleared = true;
         }
     }
 }

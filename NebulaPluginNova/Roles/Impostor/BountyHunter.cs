@@ -35,7 +35,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
 
     float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CurrentCoolDown, OthersKillCoolDownOption.CurrentCoolDown, AmongUsUtil.VanillaKillCoolDown);
 
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         private ModAbilityButton? killButton = null;
 
@@ -167,10 +167,9 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
             }
         }
 
-        public override void LocalUpdate()
-        {
-            UpdateTimer();
-        }
+        [Local]
+        void LocalUpdate() => UpdateTimer();
+        
 
         [Local]
         void OnMeetingEnd(MeetingEndEvent ev)

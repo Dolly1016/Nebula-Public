@@ -1,4 +1,6 @@
-﻿using Virial.Events.Game.Meeting;
+﻿using Virial.Assignable;
+using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
 
@@ -28,12 +30,12 @@ public class Damned : ConfigurableStandardModifier
     }
 
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IGamePlayerOperator
+    public class Instance : ModifierInstance, IBindPlayer
     {
         public override AbstractModifier Role => MyRole;
 
         private bool hasGuard = true;
-        AbstractRole? nextRole = null;
+        DefinedRole? nextRole = null;
         public override bool CanBeAwareAssignment => NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
         public Instance(GamePlayer player) : base(player)
         {
@@ -54,7 +56,7 @@ public class Damned : ConfigurableStandardModifier
             return hasGuard ? KillResult.ObviousGuard : KillResult.Kill;
         }
 
-        private void CheckAchievement(AbstractRole myNextRole)
+        private void CheckAchievement(DefinedRole myNextRole)
         {
             if (MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && myNextRole.Category == Virial.Assignable.RoleCategory.CrewmateRole)
                 //インポスター⇒クルーメイト
@@ -71,24 +73,24 @@ public class Damned : ConfigurableStandardModifier
                 RpcNoticeCurse.Invoke((MyPlayer.PlayerId, 1));
         }
 
-        void IGamePlayerOperator.OnGuard(GamePlayer killer)
+        void OnGuard(PlayerGuardEvent ev)
         {
             hasGuard = false;
-            nextRole = killer.Unbox().Role.Role;
+            nextRole = ev.Murderer.Role.Role;
 
-            if (killer.AmOwner && MyRole.DamnedMurderMyKillerOption)
+            if (ev.Murderer.AmOwner && MyRole.DamnedMurderMyKillerOption)
             {
                 IEnumerator CoDelayKill()
                 {
                     yield return Effects.Wait(MyRole.KillDelayOption.GetFloat());
 
-                    AbstractRole myNextRole = MyRole.TakeOverRoleOfKillerOption ? nextRole! : Impostor.DamnedImpostor.MyRole;
+                    DefinedRole myNextRole = MyRole.TakeOverRoleOfKillerOption ? nextRole! : Impostor.DamnedImpostor.MyRole;
                     CheckAchievement(myNextRole);
 
 
                     using (RPCRouter.CreateSection("DamedAction"))
                     {
-                        if (MyPlayer.MurderPlayer(killer, PlayerState.Cursed, EventDetail.Curse,false, true) == KillResult.Kill)
+                        if (MyPlayer.MurderPlayer(ev.Murderer, PlayerState.Cursed, EventDetail.Curse,false, true) == KillResult.Kill)
                         {
                             MyPlayer.Unbox().RpcInvokerUnsetModifier(Role).InvokeSingle();
                             MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, null).InvokeSingle();
@@ -108,7 +110,7 @@ public class Damned : ConfigurableStandardModifier
             {
                 NebulaManager.Instance.ScheduleDelayAction(() =>
                 {
-                    AbstractRole myNextRole = MyRole.TakeOverRoleOfKillerOption ? nextRole! : Impostor.DamnedImpostor.MyRole;
+                    DefinedRole myNextRole = MyRole.TakeOverRoleOfKillerOption ? nextRole! : Impostor.DamnedImpostor.MyRole;
                     CheckAchievement(myNextRole);
 
                     using (RPCRouter.CreateSection("DamnedAction"))

@@ -1,5 +1,6 @@
 ﻿using Nebula.Roles.Crewmate;
 using Virial.Assignable;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -28,7 +29,7 @@ public class Effacer : ConfigurableStandardRole, HasCitation
         EffaceDurationOption = new NebulaConfiguration(RoleConfig, "effaceDuration", null, 5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
         public override AbstractRole Role => MyRole;
@@ -72,15 +73,20 @@ public class Effacer : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGameOperator.OnPlayerMurdered(GamePlayer dead, GamePlayer murderer)
+        [Local]
+        void OnPlayerMurdered(PlayerMurderedEvent ev)
         {
-            if (AmOwner && !murderer.AmOwner && murderer.IsImpostor && dead.HasAttribute(PlayerAttributes.InvisibleElseImpostor))
+            if (!ev.Murderer.AmOwner && ev.Murderer.IsImpostor && ev.Dead.HasAttribute(PlayerAttributes.InvisibleElseImpostor))
             {
                 new StaticAchievementToken("effacer.common3");
-                if (achChallengeToken != null) achChallengeToken.Value.Add(murderer);
+                if (achChallengeToken != null) achChallengeToken.Value.Add(ev.Murderer);
             }
+        }
 
-            if(murderer.AmOwner && murderer.HasAttribute(PlayerAttributes.InvisibleElseImpostor) && (dead.Role.Role == Sheriff.MyRole || dead.Role.Role == Neutral.Jackal.MyRole || dead.Role.Role == Neutral.Avenger.MyRole))
+        [Local, OnlyMyPlayer]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
+        {
+            if (ev.Murderer.HasAttribute(PlayerAttributes.InvisibleElseImpostor) && (ev.Dead.Role.Role == Sheriff.MyRole || ev.Dead.Role.Role == Neutral.Jackal.MyRole || ev.Dead.Role.Role == Neutral.Avenger.MyRole))
             {
                 new StaticAchievementToken("effacer.common4");
             }

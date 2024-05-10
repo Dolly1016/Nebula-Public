@@ -3,6 +3,7 @@ using Nebula.Modules.GUIWidget;
 using Virial;
 using Virial.Assignable;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
 
@@ -48,7 +49,7 @@ public class Collator : ConfigurableStandardRole, HasCitation
             "options.role.collator.madmateIsClassifiedAs.crewmate"], 0, 0);
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         static private SpriteLoader meetingSprite = SpriteLoader.FromResource("Nebula.Resources.CollatorIcon.png", 115f);
 
@@ -244,11 +245,12 @@ public class Collator : ConfigurableStandardRole, HasCitation
             }
         }
 
-        void IGamePlayerOperator.OnMurdered(Virial.Game.Player murder)
+        [Local]
+        void OnMurdered(PlayerMurderedEvent ev)
         {
-            if(AmOwner && acTokenAnother1 != null)
+            if(acTokenAnother1 != null)
             {
-                if(acTokenAnother1.Value.player == murder && NebulaGameManager.Instance!.CurrentTime < acTokenAnother1.Value.time + 5f) {
+                if(acTokenAnother1.Value.player == ev.Murderer && NebulaGameManager.Instance!.CurrentTime < acTokenAnother1.Value.time + 5f) {
                     acTokenAnother1.Value.clear = true;
                 }
             }

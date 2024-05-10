@@ -38,7 +38,19 @@ internal class GameOperatorBuilder
     {
         List<(Type type, Func<object, Action<object>> action)> builderActions = new();
 
-        foreach(var method in entityType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        //公開メソッドをすべて拾い上げる
+        IEnumerable<MethodInfo> methods = entityType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+
+        //親に遡及して非公開メソッドを拾い上げる
+        Type? baseType = entityType;
+        while (baseType != null)
+        {
+            methods = methods.Concat(baseType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly));
+            baseType = baseType.BaseType;
+        }
+        
+
+        foreach(var method in methods)
         {
             var parameters = method.GetParameters();
             if (parameters.Length != 1) continue;
@@ -56,7 +68,7 @@ internal class GameOperatorBuilder
                 var lastAction = procedure;
                 procedure = (instance, e) =>
                 {
-                    if ((e as AbstractPlayerEvent)?.Player == (instance as IGamePlayerOperator)?.MyPlayer) lastAction.Invoke(instance, e);
+                    if ((e as AbstractPlayerEvent)?.Player == (instance as IBindPlayer)?.MyPlayer) lastAction.Invoke(instance, e);
                 };
             }
 
@@ -65,7 +77,7 @@ internal class GameOperatorBuilder
                 var lastAction = procedure;
                 procedure = (instance, e) =>
                 {
-                    if ((instance as IGamePlayerOperator)?.AmOwner ?? false) lastAction.Invoke(instance, e);
+                    if ((instance as IBindPlayer)?.AmOwner ?? false) lastAction.Invoke(instance, e);
                 };
             }
 
@@ -84,17 +96,17 @@ public class GameOperatorManager
     static public GameOperatorManager? Instance => instance;
 
     // 現在有効な作用素
-    private Dictionary<Type, List<GameOperatorInstance>> allOperators = new();
+    private Dictionary<Type, List<GameOperatorInstance>> allOperatorInstance = new();
 
     //特殊な作用素 (OnReleasedに限り、属性による指定なしでバインドされた寿命オブジェクトの寿命が尽きたときに個別に呼び出される。)
-    private List<(ILifespan lifespan, Action action)> onReleasedOperators = new();
+    private List<(ILifespan lifespan, IGameOperator operation)> allOperators = new();
 
     // 同じ型の作用素を登録する処理を高速化するためのキャッシュ
     static private Dictionary<Type, GameOperatorBuilder> allBuildersCache = new();
 
     private void DoSingleOperation(object e, Type type)
     {
-        if(allOperators.TryGetValue(type, out var operators))
+        if (allOperatorInstance.TryGetValue(type, out var operators))
         {
             operators.RemoveAll(o =>
             {
@@ -115,12 +127,14 @@ public class GameOperatorManager
         }
     }
 
-    public void Run<E>(E ev, bool retroactive = false) where E : class, Virial.Events.Event
+    public E Run<E>(E ev, bool retroactive = false) where E : class, Virial.Events.Event
     {
         if (retroactive)
             DoRetroactiveOperation(ev, ev.GetType());
         else
             DoRetroactiveOperation(ev, ev.GetType());
+
+        return ev;
     }
 
 
@@ -131,11 +145,11 @@ public class GameOperatorManager
         RegisterAll();
 
         //OnReleasedの呼び出し
-        onReleasedOperators.RemoveAll(tuple =>
+        allOperators.RemoveAll(tuple =>
         {
             if (tuple.lifespan.IsDeadObject)
             {
-                tuple.action.Invoke();
+                tuple.operation.OnReleased();
                 return true;
             }
             return false;
@@ -145,10 +159,10 @@ public class GameOperatorManager
     public void Abandon()
     {
         //コレクションの中身を全消去
-        allOperators.Do(entry => entry.Value.Clear());
+        allOperatorInstance.Do(entry => entry.Value.Clear());
+        allOperatorInstance.Clear();
+        allOperators.Do(t => t.operation.OnReleased());
         allOperators.Clear();
-        onReleasedOperators.Do(t => t.action.Invoke());
-        onReleasedOperators.Clear();
 
         if (instance == this) instance = null;
     }
@@ -158,15 +172,16 @@ public class GameOperatorManager
 
     private void RegisterEntity(IGameOperator operation, ILifespan lifespan)
     {
-        onReleasedOperators.Add((lifespan, operation.OnReleased));
+        allOperators.Add((lifespan, operation));
+
         var operationType = operation.GetType();
         GameOperatorBuilder? builder;
-        if(!allBuildersCache.TryGetValue(operationType, out builder))
+        if (!allBuildersCache.TryGetValue(operationType, out builder))
         {
             builder = GameOperatorBuilder.GetBuilderFromType(operationType);
             allBuildersCache.Add(operationType, builder);
         }
-        builder.Register(allOperators, lifespan, operation);
+        builder.Register(allOperatorInstance, lifespan, operation);
     }
 
     //退避されていた作用素をゲームに追加する
@@ -186,8 +201,6 @@ public class GameOperatorManager
         instance = this;
     }
 
-    //書き換えのための措置
-    public IEnumerable<IGameOperator> AllEntities => null;
-    public IEnumerable<IGamePlayerOperator> GetPlayerEntities(GamePlayer p) => null;
-    public IEnumerable<IGamePlayerOperator> GetPlayerEntities(byte p) => null;
+    
+    public IEnumerable<IGameOperator> AllOperators  { get { foreach (var op in allOperators) yield return op.operation; } }
 }

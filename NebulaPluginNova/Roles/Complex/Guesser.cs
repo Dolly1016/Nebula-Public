@@ -2,6 +2,7 @@
 using Virial;
 using Virial.Assignable;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Complex;
@@ -198,7 +199,7 @@ public class Guesser : ConfigurableStandardRole, HasCitation
         GenerateCommonEditor(RoleConfig);
     }
 
-    public class NiceInstance : Crewmate.Crewmate.Instance, IGamePlayerOperator
+    public class NiceInstance : Crewmate.Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyNiceRole;
         private int leftGuess = NumOfGuessOption;
@@ -209,14 +210,13 @@ public class Guesser : ConfigurableStandardRole, HasCitation
 
         [Local]
         void OnMeetingStart(MeetingStartEvent ev) => GuesserSystem.OnMeetingStart(leftGuess, () => leftGuess--);
-        
 
-        void IGamePlayerOperator.OnDead()
-        {
-            if (AmOwner) GuesserSystem.OnDead();
-        }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        [Local, OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev) => GuesserSystem.OnDead();
+
+
+        public override void OnGameEnd(EndState endState)
         {
             if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
         }
@@ -224,7 +224,7 @@ public class Guesser : ConfigurableStandardRole, HasCitation
         public override bool CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerOperator
+    public class EvilInstance : Impostor.Impostor.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyEvilRole;
         private int leftGuess = NumOfGuessOption;
@@ -235,14 +235,13 @@ public class Guesser : ConfigurableStandardRole, HasCitation
 
         [Local]
         void OnMeetingStart(MeetingStartEvent ev) => GuesserSystem.OnMeetingStart(leftGuess, () => leftGuess--);
-        
 
-        void IGamePlayerOperator.OnDead()
-        {
-            if (AmOwner) GuesserSystem.OnDead();
-        }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        [Local, OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev) => GuesserSystem.OnDead();
+
+
+        public override void OnGameEnd(EndState endState)
         {
             if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
         }
@@ -271,7 +270,7 @@ public class GuesserModifier : ConfigurableStandardModifier, HasCitation
         Guesser.GenerateCommonEditor(RoleConfig);
     }
 
-    public class Instance : ModifierInstance, IGamePlayerOperator
+    public class Instance : ModifierInstance, IBindPlayer
     {
         public override AbstractModifier Role => MyRole;
         public int LeftGuess = Guesser.NumOfGuessOption;
@@ -288,16 +287,15 @@ public class GuesserModifier : ConfigurableStandardModifier, HasCitation
             GuesserSystem.OnMeetingStart(LeftGuess, () => LeftGuess--);
         }
 
-        void IGamePlayerOperator.OnDead()
-        {
-            if (AmOwner) GuesserSystem.OnDead();
-        }
+        [Local, OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev) => GuesserSystem.OnDead();
+        
         public override void DecoratePlayerName(ref string text, ref Color color)
         {
             if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " ⊕".Color(MyRole.RoleColor);
         }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
         }

@@ -34,7 +34,7 @@ public class Agent : ConfigurableStandardRole
         SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = new(RoleConfig, "suicideIfSomeoneElseCompletesTasksBeforeAgent", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
         public override AbstractRole Role => MyRole;
@@ -107,7 +107,7 @@ public class Agent : ConfigurableStandardRole
             }
         }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if (AmOwner)
             {

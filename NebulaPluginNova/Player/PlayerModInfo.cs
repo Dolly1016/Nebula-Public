@@ -8,6 +8,7 @@ using Virial.Assignable;
 using Virial.Command;
 using Virial.Common;
 using Virial.DI;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
 
@@ -269,7 +270,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             }
 
             var o = new Outfit(newOutfit);
-            NebulaGameManager.Instance?.AllEntitiesAction(e => e.OnOutfitChanged(this, o));
+            GameOperatorManager.Instance?.Run(new PlayerOutfitChangeEvent(this, o));
         }
         catch (Exception e) {
             Debug.LogError("Outfit Error: Error occurred on changing " + DefaultName + " 's outfit");
@@ -352,7 +353,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             AssignableAction(r => { var newName = r.Unbox().OverrideRoleName(text, false); if (newName != null) text = newName; });
             AssignableAction(m => m.Unbox().DecorateRoleName(ref text));
 
-            if (HasAnyTasks)
+            if (HasAnyTasks && (this as GamePlayer).Tasks.Quota > 0)
                 text += (" (" + (this as GamePlayer).Tasks.Unbox().ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((FeelLikeHaveCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
         }
 
@@ -384,8 +385,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
             myRole.OnActivated(); myRole.Register();
-            NebulaGameManager.Instance.AllPlayerEntitiesAction(e => e.OnSetRole(myRole));
-            NebulaGameManager.Instance.AllEntitiesAction(e => e.OnSetRole(this, myRole));
+            GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(this, myRole));
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myRole, IsDead));
@@ -412,17 +412,16 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
             modifier.OnActivated(); modifier.Register();
-            GameOperatorManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnAddModifier(modifier));
-            GameOperatorManager.Instance?.AllEntities.Do(e => e.OnAddModifier(this, modifier));
+            GameOperatorManager.Instance?.Run(new PlayerModifierSetEvent(this, modifier));
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true, IsDead));
     }
 
-    public NebulaRPCInvoker RpcInvokerSetRole(AbstractRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Role));
-    public NebulaRPCInvoker RpcInvokerSetModifier(AbstractModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Modifier));
+    public NebulaRPCInvoker RpcInvokerSetRole(DefinedRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Role));
+    public NebulaRPCInvoker RpcInvokerSetModifier(DefinedModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Modifier));
     public NebulaRPCInvoker RpcInvokerSetGhostRole(AbstractGhostRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.GhostRole));
-    public NebulaRPCInvoker RpcInvokerUnsetModifier(AbstractModifier modifier) => RpcRemoveModifier.GetInvoker(new(PlayerId, modifier.Id));
+    public NebulaRPCInvoker RpcInvokerUnsetModifier(DefinedModifier modifier) => RpcRemoveModifier.GetInvoker(new(PlayerId, modifier.Id));
     public void UnsetModifierLocal(Predicate<ModifierInstance> predicate)
     {
         myModifiers.RemoveAll(m =>
@@ -430,8 +429,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             if (predicate.Invoke(m))
             {
                 m.Inactivate();
-                GameOperatorManager.Instance?.GetPlayerEntities(PlayerId).Do(e => e.OnRemoveModifier(m));
-                GameOperatorManager.Instance?.AllEntities.Do(e => e.OnRemoveModifier(this, m));
+                GameOperatorManager.Instance?.Run(new PlayerModifierRemoveEvent(this, m));
 
                 NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, m, false, IsDead));
                 return true;
@@ -958,8 +956,6 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         UpdateMouseAngle();
         UpdateModulators();
         UpdateVisibility(true);
-
-        if (MyControl.AmOwner) AssignableAction((role) => role.Unbox().LocalUpdate());
     }
 
     public void UpdateTaskState()
@@ -1000,7 +996,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     KillResult GamePlayer.MurderPlayer(GamePlayer player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool showBlink, bool showKillOverlay) => MyControl.ModFlexibleKill(player.VanillaPlayer, showBlink, playerState, eventDetail, showKillOverlay);
     KillResult GamePlayer.Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool showKillOverlay, bool assignGhostRole) => MyControl.ModFlexibleKill(MyControl, false, playerState, eventDetail, showKillOverlay, assignGhostRole);
-    void GamePlayer.Revive(GamePlayer? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent) => MyControl.ModRevive(healer.VanillaPlayer, new(position.x, position.y), eraseDeadBody, recordEvent);
+    void GamePlayer.Revive(GamePlayer? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent) => MyControl.ModRevive(healer?.VanillaPlayer, new(position.x, position.y), eraseDeadBody, recordEvent);
     GamePlayer? GamePlayer.MyKiller => MyKiller;
 
     // Virial::HoldingAPI

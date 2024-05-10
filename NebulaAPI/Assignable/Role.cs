@@ -1,4 +1,5 @@
 ﻿using Virial.Configuration;
+using Virial.Game;
 
 namespace Virial.Assignable;
 
@@ -93,44 +94,60 @@ public interface DefinedModifier : DefinedAssignable
     /// DefinedRoleのModifierFilterと同期しています
     /// </summary>
     RoleFilter? RoleFilter { get; }
+
+    internal int Id { get; }
 }
 
 /// <summary>
 /// プレイヤーに割り当てられた役職や追加役職のコンテナを表します。
 /// </summary>
-public interface RuntimeAssignable : IBinder, ILifespan
+public interface RuntimeAssignable : IBinder, ILifespan, IReleasable, IBindPlayer
 {
     /// <summary>
     /// 役職および追加役職の定義
     /// </summary>
     DefinedAssignable Assignable { get; }
 
-    /// <summary>
-    /// 割当先のプレイヤー
-    /// </summary>
-    Virial.Game.Player MyPlayer { get; }
-
     //AssignableAspectAPI
 
     /// <summary>
     /// 通信障害を修理できる場合Trueを返します。
     /// </summary>
-    bool CanFixComm { get; }
+    bool CanFixComm => true;
 
     /// <summary>
     /// 通信障害を修理できる場合Trueを返します。
     /// </summary>
-    bool CanFixLight { get; }
+    bool CanFixLight => true;
 
     /// <summary>
     /// 割り当てられていることを自覚できる場合Trueを返します。
     /// </summary>
-    bool CanBeAwareAssignment { get; }
+    bool CanBeAwareAssignment => true;
 
     /// <summary>
     /// 緊急ボタンを押すことができる場合Trueを返します。
     /// </summary>
     bool CanCallEmergencyMeeting { get; }
+
+    //GameFlowAPI
+
+    /// <summary>
+    /// 役職の割り当て時に呼び出されます。
+    /// </summary>
+    protected internal void OnActivated();
+
+    /// <summary>
+    /// 役職が失わる時に呼び出されます。
+    /// </summary>
+    protected void OnInactivated() { }
+
+
+    internal sealed void Inactivate()
+    {
+        (this as IReleasable).Release();
+        OnInactivated();
+    }
 }
 
 /// <summary>
@@ -143,6 +160,30 @@ public interface RuntimeRole : RuntimeAssignable
     /// </summary>
     DefinedRole Role { get; }
     DefinedAssignable RuntimeAssignable.Assignable => Role;
+
+    //AssignableAspectAPI
+
+    /// <summary>
+    /// ベントを使用できる場合はtrueを返します。
+    /// </summary>
+    bool CanUseVent => Role.Category == RoleCategory.ImpostorRole;
+
+    /// <summary>
+    /// ベント間の移動ができる場合はtrueを返します。
+    /// <see cref="CanUseVent"/>がfalseの場合は意味がありません。
+    /// </summary>
+    bool CanMoveInVent => true;
+
+    /// <summary>
+    /// インポスターの視界を持つ場合はtrueを返します。
+    /// </summary>
+    bool HasImpostorVision => Role.Category == RoleCategory.ImpostorRole;
+
+    /// <summary>
+    /// 停電の影響を受ける場合はtrueを返します。
+    /// </summary>
+    bool IgnoreBlackout => HasImpostorVision;
+
 }
 
 /// <summary>

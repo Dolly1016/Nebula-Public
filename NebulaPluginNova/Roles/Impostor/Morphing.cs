@@ -1,5 +1,6 @@
 ﻿using Virial.Assignable;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -30,7 +31,7 @@ public class Morphing : ConfigurableStandardRole, HasCitation
         LoseSampleOnMeetingOption = new NebulaConfiguration(RoleConfig, "loseSampleOnMeeting", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
@@ -126,23 +127,23 @@ public class Morphing : ConfigurableStandardRole, HasCitation
             }
         }
 
+        [Local]
         void OnMeetingEnd(MeetingEndEvent ev)
         {
             if (MyRole.LoseSampleOnMeetingOption) sample = null;
         }
 
-        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
+        [Local]
+        void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (AmOwner)
-            {
-                if (acTokenChallenge != null && exiled.Unbox()!.DefaultOutfit.ColorId == (sample?.ColorId ?? -1))
-                    acTokenChallenge.Value.exile = true;
-            }
+            if (acTokenChallenge != null && ev.Player.Unbox()!.DefaultOutfit.ColorId == (sample?.ColorId ?? -1))
+                acTokenChallenge.Value.exile = true;
         }
 
-        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
+        [OnlyMyPlayer, Local]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            var targetId = target.Unbox()?.GetOutfit(75).ColorId;
+            var targetId = ev.Dead.Unbox()?.GetOutfit(75).ColorId;
             var sampleId = sample?.ColorId;
             if (targetId.HasValue && sampleId.HasValue && targetId.Value == sampleId.Value)
                 acTokenAnother1 ??= new("morphing.another1");

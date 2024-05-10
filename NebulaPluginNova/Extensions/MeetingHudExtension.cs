@@ -1,4 +1,5 @@
-﻿using Virial.Text;
+﻿using Virial.Events.Player;
+using Virial.Text;
 
 namespace Nebula.Extensions;
 
@@ -122,15 +123,8 @@ public static class MeetingHudExtension
             player.VanillaPlayer.Data.IsDead = true;
             player.Unbox().MyState = victims.playerState;
 
-            if (killer != null) killer.RelatedEntities()?.Do(e => e.OnExtraExilePlayer(player));
             //Entityイベント発火
-            GameOperatorManager.Instance?.GetPlayerEntities(player.PlayerId).Do(e => { e.OnExtraExiled(); e.OnDead(); });
-
-            //Entityイベント発火
-            GameOperatorManager.Instance?.AllEntities.Do(e =>
-            {
-                e.OnPlayerDead(player);
-            });
+            GameOperatorManager.Instance?.Run(new PlayerExtraExiledEvent(player, killer));
 
             if (player.AmOwner && NebulaAchievementManager.GetRecord("death." + player.PlayerState.TranslationKey, out var recDeath)) new StaticAchievementToken(recDeath);
             if ((killer?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + player.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);

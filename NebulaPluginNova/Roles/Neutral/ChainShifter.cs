@@ -1,6 +1,7 @@
 ﻿using Nebula.Roles.Complex;
 using Virial.Assignable;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -35,7 +36,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
     public override bool CanBeGuessDefault => false;
 
 
-    public class Instance : RoleInstance, IGamePlayerOperator
+    public class Instance : RoleInstance, IBindPlayer
     {
         private ModAbilityButton? chainShiftButton = null;
 
@@ -166,12 +167,12 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
         }
 
 
-        void IGamePlayerOperator.OnMurdered(GamePlayer murder)
+        void OnMurdered(PlayerMurderedEvent ev)
         {
-            if (murder.AmOwner) new StaticAchievementToken("chainShifter.common1");
+            if (ev.Murderer.AmOwner) new StaticAchievementToken("chainShifter.common1");
         }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if (AmOwner) new StaticAchievementToken("chainShifter.another1");
         }

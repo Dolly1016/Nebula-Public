@@ -222,7 +222,7 @@ public class Trapper : ConfigurableStandardRole
         GenerateCommonEditor(RoleConfig, PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption);
     }
 
-    public class NiceInstance : Crewmate.Crewmate.Instance, IGamePlayerOperator
+    public class NiceInstance : Crewmate.Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyNiceRole;
         private int leftCharge = NumOfChargesOption;
@@ -250,7 +250,9 @@ public class Trapper : ConfigurableStandardRole
         }
 
         private uint lastCommPlayersMask = 0;
-        public override void LocalUpdate()
+
+        [Local]
+        void LocalUpdate(GameUpdateEvent ev)
         {
             //会議中はなにもしない
             if (MeetingHud.Instance || ExileController.Instance) return;
@@ -284,7 +286,7 @@ public class Trapper : ConfigurableStandardRole
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerOperator
+    public class EvilInstance : Impostor.Impostor.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyEvilRole;
         private int leftCharge = NumOfChargesOption;
@@ -301,14 +303,15 @@ public class Trapper : ConfigurableStandardRole
             if (AmOwner)
             {
                 TrapperSystem.OnActivated(this, new (int, int)[] { (0, 1), (1, 1), (3, CostOfKillTrapOption) }, localTraps);
-                acTokenChallenge = new("evilTrapper.challenge", 0, (val, _) => val >= 2 && NebulaEndState.CurrentEndState!.CheckWin(MyPlayer.PlayerId) && !MyPlayer.IsDead);
+                acTokenChallenge = new("evilTrapper.challenge", 0, (val, _) => val >= 2 && NebulaGameManager.Instance!.EndState!.CheckWin(MyPlayer.PlayerId) && !MyPlayer.IsDead);
             }
         }
 
         [Local]
         void OnMeetingStart() => TrapperSystem.OnMeetingStart(localTraps, killTraps);
-        
-        public override void LocalUpdate()
+
+        [Local]
+        void LocalUpdate(GameUpdateEvent ev)
         {
             //会議中はなにもしない
             if (MeetingHud.Instance || ExileController.Instance) return;

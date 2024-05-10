@@ -3,6 +3,7 @@ using Nebula.Behaviour;
 using TMPro;
 using Virial.Assignable;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -103,25 +104,27 @@ public class Disturber : ConfigurableStandardRole
         {
         }
 
-        void IGameOperator.OnAddSystemTask(PlayerTask task)
+        [OnlyMyPlayer, Local]
+        void OnAddSystemTask(PlayerSabotageTaskAddLocalEvent ev)
         {
-            if (AmOwner && acTokenChallenge != null)
+            if (acTokenChallenge != null)
             {
-                acTokenChallenge.Value.cmTask = task.TryCast<IHudOverrideTask>();
-                acTokenChallenge.Value.elTask = task.TryCast<ElectricTask>();
+                acTokenChallenge.Value.cmTask = ev.SystemTask.TryCast<IHudOverrideTask>();
+                acTokenChallenge.Value.elTask = ev.SystemTask.TryCast<ElectricTask>();
                 acTokenChallenge.Value.time = NebulaGameManager.Instance?.CurrentTime ?? 0f;
                 acTokenChallenge.Value.dead = 0;
                 acTokenChallenge.Value.ability = disturbButton?.EffectActive ?? false;
             }
         }
 
-        void IGameOperator.OnRemoveTask(PlayerTask task)
+        [OnlyMyPlayer, Local]
+        void OnRemoveTask(PlayerTaskRemoveLocalEvent ev)
         {
             if(acTokenChallenge != null)
             {
                 CheckChallengeAchievement();
-                if (acTokenChallenge.Value.cmTask == task.TryCast<IHudOverrideTask>()) acTokenChallenge.Value.cmTask = null;
-                if (acTokenChallenge.Value.elTask == task.TryCast<ElectricTask>()) acTokenChallenge.Value.elTask = null;
+                if (acTokenChallenge.Value.cmTask == ev.Task.TryCast<IHudOverrideTask>()) acTokenChallenge.Value.cmTask = null;
+                if (acTokenChallenge.Value.elTask == ev.Task.TryCast<ElectricTask>()) acTokenChallenge.Value.elTask = null;
             }
         }
 
@@ -138,9 +141,10 @@ public class Disturber : ConfigurableStandardRole
             }
         }
 
-        void IGameOperator.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
+        [Local]
+        void OnPlayerMurdered(PlayerMurderedEvent ev)
         {
-            if(AmOwner && acTokenChallenge != null)
+            if(acTokenChallenge != null)
             {
                 acTokenChallenge.Value.dead++;
                 CheckChallengeAchievement();

@@ -1,5 +1,6 @@
 ﻿using Nebula.Roles.Assignment;
 using Virial.Assignable;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Complex;
@@ -142,12 +143,10 @@ public class Secret : AbstractRole, DefinedAssignable
             }
         }
 
-        public override void OnTaskCompleteLocal()
+        public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
             if (MyPlayer.Tasks.IsCompletedCurrentTasks)
-            {
                 ScheduleSendArousalRpc(MyPlayer.Unbox(), savedArgs, savedTasks);
-            }
         }
 
         public override string? OverrideRoleName(string lastRoleName, bool isShort)
@@ -167,7 +166,7 @@ public class Secret : AbstractRole, DefinedAssignable
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, IGamePlayerOperator
+    public class EvilInstance : Impostor.Impostor.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyEvilRole;
         public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
@@ -182,7 +181,9 @@ public class Secret : AbstractRole, DefinedAssignable
         int[] savedArgs;
         AbstractRole savedRole;
         int leftKill = OptionRole.EvilConditionOption;
-        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
+
+        [OnlyMyPlayer]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
             leftKill--;
             if (leftKill <= 0 && AmOwner) ScheduleSendArousalRpc(MyPlayer, savedArgs);
@@ -204,7 +205,7 @@ public class Secret : AbstractRole, DefinedAssignable
             if (AmOwner) SetUpChallengeAchievement(MyPlayer);
         }
 
-        void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
+        void OnPlayerDead(PlayerDieEvent ev)
         {
             //Covertモードはホストが割り当てを管理する
             if (AmongUsClient.Instance.AmHost && OptionRole.EvilConditionTypeOption.CurrentValue == 1)

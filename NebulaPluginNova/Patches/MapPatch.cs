@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Virial.Events.Game.Minimap;
 using Virial.Game;
 
 namespace Nebula.Patches;
@@ -137,7 +138,7 @@ public static class OpenNormalMapPatch
         __instance.ColorControl.SetColor(new Color(0.05f, 0.2f, 1f, 1f));
         DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
 
-        GameOperatorManager.Instance?.AllEntities.Do(e=>e.OnOpenNormalMap());
+        GameOperatorManager.Instance?.Run(new MapOpenNormalEvent());
         return false;
     }
 }
@@ -163,7 +164,7 @@ public static class OpenSabotageMapPatch
         DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
         ConsoleJoystick.SetMode_Sabotage();
 
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnOpenSabotageMap());
+        GameOperatorManager.Instance?.Run(new MapOpenSabotageEvent());
         return false;
     }
 }
@@ -175,7 +176,7 @@ public static class OpenAdminMapPatch
 
     static void Postfix(MapCountOverlay __instance)
     {
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnOpenAdminMap());
+        GameOperatorManager.Instance?.Run(new MapOpenAdminEvent());
     }
 }
 
@@ -184,7 +185,7 @@ public static class InitMapPatch
 {
     static void Postfix(MapBehaviour __instance)
     {
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnMapInstantiated());
+        GameOperatorManager.Instance?.Run(new MapInstantiateEvent());
     }
 }
 

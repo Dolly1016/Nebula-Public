@@ -1,4 +1,5 @@
 ﻿using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Abilities;
@@ -121,19 +122,19 @@ public class SpectatorsAbility : IGameOperator
     }
 
     //プレイヤーの死亡時、そのプレイヤーを観戦していたら近くのプレイヤーに視点を変える
-    void IGameOperator.OnPlayerDead(Virial.Game.Player dead)
+    void OnPlayerDead(PlayerDieEvent ev)
     {
-        if(currentTarget == dead)
+        if(currentTarget == ev.Player)
         {
-            var nearest = AvailableTargets.OrderBy(p => p.VanillaPlayer.transform.position.Distance(dead.VanillaPlayer.transform.position));
+            var nearest = AvailableTargets.OrderBy(p => p.VanillaPlayer.transform.position.Distance(ev.Player.VanillaPlayer.transform.position));
             currentTarget = nearest.FirstOrDefault();
             OnChangeTarget();
         }
     }
 
-    void IGameOperator.OnPlayerMurdered(Virial.Game.Player dead, Virial.Game.Player murderer)
+    void OnPlayerMurdered(PlayerMurderedEvent ev)
     {
-        if (currentTarget == dead) new StaticAchievementToken("spectator.dead");
-        if (currentTarget == murderer) new StaticAchievementToken("spectator.murderer");
+        if (currentTarget == ev.Dead) new StaticAchievementToken("spectator.dead");
+        if (currentTarget == ev.Murderer) new StaticAchievementToken("spectator.murderer");
     }
 }

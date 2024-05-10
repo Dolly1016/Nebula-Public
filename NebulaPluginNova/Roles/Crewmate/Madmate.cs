@@ -1,5 +1,6 @@
 ﻿using Virial.Assignable;
 using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -83,7 +84,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
         });
     }
     
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer, RuntimeRole
     {
         List<byte> impostors = new();
 
@@ -92,7 +93,9 @@ public class Madmate : ConfigurableStandardRole, HasCitation
         {
         }
 
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.ImpostorWin;
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.ImpostorWin);
+
         public override bool HasCrewmateTasks => false;
 
         void SetMadmateTask()
@@ -136,20 +139,17 @@ public class Madmate : ConfigurableStandardRole, HasCitation
             }
         }
 
-        public override void OnTaskCompleteLocal()
-        {
-            IdentifyImpostors();
-        }
+        public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev) => IdentifyImpostors();
+        
 
         public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
         {
             if (impostors.Contains(player.PlayerId) && player.Role.Role.Category == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
         }
 
-        void IGamePlayerOperator.OnExiled()
+        [Local, OnlyMyPlayer]
+        void OnExiled(PlayerExiledEvent ev)
         {
-            if (!AmOwner) return;
-
             if (NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole))
                 new StaticAchievementToken("madmate.common1");
 
@@ -167,13 +167,14 @@ public class Madmate : ConfigurableStandardRole, HasCitation
 
         }
 
-        void IGamePlayerOperator.OnMurdered(GamePlayer murder)
+        [Local, OnlyMyPlayer]
+        void OnMurdered(PlayerMurderedEvent ev)
         {
-            if(AmOwner && murder.Unbox()?.Role.Role.Category == RoleCategory.ImpostorRole)
+            if(ev.Murderer?.Role.Role.Category == RoleCategory.ImpostorRole)
                 new StaticAchievementToken("madmate.another1");
         }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if(AmOwner && endState.EndCondition == NebulaGameEnd.ImpostorWin && NebulaGameManager.Instance!.AllPlayerInfo().All(p=>p.Role.Role.Category != RoleCategory.ImpostorRole || !p.IsDead))
                 new StaticAchievementToken("madmate.challenge");
@@ -181,12 +182,12 @@ public class Madmate : ConfigurableStandardRole, HasCitation
 
         public override bool HasAnyTasks => MyRole.CanIdentifyImpostorsOption.GetMappedInt() > 0;
 
-        public override bool CanFixComm => MyRole.CanFixCommsOption;
-        public override bool CanFixLight => MyRole.CanFixLightOption;
-        public override bool CanMoveInVent => MyRole.CanMoveInVentsOption;
-        public override bool CanUseVent => MyRole.CanUseVentsOption;
-        public override bool HasImpostorVision => MyRole.HasImpostorVisionOption;
-        public override bool IgnoreBlackout => MyRole.HasImpostorVisionOption;
+        bool RuntimeAssignable.CanFixComm => MyRole.CanFixCommsOption;
+        bool RuntimeAssignable.CanFixLight => MyRole.CanFixLightOption;
+        bool RuntimeRole.CanMoveInVent => MyRole.CanMoveInVentsOption;
+        bool RuntimeRole.CanUseVent => MyRole.CanUseVentsOption;
+        bool RuntimeRole.HasImpostorVision => MyRole.HasImpostorVisionOption;
+        bool RuntimeRole.IgnoreBlackout => MyRole.HasImpostorVisionOption;
     }
 }
 

@@ -98,3 +98,13 @@ public class ComponentHolder : IBinder, IReleasable, ILifespan
         IsDeadObject = true;
     }
 }
+
+public class SimpleReleasable : IReleasable, ILifespan
+{
+    public bool IsDeadObject { get; private set; } = false;
+
+    void IReleasable.Release()
+    {
+        IsDeadObject = true;
+    }
+}

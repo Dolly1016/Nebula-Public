@@ -1,6 +1,7 @@
 ﻿using Nebula.Map;
 using Nebula.Roles.Modifier;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -108,16 +109,13 @@ public class Busker : ConfigurableStandardRole
             }
         }
 
-        private void CheckChallengeAchievement(PlayerModInfo reporter)
+        private void CheckChallengeAchievement(GamePlayer reporter)
         {
-            if (AmOwner)
-            {
-                if (acTokenChallenge != null && !reporter.AmOwner) acTokenChallenge.Value.isCleared |= NebulaGameManager.Instance!.CurrentTime - acTokenChallenge.Value.lastRevive < 2f;
-            }
+            if (acTokenChallenge != null && !reporter.AmOwner) acTokenChallenge.Value.isCleared |= NebulaGameManager.Instance!.CurrentTime - acTokenChallenge.Value.lastRevive < 2f;
         }
 
-        void IGameOperator.OnReported(GamePlayer reporter, GamePlayer reported) => CheckChallengeAchievement(reporter.Unbox());
-        void IGameOperator.OnEmergencyMeeting(GamePlayer reporter) => CheckChallengeAchievement(reporter.Unbox());
+        [Local]
+        void OnReported(MeetingPreStartEvent ev) => CheckChallengeAchievement(ev.Reporter);
         
     }
 }

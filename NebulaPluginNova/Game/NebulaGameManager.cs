@@ -27,25 +27,6 @@ public enum NebulaGameStates
     Finished
 }
 
-public class NebulaEndState {
-    static public NebulaEndState? CurrentEndState => NebulaGameManager.Instance?.EndState;
-
-    public int WinnersMask { get; init; }
-    public byte ConditionId { get; init; }
-    public ulong ExtraWinMask { get; init; }
-    public GameEndReason EndReason { get; init; }
-    public CustomEndCondition? EndCondition => CustomEndCondition.GetEndCondition(ConditionId);
-    public IEnumerable<CustomExtraWin> ExtraWins => CustomExtraWin.AllExtraWins.Where(e => ((ulong)(e.ExtraWinMask) & ExtraWinMask) != 0ul);
-    public bool CheckWin(byte playerId) => ((1 << playerId) & WinnersMask) != 0;
-    public NebulaEndState(byte conditionId, int winnersMask,ulong extraWinMask, GameEndReason reason)
-    {
-        WinnersMask = winnersMask;
-        ConditionId = conditionId;
-        ExtraWinMask = extraWinMask;
-        EndReason = reason;
-    }
-}
-
 public class RuntimeGameAsset
 {
     AsyncOperationHandle<GameObject>? handle = null;
@@ -271,7 +252,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     //各種進行状況
     public NebulaGameStates GameState { get; private set; } = NebulaGameStates.NotStarted;
-    public NebulaEndState? EndState { get; set; } = null;
+    public EndState? EndState { get; set; } = null;
 
     //ゲーム内アセット
     public RuntimeGameAsset RuntimeAsset { get; private init; }
@@ -401,41 +382,44 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             endReason = GameEndReason.Sabotage;
         }
 
-        CustomEndCondition finallyCondition = endCondition!;
-        GameEndReason finallyReason = endReason;
+        
+        var finallyEnd = GameOperatorManager.Instance?.Run(new EndCriteriaMetEvent(endCondition, endReason));
+        CustomEndCondition finallyCondition = (finallyEnd?.OverwrittenGameEnd ?? endCondition).Unbox();
+        GameEndReason finallyReason = (finallyEnd?.OverwrittenEndReason ?? endReason);
 
-        //乗っ取り勝利の判定
-        GameEntityManager.AllEntities.Do(e => {
-            var tuple = e.OnCheckGameEnd(endCondition, endReason);
-            if(tuple != null && tuple.Value.end.Priority >= finallyCondition.Priority)
-            {
-                finallyCondition = tuple.Value.end.Unbox();
-                finallyReason = tuple.Value.reason;
-            }
-        });
+        //ここで終了理由が確定する
 
-        endCondition = finallyCondition;
-        endReason = finallyReason;
+        //終了理由に沿って勝利判定をする
 
-        int extraMask = 0;
-        ulong extraWinMask = 0;
+        int winnersRawMask = 0;
+        int blockedRawMask = 0;
 
-        //勝利判定
-        foreach (var p in allModPlayers) {
-            (bool canWin, bool blockWin) val = p.Value.Unbox().AllAssigned().Aggregate((false, false), (val, a) => (val.Item1 | a.Unbox().CheckWins(endCondition, ref extraWinMask), val.Item2 | a.Unbox().BlockWins(endCondition)));
-            if (val.canWin && !val.blockWin) winnersMask |= (1 << p.Value.PlayerId);
-        }
+        //勝利者を洗い出す
+        foreach (var p in allModPlayers.Values) winnersRawMask |= GameEntityManager.Run(new PlayerCheckWinEvent(p, endCondition)).IsWin ? 1 << p.PlayerId : 0;
+
+        //勝利のブロックチェック
+        FunctionalMask<GamePlayer> winnerMask = new(p => (winnersRawMask & (1 << (p?.PlayerId ?? 24))) != 0);
+        foreach (var p in allModPlayers.Values) blockedRawMask |= GameEntityManager.Run(new PlayerBlockWinEvent(p, winnerMask, endCondition)).IsWin ? 1 << p.PlayerId : 0;
+
+        //ブロックチェックの結果を統合
+        winnersRawMask &= ~blockedRawMask;
 
         //追加勝利の判定
-        for(int phase = 0; phase < (int)ExtraWinCheckPhase.PhaseMax; phase++)
+        EditableBitMask<Virial.Game.ExtraWin> extraWinMask = new HashSetMask<Virial.Game.ExtraWin>();
+        for (int phase = 0; phase < (int)ExtraWinCheckPhase.PhaseMax; phase++)
         {
-            foreach (var p in allModPlayers) if (p.Value.Unbox().AllAssigned().Any(a => a.Unbox().CheckExtraWins(endCondition, (ExtraWinCheckPhase)phase, winnersMask, ref extraWinMask))) extraMask |= (1 << p.Value.PlayerId);
-            winnersMask |= extraMask;
+            int extraMask = 0;
+            foreach (var p in allModPlayers.Values) extraMask |= GameEntityManager.Run(new PlayerCheckExtraWinEvent(p, winnerMask, extraWinMask, endCondition, (ExtraWinCheckPhase)phase)).IsExtraWin ? 1 << p.PlayerId : 0;
+            
+            //追加勝利の結果を統合
+            winnersRawMask |= extraMask;
         }
-        
-        
 
-        NebulaGameEnd.RpcSendGameEnd(endCondition!, winnersMask, extraWinMask,endReason);
+        //追加勝利の理由を拾い出す
+        ulong extraWinRawMask = 0;
+        foreach (var exWin in CustomExtraWin.AllExtraWins) if (extraWinMask.Test(exWin)) extraWinRawMask |= exWin.ExtraWinMask;
+
+        NebulaGameEnd.RpcSendGameEnd(endCondition!, winnersMask, extraWinRawMask, endReason);
     }
 
     public void OnTaskUpdated(GamePlayer player)
@@ -500,7 +484,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         var localModInfo = PlayerControl.LocalPlayer.GetModInfo()?.Unbox();
         if (localModInfo != null)
         {
-            localModInfo.AssignableAction(r => r.Unbox().LocalHudUpdate());
 
             //ベントボタン
             var ventTimer = PlayerControl.LocalPlayer.inVent ? localModInfo.Role?.VentDuration : localModInfo.Role?.VentCoolDown;
@@ -692,10 +675,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public IEnumerable<GamePlayer> AllPlayerInfo() => allModPlayers.Values;
 
-    //書き換えのための措置
-    public void AllEntitiesAction(Action<IGameOperator> action) => GameEntityManager.AllEntities.Do(action);
-    public void AllPlayerEntitiesAction(Action<IGamePlayerOperator> action) => GameEntityManager.AllEntities.Do(action);
-
 
     public void AllAssignableAction(Action<RuntimeAssignable> action)
     {
@@ -746,17 +725,12 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         {
             NebulaGameManager.Instance?.CheckGameState();
             NebulaGameManager.Instance?.AllAssignableAction(r=> {
-                r.Unbox().OnActivated(); (r as IGameOperator)?.Register(r);
+                r.OnActivated(); (r as IGameOperator)?.Register(r);
                 if (r is RuntimeRole role)
-                {
-                    GameOperatorManager.Instance?.GetPlayerEntities(r.MyPlayer).Do(e => e.OnSetRole(role));
-                    GameOperatorManager.Instance?.AllEntities.Do(e => e.OnSetRole(r.MyPlayer, role));
-                }
+                    GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(r.MyPlayer, role));
                 if (r is RuntimeModifier modifier)
-                {
-                    GameOperatorManager.Instance?.GetPlayerEntities(r.MyPlayer).Do(e => e.OnAddModifier(modifier));
-                    GameOperatorManager.Instance?.AllEntities.Do(e => e.OnAddModifier(r.MyPlayer, modifier));
-                }
+                    GameOperatorManager.Instance?.Run(new PlayerModifierSetEvent(r.MyPlayer, modifier));
+                
             });
         }
 

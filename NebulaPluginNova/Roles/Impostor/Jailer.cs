@@ -1,5 +1,7 @@
 ﻿using Nebula.Roles.Abilities;
 using Virial.Assignable;
+using Virial.Events.Game.Minimap;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -32,7 +34,7 @@ public class Jailer : ConfigurableStandardRole
         InheritAbilityOnDyingOption = new NebulaConfiguration(RoleConfig, "inheritAbilityOnDying", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -42,41 +44,32 @@ public class Jailer : ConfigurableStandardRole
         AchievementToken<bool>? acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
 
-        void IGameOperator.OnOpenSabotageMap()
+        [Local]
+        void OnOpenSabotageMap(MapOpenSabotageEvent ev)
         {
-            if (AmOwner)
-            {
-                acTokenCommon ??= new("jailer.common1", false, (val, _) => val);
-            }
+            acTokenCommon ??= new("jailer.common1", false, (val, _) => val);
         }
 
-        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
+        [OnlyMyPlayer, Local]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            if (AmOwner)
+            if (acTokenCommon != null) acTokenCommon.Value = true;
+
+            if (acTokenChallenge != null)
             {
-                if (acTokenCommon != null) acTokenCommon.Value = true;
-
-                if (acTokenChallenge != null)
+                var pos = PlayerControl.LocalPlayer.GetTruePosition();
+                Collider2D? room = null;
+                foreach (var entry in ShipStatus.Instance.FastRooms)
                 {
-                    var pos = PlayerControl.LocalPlayer.GetTruePosition();
-                    Collider2D? room = null;
-                    foreach (var entry in ShipStatus.Instance.FastRooms)
+                    if (entry.value.roomArea.OverlapPoint(pos))
                     {
-                        if (entry.value.roomArea.OverlapPoint(pos))
-                        {
-                            room = entry.value.roomArea;
-                            break;
-                        }
-                    }
-
-                    if (room != null)
-                    {
-                        if (Helpers.AllDeadBodies().Any(d => d.ParentId != target.PlayerId && room.OverlapPoint(d.TruePosition)))
-                        {
-                            acTokenChallenge!.Value++;
-                        }
+                        room = entry.value.roomArea;
+                        break;
                     }
                 }
+
+                if (room != null && Helpers.AllDeadBodies().Any(d => d.ParentId != ev.Dead.PlayerId && room.OverlapPoint(d.TruePosition)))
+                    acTokenChallenge!.Value++;
             }
         }
 
@@ -87,21 +80,22 @@ public class Jailer : ConfigurableStandardRole
             if (AmOwner)
             {
                 //JailerAbilityを獲得していなければ登録
-                if ((GameOperatorManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
+                if ((GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
                 {
                     new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
                 }
             }
         }
 
-        void IGamePlayerOperator.OnDead()
+        [OnlyMyPlayer]
+        void InheritAbilityOnDead(PlayerDieEvent ev)
         {
             var localPlayer = Virial.NebulaAPI.CurrentGame?.LocalPlayer;
 
             if (localPlayer == null) return;
 
             //継承ジェイラーの対象で、JailerAbilityを獲得していなければ登録
-            if (MyRole.InheritAbilityOnDyingOption && !localPlayer.IsDead && localPlayer.IsImpostor && (GameOperatorManager.Instance?.AllEntities.All(e => e is not JailerAbility) ?? false))
+            if (MyRole.InheritAbilityOnDyingOption && !localPlayer.IsDead && localPlayer.IsImpostor && (GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
             {
                 new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
             }

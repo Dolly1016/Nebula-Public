@@ -1,5 +1,6 @@
 ﻿using Nebula.Behaviour;
 using Virial.Assignable;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -56,7 +57,7 @@ public class Destroyer : ConfigurableStandardRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         private ModAbilityButton? destroyButton = null;
         public override AbstractRole Role => MyRole;
@@ -322,9 +323,10 @@ public class Destroyer : ConfigurableStandardRole
             }
         }
 
-        void IGameOperator.OnReported(Virial.Game.Player reporter, Virial.Game.Player reported)
+        [Local]
+        void OnReported(ReportDeadBodyEvent ev)
         {
-            if (AmOwner && lastKilling != null && reported == lastKilling) new StaticAchievementToken("destroyer.another1");
+            if (AmOwner && lastKilling != null && ev.Reported == lastKilling) new StaticAchievementToken("destroyer.another1");
         }
 
         static public RemoteProcess<(GamePlayer player, GamePlayer target, Vector2 targetPosition, bool moveToLeft)> RpcCoDestroyKill = new(

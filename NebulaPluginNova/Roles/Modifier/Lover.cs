@@ -2,6 +2,7 @@
 using Nebula.Roles.Neutral;
 using Nebula.VoiceChat;
 using Virial.Assignable;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
@@ -70,7 +71,7 @@ public class Lover : ConfigurableModifier, HasCitation
         AvengerModeOption = new(RoleConfig, "avengerMode", null, false, false);
     }
 
-    public class Instance : ModifierInstance, IGamePlayerOperator
+    public class Instance : ModifierInstance, IBindPlayer, RuntimeModifier
     {
         public override AbstractModifier Role => MyRole;
 
@@ -86,7 +87,9 @@ public class Lover : ConfigurableModifier, HasCitation
         {
             this.loversId = loversId;
         }
-        public override bool CheckWins(CustomEndCondition endCondition, ref ulong _) => endCondition == NebulaGameEnd.LoversWin && !MyPlayer.IsDead;
+
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.LoversWin && !MyPlayer.IsDead);
 
         public override void DecoratePlayerName(ref string text, ref Color color)
         {
@@ -109,7 +112,7 @@ public class Lover : ConfigurableModifier, HasCitation
             if (canSee) text += " ♥".Color(loverColor);
         }
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if (AmOwner)
             {
@@ -122,38 +125,41 @@ public class Lover : ConfigurableModifier, HasCitation
                 }
             }
         }
-        void IGamePlayerOperator.OnDead()
+
+        [OnlyMyPlayer, Local]
+        void OnDead(PlayerDieEvent ev)
         {
-            if (AmOwner && MyPlayer.PlayerState == PlayerState.Suicide) new StaticAchievementToken("lover.another1");
+            if (MyPlayer.PlayerState == PlayerState.Suicide) new StaticAchievementToken("lover.another1");
         }
 
-        void IGamePlayerOperator.OnMurdered(GamePlayer murder)
+        [OnlyMyPlayer, Local]
+        void OnMurdered(PlayerMurderedEvent ev)
         {
-            if(AmOwner && murder.PlayerId != MyPlayer.PlayerId)
+            if(!ev.Murderer.AmOwner)
             {
                 var myLover = MyLover;
                 if (myLover?.IsDead ?? true) return;
 
                 if (MyRole.AvengerModeOption)
-                    myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [murder.PlayerId]).InvokeSingle();
+                    myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [ev.Murderer.PlayerId]).InvokeSingle();
                 else
                     myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, true);
             }
         }
 
-        void IGamePlayerOperator.OnExtraExiled()
+        [OnlyMyPlayer, Local]
+        void OnExtraExiled(PlayerExtraExiledEvent ev)
         {
-            if (AmOwner && !(MyLover?.IsDead ?? false))
+            if (!(MyLover?.IsDead ?? false))
             {
-                MyLover?.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
-
-                if (Helpers.CurrentMonth == 12) new StaticAchievementToken("christmas");
+                MyLover?.VanillaPlayer.ModMeetingKill(MyLover.VanillaPlayer, false, PlayerState.Suicide, PlayerState.Suicide, false);
             }
         }
 
-        void IGamePlayerOperator.OnExiled()
+        [OnlyMyPlayer, Local]
+        void OnExiled(PlayerExtraExiledEvent ev)
         {
-            if (AmOwner && !(MyLover?.IsDead ?? false))
+            if (!(MyLover?.IsDead ?? false))
             {
                 MyLover?.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
 
@@ -161,7 +167,7 @@ public class Lover : ConfigurableModifier, HasCitation
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             NebulaGameManager.Instance?.CriteriaManager.AddCriteria(NebulaEndCriteria.LoversCriteria);
 
@@ -172,19 +178,20 @@ public class Lover : ConfigurableModifier, HasCitation
             }
         }
 
-        public override bool CheckExtraWins(CustomEndCondition endCondition, ExtraWinCheckPhase phase, int winnersMask, ref ulong extraWinMask)
+        [OnlyMyPlayer]
+        void CheckExtraWins(PlayerCheckExtraWinEvent ev)
         {
-            if (phase != ExtraWinCheckPhase.LoversPhase) return false;
-
-            if (!MyRole.AllowExtraWinOption) return false;
+            if (ev.Phase != ExtraWinCheckPhase.LoversPhase) return;
+            if (!MyRole.AllowExtraWinOption) return;
 
             var myLover = MyLover;
-            if (myLover == null) return false;
-            if (myLover.IsDead && myLover.Role.Role != Jester.MyRole) return false;
-            if ((myLover.PlayerId & winnersMask) == 0) return false;
+            if (myLover == null) return;
+            if (myLover.IsDead && myLover.Role.Role != Jester.MyRole) return;
+            if (!ev.WinnersMask.Test(myLover)) return;
+            if (ev.WinnersMask.Test(MyPlayer)) return;
 
-            extraWinMask |= NebulaGameEnd.ExtraLoversWin.ExtraWinMask;
-            return true;
+            ev.ExtraWinMask.Add(NebulaGameEnd.ExtraLoversWin);
+            ev.IsExtraWin = true;
         }
 
         public GamePlayer? MyLover => NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault(p => p.PlayerId != MyPlayer.PlayerId && p.Modifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId));

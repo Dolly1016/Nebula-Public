@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Virial.Events.Game.Minimap;
 using Virial.Game;
 
 namespace Nebula.Roles.Abilities;
@@ -16,7 +17,7 @@ public class JailerAbility : IGameOperator
         if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
     }
 
-    void IGameOperator.OnOpenNormalMap()
+    void OnOpenNormalMap(MapOpenNormalEvent ev)
     {
         MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
         MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false);
@@ -26,7 +27,7 @@ public class JailerAbility : IGameOperator
         MapBehaviour.Instance.taskOverlay.Hide();
     }
 
-    void IGameOperator.OnOpenSabotageMap()
+    void OnOpenSabotageMap(MapOpenSabotageEvent ev)
     {
         MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
         MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false, Palette.ImpostorRed);
@@ -44,7 +45,7 @@ public class JailerAbility : IGameOperator
         if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
     }
 
-    void IGameOperator.OnMapInstantiated()
+    void OnMapInstantiated(MapInstantiateEvent ev)
     {
         Transform roomNames;
         if (AmongUsUtil.CurrentMapId == 0) roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames (1)");

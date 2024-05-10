@@ -1,6 +1,7 @@
 ﻿using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -151,7 +152,7 @@ public class Raider : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Impostor.Instance, IGamePlayerOperator
+    public class Instance : Impostor.Instance, IBindPlayer
     {
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
@@ -220,18 +221,19 @@ public class Raider : ConfigurableStandardRole
             equipButton?.SetLabel("equip");
         }
 
-        void IGamePlayerOperator.OnDead()
+        [Local]
+        [OnlyMyPlayer]
+        void OnDead(PlayerDieEvent ev)
         {
-            if (AmOwner && MyAxe != null) UnequipAxe();
-
+            if (MyAxe != null) UnequipAxe();
             if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
-        void IGamePlayerOperator.OnKillPlayer(GamePlayer target)
+        [OnlyMyPlayer]
+        [Local]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            if(AmOwner && target.PlayerState == PlayerState.Beaten)
-                acTokenCommon ??= new("raider.common1");
-            
+            if(ev.Dead.PlayerState == PlayerState.Beaten) acTokenCommon ??= new("raider.common1");
         }
 
         void OnMeetingEnd(MeetingEndEvent ev)

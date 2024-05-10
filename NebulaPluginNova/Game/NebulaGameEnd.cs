@@ -1,6 +1,7 @@
 ﻿using Nebula.Behaviour;
 using Virial.Game;
 using Nebula.Roles.Modifier;
+using Virial;
 
 namespace Nebula.Game;
 
@@ -27,7 +28,7 @@ public class CustomEndCondition : Virial.Game.GameEnd
     }
 }
 
-public class CustomExtraWin
+public class CustomExtraWin : ExtraWin
 {
     static private HashSet<CustomExtraWin> allExtraWin = new();
     static public CustomExtraWin? GetEndCondition(byte id) => allExtraWin.FirstOrDefault(end => end.Id == id);
@@ -85,7 +86,12 @@ public class NebulaGameEnd
        {
            if (NebulaGameManager.Instance != null)
            {
-               NebulaGameManager.Instance.EndState ??= new NebulaEndState(message.conditionId,message.winnersMask,message.extraWinMask, message.endReason);
+               var end = CustomEndCondition.GetEndCondition(message.conditionId) ?? NebulaGameEnd.NoGame;
+               var winners = BitMasks.AsPlayer(message.winnersMask);
+               EditableBitMask<ExtraWin> extraWin = new HashSetMask<ExtraWin>();
+               foreach(var exW in CustomExtraWin.AllExtraWins) if((exW.ExtraWinMask & message.extraWinMask) != 0) extraWin.Add(exW);
+
+               NebulaGameManager.Instance.EndState ??= new EndState(winners, end, message.endReason, extraWin);
                NebulaGameManager.Instance.OnGameEnd();
                NebulaGameManager.Instance.AllAssignableAction(a => a.Unbox().OnGameEnd(NebulaGameManager.Instance.EndState));
                NebulaGameManager.Instance.ToGameEnd();

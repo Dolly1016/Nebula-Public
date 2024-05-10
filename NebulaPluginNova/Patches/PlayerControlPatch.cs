@@ -1,6 +1,7 @@
 ﻿using AmongUs.Data.Player;
 using Nebula.Behaviour;
 using PowerTools;
+using Virial.Events.Player;
 
 namespace Nebula.Patches;
 
@@ -85,10 +86,8 @@ public static class PlayerUpdatePatch
 
         NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().Update();
 
-        if (__instance.AmOwner)
-        {
-            NebulaGameManager.Instance.OnFixedUpdate();
-        }
+        if (__instance.AmOwner) NebulaGameManager.Instance.OnFixedUpdate();
+        
 
         if(__instance.cosmetics.transform.localScale.z < 100f)
         {
@@ -119,7 +118,7 @@ public static class PlayerAddSystemTaskPatch
         if (!__instance.AmOwner) return;
 
         var task = __instance.myTasks[__instance.myTasks.Count - 1];
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnAddSystemTask(task));
+        GameOperatorManager.Instance?.Run(new PlayerSabotageTaskAddLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, task));
     }
 }
 
@@ -128,7 +127,8 @@ public static class PlayerRemoveTaskPatch
 {
     static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerTask task)
     {
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnRemoveTask(task));
+        if(__instance.AmOwner)
+            GameOperatorManager.Instance?.Run(new PlayerTaskRemoveLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, task));
     }
 }
 
@@ -140,7 +140,7 @@ public static class PlayerCompleteTaskPatch
         if (!__instance.AmOwner) return;
 
         __instance.GetModInfo()?.Tasks.Unbox().OnCompleteTask();
-        __instance.GetModInfo()?.AllAssigned().Do((r)=>r.Unbox().OnTaskCompleteLocal());
+        GameOperatorManager.Instance?.Run(new PlayerTaskCompleteLocalEvent(__instance.GetModInfo()!));
     }
 }
 

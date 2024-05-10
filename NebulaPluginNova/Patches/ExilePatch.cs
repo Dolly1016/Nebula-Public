@@ -2,6 +2,7 @@
 using Virial;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Helpers;
 
 namespace Nebula.Patches;
@@ -52,21 +53,8 @@ public static class NebulaExileWrapUp
                         info.Unbox().MyState = PlayerState.Exiled;
                         if (info.AmOwner && NebulaAchievementManager.GetRecord("death." + info.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
 
-
                         //Entityイベント発火
-                        GameOperatorManager.Instance?.GetPlayerEntities(info.PlayerId).Do(e =>
-                        {
-                            e.OnExiled();
-                            e.OnDead();
-                        });
-
-
-                        //Entityイベント発火
-                        GameOperatorManager.Instance?.AllEntities.Do(e =>
-                        {
-                            e.OnPlayerExiled(info);
-                            e.OnPlayerDead(info);
-                        });
+                        GameOperatorManager.Instance?.Run(new PlayerExiledEvent(info), true);
                     }
                 }
 

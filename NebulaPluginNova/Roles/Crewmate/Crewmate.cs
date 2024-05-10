@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Events.Player;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -23,6 +24,7 @@ public class Crewmate : ConfigurableStandardRole
         {
         }
 
-        public override bool CheckWins(CustomEndCondition endCondition,ref ulong _) => endCondition == NebulaGameEnd.CrewmateWin;
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.CrewmateWin);
     }
 }

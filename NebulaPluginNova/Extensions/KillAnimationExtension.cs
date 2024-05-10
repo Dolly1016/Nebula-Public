@@ -1,4 +1,6 @@
-﻿namespace Nebula.Extensions;
+﻿using Virial.Events.Game;
+
+namespace Nebula.Extensions;
 
 public static class KillAnimationExtension
 {
@@ -33,7 +35,7 @@ public static class KillAnimationExtension
             }
         }
 
-        GameOperatorManager.Instance?.AllEntities.Do(e => e.OnDeadBodyGenerated(deadBody));
+        GameOperatorManager.Instance?.Run(new DeadBodyInstantiateEvent(target.GetModInfo(), deadBody));
         target.GetModInfo()!.Unbox().relatedDeadBodyCache = deadBody;
 
         target.Die(DeathReason.Kill, false);

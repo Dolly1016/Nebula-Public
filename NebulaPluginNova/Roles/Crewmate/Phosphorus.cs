@@ -53,7 +53,7 @@ public class Phosphorus : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? lanternButton = null;

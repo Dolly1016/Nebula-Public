@@ -1,19 +1,8 @@
-﻿namespace Nebula.Utilities;
+﻿using UnityEngine.UI;
+using Virial;
 
-public interface BitMask<T>
-{
-    bool Test(T? value);
+namespace Nebula.Utilities;
 
-    bool TestAll(params T?[] values);
-
-    bool TestAll(IEnumerable<T?> values);
-}
-
-public interface EditableBitMask<T> : BitMask<T>
-{
-    EditableBitMask<T> Add(T value);
-    EditableBitMask<T> Clear();
-}
 
 file class BitMask32<T> : EditableBitMask<T>
 {
@@ -53,6 +42,7 @@ file class BitMask32<T> : EditableBitMask<T>
     }
 }
 
+
 public class FunctionalMask<T> : BitMask<T>
 {
     Predicate<T?> predicate;
@@ -75,6 +65,41 @@ public class FunctionalMask<T> : BitMask<T>
     bool BitMask<T>.TestAll(IEnumerable<T?> values)
     {
         return values.All(p => predicate(p));
+    }
+}
+
+public class HashSetMask<T> : EditableBitMask<T>
+{
+    HashSet<T> set = new();
+
+    public HashSetMask(){}
+
+    bool BitMask<T>.Test(T? value)
+    {
+        return set.Contains(value!);
+    }
+
+    bool BitMask<T>.TestAll(params T?[] values)
+    {
+        return values.All(p => set.Contains(p!));
+    }
+
+    bool BitMask<T>.TestAll(IEnumerable<T?> values)
+    {
+        return values.All(p => set.Contains(p!));
+    }
+
+    EditableBitMask<T> EditableBitMask<T>.Add(T? value)
+    {
+        if (value == null) return this;
+        set.Add(value);
+        return this;
+    }
+
+    EditableBitMask<T> EditableBitMask<T>.Clear()
+    {
+        set.Clear();
+        return this;
     }
 }
 

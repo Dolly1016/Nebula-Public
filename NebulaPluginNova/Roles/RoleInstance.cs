@@ -9,7 +9,6 @@ public abstract class RoleInstance : AssignableInstance, IRuntimePropertyHolder,
     public override IAssignableBase AssignableBase => Role;
     public abstract AbstractRole Role { get; }
     DefinedRole RuntimeRole.Role => Role;
-    Virial.Game.Player RuntimeAssignable.MyPlayer => MyPlayer;
     public RoleInstance(GamePlayer player):base(player)
     {
     }

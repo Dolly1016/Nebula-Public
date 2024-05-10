@@ -1,5 +1,6 @@
 ﻿using Nebula.Roles.Impostor;
 using Virial.Assignable;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
@@ -48,7 +49,7 @@ public class Provocateur : ConfigurableStandardRole
         EmbroilDurationOption = new(RoleConfig, "embroilDuration", null, 1f, 20f, 1f, 5f, 5f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IGamePlayerOperator
+    public class Instance : Crewmate.Instance, IBindPlayer
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player){}
@@ -78,23 +79,24 @@ public class Provocateur : ConfigurableStandardRole
             }
         }
 
-        void IGamePlayerOperator.OnMurdered(GamePlayer murderer)
+        [Local, OnlyMyPlayer]
+        void OnMurdered(PlayerMurderedEvent ev)
         {
-            if (murderer.PlayerId == MyPlayer.PlayerId) return;
+            if (ev.Murderer.AmOwner) return;
 
-            if (AmOwner && embroilButton.EffectActive && !murderer.VanillaPlayer.Data.IsDead)
+            if (embroilButton.EffectActive && !ev.Murderer.IsDead)
             {
-                MyPlayer.MurderPlayer(murderer,PlayerState.Embroiled,EventDetail.Embroil, false);
+                MyPlayer.MurderPlayer(ev.Murderer,PlayerState.Embroiled,EventDetail.Embroil, false);
                 new StaticAchievementToken("provocateur.common2");
 
-                var murdererRole = murderer.Unbox()?.Role.Role;
-                if (murdererRole is Sniper or Raider && murderer.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) > 10f) new StaticAchievementToken("provocateur.challenge");
+                var murdererRole = ev.Murderer.Role.Role;
+                if (murdererRole is Sniper or Raider && ev.Murderer.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) > 10f) new StaticAchievementToken("provocateur.challenge");
             }
         }
 
-        void IGamePlayerOperator.OnExiled()
+        [Local, OnlyMyPlayer]
+        void OnExiled(PlayerExiledEvent ev)
         {
-            if (!AmOwner) return;
 
             ExtraExileRoleSystem.MarkExtraVictim(MyPlayer);
             new StaticAchievementToken("provocateur.common1");

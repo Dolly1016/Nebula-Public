@@ -1,4 +1,5 @@
 ﻿using Nebula.Roles.Crewmate;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
@@ -32,7 +33,7 @@ public class Obsessional : ConfigurableStandardModifier
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
-    public class Instance : ModifierInstance, IGamePlayerOperator
+    public class Instance : ModifierInstance, IBindPlayer
     {
         public override AbstractModifier Role => MyRole;
 
@@ -84,52 +85,47 @@ public class Obsessional : ConfigurableStandardModifier
             }
         }
 
-        void IGameOperator.OnPlayerExiled(GamePlayer exiled)
+        [Local]
+        void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (AmOwner)
-            {
-                if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
+            if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
 
-                if (exiled.PlayerId == (obsession?.PlayerId ?? 255) && !MyPlayer.IsDead)
-                {
-                    MyPlayer.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
-                    new StaticAchievementToken("obsessional.another1");
-                }
+            if (ev.Player.PlayerId == (obsession?.PlayerId ?? 255) && !MyPlayer.IsDead)
+            {
+                MyPlayer.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+                new StaticAchievementToken("obsessional.another1");
             }
         }
 
-        void IGameOperator.OnPlayerDead(GamePlayer dead)
+        [Local]
+        void OnPlayerDead(PlayerDieEvent ev)
         {
-            if (AmOwner)
-            {
-                if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
+            if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
 
-                if (dead.PlayerId == (obsession?.PlayerId ?? 255) && !MeetingHudExtension.MarkedAsExtraVictims(MyPlayer.PlayerId) && !MyPlayer.IsDead)
-                {
-                    MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill);
-                    new StaticAchievementToken("obsessional.another1");
-                }
+            if (ev.Player.PlayerId == (obsession?.PlayerId ?? 255) && !MeetingHudExtension.MarkedAsExtraVictims(MyPlayer.PlayerId) && !MyPlayer.IsDead)
+            {
+                MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill);
+                new StaticAchievementToken("obsessional.another1");
             }
         }
 
         //本来の勝利条件をブロックする
-        public override bool BlockWins(CustomEndCondition endCondition) => true;
+        [OnlyMyPlayer]
+        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= true;
 
-        //追加勝利
-        public override bool CheckExtraWins(CustomEndCondition endCondition, ExtraWinCheckPhase phase, int winnersMask, ref ulong extraWinMask)
+        [OnlyMyPlayer]
+        void CheckExtraWins(PlayerCheckExtraWinEvent ev)
         {
-            if (phase != ExtraWinCheckPhase.ObsessionPhase) return false;
+            if (ev.Phase != ExtraWinCheckPhase.ObsessionPhase) return;
 
-            if (!MyRole.CanWinEvenIfObsessionalDieOption && MyPlayer.IsDead) return false;
-            if (!MyRole.CanWinEvenIfObsessionalTargetDieOption && (obsession?.IsDead ?? true)) return false;
+            if (!MyRole.CanWinEvenIfObsessionalDieOption && MyPlayer.IsDead) return;
+            if (!MyRole.CanWinEvenIfObsessionalTargetDieOption && (obsession?.IsDead ?? true)) return;
 
-            if (obsession != null && ((1 << obsession.PlayerId) & winnersMask) != 0)
+            if (obsession != null && ev.WinnersMask.Test(obsession))
             {
-                extraWinMask |= NebulaGameEnd.ExtraObsessionalWin.ExtraWinMask;
-                return true;
+                ev.SetWin(true);
+                ev.ExtraWinMask.Add(NebulaGameEnd.ExtraObsessionalWin);
             }
-
-            return false;
         }
 
         public override string? IntroText => Language.Translate("role.obsessional.blurb").Replace("%NAME%", (obsession?.Name ?? "ERROR").Color(MyRole.RoleColor));
@@ -141,7 +137,7 @@ public class Obsessional : ConfigurableStandardModifier
                 instance.obsession = NebulaGameManager.Instance.GetPlayer(message.targetId);
         });
 
-        public override void OnGameEnd(NebulaEndState endState)
+        public override void OnGameEnd(EndState endState)
         {
             if (AmOwner)
             {

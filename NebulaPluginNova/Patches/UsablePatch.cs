@@ -154,8 +154,8 @@ public static class ConsoleCanUsePatch
         if (ShipStatus.Instance.SpecialTasks.Any((task) => __instance.TaskTypes.Contains(task.TaskType)))
         {
             if (
-                (__instance.TaskTypes.Contains(TaskTypes.FixLights) && info.AllAssigned().Any(assignable => !assignable.Unbox().CanFixLight)) ||
-                (__instance.TaskTypes.Contains(TaskTypes.FixComms) && info.AllAssigned().Any(assignable => !assignable.Unbox().CanFixComm))
+                (__instance.TaskTypes.Contains(TaskTypes.FixLights) && info.AllAssigned().Any(assignable => !assignable.CanFixLight)) ||
+                (__instance.TaskTypes.Contains(TaskTypes.FixComms) && info.AllAssigned().Any(assignable => !assignable.CanFixComm))
                 )
             {
                 __result = float.MaxValue;
@@ -184,7 +184,7 @@ public static class SystemConsoleCanUsePatch
         if (info == null) return;
 
         //緊急会議コンソールの使用をブロック
-        if(__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.Unbox().CanCallEmergencyMeeting))
+        if(__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting))
         {
             canUse = false;
             couldUse = false;
