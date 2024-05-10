@@ -107,18 +107,16 @@ public class Agent : ConfigurableStandardRole
             }
         }
 
-        public override void OnGameEnd(EndState endState)
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
         {
-            if (AmOwner)
+            if (ev.EndState.Winners.Test(MyPlayer) && MyPlayer.Tasks.TotalTasks > 0 && MyRole.NumOfExemptedTasksOption <= 3)
             {
-                if (endState.CheckWin(MyPlayer.PlayerId) && MyPlayer.Tasks.TotalTasks > 0 && MyRole.NumOfExemptedTasksOption <= 3)
-                {
-                    if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota > 0 && AmongUsUtil.NumOfAllTasks >= 8)
-                        new StaticAchievementToken("agent.common1");
+                if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota > 0 && AmongUsUtil.NumOfAllTasks >= 8)
+                    new StaticAchievementToken("agent.common1");
 
-                    if(MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota >= 5)
-                        new StaticAchievementToken("agent.challenge");
-                }
+                if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota >= 5)
+                    new StaticAchievementToken("agent.challenge");
             }
         }
     }

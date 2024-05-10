@@ -44,8 +44,6 @@ public abstract class AssignableInstance : ComponentHolder, RuntimeAssignable, V
     {
         this.MyPlayer = player;
     }
-
-    public virtual void OnGameEnd(EndState endState) { }
     
     
     public virtual void OnSetTaskLocal(ref List<GameData.TaskInfo> tasks, out int extraQuota) { extraQuota = 0; }

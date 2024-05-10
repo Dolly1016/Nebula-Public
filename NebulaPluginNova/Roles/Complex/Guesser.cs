@@ -1,6 +1,7 @@
 ﻿using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -199,7 +200,7 @@ public class Guesser : ConfigurableStandardRole, HasCitation
         GenerateCommonEditor(RoleConfig);
     }
 
-    public class NiceInstance : Crewmate.Crewmate.Instance, IBindPlayer
+    public class NiceInstance : Crewmate.Crewmate.Instance, RuntimeRole, IBindPlayer
     {
         public override AbstractRole Role => MyNiceRole;
         private int leftGuess = NumOfGuessOption;
@@ -216,15 +217,14 @@ public class Guesser : ConfigurableStandardRole, HasCitation
         void OnDead(PlayerDieEvent ev) => GuesserSystem.OnDead();
 
 
-        public override void OnGameEnd(EndState endState)
-        {
-            if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
-        }
+        [Local]
+        void OnGameEnd(EndState endState) => GuesserSystem.OnGameEnd(MyPlayer);
+        
 
-        public override bool CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
+        bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, IBindPlayer
+    public class EvilInstance : Impostor.Impostor.Instance, RuntimeRole, IBindPlayer
     {
         public override AbstractRole Role => MyEvilRole;
         private int leftGuess = NumOfGuessOption;
@@ -241,12 +241,10 @@ public class Guesser : ConfigurableStandardRole, HasCitation
         void OnDead(PlayerDieEvent ev) => GuesserSystem.OnDead();
 
 
-        public override void OnGameEnd(EndState endState)
-        {
-            if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
-        }
+        [Local]
+        void OnGameEnd(EndState endState) => GuesserSystem.OnGameEnd(MyPlayer);
 
-        public override bool CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
+        bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
     }
 }
 
@@ -270,7 +268,7 @@ public class GuesserModifier : ConfigurableStandardModifier, HasCitation
         Guesser.GenerateCommonEditor(RoleConfig);
     }
 
-    public class Instance : ModifierInstance, IBindPlayer
+    public class Instance : ModifierInstance, IBindPlayer, RuntimeModifier
     {
         public override AbstractModifier Role => MyRole;
         public int LeftGuess = Guesser.NumOfGuessOption;
@@ -295,13 +293,11 @@ public class GuesserModifier : ConfigurableStandardModifier, HasCitation
             if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " ⊕".Color(MyRole.RoleColor);
         }
 
-        public override void OnGameEnd(EndState endState)
-        {
-            if (AmOwner) GuesserSystem.OnGameEnd(MyPlayer);
-        }
+        [Local]
+        void OnGameEnd(GameEndEvent ev) => GuesserSystem.OnGameEnd(MyPlayer);
 
         public override string? IntroText => Language.Translate("role.guesser.blurb");
 
-        public override bool CanCallEmergencyMeeting => Guesser.CanCallEmergencyMeetingOption;
+        bool RuntimeAssignable.CanCallEmergencyMeeting => Guesser.CanCallEmergencyMeetingOption;
     }
 }

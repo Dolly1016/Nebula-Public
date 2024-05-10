@@ -2,6 +2,7 @@
 using Nebula.Roles.Neutral;
 using Nebula.VoiceChat;
 using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -112,17 +113,15 @@ public class Lover : ConfigurableModifier, HasCitation
             if (canSee) text += " ♥".Color(loverColor);
         }
 
-        public override void OnGameEnd(EndState endState)
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
         {
-            if (AmOwner)
+            if (ev.EndState.EndCondition == NebulaGameEnd.LoversWin)
             {
-                if (endState.EndCondition == NebulaGameEnd.LoversWin)
-                {
-                    if (!MyPlayer.IsDead) new StaticAchievementToken("lover.common1");
+                if (!MyPlayer.IsDead) new StaticAchievementToken("lover.common1");
 
-                    if (MyPlayer.Role.Role.Category != RoleCategory.ImpostorRole && NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole) == 2)
-                        new StaticAchievementToken("lover.challenge");
-                }
+                if (MyPlayer.Role.Role.Category != RoleCategory.ImpostorRole && NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole) == 2)
+                    new StaticAchievementToken("lover.challenge");
             }
         }
 

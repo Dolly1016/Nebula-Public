@@ -201,9 +201,10 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
                 acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
         }
 
-        public override void OnGameEnd(EndState endState)
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
         {
-            if (acTokenChallenge != null) acTokenChallenge.Value = endState.CheckWin(MyPlayer.PlayerId) && endState.EndCondition == NebulaGameEnd.ArsonistWin;
+            if (acTokenChallenge != null) acTokenChallenge.Value = ev.EndState.Winners.Test(MyPlayer) && ev.EndState.EndCondition == NebulaGameEnd.ArsonistWin;
         }
     }
 }

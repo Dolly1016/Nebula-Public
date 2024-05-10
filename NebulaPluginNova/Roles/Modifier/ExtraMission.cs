@@ -1,4 +1,5 @@
-﻿using Virial.Events.Player;
+﻿using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
@@ -63,7 +64,7 @@ public class ExtraMission : ConfigurableStandardModifier
             }
         }
 
-        public override void OnGameEnd(EndState endState)
+        void OnGameEnd(GameEndEvent ev)
         {
             if (AmOwner)
             {
@@ -71,7 +72,7 @@ public class ExtraMission : ConfigurableStandardModifier
             }
             if ((target?.AmOwner ?? false) && !target.IsDead)
             {
-                if (target.Unbox().TryGetModifier<Instance>(out var targetMission) && (targetMission.target?.IsDead ?? false) && endState.CheckWin(target.PlayerId)) new StaticAchievementToken("extraMission.challenge");
+                if (target.Unbox().TryGetModifier<Instance>(out var targetMission) && (targetMission.target?.IsDead ?? false) && ev.EndState.Winners.Test(target)) new StaticAchievementToken("extraMission.challenge");
                 new StaticAchievementToken("extraMission.common2");
             }
         }

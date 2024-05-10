@@ -174,9 +174,10 @@ public class Madmate : ConfigurableStandardRole, HasCitation
                 new StaticAchievementToken("madmate.another1");
         }
 
-        public override void OnGameEnd(EndState endState)
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
         {
-            if(AmOwner && endState.EndCondition == NebulaGameEnd.ImpostorWin && NebulaGameManager.Instance!.AllPlayerInfo().All(p=>p.Role.Role.Category != RoleCategory.ImpostorRole || !p.IsDead))
+            if(ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && NebulaGameManager.Instance!.AllPlayerInfo().All(p=>p.Role.Role.Category != RoleCategory.ImpostorRole || !p.IsDead))
                 new StaticAchievementToken("madmate.challenge");
         }
 

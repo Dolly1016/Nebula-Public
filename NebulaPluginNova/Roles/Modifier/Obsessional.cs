@@ -1,4 +1,5 @@
 ﻿using Nebula.Roles.Crewmate;
+using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -137,36 +138,34 @@ public class Obsessional : ConfigurableStandardModifier
                 instance.obsession = NebulaGameManager.Instance.GetPlayer(message.targetId);
         });
 
-        public override void OnGameEnd(EndState endState)
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
         {
-            if (AmOwner)
+            if (ev.EndState.Winners.Test(MyPlayer))
             {
-                if (endState.CheckWin(MyPlayer.PlayerId))
-                {
-                    //勝利
+                //勝利
 
-                    new StaticAchievementToken("obsessional.common1");
+                new StaticAchievementToken("obsessional.common1");
 
-                    if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota >= 5)
-                        new StaticAchievementToken("agent.challenge");
+                if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota >= 5)
+                    new StaticAchievementToken("agent.challenge");
 
-                    if(endState.EndCondition == NebulaGameEnd.LoversWin && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
-                        new StaticAchievementToken("obsessional.lover1");
+                if (ev.EndState.EndCondition == NebulaGameEnd.LoversWin && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
+                    new StaticAchievementToken("obsessional.lover1");
 
-                    //勝者に自身と執着対象しかいない場合
-                    if(NebulaGameManager.Instance!.AllPlayerInfo().Where(p=> endState.CheckWin(p.PlayerId)).All(p => p.AmOwner || p.PlayerId == (obsession?.PlayerId ?? 255)))
-                        new StaticAchievementToken("obsessional.challenge");
-                }
-                else
-                {
-                    //敗北
+                //勝者に自身と執着対象しかいない場合
+                if (NebulaGameManager.Instance!.AllPlayerInfo().Where(p => ev.EndState.Winners.Test(p)).All(p => p.AmOwner || p.PlayerId == (obsession?.PlayerId ?? 255)))
+                    new StaticAchievementToken("obsessional.challenge");
+            }
+            else
+            {
+                //敗北
 
-                    if(MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && endState.EndCondition == NebulaGameEnd.ImpostorWin)
-                        new StaticAchievementToken("obsessional.another2");
+                if (MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin)
+                    new StaticAchievementToken("obsessional.another2");
 
-                    if(endState.CheckWin(obsession?.PlayerId ?? 255) && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
-                        new StaticAchievementToken("obsessional.lover2");
-                }
+                if (ev.EndState.Winners.Test(obsession) && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
+                    new StaticAchievementToken("obsessional.lover2");
             }
         }
 

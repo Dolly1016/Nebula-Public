@@ -218,12 +218,13 @@ class SetTaskPAtch
     {
         if (!__instance.AmOwner) return true;
 
-        var tasksList = tasks.ToArray().ToList();
-        int num = tasksList.Count;
         var info = __instance.GetModInfo();
-        int extra = 0;
-        info?.AllAssigned().Do((r) => { r.Unbox().OnSetTaskLocal(ref tasksList, out var unacquired); extra += unacquired; });
-        if (num != tasksList.Count || extra > 0) info?.Tasks.Unbox().ReplaceTasks(tasksList.Count, extra);
+        int num = tasks.Count;
+
+        var result = GameOperatorManager.Instance!.Run(new PlayerTasksTrySetLocalEvent(info, tasks.ToArray()));
+        var tasksList = result.VanillaTasks.ToArray();
+
+        if (num != tasksList.Length || result.ExtraQuota > 0) info?.Tasks.Unbox().ReplaceTasks(tasksList.Length, result.ExtraQuota);
 
         __instance.StartCoroutine(CoSetTasks().WrapToIl2Cpp());
 
@@ -237,7 +238,7 @@ class SetTaskPAtch
             __instance.myTasks.Clear();
 
             __instance.Data.Role.SpawnTaskHeader(__instance);
-            for (int i = 0; i < tasksList.Count; i++)
+            for (int i = 0; i < tasksList.Length; i++)
             {
                 GameData.TaskInfo taskInfo = tasksList[i];
                 NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), __instance.transform);

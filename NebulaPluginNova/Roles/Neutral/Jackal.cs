@@ -205,13 +205,13 @@ public class Jackal : ConfigurableStandardRole, HasCitation
         public override bool HasImpostorVision => true;
         public override bool IgnoreBlackout => true;
 
-        public override void OnGameEnd(EndState endState)
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
         {
-            if (!AmOwner) return;
-            if (endState.EndCondition != NebulaGameEnd.JackalWin) return;
-            if (!endState.CheckWin(MyPlayer.PlayerId)) return;
+            if (ev.EndState.EndCondition != NebulaGameEnd.JackalWin) return;
+            if (!ev.EndState.Winners.Test(MyPlayer)) return;
 
-            if (endState.EndReason != GameEndReason.Situation) return;
+            if (ev.EndState.EndReason != GameEndReason.Situation) return;
 
             var lastDead = NebulaGameManager.Instance!.AllPlayerInfo().MaxBy(p => p.DeathTime ?? 0f);
             if (lastDead == null || lastDead.MyKiller == null || !lastDead.MyKiller.AmOwner) return;

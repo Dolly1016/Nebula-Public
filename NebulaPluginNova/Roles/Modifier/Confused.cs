@@ -1,4 +1,5 @@
-﻿using Virial.Events.Game.Meeting;
+﻿using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -83,15 +84,15 @@ public class Confused : ConfigurableStandardModifier
             if (!skipMeeting) new StaticAchievementToken("confused.another1");
         }
 
-        public override void OnGameEnd(EndState endState)
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
         {
             //無能本人で、生存していて、生存者が全員クルーで、クルーメイト勝利の場合
             if (
                 NebulaGameManager.Instance!.AllPlayerInfo().Count(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.NeutralRole) >= 2 &&
                 NebulaGameManager.Instance!.AllPlayerInfo().Count(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole) >= 2 &&
-                AmOwner &&
                 !MyPlayer.IsDead &&
-                endState.EndCondition == NebulaGameEnds.CrewmateGameEnd &&
+                ev.EndState.EndCondition == NebulaGameEnds.CrewmateGameEnd &&
                 NebulaGameManager.Instance!.AllPlayerInfo().All(p => p.IsDead || p.Role.Role.Category == Virial.Assignable.RoleCategory.CrewmateRole))
                 new StaticAchievementToken("confused.challenge");
         }

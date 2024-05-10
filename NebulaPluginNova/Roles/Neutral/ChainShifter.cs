@@ -1,5 +1,6 @@
 ﻿using Nebula.Roles.Complex;
 using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -36,7 +37,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
     public override bool CanBeGuessDefault => false;
 
 
-    public class Instance : RoleInstance, IBindPlayer
+    public class Instance : RoleInstance, IBindPlayer, RuntimeAssignable
     {
         private ModAbilityButton? chainShiftButton = null;
 
@@ -154,7 +155,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
             }
 
             //会議終了からすぐにゲームが終了すればよい
-            new AchievementToken<float>("chainShifter.challenge", Time.time, (val, _) => Time.time - val < 15f && NebulaGameManager.Instance.EndState.CheckWin(MyPlayer.PlayerId));
+            new AchievementToken<float>("chainShifter.challenge", Time.time, (val, _) => Time.time - val < 15f && NebulaGameManager.Instance.EndState.Winners.Test(MyPlayer));
 
             yield return new WaitForSeconds(0.2f);
 
@@ -172,11 +173,10 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
             if (ev.Murderer.AmOwner) new StaticAchievementToken("chainShifter.common1");
         }
 
-        public override void OnGameEnd(EndState endState)
-        {
-            if (AmOwner) new StaticAchievementToken("chainShifter.another1");
-        }
+        [Local]
+        void OnGameEnd(GameEndEvent ev) => new StaticAchievementToken("chainShifter.another1");
+        
 
-        public override bool CanCallEmergencyMeeting => MyRole.CanCallEmergencyMeetingOption;
+        bool RuntimeAssignable.CanCallEmergencyMeeting => MyRole.CanCallEmergencyMeetingOption;
     }
 }

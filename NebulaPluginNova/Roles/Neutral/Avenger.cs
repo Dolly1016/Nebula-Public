@@ -144,9 +144,10 @@ public class Avenger : ConfigurableRole
                 MyPlayer.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
         }
 
-        public override void OnGameEnd(EndState endState)
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
         {
-            if(endState.EndCondition == NebulaGameEnd.AvengerWin && endState.CheckWin(MyPlayer.PlayerId))
+            if(ev.EndState.EndCondition == NebulaGameEnd.AvengerWin && ev.EndState.Winners.Test(MyPlayer))
             {
                 if(MyPlayer.Unbox().GetModifiers<Lover.Instance>().Any(l => l.MyLover?.Role.Role is Avenger)) new StaticAchievementToken("avenger.challenge");
             }

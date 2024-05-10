@@ -2,6 +2,7 @@
 using Virial.Game;
 using Nebula.Roles.Modifier;
 using Virial;
+using Virial.Events.Game;
 
 namespace Nebula.Game;
 
@@ -93,7 +94,7 @@ public class NebulaGameEnd
 
                NebulaGameManager.Instance.EndState ??= new EndState(winners, end, message.endReason, extraWin);
                NebulaGameManager.Instance.OnGameEnd();
-               NebulaGameManager.Instance.AllAssignableAction(a => a.Unbox().OnGameEnd(NebulaGameManager.Instance.EndState));
+               GameOperatorManager.Instance?.Run(new GameEndEvent(NebulaGameManager.Instance, NebulaGameManager.Instance.EndState));
                NebulaGameManager.Instance.ToGameEnd();
            }
        }
