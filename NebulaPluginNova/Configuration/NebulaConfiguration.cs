@@ -10,106 +10,7 @@ using Virial.Configuration;
 
 namespace Nebula.Configuration;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-public class NebulaOptionHolder : Attribute
-{
-}
 
-
-/// <summary>
-/// ゲーム中では、オプションの値を共有するために一意なIDが必要になります。
-/// アドオン等によって追加された全オプションにIDを割り振り、クライアント間でのオプション値の共有を担います。
-/// </summary>
-[NebulaPreLoad(typeof(Roles.Roles))]
-[NebulaRPCHolder]
-public class NebulaConfigEntryManager
-{
-    static public DataSaver ConfigData = new DataSaver("Config");
-    static public List<INebulaConfigEntry> AllConfig = new();
-
-    static public IEnumerator CoLoad()
-    {
-        Patches.LoadPatch.LoadingText = "Building Configuration Database";
-        yield return null;
-
-        var types = Assembly.GetAssembly(typeof(RemoteProcessBase))?.GetTypes().Where((type) => type.IsDefined(typeof(NebulaOptionHolder)));
-        if (types == null) yield break;
-
-        foreach (var type in types) System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-
-        AllConfig.Sort((c1, c2) => string.Compare(c1.Name, c2.Name));
-
-        for (int i = 0; i < AllConfig.Count; i++) AllConfig[i].Id = i;
-
-        ConfigurationHolder.Load();
-    }
-
-    static public RemoteProcess<(int id, int value)> RpcShare = new(
-        "ShareOption",
-       (message, isCalledByMe) =>
-       {
-           if (!isCalledByMe) AllConfig[message.id].UpdateValue(message.value, false);
-       }
-    );
-
-    //呼び出し時の引数は使用していない
-    static private DivisibleRemoteProcess<int, Tuple<int, int>> RpcShareAll = new DivisibleRemoteProcess<int, Tuple<int, int>>(
-        "ShareAllOption",
-        (message) =>
-        {
-            //(Item1)番目から(Item2)-1番目まで
-            IEnumerator<Tuple<int, int>> GetDivider()
-            {
-                int done = 0;
-                while (done < AllConfig.Count)
-                {
-                    int max = Mathf.Min(AllConfig.Count, done + 100);
-                    yield return new Tuple<int, int>(done, max);
-                    done = max;
-                }
-            }
-            return GetDivider();
-        },
-        (writer, message) =>
-        {
-            writer.Write(message.Item1);
-            writer.Write(message.Item2 - message.Item1);
-            for (int i = message.Item1; i < message.Item2; i++) writer.Write(AllConfig[i].CurrentValue);
-        },
-       (reader) =>
-       {
-           int index = reader.ReadInt32();
-           int num = reader.ReadInt32();
-           for (int i = 0; i < num; i++)
-           {
-               AllConfig[index].UpdateValue(reader.ReadInt32(), false);
-               index++;
-           }
-           return new Tuple<int, int>(0, 0);
-       },
-       (message, isCalledByMe) =>
-       {
-           //メッセージを受け取ったときに処理しているのでここでは何もしない
-       }
-    );
-
-    static public void ShareAll()
-    {
-        RpcShareAll.Invoke(0);
-    }
-
-    static public void RestoreAll()
-    {
-        foreach (var cfg in AllConfig) cfg.LoadFromSaveData();
-    }
-
-    static public void RestoreAllAndShare()
-    {
-        RestoreAll();
-        ShareAll();
-    }
-
-}
 
 public interface INebulaConfigEntry
 {
@@ -186,129 +87,9 @@ public class NebulaStringConfigEntry : INebulaConfigEntry
     }
 }
 
-public class NebulaAssignableFilterConfigEntry<T> where T : class, IAssignableBase, ICodeName
-{
-    class FilterEntry : INebulaConfigEntry
-    {
-        NebulaAssignableFilterConfigEntry<T> myConfig { get; init; }
-        public int CurrentValue { get; protected set; }
-        public int Id { get; set; } = -1;
-        public string Name { get; set; }
-        public int Index { get; private set; }
-
-        public FilterEntry(NebulaAssignableFilterConfigEntry<T> config, int index)
-        {
-            myConfig = config;
-            Index = index;
-            Name = myConfig.Id + "." + index;
-            LoadFromSaveData();
-            NebulaConfigEntryManager.AllConfig.Add(this);
-        }
-
-        public void LoadFromSaveData()
-        {
-            CurrentValue = myConfig.LoadValue(Index);
-        }
-
-        public INebulaConfigEntry UpdateValue(int value, bool save)
-        {
-            CurrentValue = value;
-            if (save) myConfig.SaveValue(Index, value);
-            return this;
-        }
-    }
-
-    private StringArrayDataEntry dataEntry;
-    private HashSet<T> assignables = new();
-    private FilterEntry[] sharingEntry;
-
-    public string Id { get; private set; }
-    public NebulaAssignableFilterConfigEntry(string id, string[] defaultValue)
-    {
-        Id = id;
-        dataEntry = new StringArrayDataEntry(id, NebulaConfigEntryManager.ConfigData, defaultValue);
-        assignables = new();
-
-        T[] allAssignable = Roles.Roles.AllAssignables().Select(m => m as T).Where(m => m != null).ToArray()!;
-
-        foreach (var name in dataEntry.Value)
-        {
-            var r = allAssignable.FirstOrDefault(e => e.CodeName == name);
-            if(r != null) assignables.Add(r);
-        }
-
-        sharingEntry = new FilterEntry[allAssignable.Length / 30 + 1];
-        for (int i = 0; i < sharingEntry.Length; i++) sharingEntry[i] = new(this, i);
-
-    }
-
-    private void Save()
-    {
-        dataEntry.Value = assignables.Select(m => m.CodeName).ToArray();
-    }
-
-    public void SaveValue(int index, int value)
-    {
-        //該当要素を全削除
-        assignables.RemoveWhere(m => (index * 30) <= m.Id && m.Id < (index + 1) * 30);
-
-        for (int i = 0; i < 30; i++)
-        {
-            //追加するべき役職
-            if (((1 << i) & value) != 0 && !assignables.Any(a => a.Id == (i + index * 30))) assignables.Add((Roles.Roles.AllAssignables().FirstOrDefault(a => a is T && a.Id == (i+index*30)) as T)!);
-        }
-
-        Save();
-    }
-    public bool Contains(T assignable) => assignables.Contains(assignable);
-
-    public int LoadValue(int index)
-    {
-        int value = 0;
-        foreach(var m in assignables)
-            if ((index * 30) <= m.Id && m.Id < (index + 1) * 30) value |= 1 << m.Id - (index * 30);
-        return value;
-    }
-
-    public void ToggleAndShare(T assignable)
-    {
-        if (assignables.Contains(assignable))
-            assignables.Remove(assignable);
-        else
-            assignables.Add(assignable);
-
-        foreach (INebulaConfigEntry config in sharingEntry)
-        {
-            config.LoadFromSaveData();
-            config.Share();
-        }
-
-        Save();
-    }
 
 
-    public bool Test(T? assignable)
-    {
-        if(assignable != null) return !Contains(assignable);
-        return false;
-    }
-}
-
-public class NebulaModifierFilterConfigEntry : NebulaAssignableFilterConfigEntry<IntroAssignableModifier>, ModifierFilter
-{
-    public NebulaModifierFilterConfigEntry(string id, string[] defaultValue) : base(id,defaultValue) { }
-
-    bool ModifierFilter.Test(DefinedModifier modifier) => Test(modifier as IntroAssignableModifier);
-}
-
-public class NebulaGhostRoleFilterConfigEntry : NebulaAssignableFilterConfigEntry<AbstractGhostRole>
-{
-    public NebulaGhostRoleFilterConfigEntry(string id, string[] defaultValue) : base(id, defaultValue) { }
-
-    //bool GhostRoleFilter.Test(DefinedGhostRole role) => Test(role as AbstractGhostRole);
-}
-
-
+/*
 public class ConfigurationHolder
 {
     static public List<ConfigurationHolder> AllHolders = new();
@@ -402,17 +183,8 @@ public class ConfigurationHolder
             builder.AppendLine();
         }
     }
-
-    static private IDividedSpriteLoader TagSprite = DividedSpriteLoader.FromResource("Nebula.Resources.ConfigurationTag.png", 100f, 42, 42, true);
-
-    static private GUIWidget GetTagTextWidget(string translationKey) => new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), new TranslateTextComponent("configuration.tag." + translationKey));
-    static public ConfigurationTag TagChaotic { get; private set; } = new(TagSprite.AsLoader(0), GetTagTextWidget("chaotic"));
-    static public ConfigurationTag TagBeginner { get; private set; } = new(TagSprite.AsLoader(1), GetTagTextWidget("beginner"));
-    static public ConfigurationTag TagFunny { get; private set; } = new(TagSprite.AsLoader(4), GetTagTextWidget("funny"));
-    static public ConfigurationTag TagDifficult { get; private set; } = new(TagSprite.AsLoader(5), GetTagTextWidget("difficult"));
-    static public ConfigurationTag TagSNR { get; private set; } = new(TagSprite.AsLoader(2), GetTagTextWidget("superNewRoles"));
 }
-
+*/
 
 public class NebulaConfiguration : ValueConfiguration
 {
@@ -519,7 +291,7 @@ public class NebulaConfiguration : ValueConfiguration
         }
     }
 
-    string? IConfigurationEntry.GetDisplayText() => GetShownString();
+    string? IConfiguration.GetDisplayText() => GetShownString();
 
     static public TextAttributeOld GetOptionBoldAttr(float width, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.Center) => new(TextAttributeOld.BoldAttr)
     {
@@ -701,9 +473,6 @@ public class NebulaConfiguration : ValueConfiguration
     //各種Predicateを通さず、設定の生の値を取得します。
     public int CurrentUncheckedValue => entry?.CurrentValue ?? -1;
 
-    string ValueConfiguration.CurrentValue => GetString();
-    float ValueConfiguration.AsFloat() => GetFloat();
-    int ValueConfiguration.AsInt() => GetMappedInt();
     public object? GetMapped() => GetMapped(CurrentValue);
 
     private object? GetMapped(int currentValue)
@@ -734,62 +503,6 @@ public class NebulaConfiguration : ValueConfiguration
     public string ToDisplayString()
     {
         return Decorator?.Invoke(GetMapped()) ?? GetString() ?? "None";
-    }
-
-    bool ValueConfiguration.UpdateValue(int value)
-    {
-        for(int i= 0; i <= MaxValue; i++)
-        {
-            var val = (Mapper?.Invoke(i) ?? i) as int?;
-            if (val.HasValue && val.Value == value)
-            {
-                ChangeValue(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool ValueConfiguration.UpdateValue(float value)
-    {
-        for (int i = 0; i <= MaxValue; i++)
-        {
-            var val = Mapper?.Invoke(i) as float?;
-            if (val.HasValue && val.Value == value)
-            {
-                ChangeValue(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool ValueConfiguration.UpdateValue(bool value)
-    {
-        for (int i = 0; i <= MaxValue; i++)
-        {
-            var val = Mapper?.Invoke(i) as bool?;
-            if (val.HasValue && val.Value == value)
-            {
-                ChangeValue(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool ValueConfiguration.UpdateValue(string value)
-    {
-        for (int i = 0; i <= MaxValue; i++)
-        {
-            var val = Mapper?.Invoke(i) as string;
-            if (val == value)
-            {
-                ChangeValue(i);
-                return true;
-            }
-        }
-        return false;
     }
 
     public static implicit operator bool(NebulaConfiguration config) => config.GetBool();
@@ -840,46 +553,4 @@ public class CustomGameMode
     public static ReadOnlyCollection<CustomGameMode> AllGameMode { get => allGameMode.AsReadOnly(); }
 
     public static implicit operator int(CustomGameMode gamemode) => gamemode.bitFlag;
-}
-
-public class ConfigurationTab
-{
-    public static List<ConfigurationTab> allTab = new List<ConfigurationTab>();
-    public static ConfigurationTab Settings = new ConfigurationTab(0x01,"options.tab.setting",new Color(0.75f,0.75f,0.75f));
-    public static ConfigurationTab CrewmateRoles = new ConfigurationTab(0x02, "options.tab.crewmate", Palette.CrewmateBlue);
-    public static ConfigurationTab ImpostorRoles = new ConfigurationTab(0x04, "options.tab.impostor", Palette.ImpostorRed);
-    public static ConfigurationTab NeutralRoles = new ConfigurationTab(0x08, "options.tab.neutral", new Color(244f / 255f, 211f / 255f, 53f / 255f));
-    public static ConfigurationTab GhostRoles = new ConfigurationTab(0x10, "options.tab.ghost", new Color(150f / 255f, 150f / 255f, 150f / 255f));
-    public static ConfigurationTab Modifiers = new ConfigurationTab(0x20, "options.tab.modifier", new Color(255f / 255f, 255f / 255f, 243f / 255f));    
-
-    private int bitFlag;
-    private string translateKey { get; init; }
-    public Color Color { get; private init; }
-    public ConfigurationTab(int bitFlag, string translateKey,Color color)
-    {
-        this.bitFlag = bitFlag;
-        allTab.Add(this);
-        this.translateKey = translateKey;
-        Color = color;
-    }
-
-    public string DisplayName { get => Language.Translate(translateKey).Replace("[", StringHelper.ColorBegin(Color)).Replace("]", StringHelper.ColorEnd()); }
-    public static ReadOnlyCollection<ConfigurationTab> AllTab { get => allTab.AsReadOnly(); }
-
-    public static ConfigurationTab FromRoleCategory(RoleCategory roleCategory)
-    {
-        switch (roleCategory)
-        {
-            case RoleCategory.CrewmateRole:
-                return CrewmateRoles;
-            case RoleCategory.ImpostorRole:
-                return ImpostorRoles;
-            case RoleCategory.NeutralRole:
-                return NeutralRoles;
-        }
-        return Settings;
-    }
-
-    public static implicit operator int(ConfigurationTab tab) => tab.bitFlag;
-    
 }

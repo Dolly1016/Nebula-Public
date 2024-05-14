@@ -11,26 +11,14 @@ public interface IConfiguableAssignable
     ConfigurationHolder RoleConfig { get; }
 }
 
-public interface ICodeName
-{
-    string CodeName { get; }
-}
-
 public interface IAssignableBase : DefinedAssignable
 {
     public ConfigurationHolder? RelatedConfig { get; }
-    public string InternalName { get; }
-    public string DisplayName { get; }
-    public Color RoleColor { get; }
-    public int Id { get; set; }
 
     public void Load();
 
     //For Config
     public IEnumerable<IAssignableBase> RelatedOnConfig();
-
-
-    ValueConfiguration? DefinedAssignable.GetConfiguration(string id) => RelatedConfig?.MyConfigurations.FirstOrDefault(c => c.Id == id);
 }
 
 
@@ -45,9 +33,6 @@ public abstract class AssignableInstance : ComponentHolder, RuntimeAssignable, V
         this.MyPlayer = player;
     }
     
-    
-    public virtual void OnSetTaskLocal(ref List<GameData.TaskInfo> tasks, out int extraQuota) { extraQuota = 0; }
-    public virtual string? OverrideRoleName(string lastRoleName,bool isShort) => null;
     public virtual void DecoratePlayerName(ref string text, ref Color color) { }
     public virtual void DecorateOtherPlayerName(GamePlayer player,ref string text, ref Color color) { }
     public virtual void DecorateRoleName(ref string text) { }

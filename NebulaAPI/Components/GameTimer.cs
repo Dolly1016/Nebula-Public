@@ -13,4 +13,10 @@ public interface GameTimer : IReleasable
     float CurrentTime { get; }
     float Percentage { get; }
     bool IsInProcess { get; }
+
+    /// <summary>
+    /// タイマーのクールダウンがタスクフェイズの再開時にリセットされるよう特性付けます。
+    /// </summary>
+    /// <returns></returns>
+    GameTimer ResetsAtTaskPhase();
 }

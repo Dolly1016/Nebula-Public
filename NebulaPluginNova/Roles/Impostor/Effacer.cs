@@ -1,21 +1,22 @@
 ﻿using Nebula.Roles.Crewmate;
+using Virial;
 using Virial.Assignable;
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Effacer : ConfigurableStandardRole, HasCitation
+public class Effacer : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Effacer MyRole = null;// new Effacer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "effacer";
+    string DefinedAssignable.LocalizedName => "effacer";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration EffaceCoolDownOption = null!;
     private NebulaConfiguration EffaceDurationOption = null!;
@@ -29,7 +30,7 @@ public class Effacer : ConfigurableStandardRole, HasCitation
         EffaceDurationOption = new NebulaConfiguration(RoleConfig, "effaceDuration", null, 5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
         public override AbstractRole Role => MyRole;
@@ -39,10 +40,8 @@ public class Effacer : ConfigurableStandardRole, HasCitation
         }
 
         AchievementToken<EditableBitMask<GamePlayer>>? achChallengeToken = null;
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 //全プレイヤーが、　インポスターでない　あるいは　自分自身　あるいは　生存かつ条件達成済み　→　自身のぞくインポスターが全員生存 & 条件達成済み

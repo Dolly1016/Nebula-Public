@@ -4,17 +4,17 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Alien : ConfigurableStandardRole, HasCitation
+public class Alien : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Alien MyRole = null;//new Alien();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "alien";
+    string DefinedAssignable.LocalizedName => "alien";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration EMICoolDownOption = null!;
     private NebulaConfiguration EMIDurationOption = null!;
@@ -32,7 +32,7 @@ public class Alien : ConfigurableStandardRole, HasCitation
         NumOfInvalidationsOption = new NebulaConfiguration(RoleConfig, "numOfInvalidations", null, 10, 1, 1);
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
         static private ISpriteLoader invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
@@ -45,10 +45,8 @@ public class Alien : ConfigurableStandardRole, HasCitation
         ModAbilityButton? emiButton = null;
         AchievementToken<(int playerMask,bool clear)>? achCommon4Token = null;
         AchievementToken<(int killTotal,int killOnlyMe)>? achChallengeToken = null;
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 achChallengeToken = new("alien.challenge", (0, 0), (val, _) => val.killTotal >= 5 && val.killOnlyMe >= 3);

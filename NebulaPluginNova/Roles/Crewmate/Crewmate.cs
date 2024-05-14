@@ -3,26 +3,21 @@ using Virial.Events.Player;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Crewmate : ConfigurableStandardRole
+public class Crewmate : DefinedRoleTemplate, DefinedRole
 {
     static public Crewmate MyRole = new Crewmate();
     static public Team MyTeam = new("teams.crewmate", Palette.CrewmateBlue, TeamRevealType.Everyone);
 
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
+    public Crewmate() : base("crewmate", new(Palette.CrewmateBlue), RoleCategory.CrewmateRole, MyTeam) { }
 
-    public override string LocalizedName => "crewmate";
-    public override Color RoleColor => Palette.CrewmateBlue;
-    public override bool IsDefaultRole => true;
-    public override RoleTeam Team => Crewmate.MyTeam;
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-
-    public class Instance : RoleInstance
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyRole;
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
+        DefinedRole RuntimeRole.Role => MyRole;
+        public Instance(GamePlayer player) : base(player) {}
+
+        void RuntimeAssignable.OnActivated() {}
 
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.CrewmateWin);

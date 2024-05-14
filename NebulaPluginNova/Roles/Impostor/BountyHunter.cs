@@ -5,17 +5,17 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class BountyHunter : ConfigurableStandardRole, HasCitation
+public class BountyHunter : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public BountyHunter MyRole = new BountyHunter();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "bountyHunter";
+    string DefinedAssignable.LocalizedName => "bountyHunter";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private KillCoolDownConfiguration BountyKillCoolDownOption = null!;
     private KillCoolDownConfiguration OthersKillCoolDownOption = null!;
@@ -35,7 +35,7 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
 
     float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CurrentCoolDown, OthersKillCoolDownOption.CurrentCoolDown, AmongUsUtil.VanillaKillCoolDown);
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? killButton = null;
 
@@ -109,10 +109,8 @@ public class BountyHunter : ConfigurableStandardRole, HasCitation
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenKillBounty = new("bountyHunter.common1", false, (val, _) => val);

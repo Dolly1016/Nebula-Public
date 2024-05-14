@@ -134,7 +134,7 @@ public class Damned : ConfigurableStandardModifier
                 if (param.type == 0) new StaticAchievementToken("damned.common1");
                 if (param.type == 1) new StaticAchievementToken("damned.common3");
                 if (param.type == 2) new AchievementToken<int>("damned.challenge", 0, (_, _) => 
-                    NebulaGameManager.Instance!.EndState!.CheckWin(param.playerId) && NebulaGameManager.Instance!.EndState.EndCondition == NebulaGameEnd.CrewmateWin
+                    NebulaGameManager.Instance!.EndState!.Winners.Test(NebulaGameManager.Instance.GetPlayer(param.playerId)) && NebulaGameManager.Instance!.EndState.EndCondition == NebulaGameEnd.CrewmateWin
                 );
             }
         });

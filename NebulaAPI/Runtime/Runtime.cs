@@ -6,6 +6,13 @@ using Virial.Text;
 namespace Virial.Runtime;
 
 
+public enum PreprocessPhase
+{
+    /// <summary>
+    /// 役職定義の直後に呼び出されます。
+    /// </summary>
+    PostFixAssignables
+}
 
 public interface NebulaPreprocessor
 {
@@ -42,6 +49,8 @@ public interface NebulaPreprocessor
     RoleTeam CreateTeam(string translationKey, Color color, TeamRevealType revealType);
 
     DIManager DIManager { get; }
+
+    void SchedulePreprocess(PreprocessPhase phase, Action process);
 }
 
 public interface NebulaRuntime

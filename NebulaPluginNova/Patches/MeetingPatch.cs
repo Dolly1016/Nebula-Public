@@ -765,7 +765,7 @@ class MeetingIntroAnimationPatch
             dBodies.Add(GameData.Instance.GetPlayerById(dBody.ParentId));
             GameObject.Destroy(dBody.gameObject);
         }
-        deadBodies = new Il2CppReferenceArray<GameData.PlayerInfo>(dBodies.ToArray());
+        deadBodies = new Il2CppReferenceArray<GameData.PlayerInfo>(dBodies.OrderBy(d => d.PlayerId).ToArray());
 
         //生死を再確認
         MeetingHud.Instance.ResetPlayerState();

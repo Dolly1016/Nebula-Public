@@ -1,41 +1,35 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
+using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Ghost.Crewmate;
 
 [NebulaRPCHolder]
-public class Lumine : ConfigurableStandardGhostRole
+public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
 {
     static public Lumine MyRole = new Lumine();
-
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-
-    public override string LocalizedName => "lumine";
-    public override string CodeName => "LMN";
-    public override Color RoleColor => new Color(241f / 255f, 237f / 255f, 184f / 255f);
-
-    private NebulaConfiguration LightSizeOption = null!;
-    private NebulaConfiguration LightDurationOption = null!;
-
-    public override GhostRoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-        LightSizeOption = new(RoleConfig, "lightSize", null, 1f, 10f, 0.25f, 2f, 2f) { Decorator = NebulaConfiguration.OddsDecorator };
-        LightDurationOption = new(RoleConfig, "lightDuration", null, 5f, 30f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
+    public Lumine(): base("lumine", new(241, 237, 184),RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam) {
+        ConfigurationHolder?.AppendConfigurations([LightSizeOption, LightDurationOption]);
     }
 
-    public class Instance : GhostRoleInstance
+    string ICodeName.CodeName => "LMN";
+
+    FloatConfiguration LightSizeOption = new FloatConfigurationImpl("role.lumine.lightSize", ArrayHelper.Selection(1f, 10f, 0.25f), 2f).DecorateAsRatioConfiguration();
+    FloatConfiguration LightDurationOption = new FloatConfigurationImpl("role.lumine.lightDuration", ArrayHelper.Selection(5f, 30f, 2.5f), 10f).DecorateAsSecConfiguration();
+
+    RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
     {
-        public override AbstractGhostRole Role => MyRole;
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
+        DefinedGhostRole RuntimeGhostRole.Role => MyRole;
+
+        public Instance(GamePlayer player) : base(player) {}
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LumineButton.png", 115f);
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
@@ -65,7 +59,7 @@ public class Lumine : ConfigurableStandardGhostRole
     static private IEnumerator CoLight(Vector2 pos)
     {
         SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(pos);
-        lightRenderer.transform.localScale *= MyRole.LightSizeOption.GetFloat();
+        lightRenderer.transform.localScale *= MyRole.LightSizeOption;
 
         float p = 0f;
         while (p < 1f)
@@ -76,7 +70,7 @@ public class Lumine : ConfigurableStandardGhostRole
         }
 
         lightRenderer.material.color = Color.white;
-        yield return Effects.Wait(MyRole.LightDurationOption.GetFloat());
+        yield return Effects.Wait(MyRole.LightDurationOption);
         while (p > 0f)
         {
             p -= Time.deltaTime * 0.75f;

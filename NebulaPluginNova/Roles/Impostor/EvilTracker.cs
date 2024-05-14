@@ -77,17 +77,17 @@ public class TrackerPlayerMapLayer : MonoBehaviour
     }
 }
 
-public class EvilTracker : ConfigurableStandardRole, HasCitation
+public class EvilTracker : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public EvilTracker MyRole = new EvilTracker();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "evilTracker";
+    string DefinedAssignable.LocalizedName => "evilTracker";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGMH;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration ShowKillFlashOption = null!;
     private NebulaConfiguration TaskTrackingOption = null!;
@@ -113,7 +113,7 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? trackButton = null;
 
@@ -148,10 +148,8 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 //インポスターに矢印を付ける

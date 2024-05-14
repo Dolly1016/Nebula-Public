@@ -5,17 +5,17 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Morphing : ConfigurableStandardRole, HasCitation
+public class Morphing : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Morphing MyRole = new Morphing();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "morphing";
+    string DefinedAssignable.LocalizedName => "morphing";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
     private NebulaConfiguration SampleCoolDownOption = null!;
     private NebulaConfiguration MorphCoolDownOption = null!;
@@ -31,7 +31,7 @@ public class Morphing : ConfigurableStandardRole, HasCitation
         LoseSampleOnMeetingOption = new NebulaConfiguration(RoleConfig, "loseSampleOnMeeting", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
@@ -51,10 +51,8 @@ public class Morphing : ConfigurableStandardRole, HasCitation
 
         GameData.PlayerOutfit? sample = null;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenChallenge = new("morphing.challenge", (false, false), (val, _) => val.kill && val.exile);

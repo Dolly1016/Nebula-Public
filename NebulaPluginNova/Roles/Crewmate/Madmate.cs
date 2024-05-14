@@ -5,18 +5,18 @@ using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Madmate : ConfigurableStandardRole, HasCitation
+public class Madmate : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Madmate MyRole = new Madmate();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "madmate";
+    string DefinedAssignable.LocalizedName => "madmate";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration EmbroilVotersOnExileOption = null!;
     private NebulaConfiguration LimitEmbroiledPlayersToVotersOption = null!;
@@ -84,7 +84,7 @@ public class Madmate : ConfigurableStandardRole, HasCitation
         });
     }
     
-    public class Instance : Crewmate.Instance, IBindPlayer, RuntimeRole
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         List<byte> impostors = new();
 
@@ -113,10 +113,8 @@ public class Madmate : ConfigurableStandardRole, HasCitation
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             SetMadmateTask();
             if(AmOwner) IdentifyImpostors();
         }

@@ -1,6 +1,7 @@
 ﻿using Nebula.Behaviour;
 using System.Reflection;
 using Virial.DI;
+using Virial.Game;
 
 namespace Nebula.Modules;
 
@@ -49,6 +50,7 @@ public static class PreloadManager
         DIManager.Instance.RegisterContainer(() => new PlayerModInfo());
 
         //IModule<Virial.Game.Game>
+        DIManager.Instance.RegisterGeneralModule<Virial.Game.Game>(() => GeneralConfigurations.CurrentGameMode.InstantiateModule());
         DIManager.Instance.RegisterModule(() => new Synchronizer());
         DIManager.Instance.RegisterModule(() => new MeetingPlayerButtonManager());
         DIManager.Instance.RegisterModule(() => new MeetingOverlayHolder());

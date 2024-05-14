@@ -1,5 +1,6 @@
 ﻿using Nebula.Roles.Complex;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -8,18 +9,18 @@ using Virial.Game;
 namespace Nebula.Roles.Neutral;
 
 // if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, new int[] { JackalTeamId }).InvokeSingle();
-public class ChainShifter : ConfigurableStandardRole, HasCitation
+public class ChainShifter : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public ChainShifter MyRole = new ChainShifter();
     static public Team MyTeam = new("teams.chainShifter", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
     public override RoleCategory Category => RoleCategory.NeutralRole;
 
-    public override string LocalizedName => "chainShifter";
+    string DefinedAssignable.LocalizedName => "chainShifter";
     public override Color RoleColor => new Color(115f / 255f, 115f / 255f, 115f / 255f);
     public override RoleTeam Team => MyTeam;
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private new VentConfiguration VentConfiguration = null!;
     private NebulaConfiguration ShiftCoolDown = null!;
@@ -37,7 +38,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
     public override bool CanBeGuessDefault => false;
 
 
-    public class Instance : RoleInstance, IBindPlayer, RuntimeAssignable
+    public class Instance : RoleInstance, RuntimeRole
     {
         private ModAbilityButton? chainShiftButton = null;
 
@@ -45,12 +46,12 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
 
         public override AbstractRole Role => MyRole;
 
-        private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
-        private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
         private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
-        public override Timer? VentCoolDown => ventCoolDown;
-        public override Timer? VentDuration => ventDuration;
-        public override bool CanUseVent => canUseVent;
+        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
+        GameTimer? RuntimeRole.VentDuration => ventDuration;
+        bool RuntimeRole.CanUseVent => canUseVent;
         
         public Instance(GamePlayer player) : base(player)
         {
@@ -59,7 +60,7 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
         private GamePlayer? shiftTarget = null;
         private bool canExecuteShift = false;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
@@ -91,75 +92,79 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation
             canExecuteShift = !MyPlayer.IsDead;
         }
 
-        public override IEnumerator? CoMeetingEnd()
+
+        [Local]
+        void OnMeetingPreEnd(MeetingPreEndEvent ev)
         {
-            if (!AmOwner) yield break;
-
-            if (!canExecuteShift) yield break;
-            if (shiftTarget == null) yield break;
-            if(!(shiftTarget.VanillaPlayer)) yield break;
-            var player = shiftTarget.Unbox();
-
-            //会議終了時に死亡している相手とはシフトできない
-            if(player == null || player.IsDead) yield break;
-            
-            int[] targetArgument = new int[0];
-            var targetRole = player.Role.Role;
-            int targetGuess = -1;
-            yield return player.CoGetRoleArgument((args) => targetArgument = args);
-            yield return player.CoGetLeftGuess((guess) => targetGuess = guess);
-
-            int myGuess = MyPlayer.Unbox().TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1;
-
-            using (RPCRouter.CreateSection("ChainShift"))
+            ev.PushCoroutine(CoMeetingEnd());
+            IEnumerator CoMeetingEnd()
             {
-                Debug.Log("Test1");
-                //タスクに関する書き換え
-                int leftCrewmateTask = 0;
-                if (shiftTarget.Tasks.IsCrewmateTask && shiftTarget.Tasks.HasExecutableTasks)
+                if (!canExecuteShift) yield break;
+                if (shiftTarget == null) yield break;
+                if (!(shiftTarget.VanillaPlayer)) yield break;
+                var player = shiftTarget.Unbox();
+
+                //会議終了時に死亡している相手とはシフトできない
+                if (player == null || player.IsDead) yield break;
+
+                int[] targetArgument = new int[0];
+                var targetRole = player.Role.Role;
+                int targetGuess = -1;
+                yield return player.CoGetRoleArgument((args) => targetArgument = args);
+                yield return player.CoGetLeftGuess((guess) => targetGuess = guess);
+
+                int myGuess = MyPlayer.Unbox().TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1;
+
+                using (RPCRouter.CreateSection("ChainShift"))
                 {
-                    leftCrewmateTask = Mathf.Max(0, shiftTarget.Tasks.Quota - shiftTarget.Tasks.TotalCompleted);
+                    Debug.Log("Test1");
+                    //タスクに関する書き換え
+                    int leftCrewmateTask = 0;
+                    if (shiftTarget.Tasks.IsCrewmateTask && shiftTarget.Tasks.HasExecutableTasks)
+                    {
+                        leftCrewmateTask = Mathf.Max(0, shiftTarget.Tasks.Quota - shiftTarget.Tasks.TotalCompleted);
+
+                    }
+
+                    if (leftCrewmateTask > 0)
+                    {
+                        int commonTasks = GameOptionsManager.Instance.CurrentGameOptions.GetInt(AmongUs.GameOptions.Int32OptionNames.NumCommonTasks);
+                        int shortTasks = GameOptionsManager.Instance.CurrentGameOptions.GetInt(AmongUs.GameOptions.Int32OptionNames.NumShortTasks);
+                        int longTasks = GameOptionsManager.Instance.CurrentGameOptions.GetInt(AmongUs.GameOptions.Int32OptionNames.NumLongTasks);
+                        float longWeight = (float)longTasks / (float)(commonTasks + shortTasks + longTasks);
+                        float commonWeight = (float)commonTasks / (float)(commonTasks + shortTasks + longTasks);
+
+                        int actualLongTasks = (int)((float)System.Random.Shared.NextDouble() * longWeight * leftCrewmateTask);
+                        int actualcommonTasks = (int)((float)System.Random.Shared.NextDouble() * commonWeight * leftCrewmateTask);
+
+                        MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(leftCrewmateTask - actualLongTasks - actualcommonTasks, actualLongTasks, actualcommonTasks);
+                        MyPlayer.Tasks.Unbox().BecomeToCrewmate();
+                    }
+                    else
+                    {
+                        MyPlayer.Tasks.Unbox().ReleaseAllTaskState();
+                    }
+
+                    //タスクを整えたうえで役職を変更する
+                    player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
+                    MyPlayer.Unbox().RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
+
+                    if (targetGuess != -1) player.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
+                    if (myGuess != -1) MyPlayer.Unbox().RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
+
+                    if (myGuess != -1) player.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { myGuess }).InvokeSingle();
+                    if (targetGuess != -1) MyPlayer.Unbox().RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
+
 
                 }
 
-                if (leftCrewmateTask > 0)
-                {
-                    int commonTasks = GameOptionsManager.Instance.CurrentGameOptions.GetInt(AmongUs.GameOptions.Int32OptionNames.NumCommonTasks);
-                    int shortTasks = GameOptionsManager.Instance.CurrentGameOptions.GetInt(AmongUs.GameOptions.Int32OptionNames.NumShortTasks);
-                    int longTasks = GameOptionsManager.Instance.CurrentGameOptions.GetInt(AmongUs.GameOptions.Int32OptionNames.NumLongTasks);
-                    float longWeight = (float)longTasks / (float)(commonTasks + shortTasks + longTasks);
-                    float commonWeight = (float)commonTasks / (float)(commonTasks + shortTasks + longTasks);
+                //会議終了からすぐにゲームが終了すればよい
+                new AchievementToken<float>("chainShifter.challenge", Time.time, (val, _) => Time.time - val < 15f && NebulaGameManager.Instance.EndState.Winners.Test(MyPlayer));
 
-                    int actualLongTasks = (int)((float)System.Random.Shared.NextDouble() * longWeight * leftCrewmateTask);
-                    int actualcommonTasks = (int)((float)System.Random.Shared.NextDouble() * commonWeight * leftCrewmateTask);
+                yield return new WaitForSeconds(0.2f);
 
-                    MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(leftCrewmateTask - actualLongTasks - actualcommonTasks, actualLongTasks, actualcommonTasks);
-                    MyPlayer.Tasks.Unbox().BecomeToCrewmate();
-                }
-                else
-                {
-                    MyPlayer.Tasks.Unbox().ReleaseAllTaskState();
-                }
-                
-                //タスクを整えたうえで役職を変更する
-                player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
-                MyPlayer.Unbox().RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
-                
-                if (targetGuess != -1) player.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
-                if (myGuess != -1) MyPlayer.Unbox().RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
-
-                if (myGuess != -1) player.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { myGuess }).InvokeSingle();
-                if (targetGuess != -1) MyPlayer.Unbox().RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
-
-                
+                yield break;
             }
-
-            //会議終了からすぐにゲームが終了すればよい
-            new AchievementToken<float>("chainShifter.challenge", Time.time, (val, _) => Time.time - val < 15f && NebulaGameManager.Instance.EndState.Winners.Test(MyPlayer));
-
-            yield return new WaitForSeconds(0.2f);
-
-            yield break;
         }
 
         void OnMeetingEnd(MeetingEndEvent ev)

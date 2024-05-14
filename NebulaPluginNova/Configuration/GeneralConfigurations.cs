@@ -2,11 +2,12 @@
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using UnityEngine.Rendering;
+using Virial.Configuration;
+using Virial.Game;
 
 namespace Nebula.Configuration;
 
-[NebulaPreLoad(typeof(Roles.Roles))]
-[NebulaOptionHolder]
+[NebulaPreLoad(false, [typeof(Roles.Roles),typeof (GameModeDefinitionImpl)], [typeof(ConfigurationValues)])]
 public static class GeneralConfigurations
 {
     public enum MapOptionType
@@ -18,7 +19,7 @@ public static class GeneralConfigurations
         Light = 4,
     }
 
-    static public NebulaConfiguration GameModeOption = new(null, "options.gamemode", null, CustomGameMode.AllGameMode.Count - 1, 0, 0) { GameModeMask = 0x7FFFFFFF };
+    static public IntegerConfiguration GameModeOption = new IntegerConfigurationImpl("options.gamemode", Helpers.Sequential(CustomGameMode.AllGameMode.Count), 0);
 
     public class MapCustomization
     {
@@ -38,13 +39,12 @@ public static class GeneralConfigurations
         new(),
     };
 
-    static public ConfigurationHolder AssignmentOptions = new("options.assignment", null, ConfigurationTab.Settings, CustomGameMode.AllNormalGameModeMask);
-    static private Func<object?, string> AssignmentDecorator = (obj) => (int)obj! == -1 ? Language.Translate("options.assignment.unlimited") : obj.ToString()!;
-    static public NebulaConfiguration AssignmentCrewmateOption = new NebulaConfiguration(AssignmentOptions, "crewmate", null, -1, 15, -1, -1) { Decorator = AssignmentDecorator };
-    static public NebulaConfiguration AssignmentImpostorOption = new NebulaConfiguration(AssignmentOptions, "impostor", null, -1, 3, -1, -1) { Decorator = AssignmentDecorator };
-    static public NebulaConfiguration AssignmentNeutralOption = new NebulaConfiguration(AssignmentOptions, "neutral", null, -1, 15, 0, 0) { Decorator = AssignmentDecorator };
-    static public NebulaConfiguration AssignOpToHostOption = new NebulaConfiguration(AssignmentOptions, "assignOpToHost", null, false, false) { GameModeMask = CustomGameMode.Standard };
-    static public NebulaConfiguration GhostAssignmentOption = new NebulaConfiguration(AssignmentOptions, "ghostAssignmentMethod", null, ["options.assignment.ghostAssignmentMethod.normal", "options.assignment.ghostAssignmentMethod.thrilling"], 0, 0) { GameModeMask = CustomGameMode.Standard };
+    static internal ConfigurationHolder AssignmentOptions = new("options.assignment", null, ConfigurationTab.Settings, CustomGameMode.AllNormalGameModeMask);
+    static internal IntegerConfiguration AssignmentCrewmateOption = new RoleCountConfiguration("options.assignment.crewmate", 15, -1);
+    static internal IntegerConfiguration AssignmentImpostorOption = new RoleCountConfiguration("options.assignment.impostor", 3, -1);
+    static internal IntegerConfiguration AssignmentNeutralOption = new RoleCountConfiguration("options.assignment.neutral", 15, 0);
+    static internal BoolConfiguration AssignOpToHostOption = new BoolConfigurationImpl("options.assignment.assignOpToHost", false);
+    static internal ValueConfiguration<int> GhostAssignmentOption = new StringConfigurationImpl("options.assignment.ghostAssignmentMethod", ["options.assignment.ghostAssignmentMethod.normal", "options.assignment.ghostAssignmentMethod.thrilling"], 0);
 
     static public ConfigurationHolder SoloFreePlayOptions = new("options.soloFreePlay", null, ConfigurationTab.Settings, CustomGameMode.FreePlay);
     static public NebulaConfiguration NumOfDummiesOption = new NebulaConfiguration(SoloFreePlayOptions, "numOfDummies", null, 0, 14, 0, 0);
@@ -325,7 +325,7 @@ public static class GeneralConfigurations
     static public NebulaConfiguration CameraRestrictionOption = new NebulaConfiguration(ConsoleRestrictionOptions, "cameraRestriction", null, RestrictionSelections().ToArray(), null, null, RestrictionDecorator);
 
 
-    static public CustomGameMode CurrentGameMode => CustomGameMode.AllGameMode[GameModeOption.CurrentUncheckedValue];
+    static public GameModeDefinition CurrentGameMode => CustomGameMode.AllGameMode[GameModeOption.CurrentUncheckedValue];
 
     public class ExclusiveAssignmentConfiguration
     {

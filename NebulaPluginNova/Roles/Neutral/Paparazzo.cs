@@ -3,6 +3,7 @@ using LibCpp2IL;
 using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -254,18 +255,18 @@ public class PaparazzoShot : MonoBehaviour
 
 
 [NebulaRPCHolder]
-public class Paparazzo : ConfigurableStandardRole
+public class Paparazzo : ConfigurableStandardRole, DefinedRole
 {
     static public Paparazzo MyRole = new Paparazzo();
     static public Team MyTeam = new("teams.paparazzo", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
     public override RoleCategory Category => RoleCategory.NeutralRole;
 
-    public override string LocalizedName => "paparazzo";
+    string DefinedAssignable.LocalizedName => "paparazzo";
     public override Color RoleColor => new Color(202f / 255f, 118f / 255f, 140f / 255f);
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration ShotCoolDownOption = null!;
     private NebulaConfiguration RequiredSubjectsOption = null!;
@@ -283,16 +284,16 @@ public class Paparazzo : ConfigurableStandardRole
         RequiredDisclosedOption = new NebulaConfiguration(RoleConfig, "requiredDisclosed", null, 1, 15, 3, 3);
     }
 
-    public class Instance : RoleInstance, IBindPlayer
+    public class Instance : RoleInstance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
 
-        private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
-        private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
         private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
-        public override Timer? VentCoolDown => ventCoolDown;
-        public override Timer? VentDuration => ventDuration;
-        public override bool CanUseVent => canUseVent;
+        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
+        GameTimer? RuntimeRole.VentDuration => ventDuration;
+        bool RuntimeRole.CanUseVent => canUseVent;
         private List<(Transform holder,PaparazzoShot shot,int playerMask)> shots = new();
         private HudContent? shotsHolder = null;
         private bool canWin = false;
@@ -362,7 +363,7 @@ public class Paparazzo : ConfigurableStandardRole
             }
         };
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             NebulaGameManager.Instance?.CriteriaManager.AddCriteria(PaparazzoCriteria);
 

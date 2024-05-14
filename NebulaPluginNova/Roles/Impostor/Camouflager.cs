@@ -5,17 +5,17 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Camouflager : ConfigurableStandardRole, HasCitation
+public class Camouflager : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Camouflager MyRole = new Camouflager();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "camouflager";
+    string DefinedAssignable.LocalizedName => "camouflager";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration CamoCoolDownOption = null!;
     private NebulaConfiguration CamoDurationOption = null!;
@@ -31,7 +31,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
         CanInvokeCamoAfterDeathOption = new NebulaConfiguration(RoleConfig, "canInvokeCamoAfterDeath", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? camouflageButton = null;
 
@@ -44,10 +44,8 @@ public class Camouflager : ConfigurableStandardRole, HasCitation
         {
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenCommon = new("camouflager.common1", false, (val, _) => val);

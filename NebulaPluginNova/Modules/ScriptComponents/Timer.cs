@@ -137,6 +137,23 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
     GameTimer GameTimer.SetTime(float time) => SetTime(time);
 
     GameTimer GameTimer.Expand(float time) => Expand(time);
+
+    internal class TimerCoolDownHelper : IGameOperator
+    {
+        private Timer myTimer;
+        public TimerCoolDownHelper(Timer timer) { 
+            this.myTimer = timer; 
+        }
+
+        void ResetVentCoolDownOnTaskPhaseRestart(TaskPhaseRestartEvent ev) => myTimer?.Start();
+        void ResetVentCoolDownOnGameStart(GameStartEvent ev) => myTimer?.Start();
+    }
+
+    GameTimer GameTimer.ResetsAtTaskPhase()
+    {
+        GameOperatorManager.Instance?.Register(new TimerCoolDownHelper(this), this);
+        return this;
+    }
 }
 
 public class AdvancedTimer : Timer

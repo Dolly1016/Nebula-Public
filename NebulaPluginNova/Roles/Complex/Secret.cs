@@ -47,7 +47,7 @@ public class ShownSecret : ConfigurableStandardModifier
     }
 }
 
-public class Secret : AbstractRole, DefinedAssignable
+public class Secret : AbstractRole, DefinedRole
 {
     static public ShownSecret OptionRole = new ShownSecret();
     static public Secret MyNiceRole = new(false);
@@ -56,13 +56,13 @@ public class Secret : AbstractRole, DefinedAssignable
     public bool IsEvil { get; private set; }
     public override RoleCategory Category => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "secretInGame";
-    public override string DisplayName => "???";
+    string DefinedAssignable.LocalizedName => "secretInGame";
+    string DefinedAssignable.DisplayName => "???";
     public override Color RoleColor => IsEvil ? Palette.ImpostorRed : Palette.CrewmateBlue;
-    public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
+    public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.Team;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return IsEvil ? MyNiceRole : MyEvilRole; }
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
     bool DefinedAssignable.ShowOnHelpScreen => false;
 
     public override int RoleCount => 0;
@@ -91,9 +91,9 @@ public class Secret : AbstractRole, DefinedAssignable
                 {
                     new NebulaRPCInvoker(() =>
                     {
-                        player.Role.Unbox().OnSetTaskLocal(ref tasks, out int unacquired);
-                        player.Tasks.Unbox().ResetTasksLocal(tasks);
-                        player.Tasks.Unbox().GainExtraTasks(tasks.Count,false, unacquired,false);
+                        var result = GameOperatorManager.Instance!.Run(new PlayerTasksTrySetLocalEvent(player, tasks.ToArray()));
+                        player.Tasks.Unbox().ResetTasksLocal(result.VanillaTasks.ToList());
+                        player.Tasks.Unbox().GainExtraTasks(result.Tasks.Count, false, result.ExtraQuota, false);
                     }).InvokeSingle();
                     player.Tasks.Unbox().RpcSync();
                 }
@@ -105,7 +105,7 @@ public class Secret : AbstractRole, DefinedAssignable
 
     private static void SetUpChallengeAchievement(GamePlayer player)
     {
-        new AchievementToken<int>("secret.another1", 0, (_, _) => (NebulaGameManager.Instance?.EndState?.CheckWin(player.PlayerId) ?? false) && player.Role.Role != MyNiceRole && player.Role.Role != MyEvilRole);
+        new AchievementToken<int>("secret.another1", 0, (_, _) => (NebulaGameManager.Instance?.EndState?.Winners.Test(player) ?? false) && player.Role.Role != MyNiceRole && player.Role.Role != MyEvilRole);
 
         new AchievementToken<int>("secret.challenge", 0, (_, achievement) =>
         {
@@ -113,9 +113,10 @@ public class Secret : AbstractRole, DefinedAssignable
             r.Achievement is AbstractAchievement a && a.Category.type == AchievementType.Challenge && a.Category.role != null && a.Id != "secret.challenge" && r.UniteTo(false) != AbstractAchievement.ClearState.NotCleared);
         });
     }
-    public class NiceInstance : Crewmate.Crewmate.Instance
+    public class NiceInstance : Crewmate.Crewmate.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyNiceRole;
+        public override string DisplayRoleName => base.DisplayRoleName;
 
         public NiceInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
@@ -123,23 +124,22 @@ public class Secret : AbstractRole, DefinedAssignable
             this.savedRole = Roles.AllRoles.First(r => r.Id == savedArgs[0]);
         }
 
-        public override int[]? GetRoleArgument() => savedArgs;
+        int[]? RuntimeAssignable.RoleArguments => savedArgs;
         
         List<GameData.TaskInfo> savedTasks = new();
         int[] savedArgs;
         AbstractRole savedRole;
 
-        public override void OnSetTaskLocal(ref List<GameData.TaskInfo> tasks, out int extraQuota)
+        void OnSetTaskLocal(PlayerTasksTrySetLocalEvent ev)
         {
             int taskCount = OptionRole.NiceConditionOption;
-            extraQuota = 0;
-            while(tasks.Count > taskCount)
+            while(ev.Tasks.Count > taskCount)
             {
                 var index = System.Random.Shared.Next(taskCount);
-                var task = tasks[index];
-                tasks.RemoveAt(index);
-                savedTasks.Add(task);
-                extraQuota++;
+                var task = ev.Tasks[index];
+                ev.Tasks.RemoveAt(index);
+                savedTasks.Add(task.MyTask);
+                ev.AddExtraQuota(1);
             }
         }
 
@@ -149,7 +149,7 @@ public class Secret : AbstractRole, DefinedAssignable
                 ScheduleSendArousalRpc(MyPlayer.Unbox(), savedArgs, savedTasks);
         }
 
-        public override string? OverrideRoleName(string lastRoleName, bool isShort)
+        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort)
         {
             return (isShort ? "?" : "???").Color(Palette.CrewmateBlue);
         }
@@ -159,14 +159,13 @@ public class Secret : AbstractRole, DefinedAssignable
             if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) text += $" ({savedRole.ShortName.Color(savedRole.RoleColor)})".Color(Color.gray);
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
             if (AmOwner) SetUpChallengeAchievement(MyPlayer);
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, IBindPlayer
+    public class EvilInstance : Impostor.Impostor.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyEvilRole;
         public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
@@ -176,7 +175,7 @@ public class Secret : AbstractRole, DefinedAssignable
         }
 
         public override bool HasVanillaKillButton => OptionRole.EvilConditionTypeOption.CurrentValue == 0;
-        public override int[]? GetRoleArgument() => savedArgs;
+        int[]? RuntimeAssignable.RoleArguments => savedArgs;
 
         int[] savedArgs;
         AbstractRole savedRole;
@@ -189,19 +188,16 @@ public class Secret : AbstractRole, DefinedAssignable
             if (leftKill <= 0 && AmOwner) ScheduleSendArousalRpc(MyPlayer, savedArgs);
         }
 
-        public override string? OverrideRoleName(string lastRoleName, bool isShort)
-        {
-            return (isShort ? "?" : "???").Color(Palette.ImpostorRed);
-        }
+        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort) => (isShort ? "?" : "???").Color(Palette.ImpostorRed);
+        
 
         public override void DecorateRoleName(ref string text)
         {
             if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) text += $" ({savedRole.ShortName.Color(savedRole.RoleColor)})".Color(Color.gray);
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
             if (AmOwner) SetUpChallengeAchievement(MyPlayer);
         }
 

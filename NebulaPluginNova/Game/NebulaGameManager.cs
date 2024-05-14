@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Nebula.Compat;
 using Nebula.Roles;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Assignment;
@@ -48,9 +49,9 @@ public record RoleHistory
     public bool IsSet;
     public bool Dead;
 
-    public AssignableInstance Assignable;
+    public RuntimeAssignable Assignable;
 
-    public RoleHistory(byte playerId, ModifierInstance modifier, bool isSet, bool dead)
+    public RoleHistory(byte playerId, RuntimeModifier modifier, bool isSet, bool dead)
     {
         Time = NebulaGameManager.Instance!.CurrentTime;
         PlayerId = playerId;
@@ -60,7 +61,7 @@ public record RoleHistory
         Dead = dead;
     }
 
-    public RoleHistory(byte playerId, RoleInstance role, bool dead)
+    public RoleHistory(byte playerId, RuntimeRole role, bool dead)
     {
         Time = NebulaGameManager.Instance!.CurrentTime;
         PlayerId = playerId;
@@ -70,7 +71,7 @@ public record RoleHistory
         Dead = dead;
     }
 
-    public RoleHistory(byte playerId, GhostRoleInstance role, bool dead)
+    public RoleHistory(byte playerId, RuntimeGhostRole role, bool dead)
     {
         Time = NebulaGameManager.Instance!.CurrentTime;
         PlayerId = playerId;
@@ -82,11 +83,11 @@ public record RoleHistory
 }
 
 public static class RoleHistoryHelper { 
-    static public IEnumerable<T> EachMoment<T>(this List<RoleHistory> history, Predicate<RoleHistory> predicate, Func<RoleInstance, GhostRoleInstance?, List<AssignableInstance>, T> converter)
+    static public IEnumerable<T> EachMoment<T>(this List<RoleHistory> history, Predicate<RoleHistory> predicate, Func<RuntimeRole, GhostRoleInstance?, List<RuntimeAssignable>, T> converter)
     {
-        RoleInstance? role = null;
+        RuntimeRole? role = null;
         GhostRoleInstance? ghostRole = null;
-        List<AssignableInstance> modifiers = new();
+        List<RuntimeAssignable> modifiers = new();
         bool isDead = false;
 
         float lastTime = history[0].Time;
@@ -120,18 +121,18 @@ public static class RoleHistoryHelper {
         }
     }
 
-    static public string ConvertToRoleName(RoleInstance role, GhostRoleInstance? ghostRole, List<AssignableInstance> modifier, bool isShort)
+    static public string ConvertToRoleName(RuntimeRole role, GhostRoleInstance? ghostRole, List<RuntimeAssignable> modifier, bool isShort)
     {
         string result;
         if (ghostRole != null) result = isShort ? ghostRole.Role.ShortName : ghostRole.Role.DisplayName;
-        else result = isShort ? role.Role.ShortName : role.Role.DisplayName;
+        else result = isShort ? role.DisplayName : role.DisplayShort;
 
         foreach (var m in modifier)
         {
             var newName = m.OverrideRoleName(result, isShort);
             if (newName != null) result = newName;
         }
-        Color color = role.Role.RoleColor;
+        Color color = role.Role.RoleColor.ToUnityColor();
         foreach (var m in modifier) m.DecoratePlayerName(ref result, ref color);
         foreach (var m in modifier) m.DecorateRoleName(ref result);
         return result.Replace(" ", "").Color(color);
@@ -272,7 +273,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public FakeSabotageStatus? LocalFakeSabotage => PlayerControl.LocalPlayer.GetModInfo()?.Unbox().FakeSabotage;
     public IRoleAllocator? RoleAllocator { get; internal set; } = null;
 
-    public bool IgnoreWalls => LocalPlayerInfo?.Unbox().Role?.EyesightIgnoreWalls ?? false;
+    public bool IgnoreWalls => LocalPlayerInfo?.Role?.EyesightIgnoreWalls ?? false;
     public Dictionary<byte, AbstractAchievement?> TitleMap = new();
 
     private GamePlayer? localInfoCache = null;
@@ -595,7 +596,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         //実績
 
         //自身が勝利している場合
-        if (EndState!.CheckWin(PlayerControl.LocalPlayer.PlayerId)) {
+        if (EndState!.Winners.Test(PlayerControl.LocalPlayer.GetModInfo())) {
             //生存しているマッドメイト除くクルー陣営
             var aliveCrewmate = allModPlayers.Values.Where(p => !p.IsDead && p.Role.Role.Category == RoleCategory.CrewmateRole && p.Role.Role != Madmate.MyRole);
             int aliveCrewmateCount = aliveCrewmate?.Count() ?? 0;
@@ -681,9 +682,9 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         foreach (var p in AllPlayerInfo()) p.Unbox().AssignableAction(action);
     }
 
-    public void AllRoleAction(Action<RoleInstance> action)
+    public void AllRoleAction(Action<RuntimeRole> action)
     {
-        foreach (var p in AllPlayerInfo()) action.Invoke(p.Unbox().Role);
+        foreach (var p in AllPlayerInfo()) action.Invoke(p.Role);
     }
 
     public void RpcInvokeSpecialWin(CustomEndCondition endCondition, int winnersMask)

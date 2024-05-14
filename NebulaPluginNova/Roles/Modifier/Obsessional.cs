@@ -1,4 +1,5 @@
 ﻿using Nebula.Roles.Crewmate;
+using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
@@ -34,7 +35,7 @@ public class Obsessional : ConfigurableStandardModifier
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
-    public class Instance : ModifierInstance, IBindPlayer
+    public class Instance : ModifierInstance, RuntimeModifier
     {
         public override AbstractModifier Role => MyRole;
 
@@ -58,9 +59,9 @@ public class Obsessional : ConfigurableStandardModifier
                     text += $" <size=60%>({obsession?.Name ?? "ERROR" })</size>";
             }
         }
-    
 
-        public override void OnActivated()
+
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

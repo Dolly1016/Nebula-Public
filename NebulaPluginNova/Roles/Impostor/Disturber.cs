@@ -8,7 +8,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Disturber : ConfigurableStandardRole
+public class Disturber : ConfigurableStandardRole, DefinedRole
 {
     [NebulaPreLoad]
     [NebulaRPCHolder]
@@ -61,11 +61,11 @@ public class Disturber : ConfigurableStandardRole
     static public Disturber MyRole = new Disturber();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "disturber";
+    string DefinedAssignable.LocalizedName => "disturber";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration PlaceCoolDownOption = null!;
     private NebulaConfiguration DisturbCoolDownOption = null!;
@@ -87,7 +87,7 @@ public class Disturber : ConfigurableStandardRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IGameOperator
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         static float PoleDistanceMin = 0.8f;
         static float PoleDistanceMax => MyRole.MaxDistanceBetweenPolesOption.GetFloat();
@@ -160,10 +160,8 @@ public class Disturber : ConfigurableStandardRole
         private AchievementToken<(IHudOverrideTask? cmTask, ElectricTask? elTask, float time, int dead, bool ability, bool isCleared)>? acTokenChallenge = null;
         private ModAbilityButton? disturbButton = null;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenChallenge = new("disturber.challenge", (null, null, 0f, 0, false, false), (val, _) => val.isCleared);

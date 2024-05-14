@@ -24,17 +24,17 @@ public static class ExtraExileRoleSystem
     }
 }
 
-public class Provocateur : ConfigurableStandardRole
+public class Provocateur : ConfigurableStandardRole, DefinedRole
 {
     static public Provocateur MyRole = new Provocateur();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "provocateur";
+    string DefinedAssignable.LocalizedName => "provocateur";
     public override Color RoleColor => new Color(112f / 255f, 255f / 255f, 89f / 255f);
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration EmbroilCoolDownOption = null!;
     private NebulaConfiguration EmbroilAdditionalCoolDownOption = null!;
@@ -49,15 +49,15 @@ public class Provocateur : ConfigurableStandardRole
         EmbroilDurationOption = new(RoleConfig, "embroilDuration", null, 1f, 20f, 1f, 5f, 5f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IBindPlayer
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player){}
 
         private ModAbilityButton embroilButton = null!;
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
-        
-        public override void OnActivated()
+
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

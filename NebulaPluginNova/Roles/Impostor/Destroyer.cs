@@ -19,16 +19,16 @@ public class DestroyerAssets
     })).ToArray();
 
 }
-public class Destroyer : ConfigurableStandardRole
+public class Destroyer : ConfigurableStandardRole, DefinedRole
 {
     static public Destroyer MyRole = new Destroyer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "destroyer";
+    string DefinedAssignable.LocalizedName => "destroyer";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     private NebulaConfiguration KillSEStrengthOption = null!;
@@ -57,7 +57,7 @@ public class Destroyer : ConfigurableStandardRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? destroyButton = null;
         public override AbstractRole Role => MyRole;
@@ -284,13 +284,11 @@ public class Destroyer : ConfigurableStandardRole
 
         private GamePlayer? lastKilling = null;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
-                AchievementToken<int> achChallengeToken = new("destroyer.challenge", 0, (val, _) => val >= 3 && (NebulaGameManager.Instance?.EndState?.CheckWin(MyPlayer.PlayerId) ?? false));
+                AchievementToken<int> achChallengeToken = new("destroyer.challenge", 0, (val, _) => val >= 3 && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
 
                 var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer,ObjectTrackers.ImpostorKillPredicate, p => CheckDestroyKill(MyPlayer.VanillaPlayer, p.VanillaPlayer.transform.position), null));
                 destroyButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);

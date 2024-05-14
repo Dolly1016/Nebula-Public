@@ -2,13 +2,14 @@
 using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Avenger : ConfigurableRole
+public class Avenger : ConfigurableRole, DefinedRole
 {
     static public Avenger MyRole = new Avenger();
     static public Team MyTeam = new("teams.avenger", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -16,13 +17,13 @@ public class Avenger : ConfigurableRole
     public override RoleCategory Category => RoleCategory.NeutralRole;
 
 
-    public override string LocalizedName => "avenger";
+    string DefinedAssignable.LocalizedName => "avenger";
     public override Color RoleColor => new Color(141f / 255f, 111f / 255f, 131f / 255f);
     public override RoleTeam Team => MyTeam;
 
     public override int RoleCount => 0;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, -1));
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, -1));
 
     public NebulaConfiguration CanKnowExistanceOfAvengerOption = null!;
     private NebulaConfiguration TargetCanKnowAvengerOption = null!;
@@ -53,14 +54,14 @@ public class Avenger : ConfigurableRole
 
     public override bool CanBeGuessDefault => false;
 
-    public class Instance : RoleInstance, IBindPlayer
+    public class Instance : RoleInstance, RuntimeRole
     {
-        private Timer ventCoolDown = new Timer(MyRole.VentOption.CoolDown).SetAsAbilityCoolDown().Start();
-        private Timer ventDuration = new(MyRole.VentOption.Duration);
+        private GameTimer ventCoolDown = (new Timer(MyRole.VentOption.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(MyRole.VentOption.Duration);
         private bool canUseVent = MyRole.VentOption.CanUseVent;
-        public override Timer? VentCoolDown => ventCoolDown;
-        public override Timer? VentDuration => ventDuration;
-        public override bool CanUseVent => canUseVent;
+        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
+        GameTimer? RuntimeRole.VentDuration => ventDuration;
+        bool RuntimeRole.CanUseVent => canUseVent;
 
         public override AbstractRole Role => MyRole;
 
@@ -71,11 +72,9 @@ public class Avenger : ConfigurableRole
             target = NebulaGameManager.Instance?.GetPlayer(targetId);
         }
 
-        public override int[]? GetRoleArgument() => [target?.PlayerId ?? 255];
-        public override void OnActivated()
+        int[]? RuntimeAssignable.RoleArguments => [target?.PlayerId ?? 255];
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText("You became AVENGER.", MyRole.RoleColor, 5.5f, true);

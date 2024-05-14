@@ -7,19 +7,19 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Jackal : ConfigurableStandardRole, HasCitation
+public class Jackal : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Jackal MyRole = new Jackal();
     static public Team MyTeam = new("teams.jackal", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
     public override RoleCategory Category => RoleCategory.NeutralRole;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if (Sidekick.MyRole.RoleConfig.IsShown) yield return Sidekick.MyRole; }
-    public override string LocalizedName => "jackal";
+    string DefinedAssignable.LocalizedName => "jackal";
     public override Color RoleColor => new Color(8f / 255f, 190f / 255f, 245f / 255f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, 0), arguments.Get(2, 0));
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, 0), arguments.Get(2, 0));
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     public NebulaConfiguration CanCreateSidekickOption = null!;
@@ -44,7 +44,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
     }
 
 
-    public class Instance : RoleInstance, IBindPlayer
+    public class Instance : RoleInstance, RuntimeRole
     {
         private ModAbilityButton? killButton = null;
         private ModAbilityButton? sidekickButton = null;
@@ -63,7 +63,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
 
         static private ISpriteLoader sidekickButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SidekickButton.png", 115f);
 
-        public override int[]? GetRoleArgument() => [JackalTeamId, killingTotal, myKillingTotal];
+        int[]? RuntimeAssignable.RoleArguments => [JackalTeamId, killingTotal, myKillingTotal];
         public bool CanWinDueToKilling => /*killingTotal >= MyRole.NumOfKillingToWinOption*/ true;
         public bool IsMySidekick(GamePlayer? player)
         {
@@ -76,7 +76,7 @@ public class Jackal : ConfigurableStandardRole, HasCitation
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
@@ -231,28 +231,28 @@ file static class SidekickAchievementChecker
         if ((lastRole?.Assignable as RoleInstance)?.Role.Category == RoleCategory.ImpostorRole)
         {
             new AchievementToken<bool>("sidekick.challenge", default, (val, _) =>
-                NebulaGameManager.Instance!.EndState!.CheckWin(myPlayer.PlayerId) && NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.JackalWin);
+                NebulaGameManager.Instance!.EndState!.Winners.Test(myPlayer) && NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.JackalWin);
         }
 
     }
 }
 
-public class Sidekick : ConfigurableRole, HasCitation
+public class Sidekick : ConfigurableRole, HasCitation, DefinedRole
 {
     static public Sidekick MyRole = new Sidekick();
 
     public override RoleCategory Category => RoleCategory.NeutralRole;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return Jackal.MyRole; }
 
-    public override string InternalName => "jackal.sidekick";
-    public override string LocalizedName => "sidekick";
+    string DefinedAssignable.InternalName => "jackal.sidekick";
+    string DefinedAssignable.LocalizedName => "sidekick";
     
     public override Color RoleColor => Jackal.MyRole.RoleColor;
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Jackal.MyTeam;
 
     public override int RoleCount => 0;
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
 
     public NebulaConfiguration IsModifierOption = null!;
     public NebulaConfiguration SidekickCanKillOption = null!;
@@ -278,7 +278,7 @@ public class Sidekick : ConfigurableRole, HasCitation
 
     public override bool IsSpawnable { get => Jackal.MyRole.IsSpawnable && Jackal.MyRole.CanCreateSidekickOption && !IsModifierOption; }
 
-    public class Instance : RoleInstance
+    public class Instance : RoleInstance, RuntimeRole
     {
         private ModAbilityButton? killButton = null;
         public override AbstractRole Role => MyRole;
@@ -288,11 +288,11 @@ public class Sidekick : ConfigurableRole, HasCitation
             JackalTeamId=jackalTeamId;
         }
 
-        public override int[]? GetRoleArgument() => [JackalTeamId];
+        int[]? RuntimeAssignable.RoleArguments => [JackalTeamId];
 
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             //サイドキック除去
             MyPlayer.Unbox().UnsetModifierLocal(m=>m.Role == SidekickModifier.MyRole);
@@ -333,7 +333,7 @@ public class SidekickModifier : AbstractModifier, HasCitation
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0,0));
 
-    public class Instance : ModifierInstance
+    public class Instance : ModifierInstance, RuntimeModifier
     {
         public override AbstractModifier Role => MyRole;
         public int JackalTeamId;
@@ -351,7 +351,7 @@ public class SidekickModifier : AbstractModifier, HasCitation
             if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " #".Color(Jackal.MyRole.RoleColor);
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

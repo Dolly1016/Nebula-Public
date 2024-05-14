@@ -5,17 +5,17 @@ using Virial.Events.Player;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Doctor : ConfigurableStandardRole
+public class Doctor : ConfigurableStandardRole, DefinedRole
 {
     static public Doctor MyRole = new Doctor();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "doctor";
+    string DefinedAssignable.LocalizedName => "doctor";
     public override Color RoleColor => new Color(128f / 255f, 255f / 255f, 221f / 255f);
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration PortableVitalsChargeOption = null!;
     private NebulaConfiguration MaxPortableVitalsChargeOption = null!;
@@ -30,7 +30,7 @@ public class Doctor : ConfigurableStandardRole
         ChargesPerTasksOption = new(RoleConfig, "chargesPerTasks", null, 0.5f, 10f, 0.5f, 1f, 1f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         private ModAbilityButton? vitalButton = null;
         public override AbstractRole Role => MyRole;
@@ -40,12 +40,12 @@ public class Doctor : ConfigurableStandardRole
         {
         }
 
-        public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
+        void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
             vitalTimer = Mathf.Min(MyRole.MaxPortableVitalsChargeOption.GetFloat(), vitalTimer + MyRole.ChargesPerTasksOption.GetFloat());
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             StaticAchievementToken? acTokenCommon = null;
             StaticAchievementToken? acTokenChallenge = null;

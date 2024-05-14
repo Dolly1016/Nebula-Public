@@ -7,16 +7,16 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Marionette : ConfigurableStandardRole
+public class Marionette : ConfigurableStandardRole, DefinedRole
 {
     static public Marionette MyRole = new Marionette();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "marionette";
+    string DefinedAssignable.LocalizedName => "marionette";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration PlaceCoolDownOption = null!;
     private NebulaConfiguration SwapCoolDownOption = null!;
@@ -54,7 +54,7 @@ public class Marionette : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? destroyButton = null;
@@ -75,10 +75,8 @@ public class Marionette : ConfigurableStandardRole
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<(bool cleared, float swapTime)>? acTokenCommon2 = null;
         AchievementToken<(bool cleared, float killTime)>? acTokenChallenge = null;
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("marionette.another1");

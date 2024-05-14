@@ -53,6 +53,12 @@ public class EastAsianFontChanger
 [NebulaPreLoad]
 public class Language
 {
+    private class LanguageAPI : Virial.Media.Translator
+    {
+        string Virial.Media.Translator.Translate(string key) => Language.Translate(key);
+    }
+
+    static public Virial.Media.Translator API = new LanguageAPI();
     static private Language? CurrentLanguage = null;
     static private Language? GuestLanguage = null;
     static private Language? DefaultLanguage = null;

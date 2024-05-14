@@ -16,7 +16,7 @@ public class TieBreaker : ConfigurableStandardModifier, HasCitation
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
-    public class Instance : ModifierInstance, IBindPlayer
+    public class Instance : ModifierInstance, RuntimeModifier
     {
         public override AbstractModifier Role => MyRole;
 
@@ -28,7 +28,7 @@ public class TieBreaker : ConfigurableStandardModifier, HasCitation
         }
 
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

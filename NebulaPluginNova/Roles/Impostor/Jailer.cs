@@ -6,16 +6,16 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Jailer : ConfigurableStandardRole
+public class Jailer : ConfigurableStandardRole, DefinedRole
 {
     static public Jailer MyRole = new Jailer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "jailer";
+    string DefinedAssignable.LocalizedName => "jailer";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public NebulaConfiguration CanMoveWithMapWatchingOption = null!;
     public NebulaConfiguration CanIdentifyDeadBodiesOption = null!;
@@ -34,7 +34,7 @@ public class Jailer : ConfigurableStandardRole
         InheritAbilityOnDyingOption = new NebulaConfiguration(RoleConfig, "inheritAbilityOnDying", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -73,10 +73,8 @@ public class Jailer : ConfigurableStandardRole
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 //JailerAbilityを獲得していなければ登録

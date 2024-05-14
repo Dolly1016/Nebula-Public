@@ -5,17 +5,17 @@ using Virial.Game;
 namespace Nebula.Roles.Crewmate;
 
 
-public class Comet : ConfigurableStandardRole
+public class Comet : ConfigurableStandardRole, DefinedRole
 {
     static public Comet MyRole = new Comet();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "comet";
+    string DefinedAssignable.LocalizedName => "comet";
     public override Color RoleColor => new Color(121f / 255f, 175f / 255f, 206f / 255f);
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration BlazeCoolDownOption = null!;
     private NebulaConfiguration BlazeSpeedOption = null!;
@@ -36,7 +36,7 @@ public class Comet : ConfigurableStandardRole
         BlazeScreenOption = new(RoleConfig, "blazeScreenRate", null, 1f, 2f, 0.125f, 1.125f, 1.125f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IBindPlayer
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player) { }
@@ -44,7 +44,7 @@ public class Comet : ConfigurableStandardRole
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BoostButton.png", 115f);
         private ModAbilityButton? boostButton = null;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
@@ -85,7 +85,7 @@ public class Comet : ConfigurableStandardRole
             }
         }
 
-        public override bool IgnoreBlackout => true;
+        bool RuntimeRole.IgnoreBlackout => true;
 
         [Local]
         void OnPlayerMurdered(PlayerMurderedEvent ev)

@@ -1,5 +1,6 @@
 ﻿using Nebula.Behaviour;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -7,19 +8,19 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Arsonist : ConfigurableStandardRole, HasCitation
+public class Arsonist : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Arsonist MyRole = new Arsonist();
     static public Team MyTeam = new("teams.arsonist", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
     public override RoleCategory Category => RoleCategory.NeutralRole;
 
-    public override string LocalizedName => "arsonist";
+    string DefinedAssignable.LocalizedName => "arsonist";
     public override Color RoleColor => new Color(229f / 255f, 93f / 255f, 0f / 255f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
     private NebulaConfiguration DouseCoolDownOption = null!;
     private NebulaConfiguration DouseDurationOption = null!;
@@ -33,30 +34,33 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
         DouseDurationOption = new NebulaConfiguration(RoleConfig, "douseDuration", null, 1f, 10f, 0.5f, 3f, 3f);
     }
 
-    public class Instance : RoleInstance, IBindPlayer
+    public class Instance : RoleInstance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
 
-        private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
-        private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
         private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
-        public override Timer? VentCoolDown => ventCoolDown;
-        public override Timer? VentDuration => ventDuration;
-        public override bool CanUseVent => canUseVent;
+        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
+        GameTimer? RuntimeRole.VentDuration => ventDuration;
+        bool RuntimeRole.CanUseVent => canUseVent;
         private int initialDousedMask = 0;
         public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if (arguments.Length == 1) initialDousedMask = arguments[0];
         }
 
-        public override int[]? GetRoleArgument()
+        int[]? RuntimeAssignable.RoleArguments
         {
-            int mask = 0;
-            foreach(var icon in playerIcons.Where(icon => icon.icon.GetAlpha() > 0.8f))
+            get
             {
-                mask |= 1 << icon.playerId;
+                int mask = 0;
+                foreach (var icon in playerIcons.Where(icon => icon.icon.GetAlpha() > 0.8f))
+                {
+                    mask |= 1 << icon.playerId;
+                }
+                return new int[] { mask };
             }
-            return new int[] { mask };
         }
 
 
@@ -82,7 +86,7 @@ public class Arsonist : ConfigurableStandardRole, HasCitation
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

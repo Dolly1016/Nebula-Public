@@ -141,29 +141,30 @@ static file class GuesserSystem
     }
 }
 
-public class Guesser : ConfigurableStandardRole, HasCitation
+public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Guesser MyNiceRole = new(false);
     static public Guesser MyEvilRole = new(true);
 
     public bool IsEvil { get; private set; }
-    public override RoleCategory Category => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => IsEvil ? "evilGuesser" : "niceGuesser";
-    public override Color RoleColor => IsEvil ? Palette.ImpostorRed : new Color(1f, 1f, 0f);
-    public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
+
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if(MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; yield return GuesserModifier.MyRole; }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
 
     static public NebulaConfiguration NumOfGuessOption = null!;
     static public NebulaConfiguration NumOfGuessPerMeetingOption = null!;
     static public NebulaConfiguration CanCallEmergencyMeetingOption = null!;
     static public NebulaConfiguration GuessableFilterEditorOption = null!;
 
-    public override bool CanLoadDefault(IntroAssignableModifier modifier) => modifier != GuesserModifier.MyRole;
+    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => assignable != GuesserModifier.MyRole;
     
-    public Guesser(bool isEvil)
+    public Guesser(bool isEvil) : base(
+        isEvil ? "evilGuesser" : "niceGuesser", 
+        new(isEvil ? Palette.ImpostorRed : new Color(1f, 1f, 0f)), 
+        isEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole,
+        isEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam)
     {
         IsEvil = isEvil;
     }
@@ -190,7 +191,7 @@ public class Guesser : ConfigurableStandardRole, HasCitation
     {
         base.LoadOptions();
 
-        RoleConfig.AddTags(ConfigurationHolder.TagChaotic);
+        RoleConfig.AddTags(Configuration.ConfigurationHolder.TagChaotic);
 
         NumOfGuessOption ??= new NebulaConfiguration(null, "role.guesser.numOfGuess", null, 1, 15, 3, 3);
         NumOfGuessPerMeetingOption ??= new NebulaConfiguration(null, "role.guesser.numOfGuessPerMeeting", null, 1, 15, 1, 1);

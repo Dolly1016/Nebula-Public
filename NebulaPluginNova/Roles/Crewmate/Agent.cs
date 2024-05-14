@@ -1,21 +1,22 @@
 ﻿using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Agent : ConfigurableStandardRole
+public class Agent : ConfigurableStandardRole, DefinedRole
 {
     static public Agent MyRole = new Agent();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "agent";
+    string DefinedAssignable.LocalizedName => "agent";
     public override Color RoleColor => new Color(166f / 255f, 183f / 255f, 144f / 255f);
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration NumOfExemptedTasksOption = null!;
     private NebulaConfiguration NumOfExtraTasksOption = null!;
@@ -34,22 +35,22 @@ public class Agent : ConfigurableStandardRole
         SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = new(RoleConfig, "suicideIfSomeoneElseCompletesTasksBeforeAgent", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance, IBindPlayer
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
         public override AbstractRole Role => MyRole;
-        public override bool CanUseVent => leftVent > 0;
+        bool RuntimeRole.CanUseVent => leftVent > 0;
         private int leftVent = MyRole.VentConfiguration.Uses;
         private Timer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
         private TMPro.TextMeshPro UsesText = null!;
 
-        public override Timer? VentDuration => ventDuration;
+        GameTimer? RuntimeRole.VentDuration => ventDuration;
         public Instance(GamePlayer player, int[] argument) : base(player)
         {
             if (argument.Length >= 1) leftVent = argument[0];
         }
 
-        public override int[]? GetRoleArgument() => new int[] { leftVent };
+        int[]? RuntimeAssignable.RoleArguments => [leftVent];
 
         [Local]
         void OnTaskUpdated(PlayerTaskUpdateEvent ev)
@@ -66,26 +67,25 @@ public class Agent : ConfigurableStandardRole
             }
         }
 
-        public override void OnEnterVent(Vent vent)
+        [Local, OnlyMyPlayer]
+        void OnEnterVent(PlayerVentEnterEvent ev)
         {
-            if (AmOwner)
-            {
-                ventDuration.Start();
+            ventDuration.Start();
 
-                leftVent--;
-                UsesText.text = leftVent.ToString();
-                if (leftVent <= 0) UsesText.transform.parent.gameObject.SetActive(false);
-            }
+            leftVent--;
+            UsesText.text = leftVent.ToString();
+            if (leftVent <= 0) UsesText.transform.parent.gameObject.SetActive(false);
         }
 
-        public override void OnSetTaskLocal(ref List<GameData.TaskInfo> tasks, out int extraQuota)
+
+        [OnlyMyPlayer]
+        void OnSetTaskLocal(PlayerTasksTrySetLocalEvent ev)
         {
-            extraQuota = 0;
             int extempts = MyRole.NumOfExemptedTasksOption;
-            for (int i = 0; i < extempts; i++) tasks.RemoveAt(System.Random.Shared.Next(tasks.Count));
+            for (int i = 0; i < extempts; i++) ev.Tasks.RemoveAt(System.Random.Shared.Next(ev.Tasks.Count));
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

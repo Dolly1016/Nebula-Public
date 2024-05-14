@@ -5,17 +5,17 @@ using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Necromancer : ConfigurableStandardRole
+public class Necromancer : ConfigurableStandardRole, DefinedRole
 {
     static public Necromancer MyRole = new Necromancer();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "necromancer";
+    string DefinedAssignable.LocalizedName => "necromancer";
     public override Color RoleColor => new Color(108f / 255f, 50f / 255f, 160f / 255f);
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration ReviveCoolDownOption = null!;
     private NebulaConfiguration ReviveDurationOption = null!;
@@ -35,7 +35,7 @@ public class Necromancer : ConfigurableStandardRole
         ReviveMaxRangeOption = new NebulaConfiguration(RoleConfig, "reviveMaxRange", null, 10f, 30f, 2.5f, 17.5f, 17.5f) { Decorator = NebulaConfiguration.OddsDecorator };
     }
 
-    public class Instance : Crewmate.Instance, IBindPlayer
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
@@ -92,7 +92,7 @@ public class Necromancer : ConfigurableStandardRole
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             draggable?.OnActivated(this);
 
@@ -183,9 +183,9 @@ public class Necromancer : ConfigurableStandardRole
 
         [OnlyMyPlayer, Local]
         void ReleaseDeadBodyOnNecromancerDead(PlayerDieEvent ev) => draggable?.OnDead(this);
-        
 
-        protected override void OnInactivated()
+
+        void RuntimeAssignable.OnInactivated()
         {
             draggable?.OnInactivated(this);
         }

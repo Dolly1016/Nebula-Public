@@ -7,18 +7,18 @@ using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Justice : ConfigurableStandardRole, HasCitation
+public class Justice : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Justice MyRole = null;//new Justice();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "justice";
+    string DefinedAssignable.LocalizedName => "justice";
     public override Color RoleColor => new Color(255f / 255f, 128f / 255f, 0f / 255f);
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration PutJusticeOnTheBalanceOption = null!;
     protected override void LoadOptions()

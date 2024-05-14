@@ -1,4 +1,6 @@
-﻿namespace Nebula.Roles.Modifier;
+﻿using Virial.Assignable;
+
+namespace Nebula.Roles.Modifier;
 
 
 public class MetaRole : AbstractModifier
@@ -10,7 +12,7 @@ public class MetaRole : AbstractModifier
 
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    public class Instance : ModifierInstance
+    public class Instance : ModifierInstance, RuntimeModifier
     {
         public override AbstractModifier Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -18,7 +20,7 @@ public class MetaRole : AbstractModifier
         }
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MetaActionButton.png", 115f);
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

@@ -7,16 +7,16 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Raider : ConfigurableStandardRole
+public class Raider : ConfigurableStandardRole, DefinedRole
 {
     static public Raider MyRole = new Raider();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "raider";
+    string DefinedAssignable.LocalizedName => "raider";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private KillCoolDownConfiguration ThrowCoolDownOption = null!;
     private NebulaConfiguration AxeSizeOption = null!;
@@ -104,7 +104,7 @@ public class Raider : ConfigurableStandardRole
                                     {
                                         acTokenChallenge ??= new("raider.challenge", killed, (val, _) =>
                                         /*人数都合でゲームが終了している*/ NebulaGameManager.Instance!.EndState!.EndReason == GameEndReason.Situation &&
-                                        /*勝利している*/ NebulaGameManager.Instance.EndState!.CheckWin(Owner.PlayerId) &&
+                                        /*勝利している*/ NebulaGameManager.Instance.EndState!.Winners.Test(Owner) &&
                                         /*最後の死亡者がこの斧によってキルされている*/ (killed & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
                                         );
                                         acTokenChallenge.Value = killed;
@@ -152,7 +152,7 @@ public class Raider : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
@@ -167,11 +167,9 @@ public class Raider : ConfigurableStandardRole
 
         AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
         StaticAchievementToken? acTokenCommon = null;
-        
-        public override void OnActivated()
-        {
-            base.OnActivated();
 
+        void RuntimeAssignable.OnActivated()
+        {
             if (AmOwner)
             {
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("raider.another1");
@@ -252,7 +250,7 @@ public class Raider : ConfigurableStandardRole
             MyAxe = null;
         }
 
-        protected override void OnInactivated()
+        void RuntimeAssignable.OnInactivated()
         {
             UnequipAxe();
         }

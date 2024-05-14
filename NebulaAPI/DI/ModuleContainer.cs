@@ -124,7 +124,9 @@ public class DIManager
         return impl;
     }
 
-    public bool RegisterModule<Container>(Func<IGenericModule<Container>> supplier) 
+    public bool RegisterModule<Container>(Func<IGenericModule<Container>> supplier) => RegisterGeneralModule<Container>(supplier);
+
+    public bool RegisterGeneralModule<Container>(Func<IModule> supplier)
     {
         var type = typeof(Container);
 

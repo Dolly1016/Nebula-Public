@@ -2,16 +2,16 @@
 
 namespace Nebula.Roles.Impostor;
 
-public class Painter : ConfigurableStandardRole
+public class Painter : ConfigurableStandardRole, DefinedRole
 {
     static public Painter MyRole = new Painter();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "painter";
+    string DefinedAssignable.LocalizedName => "painter";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration SampleCoolDownOption = null!;
     private NebulaConfiguration PaintCoolDownOption = null!;
@@ -28,7 +28,7 @@ public class Painter : ConfigurableStandardRole
         TransformAfterMeetingOption = new NebulaConfiguration(RoleConfig, "transformAfterMeeting", null, false, false);
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? paintButton = null;
@@ -43,10 +43,8 @@ public class Painter : ConfigurableStandardRole
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<int[]> acTokenChallenge = null;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenChallenge = new("painter.challenge", new int[15], (val, _) => val.Count(v => v >= 2) >= 3);

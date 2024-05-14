@@ -1,23 +1,24 @@
 ﻿using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Jester : ConfigurableStandardRole, HasCitation
+public class Jester : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Jester MyRole = new Jester();
     static public Team MyTeam = new("teams.jester", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
     public override RoleCategory Category => RoleCategory.NeutralRole;
 
-    public override string LocalizedName => "jester";
+    string DefinedAssignable.LocalizedName => "jester";
     public override Color RoleColor => new Color(253f / 255f, 84f / 255f, 167f / 255f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration CanDragDeadBodyOption = null!;
     private NebulaConfiguration CanFixLightOption = null!;
@@ -47,16 +48,16 @@ public class Jester : ConfigurableStandardRole, HasCitation
         }
     };
 
-    public class Instance : RoleInstance, IBindPlayer, RuntimeAssignable
+    public class Instance : RoleInstance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
-        private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
-        private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
         private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
-        public override Timer? VentCoolDown => ventCoolDown;
-        public override Timer? VentDuration => ventDuration;
-        public override bool CanUseVent => canUseVent;
+        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
+        GameTimer? RuntimeRole.VentDuration => ventDuration;
+        bool RuntimeRole.CanUseVent => canUseVent;
 
 
         public Instance(GamePlayer player) : base(player)
@@ -65,7 +66,7 @@ public class Jester : ConfigurableStandardRole, HasCitation
         }
 
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             NebulaGameManager.Instance?.CriteriaManager.AddCriteria(JesterCriteria);
 

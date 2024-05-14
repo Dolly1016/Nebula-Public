@@ -4,7 +4,7 @@ using Virial;
 namespace Nebula.Utilities;
 
 
-file class BitMask32<T> : EditableBitMask<T>
+internal class BitMask32<T> : EditableBitMask<T>
 {
     private Func<T, int> converter;
     private int bitMask = 0;

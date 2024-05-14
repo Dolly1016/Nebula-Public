@@ -1,24 +1,25 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Vulture : ConfigurableStandardRole, HasCitation
+public class Vulture : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Vulture MyRole = new Vulture();
     static public Team MyTeam = new("teams.vulture", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
     public override RoleCategory Category => RoleCategory.NeutralRole;
 
-    public override string LocalizedName => "vulture";
+    string DefinedAssignable.LocalizedName => "vulture";
     public override Color RoleColor => new Color(140f / 255f, 70f / 255f, 18f / 255f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     private KillCoolDownConfiguration EatCoolDownOption = null!;
     private NebulaConfiguration NumOfEatenToWinOption = null!;
@@ -34,7 +35,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
     }
 
 
-    public class Instance : RoleInstance, IBindPlayer
+    public class Instance : RoleInstance, RuntimeRole
     {
         private ModAbilityButton? eatButton = null;
 
@@ -42,12 +43,12 @@ public class Vulture : ConfigurableStandardRole, HasCitation
 
         public override AbstractRole Role => MyRole;
 
-        private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
-        private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
         private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
-        public override Timer? VentCoolDown => ventCoolDown;
-        public override Timer? VentDuration => ventDuration;
-        public override bool CanUseVent => canUseVent;
+        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
+        GameTimer? RuntimeRole.VentDuration => ventDuration;
+        bool RuntimeRole.CanUseVent => canUseVent;
         int leftEaten = MyRole.NumOfEatenToWinOption;
 
         AchievementToken<bool>? acTokenChallenge;
@@ -56,7 +57,7 @@ public class Vulture : ConfigurableStandardRole, HasCitation
         {
             if (arguments.Length >= 1) leftEaten = arguments[0];
         }
-        public override int[]? GetRoleArgument() => new int[] { leftEaten };
+        int[]? RuntimeAssignable.RoleArguments => new int[] { leftEaten };
 
         private List<(DeadBody deadBody, Arrow arrow)> AllArrows = new();
 
@@ -89,11 +90,11 @@ public class Vulture : ConfigurableStandardRole, HasCitation
             if (acTokenChallenge != null) acTokenChallenge.Value = false;
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
-                acTokenChallenge = new("vulture.challenge", true, (val, _) =>  val && NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.VultureWin && NebulaGameManager.Instance!.EndState!.CheckWin(MyPlayer.PlayerId) );
+                acTokenChallenge = new("vulture.challenge", true, (val, _) =>  val && NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.VultureWin && NebulaGameManager.Instance!.EndState!.Winners.Test(MyPlayer) );
 
                 StaticAchievementToken? acTokenCommon = null;
 

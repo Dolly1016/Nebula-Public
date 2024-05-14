@@ -4,18 +4,18 @@ using Virial.Events.Player;
 
 namespace Nebula.Roles.Impostor;
 
-public class Impostor : ConfigurableStandardRole
+public class Impostor : ConfigurableStandardRole, DefinedRole
 {
     static public Impostor MyRole = new Impostor();
     static public Team MyTeam = new("teams.impostor", Palette.ImpostorRed,TeamRevealType.Teams);
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
+    RoleCategory DefinedSingleAssignable.Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "impostor";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    string DefinedAssignable.LocalizedName => "impostor";
+    Virial.Color DefinedAssignable.Color => new(Palette.ImpostorRed);
     public override bool IsDefaultRole => true;
+    RoleTeam DefinedSingleAssignable.Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public NebulaConfiguration CanKillHidingPlayerOption = null!;
 
@@ -26,14 +26,14 @@ public class Impostor : ConfigurableStandardRole
         CanKillHidingPlayerOption = new(RoleConfig, "canKillHidingPlayer", null, false, false);
     }
 
-    public class Instance : RoleInstance
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player)
         {
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

@@ -137,6 +137,26 @@ public enum AttributeAsset
     /// VC Settingsのデバイス設定で使用している横長のボタンです。
     /// </summary>
     DeviceButton,
+
+    /// <summary>
+    /// オプションの名称の表示で使用している固定長テキスト属性です。
+    /// </summary>
+    OptionsTitle,
+
+    /// <summary>
+    /// オプションの値の表示で使用している固定長テキスト属性です。
+    /// </summary>
+    OptionsValue,
+
+    /// <summary>
+    /// オプションの値の表示で使用している固定長テキスト属性です。
+    /// </summary>
+    OptionsValueShorter,
+
+    /// <summary>
+    /// オプション値の変更ボタンで使用している固定長テキスト属性です。
+    /// </summary>
+    OptionsButton,
 }
 
 [Flags]

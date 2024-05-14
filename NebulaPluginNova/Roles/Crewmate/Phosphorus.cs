@@ -6,17 +6,17 @@ using Virial.Game;
 namespace Nebula.Roles.Crewmate;
 
 [NebulaRPCHolder]
-public class Phosphorus : ConfigurableStandardRole
+public class Phosphorus : ConfigurableStandardRole, DefinedRole
 {
     static public Phosphorus MyRole = new Phosphorus();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "phosphorus";
+    string DefinedAssignable.LocalizedName => "phosphorus";
     public override Color RoleColor => new Color(249f / 255f, 188f / 255f, 81f / 255f);
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     private NebulaConfiguration NumOfLampsOption = null!;
     private NebulaConfiguration PlaceCoolDownOption = null!;
@@ -53,7 +53,7 @@ public class Phosphorus : ConfigurableStandardRole
         }
     }
 
-    public class Instance : Crewmate.Instance, IBindPlayer
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? lanternButton = null;
@@ -72,7 +72,7 @@ public class Phosphorus : ConfigurableStandardRole
         private int[]? globalLanterns = null;
         List<NebulaSyncStandardObject> localLanterns = null!;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

@@ -7,25 +7,25 @@ public abstract class IRoleAllocator
 {
     public class RoleTable
     {
-        public List<(AbstractRole role, int[] arguments, byte playerId)> roles = new();
-        public List<(AbstractModifier modifier, int[] arguments, byte playerId)> modifiers = new();
+        public List<(DefinedRole role, int[] arguments, byte playerId)> roles = new();
+        public List<(DefinedModifier modifier, int[] arguments, byte playerId)> modifiers = new();
 
-        public void SetRole(PlayerControl player, AbstractRole role, int[]? arguments = null)
+        public void SetRole(PlayerControl player, DefinedRole role, int[]? arguments = null)
         {
             roles.Add(new(role, arguments ?? Array.Empty<int>(), player.PlayerId));
         }
 
-        public void SetModifier(PlayerControl player, AbstractModifier role, int[]? arguments = null)
+        public void SetModifier(PlayerControl player, DefinedModifier role, int[]? arguments = null)
         {
             modifiers.Add(new(role, arguments ?? Array.Empty<int>(), player.PlayerId));
         }
 
-        public void SetRole(byte player, AbstractRole role, int[]? arguments = null)
+        public void SetRole(byte player, DefinedRole role, int[]? arguments = null)
         {
             roles.Add(new(role, arguments ?? Array.Empty<int>(), player));
         }
 
-        public void SetModifier(byte player, AbstractModifier role, int[]? arguments = null)
+        public void SetModifier(byte player, DefinedModifier role, int[]? arguments = null)
         {
             modifiers.Add(new(role, arguments ?? Array.Empty<int>(), player));
         }
@@ -62,7 +62,7 @@ public abstract class IRoleAllocator
 
         }
 
-        public IEnumerable<(byte playerId,AbstractRole role)> GetPlayers(RoleCategory category)
+        public IEnumerable<(byte playerId,DefinedRole role)> GetPlayers(RoleCategory category)
         {
             foreach (var tuple in roles) if ((tuple.role.Category & category) != 0) yield return (tuple.playerId, tuple.role);
         }

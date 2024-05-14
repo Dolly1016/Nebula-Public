@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -6,18 +7,18 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Reaper : ConfigurableStandardRole
+public class Reaper : ConfigurableStandardRole, DefinedRole
 {
 
     static public Reaper MyRole = new Reaper();
 
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "reaper";
+    string DefinedAssignable.LocalizedName => "reaper";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private new VentConfiguration VentConfiguration = null!;
     protected override void LoadOptions()
@@ -29,12 +30,12 @@ public class Reaper : ConfigurableStandardRole
         VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         private Scripts.Draggable? draggable = null;
-        private Timer ventCoolDown = new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start();
-        private Timer ventDuration = new(MyRole.VentConfiguration.Duration);
+        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
         public override Timer? VentCoolDown => ventCoolDown;
         public override Timer? VentDuration => ventDuration;
 
@@ -166,10 +167,8 @@ public class Reaper : ConfigurableStandardRole
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             draggable?.OnActivated(this);
             if (AmOwner)
             {
@@ -185,17 +184,18 @@ public class Reaper : ConfigurableStandardRole
 
         [OnlyMyPlayer]
         void OnDead(PlayerDieEvent ev) => draggable?.OnDead(this);
-        
 
-        protected override void OnInactivated()
+
+        void RuntimeAssignable.OnInactivated()
         {
             draggable?.OnInactivated(this);
             if (AmOwner) EditVentInfo(false);
         }
 
-        public override void OnEnterVent(Vent vent)
+        [Local]
+        void OnEnterVent(PlayerVentEnterEvent ev)
         {
-            if (AmOwner && MyPlayer.HoldingAnyDeadBody)
+            if (MyPlayer.HoldingAnyDeadBody)
                 acTokenCommon ??= new("reaper.common1");
         }
 

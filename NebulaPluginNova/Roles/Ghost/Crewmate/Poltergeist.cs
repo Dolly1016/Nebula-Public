@@ -1,29 +1,23 @@
 ﻿using Virial.Assignable;
+using Virial.Configuration;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Ghost.Crewmate;
 
 [NebulaRPCHolder]
-public class Poltergeist : ConfigurableStandardGhostRole
+public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
 {
     static public Poltergeist MyRole = new Poltergeist();
 
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
+    public Poltergeist() : base("poltergeist", new(210, 220, 234), RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam) { }
+    string ICodeName.CodeName => "PLT";
 
-    public override string LocalizedName => "poltergeist";
-    public override string CodeName => "PLT";
-    public override Color RoleColor => new Color(210f / 255f, 220f / 255f, 234f / 255f);
+    private FloatConfiguration PoltergeistCoolDownOption = new FloatConfigurationImpl("role.poltergeistCoolDown", ArrayHelper.Selection(5f, 30f, 2.5f), 20f).DecorateAsSecConfiguration();
 
-    private NebulaConfiguration PoltergeistCoolDownOption = null!;
+    RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    public override GhostRoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-        PoltergeistCoolDownOption = new(RoleConfig, "poltergeistCoolDown", null, 5f, 30f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-    }
-
-    public class Instance : GhostRoleInstance
+    public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
     {
         public override AbstractGhostRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)

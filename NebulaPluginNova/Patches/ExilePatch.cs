@@ -95,7 +95,8 @@ public static class NebulaExileWrapUp
             }
         }
 
-        yield return NebulaGameManager.Instance?.AllPlayerInfo().Select(p => p.Role?.Unbox().CoMeetingEnd()).WaitAll();
+        yield return GameOperatorManager.Instance?.Run(new MeetingPreEndEvent()).Coroutines.WaitAll();
+        
         NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.SendSync(SynchronizeTag.PostMeeting);
         yield return NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.CoSyncAndReset(Modules.SynchronizeTag.PostMeeting, true, true, false);
 

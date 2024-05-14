@@ -1,4 +1,5 @@
-﻿using Virial.Events.Game;
+﻿using Virial.Assignable;
+using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -18,7 +19,7 @@ public class ExtraMission : ConfigurableStandardModifier
     }
 
     public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IBindPlayer
+    public class Instance : ModifierInstance, RuntimeModifier
     {
         public override AbstractModifier Role => MyRole;
         public GamePlayer? target { get; set; } = null!;
@@ -26,7 +27,7 @@ public class ExtraMission : ConfigurableStandardModifier
         {
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

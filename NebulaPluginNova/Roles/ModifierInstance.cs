@@ -1,4 +1,5 @@
 ﻿using Virial.Assignable;
+using Virial.Game;
 
 namespace Nebula.Roles;
 
@@ -7,7 +8,7 @@ public abstract class ModifierInstance : AssignableInstance, RuntimeModifier
     public override IAssignableBase AssignableBase => Role;
     public abstract AbstractModifier Role { get; }
     DefinedModifier RuntimeModifier.Modifier => Role;
-    Virial.Game.Player RuntimeAssignable.MyPlayer => MyPlayer;
+    Virial.Game.Player IBindPlayer.MyPlayer => MyPlayer;
     
 
     public ModifierInstance(GamePlayer player) : base(player)

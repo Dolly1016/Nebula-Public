@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using Nebula.Compat;
 using Nebula.Roles.Crewmate;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -20,22 +21,8 @@ public enum RoleType
 
 public abstract class AbstractRole : IAssignableBase, DefinedRole
 {
-    public abstract RoleCategory Category { get; }
-    //内部用の名称。AllRolesのソートに用いる
-    public virtual string InternalName { get => LocalizedName; }
-    //翻訳キー用の名称。
-    public abstract string LocalizedName { get; }
-    public virtual string DisplayName { get => Language.Translate("role." + LocalizedName + ".name"); }
-    public virtual string IntroBlurb { get => Language.Translate("role." + LocalizedName + ".blurb"); }
-    public virtual string ShortName { get => Language.Translate("role." + LocalizedName + ".short"); }
-    public abstract Color RoleColor { get; }
-    Virial.Color DefinedRole.RoleColor => new Virial.Color(RoleColor);
     public virtual bool IsDefaultRole { get => false; }
-    public abstract RoleInstance CreateInstance(GamePlayer player, int[] arguments);
     public int Id { get; set; }
-    public abstract int RoleCount { get; }
-    public abstract float GetRoleChance(int count);
-    public abstract RoleTeam Team { get; }
 
     //追加付与ロールに役職プールの占有性があるか(追加付与ロールが無い場合、無意味)
     public virtual bool AdditionalRolesConsumeRolePool { get => true; }
@@ -50,19 +37,12 @@ public abstract class AbstractRole : IAssignableBase, DefinedRole
     public virtual IEnumerable<IAssignableBase> RelatedOnConfig() { yield break; }
     public virtual ConfigurationHolder? RelatedConfig { get => null; }
 
-    public virtual bool CanLoadDefault(IntroAssignableModifier modifier) => true;
-    public virtual bool CanLoadDefault(AbstractGhostRole role) => Category == role.Category;
-    public virtual bool CanLoad(IntroAssignableModifier modifier)=> CanLoadDefault(modifier);
-    public virtual bool CanLoad(AbstractGhostRole role) => CanLoadDefault(role);
-
     public virtual bool CanBeGuessDefault { get => true; }
     public virtual bool CanBeGuess => CanBeGuessDefault && (CanBeGuessOption?.GetBool() ?? true);
     public virtual bool IsSpawnable { get => true; }
 
-    ModifierFilter? DefinedRole.ModifierFilter => ModifierFilter;
+    
 
-    public bool IsCrewmateRole => Category == RoleCategory.CrewmateRole && this != Madmate.MyRole;
-    public bool IsImpostorRole => Category == RoleCategory.ImpostorRole;
 
     public abstract void Load();
 
@@ -89,8 +69,8 @@ public abstract class ConfigurableRole : AbstractRole, IConfiguableAssignable {
 
     public override sealed void Load()
     {
-        SerializableDocument.RegisterColor("role." + InternalName, RoleColor);
-        RoleConfig = new ConfigurationHolder("options.role." + InternalName, new ColorTextComponent(RoleColor, new TranslateTextComponent("role." + LocalizedName + ".name")), myTabMask ?? ConfigurationTab.FromRoleCategory(Category), CustomGameMode.AllGameModeMask);
+        DefinedRole me = this;
+        RoleConfig = new ConfigurationHolder("options.role." + me.InternalName, new ColorTextComponent(me.Color.ToUnityColor(), new TranslateTextComponent("role." + me.LocalizedName + ".name")), myTabMask ?? ConfigurationTab.FromRoleCategory(me.Category), CustomGameMode.AllGameModeMask);
         RoleConfig.Priority = IsDefaultRole ? 0 : 1;
         RoleConfig.RelatedAssignable = this;
         LoadOptions();
@@ -295,7 +275,7 @@ public abstract class ConfigurableRole : AbstractRole, IConfiguableAssignable {
     }
 }
 
-public abstract class ConfigurableStandardRole : ConfigurableRole
+public abstract class ConfigurableStandardRole : ConfigurableRole, DefinedRole
 {
     protected NebulaConfiguration RoleCountOption { get; private set; } = null!;
     protected NebulaConfiguration RoleChanceOption { get; private set; } = null!;
@@ -317,9 +297,8 @@ public abstract class ConfigurableStandardRole : ConfigurableRole
             return RoleSecondaryChanceOption.GetFloat();
         return RoleChanceOption.GetFloat();
     }
-    
-    public override bool CanLoad(IntroAssignableModifier modifier) => CanLoadDefault(modifier) && !modifierFilter.Contains(modifier);
-    public override bool CanLoad(AbstractGhostRole role) => CanLoadDefault(role) && !ghostRoleFilter.Contains(role);
+
+    bool DefinedRole.CanLoad(DefinedAssignable assignable) => (this as DefinedRole).CanLoadDefault(assignable) && !modifierFilter.Contains(assignable);
 
     public static TranslateTextComponent CountOptionText = new("options.role.count");
     public static TranslateTextComponent ChanceOptionText = new("options.role.chance");
@@ -427,7 +406,7 @@ public abstract class AbstractGhostRole : IAssignableBase, ICodeName
 }
 
 
-public abstract class ConfigurableGhostRole : AbstractGhostRole, IConfiguableAssignable {
+public abstract class ConfigurableGhostRole : AbstractGhostRole, IConfiguableAssignable, DefinedGhostRole {
     public ConfigurationHolder RoleConfig { get; private set; } = null!;
     public override ConfigurationHolder? RelatedConfig { get => RoleConfig; }
 

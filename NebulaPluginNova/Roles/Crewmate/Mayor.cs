@@ -5,18 +5,18 @@ using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Mayor : ConfigurableStandardRole, HasCitation
+public class Mayor : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Mayor MyRole = new Mayor();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "mayor";
+    string DefinedAssignable.LocalizedName => "mayor";
     public override Color RoleColor => new Color(30f / 255f, 96f / 255f, 85f / 255f);
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
     private NebulaConfiguration MinVoteOption = null!;
     private NebulaConfiguration MaxVoteOption = null!;
@@ -39,7 +39,7 @@ public class Mayor : ConfigurableStandardRole, HasCitation
         VoteAssignmentOption = new(RoleConfig, "voteAssignment", null, 1, 20, 1, 1);
     }
 
-    public class Instance : Crewmate.Instance, IBindPlayer
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player, int[] arguments) : base(player)
@@ -47,7 +47,7 @@ public class Mayor : ConfigurableStandardRole, HasCitation
             if(arguments.Length >= 1) myVote = arguments[0];
         }
 
-        public override int[]? GetRoleArgument() => new int[] { myVote };
+        int[]? RuntimeAssignable.RoleArguments => [myVote];
 
         static private SpriteLoader leftButtonSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingButtonLeft.png", 100f);
         static private SpriteLoader rightButtonSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingButtonRight.png", 100f);
@@ -59,10 +59,8 @@ public class Mayor : ConfigurableStandardRole, HasCitation
         AchievementToken<(int meetings, bool clearable)>? acTokenAnother = null;
         AchievementToken<(bool cleared, byte myVotedFor, bool triggered)>? acTokenChallenge = null;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenCommon = new("mayor.common1", (false, 0, false), (val, _) => val.cleared);

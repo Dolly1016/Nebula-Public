@@ -73,18 +73,18 @@ public class GhostAndFlashAbility : IGameOperator
     }
 }
 
-public class Seer : ConfigurableStandardRole, HasCitation
+public class Seer : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Seer MyRole = new Seer();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "seer";
+    string DefinedAssignable.LocalizedName => "seer";
     public override Color RoleColor => new Color(73f / 255f, 166f / 255f, 104f / 255f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration GhostDurationOption = null!;
     private NebulaConfiguration CanSeeGhostsInShadowOption = null!;
@@ -98,7 +98,7 @@ public class Seer : ConfigurableStandardRole, HasCitation
         CanSeeGhostsInShadowOption = new(RoleConfig, "canSeeGhostsInShadow", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance, IBindPlayer
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -107,7 +107,7 @@ public class Seer : ConfigurableStandardRole, HasCitation
 
         private AchievementToken<(bool noMissFlag, int meetings)>? acTokenChallenge;
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

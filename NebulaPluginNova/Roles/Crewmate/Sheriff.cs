@@ -3,18 +3,18 @@ using Virial.Events.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Sheriff : ConfigurableStandardRole, HasCitation
+public class Sheriff : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Sheriff MyRole = new Sheriff();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => "sheriff";
+    string DefinedAssignable.LocalizedName => "sheriff";
     public override Color RoleColor => new Color(240f / 255f, 191f / 255f, 0f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
     private KillCoolDownConfiguration KillCoolDownOption = null!;
     private NebulaConfiguration NumOfShotsOption = null!;
@@ -33,7 +33,7 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
         CanKillHidingPlayerOption = new(RoleConfig, "canKillHidingPlayer", null, false, false);
     }
 
-    public class Instance : Crewmate.Instance
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         private ModAbilityButton? killButton = null;
 
@@ -44,7 +44,7 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
         {
             if(arguments.Length >= 1) leftShots = arguments[0];
         }
-        public override int[]? GetRoleArgument() => new int[] { leftShots };
+        int[]? RuntimeAssignable.RoleArguments => [leftShots];
 
         private AchievementToken<bool>? acTokenShot;
         private AchievementToken<bool>? acTokenMisshot;
@@ -64,7 +64,7 @@ public class Sheriff : ConfigurableStandardRole, HasCitation
             return true;
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {

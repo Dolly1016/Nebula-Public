@@ -254,16 +254,16 @@ public class UbiquitousMapLayer : MonoBehaviour
 }
 
 [NebulaRPCHolder]
-public class Ubiquitous : ConfigurableStandardRole
+public class Ubiquitous : ConfigurableStandardRole, DefinedRole
 {
     static public Ubiquitous MyRole = new Ubiquitous();
 
     public override RoleCategory Category => RoleCategory.CrewmateRole;
-    public override string LocalizedName => "ubiquitous";
+    string DefinedAssignable.LocalizedName => "ubiquitous";
     public override Color RoleColor => new Color(56f / 255f, 155f / 255f, 223f / 255f);
-    public override RoleTeam Team => Crewmate.MyTeam;
+    public override RoleTeam Team => Crewmate.Team;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
 
     public NebulaConfiguration droneMicrophoneRadiousOption = null!;
@@ -289,7 +289,7 @@ public class Ubiquitous : ConfigurableStandardRole
     }
 
 
-    public class Instance : Crewmate.Instance, IBindPlayer
+    public class Instance : Crewmate.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
@@ -333,7 +333,7 @@ public class Ubiquitous : ConfigurableStandardRole
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
@@ -461,7 +461,7 @@ public class Ubiquitous : ConfigurableStandardRole
         }
 
 
-        protected override void OnInactivated()
+        void RuntimeAssignable.OnInactivated()
         {
             if (AmOwner)
             {
@@ -480,7 +480,7 @@ public class Ubiquitous : ConfigurableStandardRole
 
         bool IsOperatingDrone => myDrone && AmongUsUtil.CurrentCamTarget == myDrone;
         //ドローン視点では壁を無視
-        public override bool EyesightIgnoreWalls => IsOperatingDrone;
+        bool RuntimeRole.EyesightIgnoreWalls => IsOperatingDrone;
 
         [Local]
         public void EditLightRange(LightRangeUpdateEvent ev)

@@ -20,6 +20,8 @@ public abstract class DataEntry<T> where T : notnull
         }
     }
 
+    public string Name => name;
+
     public void SetValueWithoutSave(T value)
     {
         this.value = value;
@@ -45,25 +47,25 @@ public class StringDataEntry : DataEntry<string>
 
 public class FloatDataEntry : DataEntry<float>
 {
-    public override float Parse(string str) { return float.Parse(str, CultureInfo.InvariantCulture); }
+    public override float Parse(string str) { return float.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0f; }
     public FloatDataEntry(string name, DataSaver saver, float defaultValue) : base(name, saver, defaultValue) { }
 }
 
 public class ByteDataEntry : DataEntry<byte>
 {
-    public override byte Parse(string str) { return byte.Parse(str); }
+    public override byte Parse(string str) { return byte.TryParse(str, out var result) ? result : (byte)0; }
     public ByteDataEntry(string name, DataSaver saver, byte defaultValue) : base(name, saver, defaultValue) { }
 }
 
 public class IntegerDataEntry : DataEntry<int>
 {
-    public override int Parse(string str) { return int.Parse(str); }
+    public override int Parse(string str) { return int.TryParse(str, out var result) ? result : 0; }
     public IntegerDataEntry(string name, DataSaver saver, int defaultValue) : base(name, saver, defaultValue) { }
 }
 
 public class BooleanDataEntry : DataEntry<bool>
 {
-    public override bool Parse(string str) { return bool.Parse(str); }
+    public override bool Parse(string str) { return bool.TryParse(str, out var result) ? result : false; }
     public BooleanDataEntry(string name, DataSaver saver, bool defaultValue) : base(name, saver, defaultValue) { }
 }
 

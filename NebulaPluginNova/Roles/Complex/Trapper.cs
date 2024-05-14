@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using NAudio.CoreAudioApi;
+using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
@@ -20,7 +21,7 @@ file static class TrapperSystem
     private const int DecelTrapId = 1;
     private const int CommTrapId = 2;
     private const int KillTrapId = 3;
-    public static void OnActivated(RoleInstance myRole, (int id,int cost)[] buttonVariation, List<Trapper.Trap> localTraps)
+    public static void OnActivated(RuntimeRole myRole, (int id,int cost)[] buttonVariation, List<Trapper.Trap> localTraps)
     {
         Vector2? pos = null;
         int buttonIndex = 0;
@@ -86,20 +87,20 @@ file static class TrapperSystem
 }
 
 [NebulaRPCHolder]
-public class Trapper : ConfigurableStandardRole
+public class Trapper : ConfigurableStandardRole, DefinedRole
 {
     static public Trapper MyNiceRole = new(false);
     static public Trapper MyEvilRole = new(true);
 
     public bool IsEvil { get; private set; }
-    public override RoleCategory Category => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
+    RoleCategory DefinedSingleAssignable.Category => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
 
-    public override string LocalizedName => IsEvil ? "evilTrapper" : "niceTrapper";
-    public override Color RoleColor => IsEvil ? Palette.ImpostorRed : new Color(206f / 255f, 219f / 255f, 96f / 255f);
-    public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam;
+    string DefinedAssignable.LocalizedName => IsEvil ? "evilTrapper" : "niceTrapper";
+    Virial.Color DefinedAssignable.Color => new(IsEvil ? Palette.ImpostorRed : new Color(206f / 255f, 219f / 255f, 96f / 255f));
+    RoleTeam DefinedSingleAssignable.Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.Team;
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { if (MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; }
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player) : new NiceInstance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player) : new NiceInstance(player);
 
     static public NebulaConfiguration NumOfChargesOption = null!;
     static public NebulaConfiguration PlaceCoolDownOption = null!;
@@ -222,9 +223,9 @@ public class Trapper : ConfigurableStandardRole
         GenerateCommonEditor(RoleConfig, PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption);
     }
 
-    public class NiceInstance : Crewmate.Crewmate.Instance, IBindPlayer
+    public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyNiceRole;
+        DefinedRole RuntimeRole.Role => MyNiceRole;
         private int leftCharge = NumOfChargesOption;
         private List<Trap> localTraps = new(), commTraps = new();
 
@@ -233,7 +234,7 @@ public class Trapper : ConfigurableStandardRole
         {
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
@@ -286,7 +287,7 @@ public class Trapper : ConfigurableStandardRole
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, IBindPlayer
+    public class EvilInstance : Impostor.Impostor.Instance, RuntimeRole
     {
         public override AbstractRole Role => MyEvilRole;
         private int leftCharge = NumOfChargesOption;
@@ -296,14 +297,12 @@ public class Trapper : ConfigurableStandardRole
         }
 
         AchievementToken<int>? acTokenChallenge = null;
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 TrapperSystem.OnActivated(this, new (int, int)[] { (0, 1), (1, 1), (3, CostOfKillTrapOption) }, localTraps);
-                acTokenChallenge = new("evilTrapper.challenge", 0, (val, _) => val >= 2 && NebulaGameManager.Instance!.EndState!.CheckWin(MyPlayer.PlayerId) && !MyPlayer.IsDead);
+                acTokenChallenge = new("evilTrapper.challenge", 0, (val, _) => val >= 2 && NebulaGameManager.Instance!.EndState!.Winners.Test(MyPlayer) && !MyPlayer.IsDead);
             }
         }
 

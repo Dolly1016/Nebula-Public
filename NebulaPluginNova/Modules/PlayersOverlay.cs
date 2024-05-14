@@ -1,6 +1,7 @@
 ﻿using Nebula.Behaviour;
 using TMPro;
 using UnityEngine.Rendering;
+using Virial;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;

@@ -9,17 +9,17 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Sniper : ConfigurableStandardRole, HasCitation
+public class Sniper : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Sniper MyRole = new Sniper();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "sniper";
+    string DefinedAssignable.LocalizedName => "sniper";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private KillCoolDownConfiguration SnipeCoolDownOption = null!;
     private NebulaConfiguration ShotSizeOption = null!;
@@ -114,7 +114,7 @@ public class Sniper : ConfigurableStandardRole, HasCitation
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
@@ -142,10 +142,8 @@ public class Sniper : ConfigurableStandardRole, HasCitation
             }
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("sniper.another1");

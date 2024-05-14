@@ -1,15 +1,17 @@
-﻿using System.Reflection;
+﻿using Nebula.Compat;
+using System.Reflection;
+using Virial.Assignable;
 
 namespace Nebula.Roles;
 
 [NebulaPreLoad(typeof(RemoteProcessBase),typeof(Team),typeof(NebulaAddon))]
 public class Roles
 {
-    static public IReadOnlyList<AbstractRole> AllRoles { get; private set; } = null!;
-    static public IReadOnlyList<AbstractModifier> AllModifiers { get; private set; } = null!;
-    static public IReadOnlyList<AbstractGhostRole> AllGhostRoles { get; private set; } = null!;
+    static public IReadOnlyList<DefinedRole> AllRoles { get; private set; } = null!;
+    static public IReadOnlyList<DefinedModifier> AllModifiers { get; private set; } = null!;
+    static public IReadOnlyList<DefinedGhostRole> AllGhostRoles { get; private set; } = null!;
 
-    static public IEnumerable<IAssignableBase> AllAssignables()
+    static public IEnumerable<DefinedAssignable> AllAssignables()
     {
         foreach(var r in AllRoles) yield return r;
         foreach (var r in AllGhostRoles) yield return r;
@@ -23,25 +25,25 @@ public class Roles
 
     static public IReadOnlyList<Team> AllTeams { get; private set; } = null!;
 
-    static private List<AbstractRole>? allRoles = new();
-    static private List<AbstractGhostRole>? allGhostRoles = new();
-    static private List<AbstractModifier>? allModifiers = new();
+    static private List<DefinedRole>? allRoles = new();
+    static private List<DefinedGhostRole>? allGhostRoles = new();
+    static private List<DefinedModifier>? allModifiers = new();
     static private List<Team>? allTeams = new();
 
-    static public void Register(AbstractRole role) {
+    static public void Register(DefinedRole role) {
         if(allRoles == null)
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register role \"{role.LocalizedName}\".\nRole registration is only possible at load phase.");
         else
             allRoles?.Add(role);
     }
-    static public void Register(AbstractGhostRole role)
+    static public void Register(DefinedGhostRole role)
     {
         if (allRoles == null)
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register role \"{role.LocalizedName}\".\nRole registration is only possible at load phase.");
         else
             allGhostRoles?.Add(role);
     }
-    static public void Register(AbstractModifier role)
+    static public void Register(DefinedModifier role)
     {
         if(allModifiers == null)
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register modifier \"{role.LocalizedName}\".\nModifier registration is only possible at load phase.");
@@ -117,17 +119,15 @@ public class Roles
         AllModifiers = allModifiers!.AsReadOnly();
         AllTeams = allTeams!.AsReadOnly();
 
-        foreach (var role in allRoles) role.Load();
-        foreach (var role in allGhostRoles) role.Load();
-        foreach (var modifier in allModifiers) modifier.Load();
-
-        //Can Be Guessedのオプション
-        foreach (var role in allRoles.Where(r => r.CanBeGuessDefault)) role.CanBeGuessOption = new NebulaConfiguration(null, "role." + role.LocalizedName + ".canBeGuess", null, true, true);
+        AllAssignables().Do(a => a.Load());
         
 
         allRoles = null;
         allGhostRoles = null;
         allModifiers = null;
         allTeams = null;
+
+        //色を登録する
+        AllAssignables().Do(a => SerializableDocument.RegisterColor("role." + a.InternalName, a.Color.ToUnityColor()));
     }
 }

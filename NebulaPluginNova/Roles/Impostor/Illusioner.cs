@@ -2,16 +2,16 @@
 
 namespace Nebula.Roles.Impostor;
 
-public class Illusioner : ConfigurableStandardRole
+public class Illusioner : ConfigurableStandardRole, DefinedRole
 {
     static public Illusioner MyRole = new Illusioner();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "illusioner";
+    string DefinedAssignable.LocalizedName => "illusioner";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
     private NebulaConfiguration SampleCoolDownOption = null!;
     private NebulaConfiguration MorphCoolDownOption = null!;
@@ -36,7 +36,7 @@ public class Illusioner : ConfigurableStandardRole
         SampleOriginalLookOption = new NebulaConfiguration(RoleConfig, "sampleOriginalLook", null, false, false);
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
@@ -50,10 +50,8 @@ public class Illusioner : ConfigurableStandardRole
         {
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenChallenge = new("illusioner.challenge", 0, (val, _) =>

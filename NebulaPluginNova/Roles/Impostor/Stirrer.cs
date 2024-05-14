@@ -3,16 +3,16 @@ using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
-public class Stirrer : ConfigurableStandardRole
+public class Stirrer : ConfigurableStandardRole, DefinedRole
 {
     static public Stirrer MyRole = new Stirrer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "stirrer";
+    string DefinedAssignable.LocalizedName => "stirrer";
     public override Color RoleColor => Palette.ImpostorRed;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
     private NebulaConfiguration StirCoolDownOption = null!;
     private NebulaConfiguration SabotageChargeOption = null!;
@@ -32,7 +32,7 @@ public class Stirrer : ConfigurableStandardRole
         SabotageIntervalOption = new NebulaConfiguration(RoleConfig, "sabotageInterval", null, 30f, 120f, 5f, 60f, 60f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Impostor.Instance
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? stirButton = null;
         private ModAbilityButton? sabotageButton = null;
@@ -47,11 +47,9 @@ public class Stirrer : ConfigurableStandardRole
         Dictionary<byte, int> sabotageChargeMap = new();
 
         StaticAchievementToken? acTokenCommon = null, acTokenChallenge = null;
-        
-        public override void OnActivated()
-        {
-            base.OnActivated();
 
+        void RuntimeAssignable.OnActivated()
+        {
             if (AmOwner)
             {
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => p.PlayerId != MyPlayer.PlayerId && !p.IsDead && !p.IsImpostor));

@@ -6,17 +6,17 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Cleaner : ConfigurableStandardRole, HasCitation
+public class Cleaner : ConfigurableStandardRole, HasCitation, DefinedRole
 {
     static public Cleaner MyRole = new Cleaner();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    public override string LocalizedName => "cleaner";
+    string DefinedAssignable.LocalizedName => "cleaner";
     public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     public override RoleTeam Team => Impostor.MyTeam;
 
-    public override RoleInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     private NebulaConfiguration CleanCoolDownOption = null!;
     private NebulaConfiguration SyncKillAndCleanCoolDownOption = null!;
@@ -28,7 +28,7 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
         SyncKillAndCleanCoolDownOption = new NebulaConfiguration(RoleConfig, "syncKillAndCleanCoolDown", null, true, true);
     }
 
-    public class Instance : Impostor.Instance, IBindPlayer
+    public class Instance : Impostor.Instance, RuntimeRole
     {
         private ModAbilityButton? cleanButton = null;
 
@@ -48,10 +48,8 @@ public class Cleaner : ConfigurableStandardRole, HasCitation
             cleanButton?.CoolDownTimer?.Start(MyRole.SyncKillAndCleanCoolDownOption ? null : 5f);
         }
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
-            base.OnActivated();
-
             if (AmOwner)
             {
                 acTokenChallenge = new("cleaner.challenge",(false,0),(val,_)=>val.cleared);

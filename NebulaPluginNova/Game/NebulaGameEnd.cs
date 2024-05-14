@@ -204,7 +204,7 @@ public class EndGameManagerSetUpPatch
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
         {
             //Name Text
-            string nameText = p.Name.Color((NebulaGameManager.Instance.EndState!.WinnersMask & (1 << p.PlayerId)) != 0 ? Color.yellow : Color.white);
+            string nameText = p.Name.Color(NebulaGameManager.Instance.EndState!.Winners.Test(p) ? Color.yellow : Color.white);
             if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.Name ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.RoleColor);
 
             string stateText = p.PlayerState.Text;
@@ -263,17 +263,19 @@ public class EndGameManagerSetUpPatch
         //勝利メンバーを載せる
         List<byte> winners = new List<byte>();
         bool amWin = false;
-        for (byte i = 0; i < 32; i++)
+        foreach(var p in NebulaGameManager.Instance.AllPlayerInfo())
         {
-            if ((endState.WinnersMask & (1 << i)) != 0)
+            if (endState.Winners.Test(p))
             {
-                if (NebulaGameManager.Instance.GetPlayer(i)?.AmOwner ?? false)
+                if (p.AmOwner)
                 {
                     amWin = true;
-                    winners.Insert(0, i);
+                    winners.Insert(0, p.PlayerId);
                 }
                 else
-                    winners.Add(i);
+                {
+                    winners.Add(p.PlayerId);
+                }
             }
         }
 
@@ -318,16 +320,17 @@ public class EndGameManagerSetUpPatch
         TMPro.TMP_Text textRenderer = bonusText.GetComponent<TMPro.TMP_Text>();
 
         string extraText = "";
-        foreach (var extraWin in NebulaGameManager.Instance!.EndState!.ExtraWins) extraText += extraWin.DisplayText;
-        textRenderer.text = endCondition?.DisplayText.Replace("%EXTRA%", extraText) ?? "Error";
-        textRenderer.color = endCondition?.Color ?? Color.white;
+        var wins = NebulaGameManager.Instance.EndState!.ExtraWins;
+        CustomExtraWin.AllExtraWins.Where(e => wins.Test(e)).Do(e => extraText += e.DisplayText);
+        textRenderer.text = endCondition?.Unbox().DisplayText.Replace("%EXTRA%", extraText) ?? "Error";
+        textRenderer.color = endCondition?.Unbox().Color ?? Color.white;
 
-        __instance.BackgroundBar.material.SetColor("_Color", endCondition?.Color ?? new Color(1f, 1f, 1f));
+        __instance.BackgroundBar.material.SetColor("_Color", endCondition?.Unbox().Color ?? new Color(1f, 1f, 1f));
 
         __instance.WinText.text = DestroyableSingleton<TranslationController>.Instance.GetString(amWin ? StringNames.Victory : StringNames.Defeat);
         __instance.WinText.color = amWin ? new Color(0f, 0.549f, 1f, 1f) : Color.red;
 
-        LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
+        LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Unbox().Color ?? Color.white));
 
         GameStatisticsViewer? viewer;
 

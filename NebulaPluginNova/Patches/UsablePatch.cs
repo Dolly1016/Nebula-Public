@@ -1,5 +1,8 @@
 ﻿// 各種使用可能なオブジェクトに関するパッチ
 
+using Nebula.Compat;
+using Virial.Events.Player;
+
 namespace Nebula.Patches;
 
 
@@ -43,8 +46,8 @@ public static class VentCanUsePatch
         }
         else {
             //ベント外にいる場合
-            couldUse &= (modInfo?.Role.Unbox().CanUseVent ?? false) || @object.inVent || @object.walkingToVent;
-            if (modInfo?.Role.Unbox().HasAnyTasks ?? false) couldUse &= !@object.MustCleanVent(__instance.Id);
+            couldUse &= (modInfo?.Role.CanUseVent ?? false) || @object.inVent || @object.walkingToVent;
+            if (modInfo?.Role.TaskType != Virial.Assignable.RoleTaskType.NoTask) couldUse &= !@object.MustCleanVent(__instance.Id);
             couldUse &= !pc.IsDead && @object.CanMove;
         }
 
@@ -73,7 +76,7 @@ public static class VentCanUsePatch
 public static class VentSetOutlinePatch
 {
     public static bool Prefix(Vent __instance, [HarmonyArgument(0)]bool on, [HarmonyArgument(1)]bool mainTarget) {
-        Color color = PlayerControl.LocalPlayer.GetModInfo()!.Unbox().Role.Role.RoleColor;
+        Color color = PlayerControl.LocalPlayer.GetModInfo()!.Unbox().Role.Role.Color.ToUnityColor();
         __instance.myRend.material.SetFloat("_Outline", (float)(on ? 1 : 0));
         __instance.myRend.material.SetColor("_OutlineColor", color);
         __instance.myRend.material.SetColor("_AddColor", mainTarget ? color : Color.clear);
@@ -87,9 +90,10 @@ public static class EnterVentPatch
 {
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
-        pc.GetModInfo()?.Role.Unbox().OnEnterVent(__instance);
-        NebulaGameManager.Instance?.AllRoleAction(r => r.OnEnterVent(pc, __instance));
-        pc.GetModInfo()?.Role.Unbox().VentDuration?.Start();
+        var p = pc.GetModInfo();
+        if (p == null) return;
+        GameOperatorManager.Instance?.Run(new PlayerVentEnterEvent(p, __instance));
+        p.Role.VentDuration?.Start();
     }
 }
 
@@ -98,9 +102,10 @@ public static class ExitVentPatch
 {
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
-        pc.GetModInfo()?.Role.Unbox().OnExitVent(__instance);
-        NebulaGameManager.Instance?.AllRoleAction(r => r.OnExitVent(pc, __instance));
-        pc.GetModInfo()?.Role.Unbox().VentCoolDown?.Start();
+        var p = pc.GetModInfo();
+        if (p == null) return;
+        GameOperatorManager.Instance?.Run(new PlayerVentExitEvent(p, __instance));
+        p.Role.VentCoolDown?.Start();
     }
 }
 

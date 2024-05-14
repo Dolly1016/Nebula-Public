@@ -1,5 +1,4 @@
 ﻿using AmongUs.GameOptions;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nebula.Behaviour;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
@@ -120,13 +119,13 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public bool AmHost => MyControl.AmHost();
     private DeadBody? holdingDeadBodyCache { get; set; } = null;
 
-    public RoleInstance Role => myRole;
-    private RoleInstance myRole = null!;
+    public RuntimeRole Role => myRole;
+    private RuntimeRole myRole = null!;
 
-    public GhostRoleInstance? GhostRole => myGhostRole;
-    private GhostRoleInstance? myGhostRole = null;
+    public RuntimeGhostRole? GhostRole => myGhostRole;
+    private RuntimeGhostRole? myGhostRole = null;
 
-    private List<ModifierInstance> myModifiers = new();
+    private List<RuntimeModifier> myModifiers = new();
 
     RuntimeRole Virial.Game.Player.Role => myRole;
     IEnumerable<RuntimeModifier> Virial.Game.Player.Modifiers => myModifiers;
@@ -143,8 +142,10 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     {
         get
         {
-            bool hasTasks = Role.HasAnyTasks;
-            if (Role.HasCrewmateTasks) hasTasks = FeelLikeHaveCrewmateTasks;
+            bool hasTasks = Role.TaskType != RoleTaskType.NoTask;
+
+            //実際は持っていなくとも、クルータスクを持っていると思しきプレイヤーの場合
+            if (Role.TaskType == RoleTaskType.CrewmateTask) hasTasks = FeelLikeHaveCrewmateTasks;
             return hasTasks;
         }
     }
@@ -153,7 +154,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     {
         get
         {
-            bool hasCrewmateTasks = Role.HasCrewmateTasks;
+            bool hasCrewmateTasks = Role.TaskType == RoleTaskType.CrewmateTask;
             ModifierAction((modifier) => { hasCrewmateTasks &= !(modifier.InvalidateCrewmateTask || modifier.MyCrewmateTaskIsIgnored); });
             return hasCrewmateTasks;
         }
@@ -165,7 +166,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         {
             if (NebulaGameManager.Instance?.CanBeSpectator ?? false) return HasCrewmateTasks;
 
-            bool hasCrewmateTasks = Role.HasCrewmateTasks;
+            bool hasCrewmateTasks = Role.TaskType == RoleTaskType.CrewmateTask;
             ModifierAction((modifier) => { hasCrewmateTasks &= !modifier.InvalidateCrewmateTask; });
             return hasCrewmateTasks;
         }
@@ -191,12 +192,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         foreach (var role in AllAssigned()) action(role);
     }
 
-    public void ModifierAction(Action<ModifierInstance> action)
+    public void ModifierAction(Action<RuntimeModifier> action)
     {
         foreach (var role in myModifiers) action(role);
     }
 
-    public IEnumerable<ModifierInstance> AllModifiers => myModifiers;
+    public IEnumerable<RuntimeModifier> AllModifiers => myModifiers;
     public IEnumerable<Modifier> GetModifiers<Modifier>() where Modifier : ModifierInstance
     {
         foreach (var m in myModifiers) if (m is Modifier targetM) yield return targetM;
@@ -347,17 +348,17 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || AmOwner)
         {
-            string? roleName = IsDead ? (myGhostRole?.DisplayRoleName ?? myRole?.DisplayRoleName) : myRole.DisplayRoleName;
+            string? roleName = ((RuntimeAssignable?)(IsDead ? myGhostRole : myRole) ?? myRole).DisplayName;
             text += roleName ?? "Undefined";
 
-            AssignableAction(r => { var newName = r.Unbox().OverrideRoleName(text, false); if (newName != null) text = newName; });
+            AssignableAction(r => { var newName = r.OverrideRoleName(text, false); if (newName != null) text = newName; });
             AssignableAction(m => m.Unbox().DecorateRoleName(ref text));
 
             if (HasAnyTasks && (this as GamePlayer).Tasks.Quota > 0)
                 text += (" (" + (this as GamePlayer).Tasks.Unbox().ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((FeelLikeHaveCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
         }
 
-        if ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || (PlayerControl.LocalPlayer.GetModInfo()?.Unbox().Role.CanSeeOthersFakeSabotage ?? false))
+        if ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || (PlayerControl.LocalPlayer.GetModInfo()?.Role.CanSeeOthersFakeSabotage ?? false))
         {
             var fakeStr = FakeSabotage.MyFakeTasks.Join(type => Language.Translate("sabotage." + type.ToString().HeadLower()), ", ");
             if (fakeStr.Length > 0) fakeStr = ("(" + fakeStr + ")").Color(Color.gray);
@@ -368,7 +369,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         roleText.gameObject.SetActive(true);
     }
 
-    private void SetRole(AbstractRole role, int[] arguments)
+    private void SetRole(DefinedRole role, int[] arguments)
     {
         myRole?.Inactivate();
 
@@ -384,7 +385,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         myRole = role.CreateInstance(this, arguments);
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
-            myRole.OnActivated(); myRole.Register();
+            myRole.OnActivated(); (myRole as IGameOperator)?.Register(myRole);
             GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(this, myRole));
         }
 
@@ -399,7 +400,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized)
         {
-            myGhostRole.OnActivated(); myGhostRole.Register();
+            myGhostRole.OnActivated(); (myGhostRole as IGameOperator)?.Register(myGhostRole);
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myGhostRole, IsDead));
@@ -411,7 +412,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         myModifiers.Add(modifier);
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
-            modifier.OnActivated(); modifier.Register();
+            modifier.OnActivated(); (modifier as IGameOperator)?.Register(modifier);
             GameOperatorManager.Instance?.Run(new PlayerModifierSetEvent(this, modifier));
         }
 
@@ -422,7 +423,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public NebulaRPCInvoker RpcInvokerSetModifier(DefinedModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Modifier));
     public NebulaRPCInvoker RpcInvokerSetGhostRole(AbstractGhostRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.GhostRole));
     public NebulaRPCInvoker RpcInvokerUnsetModifier(DefinedModifier modifier) => RpcRemoveModifier.GetInvoker(new(PlayerId, modifier.Id));
-    public void UnsetModifierLocal(Predicate<ModifierInstance> predicate)
+    public void UnsetModifierLocal(Predicate<RuntimeModifier> predicate)
     {
         myModifiers.RemoveAll(m =>
         {
@@ -448,14 +449,14 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         string subStr = id.Substring(prefix.Length);
         if (subStr == "roleArgument")
         {
-            property = new NebulaInstantProperty() { IntegerArrayProperty = Role?.GetRoleArgument() };
+            property = new NebulaInstantProperty() { IntegerArrayProperty = Role?.RoleArguments };
             return true;
         } else if (subStr == "leftGuess")
         {
             property = new NebulaInstantProperty() { IntegerProperty = TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1 };
             return true;
         }
-        if (Role?.TryGetProperty(subStr, out property) ?? false) return true;
+        if (Role?.Unbox().TryGetProperty(subStr, out property) ?? false) return true;
 
         return false;
     }
