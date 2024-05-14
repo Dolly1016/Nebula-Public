@@ -2,41 +2,34 @@
 using Nebula.Patches;
 using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Justice : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Justice MyRole = null;//new Justice();
+    private Justice():base("justice", new(255, 128, 0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PutJusticeOnTheBalanceOption])
+    {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
+    }
 
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => "justice";
-    public override Color RoleColor => new Color(255f / 255f, 128f / 255f, 0f / 255f);
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
-    public override RoleTeam Team => Crewmate.Team;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration PutJusticeOnTheBalanceOption = null!;
-    protected override void LoadOptions()
+    static private BoolConfiguration PutJusticeOnTheBalanceOption = new BoolConfigurationImpl("role.justice.putJusticeOnTheBalance", false);
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagSNR);
-
-        PutJusticeOnTheBalanceOption = new(RoleConfig, "putJusticeOnTheBalance", null, false, false);
-    }
-
-    public class Instance : Crewmate.Instance, IGameOperator
-    {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player) { }
 
         static private SpriteLoader meetingSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeIcon.png", 115f);
 
+        void RuntimeAssignable.OnActivated() { }
 
         bool usedBalance = false;
         bool isMyJusticeMeeting = false;
@@ -58,7 +51,7 @@ public class Justice : ConfigurableStandardRole, HasCitation, DefinedRole
                 buttonManager?.RegisterMeetingAction(new(meetingSprite,
                    p =>
                    {
-                       if (MyRole.PutJusticeOnTheBalanceOption)
+                       if (PutJusticeOnTheBalanceOption)
                        {
                            StartJusticeMeeting(p.MyPlayer,MyPlayer);
                            usedBalance = true;

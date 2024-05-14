@@ -1,40 +1,32 @@
 ﻿using AmongUs.GameOptions;
 using Nebula.Behaviour;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Player;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Doctor : ConfigurableStandardRole, DefinedRole
+public class Doctor : DefinedRoleTemplate, DefinedRole
 {
     static public Doctor MyRole = new Doctor();
 
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => "doctor";
-    public override Color RoleColor => new Color(128f / 255f, 255f / 255f, 221f / 255f);
-    public override RoleTeam Team => Crewmate.Team;
+    private Doctor() : base("doctor", new(128,255,221),RoleCategory.CrewmateRole, Crewmate.MyTeam, [PortableVitalsChargeOption, MaxPortableVitalsChargeOption, ChargesPerTasksOption]) { }
+    
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration PortableVitalsChargeOption = null!;
-    private NebulaConfiguration MaxPortableVitalsChargeOption = null!;
-    private NebulaConfiguration ChargesPerTasksOption = null!;
+    static private FloatConfiguration PortableVitalsChargeOption = new FloatConfigurationImpl("role.doctor.portableVitalsCharge", ArrayHelper.Selection(2.5f, 60f, 2.5f), 10f).DecorateAsSecConfiguration();
+    static private FloatConfiguration MaxPortableVitalsChargeOption = new FloatConfigurationImpl("role.doctor.maxPortableVitalsCharge", ArrayHelper.Selection(2.5f, 60f, 2.5f), 10f).DecorateAsSecConfiguration();
+    static private FloatConfiguration ChargesPerTasksOption = new FloatConfigurationImpl("role.doctor.chargesPerTasks", ArrayHelper.Selection(0.5f, 10f, 0.5f), 1f).DecorateAsSecConfiguration();
 
-    protected override void LoadOptions()
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
+        DefinedRole RuntimeRole.Role => MyRole;
 
-        PortableVitalsChargeOption = new(RoleConfig, "portableVitalsCharge", null, 2.5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
-        MaxPortableVitalsChargeOption = new(RoleConfig, "maxPortableVitalsCharge", null, 2.5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
-        ChargesPerTasksOption = new(RoleConfig, "chargesPerTasks", null, 0.5f, 10f, 0.5f, 1f, 1f) { Decorator = NebulaConfiguration.SecDecorator };
-    }
-
-    public class Instance : Crewmate.Instance, RuntimeRole
-    {
         private ModAbilityButton? vitalButton = null;
-        public override AbstractRole Role => MyRole;
-        private float vitalTimer = MyRole.PortableVitalsChargeOption.GetFloat();
+        private float vitalTimer = PortableVitalsChargeOption;
 
         public Instance(GamePlayer player) : base(player)
         {
@@ -42,7 +34,7 @@ public class Doctor : ConfigurableStandardRole, DefinedRole
 
         void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
-            vitalTimer = Mathf.Min(MyRole.MaxPortableVitalsChargeOption.GetFloat(), vitalTimer + MyRole.ChargesPerTasksOption.GetFloat());
+            vitalTimer = Mathf.Min(MaxPortableVitalsChargeOption, vitalTimer + ChargesPerTasksOption);
         }
 
         void RuntimeAssignable.OnActivated()

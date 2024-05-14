@@ -1,5 +1,7 @@
 ﻿using Virial.Assignable;
+using Virial.DI;
 using Virial.Events.Player;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -8,7 +10,7 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
     static public Crewmate MyRole = new Crewmate();
     static public Team MyTeam = new("teams.crewmate", Palette.CrewmateBlue, TeamRevealType.Everyone);
 
-    public Crewmate() : base("crewmate", new(Palette.CrewmateBlue), RoleCategory.CrewmateRole, MyTeam) { }
+    private Crewmate() : base("crewmate", new(Palette.CrewmateBlue), RoleCategory.CrewmateRole, MyTeam) { }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
@@ -19,7 +21,11 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
 
         void RuntimeAssignable.OnActivated() {}
 
-        [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.CrewmateWin);
+        
     }
+}
+
+public class CrewmateWinRule : AbstractModule<IGameModeStandard>
+{
+    void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.Player.Role.Role.Category == RoleCategory.CrewmateRole && ev.GameEnd == NebulaGameEnd.CrewmateWin);
 }

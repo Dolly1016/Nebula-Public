@@ -1,47 +1,33 @@
 ﻿using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Mayor : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Mayor MyRole = new Mayor();
-
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => "mayor";
-    public override Color RoleColor => new Color(30f / 255f, 96f / 255f, 85f / 255f);
+    private Mayor() : base("mayor", new(30,96,85), RoleCategory.CrewmateRole, Crewmate.MyTeam, [FixedVotesOption, MinVoteOption, MaxVoteOption, MaxVoteStockOption, VoteAssignmentOption]) { }
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
-    public override RoleTeam Team => Crewmate.Team;
-
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
-    private NebulaConfiguration MinVoteOption = null!;
-    private NebulaConfiguration MaxVoteOption = null!;
-    private NebulaConfiguration MaxVoteStockOption = null!;
-    private NebulaConfiguration VoteAssignmentOption = null!;
-    private NebulaConfiguration FixedVotesOption = null!;
+    static private BoolConfiguration FixedVotesOption = new BoolConfigurationImpl("role.mayor.fixedVotes", false);
+    static private IntegerConfiguration MinVoteOption = new IntegerConfigurationImpl("role.mayor.minVote", ArrayHelper.Selection(0, 20), 1).SetPredicate(() => !FixedVotesOption);
+    static private IntegerConfiguration MaxVoteOption = new IntegerConfigurationImpl("role.mayor.maxVote", ArrayHelper.Selection(1, 20), 2).SetPredicate(() => !FixedVotesOption);
+    static private IntegerConfiguration MaxVoteStockOption = new IntegerConfigurationImpl("role.mayor.maxVotesStock", ArrayHelper.Selection(1, 20), 8).SetPredicate(() => !FixedVotesOption);
+    static private IntegerConfiguration VoteAssignmentOption = new IntegerConfigurationImpl("role.mayor.voteAssignment", ArrayHelper.Selection(1, 20), 1);
+    
+    static private int MinVote => FixedVotesOption ? VoteAssignmentOption : MinVoteOption;
+    static private int MaxVote => FixedVotesOption ? VoteAssignmentOption : MaxVoteOption;
+    static private int VoteAssignment => VoteAssignmentOption;
+    static private int VotesStock => FixedVotesOption ? VoteAssignmentOption : MaxVoteStockOption;
 
-    private int MinVote => FixedVotesOption ? VoteAssignmentOption : MinVoteOption;
-    private int MaxVote => FixedVotesOption ? VoteAssignmentOption : MaxVoteOption;
-    private int VoteAssignment => VoteAssignmentOption;
-    private int VotesStock => FixedVotesOption ? VoteAssignmentOption : MaxVoteStockOption;
-    protected override void LoadOptions()
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
-
-        FixedVotesOption = new(RoleConfig, "fixedVotes", null, false, false);
-        MinVoteOption = new(RoleConfig, "minVote", null, 0, 20, 1, 1) { Predicate = () => !FixedVotesOption };
-        MaxVoteOption = new(RoleConfig, "maxVote", null, 0, 20, 2, 2) { Predicate = () => !FixedVotesOption };
-        MaxVoteStockOption = new(RoleConfig, "maxVotesStock", null, 1, 20, 8, 8) { Predicate = () => !FixedVotesOption };
-        VoteAssignmentOption = new(RoleConfig, "voteAssignment", null, 1, 20, 1, 1);
-    }
-
-    public class Instance : Crewmate.Instance, RuntimeRole
-    {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if(arguments.Length >= 1) myVote = arguments[0];
@@ -89,9 +75,9 @@ public class Mayor : ConfigurableStandardRole, HasCitation, DefinedRole
                 countText.transform.localScale *= 0.8f;
                 countText.text = "";
 
-                myVote = Mathf.Min(myVote + MyRole.VoteAssignment, MyRole.VotesStock);
-                int min = Mathf.Min(MyRole.MinVote, myVote);
-                int max = Mathf.Min(MyRole.MaxVote, myVote);
+                myVote = Mathf.Min(myVote + VoteAssignment, VotesStock);
+                int min = Mathf.Min(MinVote, myVote);
+                int max = Mathf.Min(MaxVote, myVote);
                 currentVote = Mathf.Clamp(currentVote, min, max);
                 countText.text = currentVote.ToString() + "/" + myVote;
 

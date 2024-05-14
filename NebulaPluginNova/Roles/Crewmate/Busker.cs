@@ -12,16 +12,15 @@ namespace Nebula.Roles.Crewmate;
 public class Busker : DefinedRoleTemplate, DefinedRole
 {
     static public Busker MyRole = new Busker();
-    public Busker() : base("busker", new(255, 172, 117), RoleCategory.CrewmateRole, Crewmate.MyTeam) {
-        ConfigurationHolder?.AppendConfigurations([PseudocideCoolDownOption, PseudocideDurationOption, HidePseudocideFromVitalsOption]);
+    private Busker() : base("busker", new(255, 172, 117), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PseudocideCoolDownOption, PseudocideDurationOption, HidePseudocideFromVitalsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private FloatConfiguration PseudocideCoolDownOption = new FloatConfigurationImpl("role.busker.pseudocideCoolDown", ArrayHelper.Selection(5f, 60f, 2.5f), 20f).DecorateAsSecConfiguration();
-    private FloatConfiguration PseudocideDurationOption = new FloatConfigurationImpl("role.busker.pseudocideDuration", ArrayHelper.Selection(5f, 60f, 2.5f), 10f).DecorateAsSecConfiguration();
-    private BoolConfiguration HidePseudocideFromVitalsOption = new BoolConfigurationImpl("role.busker.hidePseudocideFromVitals", false);
+    static private FloatConfiguration PseudocideCoolDownOption = new FloatConfigurationImpl("role.busker.pseudocideCoolDown", ArrayHelper.Selection(5f, 60f, 2.5f), 20f).DecorateAsSecConfiguration();
+    static private FloatConfiguration PseudocideDurationOption = new FloatConfigurationImpl("role.busker.pseudocideDuration", ArrayHelper.Selection(5f, 60f, 2.5f), 10f).DecorateAsSecConfiguration();
+    static private BoolConfiguration HidePseudocideFromVitalsOption = new BoolConfigurationImpl("role.busker.hidePseudocideFromVitals", false);
 
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => assignable is not Lover;
 
@@ -52,12 +51,12 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                 pseudocideButton.SetSprite(pseudocideButtonSprite.GetSprite());
                 pseudocideButton.Availability = (button) => MyPlayer.CanMove;
                 pseudocideButton.Visibility = (button) => !MyPlayer.IsDead;
-                pseudocideButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PseudocideCoolDownOption).SetAsAbilityCoolDown().Start());
+                pseudocideButton.CoolDownTimer = Bind(new Timer(0f, PseudocideCoolDownOption).SetAsAbilityCoolDown().Start());
                 pseudocideButton.OnClick = (button) => {
                     NebulaManager.Instance.ScheduleDelayAction(() => {
                         using (RPCRouter.CreateSection("BuskerPseudocide"))
                         {
-                            if(MyRole.HidePseudocideFromVitalsOption) PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.BuskerEffect, 10000f, false, 0), true));
+                            if(HidePseudocideFromVitalsOption) PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.BuskerEffect, 10000f, false, 0), true));
                             MyPlayer.Suicide(PlayerState.Pseudocide, null, false);
                         }
                         reviveButon.ActivateEffect();
@@ -70,7 +69,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                 reviveButon.SetSprite(reviveButtonSprite.GetSprite());
                 reviveButon.Availability = (button) => MyPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.transform.position);
                 reviveButon.Visibility = (button) => button.EffectActive && Helpers.AllDeadBodies().Any(deadBody => deadBody.ParentId == MyPlayer.PlayerId);
-                reviveButon.EffectTimer = Bind(new Timer(0f, MyRole.PseudocideDurationOption));
+                reviveButon.EffectTimer = Bind(new Timer(0f, PseudocideDurationOption));
                 reviveButon.OnClick = (button) => {
                     using (RPCRouter.CreateSection("ReviveBusker"))
                     {

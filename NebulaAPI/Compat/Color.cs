@@ -1,4 +1,6 @@
-﻿namespace Virial;
+﻿using JetBrains.Annotations;
+
+namespace Virial;
 
 public struct Color
 {

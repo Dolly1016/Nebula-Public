@@ -1,41 +1,27 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
 [NebulaRPCHolder]
-public class Phosphorus : ConfigurableStandardRole, DefinedRole
+public class Phosphorus : DefinedRoleTemplate, DefinedRole
 {
     static public Phosphorus MyRole = new Phosphorus();
-
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => "phosphorus";
-    public override Color RoleColor => new Color(249f / 255f, 188f / 255f, 81f / 255f);
-    public override RoleTeam Team => Crewmate.Team;
+    private Phosphorus():base("phosphorus", new(249,188,81), RoleCategory.CrewmateRole, Crewmate.MyTeam, [NumOfLampsOption, PlaceCoolDownOption, LampCoolDownOption, LampDurationOption, LampStrengthOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    private NebulaConfiguration NumOfLampsOption = null!;
-    private NebulaConfiguration PlaceCoolDownOption = null!;
-    private NebulaConfiguration LampCoolDownOption = null!;
-    private NebulaConfiguration LampDurationOption = null!;
-    private NebulaConfiguration LampStrengthOption = null!;
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagFunny);
-
-        NumOfLampsOption = new NebulaConfiguration(RoleConfig, "numOfLamps", null, 1, 10, 2, 2);
-        PlaceCoolDownOption = new NebulaConfiguration(RoleConfig, "placeCoolDown", null, 5f, 60f, 5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        LampCoolDownOption = new NebulaConfiguration(RoleConfig, "lampCoolDown", null, 5f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
-        LampDurationOption = new NebulaConfiguration(RoleConfig, "lampDuration", null, 7.5f, 30f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        LampStrengthOption = new NebulaConfiguration(RoleConfig, "lampStrength", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
-    }
+    static private IntegerConfiguration NumOfLampsOption = new IntegerConfigurationImpl("role.phosphorus.numOfLamps", ArrayHelper.Selection(1, 10), 2);
+    static private FloatConfiguration PlaceCoolDownOption = new FloatConfigurationImpl("role.phosphorus.placeCoolDown", ArrayHelper.Selection(5f, 60f, 5f), 15f).DecorateAsSecConfiguration();
+    static private FloatConfiguration LampCoolDownOption = new FloatConfigurationImpl("role.phosphorus.lampCoolDown", ArrayHelper.Selection(5f, 60f, 5f), 30f).DecorateAsSecConfiguration();
+    static private FloatConfiguration LampDurationOption = new FloatConfigurationImpl("role.phosphorus.lampDuration", ArrayHelper.Selection(7.5f, 30f, 2.5f), 15f).DecorateAsSecConfiguration();
+    static private FloatConfiguration LampStrengthOption = new FloatConfigurationImpl("role.phosphorus.lampStrength", ArrayHelper.Selection(0.25f, 5f, 0.25f), 1f).DecorateAsRatioConfiguration();
 
     private static IDividedSpriteLoader lanternSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Lantern.png", 100f, 4);
 
@@ -53,16 +39,16 @@ public class Phosphorus : ConfigurableStandardRole, DefinedRole
         }
     }
 
-    public class Instance : Crewmate.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? lanternButton = null;
 
         static private ISpriteLoader placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternPlaceButton.png", 115f);
         static private ISpriteLoader lanternButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternButton.png", 115f);
 
-        public override AbstractRole Role => MyRole;
-        
         public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if (arguments.Length > 0) globalLanterns = arguments;
@@ -99,11 +85,11 @@ public class Phosphorus : ConfigurableStandardRole, DefinedRole
                     }
                 };
                 lanternButton.OnEffectEnd = (button) => lanternButton.StartCoolDown();
-                lanternButton.CoolDownTimer = Bind(new Timer(0f, MyRole.LampCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                lanternButton.EffectTimer = Bind(new Timer(0f, MyRole.LampDurationOption.GetFloat()));
+                lanternButton.CoolDownTimer = Bind(new Timer(0f, LampCoolDownOption).SetAsAbilityCoolDown().Start());
+                lanternButton.EffectTimer = Bind(new Timer(0f, LampDurationOption));
                 lanternButton.SetLabel("lantern");
 
-                int left = MyRole.NumOfLampsOption;
+                int left = NumOfLampsOption;
 
                 placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 var usesText = placeButton.ShowUsesIcon(3);
@@ -122,7 +108,7 @@ public class Phosphorus : ConfigurableStandardRole, DefinedRole
                     new StaticAchievementToken("phosphorus.common1");
                     new StaticAchievementToken("phosphorus.common2");
                 };
-                placeButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PlaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown());
+                placeButton.CoolDownTimer = Bind(new Timer(0f, PlaceCoolDownOption).SetAsAbilityCoolDown());
                 placeButton.SetLabel("place");
                 usesText.text = left.ToString();
 
@@ -134,7 +120,7 @@ public class Phosphorus : ConfigurableStandardRole, DefinedRole
         void OnMeetingStart(MeetingStartEvent ev)
         {
             //ランタンを全て設置していたら全員に公開する
-            if(localLanterns != null && localLanterns.Count == MyRole.NumOfLampsOption)
+            if(localLanterns != null && localLanterns.Count == NumOfLampsOption)
             {
                 globalLanterns = new int[localLanterns.Count];
                 for (int i = 0;i<localLanterns.Count;i++) {
@@ -157,11 +143,11 @@ public class Phosphorus : ConfigurableStandardRole, DefinedRole
           if (lantern != null)
           {
               SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(lantern.Position);
-              lightRenderer.transform.localScale *= MyRole.LampStrengthOption.GetFloat();
+              lightRenderer.transform.localScale *= LampStrengthOption;
 
               IEnumerator CoLight()
               {
-                  float t = MyRole.LampDurationOption.GetFloat();
+                  float t = LampDurationOption;
                   float indexT = 0f;
                   int index = 0;
                   while (t > 0f)

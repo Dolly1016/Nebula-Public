@@ -6,22 +6,22 @@ using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Agent : ConfigurableStandardRole, DefinedRole
+public class Agent : DefinedRoleTemplate, DefinedRole
 {
     static public Agent MyRole = new Agent();
 
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
+    public Agent() : base("agent", new(166, 183, 144), RoleCategory.CrewmateRole, Crewmate.MyTeam)
+    {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+    }
 
-    string DefinedAssignable.LocalizedName => "agent";
-    public override Color RoleColor => new Color(166f / 255f, 183f / 255f, 144f / 255f);
-    public override RoleTeam Team => Crewmate.Team;
-
+    
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    private NebulaConfiguration NumOfExemptedTasksOption = null!;
-    private NebulaConfiguration NumOfExtraTasksOption = null!;
-    private NebulaConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = null!;
-    private new VentConfiguration VentConfiguration = null!;
+    static private NebulaConfiguration NumOfExemptedTasksOption = null!;
+    static private NebulaConfiguration NumOfExtraTasksOption = null!;
+    static private NebulaConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = null!;
+    static private new VentConfiguration VentConfiguration = null!;
 
     protected override void LoadOptions()
     {

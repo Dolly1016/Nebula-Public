@@ -117,7 +117,7 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
         return false;
     }
 
-    public DefinedRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, bool withAssignmentOption = true, bool withOptionHolder = true) : base(localizedName, color, category, team, withAssignmentOption)
+    public DefinedRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true) : base(localizedName, color, category, team, withAssignmentOption)
     {
         if ((this as IGuessed).CanBeGuessDefault)
             (this as IGuessed).CanBeGuessVariable = NebulaAPI.Configurations.BoolVariable("role." + LocalizedName + ".canBeGuess", true);
@@ -128,7 +128,9 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
         if (withOptionHolder)
         {
             TryGenerateOptionHolder();
-            if (withAssignmentOption) ConfigurationHolder.AppendConfigurations((this as DefinedSingleAssignable).AllocationParameters.Configurations);
+            if (withAssignmentOption) ConfigurationHolder!.AppendConfigurations((this as DefinedSingleAssignable).AllocationParameters.Configurations);
+
+            if (configurations != null) ConfigurationHolder!.AppendConfigurations(configurations);
         }
     }
 

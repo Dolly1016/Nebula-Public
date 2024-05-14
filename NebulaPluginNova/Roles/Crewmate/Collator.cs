@@ -14,22 +14,21 @@ namespace Nebula.Roles.Crewmate;
 public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Collator MyRole = null;//new Collator();
-    public Collator():base("collator",new(37, 159, 148), RoleCategory.CrewmateRole, Crewmate.MyTeam) {
+    private Collator():base("collator",new(37, 159, 148), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SampleCoolDownOption, SelectiveCollatingOption, MaxTrialsOption, MaxTrialsPerMeetingOption, NumOfTubesOption, CarringOverSamplesOption, StrictClassificationOfNeutralRolesOption, MadmateIsClassifiedAsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
-        ConfigurationHolder?.AppendConfigurations([SampleCoolDownOption, SelectiveCollatingOption, MaxTrialsOption, MaxTrialsPerMeetingOption, NumOfTubesOption, CarringOverSamplesOption, StrictClassificationOfNeutralRolesOption, MadmateIsClassifiedAsOption]);
     }
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    FloatConfiguration SampleCoolDownOption = new FloatConfigurationImpl("role.collator.sampleCoolDown", ArrayHelper.Selection(0f, 60f, 2.5f), 15f).DecorateAsSecConfiguration();
-    BoolConfiguration SelectiveCollatingOption = new BoolConfigurationImpl("role.collator.selectiveCollating", false);
-    IntegerConfiguration MaxTrialsOption = new IntegerConfigurationImpl("role.collator.maxTrials", ArrayHelper.Selection(1, 15), 8);
-    IntegerConfiguration MaxTrialsPerMeetingOption = new IntegerConfigurationImpl("role.collator.maxTrialsPerMeeting", ArrayHelper.Selection(1, 5), 1).SetPredicate(() => MyRole.SelectiveCollatingOption);
-    IntegerConfiguration NumOfTubesOption = new IntegerConfigurationImpl("role.collator.numOfTubes", ArrayHelper.Selection(2, 14), 3).SetPredicate(() => MyRole.SelectiveCollatingOption);
-    BoolConfiguration CarringOverSamplesOption = new BoolConfigurationImpl("role.collator.carringOverSamples", false).SetPredicate(() => MyRole.SelectiveCollatingOption);
-    BoolConfiguration StrictClassificationOfNeutralRolesOption = new BoolConfigurationImpl("role.collator.strictClassificationForNeutralRoles", false);
-    ValueConfiguration<int> MadmateIsClassifiedAsOption = new StringConfigurationImpl("role.collator.madmateIsClassifiedAs", ["options.role.collator.madmateIsClassifiedAs.impostor", "options.role.collator.madmateIsClassifiedAs.crewmate"], 0);
+    static private FloatConfiguration SampleCoolDownOption = new FloatConfigurationImpl("role.collator.sampleCoolDown", ArrayHelper.Selection(0f, 60f, 2.5f), 15f).DecorateAsSecConfiguration();
+    static private BoolConfiguration SelectiveCollatingOption = new BoolConfigurationImpl("role.collator.selectiveCollating", false);
+    static private IntegerConfiguration MaxTrialsOption = new IntegerConfigurationImpl("role.collator.maxTrials", ArrayHelper.Selection(1, 15), 8);
+    static private IntegerConfiguration MaxTrialsPerMeetingOption = new IntegerConfigurationImpl("role.collator.maxTrialsPerMeeting", ArrayHelper.Selection(1, 5), 1).SetPredicate(() => MyRole.SelectiveCollatingOption);
+    static private IntegerConfiguration NumOfTubesOption = new IntegerConfigurationImpl("role.collator.numOfTubes", ArrayHelper.Selection(2, 14), 3).SetPredicate(() => MyRole.SelectiveCollatingOption);
+    static private BoolConfiguration CarringOverSamplesOption = new BoolConfigurationImpl("role.collator.carringOverSamples", false).SetPredicate(() => MyRole.SelectiveCollatingOption);
+    static private BoolConfiguration StrictClassificationOfNeutralRolesOption = new BoolConfigurationImpl("role.collator.strictClassificationForNeutralRoles", false);
+    static private ValueConfiguration<int> MadmateIsClassifiedAsOption = new StringConfigurationImpl("role.collator.madmateIsClassifiedAs", ["options.role.collator.madmateIsClassifiedAs.impostor", "options.role.collator.madmateIsClassifiedAs.crewmate"], 0);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -45,7 +44,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
         private List<(GamePlayer player, RoleTeam team)> sampledPlayers = new();
         private (SpriteRenderer tube, SpriteRenderer sample)[] allSamples = null!;
 
-        private int trials = MyRole.MaxTrialsOption;
+        private int trials = MaxTrialsOption;
         void UpdateSamples()
         {
             for(int i = 0; i < allSamples.Length; i++)
@@ -87,11 +86,11 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (sampledPlayers.Count >= 2)
             {
-                if (MyRole.SelectiveCollatingOption)
+                if (SelectiveCollatingOption)
                 {
                     //選択式
 
-                    int leftTest = MyRole.MaxTrialsPerMeetingOption;
+                    int leftTest = MaxTrialsPerMeetingOption;
 
                     var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
                     buttonManager?.RegisterMeetingAction(new(meetingSprite,
@@ -143,13 +142,13 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 case RoleCategory.CrewmateRole:
                     if (p.Role.Role == Madmate.MyRole)
-                        return MyRole.MadmateIsClassifiedAsOption.GetValue() switch { 0 => NebulaTeams.ImpostorTeam, 1 => NebulaTeams.CrewmateTeam, _ => NebulaTeams.CrewmateTeam };
+                        return MadmateIsClassifiedAsOption.GetValue() switch { 0 => NebulaTeams.ImpostorTeam, 1 => NebulaTeams.CrewmateTeam, _ => NebulaTeams.CrewmateTeam };
                     else
                         return NebulaTeams.CrewmateTeam;
                 case RoleCategory.ImpostorRole:
                     return NebulaTeams.ImpostorTeam;
                 case RoleCategory.NeutralRole:
-                    return MyRole.StrictClassificationOfNeutralRolesOption ? p.Role.Role.Team : NebulaTeams.JackalTeam;
+                    return StrictClassificationOfNeutralRolesOption ? p.Role.Role.Team : NebulaTeams.JackalTeam;
             }
 
             return NebulaTeams.CrewmateTeam;
@@ -183,7 +182,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                 var IconsHolder = HudContent.InstantiateContent("CollatorIcons", true, true, false);
                 this.Bind(IconsHolder.gameObject);
 
-                allSamples = new (SpriteRenderer tube, SpriteRenderer sample)[MyRole.SelectiveCollatingOption ? MyRole.NumOfTubesOption : 2];
+                allSamples = new (SpriteRenderer tube, SpriteRenderer sample)[SelectiveCollatingOption ? NumOfTubesOption : 2];
                 for(int i = 0;i<allSamples.Length;i++)
                 {
                     var tube = UnityHelper.CreateObject<SpriteRenderer>("SampleTube", IconsHolder.transform, Vector3.zero, LayerExpansion.GetUILayer());
@@ -222,8 +221,8 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                     acTokenAnother1.Value.player = p;
                     acTokenAnother1.Value.time = NebulaGameManager.Instance!.CurrentTime;
                 };
-                sampleButton.OnStartTaskPhase = (button) => { if (!MyRole.SelectiveCollatingOption || MyRole.CarringOverSamplesOption) sampledPlayers.Clear(); UpdateSamples(); };
-                sampleButton.CoolDownTimer = Bind(new Timer(MyRole.SampleCoolDownOption).SetAsAbilityCoolDown().Start());
+                sampleButton.OnStartTaskPhase = (button) => { if (!SelectiveCollatingOption || CarringOverSamplesOption) sampledPlayers.Clear(); UpdateSamples(); };
+                sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("collatorSample");
             }
         }

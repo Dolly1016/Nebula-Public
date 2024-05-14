@@ -1,4 +1,5 @@
 ﻿using Virial;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Scripts;
 
@@ -8,7 +9,7 @@ public class Draggable : ComponentHolder
 
     public Action<DeadBody>? OnHoldingDeadBody { get; set; } = null;
 
-    public void OnActivated(RoleInstance role)
+    public void OnActivated(RuntimeRole role)
     {
         if (role.MyPlayer.AmOwner)
         {
@@ -37,12 +38,12 @@ public class Draggable : ComponentHolder
         }
     }
 
-    public void OnDead(RoleInstance role)
+    public void OnDead(RuntimeRole role)
     {
         role.MyPlayer.ReleaseDeadBody();
     }
 
-    public void OnInactivated(RoleInstance role)
+    public void OnInactivated(RuntimeRole role)
     {
         role.MyPlayer.ReleaseDeadBody();
     }
