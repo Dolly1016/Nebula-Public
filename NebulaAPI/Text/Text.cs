@@ -144,6 +144,11 @@ public enum AttributeAsset
     OptionsTitle,
 
     /// <summary>
+    /// オプションの名称の表示で使用している固定長テキスト属性です。
+    /// </summary>
+    OptionsTitleHalf,
+
+    /// <summary>
     /// オプションの値の表示で使用している固定長テキスト属性です。
     /// </summary>
     OptionsValue,
@@ -157,6 +162,11 @@ public enum AttributeAsset
     /// オプション値の変更ボタンで使用している固定長テキスト属性です。
     /// </summary>
     OptionsButton,
+
+    /// <summary>
+    /// クールダウンオプションで設定方法を変更するボタンで使用されている固定長テキスト属性です。
+    /// </summary>
+    OptionsButtonLonger,
 }
 
 [Flags]

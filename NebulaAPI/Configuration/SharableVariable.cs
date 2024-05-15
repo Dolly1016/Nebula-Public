@@ -51,8 +51,7 @@ public interface ISharableVariable<T> : ISharableEntry, Reference<T>
 /// <summary>
 /// 共有可能で、とりうる値に順序のある変数を表します。
 /// </summary>
-/// <typeparam name="T"></typeparam>
-public interface IOrderedSharableVariable<T> : ISharableVariable<T>
+public interface IOrderedSharableEntry : ISharableEntry
 {
     /// <summary>
     /// 順序に沿って値を変化させます。
@@ -60,4 +59,12 @@ public interface IOrderedSharableVariable<T> : ISharableVariable<T>
     /// <param name="increase">上昇する方向に変化させる場合、true</param>
     /// <param name="allowLoop">ループした値の変化を許す場合、true</param>
     void ChangeValue(bool increase, bool allowLoop = true);
+}
+
+/// <summary>
+/// 共有可能で、とりうる値に順序のある変数を表します。
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public interface IOrderedSharableVariable<T> : ISharableVariable<T>, IOrderedSharableEntry
+{
 }

@@ -1,45 +1,38 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Sheriff : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Sheriff MyRole = new Sheriff();
+    private Sheriff():base("sheriff", new(240,191,0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [KillCoolDownOption, NumOfShotsOption, CanKillMadmateOption, CanKillHidingPlayerOption])
+    {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+    }
 
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => "sheriff";
-    public override Color RoleColor => new Color(240f / 255f, 191f / 255f, 0f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => Crewmate.Team;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
-    private KillCoolDownConfiguration KillCoolDownOption = null!;
-    private NebulaConfiguration NumOfShotsOption = null!;
-    private NebulaConfiguration CanKillMadmateOption = null!;
-    private NebulaConfiguration CanKillHidingPlayerOption = null!;
+    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.sheriff.killCoolDown", CoolDownType.Relative, ArrayHelper.Selection(10f, 60f, 2.5f), 25f, ArrayHelper.Selection(-40f, 40f, 2.5f), -5f, ArrayHelper.Selection(0.125f, 2f, 0.125f), 1f);
+    static private IntegerConfiguration NumOfShotsOption = NebulaAPI.Configurations.Configuration("role.sheriff.numOfShots", ArrayHelper.Selection(1, 15), 3);
+    static private BoolConfiguration CanKillMadmateOption = NebulaAPI.Configurations.Configuration("role.sheriff.canKillMadmate", false);
+    static private BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("role.sheriff.canKillHidingPlayer", false);
 
-    protected override void LoadOptions()
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
+        DefinedRole RuntimeRole.Role => MyRole;
 
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
-
-        KillCoolDownOption = new(RoleConfig, "killCoolDown", KillCoolDownConfiguration.KillCoolDownType.Relative, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 25f, -5f, 1f);
-        NumOfShotsOption = new(RoleConfig, "numOfShots", null, 1, 15, 3, 3);
-        CanKillMadmateOption = new(RoleConfig, "canKillMadmate", null, false, false);
-        CanKillHidingPlayerOption = new(RoleConfig, "canKillHidingPlayer", null, false, false);
-    }
-
-    public class Instance : Crewmate.Instance, RuntimeRole
-    {
         private ModAbilityButton? killButton = null;
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SheriffKillButton.png", 100f);
-        public override AbstractRole Role => MyRole;
-        private int leftShots = MyRole.NumOfShotsOption;
+        
+        private int leftShots = NumOfShotsOption;
         public Instance(GamePlayer player, int[] arguments) : base(player)
         {
             if(arguments.Length >= 1) leftShots = arguments[0];
@@ -59,7 +52,7 @@ public class Sheriff : ConfigurableStandardRole, HasCitation, DefinedRole
 
         private bool CanKill(GamePlayer target)
         {
-            if (target.Role.Role == Madmate.MyRole) return Sheriff.MyRole.CanKillMadmateOption;
+            if (target.Role.Role == Madmate.MyRole) return CanKillMadmateOption;
             if (target.Role.Role.Category == RoleCategory.CrewmateRole) return false;
             return true;
         }
@@ -71,7 +64,7 @@ public class Sheriff : ConfigurableStandardRole, HasCitation, DefinedRole
                 acTokenShot = new("sheriff.common1",false,(val,_)=>val);
                 acTokenMisshot = new("sheriff.another1", false, (val, _) => val);
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.AmOwner && !p.IsDead, null, MyRole.CanKillHidingPlayerOption));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.AmOwner && !p.IsDead, null, CanKillHidingPlayerOption));
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
 
                 var leftText = killButton.ShowUsesIcon(3);
@@ -99,7 +92,7 @@ public class Sheriff : ConfigurableStandardRole, HasCitation, DefinedRole
 
                     leftText.text = (--leftShots).ToString();
                 };
-                killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabel("kill");
             }
         }

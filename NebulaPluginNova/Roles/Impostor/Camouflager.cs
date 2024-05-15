@@ -1,42 +1,36 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Camouflager : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Camouflager : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Camouflager MyRole = new Camouflager();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
+    private Camouflager():base("camouflager", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CamoCoolDownOption, CamoDurationOption, CanInvokeCamoAfterDeathOption])
+    {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+    }
 
-    string DefinedAssignable.LocalizedName => "camouflager";
-    public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => Impostor.MyTeam;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration CamoCoolDownOption = null!;
-    private NebulaConfiguration CamoDurationOption = null!;
-    private NebulaConfiguration CanInvokeCamoAfterDeathOption = null!;
-    protected override void LoadOptions()
+    static private FloatConfiguration CamoCoolDownOption = NebulaAPI.Configurations.Configuration("role.camouflager.camoCoolDown", ArrayHelper.Selection(5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration CamoDurationOption = NebulaAPI.Configurations.Configuration("role.camouflager.camoDuration", ArrayHelper.Selection(5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanInvokeCamoAfterDeathOption = NebulaAPI.Configurations.Configuration("role.camouflager.canInvokeCamoAfterDeath", false);
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
+        DefinedRole RuntimeRole.Role => MyRole;
 
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
-
-        CamoCoolDownOption = new NebulaConfiguration(RoleConfig, "camoCoolDown", null, 5f, 60f, 5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-        CamoDurationOption = new NebulaConfiguration(RoleConfig, "camoDuration", null, 5f, 60f, 5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        CanInvokeCamoAfterDeathOption = new NebulaConfiguration(RoleConfig, "canInvokeCamoAfterDeath", null, false, false);
-    }
-
-    public class Instance : Impostor.Instance, RuntimeRole
-    {
         private ModAbilityButton? camouflageButton = null;
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CamoButton.png", 115f);
-        public override AbstractRole Role => MyRole;
 
         private AchievementToken<bool>? acTokenCommon;
         private AchievementToken<(bool cleared, int killed)>? acTokenChallenge;
@@ -54,7 +48,7 @@ public class Camouflager : ConfigurableStandardRole, HasCitation, DefinedRole
                 camouflageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 camouflageButton.SetSprite(buttonSprite.GetSprite());
                 camouflageButton.Availability = (button) =>MyPlayer.CanMove;
-                camouflageButton.Visibility = (button) => !MyPlayer.IsDead || MyRole.CanInvokeCamoAfterDeathOption;
+                camouflageButton.Visibility = (button) => !MyPlayer.IsDead || CanInvokeCamoAfterDeathOption;
                 camouflageButton.OnClick = (button) => {
                     button.ActivateEffect();
                 };
@@ -77,8 +71,8 @@ public class Camouflager : ConfigurableStandardRole, HasCitation, DefinedRole
                     }
                 };
                 camouflageButton.OnMeeting = button => button.StartCoolDown();
-                camouflageButton.CoolDownTimer = Bind(new Timer(MyRole.CamoCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                camouflageButton.EffectTimer = Bind(new Timer(MyRole.CamoDurationOption.GetFloat()));
+                camouflageButton.CoolDownTimer = Bind(new Timer(CamoCoolDownOption).SetAsAbilityCoolDown().Start());
+                camouflageButton.EffectTimer = Bind(new Timer(CamoDurationOption));
                 camouflageButton.SetLabel("camo");
             }
         }

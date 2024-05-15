@@ -116,11 +116,13 @@ internal abstract class ComparableConfigurationValueBase<T, LocalEntry> : Config
 /// <summary>
 /// 真偽値で保存されるオプション値
 /// </summary>
-internal class BoolConfigurationValue : ConfigurationValueBase<bool, BooleanDataEntry>, ISharableVariable<bool>
+internal class BoolConfigurationValue : ConfigurationValueBase<bool, BooleanDataEntry>, IOrderedSharableVariable<bool>
 {
     public BoolConfigurationValue(string name, bool defaultValue) : base(name, new(name, ConfigurationValues.ConfigurationSaver, defaultValue)){}
 
     protected override int RpcValue { get => currentValue ? 1 : 0; set => currentValue = value == 1; }
+
+    void IOrderedSharableVariable<bool>.ChangeValue(bool increase, bool allowLoop) => (this as ISharableVariable<bool>).CurrentValue = !currentValue;
 }
 
 /// <summary>

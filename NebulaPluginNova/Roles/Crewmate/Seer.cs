@@ -1,9 +1,11 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -73,34 +75,22 @@ public class GhostAndFlashAbility : IGameOperator
     }
 }
 
-public class Seer : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Seer : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Seer MyRole = new Seer();
-
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => "seer";
-    public override Color RoleColor => new Color(73f / 255f, 166f / 255f, 104f / 255f);
+    private Seer():base("seer", new(73,166,104), RoleCategory.CrewmateRole, Crewmate.MyTeam, [GhostDurationOption, CanSeeGhostsInShadowOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+    }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => Crewmate.Team;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration GhostDurationOption = null!;
-    private NebulaConfiguration CanSeeGhostsInShadowOption = null!;
-    protected override void LoadOptions()
+    static private FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("role.seer.ghostDuration", ArrayHelper.Selection(15f,300f,15f),90f,FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("role.seer.canSeeGhostsInShadow", false);
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
-
-        GhostDurationOption = new(RoleConfig, "ghostDuration", null, 15f, 300f, 15f, 90f, 90f) { Decorator = NebulaConfiguration.SecDecorator };
-        CanSeeGhostsInShadowOption = new(RoleConfig, "canSeeGhostsInShadow", null, false, false);
-    }
-
-    public class Instance : Crewmate.Instance, RuntimeRole
-    {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player)
         {
         }
@@ -114,7 +104,7 @@ public class Seer : ConfigurableStandardRole, HasCitation, DefinedRole
                 AchievementToken<bool> acTokenCommon = new("seer.common1", false, (val, _) => val);
                 acTokenChallenge = Bind(new AchievementToken<(bool noMissFlag, int meetings)>("seer.challenge2", (true, 0), (val, _) => val.noMissFlag && val.meetings >= 3));
 
-                new GhostAndFlashAbility() { CanSeeGhostInShadow = MyRole.CanSeeGhostsInShadowOption, FlashColor = MyRole.RoleColor, GhostDuration = MyRole.GhostDurationOption.GetFloat(), CommonToken = acTokenCommon }.Register(this);
+                new GhostAndFlashAbility() { CanSeeGhostInShadow = CanSeeGhostsInShadowOption, FlashColor = MyRole.UnityColor, GhostDuration = GhostDurationOption, CommonToken = acTokenCommon }.Register(this);
             }
         }
 

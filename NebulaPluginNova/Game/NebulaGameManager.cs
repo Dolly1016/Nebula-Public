@@ -112,8 +112,8 @@ public static class RoleHistoryHelper {
             lastTime = h.Time;
 
             isDead = true;
-            if (!h.IsModifier && h.Assignable is RoleInstance ri) role = ri;
-            else if (!h.IsModifier && h.Assignable is GhostRoleInstance gri) ghostRole = gri;
+            if (!h.IsModifier && h.Assignable is RuntimeRole ri) role = ri;
+            else if (!h.IsModifier && h.Assignable is RuntimeGhostRole gri) ghostRole = gri;
             else if (h.IsSet) modifiers.Add(h.Assignable);
             else modifiers.Remove(h.Assignable);
 
@@ -121,18 +121,29 @@ public static class RoleHistoryHelper {
         }
     }
 
-    static public string ConvertToRoleName(RuntimeRole role, GhostRoleInstance? ghostRole, List<RuntimeAssignable> modifier, bool isShort)
+    static public string ConvertToRoleName(RuntimeRole role, RuntimeGhostRole? ghostRole, List<RuntimeAssignable> modifier, bool isShort)
     {
         string result;
-        if (ghostRole != null) result = isShort ? ghostRole.Role.ShortName : ghostRole.Role.DisplayName;
-        else result = isShort ? role.DisplayName : role.DisplayShort;
+
+        Color color;
+
+        if (ghostRole != null)
+        {
+            result = isShort ? ghostRole.Role.DisplayShort : ghostRole.Role.DisplayName;
+            color = ghostRole.Role.Color.ToUnityColor();
+        }
+        else
+        {
+            result = isShort ? role.DisplayName : role.DisplayShort;
+            color = role.Role.Color.ToUnityColor();
+        }
 
         foreach (var m in modifier)
         {
             var newName = m.OverrideRoleName(result, isShort);
             if (newName != null) result = newName;
         }
-        Color color = role.Role.RoleColor.ToUnityColor();
+        
         foreach (var m in modifier) m.DecoratePlayerName(ref result, ref color);
         foreach (var m in modifier) m.DecorateRoleName(ref result);
         return result.Replace(" ", "").Color(color);
@@ -768,7 +779,5 @@ internal static class NebulaGameManagerExpansion
         if (!player) return null;
         return NebulaGameManager.Instance?.GetPlayer(player!.PlayerId);
     }
-
-
 }
 

@@ -10,6 +10,7 @@ using Virial;
 using Nebula.Modules.GUIWidget;
 using Epic.OnlineServices.Platform;
 using static Il2CppMono.Security.X509.X520;
+using Virial.Game;
 
 namespace Nebula.Configuration;
 
@@ -36,24 +37,24 @@ static internal class ConfigurationAssets
 
 internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
 {
-    private TextComponent title;
+    internal TextComponent Title;
     private GUIWidgetSupplier editor;
     private ISharableVariable<bool> val;
 
     public BoolConfigurationImpl(string id, bool defaultValue)
     {
-        this.title = new TranslateTextComponent(id);
+        this.Title = new TranslateTextComponent(id);
         this.val = new BoolConfigurationValue(id, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Center,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { UpdateValue(!GetValue()); if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage(); } },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(()=>ValueAsDisplayString)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { UpdateValue(!GetValue()); if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage(); } }
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } }
             );
     }
 
     private string ValueAsDisplayString => NebulaAPI.instance.Language.Translate(val.CurrentValue ? "options.switch.on" : "options.switch.off");
-    internal override string? GetDisplayText() => title.GetString() + ": " + ValueAsDisplayString;
+    internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
 
     internal Func<bool>? Predicate = null;
     internal override bool IsShown => Predicate?.Invoke() ?? true;
@@ -68,19 +69,19 @@ internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
 
 internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfiguration
 {
-    private TextComponent title;
+    internal TextComponent Title;
     private GUIWidgetSupplier editor;
     private IOrderedSharableVariable<int> val;
 
     public IntegerConfigurationImpl(string id, int[] selection, int defaultValue)
     {
-        this.title = new TranslateTextComponent(id);
+        this.Title = new TranslateTextComponent(id);
         this.val = new IntegerConfigurationValue(id, selection, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Center,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage(); } },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => ValueAsDisplayString)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage(); } }
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } }
             );
     }
 
@@ -91,7 +92,7 @@ internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfigurat
     }
 
     protected virtual string ValueAsDisplayString { get { string str = val.CurrentValue.ToString(); str = Decorator?.Invoke(str) ?? str; return str; } }
-    internal override string? GetDisplayText() => title.GetString() + ": " + ValueAsDisplayString;
+    internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
     private Func<string, string>? Decorator;
 
     internal Func<bool>? Predicate = null;
@@ -108,19 +109,19 @@ internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfigurat
 
 internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
 {
-    private TextComponent title;
+    internal TextComponent Title;
     private GUIWidgetSupplier editor;
     private IOrderedSharableVariable<float> val;
 
     public FloatConfigurationImpl(string id, float[] selection, float defaultValue)
     {
-        this.title = new TranslateTextComponent(id);
+        this.Title = new TranslateTextComponent(id);
         this.val = new FloatConfigurationValue(id, selection, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Center,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), title),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage(); } },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title),
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValueShorter), new LazyTextComponent(() => ValueAsDisplayString)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage(); } }
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } }
             );
     }
 
@@ -137,7 +138,7 @@ internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
     }
 
     protected virtual string ValueAsDisplayString { get { string str = val.CurrentValue.ToString(); str = Decorator?.Invoke(str) ?? str; return str; } }
-    internal override string? GetDisplayText() => title.GetString() + ": " + ValueAsDisplayString;
+    internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
     private Func<string, string>? Decorator;
 
     internal Func<bool>? Predicate = null;
@@ -153,19 +154,19 @@ internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
 
 internal class StringConfigurationImpl : Virial.Configuration.ValueConfiguration<int>
 {
-    private TextComponent title;
+    internal TextComponent Title;
     private GUIWidgetSupplier editor;
     private IOrderedSharableVariable<int> val;
 
     public StringConfigurationImpl(string id, string[] selection, int defaultIndex)
     {
-        this.title = new TranslateTextComponent(id);
+        this.Title = new TranslateTextComponent(id);
         this.val = new SelectionConfigurationValue(id, selection.Length, defaultIndex);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Center,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), title),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage(); } },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title),
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValueShorter), new LazyTextComponent(() => ValueAsDisplayString)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage(); } }
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } }
             );
     }
 
@@ -175,7 +176,7 @@ internal class StringConfigurationImpl : Virial.Configuration.ValueConfiguration
     bool IConfiguration.IsShown => Predicate?.Invoke() ?? true;
     internal StringConfigurationImpl SetPredicate(Func<bool>? predicate) { Predicate = predicate; return this; }
 
-    string? IConfiguration.GetDisplayText() => title.GetString() + ": " + ValueAsDisplayString;
+    string? IConfiguration.GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
 
     GUIWidgetSupplier IConfiguration.GetEditor() => editor;
 
@@ -195,4 +196,24 @@ internal class RoleCountConfiguration : IntegerConfigurationImpl
     public RoleCountConfiguration(string id, int maxCount, int defaultValue) : base(id, GetRoleCountMapper(maxCount), defaultValue ) { }
 
     protected override string ValueAsDisplayString => (this as ValueConfiguration<int>).GetValue() == -1 ? Nebula.Modules.Language.Translate("options.assignment.unlimited")  : base.ValueAsDisplayString;
+}
+
+public class EditorConfiguration : IConfiguration
+{
+    Func<bool> predicate;
+    Func<string?> shower;
+    private GUIWidgetSupplier editor;
+
+    public EditorConfiguration(Func<string?> shower, GUIWidgetSupplier editor, Func<bool>? predicate = null)
+    {
+        this.predicate = predicate ?? (() => true);
+        this.shower = shower;
+        this.editor = editor;
+    }
+
+    bool IConfiguration.IsShown => predicate.Invoke();
+
+    string? IConfiguration.GetDisplayText() => shower.Invoke();
+
+    GUIWidgetSupplier IConfiguration.GetEditor() => editor;
 }

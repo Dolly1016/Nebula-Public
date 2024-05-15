@@ -325,7 +325,7 @@ public static class GeneralConfigurations
     static public NebulaConfiguration CameraRestrictionOption = new NebulaConfiguration(ConsoleRestrictionOptions, "cameraRestriction", null, RestrictionSelections().ToArray(), null, null, RestrictionDecorator);
 
 
-    static public GameModeDefinition CurrentGameMode => CustomGameMode.AllGameMode[GameModeOption.CurrentUncheckedValue];
+    static public GameModeDefinition CurrentGameMode => CustomGameMode.AllGameMode[GameModeOption.GetValue()];
 
     public class ExclusiveAssignmentConfiguration
     {

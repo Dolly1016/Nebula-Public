@@ -1,16 +1,22 @@
-﻿using Virial.Assignable;
+﻿using Epic.OnlineServices;
+using Nebula.Modules.GUIWidget;
+using UnityEngine;
+using Virial;
+using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
+using Virial.Media;
+using Virial.Text;
 
 namespace Nebula.Roles.Crewmate;
 
 public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Madmate MyRole = new Madmate();
-    private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, CanIdentifyImpostorsOption]) { }
+    private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, CanIdentifyImpostorsOptionEditor]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -24,49 +30,43 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration CanUseVentsOption = new BoolConfigurationImpl("role.madmate.canUseVents", false);
     static private BoolConfiguration CanMoveInVentsOption = new BoolConfigurationImpl("role.madmate.canMoveInVents", false);
     static private IntegerConfiguration CanIdentifyImpostorsOption = new IntegerConfigurationImpl("role.madmate.canIdentifyImpostors", ArrayHelper.Selection(0, 3), 0);
-    static private NebulaConfiguration[] NumOfTasksToIdentifyImpostorsOptions = null!; //TODO
-
-
-    protected override void LoadOptions()
-    {
-        NumOfTasksToIdentifyImpostorsOptions = new NebulaConfiguration[]{
-            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors0",null,0,10,2,2),
-            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors1",null,0,10,4,4),
-            new NebulaConfiguration(RoleConfig,"numOfTasksToIdentifyImpostors2",null,0,10,6,6)
-        };
-
-        CanIdentifyImpostorsOption.Shower = () =>
+    static private IOrderedSharableVariable<int>[] NumOfTasksToIdentifyImpostorsOptions = [
+        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors0",ArrayHelper.Selection(0,10),2),
+        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors1",ArrayHelper.Selection(0,10),4),
+        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors2",ArrayHelper.Selection(0,10),6)
+        ];
+    static private IConfiguration CanIdentifyImpostorsOptionEditor = NebulaAPI.Configurations.Configuration(
+        () => CanIdentifyImpostorsOption.GetDisplayText() + StringExtensions.Color(
+            " (" +
+            NumOfTasksToIdentifyImpostorsOptions
+                .Take(CanIdentifyImpostorsOption)
+                .Join(option => option.Value.ToString(), ", ")
+            + ")", Color.gray),
+        () =>
         {
-            return CanIdentifyImpostorsOption.DefaultShowerString
-                + StringExtensions.Color(
-                    " (" +
-                    NumOfTasksToIdentifyImpostorsOptions
-                        .Take(CanIdentifyImpostorsOption.GetMappedInt())
-                        .Join(option => option.ToDisplayString(), ", ")
-                    + ")", Color.gray);
-        };
+            List<GUIWidget> widgets = new([CanIdentifyImpostorsOption.GetEditor().Invoke()]);
 
-        foreach (var option in NumOfTasksToIdentifyImpostorsOptions) { option.Shower = () => null; option.Editor = NebulaConfiguration.EmptyEditor; }
-
-        new NebulaConfiguration(RoleConfig, () =>
-        {
-            if (CanIdentifyImpostorsOption.CurrentValue == 0) return null;
-
-            List<IMetaParallelPlacableOld> placable = new();
-
-            for (int i = 0; i < CanIdentifyImpostorsOption.CurrentValue; i++)
+            if (CanIdentifyImpostorsOption.GetValue() > 0)
             {
-                if (i != 0) placable.Add(new MetaWidgetOld.HorizonalMargin(0.25f));
+                List<GUIWidget> inner = new();
+                int length = CanIdentifyImpostorsOption.GetValue();
+                for (int i = 0; i < length; i++)
+                {
+                    if (i != 0) inner.Add(GUI.API.HorizontalMargin(0.25f));
 
-                var option = NumOfTasksToIdentifyImpostorsOptions[i];
-                placable.Add(NebulaConfiguration.OptionButtonWidget(() => option.ChangeValue(false), "<<"));
-                placable.Add(new MetaWidgetOld.Text(NebulaConfiguration.OptionShortValueAttr) { RawText = option.ToDisplayString() });
-                placable.Add(NebulaConfiguration.OptionButtonWidget(() => option.ChangeValue(true), ">>"));
+                    var option = NumOfTasksToIdentifyImpostorsOptions[i];
+
+                    inner.AddRange([
+                        GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), "<<", _ => { option.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }),
+                        GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsValueShorter), option.CurrentValue.ToString()),
+                        GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ">>", _ => { option.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
+                        ]);
+                }
+                widgets.Add(new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, inner));
             }
-
-            return new CombinedWidgetOld(placable.ToArray());
-        });
-    }
+            return new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center, widgets);
+        }
+        );
     
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -82,15 +82,12 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         [OnlyMyPlayer]
         void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= ev.GameEnd == NebulaGameEnd.CrewmateWin;
 
-
-        public override bool HasCrewmateTasks => false;
-
         void SetMadmateTask()
         {
             if (AmOwner)
             {
-                var numOfTasksOptions = MyRole.NumOfTasksToIdentifyImpostorsOptions.Take(MyRole.CanIdentifyImpostorsOption.GetMappedInt());
-                int max = numOfTasksOptions.Max(option => option.GetMappedInt());
+                var numOfTasksOptions = NumOfTasksToIdentifyImpostorsOptions.Take(CanIdentifyImpostorsOption);
+                int max = numOfTasksOptions.Max(option => option.Value);
 
                 using (RPCRouter.CreateSection("MadmateTask"))
                 {
@@ -115,7 +112,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         private void IdentifyImpostors()
         {
             //インポスター判別のチャンスだけ繰り返す
-            while (CanIdentifyImpostorsOption > impostors.Count && MyPlayer.Tasks.CurrentCompleted >= MyRole.NumOfTasksToIdentifyImpostorsOptions[impostors.Count].GetMappedInt())
+            while (CanIdentifyImpostorsOption > impostors.Count && MyPlayer.Tasks.CurrentCompleted >= NumOfTasksToIdentifyImpostorsOptions[impostors.Count].Value)
             {
                 var pool = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole && !impostors.Contains(p.PlayerId)).ToArray();
                 //候補が残っていなければ何もしない

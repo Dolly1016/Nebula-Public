@@ -1,8 +1,11 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Components;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -10,7 +13,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
 {
     static public Agent MyRole = new Agent();
 
-    public Agent() : base("agent", new(166, 183, 144), RoleCategory.CrewmateRole, Crewmate.MyTeam)
+    private Agent() : base("agent", new(166, 183, 144), RoleCategory.CrewmateRole, Crewmate.MyTeam, [VentConfiguration, NumOfExemptedTasksOption, NumOfExtraTasksOption, SuicideIfSomeoneElseCompletesTasksBeforeAgentOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
@@ -18,30 +21,19 @@ public class Agent : DefinedRoleTemplate, DefinedRole
     
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private NebulaConfiguration NumOfExemptedTasksOption = null!;
-    static private NebulaConfiguration NumOfExtraTasksOption = null!;
-    static private NebulaConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = null!;
-    static private new VentConfiguration VentConfiguration = null!;
+    static private IntegerConfiguration NumOfExemptedTasksOption = NebulaAPI.Configurations.Configuration("role.agent.numOfExemptedTasks", ArrayHelper.Selection(1, 8), 3);
+    static private IntegerConfiguration NumOfExtraTasksOption = NebulaAPI.Configurations.Configuration("role.agent.numOfExtraTasks", ArrayHelper.Selection(0, 8), 3);
+    static private BoolConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = NebulaAPI.Configurations.Configuration("role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent", false);
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.agent.vent", false, ArrayHelper.Selection(0, 16), 3, null, -1f, ArrayHelper.Selection(2.5f, 30f, 2.5f), 10f);
 
-    protected override void LoadOptions()
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
+        DefinedRole RuntimeRole.Role => MyRole;
 
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
-
-        VentConfiguration = new(RoleConfig, (0, 16, 3), null, (2.5f, 30f, 10f));
-        NumOfExemptedTasksOption = new(RoleConfig, "numOfExemptedTasks", null, 1, 8, 3, 3);
-        NumOfExtraTasksOption = new(RoleConfig, "numOfExtraTasks", null, 0, 8, 3, 3);
-        SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = new(RoleConfig, "suicideIfSomeoneElseCompletesTasksBeforeAgent", null, false, false);
-    }
-
-    public class Instance : Crewmate.Instance, RuntimeRole
-    {
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
-        public override AbstractRole Role => MyRole;
         bool RuntimeRole.CanUseVent => leftVent > 0;
-        private int leftVent = MyRole.VentConfiguration.Uses;
-        private Timer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
+        private int leftVent = VentConfiguration.Uses;
+        private Timer ventDuration = new Timer(VentConfiguration.Duration);
         private TMPro.TextMeshPro UsesText = null!;
 
         GameTimer? RuntimeRole.VentDuration => ventDuration;
@@ -59,7 +51,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
             {
                 int tasks = AmongUsUtil.NumOfAllTasks;
                 if (ev.Player.AmOwner) return;
-                if (!ev.Player.IsDead && MyRole.SuicideIfSomeoneElseCompletesTasksBeforeAgentOption && ev.Player.Tasks.IsCrewmateTask && ev.Player.Tasks.TotalTasks >= tasks && ev.Player.Tasks.IsCompletedTotalTasks)
+                if (!ev.Player.IsDead && SuicideIfSomeoneElseCompletesTasksBeforeAgentOption && ev.Player.Tasks.IsCrewmateTask && ev.Player.Tasks.TotalTasks >= tasks && ev.Player.Tasks.IsCompletedTotalTasks)
                 {
                     MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Layoff);
                     new StaticAchievementToken("agent.another1");
@@ -81,7 +73,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
         [OnlyMyPlayer]
         void OnSetTaskLocal(PlayerTasksTrySetLocalEvent ev)
         {
-            int extempts = MyRole.NumOfExemptedTasksOption;
+            int extempts = NumOfExemptedTasksOption;
             for (int i = 0; i < extempts; i++) ev.Tasks.RemoveAt(System.Random.Shared.Next(ev.Tasks.Count));
         }
 
@@ -89,7 +81,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                if (MyRole.NumOfExtraTasksOption.GetMappedInt() > 0)
+                if (NumOfExtraTasksOption > 0)
                 {
                     var taskButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
                     taskButton.SetSprite(buttonSprite.GetSprite());
@@ -97,7 +89,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
                     taskButton.Visibility = (button) => !MyPlayer.IsDead;
                     taskButton.OnClick = (button) =>
                     {
-                        MyPlayer.Tasks.Unbox().GainExtraTasksAndRecompute(MyRole.NumOfExtraTasksOption, 0, 0, false);
+                        MyPlayer.Tasks.Unbox().GainExtraTasksAndRecompute(NumOfExtraTasksOption, 0, 0, false);
                     };
                     taskButton.SetLabel("agent");
                 }
@@ -110,7 +102,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (ev.EndState.Winners.Test(MyPlayer) && MyPlayer.Tasks.TotalTasks > 0 && MyRole.NumOfExemptedTasksOption <= 3)
+            if (ev.EndState.Winners.Test(MyPlayer) && MyPlayer.Tasks.TotalTasks > 0 && NumOfExemptedTasksOption <= 3)
             {
                 if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota > 0 && AmongUsUtil.NumOfAllTasks >= 8)
                     new StaticAchievementToken("agent.common1");

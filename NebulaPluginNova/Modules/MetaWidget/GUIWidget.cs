@@ -223,9 +223,11 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.DocumentTitle => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBoldLeft)) { FontSize = new(2.2f, 0.6f, 2.2f), Size = new(5f, 6f) },
                 AttributeAsset.DeviceButton => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(2.05f, 0.28f), new(255, 255, 255), false),
                 AttributeAsset.OptionsTitle => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(4f, 0.4f), new(255, 255, 255), false),
+                AttributeAsset.OptionsTitleHalf => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1.8f, 0.4f), new(255, 255, 255), false),
                 AttributeAsset.OptionsValue => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1.1f, 0.4f), new(255, 255, 255), false),
                 AttributeAsset.OptionsValueShorter => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(0.7f, 0.4f), new(255, 255, 255), false),
                 AttributeAsset.OptionsButton => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(0.32f, 0.22f), new(255, 255, 255), false),
+                AttributeAsset.OptionsButtonLonger => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1.8f, 0.22f), new(255, 255, 255), false),
                 _ => null!
             };
         }

@@ -1,12 +1,15 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Patches;
 using Nebula.VoiceChat;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Game.Minimap;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -169,7 +172,7 @@ public class UbiquitousDetachedDrone : MonoBehaviour, IVoiceComponent
 
     const float DroneHeight = 0.35f;
 
-    float IVoiceComponent.Radious => Ubiquitous.MyRole.droneMicrophoneRadiousOption.GetFloat();
+    float IVoiceComponent.Radious => Ubiquitous.droneMicrophoneRadiousOption;
 
     float IVoiceComponent.Volume => 0.95f;
 
@@ -214,7 +217,7 @@ public class UbiquitousMapLayer : MonoBehaviour
         lightIconPool = new(ShipStatus.Instance.MapPrefab.HerePoint, transform);
         lightIconPool.OnInstantiated = icon => PlayerMaterial.SetColors(new Color(1f, 1f, 1f), icon);
 
-        challengeToken = new("ubiquitous.challenge",false,(val,_) => val && Ubiquitous.MyRole.droneDetectionRadiousOption.GetFloat() < 3f);
+        challengeToken = new("ubiquitous.challenge",false,(val,_) => val && Ubiquitous.droneDetectionRadiousOption < 3f);
     }
 
     public void Update()
@@ -240,7 +243,7 @@ public class UbiquitousMapLayer : MonoBehaviour
             foreach (var pos in dronePos)
             {
                 float d = pos.Distance(p.VanillaPlayer.transform.position);
-                if(d < Ubiquitous.MyRole.droneDetectionRadiousOption.GetFloat())
+                if(d < Ubiquitous.droneDetectionRadiousOption)
                 {
                     var icon = (DynamicPalette.IsLightColor(Palette.PlayerColors[p.PlayerId]) ? lightIconPool : darkIconPool).Instantiate();
                     icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.VanillaPlayer.transform.position, center, scale);
@@ -254,44 +257,27 @@ public class UbiquitousMapLayer : MonoBehaviour
 }
 
 [NebulaRPCHolder]
-public class Ubiquitous : ConfigurableStandardRole, DefinedRole
+public class Ubiquitous : DefinedRoleTemplate, DefinedRole
 {
     static public Ubiquitous MyRole = new Ubiquitous();
-
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-    string DefinedAssignable.LocalizedName => "ubiquitous";
-    public override Color RoleColor => new Color(56f / 255f, 155f / 255f, 223f / 255f);
-    public override RoleTeam Team => Crewmate.Team;
+    private Ubiquitous(): base("ubiquitous", new(56,155,223), RoleCategory.CrewmateRole, Crewmate.MyTeam, [droneCoolDownOption, droneDurationOption, droneMicrophoneRadiousOption, droneDetectionRadiousOption, doorHackCoolDownOption, doorHackRadiousOption])
+    {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
 
-    public NebulaConfiguration droneMicrophoneRadiousOption = null!;
-    public NebulaConfiguration droneDetectionRadiousOption = null!;
-    public NebulaConfiguration doorHackCoolDownOption = null!;
-    public NebulaConfiguration doorHackRadiousOption = null!;
-    public NebulaConfiguration droneCoolDownOption = null!;
-    public NebulaConfiguration droneDurationOption = null!;
+    static private FloatConfiguration droneCoolDownOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.droneCoolDown", ArrayHelper.Selection(5f, 120f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration droneDurationOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.droneDuration", ArrayHelper.Selection(5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static internal FloatConfiguration droneMicrophoneRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.microphoneRadious", ArrayHelper.Selection(0f,5f,0.25f),2f, FloatConfigurationDecorator.Ratio);
+    static internal FloatConfiguration droneDetectionRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.detectionRadious", ArrayHelper.Selection(0f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration doorHackCoolDownOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.doorHackCoolDown", ArrayHelper.Selection(10f, 120f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration doorHackRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.doorHackRadious", ArrayHelper.Selection(0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
 
-    protected override void LoadOptions()
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagFunny, ConfigurationHolder.TagDifficult);
-
-        droneCoolDownOption = new(RoleConfig, "droneCoolDown", null, 5f, 120f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        droneDurationOption = new(RoleConfig, "droneDuration", null, 5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
-
-        droneMicrophoneRadiousOption = new(RoleConfig, "microphoneRadious", null, 0f, 5f, 0.25f, 2f, 2f) { Decorator = NebulaConfiguration.OddsDecorator };
-        droneDetectionRadiousOption = new(RoleConfig, "detectionRadious", null, 0f, 10f, 0.25f, 2f, 2f) { Decorator = NebulaConfiguration.OddsDecorator };
-        doorHackCoolDownOption = new(RoleConfig, "doorHackCoolDown", null, 10f, 120f, 2.5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
-        doorHackRadiousOption = new(RoleConfig, "doorHackRadious", null, 0f, 10f, 0.25f, 3f, 3f) { Decorator = NebulaConfiguration.OddsDecorator };
-    }
-
-
-    public class Instance : Crewmate.Instance, RuntimeRole
-    {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player)
         {
         }
@@ -345,7 +331,7 @@ public class Ubiquitous : ConfigurableStandardRole, DefinedRole
                 mesh.filter.CreateRectMesh(new(1.34f, 0.78f), new(0.35f, 0f, 0f));
                 Camera droneCam = null!;
 
-                var backMesh = UnityHelper.CreateMeshRenderer("MeshBackRenderer", mesh.renderer.transform, new(0, 0, 0.1f), LayerExpansion.GetUILayer(), MyRole.RoleColor);
+                var backMesh = UnityHelper.CreateMeshRenderer("MeshBackRenderer", mesh.renderer.transform, new(0, 0, 0.1f), LayerExpansion.GetUILayer(), MyRole.UnityColor);
                 backMesh.filter.CreateRectMesh(new(1.34f + 0.05f, 0.78f + 0.05f), new(0.35f, 0f, 0f));
 
                 ModAbilityButton callBackButton = null!;
@@ -389,8 +375,8 @@ public class Ubiquitous : ConfigurableStandardRole, DefinedRole
                     AmongUsUtil.SetCamTarget(null);
                     droneButton.StartCoolDown();
                 };
-                droneButton.CoolDownTimer = Bind(new Timer(MyRole.droneCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                droneButton.EffectTimer = Bind(new Timer(MyRole.droneDurationOption.GetFloat()).Start());
+                droneButton.CoolDownTimer = Bind(new Timer(droneCoolDownOption).SetAsAbilityCoolDown().Start());
+                droneButton.EffectTimer = Bind(new Timer(droneDurationOption).Start());
                 droneButton.SetLabel("drone");
                 droneButton.OnSubAction = (button) =>
                 {
@@ -439,7 +425,7 @@ public class Ubiquitous : ConfigurableStandardRole, DefinedRole
                 hackButton.Visibility = (button) => !MyPlayer.IsDead && myDrone;
                 hackButton.OnClick = (button) =>
                 {
-                    float distance = MyRole.doorHackRadiousOption.GetFloat();
+                    float distance = doorHackRadiousOption;
                     foreach(var door in ShipStatus.Instance.AllDoors)
                     {
                         if (!door.IsOpen && door.Room != SystemTypes.Decontamination && myDrone!.ColliderPosition.Distance(door.transform.position) < distance)
@@ -453,7 +439,7 @@ public class Ubiquitous : ConfigurableStandardRole, DefinedRole
                     
                     hackButton.StartCoolDown();
                 };
-                hackButton.CoolDownTimer = Bind(new Timer(MyRole.doorHackCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                hackButton.CoolDownTimer = Bind(new Timer(doorHackCoolDownOption).SetAsAbilityCoolDown().Start());
                 var pred = hackButton.CoolDownTimer.Predicate;
                 hackButton.CoolDownTimer.SetPredicate(()=>pred!.Invoke() || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone));
                 hackButton.SetLabel("doorHack");

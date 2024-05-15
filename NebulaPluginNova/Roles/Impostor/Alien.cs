@@ -10,7 +10,7 @@ public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
 {
 
     static public Alien MyRole = null;//new Alien();
-    public Alien(): base("alien", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EMICoolDownOption, EMIDurationOption, InvalidateCoolDownOption, NumOfInvalidationsOption])
+    private Alien(): base("alien", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EMICoolDownOption, EMIDurationOption, InvalidateCoolDownOption, NumOfInvalidationsOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
     }

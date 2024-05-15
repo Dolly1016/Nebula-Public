@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial.Configuration;
 using Virial.Game;
+using Virial.Helpers;
+using Virial.Media;
+using Virial.Text;
+using static Rewired.UI.ControlMapper.ControlMapper;
 
 namespace Virial.Assignable;
 
@@ -40,18 +44,57 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
     private class StandardAssignmentParameters : AllocationParameters
     {
         private IntegerConfiguration roleCountOption;
-        private IntegerConfiguration roleChanceOption;
-        private ISharableVariable<int>? roleSecondaryChanceOption;
+        private IOrderedSharableVariable<int> roleChanceEntry;
+        private IOrderedSharableVariable<int>? roleSecondaryChanceEntry;
+        private IConfiguration roleChanceEditor;
 
-        IEnumerable<IConfiguration> AllocationParameters.Configurations => [roleCountOption, roleChanceOption];
-        int AllocationParameters.RoleCount => throw new NotImplementedException();
+        public StandardAssignmentParameters(string id, bool isImpostor)
+        {
+            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", ArrayHelper.Selection(0, isImpostor ? 5 : 15), 0);
+
+            roleChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".chance", ArrayHelper.Selection(10, 100, 10), 100);
+            roleSecondaryChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".secondaryChance", ArrayHelper.Selection(0, 100, 10), 0);
+
+            roleChanceEditor = NebulaAPI.Configurations.Configuration(
+                () => "",
+                () => {
+                    var gui = NebulaAPI.GUI;
+                    if (roleCountOption.GetValue() <= 1)
+                    {
+                        return gui.HorizontalHolder(Media.GUIAlignment.Center,
+                        gui.LocalizedText(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), "options.role.chance"),
+                        gui.RawButton(GUIAlignment.Center, gui.GetAttribute(AttributeAsset.OptionsButton), "<<", _ => { roleChanceEntry.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }),
+                        gui.RawText(GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsValueShorter), roleChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage")),
+                        gui.RawButton(GUIAlignment.Center, gui.GetAttribute(AttributeAsset.OptionsButton), ">>", _ => { roleChanceEntry.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
+                        );
+                    }
+                    else
+                    {
+                        return gui.HorizontalHolder(Media.GUIAlignment.Center,
+                        gui.LocalizedText(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), "options.role.chance"),
+                        gui.RawButton(GUIAlignment.Center, gui.GetAttribute(AttributeAsset.OptionsButton), "<<", _ => { roleChanceEntry.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }),
+                        gui.RawText(GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsValueShorter), roleChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage")),
+                        gui.RawButton(GUIAlignment.Center, gui.GetAttribute(AttributeAsset.OptionsButton), ">>", _ => { roleChanceEntry.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }),
+                        gui.HorizontalMargin(0.3f),
+                        gui.LocalizedText(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), "options.role.secondaryChance"),
+                        gui.RawButton(GUIAlignment.Center, gui.GetAttribute(AttributeAsset.OptionsButton), "<<", _ => { roleSecondaryChanceEntry.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }),
+                        gui.RawText(GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsValueShorter), roleSecondaryChanceEntry.CurrentValue > 0 ? (roleSecondaryChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage")) : "-"),
+                        gui.RawButton(GUIAlignment.Center, gui.GetAttribute(AttributeAsset.OptionsButton), ">>", _ => { roleSecondaryChanceEntry.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
+                        );
+                    }
+                },
+                () => roleCountOption.GetValue() > 0);
+        }
+
+        IEnumerable<IConfiguration> AllocationParameters.Configurations => [roleCountOption, roleChanceEditor];
+        int AllocationParameters.RoleCount => roleCountOption.GetValue();
 
         int AllocationParameters.GetRoleChance(int count)
         {
-            if (roleSecondaryChanceOption == null || count == 1)
-                return roleChanceOption.GetValue();
+            if (roleSecondaryChanceEntry == null || roleSecondaryChanceEntry.CurrentValue == 0 || count == 1)
+                return roleChanceEntry.CurrentValue;
             else
-                return roleSecondaryChanceOption.CurrentValue;
+                return roleSecondaryChanceEntry.CurrentValue;
         }
     }
 
@@ -71,7 +114,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
 
         if (withAssignmentOption)
         {
-
+            myAssignmentParameters = new("role." + (this as DefinedAssignable).InternalName, category == RoleCategory.ImpostorRole);
         }
     }
 }
@@ -120,10 +163,10 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
     public DefinedRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true) : base(localizedName, color, category, team, withAssignmentOption)
     {
         if ((this as IGuessed).CanBeGuessDefault)
-            (this as IGuessed).CanBeGuessVariable = NebulaAPI.Configurations.BoolVariable("role." + LocalizedName + ".canBeGuess", true);
+            (this as IGuessed).CanBeGuessVariable = NebulaAPI.Configurations.SharableVariable("role." + (this as DefinedAssignable).InternalName + ".canBeGuess", true);
 
-        modifierFilter = NebulaAPI.Configurations.ModifierFilter("role." + LocalizedName + ".modifierFilter");
-        ghostRoleFilter = NebulaAPI.Configurations.GhostRoleFilter("role." + LocalizedName + ".ghostRoleFilter");
+        modifierFilter = NebulaAPI.Configurations.ModifierFilter("role." + (this as DefinedAssignable).InternalName + ".modifierFilter");
+        ghostRoleFilter = NebulaAPI.Configurations.GhostRoleFilter("role." + (this as DefinedAssignable).InternalName + ".ghostRoleFilter");
 
         if (withOptionHolder)
         {
@@ -142,7 +185,7 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
     protected bool TryGenerateOptionHolder()
     {
         if (ConfigurationHolder != null) return false;
-        ConfigurationHolder = NebulaAPI.Configurations.Holder("role." + LocalizedName, [Category], GameModes.AllGameModes);
+        ConfigurationHolder = NebulaAPI.Configurations.Holder("role." + (this as DefinedAssignable).InternalName, [Category], GameModes.AllGameModes);
         return true;
     }
 
