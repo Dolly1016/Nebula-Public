@@ -2,7 +2,7 @@
 
 namespace Nebula.Roles.Impostor;
 
-public class Illusioner : ConfigurableStandardRole, DefinedRole
+public class Illusioner : DefinedRoleTemplate, DefinedRole
 {
     static public Illusioner MyRole = new Illusioner();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -36,8 +36,10 @@ public class Illusioner : ConfigurableStandardRole, DefinedRole
         SampleOriginalLookOption = new NebulaConfiguration(RoleConfig, "sampleOriginalLook", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
         private ModAbilityButton? paintButton = null;
@@ -45,7 +47,6 @@ public class Illusioner : ConfigurableStandardRole, DefinedRole
         StaticAchievementToken? acTokenMorphingCommon = null, acTokenPainterCommon = null, acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
 
-        public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
         {
         }

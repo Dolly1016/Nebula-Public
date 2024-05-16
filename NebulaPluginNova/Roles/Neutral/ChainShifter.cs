@@ -9,7 +9,7 @@ using Virial.Game;
 namespace Nebula.Roles.Neutral;
 
 // if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, new int[] { JackalTeamId }).InvokeSingle();
-public class ChainShifter : ConfigurableStandardRole, HasCitation, DefinedRole
+public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public ChainShifter MyRole = new ChainShifter();
     static public Team MyTeam = new("teams.chainShifter", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -38,13 +38,14 @@ public class ChainShifter : ConfigurableStandardRole, HasCitation, DefinedRole
     public override bool CanBeGuessDefault => false;
 
 
-    public class Instance : RoleInstance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? chainShiftButton = null;
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ChainShiftButton.png", 115f);
 
-        public override AbstractRole Role => MyRole;
 
         private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
         private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);

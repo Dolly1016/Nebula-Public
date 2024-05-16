@@ -7,7 +7,7 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Marionette : ConfigurableStandardRole, DefinedRole
+public class Marionette : DefinedRoleTemplate, DefinedRole
 {
     static public Marionette MyRole = new Marionette();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -54,8 +54,10 @@ public class Marionette : ConfigurableStandardRole, DefinedRole
         }
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? destroyButton = null;
         private ModAbilityButton? swapButton = null;
@@ -65,7 +67,7 @@ public class Marionette : ConfigurableStandardRole, DefinedRole
         static private ISpriteLoader destroyButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyDestroyButton.png", 115f);
         static private ISpriteLoader swapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoySwapButton.png", 115f);
         static private ISpriteLoader monitorButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMonitorButton.png", 115f);
-        public override AbstractRole Role => MyRole;
+        
         public Decoy? MyDecoy = null;
         public Instance(GamePlayer player) : base(player)
         {

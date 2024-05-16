@@ -7,7 +7,7 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Raider : ConfigurableStandardRole, DefinedRole
+public class Raider : DefinedRoleTemplate, DefinedRole
 {
     static public Raider MyRole = new Raider();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -152,13 +152,15 @@ public class Raider : ConfigurableStandardRole, DefinedRole
         }
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AxeButton.png", 115f);
-        public override AbstractRole Role => MyRole;
+        
         public RaiderAxe? MyAxe = null;
         public override bool HasVanillaKillButton => false;
         public Instance(GamePlayer player) : base(player)

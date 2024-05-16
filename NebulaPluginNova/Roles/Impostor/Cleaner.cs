@@ -6,7 +6,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Cleaner : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Cleaner MyRole = new Cleaner();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -28,12 +28,14 @@ public class Cleaner : ConfigurableStandardRole, HasCitation, DefinedRole
         SyncKillAndCleanCoolDownOption = new NebulaConfiguration(RoleConfig, "syncKillAndCleanCoolDown", null, true, true);
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? cleanButton = null;
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CleanButton.png", 115f);
-        public override AbstractRole Role => MyRole;
+
 
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<(bool cleared, int removed)>? acTokenChallenge = null;

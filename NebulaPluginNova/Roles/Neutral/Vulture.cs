@@ -7,23 +7,19 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Vulture : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 {
+    static public Team MyTeam = new("teams.vulture", new(140 / 255f, 70 / 255f, 18 / 255f), TeamRevealType.OnlyMe);
     static public Vulture MyRole = new Vulture();
-    static public Team MyTeam = new("teams.vulture", MyRole.RoleColor, TeamRevealType.OnlyMe);
-
-    public override RoleCategory Category => RoleCategory.NeutralRole;
-
-    string DefinedAssignable.LocalizedName => "vulture";
-    public override Color RoleColor => new Color(140f / 255f, 70f / 255f, 18f / 255f);
+    
+    private Vulture() : base("vulture", new(MyTeam.Color), RoleCategory.NeutralRole, MyTeam) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => MyTeam;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    private KillCoolDownConfiguration EatCoolDownOption = null!;
-    private NebulaConfiguration NumOfEatenToWinOption = null!;
-    private new VentConfiguration VentConfiguration = null!;
+    static private KillCoolDownConfiguration EatCoolDownOption = null!;
+    static private NebulaConfiguration NumOfEatenToWinOption = null!;
+    static private VentConfiguration VentConfiguration = null!;
     protected override void LoadOptions()
     {
         base.LoadOptions();
@@ -35,13 +31,14 @@ public class Vulture : ConfigurableStandardRole, HasCitation, DefinedRole
     }
 
 
-    public class Instance : RoleInstance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? eatButton = null;
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EatButton.png", 115f);
 
-        public override AbstractRole Role => MyRole;
 
         private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
         private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);

@@ -5,7 +5,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Morphing : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Morphing MyRole = new Morphing();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -31,14 +31,16 @@ public class Morphing : ConfigurableStandardRole, HasCitation, DefinedRole
         LoseSampleOnMeetingOption = new NebulaConfiguration(RoleConfig, "loseSampleOnMeeting", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
 
         static public ISpriteLoader SampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
         static public ISpriteLoader MorphButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
-        public override AbstractRole Role => MyRole;
+        
 
         StaticAchievementToken? acTokenCommon = null;
         StaticAchievementToken? acTokenAnother1 = null;

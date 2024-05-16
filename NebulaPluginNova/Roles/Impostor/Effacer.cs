@@ -6,7 +6,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Effacer : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Effacer MyRole = null;// new Effacer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -30,10 +30,12 @@ public class Effacer : ConfigurableStandardRole, HasCitation, DefinedRole
         EffaceDurationOption = new NebulaConfiguration(RoleConfig, "effaceDuration", null, 5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
-        public override AbstractRole Role => MyRole;
+        
 
         public Instance(GamePlayer player) : base(player)
         {

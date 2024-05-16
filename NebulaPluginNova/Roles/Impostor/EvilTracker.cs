@@ -77,7 +77,7 @@ public class TrackerPlayerMapLayer : MonoBehaviour
     }
 }
 
-public class EvilTracker : ConfigurableStandardRole, HasCitation, DefinedRole
+public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public EvilTracker MyRole = new EvilTracker();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -113,12 +113,14 @@ public class EvilTracker : ConfigurableStandardRole, HasCitation, DefinedRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? trackButton = null;
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TrackButton.png", 115f);
-        public override AbstractRole Role => MyRole;
+        
 
         public Instance(GamePlayer player) : base(player)
         {

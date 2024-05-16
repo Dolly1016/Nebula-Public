@@ -6,7 +6,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Jester : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Jester MyRole = new Jester();
     static public Team MyTeam = new("teams.jester", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -48,9 +48,9 @@ public class Jester : ConfigurableStandardRole, HasCitation, DefinedRole
         }
     };
 
-    public class Instance : RoleInstance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         private Scripts.Draggable? draggable = null;
         private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
         private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);

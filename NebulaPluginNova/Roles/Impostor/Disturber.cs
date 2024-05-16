@@ -8,7 +8,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Disturber : ConfigurableStandardRole, DefinedRole
+public class Disturber : DefinedRoleTemplate, DefinedRole
 {
     [NebulaPreLoad]
     [NebulaRPCHolder]
@@ -87,8 +87,10 @@ public class Disturber : ConfigurableStandardRole, DefinedRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         static float PoleDistanceMin = 0.8f;
         static float PoleDistanceMax => MyRole.MaxDistanceBetweenPolesOption.GetFloat();
 
@@ -99,7 +101,6 @@ public class Disturber : ConfigurableStandardRole, DefinedRole
         static private ISpriteLoader elecAnimHSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnim.png", 100f);
         static private ISpriteLoader elecAnimVSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnimSub.png", 100f);
 
-        public override AbstractRole Role => MyRole;
         public Instance(GamePlayer player) : base(player)
         {
         }

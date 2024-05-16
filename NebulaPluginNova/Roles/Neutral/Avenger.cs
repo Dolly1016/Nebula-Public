@@ -9,7 +9,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Avenger : ConfigurableRole, DefinedRole
+public class Avenger : DefinedRoleTemplate, DefinedRole
 {
     static public Avenger MyRole = new Avenger();
     static public Team MyTeam = new("teams.avenger", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -54,8 +54,10 @@ public class Avenger : ConfigurableRole, DefinedRole
 
     public override bool CanBeGuessDefault => false;
 
-    public class Instance : RoleInstance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private GameTimer ventCoolDown = (new Timer(MyRole.VentOption.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
         private GameTimer ventDuration = new Timer(MyRole.VentOption.Duration);
         private bool canUseVent = MyRole.VentOption.CanUseVent;
@@ -63,7 +65,6 @@ public class Avenger : ConfigurableRole, DefinedRole
         GameTimer? RuntimeRole.VentDuration => ventDuration;
         bool RuntimeRole.CanUseVent => canUseVent;
 
-        public override AbstractRole Role => MyRole;
 
         private GamePlayer? target;
         public GamePlayer? AvengerTarget => target;

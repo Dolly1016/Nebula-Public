@@ -19,7 +19,7 @@ public class DestroyerAssets
     })).ToArray();
 
 }
-public class Destroyer : ConfigurableStandardRole, DefinedRole
+public class Destroyer : DefinedRoleTemplate, DefinedRole
 {
     static public Destroyer MyRole = new Destroyer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -57,10 +57,12 @@ public class Destroyer : ConfigurableStandardRole, DefinedRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? destroyButton = null;
-        public override AbstractRole Role => MyRole;
+        
         public override bool HasVanillaKillButton => false;
         public Instance(GamePlayer player) : base(player)
         {

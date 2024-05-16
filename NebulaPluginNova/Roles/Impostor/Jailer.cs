@@ -6,7 +6,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Jailer : ConfigurableStandardRole, DefinedRole
+public class Jailer : DefinedRoleTemplate, DefinedRole
 {
     static public Jailer MyRole = new Jailer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -34,9 +34,9 @@ public class Jailer : ConfigurableStandardRole, DefinedRole
         InheritAbilityOnDyingOption = new NebulaConfiguration(RoleConfig, "inheritAbilityOnDying", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player)
         {
         }

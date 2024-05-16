@@ -99,7 +99,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
     }
 
     private StandardAssignmentParameters? myAssignmentParameters = null;
-    AllocationParameters DefinedSingleAssignable.AllocationParameters => myAssignmentParameters;
+    AllocationParameters? DefinedSingleAssignable.AllocationParameters => myAssignmentParameters;
 
     protected RoleCategory Category { get; private init; }
     RoleCategory DefinedSingleAssignable.Category => Category;
@@ -171,7 +171,7 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
         if (withOptionHolder)
         {
             TryGenerateOptionHolder();
-            if (withAssignmentOption) ConfigurationHolder!.AppendConfigurations((this as DefinedSingleAssignable).AllocationParameters.Configurations);
+            if (withAssignmentOption) ConfigurationHolder!.AppendConfigurations((this as DefinedSingleAssignable).AllocationParameters!.Configurations);
 
             if (configurations != null) ConfigurationHolder!.AppendConfigurations(configurations);
         }

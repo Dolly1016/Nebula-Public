@@ -25,7 +25,7 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
     }
 }
 
-public class CrewmateWinRule : AbstractModule<IGameModeStandard>
+public class CrewmateGameRule : AbstractModule<IGameModeStandard>
 {
     void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.Player.Role.Role.Category == RoleCategory.CrewmateRole && ev.GameEnd == NebulaGameEnd.CrewmateWin);
 }

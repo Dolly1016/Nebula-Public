@@ -111,7 +111,7 @@ public interface DefinedSingleAssignable : DefinedAssignable
     /// </summary>
     RoleTeam Team { get; }
 
-    AllocationParameters AllocationParameters { get; }
+    AllocationParameters? AllocationParameters { get; }
 
     /// <summary>
     /// 役職の省略名

@@ -9,7 +9,7 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Sniper : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Sniper MyRole = new Sniper();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -114,14 +114,16 @@ public class Sniper : ConfigurableStandardRole, HasCitation, DefinedRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnipeButton.png", 115f);
         static private ISpriteLoader aimAssistSprite = SpriteLoader.FromResource("Nebula.Resources.SniperGuide.png", 100f);
-        public override AbstractRole Role => MyRole;
+        
         public SniperRifle? MyRifle = null;
         public override bool HasVanillaKillButton => false;
 

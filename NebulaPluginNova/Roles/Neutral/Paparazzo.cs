@@ -255,7 +255,7 @@ public class PaparazzoShot : MonoBehaviour
 
 
 [NebulaRPCHolder]
-public class Paparazzo : ConfigurableStandardRole, DefinedRole
+public class Paparazzo : DefinedRoleTemplate, DefinedRole
 {
     static public Paparazzo MyRole = new Paparazzo();
     static public Team MyTeam = new("teams.paparazzo", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -284,9 +284,9 @@ public class Paparazzo : ConfigurableStandardRole, DefinedRole
         RequiredDisclosedOption = new NebulaConfiguration(RoleConfig, "requiredDisclosed", null, 1, 15, 3, 3);
     }
 
-    public class Instance : RoleInstance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
 
         private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
         private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);

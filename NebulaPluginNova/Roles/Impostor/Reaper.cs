@@ -7,7 +7,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Reaper : ConfigurableStandardRole, DefinedRole
+public class Reaper : DefinedRoleTemplate, DefinedRole
 {
 
     static public Reaper MyRole = new Reaper();
@@ -30,9 +30,10 @@ public class Reaper : ConfigurableStandardRole, DefinedRole
         VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private Scripts.Draggable? draggable = null;
         private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
         private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);

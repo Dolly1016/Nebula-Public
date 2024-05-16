@@ -2,26 +2,21 @@
 
 namespace Nebula.Roles.Impostor;
 
-public class DamnedImpostor : AbstractRole, DefinedRole
+public class DamnedImpostor : DefinedRoleTemplate, DefinedRole
 {
     static public DamnedImpostor MyRole = new DamnedImpostor();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
 
-    string DefinedAssignable.LocalizedName => "damned";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
-
-    public override int RoleCount => 0;
-    public override float GetRoleChance(int count) => 0f;
+    private DamnedImpostor():base("damned", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, null, false, false) { }
+    
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public override void Load(){}
     bool DefinedAssignable.ShowOnHelpScreen => false;
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player){}
 
         void RuntimeAssignable.OnActivated()

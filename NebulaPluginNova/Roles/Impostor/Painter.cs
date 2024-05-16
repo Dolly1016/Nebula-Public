@@ -2,7 +2,7 @@
 
 namespace Nebula.Roles.Impostor;
 
-public class Painter : ConfigurableStandardRole, DefinedRole
+public class Painter : DefinedRoleTemplate, DefinedRole
 {
     static public Painter MyRole = new Painter();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -28,14 +28,16 @@ public class Painter : ConfigurableStandardRole, DefinedRole
         TransformAfterMeetingOption = new NebulaConfiguration(RoleConfig, "transformAfterMeeting", null, false, false);
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? paintButton = null;
 
         static public ISpriteLoader sampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
         static public ISpriteLoader paintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
-        public override AbstractRole Role => MyRole;
+        
         public Instance(GamePlayer player) : base(player)
         {
         }

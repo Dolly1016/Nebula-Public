@@ -8,7 +8,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Arsonist : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Arsonist MyRole = new Arsonist();
     static public Team MyTeam = new("teams.arsonist", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -34,9 +34,9 @@ public class Arsonist : ConfigurableStandardRole, HasCitation, DefinedRole
         DouseDurationOption = new NebulaConfiguration(RoleConfig, "douseDuration", null, 1f, 10f, 0.5f, 3f, 3f);
     }
 
-    public class Instance : RoleInstance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
 
         private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
         private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);

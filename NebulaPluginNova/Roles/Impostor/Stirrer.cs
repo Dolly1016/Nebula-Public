@@ -3,7 +3,7 @@ using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
-public class Stirrer : ConfigurableStandardRole, DefinedRole
+public class Stirrer : DefinedRoleTemplate, DefinedRole
 {
     static public Stirrer MyRole = new Stirrer();
     public override RoleCategory Category => RoleCategory.ImpostorRole;
@@ -32,14 +32,15 @@ public class Stirrer : ConfigurableStandardRole, DefinedRole
         SabotageIntervalOption = new NebulaConfiguration(RoleConfig, "sabotageInterval", null, 30f, 120f, 5f, 60f, 60f) { Decorator = NebulaConfiguration.SecDecorator };
     }
 
-    public class Instance : Impostor.Instance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
         private ModAbilityButton? stirButton = null;
         private ModAbilityButton? sabotageButton = null;
 
         static public ISpriteLoader StirButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.StirButton.png", 115f);
         static public ISpriteLoader SabotageButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FakeSaboButton.png", 115f);
-        public override AbstractRole Role => MyRole;
+        
         public Instance(GamePlayer player) : base(player)
         {
         }

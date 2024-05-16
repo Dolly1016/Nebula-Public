@@ -7,7 +7,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Jackal : ConfigurableStandardRole, HasCitation, DefinedRole
+public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Jackal MyRole = new Jackal();
     static public Team MyTeam = new("teams.jackal", MyRole.RoleColor, TeamRevealType.OnlyMe);
@@ -44,11 +44,12 @@ public class Jackal : ConfigurableStandardRole, HasCitation, DefinedRole
     }
 
 
-    public class Instance : RoleInstance, RuntimeRole
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
+        DefinedRole RuntimeRole.Role => MyRole;
+
         private ModAbilityButton? killButton = null;
         private ModAbilityButton? sidekickButton = null;
-        public override AbstractRole Role => MyRole;
         public int JackalTeamId;
         private int killingTotal = 0;
         private int myKillingTotal = 0;
