@@ -21,19 +21,19 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private BoolConfiguration EmbroilVotersOnExileOption = new BoolConfigurationImpl("role.madmate.embroilPlayersOnExile", false);
-    static private BoolConfiguration LimitEmbroiledPlayersToVotersOption = new BoolConfigurationImpl("role.madmate.limitEmbroiledPlayersToVoters", true);
+    static private BoolConfiguration EmbroilVotersOnExileOption = NebulaAPI.Configurations.Configuration("role.madmate.embroilPlayersOnExile", false);
+    static private BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("role.madmate.limitEmbroiledPlayersToVoters", true);
 
-    static private BoolConfiguration CanFixLightOption = new BoolConfigurationImpl("role.madmate.canFixLight", false);
-    static private BoolConfiguration CanFixCommsOption = new BoolConfigurationImpl("role.madmate.canFixComms", false);
-    static private BoolConfiguration HasImpostorVisionOption = new BoolConfigurationImpl("role.madmate.hasImpostorVision", false);
-    static private BoolConfiguration CanUseVentsOption = new BoolConfigurationImpl("role.madmate.canUseVents", false);
-    static private BoolConfiguration CanMoveInVentsOption = new BoolConfigurationImpl("role.madmate.canMoveInVents", false);
-    static private IntegerConfiguration CanIdentifyImpostorsOption = new IntegerConfigurationImpl("role.madmate.canIdentifyImpostors", ArrayHelper.Selection(0, 3), 0);
+    static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("role.madmate.canFixLight", false);
+    static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("role.madmate.canFixComms", false);
+    static private BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("role.madmate.hasImpostorVision", false);
+    static private BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("role.madmate.canUseVents", false);
+    static private BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("role.madmate.canMoveInVents", false);
+    static private IntegerConfiguration CanIdentifyImpostorsOption = NebulaAPI.Configurations.Configuration("role.madmate.canIdentifyImpostors", (0, 3), 0);
     static private IOrderedSharableVariable<int>[] NumOfTasksToIdentifyImpostorsOptions = [
-        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors0",ArrayHelper.Selection(0,10),2),
-        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors1",ArrayHelper.Selection(0,10),4),
-        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors2",ArrayHelper.Selection(0,10),6)
+        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors0",(0,10),2),
+        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors1",(0,10),4),
+        NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors2",(0,10),6)
         ];
     static private IConfiguration CanIdentifyImpostorsOptionEditor = NebulaAPI.Configurations.Configuration(
         () => CanIdentifyImpostorsOption.GetDisplayText() + StringExtensions.Color(

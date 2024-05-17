@@ -1,7 +1,10 @@
 ﻿using Nebula.Behaviour;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
@@ -22,30 +25,18 @@ public class DestroyerAssets
 public class Destroyer : DefinedRoleTemplate, DefinedRole
 {
     static public Destroyer MyRole = new Destroyer();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "destroyer";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    private Destroyer() : base("destroyer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [KillCoolDownOption, PhasesOfDestroyingOption, KillSEStrengthOption,LeaveKillEvidenceOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagBeginner);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private KillCoolDownConfiguration KillCoolDownOption = null!;
-    private NebulaConfiguration KillSEStrengthOption = null!;
-    private NebulaConfiguration PhasesOfDestroyingOption = null!;
-    private NebulaConfiguration LeaveKillEvidenceOption = null!;
+    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.destroyer.destroyCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 35f, (-30f, 30f, 2.5f), 10f, (0.5f, 5f, 0.125f), 1.5f);
+    static private IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("role.destroyer.phasesOfDestroying", (1, 10), 3);
+    static private FloatConfiguration KillSEStrengthOption = NebulaAPI.Configurations.Configuration("role.destroyer.killSEStrength", (1f,20f,0.5f),3.5f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration LeaveKillEvidenceOption = NebulaAPI.Configurations.Configuration("role.destroyer.leaveKillEvidence", true);
 
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner, ConfigurationHolder.TagFunny);
-
-        KillCoolDownOption = new (RoleConfig, "destroyCoolDown",KillCoolDownConfiguration.KillCoolDownType.Immediate, 2.5f,10f,60f,-30f,30f,0.125f,0.5f,5f,35f,10f,1.5f);
-        PhasesOfDestroyingOption = new NebulaConfiguration(RoleConfig, "phasesOfDestroying", null, 1, 10, 3, 3);
-        KillSEStrengthOption = new NebulaConfiguration(RoleConfig, "killSEStrength", null, 1f, 20f, 0.5f, 3.5f, 3.5f) { Decorator = NebulaConfiguration.OddsDecorator };
-        LeaveKillEvidenceOption = new NebulaConfiguration(RoleConfig, "leaveKillEvidence", null, true, true);
-
+    /*
         PhasesOfDestroyingOption.Shower = () =>
          {
              return PhasesOfDestroyingOption.DefaultShowerString
@@ -54,7 +45,8 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                      (3.2f + (2.05f * PhasesOfDestroyingOption.CurrentValue)).ToString()
                      + "s)", Color.gray);
          };
-    }
+        */
+    
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -190,7 +182,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                 float randomX = 0f;
                 float randomTimer = 0f;
 
-                if (!MeetingHud.Instance) NebulaAsset.PlaySE(audioClip, target.transform.position, 0.8f, MyRole.KillSEStrengthOption.GetFloat(), 0.46f);
+                if (!MeetingHud.Instance) NebulaAsset.PlaySE(audioClip, target.transform.position, 0.8f, KillSEStrengthOption, 0.46f);
 
                 int sePhase = 0;
                 float[] seTime = [0.45f, 0.62f, 0.98f];
@@ -240,7 +232,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
 
             }
 
-            int phases = MyRole.PhasesOfDestroyingOption.GetMappedInt() - 1;
+            int phases = PhasesOfDestroyingOption - 1;
 
             for (int i = 0;i < phases; i++)
             {
@@ -259,7 +251,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             }
             NebulaManager.Instance.StopCoroutine(monitorMeetingCoroutine);
 
-            if (MyRole.LeaveKillEvidenceOption)
+            if (LeaveKillEvidenceOption)
             {
                 var bloodRenderer = UnityHelper.CreateObject<SpriteRenderer>("DestroyerBlood", null, (targetPos + new Vector3(0f, 0.1f, 0f)).AsWorldPos(true));
                 bloodRenderer.sprite = spriteBloodPuddle.GetSprite();
@@ -317,7 +309,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                     destroyButton.StartCoolDown();
                 };
                 destroyButton.OnMeeting = button => button.StartCoolDown();
-                destroyButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
+                destroyButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
                 destroyButton.SetLabel("destroyerKill");
                 destroyButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
             }

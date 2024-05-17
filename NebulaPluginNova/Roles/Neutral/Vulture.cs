@@ -1,6 +1,7 @@
 ﻿using Virial;
 using Virial.Assignable;
 using Virial.Components;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
@@ -9,26 +10,17 @@ namespace Nebula.Roles.Neutral;
 
 public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Team MyTeam = new("teams.vulture", new(140 / 255f, 70 / 255f, 18 / 255f), TeamRevealType.OnlyMe);
+    static public Team MyTeam = new("teams.vulture", new(140, 70, 18), TeamRevealType.OnlyMe);
     static public Vulture MyRole = new Vulture();
     
-    private Vulture() : base("vulture", new(MyTeam.Color), RoleCategory.NeutralRole, MyTeam) { }
+    private Vulture() : base("vulture", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [EatCoolDownOption, NumOfEatenToWinOption, VentConfiguration]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private KillCoolDownConfiguration EatCoolDownOption = null!;
-    static private NebulaConfiguration NumOfEatenToWinOption = null!;
-    static private VentConfiguration VentConfiguration = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
-
-        EatCoolDownOption = new(RoleConfig, "eatCoolDown", KillCoolDownConfiguration.KillCoolDownType.Immediate, 5f, 5f, 60f, -40f, 20f, 0.125f, 0.125f, 2f, 20f, -10f, 0.5f);
-        NumOfEatenToWinOption = new NebulaConfiguration(RoleConfig, "numOfTheEatenToWin", null, 1, 8, 3, 3);
-    }
+    static private IRelativeCoolDownConfiguration EatCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.vulture.eatCoolDown", CoolDownType.Immediate, (5f, 60f, 5f), 20f, (-40f, 20f, 5f), -10f, (0.125f, 2f, 0.125f), 0.75f);
+    static private IntegerConfiguration NumOfEatenToWinOption = NebulaAPI.Configurations.Configuration("role.vulture.numOfTheEatenToWin", (1,8),3);
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.vulture.vent", true);
 
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -40,13 +32,13 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EatButton.png", 115f);
 
 
-        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
-        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
+        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
+        private bool canUseVent = VentConfiguration.CanUseVent;
         GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
         GameTimer? RuntimeRole.VentDuration => ventDuration;
         bool RuntimeRole.CanUseVent => canUseVent;
-        int leftEaten = MyRole.NumOfEatenToWinOption;
+        int leftEaten = NumOfEatenToWinOption;
 
         AchievementToken<bool>? acTokenChallenge;
 
@@ -112,12 +104,12 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 
                     if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId);
                 };
-                eatButton.CoolDownTimer = Bind(new Timer(MyRole.EatCoolDownOption.CurrentCoolDown).SetAsAbilityCoolDown().Start());
+                eatButton.CoolDownTimer = Bind(new Timer(EatCoolDownOption.CoolDown).SetAsAbilityCoolDown().Start());
                 eatButton.SetLabel("eat");
                 usesIcon.text= leftEaten.ToString();
             }
         }
 
-        public override bool HasImpostorVision => true;
+        bool RuntimeRole.HasImpostorVision => true;
     }
 }

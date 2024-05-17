@@ -11,7 +11,6 @@ public class DamnedImpostor : DefinedRoleTemplate, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    public override void Load(){}
     bool DefinedAssignable.ShowOnHelpScreen => false;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

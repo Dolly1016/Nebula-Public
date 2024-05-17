@@ -7,8 +7,8 @@ namespace Nebula.Roles.Crewmate;
 
 public class Crewmate : DefinedRoleTemplate, DefinedRole
 {
+    static public Team MyTeam = new("teams.crewmate", new(Palette.CrewmateBlue), TeamRevealType.Everyone);
     static public Crewmate MyRole = new Crewmate();
-    static public Team MyTeam = new("teams.crewmate", Palette.CrewmateBlue, TeamRevealType.Everyone);
 
     private Crewmate() : base("crewmate", new(Palette.CrewmateBlue), RoleCategory.CrewmateRole, MyTeam) { }
 

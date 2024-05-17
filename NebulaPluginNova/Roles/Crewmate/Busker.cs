@@ -19,8 +19,8 @@ public class Busker : DefinedRoleTemplate, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration PseudocideCoolDownOption = NebulaAPI.Configurations.Configuration("role.busker.pseudocideCoolDown", ArrayHelper.Selection(5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration PseudocideDurationOption = NebulaAPI.Configurations.Configuration("role.busker.pseudocideDuration", ArrayHelper.Selection(5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PseudocideCoolDownOption = NebulaAPI.Configurations.Configuration("role.busker.pseudocideCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PseudocideDurationOption = NebulaAPI.Configurations.Configuration("role.busker.pseudocideDuration", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration HidePseudocideFromVitalsOption = NebulaAPI.Configurations.Configuration("role.busker.hidePseudocideFromVitals", false);
 
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => assignable is not Lover;

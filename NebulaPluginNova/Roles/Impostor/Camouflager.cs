@@ -20,8 +20,8 @@ public class Camouflager : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration CamoCoolDownOption = NebulaAPI.Configurations.Configuration("role.camouflager.camoCoolDown", ArrayHelper.Selection(5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration CamoDurationOption = NebulaAPI.Configurations.Configuration("role.camouflager.camoDuration", ArrayHelper.Selection(5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration CamoCoolDownOption = NebulaAPI.Configurations.Configuration("role.camouflager.camoCoolDown", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration CamoDurationOption = NebulaAPI.Configurations.Configuration("role.camouflager.camoDuration", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration CanInvokeCamoAfterDeathOption = NebulaAPI.Configurations.Configuration("role.camouflager.canInvokeCamoAfterDeath", false);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

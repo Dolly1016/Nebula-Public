@@ -1,10 +1,13 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Nebula.Behaviour;
 using TMPro;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
@@ -59,32 +62,17 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
     }
 
     static public Disturber MyRole = new Disturber();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "disturber";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    private Disturber() : base("disturber", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [PlaceCoolDownOption, DisturbCoolDownOption, DisturbDurationOption, MaxNumOfPolesOption, MaxDistanceBetweenPolesOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagDifficult, ConfigurationTags.TagFunny);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration PlaceCoolDownOption = null!;
-    private NebulaConfiguration DisturbCoolDownOption = null!;
-    private NebulaConfiguration DisturbDurationOption = null!;
-    private NebulaConfiguration MaxNumOfPolesOption = null!;
-    private NebulaConfiguration MaxDistanceBetweenPolesOption = null!;
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagDifficult, ConfigurationHolder.TagFunny);
-
-        PlaceCoolDownOption = new NebulaConfiguration(RoleConfig, "placeCoolDown", null, 0f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
-        DisturbCoolDownOption = new NebulaConfiguration(RoleConfig, "disturbCoolDown", null, 10f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-        DisturbDurationOption = new NebulaConfiguration(RoleConfig, "disturbDuration", null, 5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        MaxNumOfPolesOption = new NebulaConfiguration(RoleConfig, "maxNumOfPoles", null, 2, 10, 5, 5);
-        MaxDistanceBetweenPolesOption = new NebulaConfiguration(RoleConfig, "maxDistanceBetweenPoles", null, 2f, 6f, 1f, 5f, 5f) { Decorator = NebulaConfiguration.OddsDecorator };
-    }
+    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("role.disturber.placeCoolDown", (0f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DisturbCoolDownOption = NebulaAPI.Configurations.Configuration("role.disturber.disturbCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DisturbDurationOption = NebulaAPI.Configurations.Configuration("role.disturber.disturbDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private IntegerConfiguration MaxNumOfPolesOption = NebulaAPI.Configurations.Configuration("role.disturber,maxNumOfPoles", (2, 10), 5);
+    static private FloatConfiguration MaxDistanceBetweenPolesOption = NebulaAPI.Configurations.Configuration("role.disturber.maxDistanceBetweenPoles", (2f, 6f, 1f), 5f, FloatConfigurationDecorator.Ratio);
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -92,7 +80,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         DefinedRole RuntimeRole.Role => MyRole;
 
         static float PoleDistanceMin = 0.8f;
-        static float PoleDistanceMax => MyRole.MaxDistanceBetweenPolesOption.GetFloat();
+        static float PoleDistanceMax => MaxDistanceBetweenPolesOption;
 
 
         static public ISpriteLoader placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ElecPolePlaceButton.png", 115f);
@@ -175,14 +163,14 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 EffectCircle? effectCircle = null;
 
                 TextMeshPro polesText = null!;
-                int GetNumOfLeftPoles() => MyRole.MaxNumOfPolesOption - (newPoles.Count + poles.Count);
+                int GetNumOfLeftPoles() =>MaxNumOfPolesOption - (newPoles.Count + poles.Count);
 
                 var placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) =>
                 {
                     var distance = (GetLastPole()?.Position.Distance(MyPlayer.Position.ToUnityVector()) ?? (PoleDistanceMin + 0.1f));
-                    return MyPlayer.CanMove && newPoles.Count + poles.Count < MyRole.MaxNumOfPolesOption && distance > PoleDistanceMin && distance < PoleDistanceMax;
+                    return MyPlayer.CanMove && newPoles.Count + poles.Count < MaxNumOfPolesOption && distance > PoleDistanceMin && distance < PoleDistanceMax;
                 };
                 placeButton.Visibility = (button) => !MyPlayer.IsDead;
                 placeButton.OnClick = (button) => {
@@ -209,7 +197,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                     }
                     newPoles.Clear();
                 };
-                placeButton.CoolDownTimer = Bind(new Timer(MyRole.PlaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                placeButton.CoolDownTimer = Bind(new Timer(PlaceCoolDownOption).SetAsAbilityCoolDown().Start());
                 placeButton.SetLabel("place");
                 polesText = placeButton.ShowUsesIcon(0);
                 polesText.text = GetNumOfLeftPoles().ToString();
@@ -245,8 +233,8 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                     }
                 };
                 
-                disturbButton.CoolDownTimer = Bind(new Timer(MyRole.DisturbCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                disturbButton.EffectTimer = Bind(new Timer(MyRole.DisturbDurationOption.GetFloat()));
+                disturbButton.CoolDownTimer = Bind(new Timer(DisturbCoolDownOption).SetAsAbilityCoolDown().Start());
+                disturbButton.EffectTimer = Bind(new Timer(DisturbDurationOption));
                 disturbButton.SetLabel("disturb");
             }
         }
@@ -352,7 +340,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
 
         static public RemoteProcess<Vector2[]> RpcDisturb = new("Disturb", (message, _) =>
         {
-            float duration = MyRole.DisturbDurationOption.GetFloat();
+            float duration = DisturbDurationOption;
             for (int i = 0; i < message.Length - 1; i++) InstantiateCollider(message[i], message[i + 1], duration);
         });
     }

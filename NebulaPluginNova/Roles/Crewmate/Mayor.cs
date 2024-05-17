@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -14,11 +15,11 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
-    static private BoolConfiguration FixedVotesOption = new BoolConfigurationImpl("role.mayor.fixedVotes", false);
-    static private IntegerConfiguration MinVoteOption = new IntegerConfigurationImpl("role.mayor.minVote", ArrayHelper.Selection(0, 20), 1).SetPredicate(() => !FixedVotesOption);
-    static private IntegerConfiguration MaxVoteOption = new IntegerConfigurationImpl("role.mayor.maxVote", ArrayHelper.Selection(1, 20), 2).SetPredicate(() => !FixedVotesOption);
-    static private IntegerConfiguration MaxVoteStockOption = new IntegerConfigurationImpl("role.mayor.maxVotesStock", ArrayHelper.Selection(1, 20), 8).SetPredicate(() => !FixedVotesOption);
-    static private IntegerConfiguration VoteAssignmentOption = new IntegerConfigurationImpl("role.mayor.voteAssignment", ArrayHelper.Selection(1, 20), 1);
+    static private BoolConfiguration FixedVotesOption = NebulaAPI.Configurations.Configuration("role.mayor.fixedVotes", false);
+    static private IntegerConfiguration MinVoteOption = NebulaAPI.Configurations.Configuration("role.mayor.minVote", (0, 20), 1, () => !FixedVotesOption);
+    static private IntegerConfiguration MaxVoteOption = NebulaAPI.Configurations.Configuration("role.mayor.maxVote", (1, 20), 2, () => !FixedVotesOption);
+    static private IntegerConfiguration MaxVoteStockOption = NebulaAPI.Configurations.Configuration("role.mayor.maxVotesStock", (1, 20), 8, () => !FixedVotesOption);
+    static private IntegerConfiguration VoteAssignmentOption = NebulaAPI.Configurations.Configuration("role.mayor.voteAssignment", (1, 20), 1);
     
     static private int MinVote => FixedVotesOption ? VoteAssignmentOption : MinVoteOption;
     static private int MaxVote => FixedVotesOption ? VoteAssignmentOption : MaxVoteOption;

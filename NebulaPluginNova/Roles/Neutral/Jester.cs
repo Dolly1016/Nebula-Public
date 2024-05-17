@@ -1,5 +1,7 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Components;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -8,34 +10,21 @@ namespace Nebula.Roles.Neutral;
 
 public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
 {
+    static public Team MyTeam = new("teams.jester", new(253,84,167), TeamRevealType.OnlyMe);
     static public Jester MyRole = new Jester();
-    static public Team MyTeam = new("teams.jester", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
-    public override RoleCategory Category => RoleCategory.NeutralRole;
+    private Jester() : base("jester", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [CanDragDeadBodyOption, CanFixLightOption, CanFixCommsOption, VentConfiguration]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+    }
 
-    string DefinedAssignable.LocalizedName => "jester";
-    public override Color RoleColor => new Color(253f / 255f, 84f / 255f, 167f / 255f);
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => MyTeam;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration CanDragDeadBodyOption = null!;
-    private NebulaConfiguration CanFixLightOption = null!;
-    private NebulaConfiguration CanFixCommsOption = null!;
-    private new VentConfiguration VentConfiguration = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-        
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
-
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
-        CanDragDeadBodyOption = new NebulaConfiguration(RoleConfig, "canDragDeadBody", null, true, true);
-        CanFixLightOption = new NebulaConfiguration(RoleConfig, "canFixLight", null, false, false);
-        CanFixCommsOption = new NebulaConfiguration(RoleConfig, "canFixComms", null, false, false);
-
-    }
+    static private BoolConfiguration CanDragDeadBodyOption = NebulaAPI.Configurations.Configuration("role.jester.canDragDeadBody", true);
+    static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("role.jester.canDragDeadBody", false);
+    static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("role.jester.canDragDeadBody", false);
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.jester.vent", true);
 
     static public NebulaEndCriteria JesterCriteria = new(CustomGameMode.Standard)
     {
@@ -52,9 +41,9 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
         private Scripts.Draggable? draggable = null;
-        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
-        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
+        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
+        private bool canUseVent = VentConfiguration.CanUseVent;
         GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
         GameTimer? RuntimeRole.VentDuration => ventDuration;
         bool RuntimeRole.CanUseVent => canUseVent;
@@ -62,7 +51,7 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
 
         public Instance(GamePlayer player) : base(player)
         {
-            if (MyRole.CanDragDeadBodyOption) draggable = Bind(new Scripts.Draggable());
+            if (CanDragDeadBodyOption) draggable = Bind(new Scripts.Draggable());
         }
 
 
@@ -81,8 +70,8 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
         void RuntimeAssignable.OnInactivated() => draggable?.OnInactivated(this);
         
 
-        bool RuntimeAssignable.CanFixComm => MyRole.CanFixCommsOption;
-        bool RuntimeAssignable.CanFixLight => MyRole.CanFixLightOption;
+        bool RuntimeAssignable.CanFixComm => CanFixCommsOption;
+        bool RuntimeAssignable.CanFixLight => CanFixLightOption;
 
 
         StaticAchievementToken? acTokenCommon = null;

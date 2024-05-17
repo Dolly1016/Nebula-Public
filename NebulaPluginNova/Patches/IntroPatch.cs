@@ -60,7 +60,7 @@ public static class ShowIntroPatch
         }
         yield return ShipStatus.Instance.CosmeticsCache.PopulateFromPlayers();
 
-        Color c = myInfo.Role!.Role.Team.Color;
+        Color c = myInfo.Role!.Role.Team.UnityColor;
 
         Vector3 position = __instance.BackgroundBar.transform.position;
         position.y -= 0.25f;

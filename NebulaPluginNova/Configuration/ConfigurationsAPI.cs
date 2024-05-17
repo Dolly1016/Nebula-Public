@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial;
+using Virial.Compat;
 using Virial.Configuration;
 using Virial.Game;
 using Virial.Media;
@@ -16,8 +17,8 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
     static public ConfigurationsAPI API { get; private set; } = new();
 
     IOrderedSharableVariable<bool> Configurations.SharableVariable(string id, bool defaultValue) => new BoolConfigurationValue(id, defaultValue);
-    IOrderedSharableVariable<float> Configurations.SharableVariable(string id, float[] values, float defaultValue) => new FloatConfigurationValue(id, values, defaultValue);
-    IOrderedSharableVariable<int> Configurations.SharableVariable(string id, int[] values, int defaultValue) => new IntegerConfigurationValue(id, values, defaultValue);
+    IOrderedSharableVariable<float> Configurations.SharableVariable(string id, FloatSelection values, float defaultValue) => new FloatConfigurationValue(id, values.Selection, defaultValue);
+    IOrderedSharableVariable<int> Configurations.SharableVariable(string id, IntegerSelection values, int defaultValue) => new IntegerConfigurationValue(id, values.Selection, defaultValue);
     ISharableVariable<int> Configurations.SharableVariable(string id, int defaultValue, int maxValueExcluded) => new SelectionConfigurationValue(id, defaultValue, maxValueExcluded);
     IConfigurationHolder Configurations.Holder(string id, IEnumerable<ConfigurationTab> tabs, IEnumerable<GameModeDefinition> gamemodes)
     {
@@ -37,16 +38,16 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
         return config;
     }
 
-    IntegerConfiguration Configurations.Configuration(string id, int[] selection, int defaultValue, Func<bool>? predicate)
+    IntegerConfiguration Configurations.Configuration(string id, IntegerSelection selection, int defaultValue, Func<bool>? predicate)
     {
-        var config = new IntegerConfigurationImpl(id, selection, defaultValue);
+        var config = new IntegerConfigurationImpl(id, selection.Selection, defaultValue);
         if (predicate != null) config.Predicate = predicate;
         return config;
     }
 
-    FloatConfiguration Configurations.Configuration(string id, float[] selection, float defaultValue, FloatConfigurationDecorator decorator, Func<bool>? predicate)
+    FloatConfiguration Configurations.Configuration(string id, FloatSelection selection, float defaultValue, FloatConfigurationDecorator decorator, Func<bool>? predicate)
     {
-        var config = new FloatConfigurationImpl(id, selection, defaultValue);
+        var config = new FloatConfigurationImpl(id, selection.Selection, defaultValue);
         if (decorator == FloatConfigurationDecorator.Ratio)
             config.DecorateAsRatioConfiguration();
         if (decorator == FloatConfigurationDecorator.Second)
@@ -69,9 +70,9 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
         if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage();
     }
 
-    IVentConfiguration Configurations.VentConfiguration(string id, bool isOptional, int[]? usesSelection, int usesDefaultValue, float[]? coolDownSelection, float coolDownDefaultValue, float[]? durationSelection, float durationDefaultValue)
-     => new VentConfiguration(id, isOptional, usesSelection, usesDefaultValue, coolDownSelection, coolDownDefaultValue, durationSelection, durationDefaultValue);
+    IVentConfiguration Configurations.VentConfiguration(string id, bool isOptional, IntegerSelection? usesSelection, int usesDefaultValue, FloatSelection? coolDownSelection, float coolDownDefaultValue, FloatSelection? durationSelection, float durationDefaultValue)
+     => new VentConfiguration(id, isOptional, usesSelection?.Selection, usesDefaultValue, coolDownSelection?.Selection, coolDownDefaultValue, durationSelection?.Selection, durationDefaultValue);
 
-    IRelativeCoolDownConfiguration Configurations.KillConfiguration(TextComponent title, string id, CoolDownType defaultType, float[] immediateSelection, float immediateDefaultValue, float[] relativeSelection, float relativeDefaultValue, float[] ratioSelection, float ratioDefaultValue)
-     => new KillCoolDownConfiguration(title, id, defaultType, immediateSelection, immediateDefaultValue, relativeSelection, relativeDefaultValue, ratioSelection, ratioDefaultValue);
+    IRelativeCoolDownConfiguration Configurations.KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue)
+     => new KillCoolDownConfiguration(title, id, defaultType, immediateSelection.Selection, immediateDefaultValue, relativeSelection.Selection, relativeDefaultValue, ratioSelection.Selection, ratioDefaultValue);
 }

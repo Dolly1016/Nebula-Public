@@ -1,5 +1,7 @@
 ﻿using Nebula.Roles.Abilities;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Minimap;
 using Virial.Events.Player;
 using Virial.Game;
@@ -9,30 +11,16 @@ namespace Nebula.Roles.Impostor;
 public class Jailer : DefinedRoleTemplate, DefinedRole
 {
     static public Jailer MyRole = new Jailer();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "jailer";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    private Jailer() : base("jailer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CanMoveWithMapWatchingOption,CanIdentifyDeadBodiesOption,CanIdentifyImpostorsOption, InheritAbilityOnDyingOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    public NebulaConfiguration CanMoveWithMapWatchingOption = null!;
-    public NebulaConfiguration CanIdentifyDeadBodiesOption = null!;
-    public NebulaConfiguration CanIdentifyImpostorsOption = null!;
-    public NebulaConfiguration InheritAbilityOnDyingOption = null!;
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
-
-        CanMoveWithMapWatchingOption = new NebulaConfiguration(RoleConfig, "canMoveWithMapWatching", null, false, false);
-        CanIdentifyDeadBodiesOption = new NebulaConfiguration(RoleConfig, "canIdentifyDeadBodies", null, false, false);
-        CanIdentifyImpostorsOption = new NebulaConfiguration(RoleConfig, "canIdentifyImpostors", null, false, false);
-        InheritAbilityOnDyingOption = new NebulaConfiguration(RoleConfig, "inheritAbilityOnDying", null, false, false);
-    }
+    static public BoolConfiguration CanMoveWithMapWatchingOption = NebulaAPI.Configurations.Configuration("role.jailer.showTrackingTargetOnMap", false);
+    static public BoolConfiguration CanIdentifyDeadBodiesOption = NebulaAPI.Configurations.Configuration("role.jailer.canIdentifyDeadBodies", false);
+    static public BoolConfiguration CanIdentifyImpostorsOption = NebulaAPI.Configurations.Configuration("role.jailer.canIdentifyImpostors", false);
+    static public BoolConfiguration InheritAbilityOnDyingOption = NebulaAPI.Configurations.Configuration("role.jailer.inheritAbilityOnDying", false);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -80,7 +68,7 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
                 //JailerAbilityを獲得していなければ登録
                 if ((GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
                 {
-                    new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
+                    new JailerAbility(CanIdentifyImpostorsOption, CanIdentifyDeadBodiesOption, CanMoveWithMapWatchingOption).Register(this);
                 }
             }
         }
@@ -93,9 +81,9 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
             if (localPlayer == null) return;
 
             //継承ジェイラーの対象で、JailerAbilityを獲得していなければ登録
-            if (MyRole.InheritAbilityOnDyingOption && !localPlayer.IsDead && localPlayer.IsImpostor && (GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
+            if (InheritAbilityOnDyingOption && !localPlayer.IsDead && localPlayer.IsImpostor && (GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
             {
-                new JailerAbility(MyRole.CanIdentifyImpostorsOption, MyRole.CanIdentifyDeadBodiesOption, MyRole.CanMoveWithMapWatchingOption).Register(this);
+                new JailerAbility(CanIdentifyImpostorsOption, CanIdentifyDeadBodiesOption, CanMoveWithMapWatchingOption).Register(this);
             }
 
         }

@@ -18,8 +18,8 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.sheriff.killCoolDown", CoolDownType.Relative, ArrayHelper.Selection(10f, 60f, 2.5f), 25f, ArrayHelper.Selection(-40f, 40f, 2.5f), -5f, ArrayHelper.Selection(0.125f, 2f, 0.125f), 1f);
-    static private IntegerConfiguration NumOfShotsOption = NebulaAPI.Configurations.Configuration("role.sheriff.numOfShots", ArrayHelper.Selection(1, 15), 3);
+    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.sheriff.killCoolDown", CoolDownType.Relative, (10f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
+    static private IntegerConfiguration NumOfShotsOption = NebulaAPI.Configurations.Configuration("role.sheriff.numOfShots", (1, 15), 3);
     static private BoolConfiguration CanKillMadmateOption = NebulaAPI.Configurations.Configuration("role.sheriff.canKillMadmate", false);
     static private BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("role.sheriff.canKillHidingPlayer", false);
 

@@ -1,8 +1,10 @@
-﻿using Nebula.Roles.Abilities;
+﻿using Nebula.Compat;
+using Nebula.Roles.Abilities;
 using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
@@ -11,56 +13,40 @@ namespace Nebula.Roles.Neutral;
 
 public class Avenger : DefinedRoleTemplate, DefinedRole
 {
+    static public Team MyTeam = new("teams.avenger", new(141,111,131), TeamRevealType.OnlyMe);
     static public Avenger MyRole = new Avenger();
-    static public Team MyTeam = new("teams.avenger", MyRole.RoleColor, TeamRevealType.OnlyMe);
+    private Avenger() : base("avenger", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [], false) {
+        
+    }
 
-    public override RoleCategory Category => RoleCategory.NeutralRole;
-
-
-    string DefinedAssignable.LocalizedName => "avenger";
-    public override Color RoleColor => new Color(141f / 255f, 111f / 255f, 131f / 255f);
-    public override RoleTeam Team => MyTeam;
-
-    public override int RoleCount => 0;
+    AllocationParameters? DefinedSingleAssignable.AllocationParameters => null;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, -1));
 
-    public NebulaConfiguration CanKnowExistanceOfAvengerOption = null!;
-    private NebulaConfiguration TargetCanKnowAvengerOption = null!;
-    private NebulaConfiguration AvengerFlashForMurdererOption = null!;
-    private NebulaConfiguration NotificationForAvengerIntervalOption = null!;
-    private NebulaConfiguration NotificationForMurdererIntervalOption = null!;
-    private KillCoolDownConfiguration KillCoolDownOption = null!;
-    private VentConfiguration VentOption = null!;
+    static public ValueConfiguration<int> CanKnowExistanceOfAvengerOption = NebulaAPI.Configurations.Configuration("role.avenger.canKnowExistanceOfAvenger", ["options.role.avenger.canKnowExistanceOfAvenger.off", "options.role.avenger.canKnowExistanceOfAvenger.onlyTarget", "options.role.avenger.canKnowExistanceOfAvenger.on"], 0);
+    static private BoolConfiguration TargetCanKnowAvengerOption = NebulaAPI.Configurations.Configuration("role.avenger.targetCanKnowAvenger", true);
+    static private BoolConfiguration AvengerFlashForMurdererOption = NebulaAPI.Configurations.Configuration("role.avenger.showAvengerFlashForTarget", true);
+    static private FloatConfiguration NotificationForAvengerIntervalOption = NebulaAPI.Configurations.Configuration("role.avenger.notificationForAvengerInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration NotificationForMurdererIntervalOption = NebulaAPI.Configurations.Configuration("role.avenger.notificationForTargetInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.avenger.killCoolDown", CoolDownType.Relative, (2.5f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
+    static private IVentConfiguration VentOption = NebulaAPI.Configurations.NeutralVentConfiguration("role.avenger.vent", false);
 
     public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return Lover.MyRole; }
 
     protected override void LoadOptions()
     {
-        base.LoadOptions();
-
-        KillCoolDownOption = new(RoleConfig, "killCoolDown", KillCoolDownConfiguration.KillCoolDownType.Relative, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 25f, -5f, 1f);
-        CanKnowExistanceOfAvengerOption = new(RoleConfig, "canKnowExistanceOfAvenger", null, ["options.role.avenger.canKnowExistanceOfAvenger.off", "options.role.avenger.canKnowExistanceOfAvenger.onlyTarget", "options.role.avenger.canKnowExistanceOfAvenger.on"], 0, 0);
-        TargetCanKnowAvengerOption = new(RoleConfig, "targetCanKnowAvenger", null, true, true);
-        AvengerFlashForMurdererOption = new(RoleConfig, "showAvengerFlashForTarget", null, true, true);
-        NotificationForAvengerIntervalOption = new(RoleConfig, "notificationForAvengerInterval", null, 2.5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
-        NotificationForMurdererIntervalOption = new(RoleConfig, "notificationForTargetInterval", null, 2.5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator, Predicate = () => TargetCanKnowAvengerOption };
-        VentOption = new(RoleConfig,null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
-
         RoleConfig.SetPredicate(() => (Modifier.Lover.MyRole.RoleConfig.IsActivated?.Invoke() ?? false) && Modifier.Lover.MyRole.AvengerModeOption);
     }
 
-    public override float GetRoleChance(int count) => 0f;
-
-    public override bool CanBeGuessDefault => false;
+    bool IGuessed.CanBeGuessDefault => false;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        private GameTimer ventCoolDown = (new Timer(MyRole.VentOption.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(MyRole.VentOption.Duration);
-        private bool canUseVent = MyRole.VentOption.CanUseVent;
+        private GameTimer ventCoolDown = (new Timer(VentOption.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(VentOption.Duration);
+        private bool canUseVent = VentOption.CanUseVent;
         GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
         GameTimer? RuntimeRole.VentDuration => ventDuration;
         bool RuntimeRole.CanUseVent => canUseVent;
@@ -78,8 +64,8 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText("You became AVENGER.", MyRole.RoleColor, 5.5f, true);
-                AmongUsUtil.PlayCustomFlash(MyRole.RoleColor, 0f, 0.8f, 0.7f);
+                NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText("You became AVENGER.", MyRole.RoleColor.ToUnityColor(), 5.5f, true);
+                AmongUsUtil.PlayCustomFlash(MyRole.RoleColor.ToUnityColor(), 0f, 0.8f, 0.7f);
 
                 var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
@@ -90,17 +76,17 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
                     MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill);
                     killButton.StartCoolDown();
                 };
-                killButton.CoolDownTimer = Bind(new Timer(MyRole.KillCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 
-                if (target != null) Bind(new TrackingArrowAbility(target, MyRole.NotificationForAvengerIntervalOption.GetFloat(), MyRole.RoleColor)).Register();
+                if (target != null) Bind(new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor())).Register();
             }
 
             if (target?.AmOwner ?? false)
             {
-                if (MyRole.TargetCanKnowAvengerOption) Bind(new TrackingArrowAbility(MyPlayer, MyRole.NotificationForMurdererIntervalOption.GetFloat(), MyRole.RoleColor)).Register();
-                if (MyRole.AvengerFlashForMurdererOption) AmongUsUtil.PlayFlash(MyRole.RoleColor);
+                if (TargetCanKnowAvengerOption) Bind(new TrackingArrowAbility(MyPlayer, NotificationForMurdererIntervalOption, MyRole.RoleColor.ToUnityColor())).Register();
+                if (AvengerFlashForMurdererOption) AmongUsUtil.PlayFlash(MyRole.RoleColor.ToUnityColor());
             }
         }
 

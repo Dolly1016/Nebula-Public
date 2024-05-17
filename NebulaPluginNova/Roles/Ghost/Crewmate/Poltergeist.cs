@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Helpers;
 
@@ -12,7 +13,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
     public Poltergeist() : base("poltergeist", new(210, 220, 234), RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam) { }
     string ICodeName.CodeName => "PLT";
 
-    private FloatConfiguration PoltergeistCoolDownOption = new FloatConfigurationImpl("role.poltergeistCoolDown", ArrayHelper.Selection(5f, 30f, 2.5f), 20f).DecorateAsSecConfiguration();
+    private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("role.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 

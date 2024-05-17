@@ -1,9 +1,12 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Components;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
@@ -12,33 +15,23 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
 
     static public Reaper MyRole = new Reaper();
 
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "reaper";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    private Reaper() : base("reaper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, []) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private new VentConfiguration VentConfiguration = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
-
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f));
-    }
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.reaper.vent", false, null, -1, (0f,60f,2.5f),15f, (0f, 30f, 2.5f), 10f);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
         private Scripts.Draggable? draggable = null;
-        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
-        public override Timer? VentCoolDown => ventCoolDown;
-        public override Timer? VentDuration => ventDuration;
+        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
+        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
+        GameTimer? RuntimeRole.VentDuration => ventDuration;
 
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;

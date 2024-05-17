@@ -16,11 +16,11 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private IRelativeCoolDownConfiguration BountyKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("bountyKillCoolDown", CoolDownType.Ratio, ArrayHelper.Selection(5f, 60f, 2.5f), 10f, ArrayHelper.Selection(-30f, 30f, 2.5f), -10f, ArrayHelper.Selection(0.125f, 2f, 0.125f), 0.5f);
-    static private IRelativeCoolDownConfiguration OthersKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("othersKillCoolDown", CoolDownType.Ratio, ArrayHelper.Selection(5f, 60f, 2.5f), 40f, ArrayHelper.Selection(-30f, 30f, 2.5f), 20f, ArrayHelper.Selection(0.125f, 2f, 0.125f), 2f);
+    static private IRelativeCoolDownConfiguration BountyKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("bountyKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 10f, (-30f, 30f, 2.5f), -10f, (0.125f, 2f, 0.125f), 0.5f);
+    static private IRelativeCoolDownConfiguration OthersKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("othersKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 40f, (-30f, 30f, 2.5f), 20f, (0.125f, 2f, 0.125f), 2f);
     static private BoolConfiguration ShowBountyArrowOption = NebulaAPI.Configurations.Configuration("role.bountyHunter.showBountyArrow", true);
-    static private FloatConfiguration ArrowUpdateIntervalOption = NebulaAPI.Configurations.Configuration("role.bountyHunter.arrowUpdateInterval", ArrayHelper.Selection(5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => ShowBountyArrowOption);
-    static private FloatConfiguration ChangeBountyIntervalOption = NebulaAPI.Configurations.Configuration("role.bountyHunter.changeBountyInterval", ArrayHelper.Selection(5f, 120f, 5f), 45f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration ArrowUpdateIntervalOption = NebulaAPI.Configurations.Configuration("role.bountyHunter.arrowUpdateInterval", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => ShowBountyArrowOption);
+    static private FloatConfiguration ChangeBountyIntervalOption = NebulaAPI.Configurations.Configuration("role.bountyHunter.changeBountyInterval", (5f, 120f, 5f), 45f, FloatConfigurationDecorator.Second);
     float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CoolDown, OthersKillCoolDownOption.CoolDown, AmongUsUtil.VanillaKillCoolDown);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

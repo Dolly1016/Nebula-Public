@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Player;
 using Virial.Game;
@@ -19,10 +20,10 @@ public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration EMICoolDownOption = new FloatConfigurationImpl("role.alien.emiCoolDown", ArrayHelper.Selection(5f, 60f, 2.5f), 20f).DecorateAsSecConfiguration();
-    static private FloatConfiguration EMIDurationOption = new FloatConfigurationImpl("role.alien.emiDuration", ArrayHelper.Selection(5f, 40f, 2.5f), 10f).DecorateAsSecConfiguration();
-    static private FloatConfiguration InvalidateCoolDownOption = new FloatConfigurationImpl("role.alien.invalidateCoolDown", ArrayHelper.Selection(5f,60f,2.5f),10f).DecorateAsSecConfiguration();
-    static private IntegerConfiguration NumOfInvalidationsOption = new IntegerConfigurationImpl("role.alien.numOfInvalidations", ArrayHelper.Selection(1, 10), 1);
+    static private FloatConfiguration EMICoolDownOption = NebulaAPI.Configurations.Configuration("role.alien.emiCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration EMIDurationOption = NebulaAPI.Configurations.Configuration("role.alien.emiDuration", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
+    static private IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("role.alien.numOfInvalidations", (1, 10), 1);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

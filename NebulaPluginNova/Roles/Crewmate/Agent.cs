@@ -21,10 +21,10 @@ public class Agent : DefinedRoleTemplate, DefinedRole
     
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private IntegerConfiguration NumOfExemptedTasksOption = NebulaAPI.Configurations.Configuration("role.agent.numOfExemptedTasks", ArrayHelper.Selection(1, 8), 3);
-    static private IntegerConfiguration NumOfExtraTasksOption = NebulaAPI.Configurations.Configuration("role.agent.numOfExtraTasks", ArrayHelper.Selection(0, 8), 3);
+    static private IntegerConfiguration NumOfExemptedTasksOption = NebulaAPI.Configurations.Configuration("role.agent.numOfExemptedTasks", (1, 8), 3);
+    static private IntegerConfiguration NumOfExtraTasksOption = NebulaAPI.Configurations.Configuration("role.agent.numOfExtraTasks", (0, 8), 3);
     static private BoolConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = NebulaAPI.Configurations.Configuration("role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent", false);
-    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.agent.vent", false, ArrayHelper.Selection(0, 16), 3, null, -1f, ArrayHelper.Selection(2.5f, 30f, 2.5f), 10f);
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.agent.vent", false, (0, 16), 3, null, -1f, (2.5f, 30f, 2.5f), 10f);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

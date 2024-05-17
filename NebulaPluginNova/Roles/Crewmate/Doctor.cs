@@ -1,5 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Nebula.Behaviour;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Player;
@@ -16,9 +17,9 @@ public class Doctor : DefinedRoleTemplate, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration PortableVitalsChargeOption = new FloatConfigurationImpl("role.doctor.portableVitalsCharge", ArrayHelper.Selection(2.5f, 60f, 2.5f), 10f).DecorateAsSecConfiguration();
-    static private FloatConfiguration MaxPortableVitalsChargeOption = new FloatConfigurationImpl("role.doctor.maxPortableVitalsCharge", ArrayHelper.Selection(2.5f, 60f, 2.5f), 10f).DecorateAsSecConfiguration();
-    static private FloatConfiguration ChargesPerTasksOption = new FloatConfigurationImpl("role.doctor.chargesPerTasks", ArrayHelper.Selection(0.5f, 10f, 0.5f), 1f).DecorateAsSecConfiguration();
+    static private FloatConfiguration PortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("role.doctor.portableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MaxPortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("role.doctor.maxPortableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration ChargesPerTasksOption = NebulaAPI.Configurations.Configuration("role.doctor.chargesPerTasks", (0.5f, 10f, 0.5f), 1f, FloatConfigurationDecorator.Second);
 
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

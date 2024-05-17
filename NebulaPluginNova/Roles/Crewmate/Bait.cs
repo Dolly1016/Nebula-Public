@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -17,10 +18,10 @@ public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private BoolConfiguration ShowKillFlashOption = new BoolConfigurationImpl("role.bait.showKillFlash", false);
-    static private FloatConfiguration ReportDelayOption = new FloatConfigurationImpl("role.bait.reportDelay", ArrayHelper.Selection(0f, 5f, 0.5f), 0f).DecorateAsSecConfiguration();
-    static private FloatConfiguration ReportDelayDispersionOption = new FloatConfigurationImpl("role.bait.reportDelayDispersion", ArrayHelper.Selection(0f, 10f, 0.25f), 0.5f).DecorateAsSecConfiguration();
-    static private BoolConfiguration CanSeeVentFlashOption = new BoolConfigurationImpl("role.bait.canSeeVentFlash", false);
+    static private BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("role.bait.showKillFlash", false);
+    static private FloatConfiguration ReportDelayOption = NebulaAPI.Configurations.Configuration("role.bait.reportDelay", (0f, 5f, 0.5f), 0f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration ReportDelayDispersionOption = NebulaAPI.Configurations.Configuration("role.bait.reportDelayDispersion", (0f, 10f, 0.25f), 0.5f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanSeeVentFlashOption = NebulaAPI.Configurations.Configuration("role.bait.canSeeVentFlash", false);
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

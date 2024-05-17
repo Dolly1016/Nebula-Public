@@ -42,7 +42,7 @@ internal class KillCoolDownConfiguration : IRelativeCoolDownConfiguration
     float IRelativeCoolDownConfiguration.CoolDown => coolDownTypeEntry.Value switch
     {
         2 => ratioEntry.Value * AmongUsUtil.VanillaKillCoolDown,
-        1 => relativeEntry.Value + AmongUsUtil.VanillaKillCoolDown,
+        1 => System.Math.Max(0f, relativeEntry.Value + AmongUsUtil.VanillaKillCoolDown),
         _ => immediateEntry.Value
     };
 

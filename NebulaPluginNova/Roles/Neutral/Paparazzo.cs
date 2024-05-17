@@ -4,6 +4,7 @@ using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -257,40 +258,28 @@ public class PaparazzoShot : MonoBehaviour
 [NebulaRPCHolder]
 public class Paparazzo : DefinedRoleTemplate, DefinedRole
 {
+    static public Team MyTeam = new("teams.paparazzo", new(202,118,140), TeamRevealType.OnlyMe);
     static public Paparazzo MyRole = new Paparazzo();
-    static public Team MyTeam = new("teams.paparazzo", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
-    public override RoleCategory Category => RoleCategory.NeutralRole;
-
-    string DefinedAssignable.LocalizedName => "paparazzo";
-    public override Color RoleColor => new Color(202f / 255f, 118f / 255f, 140f / 255f);
-    public override RoleTeam Team => MyTeam;
+    private Paparazzo() : base("paparazzo", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [ShotCoolDownOption, RequiredSubjectsOption, RequiredDisclosedOption, VentConfiguration])
+    {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    private NebulaConfiguration ShotCoolDownOption = null!;
-    private NebulaConfiguration RequiredSubjectsOption = null!;
-    private NebulaConfiguration RequiredDisclosedOption = null!;
-    private new VentConfiguration VentConfiguration = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagFunny, ConfigurationHolder.TagDifficult);
-
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
-        ShotCoolDownOption = new NebulaConfiguration(RoleConfig, "shotCoolDown", null, 2.5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-        RequiredSubjectsOption = new NebulaConfiguration(RoleConfig, "requiredSubjects", null, 1, 15, 5, 5);
-        RequiredDisclosedOption = new NebulaConfiguration(RoleConfig, "requiredDisclosed", null, 1, 15, 3, 3);
-    }
+    static private FloatConfiguration ShotCoolDownOption = NebulaAPI.Configurations.Configuration("role.paparazzo.shotCoolDown", (2.5f, 60f, 2.5f), 20f);
+    static private IntegerConfiguration RequiredSubjectsOption = NebulaAPI.Configurations.Configuration("role.paparazzo.requiredSubjects", (1, 15), 5);
+    static private IntegerConfiguration RequiredDisclosedOption = NebulaAPI.Configurations.Configuration("role.paparazzo.requiredDisclosed", (1, 15), 3);
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.paparazzo.vent", true);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
-        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
+        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
+        private bool canUseVent = VentConfiguration.CanUseVent;
         GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
         GameTimer? RuntimeRole.VentDuration => ventDuration;
         bool RuntimeRole.CanUseVent => canUseVent;
@@ -387,7 +376,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                     shotButton.StartCoolDown();
                 };
                 shotButton.OnSubAction= (button) => MyFinder?.MyObject!.ToggleDirection();
-                shotButton.CoolDownTimer = Bind(new Timer(0f, MyRole.ShotCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                shotButton.CoolDownTimer = Bind(new Timer(0f, ShotCoolDownOption).SetAsAbilityCoolDown().Start());
                 shotButton.SetLabel("shot");
                 shotButton.SetCanUseByMouseClick();
             }
@@ -419,7 +408,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
 
         private bool CheckPaparazzoWin()
         {
-            return !MyPlayer.IsDead && (GetActivatedBits(CapturedMask) >= MyRole.RequiredSubjectsOption && GetActivatedBits(DisclosedMask) >= MyRole.RequiredDisclosedOption);
+            return !MyPlayer.IsDead && (GetActivatedBits(CapturedMask) >= RequiredSubjectsOption && GetActivatedBits(DisclosedMask) >= RequiredDisclosedOption);
         }
 
         [Local]
@@ -551,12 +540,12 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
             var detail = "";
 
             detail = Language.Translate("role.paparazzo.taskTextDisclosed")
-                .Replace("%GD%", MyRole.RequiredDisclosedOption.GetMappedInt().ToString())
+                .Replace("%GD%", RequiredDisclosedOption.GetValue().ToString())
                 .Replace("%CD%", GetActivatedBits(DisclosedMask).ToString());
-            if (MyRole.RequiredDisclosedOption < MyRole.RequiredSubjectsOption)
+            if (RequiredDisclosedOption < RequiredSubjectsOption)
             {
                 detail = Language.Translate("role.paparazzo.taskTextSubject")
-                    .Replace("%GS%", MyRole.RequiredSubjectsOption.GetMappedInt().ToString())
+                    .Replace("%GS%", RequiredSubjectsOption.GetValue().ToString())
                     .Replace("%CS%", GetActivatedBits(CapturedMask).ToString())
                     + ", " + detail;
             }

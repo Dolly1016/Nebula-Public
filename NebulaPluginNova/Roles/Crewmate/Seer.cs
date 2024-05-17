@@ -85,7 +85,7 @@ public class Seer : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("role.seer.ghostDuration", ArrayHelper.Selection(15f,300f,15f),90f,FloatConfigurationDecorator.Second);
+    static private FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("role.seer.ghostDuration", (15f,300f,15f),90f,FloatConfigurationDecorator.Second);
     static private BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("role.seer.canSeeGhostsInShadow", false);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

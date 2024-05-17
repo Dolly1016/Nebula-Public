@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Compat;
 using Virial.Game;
 using Virial.Media;
 using Virial.Text;
@@ -97,7 +98,7 @@ public interface Configurations
     /// <param name="id"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
-    IOrderedSharableVariable<float> SharableVariable(string id, float[] values, float defaultValue);
+    IOrderedSharableVariable<float> SharableVariable(string id, FloatSelection values, float defaultValue);
 
     /// <summary>
     /// 指定された値のいずれかを格納できる整数型の共有変数を生成します。
@@ -105,7 +106,7 @@ public interface Configurations
     /// <param name="id"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
-    IOrderedSharableVariable<int> SharableVariable(string id, int[] values, int defaultValue);
+    IOrderedSharableVariable<int> SharableVariable(string id, IntegerSelection values, int defaultValue);
 
     /// <summary>
     /// ホルダを生成します。
@@ -131,16 +132,19 @@ public interface Configurations
     GhostRoleFilter GhostRoleFilter(string id);
 
     BoolConfiguration Configuration(string id, bool defaultValue, Func<bool>? predicate = null);
-    IntegerConfiguration Configuration(string id, int[] selection, int defaultValue, Func<bool>? predicate = null);
-    FloatConfiguration FloatOption(string id, float[] selection, float defaultValue, Func<bool>? predicate) => FloatOption(id, selection, defaultValue, predicate: predicate);
-    FloatConfiguration Configuration(string id, float[] selection, float defaultValue, FloatConfigurationDecorator decorator = FloatConfigurationDecorator.None, Func<bool>? predicate = null);
+    IntegerConfiguration Configuration(string id, IntegerSelection selection, int defaultValue, Func<bool>? predicate = null);
+    FloatConfiguration FloatOption(string id, FloatSelection selection, float defaultValue, Func<bool>? predicate) => FloatOption(id, selection, defaultValue, predicate: predicate);
+    FloatConfiguration Configuration(string id, FloatSelection selection, float defaultValue, FloatConfigurationDecorator decorator = FloatConfigurationDecorator.None, Func<bool>? predicate = null);
     ValueConfiguration<int> Configuration(string id, string[] selection, int defualtIndex, Func<bool>? predicate = null);
     IConfiguration Configuration(Func<string?> displayShower, GUIWidgetSupplier editor, Func<bool>? predicate = null);
 
-    IVentConfiguration VentConfiguration(string id, bool isOptional, int[]? usesSelection, int usesDefaultValue, float[]? coolDownSelection, float coolDownDefaultValue, float[]? durationSelection, float durationDefaultValue);
-    IRelativeCoolDownConfiguration KillConfiguration(string id, CoolDownType defaultType, float[] immediateSelection, float immediateDefaultValue, float[] relativeSelection, float relativeDefaultValue, float[] ratioSelection, float ratioDefaultValue)
+    IVentConfiguration VentConfiguration(string id, bool isOptional, IntegerSelection? usesSelection, int usesDefaultValue, FloatSelection? coolDownSelection, float coolDownDefaultValue, FloatSelection? durationSelection, float durationDefaultValue);
+    IVentConfiguration NeutralVentConfiguration(string id, bool isOptional) => VentConfiguration(id, isOptional, null, -1, (0f, 60f, 5f), 15f, (2.5f, 30f, 2.5f), 10f);
+
+
+    IRelativeCoolDownConfiguration KillConfiguration(string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue)
         => KillConfiguration(NebulaAPI.GUI.LocalizedTextComponent(id), id, defaultType, immediateSelection, immediateDefaultValue, relativeSelection, relativeDefaultValue, ratioSelection, ratioDefaultValue);
-    IRelativeCoolDownConfiguration KillConfiguration(TextComponent title, string id, CoolDownType defaultType, float[] immediateSelection, float immediateDefaultValue, float[] relativeSelection, float relativeDefaultValue, float[] ratioSelection, float ratioDefaultValue);
+    IRelativeCoolDownConfiguration KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue);
 
     /// <summary>
     /// ゲーム内設定画面を開いているとき、画面の更新を要求します。

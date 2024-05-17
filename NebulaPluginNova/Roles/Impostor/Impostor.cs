@@ -10,8 +10,8 @@ namespace Nebula.Roles.Impostor;
 
 public class Impostor : DefinedRoleTemplate, DefinedRole
 {
+    static public Team MyTeam = new("teams.impostor", new(Palette.ImpostorRed), TeamRevealType.Teams);
     static public Impostor MyRole = new Impostor();
-    static public Team MyTeam = new("teams.impostor", Palette.ImpostorRed,TeamRevealType.Teams);
     
     private Impostor():base("impostor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, MyTeam, [CanKillHidingPlayerOption]) { }
 

@@ -5,8 +5,10 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text;
 using TMPro;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Game;
 
 namespace Nebula.Configuration;
 
@@ -525,9 +527,9 @@ public class CustomGameMode
         .AddEndCriteria(NebulaEndCriteria.CrewmateTaskCriteria)
         .AddEndCriteria(NebulaEndCriteria.JackalKillCriteria);
     public static CustomGameMode FreePlay = new CustomGameMode(0x02, "gamemode.freeplay", () => new FreePlayRoleAllocator(), 0) { AllowWithoutNoS = false/*true*/ };
-    public static int AllGameModeMask = Standard | HostMode | FreePlay;
-    public static int AllNormalGameModeMask = Standard | HostMode;
-    public static int AllClientGameModeMask = Standard | FreePlay;
+    public static BitMask<GameModeDefinition> AllGameModeMask = new BitMask32<GameModeDefinition>(t => t.AsBit, Standard | HostMode | FreePlay);
+    public static BitMask<GameModeDefinition> AllNormalGameModeMask = new BitMask32<GameModeDefinition>(t => t.AsBit, Standard | HostMode);
+    public static BitMask<GameModeDefinition> AllClientGameModeMask = new BitMask32<GameModeDefinition>(t => t.AsBit, Standard | FreePlay);
 
     private int bitFlag;
     public string TranslateKey { get; private init; }

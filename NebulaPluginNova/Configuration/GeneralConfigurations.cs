@@ -2,6 +2,7 @@
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using UnityEngine.Rendering;
+using Virial;
 using Virial.Configuration;
 using Virial.Game;
 
@@ -39,15 +40,19 @@ public static class GeneralConfigurations
         new(),
     };
 
-    static internal ConfigurationHolder AssignmentOptions = new("options.assignment", null, ConfigurationTab.Settings, CustomGameMode.AllNormalGameModeMask);
     static internal IntegerConfiguration AssignmentCrewmateOption = new RoleCountConfiguration("options.assignment.crewmate", 15, -1);
     static internal IntegerConfiguration AssignmentImpostorOption = new RoleCountConfiguration("options.assignment.impostor", 3, -1);
     static internal IntegerConfiguration AssignmentNeutralOption = new RoleCountConfiguration("options.assignment.neutral", 15, 0);
     static internal BoolConfiguration AssignOpToHostOption = new BoolConfigurationImpl("options.assignment.assignOpToHost", false);
     static internal ValueConfiguration<int> GhostAssignmentOption = new StringConfigurationImpl("options.assignment.ghostAssignmentMethod", ["options.assignment.ghostAssignmentMethod.normal", "options.assignment.ghostAssignmentMethod.thrilling"], 0);
+    static internal IConfigurationHolder AssignmentOptions = new ConfigurationHolder("options.assignment", BitMasks.Bits(ConfigurationTab.Settings), CustomGameMode.AllNormalGameModeMask, [
+        AssignmentCrewmateOption, AssignmentImpostorOption, AssignmentNeutralOption, AssignOpToHostOption
+        ]);
 
-    static public ConfigurationHolder SoloFreePlayOptions = new("options.soloFreePlay", null, ConfigurationTab.Settings, CustomGameMode.FreePlay);
-    static public NebulaConfiguration NumOfDummiesOption = new NebulaConfiguration(SoloFreePlayOptions, "numOfDummies", null, 0, 14, 0, 0);
+    static public IntegerConfiguration NumOfDummiesOption = NebulaAPI.Configurations.Configuration("options.soloFreePlay.numOfDummies",(0, 14), 0);
+    static public IConfigurationHolder SoloFreePlayOptions = new ConfigurationHolder("options.soloFreePlay", BitMasks.Bits(ConfigurationTab.Settings), CustomGameMode.FreePlay, [
+        NumOfDummiesOption
+        ]);
 
     static public ConfigurationHolder MapOptions = new("options.map", null, ConfigurationTab.Settings, CustomGameMode.AllClientGameModeMask);
     static public NebulaConfiguration SpawnMethodOption = new(MapOptions, "spawnMethod", null,

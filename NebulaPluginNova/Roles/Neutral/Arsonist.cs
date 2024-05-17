@@ -1,6 +1,8 @@
 ﻿using Nebula.Behaviour;
+using Virial;
 using Virial.Assignable;
 using Virial.Components;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -10,37 +12,23 @@ namespace Nebula.Roles.Neutral;
 
 public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 {
+    static public Team MyTeam = new("teams.arsonist", new(229, 93, 0), TeamRevealType.OnlyMe);
     static public Arsonist MyRole = new Arsonist();
-    static public Team MyTeam = new("teams.arsonist", MyRole.RoleColor, TeamRevealType.OnlyMe);
-
-    public override RoleCategory Category => RoleCategory.NeutralRole;
-
-    string DefinedAssignable.LocalizedName => "arsonist";
-    public override Color RoleColor => new Color(229f / 255f, 93f / 255f, 0f / 255f);
+    private Arsonist():base("arsonist", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [DouseCoolDownOption, DouseDurationOption, VentConfiguration]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => MyTeam;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
-    private NebulaConfiguration DouseCoolDownOption = null!;
-    private NebulaConfiguration DouseDurationOption = null!;
-    private new VentConfiguration VentConfiguration = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
-        DouseCoolDownOption = new NebulaConfiguration(RoleConfig, "douseCoolDown", null, 2.5f, 30f, 2.5f, 10f, 10f);
-        DouseDurationOption = new NebulaConfiguration(RoleConfig, "douseDuration", null, 1f, 10f, 0.5f, 3f, 3f);
-    }
-
+    static private FloatConfiguration DouseCoolDownOption = NebulaAPI.Configurations.Configuration("role.arsonist.douseCoolDown", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DouseDurationOption = NebulaAPI.Configurations.Configuration("role.arsonist.douseDuration", (1f, 10f, 0.5f), 3f, FloatConfigurationDecorator.Second);
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.arsonist.vent", true);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
-        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
+        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
+        private bool canUseVent = VentConfiguration.CanUseVent;
         GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
         GameTimer? RuntimeRole.VentDuration => ventDuration;
         bool RuntimeRole.CanUseVent => canUseVent;
@@ -148,8 +136,8 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (!button.EffectActive) return;
                     if (douseTracker.CurrentTarget == null) button.InactivateEffect();
                 };
-                douseButton.CoolDownTimer = Bind(new Timer(0f, MyRole.DouseCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                douseButton.EffectTimer = Bind(new Timer(0f, MyRole.DouseDurationOption.GetFloat()));
+                douseButton.CoolDownTimer = Bind(new Timer(0f, DouseCoolDownOption).SetAsAbilityCoolDown().Start());
+                douseButton.EffectTimer = Bind(new Timer(0f, DouseDurationOption));
                 douseButton.SetLabel("douse");
 
                 bool won = false;

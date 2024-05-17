@@ -1,32 +1,25 @@
 ﻿using AmongUs.GameOptions;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
 public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Cleaner MyRole = new Cleaner();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
+    private Cleaner() : base("cleaner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CleanCoolDownOption, SyncKillAndCleanCoolDownOption]){}
 
-    string DefinedAssignable.LocalizedName => "cleaner";
-    public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => Impostor.MyTeam;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration CleanCoolDownOption = null!;
-    private NebulaConfiguration SyncKillAndCleanCoolDownOption = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        CleanCoolDownOption = new NebulaConfiguration(RoleConfig, "cleanCoolDown", null, 5f, 60f, 2.5f, 30f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        SyncKillAndCleanCoolDownOption = new NebulaConfiguration(RoleConfig, "syncKillAndCleanCoolDown", null, true, true);
-    }
+    static private FloatConfiguration CleanCoolDownOption = NebulaAPI.Configurations.Configuration("role.cleaner.cleanCoolDown", (5f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration SyncKillAndCleanCoolDownOption = NebulaAPI.Configurations.Configuration("role.cleaner.syncKillAndCleanCoolDown", true);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -47,7 +40,7 @@ public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local, OnlyMyPlayer]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            cleanButton?.CoolDownTimer?.Start(MyRole.SyncKillAndCleanCoolDownOption ? null : 5f);
+            cleanButton?.CoolDownTimer?.Start(SyncKillAndCleanCoolDownOption ? null : 5f);
         }
 
         void RuntimeAssignable.OnActivated()
@@ -64,13 +57,13 @@ public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
                 cleanButton.Visibility = (button) => !MyPlayer.IsDead;
                 cleanButton.OnClick = (button) => {
                     AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.PlayerId,MyPlayer.PlayerId,EventDetail.Clean);
-                    if (MyRole.SyncKillAndCleanCoolDownOption) PlayerControl.LocalPlayer.killTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
+                    if (SyncKillAndCleanCoolDownOption) PlayerControl.LocalPlayer.killTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
                     cleanButton.StartCoolDown();
 
                     acTokenCommon ??= new("cleaner.common1");
                     acTokenChallenge.Value.removed++;
                 };
-                cleanButton.CoolDownTimer = Bind(new Timer(MyRole.CleanCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                cleanButton.CoolDownTimer = Bind(new Timer(CleanCoolDownOption).SetAsAbilityCoolDown().Start());
                 cleanButton.SetLabel("clean");
             }
         }

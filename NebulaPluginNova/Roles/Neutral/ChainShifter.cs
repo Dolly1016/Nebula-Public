@@ -1,6 +1,8 @@
 ﻿using Nebula.Roles.Complex;
+using Virial;
 using Virial.Assignable;
 using Virial.Components;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -11,31 +13,19 @@ namespace Nebula.Roles.Neutral;
 // if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, new int[] { JackalTeamId }).InvokeSingle();
 public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
 {
+    static public Team MyTeam = new("teams.chainShifter", new(115, 115, 115), TeamRevealType.OnlyMe);
     static public ChainShifter MyRole = new ChainShifter();
-    static public Team MyTeam = new("teams.chainShifter", MyRole.RoleColor, TeamRevealType.OnlyMe);
 
-    public override RoleCategory Category => RoleCategory.NeutralRole;
+    private ChainShifter() : base("chainShifter", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [VentConfiguration, ShiftCoolDown, CanCallEmergencyMeetingOption]) { }
 
-    string DefinedAssignable.LocalizedName => "chainShifter";
-    public override Color RoleColor => new Color(115f / 255f, 115f / 255f, 115f / 255f);
-    public override RoleTeam Team => MyTeam;
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private new VentConfiguration VentConfiguration = null!;
-    private NebulaConfiguration ShiftCoolDown = null!;
-    private NebulaConfiguration CanCallEmergencyMeetingOption = null!;
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.chainShifter.vent", true);
+    static private FloatConfiguration ShiftCoolDown = NebulaAPI.Configurations.Configuration("role.chainShifter.douseCoolDown", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanCallEmergencyMeetingOption = NebulaAPI.Configurations.Configuration("role.chainShifter.canCallEmergencyMeeting", true);
 
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        VentConfiguration = new(RoleConfig, null, (5f, 60f, 15f), (2.5f, 30f, 10f), true);
-        ShiftCoolDown = new(RoleConfig, "shiftCoolDown", null, 5f, 60f, 5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        CanCallEmergencyMeetingOption = new(RoleConfig, "canCallEmergencyMeeting", null, true, true);
-    }
-
-    public override bool CanBeGuessDefault => false;
+    bool IGuessed.CanBeGuessDefault => false;
 
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -47,9 +37,9 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ChainShiftButton.png", 115f);
 
 
-        private GameTimer ventCoolDown = (new Timer(MyRole.VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(MyRole.VentConfiguration.Duration);
-        private bool canUseVent = MyRole.VentConfiguration.CanUseVent;
+        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
+        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
+        private bool canUseVent = VentConfiguration.CanUseVent;
         GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
         GameTimer? RuntimeRole.VentDuration => ventDuration;
         bool RuntimeRole.CanUseVent => canUseVent;
@@ -82,7 +72,7 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (shiftIcon) GameObject.Destroy(shiftIcon!.gameObject);
                     shiftIcon = null;
                 };
-                chainShiftButton.CoolDownTimer = Bind(new Timer(MyRole.ShiftCoolDown.GetFloat()).SetAsAbilityCoolDown().Start());
+                chainShiftButton.CoolDownTimer = Bind(new Timer(ShiftCoolDown).SetAsAbilityCoolDown().Start());
                 chainShiftButton.SetLabel("shift");
             }
         }
@@ -183,6 +173,6 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
         void OnGameEnd(GameEndEvent ev) => new StaticAchievementToken("chainShifter.another1");
         
 
-        bool RuntimeAssignable.CanCallEmergencyMeeting => MyRole.CanCallEmergencyMeetingOption;
+        bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
     }
 }

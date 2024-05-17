@@ -1,4 +1,5 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
@@ -17,11 +18,11 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private IntegerConfiguration NumOfLampsOption = new IntegerConfigurationImpl("role.phosphorus.numOfLamps", ArrayHelper.Selection(1, 10), 2);
-    static private FloatConfiguration PlaceCoolDownOption = new FloatConfigurationImpl("role.phosphorus.placeCoolDown", ArrayHelper.Selection(5f, 60f, 5f), 15f).DecorateAsSecConfiguration();
-    static private FloatConfiguration LampCoolDownOption = new FloatConfigurationImpl("role.phosphorus.lampCoolDown", ArrayHelper.Selection(5f, 60f, 5f), 30f).DecorateAsSecConfiguration();
-    static private FloatConfiguration LampDurationOption = new FloatConfigurationImpl("role.phosphorus.lampDuration", ArrayHelper.Selection(7.5f, 30f, 2.5f), 15f).DecorateAsSecConfiguration();
-    static private FloatConfiguration LampStrengthOption = new FloatConfigurationImpl("role.phosphorus.lampStrength", ArrayHelper.Selection(0.25f, 5f, 0.25f), 1f).DecorateAsRatioConfiguration();
+    static private IntegerConfiguration NumOfLampsOption = NebulaAPI.Configurations.Configuration("role.phosphorus.numOfLamps", (1, 10), 2);
+    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("role.phosphorus.placeCoolDown", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration LampCoolDownOption = NebulaAPI.Configurations.Configuration("role.phosphorus.lampCoolDown", (5f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration LampDurationOption = NebulaAPI.Configurations.Configuration("role.phosphorus.lampDuration", (7.5f, 30f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration LampStrengthOption = NebulaAPI.Configurations.Configuration("role.phosphorus.lampStrength", (0.25f, 5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
 
     private static IDividedSpriteLoader lanternSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Lantern.png", 100f, 4);
 

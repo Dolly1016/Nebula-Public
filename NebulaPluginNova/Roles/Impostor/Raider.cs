@@ -1,8 +1,11 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
@@ -10,30 +13,16 @@ namespace Nebula.Roles.Impostor;
 public class Raider : DefinedRoleTemplate, DefinedRole
 {
     static public Raider MyRole = new Raider();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "raider";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    private Raider() : base("raider", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ThrowCoolDownOption, AxeSizeOption, AxeSpeedOption,CanKillImpostorOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private KillCoolDownConfiguration ThrowCoolDownOption = null!;
-    private NebulaConfiguration AxeSizeOption = null!;
-    private NebulaConfiguration AxeSpeedOption = null!;
-    private NebulaConfiguration CanKillImpostorOption = null!;
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagFunny, ConfigurationHolder.TagDifficult);
-
-        ThrowCoolDownOption = new(RoleConfig, "throwCoolDown", KillCoolDownConfiguration.KillCoolDownType.Immediate, 2.5f, 10f, 60f, -40f, 40f, 0.125f, 0.125f, 2f, 20f, -10f, 1f);
-        AxeSizeOption = new(RoleConfig, "axeSize", null, 0.25f, 4f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
-        AxeSpeedOption = new(RoleConfig, "axeSpeed", null, 0.5f, 4f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
-        CanKillImpostorOption = new(RoleConfig, "canKillImpostor", null, false, false);
-    }
+    static private IRelativeCoolDownConfiguration ThrowCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.raider.throwCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
+    static private FloatConfiguration AxeSizeOption = NebulaAPI.Configurations.Configuration("role.raider.axeSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration AxeSpeedOption = NebulaAPI.Configurations.Configuration("role.raider.axeSpeed", (0.5f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("role.raider.canKillImpostor", false);
 
     [NebulaPreLoad]
     public class RaiderAxe : NebulaSyncStandardObject, IGameOperator
@@ -46,7 +35,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
 
         private float thrownAngle = 0f;
         private int state = 0;
-        private float speed = MyRole.AxeSpeedOption.GetFloat();
+        private float speed = AxeSpeedOption;
         private int killed = 0;
         private float thrownTime = 0f;
         AchievementToken<int>? acTokenChallenge = null;
@@ -83,13 +72,13 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                 if (AmOwner)
                 {
                     var pos = Position;
-                    var size = MyRole.AxeSizeOption.GetFloat();
+                    var size = AxeSizeOption;
                     if (!MeetingHud.Instance)
                     {
                         foreach (var p in PlayerControl.AllPlayerControls)
                         {
                             if (p.Data.IsDead || p.AmOwner) continue;
-                            if (!MyRole.CanKillImpostorOption && p.Data.Role.IsImpostor) continue;
+                            if (!CanKillImpostorOption && p.Data.Role.IsImpostor) continue;
 
                             if (!Helpers.AnyNonTriggersBetween(p.GetTruePosition(),pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
                             {
@@ -207,7 +196,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
 
                     acTokenAnother.Value.triggered = true;
                 };
-                killButton.CoolDownTimer = Bind(new Timer(MyRole.ThrowCoolDownOption.CurrentCoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(ThrowCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabel("throw");
                 killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
                 killButton.SetCanUseByMouseClick();

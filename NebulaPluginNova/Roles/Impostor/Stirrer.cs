@@ -1,36 +1,25 @@
 ﻿using Nebula.Map;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
 public class Stirrer : DefinedRoleTemplate, DefinedRole
 {
     static public Stirrer MyRole = new Stirrer();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "stirrer";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    private Stirrer() : base("stirrer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [StirCoolDownOption,SabotageChargeOption, SabotageMaxChargeOption,SabotageCoolDownOption,SabotageIntervalOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
-    private NebulaConfiguration StirCoolDownOption = null!;
-    private NebulaConfiguration SabotageChargeOption = null!;
-    private NebulaConfiguration SabotageMaxChargeOption = null!;
-    private NebulaConfiguration SabotageCoolDownOption = null!;
-    private NebulaConfiguration SabotageIntervalOption = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagFunny);
-
-        StirCoolDownOption = new NebulaConfiguration(RoleConfig, "stirCoolDown", null, 0f, 60f, 5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-        SabotageChargeOption = new NebulaConfiguration(RoleConfig, "sabotageCharge", null, 1, 10, 3, 3);
-        SabotageMaxChargeOption = new NebulaConfiguration(RoleConfig, "sabotageMaxCharge", null, 1, 20, 5, 5);
-        SabotageCoolDownOption = new NebulaConfiguration(RoleConfig, "sabotageCoolDown", null, 0f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-        SabotageIntervalOption = new NebulaConfiguration(RoleConfig, "sabotageInterval", null, 30f, 120f, 5f, 60f, 60f) { Decorator = NebulaConfiguration.SecDecorator };
-    }
+    static private FloatConfiguration StirCoolDownOption = NebulaAPI.Configurations.Configuration("role.stirrer.stirCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private IntegerConfiguration SabotageChargeOption = NebulaAPI.Configurations.Configuration("role.stirrer.sabotageCharge", (1,10),3);
+    static private IntegerConfiguration SabotageMaxChargeOption = NebulaAPI.Configurations.Configuration("role.stirrer.sabotageMaxCharge", (1, 20), 5);
+    static private FloatConfiguration SabotageCoolDownOption = NebulaAPI.Configurations.Configuration("role.stirrer.sabotageCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration SabotageIntervalOption = NebulaAPI.Configurations.Configuration("role.stirrer.sabotageInterval", (30f, 120f, 5f), 60f, FloatConfigurationDecorator.Second);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -57,16 +46,16 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
 
                 stirButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 stirButton.SetSprite(StirButtonSprite.GetSprite());
-                stirButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId,out int charge) || charge < MyRole.SabotageMaxChargeOption.GetMappedInt());
+                stirButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId,out int charge) || charge < SabotageMaxChargeOption);
                 stirButton.Visibility = (button) => !MyPlayer.IsDead;
                 stirButton.OnClick = (button) => {
                     int charge = 0;
                     if (sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget!.PlayerId, out var v)) charge = v;
-                    sabotageChargeMap[sampleTracker.CurrentTarget!.PlayerId] = Mathf.Min(MyRole.SabotageMaxChargeOption.GetMappedInt(), charge + MyRole.SabotageChargeOption.GetMappedInt());
+                    sabotageChargeMap[sampleTracker.CurrentTarget!.PlayerId] = Mathf.Min(SabotageMaxChargeOption, charge + SabotageChargeOption);
 
                     stirButton.StartCoolDown();
                 };
-                stirButton.CoolDownTimer = Bind(new Timer(MyRole.StirCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                stirButton.CoolDownTimer = Bind(new Timer(StirCoolDownOption).SetAsAbilityCoolDown().Start());
                 stirButton.SetLabel("stir");
 
                 sabotageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
@@ -90,16 +79,16 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
                         }
                         sabotageChargeMap[entry.Key] = entry.Value - 1;
                     }
-                    button.CoolDownTimer?.Start(MyRole.SabotageIntervalOption.GetFloat());
+                    button.CoolDownTimer?.Start(SabotageIntervalOption);
 
                     acTokenCommon ??= new("stirrer.common1");
-                    if(count >= 7 && MyRole.SabotageChargeOption <= 3 && !(MyRole.StirCoolDownOption.GetFloat() > 10f)) acTokenChallenge ??= new("stirrer.challenge");
+                    if(count >= 7 && SabotageChargeOption <= 3 && !(StirCoolDownOption > 10f)) acTokenChallenge ??= new("stirrer.challenge");
 
                 };
-                sabotageButton.CoolDownTimer = Bind(new Timer(Mathf.Max(MyRole.SabotageIntervalOption.GetFloat(), MyRole.SabotageCoolDownOption.GetFloat())).SetAsAbilityCoolDown().Start(MyRole.SabotageCoolDownOption.GetFloat()));
+                sabotageButton.CoolDownTimer = Bind(new Timer(Mathf.Max(SabotageIntervalOption, SabotageCoolDownOption)).SetAsAbilityCoolDown().Start(SabotageCoolDownOption));
                 sabotageButton.SetLabel("fakeSabotage");
                 sabotageButton.UseCoolDownSupport = false;
-                sabotageButton.OnStartTaskPhase = (button) => button.CoolDownTimer?.Start(MyRole.SabotageCoolDownOption.GetFloat());
+                sabotageButton.OnStartTaskPhase = (button) => button.CoolDownTimer?.Start(SabotageCoolDownOption);
             }
         }
 

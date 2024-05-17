@@ -268,12 +268,12 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
 
-    static private FloatConfiguration droneCoolDownOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.droneCoolDown", ArrayHelper.Selection(5f, 120f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration droneDurationOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.droneDuration", ArrayHelper.Selection(5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static internal FloatConfiguration droneMicrophoneRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.microphoneRadious", ArrayHelper.Selection(0f,5f,0.25f),2f, FloatConfigurationDecorator.Ratio);
-    static internal FloatConfiguration droneDetectionRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.detectionRadious", ArrayHelper.Selection(0f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration doorHackCoolDownOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.doorHackCoolDown", ArrayHelper.Selection(10f, 120f, 2.5f), 30f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration doorHackRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.doorHackRadious", ArrayHelper.Selection(0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration droneCoolDownOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.droneCoolDown", (5f, 120f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration droneDurationOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.droneDuration", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static internal FloatConfiguration droneMicrophoneRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.microphoneRadious", (0f,5f,0.25f),2f, FloatConfigurationDecorator.Ratio);
+    static internal FloatConfiguration droneDetectionRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.detectionRadious", (0f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration doorHackCoolDownOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.doorHackCoolDown", (10f, 120f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration doorHackRadiousOption = NebulaAPI.Configurations.Configuration("role.ubiquitous.doorHackRadious", (0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

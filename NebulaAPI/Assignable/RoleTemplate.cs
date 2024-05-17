@@ -50,10 +50,10 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
 
         public StandardAssignmentParameters(string id, bool isImpostor)
         {
-            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", ArrayHelper.Selection(0, isImpostor ? 5 : 15), 0);
+            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 5 : 15), 0);
 
-            roleChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".chance", ArrayHelper.Selection(10, 100, 10), 100);
-            roleSecondaryChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".secondaryChance", ArrayHelper.Selection(0, 100, 10), 0);
+            roleChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".chance", (10, 100, 10), 100);
+            roleSecondaryChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".secondaryChance", (0, 100, 10), 0);
 
             roleChanceEditor = NebulaAPI.Configurations.Configuration(
                 () => "",

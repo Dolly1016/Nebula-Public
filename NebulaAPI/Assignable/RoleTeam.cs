@@ -10,7 +10,7 @@ public enum TeamRevealType
 public interface RoleTeam
 {
     public string TranslationKey { get; }
-    internal UnityEngine.Color Color { get; }
+    internal UnityEngine.Color UnityColor { get; }
     public int Id { get; }
     public TeamRevealType RevealType { get; }
 }

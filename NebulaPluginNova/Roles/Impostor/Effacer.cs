@@ -1,34 +1,26 @@
 ﻿using Nebula.Roles.Crewmate;
 using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
 public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Effacer MyRole = null;// new Effacer();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
+    private Effacer() : base("effacer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EffaceCoolDownOption, EffaceDurationOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
+    }
 
-    string DefinedAssignable.LocalizedName => "effacer";
-    public override Color RoleColor => Palette.ImpostorRed;
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
-    public override RoleTeam Team => Impostor.MyTeam;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration EffaceCoolDownOption = null!;
-    private NebulaConfiguration EffaceDurationOption = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagSNR);
-
-        EffaceCoolDownOption = new NebulaConfiguration(RoleConfig, "effaceCoolDown", null, 10f, 60f, 2.5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
-        EffaceDurationOption = new NebulaConfiguration(RoleConfig, "effaceDuration", null, 5f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-    }
+    static private FloatConfiguration EffaceCoolDownOption = NebulaAPI.Configurations.Configuration("role.effacer.effaceCoolDown", (10f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration EffaceDurationOption = NebulaAPI.Configurations.Configuration("role.effacer.effaceDuration", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -61,7 +53,7 @@ public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
                 effaceButton.Availability = (button) => effaceTracker.CurrentTarget != null && MyPlayer.CanMove;
                 effaceButton.Visibility = (button) => !MyPlayer.IsDead;
                 effaceButton.OnClick = (button) => {
-                    effaceTracker.CurrentTarget!.GainAttribute(PlayerAttributes.InvisibleElseImpostor, MyRole.EffaceDurationOption.GetFloat(), false, 0);
+                    effaceTracker.CurrentTarget!.GainAttribute(PlayerAttributes.InvisibleElseImpostor, EffaceDurationOption, false, 0);
                     effaceButton.StartCoolDown();
 
                     new StaticAchievementToken("effacer.common1");
@@ -69,7 +61,7 @@ public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
 
                     achChallengeToken.Value.Add(effaceTracker.CurrentTarget);
                 };
-                effaceButton.CoolDownTimer = Bind(new Timer(MyRole.EffaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                effaceButton.CoolDownTimer = Bind(new Timer(EffaceCoolDownOption).SetAsAbilityCoolDown().Start());
                 effaceButton.SetLabel("efface");
             }
         }

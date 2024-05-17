@@ -1,5 +1,6 @@
 ﻿using UnityEngine.UI;
 using Virial;
+using Virial.Configuration;
 
 namespace Nebula.Utilities;
 
@@ -108,4 +109,9 @@ public static class BitMasks
     private static Func<GamePlayer, int> gamePlayerConverter = p => 1 << p.PlayerId;
     public static EditableBitMask<GamePlayer> AsPlayer(int bitMask = 0) => new BitMask32<GamePlayer>(gamePlayerConverter, bitMask);
     public static EditableBitMask<PlayerControl> AsPlayerControl(int bitMask = 0) => new BitMask32<PlayerControl>(p => 1 << p.PlayerId, bitMask);
+
+    public static BitMask<ConfigurationTab> Bits(params ConfigurationTab[] tabs)
+    {
+        return new BitMask32<ConfigurationTab>(t => t.AsBit, tabs.Aggregate(0, (val, t) => val | t.AsBit));
+    }
 }

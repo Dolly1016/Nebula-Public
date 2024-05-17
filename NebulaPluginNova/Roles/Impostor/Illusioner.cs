@@ -1,40 +1,26 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
+using Virial.Configuration;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
 public class Illusioner : DefinedRoleTemplate, DefinedRole
 {
     static public Illusioner MyRole = new Illusioner();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "illusioner";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    private Illusioner() : base("illusioner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption,MorphDurationOption,PaintCoolDownOption, LoseSampleOnMeetingOption, TransformAfterMeetingOption,SampleOriginalLookOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic, ConfigurationTags.TagDifficult);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
-    private NebulaConfiguration SampleCoolDownOption = null!;
-    private NebulaConfiguration MorphCoolDownOption = null!;
-    private NebulaConfiguration MorphDurationOption = null!;
-    private NebulaConfiguration PaintCoolDownOption = null!;
-    private NebulaConfiguration LoseSampleOnMeetingOption = null!;
-    private NebulaConfiguration TransformAfterMeetingOption = null!;
-    private NebulaConfiguration SampleOriginalLookOption = null!;
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagChaotic, ConfigurationHolder.TagDifficult);
-
-        SampleCoolDownOption = new NebulaConfiguration(RoleConfig, "sampleCoolDown", null, 0f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        MorphCoolDownOption = new NebulaConfiguration(RoleConfig, "morphCoolDown", null, 0f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
-        MorphDurationOption = new NebulaConfiguration(RoleConfig, "morphDuration", null, 5f, 120f, 2.5f, 25f, 25f) { Decorator = NebulaConfiguration.SecDecorator };
-        PaintCoolDownOption = new NebulaConfiguration(RoleConfig, "paintCoolDown", null, 0f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
-        LoseSampleOnMeetingOption = new NebulaConfiguration(RoleConfig, "loseSampleOnMeeting", null, false, false);
-        TransformAfterMeetingOption = new NebulaConfiguration(RoleConfig, "transformAfterMeeting", null, false, false);
-        SampleOriginalLookOption = new NebulaConfiguration(RoleConfig, "sampleOriginalLook", null, false, false);
-    }
+    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("role.illusioner.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("role.illusioner.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("role.illusioner.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PaintCoolDownOption = NebulaAPI.Configurations.Configuration("role.illusioner.paintCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("role.illusioner.loseSampleOnMeeting", false);
+    static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("role.illusioner.transformAfterMeeting", false);
+    static private BoolConfiguration SampleOriginalLookOption = NebulaAPI.Configurations.Configuration("role.illusioner.sampleOriginalLook", false);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -71,14 +57,14 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 sampleButton.Availability = (button) => MyPlayer.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead;
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker.CurrentTarget?.Unbox().GetOutfit(MyRole.SampleOriginalLookOption ? 35 : 75) ?? null;
+                    sample = sampleTracker.CurrentTarget?.Unbox().GetOutfit(SampleOriginalLookOption ? 35 : 75) ?? null;
                     if (sample != null) acTokenChallenge.Value |= 1 << sample.ColorId;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
                     sampleIcon = AmongUsUtil.GetPlayerIcon(sample, sampleButton.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
-                sampleButton.CoolDownTimer = Bind(new Timer(MyRole.SampleCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
 
                 morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
@@ -113,15 +99,15 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 {
                     morphButton.InactivateEffect();
 
-                    if (MyRole.LoseSampleOnMeetingOption)
+                    if (LoseSampleOnMeetingOption)
                     {
                         if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                         sampleIcon = null;
                         sample = null;
                     }
                 };
-                morphButton.CoolDownTimer = Bind(new Timer(MyRole.MorphCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                morphButton.EffectTimer = Bind(new Timer(MyRole.MorphDurationOption.GetFloat()));
+                morphButton.CoolDownTimer = Bind(new Timer(MorphCoolDownOption).SetAsAbilityCoolDown().Start());
+                morphButton.EffectTimer = Bind(new Timer(MorphDurationOption));
                 morphButton.SetLabel("morph");
 
                 paintButton = Bind(new ModAbilityButton());
@@ -130,7 +116,7 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 paintButton.Visibility = (button) => !MyPlayer.IsDead;
                 paintButton.OnClick = (button) => {
                     var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, sample ?? MyPlayer.Unbox().GetOutfit(75))));
-                    if (MyRole.TransformAfterMeetingOption)
+                    if (TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else
                         invoker.InvokeSingle();
@@ -150,14 +136,14 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 };
                 paintButton.OnMeeting = (button) =>
                 {
-                    if (MyRole.LoseSampleOnMeetingOption)
+                    if (LoseSampleOnMeetingOption)
                     {
                         if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                         sampleIcon = null;
                         sample = null;
                     }
                 };
-                paintButton.CoolDownTimer = Bind(new Timer(MyRole.PaintCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                paintButton.CoolDownTimer = Bind(new Timer(PaintCoolDownOption).SetAsAbilityCoolDown().Start());
                 paintButton.SetLabel("paint");
             }
         }

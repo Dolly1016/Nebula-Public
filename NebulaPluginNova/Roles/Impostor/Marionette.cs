@@ -1,8 +1,11 @@
 ﻿using Nebula.Behaviour;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
@@ -10,37 +13,23 @@ namespace Nebula.Roles.Impostor;
 public class Marionette : DefinedRoleTemplate, DefinedRole
 {
     static public Marionette MyRole = new Marionette();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "marionette";
-    public override Color RoleColor => Palette.ImpostorRed;
-    public override RoleTeam Team => Impostor.MyTeam;
+    private Marionette() : base("marionette", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [PlaceCoolDownOption, SwapCoolDownOption, DecoyDurationOption, CanSeeDecoyInShadowOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration PlaceCoolDownOption = null!;
-    private NebulaConfiguration SwapCoolDownOption = null!;
-    private NebulaConfiguration DecoyDurationOption = null!;
-    private NebulaConfiguration CanSeeDecoyInShadowOption = null!;
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagFunny, ConfigurationHolder.TagDifficult);
-
-        PlaceCoolDownOption = new(RoleConfig, "placeCoolDown", null, 5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-        SwapCoolDownOption = new(RoleConfig, "swapCoolDown", null, 2.5f, 60f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
-        DecoyDurationOption = new(RoleConfig, "decoyDuration", null, 5f, 180f, 5f, 40f, 40f) { Decorator = NebulaConfiguration.SecDecorator };
-        CanSeeDecoyInShadowOption = new(RoleConfig, "canSeeDecoyInShadow", null, false, false);
-    }
+    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("role.marionette.placeCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration SwapCoolDownOption = NebulaAPI.Configurations.Configuration("role.marionette.swapCoolDown", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DecoyDurationOption = NebulaAPI.Configurations.Configuration("role.marionette.decoyDuration", (5f, 180f, 5f), 40f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanSeeDecoyInShadowOption = NebulaAPI.Configurations.Configuration("role.marionette.canSeeDecoyInShadow", false);
 
     [NebulaPreLoad]
     public class Decoy : NebulaSyncStandardObject
     {
         public static string MyTag = "Decoy";
         private static SpriteLoader decoySprite = SpriteLoader.FromResource("Nebula.Resources.Decoy.png", 150f);
-        public Decoy(Vector2 pos,bool reverse) : base(pos,ZOption.Just,MyRole.CanSeeDecoyInShadowOption, decoySprite.GetSprite()) {
+        public Decoy(Vector2 pos,bool reverse) : base(pos,ZOption.Just,CanSeeDecoyInShadowOption, decoySprite.GetSprite()) {
             MyRenderer.flipX = reverse;
             MyBehaviour = MyRenderer.gameObject.AddComponent<EmptyBehaviour>();
         }
@@ -89,7 +78,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) => MyPlayer.CanMove;
                 placeButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy == null;
-                placeButton.CoolDownTimer = Bind(new Timer(MyRole.PlaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                placeButton.CoolDownTimer = Bind(new Timer(PlaceCoolDownOption).SetAsAbilityCoolDown().Start());
                 placeButton.OnClick = (button) =>
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
@@ -112,7 +101,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                 destroyButton.SetSprite(destroyButtonSprite.GetSprite());
                 destroyButton.Availability = (button) => MyPlayer.CanMove;
                 destroyButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
-                destroyButton.EffectTimer = Bind(new Timer(MyRole.DecoyDurationOption.GetFloat()));
+                destroyButton.EffectTimer = Bind(new Timer(DecoyDurationOption));
                 destroyButton.OnClick = (button) =>
                 {
                     destroyButton.InactivateEffect();
@@ -130,7 +119,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                 swapButton.SetSprite(swapButtonSprite.GetSprite());
                 swapButton.Availability = (button) => (MyPlayer.CanMove || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour) && (!MyPlayer.VanillaPlayer.inVent && !MyPlayer.VanillaPlayer.onLadder && !MyPlayer.VanillaPlayer.inMovingPlat);
                 swapButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
-                swapButton.CoolDownTimer = Bind(new Timer(MyRole.SwapCoolDownOption.GetFloat()));
+                swapButton.CoolDownTimer = Bind(new Timer(SwapCoolDownOption));
                 swapButton.OnClick = (button) =>
                 {
                     DecoySwap.Invoke((MyPlayer.PlayerId, MyDecoy!.ObjectId));

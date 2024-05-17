@@ -16,8 +16,8 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
 
     string ICodeName.CodeName => "LMN";
 
-    FloatConfiguration LightSizeOption = new FloatConfigurationImpl("role.lumine.lightSize", ArrayHelper.Selection(1f, 10f, 0.25f), 2f).DecorateAsRatioConfiguration();
-    FloatConfiguration LightDurationOption = new FloatConfigurationImpl("role.lumine.lightDuration", ArrayHelper.Selection(5f, 30f, 2.5f), 10f).DecorateAsSecConfiguration();
+    FloatConfiguration LightSizeOption = NebulaAPI.Configurations.Configuration("role.lumine.lightSize", (1f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
+    FloatConfiguration LightDurationOption = NebulaAPI.Configurations.Configuration("role.lumine.lightDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
 
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 

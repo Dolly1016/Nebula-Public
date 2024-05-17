@@ -1,35 +1,25 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
 public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public Morphing MyRole = new Morphing();
-    public override RoleCategory Category => RoleCategory.ImpostorRole;
-
-    string DefinedAssignable.LocalizedName => "morphing";
-    public override Color RoleColor => Palette.ImpostorRed;
+    private Morphing() : base("morphing", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption, MorphDurationOption, LoseSampleOnMeetingOption]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override RoleTeam Team => Impostor.MyTeam;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
-    private NebulaConfiguration SampleCoolDownOption = null!;
-    private NebulaConfiguration MorphCoolDownOption = null!;
-    private NebulaConfiguration MorphDurationOption = null!;
-    private NebulaConfiguration LoseSampleOnMeetingOption = null!;
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        SampleCoolDownOption = new NebulaConfiguration(RoleConfig, "sampleCoolDown", null, 0f, 60f, 2.5f, 15f, 15f) { Decorator = NebulaConfiguration.SecDecorator };
-        MorphCoolDownOption = new NebulaConfiguration(RoleConfig, "morphCoolDown", null, 0f, 60f, 5f, 30f, 30f) { Decorator = NebulaConfiguration.SecDecorator };
-        MorphDurationOption = new NebulaConfiguration(RoleConfig, "morphDuration", null, 5f, 120f, 2.5f, 25f, 25f) { Decorator = NebulaConfiguration.SecDecorator };
-        LoseSampleOnMeetingOption = new NebulaConfiguration(RoleConfig, "loseSampleOnMeeting", null, false, false);
-    }
+    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("role.morphing.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("role.morphing.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("role.morphing.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("role.morphing.loseSampleOnMeeting", false);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -73,7 +63,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (sample == null) return;
                     sampleIcon = AmongUsUtil.GetPlayerIcon(sample, morphButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
-                sampleButton.CoolDownTimer = Bind(new Timer(MyRole.SampleCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
 
                 morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
@@ -115,14 +105,14 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
                 {
                     morphButton.InactivateEffect();
 
-                    if (MyRole.LoseSampleOnMeetingOption)
+                    if (LoseSampleOnMeetingOption)
                     {
                         if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                         sampleIcon = null;
                     }
                 };
-                morphButton.CoolDownTimer = Bind(new Timer(MyRole.MorphCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                morphButton.EffectTimer = Bind(new Timer(MyRole.MorphDurationOption.GetFloat()));
+                morphButton.CoolDownTimer = Bind(new Timer(MorphCoolDownOption).SetAsAbilityCoolDown().Start());
+                morphButton.EffectTimer = Bind(new Timer(MorphDurationOption));
                 morphButton.SetLabel("morph");
             }
         }
@@ -130,7 +120,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnMeetingEnd(MeetingEndEvent ev)
         {
-            if (MyRole.LoseSampleOnMeetingOption) sample = null;
+            if (LoseSampleOnMeetingOption) sample = null;
         }
 
         [Local]
