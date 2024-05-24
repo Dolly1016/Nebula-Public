@@ -3,7 +3,7 @@
 "title.buttons.nebula" : "ネブラ"
 "title.label.nebula" : "Nebula on the Ship"
 
-"title.buttons.update" : "最新版に更新"
+"title.buttons.update" : "バージョン変更"
 "title.buttons.achievements" : "実績"
 "title.buttons.addons" : "アドオン"
 "title.buttons.developersStudio" : "デベロッパースタジオ"
@@ -1211,6 +1211,28 @@
 "hint.gameConfigurationMenu.detail" : "設定画面を開いているときに<b>マウス中央ボタン</b>をクリックすることで表示モードを切り替えらえます。"
 "hint.helpInGame.title" : "ゲーム内ヘルプ"
 "hint.helpInGame.detail" : "ロビー内やゲーム中にヘルプキー(デフォルト: Hキー)を押すとヘルプ画面が表示されます。<br>自身の役職や、NoSの全役職の詳細について確認することができます。"
+"hint.disturber.title" : "役職: ディスターバー"
+"hint.disturber.detail" : "ディスターバーはマップ上に障壁を作り、移動を妨害するインポスターです。<br>ポールを置いた犯人を問い詰めることで、ディスターバーに立ち向かいましょう。"
+"hint.nearClick.title" : "マウスクリックアクション"
+"hint.nearClick.detail" : "ボタンの右下にマウスのアイコンが表示されている場合は、自身の<b>近辺</b>でのマウスクリックによっても<br>ボタンの能力を発動することができます。"
+"hint.spectator.title" : "観戦者モード"
+"hint.spectator.detail" : 死亡後、会議を挟むと観戦者モードになります。観戦者モードではマウスのスクロールで視野を拡大/縮小できます。<br>タスクを全てこなしていると、視点を他の生存者に切り替えることもできます。
+"hint.keyAssignment.title" : "ボタン操作のキー割り当て"
+"hint.keyAssignment.detail" : "キルボタンや能力ボタン等はキーボード操作によっても使用できます。<br>ボタン右上の表示をチェックしてみてください。キー割り当ては設定によって変更することもできます。"
+"hint.paparazzo.title" : "役職: パパラッチ"
+"hint.paparazzo.detail" : "パパラッチはプレイヤーの映った写真を撮影する第三陣営役職です。<br>会議中に撮影した写真を何枚か公開する必要がありますが、パパラッチの正体がバレてはなりません。"
+"hint.busker.title" : "役職: バスカー"
+"hint.busker.detail" : "バスカーは、一度死亡したあと復活する<b>大道芸</b>ができるクルーメイト役職です。<br>偽装死ののち暫く復活しないでいると、本当に生き返れなくなってしまうので注意しましょう。"
+"hint.screenshot.title" : "スクリーンショット"
+"hint.screenshot.detail" : "スクリーンショットキー(デフォルト: Pキー)を押すと画面のスクリーンショットが撮影できます。<br>スクリーンショットはAmong Usの実行ファイルがあるフォルダにあるScreenshotsフォルダ内に保存されます。"
+"hint.achievement.title" : "実績を集めよう"
+"hint.achievement.detail" : "ゲーム中に指定の条件を満たすと実績を獲得することができます。獲得した実績は自身の称号として装着することができます。<br>たくさん実績を獲得して、仲間にお披露目しましょう！"
+"hint.version.title" : "NoSのバージョンを更新/変更する"
+"hint.version.detail" : "最新版のNoSに更新する、別バージョンのNoSに変更する場合は、<br>タイトル画面のNebulaタブから開けるバージョン変更が便利です。"
+"hint.freeplay.title" : "フリープレイ"
+"hint.freeplay.detail" : "ゲーム内設定からゲームモードを変更することができます。フリープレイでは<br>一人でもゲームを始めることができ、各役職の能力の使い勝手を確認できます。"
+"hint.overlay.title" : "オーバーレイ表示"
+"hint.overlay.detail" : "ゲーム上のテキスト等の表示にカーソルを合わせると、更なる情報がオーバーレイで表示されることがあります。<br>気になるモノには是非一度カーソルを合わせてみてください。"
 
 # Documents
 
