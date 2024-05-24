@@ -12,17 +12,17 @@ namespace Nebula.Roles.Crewmate;
 
 public class Busker : DefinedRoleTemplate, DefinedRole
 {
-    static public Busker MyRole = new Busker();
     private Busker() : base("busker", new(255, 172, 117), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PseudocideCoolDownOption, PseudocideDurationOption, HidePseudocideFromVitalsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration PseudocideCoolDownOption = NebulaAPI.Configurations.Configuration("role.busker.pseudocideCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration PseudocideDurationOption = NebulaAPI.Configurations.Configuration("role.busker.pseudocideDuration", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration HidePseudocideFromVitalsOption = NebulaAPI.Configurations.Configuration("role.busker.hidePseudocideFromVitals", false);
+    static private FloatConfiguration PseudocideCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.busker.pseudocideCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PseudocideDurationOption = NebulaAPI.Configurations.Configuration("options.role.busker.pseudocideDuration", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration HidePseudocideFromVitalsOption = NebulaAPI.Configurations.Configuration("options.role.busker.hidePseudocideFromVitals", false);
 
+    static public Busker MyRole = new Busker();
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => assignable is not Lover;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -68,7 +68,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                 StaticAchievementToken? acTokenCommon1 = null;
 
                 reviveButon.SetSprite(reviveButtonSprite.GetSprite());
-                reviveButon.Availability = (button) => MyPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.transform.position);
+                reviveButon.Availability = (button) => MyPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.GetTruePosition());
                 reviveButon.Visibility = (button) => button.EffectActive && Helpers.AllDeadBodies().Any(deadBody => deadBody.ParentId == MyPlayer.PlayerId);
                 reviveButon.EffectTimer = Bind(new Timer(0f, PseudocideDurationOption));
                 reviveButon.OnClick = (button) => {

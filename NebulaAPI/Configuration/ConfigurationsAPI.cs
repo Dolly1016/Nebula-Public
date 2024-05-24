@@ -108,6 +108,7 @@ public interface Configurations
     /// <returns></returns>
     IOrderedSharableVariable<int> SharableVariable(string id, IntegerSelection values, int defaultValue);
 
+
     /// <summary>
     /// ホルダを生成します。
     /// </summary>
@@ -115,7 +116,16 @@ public interface Configurations
     /// <param name="tabs"></param>
     /// <param name="gamemodes"></param>
     /// <returns></returns>
-    IConfigurationHolder Holder(string id, IEnumerable<ConfigurationTab> tabs, IEnumerable<GameModeDefinition> gamemodes);
+    IConfigurationHolder Holder(TextComponent title, TextComponent detail, IEnumerable<ConfigurationTab> tabs, IEnumerable<GameModeDefinition> gamemodes, Func<bool>? predicate = null, Func<ConfigurationHolderState>? state = null);
+
+    /// <summary>
+    /// ホルダを生成します。
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="tabs"></param>
+    /// <param name="gamemodes"></param>
+    /// <returns></returns>
+    IConfigurationHolder Holder(string id, IEnumerable<ConfigurationTab> tabs, IEnumerable<GameModeDefinition> gamemodes, Func<bool>? predicate = null) => Holder(NebulaAPI.GUI.LocalizedTextComponent(id), NebulaAPI.GUI.LocalizedTextComponent(id + ".detail"), tabs, gamemodes,predicate);
 
     /// <summary>
     /// モディファイアフィルタを生成します。
@@ -131,11 +141,12 @@ public interface Configurations
     /// <returns></returns>
     GhostRoleFilter GhostRoleFilter(string id);
 
-    BoolConfiguration Configuration(string id, bool defaultValue, Func<bool>? predicate = null);
-    IntegerConfiguration Configuration(string id, IntegerSelection selection, int defaultValue, Func<bool>? predicate = null);
+    BoolConfiguration Configuration(string id, bool defaultValue, Func<bool>? predicate = null, TextComponent? title = null);
+    IntegerConfiguration Configuration(string id, IntegerSelection selection, int defaultValue, Func<bool>? predicate = null, Func<int, string>? decorator = null, TextComponent? title = null);
     FloatConfiguration FloatOption(string id, FloatSelection selection, float defaultValue, Func<bool>? predicate) => FloatOption(id, selection, defaultValue, predicate: predicate);
-    FloatConfiguration Configuration(string id, FloatSelection selection, float defaultValue, FloatConfigurationDecorator decorator = FloatConfigurationDecorator.None, Func<bool>? predicate = null);
-    ValueConfiguration<int> Configuration(string id, string[] selection, int defualtIndex, Func<bool>? predicate = null);
+    FloatConfiguration Configuration(string id, FloatSelection selection, float defaultValue, FloatConfigurationDecorator decorator = FloatConfigurationDecorator.None, Func<bool>? predicate = null, TextComponent? title = null);
+    FloatConfiguration Configuration(string id, FloatSelection selection, float defaultValue, Func<float, string> decorator, Func<bool>? predicate = null, TextComponent? title = null);
+    ValueConfiguration<int> Configuration(string id, string[] selection, int defualtIndex, Func<bool>? predicate = null, TextComponent? title = null);
     IConfiguration Configuration(Func<string?> displayShower, GUIWidgetSupplier editor, Func<bool>? predicate = null);
 
     IVentConfiguration VentConfiguration(string id, bool isOptional, IntegerSelection? usesSelection, int usesDefaultValue, FloatSelection? coolDownSelection, float coolDownDefaultValue, FloatSelection? durationSelection, float durationDefaultValue);

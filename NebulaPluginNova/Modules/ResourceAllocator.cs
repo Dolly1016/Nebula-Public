@@ -1,17 +1,18 @@
 ﻿using System.Reflection;
 using Virial.Compat;
 using Virial.Media;
+using Virial.Runtime;
 
 namespace Nebula.Modules;
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class NebulaResourceManager
 {
     static IVariableNamespaceAllocator baseAllocator = new NamespaceAllocator();
     static public IResourceAllocator NebulaNamespace = null!;
     static public IResourceAllocator InnerslothNamespace = null!;
 
-    public static void Load()
+    static NebulaResourceManager()
     {
         NebulaNamespace = new NebulaDefaultNamespace();
         InnerslothNamespace = new InnerslothDefaultNamespace();

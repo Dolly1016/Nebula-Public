@@ -10,17 +10,18 @@ namespace Nebula.Roles.Crewmate;
 
 public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Mayor MyRole = new Mayor();
     private Mayor() : base("mayor", new(30,96,85), RoleCategory.CrewmateRole, Crewmate.MyTeam, [FixedVotesOption, MinVoteOption, MaxVoteOption, MaxVoteStockOption, VoteAssignmentOption]) { }
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
-    static private BoolConfiguration FixedVotesOption = NebulaAPI.Configurations.Configuration("role.mayor.fixedVotes", false);
-    static private IntegerConfiguration MinVoteOption = NebulaAPI.Configurations.Configuration("role.mayor.minVote", (0, 20), 1, () => !FixedVotesOption);
-    static private IntegerConfiguration MaxVoteOption = NebulaAPI.Configurations.Configuration("role.mayor.maxVote", (1, 20), 2, () => !FixedVotesOption);
-    static private IntegerConfiguration MaxVoteStockOption = NebulaAPI.Configurations.Configuration("role.mayor.maxVotesStock", (1, 20), 8, () => !FixedVotesOption);
-    static private IntegerConfiguration VoteAssignmentOption = NebulaAPI.Configurations.Configuration("role.mayor.voteAssignment", (1, 20), 1);
-    
+    static private BoolConfiguration FixedVotesOption = NebulaAPI.Configurations.Configuration("options.role.mayor.fixedVotes", false);
+    static private IntegerConfiguration MinVoteOption = NebulaAPI.Configurations.Configuration("options.role.mayor.minVote", (0, 20), 1, () => !FixedVotesOption);
+    static private IntegerConfiguration MaxVoteOption = NebulaAPI.Configurations.Configuration("options.role.mayor.maxVote", (1, 20), 2, () => !FixedVotesOption);
+    static private IntegerConfiguration MaxVoteStockOption = NebulaAPI.Configurations.Configuration("options.role.mayor.maxVotesStock", (1, 20), 8, () => !FixedVotesOption);
+    static private IntegerConfiguration VoteAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.mayor.voteAssignment", (1, 20), 1);
+
+    static public Mayor MyRole = new Mayor();
+
     static private int MinVote => FixedVotesOption ? VoteAssignmentOption : MinVoteOption;
     static private int MaxVote => FixedVotesOption ? VoteAssignmentOption : MaxVoteOption;
     static private int VoteAssignment => VoteAssignmentOption;

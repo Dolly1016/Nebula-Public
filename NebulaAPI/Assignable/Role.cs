@@ -89,6 +89,7 @@ public interface DefinedAssignable : IRoleID
     /// 役職の表示名
     /// </summary>
     string DisplayName => NebulaAPI.Language.Translate("role." + LocalizedName + ".name");
+    string DisplayColordName => DisplayName.Color(UnityColor);
 
 
     /// <summary>
@@ -112,11 +113,13 @@ public interface DefinedSingleAssignable : DefinedAssignable
     RoleTeam Team { get; }
 
     AllocationParameters? AllocationParameters { get; }
+    bool IsSpawnable { get; }
 
     /// <summary>
     /// 役職の省略名
     /// </summary>
     string DisplayShort => NebulaAPI.Language.Translate("role." + LocalizedName + ".short");
+    string DisplayColoredShort => DisplayShort.Color(UnityColor);
 }
 
 public interface RuntimeAssignableGenerator<T> where T : RuntimeAssignable
@@ -208,7 +211,16 @@ public interface DefinedModifier : DefinedAssignable, RuntimeAssignableGenerator
 {
 }
 
-public interface AllocatableDefinedModifier : DefinedModifier, ICodeName, HasRoleFilter
+/// <summary>
+/// 独自の割り当てルーチンを持つ対象を表します。
+/// </summary>
+public interface HasAssignmentRoutine
+{
+    int AssignPriority { get; }
+    void TryAssign(IRoleTable roleTable);
+}
+
+public interface DefinedAllocatableModifier : DefinedModifier, ICodeName, HasRoleFilter, HasAssignmentRoutine
 {
 }
 
@@ -265,6 +277,7 @@ public interface RuntimeAssignable : IBinder, ILifespan, IReleasable, IBindPlaye
     string? OverrideRoleName(string lastRoleName, bool isShort) => null;
 
     string DisplayName => Assignable.DisplayName;
+    string DisplayColoredName => Assignable.DisplayColordName;
 
     /// <summary>
     /// 現在の状態を役職引数に変換します。
@@ -288,6 +301,14 @@ public interface RuntimeAssignable : IBinder, ILifespan, IReleasable, IBindPlaye
         (this as IReleasable).Release();
         OnInactivated();
     }
+
+    /// <summary>
+    /// 名前のテキストを恒常的に書き換えます。
+    /// 状態に依らない書き換えが推奨されます。
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="canSeeAllInfo"></param>
+    void DecorateNameConstantly(ref string name, bool canSeeAllInfo) { }
 }
 
 /// <summary>
@@ -390,4 +411,19 @@ public interface RuntimeModifier : RuntimeAssignable
     /// </summary>
     DefinedModifier Modifier { get; }
     DefinedAssignable RuntimeAssignable.Assignable => Modifier;
+
+    /// <summary>
+    /// ゲーム開始時に割り当てられているとき、役職開示画面で表示されます。
+    /// </summary>
+    string? DisplayIntroBlurb => null;
+
+    /// <summary>
+    /// クルーメイトタスクを持っていた場合、明示的に無効化する場合はtrue
+    /// </summary>
+    public virtual bool InvalidateCrewmateTask => false;
+
+    /// <summary>
+    /// クルーメイトタスクを持っていたとしても、クルーメイトタスクの総数に計上されない場合はtrue
+    /// </summary>
+    public virtual bool MyCrewmateTaskIsIgnored => false;
 }

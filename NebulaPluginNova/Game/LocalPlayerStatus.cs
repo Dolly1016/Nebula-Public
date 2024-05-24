@@ -78,7 +78,7 @@ public class FakeSabotageStatus
                     else if (message.task == SystemTypes.HeliSabotage)
                     {
                         var reactor = ShipStatus.Instance.Systems[message.task].CastFast<HeliSabotageSystem>();
-                        reactor.Countdown = Mathf.Min(reactor.Countdown, GeneralConfigurations.AirshipHeliDurationOption.GetFloat());
+                        reactor.Countdown = Mathf.Min(reactor.Countdown, GeneralConfigurations.AirshipHeliDurationOption.CurrentValue);
                         reactor.CompletedConsoles.Clear();
                         reactor.ActiveConsoles.Clear();
                     }

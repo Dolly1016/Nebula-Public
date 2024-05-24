@@ -11,29 +11,30 @@ namespace Nebula.Roles.Crewmate;
 [NebulaRPCHolder]
 public class Phosphorus : DefinedRoleTemplate, DefinedRole
 {
-    static public Phosphorus MyRole = new Phosphorus();
     private Phosphorus():base("phosphorus", new(249,188,81), RoleCategory.CrewmateRole, Crewmate.MyTeam, [NumOfLampsOption, PlaceCoolDownOption, LampCoolDownOption, LampDurationOption, LampStrengthOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private IntegerConfiguration NumOfLampsOption = NebulaAPI.Configurations.Configuration("role.phosphorus.numOfLamps", (1, 10), 2);
-    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("role.phosphorus.placeCoolDown", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration LampCoolDownOption = NebulaAPI.Configurations.Configuration("role.phosphorus.lampCoolDown", (5f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration LampDurationOption = NebulaAPI.Configurations.Configuration("role.phosphorus.lampDuration", (7.5f, 30f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration LampStrengthOption = NebulaAPI.Configurations.Configuration("role.phosphorus.lampStrength", (0.25f, 5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private IntegerConfiguration NumOfLampsOption = NebulaAPI.Configurations.Configuration("options.role.phosphorus.numOfLamps", (1, 10), 2);
+    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.phosphorus.placeCoolDown", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration LampCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.phosphorus.lampCoolDown", (5f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration LampDurationOption = NebulaAPI.Configurations.Configuration("options.role.phosphorus.lampDuration", (7.5f, 30f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration LampStrengthOption = NebulaAPI.Configurations.Configuration("options.role.phosphorus.lampStrength", (0.25f, 5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+
+    static public Phosphorus MyRole = new Phosphorus();
 
     private static IDividedSpriteLoader lanternSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Lantern.png", 100f, 4);
 
-    [NebulaPreLoad]
+    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
     public class Lantern : NebulaSyncStandardObject
     {
         public static string MyGlobalTag = "LanternGlobal";
         public static string MyLocalTag = "LanternLocal";
         public Lantern(Vector2 pos,bool isLocal) : base(pos,ZOption.Just,true,lanternSprite.GetSprite(0),isLocal){}
 
-        public static void Load()
+        static Lantern()
         {
             NebulaSyncObject.RegisterInstantiater(MyGlobalTag, (args) => new Lantern(new(args[0], args[1]), false));
             NebulaSyncObject.RegisterInstantiater(MyLocalTag, (args) => new Lantern(new(args[0], args[1]), true));

@@ -12,19 +12,20 @@ namespace Nebula.Roles.Impostor;
 [NebulaRPCHolder]
 public class Raider : DefinedRoleTemplate, DefinedRole
 {
-    static public Raider MyRole = new Raider();
     private Raider() : base("raider", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ThrowCoolDownOption, AxeSizeOption, AxeSpeedOption,CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private IRelativeCoolDownConfiguration ThrowCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.raider.throwCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
-    static private FloatConfiguration AxeSizeOption = NebulaAPI.Configurations.Configuration("role.raider.axeSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration AxeSpeedOption = NebulaAPI.Configurations.Configuration("role.raider.axeSpeed", (0.5f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
-    static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("role.raider.canKillImpostor", false);
+    static private IRelativeCoolDownConfiguration ThrowCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.raider.throwCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
+    static private FloatConfiguration AxeSizeOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration AxeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSpeed", (0.5f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.raider.canKillImpostor", false);
 
-    [NebulaPreLoad]
+    static public Raider MyRole = new Raider();
+
+    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
     public class RaiderAxe : NebulaSyncStandardObject, IGameOperator
     {
         public static string MyTag = "RaiderAxe";
@@ -135,7 +136,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
             MyRenderer.color = Color.white;
         }
 
-        public static void Load()
+        static RaiderAxe()
         {
             NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new RaiderAxe(Helpers.GetPlayer((byte)args[0])!));
         }
@@ -151,7 +152,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AxeButton.png", 115f);
         
         public RaiderAxe? MyAxe = null;
-        public override bool HasVanillaKillButton => false;
+        bool RuntimeRole.HasVanillaKillButton => false;
         public Instance(GamePlayer player) : base(player)
         {
         }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Configuration;
+using Virial.Runtime;
 
 namespace Nebula.Configuration;
 
@@ -13,7 +14,7 @@ namespace Nebula.Configuration;
 /// <summary>
 /// ゲーム内設定のオプション値を管理します。
 /// </summary>
-[NebulaPreLoad(typeof(Roles.Roles))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
 [NebulaRPCHolder]
 internal static class ConfigurationValues
 {
@@ -26,6 +27,7 @@ internal static class ConfigurationValues
     /// 全オプション
     /// </summary>
     static internal List<ISharableEntry> AllEntries = new();
+    static internal List<Action> Reloaders = new();
 
     /// <summary>
     /// オプションの値の共有を遅らせるためのブロッカー
@@ -35,7 +37,7 @@ internal static class ConfigurationValues
     /// 値の共有を遅延させられているエントリーのID
     /// </summary>
     static HashSet<int> ChangedEntryIdList = new();
-
+    
     /// <summary>
     /// 値の共有を遅延させるブロッカー
     /// </summary>
@@ -80,6 +82,12 @@ internal static class ConfigurationValues
         ConfigurationSaver.Save();
     }
 
+    static public void RestoreAll()
+    {
+        Reloaders.Do(a => a.Invoke());
+        foreach (var entry in AllEntries) entry.RestoreSavedValue();
+    }
+
     /// <summary>
     /// オプションの値を書き換えられるかどうかを調べ、必要に応じて例外を投げます。
     /// </summary>
@@ -95,7 +103,7 @@ internal static class ConfigurationValues
     /// すべてのエントリにIDを割り振ります。
     /// </summary>
     /// <returns></returns>
-    static public IEnumerator CoLoad()
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         Patches.LoadPatch.LoadingText = "Building Configuration Database";
         yield return null;
@@ -113,6 +121,7 @@ internal static class ConfigurationValues
        (message, isCalledByMe) =>
        {
            if (!isCalledByMe) AllEntries[message.id].RpcValue = message.value;
+           HelpScreen.OnUpdateOptions();
        }
     );
 
@@ -151,10 +160,11 @@ internal static class ConfigurationValues
                AllEntries[index].RpcValue = reader.ReadInt32();
                index++;
            }
-           return new Tuple<int, int>(0, 0);
+           return new Tuple<int, int>(index, num);
        },
        (message, isCalledByMe) =>
        {
+           HelpScreen.OnUpdateOptions();
        }
     );
 }

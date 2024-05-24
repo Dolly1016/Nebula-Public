@@ -11,6 +11,7 @@ global using Nebula.Modules.ScriptComponents;
 global using System.Collections;
 global using HarmonyLib;
 global using Virial.Attributes;
+global using Virial.Helpers;
 global using Timer = Nebula.Modules.ScriptComponents.Timer;
 global using Color = UnityEngine.Color;
 global using GUIWidget = Virial.Media.GUIWidget;
@@ -23,6 +24,8 @@ using BepInEx.Unity.IL2CPP;
 using System.Runtime.InteropServices;
 using UnityEngine.SceneManagement;
 using Virial;
+using Cpp2IL.Core.Extensions;
+using System.Reflection;
 
 namespace Nebula;
 
@@ -36,11 +39,11 @@ public class NebulaPlugin : BasePlugin
     public const string PluginVersion = "2.2.3.1";
 
     //public const string VisualVersion = "v2.3";
-    public const string VisualVersion = "Snapshot 24.05.10a";
+    public const string VisualVersion = "Snapshot 24.05.23b";
     //public const string VisualVersion = "RPC Debug 2";
 
     public const int PluginEpoch = 103;
-    public const int PluginBuildNum = 1118;
+    public const int PluginBuildNum = 1121;
     public const bool GuardVanillaLangData = true;
 
     static public HttpClient HttpClient

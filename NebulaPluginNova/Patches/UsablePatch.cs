@@ -2,6 +2,7 @@
 
 using Nebula.Compat;
 using Virial.Events.Player;
+using Virial.Game;
 
 namespace Nebula.Patches;
 
@@ -141,7 +142,7 @@ public static class VentUsePatch
         if (!localPlayer.walkingToVent)
             localPlayer.MyPhysics.RpcEnterVent(__instance.Id);
 
-        __instance.SetButtons(!isNotEnter && localPlayer.GetModInfo()!.Role.Unbox().CanMoveInVent);
+        __instance.SetButtons(!isNotEnter && localPlayer.GetModInfo()!.Role.CanMoveInVent);
         return false;
     }
 }
@@ -170,7 +171,7 @@ public static class ConsoleCanUsePatch
 
         if (__instance.AllowImpostor) return true;
 
-        if (!info.Role.Unbox().HasAnyTasks)
+        if (info.Role.TaskType == Virial.Assignable.RoleTaskType.NoTask)
         {
             __result = float.MaxValue;
             return false;
@@ -203,7 +204,7 @@ class MovingPlatformBehaviourMeetingCalledPatch
     static bool Prefix(MovingPlatformBehaviour __instance)
     {
         if (AmongUsUtil.CurrentMapId != 4) return true;
-        return !GeneralConfigurations.AirshipOneWayMeetingRoomOption;
+        return !GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue;
     }
 }
 
@@ -213,7 +214,7 @@ class CanUseMovingPlayformPatch
     static bool Prefix(MovingPlatformBehaviour __instance)
     {
         if (AmongUsUtil.CurrentMapId != 4) return true;
-        return !GeneralConfigurations.AirshipOneWayMeetingRoomOption;
+        return !GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue;
     }
 }
 
@@ -223,7 +224,7 @@ class MovingPlatformBehaviourSetSidePatch
     static bool Prefix(MovingPlatformBehaviour __instance)
     {
         __instance.IsDirty = true;
-        return !GeneralConfigurations.AirshipOneWayMeetingRoomOption;
+        return !GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue;
     }
 }
 
@@ -234,7 +235,7 @@ class SystemConsoleStartPatch
 {
     static bool Prefix(SystemConsole __instance)
     {
-        if (__instance.FreeplayOnly && GeneralConfigurations.CurrentGameMode != CustomGameMode.FreePlay)
+        if (__instance.FreeplayOnly && GeneralConfigurations.CurrentGameMode != GameModes.FreePlay)
             UnityEngine.Object.Destroy(__instance.gameObject);
 
         return false;
@@ -298,7 +299,7 @@ class LadderCoolDownPatch
 {
     static bool Prefix(Ladder __instance, out float __result)
     {
-        __result = Math.Max(0.01f, GeneralConfigurations.LadderCoolDownOption.GetFloat());
+        __result = Math.Max(0.01f, GeneralConfigurations.LadderCoolDownOption);
         return false;
     }
 }
@@ -308,7 +309,7 @@ class LadderCoolDownUpdatePatch
 {
     static bool Prefix(Ladder __instance)
     {
-        float maxCoolDown = GeneralConfigurations.LadderCoolDownOption.GetFloat();
+        float maxCoolDown = GeneralConfigurations.LadderCoolDownOption;
         __instance.Destination.CoolDown = maxCoolDown;
         __instance.CoolDown = maxCoolDown;
         return false;
@@ -320,7 +321,7 @@ class ZiplineCoolDownPatch
 {
     static bool Prefix(ZiplineConsole __instance, out float __result)
     {
-        __result = Math.Max(0.01f, GeneralConfigurations.ZiplineCoolDownOption.GetFloat());
+        __result = Math.Max(0.01f, GeneralConfigurations.ZiplineCoolDownOption);
         return false;
     }
 }
@@ -330,7 +331,7 @@ class ZiplineCoolDownUpdatePatch
 {
     static bool Prefix(ZiplineConsole __instance)
     {
-        float maxCoolDown = GeneralConfigurations.ZiplineCoolDownOption.GetFloat();
+        float maxCoolDown = GeneralConfigurations.ZiplineCoolDownOption;
         __instance.destination.CoolDown = maxCoolDown;
         __instance.CoolDown = maxCoolDown;
         return false;

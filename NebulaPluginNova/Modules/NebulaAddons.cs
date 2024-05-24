@@ -3,10 +3,11 @@ using System.Reflection;
 using System.Security.Cryptography;
 using Virial.Compat;
 using Virial.Media;
+using Virial.Runtime;
 
 namespace Nebula.Modules;
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.LoadAddons)]
 public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllocator
 {
     public class AddonMeta
@@ -39,10 +40,9 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         return null;
     }
 
-    static public IEnumerator CoLoad()
+    static public IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        Patches.LoadPatch.LoadingText = "Loading Addons";
-        yield return null;
+        yield return preprocessor.SetLoadingText("Loading Addons");
 
         Directory.CreateDirectory("Addons");
 

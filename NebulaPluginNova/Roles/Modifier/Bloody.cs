@@ -1,38 +1,36 @@
-﻿using Virial.Events.Game.Meeting;
+﻿using Virial;
+using Virial.Assignable;
+using Virial.Configuration;
+using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
-public class Bloody : ConfigurableStandardModifier
+public class Bloody : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
-    static public Bloody MyRole = new Bloody();
-    public override string LocalizedName => "bloody";
-    public override string CodeName => "BLD";
-    public override Color RoleColor => new Color(180f / 255f, 0f / 255f, 0f / 255f);
-
-    private NebulaConfiguration CurseDurationOption = null!;
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagBeginner);
-
-        CurseDurationOption = new NebulaConfiguration(RoleConfig, "curseDuration", null, 2.5f, 30f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
+    private Bloody(): base("bloody", "BLD", new(180, 0, 0), [CurseDurationOption]) {
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
-    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IBindPlayer
+
+    static private FloatConfiguration CurseDurationOption = NebulaAPI.Configurations.Configuration("options.role.bloody.curseDuration", (2.5f,30f,2.5f),10f, FloatConfigurationDecorator.Second);
+
+    static public Bloody MyRole = new Bloody();
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
-        public override AbstractModifier Role => MyRole;
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
+
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
         public Instance(GamePlayer player) : base(player)
         {
         }
 
-        public override void DecoratePlayerName(ref string text, ref Color color)
+        void RuntimeAssignable.OnActivated() { }
+
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " †".Color(MyRole.RoleColor);
+            if (AmOwner || canSeeAllInfo) name += " †".Color(MyRole.UnityColor);
         }
 
         [Local, OnlyMyPlayer]
@@ -40,7 +38,7 @@ public class Bloody : ConfigurableStandardModifier
         {
             if (!ev.Murderer.AmOwner)
             {
-                PlayerModInfo.RpcAttrModulator.Invoke((ev.Murderer.PlayerId, new AttributeModulator(PlayerAttributes.CurseOfBloody, MyRole.CurseDurationOption.GetFloat(), false, 1), true));
+                PlayerModInfo.RpcAttrModulator.Invoke((ev.Murderer.PlayerId, new AttributeModulator(PlayerAttributes.CurseOfBloody, CurseDurationOption, false, 1), true));
                 new StaticAchievementToken("bloody.common1");
                 acTokenChallenge = new("bloody.challenge",(false,true),(val,_)=>val.cleared);
             }

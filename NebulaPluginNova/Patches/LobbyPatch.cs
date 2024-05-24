@@ -1,6 +1,11 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using InnerNet;
 using Nebula.Behaviour;
+using UnityEngine;
+using Virial.Game;
+using Nebula.Modules;
+using Il2CppSystem.Collections;
+using UnityEngine.SceneManagement;
 
 namespace Nebula.Patches;
 
@@ -49,7 +54,7 @@ public class GameStartManagerUpdatePatch
 
         bool canStart = __instance.LastPlayerCount >= __instance.MinPlayers;
 
-        canStart &= GeneralConfigurations.CurrentGameMode.AllowWithoutNoS || PlayerControl.AllPlayerControls.GetFastEnumerator().All(p => !p.gameObject.TryGetComponent<UncertifiedPlayer>(out _));
+        canStart &= PlayerControl.AllPlayerControls.GetFastEnumerator().All(p => !p.gameObject.TryGetComponent<UncertifiedPlayer>(out _));
 
         LastChecked = canStart;
         __instance.StartButton.color = canStart ? Palette.EnabledColor : Palette.DisabledClear;
@@ -98,7 +103,7 @@ public class GameStartManagerBeginGame
         if (AmongUsClient.Instance.AmHost)
         {
 
-            if (GeneralConfigurations.CurrentGameMode == CustomGameMode.FreePlay && PlayerControl.AllPlayerControls.Count == 1)
+            if (GeneralConfigurations.CurrentGameMode == GameModes.FreePlay && PlayerControl.AllPlayerControls.Count == 1)
             {
                 if (PlayerControl.AllPlayerControls.Count == 1)
                 {
@@ -130,5 +135,78 @@ public class SetUpCertificationPatch
     public static void Postfix(PlayerControl __instance)
     {
         if(LobbyBehaviour.Instance) __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
+    }
+}
+
+[HarmonyPatch(typeof(OptionsConsole), nameof(OptionsConsole.CanUse))]
+public class OptionsConsoleCanUsePatch
+{
+    public static void Prefix(OptionsConsole __instance)
+    {
+        __instance.HostOnly = false;
+    }
+}
+
+[HarmonyPatch(typeof(OptionsConsole), nameof(OptionsConsole.Use))]
+public class OptionsConsoleUsePatch
+{
+    public static bool Prefix(OptionsConsole __instance)
+    {
+        __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
+        if (!flag) return false;
+        
+        PlayerControl.LocalPlayer.NetTransform.Halt();
+
+        if (AmongUsClient.Instance.AmHost)
+        {
+            GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.MenuPrefab);
+            gameObject.transform.SetParent(Camera.main.transform, false);
+            gameObject.transform.localPosition = __instance.CustomPosition;
+            DestroyableSingleton<TransitionFade>.Instance.DoTransitionFade(null, gameObject.gameObject, null);
+        }
+        else
+        {
+            Modules.HelpScreen.TryOpenHelpScreen(HelpScreen.HelpTab.Options);
+        }
+
+        return false;
+    }
+}
+
+
+[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoJoinOnlineGameFromCode))]
+public class JoinGameLoadingPatch
+{
+    public static void Postfix(AmongUsClient __instance, ref Il2CppSystem.Collections.IEnumerator __result)
+    {
+        var overlay = GameObject.Instantiate(TransitionFade.Instance.overlay, null);
+        overlay.transform.position = TransitionFade.Instance.overlay.transform.position;
+
+        System.Collections.IEnumerator CoFadeInIf()
+        {
+            if (AmongUsClient.Instance.ClientId < 0)
+            {
+                yield return Effects.ColorFade(overlay, Color.black, Color.clear, 0.2f);
+                GameObject.Destroy(overlay.gameObject);
+            }
+        }
+
+        __result = Effects.Sequence(
+            Effects.ColorFade(overlay, Color.clear, Color.black, 0.2f),
+            ManagedEffects.Action(()=>NebulaManager.Instance.StartCoroutine(HintManager.CoShowHint(0.6f).WrapToIl2Cpp())).WrapToIl2Cpp(),
+            __result,
+            CoFadeInIf().WrapToIl2Cpp()
+        );
+        
+    }
+}
+
+[HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.Confirm))]
+public class CreateGameOptionsLoadingPatch
+{
+    public static void Postfix(CreateGameOptions __instance)
+    {
+        Debug.Log("Test");
+        NebulaManager.Instance.StartCoroutine(HintManager.CoShowHint(0.6f + 0.2f).WrapToIl2Cpp());
     }
 }

@@ -4,11 +4,12 @@ using TMPro;
 using Virial.Assignable;
 using Virial.Compat;
 using Virial.Media;
+using Virial.Runtime;
 using Virial.Text;
 
 namespace Nebula.Modules;
 
-[NebulaPreLoad(typeof(SerializableDocument),typeof(NebulaAddon))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
 public class DocumentManager
 {
     private static Dictionary<string, SerializableDocument> allDocuments = new();
@@ -18,10 +19,9 @@ public class DocumentManager
         return null;
     }
 
-    public static IEnumerator CoLoad()
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        Patches.LoadPatch.LoadingText = "Loading Serializable Documents";
-        yield return null;
+        yield return preprocessor.SetLoadingText("Loading Serializable Documents");
 
         
         string Postfix = ".json";
@@ -59,11 +59,11 @@ public class DocumentManager
     {
         foreach (var role in Roles.Roles.AllRoles) yield return "role." + role.InternalName;
         foreach (var modifier in Roles.Roles.AllModifiers) yield return "role." + modifier.InternalName;
-        foreach (var option in NebulaConfiguration.AllConfigurations) yield return option.Id + ".detail";
+        foreach (var option in ConfigurationValues.AllEntries) yield return option.Name + ".detail";
     }
 }
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class SerializableDocument
 {
     public class DocumentReference
@@ -100,7 +100,7 @@ public class SerializableDocument
         return null;
     }
 
-    public static void Load()
+    static SerializableDocument()
     {
         TextStyle["standard"] = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
         TextStyle["bold"] = GUI.API.GetAttribute(AttributeAsset.DocumentBold);

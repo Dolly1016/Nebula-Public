@@ -7,10 +7,10 @@ namespace Nebula.Utilities;
 
 internal class BitMask32<T> : EditableBitMask<T>
 {
-    private Func<T, int> converter;
-    private int bitMask = 0;
+    private Func<T, uint> converter;
+    private uint bitMask = 0;
 
-    public BitMask32(Func<T, int> converter, int bitMask)
+    public BitMask32(Func<T, uint> converter, uint bitMask)
     {
         this.converter = converter;
         this.bitMask = bitMask;
@@ -41,6 +41,9 @@ internal class BitMask32<T> : EditableBitMask<T>
     {
         return values.All(v => Test(v));
     }
+
+    uint BitMask<T>.AsRawPattern => bitMask;
+    ulong BitMask<T>.AsRawPatternLong => (ulong)bitMask;
 }
 
 
@@ -67,6 +70,9 @@ public class FunctionalMask<T> : BitMask<T>
     {
         return values.All(p => predicate(p));
     }
+
+    uint BitMask<T>.AsRawPattern => throw new NotImplementedException();
+    ulong BitMask<T>.AsRawPatternLong => throw new NotImplementedException();
 }
 
 public class HashSetMask<T> : EditableBitMask<T>
@@ -102,16 +108,17 @@ public class HashSetMask<T> : EditableBitMask<T>
         set.Clear();
         return this;
     }
+
+    uint BitMask<T>.AsRawPattern => throw new NotImplementedException();
+    ulong BitMask<T>.AsRawPatternLong => throw new NotImplementedException();
 }
 
 public static class BitMasks
 {
-    private static Func<GamePlayer, int> gamePlayerConverter = p => 1 << p.PlayerId;
-    public static EditableBitMask<GamePlayer> AsPlayer(int bitMask = 0) => new BitMask32<GamePlayer>(gamePlayerConverter, bitMask);
-    public static EditableBitMask<PlayerControl> AsPlayerControl(int bitMask = 0) => new BitMask32<PlayerControl>(p => 1 << p.PlayerId, bitMask);
+    private static Func<GamePlayer, uint> gamePlayerConverter = p => 1u << p.PlayerId;
+    public static EditableBitMask<GamePlayer> AsPlayer(uint bitMask = 0) => new BitMask32<GamePlayer>(gamePlayerConverter, bitMask);
+    public static EditableBitMask<PlayerControl> AsPlayerControl(uint bitMask = 0) => new BitMask32<PlayerControl>(p => 1u << p.PlayerId, bitMask);
 
-    public static BitMask<ConfigurationTab> Bits(params ConfigurationTab[] tabs)
-    {
-        return new BitMask32<ConfigurationTab>(t => t.AsBit, tabs.Aggregate(0, (val, t) => val | t.AsBit));
-    }
+    public static BitMask<B> Bits<B>(params B[] tabs) where B : IBit32 => new BitMask32<B>(t => t.AsBit, tabs.Aggregate(0u, (val, t) => val | t.AsBit));
+    
 }

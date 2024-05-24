@@ -13,30 +13,27 @@ namespace Nebula.Roles.Neutral;
 
 public class Avenger : DefinedRoleTemplate, DefinedRole
 {
-    static public Team MyTeam = new("teams.avenger", new(141,111,131), TeamRevealType.OnlyMe);
-    static public Avenger MyRole = new Avenger();
-    private Avenger() : base("avenger", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [], false) {
-        
+    static public RoleTeam MyTeam = new Team("teams.avenger", new(141,111,131), TeamRevealType.OnlyMe);
+    private Avenger() : base("avenger", MyTeam.Color, RoleCategory.NeutralRole, MyTeam,
+        [KillCoolDownOption, VentOption, CanKnowExistanceOfAvengerOption, TargetCanKnowAvengerOption, AvengerFlashForMurdererOption, NotificationForMurdererIntervalOption, NotificationForAvengerIntervalOption],
+        false, optionHolderPredicate: () => (Modifier.Lover.NumOfPairsOption > 0 && Modifier.Lover.AvengerModeOption))
+    {
+        ConfigurationHolder?.ScheduleAddRelated(() => [Modifier.Lover.MyRole.ConfigurationHolder!]);
     }
 
     AllocationParameters? DefinedSingleAssignable.AllocationParameters => null;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, -1));
 
-    static public ValueConfiguration<int> CanKnowExistanceOfAvengerOption = NebulaAPI.Configurations.Configuration("role.avenger.canKnowExistanceOfAvenger", ["options.role.avenger.canKnowExistanceOfAvenger.off", "options.role.avenger.canKnowExistanceOfAvenger.onlyTarget", "options.role.avenger.canKnowExistanceOfAvenger.on"], 0);
-    static private BoolConfiguration TargetCanKnowAvengerOption = NebulaAPI.Configurations.Configuration("role.avenger.targetCanKnowAvenger", true);
-    static private BoolConfiguration AvengerFlashForMurdererOption = NebulaAPI.Configurations.Configuration("role.avenger.showAvengerFlashForTarget", true);
-    static private FloatConfiguration NotificationForAvengerIntervalOption = NebulaAPI.Configurations.Configuration("role.avenger.notificationForAvengerInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration NotificationForMurdererIntervalOption = NebulaAPI.Configurations.Configuration("role.avenger.notificationForTargetInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.avenger.killCoolDown", CoolDownType.Relative, (2.5f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
-    static private IVentConfiguration VentOption = NebulaAPI.Configurations.NeutralVentConfiguration("role.avenger.vent", false);
+    static public ValueConfiguration<int> CanKnowExistanceOfAvengerOption = NebulaAPI.Configurations.Configuration("options.role.avenger.canKnowExistanceOfAvenger", ["options.role.avenger.canKnowExistanceOfAvenger.off", "options.role.avenger.canKnowExistanceOfAvenger.onlyTarget", "options.role.avenger.canKnowExistanceOfAvenger.on"], 0);
+    static private BoolConfiguration TargetCanKnowAvengerOption = NebulaAPI.Configurations.Configuration("options.role.avenger.targetCanKnowAvenger", true);
+    static private BoolConfiguration AvengerFlashForMurdererOption = NebulaAPI.Configurations.Configuration("options.role.avenger.showAvengerFlashForTarget", true);
+    static private FloatConfiguration NotificationForAvengerIntervalOption = NebulaAPI.Configurations.Configuration("options.role.avenger.notificationForAvengerInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration NotificationForMurdererIntervalOption = NebulaAPI.Configurations.Configuration("options.role.avenger.notificationForTargetInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.avenger.killCoolDown", CoolDownType.Relative, (2.5f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
+    static private IVentConfiguration VentOption = NebulaAPI.Configurations.NeutralVentConfiguration("options.role.avenger.vent", false);
 
-    public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return Lover.MyRole; }
-
-    protected override void LoadOptions()
-    {
-        RoleConfig.SetPredicate(() => (Modifier.Lover.MyRole.RoleConfig.IsActivated?.Invoke() ?? false) && Modifier.Lover.MyRole.AvengerModeOption);
-    }
+    static public Avenger MyRole = new Avenger();
 
     bool IGuessed.CanBeGuessDefault => false;
 
@@ -98,7 +95,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         }
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.AvengerWin && CheckKillCondition);
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.AvengerWin && CheckKillCondition);
         
 
         [OnlyMyPlayer]

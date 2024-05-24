@@ -1,5 +1,7 @@
 ﻿using NAudio.CoreAudioApi;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
@@ -38,7 +40,7 @@ file static class TrapperSystem
         };
         placeButton.OnEffectStart = (button) =>
         {
-            float duration = Trapper.PlaceDurationOption.GetFloat();
+            float duration = Trapper.PlaceDurationOption;
             NebulaAsset.PlaySE(duration < 3f ? NebulaAudioClip.Trapper2s : NebulaAudioClip.Trapper3s);
 
             pos = myRole.MyPlayer.TruePosition + new Vector2(0f, 0.085f);
@@ -51,9 +53,9 @@ file static class TrapperSystem
             leftCost -= buttonVariation[buttonIndex].cost;
             usesText.text = leftCost.ToString();
 
-            if (Trapper.KillTrapSoundDistanceOption.GetFloat() > 0f)
+            if (Trapper.KillTrapSoundDistanceOption > 0f)
             {
-                if (buttonVariation[buttonIndex].id == KillTrapId) NebulaAsset.RpcPlaySE.Invoke((NebulaAudioClip.TrapperKillTrap, PlayerControl.LocalPlayer.transform.position, Trapper.KillTrapSoundDistanceOption.GetFloat() * 0.6f, Trapper.KillTrapSoundDistanceOption.GetFloat()));
+                if (buttonVariation[buttonIndex].id == KillTrapId) NebulaAsset.RpcPlaySE.Invoke((NebulaAudioClip.TrapperKillTrap, PlayerControl.LocalPlayer.transform.position, Trapper.KillTrapSoundDistanceOption * 0.6f, Trapper.KillTrapSoundDistanceOption));
             }
 
             if (myRole.Role.Category == RoleCategory.ImpostorRole && buttonVariation[buttonIndex].id == DecelTrapId)
@@ -68,8 +70,8 @@ file static class TrapperSystem
             buttonIndex = (buttonIndex + 1) % buttonVariation.Length;
             placeButton.SetSprite(buttonSprites[buttonVariation[buttonIndex].id]?.GetSprite());
         };
-        placeButton.CoolDownTimer = myRole.Bind(new Timer(0f, Trapper.PlaceCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-        placeButton.EffectTimer = myRole.Bind(new Timer(0f, Trapper.PlaceDurationOption.GetFloat()));
+        placeButton.CoolDownTimer = myRole.Bind(new Timer(0f, Trapper.PlaceCoolDownOption).SetAsAbilityCoolDown().Start());
+        placeButton.EffectTimer = myRole.Bind(new Timer(0f, Trapper.PlaceDurationOption));
         placeButton.SetLabel("place");
     }
 
@@ -87,39 +89,46 @@ file static class TrapperSystem
 }
 
 [NebulaRPCHolder]
-public class Trapper : ConfigurableStandardRole, DefinedRole
+public class Trapper : DefinedRoleTemplate, DefinedRole
 {
-    static public Trapper MyNiceRole = new(false);
-    static public Trapper MyEvilRole = new(true);
+    private Trapper(bool isEvil) : base(
+        isEvil ? "evilTrapper" : "niceTrapper",
+        isEvil ? new(Palette.ImpostorRed) : new(206,219,96),
+        isEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole,
+        isEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam,
+        [NumOfChargesOption, isEvil ? CostOfKillTrapOption : CostOfCommTrapOption, PlaceCoolDownOption, PlaceDurationOption, SpeedTrapSizeOption, isEvil ? KillTrapSizeOption : CommTrapSizeOption, AccelRateOption, DecelRateOption])
+    {
+        IsEvil = isEvil;
+
+        ConfigurationHolder?.ScheduleAddRelated(() => [isEvil ? MyNiceRole.ConfigurationHolder! : MyEvilRole.ConfigurationHolder!]);
+    }
+
 
     public bool IsEvil { get; private set; }
-    RoleCategory DefinedSingleAssignable.Category => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => IsEvil ? "evilTrapper" : "niceTrapper";
-    Virial.Color DefinedAssignable.Color => new(IsEvil ? Palette.ImpostorRed : new Color(206f / 255f, 219f / 255f, 96f / 255f));
-    RoleTeam DefinedSingleAssignable.Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.Team;
-    public override IEnumerable<IAssignableBase> RelatedOnConfig() { if (MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player) : new NiceInstance(player);
 
-    static public NebulaConfiguration NumOfChargesOption = null!;
-    static public NebulaConfiguration PlaceCoolDownOption = null!;
-    static public NebulaConfiguration PlaceDurationOption = null!;
-    static public NebulaConfiguration SpeedTrapDurationOption = null!;
+    static internal IntegerConfiguration NumOfChargesOption = NebulaAPI.Configurations.Configuration("options.role.trapper.numOfCharges", (1, 15), 3);
+    static internal FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.trapper.placeCoolDown", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
+    static internal FloatConfiguration PlaceDurationOption = NebulaAPI.Configurations.Configuration("options.role.trapper.placeDuration", (1f, 3f, 0.5f), 2f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration SpeedTrapDurationOption = NebulaAPI.Configurations.Configuration("options.role.trapper.speedDuration", (2.5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
 
-    static public NebulaConfiguration SpeedTrapSizeOption = null!;
-    static public NebulaConfiguration CommTrapSizeOption = null!;
-    static public NebulaConfiguration KillTrapSizeOption = null!;
+    static private FloatConfiguration SpeedTrapSizeOption = NebulaAPI.Configurations.Configuration("options.role.trapper.speedTrapSize", (0.25f, 5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration CommTrapSizeOption = NebulaAPI.Configurations.Configuration("options.role.niceTrapper.commTrapSize", (0.25f, 5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration KillTrapSizeOption = NebulaAPI.Configurations.Configuration("options.role.evilTrapper.killTrapSize", (0.25f, 5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
 
-    static public NebulaConfiguration AccelRateOption = null!;
-    static public NebulaConfiguration DecelRateOption = null!;
+    static private FloatConfiguration AccelRateOption = NebulaAPI.Configurations.Configuration("options.role.trapper.accelRate", (1f, 5f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration DecelRateOption = NebulaAPI.Configurations.Configuration("options.role.trapper.decelRate", (0.125f, 1f, 0.125f), 0.5f, FloatConfigurationDecorator.Ratio);
 
-    static public NebulaConfiguration KillTrapSoundDistanceOption = null!;
-    static public NebulaConfiguration CostOfKillTrapOption = null!;
-    static public NebulaConfiguration CostOfCommTrapOption = null!;
+    static internal FloatConfiguration KillTrapSoundDistanceOption = NebulaAPI.Configurations.Configuration("options.role.evilTrapper.killTrapSoundDistance", (0f, 20f, 2.5f), 10f, FloatConfigurationDecorator.Ratio);
+    static private IntegerConfiguration CostOfKillTrapOption = NebulaAPI.Configurations.Configuration("options.role.evilTrapper.costOfKillTrap", (1, 5), 2);
+    static private IntegerConfiguration CostOfCommTrapOption = NebulaAPI.Configurations.Configuration("options.role.niceTrapper.costOfCommTrap", (1, 5), 2);
+
+    static public Trapper MyNiceRole = new(false);
+    static public Trapper MyEvilRole = new(true);
 
 
-    [NebulaPreLoad]
+    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
     public class Trap : NebulaSyncStandardObject, IGameOperator
     {
         public static string MyGlobalTag = "TrapGlobal";
@@ -147,7 +156,7 @@ public class Trapper : ConfigurableStandardRole, DefinedRole
             if (!(Color.a > 0f)) Color = Color.white;
         }
 
-        public static void Load()
+        static Trap()
         {
             NebulaSyncObject.RegisterInstantiater(MyGlobalTag, (args) => new Trap(new(args[1], args[2]), (int)args[0], false));
             NebulaSyncObject.RegisterInstantiater(MyLocalTag, (args) => new Trap(new(args[1], args[2]), (int)args[0], true));
@@ -170,57 +179,13 @@ public class Trapper : ConfigurableStandardRole, DefinedRole
             {
                 //加減速トラップはそれぞれで処理する
 
-                if (Position.Distance(PlayerControl.LocalPlayer.transform.position) < Trapper.SpeedTrapSizeOption.GetFloat()*0.35f)
+                if (Position.Distance(PlayerControl.LocalPlayer.transform.position) < SpeedTrapSizeOption*0.35f)
                 {
                     PlayerModInfo.RpcAttrModulator.Invoke((PlayerControl.LocalPlayer.PlayerId,
-                        new SpeedModulator(TypeId == 0 ? Trapper.AccelRateOption.GetFloat() : Trapper.DecelRateOption.GetFloat(), Vector2.one, true, Trapper.SpeedTrapDurationOption.GetFloat(), false, 50, "nebula.trap" + TypeId), false));
+                        new SpeedModulator(TypeId == 0 ? AccelRateOption : DecelRateOption, Vector2.one, true, Trapper.SpeedTrapDurationOption, false, 50, "nebula.trap" + TypeId), false));
                 }
             }
         }
-    }
-
-    public Trapper(bool isEvil)
-    {
-        IsEvil = isEvil;
-    }
-
-    private static NebulaConfiguration GenerateCommonEditor(ConfigurationHolder holder)
-    {
-        var commonOptions = new NebulaConfiguration[] { PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption };
-        foreach (var option in commonOptions) option.Title = new CombinedComponent(new TranslateTextComponent("role.general.common"), new RawTextComponent(" "), new TranslateTextComponent(option.Id));
-
-        return new NebulaConfiguration(holder, () => {
-            MetaWidgetOld widget = new();
-            foreach (var option in commonOptions) widget.Append(option.GetEditor()!);
-            return widget;
-        }, () => Language.Translate("options.commonSetting") + "\n" + string.Join("\n", commonOptions.Select(option => option.GetShownString())));
-    }
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-
-        PlaceCoolDownOption ??= new NebulaConfiguration(null, "role.trapper.placeCoolDown", null, 5f, 60f, 5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-        PlaceDurationOption ??= new NebulaConfiguration(null, "role.trapper.placeDuration", null, 1f, 3f, 0.5f, 2f, 2f) { Decorator = NebulaConfiguration.SecDecorator };
-        NumOfChargesOption ??= new NebulaConfiguration(null, "role.trapper.numOfCharges", null, 1, 15, 3, 3);
-        SpeedTrapSizeOption ??= new NebulaConfiguration(null, "role.trapper.speedTrapSize", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
-        AccelRateOption ??= new NebulaConfiguration(null, "role.trapper.accelRate", null, 1f, 5f, 0.25f, 1.5f, 1.5f) { Decorator = NebulaConfiguration.OddsDecorator };
-        DecelRateOption ??= new NebulaConfiguration(null, "role.trapper.decelRate", null, 0.125f, 1f, 0.125f, 0.5f, 0.5f) { Decorator = NebulaConfiguration.OddsDecorator };
-        SpeedTrapDurationOption ??= new NebulaConfiguration(null, "role.trapper.speedDuration", null, 2.5f, 40f, 2.5f, 10f, 10f) { Decorator = NebulaConfiguration.SecDecorator };
-
-        if (IsEvil)
-        {
-            KillTrapSoundDistanceOption = new NebulaConfiguration(RoleConfig, "killTrapSoundDistance", null, 0f, 20f, 1.25f, 10f, 10f) { Decorator = NebulaConfiguration.OddsDecorator };
-            CostOfKillTrapOption = new NebulaConfiguration(RoleConfig, "costOfKillTrap", null, 1, 5, 2, 2);
-            KillTrapSizeOption ??= new NebulaConfiguration(RoleConfig, "killTrapSize", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
-        }
-        else
-        {
-            CostOfCommTrapOption = new NebulaConfiguration(RoleConfig, "costOfCommTrap", null, 1, 5, 2, 2);
-            CommTrapSizeOption ??= new NebulaConfiguration(RoleConfig, "commTrapSize", null, 0.25f, 5f, 0.25f, 1f, 1f) { Decorator = NebulaConfiguration.OddsDecorator };
-        }
-
-        GenerateCommonEditor(RoleConfig, PlaceCoolDownOption, PlaceDurationOption, NumOfChargesOption, SpeedTrapSizeOption, AccelRateOption, DecelRateOption, SpeedTrapDurationOption);
     }
 
     public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
@@ -265,7 +230,7 @@ public class Trapper : ConfigurableStandardRole, DefinedRole
                 {
                     if (p.AmOwner) continue;
                     if (p.IsDead || p.Unbox().IsInvisible) continue;
-                    if (p.VanillaPlayer.transform.position.Distance(commTrap.Position) < CommTrapSizeOption.GetFloat() * 0.35f)
+                    if (p.VanillaPlayer.transform.position.Distance(commTrap.Position) < CommTrapSizeOption * 0.35f)
                     {
                         //直前にトラップを踏んでいるプレイヤーは無視する
                         commMask |= 1u << p.PlayerId;
@@ -287,9 +252,10 @@ public class Trapper : ConfigurableStandardRole, DefinedRole
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, RuntimeRole
+    public class EvilInstance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyEvilRole;
+        DefinedRole RuntimeRole.Role => MyEvilRole;
+
         private int leftCharge = NumOfChargesOption;
         private List<Trap> localTraps = new(), killTraps = new();
         public EvilInstance(GamePlayer player) : base(player)
@@ -322,7 +288,7 @@ public class Trapper : ConfigurableStandardRole, DefinedRole
                     if (p.AmOwner) continue;
                     if (p.IsDead || p.VanillaPlayer.Data.Role.IsImpostor) continue;
 
-                    if (p.VanillaPlayer.transform.position.Distance(killTrap.Position) < KillTrapSizeOption.GetFloat() * 0.35f)
+                    if (p.VanillaPlayer.transform.position.Distance(killTrap.Position) < KillTrapSizeOption * 0.35f)
                     {
                             using (RPCRouter.CreateSection("TrapKill"))
                             {

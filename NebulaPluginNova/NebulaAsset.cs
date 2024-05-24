@@ -1,5 +1,6 @@
 ﻿using Cpp2IL.Core.Extensions;
 using System.Reflection;
+using Virial.Runtime;
 
 namespace Nebula;
 
@@ -17,15 +18,14 @@ public enum NebulaAudioClip {
     Destroyer3,
 }
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 [NebulaRPCHolder]
 public static class NebulaAsset
 {
     static AssetBundle AssetBundle = null!;
-    public static IEnumerator CoLoad()
+    public static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        Patches.LoadPatch.LoadingText = "Loading Map Expansions";
-        yield return null;
+        yield return preprocessor.SetLoadingText("Loading Map Expansions");
 
         var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Nebula.Resources.Assets.nebula_asset");
         AssetBundle = AssetBundle.LoadFromMemory(resourceStream!.ReadBytes());

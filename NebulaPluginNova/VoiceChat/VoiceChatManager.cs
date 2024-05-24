@@ -130,7 +130,7 @@ public class VoiceChatManager : IDisposable
 
         if (PlayerControl.LocalPlayer.Data.IsDead) return false;
 
-        var killerHearDead = GeneralConfigurations.KillersHearDeadOption.CurrentValue;
+        var killerHearDead = GeneralConfigurations.KillersHearDeadOption.GetValue();
         if (killerHearDead == 0) return false;
 
         var localInfo = PlayerControl.LocalPlayer.GetModInfo();

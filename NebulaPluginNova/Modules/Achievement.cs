@@ -7,7 +7,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using UnityEngine.Rendering;
 using Virial;
+using Virial.Assignable;
 using Virial.Media;
+using Virial.Runtime;
 using Virial.Text;
 using static Nebula.Modules.AbstractAchievement;
 
@@ -161,7 +163,7 @@ public class AbstractAchievement : ProgressRecord {
     bool isSecret;
     bool noHint;
     
-    public (Roles.IAssignableBase? role, AchievementType? type) Category { get; private init; }
+    public (DefinedAssignable? role, AchievementType? type) Category { get; private init; }
     public int Trophy { get; private init; }
 
     static public TextComponent HiddenComponent = new RawTextComponent("???");
@@ -178,7 +180,7 @@ public class AbstractAchievement : ProgressRecord {
 
     virtual public Virial.Media.GUIWidget GetOverlayWidget(bool hiddenNotClearedAchievement = true, bool showCleared = false, bool showTitleInfo = false, bool showTorophy = false, bool showFlavor = false)
     {
-        var gui = NebulaImpl.Instance.GUILibrary;
+        var gui = NebulaAPI.GUI;
 
         List<Virial.Media.GUIWidget> list = new();
 
@@ -228,7 +230,7 @@ public class AbstractAchievement : ProgressRecord {
         List<TextComponent> list = new();
         if(Category.role != null)
         {
-            list.Add(NebulaGUIWidgetEngine.Instance.TextComponent(Category.role.RoleColor, "role." + Category.role.LocalizedName + ".name"));
+            list.Add(NebulaGUIWidgetEngine.Instance.TextComponent(Category.role.UnityColor, "role." + Category.role.LocalizedName + ".name"));
         }
 
         if(Category.type != null)
@@ -287,7 +289,7 @@ public class AbstractAchievement : ProgressRecord {
 
     virtual public Virial.Media.GUIWidget? GetDetailWidget() => null;
 
-    public AbstractAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, (Roles.IAssignableBase? role, AchievementType? type) category, int trophy) : base(key, goal, canClearOnce) 
+    public AbstractAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, (DefinedAssignable? role, AchievementType? type) category, int trophy) : base(key, goal, canClearOnce) 
     {
         this.isSecret = isSecret;
         this.noHint = noHint;
@@ -305,7 +307,7 @@ public class AbstractAchievement : ProgressRecord {
 
 public class StandardAchievement : AbstractAchievement
 {
-    public StandardAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, (Roles.IAssignableBase? role, AchievementType? type) category, int trophy)
+    public StandardAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, (DefinedAssignable? role, AchievementType? type) category, int trophy)
         : base(canClearOnce, isSecret, noHint, key, goal, category, trophy)
     {
     }
@@ -313,7 +315,7 @@ public class StandardAchievement : AbstractAchievement
 
 public class SumUpAchievement : AbstractAchievement
 {
-    public SumUpAchievement(bool isSecret, bool noHint, string key, int goal, (Roles.IAssignableBase? role, AchievementType? type) category, int trophy)
+    public SumUpAchievement(bool isSecret, bool noHint, string key, int goal, (DefinedAssignable? role, AchievementType? type) category, int trophy)
         : base(true, isSecret, noHint, key, goal, category, trophy)
     {
     }
@@ -358,7 +360,7 @@ public class SumUpAchievement : AbstractAchievement
 public class CompleteAchievement : SumUpAchievement
 {
     ProgressRecord[] records;
-    public CompleteAchievement(ProgressRecord[] allRecords, bool isSecret, bool noHint, string key, (Roles.IAssignableBase? role, AchievementType? type) category, int trophy)
+    public CompleteAchievement(ProgressRecord[] allRecords, bool isSecret, bool noHint, string key, (DefinedAssignable? role, AchievementType? type) category, int trophy)
         : base(isSecret, noHint, key, allRecords.Length, category, trophy) {
         this.records = allRecords;
     }
@@ -387,7 +389,7 @@ public class CompleteAchievement : SumUpAchievement
     }
 }
 
-[NebulaPreLoad(typeof(Roles.Roles), typeof(NebulaResourceManager))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
 static public class NebulaAchievementManager
 {
     static public DataSaver AchievementDataSaver = new("Progress");
@@ -439,9 +441,8 @@ static public class NebulaAchievementManager
             });
     }
 
-    static public IEnumerator CoLoad() {
-        Patches.LoadPatch.LoadingText = "Loading Achievements";
-        yield return null;
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor) {
+        yield return preprocessor.SetLoadingText("Loading Achievements");
 
         //組み込みレコード
         ProgressRecord[] killRecord = new TranslatableTag[] { 
@@ -534,7 +535,7 @@ static public class NebulaAchievementManager
                 }
             }
 
-            IAssignableBase? relatedRole = null;
+            DefinedAssignable? relatedRole = null;
             AchievementType? type = null;
 
             var nameSplitted = args[0].Split('.');

@@ -1,10 +1,18 @@
 ﻿using Innersloth.IO;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
 namespace Nebula.Modules;
 
-public abstract class DataEntry<T> where T : notnull
+public interface IDataEntry
+{
+    string Serialize();
+    void DeserializeAndSetWithoutSave(string val);
+    string Id { get; }
+}
+
+public abstract class DataEntry<T> : IDataEntry where T : notnull
 {
     private T value;
     string name;
@@ -33,10 +41,15 @@ public abstract class DataEntry<T> where T : notnull
         this.name = name;
         this.saver = saver;
         value = Parse(saver.GetValue(name, Serialize(defaultValue)));
+        saver.allEntries.Add(this);
     }
 
     public abstract T Parse(string str);
     protected virtual string Serialize(T value) => value.ToString()!;
+
+    string IDataEntry.Serialize() => Serialize(value);
+    void IDataEntry.DeserializeAndSetWithoutSave(string val) => SetValueWithoutSave(Parse(val));
+    string IDataEntry.Id => name;
 }
 
 public class StringDataEntry : DataEntry<string>
@@ -159,6 +172,7 @@ public class StringArrayDataEntry : DataEntry<string[]>
 public class DataSaver
 {
     private Dictionary<string, string> contents = new();
+    internal List<IDataEntry> allEntries = new();
     string filename;
 
     public string GetValue(string name, object defaultValue)
@@ -170,6 +184,8 @@ public class DataSaver
         var res = contents[name] = defaultValue.ToString()!;
         return res;
     }
+
+    public bool TryGetValue(string name, [MaybeNullWhen(false)]out string val) => contents.TryGetValue(name, out val);
 
     public void SetValue(string name, object value, bool skipSave = false)
     {
@@ -208,5 +224,13 @@ public class DataSaver
             strContents += entry.Key + ":" + entry.Value + "\n";
         }
         FileIO.WriteAllText(ToDataSaverPath(filename), strContents);
+    }
+
+    public IEnumerable<(string,string)> AllEntries()
+    {
+        foreach(var entry in contents)
+        {
+            yield return (entry.Key, entry.Value);
+        }
     }
 }

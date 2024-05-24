@@ -10,7 +10,6 @@ namespace Nebula.Roles.Impostor;
 
 public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Effacer MyRole = null;// new Effacer();
     private Effacer() : base("effacer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EffaceCoolDownOption, EffaceDurationOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
     }
@@ -19,9 +18,10 @@ public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration EffaceCoolDownOption = NebulaAPI.Configurations.Configuration("role.effacer.effaceCoolDown", (10f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration EffaceDurationOption = NebulaAPI.Configurations.Configuration("role.effacer.effaceDuration", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration EffaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.effacer.effaceCoolDown", (10f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration EffaceDurationOption = NebulaAPI.Configurations.Configuration("options.role.effacer.effaceDuration", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
 
+    static public Effacer MyRole = null;// new Effacer();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

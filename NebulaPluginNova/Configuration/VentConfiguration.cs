@@ -1,4 +1,6 @@
 ﻿using Nebula.Modules.GUIWidget;
+using System.Text;
+using UnityEngine;
 using Virial;
 using Virial.Configuration;
 using Virial.Media;
@@ -30,11 +32,28 @@ internal class VentConfiguration : IVentConfiguration
 
     bool IVentConfiguration.CanUseVent => canUseEntry?.GetValue() ?? true;
 
-    bool IConfiguration.IsShown => throw new NotImplementedException();
+    bool IConfiguration.IsShown => true;
 
     string? IConfiguration.GetDisplayText()
     {
-        throw new NotImplementedException();
+        List<string> sb = new();
+        bool hasParameter = usesEntry != null || coolDownEntry != null || durationEntry != null;
+
+        if (canUseEntry != null && (!canUseEntry.GetValue() || !hasParameter)) 
+            sb.Add(Language.Translate("role.general.canUseVent") + ": " + Language.Translate(canUseEntry.GetValue() ? "options.switch.on" : "options.switch.off"));
+
+        if (hasParameter && (canUseEntry == null || canUseEntry.GetValue()))
+        {
+            string str = Language.Translate("role.general.ventOption") + ": (";
+            string?[] vals = [
+                usesEntry != null ? (Language.Translate("role.general.ventUses") + ": " + usesEntry.Value) : null,
+                coolDownEntry != null ? (Language.Translate("role.general.ventCoolDown") + ": " + coolDownEntry.Value + Language.Translate("options.sec")) : null,
+                durationEntry != null ? (Language.Translate("role.general.ventDuration") + ": " + durationEntry.Value + Language.Translate("options.sec")) : null,
+            ];
+            str += vals.Where(s => s != null).Join(null, ", ") + ")";
+            sb.Add(str);
+        }
+        return sb.Join(null, "\n");
     }
 
     GUIWidgetSupplier IConfiguration.GetEditor()
@@ -52,10 +71,11 @@ internal class VentConfiguration : IVentConfiguration
             {
                 widgets.AddRange([
                     GUI.API.HorizontalMargin(0.1f),
-                GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsValue), translationKey),
-                GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), "<<", _ => { config.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }),
-                GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsValueShorter), shower.Invoke()),
-                GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ">>", _ => { config.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
+                    GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsValue), translationKey),
+                    GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), ":"),
+                    GUI.API.HorizontalMargin(0.1f),
+                    GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsValueShorter), shower.Invoke()),
+                    GUI.API.SpinButton(GUIAlignment.Center, v => { config.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }),
                     ]);
             }
 
@@ -64,9 +84,9 @@ internal class VentConfiguration : IVentConfiguration
             if (coolDownEntry != null) AddOptionToEditor(coolDownEntry, () => coolDownEntry.Value + Language.Translate("options.sec"), "role.general.ventCoolDown");
             if (durationEntry != null) AddOptionToEditor(durationEntry, () => durationEntry.Value + Language.Translate("options.sec"), "role.general.ventDuration");
 
-            result.Add(new HorizontalWidgetsHolder(GUIAlignment.Center, widgets));
+            result.Add(new HorizontalWidgetsHolder(GUIAlignment.Left, widgets));
         }
 
-        return new VerticalWidgetsHolder(GUIAlignment.Center, result);
+        return new VerticalWidgetsHolder(GUIAlignment.Left, result);
     };
 }

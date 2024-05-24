@@ -1,7 +1,9 @@
-﻿using Virial.Game;
+﻿using Virial.Attributes;
+using Virial.Game;
 using Virial.Helpers;
 using Virial.Media;
 using Virial.Text;
+using static Virial.Attributes.NebulaPreprocess;
 
 namespace Virial.Configuration;
 
@@ -41,10 +43,28 @@ public interface IConfiguration
     bool IsShown { get; }
 }
 
+internal record ConfigurationUpperButton(TextComponent text, Func<bool> predicate, Action onClicked);
+
+public enum ConfigurationHolderState
+{
+    /// <summary>
+    /// ホルダは暗く表示されます。
+    /// </summary>
+    Inactivated,
+    /// <summary>
+    /// ホルダは通常通り表示されます。
+    /// </summary>
+    Activated,
+    /// <summary>
+    /// ホルダは強調表示されます。
+    /// </summary>
+    Emphasized
+}
+
 public interface IConfigurationHolder
 {
-    TextComponent Title { get; }
-    TextComponent Detail { get; }
+    TextComponent Title { get; set; }
+    TextComponent Detail { get; set; }
     IEnumerable<IConfiguration> Configurations { get; }
     BitMask<ConfigurationTab> Tabs { get; }
     BitMask<GameModeDefinition> GameModes { get; }
@@ -54,21 +74,52 @@ public interface IConfigurationHolder
     /// ホルダ内にオプションを追加します。
     /// </summary>
     /// <param name="configuration"></param>
-    void AppendConfiguration(IConfiguration configuration);
+    IConfigurationHolder AppendConfiguration(IConfiguration configuration);
 
     /// <summary>
     /// ホルダ内にオプションを追加します。
     /// </summary>
     /// <param name="configuration"></param>
-    void AppendConfigurations(IEnumerable<IConfiguration> configuration);
+    IConfigurationHolder AppendConfigurations(IEnumerable<IConfiguration> configuration);
 
-    void AddTags(params ConfigurationTag[] tags);
+    IConfigurationHolder AddTags(params ConfigurationTag[] tags);
 
     /// <summary>
-    /// 関連するオプションを取得します。
+    /// 関連するアクションを追加します。
     /// </summary>
+    /// <param name="label"></param>
+    /// <param name="onClicked"></param>
     /// <returns></returns>
-    IEnumerable<IConfigurationHolder> RelatedHolders { get; }
+    IConfigurationHolder AppendRelatedAction(TextComponent label, Func<bool> predicate, Action onClicked);
+
+    /// <summary>
+    /// 関連するホルダを設定します。
+    /// </summary>
+    /// <param name="holders"></param>
+    IConfigurationHolder AppendRelatedHolders(params IConfigurationHolder[] holders);
+
+    /// <summary>
+    /// 関連するホルダの登録を予約します。
+    /// </summary>
+    /// <param name="holder"></param>
+    IConfigurationHolder ScheduleAddRelated(Func<IConfigurationHolder[]> holder)
+    {
+        NebulaAPI.Preprocessor?.SchedulePreprocess(PreprocessPhase.PostFixStructure, () => AppendRelatedHolders(holder.Invoke()));
+        return this;
+    }
+
+    /// <summary>
+    /// 現在、編集可能な設定かどうかを調べます。
+    /// </summary>
+    bool IsShown { get; }
+    /// <summary>
+    /// 設定の表示の仕方を返します。
+    /// </summary>
+    ConfigurationHolderState DisplayOption { get; }
+
+    internal IEnumerable<ConfigurationUpperButton> RelatedInformations { get; }
+
+    void SetDisplayState(Func<ConfigurationHolderState> state);
 }
 
 /// <summary>
@@ -87,6 +138,11 @@ public interface ValueConfiguration<T> : IConfiguration
     /// </summary>
     /// <param name="value"></param>
     void UpdateValue(T value);
+
+    /// <summary>
+    /// 値を更新します。
+    /// </summary>
+    void ChangeValue(bool increase, bool loopAtTerminal = true);
 }
 
 /// <summary>
@@ -98,6 +154,7 @@ public abstract class BoolConfiguration : ValueConfiguration<bool>
     internal abstract GUIWidgetSupplier GetEditor();
     internal abstract bool GetValue();
     internal abstract void UpdateValue(bool value);
+    internal abstract void ChangeValue(bool increase, bool loopAtTerminal = true);
     internal virtual bool IsShown => true;
 
     string? IConfiguration.GetDisplayText() => GetDisplayText();
@@ -107,6 +164,7 @@ public abstract class BoolConfiguration : ValueConfiguration<bool>
     bool ValueConfiguration<bool>.GetValue() => GetValue();
 
     void ValueConfiguration<bool>.UpdateValue(bool value) => UpdateValue(value);
+    void ValueConfiguration<bool>.ChangeValue(bool increase, bool loopAtTerminal) => ChangeValue(increase, loopAtTerminal);
     bool IConfiguration.IsShown => IsShown;
 
     /// <summary>
@@ -126,6 +184,7 @@ public abstract class IntegerConfiguration : ValueConfiguration<int>
     internal abstract GUIWidgetSupplier GetEditor();
     internal abstract int GetValue();
     internal abstract void UpdateValue(int value);
+    internal abstract void ChangeValue(bool increase, bool loopAtTerminal = true);
     internal virtual bool IsShown => true;
 
     string? IConfiguration.GetDisplayText() => GetDisplayText();
@@ -135,6 +194,7 @@ public abstract class IntegerConfiguration : ValueConfiguration<int>
     int ValueConfiguration<int>.GetValue() => GetValue();
 
     void ValueConfiguration<int>.UpdateValue(int value) => UpdateValue(value);
+    void ValueConfiguration<int>.ChangeValue(bool increase, bool loopAtTerminal) => ChangeValue(increase, loopAtTerminal);
     bool IConfiguration.IsShown => IsShown;
 
     /// <summary>
@@ -154,6 +214,7 @@ public abstract class FloatConfiguration : ValueConfiguration<float>
     internal abstract GUIWidgetSupplier GetEditor();
     internal abstract float GetValue();
     internal abstract void UpdateValue(float value);
+    internal abstract void ChangeValue(bool increase, bool loopAtTerminal = true);
     internal virtual bool IsShown => true;
 
     string? IConfiguration.GetDisplayText() => GetDisplayText();
@@ -163,6 +224,7 @@ public abstract class FloatConfiguration : ValueConfiguration<float>
     float ValueConfiguration<float>.GetValue() => GetValue();
 
     void ValueConfiguration<float>.UpdateValue(float value) => UpdateValue(value);
+    void ValueConfiguration<float>.ChangeValue(bool increase, bool loopAtTerminal) => ChangeValue(increase, loopAtTerminal);
     bool IConfiguration.IsShown => IsShown;
 
     /// <summary>

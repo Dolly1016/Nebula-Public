@@ -2,6 +2,8 @@
 using Nebula.Roles;
 using System.Text;
 using Virial.Assignable;
+using Virial.Configuration;
+using Virial.Runtime;
 using static Nebula.Modules.IFunctionalVariable;
 
 namespace Nebula.Modules;
@@ -282,7 +284,7 @@ static public class ArgumentTableHelper
     }
 }
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class FunctionalSpace
 {
     private Dictionary<string, TextFunction> allFunctions = new();
@@ -290,7 +292,7 @@ public class FunctionalSpace
 
     public static FunctionalSpace DefaultSpace = null!;
 
-    public static void Load()
+    static void Preprocess(NebulaPreprocessor preprocessor)
     {
         DefaultSpace = new();
 
@@ -300,35 +302,18 @@ public class FunctionalSpace
             return IFunctionalVariable.Generate(builder.ToString());
         }));
         DefaultSpace.LoadFunction("ToRoleName", new(1, (args) => IFunctionalVariable.Generate("role." + args[0].AsString())));
-        DefaultSpace.LoadFunction("IfConfig", new(3, (args) => {
-            try
-            {
-                if (NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[0].AsString())?.GetBool() ?? false)
-                    return args[1];
-                else
-                    return args[2];
-            }
-            catch
-            {
-                return IFunctionalVariable.Generate($"BADCONF({args[0]})");
-            }
-        }));
-        DefaultSpace.LoadFunction("SwitchConfig", new(n => n >= 2, (args) =>
+        DefaultSpace.LoadFunction("IfConfig", new(3, (args) =>
         {
-            try
-            {
-                int index = NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[0].AsString())?.CurrentValue ?? 0;
-                return args[index + 1];
-            }
-            catch
-            {
+
+            var option = ConfigurationValues.AllEntries.FirstOrDefault(option => option.Name == args[0].AsString()) as ValueConfiguration<bool>;
+            if (option == null)
                 return IFunctionalVariable.Generate($"BADCONF({args[0]})");
-            }
+            if (option.GetValue()) return args[1]; else return args[2];
         }));
         DefaultSpace.LoadFunction("Translate", new(1, (args) => IFunctionalVariable.Generate(Language.Translate(args[0].AsString()))));
-        DefaultSpace.LoadFunction("ConfigVal", new(1, (args) => IFunctionalVariable.Generate(NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[0].AsString())?.ToDisplayString() ?? $"BADCONF({args[0]})")));
-        DefaultSpace.LoadFunction("ConfigBool", new(1, (args) => IFunctionalVariable.Generate(NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[0].AsString())?.GetBool() ?? false)));
-        DefaultSpace.LoadFunction("ConfigRaw", new(1, (args) => IFunctionalVariable.Generate(NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[0].AsString())?.CurrentValue ?? 0)));
+        //DefaultSpace.LoadFunction("ConfigVal", new(1, (args) => IFunctionalVariable.Generate(ConfigurationValues.AllEntries.FirstOrDefault(option => option.Name == args[0].AsString())?.va ?.ToDisplayString() ?? $"BADCONF({args[0]})")));
+        //DefaultSpace.LoadFunction("ConfigBool", new(1, (args) => IFunctionalVariable.Generate(NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[0].AsString())?.GetBool() ?? false)));
+        //DefaultSpace.LoadFunction("ConfigRaw", new(1, (args) => IFunctionalVariable.Generate(NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[0].AsString())?.CurrentValue ?? 0)));
         DefaultSpace.LoadFunction("Replace", new(3, (args) => IFunctionalVariable.Generate(args[0].AsString().Replace(args[1].AsString(), args[2].AsString()))));
         DefaultSpace.LoadFunction("Property", new(1, (args) => IFunctionalVariable.Generate(PropertyManager.GetProperty(args[0].AsString())?.GetString() ?? $"BADPROP({args[0]})")));
         DefaultSpace.LoadFunction("PropertyVal", new(1, (args) => IFunctionalVariable.Generate(PropertyManager.GetProperty(args[0].AsString())?.GetFloat() ?? 0f)));
@@ -362,8 +347,8 @@ public class FunctionalSpace
         DefaultSpace.LoadFunction("GetCitation", new(1, (args) =>
         {
             Citation? citation = null;
-            if (args[0] is FunctionalObjectWrapping<IAssignableBase> w)
-                citation = (w.AsObject<IAssignableBase>() as HasCitation)?.Citaion;
+            if (args[0] is FunctionalObjectWrapping<DefinedAssignable> w)
+                citation = (w.AsObject<DefinedAssignable>() as HasCitation)?.Citaion;
             if (Citation.TryGetCitation(args[0].AsString(), out var temp))
                 citation = temp;
             

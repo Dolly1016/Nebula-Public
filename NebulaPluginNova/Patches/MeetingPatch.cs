@@ -589,15 +589,15 @@ static class CheckForEndVotingPatch
 
             if (tie)
             {
+                Dictionary<byte, GamePlayer?> voteForMap = new();
+
                 foreach (var state in __instance.playerStates)
                 {
                     if (!state.DidVote) continue;
-
-                    var modInfo = NebulaGameManager.Instance?.GetPlayer(state.TargetPlayerId);
-                    modInfo?.Unbox().AssignableAction(r=>r.Unbox().OnTieVotes(ref extraVotes,state));
+                    voteForMap[state.TargetPlayerId] = NebulaGameManager.Instance?.GetPlayer(state.VotedFor);
                 }
 
-                foreach (byte target in extraVotes) dictionary.AddValue(target, 1);
+                foreach (var target in GameOperatorManager.Instance?.Run(new MeetingTieVoteEvent(voteForMap))?.ExtraVotes ?? []) dictionary.AddValue(target?.PlayerId ?? 253, 1);
 
                 //再計算する
                 max = dictionary.MaxPair(out tie);
@@ -648,7 +648,7 @@ static class CheckForEndVotingPatch
                 });
             }
 
-            allStates.Add(new() { VoterId = byte.MaxValue-1});
+            //allStates.Add(new() { VoterId = byte.MaxValue - 1 });
             //__instance.RpcVotingComplete(allStates.ToArray(), exiled, tie);
             MeetingModRpc.RpcModCompleteVoting.Invoke((allStates, exiled?.PlayerId ?? byte.MaxValue, exiledAll.Select(e => e.PlayerId).ToArray(), tie));
 

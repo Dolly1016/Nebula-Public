@@ -261,4 +261,16 @@ public static class Helpers
         vector = pos2 - pos1;
         return PhysicsHelpers.AnyNonTriggersBetween(pos1, vector.normalized, vector.magnitude, layerMask!.Value);
     }
+
+    static public IEnumerator DoTransitionFadeOut(this TransitionFade transitionFade)
+    {
+        yield return Effects.ColorFade(transitionFade.overlay, Color.clear, Color.black, 0.2f);
+    }
+
+    static public IEnumerator DoTransitionFadeIn(this TransitionFade transitionFade)
+    {
+        transitionFade.overlay.color = Color.clear;
+        yield break;
+    }
+
 }

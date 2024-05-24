@@ -8,26 +8,26 @@ namespace Nebula.Roles.Ghost.Crewmate;
 [NebulaRPCHolder]
 public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
 {
-    static public Poltergeist MyRole = new Poltergeist();
 
     public Poltergeist() : base("poltergeist", new(210, 220, 234), RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam) { }
     string ICodeName.CodeName => "PLT";
 
-    private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("role.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 
+    static public Poltergeist MyRole = new Poltergeist();
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
 
     public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
     {
-        public override AbstractGhostRole Role => MyRole;
+        DefinedGhostRole RuntimeGhostRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player)
         {
         }
 
         static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PoltergeistButton.png", 115f);
 
-        public override void OnActivated()
+        void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
@@ -43,7 +43,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
                     new StaticAchievementToken("poltergeist.common1");
                     poltergeistButton.StartCoolDown();
                 };
-                poltergeistButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PoltergeistCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
+                poltergeistButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PoltergeistCoolDownOption).SetAsAbilityCoolDown().Start());
                 poltergeistButton.SetLabel("poltergeist");
             }
         }

@@ -10,18 +10,18 @@ namespace Nebula.Roles.Neutral;
 
 public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Team MyTeam = new("teams.vulture", new(140, 70, 18), TeamRevealType.OnlyMe);
-    static public Vulture MyRole = new Vulture();
+    static public RoleTeam MyTeam = new Team("teams.vulture", new(140, 70, 18), TeamRevealType.OnlyMe);
     
     private Vulture() : base("vulture", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [EatCoolDownOption, NumOfEatenToWinOption, VentConfiguration]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private IRelativeCoolDownConfiguration EatCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.vulture.eatCoolDown", CoolDownType.Immediate, (5f, 60f, 5f), 20f, (-40f, 20f, 5f), -10f, (0.125f, 2f, 0.125f), 0.75f);
-    static private IntegerConfiguration NumOfEatenToWinOption = NebulaAPI.Configurations.Configuration("role.vulture.numOfTheEatenToWin", (1,8),3);
-    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.vulture.vent", true);
+    static private IRelativeCoolDownConfiguration EatCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.vulture.eatCoolDown", CoolDownType.Immediate, (5f, 60f, 5f), 20f, (-40f, 20f, 5f), -10f, (0.125f, 2f, 0.125f), 0.75f);
+    static private IntegerConfiguration NumOfEatenToWinOption = NebulaAPI.Configurations.Configuration("options.role.vulture.numOfTheEatenToWin", (1,8),3);
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("options.role.vulture.vent", true);
 
+    static public Vulture MyRole = new Vulture();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

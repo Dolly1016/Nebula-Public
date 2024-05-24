@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace Nebula.Patches;
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 [HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.Open))]
 public static class RegionMenuOpenPatch
 {
@@ -36,7 +36,7 @@ public static class RegionMenuOpenPatch
 
     }
 
-    public static void Load()
+    static RegionMenuOpenPatch()
     {
         SaveIp = new StringDataEntry("ServerIp", customServerData, "");
         SavePort = new IntegerDataEntry("ServerPort", customServerData, 22023);

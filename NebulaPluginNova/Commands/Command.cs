@@ -7,6 +7,7 @@ using Virial.Command;
 using Virial.Common;
 using Virial.Compat;
 using Virial.Media;
+using Virial.Runtime;
 
 namespace Nebula.Commands;
 
@@ -104,7 +105,7 @@ public class CommandResource : INebulaResource
     ICommand? INebulaResource.AsCommand() => command;
 }
 
-[NebulaPreLoad(typeof(NebulaAddon))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
 public class CommandManager
 {
     private class AddonCommand : ICommand, INebulaResource
@@ -143,7 +144,7 @@ public class CommandManager
         ICommand? INebulaResource.AsCommand() => this;
     }
 
-    public static IEnumerator CoLoad()
+    static IEnumerator Preprocessor(NebulaPreprocessor preprocessor)
     {
         Patches.LoadPatch.LoadingText = "Loading Commands";
         yield return null;

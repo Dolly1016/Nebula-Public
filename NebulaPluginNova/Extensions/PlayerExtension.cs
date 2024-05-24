@@ -236,9 +236,9 @@ public static class PlayerExtension
     static public KillResult ModFlexibleKill(this PlayerControl killer, PlayerControl target, bool showBlink, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool showOverlay, bool assignGhostRole = true)
     {
         bool isMeetingKill = MeetingHud.Instance;
-        if (CheckKill(null, target, playerState, recordState, isMeetingKill, out var result))
+        if (CheckKill(killer, target, playerState, recordState, isMeetingKill, out var result))
         {
-            if (MeetingHud.Instance)
+            if (isMeetingKill)
                 RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showOverlay, false, assignGhostRole));
             else
                 RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, showBlink, showOverlay, assignGhostRole));
@@ -251,14 +251,9 @@ public static class PlayerExtension
     {
         var targetInfo = target.GetModInfo()!;
         var killerInfo = killer?.GetModInfo() ?? targetInfo;
-        var localResult = KillResult.Kill;
-        targetInfo.Unbox().AssignableAction(r => { if (localResult == KillResult.Kill) localResult = r.Unbox().CheckKill(killerInfo, playerState, recordState, isMeetingKill); });
-        result = localResult;
+        result = GameOperatorManager.Instance?.Run(new PlayerCheckKillEvent(targetInfo, killerInfo, isMeetingKill, playerState, recordState)).Result ?? KillResult.Kill;
            
         if (result != KillResult.Kill) RpcOnGuard.Invoke((killerInfo.PlayerId, targetInfo.PlayerId, result == KillResult.ObviousGuard));
-
-
-
         return result == KillResult.Kill;
     }
 

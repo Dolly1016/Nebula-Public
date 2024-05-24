@@ -52,30 +52,30 @@ public static class ShipExtension
     private static void ModifyEarlierSkeld() { }
     private static void ModifySkeld()
     {
-        if (GeneralConfigurations.SkeldCafeVentOption) CreateVent(SystemTypes.Cafeteria, "CafeUpperVent", new UnityEngine.Vector2(-2.1f, 3.8f));
-        if (GeneralConfigurations.SkeldStorageVentOption) CreateVent(SystemTypes.Storage, "StorageVent", new UnityEngine.Vector2(0.45f, -3.6f));
+        if (GeneralConfigurations.SkeldCafeVentOption.CurrentValue) CreateVent(SystemTypes.Cafeteria, "CafeUpperVent", new UnityEngine.Vector2(-2.1f, 3.8f));
+        if (GeneralConfigurations.SkeldStorageVentOption.CurrentValue) CreateVent(SystemTypes.Storage, "StorageVent", new UnityEngine.Vector2(0.45f, -3.6f));
 
-        if (!GeneralConfigurations.SkeldAdminOption)
+        if (!GeneralConfigurations.SkeldAdminOption.CurrentValue)
         {
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.Admin].gameObject.transform.parent.GetChild(0).GetChild(3).gameObject;
             GameObject.Destroy(obj.transform.GetChild(1).GetComponent<CircleCollider2D>());
         }
 
-        ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.SkeldO2DurationOption.GetFloat();
-        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.GetFloat();
+        ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.SkeldO2DurationOption.CurrentValue;
+        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.CurrentValue;
     }
 
     private static void ModifyEarierMira() { }
     private static void ModifyMira()
     {
-        if (!GeneralConfigurations.MiraAdminOption)
+        if (!GeneralConfigurations.MiraAdminOption.CurrentValue)
         {
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.Admin].gameObject.transform.FindChild("MapTable").gameObject;
             GameObject.Destroy(obj.transform.GetChild(0).gameObject);
         }
 
-        ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.MiraO2DurationOption.GetFloat();
-        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.MiraReactorDurationOption.GetFloat();
+        ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.MiraO2DurationOption.CurrentValue;
+        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.MiraReactorDurationOption.CurrentValue;
     }
 
     private static void ModifyEarlierPolus() { }
@@ -86,9 +86,9 @@ public static class ShipExtension
         commPos.z = 0.0001f;
         commRoom.transform.localPosition = commPos;
 
-        if (GeneralConfigurations.PolusSpecimenVentOption) CreateVent(SystemTypes.Specimens, "SpecimenVent", new UnityEngine.Vector2(-1f, -1.35f));
+        if (GeneralConfigurations.PolusSpecimenVentOption.CurrentValue) CreateVent(SystemTypes.Specimens, "SpecimenVent", new UnityEngine.Vector2(-1f, -1.35f));
 
-        if (!GeneralConfigurations.PolusAdminOption)
+        if (!GeneralConfigurations.PolusAdminOption.CurrentValue)
         {
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.Admin].gameObject.transform.FindChild("mapTable").gameObject;
             GameObject.Destroy(obj.transform.GetChild(0).GetComponent<BoxCollider2D>());
@@ -96,7 +96,7 @@ public static class ShipExtension
             GameObject.Destroy(obj.transform.GetChild(2).gameObject);
         }
 
-        ShipStatus.Instance.Systems[SystemTypes.Laboratory].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.PolusReactorDurationOption.GetFloat();
+        ShipStatus.Instance.Systems[SystemTypes.Laboratory].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.PolusReactorDurationOption.CurrentValue;
     }
 
     private static SpriteLoader medicalWiringSprite = SpriteLoader.FromResource("Nebula.Resources.AirshipWiringM.png",100f);
@@ -104,17 +104,17 @@ public static class ShipExtension
     private static void ModifyEarlierAirship() {
         //配線タスク
         ActivateWiring("task_wiresHallway2", 2);
-        if (GeneralConfigurations.AirshipArmoryWireOption) ActivateWiring("task_electricalside2", 3).Room = SystemTypes.Armory;
+        if (GeneralConfigurations.AirshipArmoryWireOption.CurrentValue) ActivateWiring("task_electricalside2", 3).Room = SystemTypes.Armory;
         ActivateWiring("task_wireShower", 4);
         ActivateWiring("taks_wiresLounge", 5);
-        if (GeneralConfigurations.AirshipMedicalWireOption)
+        if (GeneralConfigurations.AirshipMedicalWireOption.CurrentValue)
         {
             CreateConsole(SystemTypes.Medical, "task_wireMedical", medicalWiringSprite.GetSprite(), new Vector2(-0.84f, 5.63f), 0f);
             ActivateWiring("task_wireMedical", 6).Room = SystemTypes.Medical;
         }
-        if (GeneralConfigurations.AirshipHallwayWireOption) ActivateWiring("panel_wireHallwayL", 7);
+        if (GeneralConfigurations.AirshipHallwayWireOption.CurrentValue) ActivateWiring("panel_wireHallwayL", 7);
         ActivateWiring("task_wiresStorage", 8);
-        if (GeneralConfigurations.AirshipVaultWireOption) ActivateWiring("task_electricalSide", 9).Room = SystemTypes.VaultRoom;
+        if (GeneralConfigurations.AirshipVaultWireOption.CurrentValue) ActivateWiring("task_electricalSide", 9).Room = SystemTypes.VaultRoom;
         ActivateWiring("task_wiresMeeting", 10);
     }
     private static void ModifyAirship()
@@ -150,39 +150,39 @@ public static class ShipExtension
             collider.size = size;
         }
 
-        if (GeneralConfigurations.AirshipMeetingVentOption) CreateVent(SystemTypes.MeetingRoom, "MeetingVent", new Vector2(-3.1f, -1.6f)).transform.localPosition += new Vector3(0, 0, 2);
-        if (GeneralConfigurations.AirshipElectricalVentOption) CreateVent(SystemTypes.Electrical, "ElectricalVent", new Vector2(-0.275f, -1.7f)).transform.localPosition += new Vector3(0, 0, 1);
+        if (GeneralConfigurations.AirshipMeetingVentOption.CurrentValue) CreateVent(SystemTypes.MeetingRoom, "MeetingVent", new Vector2(-3.1f, -1.6f)).transform.localPosition += new Vector3(0, 0, 2);
+        if (GeneralConfigurations.AirshipElectricalVentOption.CurrentValue) CreateVent(SystemTypes.Electrical, "ElectricalVent", new Vector2(-0.275f, -1.7f)).transform.localPosition += new Vector3(0, 0, 1);
 
-        if (GeneralConfigurations.AirshipOneWayMeetingRoomOption) ModifyMeetingRoom();
+        if (GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue) ModifyMeetingRoom();
 
-        if (!GeneralConfigurations.AirshipCockpitAdminOption)
+        if (!GeneralConfigurations.AirshipCockpitAdminOption.CurrentValue)
         {
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.Cockpit].gameObject;
             GameObject.Destroy(obj.transform.FindChild("cockpit_mapfloating").gameObject);
             GameObject.Destroy(obj.transform.FindChild("panel_cockpit_map").GetComponent<BoxCollider2D>());
         }
-        if (!GeneralConfigurations.AirshipRecordAdminOption)
+        if (!GeneralConfigurations.AirshipRecordAdminOption.CurrentValue)
         {
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.Records].gameObject;
             GameObject.Destroy(obj.transform.FindChild("records_admin_map").gameObject);
         }
 
-        if (GeneralConfigurations.AirshipHarderDownloadOption)
+        if (GeneralConfigurations.AirshipHarderDownloadOption.CurrentValue)
         {
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.GapRoom].gameObject;
             var panel = obj.transform.FindChild("panel_data");
             panel.localPosition = new Vector3(4.52f, -3.95f, 0.1f);
         }
 
-        if (GeneralConfigurations.AirshipBetterImpostorVisonOption || GeneralConfigurations.AirshipShadedLowerFloorOption)
+        if (GeneralConfigurations.AirshipBetterImpostorVisonOption.CurrentValue || GeneralConfigurations.AirshipShadedLowerFloorOption.CurrentValue)
         {
             var obj = ShipStatus.Instance.FastRooms[SystemTypes.GapRoom].gameObject;
 
             var ledgeShadow = obj.transform.FindChild("Shadow").FindChild("LedgeShadow").GetComponent<OneWayShadows>();
             //インポスターについてのみ影を無効化
-            if(GeneralConfigurations.AirshipBetterImpostorVisonOption)  ledgeShadow.IgnoreImpostor = true;
+            if(GeneralConfigurations.AirshipBetterImpostorVisonOption.CurrentValue)  ledgeShadow.IgnoreImpostor = true;
             //上下両方から見えないように
-            if (GeneralConfigurations.AirshipShadedLowerFloorOption) ledgeShadow.RoomCollider.enabled = false;
+            if (GeneralConfigurations.AirshipShadedLowerFloorOption.CurrentValue) ledgeShadow.RoomCollider.enabled = false;
         }
     }
 
@@ -192,16 +192,16 @@ public static class ShipExtension
         //しばらくの措置として見た目チェンジサボ廃止
         ShipStatus.Instance.MapPrefab.infectedOverlay.transform.GetChild(6).GetChild(0).gameObject.SetActive(false);
 
-        if (GeneralConfigurations.FungleSimpleLaboratoryOption) ModifyLaboratory();
+        if (GeneralConfigurations.FungleSimpleLaboratoryOption.CurrentValue) ModifyLaboratory();
 
-        if (GeneralConfigurations.FungleThinFogOption)
+        if (GeneralConfigurations.FungleThinFogOption.CurrentValue)
         {
             var renderer = ShipStatus.Instance.transform.FindChild("FungleJungleShadow").GetChild(0).GetComponent<MeshRenderer>();
             var color = renderer.material.color;
             color.a = 0.35f;
             renderer.material.color = color;
         }
-        if (GeneralConfigurations.FungleGlowingCampfireOption)
+        if (GeneralConfigurations.FungleGlowingCampfireOption.CurrentValue)
         {
             var light = AmongUsUtil.GenerateCustomLight(new(-9.8f, 1.65f));
             var script = light.gameObject.AddComponent<ScriptBehaviour>();
@@ -216,7 +216,7 @@ public static class ShipExtension
                 }
             };
         }
-        if (GeneralConfigurations.FungleGlowingMushroomOption)
+        if (GeneralConfigurations.FungleGlowingMushroomOption.CurrentValue)
         {
             void SetUpGlowingMush(GameObject obj)
             {
@@ -230,7 +230,7 @@ public static class ShipExtension
             SetUpGlowingMush(ShipStatus.Instance.FastRooms[SystemTypes.Reactor].transform.FindChild("GlowingMushroom").gameObject);
         }
 
-        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.FungleReactorDurationOption.GetFloat();
+        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.FungleReactorDurationOption.CurrentValue;
     }
 
 

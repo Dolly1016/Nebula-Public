@@ -10,10 +10,9 @@ namespace Nebula.Roles.Neutral;
 
 public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Team MyTeam = new("teams.jester", new(253,84,167), TeamRevealType.OnlyMe);
-    static public Jester MyRole = new Jester();
+    static public RoleTeam MyTeam = new Team("teams.jester", new(253,84,167), TeamRevealType.OnlyMe);
 
-    private Jester() : base("jester", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [CanDragDeadBodyOption, CanFixLightOption, CanFixCommsOption, VentConfiguration]) {
+    private Jester() : base("jester", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [VentConfiguration, CanDragDeadBodyOption, CanFixLightOption, CanFixCommsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
 
@@ -21,21 +20,12 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private BoolConfiguration CanDragDeadBodyOption = NebulaAPI.Configurations.Configuration("role.jester.canDragDeadBody", true);
-    static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("role.jester.canDragDeadBody", false);
-    static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("role.jester.canDragDeadBody", false);
+    static private BoolConfiguration CanDragDeadBodyOption = NebulaAPI.Configurations.Configuration("options.role.jester.canDragDeadBody", true);
+    static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.jester.canFixLight", false);
+    static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.jester.canFixComms", false);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.jester.vent", true);
 
-    static public NebulaEndCriteria JesterCriteria = new(CustomGameMode.Standard)
-    {
-        OnExiled = (PlayerControl? p)=>
-        {
-            if(p== null) return null;
-
-            if (p!.GetModInfo()!.Role.Role != MyRole) return null;
-            return new(NebulaGameEnd.JesterWin, 1 << p.PlayerId);
-        }
-    };
+    static public Jester MyRole = new Jester();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -57,8 +47,6 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
 
         void RuntimeAssignable.OnActivated()
         {
-            NebulaGameManager.Instance?.CriteriaManager.AddCriteria(JesterCriteria);
-
             draggable?.OnActivated(this);
             
         }

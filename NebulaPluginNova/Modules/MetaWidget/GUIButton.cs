@@ -64,3 +64,58 @@ public class GUIButton : NoSGUIText
         return button.gameObject;
     }
 }
+
+public class GUISpinButton : AbstractGUIWidget
+{
+    public Action<bool> OnClick { get; init; }
+    public Color? Color { get; init; }
+    public Color? SelectedColor { get; init; }
+
+    public bool AsMaskedButton { get; init; } = true;
+    public float TextMargin { get; init; } = 0.26f;
+    
+
+    public GUISpinButton(GUIAlignment alignment, Action<bool> onClick) : base(alignment)
+    {
+        OnClick = onClick;
+    }
+
+    static private TextAttribute ButtonTextAttribute = new(GUI.API.GetAttribute(AttributeAsset.OptionsButton)) { Size = new(0.38f, 0.18f) };
+    static private NoSGUIText UpperButtonText = new(GUIAlignment.Center, ButtonTextAttribute, new RawTextComponent("▲"));
+    static private NoSGUIText LowerButtonText = new(GUIAlignment.Center, ButtonTextAttribute, new RawTextComponent("▼"));
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
+    {
+        GameObject GenerateButton(Transform parent, bool increase)
+        {
+            var button = UnityHelper.CreateObject<SpriteRenderer>("Button", parent, new(0f, increase ? 0.141f : -0.141f, 0f), LayerExpansion.GetUILayer());
+            button.sprite = VanillaAsset.TextButtonSprite;
+            button.drawMode = SpriteDrawMode.Sliced;
+            button.tileMode = SpriteTileMode.Continuous;
+            button.size = new(0.38f + 0.1f, 0.18f + 0.085f);
+            if (AsMaskedButton) button.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+
+            var textTransform = (increase ? UpperButtonText : LowerButtonText).Instantiate(new(1f, 1f), out _)!.transform;
+            textTransform.SetParent(button.transform);
+            textTransform.localPosition = new(0, 0, -0.1f);
+
+            var collider = button.gameObject.AddComponent<BoxCollider2D>();
+            collider.size = new(0.38f + 0.1f, 0.18f + 0.05f);
+            collider.isTrigger = true;
+
+            var passiveButton = button.gameObject.SetUpButton(true, button, Color, SelectedColor);
+            GUIClickable clickable = new(passiveButton);
+            if (OnClick != null) passiveButton.OnClick.AddListener(() => OnClick(increase));
+
+            return button.gameObject;
+        }
+
+        actualSize = new(0.38f + 0.1f, (0.18f + 0.13f) * 2f);
+
+        GameObject holder = UnityHelper.CreateObject("DualButton", null, UnityEngine.Vector3.zero, LayerExpansion.GetUILayer());
+
+        GenerateButton(holder.transform, true);
+        GenerateButton(holder.transform, false);
+
+        return holder;
+    }
+}

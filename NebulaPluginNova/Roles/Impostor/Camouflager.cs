@@ -10,7 +10,6 @@ namespace Nebula.Roles.Impostor;
 [NebulaRPCHolder]
 public class Camouflager : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Camouflager MyRole = new Camouflager();
     private Camouflager():base("camouflager", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CamoCoolDownOption, CamoDurationOption, CanInvokeCamoAfterDeathOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
@@ -20,10 +19,11 @@ public class Camouflager : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration CamoCoolDownOption = NebulaAPI.Configurations.Configuration("role.camouflager.camoCoolDown", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration CamoDurationOption = NebulaAPI.Configurations.Configuration("role.camouflager.camoDuration", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanInvokeCamoAfterDeathOption = NebulaAPI.Configurations.Configuration("role.camouflager.canInvokeCamoAfterDeath", false);
+    static private FloatConfiguration CamoCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.camoCoolDown", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration CamoDurationOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.camoDuration", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanInvokeCamoAfterDeathOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.canInvokeCamoAfterDeath", false);
 
+    static public Camouflager MyRole = new Camouflager();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

@@ -62,7 +62,6 @@ public class Synchronizer : AbstractModule<Virial.Game.Game>
             if (!withSurviver && !p.Data.IsDead) continue;
             if (!withGhost && p.Data.IsDead) continue;
             if (!withBot && p.isDummy) continue;
-            if (!withVanilla && (!p.GetModInfo()?.Unbox().WithNoS ?? false)) continue;
 
             if ((sync[tag] & (1 << p.PlayerId)) == 0) return false;
         }

@@ -65,7 +65,7 @@ internal abstract class ComparableConfigurationValueBase<T, LocalEntry> : Config
     /// <returns></returns>
     abstract protected T CalcAbsDiff(T t1, T t2);
 
-    void IOrderedSharableVariable<T>.ChangeValue(bool increase, bool allowLoop)
+    void IOrderedSharableEntry.ChangeValue(bool increase, bool allowLoop)
     {
         int nextIndex = myIndex + (increase ? 1 : -1);
 
@@ -80,6 +80,7 @@ internal abstract class ComparableConfigurationValueBase<T, LocalEntry> : Config
             nextIndex = Math.Clamp(nextIndex, 0, myMapper.Length);
         }
 
+        myIndex = nextIndex;
         (this as ISharableVariable<T>).CurrentValue = myMapper[nextIndex];
     }
 
@@ -88,7 +89,7 @@ internal abstract class ComparableConfigurationValueBase<T, LocalEntry> : Config
         T localVal =  localEntry.Value;
         T nearVal = myMapper.MinBy(v => CalcAbsDiff(v, localVal));
         (this as ISharableVariable<T>).SetValueWithoutSaveUnsafe(nearVal);
-        myIndex = Array.IndexOf(myMapper, localVal);
+        myIndex = Array.IndexOf(myMapper, nearVal);
     }
 
     public ComparableConfigurationValueBase(string name, T[] mapper, LocalEntry entry) : base(name, entry)
@@ -122,7 +123,7 @@ internal class BoolConfigurationValue : ConfigurationValueBase<bool, BooleanData
 
     protected override int RpcValue { get => currentValue ? 1 : 0; set => currentValue = value == 1; }
 
-    void IOrderedSharableVariable<bool>.ChangeValue(bool increase, bool allowLoop) => (this as ISharableVariable<bool>).CurrentValue = !currentValue;
+    void IOrderedSharableEntry.ChangeValue(bool increase, bool allowLoop) => (this as ISharableVariable<bool>).CurrentValue = !currentValue;
 }
 
 /// <summary>
@@ -138,7 +139,7 @@ internal class SelectionConfigurationValue : ConfigurationValueBase<int, Integer
 
     protected override int RpcValue { get => currentValue; set => currentValue = value; }
 
-    void IOrderedSharableVariable<int>.ChangeValue(bool increase, bool allowLoop)
+    void IOrderedSharableEntry.ChangeValue(bool increase, bool allowLoop)
     {
         if (allowLoop)
         {

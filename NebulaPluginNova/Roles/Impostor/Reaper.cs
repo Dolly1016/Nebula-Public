@@ -12,16 +12,15 @@ namespace Nebula.Roles.Impostor;
 
 public class Reaper : DefinedRoleTemplate, DefinedRole
 {
-
-    static public Reaper MyRole = new Reaper();
-
-    private Reaper() : base("reaper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, []) {
+    private Reaper() : base("reaper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [VentConfiguration]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.reaper.vent", false, null, -1, (0f,60f,2.5f),15f, (0f, 30f, 2.5f), 10f);
+
+    static public Reaper MyRole = new Reaper();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

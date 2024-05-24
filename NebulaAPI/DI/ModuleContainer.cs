@@ -86,19 +86,20 @@ public class DIManager
     private Dictionary<Type, List<Func<object>>> allInterfaces = new();
 
     internal ContainerImpl? Instantiate<ContainerImpl>(Action<ContainerImpl>? preprocess = null) where ContainerImpl : class
-    {
-        var type = typeof(ContainerImpl);
+        => Instantiate(typeof(ContainerImpl), container => preprocess?.Invoke((container as ContainerImpl)!)) as ContainerImpl;
 
+    internal object? Instantiate(Type type, Action<object>? preprocess = null)
+    {
         if (!allContainers.TryGetValue(type, out var def))
         {
             var cand = allContainers.Where(e => type.IsAssignableFrom(e.Key)).ToArray();
             if (cand.Length == 0) return null;
-            
+
             // TODO: 複数の実装がある場合の処理を考える。
             def = cand[0].Value;
         }
 
-        var impl = (def.Invoke() as ContainerImpl)!;
+        var impl = def.Invoke();
         preprocess?.Invoke(impl);
 
         var implAsContainer = (impl as IModuleContainer)!;
@@ -120,7 +121,6 @@ public class DIManager
         }
 
         InjectFromInterface(impl.GetType());
-
         return impl;
     }
 

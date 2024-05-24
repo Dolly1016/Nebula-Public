@@ -56,6 +56,6 @@ public class FungleData : MapData
         };
 
     protected override Vector2[] MapArea => MapPositions;
-
+    protected override Vector2[] NonMapArea => [];
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms };
 }

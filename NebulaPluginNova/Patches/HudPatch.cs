@@ -1,5 +1,6 @@
 ﻿using Nebula.Behaviour;
 using Virial.DI;
+using Virial.Events.Player;
 using static Nebula.Modules.HelpScreen;
 
 namespace Nebula.Patches;
@@ -85,14 +86,7 @@ class TaskTextPatch
     {
         try
         {
-            var text = __instance.taskText.text;
-            PlayerControl.LocalPlayer.GetModInfo()?.AllAssigned().Do(r =>
-            {
-                string? str = r.Unbox().GetExtraTaskText();
-                if (str != null) text += "\n" + str;
-            });
-
-            __instance.taskText.text = text;
+            __instance.taskText.text = __instance.taskText.text + GameOperatorManager.Instance?.Run(new PlayerTaskTextLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo)).Text;
         }
         catch { }
     }

@@ -10,17 +10,18 @@ namespace Nebula.Roles.Impostor;
 
 public class Jailer : DefinedRoleTemplate, DefinedRole
 {
-    static public Jailer MyRole = new Jailer();
     private Jailer() : base("jailer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CanMoveWithMapWatchingOption,CanIdentifyDeadBodiesOption,CanIdentifyImpostorsOption, InheritAbilityOnDyingOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static public BoolConfiguration CanMoveWithMapWatchingOption = NebulaAPI.Configurations.Configuration("role.jailer.showTrackingTargetOnMap", false);
-    static public BoolConfiguration CanIdentifyDeadBodiesOption = NebulaAPI.Configurations.Configuration("role.jailer.canIdentifyDeadBodies", false);
-    static public BoolConfiguration CanIdentifyImpostorsOption = NebulaAPI.Configurations.Configuration("role.jailer.canIdentifyImpostors", false);
-    static public BoolConfiguration InheritAbilityOnDyingOption = NebulaAPI.Configurations.Configuration("role.jailer.inheritAbilityOnDying", false);
+    static public BoolConfiguration CanMoveWithMapWatchingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canMoveWithMapWatching", false);
+    static public BoolConfiguration CanIdentifyDeadBodiesOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canIdentifyDeadBodies", false);
+    static public BoolConfiguration CanIdentifyImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canIdentifyImpostors", false);
+    static public BoolConfiguration InheritAbilityOnDyingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.inheritAbilityOnDying", false);
+
+    static public Jailer MyRole = new Jailer();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

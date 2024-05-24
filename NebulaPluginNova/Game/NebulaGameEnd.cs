@@ -3,6 +3,7 @@ using Virial.Game;
 using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Events.Game;
+using Virial.Runtime;
 
 namespace Nebula.Game;
 
@@ -51,26 +52,25 @@ public class CustomExtraWin : ExtraWin
 }
 
 [NebulaRPCHolder]
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
 public class NebulaGameEnd
 {
     static private Color InvalidColor = new Color(72f / 255f, 78f / 255f, 84f / 255f);
     static public CustomEndCondition CrewmateWin = new(16, "crewmate", Palette.CrewmateBlue, 16);
     static public CustomEndCondition ImpostorWin = new(17, "impostor", Palette.ImpostorRed, 16);
-    static public CustomEndCondition SabotageWin = new(18, "impostor", Palette.ImpostorRed, 96); //内部的な終了条件 ImpostorWinに置き換えられる
-    static public CustomEndCondition VultureWin = new(24, "vulture", Roles.Neutral.Vulture.MyRole.RoleColor, 32);
-    static public CustomEndCondition JesterWin = new(25, "jester", Roles.Neutral.Jester.MyRole.RoleColor, 32);
-    static public CustomEndCondition JackalWin = new(26, "jackal", Roles.Neutral.Jackal.MyRole.RoleColor, 18);
-    static public CustomEndCondition ArsonistWin = new(27, "arsonist", Roles.Neutral.Arsonist.MyRole.RoleColor, 32);
-    static public CustomEndCondition LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.RoleColor, 18);
-    static public CustomEndCondition PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.RoleColor, 32);
-    static public CustomEndCondition AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.RoleColor, 64);
+    static public CustomEndCondition VultureWin = new(24, "vulture", Roles.Neutral.Vulture.MyRole.UnityColor, 32);
+    static public CustomEndCondition JesterWin = new(25, "jester", Roles.Neutral.Jester.MyRole.UnityColor, 32);
+    static public CustomEndCondition JackalWin = new(26, "jackal", Roles.Neutral.Jackal.MyRole.UnityColor, 18);
+    static public CustomEndCondition ArsonistWin = new(27, "arsonist", Roles.Neutral.Arsonist.MyRole.UnityColor, 32);
+    static public CustomEndCondition LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.UnityColor, 18);
+    static public CustomEndCondition PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.UnityColor, 32);
+    static public CustomEndCondition AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.UnityColor, 64);
     static public CustomEndCondition NoGame = new(128, "nogame", InvalidColor, 128);
 
-    static public CustomExtraWin ExtraLoversWin = new(0, "lover", Roles.Modifier.Lover.MyRole.RoleColor);
-    static public CustomExtraWin ExtraObsessionalWin = new(1, "obsessional", Roles.Modifier.Obsessional.MyRole.RoleColor);
+    static public CustomExtraWin ExtraLoversWin = new(0, "lover", Roles.Modifier.Lover.MyRole.UnityColor);
+    static public CustomExtraWin ExtraObsessionalWin = new(1, "obsessional", Roles.Modifier.Obsessional.MyRole.UnityColor);
 
-    static public void Load()
+    static void Preprocess(NebulaPreprocessor preprocessor)
     {
         Virial.Game.NebulaGameEnds.CrewmateGameEnd = CrewmateWin;
         Virial.Game.NebulaGameEnds.ImpostorGameEnd = ImpostorWin;
@@ -88,7 +88,7 @@ public class NebulaGameEnd
            if (NebulaGameManager.Instance != null)
            {
                var end = CustomEndCondition.GetEndCondition(message.conditionId) ?? NebulaGameEnd.NoGame;
-               var winners = BitMasks.AsPlayer(message.winnersMask);
+               var winners = BitMasks.AsPlayer((uint)message.winnersMask);
                EditableBitMask<ExtraWin> extraWin = new HashSetMask<ExtraWin>();
                foreach(var exW in CustomExtraWin.AllExtraWins) if((exW.ExtraWinMask & message.extraWinMask) != 0) extraWin.Add(exW);
 
@@ -100,14 +100,14 @@ public class NebulaGameEnd
        }
        );
 
-    public static bool RpcSendGameEnd(CustomEndCondition winCondition, int winnersMask, ulong extraWinMask, GameEndReason endReason)
+    public static bool RpcSendGameEnd(Virial.Game.GameEnd winCondition, int winnersMask, ulong extraWinMask, GameEndReason endReason)
     {
         if (NebulaGameManager.Instance?.EndState != null) return false;
         RpcEndGame.Invoke((winCondition.Id, winnersMask, extraWinMask, endReason));
         return true;
     }
 
-    public static bool RpcSendGameEnd(CustomEndCondition winCondition,HashSet<byte> winners, ulong extraWinMask, GameEndReason endReason)
+    public static bool RpcSendGameEnd(Virial.Game.GameEnd winCondition,HashSet<byte> winners, ulong extraWinMask, GameEndReason endReason)
     {
         int winnersMask = 0;
         foreach (byte w in winners) winnersMask |= ((int)1 << w);
@@ -205,7 +205,7 @@ public class EndGameManagerSetUpPatch
         {
             //Name Text
             string nameText = p.Name.Color(NebulaGameManager.Instance.EndState!.Winners.Test(p) ? Color.yellow : Color.white);
-            if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.Name ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.RoleColor);
+            if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.Name ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.UnityColor);
 
             string stateText = p.PlayerState.Text;
             if (p.IsDead && p.MyKiller != null) stateText += "<color=#FF6666><size=75%> by " + (p.MyKiller?.Name ?? "ERROR") + "</size></color>";
@@ -372,7 +372,7 @@ public class EndGameManagerSetUpPatch
 
         //Achievements
         //標準ゲームモードで廃村でない、かつOP権限が誰にも付与されていないゲームの場合
-        if (GeneralConfigurations.CurrentGameMode == CustomGameMode.Standard && endCondition != NebulaGameEnd.NoGame && !GeneralConfigurations.AssignOpToHostOption)
+        if (GeneralConfigurations.CurrentGameMode == GameModes.Standard && endCondition != NebulaGameEnd.NoGame && !GeneralConfigurations.AssignOpToHostOption)
         {
             NebulaManager.Instance.StartCoroutine(NebulaAchievementManager.CoShowAchievements(NebulaManager.Instance, NebulaAchievementManager.UniteAll()).WrapToIl2Cpp());
         }

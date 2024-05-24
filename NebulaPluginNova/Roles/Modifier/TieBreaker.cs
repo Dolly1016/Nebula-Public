@@ -6,19 +6,18 @@ namespace Nebula.Roles.Modifier;
 
 
 
-public class TieBreaker : ConfigurableStandardModifier, HasCitation
+public class TieBreaker : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, HasCitation
 {
-    static public TieBreaker MyRole = new TieBreaker();
-    public override string LocalizedName => "tieBreaker";
-    public override string CodeName => "TBR";
-    public override Color RoleColor => new Color(239f / 255f, 175f / 255f, 135f / 255f);
+    private TieBreaker(): base("tieBreaker", "TBR", new(239, 175, 135)) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
+    static public TieBreaker MyRole = new TieBreaker();
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     [NebulaRPCHolder]
-    public class Instance : ModifierInstance, RuntimeModifier
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
-        public override AbstractModifier Role => MyRole;
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
+
 
         AchievementToken<bool>? acTokenCommon;
         AchievementToken<(bool cleared, byte lastTieVoted)>? acTokenChallenge;
@@ -50,15 +49,14 @@ public class TieBreaker : ConfigurableStandardModifier, HasCitation
             }
         });
 
-        public override void OnTieVotes(ref List<byte> extraVotes, PlayerVoteArea myVoteArea)
+        void OnTieVotes(MeetingTieVoteEvent ev)
         {
-            if (!myVoteArea.DidVote) return;
-            extraVotes.Add(myVoteArea.VotedFor);
+            if (ev.TryCheckVotedFor(MyPlayer, out var votedFor)) ev.AddExtraVote(votedFor);
         }
 
-        public override void DecoratePlayerName(ref string text, ref Color color)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " ♠".Color(MyRole.RoleColor);
+            if (AmOwner || canSeeAllInfo) name += " ♠".Color(MyRole.UnityColor);
         }
     }
 }

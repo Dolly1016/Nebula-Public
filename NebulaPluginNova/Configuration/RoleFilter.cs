@@ -75,16 +75,21 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
         Id = id;
         dataEntry = new StringArrayDataEntry(id, Configuration.ConfigurationValues.ConfigurationSaver, []);
 
-        NebulaAPI.Preprocessor?.SchedulePreprocess(Virial.Runtime.PreprocessPhase.PostFixAssignables, () => {
+        void RefreshCache()
+        {
             myLocalExcludedAssignableCache = new(dataEntry.Value.Select(code => AllAssignables.FirstOrDefault(a => a.CodeName == code)).Where(a => a != null)!);
 
-            int length = AllAssignables.Max(a => a.Id) / UnitSize;
+            int length = (AllAssignables.Max(a => a.Id) + 1) / UnitSize + 1;
 
             sharableVariables = new ISharableVariable<int>[length];
-            for (int i = 0;i< length; i++) {
+            for (int i = 0; i < length; i++)
+            {
                 sharableVariables[i] = new FilterSharableVariable(this, i);
             }
-        });
+        }
+
+        NebulaAPI.Preprocessor?.SchedulePreprocess(PreprocessPhase.PostFixStructure, RefreshCache);
+        ConfigurationValues.Reloaders.Add(RefreshCache);
 
     }
 
@@ -134,15 +139,16 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
     }
 }
 
-public class ModifierFilterImpl : AssignableFilterConfigurationValue<AllocatableDefinedModifier>, Virial.Configuration.ModifierFilter
+public class ModifierFilterImpl : AssignableFilterConfigurationValue<DefinedAllocatableModifier>, Virial.Configuration.ModifierFilter
 {
     public ModifierFilterImpl(string id) : base(id)
     {
     }
 
-    protected override IEnumerable<AllocatableDefinedModifier> AllAssignables => Roles.Roles.AllModifiers.Select(a => a as AllocatableDefinedModifier).Where(a => a is not null)!;
+    protected override IEnumerable<DefinedAllocatableModifier> AllAssignables => Roles.Roles.AllModifiers.Select(a => a as DefinedAllocatableModifier).Where(a => a is not null)!;
 
-    bool Virial.Configuration.ModifierFilter.Test(DefinedModifier modifier) => modifier is AllocatableDefinedModifier adm ? Test(adm) : false;
+    bool Virial.Configuration.AssignableFilter<DefinedModifier>.Test(DefinedModifier assignable) => assignable is DefinedAllocatableModifier adm ? Test(adm) : false;
+    void Virial.Configuration.AssignableFilter<DefinedModifier>.ToggleAndShare(Virial.Assignable.DefinedModifier assignable) { if (assignable is DefinedAllocatableModifier adm) ToggleAndShare(adm); }
 }
 
 public class GhostRoleFilterImpl : AssignableFilterConfigurationValue<DefinedGhostRole>, Virial.Configuration.GhostRoleFilter
@@ -153,5 +159,6 @@ public class GhostRoleFilterImpl : AssignableFilterConfigurationValue<DefinedGho
 
     protected override IEnumerable<DefinedGhostRole> AllAssignables => Roles.Roles.AllGhostRoles;
 
-    bool Virial.Configuration.GhostRoleFilter.Test(DefinedGhostRole ghostRole) => Test(ghostRole);
+    bool Virial.Configuration.AssignableFilter<DefinedGhostRole>.Test(DefinedGhostRole assignable) => Test(assignable);
+    void Virial.Configuration.AssignableFilter<DefinedGhostRole>.ToggleAndShare(Virial.Assignable.DefinedGhostRole assignable) => ToggleAndShare(assignable);
 }

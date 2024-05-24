@@ -13,7 +13,6 @@ namespace Nebula.Roles.Impostor;
 [NebulaRPCHolder]
 public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Sniper MyRole = new Sniper();
     private Sniper() : base("sniper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,AimAssistOption,DelayInAimAssistOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
     }
@@ -21,16 +20,18 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private IRelativeCoolDownConfiguration SnipeCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.sniper.snipeCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
-    static private FloatConfiguration ShotSizeOption = NebulaAPI.Configurations.Configuration("role.sniper.shotSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration ShotEffectiveRangeOption = NebulaAPI.Configurations.Configuration("role.sniper.shotEffectiveRange", (2.5f, 50f, 2.5f), 25f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration ShotNoticeRangeOption = NebulaAPI.Configurations.Configuration("role.sniper.shotNoticeRange", (2.5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Ratio);
-    static private BoolConfiguration StoreRifleOnFireOption = NebulaAPI.Configurations.Configuration("role.sniper.storeRifleOnFire", true);
-    static private BoolConfiguration StoreRifleOnUsingUtilityOption = NebulaAPI.Configurations.Configuration("role.sniper.storeRifleOnUsingUtility", false);
-    static private BoolConfiguration CanSeeRifleInShadowOption = NebulaAPI.Configurations.Configuration("role.sniper.canSeeRifleInShadow", false);
-    static private BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("role.sniper.canKillHidingPlayer", false);
-    static private BoolConfiguration AimAssistOption = NebulaAPI.Configurations.Configuration("role.sniper.aimAssist", false);
-    static private FloatConfiguration DelayInAimAssistOption = NebulaAPI.Configurations.Configuration("role.sniper.delayInAimAssistActivation", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second, () => AimAssistOption);
+    static private IRelativeCoolDownConfiguration SnipeCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sniper.snipeCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
+    static private FloatConfiguration ShotSizeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration ShotEffectiveRangeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotEffectiveRange", (2.5f, 50f, 2.5f), 25f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration ShotNoticeRangeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotNoticeRange", (2.5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Ratio);
+    static private BoolConfiguration StoreRifleOnFireOption = NebulaAPI.Configurations.Configuration("options.role.sniper.storeRifleOnFire", true);
+    static private BoolConfiguration StoreRifleOnUsingUtilityOption = NebulaAPI.Configurations.Configuration("options.role.sniper.storeRifleOnUsingUtility", false);
+    static private BoolConfiguration CanSeeRifleInShadowOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canSeeRifleInShadow", false);
+    static private BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillHidingPlayer", false);
+    static private BoolConfiguration AimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.aimAssist", false);
+    static private FloatConfiguration DelayInAimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.delayInAimAssistActivation", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second, () => AimAssistOption);
+
+    static public Sniper MyRole = new Sniper();
 
     [NebulaRPCHolder]
     public class SniperRifle : INebulaScriptComponent, IGameOperator
@@ -107,7 +108,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
         static private ISpriteLoader aimAssistSprite = SpriteLoader.FromResource("Nebula.Resources.SniperGuide.png", 100f);
         
         public SniperRifle? MyRifle = null;
-        public override bool HasVanillaKillButton => false;
+        bool RuntimeRole.HasVanillaKillButton => false;
 
         AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
         StaticAchievementToken? acTokenCommon = null;

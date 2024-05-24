@@ -7,11 +7,12 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
 using Virial.Helpers;
+using Virial.Runtime;
 using Virial.Text;
 
 namespace Nebula.Modules.ScriptComponents;
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class ModAbilityButton : INebulaScriptComponent, Virial.Components.AbilityButton, IGameOperator
 {
     public class AbilityButtonStructure
@@ -25,7 +26,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
         public TextComponent? label = null;
         public Image? image = null;
     }
-    public static void Load()
+    static ModAbilityButton()
     {
         EntityCommand.RegisterEntityDefinition("button", EntityCommand.GenerateDefinition(
             new Virial.Command.CommandStructureConverter<AbilityButtonStructure>()
@@ -381,7 +382,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.Abilit
 
 public static class ButtonEffect
 {
-    [NebulaPreLoad]
+    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
     public class KeyCodeInfo
     {
         public static string? GetKeyDisplayName(KeyCode keyCode)
@@ -408,7 +409,7 @@ public static class ButtonEffect
         }
 
         public Sprite Sprite => textureHolder.GetSprite(num);
-        public static void Load()
+        static KeyCodeInfo()
         {
             DividedSpriteLoader spriteLoader;
             spriteLoader = DividedSpriteLoader.FromResource("Nebula.Resources.KeyBindCharacters0.png", 100f, 18, 19, true);

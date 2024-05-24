@@ -62,7 +62,7 @@ public class ModNewsHistory
         {
             if (role.LocalizedName.ToUpper() == key)
             {
-                str = str.Replace(match.Value, role.DisplayName);
+                str = str.Replace(match.Value, role.DisplayColordName);
             }
         }
         str = str.Replace(match.Value, defaultString);

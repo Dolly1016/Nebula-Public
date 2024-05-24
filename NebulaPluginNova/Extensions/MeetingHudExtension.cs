@@ -27,7 +27,7 @@ public static class MeetingHudExtension
         ExileEvenIfTie = false;
         ExiledAll = null;
 
-        var deathPenalty = (int)(GeneralConfigurations.DeathPenaltyOption.GetFloat() * (float)(NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0f));
+        var deathPenalty = (int)(GeneralConfigurations.DeathPenaltyOption * (float)(NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0f));
 
         //DiscussionTimerを引けるだけ引いておいて、引き過ぎた分をVotingTimerに繰り越し
         DiscussionTimer -= deathPenalty;

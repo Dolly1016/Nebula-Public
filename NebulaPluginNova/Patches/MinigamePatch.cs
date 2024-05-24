@@ -127,7 +127,7 @@ class DoorMushroomPatch
 {
     static void Postfix(MushroomDoorSabotageMinigame __instance)
     {
-        if (GeneralConfigurations.FungleQuickPaceDoorMinigameOption)
+        if (GeneralConfigurations.FungleQuickPaceDoorMinigameOption.CurrentValue)
         {
             foreach (var m in __instance.mushrooms)
             {
@@ -191,7 +191,7 @@ public static class TaskStepPatch
 {
     public static void Prefix(NormalPlayerTask __instance)
     {
-        if (__instance.TaskType == TaskTypes.FixWiring && AmongUsUtil.CurrentMapId != 5) __instance.MaxStep = GeneralConfigurations.StepsOfWiringGameOption.GetMappedInt();
+        if (__instance.TaskType == TaskTypes.FixWiring && AmongUsUtil.CurrentMapId != 5) __instance.MaxStep = GeneralConfigurations.StepsOfWiringGameOption;
     }
 }
 

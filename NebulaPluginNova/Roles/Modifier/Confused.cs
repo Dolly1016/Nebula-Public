@@ -1,40 +1,40 @@
-﻿using Virial.Events.Game;
+﻿using Virial;
+using Virial.Assignable;
+using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
-public class Confused : ConfigurableStandardModifier
+public class Confused : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
-    static public Confused MyRole = new Confused();
-    public override string LocalizedName => "confused";
-    public override string CodeName => "CFD";
-    public override Color RoleColor => new Color(242f / 255f, 247f / 255f, 226f / 255f);
-
-    private NebulaConfiguration ChanceOfShuffleOption = null!;
-    private NebulaConfiguration NumOfMaxShuffledPairsOption = null!;
-
-    protected override void LoadOptions()
+    private Confused() : base("confused", "CFD", new(242,247,226), [ChanceOfShuffleOption, NumOfMaxShuffledPairsOption])
     {
-        base.LoadOptions();
 
-        ChanceOfShuffleOption = new NebulaConfiguration(RoleConfig, "chanceOfShuffle", null, 10f,100f,10f,60f,60f) { Decorator = NebulaConfiguration.PercentageDecorator };
-        NumOfMaxShuffledPairsOption = new NebulaConfiguration(RoleConfig, "numOfMaxShuffledPairs", null, 1, 7, 3, 3);
     }
-    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, IBindPlayer
+
+    static private IntegerConfiguration ChanceOfShuffleOption = NebulaAPI.Configurations.Configuration("options.role.confused.chanceOfShuffle", (10,100,10),60, decorator: val => val + "%");
+    static private IntegerConfiguration NumOfMaxShuffledPairsOption = NebulaAPI.Configurations.Configuration("options.role.confused.numOfMaxShuffledPairs", (1, 7), 3);
+
+    static public Confused MyRole = new Confused();
+
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
-        public override AbstractModifier Role => MyRole;
-        public override bool CanBeAwareAssignment => NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
+        bool RuntimeAssignable.CanBeAwareAssignment => NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
 
         public Instance(GamePlayer player) : base(player)
         {
         }
 
-        public override void DecoratePlayerName(ref string text, ref Color color)
+        void RuntimeAssignable.OnActivated() { }
+
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) text += " 〻".Color(MyRole.RoleColor);
+            if (canSeeAllInfo) name += " 〻".Color(MyRole.UnityColor);
         }
 
 
@@ -46,9 +46,9 @@ public class Confused : ConfigurableStandardModifier
 
             var alives = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner).ToArray();
             var randomArray = Helpers.GetRandomArray(alives.Length);
-            int maxPairs = Mathf.Min(MyRole.NumOfMaxShuffledPairsOption.GetMappedInt(), alives.Length / 2);
+            int maxPairs = Mathf.Min(NumOfMaxShuffledPairsOption, alives.Length / 2);
 
-            float prob = MyRole.ChanceOfShuffleOption.GetFloat();
+            float prob = ChanceOfShuffleOption;
 
             bool shuffled = false;
             for (int i = 0; i < maxPairs; i++)

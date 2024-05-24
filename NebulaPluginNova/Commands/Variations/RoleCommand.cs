@@ -39,7 +39,7 @@ public class RoleCommand : ICommand
             return task.Chain(_ => arguments[1].AsValue<Virial.Assignable.DefinedRole>(env).Action(role => {
                 using (RPCRouter.CreateSection("RoleCommand"))
                 {
-                    foreach (var p in players) PlayerModInfo.RpcSetAssignable.Invoke((p.PlayerId, role.Id, roleArgs, Roles.RoleType.Role));
+                    foreach (var p in players) PlayerModInfo.RpcSetAssignable.Invoke((p.PlayerId, role.Id, roleArgs, RoleType.Role));
                 }
             }));
         }

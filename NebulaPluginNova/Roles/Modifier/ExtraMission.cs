@@ -6,22 +6,16 @@ using Virial.Game;
 namespace Nebula.Roles.Modifier;
 
 [NebulaRPCHolder]
-public class ExtraMission : ConfigurableStandardModifier
+public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
+    private ExtraMission() : base("extraMission", "EXM", new(222, 69, 102)) { }
+
+
     static public ExtraMission MyRole = new ExtraMission();
-    public override string LocalizedName => "extraMission";
-    public override string CodeName => "EXM";
-    public override Color RoleColor => new Color(222f / 255f, 69f / 255f, 102f / 255f);
-
-    protected override void LoadOptions()
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
-        base.LoadOptions();
-    }
-
-    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    public class Instance : ModifierInstance, RuntimeModifier
-    {
-        public override AbstractModifier Role => MyRole;
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
         public GamePlayer? target { get; set; } = null!;
         public Instance(GamePlayer player) : base(player)
         {
@@ -35,14 +29,15 @@ public class ExtraMission : ConfigurableStandardModifier
             }
         }
 
-        public override void DecoratePlayerName(ref string text, ref Color color)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (AmongUsUtil.IsInGameScene && (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) && !AmOwner) text += $" ({ (target?.Name ?? "Undefined") })".Color(MyRole.RoleColor);
+            if (canSeeAllInfo) name += $" ({ (target?.Name ?? "Undefined") })".Color(MyRole.UnityColor);
         }
 
-        public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
+        [Local]
+        void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
         {
-            if (player == target) color = MyRole.RoleColor;
+            if(target == ev.Player) ev.Color = new(MyRole.UnityColor);
         }
 
         [OnlyMyPlayer]
@@ -77,8 +72,12 @@ public class ExtraMission : ConfigurableStandardModifier
                 new StaticAchievementToken("extraMission.common2");
             }
         }
-        public override string? GetExtraTaskText() => Language.Translate("role.extraMission.taskText").Replace("%PLAYER%", target?.Name ?? "Undefined").Color((target?.IsDead ?? false) ? Color.green : MyRole.RoleColor);
-        
+
+        [Local]
+        void AppendExtraTaskText(PlayerTaskTextLocalEvent ev)
+        {
+            ev.AppendText(Language.Translate("role.extraMission.taskText").Replace("%PLAYER%", target?.Name ?? "Undefined").Color((target?.IsDead ?? false) ? Color.green : MyRole.UnityColor));
+        }
     }
 
     public static RemoteProcess<(byte player, byte target)> RpcSetExtraMissionTarget = new(

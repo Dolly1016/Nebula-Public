@@ -9,7 +9,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
 file class Ghost : INebulaScriptComponent, IGameOperator
 {
     SpriteRenderer renderer;
@@ -77,7 +77,6 @@ public class GhostAndFlashAbility : IGameOperator
 
 public class Seer : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Seer MyRole = new Seer();
     private Seer():base("seer", new(73,166,104), RoleCategory.CrewmateRole, Crewmate.MyTeam, [GhostDurationOption, CanSeeGhostsInShadowOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
@@ -85,9 +84,10 @@ public class Seer : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("role.seer.ghostDuration", (15f,300f,15f),90f,FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("role.seer.canSeeGhostsInShadow", false);
+    static private FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("options.role.seer.ghostDuration", (15f,300f,15f),90f,FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("options.role.seer.canSeeGhostsInShadow", false);
 
+    static public Seer MyRole = new Seer();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

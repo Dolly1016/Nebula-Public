@@ -24,29 +24,18 @@ public class DestroyerAssets
 }
 public class Destroyer : DefinedRoleTemplate, DefinedRole
 {
-    static public Destroyer MyRole = new Destroyer();
     private Destroyer() : base("destroyer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [KillCoolDownOption, PhasesOfDestroyingOption, KillSEStrengthOption,LeaveKillEvidenceOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagBeginner);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("role.destroyer.destroyCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 35f, (-30f, 30f, 2.5f), 10f, (0.5f, 5f, 0.125f), 1.5f);
-    static private IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("role.destroyer.phasesOfDestroying", (1, 10), 3);
-    static private FloatConfiguration KillSEStrengthOption = NebulaAPI.Configurations.Configuration("role.destroyer.killSEStrength", (1f,20f,0.5f),3.5f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration LeaveKillEvidenceOption = NebulaAPI.Configurations.Configuration("role.destroyer.leaveKillEvidence", true);
+    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.destroyer.destroyCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 35f, (-30f, 30f, 2.5f), 10f, (0.5f, 5f, 0.125f), 1.5f);
+    static private IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.phasesOfDestroying", (1, 10), 3, decorator: val => val + ($" ({string.Format("{0:#.#}",3.2f + (2.05f * val))}{Language.Translate("options.sec")})").Color(Color.gray));
+    static private FloatConfiguration KillSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.killSEStrength", (1f,20f,0.5f),3.5f, FloatConfigurationDecorator.Ratio);
+    static private BoolConfiguration LeaveKillEvidenceOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.leaveKillEvidence", true);
 
-    /*
-        PhasesOfDestroyingOption.Shower = () =>
-         {
-             return PhasesOfDestroyingOption.DefaultShowerString
-                 + StringExtensions.Color(
-                     " (" +
-                     (3.2f + (2.05f * PhasesOfDestroyingOption.CurrentValue)).ToString()
-                     + "s)", Color.gray);
-         };
-        */
-    
+    static public Destroyer MyRole = new Destroyer();
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -55,7 +44,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
 
         private ModAbilityButton? destroyButton = null;
         
-        public override bool HasVanillaKillButton => false;
+        bool RuntimeRole.HasVanillaKillButton => false;
         public Instance(GamePlayer player) : base(player)
         {
         }

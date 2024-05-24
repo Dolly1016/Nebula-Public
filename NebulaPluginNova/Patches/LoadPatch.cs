@@ -46,14 +46,14 @@ public static class LoadPatch
         {
             if(PreloadManager.LastException != null)
             {
-                (var excep, var type) = PreloadManager.LastException.Value;
+                var excep = PreloadManager.LastException;
 
-                string errorText = $"[{excep.GetType().Name}] {excep.Message}\n on {type.FullName}\n{excep.StackTrace}";
+                string errorText = $"[{excep.GetType().Name}] {excep.Message}\n{excep.StackTrace}";
                 {
                     var inner = excep;
                     while (inner.InnerException != null) { 
                         inner = inner.InnerException;
-                        errorText += $"\ncaused by [{inner.GetType().Name}] {inner.Message}\n on {type.FullName}\n{inner.StackTrace}";
+                        errorText += $"\ncaused by [{inner.GetType().Name}] {inner.Message}\n{inner.StackTrace}";
                     }
                 }
 

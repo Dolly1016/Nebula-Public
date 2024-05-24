@@ -1,14 +1,122 @@
 ﻿using Nebula.Behaviour;
+using Nebula.Roles;
+using Nebula.Roles.Abilities;
+using Nebula.Roles.Crewmate;
+using Nebula.Roles.Impostor;
 using System.Reflection;
+using Virial;
+using Virial.Assignable;
 using Virial.DI;
-using Virial.Game;
+using Virial.Runtime;
+using static Virial.Attributes.NebulaPreprocess;
 
 namespace Nebula.Modules;
 
-[NebulaPreLoad]
+//IL Repackの都合で、APIの引数付き属性を使用できないので、子の属性と引数をNoS内で用意する。NoSではこちらを使うこと。
+public enum PreprocessPhaseForNoS
+{
+    PostBuildNoS,
+    LoadAddons,
+    CompileAddons,
+    PostLoadAddons,
+    PreRoles,
+    Roles,
+    FixRoles,
+    PostRoles,
+    PreFixStructure,
+    FixStructure,
+    PostFixStructure
+}
+
+//IL Repackの都合で、APIの引数付き属性を使用できないので、子の属性をNoS内で用意する。NoSではこちらを使うこと。
+[AttributeUsage(AttributeTargets.Class)]
+internal class NebulaPreprocessForNoS : NebulaPreprocess
+{
+    public NebulaPreprocessForNoS(PreprocessPhaseForNoS phase)
+    {
+        this.MyPhase = Enum.Parse<PreprocessPhase>(phase.ToString());
+    }
+}
+
+internal class NebulaPreprocessorImpl : NebulaPreprocessor
+{
+    static internal NebulaPreprocessor Instance { get; private set; } = new NebulaPreprocessorImpl();
+
+    DIManager NebulaPreprocessor.DIManager => DIManager.Instance;
+    bool NebulaPreprocessor.FinishPreprocess => PreloadManager.FinishedPreload;
+
+    private NebulaPreprocessorImpl()
+    {
+        NebulaAPI.preprocessor = this;
+        preprocessList = new List<IEnumerator>[(int)PreprocessPhase.NumOfPhases];
+
+        for (int i = 0; i < preprocessList.Length; i++) preprocessList[i] = new();
+    }
+
+    void NebulaPreprocessor.PickUpPreprocess(Assembly assembly)
+    {
+        foreach(var t in assembly.GetTypes())
+        {
+            var attr = t.GetCustomAttribute<NebulaPreprocess>();
+            if (attr == null) continue;
+
+            var method = t.GetMethod("Preprocess", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, [typeof(NebulaPreprocessor)]);
+            if (method == null)
+            {
+                preprocessList[(int)attr.MyPhase].Add(((Action)(() => System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle))).ToCoroutine());
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, t.Name + " doesn't have preprocessor. its static constructor is called instead.");
+            }
+            else if(method.ReturnType == typeof(void))
+                preprocessList[(int)attr.MyPhase].Add(((Action)(() => method.Invoke(null, [this]))).ToCoroutine());
+            else if (method.ReturnType == typeof(IEnumerator))
+                preprocessList[(int)attr.MyPhase].Add((method.Invoke(null, [this]) as IEnumerator)!);
+            else
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, t.Name + " has invalid preprocess that returns unsupported type.");
+        }
+    }
+
+    void NebulaPreprocessor.RegisterAssignable(DefinedAssignable assignable)
+    {
+        if (assignable is DefinedRole dr)
+            Roles.Roles.Register(dr);
+        else if (assignable is DefinedModifier dm)
+            Roles.Roles.Register(dm);
+        else if (assignable is DefinedGhostRole dgr)
+            Roles.Roles.Register(dgr);
+        else
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, assignable.GetType().Name + " is unknown type.");
+    }
+
+    RoleTeam NebulaPreprocessor.CreateTeam(string translationKey, Virial.Color color, TeamRevealType revealType) => new Team(translationKey, color, revealType);
+
+    void NebulaPreprocessor.SchedulePreprocess(PreprocessPhase phase, Action process) => (this as NebulaPreprocessor).SchedulePreprocess(phase, process.ToCoroutine());
+    
+    void NebulaPreprocessor.SchedulePreprocess(PreprocessPhase phase, IEnumerator process)
+    {
+        preprocessList[(int)phase].Add(process);
+    }
+
+    IEnumerator NebulaPreprocessor.RunPreprocess(Virial.Attributes.PreprocessPhase preprocess)
+    {
+        for(int i=0; i < preprocessList[(int)preprocess].Count; i++) {
+            yield return preprocessList[(int)preprocess][i];
+        }
+    }
+
+    IEnumerator NebulaPreprocessor.SetLoadingText(string text)
+    {
+        Patches.LoadPatch.LoadingText = text;
+        yield break;
+    }
+
+    private List<IEnumerator>[] preprocessList;
+}
+
+
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public static class ToolsInstaller
 {
-    public static IEnumerator CoLoad()
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         if (NebulaPlugin.Log.IsPreferential)
         {
@@ -43,14 +151,15 @@ public static class PreloadManager
         VanillaAsset.LoadAssetAtInitialize();
     }
 
-    public static (Exception, Type)? LastException = null;
+    public static Exception? LastException = null;
     static private IEnumerator Preload()
     {
-        DIManager.Instance.RegisterContainer(()=>new NebulaGameManager());
+        DIManager.Instance.RegisterContainer(() => new NebulaGameManager());
         DIManager.Instance.RegisterContainer(() => new PlayerModInfo());
+        DIManager.Instance.RegisterContainer(() => new GameModeFreePlayImpl());
+        DIManager.Instance.RegisterContainer(() => new GameModeStandardImpl());
 
         //IModule<Virial.Game.Game>
-        DIManager.Instance.RegisterGeneralModule<Virial.Game.Game>(() => GeneralConfigurations.CurrentGameMode.InstantiateModule());
         DIManager.Instance.RegisterModule(() => new Synchronizer());
         DIManager.Instance.RegisterModule(() => new MeetingPlayerButtonManager());
         DIManager.Instance.RegisterModule(() => new MeetingOverlayHolder());
@@ -61,125 +170,27 @@ public static class PreloadManager
         //IModule<Virial.Game.Player>
         DIManager.Instance.RegisterModule(() => new PlayerTaskState());
 
-        void OnRaisedExcep(Exception exception, Type type)
+        //IModule<Virial.Game.IGameModeFreePlay>
+        DIManager.Instance.RegisterGeneralModule<Virial.Game.IGameModeFreePlay>(() => new MetaAbility());
+
+        //IModule<Virial.Game.IGameModeStandard>
+        DIManager.Instance.RegisterModule(() => new ImpostorGameRule());
+        DIManager.Instance.RegisterModule(() => new CrewmateGameRule());
+
+
+
+        //NoSのプリプロセッサを取得
+        NebulaPreprocessorImpl.Instance.PickUpPreprocess(typeof(PreloadManager).Assembly);
+
+        void OnRaisedExcep(Exception exception)
         {
-            LastException ??= (exception, type);
+            LastException ??= exception;
         }
 
-        Patches.LoadPatch.LoadingText = "Checking Component Dependencies";
-        yield return null;
+        yield return NebulaPreprocessorImpl.Instance.SetLoadingText("Checking Component Dependencies");
 
-        var types = Assembly.GetAssembly(typeof(RemoteProcessBase))?.GetTypes().Where((type) => type.IsDefined(typeof(NebulaPreLoad)));
-        if (types != null)
-        {
-            Dictionary<Type, (Reference<int> leftPreLoad, HashSet<Type> postLoad, bool isFinalizer)> dependencyMap = new();
+        for(int i=0;i<(int)PreprocessPhase.NumOfPhases;i++) yield return NebulaPreprocessorImpl.Instance.RunPreprocess((PreprocessPhase)i).HandleException(OnRaisedExcep);
 
-            foreach (var type in types) dependencyMap[type] = (new Reference<int>().Set(0), new(), type.GetCustomAttribute<NebulaPreLoad>()!.IsFinalizer);
-
-            //有向グラフを作る
-            foreach (var type in types)
-            {
-                var myAttr = type.GetCustomAttribute<NebulaPreLoad>()!;
-                dependencyMap.TryGetValue(type, out var myInfo);
-
-                foreach (var pre in myAttr.PreLoadTypes)
-                {
-                    if (dependencyMap.TryGetValue(pre, out var preInfo))
-                    {
-                        //NebulaPreLoadの対象の場合は順番を考慮する
-                        if (preInfo.postLoad.Add(type))
-                        {
-                            myInfo.leftPreLoad.Update(v => v + 1);
-                        }
-                    }
-                    else
-                    {
-                        //NebulaPreLoadの対象でない場合はそのまま読み込む
-                        System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(pre.TypeHandle);
-                    }
-                }
-
-                foreach (var post in myAttr.PostLoadTypes)
-                {
-                    if (dependencyMap.TryGetValue(post, out var postInfo))
-                    {
-                        //NebulaPreLoadの対象の場合は順番を考慮する
-                        if (myInfo.postLoad.Add(type)) postInfo.leftPreLoad.Update(v => v + 1);
-                    }
-                    //NebulaPreLoadの対象でない場合はなにもしない
-                }
-            }
-
-            Queue<Type> waitingList = new(dependencyMap.Where(tuple => tuple.Value.leftPreLoad.Value == 0 && !tuple.Value.isFinalizer).Select(t => t.Key));
-            Queue<Type> waitingFinalizerList = new(dependencyMap.Where(tuple => tuple.Value.leftPreLoad.Value == 0 && tuple.Value.isFinalizer).Select(t => t.Key));
-
-            //読み込み順リスト
-            List<Type> loadList = new();
-
-            while (waitingList.Count > 0 || waitingFinalizerList.Count > 0)
-            {
-                var type = (waitingList.Count > 0 ? waitingList : waitingFinalizerList).Dequeue();
-
-                loadList.Add(type);
-                foreach (var post in dependencyMap[type].postLoad)
-                {
-                    if (dependencyMap.TryGetValue(post, out var postInfo))
-                    {
-                        postInfo.leftPreLoad.Update(v => v - 1);
-                        if (postInfo.leftPreLoad.Value == 0) (postInfo.isFinalizer ? waitingFinalizerList : waitingList).Enqueue(post);
-                    }
-                }
-            }
-
-            //解決状況を出力
-            var stringList = loadList.Join(t => "  -" + t.FullName, "\n");
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, "Dependencies resolved sequentially.\n" + stringList);
-
-            if (loadList.Count < dependencyMap.Count)
-            {
-                var errorStringList = dependencyMap.Where(d => d.Value.leftPreLoad.Value > 0).Join(t => "  -" + t.Key.FullName, "\n");
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Components that could not be resolved.\n" + errorStringList);
-
-                throw new Exception("Failed to resolve dependencies.");
-            }
-
-            IEnumerator Preload(Type type)
-            {
-                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-
-                var loadMethod = type.GetMethod("Load");
-                if (loadMethod != null)
-                {
-                    try
-                    {
-                        loadMethod.Invoke(null, null);
-                    }
-                    catch (Exception e)
-                    {
-                        OnRaisedExcep(e, type);
-                        NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "Preloaded type " + type.Name + " has Load with unregulated parameters.");
-                    }
-                }
-
-                var coloadMethod = type.GetMethod("CoLoad");
-                if (coloadMethod != null)
-                {
-                    IEnumerator? coload = null;
-                    try
-                    {
-                        coload = (IEnumerator)coloadMethod.Invoke(null, null)!;
-                    }
-                    catch (Exception e)
-                    {
-                        OnRaisedExcep(e, type);
-                        NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "Preloaded type " + type.Name + " has CoLoad with unregulated parameters.");
-                    }
-                    if (coload != null) yield return coload.HandleException((e) => OnRaisedExcep(e, type));
-                }
-            }
-
-            foreach (var type in loadList) yield return Preload(type);
-        }
         FinishedPreload = true;
     }
 

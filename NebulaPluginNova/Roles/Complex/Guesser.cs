@@ -1,6 +1,7 @@
 ﻿using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -13,14 +14,14 @@ static file class GuesserSystem
     static TextAttributeOld ButtonAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new(1.3f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(2f, 1f, 2f);
     public static MetaScreen LastGuesserWindow = null!;
 
-    static public MetaScreen OpenGuessWindow(int leftGuessPerMeeting, int leftGuess,Action<AbstractRole> onSelected)
+    static public MetaScreen OpenGuessWindow(int leftGuessPerMeeting, int leftGuess,Action<DefinedRole> onSelected)
     {
         var window = MetaScreen.GenerateWindow(new(7.4f, 4.2f), HudManager.Instance.transform, new Vector3(0, 0, -50f), true, false);
 
         MetaWidgetOld widget = new();
 
         MetaWidgetOld inner = new();
-        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess && r.IsSpawnable), r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayName.Color(r.RoleColor), PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess && r.IsSpawnable), r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColordName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
         MetaWidgetOld.ScrollView scroller = new(new(6.6f, 3.8f), inner, true) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
         widget.Append(scroller);
 
@@ -50,7 +51,7 @@ static file class GuesserSystem
     static private SpriteLoader targetSprite = SpriteLoader.FromResource("Nebula.Resources.TargetIcon.png", 115f);
     static public void OnMeetingStart(int leftGuess,Action guessDecrementer)
     {
-        int leftGuessPerMeeting = Guesser.NumOfGuessPerMeetingOption.GetMappedInt();
+        int leftGuessPerMeeting = Guesser.NumOfGuessPerMeetingOption;
 
         NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new(targetSprite,
             state => {
@@ -143,72 +144,48 @@ static file class GuesserSystem
 
 public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Guesser MyNiceRole = new(false);
-    static public Guesser MyEvilRole = new(true);
-
     public bool IsEvil { get; private set; }
 
-
-    public override IEnumerable<IAssignableBase> RelatedOnConfig() { if(MyNiceRole != this) yield return MyNiceRole; if (MyEvilRole != this) yield return MyEvilRole; yield return GuesserModifier.MyRole; }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
 
-    static public NebulaConfiguration NumOfGuessOption = null!;
-    static public NebulaConfiguration NumOfGuessPerMeetingOption = null!;
-    static public NebulaConfiguration CanCallEmergencyMeetingOption = null!;
-    static public NebulaConfiguration GuessableFilterEditorOption = null!;
+    static internal IntegerConfiguration NumOfGuessOption = NebulaAPI.Configurations.Configuration("options.role.guesser.numOfGuess", (1, 15), 3);
+    static internal IntegerConfiguration NumOfGuessPerMeetingOption = NebulaAPI.Configurations.Configuration("options.role.guesser.numOfGuessPerMeeting", (1, 15), 1);
+    static internal BoolConfiguration CanCallEmergencyMeetingOption = NebulaAPI.Configurations.Configuration("options.role.guesser.canCallEmergencyMeeting", true);
+    static internal IConfiguration GuessableFilterEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "role.guesser.guessableFilter", _ => OpenFilterEditor()));
+
+    static public Guesser MyNiceRole = new(false);
+    static public Guesser MyEvilRole = new(true);
 
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => assignable != GuesserModifier.MyRole;
     
     public Guesser(bool isEvil) : base(
         isEvil ? "evilGuesser" : "niceGuesser", 
-        new(isEvil ? Palette.ImpostorRed : new Color(1f, 1f, 0f)), 
+        isEvil ? new(Palette.ImpostorRed) : new(255, 255, 0f), 
         isEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole,
-        isEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam)
+        isEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam,
+        [NumOfGuessOption, NumOfGuessPerMeetingOption, CanCallEmergencyMeetingOption, GuessableFilterEditorOption])
     {
         IsEvil = isEvil;
+        ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic);
+        ConfigurationHolder?.ScheduleAddRelated(() => [isEvil ? MyNiceRole.ConfigurationHolder! : MyEvilRole.ConfigurationHolder!, GuesserModifier.MyRole.ConfigurationHolder!]);
     }
 
-    public static NebulaConfiguration GenerateCommonEditor(ConfigurationHolder holder) => GenerateCommonEditor(holder, NumOfGuessOption, NumOfGuessPerMeetingOption, CanCallEmergencyMeetingOption, GuessableFilterEditorOption);
-
-    private static void OpenFilterEditor(MetaScreen? screen = null)
+    private static void OpenFilterEditor()
     {
-        if (!screen) screen = MetaScreen.GenerateWindow(new Vector2(5f, 3.2f), HudManager.Instance.transform, Vector3.zero, true, true);
-        
-        MetaWidgetOld inner = new();
-        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuessOption != null), (role) => new MetaWidgetOld.Button(() => { role.CanBeGuessOption?.ChangeValue(true); OpenFilterEditor(screen); }, NebulaSettingMenu.RelatedInsideButtonAttr)
-        {
-            RawText = role.DisplayName.Color(role.RoleColor),
-            PostBuilder = (button, renderer, text) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask,
-            Alignment = IMetaWidgetOld.AlignmentOption.Center,
-            Color = role.CanBeGuessOption! ? Color.white : new Color(0.14f, 0.14f, 0.14f)
-        }, 3, -1, 0, 0.6f);
-
-        screen!.SetWidget(new MetaWidgetOld.ScrollView(new(5f, 3.1f), inner, true) { ScrollerTag = "guessableFilter" });
+        RoleOptionHelper.OpenFilterScreen("guessableFilter", Roles.AllRoles.Where(r => r.CanBeGuessDefault), r => r.CanBeGuess, r => r.CanBeGuessVariable!.CurrentValue = !r.CanBeGuess);
     }
 
-    protected override void LoadOptions()
+    public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(Configuration.ConfigurationHolder.TagChaotic);
-
-        NumOfGuessOption ??= new NebulaConfiguration(null, "role.guesser.numOfGuess", null, 1, 15, 3, 3);
-        NumOfGuessPerMeetingOption ??= new NebulaConfiguration(null, "role.guesser.numOfGuessPerMeeting", null, 1, 15, 1, 1);
-        CanCallEmergencyMeetingOption ??= new NebulaConfiguration(null, "role.guesser.canCallEmergencyMeeting", null, true, true);
-        GuessableFilterEditorOption = new NebulaConfiguration(null, () => new MetaWidgetOld.Button(()=>OpenFilterEditor(), TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = "role.guesser.guessableFilter" });
-
-        GenerateCommonEditor(RoleConfig);
-    }
-
-    public class NiceInstance : Crewmate.Crewmate.Instance, RuntimeRole, IBindPlayer
-    {
-        public override AbstractRole Role => MyNiceRole;
+        DefinedRole RuntimeRole.Role => MyNiceRole;
         private int leftGuess = NumOfGuessOption;
         public NiceInstance(GamePlayer player, int[] arguments) : base(player)
         {
-            if(arguments.Length>=1)leftGuess = arguments[0];
+            if (arguments.Length >= 1) leftGuess = arguments[0];
         }
+
+        void RuntimeAssignable.OnActivated() {}
 
         [Local]
         void OnMeetingStart(MeetingStartEvent ev) => GuesserSystem.OnMeetingStart(leftGuess, () => leftGuess--);
@@ -220,19 +197,20 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
 
         [Local]
         void OnGameEnd(EndState endState) => GuesserSystem.OnGameEnd(MyPlayer);
-        
 
         bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, RuntimeRole, IBindPlayer
+    public class EvilInstance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyEvilRole;
+        DefinedRole RuntimeRole.Role => MyEvilRole;
         private int leftGuess = NumOfGuessOption;
         public EvilInstance(GamePlayer player, int[] arguments) : base(player)
         {
             if (arguments.Length >= 1) leftGuess = arguments[0];
         }
+
+        void RuntimeAssignable.OnActivated() { }
 
         [Local]
         void OnMeetingStart(MeetingStartEvent ev) => GuesserSystem.OnMeetingStart(leftGuess, () => leftGuess--);
@@ -249,34 +227,32 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
     }
 }
 
-public class GuesserModifier : ConfigurableStandardModifier, HasCitation
+public class GuesserModifier : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, HasCitation
 {
     static public GuesserModifier MyRole = new GuesserModifier();
-
-    public override string LocalizedName => "guesser";
-    public override string CodeName => "GSR";
-    public override Color RoleColor => Guesser.MyNiceRole.RoleColor;
-    public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return Guesser.MyNiceRole; yield return Guesser.MyEvilRole; }
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        RoleConfig.AddTags(ConfigurationHolder.TagChaotic);
-
-        Guesser.GenerateCommonEditor(RoleConfig);
+    private GuesserModifier() : base("guesser", "GSR", new(255, 255, 0)) {
+        ConfigurationHolder?.ScheduleAddRelated(() => [Guesser.MyNiceRole.ConfigurationHolder!, Guesser.MyEvilRole.ConfigurationHolder!]);
     }
+    
+    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    public class Instance : ModifierInstance, IBindPlayer, RuntimeModifier
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
-        public override AbstractModifier Role => MyRole;
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
         public int LeftGuess = Guesser.NumOfGuessOption;
 
         public Instance(GamePlayer player,int[] arguments) : base(player){
             if (arguments.Length > 0)LeftGuess = arguments[0];
         }
+
+        void RuntimeAssignable.OnActivated() { }
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        {
+            if (AmOwner || canSeeAllInfo) name += " ⊕".Color(MyRole.UnityColor);
+        }
+
 
         [Local]
         void OnMeetingStart(MeetingStartEvent ev)
@@ -288,16 +264,11 @@ public class GuesserModifier : ConfigurableStandardModifier, HasCitation
 
         [Local, OnlyMyPlayer]
         void OnDead(PlayerDieEvent ev) => GuesserSystem.OnDead();
-        
-        public override void DecoratePlayerName(ref string text, ref Color color)
-        {
-            if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) text += " ⊕".Color(MyRole.RoleColor);
-        }
 
         [Local]
         void OnGameEnd(GameEndEvent ev) => GuesserSystem.OnGameEnd(MyPlayer);
 
-        public override string? IntroText => Language.Translate("role.guesser.blurb");
+        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.guesser.blurb");
 
         bool RuntimeAssignable.CanCallEmergencyMeeting => Guesser.CanCallEmergencyMeetingOption;
     }

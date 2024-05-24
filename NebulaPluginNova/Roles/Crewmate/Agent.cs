@@ -11,8 +11,6 @@ namespace Nebula.Roles.Crewmate;
 
 public class Agent : DefinedRoleTemplate, DefinedRole
 {
-    static public Agent MyRole = new Agent();
-
     private Agent() : base("agent", new(166, 183, 144), RoleCategory.CrewmateRole, Crewmate.MyTeam, [VentConfiguration, NumOfExemptedTasksOption, NumOfExtraTasksOption, SuicideIfSomeoneElseCompletesTasksBeforeAgentOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
@@ -21,10 +19,12 @@ public class Agent : DefinedRoleTemplate, DefinedRole
     
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private IntegerConfiguration NumOfExemptedTasksOption = NebulaAPI.Configurations.Configuration("role.agent.numOfExemptedTasks", (1, 8), 3);
-    static private IntegerConfiguration NumOfExtraTasksOption = NebulaAPI.Configurations.Configuration("role.agent.numOfExtraTasks", (0, 8), 3);
-    static private BoolConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = NebulaAPI.Configurations.Configuration("role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent", false);
+    static private IntegerConfiguration NumOfExemptedTasksOption = NebulaAPI.Configurations.Configuration("options.role.agent.numOfExemptedTasks", (1, 8), 3);
+    static private IntegerConfiguration NumOfExtraTasksOption = NebulaAPI.Configurations.Configuration("options.role.agent.numOfExtraTasks", (0, 8), 3);
+    static private BoolConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = NebulaAPI.Configurations.Configuration("options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent", false);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.agent.vent", false, (0, 16), 3, null, -1f, (2.5f, 30f, 2.5f), 10f);
+
+    static public Agent MyRole = new Agent();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

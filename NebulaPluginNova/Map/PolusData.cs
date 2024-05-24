@@ -25,9 +25,9 @@ public class PolusData : MapData
         //Storage
         new(19.4f, -11.2f),
         //オフィス左下
-        new(18f, -24.5f),
+        new(18f, -24.5f),new(14.5f, -24.2f),
         //オフィス
-        new(18.6f, -21.5f), new(20.2f, -19.2f), new(19.6f, -17.6f), new(19.6f, -16.4f), new(26.5f, -17.4f),
+        new(18.6f, -21.5f), new(20.2f, -19.2f), new(19.6f, -17.6f), new(19.6f, -16.4f), new(26.5f, -17.4f),new(17.3f,-18.6f),new(22.3f,-18.6f),
         //アドミン
         new(20f, -22.5f), new(21.4f, -25.2f), new(22.4f, -22.6f), new(25f, -20.8f),
         //デコン（左）
@@ -49,6 +49,6 @@ public class PolusData : MapData
     };
 
     protected override Vector2[] MapArea => MapPositions;
-
+    protected override Vector2[] NonMapArea => [];
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Laboratory, SystemTypes.Comms, SystemTypes.Electrical };
 }

@@ -45,16 +45,16 @@ internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
     {
         this.Title = new TranslateTextComponent(id);
         this.val = new BoolConfigurationValue(id, defaultValue);
-        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Center,
+        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(()=>ValueAsDisplayString)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } }
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
+            new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new LazyTextComponent(() => ValueAsDisplayString)) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }, Color = Color.Lerp(Color.white, GetValue() ? Color.cyan : Color.red ,0.65f) }
             );
     }
 
     private string ValueAsDisplayString => NebulaAPI.instance.Language.Translate(val.CurrentValue ? "options.switch.on" : "options.switch.off");
-    internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
+    internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString.Color(Color.Lerp(Color.white, GetValue() ? Color.cyan : Color.red, 0.65f));
 
     internal Func<bool>? Predicate = null;
     internal override bool IsShown => Predicate?.Invoke() ?? true;
@@ -65,6 +65,7 @@ internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
     internal override bool GetValue() => val.CurrentValue;
 
     internal override void UpdateValue(bool value) => val.CurrentValue = value;
+    internal override void ChangeValue(bool increase, bool loopAtTerminal = true) => val.CurrentValue = !val.CurrentValue;
 }
 
 internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfiguration
@@ -73,15 +74,16 @@ internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfigurat
     private GUIWidgetSupplier editor;
     private IOrderedSharableVariable<int> val;
 
-    public IntegerConfigurationImpl(string id, int[] selection, int defaultValue)
+    public IntegerConfigurationImpl(string id, int[] selection, int defaultValue, TextComponent? title)
     {
-        this.Title = new TranslateTextComponent(id);
+        this.Title = title ?? new TranslateTextComponent(id);
         this.val = new IntegerConfigurationValue(id, selection, defaultValue);
-        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Center,
+        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
+            new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => ValueAsDisplayString)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } }
+            new GUISpinButton(GUIAlignment.Center, v => { val.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
             );
     }
 
@@ -91,9 +93,9 @@ internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfigurat
         return this;
     }
 
-    protected virtual string ValueAsDisplayString { get { string str = val.CurrentValue.ToString(); str = Decorator?.Invoke(str) ?? str; return str; } }
+    protected virtual string ValueAsDisplayString { get => Decorator?.Invoke(val.CurrentValue) ?? val.CurrentValue.ToString(); }
     internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
-    private Func<string, string>? Decorator;
+    internal Func<int, string>? Decorator = null;
 
     internal Func<bool>? Predicate = null;
     internal override bool IsShown => Predicate?.Invoke() ?? true;
@@ -105,6 +107,7 @@ internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfigurat
     internal override int GetValue() => val.CurrentValue;
 
     internal override void UpdateValue(int value) => val.CurrentValue = value;
+    internal override void ChangeValue(bool increase, bool loopAtTerminal = true) => val.ChangeValue(increase, loopAtTerminal);
 }
 
 internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
@@ -113,15 +116,16 @@ internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
     private GUIWidgetSupplier editor;
     private IOrderedSharableVariable<float> val;
 
-    public FloatConfigurationImpl(string id, float[] selection, float defaultValue)
+    public FloatConfigurationImpl(string id, float[] selection, float defaultValue, TextComponent? title)
     {
-        this.Title = new TranslateTextComponent(id);
+        this.Title = title ?? new TranslateTextComponent(id);
         this.val = new FloatConfigurationValue(id, selection, defaultValue);
-        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Center,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValueShorter), new LazyTextComponent(() => ValueAsDisplayString)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } }
+        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
+            new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => ValueAsDisplayString)),
+            new GUISpinButton(GUIAlignment.Center, v => { val.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
             );
     }
 
@@ -137,9 +141,9 @@ internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
         return this;
     }
 
-    protected virtual string ValueAsDisplayString { get { string str = val.CurrentValue.ToString(); str = Decorator?.Invoke(str) ?? str; return str; } }
+    protected virtual string ValueAsDisplayString { get => Decorator?.Invoke(val.CurrentValue) ?? val.CurrentValue.ToString(); }
     internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
-    private Func<string, string>? Decorator;
+    internal Func<float, string>? Decorator = null;
 
     internal Func<bool>? Predicate = null;
     internal override bool IsShown => Predicate?.Invoke() ?? true;
@@ -150,6 +154,7 @@ internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
     internal override float GetValue() => val.CurrentValue;
 
     internal override void UpdateValue(float value) => val.CurrentValue = value;
+    internal override void ChangeValue(bool increase, bool loopAtTerminal = true) => val.ChangeValue(increase, loopAtTerminal);
 }
 
 internal class StringConfigurationImpl : Virial.Configuration.ValueConfiguration<int>
@@ -157,20 +162,24 @@ internal class StringConfigurationImpl : Virial.Configuration.ValueConfiguration
     internal TextComponent Title;
     private GUIWidgetSupplier editor;
     private IOrderedSharableVariable<int> val;
+    private string[] mySelection;
 
-    public StringConfigurationImpl(string id, string[] selection, int defaultIndex)
+    public StringConfigurationImpl(string id, string[] selection, int defaultIndex, TextComponent? title)
     {
-        this.Title = new TranslateTextComponent(id);
-        this.val = new SelectionConfigurationValue(id, selection.Length, defaultIndex);
-        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Center,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title),
+        this.mySelection = selection;
+        this.Title = title ?? new TranslateTextComponent(id);
+        this.val = new SelectionConfigurationValue(id, defaultIndex, selection.Length);
+        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
+            new NoSGUIMargin(GUIAlignment.Center, new(0.1f,0f)),
             new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValueShorter), new LazyTextComponent(() => ValueAsDisplayString)),
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => ValueAsDisplayString)),
             new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.RightArrow) { OnClick = _ => { val.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } }
             );
     }
 
-    protected virtual string ValueAsDisplayString => val.CurrentValue.ToString();
+    protected virtual string ValueAsDisplayString => Language.Translate(mySelection[val.CurrentValue]);
 
     internal Func<bool>? Predicate = null;
     bool IConfiguration.IsShown => Predicate?.Invoke() ?? true;
@@ -183,6 +192,7 @@ internal class StringConfigurationImpl : Virial.Configuration.ValueConfiguration
     int ValueConfiguration<int>.GetValue() => val.CurrentValue;
 
     void ValueConfiguration<int>.UpdateValue(int value) => val.CurrentValue = value;
+    void ValueConfiguration<int>.ChangeValue(bool increase, bool loopAtTerminal) => val.ChangeValue(increase, loopAtTerminal);
 }
 
 internal class RoleCountConfiguration : IntegerConfigurationImpl
@@ -193,7 +203,7 @@ internal class RoleCountConfiguration : IntegerConfigurationImpl
         for(int i = 0; i < mapper.Length; i++) mapper[i] = i - 1;
         return mapper;
     }
-    public RoleCountConfiguration(string id, int maxCount, int defaultValue) : base(id, GetRoleCountMapper(maxCount), defaultValue ) { }
+    public RoleCountConfiguration(string id, int maxCount, int defaultValue) : base(id, GetRoleCountMapper(maxCount), defaultValue, null) { }
 
     protected override string ValueAsDisplayString => (this as ValueConfiguration<int>).GetValue() == -1 ? Nebula.Modules.Language.Translate("options.assignment.unlimited")  : base.ValueAsDisplayString;
 }

@@ -10,18 +10,19 @@ namespace Nebula.Roles.Crewmate;
 
 public class Necromancer : DefinedRoleTemplate, DefinedRole
 {
-    static public Necromancer MyRole = new Necromancer();
     private Necromancer() : base("necromancer", new(108,50,160), RoleCategory.CrewmateRole, Crewmate.MyTeam, [ReviveCoolDownOption, ReviveDurationOption, DetectedRangeOption, ReviveMinRangeOption, ReviveMaxRangeOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration ReviveCoolDownOption = NebulaAPI.Configurations.Configuration("role.necromancer,reviveCoolDown", (5f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration ReviveDurationOption = NebulaAPI.Configurations.Configuration("role.necromancer.reviveDuration", (0.5f, 10f, 0.5f), 3f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration DetectedRangeOption = NebulaAPI.Configurations.Configuration("role.necromancer.detectedRange", (2.5f, 30f, 2.5f), 7.5f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration ReviveMinRangeOption = NebulaAPI.Configurations.Configuration("role.necromancer.reviveMinRange", (0f, 12.5f, 2.5f), 7.5f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration ReviveMaxRangeOption = NebulaAPI.Configurations.Configuration("role.necromancer.reviveMaxRange", (10f, 30f, 2.5f), 17.5f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration ReviveCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveCoolDown", (5f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration ReviveDurationOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveDuration", (0.5f, 10f, 0.5f), 3f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DetectedRangeOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.detectedRange", (2.5f, 30f, 2.5f), 7.5f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration ReviveMinRangeOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveMinRange", (0f, 12.5f, 2.5f), 7.5f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration ReviveMaxRangeOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveMaxRange", (10f, 30f, 2.5f), 17.5f, FloatConfigurationDecorator.Ratio);
+
+    static public Necromancer MyRole = new Necromancer();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

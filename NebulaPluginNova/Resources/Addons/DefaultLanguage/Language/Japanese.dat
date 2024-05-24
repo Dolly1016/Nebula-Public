@@ -801,6 +801,7 @@
 "location.airship.brig" : "宿舎前通路"
 "location.airship.engine" : "エンジンルーム"
 "location.airship.hallway" : "メインホール"
+"location.airship.mainHall" : "メインホール"
 "location.airship.kitchen" : "キッチン"
 "location.airship.record" : "アーカイブ"
 "location.airship.storage" : "貨物室"
@@ -1201,6 +1202,15 @@
 "configuration.tag.beginner" : "この役職は操作が簡単で、初心者にもおすすめです。"
 "configuration.tag.funny" : "この役職は独特で面白い能力を持っています。<br>一味違うゲームを楽しみたい方にお勧めです。"
 "configuration.tag.difficult" : "この役職は特殊で難しい操作が求められます。<br>フリープレイなどで一度確認してみることをお勧めします。"
+
+# Hint
+
+"hint.processorAffinity.title" : "ゲームがカクつくときは"
+"hint.processorAffinity.detail" : "ゲームの動きのカクつきがある場合は、歯車マークから開ける設定のNoSタブ内にある<br>「プロセッサ制限」の設定を変更することで改善が図れる場合があります。"
+"hint.gameConfigurationMenu.title" : "ゲーム設定UIの簡易表示"
+"hint.gameConfigurationMenu.detail" : "設定画面を開いているときに<b>マウス中央ボタン</b>をクリックすることで表示モードを切り替えらえます。"
+"hint.helpInGame.title" : "ゲーム内ヘルプ"
+"hint.helpInGame.detail" : "ロビー内やゲーム中にヘルプキー(デフォルト: Hキー)を押すとヘルプ画面が表示されます。<br>自身の役職や、NoSの全役職の詳細について確認することができます。"
 
 # Documents
 

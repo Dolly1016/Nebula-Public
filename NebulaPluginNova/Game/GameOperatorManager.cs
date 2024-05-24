@@ -132,7 +132,10 @@ public class GameOperatorManager
         if (retroactive)
             DoRetroactiveOperation(ev, ev.GetType());
         else
-            DoRetroactiveOperation(ev, ev.GetType());
+            DoSingleOperation(ev, ev.GetType());
+
+        //イベントを通して発生したゲーム終了をチェックする。
+        NebulaGameManager.Instance?.CriteriaManager.CheckAndTriggerGameEnd();
 
         return ev;
     }

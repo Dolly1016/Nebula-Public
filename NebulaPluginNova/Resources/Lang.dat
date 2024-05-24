@@ -199,6 +199,7 @@
 "options.exclusiveAssignment.category.7" : "Category 8"
 "options.exclusiveAssignment.category.8" : "Category 9"
 "options.exclusiveAssignment.category.9" : "Category 10"
+"options.exclusiveAssignment.edit" : "Edit"
 
 "options.commonSetting" : "Common Settings"
 
@@ -221,24 +222,25 @@
 
 # Complex Roles
 
-"role.guesser.numOfGuess" : "Num Of Guess"
-"role.guesser.numOfGuessPerMeeting" : "Num Of Guess Per Meeting"
-"role.guesser.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
-"role.guesser.leftGuess" : "Left Guess"
-"role.guesser.guessableFilter" : "Guessable Filter"
+"options.role.guesser.numOfGuess" : "Num Of Guess"
+"options.role.guesser.numOfGuessPerMeeting" : "Num Of Guess Per Meeting"
+"options.role.guesser.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
+"options.role.guesser.leftGuess" : "Left Guess"
+"options.role.guesser.guessableFilter" : "Guessable Filter"
 "options.role.guesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
 
-"role.trapper.placeCoolDown" : "Place Cool Down"
-"role.trapper.placeDuration" : "Place Duration"
-"role.trapper.numOfCharges" : "Num Of Charges"
-"role.trapper.speedTrapSize" : "Speed Trap Size"
-"role.trapper.accelRate" : "Accel Rate"
-"role.trapper.decelRate" : "Decel Rate"
-"role.trapper.speedDuration" : "Accel / Decel Duration"
+"options.role.trapper.placeCoolDown" : "Place Cool Down"
+"options.role.trapper.placeDuration" : "Place Duration"
+"options.role.trapper.numOfCharges" : "Num Of Charges"
+"options.role.trapper.speedTrapSize" : "Speed Trap Size"
+"options.role.trapper.accelRate" : "Accel Rate"
+"options.role.trapper.decelRate" : "Decel Rate"
+"options.role.trapper.speedDuration" : "Accel / Decel Duration"
 
 # Common Roles
 
 "options.role.modifierFilter" : "Modifiers Filter"
+"options.role.ghostRoleFilter" : "Ghost Filter"
 
 # Crewmate Roles
 
@@ -340,6 +342,7 @@
 "role.madmate.blurb" : "Assist Impostors"
 "options.role.madmate.detail" : "Madmate is on the side of imposters.<br>Obstruct crewmates to help imposters win."
 "options.role.madmate.canIdentifyImpostors" : "Can Identify Impostors"
+"options.role.madmate.requiredTasksForIdentifying" : "Can Identify Impostors"
 "options.role.madmate.embroilPlayersOnExile" : "Embroil Players On Exile"
 "options.role.madmate.limitEmbroiledPlayersToVoters" : "Limit Embroiled Players To Voters"
 "options.role.madmate.canFixLight" : "Can Fix Light"
@@ -626,11 +629,11 @@
 
 "role.sidekick.name" : "Sidekick"
 "role.sidekick.short" : "S"
-"options.role.jackal.sidekick.detail" : "Sidekick assists Jackal.<br>Sidekick is promoted to Jackal upon Jackal's death."
-"options.role.jackal.sidekick.canKill" : "Can Kill"
-"options.role.jackal.sidekick.killCoolDown" : "Kill Cool Down"
-"options.role.jackal.sidekick.isModifier" : "Is Modifier"
-"options.role.jackal.sidekick.canCreateSidekickChainly" : "Can Create Sidekick Chainly"
+"options.role.sidekick.detail" : "Sidekick assists Jackal.<br>Sidekick is promoted to Jackal upon Jackal's death."
+"options.role.sidekick.canKill" : "Has Kill Ability"
+"options.role.sidekick.killCoolDown" : "Kill Cool Down"
+"options.role.sidekick.isModifier" : "Is Modifier"
+"options.role.sidekick.canCreateSidekickChainly" : "Can Create Sidekick Chainly"
 
 "role.jester.name" : "Jester"
 "role.jester.short" : "J"
@@ -801,6 +804,7 @@
 "location.airship.brig" : "Brig"
 "location.airship.engine" : "Engine Room"
 "location.airship.hallway" : "Main Hall"
+"location.airship.mainHall" : "Main Hall"
 "location.airship.kitchen" : "Kitchen"
 "location.airship.record" : "Records"
 "location.airship.storage" : "Cargo Bay"
@@ -1063,6 +1067,8 @@
 "preset.saveFailed" : "Saving is failed.<br>More information can be found in NebulaLog.txt."
 "preset.loadSuccess" : "Preset loaded successfully."
 "preset.loadFailed" : "Failed to load preset."
+"preset.confirmLoadOld" : "This preset is OLD type.<br>Load this preset?"
+"preset.confirmLoadUnknown" : "This preset is UNKNOWN type (maybe newer).<br>Load this preset?"
 
 # Sabotage
 
@@ -1201,3 +1207,12 @@
 "configuration.tag.beginner" : "This role is recommended for beginners too."
 "configuration.tag.funny" : "This role has unique abilities."
 "configuration.tag.difficult" : "This role requires difficult operations."
+
+# Hint
+
+"hint.processorAffinity.title" : "Processor Affinity"
+"hint.processorAffinity.detail" : "If the game stutters, changing the "Processor Affinity"<br>from the settings screen that opens from the gear icon may improve the game."
+"hint.gameConfigurationMenu.title" : "More Simple Configuration UI"
+"hint.gameConfigurationMenu.detail" : "The game settings UI has a simple display mode.<br>You can switch display modes by clicking the middle mouse button."
+"hint.helpInGame.title" : "Help In Game"
+"hint.helpInGame.detail" : "Pressing the help key (default: H key) in the lobby or during the game will display the help screen. <br>You can check the details of your own role and all roles in NoS."

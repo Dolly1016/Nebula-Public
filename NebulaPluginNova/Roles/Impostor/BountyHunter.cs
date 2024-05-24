@@ -2,6 +2,7 @@
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
 using Virial.Helpers;
@@ -10,17 +11,18 @@ namespace Nebula.Roles.Impostor;
 
 public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public BountyHunter MyRole = new BountyHunter();
     private BountyHunter() : base("bountyHunter", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [BountyKillCoolDownOption, OthersKillCoolDownOption, ChangeBountyIntervalOption, ShowBountyArrowOption, ArrowUpdateIntervalOption]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private IRelativeCoolDownConfiguration BountyKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("bountyKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 10f, (-30f, 30f, 2.5f), -10f, (0.125f, 2f, 0.125f), 0.5f);
-    static private IRelativeCoolDownConfiguration OthersKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("othersKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 40f, (-30f, 30f, 2.5f), 20f, (0.125f, 2f, 0.125f), 2f);
-    static private BoolConfiguration ShowBountyArrowOption = NebulaAPI.Configurations.Configuration("role.bountyHunter.showBountyArrow", true);
-    static private FloatConfiguration ArrowUpdateIntervalOption = NebulaAPI.Configurations.Configuration("role.bountyHunter.arrowUpdateInterval", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => ShowBountyArrowOption);
-    static private FloatConfiguration ChangeBountyIntervalOption = NebulaAPI.Configurations.Configuration("role.bountyHunter.changeBountyInterval", (5f, 120f, 5f), 45f, FloatConfigurationDecorator.Second);
+    static private IRelativeCoolDownConfiguration BountyKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.bountyHunter.bountyKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 10f, (-30f, 30f, 2.5f), -10f, (0.125f, 2f, 0.125f), 0.5f);
+    static private IRelativeCoolDownConfiguration OthersKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.bountyHunter.othersKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 40f, (-30f, 30f, 2.5f), 20f, (0.125f, 2f, 0.125f), 2f);
+    static private BoolConfiguration ShowBountyArrowOption = NebulaAPI.Configurations.Configuration("options.role.bountyHunter.showBountyArrow", true);
+    static private FloatConfiguration ArrowUpdateIntervalOption = NebulaAPI.Configurations.Configuration("options.role.bountyHunter.arrowUpdateInterval", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => ShowBountyArrowOption);
+    static private FloatConfiguration ChangeBountyIntervalOption = NebulaAPI.Configurations.Configuration("options.role.bountyHunter.changeBountyInterval", (5f, 120f, 5f), 45f, FloatConfigurationDecorator.Second);
+
+    static public BountyHunter MyRole = new BountyHunter();
     float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CoolDown, OthersKillCoolDownOption.CoolDown, AmongUsUtil.VanillaKillCoolDown);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -108,7 +110,7 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
                 bountyTimer = Bind(new Timer(ChangeBountyIntervalOption)).Start();
                 arrowTimer = Bind(new Timer(ArrowUpdateIntervalOption)).Start();
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.IsImpostor && !p.IsDead, null, Impostor.MyRole.CanKillHidingPlayerOption));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.IsImpostor && !p.IsDead, null, Impostor.CanKillHidingPlayerOption));
 
                 killButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
@@ -147,14 +149,14 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
                 bountyIcon.ToggleName(true);
                 bountyIcon.SetName("", Vector3.one * 4f, Color.white, -1f);
 
-                bountyArrow = Bind(new Arrow().SetColor(Palette.ImpostorRed));
+                if(ShowBountyArrowOption) bountyArrow = Bind(new Arrow().SetColor(Palette.ImpostorRed));
 
                 ChangeBounty();
             }
         }
 
         [Local]
-        void LocalUpdate() => UpdateTimer();
+        void LocalUpdate(GameUpdateEvent ev) => UpdateTimer();
         
 
         [Local]

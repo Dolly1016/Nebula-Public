@@ -149,6 +149,11 @@ public enum AttributeAsset
     OptionsTitleHalf,
 
     /// <summary>
+    /// オプションの名称の表示で使用している固定長テキスト属性です。
+    /// </summary>
+    OptionsTitleShortest,
+
+    /// <summary>
     /// オプションの値の表示で使用している固定長テキスト属性です。
     /// </summary>
     OptionsValue,
@@ -164,9 +169,19 @@ public enum AttributeAsset
     OptionsButton,
 
     /// <summary>
+    /// 真偽値オプションで使用されている固定長テキスト属性です。
+    /// </summary>
+    OptionsButtonMedium,
+
+    /// <summary>
     /// クールダウンオプションで設定方法を変更するボタンで使用されている固定長テキスト属性です。
     /// </summary>
     OptionsButtonLonger,
+
+    /// <summary>
+    /// オプション値やオプション名と同じフォントの可変テキスト属性です。
+    /// </summary>
+    OptionsFlexible,
 }
 
 [Flags]
@@ -265,8 +280,8 @@ public class TextAttribute
 
 public interface TextComponent
 {
-    public string GetString();
-
+    string GetString();
+    string TextForCompare => GetString();
 }
 
 public class CombinedTextComponent : TextComponent

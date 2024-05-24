@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
+using Virial;
 using Virial.Media;
 
 namespace Nebula.Configuration;
@@ -28,15 +29,23 @@ public class PresetSettingMenu : MonoBehaviour
                     GUIAlignment.Center, GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.StandardLargeWideMasked),
                     preset.DisplayName,
                     _ => {
-                        MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent(preset.LoadPreset() ? "preset.loadSuccess" : "preset.loadFailed"));
-                        NebulaSettingMenu.Instance?.OpenFirstPage();
+                        void Load()
+                        {
+                            MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent(preset.LoadPreset() ? "preset.loadSuccess" : "preset.loadFailed"));
+                            NebulaSettingMenu.Instance?.OpenFirstPage();
+                        }
+
+                        if (preset.IsOldType || preset.IsUnknownType) {
+                            MetaUI.ShowYesOrNoDialog(HudManager.Instance.transform, Load, () => { }, Language.Translate(preset.IsOldType ? "preset.confirmLoadOld" : "preset.confirmLoadUnknown"), true);
+                        } else Load();
+                        
                     }, elem => NebulaManager.Instance.SetHelpWidget(elem.uiElement, preset.Detail), elem => NebulaManager.Instance.HideHelpWidgetIf(elem.uiElement)));
             }
             
             innerRef.Do(screen => screen.SetWidget(GUI.Instance.VerticalHolder(GUIAlignment.Center, widget), out _));
         }
 
-        var widget = NebulaImpl.Instance.GUILibrary.VerticalHolder(Virial.Media.GUIAlignment.Center,
+        var widget = NebulaAPI.GUI.VerticalHolder(Virial.Media.GUIAlignment.Center,
             GUI.Instance.LocalizedButton(
                 Virial.Media.GUIAlignment.Center,
                 GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.StandardMediumMasked),

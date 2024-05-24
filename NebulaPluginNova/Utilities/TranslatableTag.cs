@@ -1,8 +1,10 @@
-﻿using Virial.Text;
+﻿using Virial;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Utilities;
 
-[NebulaPreLoad(true)]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
 public class TranslatableTag : CommunicableTextTag
 {
     static public List<TranslatableTag> AllTag = new();
@@ -14,7 +16,7 @@ public class TranslatableTag : CommunicableTextTag
     public int Id { get;private set; }
 
     
-    public static void Load()
+    static void Preprocess(NebulaPreprocessor preprocessor)
     {
         AllTag.Sort((tag1,tag2 )=> tag1.TranslateKey.CompareTo(tag2.TranslateKey));
         for (int i = 0; i < AllTag.Count; i++) AllTag[i].Id = i;
@@ -24,7 +26,7 @@ public class TranslatableTag : CommunicableTextTag
     {
         TranslateKey = translateKey;
 
-        if (NebulaPreLoad.FinishedLoading)
+        if (NebulaAPI.Preprocessor?.FinishPreprocess ?? true)
             NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, "Pre-loading has been finished. Translatable tag \"" + TranslateKey + "\" is invalid on current process.");
         else
             AllTag.Add(this);

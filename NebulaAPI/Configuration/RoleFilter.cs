@@ -7,26 +7,28 @@ using Virial.Assignable;
 
 namespace Virial.Configuration;
 
+public interface AssignableFilter<T> where T : DefinedAssignable {
+    bool Test(T assignable);
+    void ToggleAndShare(T assignable);
+}
+
 /// <summary>
 /// 割り当て可能なモディファイアに制限をかけます。
 /// </summary>
-public interface ModifierFilter
+public interface ModifierFilter : AssignableFilter<DefinedModifier>
 {
-    bool Test(DefinedModifier modifier);
 }
 
 /// <summary>
 /// 割り当て可能な幽霊役職に制限をかけます。
 /// </summary>
-public interface GhostRoleFilter
+public interface GhostRoleFilter : AssignableFilter<DefinedGhostRole>
 {
-    bool Test(DefinedGhostRole modifier);
 }
 
 /// <summary>
 /// 割り当て可能な役職に制限をかけます。
 /// </summary>
-public interface RoleFilter
+public interface RoleFilter : AssignableFilter<DefinedRole>
 {
-    bool Test(DefinedRole role);
 }

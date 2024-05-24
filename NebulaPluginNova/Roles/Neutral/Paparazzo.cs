@@ -218,6 +218,8 @@ public class PaparazzoShot : MonoBehaviour
                 players.transform.localEulerAngles = Vector3.zero;
                 players.transform.localPosition = new(0, 0, -15f);
 
+                var paparazzo = (PlayerControl.LocalPlayer.GetModInfo()!.Role as Paparazzo.Instance)!;
+
                 int num = 0;
                 foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) {
                     if (((1 << p.PlayerId) & playerMask) == 0) continue;
@@ -225,7 +227,7 @@ public class PaparazzoShot : MonoBehaviour
                     var icon = AmongUsUtil.GetPlayerIcon(p.GetModInfo()!.Unbox().CurrentOutfit, players.transform, new Vector3((float)(-(playerNum - 1) + num * 2) * 0.075f, -0.3f, -0.2f), Vector3.one * 0.1f);
                     icon.transform.localEulerAngles = Vector3.zero;
                     var script = icon.gameObject.AddComponent<ScriptBehaviour>();
-                    var paparazzo = (PlayerControl.LocalPlayer.GetModInfo()!.Role as Paparazzo.Instance)!;
+                    
                     script.UpdateHandler += () =>
                     {
                         icon.SetAlpha(((paparazzo.DisclosedMask & (1 << p.PlayerId)) == 0) ? 0.4f : 1f);
@@ -234,6 +236,8 @@ public class PaparazzoShot : MonoBehaviour
                 }
 
                 if (num >= 4) new StaticAchievementToken("paparazzo.common2");
+
+                if (paparazzo.CheckPaparazzoWin()) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PaparazzoWin, 1 << PlayerControl.LocalPlayer.PlayerId);
 
                 players.transform.localScale = new Vector3(0f, 0f, 1f);
 
@@ -258,8 +262,7 @@ public class PaparazzoShot : MonoBehaviour
 [NebulaRPCHolder]
 public class Paparazzo : DefinedRoleTemplate, DefinedRole
 {
-    static public Team MyTeam = new("teams.paparazzo", new(202,118,140), TeamRevealType.OnlyMe);
-    static public Paparazzo MyRole = new Paparazzo();
+    static public RoleTeam MyTeam = new Team("teams.paparazzo", new(202,118,140), TeamRevealType.OnlyMe);
 
     private Paparazzo() : base("paparazzo", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [ShotCoolDownOption, RequiredSubjectsOption, RequiredDisclosedOption, VentConfiguration])
     {
@@ -268,11 +271,12 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private FloatConfiguration ShotCoolDownOption = NebulaAPI.Configurations.Configuration("role.paparazzo.shotCoolDown", (2.5f, 60f, 2.5f), 20f);
-    static private IntegerConfiguration RequiredSubjectsOption = NebulaAPI.Configurations.Configuration("role.paparazzo.requiredSubjects", (1, 15), 5);
-    static private IntegerConfiguration RequiredDisclosedOption = NebulaAPI.Configurations.Configuration("role.paparazzo.requiredDisclosed", (1, 15), 3);
+    static private FloatConfiguration ShotCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.shotCoolDown", (2.5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private IntegerConfiguration RequiredSubjectsOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.requiredSubjects", (1, 15), 5);
+    static private IntegerConfiguration RequiredDisclosedOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.requiredDisclosed", (1, 15), 3);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.paparazzo.vent", true);
 
+    static public Paparazzo MyRole = new Paparazzo();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -317,45 +321,17 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         }
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.PaparazzoWin && canWin);
-        
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.PaparazzoWin && canWin);
 
-        static NebulaEndCriteria PaparazzoCriteria = new() { 
-            OnExiled = (_) =>
-            {
-                foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
-                {
-                    if(p.Role is Paparazzo.Instance paparazzo && paparazzo.CheckPaparazzoWin())
-                    {
-                        return new(NebulaGameEnd.PaparazzoWin, 1 << p.PlayerId);
-                    }
-                }
-                return null;
-            },
-            OnUpdate = () =>
-            {
-                if (MeetingHud.Instance || (ExileController.Instance && !Minigame.Instance)) return null;
 
-                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
-                {
-                    if (p.Role is Paparazzo.Instance paparazzo && paparazzo.CheckPaparazzoWin())
-                    {
-                        NebulaManager.Instance.ScheduleDelayAction(() =>
-                        {
-                            NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PaparazzoWin, 1 << p.PlayerId);
-                        });
-                        return null;
-                    }
-                }
-                
-                return null;
-            }
-        };
+        [Local]
+        void OnExiled(MeetingEndEvent ev)
+        {
+            if (CheckPaparazzoWin()) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PaparazzoWin, 1 << MyPlayer.PlayerId);
+        }
 
         void RuntimeAssignable.OnActivated()
         {
-            NebulaGameManager.Instance?.CriteriaManager.AddCriteria(PaparazzoCriteria);
-
             if (AmOwner)
             {
                 var acTokenCommon = new AchievementToken<int>("paparazzo.common1", 0, (val, _) => val >= 3);
@@ -406,7 +382,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
             }
         }
 
-        private bool CheckPaparazzoWin()
+        internal bool CheckPaparazzoWin()
         {
             return !MyPlayer.IsDead && (GetActivatedBits(CapturedMask) >= RequiredSubjectsOption && GetActivatedBits(DisclosedMask) >= RequiredDisclosedOption);
         }
@@ -534,7 +510,8 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
             }
         }
 
-        public override string? GetExtraTaskText()
+        [Local]
+        void AppendExtraTaskText(PlayerTaskTextLocalEvent ev)
         {
             var text = Language.Translate("role.paparazzo.taskText");
             var detail = "";
@@ -549,7 +526,8 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                     .Replace("%CS%", GetActivatedBits(CapturedMask).ToString())
                     + ", " + detail;
             }
-            return text.Replace("%DETAIL%", detail);
+
+            ev.AppendText(text.Replace("%DETAIL%", detail));
         }
     }
 

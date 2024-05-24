@@ -152,7 +152,7 @@ class ExileControllerBeginPatch
             var role = NebulaGameManager.Instance.GetPlayer(exiled.PlayerId)?.Role;
             if (role != null)
             {
-                __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", exiled.PlayerName).Replace("%ROLE%", role.Role.Unbox().DisplayName);
+                __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", exiled.PlayerName).Replace("%ROLE%", role.Role.DisplayName);
                 if (role.Role == Roles.Neutral.Jester.MyRole) __instance.ImpostorText.text = Language.Translate("game.meeting.roleJesterText");
             }
         }

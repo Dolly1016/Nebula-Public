@@ -10,15 +10,15 @@ using Virial.Assignable;
 
 namespace Virial.Configuration;
 
-public class ConfigurationTab
+public class ConfigurationTab : IBit32
 {
-    private static ConfigurationTab tabSetting = new ConfigurationTab(0x01, "options.tab.setting", new Color(0.75f, 0.75f, 0.75f));
-    private static ConfigurationTab tabCrewmate = new ConfigurationTab(0x02, "options.tab.crewmate", new(Palette.CrewmateBlue));
-    private static ConfigurationTab tabImpostor = new ConfigurationTab(0x04, "options.tab.impostor", new(Palette.ImpostorRed));
-    private static ConfigurationTab tabNeutral = new ConfigurationTab(0x08, "options.tab.neutral", new Color(244f / 255f, 211f / 255f, 53f / 255f));
-    private static ConfigurationTab tabGhost = new ConfigurationTab(0x10, "options.tab.ghost", new Color(150f / 255f, 150f / 255f, 150f / 255f));
-    private static ConfigurationTab tabModifier = new ConfigurationTab(0x20, "options.tab.modifier", new Color(255f / 255f, 255f / 255f, 243f / 255f));
-    private static List<ConfigurationTab> allTab = [tabSetting, tabCrewmate, tabImpostor, tabNeutral, tabGhost, tabModifier];
+    internal static ConfigurationTab tabSetting;
+    internal static ConfigurationTab tabCrewmate;
+    internal static ConfigurationTab tabImpostor;
+    internal static ConfigurationTab tabNeutral;
+    internal static ConfigurationTab tabGhost;
+    internal static ConfigurationTab tabModifier;
+    internal static List<ConfigurationTab> allTab;
 
     public static ConfigurationTab Settings => tabSetting;
     public static ConfigurationTab CrewmateRoles => tabCrewmate;
@@ -27,15 +27,14 @@ public class ConfigurationTab
     public static ConfigurationTab GhostRoles => tabGhost;
     public static ConfigurationTab Modifiers => tabModifier;
 
-    public int AsBit => bitFlag;
+    public uint AsBit => bitFlag;
 
-    private int bitFlag;
+    private uint bitFlag;
     private string translateKey { get; init; }
     public Color Color { get; private init; }
-    public ConfigurationTab(int bitFlag, string translateKey, Color color)
+    internal ConfigurationTab(uint bitFlag, string translateKey, Color color)
     {
         this.bitFlag = bitFlag;
-        allTab.Add(this);
         this.translateKey = translateKey;
         Color = color;
     }

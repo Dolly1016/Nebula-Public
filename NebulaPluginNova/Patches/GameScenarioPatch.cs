@@ -1,4 +1,6 @@
-﻿namespace Nebula.Patches;
+﻿using Virial;
+
+namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
 public static class InitializeRolePatch
@@ -10,16 +12,16 @@ public static class InitializeRolePatch
         
         int adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(PlayerControl.AllPlayerControls.Count);
 
-        List<PlayerControl> impostors = new();
-        List<PlayerControl> others = new();
+        List<byte> impostors = new();
+        List<byte> others = new();
 
         for (int i = 0; i < players.Count; i++)
             if (i < adjustedNumImpostors)
-                impostors.Add(players[i]);
+                impostors.Add(players[i].PlayerId);
             else
-                others.Add(players[i]);
+                others.Add(players[i].PlayerId);
 
-        NebulaGameManager.Instance!.RoleAllocator = GeneralConfigurations.CurrentGameMode.RoleAllocator.Invoke();
+        NebulaGameManager.Instance!.RoleAllocator = GeneralConfigurations.CurrentGameMode.InstantiateRoleAllocator();
         NebulaGameManager.Instance.RoleAllocator.Assign(impostors, others);
         
 
@@ -32,7 +34,7 @@ public static class StartGamePatch
 {
     static void Postfix(GameManager __instance)
     {
-        __instance.ShouldCheckForGameEnd = false;
+        __instance.ShouldCheckForGameEnd = false; 
     }
 }
 
@@ -80,6 +82,6 @@ static class CreateOnlineGamePatch
 {
     static void Prefix(AmongUsClient __instance)
     {
-        NebulaConfigEntryManager.RestoreAll();
+        ConfigurationValues.RestoreAll();
     }
 }

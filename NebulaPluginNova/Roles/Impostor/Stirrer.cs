@@ -2,25 +2,26 @@
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Player;
 using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
 public class Stirrer : DefinedRoleTemplate, DefinedRole
 {
-    static public Stirrer MyRole = new Stirrer();
     private Stirrer() : base("stirrer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [StirCoolDownOption,SabotageChargeOption, SabotageMaxChargeOption,SabotageCoolDownOption,SabotageIntervalOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
-    static private FloatConfiguration StirCoolDownOption = NebulaAPI.Configurations.Configuration("role.stirrer.stirCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration SabotageChargeOption = NebulaAPI.Configurations.Configuration("role.stirrer.sabotageCharge", (1,10),3);
-    static private IntegerConfiguration SabotageMaxChargeOption = NebulaAPI.Configurations.Configuration("role.stirrer.sabotageMaxCharge", (1, 20), 5);
-    static private FloatConfiguration SabotageCoolDownOption = NebulaAPI.Configurations.Configuration("role.stirrer.sabotageCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration SabotageIntervalOption = NebulaAPI.Configurations.Configuration("role.stirrer.sabotageInterval", (30f, 120f, 5f), 60f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration StirCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.stirCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private IntegerConfiguration SabotageChargeOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageCharge", (1,10),3);
+    static private IntegerConfiguration SabotageMaxChargeOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageMaxCharge", (1, 20), 5);
+    static private FloatConfiguration SabotageCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration SabotageIntervalOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageInterval", (30f, 120f, 5f), 60f, FloatConfigurationDecorator.Second);
 
+    static public Stirrer MyRole = new Stirrer();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -92,13 +93,14 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
             }
         }
 
-        public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
+        [Local]
+        void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
         {
-            if(sabotageChargeMap.TryGetValue(player.PlayerId,out int val))
+            if(sabotageChargeMap.TryGetValue(ev.Player.PlayerId,out int val))
             {
-                if (player.IsImpostor) return;
+                if (ev.Player.IsImpostor) return;
                 if (val <= 0) return;
-                text += StringExtensions.Color(" (" + val + ")", Color.gray);
+                ev.Name += StringExtensions.Color(" (" + val + ")", Color.gray);
             }
         }
     }

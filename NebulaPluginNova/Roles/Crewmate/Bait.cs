@@ -10,7 +10,6 @@ namespace Nebula.Roles.Crewmate;
 
 public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Bait MyRole = new Bait();
 
     private Bait(): base("bait", new(0, 247, 255), RoleCategory.CrewmateRole, Crewmate.MyTeam, [ShowKillFlashOption, ReportDelayOption, ReportDelayDispersionOption, CanSeeVentFlashOption]) {
     }
@@ -18,10 +17,12 @@ public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("role.bait.showKillFlash", false);
-    static private FloatConfiguration ReportDelayOption = NebulaAPI.Configurations.Configuration("role.bait.reportDelay", (0f, 5f, 0.5f), 0f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration ReportDelayDispersionOption = NebulaAPI.Configurations.Configuration("role.bait.reportDelayDispersion", (0f, 10f, 0.25f), 0.5f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanSeeVentFlashOption = NebulaAPI.Configurations.Configuration("role.bait.canSeeVentFlash", false);
+    static private BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("options.role.bait.showKillFlash", false);
+    static private FloatConfiguration ReportDelayOption = NebulaAPI.Configurations.Configuration("options.role.bait.reportDelay", (0f, 5f, 0.5f), 0f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration ReportDelayDispersionOption = NebulaAPI.Configurations.Configuration("options.role.bait.reportDelayDispersion", (0f, 10f, 0.25f), 0.5f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanSeeVentFlashOption = NebulaAPI.Configurations.Configuration("options.role.bait.canSeeVentFlash", false);
+
+    static public Bait MyRole = new Bait();
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

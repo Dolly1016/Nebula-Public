@@ -991,7 +991,12 @@ public static class Helpers
 
     static public void DoTransitionFade(this TransitionFade transitionFade, GameObject transitionFrom) 
     {
-        DestroyableSingleton<TransitionFade>.Instance.DoTransitionFade(transitionFrom, null, (Il2CppSystem.Action)(() => { GameObject.Destroy(transitionFrom); }));
+        transitionFade.DoTransitionFade(transitionFrom, null, (Il2CppSystem.Action)(() => { GameObject.Destroy(transitionFrom); }));
+    }
+
+    static public void DoTransitionFadeOut(this TransitionFade transitionFade)
+    {
+        transitionFade.StartCoroutine(Effects.ColorFade(transitionFade.overlay, Color.clear, Color.black, 0.1f));
     }
 
     static public string ToUnicodeEscapeSequence(string unescaped)

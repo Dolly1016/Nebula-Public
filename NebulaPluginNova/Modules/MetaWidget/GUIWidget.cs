@@ -1,4 +1,6 @@
 ﻿using Nebula.Compat;
+using Nebula.Roles;
+using Virial.Assignable;
 using Virial.Compat;
 using Virial.Media;
 using Virial.Text;
@@ -224,10 +226,13 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.DeviceButton => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(2.05f, 0.28f), new(255, 255, 255), false),
                 AttributeAsset.OptionsTitle => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(4f, 0.4f), new(255, 255, 255), false),
                 AttributeAsset.OptionsTitleHalf => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1.8f, 0.4f), new(255, 255, 255), false),
+                AttributeAsset.OptionsTitleShortest => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1f, 0.4f), new(255, 255, 255), false),
                 AttributeAsset.OptionsValue => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1.1f, 0.4f), new(255, 255, 255), false),
                 AttributeAsset.OptionsValueShorter => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(0.7f, 0.4f), new(255, 255, 255), false),
                 AttributeAsset.OptionsButton => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(0.32f, 0.22f), new(255, 255, 255), false),
                 AttributeAsset.OptionsButtonLonger => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1.8f, 0.22f), new(255, 255, 255), false),
+                AttributeAsset.OptionsButtonMedium => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(0.9f, 0.22f), new(255, 255, 255), false),
+                AttributeAsset.OptionsFlexible => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(6f, 0.22f), new(255, 255, 255), true),
                 _ => null!
             };
         }
@@ -295,6 +300,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     public Virial.Media.GUIWidget Button(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
         => new GUIButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor() };
 
+    public Virial.Media.GUIWidget SpinButton(GUIAlignment alignment, Action<bool> onClick) => new GUISpinButton(alignment, onClick);
 
     public Virial.Media.GUIWidget LocalizedText(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string translationKey) => new NoSGUIText(alignment, attribute, new TranslateTextComponent(translationKey));
     
@@ -310,7 +316,12 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     public TextComponent RawTextComponent(string rawText) => new RawTextComponent(rawText);
     public TextComponent LocalizedTextComponent(string translationKey) => new TranslateTextComponent(translationKey);
     public TextComponent ColorTextComponent(Virial.Color color, TextComponent component) => new ColorTextComponent(color.ToUnityColor(), component);
+    public TextComponent FunctionalTextComponent(Func<string> supplier) => new LazyTextComponent(supplier);
 
+    public void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable
+    {
+        RoleOptionHelper.OpenFilterScreen<R>(scrollerTag, allRoles, test, toggleAndShare);
+    }
 }
 
 public class GUIScreenImpl : GUIScreen

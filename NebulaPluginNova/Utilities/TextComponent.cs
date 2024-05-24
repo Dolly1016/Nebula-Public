@@ -18,6 +18,8 @@ public class CombinedComponent : TextComponent
         foreach (var str in components) builder.Append(str.GetString());
         return builder.ToString();
     }
+
+    string TextComponent.TextForCompare => components.Length > 0 ? components[0].TextForCompare : "";
 }
 
 public class RawTextComponent : TextComponent
@@ -52,6 +54,8 @@ public class ColorTextComponent : TextComponent
         Color = color;
         Inner = inner;
     }
+
+    string TextComponent.TextForCompare => Inner.TextForCompare;
 }
 
 public class TranslateTextComponent : TextComponent
@@ -62,4 +66,6 @@ public class TranslateTextComponent : TextComponent
     {
         TranslationKey = translationKey;
     }
+
+    string TextComponent.TextForCompare => TranslationKey;
 }

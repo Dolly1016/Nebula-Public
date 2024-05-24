@@ -5,6 +5,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Text;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula;
 
@@ -19,7 +20,7 @@ public class NebulaImpl : INebula
     {
         Instance = this;
 
-        allModules.AddRange([Language.API, GUI.API, ConfigurationsAPI.API]);
+        allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API]);
     }
 
     public string APIVersion => typeof(NebulaAPI).Assembly.GetName().Version?.ToString() ?? "Undefined";
@@ -44,17 +45,17 @@ public class NebulaImpl : INebula
     }
 
     Virial.Game.Game? INebula.CurrentGame => NebulaGameManager.Instance;
+
+    //ショートカット
+    Virial.Configuration.Configurations Configurations => ConfigurationsAPI.API;
+    Virial.Media.GUI GUILibrary => GUI.API;
+    Virial.Media.Translator Language => Nebula.Modules.Language.API;
 }
 
 internal static class UnboxExtension
 {
     internal static PlayerModInfo Unbox(this Virial.Game.Player player) => (PlayerModInfo)player;
-    internal static ModifierInstance Unbox(this RuntimeModifier modifier) => (ModifierInstance)modifier;
-    internal static AbstractRole Unbox(this DefinedRole role) => (AbstractRole)role;
-    internal static AbstractModifier Unbox(this DefinedModifier role) => (AbstractModifier)role;
-    internal static ModAbilityButton Unbox(this Virial.Components.AbilityButton button) => (ModAbilityButton)button;
     internal static CustomEndCondition Unbox(this Virial.Game.GameEnd end) => (CustomEndCondition)end;
-    internal static AssignableInstance Unbox(this Virial.Assignable.RuntimeAssignable assignable) => (AssignableInstance)assignable;
     internal static PlayerTaskState Unbox(this Virial.Game.PlayerTasks taskInfo) => (PlayerTaskState)taskInfo;
 }
 

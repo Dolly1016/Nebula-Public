@@ -1,6 +1,7 @@
 ﻿using Nebula.Patches;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using Virial.Runtime;
 
 namespace Nebula.Modules;
 
@@ -50,7 +51,7 @@ public class EastAsianFontChanger
     }
 }
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class Language
 {
     private class LanguageAPI : Virial.Media.Translator
@@ -125,10 +126,9 @@ public class Language
     }
 
     public static Stream? OpenDefaultLangStream() => StreamHelper.OpenFromResource("Nebula.Resources.Lang.dat");
-    public static IEnumerator CoLoad()
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        LoadPatch.LoadingText = "Loading Language Data";
-        yield return null;
+        yield return preprocessor.SetLoadingText("Loading Language Data");
 
         DefaultLanguage = new Language();
         using (var stream = StreamHelper.OpenFromResource("Nebula.Resources.Color.dat")) DefaultLanguage.Deserialize(stream);
@@ -180,7 +180,14 @@ public class Language
                 }
 
                 strings = line.Split(':', 2);
-                for(int i = 0; i < 2; i++)
+
+                if (strings.Length != 2)
+                {
+                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Language, "Failed to read the line \"" + line + "\"");
+                    continue;
+                }
+
+                for (int i = 0; i < 2; i++)
                 {
                     int first = strings[i].IndexOf('"') + 1;
                     int last = strings[i].LastIndexOf('"');
@@ -196,11 +203,7 @@ public class Language
                     }
                 }
 
-                if (strings.Length != 2)
-                {
-                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Language, "Failed to read the line \"" + line + "\"");
-                    continue;
-                }
+                
 
                 pairAction.Invoke(strings[0], strings[1]);
                 pairs++;

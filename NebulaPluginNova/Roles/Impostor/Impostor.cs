@@ -10,14 +10,15 @@ namespace Nebula.Roles.Impostor;
 
 public class Impostor : DefinedRoleTemplate, DefinedRole
 {
-    static public Team MyTeam = new("teams.impostor", new(Palette.ImpostorRed), TeamRevealType.Teams);
-    static public Impostor MyRole = new Impostor();
+    static public RoleTeam MyTeam = new Team("teams.impostor", new(Palette.ImpostorRed), TeamRevealType.Teams);
     
     private Impostor():base("impostor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, MyTeam, [CanKillHidingPlayerOption]) { }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static public BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("role.impostor.canKillHidingPlayer", false);
+    static public BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.impostor.canKillHidingPlayer", false);
+
+    static public Impostor MyRole = new Impostor();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -39,16 +40,16 @@ public class Impostor : DefinedRoleTemplate, DefinedRole
                 }
             }
         }
-
-
-        public override void DecoratePlayerName(ref string text, ref Color color)
-        {
-            if ((PlayerControl.LocalPlayer.GetModInfo() as GamePlayer)?.IsImpostor ?? false) color = Palette.ImpostorRed;
-        }
     }
 }
 
-public class ImpostorGameRule : AbstractModule<IGameModeStandard>
+public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 {
-    void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.Player.Role.Role.Category == RoleCategory.ImpostorRole && ev.GameEnd == NebulaGameEnd.ImpostorWin);
+    public ImpostorGameRule() => this.Register(NebulaAPI.CurrentGame!);
+    void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.Player.IsImpostor && ev.GameEnd == NebulaGameEnd.ImpostorWin);  
+    
+    void DecoratePlayerColor(PlayerDecorateNameEvent ev)
+    {
+        if (ev.Player.IsImpostor && (NebulaGameManager.Instance?.LocalPlayerInfo.IsImpostor ?? false)) ev.Color = new(Palette.ImpostorRed);
+    }
 }

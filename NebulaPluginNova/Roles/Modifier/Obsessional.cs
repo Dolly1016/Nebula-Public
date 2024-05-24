@@ -1,43 +1,33 @@
 ﻿using Nebula.Roles.Crewmate;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Modifier;
 
-public class Obsessional : ConfigurableStandardModifier
+public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
+    private Obsessional():base("obsessional", "OBS", new(177, 102, 156), [CanWinEvenIfObsessionalDieOption,CanWinEvenIfObsessionalTargetDieOption, ObsessionalSuicideWhenObsessionalTargetDieOption, ImpostorObsessionalObsessesOverOption]) { }
+
+    static private BoolConfiguration CanWinEvenIfObsessionalTargetDieOption = NebulaAPI.Configurations.Configuration("options.role.obsessional.canWinEvenIfObsessionalTargetDie", false);
+    static private BoolConfiguration CanWinEvenIfObsessionalDieOption = NebulaAPI.Configurations.Configuration("options.role.obsessional.canWinEvenIfObsessionalDie", true);
+    static private BoolConfiguration ObsessionalSuicideWhenObsessionalTargetDieOption = NebulaAPI.Configurations.Configuration("options.role.obsessional.obsessionalSuicideWhenObsessionalTargetDie", true);
+    static private ValueConfiguration<int> ImpostorObsessionalObsessesOverOption = NebulaAPI.Configurations.Configuration("options.role.obsessional.impostorObsessionalObsessesOver", [
+        "options.role.obsessional.impostorObsessionalObsessesOver.default",
+        "options.role.obsessional.impostorObsessionalObsessesOver.neutralOnly",
+        "options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate"
+        ], 0);
+
     static public Obsessional MyRole = new Obsessional();
-    public override string LocalizedName => "obsessional";
-    public override string CodeName => "OBS";
-    public override Color RoleColor => new(177f / 255f, 102f / 255f, 156f / 255f);
 
-    private NebulaConfiguration CanWinEvenIfObsessionalTargetDieOption = null!;
-    private NebulaConfiguration CanWinEvenIfObsessionalDieOption = null!;
-    private NebulaConfiguration ObsessionalSuicideWhenObsessionalTargetDieOption = null!;
-    private NebulaConfiguration ImpostorObsessionalObsessesOverOption = null!;
 
-    protected override void LoadOptions()
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
-        base.LoadOptions();
-
-        CanWinEvenIfObsessionalTargetDieOption = new NebulaConfiguration(RoleConfig, "canWinEvenIfObsessionalTargetDie", null, false, false);
-        CanWinEvenIfObsessionalDieOption = new NebulaConfiguration(RoleConfig, "canWinEvenIfObsessionalDie", null, true, true);
-        ObsessionalSuicideWhenObsessionalTargetDieOption = new NebulaConfiguration(RoleConfig, "obsessionalSuicideWhenObsessionalTargetDie", null, true, true);
-        ImpostorObsessionalObsessesOverOption = new NebulaConfiguration(RoleConfig, "impostorObsessionalObsessesOver", null,
-            new string[] { 
-                "options.role.obsessional.impostorObsessionalObsessesOver.default",
-                "options.role.obsessional.impostorObsessionalObsessesOver.neutralOnly",
-                "options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate"}, 0, 0);
-    }
-
-    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-
-    [NebulaRPCHolder]
-    public class Instance : ModifierInstance, RuntimeModifier
-    {
-        public override AbstractModifier Role => MyRole;
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
 
         public Instance(GamePlayer player) : base(player)
         {
@@ -45,18 +35,19 @@ public class Obsessional : ConfigurableStandardModifier
 
         GamePlayer? obsession = null;
 
-        public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
+        [Local]
+        void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
         {
-            if(player.PlayerId == (obsession?.PlayerId ?? 255)) text += " #".Color(Role.RoleColor);
+            if(ev.Player == obsession) ev.Name += " #".Color(MyRole.UnityColor);
         }
 
-        public override void DecoratePlayerName(ref string text, ref Color color)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false)
+            if (canSeeAllInfo)
             {
-                text += " $".Color(Role.RoleColor);
+                name += " $".Color(MyRole.UnityColor);
                 if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
-                    text += $" <size=60%>({obsession?.Name ?? "ERROR" })</size>";
+                    name += $" <size=60%>({obsession?.Name ?? "ERROR" })</size>";
             }
         }
 
@@ -70,7 +61,7 @@ public class Obsessional : ConfigurableStandardModifier
                 var limitted = cands;
                 if (MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole)
                 {
-                    switch (MyRole.ImpostorObsessionalObsessesOverOption.CurrentValue)
+                    switch (ImpostorObsessionalObsessesOverOption.GetValue())
                     {
                         case 1:
                              limitted = cands.Where(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.NeutralRole);
@@ -90,7 +81,7 @@ public class Obsessional : ConfigurableStandardModifier
         [Local]
         void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
+            if (!ObsessionalSuicideWhenObsessionalTargetDieOption) return;
 
             if (ev.Player.PlayerId == (obsession?.PlayerId ?? 255) && !MyPlayer.IsDead)
             {
@@ -102,7 +93,7 @@ public class Obsessional : ConfigurableStandardModifier
         [Local]
         void OnPlayerDead(PlayerDieEvent ev)
         {
-            if (!MyRole.ObsessionalSuicideWhenObsessionalTargetDieOption) return;
+            if (!ObsessionalSuicideWhenObsessionalTargetDieOption) return;
 
             if (ev.Player.PlayerId == (obsession?.PlayerId ?? 255) && !MeetingHudExtension.MarkedAsExtraVictims(MyPlayer.PlayerId) && !MyPlayer.IsDead)
             {
@@ -120,8 +111,8 @@ public class Obsessional : ConfigurableStandardModifier
         {
             if (ev.Phase != ExtraWinCheckPhase.ObsessionPhase) return;
 
-            if (!MyRole.CanWinEvenIfObsessionalDieOption && MyPlayer.IsDead) return;
-            if (!MyRole.CanWinEvenIfObsessionalTargetDieOption && (obsession?.IsDead ?? true)) return;
+            if (!CanWinEvenIfObsessionalDieOption && MyPlayer.IsDead) return;
+            if (!CanWinEvenIfObsessionalTargetDieOption && (obsession?.IsDead ?? true)) return;
 
             if (obsession != null && ev.WinnersMask.Test(obsession))
             {
@@ -130,7 +121,7 @@ public class Obsessional : ConfigurableStandardModifier
             }
         }
 
-        public override string? IntroText => Language.Translate("role.obsessional.blurb").Replace("%NAME%", (obsession?.Name ?? "ERROR").Color(MyRole.RoleColor));
+        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.obsessional.blurb").Replace("%NAME%", (obsession?.Name ?? "ERROR").Color(MyRole.UnityColor));
 
         static RemoteProcess<(byte playerId, byte targetId)> RpcSetObsessionalTarget = new("SetObsessionalTarget",
         (message, _) =>
@@ -170,6 +161,6 @@ public class Obsessional : ConfigurableStandardModifier
             }
         }
 
-        public override bool MyCrewmateTaskIsIgnored => obsession?.Role.Role.Category != Virial.Assignable.RoleCategory.CrewmateRole || obsession?.Role.Role == Madmate.MyRole;
+        bool RuntimeModifier.MyCrewmateTaskIsIgnored => obsession?.Role.Role.Category != Virial.Assignable.RoleCategory.CrewmateRole || obsession?.Role.Role == Madmate.MyRole;
     }
 }

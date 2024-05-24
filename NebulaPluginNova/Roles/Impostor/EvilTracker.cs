@@ -81,20 +81,21 @@ public class TrackerPlayerMapLayer : MonoBehaviour
 
 public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public EvilTracker MyRole = new EvilTracker();
     private EvilTracker() : base("evilTracker", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ShowKillFlashOption, TaskTrackingOption, TrackCoolDownOption, CanChangeTargetOption, UpdateArrowIntervalOption, TrackImpostorsOption,ShowTrackingTargetOnMapOption]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGMH;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("role.evilTracker.showKillFlash", false);
-    static private ValueConfiguration<int> TaskTrackingOption = NebulaAPI.Configurations.Configuration("role.evilTracker.taskTracking", ["options.role.evilTracker.taskTracking.off", "options.role.evilTracker.taskTracking.onlyTarget", "options.role.evilTracker.taskTracking.on"], 0);
-    static private FloatConfiguration TrackCoolDownOption = NebulaAPI.Configurations.Configuration("role.evilTracker.trackCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanChangeTargetOption = NebulaAPI.Configurations.Configuration("role.evilTracker.canChangeTarget", false);
-    static private FloatConfiguration UpdateArrowIntervalOption = NebulaAPI.Configurations.Configuration("role.evilTracker.updateArrowInterval", (0f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration TrackImpostorsOption = NebulaAPI.Configurations.Configuration("role.evilTracker.trackImpostors", false);
-    static private BoolConfiguration ShowTrackingTargetOnMapOption = NebulaAPI.Configurations.Configuration("role.evilTracker.showTrackingTargetOnMap", false);
+    static private BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.showKillFlash", false);
+    static private ValueConfiguration<int> TaskTrackingOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.taskTracking", ["options.role.evilTracker.taskTracking.off", "options.role.evilTracker.taskTracking.onlyTarget", "options.role.evilTracker.taskTracking.on"], 0);
+    static private FloatConfiguration TrackCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.trackCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanChangeTargetOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.canChangeTarget", false);
+    static private FloatConfiguration UpdateArrowIntervalOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.updateArrowInterval", (0f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration TrackImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.trackImpostors", false);
+    static private BoolConfiguration ShowTrackingTargetOnMapOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.showTrackingTargetOnMap", false);
     //private NebulaConfiguration ShowRoomWhereTrackingTargetIsOption = null!;
+
+    static public EvilTracker MyRole = new EvilTracker();
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

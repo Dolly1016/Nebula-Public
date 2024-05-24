@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Modules.GUIWidget;
+using Virial;
 using Virial.Media;
 using Virial.Text;
 
@@ -29,7 +30,7 @@ internal class AchievementViewer : MonoBehaviour
     {
         scrollerTag ??= "Achievements";
 
-        var gui = NebulaImpl.Instance.GUILibrary;
+        var gui = NebulaAPI.GUI;
 
         List<GUIWidget> inner = new();
         var holder = new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, inner);
@@ -93,7 +94,7 @@ internal class AchievementViewer : MonoBehaviour
     }
 
     public void OnShown() {
-        var gui = NebulaImpl.Instance.GUILibrary;
+        var gui = NebulaAPI.GUI;
 
         var title = new NoSGUIText(GUIAlignment.Left, gui.GetAttribute(Virial.Text.AttributeAsset.OblongHeader), new TranslateTextComponent("achievement.ui.title"));
 

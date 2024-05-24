@@ -10,7 +10,6 @@ namespace Nebula.Roles.Crewmate;
 
 public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Justice MyRole = null;//new Justice();
     private Justice():base("justice", new(255, 128, 0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PutJusticeOnTheBalanceOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
@@ -22,6 +21,7 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
 
     static private BoolConfiguration PutJusticeOnTheBalanceOption = new BoolConfigurationImpl("role.justice.putJusticeOnTheBalance", false);
 
+    static public Justice MyRole = null;//new Justice();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

@@ -1,81 +1,70 @@
 ﻿using Nebula.Roles.Assignment;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Complex;
 
-public class ShownSecret : ConfigurableStandardModifier
+public class ShownSecret : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
-    public override int AssignPriority => 100;
-
-    public NebulaConfiguration EvilConditionTypeOption = null!;
-    public NebulaConfiguration EvilConditionOption = null!;
-    public NebulaConfiguration NiceConditionOption = null!;
-
-    protected override void LoadOptions()
-    {
-        base.LoadOptions();
-
-        NeutralRoleCountOption.Predicate = () => false;
-        EvilConditionTypeOption = new NebulaConfiguration(RoleConfig, "impostorArousalMethod", null, ["options.role.secret.impostorArousalMethod.kill", "options.role.secret.impostorArousalMethod.death"], 0, 0);
-        EvilConditionOption = new NebulaConfiguration(RoleConfig, "killingForArousal", null, 1, 10, 2, 2) { Predicate = () => EvilConditionTypeOption.CurrentValue == 0 };
-        NiceConditionOption = new NebulaConfiguration(RoleConfig, "tasksForArousal", null, 1, 10, 3, 3);
+    private ShownSecret() : base("secret", "SCR", new(Color.white.RGBMultiplied(0.82f)), [EvilConditionTypeOption, EvilConditionOption, NiceConditionOption], allocateToNeutral: false) { 
     }
 
-    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments)
-    {
-        throw new NotImplementedException();
-    }
+    //割り当てる役職が変更されてしまうので、一番最後に割り当てる
+    int HasAssignmentRoutine.AssignPriority => 100;
 
-    public override string LocalizedName => "secret";
+    static internal ValueConfiguration<int> EvilConditionTypeOption = NebulaAPI.Configurations.Configuration("options.role.secret.impostorArousalMethod", ["options.role.secret.impostorArousalMethod.kill", "options.role.secret.impostorArousalMethod.death"], 0);
+    static internal IntegerConfiguration EvilConditionOption = NebulaAPI.Configurations.Configuration("options.role.secret.killingForArousal", (1, 10), 2, () => EvilConditionTypeOption.GetValue() == 0);
+    static internal IntegerConfiguration NiceConditionOption = NebulaAPI.Configurations.Configuration("options.role.secret.tasksForArousal", (1, 10), 3);
 
-    public override Color RoleColor => Color.white.RGBMultiplied(0.82f);
-    public override string CodeName => "SCR";
-    override protected void AssignToTable(IRoleAllocator.RoleTable roleTable, byte playerId)
+    static public ShownSecret OptionRole = new ShownSecret();
+
+
+    // このモディファイアは実際に割り当てられることはない
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => throw new NotImplementedException();
+
+    override protected void SetModifier(IRoleTable roleTable, byte playerId)
     {
-        var tuple = roleTable.roles.Find(r => r.playerId == playerId);
-        roleTable.roles.RemoveAll(r => r.playerId == playerId);
+        var rawTable = roleTable as RoleTable;
+        if (rawTable == null) return;
+        var tuple = rawTable.roles.Find(r => r.playerId == playerId);
+        rawTable.roles.RemoveAll(r => r.playerId == playerId);
         var exArg = 0;
-        if (roleTable.modifiers.Any(m => m.modifier == GuesserModifier.MyRole && m.playerId == playerId))
+        if (rawTable.modifiers.Any(m => m.modifier == GuesserModifier.MyRole && m.playerId == playerId))
         {
             exArg |= 0b1;
-            roleTable.modifiers.RemoveAll(m => m.modifier == GuesserModifier.MyRole && m.playerId == playerId);
+            rawTable.modifiers.RemoveAll(m => m.modifier == GuesserModifier.MyRole && m.playerId == playerId);
         }
         var args = tuple.arguments.Prepend(exArg).Prepend(tuple.role.Id).ToArray();
         roleTable.SetRole(playerId, tuple.role.Category == RoleCategory.ImpostorRole ? Secret.MyEvilRole : Secret.MyNiceRole, args);
     }
 }
 
-public class Secret : AbstractRole, DefinedRole
+public class Secret : DefinedRoleTemplate, DefinedRole
 {
-    static public ShownSecret OptionRole = new ShownSecret();
     static public Secret MyNiceRole = new(false);
     static public Secret MyEvilRole = new(true);
 
     public bool IsEvil { get; private set; }
-    public override RoleCategory Category => IsEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => "secretInGame";
+    string DefinedAssignable.InternalName => IsEvil ? "evilSecret" : "niceSecret";
     string DefinedAssignable.DisplayName => "???";
-    public override Color RoleColor => IsEvil ? Palette.ImpostorRed : Palette.CrewmateBlue;
-    public override RoleTeam Team => IsEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.Team;
-    public override IEnumerable<IAssignableBase> RelatedOnConfig() { yield return IsEvil ? MyNiceRole : MyEvilRole; }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
     bool DefinedAssignable.ShowOnHelpScreen => false;
+    bool IGuessed.CanBeGuessDefault => false;
+    bool AssignableFilterHolder.CanLoadDefault(Virial.Assignable.DefinedAssignable assignable) => false;
 
-    public override int RoleCount => 0;
-    public override float GetRoleChance(int count) => 0f;
-
-    public override bool CanBeGuessDefault => false;
-
-    public Secret(bool isEvil)
+    public Secret(bool isEvil) : base("secretInGame", 
+        new(isEvil ? Palette.ImpostorRed : Palette.CrewmateBlue), 
+        isEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole,
+        isEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam, withAssignmentOption: false, withOptionHolder: false)
     {
         IsEvil = isEvil;
+        ConfigurationHolder?.ScheduleAddRelated(() => [isEvil ? MyNiceRole.ConfigurationHolder! : MyEvilRole.ConfigurationHolder!]);
     }
 
-    public override void Load(){}
 
     //クルーメイトの場合はLocalで呼び出すこと(タスク置き換えの都合上)
     private static void ScheduleSendArousalRpc(GamePlayer player, int[] savedArgs,List<GameData.TaskInfo>? tasks = null)
@@ -113,10 +102,9 @@ public class Secret : AbstractRole, DefinedRole
             r.Achievement is AbstractAchievement a && a.Category.type == AchievementType.Challenge && a.Category.role != null && a.Id != "secret.challenge" && r.UniteTo(false) != AbstractAchievement.ClearState.NotCleared);
         });
     }
-    public class NiceInstance : Crewmate.Crewmate.Instance, RuntimeRole
+    public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyNiceRole;
-        public override string DisplayRoleName => base.DisplayRoleName;
+        DefinedRole RuntimeRole.Role => MyNiceRole;
 
         public NiceInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
@@ -128,11 +116,11 @@ public class Secret : AbstractRole, DefinedRole
         
         List<GameData.TaskInfo> savedTasks = new();
         int[] savedArgs;
-        AbstractRole savedRole;
+        DefinedRole savedRole;
 
         void OnSetTaskLocal(PlayerTasksTrySetLocalEvent ev)
         {
-            int taskCount = OptionRole.NiceConditionOption;
+            int taskCount = ShownSecret.NiceConditionOption;
             while(ev.Tasks.Count > taskCount)
             {
                 var index = System.Random.Shared.Next(taskCount);
@@ -151,13 +139,11 @@ public class Secret : AbstractRole, DefinedRole
 
         string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort)
         {
-            return (isShort ? "?" : "???").Color(Palette.CrewmateBlue);
+            string str = (isShort ? "?" : "???").Color(Palette.CrewmateBlue);
+            if(NebulaGameManager.Instance?.CanSeeAllInfo ?? false) str += $" ({savedRole.DisplayShort.Color(savedRole.UnityColor)})".Color(Color.gray);
+            return str;
         }
 
-        public override void DecorateRoleName(ref string text)
-        {
-            if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) text += $" ({savedRole.ShortName.Color(savedRole.RoleColor)})".Color(Color.gray);
-        }
 
         void RuntimeAssignable.OnActivated()
         {
@@ -165,21 +151,21 @@ public class Secret : AbstractRole, DefinedRole
         }
     }
 
-    public class EvilInstance : Impostor.Impostor.Instance, RuntimeRole
+    public class EvilInstance : RuntimeAssignableTemplate, RuntimeRole
     {
-        public override AbstractRole Role => MyEvilRole;
+        DefinedRole RuntimeRole.Role => MyNiceRole;
         public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
             this.savedArgs = savedArgs;
             this.savedRole = Roles.AllRoles.First(r => r.Id == savedArgs[0]);
         }
 
-        public override bool HasVanillaKillButton => OptionRole.EvilConditionTypeOption.CurrentValue == 0;
+        bool RuntimeRole.HasVanillaKillButton => ShownSecret.EvilConditionTypeOption.GetValue() == 0;
         int[]? RuntimeAssignable.RoleArguments => savedArgs;
 
         int[] savedArgs;
-        AbstractRole savedRole;
-        int leftKill = OptionRole.EvilConditionOption;
+        DefinedRole savedRole;
+        int leftKill = ShownSecret.EvilConditionOption;
 
         [OnlyMyPlayer]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
@@ -187,13 +173,11 @@ public class Secret : AbstractRole, DefinedRole
             leftKill--;
             if (leftKill <= 0 && AmOwner) ScheduleSendArousalRpc(MyPlayer, savedArgs);
         }
-
-        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort) => (isShort ? "?" : "???").Color(Palette.ImpostorRed);
-        
-
-        public override void DecorateRoleName(ref string text)
+        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort)
         {
-            if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) text += $" ({savedRole.ShortName.Color(savedRole.RoleColor)})".Color(Color.gray);
+            string str = (isShort ? "?" : "???").Color(Palette.ImpostorRed);
+            if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) str += $" ({savedRole.DisplayShort.Color(savedRole.UnityColor)})".Color(Color.gray);
+            return str;
         }
 
         void RuntimeAssignable.OnActivated()
@@ -204,7 +188,7 @@ public class Secret : AbstractRole, DefinedRole
         void OnPlayerDead(PlayerDieEvent ev)
         {
             //Covertモードはホストが割り当てを管理する
-            if (AmongUsClient.Instance.AmHost && OptionRole.EvilConditionTypeOption.CurrentValue == 1)
+            if (AmongUsClient.Instance.AmHost && ShownSecret.EvilConditionTypeOption.GetValue() == 1)
             {
                 //死者、非インポスター、シークレットしかいないとき
                 if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || p.Role.Role.Category != RoleCategory.ImpostorRole || p.Role.Role == MyEvilRole) ?? false)

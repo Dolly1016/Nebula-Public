@@ -7,7 +7,7 @@ public class SkeldData : MapData
         //カフェ
         new(0f, 5.3f), new(-5.2f, 1.2f), new(-0.9f, -3.1f), new(4.6f, 1.2f),
         //ウェポン
-        new(10.1f, 3f),
+        new(10.1f, 3f),new(8.45f, 1.1f),
         //コの字通路/O2
         new(9.6f, -3.4f), new(11.8f, -6.5f),
         //ナビ
@@ -37,7 +37,15 @@ public class SkeldData : MapData
         //アドミン
         new(2.6f, -7.1f), new(6.3f, -9.5f)
     };
-    protected override Vector2[] MapArea => MapPositions;
 
+    static private Vector2[] NonMapPositions = new Vector2[]
+    {
+        //ナビ左上
+        new(13.55f, -3.5f),
+        //リアクター右上方
+        new(-18.45f, -2.65f)
+    };
+    protected override Vector2[] MapArea => MapPositions;
+    protected override Vector2[] NonMapArea => NonMapPositions;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };
 }

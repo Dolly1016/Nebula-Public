@@ -56,7 +56,7 @@ class HeliSabotageSystemPatch
     {
         if((msgReader.GetPrevByte() & 240) == (int)HeliSabotageSystem.Tags.DamageBit)
         {
-            __instance.Countdown = GeneralConfigurations.AirshipHeliDurationOption.GetFloat();
+            __instance.Countdown = GeneralConfigurations.AirshipHeliDurationOption.CurrentValue;
         }
     }
 }

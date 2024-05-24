@@ -13,7 +13,7 @@ namespace Nebula.Roles.Impostor;
 
 public class Disturber : DefinedRoleTemplate, DefinedRole
 {
-    [NebulaPreLoad]
+    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
     [NebulaRPCHolder]
     public class DisturbPole : NebulaSyncStandardObject
     {
@@ -48,7 +48,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
             }catch { }
         }
 
-        public static void Load()
+        static DisturbPole()
         {
             NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new DisturbPole(new(args[0], args[1])));
         }
@@ -61,18 +61,19 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         static public RemoteProcess<int> RpcActivate = new("ActivatePole", (id, _) => NebulaSyncObject.GetObject<DisturbPole>(id)?.Activate());
     }
 
-    static public Disturber MyRole = new Disturber();
     private Disturber() : base("disturber", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [PlaceCoolDownOption, DisturbCoolDownOption, DisturbDurationOption, MaxNumOfPolesOption, MaxDistanceBetweenPolesOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagDifficult, ConfigurationTags.TagFunny);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("role.disturber.placeCoolDown", (0f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration DisturbCoolDownOption = NebulaAPI.Configurations.Configuration("role.disturber.disturbCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration DisturbDurationOption = NebulaAPI.Configurations.Configuration("role.disturber.disturbDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration MaxNumOfPolesOption = NebulaAPI.Configurations.Configuration("role.disturber,maxNumOfPoles", (2, 10), 5);
-    static private FloatConfiguration MaxDistanceBetweenPolesOption = NebulaAPI.Configurations.Configuration("role.disturber.maxDistanceBetweenPoles", (2f, 6f, 1f), 5f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.disturber.placeCoolDown", (0f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DisturbCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DisturbDurationOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private IntegerConfiguration MaxNumOfPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxNumOfPoles", (2, 10), 5);
+    static private FloatConfiguration MaxDistanceBetweenPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxDistanceBetweenPoles", (2f, 6f, 1f), 5f, FloatConfigurationDecorator.Ratio);
+
+    static public Disturber MyRole = new Disturber();
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

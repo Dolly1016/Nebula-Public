@@ -10,17 +10,17 @@ namespace Nebula.Roles.Crewmate;
 
 public class Doctor : DefinedRoleTemplate, DefinedRole
 {
-    static public Doctor MyRole = new Doctor();
 
     private Doctor() : base("doctor", new(128,255,221),RoleCategory.CrewmateRole, Crewmate.MyTeam, [PortableVitalsChargeOption, MaxPortableVitalsChargeOption, ChargesPerTasksOption]) { }
     
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration PortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("role.doctor.portableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration MaxPortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("role.doctor.maxPortableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration ChargesPerTasksOption = NebulaAPI.Configurations.Configuration("role.doctor.chargesPerTasks", (0.5f, 10f, 0.5f), 1f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.portableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MaxPortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.maxPortableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration ChargesPerTasksOption = NebulaAPI.Configurations.Configuration("options.role.doctor.chargesPerTasks", (0.5f, 10f, 0.5f), 1f, FloatConfigurationDecorator.Second);
 
+    static public Doctor MyRole = new Doctor();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

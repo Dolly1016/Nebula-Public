@@ -1,9 +1,11 @@
-﻿namespace Nebula.Modules.Property;
+﻿using Virial.Runtime;
 
-[NebulaPreLoad]
+namespace Nebula.Modules.Property;
+
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 static public class GlobalProperties
 {
-    static public void Load()
+    static void Preprocess(NebulaPreprocessor preprocessor)
     {
         new NebulaGlobalFunctionProperty("myPuid", () =>
         {

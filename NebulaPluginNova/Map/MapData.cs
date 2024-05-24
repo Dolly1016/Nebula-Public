@@ -3,12 +3,13 @@
 public abstract class MapData
 {
     abstract protected Vector2[] MapArea { get; }
+    abstract protected Vector2[] NonMapArea { get; }
     abstract protected SystemTypes[] SabotageTypes { get; }
 
     public SystemTypes[] GetSabotageSystemTypes() => SabotageTypes;
     public bool CheckMapArea(Vector2 position)
     {
-        int num = Physics2D.OverlapCircleNonAlloc(position, 0.23f, PhysicsHelpers.colliderHits, Constants.ShipAndAllObjectsMask);
+        int num = Physics2D.OverlapCircleNonAlloc(position, 0.1f, PhysicsHelpers.colliderHits, Constants.ShipAndAllObjectsMask);
         if (num > 0) for (int i = 0; i < num; i++) if (!PhysicsHelpers.colliderHits[i].isTrigger) return false;
 
         return CheckMapAreaInternal(position);
@@ -18,6 +19,15 @@ public abstract class MapData
     {
         Vector2 vector;
         float magnitude;
+
+        foreach (Vector2 p in NonMapArea)
+        {
+            vector = p - position;
+            magnitude = vector.magnitude;
+            if (magnitude > 6.0f) continue;
+
+            if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.normalized, magnitude, Constants.ShipAndAllObjectsMask)) return false;
+        }
 
         foreach (Vector2 p in MapArea)
         {
@@ -36,6 +46,16 @@ public abstract class MapData
         Vector2 vector;
         float magnitude;
         int count = 0;
+
+        foreach (Vector2 p in NonMapArea)
+        {
+            vector = p - position;
+            magnitude = vector.magnitude;
+            if (magnitude > 6.0f) continue;
+
+            if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.normalized, magnitude, Constants.ShipAndAllObjectsMask)) return 0;
+        }
+
         foreach (Vector2 p in MapArea)
         {
             vector = p - position;
@@ -67,14 +87,14 @@ public abstract class MapData
         RenderTexture.ReleaseTemporary(renderTexture);
 
         return readableTextur2D;
-    }
-    public Texture2D OutputMap(Vector2 pos, Vector2 size)
+    } 
+    public Texture2D OutputMap(Vector2 center, Vector2 size, float resolution = 10f)
     {
         int x1, y1, x2, y2;
-        x1 = (int)(pos.x * 10);
-        y1 = (int)(pos.y * 10);
-        x2 = x1 + (int)(size.x * 10);
-        y2 = y1 + (int)(size.y * 10);
+        x1 = (int)((center.x - size.x * 0.5f) * resolution);
+        y1 = (int)((center.y - size.y * 0.5f) * resolution);
+        x2 = (int)((center.x + size.x * 0.5f) * resolution);
+        y2 = (int)((center.y + size.y * 0.5f) * resolution);
         int temp;
         if (x1 > x2)
         {
@@ -98,8 +118,7 @@ public abstract class MapData
         {
             for (int x = x1; x < x2; x++)
             {
-                num = CheckMapAreaDebug(new Vector2(((float)x) / 10f, ((float)y) / 10f));
-
+                num = CheckMapAreaDebug(new Vector2(((float)x) / resolution, ((float)y) / resolution));
                 texture.SetPixel(x - x1, y - y1, (num == 0) ? color : new Color((num > 1 ? 100 : 0) / 255f, (150 + (num * 5)) / 255f, 0));
                 if (num > 0) r++;
             }

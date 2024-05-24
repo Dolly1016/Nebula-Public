@@ -74,7 +74,6 @@
 		<Compile Remove="Roles\Perks\**" />
 		<EmbeddedResource Remove="Roles\Perks\**" />
 		<None Remove="Roles\Perks\**" />
-		<Reference Include="libs\Mono.CSharp.dll" />
 	</ItemGroup>
 
 	<ItemGroup>

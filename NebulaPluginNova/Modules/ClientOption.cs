@@ -4,11 +4,12 @@ using Nebula.Modules.GUIWidget;
 using Rewired.UI.ControlMapper;
 using System.Diagnostics;
 using TMPro;
+using Virial.Runtime;
 
 namespace Nebula.Modules;
 
 
-[NebulaPreLoad(typeof(ToolsInstaller))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.LoadAddons)]
 public class ClientOption
 {
     public enum ClientOptionType
@@ -21,6 +22,7 @@ public class ClientOption
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
+    static public BooleanDataEntry UseSimpleConfigurationViewerEntry = new("useSimpleConfig", ClientOptionSaver, false);
     static public Dictionary<ClientOptionType,ClientOption> AllOptions = new();
     DataEntry<int> configEntry;
     string id;
@@ -97,7 +99,7 @@ public class ClientOption
         configEntry.Value = (configEntry.Value + 1) % selections.Length;
         OnValueChanged?.Invoke();
     }
-    static public void Load()
+    static public void Preprocess(NebulaPreprocessor preprocessor)
     {
         new ClientOption(ClientOptionType.OutputCosmicHash, "outputHash", new string[] { "options.switch.off", "options.switch.on" }, 0);
         //new ClientOption(ClientOptionType.UseNoiseReduction, "noiseReduction", new string[] { "options.switch.off", "options.switch.on" }, 0);

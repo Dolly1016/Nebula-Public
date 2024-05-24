@@ -9,16 +9,16 @@ namespace Nebula.Roles.Ghost.Crewmate;
 [NebulaRPCHolder]
 public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
 {
-    static public Lumine MyRole = new Lumine();
     public Lumine(): base("lumine", new(241, 237, 184),RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam) {
         ConfigurationHolder?.AppendConfigurations([LightSizeOption, LightDurationOption]);
     }
 
     string ICodeName.CodeName => "LMN";
 
-    FloatConfiguration LightSizeOption = NebulaAPI.Configurations.Configuration("role.lumine.lightSize", (1f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
-    FloatConfiguration LightDurationOption = NebulaAPI.Configurations.Configuration("role.lumine.lightDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    FloatConfiguration LightSizeOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightSize", (1f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
+    FloatConfiguration LightDurationOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
 
+    static public Lumine MyRole = new Lumine();
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole

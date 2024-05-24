@@ -2,10 +2,11 @@
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using TMPro;
+using Virial.Runtime;
 
 namespace Nebula.Modules;
 
-[NebulaPreLoad(typeof(RemoteProcessBase),typeof(NebulaAddon))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 [NebulaRPCHolder]
 public class DynamicPalette
 {
@@ -25,8 +26,10 @@ public class DynamicPalette
     public static Dictionary<string, List<RestorableColor>> ColorCatalogue = new();
     public static Dictionary<string, List<RestorableColor>> VisorColorCatalogue = new();
 
-    static public void Load()
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
+        yield return preprocessor.SetLoadingText("Loading Color Catalogue");
+
         ColorData = new DataSaver("DynamicColor");
         MyColor = new ModColor("myColor");
         MyVisorColor = new ColorEntry("myColor.visor");
@@ -65,12 +68,6 @@ public class DynamicPalette
         //プレビューカラーを設定しておく(Dev. Studio用)
         Palette.PlayerColors[NebulaPlayerTab.PreviewColorId] = DynamicPalette.MyColor.MainColor;
         Palette.ShadowColors[NebulaPlayerTab.PreviewColorId] = DynamicPalette.MyColor.ShadowColor;
-    }
-
-    static public IEnumerator CoLoad()
-    {
-        Patches.LoadPatch.LoadingText = "Loading Color Catalogue";
-        yield return null;
 
         foreach (var addon in NebulaAddon.AllAddons)
         {

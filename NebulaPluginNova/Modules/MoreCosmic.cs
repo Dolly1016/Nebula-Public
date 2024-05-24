@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine.AddressableAssets;
+using Virial.Runtime;
 
 namespace Nebula.Modules;
 
@@ -579,7 +580,7 @@ public class CustomItemBundle
     }
 }
 
-[NebulaPreLoad(typeof(NebulaAddon),typeof(ClientOption))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
 public static class MoreCosmic
 {
     public static Dictionary<string, CosmicHat> AllHats = new();
@@ -676,7 +677,7 @@ public static class MoreCosmic
         await LoadOnline();
     }
 
-    public static void Load()
+    static void Preprocess(NebulaPreprocessor preprocessor)
     {
         if (isLoaded) return;
 
@@ -686,10 +687,10 @@ public static class MoreCosmic
     }
 }
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public static class WrappedAddressableAssetLoader
 {
-    public static void Load()
+    public static void Preprocess(NebulaPreprocessor preprocessor)
     {
         try
         {

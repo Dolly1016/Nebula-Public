@@ -2,7 +2,7 @@
 
 namespace Nebula.Commands;
 
-[NebulaPreLoad(typeof(NebulaResourceManager))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
 static public class Commands
 {
     static public void Load()

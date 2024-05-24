@@ -12,19 +12,20 @@ namespace Nebula.Roles.Impostor;
 [NebulaRPCHolder]
 public class Marionette : DefinedRoleTemplate, DefinedRole
 {
-    static public Marionette MyRole = new Marionette();
     private Marionette() : base("marionette", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [PlaceCoolDownOption, SwapCoolDownOption, DecoyDurationOption, CanSeeDecoyInShadowOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("role.marionette.placeCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration SwapCoolDownOption = NebulaAPI.Configurations.Configuration("role.marionette.swapCoolDown", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration DecoyDurationOption = NebulaAPI.Configurations.Configuration("role.marionette.decoyDuration", (5f, 180f, 5f), 40f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanSeeDecoyInShadowOption = NebulaAPI.Configurations.Configuration("role.marionette.canSeeDecoyInShadow", false);
+    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.marionette.placeCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration SwapCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.marionette.swapCoolDown", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DecoyDurationOption = NebulaAPI.Configurations.Configuration("options.role.marionette.decoyDuration", (5f, 180f, 5f), 40f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanSeeDecoyInShadowOption = NebulaAPI.Configurations.Configuration("options.role.marionette.canSeeDecoyInShadow", false);
 
-    [NebulaPreLoad]
+    static public Marionette MyRole = new Marionette();
+
+    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
     public class Decoy : NebulaSyncStandardObject
     {
         public static string MyTag = "Decoy";
@@ -37,7 +38,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
         public bool Flipped { get => MyRenderer.flipX; set => MyRenderer.flipX = value; }
         public EmptyBehaviour MyBehaviour = null!;
 
-        public static void Load()
+        static Decoy()
         {
             NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new Decoy(new Vector2(args[0], args[1]), args[2] < 0f));
         }

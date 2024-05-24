@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+using Virial.Runtime;
 
 namespace Nebula.Scripts;
 
@@ -15,10 +16,10 @@ internal class AddonAssembly
 internal record AddonScript(Assembly Assembly, NebulaAddon Addon, MetadataReference reference);
 
 
-[NebulaPreLoad(typeof(NebulaAddon))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.CompileAddons)]
 internal static class AddonScriptManagerLoader
 {
-    static public IEnumerator CoLoad()
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         Patches.LoadPatch.LoadingText = "Compiling Addon Scripts";
         yield return null;
@@ -48,7 +49,7 @@ internal static class AddonScriptManager
     static public IEnumerator CoLoad(Assembly[] assemblies)
     {
         //参照可能なアセンブリを抽出する
-        ReferenceAssemblies = assemblies.Where(a => { try { return (a.Location?.Length ?? 0) > 0; } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray();
+        ReferenceAssemblies = assemblies.Where(a => { try { return ((a.Location?.Length ?? 0) > 0); } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray();
         
         var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp12);
         var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic").WithWarningLevel(0);

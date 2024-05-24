@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Virial.Runtime;
 
 namespace Nebula.Modules;
 
@@ -145,7 +146,7 @@ public class LobbySlideTemplate
 }
 
 [NebulaRPCHolder]
-[NebulaPreLoad(typeof(NebulaAddon))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
 public class LobbySlideManager
 {
     public Dictionary<string,LobbySlide> allSlides = new();
@@ -154,10 +155,9 @@ public class LobbySlideManager
     private (string tag, bool detatched)? lastShowRequest;
     public bool IsValid { get; private set; } = true;
 
-    static public IEnumerator CoLoad()
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        Patches.LoadPatch.LoadingText = "Loading Lobby Slides";
-        yield return null;
+        yield return preprocessor.SetLoadingText("Loading Lobby Slides");
 
         foreach (var addon in NebulaAddon.AllAddons)
         {

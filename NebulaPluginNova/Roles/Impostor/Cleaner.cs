@@ -11,16 +11,16 @@ namespace Nebula.Roles.Impostor;
 
 public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Cleaner MyRole = new Cleaner();
     private Cleaner() : base("cleaner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CleanCoolDownOption, SyncKillAndCleanCoolDownOption]){}
 
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration CleanCoolDownOption = NebulaAPI.Configurations.Configuration("role.cleaner.cleanCoolDown", (5f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration SyncKillAndCleanCoolDownOption = NebulaAPI.Configurations.Configuration("role.cleaner.syncKillAndCleanCoolDown", true);
+    static private FloatConfiguration CleanCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cleaner.cleanCoolDown", (5f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration SyncKillAndCleanCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cleaner.syncKillAndCleanCoolDown", true);
 
+    static public Cleaner MyRole = new Cleaner();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

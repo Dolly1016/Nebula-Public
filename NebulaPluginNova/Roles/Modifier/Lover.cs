@@ -1,7 +1,9 @@
 ﻿using Nebula.Roles.Assignment;
 using Nebula.Roles.Neutral;
 using Nebula.VoiceChat;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
@@ -9,23 +11,32 @@ using Virial.Game;
 namespace Nebula.Roles.Modifier;
 
 
-public class Lover : ConfigurableModifier, HasCitation
+public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCitation, RoleFilter
 {
-    static public Lover MyRole = new Lover();
-    public override string LocalizedName => "lover";
-    public override string CodeName => "LVR";
-    public override Color RoleColor => new Color(255f / 255f, 0f / 255f, 184f / 255f);
+    private Lover() : base("lover", new(255, 0, 184), [NumOfPairsOption, RoleChanceOption, ChanceOfAssigningImpostorsOption, AllowExtraWinOption, AvengerModeOption]) {
+        ConfigurationHolder?.ScheduleAddRelated(() => [Neutral.Avenger.MyRole.ConfigurationHolder!]);
+        ConfigurationHolder?.SetDisplayState(() => NumOfPairsOption == 0 ? ConfigurationHolderState.Inactivated : RoleChanceOption == 100 ? ConfigurationHolderState.Emphasized : ConfigurationHolderState.Activated);
+    }
+    string ICodeName.CodeName => "LVR";
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    private NebulaConfiguration RoleChanceOption = null!;
-    private NebulaConfiguration NumOfPairsOption = null!;
-    private NebulaConfiguration ChanceOfAssigningImpostorsOption = null!;
-    private NebulaConfiguration AllowExtraWinOption = null!;
-    public NebulaConfiguration AvengerModeOption = null!;
-    public override ModifierInstance CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments[0]);
 
-    public override IEnumerable<IAssignableBase> RelatedOnConfig() { if (Avenger.MyRole.RoleConfig.IsShown) yield return Avenger.MyRole; }
+    bool AssignableFilter<DefinedRole>.Test(DefinedRole role) => role.ModifierFilter?.Test((this as DefinedModifier)!) ?? false;
+    void AssignableFilter<DefinedRole>.ToggleAndShare(DefinedRole role) => role.ModifierFilter?.ToggleAndShare((this as DefinedModifier)!);
+    RoleFilter HasRoleFilter.RoleFilter => this;
 
-    public override void Assign(IRoleAllocator.RoleTable roleTable) {
+    int HasAssignmentRoutine.AssignPriority => 1;
+
+    static internal IntegerConfiguration NumOfPairsOption = NebulaAPI.Configurations.Configuration("options.role.lover.numOfPairs", (0, 7), 0);
+    static private IntegerConfiguration RoleChanceOption = NebulaAPI.Configurations.Configuration("options.role.lover.roleChance", (10, 100, 10), 100, decorator: num => num + "%",title: new TranslateTextComponent("options.role.chance"));
+    static private IntegerConfiguration ChanceOfAssigningImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.lover.chanceOfAssigningImpostors", (0,100,10), 0, decorator: num => num + "%");
+    static private BoolConfiguration AllowExtraWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.allowExtraWin", true);
+    static internal BoolConfiguration AvengerModeOption = NebulaAPI.Configurations.Configuration("options.role.lover.avengerMode", false);
+
+    static public Lover MyRole = new Lover();
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments[0]);
+
+
+    void HasAssignmentRoutine.TryAssign(Virial.Assignable.IRoleTable roleTable){
         var impostors = roleTable.GetPlayers(RoleCategory.ImpostorRole).Where(p => p.role.CanLoad(this)).OrderBy(_=>Guid.NewGuid()).ToArray();
         var others = roleTable.GetPlayers(RoleCategory.CrewmateRole | RoleCategory.NeutralRole).Where(p => p.role.CanLoad(this)).OrderBy(_ => Guid.NewGuid()).ToArray();
         int impostorsIndex = 0;
@@ -33,13 +44,13 @@ public class Lover : ConfigurableModifier, HasCitation
 
 
         int maxPairs = NumOfPairsOption;
-        float chanceImpostor = ChanceOfAssigningImpostorsOption.GetFloat() / 100f;
-        (byte playerId, AbstractRole role)? first,second;
+        float chanceImpostor = ChanceOfAssigningImpostorsOption / 100f;
+        (byte playerId, DefinedRole role)? first,second;
 
         int assigned = 0;
         for (int i = 0; i < maxPairs; i++)
         {
-            float chance = RoleChanceOption.GetFloat() / 100f;
+            float chance = RoleChanceOption / 100f;
             if ((float)System.Random.Shared.NextDouble() >= chance) continue;
 
             try
@@ -60,23 +71,11 @@ public class Lover : ConfigurableModifier, HasCitation
         }
     }
 
-    protected override void LoadOptions()
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
-        RoleChanceOption = ConfigurableStandardModifier.Generate100PercentRoleChanceOption(RoleConfig);
-        NumOfPairsOption = new(RoleConfig, "numOfPairs", null, 0, 7, 0, 0);
-        RoleConfig.IsActivated = () => NumOfPairsOption > 0;
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
 
-        ChanceOfAssigningImpostorsOption = new(RoleConfig, "chanceOfAssigningImpostors", null, 0f, 100f, 10f, 0f, 0f) { Decorator = NebulaConfiguration.PercentageDecorator };
-        AllowExtraWinOption = new(RoleConfig, "allowExtraWin", null, true, true);
-
-        AvengerModeOption = new(RoleConfig, "avengerMode", null, false, false);
-    }
-
-    public class Instance : ModifierInstance, IBindPlayer, RuntimeModifier
-    {
-        public override AbstractModifier Role => MyRole;
-
-        static private Color[] colors = new Color[] { MyRole.RoleColor,
+        static private Color[] colors = new Color[] { MyRole.UnityColor,
         (Color)new Color32(254, 132, 3, 255) ,
         (Color)new Color32(3, 254, 188, 255) ,
         (Color)new Color32(255, 255, 0, 255) ,
@@ -90,27 +89,27 @@ public class Lover : ConfigurableModifier, HasCitation
         }
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWin(ev.GameEnd == NebulaGameEnd.LoversWin && !MyPlayer.IsDead);
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.LoversWin && !MyPlayer.IsDead);
 
-        public override void DecoratePlayerName(ref string text, ref Color color)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
             Color loverColor = colors[loversId];
             var myLover = MyLover;
             bool canSee = false;
 
-            if (AmOwner || (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || (MyLover?.AmOwner ?? false))
+            if (AmOwner || canSeeAllInfo || (MyLover?.AmOwner ?? false))
             {
                 canSee = true;
             }else if (myLover?.Role.Role == Avenger.MyRole && !myLover.IsDead && MyPlayer.IsDead)
             {
-                int optionValue = Avenger.MyRole.CanKnowExistanceOfAvengerOption.CurrentValue;
+                int optionValue = Avenger.CanKnowExistanceOfAvengerOption.GetValue();
                 if(optionValue == 2 || ((optionValue == 1) && ((myLover!.Role as Avenger.Instance)?.AvengerTarget?.AmOwner ?? false))){
                     canSee = true;
-                    loverColor = Avenger.MyRole.RoleColor;
+                    loverColor = Avenger.MyRole.UnityColor;
                 }
             }
 
-            if (canSee) text += " ♥".Color(loverColor);
+            if (canSee) name += " ♥".Color(loverColor);
         }
 
         [Local]
@@ -132,17 +131,24 @@ public class Lover : ConfigurableModifier, HasCitation
         }
 
         [OnlyMyPlayer, Local]
-        void OnMurdered(PlayerMurderedEvent ev)
+        void OnMurdered(PlayerDieEvent ev)
         {
-            if(!ev.Murderer.AmOwner)
-            {
-                var myLover = MyLover;
-                if (myLover?.IsDead ?? true) return;
+            var myLover = MyLover;
+            if (myLover?.IsDead ?? true) return;
 
-                if (MyRole.AvengerModeOption)
-                    myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [ev.Murderer.PlayerId]).InvokeSingle();
-                else
-                    myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, true);
+            if (ev is PlayerMurderedEvent pme)
+            {
+                if (!pme.Murderer.AmOwner)
+                {
+                    if (AvengerModeOption)
+                        myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [pme.Murderer.PlayerId]).InvokeSingle();
+                    else
+                        myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, true);
+                }
+            }
+            else
+            {   
+                myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, true);
             }
         }
 
@@ -168,12 +174,10 @@ public class Lover : ConfigurableModifier, HasCitation
 
         void RuntimeAssignable.OnActivated()
         {
-            NebulaGameManager.Instance?.CriteriaManager.AddCriteria(NebulaEndCriteria.LoversCriteria);
-
             if (AmOwner)
             {
                 if (GeneralConfigurations.LoversRadioOption)
-                    Bind(VoiceChatManager.GenerateBindableRadioScript(p=>p == MyLover, "voiceChat.info.loversRadio", MyRole.RoleColor));
+                    Bind(VoiceChatManager.GenerateBindableRadioScript(p=>p == MyLover, "voiceChat.info.loversRadio", MyRole.UnityColor));
             }
         }
 
@@ -181,7 +185,7 @@ public class Lover : ConfigurableModifier, HasCitation
         void CheckExtraWins(PlayerCheckExtraWinEvent ev)
         {
             if (ev.Phase != ExtraWinCheckPhase.LoversPhase) return;
-            if (!MyRole.AllowExtraWinOption) return;
+            if (!AllowExtraWinOption) return;
 
             var myLover = MyLover;
             if (myLover == null) return;
@@ -194,7 +198,8 @@ public class Lover : ConfigurableModifier, HasCitation
         }
 
         public GamePlayer? MyLover => NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault(p => p.PlayerId != MyPlayer.PlayerId && p.Modifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId));
-        public override string? IntroText => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover?.Name ?? "ERROR").Color(MyRole.RoleColor));
-        public override bool InvalidateCrewmateTask => true;
+        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover?.Name ?? "ERROR").Color(MyRole.UnityColor));
+        bool RuntimeModifier.InvalidateCrewmateTask => true;
+        bool RuntimeModifier.MyCrewmateTaskIsIgnored => true;
     }
 }

@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Virial.Attributes;
 using Virial.Game;
+using Virial.Runtime;
 using Virial.Text;
 
 namespace Nebula.Modules;
@@ -137,7 +138,7 @@ public static class RPCRouter
     }
 }
 
-[NebulaPreLoad(true,[typeof(NebulaAddon)])]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
 public class RemoteProcessBase
 {
     static public Dictionary<int, RemoteProcessBase> AllNebulaProcess = new();
@@ -203,10 +204,12 @@ public class RemoteProcessBase
         var newMethod = harmony.Patch(method, new HarmonyMethod(prefixInfo.Method));
     }
 
-    static public void Load()
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
+        yield return preprocessor.SetLoadingText("Building Remote Procedure Calls");
+
         var types = Assembly.GetAssembly(typeof(RemoteProcessBase))?.GetTypes().Where((type) => type.IsDefined(typeof(NebulaRPCHolder)));
-        if (types == null) return;
+        if (types == null) yield break;
 
         foreach (var type in types)
         {

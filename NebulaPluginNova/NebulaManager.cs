@@ -1,6 +1,8 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
+using Nebula.Map;
 using UnityEngine.Rendering;
+using Virial.Runtime;
 
 namespace Nebula;
 
@@ -184,7 +186,7 @@ public class MouseOverPopup : MonoBehaviour
     }
 }
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 [NebulaRPCHolder]
 public class NebulaManager : MonoBehaviour
 {
@@ -227,7 +229,7 @@ public class NebulaManager : MonoBehaviour
             if(GameStartManager.Instance) GameStartManager.Instance.ResetStartState();
         }
         );
-    static public void Load()
+    static public void Preprocess(NebulaPreprocessor preprocess)
     {
         commands.Add(new( "help.command.nogame",
             () => NebulaGameManager.Instance != null && AmongUsClient.Instance &&  AmongUsClient.Instance.AmHost && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started,
@@ -314,14 +316,23 @@ public class NebulaManager : MonoBehaviour
 
     public void Update()
     {
-
         if (PreloadManager.FinishedPreload)
         {
+
+            
             //スクリーンショット
             if (!TextField.AnyoneValid && NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDown) StartCoroutine(CaptureAndSave().WrapToIl2Cpp());
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
+                /*
+                if (Input.GetKeyDown(KeyCode.K))
+                {
+                    Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;
+                    File.WriteAllBytesAsync("SpawnableMap" + NebulaPreSpawnLocation.MapName[AmongUsUtil.CurrentMapId] +".png", MapData.GetCurrentMapData().OutputMap(center, new Vector2(10f, 7f) * ShipStatus.Instance.MapScale, 40f).EncodeToPNG());
+                }
+                */
+
                 //コマンド
                 if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyDown)
                 {

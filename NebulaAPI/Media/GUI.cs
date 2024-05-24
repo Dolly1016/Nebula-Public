@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Virial.Assignable;
 using Virial.Compat;
 using Virial.Text;
 
@@ -207,6 +208,14 @@ public interface GUI
     GUIWidget Button(GUIAlignment alignment, TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null);
 
     /// <summary>
+    /// 値の増減に使うことができるボタンです。
+    /// </summary>
+    /// <param name="alignment"></param>
+    /// <param name="onClick"></param>
+    /// <returns></returns>
+    GUIWidget SpinButton(GUIAlignment alignment, Action<bool> onClick);
+
+    /// <summary>
     /// 画像を表示するウィジェットです。
     /// </summary>
     /// <param name="alignment">画像の表示位置</param>
@@ -405,5 +414,7 @@ public interface GUI
     /// <returns>色付きのテキストコンポーネント</returns>
     TextComponent ColorTextComponent(Virial.Color color, TextComponent component);
 
-    
+    TextComponent FunctionalTextComponent(Func<string> supplier);
+
+    internal void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable;
 }

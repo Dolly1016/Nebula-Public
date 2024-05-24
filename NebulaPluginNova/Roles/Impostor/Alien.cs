@@ -9,8 +9,6 @@ namespace Nebula.Roles.Impostor;
 
 public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-
-    static public Alien MyRole = null;//new Alien();
     private Alien(): base("alien", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EMICoolDownOption, EMIDurationOption, InvalidateCoolDownOption, NumOfInvalidationsOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
@@ -20,11 +18,12 @@ public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration EMICoolDownOption = NebulaAPI.Configurations.Configuration("role.alien.emiCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration EMIDurationOption = NebulaAPI.Configurations.Configuration("role.alien.emiDuration", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("role.alien.numOfInvalidations", (1, 10), 1);
+    static private FloatConfiguration EMICoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration EMIDurationOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiDuration", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
+    static private IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("options.role.alien.numOfInvalidations", (1, 10), 1);
 
+    static public Alien MyRole = null;//new Alien();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

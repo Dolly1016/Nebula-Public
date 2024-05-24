@@ -12,7 +12,7 @@ public class PlayerBlockWinEvent : AbstractPlayerEvent
     public BitMask<Virial.Game.Player> WinnersMask { get; private init; }
     public bool IsWin { get; private init; }
     public bool IsBlocked { get; set; } = false;
-    public void SetBlocked(bool blocked) => IsBlocked = blocked;
+    public void SetBlockedIf(bool blocked) => IsBlocked |= blocked;
 
     internal PlayerBlockWinEvent(Virial.Game.Player player, BitMask<Virial.Game.Player> winners, Virial.Game.GameEnd gameEnd) : base(player)
     {

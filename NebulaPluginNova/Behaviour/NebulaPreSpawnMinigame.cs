@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using TMPro;
+using Virial.Configuration;
 
 namespace Nebula.Behaviour;
 
@@ -117,7 +118,7 @@ public class NebulaPreSpawnLocation
     public string AssetImagePath(byte mapId) => "assets/SpawnCandidates/" + MapName[mapId] + "/" + LocationName + ".png";
     public IDividedSpriteLoader GetSprite(byte mapId) => new DividedSpriteLoader(new AssetTextureLoader(AssetImagePath(mapId)), 115f, ImageSize, ImageSize, true) { Pivot = new(0.5f, 0f) };
     private int ImageSize { get; set; } = 200;
-    public NebulaConfiguration.NebulaByteConfiguration Configuration { get; set; }
+    public IOrderedSharableVariable<bool> Configuration { get; set; }
     public NebulaPreSpawnLocation(string locationName,Vector2 pos,string? audioClip = null) { 
         this.LocationName = locationName;
         this.Positions = new Vector2[] { pos };
@@ -158,14 +159,14 @@ public class NebulaPreSpawnMinigame : Minigame
             var cand = NebulaPreSpawnLocation.Locations[mapId];
 
             //スポーンポイントを抽出する
-            if (GeneralConfigurations.SpawnMethodOption.CurrentValue == 0)
+            if (GeneralConfigurations.SpawnMethodOption.GetValue() == 0)
             {
                 //Default
                 cand = cand.Where(l => l.VanillaIndex.HasValue).ToArray();
             }
             else
             {
-                cand = cand.Where(l => l.Configuration.CurrentValue).ToArray();
+                cand = cand.Where(l => l.Configuration.Value).ToArray();
             }
 
             return cand;
@@ -220,7 +221,7 @@ public class NebulaPreSpawnMinigame : Minigame
 
         int candidates = Mathf.Min(GeneralConfigurations.SpawnCandidatesOption, cand.Length);
 
-        if (GeneralConfigurations.SpawnMethodOption.CurrentValue == 2) candidates = 1;
+        if (GeneralConfigurations.SpawnMethodOption.GetValue() == 2) candidates = 1;
 
         Tuple<SpriteRenderer, TextMeshPro>[] allButton = new Tuple<SpriteRenderer, TextMeshPro>[candidates];
         IDividedSpriteLoader[] allSprite = new IDividedSpriteLoader[candidates];

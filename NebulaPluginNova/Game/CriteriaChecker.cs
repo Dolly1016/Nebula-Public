@@ -1,11 +1,28 @@
 ﻿using Nebula.Roles.Impostor;
 using Nebula.Roles.Modifier;
 using Nebula.Roles.Neutral;
+using Virial;
+using Virial.DI;
+using Virial.Events.Game;
+using Virial.Events.Player;
+using Virial.Game;
 
 namespace Nebula.Game;
 
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class NebulaEndCriteria
 {
+    static NebulaEndCriteria()
+    {
+        DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new SabotageCriteria().Register(NebulaAPI.CurrentGame!));
+        DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new CrewmateCriteria().Register(NebulaAPI.CurrentGame!));
+        DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new ImpostorCriteria().Register(NebulaAPI.CurrentGame!));
+        DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new JackalCriteria().Register(NebulaAPI.CurrentGame!));
+        DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new LoversCriteria().Register(NebulaAPI.CurrentGame!));
+        DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new JesterCriteria().Register(NebulaAPI.CurrentGame!));
+    }
+
+
     int gameModeMask;
 
     public bool IsValidCriteria => (gameModeMask & GeneralConfigurations.CurrentGameMode) != 0;
@@ -19,9 +36,9 @@ public class NebulaEndCriteria
         this.gameModeMask = gameModeMask;
     }
 
-    static public NebulaEndCriteria SabotageCriteria = new()
+    private class SabotageCriteria : IModule, IGameOperator
     {
-        OnUpdate = () =>
+        void OnUpdate(GameUpdateEvent ev)
         {
             if (ShipStatus.Instance != null)
             {
@@ -35,7 +52,7 @@ public class NebulaEndCriteria
                         if (lifeSuppSystemType != null && lifeSuppSystemType.Countdown < 0f)
                         {
                             lifeSuppSystemType.Countdown = 10000f;
-                            return NebulaGameEnd.SabotageWin;
+                            NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.ImpostorWin, GameEndReason.Sabotage);
                         }
                     }
 
@@ -45,18 +62,17 @@ public class NebulaEndCriteria
                         if (criticalSabotage != null && criticalSabotage.Countdown < 0f)
                         {
                             criticalSabotage.ClearSabotage();
-                            return NebulaGameEnd.SabotageWin;
+                            NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.ImpostorWin, GameEndReason.Sabotage);
                         }
                     }
                 }
             }
-            return null;
         }
     };
 
-    static public NebulaEndCriteria CrewmateAliveCriteria = new()
+    private class CrewmateCriteria : IModule, IGameOperator
     {
-        OnUpdate = () =>
+        void OnUpdate(GameUpdateEvent ev)
         {
             if (NebulaGameManager.Instance?.AllPlayerInfo().Any(p =>
             {
@@ -64,15 +80,12 @@ public class NebulaEndCriteria
                 if (p.Role.Role.Team == Impostor.MyTeam) return true;
                 if (p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return true;
                 return false;
-            }) ?? true) return null;
+            }) ?? true) return;
 
-            return NebulaGameEnd.CrewmateWin;
+            NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Situation);
         }
-    };
 
-    static public NebulaEndCriteria CrewmateTaskCriteria = new()
-    {
-        OnTaskUpdated = () =>
+        void OnTaskUpdate(PlayerTaskUpdateEvent ev)
         {
             int quota = 0;
             int completed = 0;
@@ -84,13 +97,13 @@ public class NebulaEndCriteria
                 quota += p.Tasks.Quota;
                 completed += p.Tasks.TotalCompleted;
             }
-            return (quota > 0 && quota <= completed) ? NebulaGameEnd.CrewmateWin : null;
+            if (quota > 0 && quota <= completed) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Task);
         }
     };
 
-    static public NebulaEndCriteria ImpostorKillCriteria = new()
+    private class ImpostorCriteria : IModule, IGameOperator
     {
-        OnUpdate = () =>
+        void OnUpdate(GameUpdateEvent ev)
         {
             int impostors = 0;
             int totalAlive = 0;
@@ -104,20 +117,20 @@ public class NebulaEndCriteria
                 if (p.Role.Role.Team == Impostor.MyTeam && !p.Unbox().TryGetModifier<Lover.Instance>(out _)) impostors++;
 
                 //ジャッカル陣営が生存している間は勝利できない
-                if (p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Role == SidekickModifier.MyRole)) return null;
+                if (p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return;
             }
 
-            return impostors * 2 >= totalAlive ? NebulaGameEnd.ImpostorWin : null;
+            if(impostors * 2 >= totalAlive) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.ImpostorWin, GameEndReason.Situation);
         }
     };
 
-    static public NebulaEndCriteria JackalKillCriteria = new()
+    private class JackalCriteria : IModule, IGameOperator
     {
-        OnUpdate = () =>
+        void OnUpdate(GameUpdateEvent ev)
         {
             int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead);
 
-            bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Role == SidekickModifier.MyRole);
+            bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
 
             int totalAliveAllJackals = 0;
 
@@ -129,9 +142,9 @@ public class NebulaEndCriteria
                 if (isJackalTeam(p)) totalAliveAllJackals++;
 
                 //ラバーズが生存している間は勝利できない
-                if (p.Unbox().TryGetModifier<Lover.Instance>(out _)) return null;
+                if (p.Unbox().TryGetModifier<Lover.Instance>(out _)) return;
                 //インポスターが生存している間は勝利できない
-                if (p.Role.Role.Team == Impostor.MyTeam) return null;
+                if (p.Role.Role.Team == Impostor.MyTeam) return;
             }
 
             //全ジャッカルに対して、各チームごとに勝敗を調べる
@@ -145,19 +158,17 @@ public class NebulaEndCriteria
                 //他のJackal陣営が生きていたら勝利できない
                 if (aliveJackals < totalAliveAllJackals) continue;
 
-                if (aliveJackals * 2 >= totalAlive) return NebulaGameEnd.JackalWin;
+                if (aliveJackals * 2 >= totalAlive) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JackalWin, GameEndReason.Situation);
             }
-
-            return null;
         }
     };
 
-    static public NebulaEndCriteria LoversCriteria = new()
+    private class LoversCriteria : IModule, IGameOperator
     {
-        OnUpdate = () =>
+        void OnUpdate(GameUpdateEvent ev)
         {
             int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count((p) => !p.IsDead);
-            if (totalAlive != 3) return null;
+            if (totalAlive != 3) return;
 
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
@@ -166,58 +177,48 @@ public class NebulaEndCriteria
                 if (p.Unbox().TryGetModifier<Lover.Instance>(out var lover)){
                     if (lover.MyLover?.IsDead ?? true) continue;
 
-                    return NebulaGameEnd.LoversWin;
+                    NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.LoversWin, GameEndReason.Situation);
                 }
 
             }
 
-            return null;
+            return;
+        }
+    };
+
+    private class JesterCriteria : IModule, IGameOperator
+    {
+        void OnExiled(PlayerExiledEvent ev) 
+        {
+            if (ev.Player?.Role.Role == Roles.Neutral.Jester.MyRole) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JesterWin, GameEndReason.Situation, BitMasks.AsPlayer(1u << ev.Player.PlayerId));
         }
     };
 }
 
 public class CriteriaManager
 {
-    HashSet<NebulaEndCriteria> monitorings = new();
-
-    public void AddCriteria(NebulaEndCriteria criteria)
+    private record TriggeredGameEnd(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, BitMask<Virial.Game.Player>? additionalWinners);
+    private List<TriggeredGameEnd> triggeredGameEnds = new();
+    
+    public void Trigger(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, BitMask<Virial.Game.Player>? additionalWinners)
     {
-        monitorings.Add(criteria);
+        triggeredGameEnds.Add(new(gameEnd, reason, additionalWinners));
     }
 
-    public CustomEndCondition? CheckEnd(Func<NebulaEndCriteria,CustomEndCondition?> checker)
+    public void CheckAndTriggerGameEnd()
     {
-        //ホスト以外はゲーム終了チェックをしない
-        if (!AmongUsClient.Instance.AmHost) return null;
+        if (!AmongUsClient.Instance.AmHost) return;
 
-        CustomEndCondition? end = null;
-        foreach (var c in monitorings)
-        {
-            var temp = checker.Invoke(c);
-            if (temp == null) continue;
-            if (end != null && temp.Priority < end.Priority) continue;
-            end = temp;
-        }
-        return end;
+        //終了条件が確定済みなら何もしない
+        if (NebulaGameManager.Instance?.EndState != null) return;
+
+        if(triggeredGameEnds.Count == 0) return;
+
+        var end = triggeredGameEnds.MaxBy(g => g.gameEnd.Priority);
+        triggeredGameEnds.Clear();
+
+        if (end == null) return;
+
+        NebulaGameManager.Instance?.InvokeEndGame(end.gameEnd, end.reason, end.additionalWinners != null ? (NebulaGameManager.Instance.AllPlayerInfo().Aggregate(0, (v, p) => end.additionalWinners.Test(p) ? (v | (1 << p.PlayerId)) : v)) : 0);
     }
-
-    public Tuple<CustomEndCondition, int>? CheckEnd(Func<NebulaEndCriteria, Tuple<CustomEndCondition,int>?> checker)
-    {
-        //ホスト以外はゲーム終了チェックをしない
-        if (!AmongUsClient.Instance.AmHost) return null;
-
-        Tuple<CustomEndCondition, int>? end = null;
-        foreach (var c in monitorings)
-        {
-            var temp = checker.Invoke(c);
-            if (temp == null) continue;
-            if (end != null && temp.Item1.Priority < end.Item1.Priority) continue;
-            end = temp;
-        }
-        return end;
-    }
-
-    public CustomEndCondition? OnUpdate() => CheckEnd(c=>c.OnUpdate?.Invoke());
-    public Tuple<CustomEndCondition,int>? OnExiled(PlayerControl? exiled) => CheckEnd(c => c.OnExiled?.Invoke(exiled));
-    public CustomEndCondition? OnTaskUpdated() => CheckEnd(c => c.OnTaskUpdated?.Invoke());
 }

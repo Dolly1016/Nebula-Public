@@ -10,8 +10,6 @@ namespace Nebula.Roles.Crewmate;
 
 public class Comet : DefinedRoleTemplate, DefinedRole
 {
-    static public Comet MyRole = new Comet();
-
     public Comet() : base("comet", new(121,175,206), RoleCategory.CrewmateRole, Crewmate.MyTeam, [BlazeCoolDownOption, BlazeDurationOption, BlazeSpeedOption, BlazeVisionOption, BlazeScreenOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
@@ -19,11 +17,13 @@ public class Comet : DefinedRoleTemplate, DefinedRole
     
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration BlazeCoolDownOption = NebulaAPI.Configurations.Configuration("role.comet.blazeCooldown", (5f,60f,2.5f),20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration BlazeSpeedOption = NebulaAPI.Configurations.Configuration("role.comet.blazeSpeed", (0.5f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration BlazeDurationOption = NebulaAPI.Configurations.Configuration("role.comet.blazeDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration BlazeVisionOption = NebulaAPI.Configurations.Configuration("role.comet.blazeVisionRate", (1f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration BlazeScreenOption = NebulaAPI.Configurations.Configuration("role.comet.blazeScreenRate", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration BlazeCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeCoolDown", (5f,60f,2.5f),20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration BlazeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeSpeed", (0.5f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration BlazeDurationOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration BlazeVisionOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeVisionRate", (1f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration BlazeScreenOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeScreenRate", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
+
+    static public Comet MyRole = new Comet();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

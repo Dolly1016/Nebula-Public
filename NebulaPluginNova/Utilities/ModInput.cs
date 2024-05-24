@@ -69,7 +69,7 @@ public class VirtualInput
 
 }
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class NebulaInput
 {
     private static bool SomeUiIsActive => (ControllerManager.Instance && ControllerManager.Instance.CurrentUiState?.BackButton != null) || NebulaManager.Instance.HasSomeUI || TextField.AnyoneValid;
@@ -96,7 +96,7 @@ public class NebulaInput
 
     static public VirtualInput GetInput(Virial.Compat.VirtualKeyInput type) => modInput[type];
 
-    static public void Load()
+    static NebulaInput()
     {
         IEnumerable<KeyCode> GetVanillaKeyCode(int actionId)
         {

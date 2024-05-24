@@ -10,16 +10,17 @@ namespace Nebula.Roles.Impostor;
 
 public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Morphing MyRole = new Morphing();
     private Morphing() : base("morphing", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption, MorphDurationOption, LoseSampleOnMeetingOption]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
-    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("role.morphing.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("role.morphing.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("role.morphing.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("role.morphing.loseSampleOnMeeting", false);
+    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.morphing.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.morphing.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("options.role.morphing.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.morphing.loseSampleOnMeeting", false);
+
+    static public Morphing MyRole = new Morphing();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

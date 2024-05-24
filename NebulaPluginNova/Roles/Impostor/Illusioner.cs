@@ -7,20 +7,21 @@ namespace Nebula.Roles.Impostor;
 
 public class Illusioner : DefinedRoleTemplate, DefinedRole
 {
-    static public Illusioner MyRole = new Illusioner();
     private Illusioner() : base("illusioner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption,MorphDurationOption,PaintCoolDownOption, LoseSampleOnMeetingOption, TransformAfterMeetingOption,SampleOriginalLookOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic, ConfigurationTags.TagDifficult);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
-    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("role.illusioner.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("role.illusioner.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("role.illusioner.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration PaintCoolDownOption = NebulaAPI.Configurations.Configuration("role.illusioner.paintCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("role.illusioner.loseSampleOnMeeting", false);
-    static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("role.illusioner.transformAfterMeeting", false);
-    static private BoolConfiguration SampleOriginalLookOption = NebulaAPI.Configurations.Configuration("role.illusioner.sampleOriginalLook", false);
+    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PaintCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.paintCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.loseSampleOnMeeting", false);
+    static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.transformAfterMeeting", false);
+    static private BoolConfiguration SampleOriginalLookOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleOriginalLook", false);
+
+    static public Illusioner MyRole = new Illusioner();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

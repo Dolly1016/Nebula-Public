@@ -43,9 +43,9 @@ public class ConsoleRestriction
 
     public void OnGameStart()
     {
-        timer[(int)ConsoleType.Admin] = GeneralConfigurations.AdminRestrictionOption.CurrentValue == 0 ? null : GeneralConfigurations.AdminRestrictionOption.GetFloat();
-        timer[(int)ConsoleType.Vitals] = GeneralConfigurations.VitalsRestrictionOption.CurrentValue == 0 ? null : GeneralConfigurations.VitalsRestrictionOption.GetFloat();
-        timer[(int)ConsoleType.Camera] = GeneralConfigurations.CameraRestrictionOption.CurrentValue == 0 ? null : GeneralConfigurations.CameraRestrictionOption.GetFloat();
+        timer[(int)ConsoleType.Admin] = GeneralConfigurations.AdminRestrictionOption < 0f ? null : GeneralConfigurations.AdminRestrictionOption.GetValue();
+        timer[(int)ConsoleType.Vitals] = GeneralConfigurations.VitalsRestrictionOption < 0f ? null : GeneralConfigurations.VitalsRestrictionOption.GetValue();
+        timer[(int)ConsoleType.Camera] = GeneralConfigurations.CameraRestrictionOption < 0f ? null : GeneralConfigurations.CameraRestrictionOption.GetValue();
     }
 
     public ConsoleTimer? ShowTimerIfNecessary(ConsoleRestriction.ConsoleType consoleType,Transform parentTransform,Vector3 localPos)

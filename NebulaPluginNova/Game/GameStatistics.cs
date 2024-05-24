@@ -1,9 +1,10 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Virial.Runtime;
 using Virial.Text;
 
 namespace Nebula.Game;
 
-[NebulaPreLoad]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public static class EventDetail
 {
     static public TranslatableTag Kill = new("statistics.events.kill");
@@ -30,7 +31,7 @@ public static class EventDetail
     static public TranslatableTag Layoff = new("statistics.events.layoff");
     static public TranslatableTag DestroyKill = new("statistics.events.destroy");
 
-    static public void Load()
+    static void Preprocess(NebulaPreprocessor preprocessor)
     {
         Virial.Text.EventDetails.Kill = Kill;
         Virial.Text.EventDetails.Exiled = Exiled;

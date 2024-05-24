@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using Cpp2IL.Core.Extensions;
+using System.Text;
+using Virial.Runtime;
 
 namespace Nebula.Modules;
 
@@ -13,6 +15,8 @@ public interface IConfigPreset
     string? Detail { get; }
     string? RelatedHolder { get; }
     bool IsHidden { get; }
+    bool IsOldType => false;
+    bool IsUnknownType => false;
 }
 
 public class ScriptPreset : IConfigPreset{
@@ -51,7 +55,7 @@ public class ScriptPreset : IConfigPreset{
     }
     
 }
-[NebulaPreLoad(typeof(NebulaAddon))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.Roles)]
 public class ConfigPreset : IConfigPreset
 {
 
@@ -61,11 +65,15 @@ public class ConfigPreset : IConfigPreset
     public string? displayName;
     public string? detail = null;
     public string? relatedHolder = null;
+    public int version { get; private set; } = 1;
     public bool IsHidden { get;private set; }
     string IConfigPreset.Id => Name;
     public string DisplayName => displayName ?? Name;
     public string? Detail => detail;
     public string? RelatedHolder => relatedHolder;
+
+    bool IConfigPreset.IsOldType => version >= 0 && version < 2;
+    bool IConfigPreset.IsUnknownType => version < 0;
 
     public ConfigPreset(NebulaAddon? addon,string path, string name)
     {
@@ -102,10 +110,9 @@ public class ConfigPreset : IConfigPreset
 
     }
 
-    public static IEnumerator CoLoad()
+    public static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        Patches.LoadPatch.LoadingText = "Loading Presets";
-        yield return null;
+        yield return preprocessor.SetLoadingText("Loading Presets");
 
         foreach (var addon in NebulaAddon.AllAddons)
         {
@@ -168,21 +175,18 @@ public class ConfigPreset : IConfigPreset
                 case "#RELATED":
                     relatedHolder = args[1];
                     break;
+                case "#VERSION":
+                    version = int.TryParse(args[1],out var v) ? v : -1;
+                    break;
             }
         }
 
     }
 
-    public bool LoadPreset() => LoadPreset(new());
+    public bool LoadPreset() => LoadPreset(true);
 
-    public bool LoadPreset(FunctionalEnvironment table,bool share = true)
+    public bool LoadPreset(bool share)
     {
-        try
-        {
-            table.Arguments["Players"] = IFunctionalVariable.Generate(PlayerControl.AllPlayerControls.Count);
-        }
-        catch { }
-
         try
         {
             var str = ReadString();
@@ -191,10 +195,6 @@ public class ConfigPreset : IConfigPreset
 
             var codes = str.Split('\n');
 
-            //Ifステートメントの履歴 0:真となる条件式なし　1:IF文中にいる　2:IF文脱出済み
-            List<int> IfHistory = new();
-            bool ShouldSkip() => IfHistory.Count > 0 && IfHistory[IfHistory.Count - 1] != 1;
-            int GetIfState() => IfHistory.Count == 1 ? -1 : IfHistory[IfHistory.Count - 1];
 
             foreach (var code in codes)
             {
@@ -204,55 +204,20 @@ public class ConfigPreset : IConfigPreset
                 var args = code.Split(':');
                 for (int i = 0; i < args.Length; i++) args[i] = args[i].Trim();
 
-
                 switch (args[0].ToUpper())
                 {
-                    case "IF":
-                        if (ShouldSkip())
-                        {
-                            IfHistory.Add(2);
-                            break;
-                        }
-
-                        IfHistory.Add(0);
-                        if (args.Length != 2) break;
-                        if (table.GetValue(args[1]).AsBool()) IfHistory[IfHistory.Count - 1] = 1;
-                        break;
-                    case "ELIF":
-                    case "ELSEIF":
-                        if (IfHistory.Count == 0) IfHistory.Add(0);
-                        if (GetIfState() == 0)
-                        {
-                            if (table.GetValue(args[1]).AsBool()) IfHistory[IfHistory.Count - 1] = 1;
-                        }
-                        else
-                        {
-                            IfHistory[IfHistory.Count - 1] = 2;
-                        }
-                        break;
-                    case "ELSE":
-                        if (IfHistory.Count == 0) IfHistory.Add(0);
-                        if (GetIfState() == 0)
-                            IfHistory[IfHistory.Count - 1] = 1;
-                        else
-                            IfHistory[IfHistory.Count - 1] = 2;
-                        break;
-                    case "ENDIF":
-                        if (IfHistory.Count > 0) IfHistory.RemoveAt(IfHistory.Count - 1);
-                        break;
                     case "SET":
-                        if (ShouldSkip()) break;
-
                         try
                         {
+                            if (args[2].StartsWith("'") && args[2].EndsWith("'")) args[2] = args[2].Substring(1, args[2].Length - 2);
+
                             if (args[1].StartsWith("vanilla."))
                             {
-                                AmongUsUtil.ChangeOptionAs(args[1], table.GetValue(args[2]).AsString());
+                                AmongUsUtil.ChangeOptionAs(args[1], args[2]);
                             }
                             else
                             {
-                                var option = NebulaConfiguration.AllConfigurations.FirstOrDefault(option => option.Id == args[1]);
-                                if (option != null) option.ChangeAs(table.GetValue(args[2]).AsString(), false);
+                                ConfigurationValues.ConfigurationSaver.SetValue(args[1], args[2], true);
                             }
                         }
                         catch
@@ -260,57 +225,37 @@ public class ConfigPreset : IConfigPreset
                             NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Preset, "Load Failed: " + args[1]);
                         }
                         break;
-                    case "SUBSTITUTE":
-                        table.Arguments[args[1]] = table.GetValue(args[2]);
-                        break;
-                    case "QUOTE":
-                        if (IConfigPreset.allPresets.TryGetValue(table.GetValue(args[1]).AsString(), out var preset))
-                        {
-                            Dictionary<string, string> rawTable = new();
-                            for (int i = 2; i < args.Length; i++) rawTable["#ARG" + (i - 2).ToString()] = args[i];
-                            if (preset is ConfigPreset cp)
-                                cp.LoadPreset(new(rawTable, table), false);
-                            else
-                                preset.LoadPreset();
-                        }
-                        break;
-                    case "UNPACK":
-                        for (int i = 1; i < args.Length; i++) table.Arguments[args[i]] = table.GetValue("#ARG" + (i - 1).ToString());
-                        break;
                 }
             }
 
-            if (share) NebulaConfigEntryManager.ShareAll();
+            foreach (var entry in ConfigurationValues.ConfigurationSaver.allEntries)
+            {
+                if (ConfigurationValues.ConfigurationSaver.TryGetValue(entry.Id, out var val)) entry.DeserializeAndSetWithoutSave(val);
+            }
+            ConfigurationValues.RestoreAll();
+
+            if (share) ConfigurationValues.ShareAll();
 
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.Log(ex.ToString());
             return false;
         }
     }
 
     static private string OutputCurrentSettings(string name)
     {
-        string result = "#DISPLAY:" + name;
+        string result = "#DISPLAY:" + name + "\n#VERSION:2";
 
         foreach (var option in AmongUsUtil.AllVanillaOptions)
             result += "\nSET:" + option + ":'" + AmongUsUtil.GetOptionAsString(option) + "'";
 
         bool error = false;
-        foreach(var option in NebulaConfiguration.AllConfigurations)
+        foreach (var option in ConfigurationValues.ConfigurationSaver.AllEntries())
         {
-            try
-            {
-                result += "\nSET:" + option.Id + ":'" + (option.MaxValue >= 128 ? option.CurrentValue.ToString() : (option.GetMapped()?.ToString() ?? "null")) + "'";
-            }catch(Exception e)
-            {
-                error = true;
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Preset,
-                    $"The value of the option \"{option.Id}\" is invalid. (value: {option.CurrentValue})\nException -> " + e.ToString()
-                    );
-                
-            }
+            result += "\nSET:" + option.Item1 + ":'" + option.Item2 + "'";
         }
 
         //1回でもエラーが起きていれば例外を投げる (出せるだけエラーを出し切ってから投げる)

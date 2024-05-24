@@ -12,16 +12,17 @@ namespace Nebula.Roles.Neutral;
 
 public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Team MyTeam = new("teams.arsonist", new(229, 93, 0), TeamRevealType.OnlyMe);
-    static public Arsonist MyRole = new Arsonist();
+    static public RoleTeam MyTeam = new Team("teams.arsonist", new(229, 93, 0), TeamRevealType.OnlyMe);
     private Arsonist():base("arsonist", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [DouseCoolDownOption, DouseDurationOption, VentConfiguration]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
-    static private FloatConfiguration DouseCoolDownOption = NebulaAPI.Configurations.Configuration("role.arsonist.douseCoolDown", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration DouseDurationOption = NebulaAPI.Configurations.Configuration("role.arsonist.douseDuration", (1f, 10f, 0.5f), 3f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DouseCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.arsonist.douseCoolDown", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration DouseDurationOption = NebulaAPI.Configurations.Configuration("options.role.arsonist.douseDuration", (1f, 10f, 0.5f), 3f, FloatConfigurationDecorator.Second);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.arsonist.vent", true);
+
+    static public Arsonist MyRole = new Arsonist();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

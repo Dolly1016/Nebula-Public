@@ -13,8 +13,7 @@ namespace Nebula.Roles.Neutral;
 // if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, new int[] { JackalTeamId }).InvokeSingle();
 public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Team MyTeam = new("teams.chainShifter", new(115, 115, 115), TeamRevealType.OnlyMe);
-    static public ChainShifter MyRole = new ChainShifter();
+    static public RoleTeam MyTeam = new Team("teams.chainShifter", new(115, 115, 115), TeamRevealType.OnlyMe);
 
     private ChainShifter() : base("chainShifter", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [VentConfiguration, ShiftCoolDown, CanCallEmergencyMeetingOption]) { }
 
@@ -22,9 +21,10 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.chainShifter.vent", true);
-    static private FloatConfiguration ShiftCoolDown = NebulaAPI.Configurations.Configuration("role.chainShifter.douseCoolDown", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanCallEmergencyMeetingOption = NebulaAPI.Configurations.Configuration("role.chainShifter.canCallEmergencyMeeting", true);
+    static private FloatConfiguration ShiftCoolDown = NebulaAPI.Configurations.Configuration("options.role.chainShifter.shiftCoolDown", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration CanCallEmergencyMeetingOption = NebulaAPI.Configurations.Configuration("options.role.chainShifter.canCallEmergencyMeeting", true);
 
+    static public ChainShifter MyRole = new ChainShifter();
     bool IGuessed.CanBeGuessDefault => false;
 
 

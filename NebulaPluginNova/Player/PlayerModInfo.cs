@@ -1,5 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Nebula.Behaviour;
+using Nebula.Compat;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
 using System.Diagnostics.CodeAnalysis;
@@ -13,7 +14,14 @@ using Virial.Text;
 
 namespace Nebula.Player;
 
-[NebulaPreLoad]
+public enum RoleType
+{
+    Role,
+    Modifier,
+    GhostRole,
+}
+
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public static class PlayerState
 {
     public static TranslatableTag Alive = new("state.alive");
@@ -33,7 +41,7 @@ public static class PlayerState
     public static TranslatableTag Cursed = new("state.cursed");
     public static TranslatableTag Crushed = new("state.crushed");
 
-    public static void Load()
+    static PlayerState()
     {
         Virial.Text.PlayerStates.Alive = Alive;
         Virial.Text.PlayerStates.Dead = Dead;
@@ -51,7 +59,7 @@ public static class PlayerState
 }
 
 
-[NebulaPreLoad(typeof(TranslatableTag))]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class PlayerAttributeImpl : IPlayerAttribute
 {
     public int Id { get; init; }
@@ -77,7 +85,7 @@ public class PlayerAttributeImpl : IPlayerAttribute
         Name = name;
     }
 
-    public static void Load()
+    static PlayerAttributeImpl()
     {
         PlayerAttributes.Accel = new PlayerAttributeImpl(0, "$accel");
         PlayerAttributes.Decel = new PlayerAttributeImpl(1, "$decel");
@@ -107,7 +115,6 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public PlayerControl MyControl { get; private set; }
     public byte PlayerId { get; private set; }
     public bool AmOwner { get; private set; }
-    public bool WithNoS { get; private set; }
     public bool IsDisconnected { get; set; } = false;
     public bool IsDead => IsDisconnected || (MyControl.Data?.IsDead ?? false);
     public float MouseAngle { get; private set; }
@@ -198,7 +205,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     }
 
     public IEnumerable<RuntimeModifier> AllModifiers => myModifiers;
-    public IEnumerable<Modifier> GetModifiers<Modifier>() where Modifier : ModifierInstance
+    public IEnumerable<Modifier> GetModifiers<Modifier>() where Modifier : RuntimeModifier
     {
         foreach (var m in myModifiers) if (m is Modifier targetM) yield return targetM;
     }
@@ -225,8 +232,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         this.MyControl = myPlayer;
         PlayerId = myPlayer.PlayerId;
         AmOwner = myPlayer.AmOwner;
-        WithNoS = !myPlayer.gameObject.TryGetComponent<UncertifiedPlayer>(out var up);
-
+        
         DefaultOutfit = myPlayer.Data.DefaultOutfit;
         roleText = GameObject.Instantiate(myPlayer.cosmetics.nameText, myPlayer.cosmetics.nameText.transform);
         roleText.transform.localPosition = new Vector3(0, 0.185f, -0.01f);
@@ -323,21 +329,16 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public void UpdateNameText(TMPro.TextMeshPro nameText, bool onMeeting = false, bool showDefaultName = false)
     {
         var text = onMeeting ? DefaultName : CurrentOutfit.PlayerName;
-        var color = Color.white;
 
-        AssignableAction(r => r.Unbox().DecoratePlayerName(ref text, ref color));
-        PlayerControl.LocalPlayer.GetModInfo()?.AllAssigned().Do(r => r.Unbox().DecorateOtherPlayerName(this, ref text, ref color));
+        AssignableAction(r => r.DecorateNameConstantly(ref text, NebulaGameManager.Instance?.CanSeeAllInfo ?? false));
+        var ev = GameOperatorManager.Instance?.Run(new PlayerDecorateNameEvent(this, text));
+        var color = (ev?.Color.HasValue ?? false) ? ev.Color.Value.ToUnityColor() : Color.white;
 
         if (showDefaultName && !CurrentOutfit.PlayerName.Equals(DefaultName))
             text += (" (" + DefaultName + ")").Color(Color.gray);
 
-        if (NebulaGameManager.Instance.VoiceChatManager?.GetClient(PlayerId)?.IsSpeaking ?? false) text += "🔈";
-
         nameText.text = text;
         nameText.color = color;
-
-
-
     }
 
     static public readonly Color FakeTaskColor = new Color(0x86 / 255f, 0x86 / 255f, 0x86 / 255f);
@@ -348,11 +349,10 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || AmOwner)
         {
-            string? roleName = ((RuntimeAssignable?)(IsDead ? myGhostRole : myRole) ?? myRole).DisplayName;
+            string? roleName = ((RuntimeAssignable?)(IsDead ? myGhostRole : myRole) ?? myRole).DisplayColoredName;
             text += roleName ?? "Undefined";
 
             AssignableAction(r => { var newName = r.OverrideRoleName(text, false); if (newName != null) text = newName; });
-            AssignableAction(m => m.Unbox().DecorateRoleName(ref text));
 
             if (HasAnyTasks && (this as GamePlayer).Tasks.Quota > 0)
                 text += (" (" + (this as GamePlayer).Tasks.Unbox().ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((FeelLikeHaveCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
@@ -392,7 +392,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myRole, IsDead));
     }
 
-    private void SetGhostRole(AbstractGhostRole role, int[] arguments)
+    private void SetGhostRole(DefinedGhostRole role, int[] arguments)
     {
         myGhostRole?.Inactivate();
 
@@ -406,7 +406,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myGhostRole, IsDead));
     }
 
-    private void SetModifier(AbstractModifier role, int[] arguments)
+    private void SetModifier(DefinedModifier role, int[] arguments)
     {
         var modifier = role.CreateInstance(this, arguments);
         myModifiers.Add(modifier);
@@ -419,9 +419,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true, IsDead));
     }
 
-    public NebulaRPCInvoker RpcInvokerSetRole(DefinedRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Role));
-    public NebulaRPCInvoker RpcInvokerSetModifier(DefinedModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.Modifier));
-    public NebulaRPCInvoker RpcInvokerSetGhostRole(AbstractGhostRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), Roles.RoleType.GhostRole));
+    public NebulaRPCInvoker RpcInvokerSetRole(DefinedRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), RoleType.Role));
+    public NebulaRPCInvoker RpcInvokerSetModifier(DefinedModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), RoleType.Modifier));
+    public NebulaRPCInvoker RpcInvokerSetGhostRole(DefinedGhostRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), RoleType.GhostRole));
     public NebulaRPCInvoker RpcInvokerUnsetModifier(DefinedModifier modifier) => RpcRemoveModifier.GetInvoker(new(PlayerId, modifier.Id));
     public void UnsetModifierLocal(Predicate<RuntimeModifier> predicate)
     {
@@ -456,7 +456,6 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             property = new NebulaInstantProperty() { IntegerProperty = TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1 };
             return true;
         }
-        if (Role?.Unbox().TryGetProperty(subStr, out property) ?? false) return true;
 
         return false;
     }
@@ -493,7 +492,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         );
 
     private readonly static RemoteProcess<(byte playerId, int modifierId)> RpcRemoveModifier = new(
-        "RemoveModifier", (message, _) => NebulaGameManager.Instance?.GetPlayer(message.playerId)?.Unbox().UnsetModifierLocal((m) => m.Role.Id == message.modifierId)
+        "RemoveModifier", (message, _) => NebulaGameManager.Instance?.GetPlayer(message.playerId)?.Unbox().UnsetModifierLocal((m) => m.Modifier.Id == message.modifierId)
         );
 
     public readonly static RemoteProcess<(byte playerId, OutfitCandidate outfit)> RpcAddOutfit = new(
@@ -707,12 +706,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                         if (MyControl.MyPhysics.Velocity.magnitude > 0)
                         {
                             var vec = MyControl.MyPhysics.Velocity.normalized * 0.08f * (isLeft ? 1f : -1f);
-                            AmongUsUtil.GenerateFootprint(MyControl.transform.position + new Vector3(-vec.y, vec.x - 0.22f), Roles.Modifier.Bloody.MyRole.RoleColor, 5f);
+                            AmongUsUtil.GenerateFootprint(MyControl.transform.position + new Vector3(-vec.y, vec.x - 0.22f), Roles.Modifier.Bloody.MyRole.UnityColor, 5f);
                             isLeft = !isLeft;
                         }
                         else
                         {
-                            AmongUsUtil.GenerateFootprint(MyControl.transform.position + new Vector3(0f, -0.22f), Roles.Modifier.Bloody.MyRole.RoleColor, 5f);
+                            AmongUsUtil.GenerateFootprint(MyControl.transform.position + new Vector3(0f, -0.22f), Roles.Modifier.Bloody.MyRole.UnityColor, 5f);
                         }
                     }
                 }

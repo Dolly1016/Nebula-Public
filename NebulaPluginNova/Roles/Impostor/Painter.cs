@@ -7,15 +7,16 @@ namespace Nebula.Roles.Impostor;
 
 public class Painter : DefinedRoleTemplate, DefinedRole
 {
-    static public Painter MyRole = new Painter();
     private Painter() : base("painter", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, PaintCoolDownOption, LoseSampleOnMeetingOption, TransformAfterMeetingOption]) { }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("role.painter.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration PaintCoolDownOption = NebulaAPI.Configurations.Configuration("role.painter.paintCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("role.painter.loseSampleOnMeeting", false);
-    static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("role.painter.transformAfterMeeting", false);
+    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.painter.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PaintCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.painter.paintCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.painter.loseSampleOnMeeting", false);
+    static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("options.role.painter.transformAfterMeeting", false);
+
+    static public Painter MyRole = new Painter();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

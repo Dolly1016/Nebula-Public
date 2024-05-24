@@ -7,33 +7,50 @@ using System.Threading.Tasks;
 using Virial;
 using Virial.Configuration;
 using Virial.Game;
+using Virial.Runtime;
 using Virial.Text;
 
 namespace Nebula.Configuration;
 
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
 internal class ConfigurationHolder : IConfigurationHolder
 {
     TextComponent title, detail;
     List<IConfiguration> myConfigurations;
     BitMask<ConfigurationTab> tabs;
     BitMask<GameModeDefinition> gamemodes;
-    List<ConfigurationHolder> relatedHolders;
+    List<ConfigurationUpperButton> relatedButtons;
     List<ConfigurationTag> tags;
+    Func<bool>? isShown;
+    Func<ConfigurationHolderState>? state;
 
-    public ConfigurationHolder(string id, BitMask<ConfigurationTab> tabs, BitMask<GameModeDefinition> gamemodes, IEnumerable<IConfiguration> configurations)
+    static private List<ConfigurationHolder> allHolders = new();
+    static public IEnumerable<IConfigurationHolder> AllHolders = allHolders;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
     {
-        this.title = new TranslateTextComponent(id);
-        this.detail = new TranslateTextComponent(id + ".detail");
+        allHolders.Sort((h1, h2) => h1.tabs.AsRawPattern != h2.tabs.AsRawPattern ? (int)h1.tabs.AsRawPattern - (int)h2.tabs.AsRawPattern : h1.title.TextForCompare.CompareTo(h2.title.TextForCompare));
+    }
+
+    public ConfigurationHolder(TextComponent title, TextComponent detail, BitMask<ConfigurationTab> tabs, BitMask<GameModeDefinition> gamemodes, IEnumerable<IConfiguration> configurations, Func<bool>? isShown = null, Func<ConfigurationHolderState>? state = null)
+    {
+        this.title = title;
+        this.detail = detail;
         this.tabs = tabs;
         this.tags = new();
         this.gamemodes = gamemodes;
         this.myConfigurations = new(configurations);
-        this.relatedHolders = new();
+        this.relatedButtons = new();
+        this.isShown = isShown;
+        this.state = state;
+
+        allHolders.Add(this);
+        
     }
 
-    TextComponent IConfigurationHolder.Title => title;
+    TextComponent IConfigurationHolder.Title { get => title; set => title = value; }
 
-    TextComponent IConfigurationHolder.Detail => detail;
+    TextComponent IConfigurationHolder.Detail { get => detail; set => detail = value; }
 
     IEnumerable<IConfiguration> IConfigurationHolder.Configurations => myConfigurations;
 
@@ -41,16 +58,31 @@ internal class ConfigurationHolder : IConfigurationHolder
 
     BitMask<GameModeDefinition> IConfigurationHolder.GameModes => gamemodes;
 
-    IEnumerable<IConfigurationHolder> IConfigurationHolder.RelatedHolders => relatedHolders;
+    IEnumerable<ConfigurationUpperButton> IConfigurationHolder.RelatedInformations => relatedButtons;
     IEnumerable<ConfigurationTag> IConfigurationHolder.Tags => tags;
 
-    void IConfigurationHolder.AppendConfiguration(Virial.Configuration.IConfiguration configuration) => myConfigurations.Add(configuration);
-    void IConfigurationHolder.AppendConfigurations(IEnumerable<Virial.Configuration.IConfiguration> configuration) => myConfigurations.AddRange(configuration);
+    IConfigurationHolder IConfigurationHolder.AppendConfiguration(Virial.Configuration.IConfiguration configuration) { myConfigurations.Add(configuration); return this; }
+    IConfigurationHolder IConfigurationHolder.AppendConfigurations(IEnumerable<Virial.Configuration.IConfiguration> configuration) { myConfigurations.AddRange(configuration); return this; }
 
-    void IConfigurationHolder.AddTags(params ConfigurationTag[] tags)
+    IConfigurationHolder IConfigurationHolder.AddTags(params ConfigurationTag[] tags)
     {
         this.tags.AddRange(tags);
+        return this;
     }
+
+    IConfigurationHolder IConfigurationHolder.AppendRelatedHolders(params IConfigurationHolder[] holders) { relatedButtons.AddRange(holders.Select(h => new ConfigurationUpperButton(h.Title, () => h.IsShown, () => NebulaSettingMenu.Instance?.OpenSecondaryPage(h)))); return this; }
+
+    IConfigurationHolder IConfigurationHolder.AppendRelatedAction(TextComponent label, Func<bool> predicate, Action onClicked)
+    {
+        relatedButtons.Add(new(label, predicate, onClicked));
+        return this;
+    }
+
+
+    bool IConfigurationHolder.IsShown => isShown?.Invoke() ?? true;
+
+    ConfigurationHolderState IConfigurationHolder.DisplayOption => state?.Invoke() ?? ConfigurationHolderState.Activated;
+    void IConfigurationHolder.SetDisplayState(Func<ConfigurationHolderState> state) => this.state = state;
 }
 
 public class ConfigurationTags

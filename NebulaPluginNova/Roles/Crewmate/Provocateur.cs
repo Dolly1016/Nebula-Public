@@ -1,5 +1,7 @@
 ﻿using Nebula.Roles.Impostor;
+using Virial;
 using Virial.Assignable;
+using Virial.Configuration;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -24,34 +26,22 @@ public static class ExtraExileRoleSystem
     }
 }
 
-public class Provocateur : ConfigurableStandardRole, DefinedRole
+public class Provocateur : DefinedRoleTemplate, DefinedRole
 {
-    static public Provocateur MyRole = new Provocateur();
-
-    public override RoleCategory Category => RoleCategory.CrewmateRole;
-
-    string DefinedAssignable.LocalizedName => "provocateur";
-    public override Color RoleColor => new Color(112f / 255f, 255f / 255f, 89f / 255f);
-    public override RoleTeam Team => Crewmate.Team;
+    private Provocateur() : base("provocateur", new(112, 225, 89), RoleCategory.CrewmateRole, Crewmate.MyTeam, [EmbroilCoolDownOption, EmbroilAdditionalCoolDownOption, EmbroilDurationOption]) { }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    private NebulaConfiguration EmbroilCoolDownOption = null!;
-    private NebulaConfiguration EmbroilAdditionalCoolDownOption = null!;
-    private NebulaConfiguration EmbroilDurationOption = null!;
+    static private FloatConfiguration EmbroilCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration EmbroilAdditionalCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilAdditionalCoolDown", (0f, 30f, 2.5f), 5f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration EmbroilDurationOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilDuration", (1f, 20f, 1f), 5f, FloatConfigurationDecorator.Second);
 
-    protected override void LoadOptions()
+    static public Provocateur MyRole = new Provocateur();
+
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        base.LoadOptions();
-
-        EmbroilCoolDownOption = new(RoleConfig, "embroilCoolDown", null, 5f, 60f, 2.5f, 20f, 20f) { Decorator = NebulaConfiguration.SecDecorator };
-        EmbroilAdditionalCoolDownOption = new(RoleConfig, "embroilAdditionalCoolDown", null, 0f, 30f, 2.5f, 5f, 5f) { Decorator = NebulaConfiguration.SecDecorator };
-        EmbroilDurationOption = new(RoleConfig, "embroilDuration", null, 1f, 20f, 1f, 5f, 5f) { Decorator = NebulaConfiguration.SecDecorator };
-    }
-
-    public class Instance : Crewmate.Instance, RuntimeRole
-    {
-        public override AbstractRole Role => MyRole;
+        DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player){}
 
         private ModAbilityButton embroilButton = null!;
@@ -70,11 +60,11 @@ public class Provocateur : ConfigurableStandardRole, DefinedRole
                 };
                 embroilButton.OnEffectEnd = (button) =>
                 {
-                    button.CoolDownTimer?.Expand(MyRole.EmbroilAdditionalCoolDownOption.GetFloat());
+                    button.CoolDownTimer?.Expand(EmbroilAdditionalCoolDownOption);
                     embroilButton.StartCoolDown();
                 };
-                embroilButton.CoolDownTimer = Bind(new Timer(0f, MyRole.EmbroilCoolDownOption.GetFloat()).SetAsAbilityCoolDown().Start());
-                embroilButton.EffectTimer = Bind(new Timer(0f, MyRole.EmbroilDurationOption.GetFloat()));
+                embroilButton.CoolDownTimer = Bind(new Timer(0f, EmbroilCoolDownOption).SetAsAbilityCoolDown().Start());
+                embroilButton.EffectTimer = Bind(new Timer(0f, EmbroilDurationOption));
                 embroilButton.SetLabel("embroil");
             }
         }

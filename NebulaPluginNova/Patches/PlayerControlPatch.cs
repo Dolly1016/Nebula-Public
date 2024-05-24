@@ -273,7 +273,7 @@ public class PlayerJoinedPatch
 {
     public static void Postfix()
     {
-        if (AmongUsClient.Instance.AmHost) NebulaConfigEntryManager.ShareAll();
+        if (AmongUsClient.Instance.AmHost) ConfigurationValues.ShareAll();
     }
 }
 

@@ -15,21 +15,20 @@ namespace Nebula.Roles.Crewmate;
 
 public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public Madmate MyRole = new Madmate();
     private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, CanIdentifyImpostorsOptionEditor]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private BoolConfiguration EmbroilVotersOnExileOption = NebulaAPI.Configurations.Configuration("role.madmate.embroilPlayersOnExile", false);
-    static private BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("role.madmate.limitEmbroiledPlayersToVoters", true);
+    static private BoolConfiguration EmbroilVotersOnExileOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilPlayersOnExile", false);
+    static private BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("options.role.madmate.limitEmbroiledPlayersToVoters", true);
 
-    static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("role.madmate.canFixLight", false);
-    static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("role.madmate.canFixComms", false);
-    static private BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("role.madmate.hasImpostorVision", false);
-    static private BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("role.madmate.canUseVents", false);
-    static private BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("role.madmate.canMoveInVents", false);
-    static private IntegerConfiguration CanIdentifyImpostorsOption = NebulaAPI.Configurations.Configuration("role.madmate.canIdentifyImpostors", (0, 3), 0);
+    static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixLight", false);
+    static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixComms", false);
+    static private BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.madmate.hasImpostorVision", false);
+    static private BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canUseVents", false);
+    static private BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canMoveInVents", false);
+    static private IntegerConfiguration CanIdentifyImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canIdentifyImpostors", (0, 3), 0);
     static private IOrderedSharableVariable<int>[] NumOfTasksToIdentifyImpostorsOptions = [
         NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors0",(0,10),2),
         NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors1",(0,10),4),
@@ -48,26 +47,31 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 
             if (CanIdentifyImpostorsOption.GetValue() > 0)
             {
-                List<GUIWidget> inner = new();
+                List<GUIWidget> inner = new([
+                    GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), "options.role.madmate.requiredTasksForIdentifying"),
+                    GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OptionsFlexible), ":"),
+                    GUI.API.HorizontalMargin(0.05f)
+                    ]);
                 int length = CanIdentifyImpostorsOption.GetValue();
                 for (int i = 0; i < length; i++)
                 {
-                    if (i != 0) inner.Add(GUI.API.HorizontalMargin(0.25f));
+                    if (i != 0) inner.AddRange([GUI.API.HorizontalMargin(0.05f), GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), ",")]);
 
                     var option = NumOfTasksToIdentifyImpostorsOptions[i];
 
                     inner.AddRange([
-                        GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), "<<", _ => { option.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }),
                         GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsValueShorter), option.CurrentValue.ToString()),
-                        GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ">>", _ => { option.ChangeValue(true, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
+                        GUI.API.SpinButton(GUIAlignment.Center, v => { option.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
                         ]);
                 }
-                widgets.Add(new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, inner));
+                widgets.Add(new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Left, inner));
             }
-            return new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center, widgets);
+            return new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, widgets);
         }
         );
-    
+
+    static public Madmate MyRole = new Madmate();
+
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -122,11 +126,12 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         }
 
         public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev) => IdentifyImpostors();
-        
 
-        public override void DecorateOtherPlayerName(GamePlayer player, ref string text, ref Color color)
+
+        [Local]
+        void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
         {
-            if (impostors.Contains(player.PlayerId) && player.Role.Role.Category == RoleCategory.ImpostorRole) color = Palette.ImpostorRed;
+            if (impostors.Contains(ev.Player.PlayerId) && ev.Player.IsImpostor) ev.Color = new(Palette.ImpostorRed);
         }
 
         [Local, OnlyMyPlayer]
