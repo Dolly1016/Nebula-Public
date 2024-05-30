@@ -143,12 +143,12 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
                     if (AvengerModeOption)
                         myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [pme.Murderer.PlayerId]).InvokeSingle();
                     else
-                        myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, true);
+                        myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
                 }
             }
             else
             {   
-                myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, true);
+                myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
             }
         }
 
@@ -157,7 +157,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         {
             if (!(MyLover?.IsDead ?? false))
             {
-                MyLover?.VanillaPlayer.ModMeetingKill(MyLover.VanillaPlayer, false, PlayerState.Suicide, PlayerState.Suicide, false);
+                MyLover?.VanillaPlayer.ModMeetingKill(MyLover.VanillaPlayer, PlayerState.Suicide, PlayerState.Suicide, KillParameter.NormalKill);
             }
         }
 

@@ -7,8 +7,11 @@ namespace Nebula.Roles.Abilities;
 
 
 
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.BuildNoSModule)]
 public class MetaAbility : ComponentHolder, IGameOperator, IModule
 {
+    static MetaAbility() => DIManager.Instance.RegisterGeneralModule<Virial.Game.IGameModeFreePlay>(() => new MetaAbility());
+
     public MetaAbility()
     {
         this.Register(NebulaAPI.CurrentGame!);

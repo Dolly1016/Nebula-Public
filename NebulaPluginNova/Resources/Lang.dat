@@ -7,6 +7,7 @@
 "title.buttons.achievements" : "Achievements"
 "title.buttons.addons" : "Add-ons"
 "title.buttons.developersStudio" : "Dev. Studio"
+"title.buttons.marketplace" : "Marketplace"
 
 # Certification
 
@@ -1216,3 +1217,33 @@
 "hint.gameConfigurationMenu.detail" : "The game settings UI has a simple display mode.<br>You can switch display modes by clicking the middle mouse button."
 "hint.helpInGame.title" : "Help In Game"
 "hint.helpInGame.detail" : "Pressing the help key (default: H key) in the lobby or during the game will display the help screen. <br>You can check the details of your own role and all roles in NoS."
+"hint.nearClick.title" : "Mouse Click Action"
+"hint.nearClick.detail" : "If a button has a mouse icon, you can also activate the button's ability by clicking <b>near you</b> with the mouse."
+"hint.spectator.title" : "Spectator Mode"
+"hint.spectator.detail" : "When you die, you go into spectator mode. In spectator mode, you can enlarge or reduce the field of view by scrolling the mouse. <br>Once you have completed all the tasks, you can also switch your perspective to other survivors."
+"hint.keyAssignment.title" : "Key Assignment For Buttons"
+"hint.keyAssignment.detail" : "Kill buttons, ability buttons, etc. can also be used by keyboard operations. <br>The display at the top right of the button indicates the corresponding key. Key assignments can also be changed through settings."
+"hint.paparazzo.title" : "Role: Paparazzo"
+"hint.paparazzo.detail" : "Paparazzo is a neutral role that takes photos of players. <br>Paparazzo must show some photos taken during the meeting."
+"hint.busker.title" : "Roles: Busker"
+"hint.busker.detail" : "Busker is a Crewmate role that can be revived after dying. <br>Be careful, because if you do not revive for a while after fake death, you will not be able to come back."
+"hint.screenshot.title" : "Take a Screenshot!"
+"hint.screenshot.detail" : "Press the screenshot key (default: P key) to take a screenshot of the screen."
+"hint.achievement.title" : "Achievements"
+"hint.achievement.detail" : "You can earn achievements by meeting specified conditions during the game. Acquired achievements can be equipped as your own title. <br>Get a lot of achievements and show them off to your friends!"
+"hint.version.title" : "Update NoS"
+"hint.version.detail" : "If you want to update to the latest or different version of NoS,<br>it is convenient use "Update to latest NoS" which can be opened from the Nebula tab on the title screen."
+"hint.freeplay.title" : "Free Play"
+"hint.freeplay.detail" : "You can change the game mode from the in-game settings.<br>With free play, even one person can start the game and check the usability of each role's abilities."
+"hint.overlay.title" : "Overlay UI"
+"hint.overlay.detail" : "Some of texts and other displays in the game have additional information via overlay. <br>Let's move the cursor to the display that interests us."
+
+# Marketplace
+
+"marketplace.ui.title" : "Marketplace"
+"marketplace.ui.hint" : "Keyword"
+"marketplace.ui.publish" : "Publish / Edit"
+"marketplace.type.addons" : "Addons"
+"marketplace.type.cosmetics" : "Cosmetics"
+"marketplace.searchMore.addons" : "Search more addons by "%QUERY%""
+"marketplace.searchMore.cosmetics" : "Search more cosmetics by "%QUERY%""

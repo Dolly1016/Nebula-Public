@@ -79,11 +79,11 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
                         acTokenShot!.Value = true;
                         if (acTokenChallenge != null && killTracker.CurrentTarget!.IsImpostor) acTokenChallenge!.Value--;
 
-                        MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill);
+                        MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
                     }
                     else
                     {
-                        MyPlayer.Suicide(PlayerState.Misfired, null);
+                        MyPlayer.Suicide(PlayerState.Misfired, null, Virial.Game.KillParameter.NormalKill);
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.VanillaPlayer, killTracker.CurrentTarget!.VanillaPlayer);
 
                         acTokenMisshot!.Value = true;

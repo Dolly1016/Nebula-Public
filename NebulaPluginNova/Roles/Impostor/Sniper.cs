@@ -172,7 +172,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                     var target = MyRifle?.GetTarget(ShotSizeOption, ShotEffectiveRangeOption);
                     if (target != null)
                     {
-                        MyPlayer.MurderPlayer(target, PlayerState.Sniped, EventDetail.Kill, false);
+                        MyPlayer.MurderPlayer(target, PlayerState.Sniped, EventDetail.Kill, KillParameter.RemoteKill);
 
                         acTokenCommon ??= new("sniper.common1");
                         if (MyPlayer.VanillaPlayer.GetTruePosition().Distance(target!.VanillaPlayer.GetTruePosition()) > 20f) acTokenChallenge.Value++;

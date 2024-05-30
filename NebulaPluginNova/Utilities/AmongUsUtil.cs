@@ -140,7 +140,7 @@ public static class AmongUsUtil
             foreach (var d in Helpers.AllDeadBodies()) if (d.ParentId == message.TargetId) GameObject.Destroy(d.gameObject);
 
             if (message.SourceId != byte.MaxValue)
-                NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.CreanBody, message.SourceId, 1 << message.TargetId) { RelatedTag = message.RelatedTag });
+                NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.CleanBody, message.SourceId, 1 << message.TargetId) { RelatedTag = message.RelatedTag });
         }
         );
 

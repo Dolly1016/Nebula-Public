@@ -312,7 +312,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         if (!HudManager.InstanceExists) return;
 
-        RpcTryAssignGhostRole.Invoke(LocalPlayerInfo);
+        if (!LocalPlayerInfo.AttemptedGhostAssignment) RpcTryAssignGhostRole.Invoke(LocalPlayerInfo);
+        
 
         new SpectatorsAbility().Register(this);
     }
@@ -667,7 +668,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
 
     public IEnumerable<GamePlayer> AllPlayerInfo() => allModPlayers.Values;
-
+    public int AllPlayersNum => allModPlayers.Count;
 
     public void AllAssignableAction(Action<RuntimeAssignable> action)
     {
@@ -748,9 +749,14 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         "TryAssignGhostRole",
         (message, _) =>
         {
-            if (!AmongUsClient.Instance.AmHost) return;
-            var role = Instance?.RoleAllocator?.AssignToGhost(message);
-            if (role != null) message.Unbox().RpcInvokerSetGhostRole(role, null).InvokeSingle();
+            if (message.AttemptedGhostAssignment) return;
+
+            if (AmongUsClient.Instance.AmHost)
+            {
+                var role = Instance?.RoleAllocator?.AssignToGhost(message);
+                if (role != null) message.Unbox().RpcInvokerSetGhostRole(role, null).InvokeSingle();
+            }
+            message.AttemptedGhostAssignment = true;
         }
         );
 }

@@ -27,8 +27,10 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
     }
 }
 
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.BuildNoSModule)]
 public class CrewmateGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 {
+    static CrewmateGameRule() => DIManager.Instance.RegisterModule(() => new CrewmateGameRule());
     public CrewmateGameRule() => this.Register(NebulaAPI.CurrentGame!);
     void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.Player.Role.Role.Category == RoleCategory.CrewmateRole && ev.GameEnd == NebulaGameEnd.CrewmateWin);
     

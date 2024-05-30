@@ -59,7 +59,7 @@ public class GUIFixedView : AbstractGUIWidget
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
-        var view = UnityHelper.CreateObject("ScrollView", null, new UnityEngine.Vector3(0f, 0f, 0f), LayerExpansion.GetUILayer());
+        var view = UnityHelper.CreateObject("FixedView", null, new UnityEngine.Vector3(0f, 0f, 0f), LayerExpansion.GetUILayer());
         var inner = UnityHelper.CreateObject("Inner", view.transform, new UnityEngine.Vector3(-0.2f, 0f, -0.1f));
         var innerSize = Size - new UnityEngine.Vector2(0.4f, 0f);
 

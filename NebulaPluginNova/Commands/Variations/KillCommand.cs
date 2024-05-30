@@ -1,5 +1,6 @@
 ﻿using Virial.Command;
 using Virial.Compat;
+using Virial.Game;
 
 namespace Nebula.Commands.Variations;
 
@@ -39,15 +40,16 @@ public class KillCommand : ICommand
                         int count = 0;
                         using (RPCRouter.CreateSection("killCommand"))
                         {
+                            KillParameter param = KillParameter.WithOverlay | KillParameter.WithAssigningGhostRole;
+                            if (leftDeadBody) param |= KillParameter.WithDeadBody;
+                            if (blink) param |= KillParameter.WithBlink;
+                            if (MeetingHud.Instance) param |= KillParameter.WithKillSEWidely;
 
                             foreach (var player in players)
                             {
                                 if (player.IsDead && !evenIfDead) continue;
 
-                                if (leftDeadBody)
-                                    (killer ?? player).VanillaPlayer.ModKill(player.VanillaPlayer, blink, PlayerState.Dead, EventDetail.Kill, true);
-                                else
-                                    (killer ?? player).VanillaPlayer.ModMeetingKill(player.VanillaPlayer, true, PlayerState.Dead, EventDetail.Kill, MeetingHud.Instance);
+                                (killer ?? player).VanillaPlayer.ModFlexibleKill(player.VanillaPlayer, PlayerState.Dead, EventDetail.Kill, param);
 
                                 count++;
                             }

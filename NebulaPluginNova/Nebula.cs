@@ -39,11 +39,11 @@ public class NebulaPlugin : BasePlugin
     public const string PluginVersion = "2.2.3.1";
 
     //public const string VisualVersion = "v2.3";
-    public const string VisualVersion = "Snapshot 24.05.23b";
+    public const string VisualVersion = "Snapshot 24.05.28a";
     //public const string VisualVersion = "RPC Debug 2";
 
     public const int PluginEpoch = 103;
-    public const int PluginBuildNum = 1121;
+    public const int PluginBuildNum = 1124;
     public const bool GuardVanillaLangData = true;
 
     static public HttpClient HttpClient

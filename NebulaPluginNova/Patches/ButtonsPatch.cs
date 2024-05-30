@@ -110,7 +110,7 @@ public static class KillButtonClickPatch
     {
         if (__instance.enabled && __instance.currentTarget && !__instance.isCoolingDown && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
         {
-            PlayerControl.LocalPlayer.ModKill(__instance.currentTarget, true, PlayerState.Dead, EventDetail.Kill);
+            PlayerControl.LocalPlayer.ModKill(__instance.currentTarget, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
             __instance.SetTarget(null);
         }
         return false;

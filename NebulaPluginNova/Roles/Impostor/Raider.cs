@@ -86,7 +86,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                                 //不可視なプレイヤーは無視
                                 if (p.GetModInfo()?.Unbox().IsInvisible ?? false) continue;
 
-                                if (PlayerControl.LocalPlayer.ModKill(p, false, PlayerState.Beaten, EventDetail.Kill) == KillResult.Kill)
+                                if (PlayerControl.LocalPlayer.ModKill(p, PlayerState.Beaten, EventDetail.Kill, KillParameter.RemoteKill) == KillResult.Kill)
                                 {
                                     killed |= 1 << p.PlayerId;
 

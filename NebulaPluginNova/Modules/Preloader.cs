@@ -15,6 +15,8 @@ namespace Nebula.Modules;
 //IL Repackの都合で、APIの引数付き属性を使用できないので、子の属性と引数をNoS内で用意する。NoSではこちらを使うこと。
 public enum PreprocessPhaseForNoS
 {
+    BuildNoSModuleContainer,
+    BuildNoSModule,
     PostBuildNoS,
     LoadAddons,
     CompileAddons,
@@ -169,13 +171,7 @@ public static class PreloadManager
 
         //IModule<Virial.Game.Player>
         DIManager.Instance.RegisterModule(() => new PlayerTaskState());
-
-        //IModule<Virial.Game.IGameModeFreePlay>
-        DIManager.Instance.RegisterGeneralModule<Virial.Game.IGameModeFreePlay>(() => new MetaAbility());
-
-        //IModule<Virial.Game.IGameModeStandard>
-        DIManager.Instance.RegisterModule(() => new ImpostorGameRule());
-        DIManager.Instance.RegisterModule(() => new CrewmateGameRule());
+        
 
 
 

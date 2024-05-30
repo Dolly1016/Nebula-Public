@@ -292,7 +292,7 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
                     {
                             using (RPCRouter.CreateSection("TrapKill"))
                             {
-                                PlayerControl.LocalPlayer.ModKill(p.VanillaPlayer,false,PlayerState.Trapped,EventDetail.Trap);
+                                PlayerControl.LocalPlayer.ModKill(p.VanillaPlayer,PlayerState.Trapped,EventDetail.Trap, KillParameter.RemoteKill);
                                 RpcTrapKill.Invoke(killTrap.ObjectId);
                                 acTokenChallenge!.Value++;
                             }

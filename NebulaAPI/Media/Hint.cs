@@ -22,7 +22,7 @@ public class HintWithImage : Hint
     {
         return NebulaAPI.GUI.VerticalHolder(GUIAlignment.Center,
             NebulaAPI.GUI.Margin(new(null, 0.5f)),
-            NebulaAPI.GUI.Image(GUIAlignment.Center, Image, new(2.8f, 1.5f)),
+            NebulaAPI.GUI.Image(GUIAlignment.Center, Image, new(4f, 2.1f)),
             NebulaAPI.GUI.Margin(new(null, 0.6f)),
             NebulaAPI.GUI.Text(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentTitle), Title),
             NebulaAPI.GUI.Margin(new(null, 0.1f)),
@@ -46,7 +46,7 @@ public class HintOnlyText : Hint
     GUIWidgetSupplier Hint.GUI => () =>
     {
         return NebulaAPI.GUI.VerticalHolder(GUIAlignment.Center,
-            NebulaAPI.GUI.Margin(new(null, 1.5f + 0.6f + 0.5f)),
+            NebulaAPI.GUI.Margin(new(null, 2.1f + 0.6f + 0.5f)),
             NebulaAPI.GUI.Text(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentTitle), Title),
             NebulaAPI.GUI.Margin(new(null, 0.1f)),
             NebulaAPI.GUI.HorizontalHolder(GUIAlignment.Center,NebulaAPI.GUI.HorizontalMargin(0.16f), NebulaAPI.GUI.Text(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), Detail))

@@ -70,7 +70,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) => {
-                    MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill);
+                    MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                     killButton.StartCoolDown();
                 };
                 killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
@@ -141,7 +141,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         {
             if (!CheckKillCondition && ev.Player == target && !MyPlayer.IsDead)
             {
-                MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, false);
+                MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
                 new StaticAchievementToken("avenger.another1");
             }
         }

@@ -506,6 +506,8 @@ public class CombinedRemoteProcess : RemoteProcessBase
 
         for (int i = 0; i < num; i++)
         {
+            Tuple<double, double, double, double, double, double> a;
+
             int id = reader.ReadInt32();
             if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id,out var rpc)){
                 rpc.Receive(reader);

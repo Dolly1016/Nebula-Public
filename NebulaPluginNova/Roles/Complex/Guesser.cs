@@ -62,9 +62,9 @@ static file class GuesserSystem
                     if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
 
                     if (p?.Role.Role == r)
-                        NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, false);
+                        NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill);
                     else
-                        NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, false);
+                        NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill);
 
                     //のこり推察数を減らす
                     guessDecrementer.Invoke();
@@ -230,7 +230,7 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
 public class GuesserModifier : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, HasCitation
 {
     static public GuesserModifier MyRole = new GuesserModifier();
-    private GuesserModifier() : base("guesser", "GSR", new(255, 255, 0)) {
+    private GuesserModifier() : base("guesser", "GSR", new(255, 255, 0), [Guesser.NumOfGuessOption, Guesser.NumOfGuessPerMeetingOption, Guesser.GuessableFilterEditorOption]) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Guesser.MyNiceRole.ConfigurationHolder!, Guesser.MyEvilRole.ConfigurationHolder!]);
     }
     

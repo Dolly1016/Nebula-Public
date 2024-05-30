@@ -97,7 +97,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
 
             if (ev.Player.PlayerId == (obsession?.PlayerId ?? 255) && !MeetingHudExtension.MarkedAsExtraVictims(MyPlayer.PlayerId) && !MyPlayer.IsDead)
             {
-                MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill);
+                MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
                 new StaticAchievementToken("obsessional.another1");
             }
         }

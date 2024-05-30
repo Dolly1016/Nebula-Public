@@ -76,7 +76,7 @@ public class Provocateur : DefinedRoleTemplate, DefinedRole
 
             if (embroilButton.EffectActive && !ev.Murderer.IsDead)
             {
-                MyPlayer.MurderPlayer(ev.Murderer,PlayerState.Embroiled,EventDetail.Embroil, false);
+                MyPlayer.MurderPlayer(ev.Murderer,PlayerState.Embroiled,EventDetail.Embroil, KillParameter.NormalKill);
                 new StaticAchievementToken("provocateur.common2");
 
                 var murdererRole = ev.Murderer.Role.Role;

@@ -182,6 +182,21 @@ public enum AttributeAsset
     /// オプション値やオプション名と同じフォントの可変テキスト属性です。
     /// </summary>
     OptionsFlexible,
+
+    /// <summary>
+    /// マーケットプレイスのタイトルで使われている固定長テキスト属性です。
+    /// </summary>
+    MarketplaceTitle,
+
+    /// <summary>
+    /// マーケットプレイスの作者名で使われている固定長テキスト属性です。
+    /// </summary>
+    MarketplaceDeveloper,
+
+    /// <summary>
+    /// マーケットプレイスの見出しで使われている固定長テキスト属性です。
+    /// </summary>
+    MarketplaceBlurb,
 }
 
 [Flags]

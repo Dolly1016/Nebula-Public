@@ -1,11 +1,15 @@
-﻿using Nebula.Commands.Variations;
+﻿using Nebula.Behaviour;
+using Nebula.Commands.Variations;
+using Virial.Command;
+using Virial.Compat;
 
 namespace Nebula.Commands;
 
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
 static public class Commands
 {
-    static public void Load()
+
+    static Commands()
     {
         CommandManager.RegisterCommand(new FormulaCommand(), "nebula::formula", "nebula::f");
         CommandManager.RegisterCommand(new IfCommand(), "nebula::if");

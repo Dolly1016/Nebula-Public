@@ -9,14 +9,12 @@ namespace Nebula.Roles.Ghost.Crewmate;
 [NebulaRPCHolder]
 public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
 {
-    public Lumine(): base("lumine", new(241, 237, 184),RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam) {
-        ConfigurationHolder?.AppendConfigurations([LightSizeOption, LightDurationOption]);
-    }
+    public Lumine(): base("lumine", new(241, 237, 184),RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam, [LightSizeOption, LightDurationOption]) {}
 
     string ICodeName.CodeName => "LMN";
 
-    FloatConfiguration LightSizeOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightSize", (1f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
-    FloatConfiguration LightDurationOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration LightSizeOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightSize", (1f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration LightDurationOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
 
     static public Lumine MyRole = new Lumine();
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -59,7 +57,7 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
     static private IEnumerator CoLight(Vector2 pos)
     {
         SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(pos);
-        lightRenderer.transform.localScale *= MyRole.LightSizeOption;
+        lightRenderer.transform.localScale *= LightSizeOption;
 
         float p = 0f;
         while (p < 1f)
@@ -70,7 +68,7 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
         }
 
         lightRenderer.material.color = Color.white;
-        yield return Effects.Wait(MyRole.LightDurationOption);
+        yield return Effects.Wait(LightDurationOption);
         while (p > 0f)
         {
             p -= Time.deltaTime * 0.75f;

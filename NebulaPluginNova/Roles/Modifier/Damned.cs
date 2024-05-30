@@ -85,7 +85,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
                     using (RPCRouter.CreateSection("DamedAction"))
                     {
-                        if (MyPlayer.MurderPlayer(ev.Murderer, PlayerState.Cursed, EventDetail.Curse,false, true) == KillResult.Kill)
+                        if (MyPlayer.MurderPlayer(ev.Murderer, PlayerState.Cursed, EventDetail.Curse, KillParameter.RemoteKill) == KillResult.Kill)
                         {
                             MyPlayer.Unbox().RpcInvokerUnsetModifier(MyRole).InvokeSingle();
                             MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, null).InvokeSingle();

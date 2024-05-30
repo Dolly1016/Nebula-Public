@@ -1,6 +1,15 @@
-﻿using Il2CppInterop.Runtime.Injection;
+﻿using AmongUs.Data.Player;
+using Il2CppInterop.Runtime.Injection;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Text;
+using UnityEngine;
+using Virial.DI;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
+using Virial.Game;
 using Virial.Runtime;
 using Virial.Text;
+using Virial.Utilities;
 
 namespace Nebula.Game;
 
@@ -59,6 +68,224 @@ public enum GameStatisticsGatherTag
     Spawn
 }
 
+[Flags]
+internal enum PlayerTrackingFlags : byte
+{
+    IsDead = 0x01,
+    InVent = 0x02,
+    IsInvisible = 0x04,
+}
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="Position"></param>
+/// <param name="States"></param>
+internal record TrackedPlayerMoment(Vector2 Position, PlayerTrackingFlags States)
+{
+    bool HasState(PlayerTrackingFlags flag) => (States & flag) != 0;
+}
+
+internal class TrackedMoment
+{
+    public TrackedPlayerMoment[] PlayerData { get; init; }
+    public float Time { get; init; }
+
+    public TrackedMoment() { }
+
+    public static TrackedMoment CaptureCurrent()
+    {
+        var trackingDataArray = new TrackedPlayerMoment[NebulaGameManager.Instance!.AllPlayersNum];
+        foreach(var p in NebulaGameManager.Instance.AllPlayerInfo())
+        {
+            PlayerTrackingFlags flag = 0;
+            if (p.IsDead) flag |= PlayerTrackingFlags.IsDead;
+            if (p.VanillaPlayer.inVent) flag |= PlayerTrackingFlags.InVent;
+            if (p.Unbox().VisibilityLevel > 0) flag |= PlayerTrackingFlags.IsInvisible;
+            trackingDataArray[p.PlayerId] = new(p.VanillaPlayer.transform.position, flag);
+        }
+
+        TrackedMoment tracked = new() { PlayerData = trackingDataArray, Time = NebulaGameManager.Instance.CurrentTime };
+
+        return tracked;
+    }
+}
+
+internal class TrackedTaskPhase
+{
+    public bool IsClosed { get; set; } = false;
+    public List<TrackedMoment> Moments { get; init; } = new();
+    public float Start { get; set; } = 0f;
+    public float End { get; set; } = float.MaxValue;
+    public void CaptureCurrent()
+    {
+        Moments.Add(TrackedMoment.CaptureCurrent());
+    }
+}
+
+internal record ArchivedPlayer(string Name,byte Id,UnityEngine.Color32 MainColor,UnityEngine.Color32 ShadowColor, UnityEngine.Color32 VisorColor,string HatId,string VisorId,string SkinId)
+{
+    public static ArchivedPlayer FromPlayer(GamePlayer player)
+    {
+        var outfit = player.DefaultOutfit.outfit;
+        byte id = player.PlayerId;
+        return new ArchivedPlayer(player.Name, id, Palette.PlayerColors[id], Palette.ShadowColors[id], DynamicPalette.VisorColors[id], outfit.HatId, outfit.VisorId, outfit.SkinId);
+    }
+
+    public void ReflectTo(PoolablePlayer player, PlayerMaterial.MaskType maskType)
+    {
+        player.cosmetics.SetMaskType(maskType);
+        Palette.PlayerColors[NebulaPlayerTab.ArchiveColorId] = MainColor;
+        Palette.ShadowColors[NebulaPlayerTab.ArchiveColorId] = ShadowColor;
+        
+        player.cosmetics.SetBodyColor(NebulaPlayerTab.ArchiveColorId);
+        player.cosmetics.SetSkin(SkinId, NebulaPlayerTab.ArchiveColorId, null);
+        player.cosmetics.SetHatColor(Palette.White);
+        player.cosmetics.SetVisorAlpha(1f);
+        player.cosmetics.SetHat(HatId, NebulaPlayerTab.ArchiveColorId);
+        player.cosmetics.SetVisor(VisorId, NebulaPlayerTab.ArchiveColorId);
+        player.cosmetics.visor.Image.sharedMaterial.SetColor(PlayerMaterial.VisorColor, VisorColor);
+        player.cosmetics.hat.FrontLayer.sharedMaterial.SetColor(PlayerMaterial.VisorColor, VisorColor);
+        player.cosmetics.hat.BackLayer.sharedMaterial.SetColor(PlayerMaterial.VisorColor, VisorColor);
+        player.cosmetics.skin.layer.sharedMaterial.SetColor(PlayerMaterial.VisorColor, VisorColor);
+        player.cosmetics.SetEnabledColorblind(false);
+
+        player.SetName(Name);
+    }
+
+    public void ReflectTo(SpriteRenderer renderer)
+    {
+        Palette.PlayerColors[NebulaPlayerTab.ArchiveColorId] = MainColor;
+        Palette.ShadowColors[NebulaPlayerTab.ArchiveColorId] = ShadowColor;
+
+        PlayerMaterial.SetColors(NebulaPlayerTab.ArchiveColorId, renderer);
+        renderer.sharedMaterial.SetColor(PlayerMaterial.VisorColor, VisorColor);
+    }
+}
+
+internal class ArchivedTrackingData
+{
+    public TrackedTaskPhase[] TaskPhases;
+    public ArchivedPlayer[] Players;
+
+    public byte[] Serialize()
+    {
+        SerializedDataWriter writer = new();
+        writer.Write(Players.Length);
+        foreach (var p in Players)
+        {
+            writer.Write(p.Name);
+            writer.Write(p.MainColor);
+            writer.Write(p.ShadowColor);
+            writer.Write(p.VisorColor);
+            writer.Write(p.HatId);
+            writer.Write(p.VisorId);
+            writer.Write(p.SkinId);
+        }
+        writer.Write(TaskPhases.Length);
+        foreach(var t in TaskPhases)
+        {
+            writer.Write(t.Start);
+            writer.Write(t.End);
+            writer.Write(t.Moments.Count);
+            foreach(var m in t.Moments)
+            {
+                writer.Write(m.Time);
+                foreach (var p in m.PlayerData)
+                {
+                    writer.Write(p.Position.x);
+                    writer.Write(p.Position.y);
+                    writer.Write((byte)p.States);
+                }
+            }
+        }
+        return writer.ToData();
+    }
+
+    public static ArchivedTrackingData Deserialize(Stream stream)
+    {
+        SerializedDataReader reader = new();
+        ArchivedPlayer[] players = new ArchivedPlayer[reader.ReadInt32()];
+        for (int p = 0; p < players.Length; p++)
+        {
+            players[p] = new(reader.ReadString(),p,reader.ReadColor32(), reader.ReadColor32(), reader.ReadColor32(), reader.ReadString(), reader.ReadString(), reader.ReadString());
+        }
+        TrackedTaskPhase[] taskPhases = new TrackedTaskPhase[reader.ReadInt32()];
+        for(int t = 0;t< taskPhases.Length; t++)
+        {
+            float start = reader.ReadSingle();
+            float end = reader.ReadSingle();
+            TrackedMoment[] moments = new TrackedMoment[reader.ReadInt32()];
+            for(int m = 0; m < moments.Length; m++)
+            {
+                float time = reader.ReadSingle();
+                TrackedPlayerMoment[] trackedPlayers = new TrackedPlayerMoment[players.Length];
+                for (int p = 0; p < trackedPlayers.Length; p++)
+                {
+                    trackedPlayers[p] = new(new(reader.ReadSingle(),reader.ReadSingle()), (PlayerTrackingFlags)reader.ReadByte());
+                }
+                moments[m] = new() { Time = time, PlayerData = trackedPlayers };
+            }
+            taskPhases[t] = new() { Start = start, End = end, Moments = new(moments), IsClosed = true };
+        }
+
+        return new() { Players = players, TaskPhases = taskPhases };
+    }
+}
+
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.BuildNoSModule)]
+internal class GameTracker : AbstractModule<Virial.Game.Game>, IGameOperator
+{
+    static GameTracker()
+    {
+        DIManager.Instance.RegisterModule(() => new GameTracker());
+    }
+
+    public GameTracker()
+    {
+        this.Register(NebulaGameManager.Instance!);
+    }
+
+    public List<TrackedTaskPhase> TaskPhases { get; private init; } = new();
+
+    void AddTaskPhase()
+    {
+        TaskPhases.Add(new());
+        interval = 0f;
+    }
+
+    void OnTaskPhaseRestarted(TaskPhaseRestartEvent ev) => AddTaskPhase();
+    void OnGameStarted(GameStartEvent ev) => AddTaskPhase();
+
+    void FixTaskPhase() {
+        if (TaskPhases.Count > 0) TaskPhases[TaskPhases.Count - 1].IsClosed = true;
+    }
+
+    void OnMeetingStart(MeetingPreStartEvent ev) => FixTaskPhase();
+    void OnGameEnd(GameEndEvent ev) => FixTaskPhase();
+
+    float interval = 0f;
+    void OnUpdate(GameUpdateEvent ev)
+    {
+        if(TaskPhases.Count > 0 && !TaskPhases[TaskPhases.Count - 1].IsClosed)
+        {
+            if (interval > 0f)
+            {
+                interval -= Time.deltaTime;
+            }
+            else
+            {
+                TaskPhases[TaskPhases.Count - 1].CaptureCurrent();
+            }
+        }
+    }
+
+    public ArchivedTrackingData Output()
+    {
+        return new ArchivedTrackingData() { Players = NebulaGameManager.Instance!.AllPlayerInfo().Select(p => ArchivedPlayer.FromPlayer(p)).ToArray(), TaskPhases = TaskPhases.ToArray() };
+    }
+}
+
 [NebulaRPCHolder]
 public class GameStatistics
 {
@@ -75,7 +302,7 @@ public class GameStatistics
         static public EventVariation EmergencyButton = new(6, iconSprite.WrapLoader(3), iconSprite.WrapLoader(3), true, false);
         static public EventVariation Disconnect = new(7, iconSprite.WrapLoader(5), iconSprite.WrapLoader(5), false, false);
         static public EventVariation Revive = new(8, iconSprite.WrapLoader(6), iconSprite.WrapLoader(6), true, false);
-        static public EventVariation CreanBody = new(9, iconSprite.WrapLoader(7), iconSprite.WrapLoader(7), true, false);
+        static public EventVariation CleanBody = new(9, iconSprite.WrapLoader(7), iconSprite.WrapLoader(7), true, false);
 
         public int Id { get; private init; }
         public ISpriteLoader? EventIcon { get; private init; }
@@ -149,7 +376,7 @@ public class GameStatistics
         }
     }
 
-    private List<Event> allEvents { get; set; } = new List<Event>();
+    private List<Event> allEvents { get; set; } = new();
     public IEnumerable<Event> AllEvents => allEvents;
     public Event[] Sealed { get => allEvents.ToArray(); }
 

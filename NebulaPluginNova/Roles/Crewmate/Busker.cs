@@ -58,7 +58,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                         using (RPCRouter.CreateSection("BuskerPseudocide"))
                         {
                             if(HidePseudocideFromVitalsOption) PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.BuskerEffect, 10000f, false, 0), true));
-                            MyPlayer.Suicide(PlayerState.Pseudocide, null, false);
+                            MyPlayer.Suicide(PlayerState.Pseudocide, null, KillParameter.WithDeadBody);
                         }
                         reviveButon.ActivateEffect();
                     });

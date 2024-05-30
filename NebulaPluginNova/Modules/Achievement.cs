@@ -382,7 +382,7 @@ public class CompleteAchievement : SumUpAchievement
         var button = collider.gameObject.SetUpButton();
         button.OnMouseOver.AddListener(() =>
         {
-            string text = string.Join("\n", records.Where(r => !r.IsCleared).Select(r => "- " + Language.Translate(r.TranslationKey)));
+            string text = string.Join("\n", records.Select(r => "- " + Language.Translate(r.TranslationKey).Color(r.IsCleared ? Color.green : Color.white)));
             NebulaManager.Instance.SetHelpWidget(button, new NoSGUIText(GUIAlignment.Left, TextAttr, new RawTextComponent(text)));
         });
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));

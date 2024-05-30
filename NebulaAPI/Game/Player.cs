@@ -171,6 +171,19 @@ public class OutfitCandidate
     }
 }
 
+[Flags]
+public enum KillParameter
+{
+    WithBlink = 0x01,
+    WithOverlay = 0x02,
+    WithAssigningGhostRole = 0x04,
+    WithKillSEWidely = 0x08,
+    WithDeadBody = 0x10,
+    RemoteKill = WithOverlay | WithAssigningGhostRole | WithDeadBody,
+    NormalKill = WithBlink | RemoteKill,
+    MeetingKill = WithOverlay | WithAssigningGhostRole | WithKillSEWidely
+}
+
 public interface Player : IModuleContainer, ICommandExecutor
 {
     // Internal
@@ -281,8 +294,15 @@ public interface Player : IModuleContainer, ICommandExecutor
 
     // MurderAPI
 
-    public KillResult MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool showBlink = true, bool showKillOverlay = true);
-    public KillResult Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail,bool showKillOverlay = true, bool assignGhostRole = true);
+    /// <summary>
+    /// プレイヤーをキルします。会議中の場合は<paramref name="leftDeadBody"/>の値は無視され、強制的に死体を残さないキルを起こします。
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="playerState"></param>
+    /// <param name="eventDetail"></param>
+    /// <returns></returns>
+    public KillResult MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams);
+    public KillResult Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail,KillParameter killParams);
     public void Revive(Player? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent = true);
     public Player? MyKiller { get; }
 
@@ -333,7 +353,7 @@ public interface Player : IModuleContainer, ICommandExecutor
     public IEnumerable<RuntimeModifier> Modifiers { get; }
     public IEnumerable<RuntimeAssignable> AllAssigned();
     public bool TryGetModifier<Modifier>([MaybeNullWhen(false)] out Modifier modifier) where Modifier : class, RuntimeModifier;
-
+    public bool AttemptedGhostAssignment { get; internal set; }
 
 
 

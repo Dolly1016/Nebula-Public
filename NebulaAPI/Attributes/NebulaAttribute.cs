@@ -13,6 +13,14 @@ public class NebulaRPC : Attribute
 public enum PreprocessPhase
 {
     /// <summary>
+    /// NoSがモジュールコンテナを追加するフェイズです。
+    /// </summary>
+    BuildNoSModuleContainer,
+    /// <summary>
+    /// NoSがモジュールを追加するフェイズです。
+    /// </summary>
+    BuildNoSModule,
+    /// <summary>
     /// NoSが提供するAPIの内部構造の構築が終わった直後のフェイズです。
     /// アドオンはこのフェイズに処理を差し込めません。
     /// </summary>

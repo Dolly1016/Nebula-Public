@@ -114,7 +114,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                     {
                         if (!target.Data.IsDead && myPlayer.AmOwner)
                         {
-                            myPlayer.ModMeetingKill(target, false, PlayerState.Crushed, null, false);
+                            myPlayer.GetModInfo()?.MurderPlayer(target.GetModInfo()!, PlayerState.Crushed, null, KillParameter.WithAssigningGhostRole);
                         }
                         yield break;
                     }
@@ -236,7 +236,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
 
             if (myPlayer.AmOwner && !target.Data.IsDead)
             {
-                myPlayer.ModMeetingKill(target, true, PlayerState.Crushed, null, false);
+                myPlayer.GetModInfo()?.MurderPlayer(target.GetModInfo()!, PlayerState.Crushed, null, KillParameter.WithOverlay | KillParameter.WithAssigningGhostRole);
             }
             NebulaManager.Instance.StopCoroutine(monitorMeetingCoroutine);
 

@@ -299,6 +299,15 @@ public class HintManager
         RegisterHint(WithImage("ProcessorAffinity"));
         RegisterHint(WithImage("GameConfigurationMenu"));
         RegisterHint(WithImage("HelpInGame"));
+        RegisterHint(WithImage("NearClick"));
+        RegisterHint(WithImage("Paparazzo"));
+        RegisterHint(WithImage("Busker"));
+        RegisterHint(WithImage("Spectator"));
+        RegisterHint(WithImage("Freeplay"));
+        RegisterHint(WithImage("KeyAssignment"));
+        RegisterHint(WithImage("Screenshot"));
+        RegisterHint(WithImage("Overlay"));
+        RegisterHint(WithImage("Achievement"));
     }
 
     public static void RegisterHint(Virial.Media.Hint hint) => AllHints.Add(hint);

@@ -85,8 +85,9 @@ public static class MainMenuSetUpPatch
                 VanillaAsset.PlaySelectSE();
                 clickAction.Invoke();
             });
-            obj.transform.localPosition = new Vector3(0f, 0.98f - index * 0.68f, 0f);
 
+            obj.transform.localPosition = new Vector3((index % 2 == 0) ? -1.45f : 1.45f, 0.98f - (index / 2) * 0.59f, 0f);
+            obj.transform.localScale = new Vector3(0.72f, 0.72f, 1f);
             index++;
         }
 
@@ -99,6 +100,11 @@ public static class MainMenuSetUpPatch
         SetUpButton("title.buttons.achievements", () => {
             AchievementViewer.Open(__instance);
         });
+        /*
+        SetUpButton("title.buttons.marketplace", () => {
+            Marketplace.Open(__instance);
+        });
+        */
         SetUpButton("title.buttons.addons", () => {
             __instance.ResetScreen();
             if (!AddonsScreen) CreateAddonsScreen();

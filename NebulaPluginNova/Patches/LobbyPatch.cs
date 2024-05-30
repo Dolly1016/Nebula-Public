@@ -152,6 +152,8 @@ public class OptionsConsoleUsePatch
 {
     public static bool Prefix(OptionsConsole __instance)
     {
+        if (!__instance.MenuPrefab.TryGetComponent<GameSettingMenu>(out _)) return true;
+
         __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
         if (!flag) return false;
         
@@ -206,7 +208,6 @@ public class CreateGameOptionsLoadingPatch
 {
     public static void Postfix(CreateGameOptions __instance)
     {
-        Debug.Log("Test");
         NebulaManager.Instance.StartCoroutine(HintManager.CoShowHint(0.6f + 0.2f).WrapToIl2Cpp());
     }
 }

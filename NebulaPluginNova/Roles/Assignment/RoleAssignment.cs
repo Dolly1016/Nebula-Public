@@ -161,7 +161,7 @@ public class StandardRoleAllocator : IRoleAllocator
         var pool = ghostRolePool.Where(g => g.role.Category == player.Role.Role.Category && player.Role.Role.CanLoad(g.role)).ToArray();
 
         //まずは100%割り当て役職を抽出
-        var cand = pool.Where(g => g.role.AllocationParameters!.GetRoleChance(g.count - g.left) == 100f).ToArray();
+        var cand = pool.Where(g => g.left > 0 && g.role.AllocationParameters!.GetRoleChance(g.count - g.left) == 100f).ToArray();
         //100%割り当て役職がいなければ
         if (cand.Length == 0)
         {
@@ -189,7 +189,7 @@ public class StandardRoleAllocator : IRoleAllocator
         if (cand.Length > 0)
         {
             var selected = cand.Random();
-            selected.count--;
+            selected.left--;
             if (selected.left == 0) ghostRolePool.Remove(selected);
             return selected.role;
         }

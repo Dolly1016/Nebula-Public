@@ -865,6 +865,7 @@ public class NebulaPlayerTab : MonoBehaviour
     }
 
     static public readonly byte PreviewColorId = 15;
+    static public readonly byte ArchiveColorId = 16;
 
     //SetColorの複製をしない版
     private static void SetSharedColors(int colorId, Renderer renderer)

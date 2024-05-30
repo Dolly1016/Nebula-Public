@@ -8,13 +8,16 @@ namespace Nebula.Roles.Ghost.Crewmate;
 [NebulaRPCHolder]
 public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
 {
+    public Poltergeist() : base("poltergeist", new(210, 220, 234), RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam, [PoltergeistCoolDownOption]) { }
 
-    public Poltergeist() : base("poltergeist", new(210, 220, 234), RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam) { }
     string ICodeName.CodeName => "PLT";
 
-    private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 
     static public Poltergeist MyRole = new Poltergeist();
+
+    
+
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
 
@@ -43,7 +46,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
                     new StaticAchievementToken("poltergeist.common1");
                     poltergeistButton.StartCoolDown();
                 };
-                poltergeistButton.CoolDownTimer = Bind(new Timer(0f, MyRole.PoltergeistCoolDownOption).SetAsAbilityCoolDown().Start());
+                poltergeistButton.CoolDownTimer = Bind(new Timer(0f, PoltergeistCoolDownOption).SetAsAbilityCoolDown().Start());
                 poltergeistButton.SetLabel("poltergeist");
             }
         }

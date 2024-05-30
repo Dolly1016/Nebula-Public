@@ -53,7 +53,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
                 if (ev.Player.AmOwner) return;
                 if (!ev.Player.IsDead && SuicideIfSomeoneElseCompletesTasksBeforeAgentOption && ev.Player.Tasks.IsCrewmateTask && ev.Player.Tasks.TotalTasks >= tasks && ev.Player.Tasks.IsCompletedTotalTasks)
                 {
-                    MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Layoff);
+                    MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Layoff, KillParameter.NormalKill);
                     new StaticAchievementToken("agent.another1");
                 }
             }

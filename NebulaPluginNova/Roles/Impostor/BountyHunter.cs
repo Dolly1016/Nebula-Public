@@ -116,7 +116,7 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) => {
-                    MyPlayer.MurderPlayer(killTracker.CurrentTarget!,PlayerState.Dead, EventDetail.Kill);
+                    MyPlayer.MurderPlayer(killTracker.CurrentTarget!,PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
 
                     if(killTracker.CurrentTarget!.PlayerId == currentBounty)
                     {

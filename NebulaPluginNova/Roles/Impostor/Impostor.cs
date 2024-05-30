@@ -43,8 +43,11 @@ public class Impostor : DefinedRoleTemplate, DefinedRole
     }
 }
 
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.BuildNoSModule)]
 public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 {
+    static ImpostorGameRule() => DIManager.Instance.RegisterModule(() => new ImpostorGameRule());
+
     public ImpostorGameRule() => this.Register(NebulaAPI.CurrentGame!);
     void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.Player.IsImpostor && ev.GameEnd == NebulaGameEnd.ImpostorWin);  
     

@@ -57,6 +57,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
         static private ISpriteLoader sidekickButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SidekickButton.png", 115f);
 
+        bool RuntimeRole.CanUseVent => true;
         int[]? RuntimeAssignable.RoleArguments => [JackalTeamId, killingTotal, myKillingTotal];
         public bool CanWinDueToKilling => /*killingTotal >= MyRole.NumOfKillingToWinOption*/ true;
         public bool IsMySidekick(GamePlayer? player)
@@ -119,7 +120,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) =>
                 {
-                    MyPlayer.MurderPlayer(myTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, true, true);
+                    MyPlayer.MurderPlayer(myTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                     button.StartCoolDown();
 
                     if (LeftKillingToCreateSidekick == 0)
@@ -168,11 +169,19 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             JackalTeamId = MyPlayer.PlayerId;
         }
 
+        //ジャッカルはサイドキックを識別できる
         [Local]
         void DecorateSidekickColor(PlayerDecorateNameEvent ev)
         {
+            if (IsMySidekick(ev.Player)) ev.Color = Jackal.MyRole.RoleColor;
+        }
+        
+        //サイドキックはジャッカルを識別できる
+        [OnlyMyPlayer]
+        void DecorateJackalColor(PlayerDecorateNameEvent ev)
+        {
             var myInfo = PlayerControl.LocalPlayer.GetModInfo();
-            if(myInfo == null) return;
+            if (myInfo == null) return;
 
             if (IsMySidekick(myInfo)) ev.Color = Jackal.MyRole.RoleColor;
         }
@@ -273,7 +282,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
                     killButton.Visibility = (button) => !MyPlayer.IsDead;
                     killButton.OnClick = (button) =>
                     {
-                        MyPlayer.MurderPlayer(myTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, true, true);
+                        MyPlayer.MurderPlayer(myTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                         button.StartCoolDown();
                     };
                     killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());

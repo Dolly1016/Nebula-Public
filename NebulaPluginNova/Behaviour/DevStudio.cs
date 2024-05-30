@@ -8,13 +8,39 @@ using static Nebula.Modules.MetaWidgetOld;
 using Nebula.Modules.GUIWidget;
 using Virial.Text;
 using Virial.Media;
+using UnityEngine;
 
 namespace Nebula.Behaviour;
+
+internal static class MainMenuManagerInstance { 
+    internal static MainMenuManager? MainMenu;
+
+    internal static MetaScreen SetUpScreen(Transform transform, Action closeScreen)
+    {
+        if (MainMenuManagerInstance.MainMenu != null)
+        {
+            var backBlackPrefab = MainMenuManagerInstance.MainMenu.playerCustomizationPrefab.transform.GetChild(1);
+            GameObject.Instantiate(backBlackPrefab.gameObject, transform);
+            var backGroundPrefab = MainMenuManagerInstance.MainMenu.playerCustomizationPrefab.transform.GetChild(2);
+            var backGround = GameObject.Instantiate(backGroundPrefab.gameObject, transform);
+            GameObject.Destroy(backGround.transform.GetChild(2).gameObject);
+
+            var closeButtonPrefab = MainMenuManagerInstance.MainMenu.playerCustomizationPrefab.transform.GetChild(0).GetChild(0);
+            var closeButton = GameObject.Instantiate(closeButtonPrefab.gameObject, transform);
+            GameObject.Destroy(closeButton.GetComponent<AspectPosition>());
+            var button = closeButton.GetComponent<PassiveButton>();
+            button.gameObject.SetActive(true);
+            button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
+            button.OnClick.AddListener(closeScreen);
+            button.transform.localPosition = new Vector3(-4.9733f, 2.6708f, -50f);
+        }
+        return UnityHelper.CreateObject<MetaScreen>("Screen", transform, new Vector3(0, -0.1f, -10f));
+    }
+}
 
 public class DevStudio : MonoBehaviour
 {
     static DevStudio() => ClassInjector.RegisterTypeInIl2Cpp<DevStudio>();
-    static public MainMenuManager? MainMenu;
 
     private MetaScreen myScreen = null!;
 
@@ -69,40 +95,22 @@ public class DevStudio : MonoBehaviour
 
     protected void Close()
     {
-        TransitionFade.Instance.DoTransitionFade(gameObject, null!, () => MainMenu?.mainMenuUI.SetActive(true), () => GameObject.Destroy(gameObject));
+        TransitionFade.Instance.DoTransitionFade(gameObject, null!, () => MainMenuManagerInstance.MainMenu?.mainMenuUI.SetActive(true), () => GameObject.Destroy(gameObject));
     }
 
     static public void Open(MainMenuManager mainMenu)
     {
-        MainMenu = mainMenu;
+        MainMenuManagerInstance.MainMenu = mainMenu;
 
         var obj = UnityHelper.CreateObject<DevStudio>("DevStudioMenu", Camera.main.transform, new Vector3(0, 0, -30f));
-        TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, () => { obj.OnShown(); });
+        TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, obj.OnShown);
     }
 
     public void OnShown() => OpenScreen(ShowMainScreen);
 
     public void Awake()
     {
-        if (MainMenu != null)
-        {
-            var backBlackPrefab = MainMenu.playerCustomizationPrefab.transform.GetChild(1);
-            GameObject.Instantiate(backBlackPrefab.gameObject, transform);
-            var backGroundPrefab = MainMenu.playerCustomizationPrefab.transform.GetChild(2);
-            var backGround = GameObject.Instantiate(backGroundPrefab.gameObject, transform);
-            GameObject.Destroy(backGround.transform.GetChild(2).gameObject);
-
-            var closeButtonPrefab = MainMenu.playerCustomizationPrefab.transform.GetChild(0).GetChild(0);
-            var closeButton = GameObject.Instantiate(closeButtonPrefab.gameObject, transform);
-            GameObject.Destroy(closeButton.GetComponent<AspectPosition>());
-            var button = closeButton.GetComponent<PassiveButton>();
-            button.gameObject.SetActive(true);
-            button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
-            button.OnClick.AddListener(()=>CloseScreen());
-            button.transform.localPosition = new Vector3(-4.9733f, 2.6708f, -50f);
-        }
-
-        myScreen = UnityHelper.CreateObject<MetaScreen>("Screen", transform, new Vector3(0, -0.1f, -10f));
+        myScreen = MainMenuManagerInstance.SetUpScreen(transform, () => CloseScreen());
     }
     
     public (IMetaWidgetOld widget, Action? postAction, Func<bool>? confirm) ShowMainScreen()

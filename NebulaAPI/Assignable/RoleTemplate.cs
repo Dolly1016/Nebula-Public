@@ -347,8 +347,9 @@ public class DefinedGhostRoleTemplate : DefinedSingleAssignableTemplate, RoleFil
     void AssignableFilter<DefinedRole>.ToggleAndShare(DefinedRole role) => role.GhostRoleFilter?.ToggleAndShare((this as DefinedGhostRole)!);
     RoleFilter HasRoleFilter.RoleFilter => this;
 
-    public DefinedGhostRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team) : base(localizedName, color, category, team, true, ConfigurationTab.GhostRoles)
+    public DefinedGhostRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IConfiguration[]? configurations = null) : base(localizedName, color, category, team, true, ConfigurationTab.GhostRoles)
     {
+        if(configurations != null) ConfigurationHolder?.AppendConfigurations(configurations);
     }
 }
 

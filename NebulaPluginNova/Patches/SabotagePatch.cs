@@ -1,5 +1,6 @@
 ﻿using Hazel;
 using System.Text;
+using Virial.Game;
 
 namespace Nebula.Patches;
 
@@ -77,7 +78,7 @@ public static class ReactorSabotagePatch
         {
             if(!(__instance.reactor.Countdown > 0f))
             {
-                if(!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide( false, PlayerState.Deranged, EventDetail.FakeSabotage, true);
+                if(!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.Reactor, SystemTypes.Laboratory);
                 __instance.reactor.ClearSabotage();
             }
@@ -97,7 +98,7 @@ public static class NoOxySabotagePatch
         {
             if (!(__instance.reactor.Countdown > 0f))
             {
-                if (!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide(false, PlayerState.Deranged, EventDetail.FakeSabotage, true);
+                if (!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.LifeSupp);
                 __instance.reactor.Countdown = 10000f;
             }
@@ -117,7 +118,7 @@ public static class HeliSabotagePatch
         {
             if (!(__instance.sabotage.Countdown > 0f))
             {
-                if (!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide(false, PlayerState.Deranged, EventDetail.FakeSabotage, true);
+                if (!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.HeliSabotage);
                 __instance.sabotage.ClearSabotage();
             }

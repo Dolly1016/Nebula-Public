@@ -990,12 +990,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     // Virial::AssignableAPI
     IEnumerable<RuntimeAssignable> GamePlayer.AllAssigned() => AllAssigned();
     bool GamePlayer.TryGetModifier<Modifier>([MaybeNullWhen(false)] out Modifier modifier) where Modifier : class => TryGetModifier<Modifier>(out modifier);
-
+    bool GamePlayer.AttemptedGhostAssignment { get; set; } = false;
 
     // Virial::MurderAPI
 
-    KillResult GamePlayer.MurderPlayer(GamePlayer player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool showBlink, bool showKillOverlay) => MyControl.ModFlexibleKill(player.VanillaPlayer, showBlink, playerState, eventDetail, showKillOverlay);
-    KillResult GamePlayer.Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, bool showKillOverlay, bool assignGhostRole) => MyControl.ModFlexibleKill(MyControl, false, playerState, eventDetail, showKillOverlay, assignGhostRole);
+    KillResult GamePlayer.MurderPlayer(GamePlayer player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams) => MyControl.ModFlexibleKill(player.VanillaPlayer, playerState, eventDetail, killParams);
+    KillResult GamePlayer.Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams) => MyControl.ModFlexibleKill(MyControl, playerState, eventDetail, killParams);
     void GamePlayer.Revive(GamePlayer? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent) => MyControl.ModRevive(healer?.VanillaPlayer, new(position.x, position.y), eraseDeadBody, recordEvent);
     GamePlayer? GamePlayer.MyKiller => MyKiller;
 
