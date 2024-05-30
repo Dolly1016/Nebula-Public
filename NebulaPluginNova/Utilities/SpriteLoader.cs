@@ -362,7 +362,7 @@ public class DividedSpriteLoader : ISpriteLoader, IDividedSpriteLoader
 
     public Sprite GetSprite() => GetSprite(0);
 
-    public ISpriteLoader WrapLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
+    public ISpriteLoader AsLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
 
     public int Length {
         get {

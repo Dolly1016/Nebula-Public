@@ -40,7 +40,7 @@ public static class EventDetail
     static public TranslatableTag Layoff = new("statistics.events.layoff");
     static public TranslatableTag DestroyKill = new("statistics.events.destroy");
 
-    static void Preprocess(NebulaPreprocessor preprocessor)
+    static EventDetail()
     {
         Virial.Text.EventDetails.Kill = Kill;
         Virial.Text.EventDetails.Exiled = Exiled;
@@ -123,6 +123,10 @@ internal class TrackedTaskPhase
     }
 }
 
+internal record TrackedEvent(TrackedMoment Moment, string ImageType, string TranslationKey, int LeftMask, int RightMask)
+{
+}
+
 internal record ArchivedPlayer(string Name,byte Id,UnityEngine.Color32 MainColor,UnityEngine.Color32 ShadowColor, UnityEngine.Color32 VisorColor,string HatId,string VisorId,string SkinId)
 {
     public static ArchivedPlayer FromPlayer(GamePlayer player)
@@ -166,11 +170,25 @@ internal record ArchivedPlayer(string Name,byte Id,UnityEngine.Color32 MainColor
 internal class ArchivedTrackingData
 {
     public TrackedTaskPhase[] TaskPhases;
+    public TrackedEvent[] Events;
     public ArchivedPlayer[] Players;
 
     public byte[] Serialize()
     {
         SerializedDataWriter writer = new();
+        writer.Write((byte)1);
+
+        void WriteMoment(TrackedMoment m)
+        {
+            writer.Write(m.Time);
+            foreach (var p in m.PlayerData)
+            {
+                writer.Write(p.Position.x);
+                writer.Write(p.Position.y);
+                writer.Write((byte)p.States);
+            }
+        }
+
         writer.Write(Players.Length);
         foreach (var p in Players)
         {
@@ -182,34 +200,56 @@ internal class ArchivedTrackingData
             writer.Write(p.VisorId);
             writer.Write(p.SkinId);
         }
+
         writer.Write(TaskPhases.Length);
         foreach(var t in TaskPhases)
         {
             writer.Write(t.Start);
             writer.Write(t.End);
             writer.Write(t.Moments.Count);
-            foreach(var m in t.Moments)
-            {
-                writer.Write(m.Time);
-                foreach (var p in m.PlayerData)
-                {
-                    writer.Write(p.Position.x);
-                    writer.Write(p.Position.y);
-                    writer.Write((byte)p.States);
-                }
-            }
+            foreach(var m in t.Moments) WriteMoment(m);
+        }
+
+        writer.Write(Events.Length);
+        foreach(var e in Events)
+        {
+            WriteMoment(e.Moment);
+            writer.Write(e.ImageType);
+            writer.Write(e.TranslationKey);
+            writer.Write(e.LeftMask);
+            writer.Write(e.RightMask);
         }
         return writer.ToData();
     }
 
-    public static ArchivedTrackingData Deserialize(Stream stream)
+    public static ArchivedTrackingData? Deserialize(Stream stream)
     {
-        SerializedDataReader reader = new();
+        SerializedDataReader reader = new(stream);
+
+        int version = reader.ReadByte();
+
+        if (version == 1)
+            return DeserializeV1(reader);
+
+        return null;
+    }
+
+    private static TrackedMoment DeserializeMomentV1(SerializedDataReader reader, int players)
+    {
+        float time = reader.ReadSingle();
+        TrackedPlayerMoment[] trackedPlayers = new TrackedPlayerMoment[players];
+        for (int p = 0; p < trackedPlayers.Length; p++)
+            trackedPlayers[p] = new(new(reader.ReadSingle(), reader.ReadSingle()), (PlayerTrackingFlags)reader.ReadByte());
+        return new() { Time = time, PlayerData = trackedPlayers };
+    }
+
+    private static ArchivedTrackingData DeserializeV1(SerializedDataReader reader) { 
         ArchivedPlayer[] players = new ArchivedPlayer[reader.ReadInt32()];
         for (int p = 0; p < players.Length; p++)
         {
-            players[p] = new(reader.ReadString(),p,reader.ReadColor32(), reader.ReadColor32(), reader.ReadColor32(), reader.ReadString(), reader.ReadString(), reader.ReadString());
+            players[p] = new(reader.ReadString(),(byte)p,reader.ReadColor32(), reader.ReadColor32(), reader.ReadColor32(), reader.ReadString(), reader.ReadString(), reader.ReadString());
         }
+
         TrackedTaskPhase[] taskPhases = new TrackedTaskPhase[reader.ReadInt32()];
         for(int t = 0;t< taskPhases.Length; t++)
         {
@@ -217,25 +257,56 @@ internal class ArchivedTrackingData
             float end = reader.ReadSingle();
             TrackedMoment[] moments = new TrackedMoment[reader.ReadInt32()];
             for(int m = 0; m < moments.Length; m++)
-            {
-                float time = reader.ReadSingle();
-                TrackedPlayerMoment[] trackedPlayers = new TrackedPlayerMoment[players.Length];
-                for (int p = 0; p < trackedPlayers.Length; p++)
-                {
-                    trackedPlayers[p] = new(new(reader.ReadSingle(),reader.ReadSingle()), (PlayerTrackingFlags)reader.ReadByte());
-                }
-                moments[m] = new() { Time = time, PlayerData = trackedPlayers };
-            }
+                moments[m] = DeserializeMomentV1(reader, players.Length);
             taskPhases[t] = new() { Start = start, End = end, Moments = new(moments), IsClosed = true };
         }
 
-        return new() { Players = players, TaskPhases = taskPhases };
+        TrackedEvent[] events = new TrackedEvent[reader.ReadInt32()];
+        for (int e = 0; e < events.Length; e++)
+        {
+            events[e] = new(DeserializeMomentV1(reader, players.Length), reader.ReadString(), reader.ReadString(), reader.ReadInt32(), reader.ReadInt32());
+        }
+
+        return new() { Players = players, TaskPhases = taskPhases, Events = events };
     }
 }
+
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
+internal class TrackedEventImage
+{
+    public string TextId { get; private init; }
+    public int Id { get; private set; } = -1;
+    public Virial.Media.Image Image { get; private init; }
+
+    public TrackedEventImage(string id, Virial.Media.Image image)
+    {
+        this.TextId = id;
+        this.Image = image;
+        AllImages.Add(this);
+        ImagesDic[id] = this;
+    }
+
+    static public List<TrackedEventImage> AllImages = new();
+    static public Dictionary<string, TrackedEventImage> ImagesDic = new();
+
+    static void Preproces(NebulaPreprocessor preprocessor)
+    {
+        int num = 0;
+        foreach(var i in AllImages.OrderBy(i => i.TextId))
+        {
+            i.Id = num;
+            num++;
+        }
+        AllImages.Sort((i1, i2) => i2.Id - i1.Id);
+    }
+}
+
 
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.BuildNoSModule)]
 internal class GameTracker : AbstractModule<Virial.Game.Game>, IGameOperator
 {
+    static public GameTracker? Instance { get; private set; } = null;
+
     static GameTracker()
     {
         DIManager.Instance.RegisterModule(() => new GameTracker());
@@ -243,10 +314,12 @@ internal class GameTracker : AbstractModule<Virial.Game.Game>, IGameOperator
 
     public GameTracker()
     {
+        Instance = this;
         this.Register(NebulaGameManager.Instance!);
     }
 
     public List<TrackedTaskPhase> TaskPhases { get; private init; } = new();
+    public List<TrackedEvent> Events { get; private init; } = new();
 
     void AddTaskPhase()
     {
@@ -284,7 +357,21 @@ internal class GameTracker : AbstractModule<Virial.Game.Game>, IGameOperator
     {
         return new ArchivedTrackingData() { Players = NebulaGameManager.Instance!.AllPlayerInfo().Select(p => ArchivedPlayer.FromPlayer(p)).ToArray(), TaskPhases = TaskPhases.ToArray() };
     }
+
+    static private string GetImageTagById(int id) { }
+
+    static private RemoteProcess<(CommunicableTextTag eventDetail, int imageId, int leftMask, int rightMask)> RpcRecordEvent = new(
+            "RecordEvent",
+            (message, calledByMe) =>
+            {
+                Instance?.Events.Add(new(TrackedMoment.CaptureCurrent(), GetImageTagById(message.imageId), message.eventDetail.TranslationKey, message.leftMask, message.rightMask));
+            }
+        );
 }
+
+/// <summary>
+/// 旧版のイベント記録
+/// </summary>
 
 [NebulaRPCHolder]
 public class GameStatistics
@@ -293,16 +380,16 @@ public class GameStatistics
     {
         static Dictionary<int, EventVariation> AllEvents = new();
         static private DividedSpriteLoader iconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GameStatisticsIcon.png", 100f, 8, 1);
-        static public EventVariation Kill = new(0, iconSprite.WrapLoader(0), iconSprite.WrapLoader(0), true, true);
-        static public EventVariation Exile = new(1, iconSprite.WrapLoader(2), iconSprite.WrapLoader(2), false, false);
-        static public EventVariation GameStart = new(2, iconSprite.WrapLoader(1), iconSprite.WrapLoader(1), true, false);
-        static public EventVariation GameEnd = new(3, iconSprite.WrapLoader(1), iconSprite.WrapLoader(1), true, false);
-        static public EventVariation MeetingEnd = new(4, iconSprite.WrapLoader(1), iconSprite.WrapLoader(1), true, false);
-        static public EventVariation Report = new(5, iconSprite.WrapLoader(4), iconSprite.WrapLoader(4), true, false);
-        static public EventVariation EmergencyButton = new(6, iconSprite.WrapLoader(3), iconSprite.WrapLoader(3), true, false);
-        static public EventVariation Disconnect = new(7, iconSprite.WrapLoader(5), iconSprite.WrapLoader(5), false, false);
-        static public EventVariation Revive = new(8, iconSprite.WrapLoader(6), iconSprite.WrapLoader(6), true, false);
-        static public EventVariation CleanBody = new(9, iconSprite.WrapLoader(7), iconSprite.WrapLoader(7), true, false);
+        static public EventVariation Kill = new(0, iconSprite.AsLoader(0), iconSprite.AsLoader(0), true, true);
+        static public EventVariation Exile = new(1, iconSprite.AsLoader(2), iconSprite.AsLoader(2), false, false);
+        static public EventVariation GameStart = new(2, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
+        static public EventVariation GameEnd = new(3, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
+        static public EventVariation MeetingEnd = new(4, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
+        static public EventVariation Report = new(5, iconSprite.AsLoader(4), iconSprite.AsLoader(4), true, false);
+        static public EventVariation EmergencyButton = new(6, iconSprite.AsLoader(3), iconSprite.AsLoader(3), true, false);
+        static public EventVariation Disconnect = new(7, iconSprite.AsLoader(5), iconSprite.AsLoader(5), false, false);
+        static public EventVariation Revive = new(8, iconSprite.AsLoader(6), iconSprite.AsLoader(6), true, false);
+        static public EventVariation CleanBody = new(9, iconSprite.AsLoader(7), iconSprite.AsLoader(7), true, false);
 
         public int Id { get; private init; }
         public ISpriteLoader? EventIcon { get; private init; }

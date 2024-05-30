@@ -64,6 +64,11 @@ public class SerializedDataWriter
 
 public class SerializedDataReader : IDisposable
 {
+    public SerializedDataReader(Stream stream)
+    {
+        myStream = stream;
+    }
+
     Stream myStream;
 
     public string ReadString()
