@@ -1,53 +1,66 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using LibCpp2IL.Wasm;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.MetaWidget;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+using Sentry.Unity.NativeUtils;
 using System.Text;
-using System.Threading.Tasks;
 using TMPro;
-using UnityEngine.Rendering;
 using Virial.Media;
 using Virial.Text;
 
 namespace Nebula.Behaviour;
 
-public class MarketplaceExhibit
+public class DeveloperMarketplaceItem
 {
-    [JsonSerializableField]
-    public int EntryId;
+    static public char[] Alphabets = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
+    static public string GetRandomizedString(int length) => new String(Enumerable.Repeat<Func<char>>(Alphabets.Random, length).Select(f => f.Invoke()).ToArray());
 
-    [JsonSerializableField]
+    public int EntryId = -1;
+
     public string Title;
-
-    [JsonSerializableField]
     public string Blurb;
-
-    [JsonSerializableField]
     public string Detail;
-
-    [JsonSerializableField]
-    public string DeveloperId;
-
-    [JsonSerializableField]
-    public string Developer;
-
-    [JsonSerializableField]
+    public string Author;
     public bool IsAddon;
-
-    [JsonSerializableField]
     public string Url;
+    public string Discord;
+    public string Key = GetRandomizedString(64);
+
+    public async Task<bool> TryOnlineCheck()
+    {
+        LocalMarketplaceItem item = new() { Url = Url };
+        if (IsAddon)
+        {
+            var response = await NebulaPlugin.HttpClient.GetAsync(item.ToAddonUrl);
+            return response.StatusCode == System.Net.HttpStatusCode.OK;
+        }
+        else
+        {
+            var response = await NebulaPlugin.HttpClient.GetAsync(item.ToCostumeUrl + "/Contents.json");
+            return response.StatusCode == System.Net.HttpStatusCode.OK;
+        }
+    }
 }
 
-public class OwningMarketplaceItem
+public class LocalMarketplaceItem
 {
     [JsonSerializableField]
     public int EntryId;
-
     [JsonSerializableField]
-    public string OwningVersion;
+    public string Title;
+    [JsonSerializableField]
+    public string Url;
+    [JsonSerializableField]
+    public bool AutoUpdate = false;
+
+    public string ToCostumeUrl => "https://raw.githubusercontent.com/" + Url;
+    public string ToAddonUrl => "https://api.github.com/repos/" + Url + "/releases/latest";
+}
+
+public class DevMarketplaceItem : LocalMarketplaceItem
+{
+    [JsonSerializableField]
+    public string Key;
 }
 
 public record MarketplaceItem(int EntityId, string Title, string Short, string Url)
@@ -55,11 +68,33 @@ public record MarketplaceItem(int EntityId, string Title, string Short, string U
     public string? Detail { get; set; } = null;
 }
 
+public class MyMarketplaceStructure
+{
+    [JsonSerializableField]
+    public List<LocalMarketplaceItem> OwningCostumes = [];
+    [JsonSerializableField]
+    public List<LocalMarketplaceItem> OwningAddons = [];
+
+    [JsonSerializableField]
+    public List<DevMarketplaceItem> DevCostumes = [];
+    [JsonSerializableField]
+    public List<DevMarketplaceItem> DevAddons = [];
+}
+
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+internal class MarketplaceData
+{
+    static private JsonDataSaver<MyMarketplaceStructure> DataSaver = new JsonDataSaver<MyMarketplaceStructure>("Marketplace");
+    static internal MyMarketplaceStructure Data => DataSaver.Data;
+    static internal void Save() => DataSaver.Save();
+}
+
 public class Marketplace : MonoBehaviour
 {
     static Marketplace() => ClassInjector.RegisterTypeInIl2Cpp<Marketplace>();
 
-    private MetaScreen myScreen = null!;
+    private MetaScreen MarketplaceScreen = null!;
+    private MetaScreen MyItemsScreen = null!;
 
     private List<Func<(IMetaWidgetOld widget, Action? postAction, Func<bool>? confirm)>> screenLayer = new();
     private Func<bool>? currentConfirm = null;
@@ -75,13 +110,79 @@ public class Marketplace : MonoBehaviour
         MainMenuManagerInstance.MainMenu = mainMenu;
 
         var obj = UnityHelper.CreateObject<Marketplace>("MarketplaceMenu", Camera.main.transform, new Vector3(0, 0, -30f));
-        TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, obj.OnShown);
+        TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, () => { obj.SetUp(); obj.ShowMarketplaceScreen(); });
+    }
+
+    void SetUp()
+    {
+        SetUpMarketplaceScreen();
+        SetUpItemsScreen();
+    }
+
+    void ShowMarketplaceScreen()
+    {
+        MarketplaceScreen.gameObject.SetActive(true);
+        MyItemsScreen.gameObject.SetActive(false);
+    }
+
+    void ShowMyItemScreen()
+    {
+        MarketplaceScreen.gameObject.SetActive(false);
+        MyItemsScreen.gameObject.SetActive(true);
     }
 
     static private TextComponent TextCosmetics = new TranslateTextComponent("marketplace.type.cosmetics");
     static private TextComponent TextAddons = new TranslateTextComponent("marketplace.type.addons");
     static private TextComponent TextSearch = new RawTextComponent(">");
-    public void OnShown()
+
+    private MetaScreen OpenDetailWindow(bool isAddon, int entryId)
+    {
+        var window = MetaScreen.GenerateWindow(new(7f, 3.6f), transform, Vector3.zero, true, true);
+        window.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.3f }, new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayTitle), new TranslateTextComponent("marketplace.ui.loading"))), new(0.5f,0.5f), out _);
+
+        void ShowDetail(OnlineMarketplace.GetContentResult? result)
+        {
+            if (result == null) return;
+
+            List<LocalMarketplaceItem> owningItems = (isAddon ? MarketplaceData.Data.OwningAddons : MarketplaceData.Data.OwningCostumes);
+            var localItem = owningItems.FirstOrDefault(item => item.EntryId == entryId);
+            bool owning = localItem != null;
+            Virial.Color color = owning ? Virial.Color.Red : new(1f,1f,0f);
+
+            window.SetWidget(new GUIScrollView(GUIAlignment.Center, new(6.8f, 3.5f), new VerticalWidgetsHolder(GUIAlignment.Center,
+                new HorizontalWidgetsHolder(GUIAlignment.Left, GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplaceTitle), Uri.UnescapeDataString(result.title)), GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.author))),
+                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.blurb)),
+                GUI.API.VerticalMargin(0.1f),
+                new HorizontalWidgetsHolder(GUIAlignment.Left,
+                    GUI.API.Button(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplacePublishButton), GUI.API.TextComponent(color, owning ? "marketplace.ui.marketplace.deactivate" : "marketplace.ui.marketplace.activate"), clickable =>
+                    {
+                        if (owning)
+                            owningItems.RemoveAll(item => item.EntryId == entryId);
+                        else {
+                            LocalMarketplaceItem item = new LocalMarketplaceItem() { EntryId = entryId, Title = Uri.UnescapeDataString(result.title), Url = Uri.UnescapeDataString(result.url) };
+                            owningItems.Add(item);
+                            if (!isAddon) MoreCosmic.LoadOnlineExtra(item.ToCostumeUrl).Start();
+
+                            MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent("marketplace.ui.marketplace.activated" + (isAddon ? ".addons" : ".cosmetics")));
+                        }
+                    
+                        MarketplaceData.Save();
+                        ShowDetail(result);
+                        if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen();
+                    }, color: color),
+                    new NoSGUIMargin(GUIAlignment.Center, new(0.25f,0f)),
+                    (isAddon && owning) ? new HorizontalWidgetsHolder(GUIAlignment.Center, new NoSGUICheckbox(GUIAlignment.Left, localItem!.AutoUpdate) { OnValueChanged = val => { localItem.AutoUpdate = val; MarketplaceData.Save(); } }, GUI.API.HorizontalMargin(0.1f),  GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentBold), "marketplace.ui.marketplace.autoUpdate")) : GUIEmptyWidget.Default
+                ),
+                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.detail).Replace("\r","<br>"))
+                )), out _);
+        }
+
+        StartCoroutine(OnlineMarketplace.CoGetContent(entryId, result => ManagedEffects.Action(()=>ShowDetail(result))).WrapToIl2Cpp());
+
+        return window;
+    }
+
+    void SetUpMarketplaceScreen()
     {
         bool isAddon = true;
         TextMeshPro buttonText = null!;
@@ -115,7 +216,11 @@ public class Marketplace : MonoBehaviour
                         var button = renderer.gameObject.SetUpButton(true, renderer, Color.clear, UnityEngine.Color.Lerp(UnityEngine.Color.cyan, UnityEngine.Color.green, 0.4f).AlphaMultiplied(0.3f));
                         var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
                         collider.size = renderer.size;
-                        //button.OnClick.AddListener();
+                        button.OnClick.AddListener(() =>
+                        {
+                            if (int.TryParse(r.entryId, out var id))
+                                OpenDetailWindow(isAddon, id);
+                        });
                     }
                 }));
                 viewer.InnerArtifact.Do(screen => screen.SetWidget(new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center, lastContents), out _));
@@ -144,6 +249,7 @@ public class Marketplace : MonoBehaviour
                     {
                         if (searching) return;
 
+                        viewer.InnerArtifact.Do(a => a.SetStaticWidget(new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, new(0.5f, 0.5f), out _));
                         var text = textField.Artifact.FirstOrDefault()?.Text ?? "";
                         if (text.Length == 0)
                         {
@@ -160,33 +266,245 @@ public class Marketplace : MonoBehaviour
                             StartCoroutine(OnlineMarketplace.CoSearchContents(isAddon, lastQuery, 0, result => CoSetToViewer(result)).WrapToIl2Cpp());
                         }
                     }
-                },
-                new NoSGUIMargin(GUIAlignment.Center, new(0.25f, 0f)),
-                new GUIButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsButtonMedium), new TranslateTextComponent("marketplace.ui.publish"))
-                {
-                    OnClick = _ =>
-                    {
-                        
-                    }
                 }
             )),
             viewer
             );
 
-        myScreen.SetBorder(new(9f, 5f));
-        myScreen.SetWidget(widget, new(0f, 1f), out _);
+        MarketplaceScreen.SetBorder(new(9f, 5f));
+        MarketplaceScreen.SetWidget(widget, new(0f, 1f), out _);
+    }
+
+    (Func<bool, IEnumerable<LocalMarketplaceItem>> items, Action<LocalMarketplaceItem> action) currentItemsAction;
+
+    void SetActionOnItemsScreen((Func<bool, IEnumerable<LocalMarketplaceItem>> items, Action<LocalMarketplaceItem> action) action)
+    {
+        currentItemsAction = action;
+        if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen();
+    }
+
+    void UpdateItemsScreen()
+    {
+        SetOnItemsScreen(currentItemsAction.items.Invoke(isAddonOnItemsScreen));
+    }
+
+    private bool isAddonOnItemsScreen = true;
+    private GUIScrollView viewerOnItemsScreen;
+    private void SetOnItemsScreen(IEnumerable<LocalMarketplaceItem>? result)
+    {
+        List<GUIWidget> contents = new List<GUIWidget>(result?.Select(r => new NoSGUIFramed(Virial.Media.GUIAlignment.Left,
+                GUI.API.RawText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplaceTitle), Uri.UnescapeDataString(r.Title))
+       , new(0.1f, 0.1f), Color.clear)
+        {
+            PostBuilder = renderer =>
+            {
+                renderer.transform.localPosition = new(0, 0, 0.1f);
+                renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                var button = renderer.gameObject.SetUpButton(true, renderer, Color.clear, UnityEngine.Color.Lerp(UnityEngine.Color.cyan, UnityEngine.Color.green, 0.4f).AlphaMultiplied(0.3f));
+                var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
+                collider.size = renderer.size;
+                button.OnClick.AddListener(() => currentItemsAction.action.Invoke(r));
+            }
+        }) ?? []);
+        viewerOnItemsScreen.InnerArtifact.Do(screen => screen.SetWidget(new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center, contents), out _));
+    }
+
+    void SetUpItemsScreen()
+    {        
+        TextMeshPro buttonText = null!;
+
+        viewerOnItemsScreen = new GUIScrollView(Virial.Media.GUIAlignment.Center, new(7f, 3.9f), null);
+
+        var widget = new VerticalWidgetsHolder(Virial.Media.GUIAlignment.TopLeft,
+            new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OblongHeader), new TranslateTextComponent("marketplace.ui.title")),
+            new GUIFixedView(Virial.Media.GUIAlignment.TopLeft, new(9.5f, 0.65f),
+            new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.TopLeft,
+                new GUIButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsButtonMedium), (isAddonOnItemsScreen ? TextAddons : TextCosmetics))
+                {
+                    PostBuilder = (t) => buttonText = t,
+                    OnClick = _ =>
+                    {
+                        isAddonOnItemsScreen = !isAddonOnItemsScreen;
+                        buttonText.text = (isAddonOnItemsScreen ? TextAddons : TextCosmetics).GetString();
+                        SetOnItemsScreen(currentItemsAction.items.Invoke(isAddonOnItemsScreen));
+                    }
+                }
+            )),
+            viewerOnItemsScreen
+            );
+
+        MyItemsScreen.SetBorder(new(9f, 5f));
+        MyItemsScreen.SetWidget(widget, new(0f, 1f), out _);
     }
 
     public void Awake()
     {
-        myScreen = MainMenuManagerInstance.SetUpScreen(transform, () => Close());
+        (string key, Action action)[] buttons = [
+            ("marketplace", () => ShowMarketplaceScreen()), 
+            ("inventory", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.OwningAddons : MarketplaceData.Data?.OwningCostumes) ?? [], item =>OpenDetailWindow(isAddonOnItemsScreen, item.EntryId))); }), 
+            ("contents", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.DevAddons : MarketplaceData.Data?.DevCostumes) ?? [], item => EditContent(isAddonOnItemsScreen, (item as DevMarketplaceItem)!))); }),
+            ("publish", () => { ShowPublishWindow(); })
+            ];
+        var tabScreen = MetaScreen.GenerateScreen(new(8f, 1f), transform, new(2.2f, 1.9f, -10f), false, false, false);
+        tabScreen.SetWidget(new GUIFixedView(GUIAlignment.Center, new(8f,1f), new HorizontalWidgetsHolder(GUIAlignment.Center, buttons.Select(b => new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new TranslateTextComponent("marketplace.tab." + b.key)) { OnClick = _ => b.action.Invoke() }))),new(0f,0.5f),out _);
+        
+        MarketplaceScreen = MainMenuManagerInstance.SetUpScreen(transform, () => Close());
+        MyItemsScreen = MainMenuManagerInstance.SetUpScreen(transform, () => Close());
+    }
+
+    void EditContent(bool isAddon, DevMarketplaceItem item)
+    {
+        var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, true, true);
+        waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.fetch")), new(0.5f, 0.5f), out _);
+
+        StartCoroutine(OnlineMarketplace.CoGetContent(item.EntryId, result =>
+        {
+            waitWindow.CloseScreen();
+            return ManagedEffects.Action(() =>
+            {
+                if (result == null)
+                    MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent("marketplace.ui.edit.fetch.error"));
+                else
+                    ShowEditWindow(isAddon, edited => {
+                        var waitUpdateWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, true, true);
+                        waitUpdateWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.wait")), new(0.5f, 0.5f), out _);
+
+                        StartCoroutine(OnlineMarketplace.CoEditContent(edited.EntryId, edited.Key, edited.Title, edited.Blurb, edited.Detail, edited.Author, edited.Url, success => {
+                            waitUpdateWindow.CloseScreen();
+                            return ManagedEffects.Action(() => MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent(success ? "marketplace.ui.edit.finish" : "marketplace.ui.edit.failed")));
+                        }).WrapToIl2Cpp());
+                    }, new()
+                    {
+                        Title = Uri.UnescapeDataString(result.title),
+                        Author = Uri.UnescapeDataString(result.author),
+                        Blurb = Uri.UnescapeDataString(result.blurb),
+                        Detail = Uri.UnescapeDataString(result.detail),
+                        Url = Uri.UnescapeDataString(result.url),
+                        Key = item.Key,
+                        EntryId = item.EntryId,
+                        IsAddon = isAddon,
+                    });
+            });
+        }).WrapToIl2Cpp());
+    }
+
+    void ShowEditWindow(bool isAddon, Action<DeveloperMarketplaceItem> callback, DeveloperMarketplaceItem? item = null)
+    {
+        var window = MetaScreen.GenerateWindow(new(8f, 4.8f), transform, Vector3.zero, true, true, true, true);
+
+        (GUIWidget widget, GUITextField textField) TextField(bool isMultiple, float width, string translateKey, string? defaultText = null)
+        {
+            var textField = new GUITextField(GUIAlignment.Left, new(width, isMultiple ? 2.2f : 0.22f)) { HintText = Language.Translate("marketplace.ui.publish." + translateKey + ".hint").Color(Color.gray), TextPredicate = c => c != '"', IsSharpField = false, MaxLines = isMultiple ? 10 : 1, FontSize = isMultiple ? 1.5f : 1.8f, DefaultText = defaultText ?? "" };
+            return (new HorizontalWidgetsHolder(GUIAlignment.Left, GUI.API.LocalizedText(isMultiple ? GUIAlignment.TopLeft : GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OptionsTitleShortest), "marketplace.ui.publish." + translateKey), textField), textField);
+        }
+
+        bool withDiscord = item == null;
+
+        (var nameWidget, var nameField) = TextField(false, 5f, "name", item?.Title);
+        (var authorWidget, var authorField) = TextField(false, 2f, "author", item?.Author);
+        (var discordWidget, var discordField) = TextField(false, 2f, "discord");
+        (var repositoryWidget, var repositoryField) = TextField(false, 5f, "repository" + (isAddon ? ".addons" : ".cosmetics"), item?.Url);
+        (var blurbWidget, var blurbField) = TextField(false, 5f, "blurb", item?.Blurb);
+        (var detailWidget, var detailField) = TextField(true, 6.5f, "detail", item?.Detail);
+        GUITextField[] fields = withDiscord ? [nameField, authorField, discordField, repositoryField, blurbField, detailField] : [nameField, authorField, repositoryField, blurbField, detailField];
+
+        bool isChecking = false;
+
+        IEnumerator CoCheckAndInvokeCallback()
+        {
+            
+
+            bool flag = false;
+            foreach (var field in fields)
+            {
+                field.Artifact.Do(a =>
+                {
+                    if (a.Text.Length == 0) {
+                        flag = true;
+                        a.SetHint(Language.Translate("marketplace.ui.publish.blankField").Color(new UnityEngine.Color(0.6f, 0f, 0f)));
+                    }
+                });
+            }
+            if (flag) yield break;
+            
+
+            isChecking = true;
+
+            var task = item.TryOnlineCheck();
+            yield return task.WaitAsCoroutine();
+            if (task.Result)
+            {
+                callback.Invoke(item);
+                window.CloseScreen();
+            }
+            else
+            {
+                repositoryField.Artifact.Do(t => { t.SetText(""); t.SetHint(Language.Translate("marketplace.ui.publish.invalidRepos" + (isAddon ? ".addons" : ".cosmetics")).Color(new UnityEngine.Color(0.6f, 0f, 0f))); });
+            }
+            isChecking = false;
+        }
+
+        window.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, nameWidget, withDiscord ?new HorizontalWidgetsHolder(GUIAlignment.Left, authorWidget, discordWidget) : authorWidget, repositoryWidget, blurbWidget, detailWidget, new NoSGUIMargin(GUIAlignment.Center, new(0f, 0.15f)), GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.MarketplacePublishButton), "marketplace.ui.publish.publish", _ =>
+        {
+            if (!isChecking)
+            {
+                item ??= new();
+                item.Title = nameField.Artifact.First().Text;
+                item.Author = authorField.Artifact.First().Text;
+                if (withDiscord) item.Discord = discordField.Artifact.First().Text;
+                item.Url = repositoryField.Artifact.First().Text;
+                item.Blurb = blurbField.Artifact.First().Text;
+                item.Detail = detailField.Artifact.First().Text;
+                item.IsAddon = isAddon;
+
+                StartCoroutine(CoCheckAndInvokeCallback().WrapToIl2Cpp());
+            }
+        })), out var windowSize);
+    }
+
+    void ShowPublishWindow()
+    {
+
+        var typeWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, true, true);
+        GUIWidget TypeButton(bool isAddon) => GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), "marketplace.type." + (isAddon ? "addons" : "cosmetics"),
+            clickable =>
+            {
+                typeWindow.CloseScreen();
+                ShowEditWindow(isAddon, item =>
+                {
+                    var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, true, true);
+                    waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.publish.wait")), new(0.5f, 0.5f), out _);
+
+                    IEnumerator CoFinishPublish(bool success)
+                    {
+                        waitWindow.CloseScreen();
+
+                        MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent(success ? "marketplace.ui.publish.finish" : "marketplace.ui.publish.failed"));
+                        yield break;
+                    }
+                    StartCoroutine(OnlineMarketplace.CoPushContent(item.IsAddon, item.Title, item.Blurb, item.Detail, item.Author, item.Url, item.Key, item.Discord, id =>
+                    {
+                        if (id.HasValue)
+                        {
+                            if (isAddon)
+                                MarketplaceData.Data.DevAddons.Add(new() { EntryId = id.Value, Title = item.Title, Key = item.Key, Url = item.Url });
+                            else
+                                MarketplaceData.Data.DevCostumes.Add(new() { EntryId = id.Value, Title = item.Title, Key = item.Key, Url = item.Url });
+                            MarketplaceData.Save();
+                        }
+                        return CoFinishPublish(id.HasValue);
+                    }).WrapToIl2Cpp());
+                });
+            });
+
+        typeWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent),"marketplace.ui.publish.selectTypes"), new NoSGUIMargin(GUIAlignment.Center, new(0f,0.2f)), new HorizontalWidgetsHolder(GUIAlignment.Center, TypeButton(true), TypeButton(false))), new(0.5f, 0.5f), out _);
     }
 
 }
 
 internal static class OnlineMarketplace
 {
-    private const string APIURL = "https://script.google.com/macros/s/AKfycbxlRptoER8nf8CUAR-LX-shMCqFIghhZdpyVYBjcvH38E-z9wyNawBMpyJLis-4-nU1/exec";
+    private const string APIURL = "https://script.google.com/macros/s/AKfycbwjneZc7ThM3Y3Hq5EprYDgeUX0Ey2HwSGaxkiuVzZN7Ctw14UA5xZtCMTjWHNuaToMTQ/exec";
 
     private class OnlineResponse<T>
     {
@@ -221,9 +539,6 @@ internal static class OnlineMarketplace
 
         [JsonSerializableField]
         public string author;
-
-        [JsonSerializableField]
-        public string url;
     }
     private class SearchResult
     {
@@ -234,11 +549,45 @@ internal static class OnlineMarketplace
         public List<SearchContentResult> result;
 
     }
+    public class GetContentResult
+    {
+        [JsonSerializableField]
+        public bool isValid;
+
+        [JsonSerializableField]
+        public string title;
+
+        [JsonSerializableField]
+        public string blurb;
+
+        [JsonSerializableField]
+        public string detail;
+
+        [JsonSerializableField]
+        public string author;
+
+        [JsonSerializableField]
+        public string url;
+    }
+    private class GetResult
+    {
+        [JsonSerializableField]
+        public bool success;
+
+        [JsonSerializableField]
+        public GetContentResult result;
+
+    }
     private class PublishResult
     {
         [JsonSerializableField]
         public int id;
+    }
 
+    private class EditResult
+    {
+        [JsonSerializableField]
+        public bool success;
     }
 
     static public IEnumerator CoSearchContents(bool isAddon, string query, int page, Func<SearchContentResult[]?,IEnumerator> callback)
@@ -249,5 +598,15 @@ internal static class OnlineMarketplace
     static public IEnumerator CoPushContent(bool isAddon, string title, string blurb, string detail, string author, string url, string key, string discordId, Func<int?, IEnumerator> callback)
     {
         yield return CoGetResponse<PublishResult>("publish", r => callback.Invoke(r.id), ("type", isAddon ? "addon" : "cosmetics"), ("title", title), ("short", blurb), ("detail", detail), ("author", author), ("url", url), ("key", key), ("discordId", discordId));
+    }
+
+    static public IEnumerator CoGetContent(int id, Func<GetContentResult?, IEnumerator> callback)
+    {
+        yield return CoGetResponse<GetResult>("get", r => callback.Invoke(r.success ? r.result : null), ("id", id.ToString()));
+    }
+
+    static public IEnumerator CoEditContent(int entryId, string key, string title, string blurb, string detail, string author, string url, Func<bool, IEnumerator> callback)
+    {
+        yield return CoGetResponse<EditResult>("edit", r => callback.Invoke(r.success), ("entryId", entryId.ToString()), ("title", title), ("short", blurb), ("detail", detail), ("author", author), ("url", url), ("key", key));
     }
 }

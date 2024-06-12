@@ -6,6 +6,8 @@ using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
 using OpusDotNet;
 using System.Runtime.CompilerServices;
+using TMPro;
+using Virial;
 using Virial.Assignable;
 using Virial.Game;
 using Virial.Media;
@@ -84,6 +86,7 @@ public class VoiceChatManager : IDisposable
     public static DataEntry<string> VCPlayerEntry = new StringDataEntry("@PlayerDevice", VCSaver, "");
     public static DataEntry<string> VCMicEntry = new StringDataEntry("@MicDevice", VCSaver, "");
     public static DataEntry<float> MasterVolumeEntry = new FloatDataEntry("@PlayerVolume", VCSaver, 1f);
+    public static DataEntry<float> MicVolumeEntry = new FloatDataEntry("@MicVolume", VCSaver, 1f);
     public static DataEntry<float> MicGateEntry = new FloatDataEntry("@MicGate", VCSaver, 0.1f);
 
     MixingSampleProvider routeNormal, routeGhost, routeRadio, routeMixer;
@@ -113,6 +116,11 @@ public class VoiceChatManager : IDisposable
     private Coroutine? myCoroutine = null;
 
     public float LocalLevel = 0f;
+
+    //DemoScreenが有効で、試聴中は自分の声が聞こえる
+    public MetaScreen? DemoScreen;
+    public bool DemoMode = false;
+    public bool CanListenSelf { get; private set; } = false;
 
     public VCClient? GetClient(byte playerId) => allClients.TryGetValue(playerId, out var client) ? client : null;
     public void AddRadio(VoiceChatRadio radio)=>allRadios.Add(radio);
@@ -266,6 +274,9 @@ public class VoiceChatManager : IDisposable
 
     public void Update()
     {
+        //値を毎回更新しておく
+        CanListenSelf = DemoScreen && DemoMode;
+
         if (!GeneralConfigurations.UseVoiceChatOption)
         {
             NebulaGameManager.Instance!.VoiceChatManager = null;
@@ -302,13 +313,13 @@ public class VoiceChatManager : IDisposable
 
         if (!usingMic) return;
 
-        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDown)
+        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDownForAction)
         {
             IsMuting = !IsMuting;
             InfoShower.SetMute(IsMuting);
         }
 
-        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.VCFilter).KeyDown)
+        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.VCFilter).KeyDownForAction)
         {
             FilteringMode++;
             if (FilteringMode >= VCFilteringMode.OutOfRange) FilteringMode = VCFilteringMode.All;
@@ -402,8 +413,8 @@ public class VoiceChatManager : IDisposable
         myWaveIn.BufferMilliseconds = 100;
         myWaveIn.DeviceNumber = deviceNumber;
         myWaveIn.WaveFormat = new WaveFormat(22050, 16, 1);
-
-        byte[] left = new byte[2880];
+        
+        byte[] left = new byte[960];
         int leftLength = 0;
         byte[] opusBuffer = new byte[2048];
 
@@ -422,18 +433,24 @@ public class VoiceChatManager : IDisposable
                 leftLength += consumed;
                 read += consumed;
 
-                if (leftLength == 2880)
+                if (leftLength == 960)
                 {
                     //音量チェック
                     WaveBuffer waveBuffer = new WaveBuffer(left);
-                    waveBuffer.ByteBufferCount = 2880;
+                    waveBuffer.ByteBufferCount = 960;
 
                     int shortLen = waveBuffer.ShortBufferCount;
                     var shortBuffer = waveBuffer.ShortBuffer;
 
                     bool findPeek = false;
+                    float coeff = VoiceChatManager.MicVolumeEntry.Value;
                     for (int i = 0; i < shortLen; i++)
                     {
+                        if (shortBuffer[i] > 0)
+                            shortBuffer[i] = (short)Math.Min(shortBuffer[i] * coeff, (float)short.MaxValue);
+                        else
+                            shortBuffer[i] = (short)-Math.Min(-shortBuffer[i] * coeff, (float)short.MaxValue);
+
                         if (shortBuffer[i] > gate)
                         {
                             findPeek = true;
@@ -449,7 +466,7 @@ public class VoiceChatManager : IDisposable
 
                     if (findPeek)
                     {
-                        var length = myEncoder.Encode(left, 2880, opusBuffer, 2048);
+                        var length = myEncoder.Encode(left, 960, opusBuffer, 2048);
                         var array = opusBuffer.Take(length).ToArray();
                         lock (this)
                         {
@@ -518,10 +535,9 @@ public class VoiceChatManager : IDisposable
         }
         );
 
-
     public void OpenSettingScreen(OptionsMenuBehaviour menu)
     {
-        var screen = MetaScreen.GenerateWindow(new Vector2(7f,4.5f), HudManager.Instance.transform, Vector3.zero, true, false, true, true);
+        var screen = MetaScreen.GenerateWindow(new Vector2(8f,4.5f), HudManager.Instance.transform, Vector3.zero, true, false, true, true);
 
         MetaWidgetOld widget = new();
 
@@ -573,6 +589,9 @@ public class VoiceChatManager : IDisposable
             new NoSGameObjectGUIWrapper(GUIAlignment.Center, () => (InstantiateSlideBar(null, PlayerVolume * 0.5f, v => PlayerVolume = v * 2f), new(1.2f, 0.8f)))
             );
 
+        TextMeshPro micTestText = null!;
+        DemoMode = false;
+        DemoScreen = screen;
         var micSetting = new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Left,
             GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed), "voiceChat.settings.inputDevice"),
             GUI.API.HorizontalMargin(0.5f),
@@ -593,24 +612,38 @@ public class VoiceChatManager : IDisposable
                     })));
                 micsScreen.SetWidget(new GUIScrollView(Virial.Media.GUIAlignment.Center, new(3f, 4.2f), inner), out var _);
             }),
+            GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed), "voiceChat.settings.inputVolume"),
+            new NoSGameObjectGUIWrapper(GUIAlignment.Center, () => (InstantiateSlideBar(null, MicVolumeEntry.Value * 0.5f, v => MicVolumeEntry.Value = v * 2f), new(1.2f, 0.8f))),
+            new GUIButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed), new TranslateTextComponent("voiceChat.settings.micTest")) { 
+                PostBuilder = t => micTestText = t,
+                OnClick = clickable =>
+                {
+                    DemoMode = !DemoMode;
+                    micTestText.text = Language.Translate(DemoMode ? "voiceChat.settings.micTest.end" : "voiceChat.settings.micTest");
+                }
+            }
+            );
+
+        var micSettingMore = new HorizontalWidgetsHolder(GUIAlignment.Left,
             GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed), "voiceChat.settings.noiseGate"),
             new NoSGameObjectGUIWrapper(GUIAlignment.Center, () => (InstantiateSlideBar(null, MicGateEntry.Value, v => MicGateEntry.Value = v), new(1.2f, 0.8f)))
             );
 
-        widget.Append(new WrappedWidget(new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center, phoneSetting, micSetting)));
+        widget.Append(new WrappedWidget(new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center, phoneSetting, micSetting, micSettingMore)));
 
-        widget.Append(allClients.Values.Where(v=>!v.MyPlayer.AmOwner), (client) => {
-
-        return new MetaWidgetOld.Text(TextAttributeOld.BoldAttr)
+        var nameAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new(1.4f, 0.3f) };
+        widget.Append(allClients.Values.Where(v => !v.MyPlayer.AmOwner), (client) =>
         {
-            RawText = client.MyPlayer.name,
-            PostBuilder = (text) =>
+
+            return new MetaWidgetOld.Text(nameAttr)
             {
-                InstantiateSlideBar(text.transform.parent, client.Volume * 0.125f, v => client.SetVolume(v * 8f));
-            }
-        };
-        }, 4, -1, 0, 0.65f);
-        
+                RawText = client.MyPlayer.name,
+                PostBuilder = (text) =>
+                {
+                    InstantiateSlideBar(text.transform.parent, client.Volume * 0.125f, v => client.SetVolume(v * 8f));
+                }
+            };
+        }, 5, -1, 0, 0.65f);
 
         screen.SetWidget(widget);
     }
@@ -684,9 +717,9 @@ public class VolumeMeter : ISampleProvider
     private readonly ISampleProvider source;
 
     public WaveFormat WaveFormat => source.WaveFormat;
-    private bool OnlySampleVolume;
+    private Func<bool> OnlySampleVolume;
     public float Level { get; private set; }
-    public VolumeMeter(ISampleProvider source,bool onlySampleVolume)
+    public VolumeMeter(ISampleProvider source,Func<bool> onlySampleVolume)
     {
         this.source = source;
         OnlySampleVolume = onlySampleVolume;
@@ -697,10 +730,11 @@ public class VolumeMeter : ISampleProvider
         int result = source.Read(buffer, offset, sampleCount);
 
         Level = 0f;
+        bool onlySampleVolume = OnlySampleVolume.Invoke();
         for (int i = 0; i < sampleCount; i++)
         {
             if(buffer[offset + i] > Level) Level = buffer[offset + i];
-            if (OnlySampleVolume) buffer[offset + i] = 0f;
+            if (onlySampleVolume) buffer[offset + i] = 0f;
         }
         return result;
     }

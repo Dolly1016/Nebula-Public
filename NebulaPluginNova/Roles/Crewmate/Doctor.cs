@@ -101,7 +101,7 @@ public class Doctor : DefinedRoleTemplate, DefinedRole
 
                     vitalsMinigame.StartCoroutine(CoUpdate().WrapToIl2Cpp());
                 };
-                vitalButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Utility);
+                vitalButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Utility);
                 vitalButton.SetLabel("vital");
             }
         }

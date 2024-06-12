@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Game.Statistics;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
@@ -30,7 +31,7 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
 
         private ModAbilityButton? killButton = null;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SheriffKillButton.png", 100f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SheriffKillButton.png", 100f);
         
         private int leftShots = NumOfShotsOption;
         public Instance(GamePlayer player, int[] arguments) : base(player)

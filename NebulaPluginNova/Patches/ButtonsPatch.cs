@@ -1,4 +1,6 @@
-﻿namespace Nebula.Patches;
+﻿using Nebula.Game.Statistics;
+
+namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(SabotageButton), nameof(SabotageButton.Refresh))]
 public static class SabotageButtonPatch

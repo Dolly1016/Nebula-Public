@@ -17,6 +17,7 @@ public interface IPlayerAttribute
 {
     internal int Id { get; }
     internal string Name { get; }
+    internal string UIName { get; }
     
     /// <summary>
     /// 分類上の属性を取得します。

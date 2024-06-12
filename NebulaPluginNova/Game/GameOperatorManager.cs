@@ -112,7 +112,13 @@ public class GameOperatorManager
             {
                 if (o.lifespan.IsDeadObject)
                     return true;
-                o.action.Invoke(e);
+                try
+                {
+                    o.action.Invoke(e);
+                }catch (Exception ex)
+                {
+                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, ex.ToString());
+                }
                 return false;
             });
         }

@@ -23,7 +23,7 @@ public class NebulaSettingMenu : MonoBehaviour
     Virial.Compat.Artifact<GUIScreen> FirstInnerScreen = null!, SecondInnerScreen = null!;
     TMPro.TextMeshPro SecondTitle = null!;
     ConfigurationTab CurrentTab = null!;
-
+    SpriteRenderer RightImage = null!;
     static public NebulaSettingMenu Instance { get; private set; } = null!;
 
     public void Start()
@@ -35,6 +35,8 @@ public class NebulaSettingMenu : MonoBehaviour
         FirstPage = UnityHelper.CreateObject("FirstPage",transform,Vector3.zero);
         LeftHolder = UnityHelper.CreateObject<MetaScreen>("LeftHolder", FirstPage.transform, new Vector3(-4.1f, 0.3f));
         RightHolder = UnityHelper.CreateObject<MetaScreen>("RightHolder", FirstPage.transform, new Vector3(2.5f, 0f));
+        var rightPos = UnityHelper.CreateObject("RightImage", transform, new Vector3(3.9f, -1.6f, 1f));
+        RightImage = UnityHelper.CreateObject<SpriteRenderer>("Image", rightPos.transform, Vector3.zero);
 
         var MainHolderParent = UnityHelper.CreateObject("Main", FirstPage.transform, new Vector3(-1.05f, -0.4f));
         MainHolderParent.AddComponent<SortingGroup>();
@@ -77,6 +79,26 @@ public class NebulaSettingMenu : MonoBehaviour
         OpenFirstPage();
     }
 
+    private IEnumerator CoShowRightImage()
+    {
+        Color col = new(0.2f, 0.2f, 0.2f, 0f);
+        float p = 0f;
+        float pp = 0f; 
+        while (p < 1f)
+        {
+            pp = (1f - p) * (1f - p);
+            col.a = 1f - pp; 
+            RightImage.color = col;
+            RightImage.transform.localPosition = new(pp * 0.24f, 0f, 0f);
+            p += Time.deltaTime * 4.8f;
+            yield return null;
+        }
+
+        col.a = 1f;
+        RightImage.transform.localPosition = Vector3.zero;
+        RightImage.color = col;
+    }
+
     private void UpdateLeftTab()
     {
         MetaWidgetOld widget = new();
@@ -113,10 +135,23 @@ public class NebulaSettingMenu : MonoBehaviour
 
     private static TextAttributeOld RightTextAttr = new(TextAttributeOld.NormalAttr) { FontSize = 1.5f, FontMaxSize = 1.5f, FontMinSize = 0.7f, Size = new(3f, 5f), Alignment = TMPro.TextAlignmentOptions.TopLeft };
 
+    private void UpdateRightImage(Image? image)
+    {
+        var last = RightImage.sprite;
+        RightImage.sprite = image?.GetSprite() ?? null;
+        if (RightImage.sprite != null && last != RightImage.sprite)
+        {
+            RightImage.color = Color.clear;
+            StartCoroutine(CoShowRightImage().WrapToIl2Cpp());
+        }
+    }
+
     private void UpdateMainTab(bool stay = false)
     {
         if (!stay) MetaWidgetOld.ScrollView.RemoveDistHistory("RoleSettingFirst");
+        
         RightHolder.SetWidget(null);
+        UpdateRightImage(null);
 
         MetaWidgetOld widget = new();
 
@@ -154,10 +189,16 @@ public class NebulaSettingMenu : MonoBehaviour
             ConfigurationHolderState.Emphasized => Color.yellow,
             _ => UnityEngine.Color.white
         };
+
+        IConfigurationHolder? lastRight = null;
         void ShowOptionsOnRightViewer(IConfigurationHolder h)
         {
+            if (lastRight == h) return;
+
             var str = "<size=150%>" + h.Title.GetString().Bold() + "</size>\n" + h.Configurations.Where(c => c.IsShown).Select(a => a?.GetDisplayText()).Where(str => str != null).Join(null, "\n");
             RightHolder.SetWidget(new(2.2f, 3.8f), new MetaWidgetOld.Text(RightTextAttr) { RawText = str });
+
+            UpdateRightImage(h.Illustration);
         }
 
         if (ClientOption.UseSimpleConfigurationViewerEntry.Value)
@@ -253,6 +294,8 @@ public class NebulaSettingMenu : MonoBehaviour
         }
 
         if(CurrentHolder == null) return;
+
+        UpdateRightImage(CurrentHolder.Illustration);
 
         SecondInnerScreen.Do(screen => screen.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, CurrentHolder.Configurations.Where(c => c.IsShown).Select(c => c.GetEditor().Invoke())), out _));
         //SecondScroller.SetYBoundsMax(SecondScreen.SetWidget(new Vector2(7.8f, 4.1f), CurrentHolder.GetWidget()) - 4.1f);

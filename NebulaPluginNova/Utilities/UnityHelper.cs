@@ -43,7 +43,6 @@ public static class UnityHelper
         camera.orthographic = true;
         camera.orthographicSize = halfYSize;
         camera.cullingMask = layerMask;
-
         return camera;
     }
 

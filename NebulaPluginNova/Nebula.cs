@@ -36,14 +36,14 @@ public class NebulaPlugin : BasePlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.2.3.1";
+    public const string PluginVersion = "2.4.1.1";
 
-    //public const string VisualVersion = "v2.3";
-    public const string VisualVersion = "Snapshot 24.05.28a";
+    public const string VisualVersion = "v2.4.1.1";
+    //public const string VisualVersion = "Snapshot 24.06.11b";
     //public const string VisualVersion = "RPC Debug 2";
 
     public const int PluginEpoch = 103;
-    public const int PluginBuildNum = 1124;
+    public const int PluginBuildNum = 1135;
     public const bool GuardVanillaLangData = true;
 
     static public HttpClient HttpClient
@@ -60,6 +60,7 @@ public class NebulaPlugin : BasePlugin
     }
     static private HttpClient? httpClient = null;
 
+    
     public static new NebulaLog Log { get; private set; } = new();
 
 
@@ -80,8 +81,14 @@ public class NebulaPlugin : BasePlugin
 
     override public void Load()
     {
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Core.dll")!.ReadBytes());
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Wasapi.dll")!.ReadBytes());
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.WinMM.dll")!.ReadBytes());
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.OpusDotNet.dll")!.ReadBytes());
+        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes());
+        
         MyPlugin = this;
-
+        
         Harmony.PatchAll();
 
         SetWindowText(FindWindow(null!, Application.productName),"Among Us w/ " + GetNebulaVersionString());
@@ -92,6 +99,11 @@ public class NebulaPlugin : BasePlugin
         });
 
         SetUpNebulaImpl();
+
+        Debug.Log("Listeners:");
+        foreach (var listener in BepInEx.Logging.Logger.Listeners) Debug.Log(listener.GetType().Name);
+        Debug.Log("Sources:");
+        foreach (var source in BepInEx.Logging.Logger.Sources) Debug.Log(source.SourceName);
     }
 
     private void SetUpNebulaImpl()
@@ -114,6 +126,7 @@ public static class AmongUsClientAwakePatch
         Language.OnChangeLanguage((uint)AmongUs.Data.DataManager.Settings.Language.CurrentLanguage);
 
         __instance.StartCoroutine(VanillaAsset.CoLoadAssetOnTitle().WrapToIl2Cpp());
+
 
     }
 }

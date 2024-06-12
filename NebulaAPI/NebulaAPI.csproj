@@ -42,6 +42,7 @@
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
 	<Message Text="Second occurrence" />
 	<Copy SourceFiles="bin\Release\net6.0\NebulaAPI.dll" DestinationFolder="$(AmongUsRelease)\" />
+	<Copy SourceFiles="bin\Release\net6.0\NebulaAPI.dll" DestinationFolder="..\NebulaPluginNova\Resources\API\" />
   </Target>
 	
 	

@@ -53,10 +53,10 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
         }
 
 
-        private ModAbilityButton? douseButton = null;
-        private ModAbilityButton? igniteButton = null;
-        static private ISpriteLoader douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DouseButton.png", 115f);
-        static private ISpriteLoader IgniteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.IgniteButton.png", 115f);
+        private Modules.ScriptComponents.ModAbilityButton? douseButton = null;
+        private Modules.ScriptComponents.ModAbilityButton? igniteButton = null;
+        static private Image douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DouseButton.png", 115f);
+        static private Image IgniteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.IgniteButton.png", 115f);
         private List<(byte playerId,PoolablePlayer icon)> playerIcons = new();
         private bool canIgnite;
 
@@ -116,7 +116,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 var douseTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)));
 
-                douseButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                douseButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 douseButton.SetSprite(douseButtonSprite.GetSprite());
                 douseButton.Availability = (button) => MyPlayer.CanMove && douseTracker.CurrentTarget != null;
                 douseButton.Visibility = (button) => !MyPlayer.IsDead && !canIgnite;
@@ -142,7 +142,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                 douseButton.SetLabel("douse");
 
                 bool won = false;
-                igniteButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                igniteButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 igniteButton.SetSprite(IgniteButtonSprite.GetSprite());
                 igniteButton.Availability = (button) => MyPlayer.CanMove;
                 igniteButton.Visibility = (button) => !MyPlayer.IsDead && canIgnite && !won;

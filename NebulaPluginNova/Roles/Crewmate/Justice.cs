@@ -13,15 +13,16 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
     private Justice():base("justice", new(255, 128, 0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PutJusticeOnTheBalanceOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Justice.png");
     }
 
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private BoolConfiguration PutJusticeOnTheBalanceOption = new BoolConfigurationImpl("role.justice.putJusticeOnTheBalance", false);
+    static private BoolConfiguration PutJusticeOnTheBalanceOption = new BoolConfigurationImpl("options.role.justice.putJusticeOnTheBalance", false);
 
-    static public Justice MyRole = null;//new Justice();
+    static public Justice MyRole = null!;//new Justice();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -51,6 +52,8 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
                 buttonManager?.RegisterMeetingAction(new(meetingSprite,
                    p =>
                    {
+                       if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
+
                        if (PutJusticeOnTheBalanceOption)
                        {
                            StartJusticeMeeting(p.MyPlayer,MyPlayer);

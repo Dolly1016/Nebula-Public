@@ -234,3 +234,30 @@ public class DataSaver
         }
     }
 }
+
+public class JsonDataSaver<T> where T : class, new()
+{
+    public T? Data { get; private set; } = new();
+    string filename { get; set; }
+
+    public JsonDataSaver(string filename)
+    {
+        this.filename = filename;
+        Load();
+    }
+
+    public void Save()
+    {
+        string json = JsonStructure.Serialize(Data);
+        FileIO.WriteAllText(DataSaver.ToDataSaverPath(filename), json);
+    }
+
+    public void Load()
+    {
+        string dataPathTo = DataSaver.ToDataSaverPath(filename);
+
+        if (!FileIO.Exists(dataPathTo)) return;
+
+        Data = JsonStructure.Deserialize<T>(FileIO.ReadAllText(dataPathTo));
+    }
+}

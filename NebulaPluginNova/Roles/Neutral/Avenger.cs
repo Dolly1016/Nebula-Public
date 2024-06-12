@@ -1,4 +1,5 @@
 ﻿using Nebula.Compat;
+using Nebula.Game.Statistics;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Modifier;
 using Virial;
@@ -66,7 +67,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
 
                 var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
-                var killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
+                var killButton = Bind(new Modules.ScriptComponents.ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) => {
@@ -74,7 +75,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
                     killButton.StartCoolDown();
                 };
                 killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
+                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 
                 if (target != null) Bind(new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor())).Register();

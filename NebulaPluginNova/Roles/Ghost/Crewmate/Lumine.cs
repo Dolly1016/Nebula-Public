@@ -25,7 +25,7 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
 
         public Instance(GamePlayer player) : base(player) {}
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LumineButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LumineButton.png", 115f);
 
         void RuntimeAssignable.OnActivated()
         {

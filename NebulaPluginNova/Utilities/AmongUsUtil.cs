@@ -1,11 +1,61 @@
 ﻿using AmongUs.GameOptions;
+using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 
 namespace Nebula.Utilities;
+
+file static class IgnoreShadowHelpers
+{
+    static public void SetIgnoreShadow(bool ignore = true, bool showNameText = true)
+    {
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) p.Unbox().UpdateVisibility(false, ignore, showNameText);
+    }
+
+    static public void ResetIgnoreShadow()
+    {
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) p.Unbox().UpdateVisibility(false, !NebulaGameManager.Instance.WideCamera.DrawShadow);
+    }
+}
+file class IgnoreShadowScope : IDisposable
+{
+    public IgnoreShadowScope(bool showNameText = true)
+    {
+        IgnoreShadowHelpers.SetIgnoreShadow(showNameText: showNameText);
+    }
+
+    void IDisposable.Dispose()
+    {
+        IgnoreShadowHelpers.ResetIgnoreShadow();
+    }
+}
+
+public class IgnoreShadowCamera : MonoBehaviour
+{
+    static IgnoreShadowCamera() => ClassInjector.RegisterTypeInIl2Cpp<IgnoreShadowCamera>();
+    public bool ShowNameText = true;
+    void OnPreRender() => IgnoreShadowHelpers.SetIgnoreShadow(true, ShowNameText);
+}
+
+public class CustomIgnoreShadowCamera : MonoBehaviour
+{
+    static CustomIgnoreShadowCamera() => ClassInjector.RegisterTypeInIl2Cpp<CustomIgnoreShadowCamera>();
+    public Func<bool>? IgnoreShadow { get; set; } = null;
+    void OnPreRender() => IgnoreShadowHelpers.SetIgnoreShadow(IgnoreShadow?.Invoke() ?? false);
+}
+
+public class ResetIgnoreShadowCamera : MonoBehaviour
+{
+    static ResetIgnoreShadowCamera() => ClassInjector.RegisterTypeInIl2Cpp<ResetIgnoreShadowCamera>();
+    void OnPostRender() => IgnoreShadowHelpers.ResetIgnoreShadow();
+}
+
 
 [NebulaRPCHolder]
 public static class AmongUsUtil
 {
+    public static IDisposable IgnoreShadow(bool showNameText = true) => new IgnoreShadowScope(showNameText);
+
     public static MonoBehaviour CurrentCamTarget => HudManager.Instance.PlayerCam.Target;
     public static void SetCamTarget(MonoBehaviour? target = null)
     {
@@ -203,6 +253,10 @@ public static class AmongUsUtil
         playerControl.isDummy = true;
         playerControl.SetName(AccountManager.Instance.GetRandomName());
         playerControl.SetColor(i);
+        playerControl.SetHat(CosmeticsLayer.EMPTY_HAT_ID, i);
+        playerControl.SetVisor(CosmeticsLayer.EMPTY_VISOR_ID, i);
+        playerControl.SetSkin(CosmeticsLayer.EMPTY_SKIN_ID, i);
+        playerControl.SetPet(CosmeticsLayer.EMPTY_PET_ID, i);
         playerControl.GetComponent<UncertifiedPlayer>().Certify();
 
         AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);

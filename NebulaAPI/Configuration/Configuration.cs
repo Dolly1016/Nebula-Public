@@ -116,6 +116,7 @@ public interface IConfigurationHolder
     /// 設定の表示の仕方を返します。
     /// </summary>
     ConfigurationHolderState DisplayOption { get; }
+    Image? Illustration { get; set; }
 
     internal IEnumerable<ConfigurationUpperButton> RelatedInformations { get; }
 

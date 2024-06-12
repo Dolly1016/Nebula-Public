@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -157,7 +158,7 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
     static public Guesser MyNiceRole = new(false);
     static public Guesser MyEvilRole = new(true);
 
-    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => assignable != GuesserModifier.MyRole;
+    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable != GuesserModifier.MyRole;
     
     public Guesser(bool isEvil) : base(
         isEvil ? "evilGuesser" : "niceGuesser", 

@@ -44,7 +44,6 @@ class VitalsMinigameUpdatePatch
                 if (!v.IsDiscon || forcely)
                 {
                     v.SetDisconnected();
-                    Debug.Log("AA Disconnected");
                 }
             }
             else if (myInfo.state == VitalsState.Dead && !(modInfo?.HasAttribute(PlayerAttributes.BuskerEffect) ?? false))
@@ -53,7 +52,6 @@ class VitalsMinigameUpdatePatch
                 {
                     v.SetDead();
                     v.Cardio.gameObject.SetActive(true);
-                    Debug.Log("AA Dead");
                 }
             }
             else
@@ -64,7 +62,6 @@ class VitalsMinigameUpdatePatch
                     v.IsDead = false;
                     v.SetAlive();
                     v.Background.sprite = __instance.PanelPrefab.Background.sprite;
-                    Debug.Log("AA Alive");
                     v.Cardio.gameObject.SetActive(true);
                 }
             }

@@ -1,4 +1,5 @@
-﻿using Virial.Events.Player;
+﻿using Nebula.Game.Statistics;
+using Virial.Events.Player;
 using Virial.Text;
 
 namespace Nebula.Extensions;

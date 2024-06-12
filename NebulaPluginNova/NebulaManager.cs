@@ -321,7 +321,7 @@ public class NebulaManager : MonoBehaviour
 
             
             //スクリーンショット
-            if (!TextField.AnyoneValid && NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDown) StartCoroutine(CaptureAndSave().WrapToIl2Cpp());
+            if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDownForAction) StartCoroutine(CaptureAndSave().WrapToIl2Cpp());
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
@@ -334,7 +334,7 @@ public class NebulaManager : MonoBehaviour
                 */
 
                 //コマンド
-                if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyDown)
+                if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyDownForAction)
                 {
                     MetaWidgetOld widget = new();
                     widget.Append(new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left }) { TranslationKey = "help.command", Alignment = IMetaWidgetOld.AlignmentOption.Left });

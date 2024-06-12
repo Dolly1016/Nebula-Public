@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Crewmate;
+﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Crewmate;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;

@@ -102,7 +102,6 @@
 
 	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
 		<Message Text="Second occurrence" />
-		<Exec Command="tools\ILRepack.exe /wildcards /target:library /lib:references /lib:%22..\..\Among Us\BepInEx\core%22 /lib:%22..\..\Among Us\BepInEx\interop%22 /internalize /out:bin\x86\Release\net6.0\Nebula.dll %22bin\x86\Release\net6.0\Nebula.dll%22 %22libs\*.dll%22 %22$(AmongUsRelease)\NebulaAPI.dll%22 " />
 		<Copy SourceFiles="bin\x86\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\" />
 		<Copy SourceFiles="bin\x86\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\Nebula\BepInEx\plugins\" />
 		<Exec Command="%22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula.zip $(AmongUsRelease)\Nebula" />

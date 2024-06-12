@@ -30,7 +30,7 @@ public class Comet : DefinedRoleTemplate, DefinedRole
         DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player) { }
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BoostButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BoostButton.png", 115f);
         private ModAbilityButton? boostButton = null;
 
         void RuntimeAssignable.OnActivated()

@@ -9,6 +9,7 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
 {
     private Illusioner() : base("illusioner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption,MorphDurationOption,PaintCoolDownOption, LoseSampleOnMeetingOption, TransformAfterMeetingOption,SampleOriginalLookOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic, ConfigurationTags.TagDifficult);
+        //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Illusioner.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);

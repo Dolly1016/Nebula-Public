@@ -12,6 +12,7 @@ public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
     private Alien(): base("alien", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EMICoolDownOption, EMIDurationOption, InvalidateCoolDownOption, NumOfInvalidationsOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Alien.png");
     }
     
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
@@ -23,13 +24,13 @@ public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
     static private FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
     static private IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("options.role.alien.numOfInvalidations", (1, 10), 1);
 
-    static public Alien MyRole = null;//new Alien();
+    static public Alien MyRole = null!;//new Alien();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
-        static private ISpriteLoader invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
+        static private Image invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
         
 
         public Instance(GamePlayer player) : base(player){}
@@ -64,8 +65,6 @@ public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
                         yield return Effects.Wait(0.45f);
                         PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 20, 0.5f, false, 0, "nebula::alien", false), true));
                         yield return Effects.Wait(0.55f);
-                        
-                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 4, EMIDurationOption - 1f, false, 0, "nebula::alien", false), true));
                     }
                     NebulaManager.Instance.StartCoroutine(CoNoise().WrapToIl2Cpp());
 

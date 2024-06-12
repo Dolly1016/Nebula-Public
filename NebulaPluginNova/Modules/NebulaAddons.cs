@@ -1,15 +1,33 @@
-﻿using System.IO.Compression;
+﻿using Nebula.Behaviour;
+using System.IO.Compression;
+using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
+using UnityEngine;
 using Virial.Compat;
 using Virial.Media;
 using Virial.Runtime;
+using static Nebula.Modules.ModUpdater;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Modules;
 
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.LoadAddons)]
 public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllocator
 {
+    static private MD5 md5 = MD5.Create();
+
+    public class MarketplaceAddonMeta
+    {
+        [JsonSerializableField]
+        public int Id = -1;
+        [JsonSerializableField]
+        public long Release = 0;
+        [JsonSerializableField]
+        public int Hash = 0;
+
+    }
+
     public class AddonMeta
     {
         [JsonSerializableField]
@@ -31,6 +49,25 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         public bool Hidden = false;
     }
 
+    public class GitHubReleaseContent
+    {
+        public class GitHubReleaseAsset
+        {
+            [JsonSerializableField]
+            public long id = 0;
+
+            [JsonSerializableField]
+            public string browser_download_url = "";
+
+            [JsonSerializableField]
+            public string name = "";
+        }
+
+        [JsonSerializableField]
+        public List<GitHubReleaseAsset>? assets = null!;
+    }
+
+
     static private Dictionary<string, NebulaAddon> allAddons = new();
     static private List<NebulaAddon> allOrderedAddons = new();
     static public IEnumerable<NebulaAddon> AllAddons => allOrderedAddons;
@@ -40,13 +77,115 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         return null;
     }
 
+    static private IEnumerable<string> ExternalAddons()
+    {
+        foreach (var file in Directory.GetFiles("Addons"))
+        {
+            var ext = Path.GetExtension(file);
+            if (ext == null) continue;
+            if (!ext.Equals(".zip") && !ext.Equals(".addon")) continue;
+            yield return file;
+        }
+    }
+
+    private static async Task FetchAndDownloadAddon(string url, long? lastId, int entryId, Action? onDownload = null)
+    {
+        var response = await NebulaPlugin.HttpClient.GetAsync(url);
+        if (response.StatusCode != HttpStatusCode.OK) return;
+        string json = await response.Content.ReadAsStringAsync();
+
+        var assets = JsonStructure.Deserialize<GitHubReleaseContent>(json);
+
+        var addonAsset = assets?.assets?.FirstOrDefault(a => a.name.EndsWith(".zip") || a.name.EndsWith(".addon"));
+        if (addonAsset == null) return;
+
+        if(!lastId.HasValue || lastId.Value != addonAsset.id)
+        {
+            onDownload?.Invoke();
+            response = await NebulaPlugin.HttpClient.GetAsync(addonAsset.browser_download_url);
+            if (response.StatusCode != HttpStatusCode.OK) return;
+            var dllStream = await response.Content.ReadAsStreamAsync();
+
+            try
+            {
+                //ダウンロードしたファイルを配置
+                string path = "Addons" + Path.DirectorySeparatorChar + "[M" + entryId + "]" + addonAsset.name;
+                using (var fileStream = File.Create(path))
+                {
+                    dllStream.CopyTo(fileStream);
+                    fileStream.Flush();
+                }
+
+                //元のハッシュ値を計算
+                int hash;
+                using (var file = File.Open(path, FileMode.Open))
+                {
+                    hash = System.BitConverter.ToString(md5.ComputeHash(file)).ComputeConstantHash();
+                }
+
+                //メタ情報を付加
+                using (var zip = ZipFile.Open(path, ZipArchiveMode.Update))
+                {
+                    var entry = zip.CreateEntry(".marketplace");
+                    using (var writer = new StreamWriter(entry.Open()))
+                    {
+
+                        writer.Write(JsonStructure.Serialize(new MarketplaceAddonMeta() { Id = entryId, Release = addonAsset.id, Hash = hash}));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, ex.GetType().Name + ex.Message + ex.StackTrace);
+            }
+        }
+    }
+
     static public IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        yield return preprocessor.SetLoadingText("Loading Addons");
-
         Directory.CreateDirectory("Addons");
 
-        var md5 = MD5.Create();
+        yield return preprocessor.SetLoadingText("Fetching Addons");
+
+        List<int> existingEntry = new();
+        foreach(var path in ExternalAddons())
+        {
+            var zip = ZipFile.OpenRead(path);
+            var entry = zip.GetEntry(".marketplace");
+            if(entry == null) continue;
+
+            using var stream = entry.Open();
+            var meta = JsonStructure.Deserialize<MarketplaceAddonMeta>(stream)!;
+            zip.Dispose();
+
+            if (meta == null) continue;
+
+            var marketplaceData = MarketplaceData.Data?.OwningAddons.Find(a => a.EntryId == meta.Id);
+
+
+            if (marketplaceData == null)
+            {
+                //削除済みのEntryIdのアドオンは削除する
+                File.Delete(path);
+            }
+            else if (marketplaceData.AutoUpdate)
+            {
+                //自動アップデートが必要な場合
+                yield return FetchAndDownloadAddon(marketplaceData.ToAddonUrl, meta.Release, marketplaceData.EntryId, preprocessor.SetLoadingText("Update Addon - " + marketplaceData.Title).Do).WaitAsCoroutine();
+            }
+
+            existingEntry.Add(meta.Id);
+        }
+
+        
+
+        foreach (var addon in MarketplaceData.Data!.OwningAddons.Where(a => !existingEntry.Contains(a.EntryId)))
+        {
+            yield return FetchAndDownloadAddon(addon.ToAddonUrl, null, addon.EntryId, preprocessor.SetLoadingText("Download Addon - " + addon.Title).Do).WaitAsCoroutine();
+        }
+
+
+        yield return preprocessor.SetLoadingText("Loading Addons");
 
         //ローカルなアドオンを更新
         foreach (var dir in Directory.GetDirectories("Addons", "*"))
@@ -62,11 +201,12 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         string prefix = "Nebula.Resources.Addons.";
         foreach (var file in assembly.GetManifestResourceNames().Where(name => name.StartsWith(prefix) && name.EndsWith(".zip")))
         {
+            ZipArchive? zip = null;
             try
             {
                 var stream = assembly.GetManifestResourceStream(file);
                 if (stream == null) continue;
-                var zip = new ZipArchive(stream);
+                zip = new ZipArchive(stream);
 
                 var addon = new NebulaAddon(zip, file.Substring(prefix.Length)) { IsBuiltIn = true };
                 allAddons.Add(addon.Id, addon);
@@ -75,6 +215,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
             }
             catch
             {
+                zip?.Dispose();
             }
         }
 
@@ -83,7 +224,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         {
             var ext = Path.GetExtension(file);
             if (ext == null) continue;
-            if (!ext.Equals(".zip")) continue;
+            if (!ext.Equals(".zip") && !ext.Equals(".addon")) continue;
 
             var zip = ZipFile.OpenRead(file);
 
@@ -92,10 +233,21 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
                 var addon = new NebulaAddon(zip, file);
                 allAddons.Add(addon.Id, addon);
 
-                addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(File.OpenRead(file))).ComputeConstantHash();
+                var marketplaceMeta = zip.GetEntry(".marketplace");
+                if (marketplaceMeta == null)
+                    addon.HandshakeHash = addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(File.OpenRead(file))).ComputeConstantHash();
+                else
+                {
+                    using (var mmStream = marketplaceMeta.Open())
+                    {
+                        var mMeta = JsonStructure.Deserialize<MarketplaceAddonMeta>(mmStream);
+                        addon.HandshakeHash = mMeta?.Hash ?? 0;
+                    }
+                }
             }
             catch
             {
+                zip.Dispose();
                 NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Addon, "Failed to load addon \"" + Path.GetFileName(file) + "\".");
             }
         }
@@ -134,6 +286,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
     static private string MetaFileName = "addon.meta";
     private NebulaAddon(ZipArchive zip, string path)
     {
+        bool foundMetaFile = false;
         foreach (var entry in zip.Entries)
         {
             if (entry.Name != MetaFileName) continue;
@@ -157,9 +310,11 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
             NebulaResourceManager.RegisterNamespace(Id ,this);
 
+            foundMetaFile = true;
             break;
         }
-
+        if (!foundMetaFile) throw new Exception();
+        
         using var iconEntry = zip.GetEntry(InZipPath + "icon.png")?.Open();
         if (iconEntry != null)
         {

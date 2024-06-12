@@ -1,6 +1,9 @@
 ﻿using AmongUs.GameOptions;
+using Il2CppSystem.Text.Json;
+using NAudio.CoreAudioApi;
 using Nebula.Behaviour;
 using Nebula.Compat;
+using Nebula.Game.Statistics;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
 using System.Diagnostics.CodeAnalysis;
@@ -16,9 +19,9 @@ namespace Nebula.Player;
 
 public enum RoleType
 {
-    Role,
-    Modifier,
-    GhostRole,
+    Role = 0,
+    Modifier = 1,
+    GhostRole = 2,
 }
 
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
@@ -64,6 +67,7 @@ public class PlayerAttributeImpl : IPlayerAttribute
 {
     public int Id { get; init; }
     public string Name { get; init; }
+    public string? UIName { get; init; }
     public Virial.Media.Image Image { get; private init; }
     public Predicate<GamePlayer>? Cognizable { get; init; }
     public bool CanCognize(GamePlayer player) => Cognizable?.Invoke(player) ?? true;
@@ -77,33 +81,34 @@ public class PlayerAttributeImpl : IPlayerAttribute
     static public IPlayerAttribute GetAttributeById(int id) => allAttributes[id];
 
 
-    public PlayerAttributeImpl(int imageId, string name)
+    public PlayerAttributeImpl(int imageId, string name, string? uiId = null)
     {
         this.Id = allAttributes.Count;
         this.Image = AttributeShower.AttributeIcon.GetIconSprite(imageId);
         allAttributes.Add(this);
         Name = name;
+        UIName = uiId;
     }
 
     static PlayerAttributeImpl()
     {
-        PlayerAttributes.Accel = new PlayerAttributeImpl(0, "$accel");
-        PlayerAttributes.Decel = new PlayerAttributeImpl(1, "$decel");
-        PlayerAttributes.Drunk = new PlayerAttributeImpl(5, "$inverse");
-        PlayerAttributes.Size = new PlayerAttributeImpl(6, "$size");
-        PlayerAttributes.Invisible = new PlayerAttributeImpl(2, "invisible");
+        PlayerAttributes.Accel = new PlayerAttributeImpl(0, "$accel", "accel");
+        PlayerAttributes.Decel = new PlayerAttributeImpl(1, "$decel", "decel");
+        PlayerAttributes.Drunk = new PlayerAttributeImpl(5, "$inverse", "inverse");
+        PlayerAttributes.Size = new PlayerAttributeImpl(6, "$size", "size");
+        PlayerAttributes.Invisible = new PlayerAttributeImpl(2, "invisible", "invisible");
         PlayerAttributes.InvisibleElseImpostor = new PlayerAttributeImpl(2, "$invisible") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Invisible };
-        PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody");
-        PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation") { Cognizable = p => p.IsImpostor };
-        PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4, "busker") { Cognizable = _ => false };
+        PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody", "curseOfBloody");
+        PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation", "isolation") { Cognizable = p => p.IsImpostor };
+        PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4, "busker", "busker") { Cognizable = _ => false };
 
-        PlayerAttributes.FlipXY = new PlayerAttributeImpl(7, "$flip");
+        PlayerAttributes.FlipXY = new PlayerAttributeImpl(7, "$flip", "flip");
         PlayerAttributes.FlipX = new PlayerAttributeImpl(7, "$flipX") { IdenticalAttribute = PlayerAttributes.FlipXY };
         PlayerAttributes.FlipY = new PlayerAttributeImpl(7, "$flipY") { IdenticalAttribute = PlayerAttributes.FlipXY };
 
-        PlayerAttributes.ScreenSize = new PlayerAttributeImpl(8, "$screenSize");
-        PlayerAttributes.Eyesight = new PlayerAttributeImpl(9, "$eyesight");
-        PlayerAttributes.Roughening = new PlayerAttributeImpl(10, "$rough");
+        PlayerAttributes.ScreenSize = new PlayerAttributeImpl(8, "$screenSize", "screenSize");
+        PlayerAttributes.Eyesight = new PlayerAttributeImpl(9, "$eyesight", "eyesight");
+        PlayerAttributes.Roughening = new PlayerAttributeImpl(10, "$rough", "rough");
     }
 }
 
@@ -390,6 +395,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myRole, IsDead));
+        GameTracker.Instance?.AddRoleHistory(new(NebulaGameManager.Instance!.CurrentTime, RoleType.Role, role.InternalName, PlayerId, arguments));
     }
 
     private void SetGhostRole(DefinedGhostRole role, int[] arguments)
@@ -404,6 +410,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myGhostRole, IsDead));
+        GameTracker.Instance?.AddRoleHistory(new(NebulaGameManager.Instance!.CurrentTime, RoleType.GhostRole, role.InternalName, PlayerId, arguments));
     }
 
     private void SetModifier(DefinedModifier role, int[] arguments)
@@ -417,6 +424,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         }
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true, IsDead));
+        GameTracker.Instance?.AddRoleHistory(new(NebulaGameManager.Instance!.CurrentTime, RoleType.Modifier, role.InternalName, PlayerId, arguments));
     }
 
     public NebulaRPCInvoker RpcInvokerSetRole(DefinedRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), RoleType.Role));
@@ -433,6 +441,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 GameOperatorManager.Instance?.Run(new PlayerModifierRemoveEvent(this, m));
 
                 NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, m, false, IsDead));
+                GameTracker.Instance?.AddRoleHistory(new(NebulaGameManager.Instance!.CurrentTime, RoleType.Role, m.Modifier.InternalName, PlayerId, [], false));
                 return true;
             }
             return false;
@@ -840,97 +849,150 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     private int visibilityCache = 0;
     public bool IsInvisible => visibilityCache == 2;
     public int VisibilityLevel => visibilityCache;
-    public void UpdateVisibility(bool update)
+    private float VisibilityAlpha = 1f;
+    private bool IsInShadowCache = false;
+    private void UpdateVisibilityAlpha(int invisibleLevel)
     {
-        //不可視度合を調べる
-        int invisibleLevel = 0;
-        PlayerModInfo localInfo = NebulaGameManager.Instance!.LocalPlayerInfo.Unbox();
+        float min = 0f, max = 1f;
+        if (invisibleLevel == 1) min = 0.25f;
 
-        //属性効果はより透明にする効果を優先する
-        if (!IsDead) {
-            if (HasAttribute(PlayerAttributes.InvisibleElseImpostor))
-            {
-                if (localInfo.Role.Role.Category == RoleCategory.ImpostorRole)
-                    invisibleLevel = Math.Max(invisibleLevel, 1);
-                else if (!AmOwner)
-                    invisibleLevel = Math.Max(invisibleLevel, 2);
-            }
+        float goal = invisibleLevel switch
+        {
+            1 => 0.25f,
+            2 => 0f,
+            _ => 1f
+        };
 
-            if (HasAttribute(PlayerAttributes.Invisible)) invisibleLevel = 2;
+        if (Math.Abs(VisibilityAlpha - goal) < 0.01f)
+        {
+            VisibilityAlpha = goal;
         }
         else
         {
-            //視点主が生存していてプレイヤーが死亡しているなら見えない
-            if (!localInfo.IsDead) invisibleLevel = 2;
-        }
-
-        visibilityCache = invisibleLevel;
-
-        //情報が開示済みの場合、あるいは自分自身を見る場合は半透明までにしかならない
-        if (AmOwner || NebulaGameManager.Instance!.CanBeSpectator) invisibleLevel = Math.Min(1, invisibleLevel);
-
-        MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(!MyControl.inVent && (invisibleLevel < 2));
-
-        if (IsDead)
-        {
-            if (!MyControl.AmOwner && MyControl.cosmetics.currentPet)
-            {
-                foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = Color.clear;
-                foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = Color.clear;
-            }
-
-            return;
-        }
-
-        float alpha = MyControl.cosmetics.currentBodySprite.BodySprite.color.a;
-        if (update)
-        {
-            float min = 0f, max = 1f;
-            if (invisibleLevel == 1) min = 0.25f;
-
-            float goal = invisibleLevel switch
-            {
-                1 => 0.25f,
-                2 => 0f,
-                _ => 1f
-            };
-
-            if (Math.Abs(alpha - goal) < 0.01f)
-            {
-                alpha = goal;
-            }
+            if (VisibilityAlpha > goal)
+                VisibilityAlpha -= 0.85f * Time.deltaTime;
             else
+                VisibilityAlpha += 0.85f * Time.deltaTime;
+
+            VisibilityAlpha = Mathf.Clamp(VisibilityAlpha, min, max);
+        }
+    }
+
+    private static Vector2[] VisibilityCheckVectors = [
+        Vector2.zero,
+        Vector2.right,
+        Vector2.left,
+        Vector2.up * 1.35f,
+        Vector2.down * 1.35f,
+        Vector2.right + Vector2.up,
+        Vector2.right + Vector2.down,
+        Vector2.left + Vector2.up,
+        Vector2.left + Vector2.down,
+        ];
+    public void UpdateVisibility(bool update, bool ignoreShadow = false, bool showNameText = true)
+    {
+        try
+        {
+            if (update)
             {
-                if (alpha > goal)
-                    alpha -= 0.85f * Time.deltaTime;
+                //不可視度合を調べる
+                int invisibleLevel = 0;
+                PlayerModInfo localInfo = NebulaGameManager.Instance!.LocalPlayerInfo.Unbox();
+
+                //属性効果はより透明にする効果を優先する
+                if (!IsDead)
+                {
+                    if (HasAttribute(PlayerAttributes.InvisibleElseImpostor))
+                    {
+                        if (localInfo.Role.Role.Category == RoleCategory.ImpostorRole)
+                            invisibleLevel = Math.Max(invisibleLevel, 1);
+                        else if (!AmOwner)
+                            invisibleLevel = Math.Max(invisibleLevel, 2);
+                    }
+
+                    if (HasAttribute(PlayerAttributes.Invisible)) invisibleLevel = 2;
+                }
                 else
-                    alpha += 0.85f * Time.deltaTime;
+                {
+                    //視点主が生存していてプレイヤーが死亡しているなら見えない
+                    if (!localInfo.IsDead) invisibleLevel = 2;
+                }
 
-                alpha = Mathf.Clamp(alpha, min, max);
+                //属性による可視性の情報を控えておく
+                visibilityCache = invisibleLevel;
             }
+
+            int visualInvisibleLevel = visibilityCache;
+
+            //情報が開示済みの場合、あるいは自分自身を見る場合は半透明までにしかならない
+            if (AmOwner || NebulaGameManager.Instance!.CanBeSpectator) visualInvisibleLevel = Math.Min(1, visualInvisibleLevel);
+
+            MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(!MyControl.inVent && (visualInvisibleLevel < 2) && showNameText);
+
+            if (IsDead)
+            {
+                if (!MyControl.AmOwner && MyControl.cosmetics.currentPet)
+                {
+                    foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = Color.clear;
+                    foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = Color.clear;
+                }
+
+                return;
+            }
+
+            //対象プレイヤーが生存している場合
+
+            if (update)
+            {
+                UpdateVisibilityAlpha(visualInvisibleLevel);
+
+                bool isInShadow = false;
+                if (!NebulaGameManager.Instance.LocalPlayerInfo.IsDead && !AmOwner)
+                {
+                    //自身も生存している場合、影の中にいるプレイヤーは見えないようにする
+
+                    int shadowMask = Constants.ShadowMask;
+                    int objectMask = Constants.ShipAndAllObjectsMask;
+
+                    var light = PlayerControl.LocalPlayer.lightSource;
+                    Vector2 pos = light.transform.position;
+                    Vector2 myPos = MyControl.transform.position;
+
+                    var isAcrossWalls = VisibilityCheckVectors.All(v => Helpers.AnyNonTriggersBetween(pos, myPos + v * 0.22f, out _, objectMask));
+
+                    var mag = isAcrossWalls ? 0.22f : 0.4f;
+                    isInShadow = VisibilityCheckVectors.All(v => Helpers.AnyCustomNonTriggersBetween(pos, myPos + v * mag,
+                        collider => LightSource.OneWayShadows.TryGetValue(collider.gameObject, out var oneWayShadows) ? !oneWayShadows.IsIgnored(light) : true,
+                        shadowMask));
+                }
+
+                IsInShadowCache = isInShadow;
+            }
+
+            if (!ignoreShadow && IsInShadowCache) MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(false);
+
+            var color = new Color(1f, 1f, 1f, (!ignoreShadow && IsInShadowCache) ? 0f : VisibilityAlpha);
+
+
+            if (MyControl.cosmetics.currentBodySprite.BodySprite != null) MyControl.cosmetics.currentBodySprite.BodySprite.color = color;
+
+            if (MyControl.cosmetics.skin.layer != null) MyControl.cosmetics.skin.layer.color = color;
+
+            if (MyControl.cosmetics.hat)
+            {
+                if (MyControl.cosmetics.hat.FrontLayer != null) MyControl.cosmetics.hat.FrontLayer.color = color;
+                if (MyControl.cosmetics.hat.BackLayer != null) MyControl.cosmetics.hat.BackLayer.color = color;
+            }
+
+            if (MyControl.cosmetics.currentPet)
+            {
+                foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = color;
+                foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = color;
+            }
+
+            if (MyControl.cosmetics.visor != null) MyControl.cosmetics.visor.Image.color = color;
         }
-
-
-        var color = new Color(1f, 1f, 1f, alpha);
-
-
-        if (MyControl.cosmetics.currentBodySprite.BodySprite != null) MyControl.cosmetics.currentBodySprite.BodySprite.color = color;
-
-        if (MyControl.cosmetics.skin.layer != null) MyControl.cosmetics.skin.layer.color = color;
-
-        if (MyControl.cosmetics.hat)
-        {
-            if (MyControl.cosmetics.hat.FrontLayer != null) MyControl.cosmetics.hat.FrontLayer.color = color;
-            if (MyControl.cosmetics.hat.BackLayer != null) MyControl.cosmetics.hat.BackLayer.color = color;
-        }
-
-        if (MyControl.cosmetics.currentPet)
-        {
-            foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = color;
-            foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = color;
-        }
-
-        if (MyControl.cosmetics.visor != null) MyControl.cosmetics.visor.Image.color = color;
+        catch (Exception e){ }
     }
 
 
@@ -955,7 +1017,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         UpdateHoldingDeadBody();
         UpdateMouseAngle();
         UpdateModulators();
-        UpdateVisibility(true);
+        UpdateVisibility(true, !NebulaGameManager.Instance.WideCamera.DrawShadow);
     }
 
     public void UpdateTaskState()

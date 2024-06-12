@@ -30,7 +30,7 @@ public class Camouflager : DefinedRoleTemplate, HasCitation, DefinedRole
 
         private ModAbilityButton? camouflageButton = null;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CamoButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CamoButton.png", 115f);
 
         private AchievementToken<bool>? acTokenCommon;
         private AchievementToken<(bool cleared, int killed)>? acTokenChallenge;

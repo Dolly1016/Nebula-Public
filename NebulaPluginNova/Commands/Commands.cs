@@ -13,6 +13,7 @@ static public class Commands
     {
         CommandManager.RegisterCommand(new FormulaCommand(), "nebula::formula", "nebula::f");
         CommandManager.RegisterCommand(new IfCommand(), "nebula::if");
+        CommandManager.RegisterCommand(new AtCommand(), "nebula::at");
         CommandManager.RegisterCommand(new LetCommand(), "nebula::let");
         CommandManager.RegisterCommand(new LetsCommand(), "nebula::lets", "nebula::scope");
         CommandManager.RegisterCommand(new EchoCommand(), "nebula::echo");

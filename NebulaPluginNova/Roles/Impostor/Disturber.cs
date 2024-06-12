@@ -84,11 +84,11 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         static float PoleDistanceMax => MaxDistanceBetweenPolesOption;
 
 
-        static public ISpriteLoader placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ElecPolePlaceButton.png", 115f);
-        static public ISpriteLoader disturbButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DisturbButton.png", 115f);
+        static public Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ElecPolePlaceButton.png", 115f);
+        static public Image disturbButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DisturbButton.png", 115f);
 
-        static private ISpriteLoader elecAnimHSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnim.png", 100f);
-        static private ISpriteLoader elecAnimVSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnimSub.png", 100f);
+        static private Image elecAnimHSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnim.png", 100f);
+        static private Image elecAnimVSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnimSub.png", 100f);
 
         public Instance(GamePlayer player) : base(player)
         {

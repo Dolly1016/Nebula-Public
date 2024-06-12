@@ -1,4 +1,5 @@
-﻿using Nebula.Map;
+﻿using Nebula.Game.Statistics;
+using Nebula.Map;
 using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Assignable;
@@ -14,6 +15,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
 {
     private Busker() : base("busker", new(255, 172, 117), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PseudocideCoolDownOption, PseudocideDurationOption, HidePseudocideFromVitalsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
+        //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Busker.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -23,15 +25,15 @@ public class Busker : DefinedRoleTemplate, DefinedRole
     static private BoolConfiguration HidePseudocideFromVitalsOption = NebulaAPI.Configurations.Configuration("options.role.busker.hidePseudocideFromVitals", false);
 
     static public Busker MyRole = new Busker();
-    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => assignable is not Lover;
+    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable is not Lover;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player){}
 
-        static private ISpriteLoader pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
-        static private ISpriteLoader reviveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskReviveButton.png", 115f);
+        static private Image pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
+        static private Image reviveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskReviveButton.png", 115f);
 
         AchievementToken<(bool isCleared,float lastRevive)>? acTokenChallenge;
 

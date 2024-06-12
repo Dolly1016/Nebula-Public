@@ -12,7 +12,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
 
     string ICodeName.CodeName => "PLT";
 
-    static private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.poltergeist.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 
     static public Poltergeist MyRole = new Poltergeist();
 
@@ -28,7 +28,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
         {
         }
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PoltergeistButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PoltergeistButton.png", 115f);
 
         void RuntimeAssignable.OnActivated()
         {

@@ -6,7 +6,7 @@ using Virial.Runtime;
 
 namespace Nebula.Modules;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
 [NebulaRPCHolder]
 public class DynamicPalette
 {
@@ -584,11 +584,11 @@ public class DynamicPalette
 
 public class NebulaPlayerTab : MonoBehaviour
 {
-    static ISpriteLoader spritePalette = SpriteLoader.FromResource("Nebula.Resources.Palette.png", 100f);
-    static ISpriteLoader spriteTarget = SpriteLoader.FromResource("Nebula.Resources.TargetIcon.png", 100f);
+    static Image spritePalette = SpriteLoader.FromResource("Nebula.Resources.Palette.png", 100f);
+    static Image spriteTarget = SpriteLoader.FromResource("Nebula.Resources.TargetIcon.png", 100f);
 
-    static ISpriteLoader spriteBrPalette = SpriteLoader.FromResource("Nebula.Resources.PaletteBrightness.png", 100f);
-    static ISpriteLoader spriteBrTarget = SpriteLoader.FromResource("Nebula.Resources.PaletteKnob.png", 100f);
+    static Image spriteBrPalette = SpriteLoader.FromResource("Nebula.Resources.PaletteBrightness.png", 100f);
+    static Image spriteBrTarget = SpriteLoader.FromResource("Nebula.Resources.PaletteKnob.png", 100f);
 
     static XOnlyDividedSpriteLoader spriteColorIcons = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.ColorIcon.png", 100f, 50, true);
 

@@ -17,8 +17,8 @@ public class EffectCircle : MonoBehaviour
     }
 
     static EffectCircle() => ClassInjector.RegisterTypeInIl2Cpp<EffectCircle>();
-    static private ISpriteLoader innerCircleSprite = SpriteLoader.FromResource("Nebula.Resources.EffectCircleInner.png",100f);
-    static private ISpriteLoader outerCircleSprite = SpriteLoader.FromResource("Nebula.Resources.EffectCircle.png", 250f);
+    static private Image innerCircleSprite = SpriteLoader.FromResource("Nebula.Resources.EffectCircleInner.png",100f);
+    static private Image outerCircleSprite = SpriteLoader.FromResource("Nebula.Resources.EffectCircle.png", 250f);
     private bool isActive = true;
 
     public void Update()
@@ -77,6 +77,10 @@ public class EffectCircle : MonoBehaviour
         }
     }
 
+    public void DestroyFast()
+    {
+        GameObject.Destroy(gameObject);
+    }
 
     public void Disappear()
     {

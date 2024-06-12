@@ -15,6 +15,7 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
     static public Crewmate MyRole = new Crewmate();
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    bool DefinedSingleAssignable.IsSpawnable => true;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

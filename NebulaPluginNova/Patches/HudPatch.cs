@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 using Virial.DI;
 using Virial.Events.Player;
 using static Nebula.Modules.HelpScreen;
@@ -33,7 +34,7 @@ public static class HudManagerUpdatePatch
     {
         NebulaGameManager.Instance?.OnUpdate();
 
-        if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDown && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
+        if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDownForAction && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
         {
             HelpScreen.TryOpenHelpScreen(HelpTab.MyInfo);
         }

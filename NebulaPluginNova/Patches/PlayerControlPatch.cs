@@ -1,5 +1,6 @@
 ﻿using AmongUs.Data.Player;
 using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 using PowerTools;
 using Virial.Events.Player;
 

@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Impostor;
+﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Impostor;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -45,7 +46,7 @@ public class Provocateur : DefinedRoleTemplate, DefinedRole
         public Instance(GamePlayer player) : base(player){}
 
         private ModAbilityButton embroilButton = null!;
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
 
         void RuntimeAssignable.OnActivated()
         {

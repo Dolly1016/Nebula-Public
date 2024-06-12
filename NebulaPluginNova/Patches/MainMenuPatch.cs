@@ -6,7 +6,8 @@ namespace Nebula.Patches;
 [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Awake))]
 public static class MainMenuSetUpPatch
 {
-    static private ISpriteLoader nebulaIconSprite = SpriteLoader.FromResource("Nebula.Resources.NebulaNewsIcon.png", 100f);
+    static private Image nebulaIconSprite = SpriteLoader.FromResource("Nebula.Resources.NebulaNewsIcon.png", 100f);
+    static private Image discordIconSprite = SpriteLoader.FromResource("Nebula.Resources.DiscordIcon.png", 100f);
     static public GameObject? NebulaScreen = null;
     static public GameObject? AddonsScreen = null;
     static public GameObject? VersionsScreen = null;
@@ -100,11 +101,11 @@ public static class MainMenuSetUpPatch
         SetUpButton("title.buttons.achievements", () => {
             AchievementViewer.Open(__instance);
         });
-        /*
+
         SetUpButton("title.buttons.marketplace", () => {
             Marketplace.Open(__instance);
         });
-        */
+        
         SetUpButton("title.buttons.addons", () => {
             __instance.ResetScreen();
             if (!AddonsScreen) CreateAddonsScreen();
@@ -114,6 +115,14 @@ public static class MainMenuSetUpPatch
         SetUpButton("title.buttons.developersStudio", () => {
             DevStudio.Open(__instance);
         });
+
+        var discordRenderer = UnityHelper.CreateObject<SpriteRenderer>("DiscordButton", NebulaScreen.transform, new Vector3(2.8f,-1.4f));
+        discordRenderer.sprite = discordIconSprite.GetSprite();
+        var discordButton = discordRenderer.gameObject.SetUpButton(true, discordRenderer);
+        discordButton.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(discordButton, Language.Translate("title.label.discord")));
+        discordButton.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(discordButton));
+        discordButton.OnClick.AddListener(() => Application.OpenURL("https://discord.gg/kHNZD4pq9E"));
+        discordButton.gameObject.AddComponent<CircleCollider2D>().radius = 0.25f;
 
         void CreateAddonsScreen()
         {

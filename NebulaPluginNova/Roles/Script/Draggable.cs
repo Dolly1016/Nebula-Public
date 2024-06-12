@@ -5,7 +5,7 @@ namespace Nebula.Roles.Scripts;
 
 public class Draggable : ComponentHolder
 {
-    static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DragAndDropButton.png", 115f);
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DragAndDropButton.png", 115f);
 
     public Action<DeadBody>? OnHoldingDeadBody { get; set; } = null;
 

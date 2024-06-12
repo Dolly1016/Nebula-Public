@@ -1,4 +1,5 @@
 ﻿using Cpp2IL.Core.Extensions;
+using Nebula.Utilities;
 using System.Reflection;
 using Virial.Runtime;
 
@@ -22,7 +23,9 @@ public enum NebulaAudioClip {
 [NebulaRPCHolder]
 public static class NebulaAsset
 {
-    static AssetBundle AssetBundle = null!;
+    static internal AssetBundle AssetBundle { get; private set; } = null!;
+
+    private static T Load<T>(string path) where T : UnityEngine.Object => AssetBundle.LoadAsset<T>(path).MarkDontUnload();
     public static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         yield return preprocessor.SetLoadingText("Loading Map Expansions");
@@ -30,32 +33,32 @@ public static class NebulaAsset
         var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Nebula.Resources.Assets.nebula_asset");
         AssetBundle = AssetBundle.LoadFromMemory(resourceStream!.ReadBytes());
 
-        MultiplyBackShader = AssetBundle.LoadAsset<Shader>("Sprites-MultiplyBackground").MarkDontUnload();
-        StoreBackShader = AssetBundle.LoadAsset<Shader>("Sprites-StoreBackground").MarkDontUnload();
-        GuageShader = AssetBundle.LoadAsset<Shader>("Sprites-Guage").MarkDontUnload();
-        WhiteShader = AssetBundle.LoadAsset<Shader>("Sprites-White").MarkDontUnload();
-        ProgressShader = AssetBundle.LoadAsset<Shader>("Sprites-Progress").MarkDontUnload();
+        MultiplyBackShader = Load<Shader>("Sprites-MultiplyBackground");
+        StoreBackShader = Load<Shader>("Sprites-StoreBackground");
+        GuageShader = Load<Shader>("Sprites-Guage");
+        WhiteShader = Load<Shader>("Sprites-White");
+        ProgressShader = Load<Shader>("Sprites-Progress");
 
-        DivMap[0] = AssetBundle.LoadAsset<GameObject>("SkeldDivMap").MarkDontUnload();
-        DivMap[1] = AssetBundle.LoadAsset<GameObject>("MIRADivMap").MarkDontUnload();
-        DivMap[2] = AssetBundle.LoadAsset<GameObject>("PolusDivMap").MarkDontUnload();
+        DivMap[0] = Load<GameObject>("SkeldDivMap");
+        DivMap[1] = Load<GameObject>("MIRADivMap");
+        DivMap[2] = Load<GameObject>("PolusDivMap");
         DivMap[3] = null!;
-        DivMap[4] = AssetBundle.LoadAsset<GameObject>("AirshipDivMap").MarkDontUnload();
-        DivMap[5] = AssetBundle.LoadAsset<GameObject>("FungleDivMap").MarkDontUnload();
+        DivMap[4] = Load<GameObject>("AirshipDivMap");
+        DivMap[5] = Load<GameObject>("FungleDivMap");
 
-        audioMap[NebulaAudioClip.ThrowAxe] = AssetBundle.LoadAsset<AudioClip>("RaiderThrow.wav").MarkDontUnload();
-        audioMap[NebulaAudioClip.SniperShot] = AssetBundle.LoadAsset<AudioClip>("SniperShot.wav").MarkDontUnload();
-        audioMap[NebulaAudioClip.SniperEquip] = AssetBundle.LoadAsset<AudioClip>("SniperEquip.wav").MarkDontUnload();
-        audioMap[NebulaAudioClip.Trapper2s] = AssetBundle.LoadAsset<AudioClip>("PlaceTrap2s.wav").MarkDontUnload();
-        audioMap[NebulaAudioClip.Trapper3s] = AssetBundle.LoadAsset<AudioClip>("PlaceTrap3s.wav").MarkDontUnload();
-        audioMap[NebulaAudioClip.TrapperKillTrap] = AssetBundle.LoadAsset<AudioClip>("PlaceKillTrap.wav").MarkDontUnload();
-        audioMap[NebulaAudioClip.Camera] = AssetBundle.LoadAsset<AudioClip>("Camera.mp3").MarkDontUnload();
-        audioMap[NebulaAudioClip.FakeSabo] = AssetBundle.LoadAsset<AudioClip>("FakeSabo.ogg").MarkDontUnload();
-        audioMap[NebulaAudioClip.Destroyer1] = AssetBundle.LoadAsset<AudioClip>("Destroyer1.ogg").MarkDontUnload();
-        audioMap[NebulaAudioClip.Destroyer2] = AssetBundle.LoadAsset<AudioClip>("Destroyer2.ogg").MarkDontUnload();
-        audioMap[NebulaAudioClip.Destroyer3] = AssetBundle.LoadAsset<AudioClip>("Destroyer3.ogg").MarkDontUnload();
+        audioMap[NebulaAudioClip.ThrowAxe] = Load<AudioClip>("RaiderThrow.wav");
+        audioMap[NebulaAudioClip.SniperShot] = Load<AudioClip>("SniperShot.wav");
+        audioMap[NebulaAudioClip.SniperEquip] = Load<AudioClip>("SniperEquip.wav");
+        audioMap[NebulaAudioClip.Trapper2s] = Load<AudioClip>("PlaceTrap2s.wav");
+        audioMap[NebulaAudioClip.Trapper3s] = Load<AudioClip>("PlaceTrap3s.wav");
+        audioMap[NebulaAudioClip.TrapperKillTrap] = Load<AudioClip>("PlaceKillTrap.wav");
+        audioMap[NebulaAudioClip.Camera] = Load<AudioClip>("Camera.mp3");
+        audioMap[NebulaAudioClip.FakeSabo] = Load<AudioClip>("FakeSabo.ogg");
+        audioMap[NebulaAudioClip.Destroyer1] = Load<AudioClip>("Destroyer1.ogg");
+        audioMap[NebulaAudioClip.Destroyer2] = Load<AudioClip>("Destroyer2.ogg");
+        audioMap[NebulaAudioClip.Destroyer3] = Load<AudioClip>("Destroyer3.ogg");
 
-        PaparazzoShot = AssetBundle.LoadAsset<GameObject>("PhotoObject").MarkDontUnload();
+        PaparazzoShot = Load<GameObject>("PhotoObject");
     }
 
     private static T LoadAsset<T>(this AssetBundle assetBundle, string name) where T : UnityEngine.Object

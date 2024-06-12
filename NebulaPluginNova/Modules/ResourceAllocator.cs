@@ -141,7 +141,7 @@ public class StreamResource : INebulaResource {
         return streamGetter.Invoke();
     }
 
-    Image? INebulaResource.AsImage(float defaultPixsPerUnit = 100f)
+    Image? INebulaResource.AsImage(float defaultPixsPerUnit)
     {
         Stream? stream = streamGetter.Invoke();
         if (stream == null) return null;

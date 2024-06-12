@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -104,8 +105,8 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnipeButton.png", 115f);
-        static private ISpriteLoader aimAssistSprite = SpriteLoader.FromResource("Nebula.Resources.SniperGuide.png", 100f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnipeButton.png", 115f);
+        static private Image aimAssistSprite = SpriteLoader.FromResource("Nebula.Resources.SniperGuide.png", 100f);
         
         public SniperRifle? MyRifle = null;
         bool RuntimeRole.HasVanillaKillButton => false;
@@ -191,7 +192,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 };
                 killButton.CoolDownTimer = Bind(new Timer(SnipeCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
+                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetLabel("snipe");
                 killButton.SetCanUseByMouseClick();
             }

@@ -61,6 +61,8 @@ public static class JsonStructure
 
         if (type.Equals(typeof(int)))
             return int.Parse(trimmed);
+        if (type.Equals(typeof(long)))
+            return long.Parse(trimmed);
         if (type.Equals(typeof(byte)))
             return byte.Parse(trimmed);
         if (type.Equals(typeof(string)))
@@ -316,7 +318,7 @@ public static class JsonStructure
             return "null";
         }
 
-        if (obj is int or byte or float or double or bool)
+        if (obj is int or byte or float or double or bool or long)
             return obj.ToString() ?? "null";
         if (obj is string)
             return "\"" + obj + "\"";

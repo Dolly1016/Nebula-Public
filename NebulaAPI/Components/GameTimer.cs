@@ -8,6 +8,7 @@ public interface GameTimer : IReleasable
     GameTimer Pause();
     GameTimer Resume();
     GameTimer SetRange(float min, float max);
+    GameTimer SetRange(float max) => SetRange(0, max);
     GameTimer SetTime(float time);
     GameTimer Expand(float time);
     float CurrentTime { get; }

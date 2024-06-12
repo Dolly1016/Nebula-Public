@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Nebula.Game.Statistics;
 using TMPro;
 using Virial.Configuration;
 
@@ -168,7 +169,6 @@ public class NebulaPreSpawnMinigame : Minigame
             {
                 cand = cand.Where(l => l.Configuration.Value).ToArray();
             }
-
             return cand;
         } }
     public IEnumerator CoClose()

@@ -1,5 +1,6 @@
 ﻿using NAudio.CoreAudioApi;
 using Nebula.Compat;
+using Nebula.Scripts;
 using System.Reflection;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -39,13 +40,12 @@ internal class NoSRoleSetUp
     {
         SetTabs();
 
-        var types = Assembly.GetAssembly(typeof(Roles))?.GetTypes().Where((type) => type.IsAssignableTo(typeof(DefinedAssignable)));
-        if (types == null) return;
-
-        foreach (var type in types)
-            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-
         SetNebulaTeams();
+        foreach (var assembly in AddonScriptManager.ScriptAssemblies.Where(script => script.Behaviour.LoadRoles).Select(s => s.Assembly).Prepend(Assembly.GetAssembly(typeof(Roles))))
+        {
+            var types = assembly?.GetTypes().Where((type) => type.IsAssignableTo(typeof(DefinedAssignable)));
+            foreach(var type in types ?? []) System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+        }
     }
 }
 

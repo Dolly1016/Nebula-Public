@@ -8,12 +8,13 @@ using Virial.Runtime;
 
 namespace Nebula.Scripts;
 
-internal class AddonAssembly
+internal class AddonBehaviour
 {
-
+    [JsonSerializableField]
+    public bool LoadRoles = false;
 }
 
-internal record AddonScript(Assembly Assembly, NebulaAddon Addon, MetadataReference reference);
+internal record AddonScript(Assembly Assembly, NebulaAddon Addon, MetadataReference Reference, AddonBehaviour Behaviour);
 
 
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.CompileAddons)]
@@ -31,11 +32,6 @@ internal static class AddonScriptManagerLoader
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.CSharp.dll")!.ReadBytes());
 
-        //System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Collections.Immutable.dll")!);
-        //System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Reflection.Metadata.dll")!);
-        //System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.dll")!);
-        //System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.CSharp.dll")!);
-
         yield return AddonScriptManager.CoLoad(assemblies);
     }
 }
@@ -49,23 +45,39 @@ internal static class AddonScriptManager
     static public IEnumerator CoLoad(Assembly[] assemblies)
     {
         //参照可能なアセンブリを抽出する
-        ReferenceAssemblies = assemblies.Where(a => { try { return ((a.Location?.Length ?? 0) > 0); } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray();
+        ReferenceAssemblies = assemblies.Where(a => { try { return ((a.Location?.Length ?? 0) > 0); } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).Append(MetadataReference.CreateFromImage(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes())).ToArray();
         
         var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp12);
-        var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic").WithWarningLevel(0);
+        var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            .WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic")
+            .WithNullableContextOptions(NullableContextOptions.Enable)
+            .WithOptimizationLevel(OptimizationLevel.Release);
         
 
         foreach (var addon in NebulaAddon.AllAddons)
         {
             string prefix = addon.InZipPath + "Scripts/";
+            
+            AddonBehaviour? addonBehaviour = null;
+            var behaviour = addon.Archive.GetEntry(prefix + ".behaviour");
+            if (behaviour != null)
+            {
+                using (var stream = behaviour.Open())
+                {
+                    addonBehaviour = JsonStructure.Deserialize<AddonBehaviour>(stream);
+                }
+            }
 
             List<SyntaxTree> trees = new();
             foreach(var entry in addon.Archive.Entries)
             {
                 if (!entry.FullName.StartsWith(prefix)) continue;
 
-                //解析木をつくる
-                trees.Add(CSharpSyntaxTree.ParseText(entry.Open().ReadToEnd(), parseOptions, entry.FullName.Substring(prefix.Length), Encoding.UTF8));
+                if (entry.FullName.EndsWith(".cs"))
+                {
+                    //解析木をつくる
+                    trees.Add(CSharpSyntaxTree.ParseText(entry.Open().ReadToEnd(), parseOptions, entry.FullName.Substring(prefix.Length), Encoding.UTF8));
+                }
             }
             
             //解析木が一つも無ければコンパイルは不要
@@ -75,7 +87,7 @@ internal static class AddonScriptManager
             yield return null;
 
             var compilation = CSharpCompilation.Create("Script." + addon.Id.HeadUpper(), trees, ReferenceAssemblies, compilationOptions.WithModuleName("Script." + addon.Id.HeadUpper()))
-                .AddReferences(scriptAssemblies.Where(a => addon.Dependency.Contains(a.Addon)).Select(a => a.reference));
+                .AddReferences(scriptAssemblies.Where(a => addon.Dependency.Contains(a.Addon)).Select(a => a.Reference));
             
             Assembly? assembly = null;
             using (var stream = new MemoryStream())
@@ -105,7 +117,7 @@ internal static class AddonScriptManager
                 }
             }
             
-            if (assembly != null) scriptAssemblies.Add(new(assembly, addon, compilation.ToMetadataReference()));
+            if (assembly != null) scriptAssemblies.Add(new(assembly, addon, compilation.ToMetadataReference(), addonBehaviour ?? new()));
 
             assembly?.GetType("TestClass")?.GetMethod("Func")?.Invoke(null, []);
         }

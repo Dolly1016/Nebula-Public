@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Virial.Runtime;
+using static Il2CppSystem.Net.Http.Headers.Parser;
 
 namespace Nebula.Modules;
 
@@ -51,6 +52,19 @@ public class EastAsianFontChanger
     }
 }
 
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostFixStructure)]
+public static class AddonDefaultLanguageLoader
+{
+    static AddonDefaultLanguageLoader()
+    {
+        foreach (var addon in NebulaAddon.AllAddons)
+        {
+            using var stream = addon.OpenStream("Language/English.dat");
+            if (stream != null) Language.DefaultLanguage!.Deserialize(stream);
+        }
+    }
+}
+
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
 public class Language
 {
@@ -62,7 +76,7 @@ public class Language
     static public Virial.Media.Translator API = new LanguageAPI();
     static private Language? CurrentLanguage = null;
     static private Language? GuestLanguage = null;
-    static private Language? DefaultLanguage = null;
+    static internal Language? DefaultLanguage = null;
 
     public Dictionary<string, string> translationMap = new();
 

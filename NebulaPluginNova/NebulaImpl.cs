@@ -1,6 +1,8 @@
 ﻿using Nebula.Compat;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
+using Nebula.Scripts;
+using System.Reflection;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -16,11 +18,18 @@ public class NebulaImpl : INebula
     private static List<object> allModules = new();
     private static Dictionary<Type, object> moduleFastMap = new();
 
+    private static List<(Type type,Func<object> generator)> allDefinitions = new();
+    private static Dictionary<Type, Func<object>> definitionFastMap = new();
+
     public NebulaImpl()
     {
         Instance = this;
 
         allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API]);
+        allDefinitions.AddRange([
+            (typeof(ModAbilityButton), () => new ModAbilityButton()), 
+            (typeof(Timer), () => new Timer())
+            ]);
     }
 
     public string APIVersion => typeof(NebulaAPI).Assembly.GetName().Version?.ToString() ?? "Undefined";
@@ -29,10 +38,8 @@ public class NebulaImpl : INebula
 
     public Virial.Media.IResourceAllocator InnerslothAsset => NebulaResourceManager.InnerslothNamespace;
 
-    public Virial.Media.IResourceAllocator? GetAddonResource(string addonId)
-    {
-        return NebulaAddon.GetAddon(addonId);
-    }
+    public Virial.Media.IResourceAllocator? GetAddonResource(string addonId) => NebulaAddon.GetAddon(addonId);
+    public Virial.Media.IResourceAllocator GetCallingAddonResource(Assembly assembly) => AddonScriptManager.ScriptAssemblies.FirstOrDefault(a => a.Assembly == assembly )?.Addon!;
 
     T? INebula.Get<T>() where T : class
     {
@@ -42,6 +49,16 @@ public class NebulaImpl : INebula
         var result = allModules.FirstOrDefault(m => m.GetType().IsAssignableTo(type));
         if (result != null) moduleFastMap[type] = result;
         return result as T;
+    }
+
+    T? INebula.Instantiate<T>() where T : class
+    {
+        var type = typeof(T);
+        if (definitionFastMap.TryGetValue(type, out var module))
+            return module as T;
+        var result = allDefinitions.FirstOrDefault(m => m.type.IsAssignableTo(type)).generator;
+        if (result != null) definitionFastMap[type] = result;
+        return result?.Invoke() as T;
     }
 
     Virial.Game.Game? INebula.CurrentGame => NebulaGameManager.Instance;

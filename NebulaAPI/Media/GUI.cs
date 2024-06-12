@@ -222,7 +222,7 @@ public interface GUI
     /// <param name="image">画像</param>
     /// <param name="size">表示する大きさ</param>
     /// <returns>生成されたウィジェット定義</returns>
-    GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidget? overlay = null);
+    GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null);
 
     /// <summary>
     /// スクロールビューです。

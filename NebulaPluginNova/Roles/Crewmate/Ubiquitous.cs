@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Patches;
+using Nebula.Utilities;
 using Nebula.VoiceChat;
 using Virial;
 using Virial.Assignable;
@@ -262,6 +263,7 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
     private Ubiquitous(): base("ubiquitous", new(56,155,223), RoleCategory.CrewmateRole, Crewmate.MyTeam, [droneCoolDownOption, droneDurationOption, droneMicrophoneRadiousOption, droneDetectionRadiousOption, doorHackCoolDownOption, doorHackRadiousOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+        //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Ubiquitous.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -286,9 +288,9 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
         UbiquitousMapLayer? mapLayer = null;
         List<Vector2> dronePos = new();
 
-        static private ISpriteLoader droneButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneButton.png", 115f);
-        static private ISpriteLoader callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
-        static private ISpriteLoader hackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneHackButton.png", 115f);
+        static private Image droneButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneButton.png", 115f);
+        static private Image callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
+        static private Image hackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneHackButton.png", 115f);
 
         [Local]
         void OnOpenNormalMap(MapOpenNormalEvent ev)
@@ -365,6 +367,10 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                             myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.TruePosition.ToUnityVector());
 
                             droneCam = UnityHelper.CreateRenderingCamera("Camera", myDrone.transform, Vector3.zero, 1.4f);
+                            var isc = droneCam.gameObject.AddComponent<IgnoreShadowCamera>();
+                            isc.ShowNameText = false;
+                            droneCam.gameObject.AddComponent<ResetIgnoreShadowCamera>();
+
                             mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134, 78);
                         }
                         AmongUsUtil.ToggleCamTarget(myDrone, null);

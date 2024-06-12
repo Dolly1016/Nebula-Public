@@ -13,6 +13,7 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
 {
     private Phosphorus():base("phosphorus", new(249,188,81), RoleCategory.CrewmateRole, Crewmate.MyTeam, [NumOfLampsOption, PlaceCoolDownOption, LampCoolDownOption, LampDurationOption, LampStrengthOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
+        //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Phosphorus.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
@@ -48,8 +49,8 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? lanternButton = null;
 
-        static private ISpriteLoader placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternPlaceButton.png", 115f);
-        static private ISpriteLoader lanternButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternButton.png", 115f);
+        static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternPlaceButton.png", 115f);
+        static private Image lanternButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternButton.png", 115f);
 
         public Instance(GamePlayer player, int[] arguments) : base(player)
         {

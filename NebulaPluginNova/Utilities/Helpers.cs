@@ -262,6 +262,24 @@ public static class Helpers
         return PhysicsHelpers.AnyNonTriggersBetween(pos1, vector.normalized, vector.magnitude, layerMask!.Value);
     }
 
+    static public bool AnyCustomNonTriggersBetween(Vector2 pos1, Vector2 pos2, Predicate<Collider2D> predicate, int? layerMask = null)
+    {
+        layerMask ??= Constants.ShipAndAllObjectsMask;
+        var vector = pos2 - pos1;
+        
+        int num = Physics2D.RaycastNonAlloc(pos1, vector.normalized, PhysicsHelpers.castHits, vector.magnitude, layerMask!.Value);
+        bool result = false;
+        for (int i = 0; i < num; i++)
+        {
+            if (!PhysicsHelpers.castHits[i].collider.isTrigger && predicate.Invoke(PhysicsHelpers.castHits[i].collider))
+            {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
     static public IEnumerator DoTransitionFadeOut(this TransitionFade transitionFade)
     {
         yield return Effects.ColorFade(transitionFade.overlay, Color.clear, Color.black, 0.2f);

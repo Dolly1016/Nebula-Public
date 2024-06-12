@@ -15,6 +15,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     private Collator():base("collator",new(37, 159, 148), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SampleCoolDownOption, SelectiveCollatingOption, MaxTrialsOption, MaxTrialsPerMeetingOption, NumOfTubesOption, CarringOverSamplesOption, StrictClassificationOfNeutralRolesOption, MadmateIsClassifiedAsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Collator.png");
     }
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
 
@@ -24,12 +25,12 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration SelectiveCollatingOption = NebulaAPI.Configurations.Configuration("options.role.collator.selectiveCollating", false);
     static private IntegerConfiguration MaxTrialsOption = NebulaAPI.Configurations.Configuration("options.role.collator.maxTrials", (1, 15), 8);
     static private IntegerConfiguration MaxTrialsPerMeetingOption = NebulaAPI.Configurations.Configuration("options.role.collator.maxTrialsPerMeeting", (1, 5), 1, () => SelectiveCollatingOption);
-    static private IntegerConfiguration NumOfTubesOption = NebulaAPI.Configurations.Configuration("options.role.collator.numOfTubes", (2, 14), 3, () => SelectiveCollatingOption);
+    static private IntegerConfiguration NumOfTubesOption = NebulaAPI.Configurations.Configuration("options.role.collator.numOfTubes", (3, 14), 5, () => SelectiveCollatingOption);
     static private BoolConfiguration CarringOverSamplesOption = NebulaAPI.Configurations.Configuration("options.role.collator.carringOverSamples", false, () => SelectiveCollatingOption);
     static private BoolConfiguration StrictClassificationOfNeutralRolesOption = NebulaAPI.Configurations.Configuration("options.role.collator.strictClassificationForNeutralRoles", false);
     static private ValueConfiguration<int> MadmateIsClassifiedAsOption = NebulaAPI.Configurations.Configuration("options.role.collator.madmateIsClassifiedAs", ["options.role.collator.madmateIsClassifiedAs.impostor", "options.role.collator.madmateIsClassifiedAs.crewmate"], 0);
 
-    static public Collator MyRole = null;//new Collator();
+    static public Collator MyRole = null!;// new Collator();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -37,7 +38,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
 
         static private SpriteLoader meetingSprite = SpriteLoader.FromResource("Nebula.Resources.CollatorIcon.png", 115f);
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CollatorSampleButton.png", 100f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CollatorSampleButton.png", 100f);
         static private IDividedSpriteLoader tubeSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CollatorTube.png", 125f, 2, 1);
 
         public Instance(GamePlayer player, int[] arguments) : base(player){}
@@ -97,7 +98,9 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                     buttonManager?.RegisterMeetingAction(new(meetingSprite,
                     p =>
                     {
-                        if(p.IsSelected)
+                        if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
+
+                        if (p.IsSelected)
                             p.SetSelect(false);
                         else
                         {

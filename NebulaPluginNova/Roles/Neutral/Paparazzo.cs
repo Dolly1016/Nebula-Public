@@ -101,8 +101,9 @@ public class PaparazzoShot : MonoBehaviour
         cam.targetTexture = rt;
 
         foreach (var usable in ShipStatus.Instance.GetComponentsInChildren<IUsable>()) usable.SetOutline(false, false);
-        
-        cam.Render();
+
+        //一時的に影を無視して描画させる
+        using(var ignoreShadow = AmongUsUtil.IgnoreShadow(false)) cam.Render();
 
         RenderTexture.active = cam.targetTexture;
         Texture2D texture2D = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false, false);
@@ -301,8 +302,8 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
             }
         }
 
-        private ModAbilityButton? shotButton = null;
-        static private ISpriteLoader cameraButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CameraButton.png", 115f);
+        private Modules.ScriptComponents.ModAbilityButton? shotButton = null;
+        static private Image cameraButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CameraButton.png", 115f);
 
         private ComponentBinding<PaparazzoShot>? MyFinder = null;
 
@@ -340,7 +341,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                 shotsHolder = HudContent.InstantiateContent("Pictures", true, true, false, true);
                 this.Bind(shotsHolder.gameObject);
 
-                shotButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                shotButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
                 shotButton.SetSprite(cameraButtonSprite.GetSprite());
                 shotButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && MyFinder != null;
                 shotButton.Visibility = (button) => !MyPlayer.IsDead;

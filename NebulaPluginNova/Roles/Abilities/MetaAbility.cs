@@ -27,7 +27,7 @@ public class MetaAbility : ComponentHolder, IGameOperator, IModule
         roleButton.SetLabel("operate");
     }
 
-    static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MetaActionButton.png", 115f);
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MetaActionButton.png", 115f);
 
     private void OpenRoleWindow()
     {

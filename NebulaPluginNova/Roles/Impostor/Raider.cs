@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Game.Statistics;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
@@ -149,7 +150,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AxeButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AxeButton.png", 115f);
         
         public RaiderAxe? MyAxe = null;
         bool RuntimeRole.HasVanillaKillButton => false;
@@ -199,7 +200,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                 };
                 killButton.CoolDownTimer = Bind(new Timer(ThrowCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabel("throw");
-                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
+                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetCanUseByMouseClick();
             }
         }

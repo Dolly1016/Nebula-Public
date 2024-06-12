@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Assignment;
+﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Assignment;
 using Nebula.Roles.Neutral;
 using Nebula.VoiceChat;
 using Virial;

@@ -1,5 +1,6 @@
 ﻿using Nebula.Behaviour;
 using Nebula.Compat;
+using Nebula.Game.Statistics;
 using Nebula.Roles;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Assignment;
@@ -329,7 +330,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         HudGrid = HudManager.Instance.gameObject.AddComponent<HudGrid>();
         RuntimeAsset = new();
 
-        var vcConnectButton = new ModAbilityButton(true);
+        var vcConnectButton = new Modules.ScriptComponents.ModAbilityButton(true);
         vcConnectButton.Visibility = (_) => VoiceChatManager != null && GameState == NebulaGameStates.NotStarted;
         vcConnectButton.Availability = (_) =>true;
         vcConnectButton.SetSprite(vcConnectSprite.GetSprite());
@@ -513,7 +514,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
         {
-            KillButtonTracker ??= ObjectTrackers.ForPlayer(null, NebulaGameManager.Instance!.LocalPlayerInfo, p => !p.AmOwner && !p.IsDead && !p.IsImpostor && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
+            KillButtonTracker ??= ObjectTrackers.ForPlayer(null, NebulaGameManager.Instance!.LocalPlayerInfo, p => !p.AmOwner && !p.IsDead && !p.Unbox().IsInvisible && !p.IsImpostor && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
             HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
         }
 
@@ -539,47 +540,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         HudManager.Instance.UpdateHudContent();
 
         ConsoleRestriction?.OnGameStart();
-
-        //実績
-        new AchievementToken<int>("challenge.death2", 0, (exileAnyone, _) => (NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.IsDead && p.MyKiller == LocalPlayerInfo && p != LocalPlayerInfo).Select(p => p.PlayerState).Distinct().Count() + exileAnyone) >= 4);
-        if (Helpers.CurrentMonth == 3) new AchievementToken<int>("graduation2", 0, (exileAnyone, _) => exileAnyone >= 3);
-
-        if (Helpers.CurrentMonth == 5 && (AmongUsUtil.CurrentMapId is 1 or 4))
-        {
-            if (LocalPlayerInfo.Unbox().TryGetModifier<Lover.Instance>(out var lover)) {
-                var myLover = lover.MyLover;
-                float time = 0f;
-                bool isCleared = false;
-                new NebulaGameScript() {
-                    OnUpdateEvent = () =>
-                    {
-                        if (isCleared) return;
-
-                        if (!lover.IsDeadObject && !LocalPlayerInfo.IsDead && !myLover!.IsDead)
-                        {
-                            if (
-                                LocalPlayerInfo.HasAttribute(PlayerAttributes.Accel) &&
-                                myLover.HasAttribute(PlayerAttributes.Accel) &&
-                                LocalPlayerInfo.VanillaPlayer.MyPhysics.Velocity.magnitude > 0f &&
-                                LocalPlayerInfo.VanillaPlayer.transform.position.Distance(myLover.VanillaPlayer.transform.position) < 2f
-                            )
-                            {
-                                time += Time.deltaTime;
-                                if (time > 5f)
-                                {
-                                    new StaticAchievementToken("koinobori");
-                                    isCleared = true;
-                                }
-                            }
-                            else
-                            {
-                                time = 0f;
-                            }
-                        }
-                    }
-                };
-            }
-        }
     }
 
     public void OnGameEnd()

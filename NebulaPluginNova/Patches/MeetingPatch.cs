@@ -21,7 +21,7 @@ public static class MeetingModRpc
         var ordered = __instance.playerStates.OrderBy(p => p.TargetPlayerId + 32 * rank.Invoke(NebulaGameManager.Instance!.GetPlayer(p.TargetPlayerId)!)).ToArray();
 
         for(int i = 0; i < ordered.Length; i++)
-            __instance.StartCoroutine(ordered[i].transform.Smooth(ToVoteAreaPos(i), 1.5f).WrapToIl2Cpp());
+            __instance.StartCoroutine(ordered[i].transform.Smooth(ToVoteAreaPos(i), 1.6f).WrapToIl2Cpp());
     }
 
     public static readonly RemoteProcess RpcBreakEmergencyButton = new("BreakEmergencyButton",
@@ -228,8 +228,8 @@ class MeetingIntroStartPatch
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
 class MeetingStartPatch
 {
-    static private ISpriteLoader LightColorSprite = SpriteLoader.FromResource("Nebula.Resources.ColorLight.png", 100f);
-    static private ISpriteLoader DarkColorSprite = SpriteLoader.FromResource("Nebula.Resources.ColorDark.png", 100f);
+    static private Image LightColorSprite = SpriteLoader.FromResource("Nebula.Resources.ColorLight.png", 100f);
+    static private Image DarkColorSprite = SpriteLoader.FromResource("Nebula.Resources.ColorDark.png", 100f);
 
     class MeetingPlayerContent
     {

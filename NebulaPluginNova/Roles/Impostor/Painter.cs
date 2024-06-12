@@ -25,8 +25,8 @@ public class Painter : DefinedRoleTemplate, DefinedRole
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? paintButton = null;
 
-        static public ISpriteLoader sampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
-        static public ISpriteLoader paintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
+        static public Image sampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
+        static public Image paintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
         
         public Instance(GamePlayer player) : base(player)
         {

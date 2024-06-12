@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Il2CppSystem.Text;
 using Nebula.Commands.Tokens;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
@@ -144,7 +145,7 @@ public class CommandManager
         ICommand? INebulaResource.AsCommand() => this;
     }
 
-    static IEnumerator Preprocessor(NebulaPreprocessor preprocessor)
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         Patches.LoadPatch.LoadingText = "Loading Commands";
         yield return null;
@@ -183,6 +184,7 @@ public class CommandManager
                     {
                         bool isFirst = true;
 
+                        string? buffer = null;
                         while (true)
                         {
                             var str = reader.ReadLine();
@@ -194,11 +196,19 @@ public class CommandManager
                             }
                             else
                             {
-                                commands.Add(new StatementCommandToken(CommandManager.ParseCommand(CommandManager.ParseRawCommand(str))));
+                                if(!str.StartsWith(" ") && buffer != null)
+                                {
+                                    commands.Add(new StatementCommandToken(CommandManager.ParseCommand(CommandManager.ParseRawCommand(buffer))));
+                                    buffer = null;
+                                }
+                                if (buffer == null) buffer = str;
+                                else buffer += str;
                             }
 
                             isFirst = false;
                         }
+
+                        if(buffer != null) commands.Add(new StatementCommandToken(CommandManager.ParseCommand(CommandManager.ParseRawCommand(buffer))));
                     }
 
                     varAllocator.Register(splittedPath[splittedPath.Length - 1], new AddonCommand(arguments, commands.ToArray()));

@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.IO.Compression;
 using Cpp2IL.Core.Extensions;
+using Virial.Utilities;
 
 namespace Nebula.Utilities;
 
@@ -10,14 +11,10 @@ public interface ITextureLoader
     Texture2D GetTexture();
 }
 
-public interface ISpriteLoader : Image
-{
-}
-
 public interface IDividedSpriteLoader
 {
     Sprite GetSprite(int index);
-    ISpriteLoader AsLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
+    Image AsLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
     int Length { get; }
 }
 
@@ -30,7 +27,7 @@ public static class GraphicsHelper
         Stream? stream = assembly.GetManifestResourceStream(path);
         if (stream == null) return null!;
         var byteTexture = new byte[stream.Length];
-        var read = stream.Read(byteTexture, 0, (int)stream.Length);
+        stream.Read(byteTexture, 0, (int)stream.Length);
         LoadImage(texture, byteTexture, false);
         return texture;
     }
@@ -186,6 +183,7 @@ public class StreamTextureLoader : ITextureLoader
     {
         texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
         GraphicsHelper.LoadImage(texture, stream.ReadBytes(), false);
+        texture.hideFlags |= HideFlags.DontUnloadUnusedAsset | HideFlags.HideAndDontSave;
     }
 
     public Texture2D GetTexture() => texture;
@@ -268,7 +266,7 @@ public class AssetTextureLoader : ITextureLoader
     }
 }
 
-public class SpriteLoader : ISpriteLoader
+public class SpriteLoader : Image
 {
     Sprite sprite = null!;
     float pixelsPerUnit;
@@ -289,7 +287,16 @@ public class SpriteLoader : ISpriteLoader
     static public SpriteLoader FromResource(string address, float pixelsPerUnit) => new SpriteLoader(new ResourceTextureLoader(address), pixelsPerUnit);
 }
 
-public class ResourceExpandableSpriteLoader : ISpriteLoader
+internal class NebulaSpriteLoader : AssetBundleResource<Sprite>, Image
+{
+    protected override AssetBundle AssetBundle => NebulaAsset.AssetBundle;
+
+    Sprite Image.GetSprite() => Asset;
+
+    public NebulaSpriteLoader(string name) : base(name) { }
+}
+
+public class ResourceExpandableSpriteLoader : Image
 {
     Sprite sprite = null!;
     string address;
@@ -313,7 +320,7 @@ public class ResourceExpandableSpriteLoader : ISpriteLoader
 }
 
 
-public class DividedSpriteLoader : ISpriteLoader, IDividedSpriteLoader
+public class DividedSpriteLoader : Image, IDividedSpriteLoader
 {
     float pixelsPerUnit;
     Sprite[] sprites;
@@ -362,7 +369,7 @@ public class DividedSpriteLoader : ISpriteLoader, IDividedSpriteLoader
 
     public Sprite GetSprite() => GetSprite(0);
 
-    public ISpriteLoader AsLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
+    public Image AsLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
 
     public int Length {
         get {
@@ -377,7 +384,7 @@ public class DividedSpriteLoader : ISpriteLoader, IDividedSpriteLoader
          => new DividedSpriteLoader(new DiskTextureLoader(address), pixelsPerUnit, x, y, isSize);
 }
 
-public class XOnlyDividedSpriteLoader : ISpriteLoader, IDividedSpriteLoader
+public class XOnlyDividedSpriteLoader : Image, IDividedSpriteLoader
 {
     float pixelsPerUnit;
     Sprite[] sprites;
@@ -433,7 +440,7 @@ public class XOnlyDividedSpriteLoader : ISpriteLoader, IDividedSpriteLoader
         }
     }
 
-    public ISpriteLoader WrapLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
+    public Image WrapLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
 
     static public XOnlyDividedSpriteLoader FromResource(string address, float pixelsPerUnit, int x, bool isSize = false)
          => new XOnlyDividedSpriteLoader(new ResourceTextureLoader(address), pixelsPerUnit, x, isSize);
@@ -441,7 +448,7 @@ public class XOnlyDividedSpriteLoader : ISpriteLoader, IDividedSpriteLoader
          => new XOnlyDividedSpriteLoader(new DiskTextureLoader(address), pixelsPerUnit, x, isSize);
 }
 
-public class WrapSpriteLoader : ISpriteLoader
+public class WrapSpriteLoader : Image
 {
     Func<Sprite> supplier;
 

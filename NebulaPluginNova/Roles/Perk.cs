@@ -15,16 +15,16 @@ public record PerkDefinition(string localizedName, Image backSprite, Image iconS
         return perk;
     }
 
-    static public ISpriteLoader GetPerkIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Front" + id + ".png", 100f);
-    static public ISpriteLoader GetPerkBackIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Back" + id + ".png", 100f);
+    static public Image GetPerkIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Front" + id + ".png", 100f);
+    static public Image GetPerkBackIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Back" + id + ".png", 100f);
 }
 
 public class PerkInstance : IGameOperator, ILifespan, IReleasable
 {
-    static private ISpriteLoader IconFrameBackSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.FrameBack.png", 100f);
-    static private ISpriteLoader IconFrameSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Frame.png", 100f);
-    static private ISpriteLoader IconMaskSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.PerkMask.png", 100f);
-    static private ISpriteLoader IconHighlightSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Highlight.png", 100f);
+    static private Image IconFrameBackSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.FrameBack.png", 100f);
+    static private Image IconFrameSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Frame.png", 100f);
+    static private Image IconMaskSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.PerkMask.png", 100f);
+    static private Image IconHighlightSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Highlight.png", 100f);
 
     private bool isDead = false;
     bool ILifespan.IsDeadObject => isDead;

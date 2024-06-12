@@ -34,7 +34,7 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
         private TMPro.TextMeshPro message = null!;
         private SpriteRenderer? fullScreen;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ReviveButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ReviveButton.png", 115f);
 
         private Dictionary<byte, SystemTypes> resurrectionRoom = new();
 
@@ -97,7 +97,7 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
 
                 bool canReviveHere()
                 {
-                    return currentTargetRoom.HasValue && MyPlayer.HoldingAnyDeadBody && ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.OverlapPoint(MyPlayer.TruePosition);
+                    return currentTargetRoom.HasValue && MyPlayer.VanillaPlayer.moveable && MyPlayer.HoldingAnyDeadBody && ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.OverlapPoint(MyPlayer.TruePosition);
                 }
 
                 myArrow = Bind(new Arrow());
@@ -113,8 +113,8 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
                         foreach (var entry in ShipStatus.Instance.FastRooms)
                         {
                             if (entry.Key == SystemTypes.Ventilation) continue;
-
-                            float d = entry.Value.roomArea.Distance(MyPlayer.VanillaPlayer.Collider).distance;
+                            
+                            float d = Physics2D.ClosestPoint_Collider(MyPlayer.VanillaPlayer.transform.position, entry.Value.roomArea).magnitude;
                             if (d < ReviveMinRangeOption) continue;
 
                             cand.Add(new(d, entry.Value));
@@ -130,7 +130,7 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
                     }
 
                     currentTargetRoom = resurrectionRoom[deadBody.ParentId];
-                    myArrow.TargetPos = ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.transform.position;
+                    myArrow.TargetPos = ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.bounds.center;
                     message.text = Language.Translate("role.necromancer.phantomMessage").Replace("%ROOM%", AmongUsUtil.ToDisplayString(currentTargetRoom.Value));
                 };
 

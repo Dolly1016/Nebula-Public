@@ -296,7 +296,7 @@ public class FormulaCommand : ICommand
 
     FToken? SyntaxAnalyze(FTokenType required, FTokenType[] followerTypes, IReadOnlyArray<FToken> tokens, CommandEnvironment env, out IReadOnlyArray<FToken> follower)
     {
-        Debug.Log("Required: " + required.ToString() +", [" + tokens.Join(t => t.TokenType.ToString(), ", ")+ "]");
+        //Debug.Log("Required: " + required.ToString() +", [" + tokens.Join(t => t.TokenType.ToString(), ", ")+ "]");
 
         if (AllRule.TryGetValue(required, out var rules))
         {
@@ -311,7 +311,7 @@ public class FormulaCommand : ICommand
         //シフト
         if (tokens.Count >= 1 && tokens[0].TokenType == required)
         {
-            Debug.Log("Shift: " + required.ToString());
+            //Debug.Log("Shift: " + required.ToString());
             follower = tokens.Skip(1);
             return tokens[0];
         }

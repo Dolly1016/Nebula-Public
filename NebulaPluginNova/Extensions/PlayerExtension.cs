@@ -1,5 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;

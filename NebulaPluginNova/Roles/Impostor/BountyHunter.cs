@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Modifier;
+﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -140,7 +141,7 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 };
                 killButton.CoolDownTimer = Bind(new AdvancedTimer(AmongUsUtil.VanillaKillCoolDown, MyRole.MaxKillCoolDown).SetDefault(AmongUsUtil.VanillaKillCoolDown).SetAsKillCoolDown().Start(10f));
-                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
+                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 
                 var iconHolder = HudContent.InstantiateContent("BountyHolder",true);

@@ -88,7 +88,7 @@ public class VCClient : IDisposable
         bufferedProvider = new(new(22050, 1));
         var floatConverter = new WaveToSampleProvider(new Wave16ToFloatProvider(bufferedProvider));
         volumeFilter = new(floatConverter);
-        volumeMeter = new(volumeFilter, player.AmOwner);
+        volumeMeter = new(volumeFilter, player.AmOwner ? (() => !(NebulaGameManager.Instance?.VoiceChatManager?.CanListenSelf ?? false)) : (() => false));
         panningFilter = new(volumeMeter);
         panningFilter.Pan = 0f;
 

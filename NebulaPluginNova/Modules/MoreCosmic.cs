@@ -2,6 +2,7 @@
 using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Text.RegularExpressions;
 using Innersloth.Assets;
+using Nebula.Behaviour;
 using PowerTools;
 using System.IO.Compression;
 using System.Net;
@@ -623,6 +624,7 @@ public static class MoreCosmic
         }
     }
 
+    private static List<string> allRepos = new();
     private static async Task LoadOnline()
     {
         var response = await NebulaPlugin.HttpClient.GetAsync(new System.Uri("https://raw.githubusercontent.com/Dolly1016/MoreCosmic/master/UserCosmics.dat"), HttpCompletionOption.ResponseContentRead);
@@ -632,7 +634,8 @@ public static class MoreCosmic
 
         while (!HatManager.InstanceExists) await Task.Delay(1000);
 
-        foreach (string repo in repos.Split("\n"))
+        allRepos.AddRange(repos.Split("\n").Concat(MarketplaceData.Data?.OwningCostumes.Select(c => c.ToCostumeUrl) ?? []));
+        foreach (string repo in allRepos.ToArray())
         {
             try
             {
@@ -646,6 +649,27 @@ public static class MoreCosmic
             catch { }
         }
     }
+
+    public static async Task LoadOnlineExtra(string url)
+    {
+        if (allRepos.Contains(url)) return;
+        allRepos.Add(url);
+
+        try
+        {
+            var result = await Modules.CustomItemBundle.LoadOnline(url);
+
+            lock (loadedBundles)
+            {
+                loadedBundles.Add(result);
+            }
+        }
+        catch (Exception e){
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.MoreCosmic, "Error is occurred while loading costumes.\n" + e.ToString());
+        }
+    }
+
+
 
     static private Queue<StackfullCoroutine> ActivateQueue = new Queue<StackfullCoroutine>();
     

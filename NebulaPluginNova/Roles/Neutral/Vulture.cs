@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Game.Statistics;
+using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
@@ -27,9 +28,9 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        private ModAbilityButton? eatButton = null;
+        private Modules.ScriptComponents.ModAbilityButton? eatButton = null;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EatButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EatButton.png", 115f);
 
 
         private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
@@ -89,7 +90,7 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 var eatTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => true));
 
-                eatButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                eatButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 var usesIcon = eatButton.ShowUsesIcon(2);
                 eatButton.SetSprite(buttonSprite.GetSprite());
                 eatButton.Availability = (button) => eatTracker.CurrentTarget != null && MyPlayer.CanMove;

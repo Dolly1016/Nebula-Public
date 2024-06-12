@@ -197,6 +197,11 @@ public enum AttributeAsset
     /// マーケットプレイスの見出しで使われている固定長テキスト属性です。
     /// </summary>
     MarketplaceBlurb,
+
+    /// <summary>
+    /// マーケットプレイスで四角いボタンに使われているテキスト属性です。
+    /// </summary>
+    MarketplacePublishButton,
 }
 
 [Flags]

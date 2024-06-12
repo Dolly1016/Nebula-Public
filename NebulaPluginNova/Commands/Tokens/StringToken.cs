@@ -36,7 +36,9 @@ public class StringCommandToken : ICommandToken
 
     CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(CommandEnvironment env)
     {
-        return new CoImmediateTask<IEnumerable<ICommandToken>>([env.ArgumentTable.ApplyTo(this)]);
+        var substituted = env.ArgumentTable.ApplyTo(this);
+        if (substituted == this) return  new CoImmediateTask<IEnumerable<ICommandToken>>([this]);
+        return substituted.AsEnumerable(env);
     }
 
     CoTask<T> ICommandToken.AsValue<T>(CommandEnvironment env)

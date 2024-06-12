@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Game;
@@ -21,11 +22,19 @@ internal interface INebula
     /// <returns></returns>
     T? Get<T>() where T : class;
 
+    /// <summary>
+    /// モジュールを生成します。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    T? Instantiate<T>() where T : class;
+
     // ResourceAPI
 
     IResourceAllocator NebulaAsset { get; }
     IResourceAllocator InnerslothAsset { get; }
     IResourceAllocator? GetAddonResource(string addonId);
+    IResourceAllocator GetCallingAddonResource(Assembly assembly);
     
     // GameAPI
 
@@ -49,9 +58,11 @@ public static class NebulaAPI
 
     static public IResourceAllocator NebulaAsset => instance.NebulaAsset;
     static public IResourceAllocator InnerslothAsset => instance.InnerslothAsset;
+    static public IResourceAllocator AddonAsset => instance.GetCallingAddonResource(Assembly.GetCallingAssembly());
     static public IResourceAllocator? GetAddon(string addonId) => instance.GetAddonResource(addonId);
 
-
+    static public T? Get<T>() where T : class => instance.Get<T>();
+    static public T? Instantiate<T>() where T : class => instance.Instantiate<T>();
 
 
     /// <summary>

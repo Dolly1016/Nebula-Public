@@ -1,4 +1,5 @@
-﻿using Virial.Command;
+﻿using Nebula.Game.Statistics;
+using Virial.Command;
 using Virial.Compat;
 using Virial.Game;
 

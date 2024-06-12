@@ -32,9 +32,9 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        private ModAbilityButton? chainShiftButton = null;
+        private Modules.ScriptComponents.ModAbilityButton? chainShiftButton = null;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ChainShiftButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ChainShiftButton.png", 115f);
 
 
         private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
@@ -59,7 +59,7 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 var playerTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
-                chainShiftButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                chainShiftButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 chainShiftButton.SetSprite(buttonSprite.GetSprite());
                 chainShiftButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.CanMove && shiftTarget == null;
                 chainShiftButton.Visibility = (button) => !MyPlayer.IsDead;

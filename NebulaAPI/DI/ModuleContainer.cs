@@ -85,7 +85,7 @@ public class DIManager
     private Dictionary<Type, Func<object>> allContainers = new();
     private Dictionary<Type, List<Func<object>>> allInterfaces = new();
 
-    internal ContainerImpl? Instantiate<ContainerImpl>(Action<ContainerImpl>? preprocess = null) where ContainerImpl : class
+    public ContainerImpl? Instantiate<ContainerImpl>(Action<ContainerImpl>? preprocess = null) where ContainerImpl : class
         => Instantiate(typeof(ContainerImpl), container => preprocess?.Invoke((container as ContainerImpl)!)) as ContainerImpl;
 
     internal object? Instantiate(Type type, Action<object>? preprocess = null)
@@ -135,7 +135,7 @@ public class DIManager
         return true;
     }
 
-    internal void RegisterContainer<ContainerImpl>(Func<ContainerImpl> supplier) where ContainerImpl : class, IModuleContainer
+    public void RegisterContainer<ContainerImpl>(Func<ContainerImpl> supplier) where ContainerImpl : class, IModuleContainer
     {
         var type = typeof(ContainerImpl);
 

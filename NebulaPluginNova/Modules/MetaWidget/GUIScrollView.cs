@@ -58,6 +58,35 @@ public class GUIScrollView : AbstractGUIWidget
                 actualSize = new Size(0f,0f);
             }
         }
+
+        public void SetStaticWidget(Virial.Media.GUIWidget? widget, Virial.Compat.Vector2 anchor, out Size actualSize)
+        {
+            screen.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => GameObject.Destroy(obj)));
+
+            if (widget != null)
+            {
+                Virial.Compat.Vector3 anchoredPos = new(anchor.x,anchor.y,0f);
+                anchoredPos.x -= 0.5f;
+                anchoredPos.y -= 0.5f;
+                anchoredPos.x *= innerSize.Width;
+                anchoredPos.y *= innerSize.Height;
+
+                var obj = widget.Instantiate(new(anchor, anchoredPos), innerSize, out actualSize);
+                if (obj != null)
+                {
+                    obj.transform.SetParent(screen.transform, false);
+
+                    scroller.SetBounds(new FloatRange(0, 0), null);
+                    scroller.ScrollRelative(UnityEngine.Vector2.zero);
+
+                    foreach (var button in screen.GetComponentsInChildren<PassiveButton>()) button.ClickMask = scrollerCollider;
+                }
+            }
+            else
+            {
+                actualSize = new Size(0f, 0f);
+            }
+        }
     }
 
     public string? ScrollerTag { get; init; } = null;

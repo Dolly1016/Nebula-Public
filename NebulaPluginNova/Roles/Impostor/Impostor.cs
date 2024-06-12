@@ -19,7 +19,7 @@ public class Impostor : DefinedRoleTemplate, DefinedRole
     static public BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.impostor.canKillHidingPlayer", false);
 
     static public Impostor MyRole = new Impostor();
-
+    bool DefinedSingleAssignable.IsSpawnable => true;
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

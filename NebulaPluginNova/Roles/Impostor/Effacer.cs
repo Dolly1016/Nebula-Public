@@ -12,6 +12,7 @@ public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     private Effacer() : base("effacer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EffaceCoolDownOption, EffaceDurationOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Effacer.png");
     }
 
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
@@ -21,12 +22,12 @@ public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
     static private FloatConfiguration EffaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.effacer.effaceCoolDown", (10f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration EffaceDurationOption = NebulaAPI.Configurations.Configuration("options.role.effacer.effaceDuration", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
 
-    static public Effacer MyRole = null;// new Effacer();
+    static public Effacer MyRole = null!;//new Effacer();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
         
 
         public Instance(GamePlayer player) : base(player)

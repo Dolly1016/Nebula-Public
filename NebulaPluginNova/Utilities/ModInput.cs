@@ -61,6 +61,11 @@ public class VirtualInput
     public bool KeyDownInGame => AllKeyCode().Any(a => NebulaInput.GetKeyDown(a));
     public bool KeyUpInGame => AllKeyCode().Any(a => NebulaInput.GetKeyUp(a));
     public bool KeyInGame => AllKeyCode().Any(a => NebulaInput.GetKey(a));
+
+    public bool KeyDownForAction => AllKeyCode().Any(a => NebulaInput.GetKeyDownForAction(a));
+    public bool KeyUpForAction => AllKeyCode().Any(a => NebulaInput.GetKeyUpForAction(a));
+    public bool KeyForAction => AllKeyCode().Any(a => NebulaInput.GetKeyForAction(a));
+
     public bool KeyDown => AllKeyCode().Any(a => Input.GetKeyDown(a));
     public bool KeyUp => AllKeyCode().Any(a => Input.GetKeyUp(a));
     public bool KeyState => AllKeyCode().Any(a => Input.GetKey(a));
@@ -73,6 +78,7 @@ public class VirtualInput
 public class NebulaInput
 {
     private static bool SomeUiIsActive => (ControllerManager.Instance && ControllerManager.Instance.CurrentUiState?.BackButton != null) || NebulaManager.Instance.HasSomeUI || TextField.AnyoneValid;
+    private static bool SomeInputUiIsActive => (HudManager.InstanceExists && HudManager.Instance.Chat.freeChatField.textArea.hasFocus) || TextField.AnyoneValid;
 
     public static bool GetKeyDown(KeyCode keyCode)
     {
@@ -82,13 +88,31 @@ public class NebulaInput
 
     public static bool GetKeyUp(KeyCode keyCode)
     {
-        if (SomeUiIsActive) return true;
+        if (SomeUiIsActive) return false;
         return Input.GetKeyUp(keyCode);
     }
 
     public static bool GetKey(KeyCode keyCode)
     {
         if (SomeUiIsActive) return false;
+        return Input.GetKey(keyCode);
+    }
+
+    public static bool GetKeyDownForAction(KeyCode keyCode)
+    {
+        if (SomeInputUiIsActive) return false;
+        return Input.GetKeyDown(keyCode);
+    }
+
+    public static bool GetKeyUpForAction(KeyCode keyCode)
+    {
+        if (SomeInputUiIsActive) return false;
+        return Input.GetKeyUp(keyCode);
+    }
+
+    public static bool GetKeyForAction(KeyCode keyCode)
+    {
+        if (SomeInputUiIsActive) return false;
         return Input.GetKey(keyCode);
     }
 

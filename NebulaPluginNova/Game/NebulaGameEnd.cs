@@ -4,6 +4,7 @@ using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Events.Game;
 using Virial.Runtime;
+using Nebula.Game.Statistics;
 
 namespace Nebula.Game;
 

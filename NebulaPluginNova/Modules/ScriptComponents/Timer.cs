@@ -1,4 +1,5 @@
 ﻿using Virial.Components;
+using Virial.DI;
 using Virial.Events.Game;
 using Virial.Game;
 
@@ -82,6 +83,7 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
             currentTime = Mathf.Clamp(currentTime - Time.deltaTime, min, max);
     }
 
+    public Timer() : this(0f, 0f) { }
     public Timer(float max) : this(0f, max) { }
 
     public Timer(float min, float max)

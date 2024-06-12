@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using Nebula.Game.Statistics;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -27,7 +28,7 @@ public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
 
         private ModAbilityButton? cleanButton = null;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CleanButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CleanButton.png", 115f);
 
 
         StaticAchievementToken? acTokenCommon = null;

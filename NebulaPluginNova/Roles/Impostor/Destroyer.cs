@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -12,7 +13,7 @@ public class DestroyerAssets
 {
     static private Sprite?[] handAnimSprite = [null,null,null,null];
     static private float[] handAnimSampleTime = [0.05f, 0.2f, 0.8f, 0.9f];
-    static public ISpriteLoader[] HandSprite = Helpers.Sequential(4).Select(num => new WrapSpriteLoader(() => {
+    static public Image[] HandSprite = Helpers.Sequential(4).Select(num => new WrapSpriteLoader(() => {
         if (!handAnimSprite[num]) {
             var hand = PlayerControl.LocalPlayer.cosmetics.PettingHand;
             hand.PetClip.SampleAnimation(hand.gameObject, handAnimSampleTime[num]);
@@ -65,7 +66,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
         }
 
         static private IDividedSpriteLoader spriteModBlood = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.DestroyerBlood.png",136f,6);
-        static private ISpriteLoader spriteBloodPuddle = SpriteLoader.FromResource("Nebula.Resources.BloodPuddle.png",130f);
+        static private Image spriteBloodPuddle = SpriteLoader.FromResource("Nebula.Resources.BloodPuddle.png",130f);
         private const string destroyerAttrTag = "nebula::destroyer";
         static private IEnumerator CoDestroyKill(PlayerControl myPlayer, PlayerControl target, Vector3 targetPos, bool moveToLeft)
         {
@@ -300,7 +301,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                 destroyButton.OnMeeting = button => button.StartCoolDown();
                 destroyButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
                 destroyButton.SetLabel("destroyerKill");
-                destroyButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
+                destroyButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
             }
         }
 

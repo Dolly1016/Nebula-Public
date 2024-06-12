@@ -102,20 +102,26 @@ public class CoChainedTask<T, S> : CoTask<T>
 {
     CoTask<S> precedeTask;
     TaskSupplier<T, S> followerSupplier;
-    Action? onFailed;
+    Func<CoTask<T>?>? onFailed;
 
     public IEnumerator CoWait()
     {
         yield return precedeTask.CoWait();
+
+        CoTask<T>? follower = null;
         if (precedeTask.IsFailed)
         {
             IsCompleted = true;
             IsFailed = true;
-            onFailed?.Invoke();
-            yield break;
+            follower = onFailed?.Invoke();
+        }
+        else
+        {
+            follower = followerSupplier.Invoke(precedeTask.Result);
         }
 
-        var follower = followerSupplier.Invoke(precedeTask.Result);
+        if (follower == null) yield break;
+
         yield return follower.CoWait();
 
         if (follower.IsFailed)
@@ -133,7 +139,7 @@ public class CoChainedTask<T, S> : CoTask<T>
     public bool IsFailed { get; private set; } = false;
     public T Result { get; private set; }
 
-    public CoChainedTask(CoTask<S> precedeTask, TaskSupplier<T, S> followerSupplier, Action? onFailed = null)
+    public CoChainedTask(CoTask<S> precedeTask, TaskSupplier<T, S> followerSupplier, Func<CoTask<T>?>? onFailed = null)
     {
         this.precedeTask = precedeTask;
         this.followerSupplier = followerSupplier;
@@ -152,14 +158,19 @@ public static class CoChainedTasksHelper
     /// <param name="onFailed"></param>
     /// <param name="followerSupplier"></param>
     /// <returns></returns>
-    public static CoTask<T> Chain<T, S>(this CoTask<S> precedeTask, TaskSupplier<T, S> followerSupplier, Action? onFailed = null)
+    public static CoTask<T> Chain<T, S>(this CoTask<S> precedeTask, TaskSupplier<T, S> followerSupplier, Action onFailed)
+    {
+        return new CoChainedTask<T, S>(precedeTask, result => followerSupplier(result), () => { onFailed.Invoke(); return null; });
+    }
+
+    public static CoTask<T> Chain<T, S>(this CoTask<S> precedeTask, TaskSupplier<T, S> followerSupplier, Func<CoTask<T>?>? onFailed = null)
     {
         return new CoChainedTask<T, S>(precedeTask, result => followerSupplier(result), onFailed);
     }
 
     public static CoTask<T> ChainFast<T, S>(this CoTask<S> precedeTask, Func<S, T> followerSupplier, Action? onFailed = null)
     {
-        return new CoChainedTask<T, S>(precedeTask, result => new CoImmediateTask<T>(followerSupplier.Invoke(result)), onFailed);
+        return new CoChainedTask<T, S>(precedeTask, result => new CoImmediateTask<T>(followerSupplier.Invoke(result)), onFailed == null ? null : () => { onFailed.Invoke(); return null; });
     }
 
     public static CoTask<T> ChainIf<T, S>(this CoTask<S> precedeTask, Dictionary<S,Func<CoTask<T>>> followers, Func<CoTask<T>>? defaultFollower = null, Action? onFailed = null)
@@ -171,7 +182,7 @@ public static class CoChainedTasksHelper
             else
                 return defaultFollower?.Invoke() ?? new CoImmediateErrorTask<T>();
             
-        }, onFailed);
+        }, onFailed == null ? null : () => { onFailed.Invoke(); return null; });
     }
 
     /// <summary>
@@ -184,7 +195,7 @@ public static class CoChainedTasksHelper
     /// <param name="supplier"></param>
     /// <param name="onFailed"></param>
     /// <returns></returns>
-    public static CoTask<IEnumerable<T>> Select<T, V>(this CoTask<IEnumerable<V>> precedeTask, TaskSupplier<T, V> supplier, Action? onFailed = null)
+    public static CoTask<IEnumerable<T>> Select<T, V>(this CoTask<IEnumerable<V>> precedeTask, TaskSupplier<T, V> supplier, Func<CoTask<IEnumerable<T>>?>? onFailed = null)
     {
         return new CoChainedTask<IEnumerable<T>, IEnumerable<V>>(precedeTask, result =>
         {
@@ -204,7 +215,7 @@ public static class CoChainedTasksHelper
         }, onFailed);
     }
 
-    public static CoTask<IEnumerable<T>> SelectParallel<T, V>(this CoTask<IEnumerable<V>> precedeTask, TaskSupplier<T, V> supplier, Action? onFailed = null)
+    public static CoTask<IEnumerable<T>> SelectParallel<T, V>(this CoTask<IEnumerable<V>> precedeTask, TaskSupplier<T, V> supplier, Func<CoTask<IEnumerable<T>>?>? onFailed = null)
     {
         return new CoChainedTask<IEnumerable<T>, IEnumerable<V>>(precedeTask, result =>
         {
@@ -225,10 +236,10 @@ public static class CoChainedTasksHelper
         }, onFailed);
     }
 
-    public static CoTask<IEnumerable<T>> As<T>(this CoTask<IEnumerable<ICommandToken>> precedeTask, CommandEnvironment env, Action? onFailed = null) => precedeTask.Select(token => token.AsValue<T>(env), onFailed);
-    public static CoTask<IEnumerable<T>> AsValues<T>(this ICommandToken token, CommandEnvironment env, Action? onFailed = null) => token.AsEnumerable(env).As<T>(env, onFailed);
-    public static CoTask<IEnumerable<T>> AsValues<T>(this CoTask<ICommandToken> precedeTask, CommandEnvironment env, Action? onFailed = null) => precedeTask.Chain(token => token.AsValues<T>(env));
-    public static CoTask<IEnumerable<T>> AsParallel<T>(this CoTask<IEnumerable<ICommandToken>> precedeTask, CommandEnvironment env, Action? onFailed = null) => precedeTask.SelectParallel(token => token.AsValue<T>(env), onFailed);
+    public static CoTask<IEnumerable<T>> As<T>(this CoTask<IEnumerable<ICommandToken>> precedeTask, CommandEnvironment env, Func<CoTask<IEnumerable<T>>?>? onFailed = null) => precedeTask.Select(token => token.AsValue<T>(env), onFailed);
+    public static CoTask<IEnumerable<T>> AsValues<T>(this ICommandToken token, CommandEnvironment env, Func<CoTask<IEnumerable<T>>?>? onFailed = null) => token.AsEnumerable(env).As<T>(env, onFailed);
+    public static CoTask<IEnumerable<T>> AsValues<T>(this CoTask<ICommandToken> precedeTask, CommandEnvironment env, Func<CoTask<IEnumerable<T>>?>? onFailed = null) => precedeTask.Chain(token => token.AsValues<T>(env));
+    public static CoTask<IEnumerable<T>> AsParallel<T>(this CoTask<IEnumerable<ICommandToken>> precedeTask, CommandEnvironment env, Func<CoTask<IEnumerable<T>>?>? onFailed = null) => precedeTask.SelectParallel(token => token.AsValue<T>(env), onFailed);
 
     /// <summary>
     /// 条件に沿った値のみを抽出します。
@@ -238,14 +249,14 @@ public static class CoChainedTasksHelper
     /// <param name="predicate"></param>
     /// <param name="onFailed"></param>
     /// <returns></returns>
-    public static CoTask<IEnumerable<T>> Where<T>(this CoTask<IEnumerable<T>> precedeTask, Predicate<T> predicate, Action? onFailed = null)
+    public static CoTask<IEnumerable<T>> Where<T>(this CoTask<IEnumerable<T>> precedeTask, Predicate<T> predicate, Func<CoTask<IEnumerable<T>>?>? onFailed = null)
     {
         return new CoChainedTask<IEnumerable<T>, IEnumerable<T>>(precedeTask,
             result => new CoImmediateTask<IEnumerable<T>>(result.Where(v => predicate.Invoke(v)))
         , onFailed);
     }
 
-    public static CoTask<ICommandToken> Do<T>(this CoTask<IEnumerable<T>> precedeTask, Action<T> consumer, Action? onFailed = null)
+    public static CoTask<ICommandToken> Do<T>(this CoTask<IEnumerable<T>> precedeTask, Action<T> consumer, Func<CoTask<ICommandToken>?>? onFailed = null)
     {
         return new CoChainedTask<ICommandToken, IEnumerable<T>>(precedeTask, result =>
         {

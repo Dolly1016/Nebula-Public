@@ -83,6 +83,8 @@ internal class ConfigurationHolder : IConfigurationHolder
 
     ConfigurationHolderState IConfigurationHolder.DisplayOption => state?.Invoke() ?? ConfigurationHolderState.Activated;
     void IConfigurationHolder.SetDisplayState(Func<ConfigurationHolderState> state) => this.state = state;
+
+    public Image? Illustration { get; set; }
 }
 
 public class ConfigurationTags

@@ -143,12 +143,6 @@ public class StructCommandToken : ICommandToken
             .Chain(val => new CoImmediateTask<ICommandToken>(new StructCommandToken(new ReadOnlyArray<(ICommandToken label,ICommandToken value)>(val))));
     }
 
-    CoTask<IEnumerable<ICommandToken>> ICommandToken.AsEnumerable(CommandEnvironment env)
-    {
-        env.Logger.PushError("Struct Tokens can be not evaluated as enumerable.");
-        throw new Exception();
-    }
-
     CoTask<T> ICommandToken.AsValue<T>(CommandEnvironment env)
     {
         var type = typeof(T);

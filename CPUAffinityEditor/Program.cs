@@ -32,7 +32,7 @@ namespace CPUAffinityEditor
                 result[i] = new FloatWithIndex(i);
                 counters[i] = new PerformanceCounter("Processor", "% Processor Time", i.ToString());
             }
-
+            
             int max = (int)(duration * 100);
             for(int t = 0; t < max; t++)
             {

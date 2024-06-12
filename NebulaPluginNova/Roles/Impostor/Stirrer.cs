@@ -28,8 +28,8 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
         private ModAbilityButton? stirButton = null;
         private ModAbilityButton? sabotageButton = null;
 
-        static public ISpriteLoader StirButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.StirButton.png", 115f);
-        static public ISpriteLoader SabotageButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FakeSaboButton.png", 115f);
+        static public Image StirButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.StirButton.png", 115f);
+        static public Image SabotageButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FakeSaboButton.png", 115f);
         
         public Instance(GamePlayer player) : base(player)
         {

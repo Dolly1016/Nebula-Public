@@ -1,4 +1,5 @@
-﻿using Virial.Compat;
+﻿using Il2CppInterop.Runtime.Injection;
+using Virial.Compat;
 using Virial.Media;
 
 namespace Nebula.Modules.GUIWidget;
@@ -54,6 +55,43 @@ public class NoSGUIImage : AbstractGUIWidget
                 button.OnMouseOut.AddListener(() => { NebulaManager.Instance.HideHelpWidgetIf(button); });
             }
         }
+
+        return renderer.gameObject;
+    }
+}
+
+public class GUILoadingIconRotator : MonoBehaviour
+{
+    static GUILoadingIconRotator() => ClassInjector.RegisterTypeInIl2Cpp<GUILoadingIconRotator>();
+
+    public float Speed = 1f;
+    void Update()
+    {
+        transform.localEulerAngles += new UnityEngine.Vector3(0f, 0f, Speed * 480f * Time.deltaTime);
+    }
+}
+public class GUILoadingIcon : AbstractGUIWidget
+{
+    static private Image LoadingSprite = SpriteLoader.FromResource("Nebula.Resources.LoadingIcon.png", 100f);
+    public float Speed { get; init; } = 1f;
+    public float Size { get; init; } = 1f;
+    public bool IsMasked { get; init; } = false;
+
+    public GUILoadingIcon(GUIAlignment alignment) : base(alignment)
+    {
+    }
+
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
+    {
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Image", null, UnityEngine.Vector3.zero, LayerExpansion.GetUILayer());
+        renderer.gameObject.AddComponent<GUILoadingIconRotator>();
+        renderer.sprite = LoadingSprite.GetSprite();
+        renderer.sortingOrder = 10;
+        if (IsMasked) renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+
+        renderer.transform.localScale = UnityEngine.Vector3.one * Size;
+
+        actualSize = new(renderer.size * Size);
 
         return renderer.gameObject;
     }

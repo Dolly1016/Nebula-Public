@@ -1,4 +1,5 @@
 ﻿using Nebula.Compat;
+using Nebula.Game.Statistics;
 using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
 using Virial;
@@ -55,7 +56,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             myKillingTotal = myTotalKilling;
         }
 
-        static private ISpriteLoader sidekickButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SidekickButton.png", 115f);
+        static private Image sidekickButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SidekickButton.png", 115f);
 
         bool RuntimeRole.CanUseVent => true;
         int[]? RuntimeAssignable.RoleArguments => [JackalTeamId, killingTotal, myKillingTotal];
@@ -136,7 +137,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                     }
                 };
                 killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(Virial.Components.AbilityButton.LabelType.Impostor);
+                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 
                 if (GeneralConfigurations.JackalRadioOption)

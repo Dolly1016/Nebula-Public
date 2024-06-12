@@ -3,8 +3,8 @@
 [HarmonyPatch(typeof(GameSettingMenu), nameof(GameSettingMenu.Start))]
 public class GameSettingMenuStartPatch
 {
-    public static ISpriteLoader nebulaTabSprite = SpriteLoader.FromResource("Nebula.Resources.TabIcon.png",100f);
-    public static ISpriteLoader presetTabSprite = SpriteLoader.FromResource("Nebula.Resources.TabIconPreset.png", 100f);
+    public static Image nebulaTabSprite = SpriteLoader.FromResource("Nebula.Resources.TabIcon.png",100f);
+    public static Image presetTabSprite = SpriteLoader.FromResource("Nebula.Resources.TabIconPreset.png", 100f);
     private static GameObject CreateTab(GameSettingMenu __instance,string tabName,Sprite tabSprite)
     {
         var tabs = __instance.Tabs.transform;

@@ -36,7 +36,7 @@ public class GUITextField : AbstractGUIWidget
         background.drawMode = SpriteDrawMode.Sliced;
         background.tileMode = SpriteTileMode.Continuous;
         background.size = unitySize;
-        if (!IsSharpField) background.size += new UnityEngine.Vector2(0.12f, 0f);
+        if (!IsSharpField) background.size += new UnityEngine.Vector2(0.12f, 0.12f);
         background.sortingOrder = 5;
         if (WithMaskMaterial) background.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         var collider = background.gameObject.AddComponent<BoxCollider2D>();
@@ -48,7 +48,7 @@ public class GUITextField : AbstractGUIWidget
         if (DefaultText.Length > 0) field.SetText(DefaultText);
         if (HintText != null) field.SetHint(HintText!);
 
-        actualSize = new Size(unitySize + new UnityEngine.Vector2(IsSharpField ? 0.1f : 0.22f, 0.1f));
+        actualSize = new Size(unitySize + new UnityEngine.Vector2(IsSharpField ? 0.1f : 0.22f, IsSharpField ? 0.1f : 0.22f));
         return obj;
     }
 }

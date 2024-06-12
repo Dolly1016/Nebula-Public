@@ -1,4 +1,7 @@
-﻿using Nebula.Roles.Abilities;
+﻿using Hazel.Udp;
+using Nebula.Roles.Abilities;
+using Nebula.Roles.Assignment;
+using Nebula.Roles.Complex;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -12,6 +15,7 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
 {
     private Jailer() : base("jailer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CanMoveWithMapWatchingOption,CanIdentifyDeadBodiesOption,CanIdentifyImpostorsOption, InheritAbilityOnDyingOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+        ConfigurationHolder?.ScheduleAddRelated(() => [JailerModifier.MyRole.ConfigurationHolder!]);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -22,6 +26,8 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
     static public BoolConfiguration InheritAbilityOnDyingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.inheritAbilityOnDying", false);
 
     static public Jailer MyRole = new Jailer();
+
+    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable != JailerModifier.MyRole;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -87,6 +93,47 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
                 new JailerAbility(CanIdentifyImpostorsOption, CanIdentifyDeadBodiesOption, CanMoveWithMapWatchingOption).Register(this);
             }
 
+        }
+    }
+}
+
+public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
+{
+    private JailerModifier() : base("jailer", "JLR", new(Palette.ImpostorRed), [Jailer.CanMoveWithMapWatchingOption, Jailer.CanIdentifyDeadBodiesOption, Jailer.CanIdentifyImpostorsOption], allocateToNeutral: false, allocateToCrewmate: false)
+    {
+        ConfigurationHolder?.ScheduleAddRelated(() => [Jailer.MyRole.ConfigurationHolder!]);
+    }
+    string DefinedAssignable.InternalName => "jailerModifier";
+
+    //割り当てる役職が変更されてしまうので、一番最後に割り当てる
+    int HasAssignmentRoutine.AssignPriority => 2;
+
+    static public JailerModifier MyRole = new JailerModifier();
+
+
+    // このモディファイアは実際に割り当てられることはない
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
+    {
+        public Instance(GamePlayer myPlayer) : base(myPlayer)
+        {
+        }
+
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
+
+        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort)
+        {
+            if (isShort) return null;
+            return lastRoleName + " " + (this as RuntimeModifier).DisplayColoredName;
+        }
+
+        void RuntimeAssignable.OnActivated()
+        {
+            if(AmOwner && (GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
+            {
+                new JailerAbility(Jailer.CanIdentifyImpostorsOption, Jailer.CanIdentifyDeadBodiesOption, Jailer.CanMoveWithMapWatchingOption).Register(this);
+            }
         }
     }
 }

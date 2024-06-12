@@ -6,8 +6,8 @@ namespace Nebula.Roles.Abilities;
 
 public class SpectatorsAbility : IGameOperator
 {
-    static ISpriteLoader spectatorSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorButton.png", 115f);
-    static ISpriteLoader spectatorChangeSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorChangeButton.png", 115f);
+    static Image spectatorSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorButton.png", 115f);
+    static Image spectatorChangeSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorChangeButton.png", 115f);
 
     GamePlayer? currentTarget = null;
 

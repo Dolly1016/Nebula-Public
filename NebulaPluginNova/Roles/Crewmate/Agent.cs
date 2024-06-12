@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Game.Statistics;
+using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
@@ -30,7 +31,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
         bool RuntimeRole.CanUseVent => leftVent > 0;
         private int leftVent = VentConfiguration.Uses;
         private Timer ventDuration = new Timer(VentConfiguration.Duration);
@@ -83,7 +84,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
             {
                 if (NumOfExtraTasksOption > 0)
                 {
-                    var taskButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
+                    var taskButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
                     taskButton.SetSprite(buttonSprite.GetSprite());
                     taskButton.Availability = (button) => MyPlayer.CanMove && MyPlayer.Tasks.IsCompletedCurrentTasks;
                     taskButton.Visibility = (button) => !MyPlayer.IsDead;

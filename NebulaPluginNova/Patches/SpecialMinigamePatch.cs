@@ -8,6 +8,12 @@ class SurveillanceMinigameBeginPatch
 {
     public static void Prefix(SurveillanceMinigame __instance)
     {
+        if(!__instance.CameraPrefab.gameObject.TryGetComponent<IgnoreShadowCamera>(out _))
+        {
+            var isc = __instance.CameraPrefab.gameObject.AddComponent<IgnoreShadowCamera>();
+            isc.ShowNameText = false;
+        }
+
         NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Camera, __instance.transform, new Vector3(3.4f, 2f, -50f));
     }
 }
@@ -35,6 +41,9 @@ class PlanetSurveillanceMinigameBeginPatch
 {
     public static void Prefix(PlanetSurveillanceMinigame __instance)
     {
+        var isc = __instance.Camera.gameObject.AddComponent<IgnoreShadowCamera>();
+        isc.ShowNameText = false;
+
         NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Camera, __instance.transform, new Vector3(0f, -1.9f, -50f));
     }
 }

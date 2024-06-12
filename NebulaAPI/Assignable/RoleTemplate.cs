@@ -159,13 +159,16 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
     /// </summary>
     /// <param name="modifier"></param>
     /// <returns></returns>
-    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable)
+    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable);
+
+    protected bool CanLoadDefaultTemplate(DefinedAssignable assignable)
     {
-        if (assignable is DefinedAllocatableModifier or DefinedGhostRole)
-            return true;
+        if (assignable is DefinedAllocatableModifierTemplate damt) return damt.CanAssignTo(Category);
+        if (assignable is DefinedGhostRoleTemplate dgrt) return (dgrt as DefinedSingleAssignable).Category == Category;
+        else if (assignable is DefinedAllocatableModifier or DefinedGhostRole) return true;
         return false;
     }
-    
+
     /// <summary>
     /// 幽霊役職/モディファイアを割り当てられるかどうか返します。
     /// </summary>
@@ -226,6 +229,7 @@ public class DefinedAllocatableModifierTemplate : DefinedModifierTemplate, HasAs
     private IOrderedSharableVariable<int>? CrewmateChance = null;
     private IOrderedSharableVariable<int>? ImpostorChance = null;
     private IOrderedSharableVariable<int>? NeutralChance = null;
+    internal bool CanAssignTo(RoleCategory category) => category switch { RoleCategory.ImpostorRole => ImpostorAssignment, RoleCategory.CrewmateRole => CrewmateAssignment, RoleCategory.NeutralRole => NeutralAssignment, _ => null } != null;
 
     public DefinedAllocatableModifierTemplate(string localizedName, string codeName, Virial.Color color, IEnumerable<IConfiguration>? configurations = null, bool allocateToCrewmate = true, bool allocateToImpostor = true, bool allocateToNeutral = true) : base(localizedName, color)
     {

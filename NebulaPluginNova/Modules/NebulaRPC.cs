@@ -113,7 +113,7 @@ public static class RPCRouter
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 64, Hazel.SendOption.Reliable, -1);
             writer.Write(hash);
             sender.Invoke(writer);
-            //NebulaPlugin.Log.Print(null, "sent RPC:" + name + "(size:" + writer.Length + ")");
+            //NebulaPlugin.Log.Print("sent RPC:" + name + "(size:" + writer.Length + ")");
             AmongUsClient.Instance.FinishRpcImmediately(writer);
 
             
@@ -124,7 +124,7 @@ public static class RPCRouter
             }
             catch(Exception ex)
             {
-                NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.System, $"Error in RPC(Invoke: {name})" + ex.Message + ex.StackTrace);
+                NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.System, $"Error in RPC(Invoke: {name})\n" + ex.ToString());
             }
 
             NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Called RPC : {name}");
@@ -479,7 +479,7 @@ public class RemoteProcess<Parameter> : RemoteProcessBase
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Error in RPC(Received: {Name})" + ex.Message);
+            Debug.LogError($"Error in RPC(Received: {Name})\n" + ex.ToString());
         }
     }
 }
@@ -565,7 +565,7 @@ public class RemoteProcess : RemoteProcessBase
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Error in RPC(Received: {Name})" + ex.Message);
+            Debug.LogError($"Error in RPC(Received: {Name})\n" + ex.ToString());
         }
     }
 }
@@ -622,7 +622,7 @@ public class DivisibleRemoteProcess<Parameter, DividedParameter> : RemoteProcess
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Error in RPC(Received: {Name})" + ex.Message);
+            Debug.LogError($"Error in RPC(Received: {Name})\n" + ex.ToString());
         }
     }
 }

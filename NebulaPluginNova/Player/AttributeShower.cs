@@ -4,10 +4,10 @@ public class AttributeShower
 {
     public class AttributeIcon
     {
-        private static ISpriteLoader guageSprite = SpriteLoader.FromResource("Nebula.Resources.AttributeGuage.png", 100f);
+        private static Image guageSprite = SpriteLoader.FromResource("Nebula.Resources.AttributeGuage.png", 100f);
         private static IDividedSpriteLoader imageSprites = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.AttributeIcon.png", 100f, 33, true);
-        private static ISpriteLoader[] imageLoaders = Helpers.Sequential(imageSprites.Length).Select(i => imageSprites.AsLoader(i)).ToArray();
-        public static ISpriteLoader GetIconSprite(int index) => imageLoaders[index + 2];
+        private static Image[] imageLoaders = Helpers.Sequential(imageSprites.Length).Select(i => imageSprites.AsLoader(i)).ToArray();
+        public static Image GetIconSprite(int index) => imageLoaders[index + 2];
         public Virial.Game.IPlayerAttribute Attribute { get; private set; }
         public Transform MyTransform { get; private set; }
 
@@ -29,6 +29,17 @@ public class AttributeShower
             guageRenderer.sprite = guageSprite.GetSprite();
             guageRenderer.material.shader = NebulaAsset.GuageShader;
             guageRenderer.material.SetFloat("_Guage", 1f);
+
+            if (attribute.UIName != null)
+            {
+                var collider = guageRenderer.gameObject.AddComponent<CircleCollider2D>();
+                collider.radius = 0.2f;
+                collider.isTrigger = true;
+
+                var button = guageRenderer.gameObject.SetUpButton();
+                button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.attribute." + attribute.UIName)));
+                button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+            }
 
             Attribute = attribute;
         }

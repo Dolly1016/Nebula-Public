@@ -29,8 +29,8 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
 
-        static public ISpriteLoader SampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
-        static public ISpriteLoader MorphButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
+        static public Image SampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
+        static public Image MorphButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
         
 
         StaticAchievementToken? acTokenCommon = null;

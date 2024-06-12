@@ -498,6 +498,16 @@
 "achievement.koinobori.goal" : "天空にて、Loversの二人で並んで悠々と走る。"
 "achievement.koinobori.cond" : "5月限定+Loversで二人とも<br>加速効果</br>が付与されていること+<br>5秒間</br>、移動しながら近くにいつづけること+MIRA HQ, Airship限定"
 
+"achievement.rainyStep.title" : "雨降る日の足どり"
+"achievement.rainyStep.goal" : "速度低下効果を受けながら歩き続ける。"
+"achievement.rainyStep.cond" : "6月限定+6秒間、止まらずに移動しつづけること+Polus, The Fungle限定"
+"achievement.rainyStep.flavor" : ""でんでんむし、みつけた""
+
+"achievement.rainyStepAnother.title" : "星降る日の足どり"
+"achievement.rainyStepAnother.goal" : "速度上昇効果を受けながら歩き続ける。"
+"achievement.rainyStepAnother.cond" : "6月限定+6秒間、止まらずに移動しつづけること+The Skeld限定"
+"achievement.rainyStepAnother.flavor" : ""超光速で、あなたのもとへ""
+
 "achievement.christmas.title" : "末永くご爆発下さい"
 "achievement.christmas.goal" : "ラバーズで追放される。"
 "achievement.christmas.cond" : "12月限定"

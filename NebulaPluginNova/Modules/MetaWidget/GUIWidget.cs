@@ -236,6 +236,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.MarketplaceTitle => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(2.6f, 1f, 2f), new(3.8f, 0.4f), new(255, 255, 255), false),
                 AttributeAsset.MarketplaceDeveloper => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Normal, new(1.4f, 1f, 1.4f), new(2f, 0.32f), new(255, 255, 255), false),
                 AttributeAsset.MarketplaceBlurb => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Normal, new(1.4f, 1f, 1.4f), new(6f, 0.3f), new(255, 255, 255), false),
+                AttributeAsset.MarketplacePublishButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBold)) { FontSize = new(2.2f, 0.6f, 2.2f), Size = new(0.95f, 0.17f) },
                 _ => null!
             };
         }
@@ -288,7 +289,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
 
     public Virial.Media.GUIWidget VerticalHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, float? fixedWidth = null) => new VerticalWidgetsHolder(alignment, inner) { FixedWidth = fixedWidth };
 
-    public Virial.Media.GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, Virial.Media.GUIWidget? overlay = null) => new NoSGUIImage(alignment, image, size, null, onClick, overlay);
+    public Virial.Media.GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) => new NoSGUIImage(alignment, image, size, null, onClick, overlay);
 
     public Virial.Media.GUIWidget ScrollView(GUIAlignment alignment, Size size, string? scrollerTag, Virial.Media.GUIWidget? inner, out Artifact<GUIScreen> artifact) {
         var result = new GUIScrollView(alignment, size.ToUnityVector(), inner) { ScrollerTag = scrollerTag, WithMask = true };

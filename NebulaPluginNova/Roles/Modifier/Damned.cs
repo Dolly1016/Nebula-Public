@@ -1,4 +1,5 @@
-﻿using Nebula.Utilities;
+﻿using Nebula.Game.Statistics;
+using Nebula.Utilities;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;

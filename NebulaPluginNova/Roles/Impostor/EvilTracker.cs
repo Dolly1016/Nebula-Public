@@ -104,7 +104,7 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
 
         private ModAbilityButton? trackButton = null;
 
-        static private ISpriteLoader buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TrackButton.png", 115f);
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TrackButton.png", 115f);
         
 
         public Instance(GamePlayer player) : base(player)

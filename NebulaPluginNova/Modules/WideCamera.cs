@@ -33,6 +33,8 @@ public class WideCamera
         myCamera.nearClipPlane = -1000f;
         myCamera.orthographic = true;
         myCamera.orthographicSize = 3;
+        var customIgnoreShadow = myCamera.gameObject.AddComponent<CustomIgnoreShadowCamera>();
+        customIgnoreShadow.IgnoreShadow = () => !DrawShadow;
         SetDrawShadow(true);
 
         var blackCam = UnityHelper.CreateObject<Camera>("BlackCam", myCamera.transform, Vector3.zero);
@@ -56,6 +58,7 @@ public class WideCamera
         (meshRenderer, meshFilter) = UnityHelper.CreateMeshRenderer("mesh", myCamera.transform, Vector3.zero, LayerExpansion.GetUILayer());
     }
 
+    public bool DrawShadow => drawShadow && !(NebulaGameManager.Instance?.IgnoreWalls ?? false);
     private bool drawShadow = false;
     public void SetDrawShadow(bool drawShadow)
     {

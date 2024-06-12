@@ -3,6 +3,11 @@ namespace Nebula.Utilities;
 
 public static class ManagedEffects
 {
+    static public void Do(this IEnumerator coroutine)
+    {
+        while (coroutine.MoveNext()) { }
+    }
+
     static public IEnumerator Sequence(params IEnumerator[] enumerator)
     {
         foreach(var e in enumerator) yield return e;
@@ -41,6 +46,7 @@ public static class ManagedEffects
             p += Time.deltaTime / duration;
 
             float pp = (1f - p) * (1f - p);
+            pp *= pp * pp;
             transform.localPosition = origin * pp + goalLocalPosition * (1f - pp);
             yield return null;
         }
@@ -48,7 +54,7 @@ public static class ManagedEffects
         transform.localPosition = goalLocalPosition;
     }
 
-    private static IEnumerator CoPlayEffect(int layer, string name, ISpriteLoader sprite, Transform? parent, Vector3 pos, Vector3 velocity, float angVel, float scale, Color color, float maxTime, float fadeInTime, float fadeOutTime)
+    private static IEnumerator CoPlayEffect(int layer, string name, Image sprite, Transform? parent, Vector3 pos, Vector3 velocity, float angVel, float scale, Color color, float maxTime, float fadeInTime, float fadeOutTime)
     {
         var obj = new GameObject(name);
         if (parent != null) obj.transform.SetParent(parent);
@@ -76,7 +82,7 @@ public static class ManagedEffects
         GameObject.Destroy(obj);
     }
 
-    private static ISpriteLoader smokeSprite = SpriteLoader.FromResource("Nebula.Resources.Smoke.png", 100f);
+    private static Image smokeSprite = SpriteLoader.FromResource("Nebula.Resources.Smoke.png", 100f);
     public static IEnumerator CoSmokeEffect(int layer, Transform? parent, Vector3 pos, Vector3 velocity, float angVel, float scale)
     {
         return CoPlayEffect(layer, "Smoke", smokeSprite, parent, pos, velocity, angVel, scale, Color.white, 0.4f, 0f, 0.35f);
