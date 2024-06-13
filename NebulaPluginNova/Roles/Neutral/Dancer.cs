@@ -2,6 +2,7 @@
 using Nebula.Modules.GUIWidget;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 
 namespace Nebula.Roles.Neutral;
@@ -19,22 +20,29 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
     static public float DancePlayerRange => 3f;
     static public float DanceCorpseRange => 3f;
     static public float DanceDuration => 3f;
-    public class DanceProgress
+
+    private class DanceProgress
     {
         public Vector2 Position { get; private set; }
         public EditableBitMask<GamePlayer> Players = BitMasks.AsPlayer();
         public EditableBitMask<GamePlayer> Corpses = BitMasks.AsPlayer();
         public float Progress { get; private set; }
+        public float Percentage => Progress / DanceDuration;
+        public float LeftProgress => DanceDuration - LeftProgress;
         private float failProgress = 0f;
         public bool IsFailed { get; private set; } = false;
         public bool IsCompleted { get; private set; } = false;
+        public bool IsFinishedWithSomeReason => IsCompleted || IsFailed;
         private EffectCircle Effect;
         public void Update(bool isDancing)
         {
-            if (IsCompleted || IsFailed) return;
+            if (IsFinishedWithSomeReason) return;
 
             if (isDancing)
             {
+                NebulaAPI.CurrentGame?.GetAllPlayers().Where(p => p.VanillaPlayer.transform.position.Distance(Position) < DancePlayerRange).Do(p => Players.Add(p));
+                Helpers.AllDeadBodies().Where(p => p.transform.position.Distance(Position) < DanceCorpseRange).Do(p => Corpses.Add(NebulaGameManager.Instance!.GetPlayer(p.ParentId)!));
+
                 Progress += Time.deltaTime;
                 if (Progress > DanceDuration)
                 {
@@ -49,8 +57,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                 {
                     IsFailed = true;
                     OnFinished();
-                }
-                
+                }       
             }
         }
 
@@ -71,6 +78,13 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         }
     }
 
+    private class DancePlayerIcon
+    {
+        public PoolablePlayer PlayerIcon;
+        public float LeftTime;
+        public bool Success;
+    }
+
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -79,9 +93,27 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         {
         }
 
+        GameTimer? danceCoolDownTimer = null;
+        List<DancePlayerIcon> iconList = null!;
+
         void RuntimeAssignable.OnActivated()
         {
+            iconList = new();
+
+            danceCoolDownTimer = Bind(new Timer(10f));
+            danceCoolDownTimer.ResetsAtTaskPhase();
+
+            var danceButton = Bind(new Modules.ScriptComponents.ModAbilityButton());
+            //danceButton.SetSprite(buttonSprite.GetSprite());
+            danceButton.Availability = (button) => currentDance != null && IsDancing;
+            danceButton.Visibility = (button) => !MyPlayer.IsDead;
+            danceButton.CoolDownTimer = new ScriptVisualTimer(
+                () => danceCoolDownTimer.IsProgressing ? danceCoolDownTimer.Percentage : (currentDance?.Percentage ?? 0f),
+                () => danceCoolDownTimer.IsProgressing ? danceCoolDownTimer.TimerText : currentDance != null ? Mathf.CeilToInt(currentDance.LeftProgress).ToString().Color(Color.blue) : null
+                );
+            danceButton.SetLabel("dance");
         }
+
 
         void RuntimeAssignable.OnInactivated()
         {
@@ -95,6 +127,16 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         Vector2 displacement = new();
         float distance = 0f;
         float danceGuage = 0f;
+
+        [Local]
+        void OnHudUpdate(GameHudUpdateEvent ev)
+        {
+            if(currentDance != null)
+            {
+                NebulaGameManager.Instance?.AllPlayerInfo().Where(currentDance.Players.Test).Do(p => HighlightHelpers.SetHighlight(p, MyRole.UnityColor));
+                NebulaGameManager.Instance?.AllPlayerInfo().Where(p => currentDance.Players.Test(p)).Do(p => HighlightHelpers.SetHighlight(p.RelatedDeadBody, MyRole.UnityColor));
+            }
+        }
 
         [Local]
         void OnUpdate(GameUpdateEvent ev)

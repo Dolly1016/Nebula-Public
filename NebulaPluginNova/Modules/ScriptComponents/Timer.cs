@@ -1,7 +1,9 @@
-﻿using Virial.Components;
+﻿using Rewired.Utils.Platforms.Windows;
+using Virial.Components;
 using Virial.DI;
 using Virial.Events.Game;
 using Virial.Game;
+using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 
 namespace Nebula.Modules.ScriptComponents;
 
@@ -75,7 +77,7 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
 
     public float CurrentTime { get => currentTime; }
     public virtual float Percentage { get => max > min ? (currentTime - min) / (max - min) : 0f; }
-    public bool IsInProcess => CurrentTime > min;
+    public bool IsProgressing => CurrentTime > min;
 
     void Update(GameUpdateEvent ev)
     {
@@ -128,7 +130,7 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
 
     GameTimer GameTimer.SetAsAbilityTimer() => SetAsAbilityCoolDown();
 
-    GameTimer GameTimer.Start(float? time) => Start(time);
+    void IVisualTimer.Start(float? time) => Start(time);
 
     GameTimer GameTimer.Pause() => Pause();
 
@@ -139,7 +141,7 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
     GameTimer GameTimer.SetTime(float time) => SetTime(time);
 
     GameTimer GameTimer.Expand(float time) => Expand(time);
-
+    string IVisualTimer.TimerText => currentTime > 0f ? Mathf.CeilToInt(currentTime).ToString() : null;
     internal class TimerCoolDownHelper : IGameOperator
     {
         private Timer myTimer;
@@ -181,4 +183,24 @@ public class AdvancedTimer : Timer
     public override Timer Start(float? time = null) => base.Start(time ?? defaultMax);
 
     public override float Percentage { get => Mathf.Min(1f, visualMax > min ? (currentTime - min) / (visualMax - min) : 0f); }
+}
+
+internal class ScriptVisualTimer : IVisualTimer
+{
+    private Func<float> percentage;
+    private Func<string?> text;
+
+    public ScriptVisualTimer(Func<float> percentage, Func<string?> text)
+    {
+        this.percentage = percentage;
+        this.text = text;
+    }
+
+    string? IVisualTimer.TimerText => text.Invoke();
+
+    float IVisualTimer.Percentage => percentage.Invoke();
+
+    bool IVisualTimer.IsProgressing => true;
+
+    void IVisualTimer.Start(float? time) {}
 }

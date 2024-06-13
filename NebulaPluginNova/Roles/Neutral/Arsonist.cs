@@ -127,7 +127,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                 {
                     if (douseTracker.CurrentTarget == null) return;
 
-                    if (!button.EffectTimer!.IsInProcess)
+                    if (!button.EffectTimer!.IsProgressing)
                         foreach (var icon in playerIcons) if (icon.playerId == douseTracker.CurrentTarget.PlayerId) icon.icon.SetAlpha(1f);
 
                     CheckIgnitable();

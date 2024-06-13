@@ -445,9 +445,12 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                     
                     hackButton.StartCoolDown();
                 };
-                hackButton.CoolDownTimer = Bind(new Timer(doorHackCoolDownOption).SetAsAbilityCoolDown().Start());
-                var pred = hackButton.CoolDownTimer.Predicate;
-                hackButton.CoolDownTimer.SetPredicate(()=>pred!.Invoke() || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone));
+                
+                var coolDownTimer = Bind(new Timer(doorHackCoolDownOption).SetAsAbilityCoolDown().Start());
+                var pred = coolDownTimer.Predicate;
+                coolDownTimer.SetPredicate(()=>pred!.Invoke() || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone));
+                hackButton.CoolDownTimer = coolDownTimer;
+
                 hackButton.SetLabel("doorHack");
             }
         }

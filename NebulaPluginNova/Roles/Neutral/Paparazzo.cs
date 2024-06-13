@@ -363,7 +363,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         [Local]
         void LocalUpdate(GameUpdateEvent ev)
         {
-            if (!MyPlayer.IsDead && !(shotButton?.CoolDownTimer?.IsInProcess ?? true) && MyFinder == null && !MeetingHud.Instance && !ExileController.Instance)
+            if (!MyPlayer.IsDead && !(shotButton?.CoolDownTimer?.IsProgressing ?? true) && MyFinder == null && !MeetingHud.Instance && !ExileController.Instance)
             {
                 MyFinder = Bind(new ComponentBinding<PaparazzoShot>(GameObject.Instantiate(NebulaAsset.PaparazzoShot, null).AddComponent<PaparazzoShot>()));
                 var shot = MyFinder.MyObject!;

@@ -88,13 +88,13 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
 
         void UpdateTimer()
         {
-            if (!bountyTimer.IsInProcess)
+            if (!bountyTimer.IsProgressing)
             {
                 ChangeBounty();
             }
             bountyIcon.SetName(Mathf.CeilToInt(bountyTimer.CurrentTime).ToString());
 
-            if (ShowBountyArrowOption && !arrowTimer.IsInProcess)
+            if (ShowBountyArrowOption && !arrowTimer.IsProgressing)
             {
                 UpdateArrow();
             }

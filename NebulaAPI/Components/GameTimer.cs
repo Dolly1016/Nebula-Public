@@ -1,10 +1,19 @@
 ﻿namespace Virial.Components;
 
-public interface GameTimer : IReleasable
+public interface IVisualTimer
+{
+    void Start(float? time = null);
+    string? TimerText { get; }
+    float Percentage { get; }
+
+    //タイマーが進行中であるとき、真を返します。
+    bool IsProgressing { get; }
+}
+
+public interface GameTimer : IReleasable, IVisualTimer
 {
     GameTimer SetAsKillCoolTimer();
     GameTimer SetAsAbilityTimer();
-    GameTimer Start(float? time = null);
     GameTimer Pause();
     GameTimer Resume();
     GameTimer SetRange(float min, float max);
@@ -12,8 +21,6 @@ public interface GameTimer : IReleasable
     GameTimer SetTime(float time);
     GameTimer Expand(float time);
     float CurrentTime { get; }
-    float Percentage { get; }
-    bool IsInProcess { get; }
 
     /// <summary>
     /// タイマーのクールダウンがタスクフェイズの再開時にリセットされるよう特性付けます。

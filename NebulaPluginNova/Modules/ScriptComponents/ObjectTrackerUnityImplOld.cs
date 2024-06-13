@@ -1,9 +1,27 @@
-﻿using Virial.Components;
+﻿using Nebula.Compat;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
 
+public static class HighlightHelpers
+{
+    public static void SetHighlight(Renderer renderer, UnityEngine.Color color)
+    {
+        renderer.material.SetFloat("_Outline", 1f);
+        renderer.material.SetColor("_OutlineColor", color);
+    }
+
+    internal static void SetHighlight(GamePlayer player, UnityEngine.Color color) => SetHighlight(player.VanillaPlayer.cosmetics.currentBodySprite.BodySprite, color);
+    internal static void SetHighlight(DeadBody? player, UnityEngine.Color color)
+    {
+        if (player != null) SetHighlight(player.bodyRenderers[0], color);
+    }
+
+    public static void SetHighlight(GamePlayer player, Virial.Color color) => SetHighlight(player, color.ToUnityColor());
+    public static void SetDeadBodyHighlight(GamePlayer player, Virial.Color color) => SetHighlight(player.RelatedDeadBody, color.ToUnityColor());
+}
 
 public static class ObjectTrackers
 {
@@ -69,9 +87,7 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
     {
         if (currentTarget == null) return;
 
-        var renderer = rendererConverter.Invoke(currentTarget!.Item1);
-        renderer.material.SetFloat("_Outline", 1f);
-        renderer.material.SetColor("_OutlineColor", color);
+        HighlightHelpers.SetHighlight(rendererConverter.Invoke(currentTarget!.Item1), color);
     }
 
     void HudUpdate(GameHudUpdateEvent ev)

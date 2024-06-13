@@ -93,7 +93,7 @@ public static class VentClickPatch
 {
     static bool Prefix(VentButton __instance)
     {
-        if ((!PlayerControl.LocalPlayer.inVent) && (PlayerControl.LocalPlayer?.GetModInfo()?.Unbox().Role?.VentCoolDown?.IsInProcess ?? false))
+        if ((!PlayerControl.LocalPlayer.inVent) && (PlayerControl.LocalPlayer?.GetModInfo()?.Unbox().Role?.VentCoolDown?.IsProgressing ?? false))
             return false;
 
         if (__instance.currentTarget != null)

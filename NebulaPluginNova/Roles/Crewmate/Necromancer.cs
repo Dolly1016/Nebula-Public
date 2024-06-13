@@ -145,7 +145,7 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
                 reviveButton.OnClick = (button) => button.ActivateEffect();
                 reviveButton.OnEffectEnd = (button) =>
                 {
-                    if (!button.EffectTimer!.IsInProcess)
+                    if (!button.EffectTimer!.IsProgressing)
                     {
                         var currentHolding = MyPlayer.HoldingDeadBody!;
 

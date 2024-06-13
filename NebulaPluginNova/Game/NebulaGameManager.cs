@@ -486,12 +486,12 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             var ventTimer = PlayerControl.LocalPlayer.inVent ? localModInfo.Role?.VentDuration : localModInfo.Role?.VentCoolDown;
             string ventText = "";
             float ventPercentage = 0f;
-            if (ventTimer != null && ventTimer.IsInProcess)
+            if (ventTimer != null && ventTimer.IsProgressing)
             {
                 ventText = Mathf.CeilToInt(ventTimer.CurrentTime).ToString();
                 ventPercentage = ventTimer.Percentage;
             }
-            if (ventTimer != null && !ventTimer.IsInProcess && PlayerControl.LocalPlayer.inVent)
+            if (ventTimer != null && !ventTimer.IsProgressing && PlayerControl.LocalPlayer.inVent)
             {
                 Vent.currentVent.SetButtons(false);
                 PlayerControl.LocalPlayer.MyPhysics.RpcExitVent(Vent.currentVent!.Id);

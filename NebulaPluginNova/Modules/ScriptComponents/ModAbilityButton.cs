@@ -53,9 +53,9 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
 
     public ActionButton VanillaButton { get; private set; }
 
-    public Timer? CoolDownTimer;
-    public Timer? EffectTimer;
-    public Timer? CurrentTimer => (EffectActive && (EffectTimer?.IsInProcess ?? false)) ? EffectTimer : CoolDownTimer;
+    public IVisualTimer? CoolDownTimer;
+    public IVisualTimer? EffectTimer;
+    public IVisualTimer? CurrentTimer => (EffectActive && (EffectTimer?.IsProgressing ?? false)) ? EffectTimer : CoolDownTimer;
     public bool EffectActive = false;
 
     public float CoolDownOnGameStart = 10f;
@@ -126,12 +126,12 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
 
         OnUpdate?.Invoke(this);
 
-        if (EffectActive && (EffectTimer == null || !EffectTimer.IsInProcess)) InactivateEffect();
+        if (EffectActive && (EffectTimer == null || !EffectTimer.IsProgressing)) InactivateEffect();
 
         VanillaButton.SetCooldownFill(CurrentTimer?.Percentage ?? 0f);
 
         string timerText = "";
-        if (CurrentTimer?.IsInProcess ?? false) timerText = Mathf.CeilToInt(CurrentTimer.CurrentTime).ToString();
+        if (CurrentTimer?.IsProgressing ?? false) timerText = CurrentTimer.TimerText ?? "";
         VanillaButton.cooldownTimerText.text = timerText;
         VanillaButton.cooldownTimerText.color = EffectActive ? Color.green : Color.white;
 
@@ -187,14 +187,14 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
     }
 
     public void OnGameStart(GameStartEvent ev) {
-        if (UseCoolDownSupport && CoolDownTimer != null) CoolDownTimer!.Start(Mathf.Min(CoolDownTimer!.Max, CoolDownOnGameStart));
+        if (UseCoolDownSupport && CoolDownTimer != null && CoolDownTimer is Timer timer) timer.Start(Mathf.Min(timer.Max, CoolDownOnGameStart));
         OnStartTaskPhase?.Invoke(this);
     }
 
     public ModAbilityButton DoClick()
     {
         //効果中でなく、クールダウン中ならばなにもしない
-        if (!EffectActive && (CoolDownTimer?.IsInProcess ?? false)) return this;
+        if (!EffectActive && (CoolDownTimer?.IsProgressing ?? false)) return this;
         //使用可能でないかを判定 (ボタン発火のタイミングと可視性更新のタイミングにずれが生じうるためここで再計算)
         if (!IsAvailable) return this;
 
@@ -300,21 +300,21 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
     Virial.Components.ModAbilityButton Virial.Components.ModAbilityButton.SetImage(Image image) => SetSprite(image.GetSprite());
     Virial.Components.ModAbilityButton Virial.Components.ModAbilityButton.SetLabel(string translationKey) => SetLabel(translationKey);
 
-    Virial.Components.ModAbilityButton Virial.Components.ModAbilityButton.SetCoolDownTimer(GameTimer timer)
+    Virial.Components.ModAbilityButton Virial.Components.ModAbilityButton.SetCoolDownTimer(IVisualTimer timer)
     {
-        CoolDownTimer = timer as Timer;
+        CoolDownTimer = timer;
         return this;
     }
 
-    Virial.Components.ModAbilityButton Virial.Components.ModAbilityButton.SetEffectTimer(GameTimer timer)
+    Virial.Components.ModAbilityButton Virial.Components.ModAbilityButton.SetEffectTimer(IVisualTimer timer)
     {
-        EffectTimer = timer as Timer;
+        EffectTimer = timer;
         return this;
     }
 
-    GameTimer? Virial.Components.ModAbilityButton.GetCoolDownTimer() => CoolDownTimer;
+    IVisualTimer? Virial.Components.ModAbilityButton.GetCoolDownTimer() => CoolDownTimer;
 
-    GameTimer? Virial.Components.ModAbilityButton.GetEffectTimer() => EffectTimer;
+    IVisualTimer? Virial.Components.ModAbilityButton.GetEffectTimer() => EffectTimer;
 
     Virial.Components.ModAbilityButton Virial.Components.ModAbilityButton.StartCoolDown() => StartCoolDown();
 

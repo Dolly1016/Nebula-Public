@@ -59,12 +59,13 @@ public class Provocateur : DefinedRoleTemplate, DefinedRole
                 embroilButton.OnClick = (button) => {
                     button.ActivateEffect();
                 };
+                var coolDownTimer = Bind(new Timer(0f, EmbroilCoolDownOption).SetAsAbilityCoolDown().Start());
                 embroilButton.OnEffectEnd = (button) =>
                 {
-                    button.CoolDownTimer?.Expand(EmbroilAdditionalCoolDownOption);
+                    coolDownTimer.Expand(EmbroilAdditionalCoolDownOption);
                     embroilButton.StartCoolDown();
                 };
-                embroilButton.CoolDownTimer = Bind(new Timer(0f, EmbroilCoolDownOption).SetAsAbilityCoolDown().Start());
+                embroilButton.CoolDownTimer = coolDownTimer;
                 embroilButton.EffectTimer = Bind(new Timer(0f, EmbroilDurationOption));
                 embroilButton.SetLabel("embroil");
             }

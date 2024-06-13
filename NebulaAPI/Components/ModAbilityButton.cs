@@ -16,10 +16,10 @@ public interface ModAbilityButton : IReleasable
 
     ModAbilityButton SetImage(Image image);
     ModAbilityButton SetLabel(string translationKey);
-    ModAbilityButton SetCoolDownTimer(GameTimer timer);
-    ModAbilityButton SetEffectTimer(GameTimer timer);
-    GameTimer? GetCoolDownTimer();
-    GameTimer? GetEffectTimer();
+    ModAbilityButton SetCoolDownTimer(IVisualTimer timer);
+    ModAbilityButton SetEffectTimer(IVisualTimer timer);
+    IVisualTimer? GetCoolDownTimer();
+    IVisualTimer? GetEffectTimer();
     ModAbilityButton StartCoolDown();
     ModAbilityButton StartEffect();
     ModAbilityButton InterruptEffect();
