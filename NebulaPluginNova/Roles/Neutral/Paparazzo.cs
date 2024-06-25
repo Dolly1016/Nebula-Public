@@ -171,7 +171,7 @@ public class PaparazzoShot : MonoBehaviour
             {
                 pictureScaler.transform.localScale -= (pictureScaler.transform.localScale - Vector3.one).Delta(2f, 0.02f);
                 pictureScaler.transform.localEulerAngles -= (pictureScaler.transform.localEulerAngles - Vector3.zero).Delta(2f, 0.2f);
-                transform.localPosition -= (transform.localPosition - new Vector3(0f, 0f, -10f)).Delta(3f, 0.02f);
+                transform.localPosition -= (transform.localPosition - new Vector3(0f, 0f, -10f)).Delta(8f, 0.2f);
                 t -= Time.deltaTime;
                 yield return null;
             }
@@ -341,7 +341,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                 shotsHolder = HudContent.InstantiateContent("Pictures", true, true, false, true);
                 this.Bind(shotsHolder.gameObject);
 
-                shotButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                shotButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "paparazzo.camera").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction,"paparazzo.toggle");
                 shotButton.SetSprite(cameraButtonSprite.GetSprite());
                 shotButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && MyFinder != null;
                 shotButton.Visibility = (button) => !MyPlayer.IsDead;

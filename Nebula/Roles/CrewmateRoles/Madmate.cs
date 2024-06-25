@@ -166,7 +166,7 @@ public class Madmate : Role
     }
 
     //カットするタスクの数を計上したうえで初期化
-    public override void OnSetTasks(ref List<GameData.TaskInfo> initialTasks, ref List<GameData.TaskInfo> actualTasks)
+    public override void OnSetTasks(ref List<NetworkedPlayerInfo.TaskInfo> initialTasks, ref List<NetworkedPlayerInfo.TaskInfo> actualTasks)
     {
         int impostors = 0;
         foreach (var player in PlayerControl.AllPlayerControls.GetFastEnumerator())

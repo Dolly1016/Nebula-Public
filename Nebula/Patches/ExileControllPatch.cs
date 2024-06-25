@@ -7,7 +7,7 @@ class ExileControllerPatch
     class ExileControllerBeginPatch
     {
 
-        public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref GameData.PlayerInfo exiled, [HarmonyArgument(1)] bool tie)
+        public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref NetworkedPlayerInfo exiled, [HarmonyArgument(1)] bool tie)
         {
             if (CustomOptionHolder.meetingOptions.getBool() && CustomOptionHolder.showRoleOfExiled.getBool() && GameManager.Instance.LogicOptions.GetConfirmImpostor())
             {
@@ -93,7 +93,7 @@ class ExileControllerPatch
     }
 
 
-    static void OnExiled(GameData.PlayerInfo? exiled)
+    static void OnExiled(NetworkedPlayerInfo? exiled)
     {
         if (exiled != null)
         {

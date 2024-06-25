@@ -279,7 +279,7 @@ class IntroPatch
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.CreatePlayer))]
 class CreatePlayerPatch
 {
-    public static void Postfix(IntroCutscene __instance, ref PoolablePlayer __result, ref int i, ref int maxDepth, ref GameData.PlayerInfo pData, ref bool impostorPositioning)
+    public static void Postfix(IntroCutscene __instance, ref PoolablePlayer __result, ref int i, ref int maxDepth, ref NetworkedPlayerInfo pData, ref bool impostorPositioning)
     {
         if (!impostorPositioning) return;
 

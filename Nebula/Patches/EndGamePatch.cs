@@ -744,7 +744,7 @@ public class PlayerStatistics
         Roles.Side side;
         
 
-        foreach (GameData.PlayerInfo playerInfo in GameData.Instance.AllPlayers.GetFastEnumerator())
+        foreach (NetworkedPlayerInfo playerInfo in GameData.Instance.AllPlayers.GetFastEnumerator())
         {
             try
             {

@@ -22,7 +22,7 @@ static internal class ConfigurationAssets
     {
         string detailId = id + ".detail";
 
-        var widget = DocumentManager.GetDocument(detailId)?.Build(null, false);
+        var widget = DocumentManager.GetDocument(detailId)?.Build(null);
 
         if (widget == null)
         {

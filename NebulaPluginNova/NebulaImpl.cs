@@ -63,6 +63,10 @@ public class NebulaImpl : INebula
 
     Virial.Game.Game? INebula.CurrentGame => NebulaGameManager.Instance;
 
+    Virial.Assignable.DefinedRole? INebula.GetRole(string internalName) => Roles.Roles.AllRoles.FirstOrDefault(r => r.InternalName == internalName);
+    Virial.Assignable.DefinedModifier? INebula.GetModifier(string internalName) => Roles.Roles.AllModifiers.FirstOrDefault(r => r.InternalName == internalName);
+    Virial.Assignable.DefinedGhostRole? INebula.GetGhostRole(string internalName) => Roles.Roles.AllGhostRoles.FirstOrDefault(r => r.InternalName == internalName);
+
     //ショートカット
     Virial.Configuration.Configurations Configurations => ConfigurationsAPI.API;
     Virial.Media.GUI GUILibrary => GUI.API;

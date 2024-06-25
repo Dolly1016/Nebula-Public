@@ -21,12 +21,12 @@ public class Secret : AllSideRole, ExtraAssignable
         hasMadmate = (exRoleId & 0b10) != 0;
     }
 
-    public override void OnSetTasks(ref List<GameData.TaskInfo> initialTasks, ref List<GameData.TaskInfo>? actualTasks)
+    public override void OnSetTasks(ref List<NetworkedPlayerInfo.TaskInfo> initialTasks, ref List<NetworkedPlayerInfo.TaskInfo>? actualTasks)
     {
         if (category == RoleCategory.Crewmate)
         {
             int num = (int)CustomOptionHolder.RequiredTasksForArousal.getFloat();
-            actualTasks = new List<GameData.TaskInfo>();
+            actualTasks = new List<NetworkedPlayerInfo.TaskInfo>();
 
             for (int i = 0; i < num; i++)
             {

@@ -23,10 +23,10 @@ public class PlayerCommandToken : ICommandToken
         {
             return new CoImmediateTask<T>(Unsafe.As<GamePlayer, T>(ref player));
         }
-        else if (type == typeof(GameData.PlayerOutfit))
+        else if (type == typeof(NetworkedPlayerInfo.PlayerOutfit))
         {
             var outfit = player.Unbox().DefaultOutfit;
-            return new CoImmediateTask<T>(Unsafe.As<GameData.PlayerOutfit, T>(ref outfit));
+            return new CoImmediateTask<T>(Unsafe.As<NetworkedPlayerInfo.PlayerOutfit, T>(ref outfit));
         }
         else if(type == typeof(string))
         {

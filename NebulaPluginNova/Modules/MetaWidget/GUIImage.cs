@@ -24,6 +24,12 @@ public class NoSGUIImage : AbstractGUIWidget
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
+        if(Image?.GetSprite() == null)
+        {
+            actualSize = new(0f, 0f);
+            return null;
+        }
+
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Image", null, UnityEngine.Vector3.zero,LayerExpansion.GetUILayer());
         renderer.sprite = Image.GetSprite();
         renderer.sortingOrder = 10;

@@ -47,6 +47,12 @@ internal interface INebula
     Configuration.Configurations Configurations => Get<Configuration.Configurations>()!;
     Media.GUI GUILibrary => Get<Media.GUI>()!;
     Media.Translator Language => Get<Media.Translator>()!;
+
+    //AssignableAPI
+
+    Assignable.DefinedRole? GetRole(string internalName);
+    Assignable.DefinedModifier? GetModifier(string internalName);
+    Assignable.DefinedGhostRole? GetGhostRole(string internalName);
 }
 
 public static class NebulaAPI
@@ -94,4 +100,23 @@ public static class NebulaAPI
     /// プリプロセス終了後はnullが返ります。
     /// </summary>
     static public NebulaPreprocessor? Preprocessor => preprocessor;
+
+    /// <summary>
+    /// 定義済み役職を取得します。
+    /// </summary>
+    /// <param name="internalName"></param>
+    /// <returns></returns>
+    static public Assignable.DefinedRole? GetRole(string internalName) => instance.GetRole(internalName);
+    /// <summary>
+    /// 定義済みモディファイアを取得します。
+    /// </summary>
+    /// <param name="internalName"></param>
+    /// <returns></returns>
+    static public Assignable.DefinedModifier? GetModifier(string internalName) => instance.GetModifier(internalName);
+    /// <summary>
+    /// 定義済み幽霊役職を取得します。
+    /// </summary>
+    /// <param name="internalName"></param>
+    /// <returns></returns>
+    static public Assignable.DefinedGhostRole? GetGhostRole(string internalName) => instance.GetGhostRole(internalName);
 }

@@ -21,7 +21,7 @@ public class HasHologram : Role
         {
             foreach (PlayerControl p in PlayerControl.AllPlayerControls)
             {
-                GameData.PlayerInfo data = p.Data;
+                NetworkedPlayerInfo data = p.Data;
                 PoolablePlayer player = UnityEngine.Object.Instantiate<PoolablePlayer>(Patches.IntroCutsceneOnDestroyPatch.PlayerPrefab, HudManager.Instance.transform);
 
                 player.transform.SetParent(PlayerIconsTop);

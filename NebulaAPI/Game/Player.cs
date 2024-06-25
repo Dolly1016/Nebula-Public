@@ -118,9 +118,9 @@ public static class PlayerAttributes
 
 public class Outfit
 {
-    internal GameData.PlayerOutfit outfit { get; private set; }
+    internal NetworkedPlayerInfo.PlayerOutfit outfit { get; private set; }
 
-    internal Outfit(GameData.PlayerOutfit outfit, bool clone = false)
+    internal Outfit(NetworkedPlayerInfo.PlayerOutfit outfit, bool clone = false)
     {
         if (clone)
         {
@@ -141,9 +141,9 @@ public class Outfit
 
     public override bool Equals(object? obj)
     {
-        GameData.PlayerOutfit? outfit = null;
+        NetworkedPlayerInfo.PlayerOutfit? outfit = null;
         if (obj is Outfit o) outfit = o.outfit;
-        else if (obj is GameData.PlayerOutfit po) outfit = po;
+        else if (obj is NetworkedPlayerInfo.PlayerOutfit po) outfit = po;
 
         if(outfit != null){
             return 
@@ -161,9 +161,9 @@ public class OutfitCandidate
     public string Tag { get; private set; }
     public int Priority { get; private set; }
     public bool SelfAware { get; private set; }
-    internal GameData.PlayerOutfit outfit { get; private set; }
+    internal NetworkedPlayerInfo.PlayerOutfit outfit { get; private set; }
 
-    internal OutfitCandidate(string tag, int priority, bool selfAware, GameData.PlayerOutfit outfit)
+    internal OutfitCandidate(string tag, int priority, bool selfAware, NetworkedPlayerInfo.PlayerOutfit outfit)
     {
         this.Tag = tag;
         this.Priority = priority;

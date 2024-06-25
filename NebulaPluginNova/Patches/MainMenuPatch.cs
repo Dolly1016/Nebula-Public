@@ -229,6 +229,36 @@ public static class MainMenuSetUpPatch
 
                 var inner = new MetaWidgetOld();
 
+                void AutoUpdateContent(string translationKey, Func<bool> predicate, Action onSelected)
+                {
+                    List<IMetaParallelPlacableOld> placable = new();
+
+                    placable.Add(new MetaWidgetOld.Text(CategoryAttribute) { RawText = Language.Translate("version.category.auto") });
+                    placable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
+                    placable.Add(new MetaWidgetOld.Text(NameAttribute) { TranslationKey = translationKey });
+                    placable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
+                    if(!predicate.Invoke())
+                        placable.Add(new MetaWidgetOld.Button(() => { onSelected.Invoke(); UpdateContents(category);  MetaUI.ShowConfirmDialog(null, new TranslateTextComponent("ui.update.autoUpdate")); }, ButtonAttribute) { TranslationKey = "version.fetching.setAutoUpdate", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
+                    else
+                    {
+                        placable.Add(new MetaWidgetOld.HorizonalMargin(0.13f));
+                        placable.Add(new MetaWidgetOld.Text(ButtonAttribute) { TranslationKey = "version.fetching.applied" });
+                    }
+                    
+                    inner.Append(new CombinedWidgetOld(0.5f, placable.ToArray()) { Alignment = IMetaWidgetOld.AlignmentOption.Left });
+                }
+
+                if ((category ?? ModUpdater.ReleasedInfo.ReleaseCategory.Major) == ModUpdater.ReleasedInfo.ReleaseCategory.Major)
+                    AutoUpdateContent("version.fetching.autoUpdate.major", () => NebulaLoader.NebulaLoader.AutoUpdate.Value && !NebulaLoader.NebulaLoader.UseSnapshot.Value, () => {
+                        NebulaLoader.NebulaLoader.AutoUpdate.Value = true;
+                        NebulaLoader.NebulaLoader.UseSnapshot.Value = false;
+                    });
+                if ((category ?? ModUpdater.ReleasedInfo.ReleaseCategory.Snapshot) == ModUpdater.ReleasedInfo.ReleaseCategory.Snapshot)
+                    AutoUpdateContent("version.fetching.autoUpdate.snapshot", ()=> NebulaLoader.NebulaLoader.AutoUpdate.Value && NebulaLoader.NebulaLoader.UseSnapshot.Value, () => {
+                        NebulaLoader.NebulaLoader.AutoUpdate.Value = true;
+                        NebulaLoader.NebulaLoader.UseSnapshot.Value = true;
+                    });
+
                 foreach (var version in versions)
                 {
                     if (category != null && version.Category != category) continue;
@@ -306,10 +336,10 @@ public static class MainMenuClearScreenPatch
     }
 }
 
+/*
 [HarmonyPatch(typeof(Constants), nameof(Constants.GetBroadcastVersion))]
-class ServerVersionPatch
+public class ServerVersionPatch
 {
-
     private static bool IsCustomServer()
     {
         return ServerManager.Instance?.CurrentRegion.TranslateName is StringNames.NoTranslation or null;
@@ -320,3 +350,15 @@ class ServerVersionPatch
         if(!MainMenuSetUpPatch.IsLocalGame && !IsCustomServer()) __result += 25;
     }
 }
+
+[HarmonyPatch(typeof(Constants), nameof(Constants.IsVersionModded))]
+class IsVersionModdedPatch
+{
+    static bool Prefix(ref bool __result)
+    {
+        int broadcastVersion = Constants.GetBroadcastVersion();
+        __result = Constants.GetVersionComponents(broadcastVersion).Item4 >= 25;
+        return false;
+    }
+}
+*/

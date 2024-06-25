@@ -155,9 +155,17 @@ public class VCClient : IDisposable
     private void UpdateAudio()
     {
         bool atLobby = AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Joined;
+        bool atEnd = AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Ended;
 
         //常に出来る限り普通に聞こうとするものとする
         SetListenAsVoiceType(VoiceType.Normal);
+
+        if (atEnd)
+        {
+            volumeFilter.Volume = 1f;
+            panningFilter.Pan = 0f;
+            return;
+        }
 
         //幽霊として語りかけていないとき
         if (InputtedVoiceType != VoiceType.Ghost)
@@ -191,7 +199,7 @@ public class VCClient : IDisposable
                 if (VoiceChatManager.ListenerIsDead && NebulaGameManager.Instance?.VoiceChatManager?.FilteringMode == VCFilteringMode.DeadOnly)
                     volumeFilter.Volume = 0f;
                 else
-                    volumeFilter.Volume = (VoiceChatManager.ListenerIsDead || !relatedControl.Data.IsDead) ? 1f : 0f;
+                    volumeFilter.Volume = (VoiceChatManager.ListenerIsDead || !relatedControl.Data!.IsDead) ? 1f : 0f;
                 
                 panningFilter.Pan = 0f;
                 return;

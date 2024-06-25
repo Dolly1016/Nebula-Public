@@ -26,6 +26,12 @@ public class Synchronizer : AbstractModule<Virial.Game.Game>
         sync[tag] |= (uint)1 << (int)playerId;
     }
 
+    public bool TestSyncSingle(SynchronizeTag tag, byte playerId)
+    {
+        if (!sync.TryGetValue(tag, out var val)) return false;
+        return (val & ((uint)1 << (int)playerId)) != 0;
+    }
+
     static public RemoteProcess<(SynchronizeTag, byte)> RpcSync = new(
         "Syncronize",
         (message, calledByMe) => NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.Sync(message.Item1,message.Item2)
@@ -57,13 +63,14 @@ public class Synchronizer : AbstractModule<Virial.Game.Game>
 
     public bool TestSync(SynchronizeTag tag, bool withSurviver = true, bool withGhost = false, bool withBot = false, bool withVanilla = false)
     {
+        if (!sync.TryGetValue(tag, out var val)) val = 0;
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
         {
             if (!withSurviver && !p.Data.IsDead) continue;
             if (!withGhost && p.Data.IsDead) continue;
             if (!withBot && p.isDummy) continue;
 
-            if ((sync[tag] & (1 << p.PlayerId)) == 0) return false;
+            if ((val & (1 << p.PlayerId)) == 0) return false;
         }
         return true;
     }

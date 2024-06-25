@@ -112,6 +112,8 @@ public static class NebulaExileWrapUp
         GameOperatorManager.Instance?.Run(new TaskPhaseRestartEvent());
 
         __instance.ReEnableGameplay();
+        AmongUsUtil.SetEmergencyCoolDown(0f, true);
+
         GameObject.Destroy(__instance.gameObject);
     }
 }
@@ -139,8 +141,15 @@ public static class AirshipExileWrapUpPatch
 [HarmonyPatch(typeof(ExileController), nameof(ExileController.Begin))]
 class ExileControllerBeginPatch
 {
+    public static void Prefix(ExileController __instance, [HarmonyArgument(0)] ref NetworkedPlayerInfo exiled, [HarmonyArgument(1)] ref bool tie)
+    {
+        exiled = MeetingHudExtension.ExiledAll?.FirstOrDefault()?.Data!;
+        tie = MeetingHudExtension.WasTie;
 
-    public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref GameData.PlayerInfo exiled, [HarmonyArgument(1)] bool tie)
+        Debug.Log("Rewrite Exiled: " + (exiled?.PlayerName ?? "None"));
+    }
+
+    public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref NetworkedPlayerInfo exiled, [HarmonyArgument(1)] bool tie)
     {
         if (exiled == null) return;
 

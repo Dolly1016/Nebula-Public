@@ -43,6 +43,7 @@ public static class PlayerState
     public static TranslatableTag Deranged = new("state.deranged");
     public static TranslatableTag Cursed = new("state.cursed");
     public static TranslatableTag Crushed = new("state.crushed");
+    public static TranslatableTag Frenzied = new("state.frenzied");
 
     static PlayerState()
     {
@@ -251,14 +252,14 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     public string DefaultName => DefaultOutfit.PlayerName;
     public string ColoredDefaultName => DefaultName.Color(Color.Lerp(Palette.PlayerColors[PlayerId], Color.white, 0.3f));
-    public GameData.PlayerOutfit DefaultOutfit { get; private set; }
-    public GameData.PlayerOutfit CurrentOutfit => outfits.Count > 0 ? outfits[0].outfit : DefaultOutfit;
+    public NetworkedPlayerInfo.PlayerOutfit DefaultOutfit { get; private set; }
+    public NetworkedPlayerInfo.PlayerOutfit CurrentOutfit => outfits.Count > 0 ? outfits[0].outfit : DefaultOutfit;
 
     private void UpdateOutfit()
     {
         int lastColor = MyControl.cosmetics.ColorId;
 
-        GameData.PlayerOutfit newOutfit = DefaultOutfit;
+        NetworkedPlayerInfo.PlayerOutfit newOutfit = DefaultOutfit;
         if (outfits.Count > 0)
         {
             outfits = outfits.OrderBy(o => -o.Priority).ToList();
@@ -325,7 +326,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         UpdateOutfit();
     }
 
-    public GameData.PlayerOutfit GetOutfit(int maxPriority)
+    public NetworkedPlayerInfo.PlayerOutfit GetOutfit(int maxPriority)
     {
         foreach (var outfit in outfits) if (outfit.Priority <= maxPriority) return outfit.outfit;
         return DefaultOutfit;
@@ -931,6 +932,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
             if (IsDead)
             {
+                if (MyControl.cosmetics.currentBodySprite.BodySprite != null) MyControl.cosmetics.currentBodySprite.BodySprite.color = Color.white;
+
                 if (!MyControl.AmOwner && MyControl.cosmetics.currentPet)
                 {
                     foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = Color.clear;
@@ -947,7 +950,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 UpdateVisibilityAlpha(visualInvisibleLevel);
 
                 bool isInShadow = false;
-                if (!NebulaGameManager.Instance.LocalPlayerInfo.IsDead && !AmOwner)
+                if (!NebulaGameManager.Instance!.LocalPlayerInfo.IsDead && !AmOwner)
                 {
                     //自身も生存している場合、影の中にいるプレイヤーは見えないようにする
 

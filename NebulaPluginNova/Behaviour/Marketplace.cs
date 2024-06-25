@@ -161,7 +161,10 @@ public class Marketplace : MonoBehaviour
                         else {
                             LocalMarketplaceItem item = new LocalMarketplaceItem() { EntryId = entryId, Title = Uri.UnescapeDataString(result.title), Url = Uri.UnescapeDataString(result.url) };
                             owningItems.Add(item);
-                            if (!isAddon) MoreCosmic.LoadOnlineExtra(item.ToCostumeUrl).Start();
+                            if (!isAddon)
+                            {
+                                var _ = MoreCosmic.LoadOnlineExtra(item.ToCostumeUrl);
+                            }
 
                             MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent("marketplace.ui.marketplace.activated" + (isAddon ? ".addons" : ".cosmetics")));
                         }

@@ -70,5 +70,10 @@ static public class LayerExpansion
         return 29;
     }
 
+    static public int GetRaiderColliderLayer()
+    {
+        return 28;
+    }
+
 }
 

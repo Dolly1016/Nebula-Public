@@ -6,7 +6,7 @@ namespace Nebula.Roles.Abilities;
 
 public class SpectatorsAbility : IGameOperator
 {
-    static Image spectatorSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorButton.png", 115f);
+    static Image spectatorExitSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorExitButton.png", 115f);
     static Image spectatorChangeSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectatorChangeButton.png", 115f);
 
     GamePlayer? currentTarget = null;
@@ -94,14 +94,6 @@ public class SpectatorsAbility : IGameOperator
 
     public SpectatorsAbility()
     {
-        /*
-        var spectatorButton = new ModAbilityButton(true).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Spectator));
-        spectatorButton.SetSprite(spectatorSprite.GetSprite());
-        spectatorButton.Availability = button => true;
-        spectatorButton.Visibility = button => true;
-        spectatorButton.OnClick = (button) => SwitchSpectatorMode();
-        spectatorButton.SetLabel("spectator");
-        */
 
         var spectatorChangeButton = new ModAbilityButton(true)
             .KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.SpectatorRight)).SubKeyBind(Virial.Compat.VirtualKeyInput.SpectatorLeft);
@@ -117,6 +109,20 @@ public class SpectatorsAbility : IGameOperator
             ChangeTarget(false);
         };
         spectatorChangeButton.SetLabel("spectatorChange");
+
+
+        
+        var spectatorButton = new ModAbilityButton(true).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Spectator));
+        spectatorButton.SetSprite(spectatorExitSprite.GetSprite());
+        spectatorButton.Availability = button => true;
+        spectatorButton.Visibility = button => !(currentTarget?.AmOwner ?? true);
+        spectatorButton.OnClick = (button) =>
+        {
+            currentTarget = null;
+            OnChangeTarget();
+        };
+        spectatorButton.SetLabel("spectatorExit");
+
 
         SetSpectatorMode(true);
     }

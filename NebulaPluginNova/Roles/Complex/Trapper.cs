@@ -29,7 +29,7 @@ file static class TrapperSystem
         Vector2? pos = null;
         int buttonIndex = 0;
         int leftCost = Trapper.NumOfChargesOption;
-        var placeButton = myRole.Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+        var placeButton = myRole.Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "trapper.place").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "trapper.switch");
         placeButton.SetSprite(buttonSprites[buttonVariation[0].id]?.GetSprite());
         placeButton.Availability = (button) => myRole.MyPlayer.CanMove && leftCost >= buttonVariation[buttonIndex].cost;
         placeButton.Visibility = (button) => !myRole.MyPlayer.IsDead && leftCost > 0;
@@ -87,6 +87,14 @@ file static class TrapperSystem
         }
         localTraps.Clear();
     }
+
+    public static void OnInactivated(List<Trapper.Trap> localTraps, List<Trapper.Trap>? specialTraps)
+    {
+        foreach (var lTrap in localTraps) NebulaSyncObject.LocalDestroy(lTrap.ObjectId);
+        foreach (var sTrap in specialTraps ?? []) NebulaSyncObject.LocalDestroy(sTrap.ObjectId);
+        localTraps.Clear();
+        specialTraps?.Clear();
+    }
 }
 
 [NebulaRPCHolder]
@@ -97,7 +105,7 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
         isEvil ? new(Palette.ImpostorRed) : new(206,219,96),
         isEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole,
         isEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam,
-        [NumOfChargesOption, isEvil ? CostOfKillTrapOption : CostOfCommTrapOption, PlaceCoolDownOption, PlaceDurationOption, SpeedTrapSizeOption, isEvil ? KillTrapSizeOption : CommTrapSizeOption, AccelRateOption, DecelRateOption])
+        [NumOfChargesOption, isEvil ? CostOfKillTrapOption : CostOfCommTrapOption, PlaceCoolDownOption, PlaceDurationOption, SpeedTrapSizeOption, isEvil ? KillTrapSizeOption : CommTrapSizeOption, SpeedTrapDurationOption, AccelRateOption, DecelRateOption])
     {
         IsEvil = isEvil;
 
@@ -209,6 +217,11 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
             }
         }
 
+        void RuntimeAssignable.OnInactivated()
+        {
+            if (AmOwner) TrapperSystem.OnInactivated(localTraps, commTraps);
+        }
+
         [Local]
         void OnMeetingStart(MeetingStartEvent ev)
         {
@@ -273,8 +286,13 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
             }
         }
 
+        void RuntimeAssignable.OnInactivated()
+        {
+            if (AmOwner) TrapperSystem.OnInactivated(localTraps, killTraps);
+        }
+
         [Local]
-        void OnMeetingStart() => TrapperSystem.OnMeetingStart(localTraps, killTraps);
+        void OnMeetingStart(MeetingStartEvent ev) => TrapperSystem.OnMeetingStart(localTraps, killTraps);
 
         [Local]
         void LocalUpdate(GameUpdateEvent ev)

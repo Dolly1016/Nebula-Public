@@ -589,10 +589,10 @@ public class Spectre : Role
 
     public override bool CanKnowImpostors { get => true; }
 
-    public override void OnSetTasks(ref List<GameData.TaskInfo> initialTasks, ref List<GameData.TaskInfo>? actualTasks)
+    public override void OnSetTasks(ref List<NetworkedPlayerInfo.TaskInfo> initialTasks, ref List<NetworkedPlayerInfo.TaskInfo>? actualTasks)
     {
         initialTasks.Clear();
-        if (spectreTaskOption.getSelection() != 0) initialTasks.Add(new GameData.TaskInfo(byte.MaxValue - 3, 0));
+        if (spectreTaskOption.getSelection() != 0) initialTasks.Add(new NetworkedPlayerInfo.TaskInfo(byte.MaxValue - 3, 0));
     }
 
     public override void OnMeetingEnd()

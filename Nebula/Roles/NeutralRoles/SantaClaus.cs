@@ -41,7 +41,7 @@ public class SantaClaus : Role
     public override int AssignmentCost => occupyDoubleRoleCountOption.getBool() ? 2 : 1;
     public override bool IsGuessableRole { get => isGuessableOption.getBool(); protected set => base.IsGuessableRole = value; }
 
-    public override void OnSetTasks(ref List<GameData.TaskInfo> initialTasks, ref List<GameData.TaskInfo>? actualTasks)
+    public override void OnSetTasks(ref List<NetworkedPlayerInfo.TaskInfo> initialTasks, ref List<NetworkedPlayerInfo.TaskInfo>? actualTasks)
     {
         actualTasks = Helpers.GetRandomTaskList((int)tasksPerPresentOption.getFloat(), 0.4);
     }

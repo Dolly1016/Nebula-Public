@@ -1,4 +1,5 @@
 ﻿using Nebula.Game.Statistics;
+using Nebula.Map;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -40,6 +41,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
         private float speed = AxeSpeedOption;
         private int killed = 0;
         private float thrownTime = 0f;
+        private float thrownDistance = 0f;
         AchievementToken<int>? acTokenChallenge = null;
 
         public RaiderAxe(PlayerControl owner) : base(owner.GetTruePosition(),ZOption.Front,false,staticAxeSprite.GetSprite())
@@ -60,7 +62,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                 if (AmOwner)
                 {
                     var vec = MyRenderer.transform.position - PlayerControl.LocalPlayer.transform.position;
-                    if(PhysicsHelpers.AnyNonTriggersBetween(PlayerControl.LocalPlayer.GetTruePosition(),(Vector2)vec.normalized,((Vector2)vec).magnitude, Constants.ShipAndAllObjectsMask))
+                    if(PhysicsHelpers.AnyNonTriggersBetween(PlayerControl.LocalPlayer.GetTruePosition(),(Vector2)vec.normalized,((Vector2)vec).magnitude, Constants.ShipAndAllObjectsMask) && !Physics2D.Raycast(PlayerControl.LocalPlayer.GetTruePosition(), vec, vec.magnitude, 1 << LayerExpansion.GetRaiderColliderLayer()))
                         MyRenderer.color = Color.red;
                     else
                         MyRenderer.color = Color.white;
@@ -106,7 +108,14 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                     }
                 }
 
-                if (NebulaPhysicsHelpers.AnyNonTriggersBetween(MyRenderer.transform.position, vec, speed * 4f * Time.deltaTime, Constants.ShipAndAllObjectsMask, out var d))
+                float d = speed * 4f * Time.deltaTime;
+                if (thrownDistance > 50f)
+                {
+                    state = 2;
+                    MyRenderer.gameObject.SetActive(false);
+                    NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(MyRenderer.gameObject.layer, null, MyRenderer.transform.position, 0.8f).WrapToIl2Cpp());
+                }
+                else if (!Physics2D.OverlapPoint(MyRenderer.transform.position, 1 << LayerExpansion.GetRaiderColliderLayer()) && NebulaPhysicsHelpers.AnyNonTriggersBetween(MyRenderer.transform.position, vec, speed * 4f * Time.deltaTime, Constants.ShipAndAllObjectsMask, out d))
                 {
                     state = 2;
                     MyRenderer.sprite = stuckAxeSprite.GetSprite();
@@ -121,6 +130,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                 }
 
                 Position += vec * d;
+                thrownDistance += d;
             }
             else if (state == 2) { }
         }
@@ -167,7 +177,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
             {
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("raider.another1");
 
-                equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "raider.equip");
                 equipButton.SetSprite(buttonSprite.GetSprite());
                 equipButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove;
                 equipButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -182,7 +192,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                 };
                 equipButton.SetLabel("equip");
 
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
+                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "raider.kill");
                 killButton.Availability = (button) => MyAxe != null && MyPlayer.CanMove && MyAxe.MyRenderer.color.b > 0.5f;
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) =>

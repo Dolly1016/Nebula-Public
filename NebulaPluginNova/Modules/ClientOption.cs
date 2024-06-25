@@ -18,7 +18,8 @@ public class ClientOption
         UseNoiseReduction,
         ProcessorAffinity,
         ForceSkeldMeetingSE,
-        SpoilerAfterDeath
+        SpoilerAfterDeath,
+        PlayLobbyMusic,
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
@@ -111,6 +112,22 @@ public class ClientOption
         { OnValueChanged = ReflectProcessorAffinity };
         new ClientOption(ClientOptionType.ForceSkeldMeetingSE, "forceSkeldMeetingSE", new string[] { "options.switch.off", "options.switch.on" }, 0);
         new ClientOption(ClientOptionType.SpoilerAfterDeath, "spoilerAfterDeath", new string[] { "options.switch.off", "options.switch.on" }, 1);
+        new ClientOption(ClientOptionType.PlayLobbyMusic, "playLobbyMusic", new string[] { "options.switch.off", "options.switch.on" }, 1) { 
+            OnValueChanged = () =>
+            {
+                if (!LobbyBehaviour.Instance) return;
+                bool playMusic = AllOptions[ClientOptionType.PlayLobbyMusic].Value == 1;
+
+                if (playMusic)
+                {
+                    SoundManager.Instance.CrossFadeSound("MapTheme", LobbyBehaviour.Instance.MapTheme, 0.5f, 1.5f);
+                }
+                else
+                {
+                    SoundManager.Instance.CrossFadeSound("MapTheme", null, 0.5f, 1.5f);
+                }
+            }
+        };
 
         ReflectProcessorAffinity();
     }

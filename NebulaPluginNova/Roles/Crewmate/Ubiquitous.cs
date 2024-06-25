@@ -272,7 +272,7 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration droneCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.droneCoolDown", (5f, 120f, 2.5f), 15f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration droneDurationOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.droneDuration", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static internal FloatConfiguration droneMicrophoneRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.microphoneRadious", (0f,5f,0.25f),2f, FloatConfigurationDecorator.Ratio);
-    static internal FloatConfiguration droneDetectionRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.detectionRadious", (0f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
+    static internal FloatConfiguration droneDetectionRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.detectionRadious", (0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration doorHackCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.doorHackCoolDown", (10f, 120f, 2.5f), 30f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration doorHackRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.doorHackRadious", (0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
 
@@ -339,7 +339,7 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                 ModAbilityButton callBackButton = null!;
                 ModAbilityButton droneButton;
 
-                droneButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                droneButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "ubiquitous.drone");
                 droneButton.SetSprite(droneButtonSprite.GetSprite());
                 droneButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
                 droneButton.Visibility = (button) =>
@@ -384,18 +384,6 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                 droneButton.CoolDownTimer = Bind(new Timer(droneCoolDownOption).SetAsAbilityCoolDown().Start());
                 droneButton.EffectTimer = Bind(new Timer(droneDurationOption).Start());
                 droneButton.SetLabel("drone");
-                droneButton.OnSubAction = (button) =>
-                {
-                    NebulaManager.Instance.ScheduleDelayAction(() =>
-                    {
-                        if (callBackButton.IsVisible)
-                        {
-                            droneButton.ResetKeyBind();
-                            callBackButton!.KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                            callBackButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
-                        }
-                    });
-                };
 
                 callBackButton = Bind(new ModAbilityButton());
                 callBackButton.SetSprite(callBackButtonSprite.GetSprite());
@@ -412,20 +400,10 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                 };
                 callBackButton.CoolDownTimer = Bind(new Timer(0f).SetAsAbilityCoolDown().Start());
                 callBackButton.SetLabel("callBack");
-                callBackButton.OnSubAction = (button) =>
-                {
-                    NebulaManager.Instance.ScheduleDelayAction(() =>
-                    {
-                        callBackButton.ResetKeyBind();
-                        droneButton.KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                        droneButton.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
-
-                    });
-                };
 
                 AchievementToken<int> totalAchievement = new("ubiquitous.common1", 0, (val, _) => val >= 5);
 
-                var hackButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                var hackButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "ubiquitous.doorHack");
                 hackButton.SetSprite(hackButtonSprite.GetSprite());
                 hackButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
                 hackButton.Visibility = (button) => !MyPlayer.IsDead && myDrone;

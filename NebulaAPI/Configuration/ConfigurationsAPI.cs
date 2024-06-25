@@ -161,4 +161,12 @@ public interface Configurations
     /// ゲーム内設定画面を開いているとき、画面の更新を要求します。
     /// </summary>
     void RequireUpdateSettingScreen();
+
+    /// <summary>
+    /// 名前から共有可能な値を取得します。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    ISharableVariable<T>? GetSharableVariable<T>(string id);
 }

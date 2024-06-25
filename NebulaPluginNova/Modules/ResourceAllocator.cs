@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Cpp2IL.Core.Extensions;
+using System.Reflection;
 using Virial.Compat;
 using Virial.Media;
 using Virial.Runtime;
@@ -145,7 +146,7 @@ public class StreamResource : INebulaResource {
     {
         Stream? stream = streamGetter.Invoke();
         if (stream == null) return null;
-        return new SpriteLoader(new StreamTextureLoader(stream), defaultPixsPerUnit);
+        return new SpriteLoader(new UnloadTextureLoader(stream.ReadBytes()), defaultPixsPerUnit);
     }
 }
 

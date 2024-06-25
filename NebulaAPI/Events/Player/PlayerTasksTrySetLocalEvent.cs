@@ -9,11 +9,11 @@ namespace Virial.Events.Player;
 public class PlayerTasksTrySetLocalEvent : AbstractPlayerEvent
 {
     public class Task { 
-        internal GameData.TaskInfo MyTask { get; private init; }
+        internal NetworkedPlayerInfo.TaskInfo MyTask { get; private init; }
         uint Id => MyTask.Id;
         byte TaskTypeId => MyTask.TypeId;
         
-        internal Task(GameData.TaskInfo task)
+        internal Task(NetworkedPlayerInfo.TaskInfo task)
         {
             this.MyTask = task;
         }
@@ -27,10 +27,10 @@ public class PlayerTasksTrySetLocalEvent : AbstractPlayerEvent
 
     public int ExtraQuota { get; private set; } = 0;
     public int AddExtraQuota(int extraQuota) => ExtraQuota += extraQuota;
-    internal PlayerTasksTrySetLocalEvent(Virial.Game.Player player, IEnumerable<GameData.TaskInfo> tasks):base(player)
+    internal PlayerTasksTrySetLocalEvent(Virial.Game.Player player, IEnumerable<NetworkedPlayerInfo.TaskInfo> tasks):base(player)
     {
         Tasks = new(tasks.Select(t => new Task(t)));
     }
 
-    internal IEnumerable<GameData.TaskInfo> VanillaTasks => Tasks.Select(t => t.MyTask);
+    internal IEnumerable<NetworkedPlayerInfo.TaskInfo> VanillaTasks => Tasks.Select(t => t.MyTask);
 }

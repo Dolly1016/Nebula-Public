@@ -54,6 +54,8 @@ namespace Nebula.Behaviour
             {
                 yield return new WaitForSeconds(0.5f);
                 RpcRequireHandshake.Invoke();
+                yield return new WaitForSeconds(3f);
+                RpcRequireHandshake.Invoke();
             }
 
             AmongUsClient.Instance.StartCoroutine(CoWaitAndRequireHandshake().WrapToIl2Cpp());

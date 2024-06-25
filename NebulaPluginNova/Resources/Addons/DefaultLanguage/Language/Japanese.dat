@@ -6,7 +6,7 @@
 "title.label.discord" : "NoSの公式Discordはこちらから！"
 
 "title.buttons.update" : "バージョン変更"
-"title.buttons.achievements" : "実績"
+"title.buttons.achievements" : "称号"
 "title.buttons.addons" : "アドオン"
 "title.buttons.developersStudio" : "デベロッパースタジオ"
 "title.buttons.marketplace" : "マーケットプレイス"
@@ -48,6 +48,50 @@
 "ui.discordWebhook.send" : "送信"
 "ui.dragAndDrop" : "ドラッグ&ドロップで画像を選択"
 
+"ui.attribute.accel" : "移動速度上昇"
+"ui.attribute.decel" : "移動速度低下"
+"ui.attribute.inverse" : "移動反転"
+"ui.attribute.invisible" : "透明化"
+"ui.attribute.size" : "サイズ変化"
+"ui.attribute.curseOfBloody" : "血の呪い"
+"ui.attribute.isolation" : "アドミンやバイタルに映らなくなります。"
+"ui.attribute.busker" : "バイタルでは生存しているように表示されます。"
+"ui.attribute.flip" : "画面反転"
+"ui.attribute.screenSize" : "画面サイズ変化"
+"ui.attribute.eyesight" : "視野拡大/縮小"
+"ui.attribute.rough" : "モザイク"
+
+"ui.button.mainAction" : "アクション"
+"ui.button.aidAction" : "サブアクション"
+
+"ui.action.cleaner.clean" : "死体を消し去ります。<br>能力発動時、キルクールダウンも同時に上がります。"
+"ui.action.destroyer.kill" : "プレイヤーの真横に立ち、押しつぶしてキルします。"
+"ui.action.disturber.place" : "ポールを設置します。<br>2本目以降のポールは円で示された範囲内に設置する必要があります。"
+"ui.action.disturber.disturb" : "ポール間に障壁を張ります。<br>妨害効果の終了時に、一番古いポールは壊れて消滅します。"
+"ui.action.trapper.place" : "トラップを設置します。"
+"ui.action.trapper.switch" : "設置するトラップの種類を切り替えます。"
+"ui.action.illusioner.sample" : "サンプルを採取します。"
+"ui.action.illusioner.paint" : "採取した見た目をプレイヤーに塗り付けます。"
+"ui.action.illusioner.morph" : "採取した見た目に変身します。"
+"ui.action.illusioner.switch" : "キー入力によって発動する能力を切り替えます。<br>切り替え対象: ペイント, モーフ"
+"ui.action.marionette.place" : "デコイを設置します。"
+"ui.action.marionette.destroy" : "デコイを破壊します。"
+"ui.action.marionette.monitor" : "デコイと視点を切り替えます。"
+"ui.action.marionette.swap" : "デコイと位置をスワップします。"
+"ui.action.marionette.switch" : "キー入力によって発動する能力を切り替えます。<br>切り替え対象: スワップ, 監視"
+"ui.action.raider.equip" : "斧を装備、格納します。"
+"ui.action.raider.kill" : "装備している斧を投げます。"
+"ui.action.sniper.equip" : "スナイパーライフルを装備、格納します。"
+"ui.action.sniper.kill" : "スナイパーライフルで発砲します。"
+"ui.action.stirrer.stir" : "プレイヤーに偽サボタージュのチャージを与えます。"
+"ui.action.stirrer.fakeSabo" : "チャージを消費して偽サボタージュを引き起こします。"
+"ui.action.ubiquitous.drone" : "ドローンを呼び出して視点を切り替えます。<br>すでにドローンが呼び出されている場合は、そのままドローンと視点を切り替えます。<br>ドローン操作中の場合は、元の視点に戻ります。"
+"ui.action.ubiquitous.doorHack" : "ドローン近辺のドアをこじ開けます。"
+"ui.action.paparazzo.camera" : "写真を撮影します。"
+"ui.action.paparazzo.toggle" : "ファインダーの向きを90度回転させます。"
+"ui.action.mouseClick" : "プレイヤー近辺を左クリックすることによってもアクションを発動できます。"
+"ui.action.danceAction" : "このボタンは<b>クリックで発動できません。</b><br>小刻みに動いて<b>ダンス</b>をすることで発動できます。"
+
 # Versions
 
 "version.category.all" : "すべて"
@@ -56,9 +100,14 @@
 "version.category.preRelease" : "プレリリース"
 "version.category.custom" : "カスタム"
 "version.category.unknown" : "不明"
+"version.category.auto" : "自動更新"
+"version.fetching.autoUpdate.major" : "最新の安定版"
+"version.fetching.autoUpdate.snapshot" : "最新のスナップショット"
 "version.fetching.gainPackage" : "取得"
+"version.fetching.setAutoUpdate" : "適用"
 "version.fetching.current" : "使用中"
 "version.fetching.mismatched" : "変更不可"
+"version.fetching.applied" : "適用中"
 
 # Game Mode
 
@@ -151,7 +200,10 @@
 "options.meeting.noticeExtraVictims" : "追加追放者の通知"
 "options.meeting.deathPenalty" : "死者一人当たりの会議時間減少"
 "options.meeting.numOfMeeting" : "ゲーム全体の緊急ボタンの最大回数"
+"options.meeting.emergencyCooldownAtGameStart" : "ゲーム開始時の緊急クールダウン"
 "options.meeting.showRoleOfExiled" : "追放者の役職開示"
+"options.meeting.extraEmergencyCooldownInTheEarly" : "ゲーム序盤の追加緊急クールダウン"
+"options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "ゲーム序盤終了までに必要な死者数"
 
 "options.consoleRestriction" : "情報端末制限"
 "options.consoleRestriction.detail" : "アドミンやバイタルの使用時間に制限をかけることができます。"
@@ -215,7 +267,6 @@
 "role.general.ventDuration.short" : "潜伏"
 "role.general.ventUses" : "最大使用回数"
 "role.general.ventUses.short" : "使用"
-"role.general.common" : "#"
 
 "role.category.crewmate" : "クルーメイト役職"
 "role.category.impostor" : "インポスター役職"
@@ -224,20 +275,20 @@
 
 # Complex Roles
 
-"role.guesser.numOfGuess" : "推察可能回数"
-"role.guesser.numOfGuessPerMeeting" : "会議ごとの推察可能回数"
-"role.guesser.canCallEmergencyMeeting" : "緊急会議ボタンの使用"
-"role.guesser.leftGuess" : "のこり推察回数"
+"options.role.guesser.numOfGuess" : "推察可能回数"
+"options.role.guesser.numOfGuessPerMeeting" : "会議ごとの推察可能回数"
+"options.role.guesser.canCallEmergencyMeeting" : "緊急会議ボタンの使用"
+"options.role.guesser.leftGuess" : "のこり推察回数"
 "role.guesser.guessableFilter" : "推察可能フィルター"
 "options.role.guesser.detail" : "ゲッサーは会議中にプレイヤーの役職を推察してキルすることができます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
 
-"role.trapper.placeCoolDown" : "設置クールダウン"
-"role.trapper.placeDuration" : "設置にかかる時間"
-"role.trapper.numOfCharges" : "初期割り当てコスト"
-"role.trapper.speedTrapSize" : "加減速トラップの当たり判定"
-"role.trapper.accelRate" : "加速倍率"
-"role.trapper.decelRate" : "減速倍率"
-"role.trapper.speedDuration" : "加減速トラップの効果時間"
+"options.role.trapper.placeCoolDown" : "設置クールダウン"
+"options.role.trapper.placeDuration" : "設置にかかる時間"
+"options.role.trapper.numOfCharges" : "初期割り当てコスト"
+"options.role.trapper.speedTrapSize" : "加減速トラップの当たり判定"
+"options.role.trapper.accelRate" : "加速倍率"
+"options.role.trapper.decelRate" : "減速倍率"
+"options.role.trapper.speedDuration" : "加減速トラップの効果時間"
 
 # Common Roles
 
@@ -583,6 +634,7 @@
 "options.role.sniper.canKillHidingPlayer" : "隠れているプレイヤーをキル可能"
 "options.role.sniper.aimAssist" : "エイムアシスト"
 "options.role.sniper.delayInAimAssistActivation" : "エイムアシスト有効化までの遅延"
+"options.role.sniper.canKillImpostor" : "インポスターのフレンドリーファイア"
 
 "role.stirrer.name" : "スターラー"
 "role.stirrer.short" : "St"
@@ -622,6 +674,19 @@
 "options.role.chainShifter.detail" : "チェインシフターはそのままでは勝利できません。<br>役職を交換することで勝利条件を獲得できます。"
 "options.role.chainShifter.shiftCoolDown" : "シフトクールダウン"
 "options.role.chainShifter.canCallEmergencyMeeting" : "緊急ボタンを使用可能"
+
+"role.dancer.name" : "ダンサー"
+"role.dancer.short" : "D"
+"role.dancer.blurb" : "その日に花を添えて"
+"options.role.dancer.detail" : "ダンサーはダンスをして死の宣告をすることができます。<br>死の宣告はゲームや会議の進行に影響をもたらします。"
+"options.role.dancer.numOfSuccessfulForecastToWin" : "勝利に必要な完遂された死の宣告の回数"
+"options.role.dancer.danceCoolDown" : "ダンスクールダウン"
+"options.role.dancer.danceDuration" : "ダンスに必要な時間"
+"options.role.dancer.forecastDuration" : "死の宣告の有効時間"
+"options.role.dancer.finalDance" : "ラストダンスモード"
+"options.role.dancer.deathNotification" : "死体発生の通知"
+"role.dancer.taskDanceText" : "死の宣告を完遂させる。"
+"role.dancer.taskFinalText" : "ラストダンスを生存者に見せて勝利せよ。"
 
 "role.jackal.name" : "ジャッカル"
 "role.jackal.short" : "J"
@@ -750,6 +815,7 @@
 "teams.impostor" : "インポスター"
 "teams.arsonist" : "アーソニスト"
 "teams.chainShifter" : "チェインシフター"
+"teams.dancer" : "ダンサー"
 "teams.jackal" : "ジャッカル"
 "teams.jester" : "ジェスター"
 "teams.paparazzo" : "パパラッチ"
@@ -825,6 +891,7 @@
 "location.airship.shower" : "シャワー"
 "location.airship.toilet" : "トイレ"
 "location.airship.vault" : "金庫室"
+"location.airship.vaultRoom" : "金庫室"
 "location.airship.viewingDeck" : "展望デッキ"
 "location.fungle.beach" : "ビーチ"
 "location.fungle.cafeteria" : "カフェテリア"
@@ -931,6 +998,7 @@
 "statistics.events.layoff" : "解雇"
 "statistics.events.destroy" : "クラッシュキル"
 "statistics.events.accident" : "復活失敗"
+"statistics.events.dance" : "ダンス"
 
 # States
 
@@ -950,12 +1018,14 @@
 "state.pseudocide" : "偽装死"
 "state.cursed" : "呪殺"
 "state.crushed" : "圧死"
+"state.frenzied" : "狂乱"
 
 # Endings
 
 "end.crewmate" : "クルーメイト%EXTRA%勝利"
 "end.impostor" : "インポスター%EXTRA%勝利"
 "end.arsonist" : "アーソニスト%EXTRA%勝利"
+"end.dancer" : "ダンサー<color=#FFFFFF>+ 亡霊</color>%EXTRA%勝利"
 "end.jackal" : "ジャッカル%EXTRA%勝利"
 "end.jester" : "ジェスター%EXTRA%勝利"
 "end.vulture" : "ヴァルチャー%EXTRA%勝利"
@@ -974,7 +1044,7 @@
 "help.tabs.modifiers" : "モディファイア"
 "help.tabs.options" : "オプション"
 "help.tabs.slides" : "スライド"
-"help.tabs.achievements" : "実績"
+"help.tabs.achievements" : "称号"
 "help.slides.share" : "共有"
 "help.command" : "コマンド"
 "help.command.nogame" : "廃村"
@@ -1040,7 +1110,7 @@
 "input.mute" : "ミュート"
 "input.vcFilter" : "VCフィルタリング"
 "input.help" : "ヘルプ"
-"input.spectator" : "観戦"
+"input.spectator" : "観戦退出"
 "input.spectatorRight" : "視点変更 (左)"
 "input.spectatorLeft" : "視点変更 (右)"
 "input.recording" : "キー入力待ち"
@@ -1059,6 +1129,7 @@
 "config.client.processorAffinity.singleCore" : "1コア"
 "config.client.forceSkeldMeetingSE" : "スケルド会議SEの使用"
 "config.client.spoilerAfterDeath" : "死後の役職開示"
+"config.client.playLobbyMusic" : "ロビーBGMの再生"
 "config.client.webhook" : "Discord ウェブフック"
 
 # Preset
@@ -1178,9 +1249,9 @@
 
 # Achievements
 
-"achievement.ui.title" : "Achievements"
+"achievement.ui.title" : "称号"
 "achievement.ui.cond" : "[制約]"
-"achievement.ui.allAchievements" : "全実績"
+"achievement.ui.allAchievements" : "全称号"
 "achievement.ui.shown" : "表示中"
 "achievement.ui.cleared" : "[クリア済]"
 "achievement.ui.equipped" : "[装着中]"
@@ -1188,21 +1259,21 @@
 "achievement.ui.unsetTitle" : "クリックで称号を外せます。"
 "achievement.ui.unselected" : "(称号未選択)"
 "achievement.ui.unselected.detail" : "クリックで称号を選択できます。"
-"achievement.title.hidden" : "未達成の実績"
-"achievement.title.hiddenDetail" : "実績を達成すると達成条件が明かされます。"
+"achievement.title.hidden" : "未獲得の称号"
+"achievement.title.hiddenDetail" : "称号を獲得すると詳細が明かされます。"
 "achievement.type.challenge" : "チャレンジ"
 "achievement.type.secret" : "シークレット"
 "achievement.type.seasonal" : "期間限定"
 
-"achievement.filter.all" : "全実績"
+"achievement.filter.all" : "全称号"
 "achievement.filter.achieved" : "達成済"
 "achievement.filter.notAchieved" : "未達成"
 "achievement.filter.myRole" : "自役職"
 
 # Help
 
-"help.color.icon.april0" : "この色は4月限定実績の対象色(黄緑)です。"
-"help.color.icon.april1" : "この色は4月限定実績の対象色(桜色)です。"
+"help.color.icon.april0" : "この色は4月限定称号の対象色(黄緑)です。"
+"help.color.icon.april1" : "この色は4月限定称号の対象色(桜色)です。"
 
 # Tag
 
@@ -1231,8 +1302,8 @@
 "hint.busker.detail" : "バスカーは、一度死亡したあと復活する<b>大道芸</b>ができるクルーメイト役職です。<br>偽装死ののち暫く復活しないでいると生き返れなくなってしまうので注意しましょう。"
 "hint.screenshot.title" : "スクリーンショット"
 "hint.screenshot.detail" : "スクリーンショットキー(デフォルト: Pキー)を押すと画面のスクリーンショットが撮影できます。<br>スクリーンショットはAmong Usの実行ファイルがあるフォルダにあるScreenshotsフォルダ内に保存されます。"
-"hint.achievement.title" : "実績を集めよう"
-"hint.achievement.detail" : "ゲーム中に指定の条件を満たすと実績を獲得することができます。獲得した実績は自身の称号として装着することができます。<br>たくさん実績を獲得して、仲間にお披露目しましょう！"
+"hint.achievement.title" : "称号を集めよう"
+"hint.achievement.detail" : "ゲーム中に指定の条件を満たすと称号を獲得することができます。獲得した称号は装着して他プレイヤーに見せることもできます。<br>たくさん称号を獲得して、仲間にお披露目しましょう！"
 "hint.version.title" : "NoSのバージョンを更新/変更する"
 "hint.version.detail" : "最新版のNoSに更新する、別バージョンのNoSに変更する場合は、<br>タイトル画面のNebulaタブから開けるバージョン変更が便利です。"
 "hint.freeplay.title" : "フリープレイ"
@@ -1424,3 +1495,15 @@
 "role.obsessional.doc.main" : "一人のプレイヤーに<b>執着</b>します。<br>本来の自身の勝利条件は<b>放棄</b>され、執着対象のプレイヤーが勝利すると追加勝利することができます。"
 "role.secret.doc.main" : "シークレットは本来の役職を隠します。<br><b>キル</b>するか、<b>タスク</b>をこなすことによって本来の役職が覚醒します。"
 "role.tieBreaker.doc.main" : "タイ投票が発生したとき、自身の投票先にさらに1票を投じます。<br>この能力は適切なタイミングで自動的に発動します。"
+
+"role.dancer.winCond.title" : "勝利条件"
+"role.dancer.winCond.main" : "生存しながら、<b>ダンス</b>によって<b><color=#00ffffff>#NUM</color></b>人の死の宣告を完遂させる。#ADD"
+"role.dancer.winCond.main.lastDance" : "<br>また、上の条件を満たしたときに生存者に<b><color=#00ffffff>ラストダンス</color></b>を見せる。"
+"role.dancer.ability.title" : "固有能力 <b>"死の舞踏"</b>"
+"role.dancer.ability.main" : "ダンサーは体を小刻みに動かすことで<b>ダンス</b>を踊ることができます。<br>ダンスを目撃した生存者は<b>死の宣告</b>を受けます。<br>死の宣告には有効時間があり、有効時間内に対象のプレイヤーが死亡することで<b>死の宣告</b>が完遂されます。<br>有効時間を過ぎると、死の宣告は解除されます。"
+"role.dancer.ability.dance" : "その場で小刻みに動き続けることでダンスを踊ります。<br>ボタンクリック/キー入力では<b><color=#ff0000ff>発動できません</color></b>。<br>ボタンのタイマーが上がりきるまでダンスを踊ると、<b>死の宣告</b>をします。"
+"role.dancer.ability.danceKill" : "死体のそばでダンスを踊ると、次のダンスはプレイヤーをキルできる<b>死のダンス</b>に変化します。<br><b>死のダンス</b>によるキルは、完遂された死の宣告としてカウントされます。"
+"role.dancer.tips.title" : "Tips"
+"role.dancer.tips.main" : "・<b>死の宣告</b>を受けている間、対象のプレイヤーは勝利をブロックされます。<br>・ダンサーが勝利したとき、死の宣告が完遂したプレイヤーはダンサーとともに勝利します。<br>・ダンサーが死亡したとき、死の宣告を受けているプレイヤーもともに死亡します。"
+
+"document.caption.configuration" : "* オプションから変更可能な値は<b><color=#00ffffff>水色</color></b>で表示されています。"

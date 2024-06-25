@@ -3,7 +3,7 @@
 [HarmonyPatch(typeof(Console), nameof(Console.CanUse))]
 public static class ConsoleCanUsePatch
 {
-    public static bool Prefix(ref float __result, Console __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+    public static bool Prefix(ref float __result, Console __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
     {
         canUse = couldUse = false;
 
@@ -36,7 +36,7 @@ public static class ConsoleCanUsePatch
 [HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.CanUse))]
 public static class SystemConsoleCanUsePatch
 {
-    public static bool Prefix(ref float __result, SystemConsole __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+    public static bool Prefix(ref float __result, SystemConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
     {
         canUse = couldUse = false;
 
@@ -49,7 +49,7 @@ public static class SystemConsoleCanUsePatch
 [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.CanUse))]
 public static class MapConsoleCanUsePatch
 {
-    public static bool Prefix(ref float __result, MapConsole __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+    public static bool Prefix(ref float __result, MapConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
     {
         canUse = couldUse = false;
 
@@ -62,7 +62,7 @@ public static class MapConsoleCanUsePatch
 [HarmonyPatch(typeof(DoorConsole), nameof(DoorConsole.CanUse))]
 public static class DoorConsoleCanUsePatch
 {
-    public static bool Prefix(ref float __result, DoorConsole __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+    public static bool Prefix(ref float __result, DoorConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
     {
         canUse = couldUse = false;
 
@@ -75,7 +75,7 @@ public static class DoorConsoleCanUsePatch
 [HarmonyPatch(typeof(OpenDoorConsole), nameof(OpenDoorConsole.CanUse))]
 public static class OpenDoorConsoleCanUsePatch
 {
-    public static bool Prefix(ref float __result, OpenDoorConsole __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+    public static bool Prefix(ref float __result, OpenDoorConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
     {
         canUse = couldUse = false;
 

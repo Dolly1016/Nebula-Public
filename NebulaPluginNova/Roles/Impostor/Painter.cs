@@ -41,11 +41,11 @@ public class Painter : DefinedRoleTemplate, DefinedRole
             {
                 acTokenChallenge = new("painter.challenge", new int[15], (val, _) => val.Count(v => v >= 2) >= 3);
 
-                GameData.PlayerOutfit? sample = null;
+                NetworkedPlayerInfo.PlayerOutfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
-                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample");
                 sampleButton.SetSprite(sampleButtonSprite.GetSprite());
                 sampleButton.Availability = (button) => MyPlayer.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -59,7 +59,7 @@ public class Painter : DefinedRoleTemplate, DefinedRole
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
                 
-                paintButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                paintButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.paint");
                 paintButton.SetSprite(paintButtonSprite.GetSprite());
                 paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
                 paintButton.Visibility = (button) => !MyPlayer.IsDead;

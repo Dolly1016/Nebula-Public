@@ -291,6 +291,7 @@ public class VoiceChatManager : IDisposable
             if (!entry.IsValid)
             {
                 entry.Dispose();
+                allClients.Remove(key);
                 continue;
             }
             else
@@ -480,26 +481,37 @@ public class VoiceChatManager : IDisposable
         };
         myWaveIn.StartRecording();
 
-        while (true)
+        IEnumerator CoSend()
         {
-            if(data.Count > 0)
+            while (true)
             {
-                lock (this)
+                if (data.Count > 0)
                 {
-
-                    if (!(IsMuting || (ListenerIsDead && !ListenerIsPerfectlyDead)))
+                    lock (this)
                     {
-                        foreach (var d in data)
+
+                        if (!(IsMuting || (ListenerIsDead && !ListenerIsPerfectlyDead)))
                         {
-                            RpcSendAudio.Invoke((PlayerControl.LocalPlayer.PlayerId, sId++, currentRadio != null, currentRadio?.RadioMask ?? 0, d.Length, d));
+                            foreach (var d in data)
+                            {
+                                RpcSendAudio.Invoke((PlayerControl.LocalPlayer.PlayerId, sId++, currentRadio != null, currentRadio?.RadioMask ?? 0, d.Length, d));
+                            }
                         }
+                        data.Clear();
                     }
-                    data.Clear();
                 }
+                gate = (short)(short.MaxValue * MicGateEntry.Value * 0.15f);
+                yield return null;
             }
-            gate = (short)(short.MaxValue * MicGateEntry.Value * 0.15f);
-            yield return null;
         }
+        //EndCoroutine = CoSend();
+        yield return CoSend();
+    }
+
+    IEnumerator? EndCoroutine = null;
+    public void OnGameEndScene()
+    {
+        if (EndCoroutine != null) NebulaManager.Instance.StartCoroutine(EndCoroutine.WrapToIl2Cpp());
     }
 
     bool isValid = true;

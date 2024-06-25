@@ -15,7 +15,12 @@ public static class MeetingHudExtension
     static public int VotingMask = 0;
     static public bool CanSkip = true;
     static public bool ExileEvenIfTie = false;
+    
+
+    //直近の投票の結果吊られるプレイヤー
     static public PlayerControl[]? ExiledAll = null;
+    //直近の投票がタイであったかどうか
+    static public bool WasTie = false;
 
     public static void InitMeetingTimer()
     {
@@ -149,7 +154,22 @@ public static class MeetingHudExtension
         (message, _) =>
         {
             WeightMap[message.source] = message.weight;
-            if (AmongUsClient.Instance.AmHost) MeetingHud.Instance.CastVote(message.source, message.target);
+            if (AmongUsClient.Instance.AmHost)
+            {
+                //MeetingHud.CastVote
+                NetworkedPlayerInfo playerById = GameData.Instance.GetPlayerById(message.source);
+                var playerVoteArea = MeetingHud.Instance.playerStates.FirstOrDefault(pv => pv.TargetPlayerId == message.source);
+                
+                if (playerVoteArea != null && !playerVoteArea.AmDead && !playerVoteArea.DidVote)
+                {
+                    if (playerById.AmOwner || AmongUsClient.Instance.NetworkMode != NetworkModes.LocalGame) SoundManager.Instance.PlaySound(MeetingHud.Instance.VoteLockinSound, false, 1f, null);
+                    
+                    playerVoteArea.SetVote(message.target);
+                    MeetingHud.Instance.SetDirtyBit(1U);
+                    MeetingHud.Instance.CheckForEndVoting();
+                    PlayerControl.LocalPlayer.RpcSendChatNote(message.source, ChatNoteTypes.DidVote);
+                }
+            }
         }
         );
     

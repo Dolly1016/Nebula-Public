@@ -434,7 +434,7 @@ public class DynamicPalette
             try
             {
                 var player = PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.PlayerId == message.playerId));
-                if (isCalledByMe) player?.RpcSetColor(player!.PlayerId);
+                player?.SetColor(player!.PlayerId);
             }
             catch{ }
         }

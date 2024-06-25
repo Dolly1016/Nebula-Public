@@ -1,6 +1,9 @@
 ﻿using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
+using Nebula.Scripts;
+using System.Reflection;
 using TMPro;
+using Virial;
 using Virial.Assignable;
 using Virial.Compat;
 using Virial.Media;
@@ -12,8 +15,8 @@ namespace Nebula.Modules;
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
 public class DocumentManager
 {
-    private static Dictionary<string, SerializableDocument> allDocuments = new();
-    static public SerializableDocument? GetDocument(string id)
+    private static Dictionary<string, IDocument> allDocuments = new();
+    static public IDocument? GetDocument(string id)
     {
         if(allDocuments.TryGetValue(id, out var document)) return document;
         return null;
@@ -52,6 +55,16 @@ public class DocumentManager
 
             yield return null;
         }
+
+        foreach (var assembly in AddonScriptManager.ScriptAssemblies.Select(s => s.Assembly))
+        {
+            var types = assembly?.GetTypes().Where((type) => type.IsAssignableTo(typeof(IDocument)) && type.GetCustomAttribute<AddonDocumentAttribute>() != null);
+            foreach (var type in types ?? [])
+            {
+                var doc = type.GetConstructor([])?.Invoke(null) as IDocument;
+                if(doc != null) allDocuments[type.GetCustomAttribute<AddonDocumentAttribute>()!.DocumentId] = doc;
+            }
+        }
     }
 
     //ゲーム内で使用しているID
@@ -64,7 +77,7 @@ public class DocumentManager
 }
 
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
-public class SerializableDocument
+public class SerializableDocument : IDocument
 {
     public class DocumentReference
     {
@@ -303,6 +316,7 @@ public class SerializableDocument
         return widget;
     }
 
+    Virial.Media.GUIWidget? IDocument.Build(Virial.Compat.Artifact<Virial.Media.GUIScreen>? target) => Build(target);
     public Virial.Media.GUIWidget? Build(Artifact<GUIScreen>? myScreen, bool useMaskedMaterial = true, int leftNesting = MaxNesting, IResourceAllocator? nameSpace = null) => BuildInternal(nameSpace ?? RelatedNamespace, null, myScreen, c => c.Build(myScreen, useMaskedMaterial, leftNesting, nameSpace ?? RelatedNamespace), true, useMaskedMaterial, leftNesting);
     public Virial.Media.GUIWidget? BuildReference(FunctionalEnvironment? table, IResourceAllocator? nameSpace, Artifact<GUIScreen>? myScreen, bool buildHyperLink, int leftNesting = MaxNesting) => BuildInternal(nameSpace, table, myScreen, c => c.BuildReference(table, c.RelatedNamespace, myScreen, buildHyperLink, leftNesting), buildHyperLink, true, leftNesting);
 
@@ -432,7 +446,7 @@ public class SerializableDocument
                         doc = JsonStructure.Deserialize<SerializableDocument>(new StreamReader(stream).ReadToEnd());
                     }
                 }
-                doc ??= DocumentManager.GetDocument(docId);
+                doc ??= DocumentManager.GetDocument(docId) as SerializableDocument;
                 return doc?.BuildReference(new FunctionalEnvironment(Document.Arguments, arguments), nameSpace, myScreen, buildHyperLink, leftNesting - 1) ?? new NoSGUIMargin(GetAlignment(), UnityEngine.Vector2.zero);
             }
         }
@@ -448,7 +462,7 @@ public class SerializableDocument
             var overlay = (buildHyperLink && citation.RelatedUrl != null) ? GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), "ui.citation.openUrl") : null;
 
             if (citation?.LogoImage != null) return GUI.Instance.Image(GetAlignment(), citation.LogoImage, new(1.5f, 0.37f), onClick, overlay);
-
+            
             return new NoSGUIText(GetAlignment(), GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), citation!.Name) {
                 OverlayWidget = overlay,
                 OnClickText = onClick != null ? (() => onClick?.Invoke(null!), false) : null

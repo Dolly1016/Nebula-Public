@@ -362,7 +362,7 @@ public class Assignable
     public virtual void IntroInitialize(PlayerControl __instance) { }
 
     [RoleLocalMethod]
-    public virtual void OnSetTasks(ref List<GameData.TaskInfo> initialTasks, ref List<GameData.TaskInfo>? actualTasks) { }
+    public virtual void OnSetTasks(ref List<NetworkedPlayerInfo.TaskInfo> initialTasks, ref List<NetworkedPlayerInfo.TaskInfo>? actualTasks) { }
 
     /*--------------------------------------------------------------------------------------*/
 

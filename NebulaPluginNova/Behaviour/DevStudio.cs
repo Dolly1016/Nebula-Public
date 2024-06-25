@@ -693,7 +693,7 @@ public class DevStudio : MonoBehaviour
                 AppendParallel(GetTextFieldContent(false, 2.6f, doc.Document.Id.ToString() ?? "", (input) =>
                 {
                     doc.Document.Id = input;
-                    var refDoc = DocumentManager.GetDocument(input);
+                    var refDoc = DocumentManager.GetDocument(input) as SerializableDocument;
                     if(refDoc?.Arguments != null)
                     {
                         foreach (var entry in doc.Document.Arguments) if (!refDoc!.Arguments!.Contains(entry.Key)) doc.Document.Arguments.Remove(entry.Key);
@@ -1005,7 +1005,7 @@ public class DevStudio : MonoBehaviour
                     {
                         File.Copy(path[0], destPath, true);
 
-                        var image = new CosmicImage() { Address = costumeNameRef.Value!.Text.ToByteString() + "/" + fieldName + ".png" };
+                        var image = new CosmicImage() { Address = costumeNameRef.Value!.Text.ToByteString() + "_" + fieldName + ".png" };
                         costume.GetType().GetField(fieldName)?.SetValue(costume, image);
                         costume.MyBundle = addon.MyBundle!;
                         new StackfullCoroutine(costume.Activate(false)).Wait();
@@ -1164,11 +1164,15 @@ public class DevStudio : MonoBehaviour
             {
                 hat.MyHat.NoBounce = !hat.Bounce;
                 hat.MyView.MatchPlayerColor = hat.Adaptive;
+
+                hat.MyHat.ProductId = MoreCosmic.DebugProductId;
                 displayRef?.Value?.Cosmetics.SetHat(hat.MyHat, NebulaPlayerTab.PreviewColorId);
             }
             else if (costume is CosmicVisor visor)
             {
                 visor.MyView.MatchPlayerColor = visor.Adaptive;
+
+                visor.MyVisor.ProductId = MoreCosmic.DebugProductId;
                 displayRef?.Value?.Cosmetics.SetVisor(visor.MyVisor, NebulaPlayerTab.PreviewColorId);
             }
         }

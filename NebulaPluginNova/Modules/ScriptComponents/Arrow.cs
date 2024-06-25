@@ -25,7 +25,7 @@ public class Arrow : INebulaScriptComponent, IGameOperator
         if (usePlayerMaterial) SetColor(Color.white, Color.gray);
     }
 
-    public Arrow SetColorByOutfit(GameData.PlayerOutfit outfit)
+    public Arrow SetColorByOutfit(NetworkedPlayerInfo.PlayerOutfit outfit)
     {
         return SetColor(Palette.PlayerColors[outfit.ColorId], Palette.ShadowColors[outfit.ColorId]);
     }

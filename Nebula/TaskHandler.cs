@@ -24,7 +24,7 @@ public static class TasksHandler
         }
     }
 
-    public static Tuple<int, int> taskInfo(GameData.PlayerInfo playerInfo)
+    public static Tuple<int, int> taskInfo(NetworkedPlayerInfo playerInfo)
     {
         var p = playerInfo.GetModData();
         if (p != null && p.Tasks != null) return Tuple.Create(p.Tasks.Completed, p.Tasks.Quota);
@@ -48,7 +48,7 @@ public static class TasksHandler
 
         for (int i = 0; i < __instance.AllPlayers.Count; i++)
         {
-            GameData.PlayerInfo playerInfo = __instance.AllPlayers[i];
+            NetworkedPlayerInfo playerInfo = __instance.AllPlayers[i];
 
             //切断されたプレイヤーのタスクは数えない
             if (Helpers.playerById(playerInfo.PlayerId) == null) continue;

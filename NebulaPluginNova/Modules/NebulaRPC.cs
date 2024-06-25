@@ -1,4 +1,5 @@
 ﻿using Hazel;
+using InnerNet;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -110,12 +111,11 @@ public static class RPCRouter
     public static void SendRpc(string name, int hash, Action<MessageWriter> sender, Action localBodyProcess) {
         if(currentSection == null)
         {
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 64, Hazel.SendOption.Reliable, -1);
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 128, Hazel.SendOption.Reliable, -1);
             writer.Write(hash);
             sender.Invoke(writer);
             //NebulaPlugin.Log.Print("sent RPC:" + name + "(size:" + writer.Length + ")");
             AmongUsClient.Instance.FinishRpcImmediately(writer);
-
             
 
             try
@@ -214,7 +214,7 @@ public class RemoteProcessBase
         foreach (var type in types)
         {
             System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-            foreach(var method in type.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC)))) WrapRpcMethod(NebulaPlugin.MyPlugin.Harmony, method);
+            foreach(var method in type.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC)))) WrapRpcMethod(NebulaPlugin.Harmony, method);
         }
 
         //全アドオンに対してRPCをセットアップ
@@ -227,7 +227,7 @@ public class RemoteProcessBase
                 {
                     //RPCを持つならハンドシェイクが必要
                     script.Addon.MarkAsNeedingHandshake();
-                    WrapRpcMethod(NebulaPlugin.MyPlugin.Harmony, method);
+                    WrapRpcMethod(NebulaPlugin.Harmony, method);
                 }
             }
         }
@@ -283,7 +283,7 @@ public static class RemoteProcessAsset
                 writer.Write(cand.SelfAware);
             },
             (reader) => {
-                GameData.PlayerOutfit outfit = new() { PlayerName = reader.ReadString(), HatId = reader.ReadString(), SkinId = reader.ReadString(), VisorId = reader.ReadString(), PetId = reader.ReadString(), ColorId = reader.ReadInt32() };
+                NetworkedPlayerInfo.PlayerOutfit outfit = new() { PlayerName = reader.ReadString(), HatId = reader.ReadString(), SkinId = reader.ReadString(), VisorId = reader.ReadString(), PetId = reader.ReadString(), ColorId = reader.ReadInt32() };
                 return new OutfitCandidate(reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean(), outfit);
             }
         );
@@ -793,7 +793,7 @@ class NebulaRPCHandlerPatch
 {
     static void Postfix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
     {
-        if (callId != 64) return;
+        if (callId != 128) return;
 
         int id = reader.ReadInt32();
         if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id,out var rpc))

@@ -82,10 +82,10 @@ public class StringCommandToken : ICommandToken
             var temp = NebulaAPI.CurrentGame?.GetAllPlayers().FirstOrDefault(p => p.Name == myStr);
             if (temp != null) return new CoImmediateTask<T>(Unsafe.As<Virial.Game.Player, T>(ref temp));
         }
-        else if (type == typeof(GameData.PlayerOutfit))
+        else if (type == typeof(NetworkedPlayerInfo.PlayerOutfit))
         {
             var temp = NebulaAPI.CurrentGame?.GetAllPlayers().FirstOrDefault(p => p.Name == myStr)?.Unbox().DefaultOutfit;
-            if (temp != null) return new CoImmediateTask<T>(Unsafe.As<GameData.PlayerOutfit, T>(ref temp));
+            if (temp != null) return new CoImmediateTask<T>(Unsafe.As<NetworkedPlayerInfo.PlayerOutfit, T>(ref temp));
         }
         else if (type == typeof(Virial.Assignable.DefinedRole))
         {

@@ -19,7 +19,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
     static private IntegerConfiguration SabotageChargeOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageCharge", (1,10),3);
     static private IntegerConfiguration SabotageMaxChargeOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageMaxCharge", (1, 20), 5);
     static private FloatConfiguration SabotageCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration SabotageIntervalOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageInterval", (30f, 120f, 5f), 60f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration SabotageIntervalOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageInterval", (10f, 120f, 5f), 60f, FloatConfigurationDecorator.Second);
 
     static public Stirrer MyRole = new Stirrer();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -45,7 +45,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
             {
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => p.PlayerId != MyPlayer.PlayerId && !p.IsDead && !p.IsImpostor));
 
-                stirButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                stirButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir");
                 stirButton.SetSprite(StirButtonSprite.GetSprite());
                 stirButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId,out int charge) || charge < SabotageMaxChargeOption);
                 stirButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -59,7 +59,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
                 stirButton.CoolDownTimer = Bind(new Timer(StirCoolDownOption).SetAsAbilityCoolDown().Start());
                 stirButton.SetLabel("stir");
 
-                sabotageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                sabotageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility,"stirrer.fakeSabo");
                 sabotageButton.SetSprite(SabotageButtonSprite.GetSprite());
                 sabotageButton.Availability = (button) => MyPlayer.CanMove && sabotageChargeMap.Any(entry => entry.Value > 0) && PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null;
                 sabotageButton.Visibility = (button) => !MyPlayer.IsDead;

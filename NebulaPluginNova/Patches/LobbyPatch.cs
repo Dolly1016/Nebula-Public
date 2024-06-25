@@ -24,8 +24,23 @@ public class GameStartManagerUpdatePatch
 
         __instance.MinPlayers = GeneralConfigurations.CurrentGameMode.MinPlayers;
 
-        __instance.MakePublicButton.sprite = (AmongUsClient.Instance.IsGamePublic ? __instance.PublicGameImage : __instance.PrivateGameImage);
-        __instance.privatePublicText.text = (AmongUsClient.Instance.IsGamePublic ? DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.PublicHeader) : DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.PrivateHeader));
+        try
+        {
+            __instance.UpdateMapImage((MapNames)GameManager.Instance.LogicOptions.MapId);
+            __instance.CheckSettingsDiffs();
+            if (ConfigurationValues.CurrentPresetName.Length > 0)
+                __instance.RulesPresetText.text = ConfigurationValues.CurrentPresetName;
+            else
+                __instance.RulesPresetText.text = DestroyableSingleton<TranslationController>.Instance.GetString(GameOptionsManager.Instance.CurrentGameOptions.GetRulesPresetTitle());
+        }
+        catch { }
+
+        if (GameCode.IntToGameName(AmongUsClient.Instance.GameId) == null) __instance.privatePublicPanelText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.LocalButton);
+        else if (AmongUsClient.Instance.IsGamePublic) __instance.privatePublicPanelText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.PublicHeader);
+        else __instance.privatePublicPanelText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.PrivateHeader);
+        
+        __instance.HostPrivateButton.gameObject.SetActive(!AmongUsClient.Instance.IsGamePublic);
+        __instance.HostPublicButton.gameObject.SetActive(AmongUsClient.Instance.IsGamePublic);
 
         if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.C))
             ClipboardHelper.PutClipboardString(GameCode.IntToGameName(AmongUsClient.Instance.GameId));
@@ -57,8 +72,7 @@ public class GameStartManagerUpdatePatch
         canStart &= PlayerControl.AllPlayerControls.GetFastEnumerator().All(p => !p.gameObject.TryGetComponent<UncertifiedPlayer>(out _));
 
         LastChecked = canStart;
-        __instance.StartButton.color = canStart ? Palette.EnabledColor : Palette.DisabledClear;
-        __instance.startLabelText.color = canStart ? Palette.EnabledColor : Palette.DisabledClear;
+        __instance.StartButton.SetButtonEnableState(canStart);
         ActionMapGlyphDisplay startButtonGlyph = __instance.StartButtonGlyph;
         
         startButtonGlyph?.SetColor(canStart ? Palette.EnabledColor : Palette.DisabledClear);
@@ -78,13 +92,16 @@ public class GameStartManagerUpdatePatch
                 int num = Mathf.CeilToInt(__instance.countDownTimer);
                 __instance.countDownTimer -= Time.deltaTime;
                 int num2 = Mathf.CeilToInt(__instance.countDownTimer);
-                __instance.GameStartText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GameStarting, new Il2CppReferenceArray<Il2CppSystem.Object>(new Il2CppSystem.Object[] { num2 }));
+                if (!__instance.GameStartTextParent.activeSelf) SoundManager.Instance.PlaySound(__instance.gameStartSound, false, 1f, null);
+
+                __instance.GameStartTextParent.SetActive(true);
+                __instance.GameStartText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GameStarting, num2);
                 if (num != num2) PlayerControl.LocalPlayer.RpcSetStartCounter(num2);
-                
                 if (num2 <= 0) __instance.FinallyBegin();
             }
             else
             {
+                __instance.GameStartTextParent.SetActive(false);
                 __instance.GameStartText.text = string.Empty;
             }
         }
@@ -119,13 +136,16 @@ public class GameStartManagerBeginGame
 }
 
 
-[HarmonyPatch(typeof(GameData), nameof(GameData.AddPlayer))]
+[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CreatePlayer))]
 public class RequireHandshakePatch
 {
-    public static void Postfix(GameData __instance, [HarmonyArgument(0)] PlayerControl pc)
+    public static void Postfix(AmongUsClient __instance, ref Il2CppSystem.Collections.IEnumerator __result)
     {
-        //if (AmongUsClient.Instance.AmHost)
-        Certification.RequireHandshake();
+        __result = ManagedEffects.Sequence(__result.WrapToManaged(), ManagedEffects.Action(()=>
+        {
+            Certification.RequireHandshake();
+            PlayerControl.AllPlayerControls.GetFastEnumerator().Do(p => { if (p.PlayerId != p.cosmetics.ColorId) p.SetColor(p.PlayerId); });
+        })).WrapToIl2Cpp();
     }
 }
 
@@ -209,5 +229,36 @@ public class CreateGameOptionsLoadingPatch
     public static void Postfix(CreateGameOptions __instance)
     {
         NebulaManager.Instance.StartCoroutine(HintManager.CoShowHint(0.6f + 0.2f).WrapToIl2Cpp());
+    }
+}
+
+[HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.Start))]
+public class DelayPlayDropshipAmbiencePatch
+{
+    static private System.Collections.IEnumerator CoDelayPlayWithoutMusic(LobbyBehaviour __instance)
+    {
+        SoundManager.Instance.StopAllSound();
+        yield return new WaitForSeconds(0.5f);
+        AudioSource audioSource = SoundManager.Instance.PlayNamedSound("DropShipAmb", __instance.DropShipSound, true, SoundManager.Instance.AmbienceChannel);
+        audioSource.loop = true;
+        audioSource.pitch = 1.2f;
+    }
+    public static void Postfix(LobbyBehaviour __instance)
+    {
+        if (ClientOption.AllOptions[ClientOption.ClientOptionType.PlayLobbyMusic].Value == 0)
+        {
+            __instance.StopAllCoroutines();
+            __instance.StartCoroutine(CoDelayPlayWithoutMusic(__instance).WrapToIl2Cpp());
+        }
+    }
+}
+
+[HarmonyPatch(typeof(LobbyViewSettingsPane), nameof(LobbyViewSettingsPane.Awake))]
+public class LobbyViewSettingsPanePatch
+{
+    public static void Postfix(LobbyViewSettingsPane __instance)
+    {
+        //役職タブを隠す
+        __instance.rolesTabButton.gameObject.SetActive(false);
     }
 }

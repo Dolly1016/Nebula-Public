@@ -1,4 +1,5 @@
 ﻿using Hazel;
+using Nebula.Map;
 
 namespace Nebula.Patches;
 
@@ -14,6 +15,13 @@ public class ShipStatusPatch
     static private void ModifyEarlier()
     {
         ShipExtension.PatchEarlierModification(AmongUsUtil.CurrentMapId);
+
+        foreach(var vectors in MapData.GetCurrentMapData().RaiderIgnoreArea)
+        {
+            var collider = UnityHelper.CreateObject<PolygonCollider2D>("RaiderIgnoreArea", null, Vector3.zero, LayerExpansion.GetRaiderColliderLayer());
+            collider.SetPath(0, vectors);
+            collider.isTrigger = true;
+        }
     }
 
     static private void Modify() { 

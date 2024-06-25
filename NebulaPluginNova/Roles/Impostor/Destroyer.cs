@@ -239,7 +239,14 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             {
                 myPlayer.GetModInfo()?.MurderPlayer(target.GetModInfo()!, PlayerState.Crushed, null, KillParameter.WithOverlay | KillParameter.WithAssigningGhostRole);
             }
-            NebulaManager.Instance.StopCoroutine(monitorMeetingCoroutine);
+
+            try
+            {
+                NebulaManager.Instance.StopCoroutine(monitorMeetingCoroutine);
+            }
+            catch { 
+                //会議に入って停止に失敗しても何もしない
+            }
 
             if (LeaveKillEvidenceOption)
             {
@@ -253,10 +260,12 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             if(deadBody) GameObject.Destroy(deadBody.gameObject);
 
             myPlayer.moveable = true;
-            target.moveable = true;
             
             //こちらの目線で死ぬまで待つ
             while (!targetModInfo.IsDead) yield return null;
+
+            target.moveable = true;
+
             yield return new WaitForSeconds(0.2f);
 
             PlayerModInfo.RpcRemoveAttrByTag.LocalInvoke((targetModInfo.PlayerId, destroyerAttrTag));
@@ -275,7 +284,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                 AchievementToken<int> achChallengeToken = new("destroyer.challenge", 0, (val, _) => val >= 3 && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
 
                 var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer,ObjectTrackers.ImpostorKillPredicate, p => CheckDestroyKill(MyPlayer.VanillaPlayer, p.VanillaPlayer.transform.position), null));
-                destroyButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
+                destroyButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "destroyer.kill");
                 destroyButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && killTracker.CurrentTarget != null;
                 destroyButton.Visibility = (button) => !MyPlayer.VanillaPlayer.Data.IsDead;
                 destroyButton.OnClick = (button) => {

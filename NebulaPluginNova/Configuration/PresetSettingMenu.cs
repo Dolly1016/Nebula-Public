@@ -13,9 +13,10 @@ public class PresetSettingMenu : MonoBehaviour
         ClassInjector.RegisterTypeInIl2Cpp<PresetSettingMenu>();
     }
 
+    public GameSettingMenu GameSettingMenu { get; set; }
     public void Start()
     {
-        var screen = new GUIScreenImpl(Virial.Media.Anchor.At(new(0.5f,0.5f)), new(2f, 3.6f),transform, new(-4.1f, -0.4f, -10f));
+        var screen = new GUIScreenImpl(Virial.Media.Anchor.At(new(0.5f,0.5f)), new(2f, 3.6f),transform, new(-3.3f, -0.4f, -10f));
 
         Virial.Compat.Artifact<GUIScreen> innerRef = null!;
         void ShowInner()
@@ -31,7 +32,12 @@ public class PresetSettingMenu : MonoBehaviour
                     _ => {
                         void Load()
                         {
-                            MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent(preset.LoadPreset() ? "preset.loadSuccess" : "preset.loadFailed"));
+                            bool success = preset.LoadPreset();
+                            if(success) ConfigurationValues.RpcSharePresetName.Invoke(preset.DisplayName);
+                            //値を再読み込み
+                            foreach (var child in GameSettingMenu.GameSettingsTab.Children) child.Initialize();
+
+                            MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent(success ? "preset.loadSuccess" : "preset.loadFailed"));
                             NebulaSettingMenu.Instance?.OpenFirstPage();
                         }
 
@@ -86,7 +92,7 @@ public class PresetSettingMenu : MonoBehaviour
 
         screen.SetWidget(widget, out _);
 
-        MetaScreen mainScreen = MetaScreen.GenerateScreen(new Vector2(6f, 4f), transform, new(0.9f, -0.4f, -10f), false, false, false);
+        MetaScreen mainScreen = MetaScreen.GenerateScreen(new Vector2(6f, 4f), transform, new(1.5f, -0.1f, -10f), false, false, false);
         mainScreen.SetWidget(GUI.Instance.ScrollView(Virial.Media.GUIAlignment.Top, new(5f, 4f), "Preset", null, out innerRef), out _);
 
         ShowInner();

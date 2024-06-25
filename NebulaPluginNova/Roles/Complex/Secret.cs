@@ -67,7 +67,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
 
 
     //クルーメイトの場合はLocalで呼び出すこと(タスク置き換えの都合上)
-    private static void ScheduleSendArousalRpc(GamePlayer player, int[] savedArgs,List<GameData.TaskInfo>? tasks = null)
+    private static void ScheduleSendArousalRpc(GamePlayer player, int[] savedArgs,List<NetworkedPlayerInfo.TaskInfo>? tasks = null)
     {
         NebulaManager.Instance.ScheduleDelayAction(() =>
         {
@@ -114,10 +114,11 @@ public class Secret : DefinedRoleTemplate, DefinedRole
 
         int[]? RuntimeAssignable.RoleArguments => savedArgs;
         
-        List<GameData.TaskInfo> savedTasks = new();
+        List<NetworkedPlayerInfo.TaskInfo> savedTasks = new();
         int[] savedArgs;
         DefinedRole savedRole;
 
+        [OnlyMyPlayer]
         void OnSetTaskLocal(PlayerTasksTrySetLocalEvent ev)
         {
             int taskCount = ShownSecret.NiceConditionOption;

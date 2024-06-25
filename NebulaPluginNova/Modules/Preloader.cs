@@ -12,7 +12,7 @@ using static Virial.Attributes.NebulaPreprocess;
 
 namespace Nebula.Modules;
 
-//IL Repackの都合で、APIの引数付き属性を使用できないので、子の属性と引数をNoS内で用意する。NoSではこちらを使うこと。
+//IL Repackの都合で、APIの引数付き属性を使用できないので、この属性と引数をNoS内で用意する。NoSではこちらを使うこと。
 public enum PreprocessPhaseForNoS
 {
     BuildNoSModuleContainer,
@@ -27,10 +27,12 @@ public enum PreprocessPhaseForNoS
     PostRoles,
     PreFixStructure,
     FixStructure,
+    FixStructureRoleFilter,
+    FixStructureConfig,
     PostFixStructure
 }
 
-//IL Repackの都合で、APIの引数付き属性を使用できないので、子の属性をNoS内で用意する。NoSではこちらを使うこと。
+//IL Repackの都合で、APIの引数付き属性を使用できないので、この属性をNoS内で用意する。NoSではこちらを使うこと。
 [AttributeUsage(AttributeTargets.Class)]
 internal class NebulaPreprocessForNoS : NebulaPreprocess
 {
@@ -185,7 +187,7 @@ public static class PreloadManager
 
         yield return NebulaPreprocessorImpl.Instance.SetLoadingText("Checking Component Dependencies");
 
-        for(int i=0;i<(int)PreprocessPhase.NumOfPhases;i++) yield return NebulaPreprocessorImpl.Instance.RunPreprocess((PreprocessPhase)i).HandleException(OnRaisedExcep);
+        for(int i=0;i<(int)PreprocessPhase.NumOfPhases;i++) yield return NebulaPreprocessorImpl.Instance. RunPreprocess((PreprocessPhase)i).HandleException(OnRaisedExcep);
 
         FinishedPreload = true;
     }

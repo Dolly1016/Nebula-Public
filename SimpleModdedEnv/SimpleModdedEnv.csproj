@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
+		<Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
+	</ItemGroup>
+
+
+</Project>

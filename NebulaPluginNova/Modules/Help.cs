@@ -111,7 +111,7 @@ public static class HelpScreen
         screen.SetWidget(widget);
     }
 
-    static private void ShowSerializableDocumentScreen(SerializableDocument doc)
+    static private void ShowDocumentScreen(IDocument doc)
     {
         var screen = MetaScreen.GenerateWindow(new(7f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, true, true);
 
@@ -143,7 +143,7 @@ public static class HelpScreen
                 var doc = DocumentManager.GetDocument("role." + role.InternalName);
                 if (doc == null) return;
 
-                ShowSerializableDocumentScreen(doc);
+                ShowDocumentScreen(doc);
             }, RoleTitleAttr)
             {
                 RawText = role.DisplayColordName,

@@ -26,24 +26,29 @@ using UnityEngine.SceneManagement;
 using Virial;
 using Cpp2IL.Core.Extensions;
 using System.Reflection;
+using System.Reflection.Metadata;
+
+[assembly: System.Reflection.AssemblyFileVersionAttribute(Nebula.NebulaPlugin.PluginEpochStr + "."  + Nebula.NebulaPlugin.PluginBuildNumStr)]
 
 namespace Nebula;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
 [BepInProcess("Among Us.exe")]
-public class NebulaPlugin : BasePlugin
+public class NebulaPlugin
 {
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.4.1.1";
+    public const string PluginVersion = "2.5.0.0";
 
-    public const string VisualVersion = "v2.4.1.1";
-    //public const string VisualVersion = "Snapshot 24.06.11b";
-    //public const string VisualVersion = "RPC Debug 2";
+    public const string VisualVersion = "v2.5";
+    //public const string VisualVersion = "Snapshot 24.06.22a";
+    //public const string VisualVersion = "Modded Server Debug";
 
-    public const int PluginEpoch = 103;
-    public const int PluginBuildNum = 1135;
+    public const string PluginEpochStr = "104";
+    public const string PluginBuildNumStr = "1152";
+    public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
+    public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = true;
 
     static public HttpClient HttpClient
@@ -69,17 +74,13 @@ public class NebulaPlugin : BasePlugin
         return "NoS " + VisualVersion;
     }
 
-    public Harmony Harmony = new Harmony(PluginGuid);
+    static public Harmony Harmony = new Harmony(PluginGuid);
 
-    [DllImport("user32.dll", EntryPoint = "SetWindowText")]
-    public static extern bool SetWindowText(System.IntPtr hwnd, System.String lpString);
-    [DllImport("user32.dll", EntryPoint = "FindWindow")]
-    public static extern System.IntPtr FindWindow(System.String className, System.String windowName);
 
     public bool IsPreferential => Log.IsPreferential;
     public static NebulaPlugin MyPlugin { get; private set; } = null!;
 
-    override public void Load()
+    static public void Load()
     {
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Core.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Wasapi.dll")!.ReadBytes());
@@ -87,17 +88,13 @@ public class NebulaPlugin : BasePlugin
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.OpusDotNet.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes());
         
-        MyPlugin = this;
-        
         Harmony.PatchAll();
-
-        SetWindowText(FindWindow(null!, Application.productName),"Among Us w/ " + GetNebulaVersionString());
 
         SceneManager.sceneLoaded += (UnityEngine.Events.UnityAction<Scene, LoadSceneMode>)((scene, loadMode) =>
         {
             new GameObject("NebulaManager").AddComponent<NebulaManager>();
         });
-
+        
         SetUpNebulaImpl();
 
         Debug.Log("Listeners:");
@@ -106,7 +103,7 @@ public class NebulaPlugin : BasePlugin
         foreach (var source in BepInEx.Logging.Logger.Sources) Debug.Log(source.SourceName);
     }
 
-    private void SetUpNebulaImpl()
+    static private void SetUpNebulaImpl()
     {
         NebulaAPI.instance = new NebulaImpl();
     }

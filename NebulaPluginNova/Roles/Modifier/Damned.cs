@@ -38,7 +38,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (canSeeAllInfo) name += Language.Translate("role.damned.prefix").Color(MyRole.UnityColor) + "<space=0.5em>" + name;
+            if (canSeeAllInfo) name = Language.Translate("role.damned.prefix").Color(MyRole.UnityColor) + "<space=0.5em>" + name;
         }
 
         [OnlyMyPlayer]

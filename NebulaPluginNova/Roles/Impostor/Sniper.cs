@@ -14,7 +14,7 @@ namespace Nebula.Roles.Impostor;
 [NebulaRPCHolder]
 public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Sniper() : base("sniper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,AimAssistOption,DelayInAimAssistOption]) {
+    private Sniper() : base("sniper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,AimAssistOption,DelayInAimAssistOption, CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
     }
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
@@ -31,6 +31,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillHidingPlayer", false);
     static private BoolConfiguration AimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.aimAssist", false);
     static private FloatConfiguration DelayInAimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.delayInAimAssistActivation", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second, () => AimAssistOption);
+    static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillImpostor", false);
 
     static public Sniper MyRole = new Sniper();
 
@@ -76,7 +77,8 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 if (p.IsDead || p.AmOwner || ((!CanKillHidingPlayerOption) && p.VanillaPlayer.inVent)) continue;
 
                 //インポスターは無視
-                if (p.Role.Role.Category == RoleCategory.ImpostorRole) continue;
+                if (!CanKillImpostorOption && p.IsImpostor) continue;
+
                 //不可視なプレイヤーは無視
                 if (p.Unbox().IsInvisible) continue;
 
@@ -135,7 +137,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("sniper.another1");
                 AchievementToken<int> acTokenChallenge = new("sniper.challenge", 0, (val, _) => val >= 2);
 
-                equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "sniper.equip");
                 equipButton.SetSprite(buttonSprite.GetSprite());
                 equipButton.Availability = (button) => MyPlayer.CanMove;
                 equipButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -164,7 +166,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 };
                 equipButton.SetLabel("equip");
 
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
+                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "sniper.kill");
                 killButton.Availability = (button) => MyRifle != null && MyPlayer.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) =>

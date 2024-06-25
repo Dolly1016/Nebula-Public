@@ -12,13 +12,14 @@ public static class PlayerStartPatch
 {
     static void Postfix(PlayerControl __instance, ref Il2CppSystem.Collections.IEnumerator __result)
     {
-        __result = Effects.Sequence(new Il2CppSystem.Collections.IEnumerator[] {
+        __result = Effects.Sequence(
             __result,
-            Effects.Action((Il2CppSystem.Action)(()=>{
+            Effects.Action((Il2CppSystem.Action)(()=>
+            {
                 __instance.SetColor(__instance.PlayerId);
-                if(PlayerControl.LocalPlayer)DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
+                if (PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
             }))
-            }.ToArray());
+            );
     }
 }
 
@@ -148,7 +149,7 @@ public static class PlayerCompleteTaskPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.StartMeeting))]
 public static class PlayerStartMeetingPatch
 {
-    public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo info)
+    public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo info)
     {
         TranslatableTag tag = info == null ? EventDetail.EmergencyButton : EventDetail.Report;
 
@@ -171,7 +172,7 @@ public static class PlayerStartMeetingPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CurrentOutfit), MethodType.Getter)]
 class CurrentOutfitPatch
 {
-    public static bool Prefix(PlayerControl __instance, ref GameData.PlayerOutfit __result)
+    public static bool Prefix(PlayerControl __instance, ref NetworkedPlayerInfo.PlayerOutfit __result)
     {
         __result = __instance.GetModInfo()?.Unbox().CurrentOutfit!;
         return __result == null;
@@ -181,11 +182,11 @@ class CurrentOutfitPatch
 [HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.Initialize))]
 class OverlayKillAnimationPatch
 {
-    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] GameData.PlayerInfo kInfo, [HarmonyArgument(1)] GameData.PlayerInfo vInfo)
+    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] NetworkedPlayerInfo kInfo, [HarmonyArgument(1)] NetworkedPlayerInfo vInfo)
     {
         if (__instance.killerParts)
         {
-            GameData.PlayerOutfit? currentOutfit = NebulaGameManager.Instance?.GetPlayer(kInfo.PlayerId)?.Unbox().CurrentOutfit;
+            NetworkedPlayerInfo.PlayerOutfit? currentOutfit = NebulaGameManager.Instance?.GetPlayer(kInfo.PlayerId)?.Unbox().CurrentOutfit;
             if (currentOutfit != null)
             {
                 __instance.killerParts.SetBodyType(PlayerBodyTypes.Normal);
@@ -197,7 +198,7 @@ class OverlayKillAnimationPatch
         }
         if (vInfo != null && __instance.victimParts)
         {
-            GameData.PlayerOutfit? defaultOutfit = NebulaGameManager.Instance?.GetPlayer(vInfo.PlayerId)?.Unbox().DefaultOutfit;
+            NetworkedPlayerInfo.PlayerOutfit? defaultOutfit = NebulaGameManager.Instance?.GetPlayer(vInfo.PlayerId)?.Unbox().DefaultOutfit;
             if (defaultOutfit != null)
             {
                 __instance.victimHat = defaultOutfit.HatId;
@@ -215,7 +216,7 @@ class OverlayKillAnimationPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetTasks))]
 class SetTaskPAtch
 {
-    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] Il2CppSystem.Collections.Generic.List<GameData.TaskInfo> tasks)
+    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] Il2CppSystem.Collections.Generic.List<NetworkedPlayerInfo.TaskInfo> tasks)
     {
         if (!__instance.AmOwner) return true;
 
@@ -241,7 +242,7 @@ class SetTaskPAtch
             __instance.Data.Role.SpawnTaskHeader(__instance);
             for (int i = 0; i < tasksList.Length; i++)
             {
-                GameData.TaskInfo taskInfo = tasksList[i];
+                NetworkedPlayerInfo.TaskInfo taskInfo = tasksList[i];
                 NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), __instance.transform);
                 normalPlayerTask.Id = taskInfo.Id;
                 normalPlayerTask.Owner = __instance;
@@ -330,10 +331,10 @@ class VelocityPatch
     }
 }
 
-[HarmonyPatch(typeof(KillOverlay), nameof(KillOverlay.ShowKillAnimation), typeof(GameData.PlayerInfo), typeof(GameData.PlayerInfo))]
+[HarmonyPatch(typeof(KillOverlay), nameof(KillOverlay.ShowKillAnimation), typeof(NetworkedPlayerInfo), typeof(NetworkedPlayerInfo))]
 public static class KillOverlayPatch
 {
-    public static bool Prefix(KillOverlay __instance, GameData.PlayerInfo killer, GameData.PlayerInfo victim)
+    public static bool Prefix(KillOverlay __instance, NetworkedPlayerInfo killer, NetworkedPlayerInfo victim)
     {
         if (killer == null ||  killer.PlayerId == victim.PlayerId)
         {
@@ -347,7 +348,7 @@ public static class KillOverlayPatch
 [HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.Initialize))]
 public static class OverlayKillAnimationInitializePatch
 {
-    public static void Postfix(OverlayKillAnimation __instance, GameData.PlayerInfo kInfo, GameData.PlayerInfo vInfo)
+    public static void Postfix(OverlayKillAnimation __instance, NetworkedPlayerInfo kInfo, NetworkedPlayerInfo vInfo)
     {
         if (kInfo.PlayerId == vInfo.PlayerId)
         {
@@ -380,7 +381,7 @@ public static class OverlayKillAnimationInitializePatch
 [HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.LoadVictimSkin))]
 public static class LoadVictimSkinPatch
 {
-    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] GameData.PlayerOutfit victimOutfit)
+    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] NetworkedPlayerInfo.PlayerOutfit victimOutfit)
     {
         var script = __instance.victimParts.gameObject.AddComponent<ScriptBehaviour>();
         SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(victimOutfit.SkinId);
@@ -418,7 +419,7 @@ public static class LoadVictimSkinPatch
 [HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.LoadKillerSkin))]
 public static class LoadKillerSkinPatch
 {
-    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] GameData.PlayerOutfit killerOutfit)
+    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] NetworkedPlayerInfo.PlayerOutfit killerOutfit)
     {
         var script = __instance.killerParts.gameObject.AddComponent<ScriptBehaviour>();
         SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(killerOutfit.SkinId);

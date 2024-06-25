@@ -50,11 +50,11 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                     NebulaGameManager.Instance!.AllPlayerInfo().Where(p => (p.MyKiller?.AmOwner ?? false) && (val & (1 << p.PlayerId)) != 0).Count() > 0;
                 });
 
-                GameData.PlayerOutfit? sample = null;
+                NetworkedPlayerInfo.PlayerOutfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
-                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample");
                 sampleButton.SetSprite(Morphing.Instance.SampleButtonSprite.GetSprite());
                 sampleButton.Availability = (button) => MyPlayer.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -69,7 +69,7 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
 
-                morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction,"illusioner.switch");
                 morphButton.SetSprite(Morphing.Instance.MorphButtonSprite.GetSprite());
                 morphButton.Availability = (button) => MyPlayer.CanMove && sample != null;
                 morphButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -81,8 +81,8 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         morphButton.ResetKeyBind();
-                        paintButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
-                        paintButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                        paintButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility,"illusioner.paint");
+                        paintButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "illusioner.switch");
                     });
                 };
                 morphButton.OnEffectStart = (button) =>
@@ -132,8 +132,8 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         paintButton.ResetKeyBind();
-                        morphButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
-                        morphButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                        morphButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph");
+                        morphButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "illusioner.switch");
                     });
                 };
                 paintButton.OnMeeting = (button) =>

@@ -4,6 +4,7 @@ public abstract class MapData
 {
     abstract protected Vector2[] MapArea { get; }
     abstract protected Vector2[] NonMapArea { get; }
+    virtual public Vector2[][] RaiderIgnoreArea { get => []; }
     abstract protected SystemTypes[] SabotageTypes { get; }
 
     public SystemTypes[] GetSabotageSystemTypes() => SabotageTypes;

@@ -105,6 +105,9 @@ public class ModUpdater
 
         public IEnumerator CoUpdateAndShowDialog()
         {
+            NebulaLoader.NebulaLoader.AutoUpdate.Value = false;
+            NebulaLoader.NebulaLoader.UseSnapshot.Value = false;
+
             var preWindow = MetaScreen.GenerateWindow(new Vector2(3f, 1.2f), null, new Vector3(0, 0, 0), true, true, true);
             preWindow.SetWidget(new MetaWidgetOld.Text(new(TextAttributeOld.NormalAttr) { Size = new(3f, 1.2f) }) { TranslationKey = "ui.update.waitFinishing" });
             yield return UpdateAsync().WaitAsCoroutine();

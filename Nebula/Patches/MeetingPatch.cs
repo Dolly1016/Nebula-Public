@@ -30,8 +30,8 @@ class MeetingHudPatch
 
         static bool Prefix(MeetingHud __instance, [HarmonyArgument(0)] byte srcPlayerId, [HarmonyArgument(1)] byte suspectPlayerId)
         {
-            GameData.PlayerInfo playerById = GameData.Instance.GetPlayerById(srcPlayerId);
-            GameData.PlayerInfo playerById2 = GameData.Instance.GetPlayerById(suspectPlayerId);
+            NetworkedPlayerInfo playerById = GameData.Instance.GetPlayerById(srcPlayerId);
+            NetworkedPlayerInfo playerById2 = GameData.Instance.GetPlayerById(suspectPlayerId);
             __instance.logger.Debug(playerById.PlayerName + " has voted for " + ((playerById2 != null) ? playerById2.PlayerName : "No one"), null);
             int num = __instance.playerStates.IndexOf((Il2CppSystem.Predicate<PlayerVoteArea>)((PlayerVoteArea pv) => pv.TargetPlayerId == srcPlayerId));
             PlayerVoteArea playerVoteArea = __instance.playerStates[num];
@@ -114,7 +114,7 @@ class MeetingHudPatch
                 CalculateVotes(ref VoteHistory, __instance);
                 bool tie;
                 KeyValuePair<byte, int> max = VoteHistory.MaxPair(out tie);
-                GameData.PlayerInfo exiled = GameData.Instance.AllPlayers.ToArray().FirstOrDefault(v => !tie && v.PlayerId == max.Key && !v.IsDead);
+                NetworkedPlayerInfo exiled = GameData.Instance.AllPlayers.ToArray().FirstOrDefault(v => !tie && v.PlayerId == max.Key && !v.IsDead);
 
                 int sum = 0;
                 foreach (int value in VoteHistory.Values)
@@ -196,7 +196,7 @@ class MeetingHudPatch
     [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
     class MeetingHudVotingCompletedPatch
     {
-        static void Postfix(MeetingHud __instance, [HarmonyArgument(0)] byte[] states, [HarmonyArgument(1)] GameData.PlayerInfo exiled, [HarmonyArgument(2)] bool tie)
+        static void Postfix(MeetingHud __instance, [HarmonyArgument(0)] byte[] states, [HarmonyArgument(1)] NetworkedPlayerInfo exiled, [HarmonyArgument(2)] bool tie)
         {
             if (meetingInfoText != null) meetingInfoText.gameObject.SetActive(false);
 
@@ -221,9 +221,9 @@ class MeetingHudPatch
     [HarmonyPatch(typeof(MeetingIntroAnimation), nameof(MeetingIntroAnimation.Init))]
     class MeetingIntroAnimationPatch
     {
-        public static void Prefix(MeetingIntroAnimation __instance, [HarmonyArgument(1)] ref Il2CppReferenceArray<GameData.PlayerInfo> deadBodies)
+        public static void Prefix(MeetingIntroAnimation __instance, [HarmonyArgument(1)] ref Il2CppReferenceArray<NetworkedPlayerInfo> deadBodies)
         {
-            List<GameData.PlayerInfo> dBodies = new List<GameData.PlayerInfo>();
+            List<NetworkedPlayerInfo> dBodies = new List<NetworkedPlayerInfo>();
             //既に発見されている死体
             foreach (var dBody in deadBodies)
             {
@@ -235,7 +235,7 @@ class MeetingHudPatch
                 dBodies.Add(GameData.Instance.GetPlayerById(dBody.ParentId));
                 GameObject.Destroy(dBody.gameObject);
             }
-            deadBodies = new Il2CppReferenceArray<GameData.PlayerInfo>(dBodies.ToArray());
+            deadBodies = new Il2CppReferenceArray<NetworkedPlayerInfo>(dBodies.ToArray());
 
             //生死を再確認
             MeetingHud.Instance.RecheckPlayerState();
@@ -256,7 +256,7 @@ class MeetingHudPatch
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.StartMeeting))]
     class StartMeetingPatch
     {
-        public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo meetingTarget)
+        public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo meetingTarget)
         {
             //会議前の位置を共有する
             RPCEventInvoker.SendPreMeetingPosition(PlayerControl.LocalPlayer.transform.position);

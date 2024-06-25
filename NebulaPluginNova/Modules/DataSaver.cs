@@ -175,6 +175,10 @@ public class DataSaver
     internal List<IDataEntry> allEntries = new();
     string filename;
 
+    public IEnumerable<(string,string)> AllRawContents()
+    {
+        foreach (var entry in contents) yield return (entry.Key, entry.Value);
+    }
     public string GetValue(string name, object defaultValue)
     {
         if (contents.TryGetValue(name, out string? value))
@@ -198,6 +202,8 @@ public class DataSaver
         this.filename = filename;
         Load();
     }
+
+    public static bool ExistData(string filename) => FileIO.Exists(ToDataSaverPath(filename));
 
     public static string ToDataSaverPath(string filename) => FileIO.GetDataPathTo(new string[] { "NebulaOnTheShip\\" + filename + ".dat" });
 

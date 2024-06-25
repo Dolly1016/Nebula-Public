@@ -103,10 +103,16 @@ public static class MeetingModRpc
 
 
         //追放者とタイ投票の結果だけは必ず書き換える
-        meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
-        meetingHud.wasTie = tie;
-        MeetingHudExtension.ExiledAll = exiledAll.Select(p => Helpers.GetPlayer(p)!).ToArray();
+        void UpdateResult()
+        {
+            meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
+            meetingHud.wasTie = tie;
+            MeetingHudExtension.ExiledAll = exiledAll.Select(p => Helpers.GetPlayer(p)!).ToArray();
+            MeetingHudExtension.WasTie = tie;
+        }
 
+        UpdateResult();
+        
         if (meetingHud.state == MeetingHud.VoteStates.Results) return;
 
         meetingHud.state = MeetingHud.VoteStates.Results;
@@ -123,7 +129,7 @@ public static class MeetingModRpc
         try
         {
             MeetingHud.VoterState voterState = states.FirstOrDefault((MeetingHud.VoterState s) => s.VoterId == PlayerControl.LocalPlayer.PlayerId);
-            GameData.PlayerInfo playerById = GameData.Instance.GetPlayerById(voterState.VotedForId);
+            NetworkedPlayerInfo playerById = GameData.Instance.GetPlayerById(voterState.VotedForId);
         }
         catch 
         {
@@ -155,7 +161,7 @@ class MeetingCalledAnimationPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 class ReportDeadBodyPatch
 {
-    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo target)
+    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo target)
     {
         //会議室が開くか否かのチェック
         if (AmongUsClient.Instance.IsGameOver || MeetingHud.Instance) return false;
@@ -335,7 +341,7 @@ class MeetingHudUpdatePatch
     static bool Prefix(MeetingHud __instance)
     {
         if (__instance.state == MeetingHud.VoteStates.Animating) return false;
-
+        
         __instance.UpdateButtons();
 
         switch (__instance.state)
@@ -379,7 +385,7 @@ class MeetingHudUpdatePatch
                         SoundManager.Instance.PlaySound(__instance.VoteEndingSound, false, 1f, null).pitch = Mathf.Lerp(1.5f, 0.8f, (float)__instance.lastSecond / 10f);
                     }
                 }
-                else
+                else if(AmongUsClient.Instance.AmHost)
                 {
                     //結果開示へ
                     __instance.ForceSkipAll();
@@ -547,9 +553,10 @@ static class CheckForEndVotingPatch
         for (int i = 0; i < __instance.playerStates.Length; i++)
         {
             PlayerVoteArea playerVoteArea = __instance.playerStates[i];
-            if (playerVoteArea.VotedFor != 252 && playerVoteArea.VotedFor != 255 && playerVoteArea.VotedFor != 254)
+            if (!(NebulaGameManager.Instance?.GetPlayer(playerVoteArea.TargetPlayerId)?.IsDead ?? true) && playerVoteArea.VotedFor != 252 && playerVoteArea.VotedFor != 255 && playerVoteArea.VotedFor != 254)
             {
                 if (!MeetingHudExtension.WeightMap.TryGetValue((byte)i, out var vote)) vote = 1;
+                Debug.Log($"Voter({i}) -> VoteFor({playerVoteArea.VotedFor}) x{vote}");
                 dictionary.AddValue(playerVoteArea.VotedFor,vote);
             }
         }
@@ -560,7 +567,7 @@ static class CheckForEndVotingPatch
     public static KeyValuePair<byte, int> MaxPair(this Dictionary<byte, int> self, out bool tie)
     {
         tie = true;
-        KeyValuePair<byte, int> result = new KeyValuePair<byte, int>(byte.MaxValue, 0);
+        KeyValuePair<byte, int> result = new KeyValuePair<byte, int>(PlayerVoteArea.SkippedVote, 0);
         foreach (KeyValuePair<byte, int> keyValuePair in self)
         {
             if (keyValuePair.Value > result.Value)
@@ -604,8 +611,8 @@ static class CheckForEndVotingPatch
             }
 
 
-            GameData.PlayerInfo exiled = null!;
-            GameData.PlayerInfo[] exiledAll = new GameData.PlayerInfo[0];
+            NetworkedPlayerInfo exiled = null!;
+            NetworkedPlayerInfo[] exiledAll = new NetworkedPlayerInfo[0];
 
             if (MeetingHudExtension.ExileEvenIfTie) tie = false;
             try
@@ -648,9 +655,10 @@ static class CheckForEndVotingPatch
                 });
             }
 
+            Debug.Log($"Exiled: ({string.Join(',', (exiledAll ?? []).Select(b => b.ToString()))})");
             //allStates.Add(new() { VoterId = byte.MaxValue - 1 });
             //__instance.RpcVotingComplete(allStates.ToArray(), exiled, tie);
-            MeetingModRpc.RpcModCompleteVoting.Invoke((allStates, exiled?.PlayerId ?? byte.MaxValue, exiledAll.Select(e => e.PlayerId).ToArray(), tie));
+            MeetingModRpc.RpcModCompleteVoting.Invoke((allStates, exiled?.PlayerId ?? byte.MaxValue, exiledAll?.Select(e => e.PlayerId).ToArray() ?? [], tie));
 
 
         }
@@ -659,6 +667,7 @@ static class CheckForEndVotingPatch
     }
 }
 
+//おそらくこれはまともに動いてない。
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
 class CancelVotingCompleteDirectlyPatch
 {
@@ -669,6 +678,8 @@ class CancelVotingCompleteDirectlyPatch
     }
 }
 
+
+//おそらくこれはまともに動いてない。
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.HandleRpc))]
 class CancelVotingCompleteByRPCPatch
 {
@@ -686,7 +697,7 @@ class CancelVotingCompleteByRPCPatch
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.PopulateResults))]
 class PopulateResultPatch
 {
-    private static void ModBloopAVoteIcon(MeetingHud __instance,GameData.PlayerInfo? voterPlayer, int index, Transform parent,bool isExtra)
+    private static void ModBloopAVoteIcon(MeetingHud __instance,NetworkedPlayerInfo? voterPlayer, int index, Transform parent,bool isExtra)
     {
         SpriteRenderer spriteRenderer = GameObject.Instantiate<SpriteRenderer>(__instance.PlayerVotePrefab);
         if (GameManager.Instance.LogicOptions.GetAnonymousVotes() || voterPlayer == null)
@@ -737,7 +748,7 @@ class PopulateResultPatch
 
             if (voteFor != null)
             {
-                GameData.PlayerInfo? playerById = GameData.Instance.GetPlayerById(state.VoterId);
+                NetworkedPlayerInfo? playerById = GameData.Instance.GetPlayerById(state.VoterId);
 
                 ModBloopAVoteIcon(__instance, playerById, num, voteFor, state.VoterId == byte.MaxValue);
                 num++;
@@ -753,9 +764,9 @@ class PopulateResultPatch
 [HarmonyPatch(typeof(MeetingIntroAnimation), nameof(MeetingIntroAnimation.Init))]
 class MeetingIntroAnimationPatch
 {
-    public static void Prefix(MeetingIntroAnimation __instance, [HarmonyArgument(1)] ref Il2CppReferenceArray<GameData.PlayerInfo> deadBodies)
+    public static void Prefix(MeetingIntroAnimation __instance, [HarmonyArgument(1)] ref Il2CppReferenceArray<NetworkedPlayerInfo> deadBodies)
     {
-        List<GameData.PlayerInfo> dBodies = new List<GameData.PlayerInfo>();
+        List<NetworkedPlayerInfo> dBodies = new List<NetworkedPlayerInfo>();
         //既に発見されている死体
         foreach (var dBody in deadBodies) dBodies.Add(dBody);
         
@@ -765,7 +776,7 @@ class MeetingIntroAnimationPatch
             dBodies.Add(GameData.Instance.GetPlayerById(dBody.ParentId));
             GameObject.Destroy(dBody.gameObject);
         }
-        deadBodies = new Il2CppReferenceArray<GameData.PlayerInfo>(dBodies.OrderBy(d => d.PlayerId).ToArray());
+        deadBodies = new Il2CppReferenceArray<NetworkedPlayerInfo>(dBodies.OrderBy(d => d.PlayerId).ToArray());
 
         //生死を再確認
         MeetingHud.Instance.ResetPlayerState();

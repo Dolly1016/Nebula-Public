@@ -100,7 +100,7 @@ while (!exit)
                         {
                             AllProcess.Add(Process.Start(path + "\\Among Us.exe"));
                             Console.WriteLine($"{i + 1}/{num}回目 起動済み");
-                            if(i + 1 < num) Thread.Sleep(16000);
+                            if (i + 1 < num) Thread.Sleep(8000);
                             path += "\\m";
                             
                         }
@@ -211,7 +211,7 @@ string GetTagVersion()
     else if (NebulaPlugin.VisualVersion.StartsWith("Snapshot"))
         prefix = "s";
 
-    return prefix + "," + NebulaPlugin.VisualVersion.Replace(" ","_") + "," + NebulaPlugin.PluginEpoch + "," + NebulaPlugin.PluginBuildNum;
+    return prefix + "," + NebulaPlugin.VisualVersion.Replace(" ","_") + "," + NebulaPlugin.PluginEpochStr + "," + NebulaPlugin.PluginBuildNumStr;
 }
 
 string GetGitHubToken()

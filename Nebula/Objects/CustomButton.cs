@@ -490,11 +490,11 @@ public class InterpersonalAbilityAttribute : SimpleAbilityAttribute
 
     public override bool IsEnabled() => base.IsEnabled() && Game.GameData.data.myData.currentTarget != null;
 
-    private Predicate<GameData.PlayerInfo> targetablePredicate;
+    private Predicate<NetworkedPlayerInfo> targetablePredicate;
     private Color outlineColor;
     private float distance;
 
-    public InterpersonalAbilityAttribute(float coolDown, float initialCoolDown, Predicate<GameData.PlayerInfo> targetablePredicate, Color outlineColor,float distance,ModAbilityButton.IButtonEvent buttonEvent)
+    public InterpersonalAbilityAttribute(float coolDown, float initialCoolDown, Predicate<NetworkedPlayerInfo> targetablePredicate, Color outlineColor,float distance,ModAbilityButton.IButtonEvent buttonEvent)
     :base(coolDown,initialCoolDown, buttonEvent)
     {
         this.targetablePredicate = targetablePredicate;
@@ -507,13 +507,13 @@ public class KillAbilityAttribute : InterpersonalAbilityAttribute
 {
     protected override bool IsKillButton => true;
 
-    public KillAbilityAttribute(float coolDown, float initialCoolDown, Predicate<GameData.PlayerInfo> targetablePredicate, Color outlineColor, float distance, Action<PlayerControl> buttonEvent)
+    public KillAbilityAttribute(float coolDown, float initialCoolDown, Predicate<NetworkedPlayerInfo> targetablePredicate, Color outlineColor, float distance, Action<PlayerControl> buttonEvent)
     : base(coolDown, initialCoolDown, targetablePredicate, outlineColor,distance,new SimpleButtonEvent((button) => {
         if (Game.GameData.data.myData.currentTarget != null) buttonEvent.Invoke(Game.GameData.data.myData.currentTarget);
         button.MyAttribute!.StartCoolingDown();
     }, Module.NebulaInputManager.modKillInput.keyCode)){}
 
-    public KillAbilityAttribute(float coolDown, float initialCoolDown, Predicate<GameData.PlayerInfo> targetablePredicate, Color outlineColor, float distance, Game.PlayerData.PlayerStatus deathReason ,Action<PlayerControl>? extraAction)
+    public KillAbilityAttribute(float coolDown, float initialCoolDown, Predicate<NetworkedPlayerInfo> targetablePredicate, Color outlineColor, float distance, Game.PlayerData.PlayerStatus deathReason ,Action<PlayerControl>? extraAction)
      : base(coolDown, initialCoolDown, targetablePredicate, outlineColor, distance, new SimpleButtonEvent((button) => {
          if (Game.GameData.data.myData.currentTarget != null)
          {

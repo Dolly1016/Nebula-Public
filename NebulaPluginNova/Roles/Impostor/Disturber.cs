@@ -166,7 +166,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 TextMeshPro polesText = null!;
                 int GetNumOfLeftPoles() =>MaxNumOfPolesOption - (newPoles.Count + poles.Count);
 
-                var placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                var placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) =>
                 {
@@ -203,7 +203,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 polesText = placeButton.ShowUsesIcon(0);
                 polesText.text = GetNumOfLeftPoles().ToString();
 
-                disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "disturber.disturb");
                 disturbButton.SetSprite(disturbButtonSprite.GetSprite());
                 disturbButton.Availability = (button) => poles.Count >= 2;
                 disturbButton.Visibility = (button) => !MyPlayer.IsDead;

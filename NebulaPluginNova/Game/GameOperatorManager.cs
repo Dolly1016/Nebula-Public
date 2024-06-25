@@ -170,7 +170,16 @@ public class GameOperatorManager
         //コレクションの中身を全消去
         allOperatorInstance.Do(entry => entry.Value.Clear());
         allOperatorInstance.Clear();
-        allOperators.Do(t => t.operation.OnReleased());
+        allOperators.Do(t =>
+        {
+            try
+            {
+                t.operation.OnReleased();
+            }
+            catch(Exception e) {
+                Debug.LogError(e.ToString());
+            }
+        });
         allOperators.Clear();
 
         if (instance == this) instance = null;

@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Impostor;
+﻿using Nebula.Behaviour;
+using Nebula.Roles.Impostor;
 using Nebula.Roles.Modifier;
 using Nebula.Roles.Neutral;
 using Virial;
@@ -190,7 +191,7 @@ public class NebulaEndCriteria
     {
         void OnExiled(PlayerExiledEvent ev) 
         {
-            if (ev.Player?.Role.Role == Roles.Neutral.Jester.MyRole) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JesterWin, GameEndReason.Situation, BitMasks.AsPlayer(1u << ev.Player.PlayerId));
+            if (ev.Player?.Role.Role == Roles.Neutral.Jester.MyRole) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JesterWin, GameEndReason.Special, BitMasks.AsPlayer(1u << ev.Player.PlayerId));
         }
     };
 }
@@ -211,6 +212,8 @@ public class CriteriaManager
 
         //終了条件が確定済みなら何もしない
         if (NebulaGameManager.Instance?.EndState != null) return;
+
+        if ((ExileController.Instance) && !Minigame.Instance) triggeredGameEnds.RemoveAll(t => t.reason == GameEndReason.Situation);
 
         if(triggeredGameEnds.Count == 0) return;
 

@@ -91,13 +91,16 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (AmOwner)
             {
-                var numOfTasksOptions = NumOfTasksToIdentifyImpostorsOptions.Take(CanIdentifyImpostorsOption);
-                int max = numOfTasksOptions.Max(option => option.Value);
-
-                using (RPCRouter.CreateSection("MadmateTask"))
+                if (CanIdentifyImpostorsOption > 0)
                 {
-                    MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(max, 0, 0);
-                    MyPlayer.Tasks.Unbox().BecomeToOutsider();
+                    var numOfTasksOptions = NumOfTasksToIdentifyImpostorsOptions.Take(CanIdentifyImpostorsOption);
+                    int max = numOfTasksOptions.Max(option => option.Value);
+
+                    using (RPCRouter.CreateSection("MadmateTask"))
+                    {
+                        MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(max, 0, 0);
+                        MyPlayer.Tasks.Unbox().BecomeToOutsider();
+                    }
                 }
             }
         }

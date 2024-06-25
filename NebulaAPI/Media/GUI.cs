@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Virial.Assignable;
+using Virial.Attributes;
 using Virial.Compat;
 using Virial.Text;
 
@@ -417,4 +418,21 @@ public interface GUI
     TextComponent FunctionalTextComponent(Func<string> supplier);
 
     internal void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable;
+
+    /// <summary>
+    /// オーバーレイを表示します。
+    /// </summary>
+    /// <param name="widget"></param>
+    /// <param name="clickable"></param>
+    void ShowOverlay(GUIWidget widget, GUIClickable? clickable = null);
+    /// <summary>
+    /// オーバーレイを隠します。
+    /// </summary>
+    void HideOverlay();
+    /// <summary>
+    /// 指定のGUIClickableと紐づけられたオーバーレイが表示中の場合、隠します。
+    /// </summary>
+    /// <param name="clickable"></param>
+    void HideOverlayIf(GUIClickable? clickable);
 }
+

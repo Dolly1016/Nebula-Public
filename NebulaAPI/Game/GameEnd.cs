@@ -28,8 +28,9 @@ public enum ExtraWinCheckPhase
     Phase3,
     PhaseMax,
 
-    LoversPhase = Phase1,
-    ObsessionPhase = Phase0,
+    LoversPhase = Phase2,
+    ObsessionPhase = Phase1,
+    DancerPhase = Phase0,
 }
 
 public static class NebulaGameEnds

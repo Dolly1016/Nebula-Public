@@ -35,7 +35,7 @@ public class PlayerDisplay : MonoBehaviour
 
     public void UpdateFromPlayerOutfit(PlayerControl player, bool isDead, bool includePet)
     {
-        GameData.PlayerOutfit outfit = player.Data.Outfits[player.CurrentOutfitType];
+        NetworkedPlayerInfo.PlayerOutfit outfit = player.Data.Outfits[player.CurrentOutfitType];
 
 
         Cosmetics.SetMaskType(PlayerMaterial.MaskType.None);

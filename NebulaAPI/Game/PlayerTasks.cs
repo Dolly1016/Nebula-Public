@@ -51,7 +51,14 @@ public interface PlayerTasks : IModule
     bool IsCompletedTotalTasks => TotalCompleted >= TotalTasks;
 
     /// <summary>
+    /// タスクノルマをすべてクリアしている場合Trueが返ります。
+    /// </summary>
+    bool IsAchievedQuota => TotalCompleted >= Quota;
+
+    /// <summary>
     /// 実行可能なタスクを持ちうる場合Trueが返ります。
     /// </summary>
     bool HasExecutableTasks => CurrentTasks > 0;
+
+
 }

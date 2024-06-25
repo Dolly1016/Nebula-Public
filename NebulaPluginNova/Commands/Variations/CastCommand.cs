@@ -9,7 +9,7 @@ public class CastCommand : ICommand
     private static Dictionary<string, Func<ICommandToken, CommandEnvironment, CoTask<ICommandToken>>> objectDics = new()
     {
         {  "player", GetCastTask<GamePlayer> },
-        {  "outfit", GetCastTask<GameData.PlayerOutfit> },
+        {  "outfit", GetCastTask<NetworkedPlayerInfo.PlayerOutfit> },
     };
 
     public static CoTask<ICommandToken> GetCastTask<T>(ICommandToken argument, CommandEnvironment env)

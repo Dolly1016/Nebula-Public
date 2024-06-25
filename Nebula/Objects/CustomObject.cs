@@ -42,7 +42,7 @@ public class UsableCustomObjectBehaviour : MonoBehaviour
     }
 
 
-    public float CanUse(GameData.PlayerInfo pc, out bool canUse, out bool couldUse)
+    public float CanUse(NetworkedPlayerInfo pc, out bool canUse, out bool couldUse)
     {
         float num = float.MaxValue;
         PlayerControl @object = pc.Object;

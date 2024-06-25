@@ -126,7 +126,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, IInjectable, PlayerTa
         }));
     }
 
-    public void ResetTasksLocal(List<GameData.TaskInfo> tasks)
+    public void ResetTasksLocal(List<NetworkedPlayerInfo.TaskInfo> tasks)
     {
         RemoveAllTasks();
 
@@ -167,13 +167,13 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, IInjectable, PlayerTa
         MyContainer.VanillaPlayer.Data.Tasks = new(newTaskIdList.Count);
         for (int i = 0; i < newTaskIdList.Count; i++)
         {
-            MyContainer.VanillaPlayer.Data.Tasks.Add(new GameData.TaskInfo(newTaskIdList[i], (uint)i));
+            MyContainer.VanillaPlayer.Data.Tasks.Add(new NetworkedPlayerInfo.TaskInfo(newTaskIdList[i], (uint)i));
             MyContainer.VanillaPlayer.Data.Tasks[i].Id = (uint)i;
         }
 
         for (int i = 0; i < MyContainer.VanillaPlayer.Data.Tasks.Count; i++)
         {
-            GameData.TaskInfo taskInfo = MyContainer.VanillaPlayer.Data.Tasks[i];
+            NetworkedPlayerInfo.TaskInfo taskInfo = MyContainer.VanillaPlayer.Data.Tasks[i];
             NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), MyContainer.VanillaPlayer.transform);
             normalPlayerTask.Id = taskInfo.Id;
             normalPlayerTask.Owner = MyContainer.VanillaPlayer;

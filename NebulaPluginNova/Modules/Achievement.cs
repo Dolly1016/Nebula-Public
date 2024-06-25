@@ -104,13 +104,20 @@ public class ProgressRecord
 
     public bool IsCleared => goal <= entry.Value;
 
+    public string OldEntryTag => "a." + key.ComputeConstantHashAsString();
+    public string EntryTag => "a." + this.hashedKey;
+    public void AdoptBigger(int value)
+    {
+        if(entry.Value < value) entry.Value = value;
+    }
     public ProgressRecord(string key, int goal, bool canClearOnce)
     {
         this.key = key;
-        this.hashedKey = key.ComputeConstantHashAsString();
+        this.hashedKey = key.ComputeConstantHashAsStringLong();
         this.canClearOnce = canClearOnce;
         this.entry = new IntegerDataEntry("a." + hashedKey, NebulaAchievementManager.AchievementDataSaver, 0);
         this.goal = goal;
+        if (NebulaAchievementManager.AllRecords.Any(r => r.entry.Name == this.entry.Name)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Duplicate achievement hash: " + key);
         NebulaAchievementManager.RegisterAchievement(this, key);
     }
 
@@ -392,7 +399,7 @@ public class CompleteAchievement : SumUpAchievement
 [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
 static public class NebulaAchievementManager
 {
-    static public DataSaver AchievementDataSaver = new("Progress");
+    static public DataSaver AchievementDataSaver = new("Achievements");
     static private Dictionary<string, ProgressRecord> allRecords = new();
     static private StringDataEntry myTitleEntry = new("MyTitle", AchievementDataSaver, "-");
 
@@ -453,7 +460,8 @@ static public class NebulaAchievementManager
             PlayerState.Embroiled,
             PlayerState.Trapped,
             PlayerState.Cursed,
-            PlayerState.Crushed
+            PlayerState.Crushed,
+            PlayerState.Frenzied
         }.Select(tag => new DisplayProgressRecord("kill." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
         ProgressRecord[] deathRecord = new TranslatableTag[] { 
             PlayerState.Dead,
@@ -469,7 +477,8 @@ static public class NebulaAchievementManager
             PlayerState.Pseudocide,
             PlayerState.Deranged,
             PlayerState.Cursed,
-            PlayerState.Crushed
+            PlayerState.Crushed,
+            PlayerState.Frenzied
         }.Select(tag => new DisplayProgressRecord("death." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
 
         //読み込み
@@ -561,6 +570,24 @@ static public class NebulaAchievementManager
                 new StandardAchievement(clearOnce, secret, noHint, args[0], goal, (relatedRole, type), rarity);
 
             if (recordsList.Count > 0) recordsList.Clear();
+        }
+
+        //旧形式から更新する
+        if (DataSaver.ExistData("Progress"))
+        {
+            yield return preprocessor.SetLoadingText("Reformatting Achievement Progress");
+
+            var oldSaver = new DataSaver("Progress");
+
+            foreach (var tuple in oldSaver.AllRawContents())
+            {
+                if (int.TryParse(tuple.Item2, out var val)) {
+                    var record = AllRecords.FirstOrDefault(r => tuple.Item1 == r.OldEntryTag);
+                    if (record != null) record.AdoptBigger(val);
+                }
+            }
+
+            File.Move(DataSaver.ToDataSaverPath("Progress"), DataSaver.ToDataSaverPath("Progress") + ".old", true);
         }
 
         foreach (var achievement in AllAchievements) achievement.CheckClear();

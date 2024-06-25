@@ -78,7 +78,7 @@ public static class ShowIntroPatch
             PlayerControl playerControl = shownPlayers[i];
             if (playerControl)
             {
-                GameData.PlayerInfo data = playerControl.Data;
+                NetworkedPlayerInfo data = playerControl.Data;
                 if (data != null)
                 {
                     PoolablePlayer poolablePlayer = __instance.CreatePlayer(i, maxDepth, data, false);

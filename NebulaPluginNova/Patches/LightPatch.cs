@@ -10,7 +10,7 @@ public class LightPatch
 {
     public static float lastRange = 1f;
 
-    public static bool Prefix(ref float __result, ShipStatus __instance, [HarmonyArgument(0)] GameData.PlayerInfo? player)
+    public static bool Prefix(ref float __result, ShipStatus __instance, [HarmonyArgument(0)] NetworkedPlayerInfo? player)
     {
         if (__instance == null)
         {

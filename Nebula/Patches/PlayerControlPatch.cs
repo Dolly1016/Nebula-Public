@@ -6,32 +6,31 @@ public class SyncTransformPatch
 {
     public static void Postfix(CustomNetworkTransform __instance)
     {
-        __instance.snapThreshold = 0.5f;
+        //__instance.snapThreshold = 0.5f;
     }
 }
 
-[HarmonyPatch(typeof(GameData), nameof(GameData.SetTasks))]
+[HarmonyPatch(typeof(NetworkedPlayerInfo), nameof(NetworkedPlayerInfo.SetTasks))]
 public class PlayerControlSetTaskPatch
 {
-    public static bool Prefix(GameData __instance, [HarmonyArgument(0)] byte playerId, [HarmonyArgument(1)] Il2CppStructArray<byte> taskTypeIds)
+    public static bool Prefix(NetworkedPlayerInfo __instance, [HarmonyArgument(0)] Il2CppStructArray<byte> taskTypeIds)
     {
-        if (playerId != PlayerControl.LocalPlayer.PlayerId) return true;
+        if (!__instance.AmOwner) return true;
 
-        GameData.PlayerInfo playerById = __instance.GetPlayerById(playerId);
-        if (playerById == null || playerById.Disconnected || !playerById.Object) return false;
+        if (__instance == null || __instance.Disconnected || !__instance.Object) return false;
 
 
-        var initialTasks = new List<GameData.TaskInfo>();
-        List<GameData.TaskInfo>? actualTasks = null;
+        var initialTasks = new List<NetworkedPlayerInfo.TaskInfo>();
+        List<NetworkedPlayerInfo.TaskInfo>? actualTasks = null;
 
-        for (int i = 0; i < taskTypeIds.Length; i++) initialTasks.Add(new GameData.TaskInfo(taskTypeIds[i], (uint)i));
+        for (int i = 0; i < taskTypeIds.Length; i++) initialTasks.Add(new NetworkedPlayerInfo.TaskInfo(taskTypeIds[i], (uint)i));
 
         Game.GameData.data.myData.InitialTasks = initialTasks;
 
         Helpers.RoleAction(Game.GameData.data.myData.getGlobalData(), (r) => r.OnSetTasks(ref initialTasks, ref actualTasks));
 
         if (actualTasks == null) actualTasks = initialTasks;
-        playerById.SetLocalTask(actualTasks);
+        __instance.SetLocalTask(actualTasks);
 
         //フェイクタスクでなければタスクを持つ
         bool hasCrewmateTask = true;
@@ -145,13 +144,13 @@ public class PlayerControlPatch
                 onlyWhiteNames, targetPlayersInVents, untargetablePlayers, targetingPlayer);
     }
 
-    static public PlayerControl? SetMyTarget(System.Predicate<GameData.PlayerInfo> targetablePlayers, PlayerControl targetingPlayer = null)
+    static public PlayerControl? SetMyTarget(System.Predicate<NetworkedPlayerInfo> targetablePlayers, PlayerControl targetingPlayer = null)
     {
         return SetMyTarget(GameOptionsData.KillDistances[Mathf.Clamp(GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.KillDistance), 0, 2)],
             targetablePlayers);
     }
 
-    static public PlayerControl? SetMyTarget(float range, System.Predicate<GameData.PlayerInfo> targetablePlayers, PlayerControl? targetingPlayer = null)
+    static public PlayerControl? SetMyTarget(float range, System.Predicate<NetworkedPlayerInfo> targetablePlayers, PlayerControl? targetingPlayer = null)
     {
         PlayerControl result = null;
         float num = range;
@@ -160,10 +159,10 @@ public class PlayerControlPatch
         if (targetingPlayer.Data.IsDead) return result;
 
         Vector2 truePosition = targetingPlayer.GetTruePosition();
-        Il2CppSystem.Collections.Generic.List<GameData.PlayerInfo> allPlayers = GameData.Instance.AllPlayers;
+        Il2CppSystem.Collections.Generic.List<NetworkedPlayerInfo> allPlayers = GameData.Instance.AllPlayers;
         for (int i = 0; i < allPlayers.Count; i++)
         {
-            GameData.PlayerInfo playerInfo = allPlayers[i];
+            NetworkedPlayerInfo playerInfo = allPlayers[i];
 
             if (playerInfo == null || (targetingPlayer.PlayerId == playerInfo.PlayerId) || (playerInfo.Object == null))
                 continue;
@@ -408,11 +407,8 @@ public class PlayerControlPatch
 
         if (player.cosmetics.currentPet)
         {
-            if (player.cosmetics.currentPet.rend != null)
-                player.cosmetics.currentPet.rend.color = data.TransColor;
-
-            if (player.cosmetics.currentPet.shadowRend != null)
-                player.cosmetics.currentPet.shadowRend.color = data.TransColor;
+            player.cosmetics.currentPet.renderers.Do(r => r.color = data.TransColor);
+            player.cosmetics.currentPet.shadows.Do(r => r.color = data.TransColor);
         }
 
         if (player.cosmetics.visor != null)
@@ -478,11 +474,12 @@ class BlockRPCSetRolePatch
     }
 }
 
-[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetRole))]
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CoSetRole))]
 class BlockSetRolePatch
 {
-    public static bool Prefix(PlayerControl __instance)
+    public static bool Prefix(PlayerControl __instance, ref Il2CppSystem.Collections.IEnumerator __result)
     {
+        __result = Effects.Wait(0f);
         return false;
     }
 }
@@ -697,7 +694,7 @@ class MyWalkPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 class ReportDeadBodyPatch
 {
-    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo target)
+    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo target)
     {
         if (AmongUsClient.Instance.IsGameOver || MeetingHud.Instance || __instance.Data.IsDead)
         {
@@ -807,12 +804,12 @@ class PlayerIsKillTimerEnabledPatch
 [HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.Initialize))]
 class OverlayKillAnimationPatch
 {
-    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] GameData.PlayerInfo kInfo, [HarmonyArgument(1)] GameData.PlayerInfo vInfo)
+    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] NetworkedPlayerInfo kInfo, [HarmonyArgument(1)] NetworkedPlayerInfo vInfo)
     {
         if (__instance.killerParts)
         {
             PlayerControl playerControl = Helpers.playerById(kInfo.PlayerId);
-            GameData.PlayerOutfit currentOutfit = playerControl.GetModData().CurrentOutfit.toPlayerOutfit();
+            NetworkedPlayerInfo.PlayerOutfit currentOutfit = playerControl.GetModData().CurrentOutfit.toPlayerOutfit();
             __instance.killerParts.SetBodyType(playerControl.BodyType);
             __instance.killerParts.UpdateFromPlayerOutfit(currentOutfit, PlayerMaterial.MaskType.None, false, false);
             __instance.killerParts.ToggleName(false);
@@ -822,7 +819,7 @@ class OverlayKillAnimationPatch
         if (vInfo != null && __instance.victimParts)
         {
             PlayerControl playerControl2 = Helpers.playerById(vInfo.PlayerId);
-            GameData.PlayerOutfit currentOutfit2 = playerControl2.GetModData().CurrentOutfit.toPlayerOutfit();
+            NetworkedPlayerInfo.PlayerOutfit currentOutfit2 = playerControl2.GetModData().CurrentOutfit.toPlayerOutfit();
             __instance.victimHat = currentOutfit2.HatId;
             __instance.victimParts.SetBodyType(playerControl2.BodyType);
             __instance.victimParts.UpdateFromPlayerOutfit(currentOutfit2, PlayerMaterial.MaskType.None, false, false);

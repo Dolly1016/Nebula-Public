@@ -352,14 +352,13 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public void OnSceneChanged()
     {
-        VoiceChatManager?.Dispose();
-        VoiceChatManager = null;
-    }
-
-    public void OnTerminal()
-    {
-        VoiceChatManager?.Dispose();
-        VoiceChatManager = null;
+        if (SceneManager.GetActiveScene().name == "EndGame")
+            VoiceChatManager?.OnGameEndScene();
+        else
+        {
+            VoiceChatManager?.Dispose();
+            VoiceChatManager = null;
+        }
     }
 
     void Virial.Game.Game.RegisterEntity(IGameOperator entity, ILifespan lifespan) => GameEntityManager.Register(entity, lifespan);

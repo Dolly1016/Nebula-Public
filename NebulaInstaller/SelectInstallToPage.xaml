@@ -1,0 +1,23 @@
+﻿<Page x:Class="NebulaInstaller.SelectInstallToPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NebulaInstaller"
+      mc:Ignorable="d" 
+      d:DesignHeight="320" d:DesignWidth="620"
+      Title="SelectInstallToPage">
+
+    <Grid>
+        <TextBlock HorizontalAlignment="Left" Margin="20,20,0,0" TextWrapping="Wrap" VerticalAlignment="Top" ><Run Language="ja-jp" Text="インストール先を選択します。"/></TextBlock>
+        <Button Content="インストール" Margin="40,80,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="120" Click="ClickInstall"/>
+        <Button Content="カスタムインストール" Margin="40,140,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="120" Click="ClickCustom"/>
+        <Button Content="戻る" Margin="20,0,0,20" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="80"  Click="ClickPrev"/>
+        <Label HorizontalAlignment="Left" Margin="180,80,0,0" Height="30" VerticalAlignment="Top" VerticalContentAlignment="Center" >
+            <Run Language="ja-jp" Text="推奨される場所に自動でインストールします。"/>
+        </Label>
+        <Label HorizontalAlignment="Left" Margin="180,140,0,0" Height="30" VerticalAlignment="Top" VerticalContentAlignment="Center" >
+            <Run Language="ja-jp" Text="ユーザーが選択したインストール先にインストールします。"/>
+        </Label>
+    </Grid>
+</Page>

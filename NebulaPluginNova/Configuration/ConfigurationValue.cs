@@ -14,7 +14,7 @@ namespace Nebula.Configuration;
 /// <summary>
 /// ゲーム内設定のオプション値を管理します。
 /// </summary>
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
+[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructureConfig)]
 [NebulaRPCHolder]
 internal static class ConfigurationValues
 {
@@ -28,6 +28,15 @@ internal static class ConfigurationValues
     /// </summary>
     static internal List<ISharableEntry> AllEntries = new();
     static internal List<Action> Reloaders = new();
+    static internal StringDataEntry PresetName = new("preset", ConfigurationSaver, "");
+    static internal string CurrentPresetName = "";
+
+    static private bool IsFixed = false;
+    static internal void RegisterEntry(ISharableEntry entry)
+    {
+        if (IsFixed) Debug.LogError($"Bad Register Action! Name:{entry.Name}");
+        AllEntries.Add(entry);
+    }
 
     /// <summary>
     /// オプションの値の共有を遅らせるためのブロッカー
@@ -86,6 +95,7 @@ internal static class ConfigurationValues
     {
         Reloaders.Do(a => a.Invoke());
         foreach (var entry in AllEntries) entry.RestoreSavedValue();
+        CurrentPresetName = PresetName.Value;
     }
 
     /// <summary>
@@ -111,7 +121,23 @@ internal static class ConfigurationValues
         AllEntries.Sort((c1, c2) => string.Compare(c1.Name, c2.Name));
 
         for (int i = 0; i < AllEntries.Count; i++) AllEntries[i].Id = i;
+
+        Debug.Log("All NoS Config Entries: " + AllEntries.Count);
+        IsFixed = true;
+
     }
+
+    /// <summary>
+    /// ゲーム内のプレイヤーとプリセットの値を共有します。
+    /// </summary>
+    static public RemoteProcess<string> RpcSharePresetName = new(
+        "SharePresetName",
+       (message, isCalledByMe) =>
+       {
+           if (isCalledByMe) PresetName.Value = message;
+           CurrentPresetName = message;
+       }
+    );
 
     /// <summary>
     /// ゲーム内のプレイヤーとオプションの値を共有します。
@@ -122,6 +148,9 @@ internal static class ConfigurationValues
        {
            if (!isCalledByMe) AllEntries[message.id].RpcValue = message.value;
            HelpScreen.OnUpdateOptions();
+           if (isCalledByMe) PresetName.Value = "";
+           CurrentPresetName = "";
+           GameOptionsManager.Instance.currentGameOptions.SetInt(AmongUs.GameOptions.Int32OptionNames.RulePreset, (int)AmongUs.GameOptions.RulesPresets.Custom);
        }
     );
 
@@ -155,10 +184,17 @@ internal static class ConfigurationValues
        {
            int index = reader.ReadInt32();
            int num = reader.ReadInt32();
+           Debug.Log($"Received Share All Option RPC, Index: {index}, Num: {num}");
            for (int i = 0; i < num; i++)
            {
-               AllEntries[index].RpcValue = reader.ReadInt32();
-               index++;
+               int value = reader.ReadInt32();
+               try
+               {
+                   AllEntries[index + i].RpcValue = value;
+               }catch(Exception ex)
+               {
+                   Debug.LogError($"RPC Set Error (ID: {index + i}, Name: {AllEntries[index + i].Name}, Value: {value})\n" + ex.ToString());
+               }
            }
            return new Tuple<int, int>(index, num);
        },

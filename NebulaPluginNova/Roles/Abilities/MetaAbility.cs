@@ -25,9 +25,29 @@ public class MetaAbility : ComponentHolder, IGameOperator, IModule
             OpenRoleWindow();
         };
         roleButton.SetLabel("operate");
+
+        var reviveButton = Bind(new ModAbilityButton(true, false, 100));
+        reviveButton.SetSprite(reviveSprite.GetSprite());
+        reviveButton.Availability = (button) => true;
+        reviveButton.Visibility = (button) => PlayerControl.LocalPlayer.Data.IsDead;
+        reviveButton.OnClick = (button) =>
+        {
+            NebulaGameManager.Instance?.LocalPlayerInfo.Revive(null, new(PlayerControl.LocalPlayer.transform.position), true, false);
+        };
+        reviveButton.SetLabel("revive");
+
+        var suicideButton = Bind(new ModAbilityButton(true, false, 100));
+        suicideButton.Availability = (button) => true;
+        suicideButton.Visibility = (button) => !PlayerControl.LocalPlayer.Data.IsDead;
+        suicideButton.OnClick = (button) =>
+        {
+            NebulaGameManager.Instance?.LocalPlayerInfo.Suicide(PlayerState.Suicide, null, KillParameter.WithDeadBody);
+        };
+        suicideButton.SetLabel("suicide");
     }
 
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MetaActionButton.png", 115f);
+    static private Image reviveSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ReviveButton.png", 115f);
 
     private void OpenRoleWindow()
     {

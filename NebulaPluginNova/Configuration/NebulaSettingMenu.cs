@@ -33,20 +33,28 @@ public class NebulaSettingMenu : MonoBehaviour
         CurrentTab = ConfigurationTab.Settings;
 
         FirstPage = UnityHelper.CreateObject("FirstPage",transform,Vector3.zero);
-        LeftHolder = UnityHelper.CreateObject<MetaScreen>("LeftHolder", FirstPage.transform, new Vector3(-4.1f, 0.3f));
-        RightHolder = UnityHelper.CreateObject<MetaScreen>("RightHolder", FirstPage.transform, new Vector3(2.5f, 0f));
-        var rightPos = UnityHelper.CreateObject("RightImage", transform, new Vector3(3.9f, -1.6f, 1f));
+        LeftHolder = UnityHelper.CreateObject<MetaScreen>("LeftHolder", FirstPage.transform, new Vector3(-3.8f, 0.5f));
+        RightHolder = UnityHelper.CreateObject<MetaScreen>("RightHolder", FirstPage.transform, new Vector3(2.8f, 0f));
+        
+        var rightHolder = UnityHelper.CreateObject("RightImage", transform, Vector3.zero);
+        rightHolder.AddComponent<SortingGroup>();
+        var rightPos = UnityHelper.CreateObject("Mover", rightHolder.transform, new Vector3(3.4f, -1.1f, 1f));
         RightImage = UnityHelper.CreateObject<SpriteRenderer>("Image", rightPos.transform, Vector3.zero);
+        RightImage.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        var rightMask = UnityHelper.CreateObject<SpriteMask>("Mask", rightHolder.transform, new(0f,-0.16f));
+        rightMask.sprite = VanillaAsset.FullScreenSprite;
+        rightMask.transform.localScale = new Vector3(9.74f, 4.38f);
 
-        var MainHolderParent = UnityHelper.CreateObject("Main", FirstPage.transform, new Vector3(-1.05f, -0.4f));
+
+        var MainHolderParent = UnityHelper.CreateObject("Main", FirstPage.transform, new Vector3(-0.65f, -0.15f));
         MainHolderParent.AddComponent<SortingGroup>();
         var MainHolderMask = UnityHelper.CreateObject<SpriteMask>("Mask",MainHolderParent.transform, Vector3.zero);
         MainHolderMask.sprite = VanillaAsset.FullScreenSprite;
-        MainHolderMask.transform.localScale = new Vector3(6f,4.5f);
+        MainHolderMask.transform.localScale = new Vector3(6f,4.2f);
         MainHolder = UnityHelper.CreateObject<MetaScreen>("MainHolder", MainHolderParent.transform, new Vector3(0f, 0f));
         MainHolder.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += MetaWidgetOld.ScrollView.GetDistHistoryUpdater(() => MainHolder.transform.localPosition.y, "SettingsMenu");
 
-        var firstScroller = new GUIScrollView(Virial.Media.GUIAlignment.Left, new Vector2(4f, 4.5f), null) { ScrollerTag = "RoleSettingFirst" };
+        var firstScroller = new GUIScrollView(Virial.Media.GUIAlignment.Left, new Vector2(4f, 4.1f), null) { ScrollerTag = "RoleSettingFirst" };
         FirstInnerScreen = firstScroller.Artifact;
         MainHolder.SetWidget(firstScroller, new(0.5f, 0.5f), out _);
         //FirstScroller = VanillaAsset.GenerateScroller(new Vector2(4f, 4.5f), MainHolderParent.transform, new Vector3(2.2f, -0.05f, -1f), MainHolder.transform, new FloatRange(0f, 1f),4.6f);
@@ -54,15 +62,15 @@ public class NebulaSettingMenu : MonoBehaviour
         UpdateLeftTab();
         UpdateMainTab();
 
-        SecondPage = UnityHelper.CreateObject("SecondPage", transform, Vector3.zero);
-        var SecondParent = UnityHelper.CreateObject("Main", SecondPage.transform, new Vector3(-0.3f, -0.7f));
+        SecondPage = UnityHelper.CreateObject("SecondPage", transform, new(0.4f,-0.25f));
+        var SecondParent = UnityHelper.CreateObject("Main", SecondPage.transform, new Vector3(0f, -0.3f));
         SecondParent.AddComponent<SortingGroup>();
         var SecondMask = UnityHelper.CreateObject<SpriteMask>("Mask", SecondParent.transform, Vector3.zero);
         SecondMask.sprite = VanillaAsset.FullScreenSprite;
-        SecondMask.transform.localScale = new Vector3(8f, 4.1f);
+        SecondMask.transform.localScale = new Vector3(8f, 3.5f);
         SecondScreen = UnityHelper.CreateObject<MetaScreen>("SecondScreen", SecondParent.transform, new Vector3(0f, 0f, -5f));
 
-        var secondScroller = new GUIScrollView(Virial.Media.GUIAlignment.Left, new Vector2(8f, 4.1f), null) { ScrollerTag = "RoleSettingSecond" };
+        var secondScroller = new GUIScrollView(Virial.Media.GUIAlignment.Left, new Vector2(8f, 3.5f), null) { ScrollerTag = "RoleSettingSecond" };
         SecondInnerScreen = secondScroller.Artifact;
         SecondScreen.SetWidget(secondScroller, new(0.5f, 0.5f), out _);
         //SecondScroller = VanillaAsset.GenerateScroller(new Vector2(8f, 4.1f), SecondParent.transform, new Vector3(4.2f, -0.05f, -1f), SecondScreen.transform, new FloatRange(0f, 1f), 4.2f);

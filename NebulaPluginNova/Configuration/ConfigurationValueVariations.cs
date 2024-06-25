@@ -16,7 +16,7 @@ internal abstract class ConfigurationValueBase<T, LocalEntry> : ISharableVariabl
         this.localEntry = entry;
         this.currentValue = entry.Value;
 
-        ConfigurationValues.AllEntries.Add(this);
+        ConfigurationValues.RegisterEntry(this);
     }
 
     string ISharableEntry.Name => localEntry.Name;
@@ -193,7 +193,7 @@ internal class RawIntegerSharableVariable : ISharableVariable<int>
         localEntry = new(name, ConfigurationValues.ConfigurationSaver, defaultValue);
         currentValue = localEntry.Value;
 
-        ConfigurationValues.AllEntries.Add(this);
+        ConfigurationValues.RegisterEntry(this);
     }
 
     string ISharableEntry.Name => name;

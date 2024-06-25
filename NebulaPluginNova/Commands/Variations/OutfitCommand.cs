@@ -33,8 +33,8 @@ public class OutfitCommand : ICommand
                     if (arguments.Count < 3)
                         return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " set <target> <outfit> [<priority>] [<selfAware>]");
 
-                    GameData.PlayerOutfit? outfit = null;
-                    task = task.Chain(_ => arguments[2].AsValue<GameData.PlayerOutfit>(env).Action(val => outfit = val));
+                    NetworkedPlayerInfo.PlayerOutfit? outfit = null;
+                    task = task.Chain(_ => arguments[2].AsValue<NetworkedPlayerInfo.PlayerOutfit>(env).Action(val => outfit = val));
                     if (arguments.Count >= 4) task = task.Chain(_ => arguments[3].AsValue<int>(env).Action(val => priority = val));
                     if (arguments.Count == 5) task = task.Chain(_ => arguments[4].AsValue<bool>(env).Action(val => selfAware = val));
 
@@ -56,7 +56,7 @@ public class OutfitCommand : ICommand
                     if (arguments.Count == 3) task = task.Chain(_ => arguments[2].AsValue<int>(env).Action(val => priority = val));
 
                     return task.ChainFast(_ => (targets.Count() == 0 ? EmptyCommandToken.Token
-                    : new ObjectCommandToken<GameData.PlayerOutfit>(targets.First().Unbox().GetOutfit(priority))));
+                    : new ObjectCommandToken<NetworkedPlayerInfo.PlayerOutfit>(targets.First().Unbox().GetOutfit(priority))));
                 }
             });
     }

@@ -21,7 +21,7 @@ public class Opportunist : Role
     private List<int> stayingTaskOrder;
     private int taskCount;
 
-    public override void OnSetTasks(ref List<GameData.TaskInfo> initialTasks, ref List<GameData.TaskInfo>? actualTasks)
+    public override void OnSetTasks(ref List<NetworkedPlayerInfo.TaskInfo> initialTasks, ref List<NetworkedPlayerInfo.TaskInfo>? actualTasks)
     {
         stayingTaskOrder = new List<int>(Helpers.GetRandomArray(Map.MapData.GetCurrentMapData().Objects.Count));
         taskCount = 0;
@@ -30,7 +30,7 @@ public class Opportunist : Role
         int tasks = (int)numOfTasksOption.getFloat();
         for (int i = 0; i < tasks; i++)
         {
-            initialTasks.Add(new GameData.TaskInfo(byte.MaxValue - 2, 0));
+            initialTasks.Add(new NetworkedPlayerInfo.TaskInfo(byte.MaxValue - 2, 0));
         }
     }
 

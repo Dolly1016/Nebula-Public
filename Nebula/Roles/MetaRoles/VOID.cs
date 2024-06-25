@@ -8,7 +8,7 @@ public class VOID : Role
 
     public override bool CanHaveGhostRole { get => false; }
 
-    public override void OnSetTasks(ref List<GameData.TaskInfo> initialTasks, ref List<GameData.TaskInfo>? actualTasks)
+    public override void OnSetTasks(ref List<NetworkedPlayerInfo.TaskInfo> initialTasks, ref List<NetworkedPlayerInfo.TaskInfo>? actualTasks)
     {
         initialTasks.Clear();
         actualTasks = null;

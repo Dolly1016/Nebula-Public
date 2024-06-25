@@ -19,7 +19,7 @@ public class CustomItemGrouped
     public CustomItemBundle MyBundle = null!;
 }
 
-public class CustomCosmicItem : CustomItemGrouped
+public abstract class CustomCosmicItem : CustomItemGrouped
 {
     [JsonSerializableField]
     public string Name = "Undefined";
@@ -81,10 +81,10 @@ public class CustomCosmicItem : CustomItemGrouped
             yield return loader.LoadAsync((ex) => {
                 string? message = null;
                 if (ex is DirectoryNotFoundException)
-                    message = "Missed Directory";
+                    message = "Missed Directory (" + ex.ToString() + ")";
                 if (ex is FileNotFoundException)
-                    message = "Missed File";
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Warning , NebulaLog.LogCategory.MoreCosmic, "Failed to load images. ( \"" + image.Address + "\" in \"" + Name + "\" )\nReason: " + (message ?? "Others (" + ex.Message + ")"));
+                    message = "Missed File ("+ ex.ToString()+")";
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Warning , NebulaLog.LogCategory.MoreCosmic, "Failed to load images. ( \"" + image.Address + "\" in \"" + Name + "\" )\nReason: " + (message ?? "Others (" + ex.ToString() + ")"));
             });
             
             try
@@ -109,6 +109,8 @@ public class CustomCosmicItem : CustomItemGrouped
     {
 
     }
+
+    abstract public Sprite? PreviewSprite { get; }
 }
 
 public class CosmicImage
@@ -239,9 +241,7 @@ public class CosmicHat : CustomCosmicItem
         MyHat.ChipOffset = new Vector2(0f, 0.2f);
         MyHat.Free = true;
         MyHat.PreviewCrewmateColor = Adaptive;
-        MyHat.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0) ?? Back?.GetSprite(0) ?? Move?.GetSprite(0);
 
-        //if (Adaptive) MyView.AltShader = MoreCosmic.AdaptiveShader;
         MyView.MatchPlayerColor = Adaptive;
 
         MyHat.CreateAddressableAsset();
@@ -263,6 +263,8 @@ public class CosmicHat : CustomCosmicItem
     }
 
     public override string Category { get => "hats"; }
+
+    public override Sprite? PreviewSprite => Preview?.GetSprite(0) ?? Main?.GetSprite(0) ?? Back?.GetSprite(0) ?? Move?.GetSprite(0);
 }
 
 public class CosmicVisor : CustomCosmicItem
@@ -333,7 +335,7 @@ public class CosmicVisor : CustomCosmicItem
         MyVisor.ChipOffset = new Vector2(0f, 0.2f);
         MyVisor.Free = true;
         MyVisor.PreviewCrewmateColor = Adaptive;
-        MyVisor.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0);
+        //MyVisor.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0);
 
         //if (Adaptive) MyView.AltShader = MoreCosmic.AdaptiveShader;
         MyView.MatchPlayerColor = Adaptive;
@@ -352,6 +354,8 @@ public class CosmicVisor : CustomCosmicItem
         if (addToMoreCosmic) MoreCosmic.AllVisors.Add(MyVisor.ProductId, this);
     }
     public override string Category { get => "visors"; }
+
+    public override Sprite? PreviewSprite => Preview?.GetSprite(0) ?? Main?.GetSprite(0);
 }
 
 public class CosmicNameplate : CustomCosmicItem
@@ -383,13 +387,15 @@ public class CosmicNameplate : CustomCosmicItem
         MyPlate.ProductId = "nosplate_" + Author + "_" + Name;
         MyPlate.ChipOffset = new Vector2(0f, 0.2f);
         MyPlate.Free = true;
-        MyPlate.SpritePreview = Plate?.GetSprite(0);
+        //MyPlate.SpritePreview = Plate?.GetSprite(0);
 
         MyPlate.CreateAddressableAsset();
 
         if (addToMoreCosmic) MoreCosmic.AllNameplates.Add(MyPlate.ProductId, this);
     }
     public override string Category { get => "nameplates"; }
+
+    public override Sprite? PreviewSprite => Plate?.GetSprite(0);
 }
 
 public class CosmicPackage : CustomItemGrouped
@@ -445,6 +451,9 @@ public class CustomItemBundle
     public async Task Load()
     {
         if (IsActive) return;
+
+        if (RelatedLocalAddress != null && !RelatedLocalAddress.EndsWith("/")) RelatedLocalAddress += "/";
+        if (RelatedRemoteAddress != null && !RelatedRemoteAddress.EndsWith("/")) RelatedRemoteAddress += "/";
 
         foreach (var item in AllContents()) item.MyBundle = this;
         foreach (var item in AllCosmicItem()) await item.Preactivate();
@@ -589,7 +598,7 @@ public static class MoreCosmic
     public static Dictionary<string, CosmicNameplate> AllNameplates = new();
     public static Dictionary<string, CosmicPackage> AllPackages = new();
 
-    private static string DebugProductId = "NEBULA_DEBUG";
+    internal static string DebugProductId = "NEBULA_DEBUG";
     public static void RegisterDebugHat(CosmicHat hat)
     {
         hat.MyHat.ProductId = DebugProductId;
@@ -634,7 +643,7 @@ public static class MoreCosmic
 
         while (!HatManager.InstanceExists) await Task.Delay(1000);
 
-        allRepos.AddRange(repos.Split("\n").Concat(MarketplaceData.Data?.OwningCostumes.Select(c => c.ToCostumeUrl) ?? []));
+        allRepos.AddRange(repos.Split("\n").Concat(MarketplaceData.Data?.OwningCostumes.Select(c => c.ToCostumeUrl) ?? []).Where(url => url.Length > 3));
         foreach (string repo in allRepos.ToArray())
         {
             try
@@ -1438,6 +1447,37 @@ public static class TabEnablePatch
                 }
             );
 
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(CosmeticData), nameof(CosmeticData.SetPreview))]
+    public class SetPreviewPatch
+    {
+        public static bool Prefix(CosmeticData __instance, [HarmonyArgument(0)] SpriteRenderer renderer, [HarmonyArgument(1)] int color)
+        {
+            if (renderer != null)
+            {
+                if (__instance.TryCast<HatData>() != null && MoreCosmic.AllHats.TryGetValue(__instance.ProductId, out var hat))
+                {
+                    renderer.sprite = hat.PreviewSprite;
+                    PlayerMaterial.SetColors(color, renderer);
+                    return false;
+                }
+                if (__instance.TryCast<VisorData>() != null && MoreCosmic.AllVisors.TryGetValue(__instance.ProductId, out var visor))
+                {
+                    renderer.sprite = visor.PreviewSprite;
+                    PlayerMaterial.SetColors(color, renderer);
+                    return false;
+                }
+                if (__instance.TryCast<NamePlateData>() != null && MoreCosmic.AllNameplates.TryGetValue(__instance.ProductId, out var nameplate))
+                {
+                    renderer.sprite = nameplate.PreviewSprite;
+                    PlayerMaterial.SetColors(color, renderer);
+                    return false;
+                }
+                return true;
+            }
             return false;
         }
     }

@@ -42,7 +42,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
         {
         }
 
-        GameData.PlayerOutfit? sample = null;
+        NetworkedPlayerInfo.PlayerOutfit? sample = null;
 
         void RuntimeAssignable.OnActivated()
         {
@@ -53,7 +53,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
-                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample");
                 sampleButton.SetSprite(SampleButtonSprite.GetSprite());
                 sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -67,7 +67,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
 
-                morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph");
                 morphButton.SetSprite(MorphButtonSprite.GetSprite());
                 morphButton.Availability = (button) => MyPlayer.CanMove && sample != null;
                 morphButton.Visibility = (button) => !MyPlayer.IsDead;

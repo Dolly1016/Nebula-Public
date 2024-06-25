@@ -245,12 +245,10 @@ public static class EmergencyUpdatePatch
 
     public static bool Prefix(EmergencyMinigame __instance)
     {
-        //ゲーム開始直ぐはボタンを押せない →スポーン直後に緊急会議クールをいじりたい
-        if (ShipStatus.Instance.Timer < 15f)
-            WaitingButtonUpdate(__instance, 15f - ShipStatus.Instance.Timer);
+        float Cooldown = Mathf.Max(GeneralConfigurations.EmergencyCooldownAtGameStart ? 15f - ShipStatus.Instance.Timer : 0f, ShipStatus.Instance.EmergencyCooldown);
         //クールダウン中はボタンを押せない
-        else if (ShipStatus.Instance.EmergencyCooldown > 0f)
-            WaitingButtonUpdate(__instance, ShipStatus.Instance.EmergencyCooldown);
+        if (Cooldown > 0f)
+            WaitingButtonUpdate(__instance, Cooldown);
         //緊急サボタージュが発生している場合はボタンを押せない
         else if (PlayerControl.LocalPlayer.myTasks.GetFastEnumerator().Any(PlayerTask.TaskIsEmergency))
         {

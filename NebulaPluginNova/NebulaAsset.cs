@@ -38,6 +38,7 @@ public static class NebulaAsset
         GuageShader = Load<Shader>("Sprites-Guage");
         WhiteShader = Load<Shader>("Sprites-White");
         ProgressShader = Load<Shader>("Sprites-Progress");
+        HSVShader = Load<Shader>("Sprites-HSV");
 
         DivMap[0] = Load<GameObject>("SkeldDivMap");
         DivMap[1] = Load<GameObject>("MIRADivMap");
@@ -127,6 +128,7 @@ public static class NebulaAsset
     static public Shader GuageShader { get; private set; } = null!;
     static public Shader WhiteShader { get; private set; } = null!;
     static public Shader ProgressShader { get; private set; } = null!;
+    static public Shader HSVShader { get; private set; } = null!;
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public GameObject PaparazzoShot { get; private set; } = null!;

@@ -1,5 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Nebula.Commands.Variations;
+using UnityEngine;
 using Virial.Command;
 using Virial.Compat;
 using Virial.Components;
@@ -249,9 +250,11 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
         return this;
     }
 
+    internal GameObject UsesIcon = null!;
     public TMPro.TextMeshPro ShowUsesIcon(int iconVariation)
     {
-        ButtonEffect.ShowUsesIcon(VanillaButton,iconVariation,out var text);
+        if(UsesIcon)GameObject.Destroy(UsesIcon);
+        UsesIcon = ButtonEffect.ShowUsesIcon(VanillaButton,iconVariation,out var text);
         return text;
     }
 
@@ -263,22 +266,23 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
         return this;
     }
 
-    public ModAbilityButton KeyBind(Virial.Compat.VirtualKeyInput keyCode) => KeyBind(NebulaInput.GetInput(keyCode));
-    public ModAbilityButton KeyBind(VirtualInput keyCode)
+    public ModAbilityButton KeyBind(Virial.Compat.VirtualKeyInput keyCode, string? action = null) => KeyBind(NebulaInput.GetInput(keyCode), action);
+    public ModAbilityButton KeyBind(VirtualInput keyCode, string? action = null)
     {
         VanillaButton.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((c) => { if (c.name.Equals("HotKeyGuide")) GameObject.Destroy(c); }));
 
         this.keyCode= keyCode;
-        ButtonEffect.SetKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey);
+        ButtonEffect.SetKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, action: action);
+        
         return this;
     }
 
     private static SpriteLoader aidActionSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindOption.png", 100f);
-    public ModAbilityButton SubKeyBind(Virial.Compat.VirtualKeyInput keyCode) => SubKeyBind(NebulaInput.GetInput(keyCode));
-    public ModAbilityButton SubKeyBind(VirtualInput keyCode)
+    public ModAbilityButton SubKeyBind(Virial.Compat.VirtualKeyInput keyCode, string? action = null) => SubKeyBind(NebulaInput.GetInput(keyCode), action);
+    public ModAbilityButton SubKeyBind(VirtualInput keyCode, string? action = null)
     {
         this.subKeyCode = keyCode;
-        var guideObj = ButtonEffect.SetSubKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, false);
+        var guideObj = ButtonEffect.SetSubKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, false, action);
 
         if (guideObj != null)
         {
@@ -290,10 +294,10 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
     }
 
     private bool canUseByMouseClick = false;
-    public ModAbilityButton SetCanUseByMouseClick(bool onlyLook = false)
+    public ModAbilityButton SetCanUseByMouseClick(bool onlyLook = false, ButtonEffect.ActionIconType iconType = ButtonEffect.ActionIconType.ClickAction, string? action = "mouseClick", bool atBottom = true)
     {
         if(!onlyLook)canUseByMouseClick = true;
-        ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true);
+        ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, iconType, action, atBottom);
         return this;
     }
 
@@ -477,8 +481,9 @@ public static class ButtonEffect
 
     static Image keyBindBackgroundSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindBackground.png", 100f);
     static Image mouseActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionIcon.png", 100f);
+    static Image mouseDisableActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionDisableIcon.png", 100f);
 
-    static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide)
+    static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide, bool isAidAction = false, string? action = null)
     {
         if(removeExistingGuide)button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "HotKeyGuide") GameObject.Destroy(obj); }));
 
@@ -502,16 +507,18 @@ public static class ButtonEffect
         renderer.transform.localPosition = new(0, 0, -1f);
         renderer.sprite = numSprite;
 
+        SetHintOverlay(obj, isAidAction, key, action);
+
         return obj;
     }
-    static public GameObject? SetKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide = true)
+    static public GameObject? SetKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide = true, string? action = null)
     {
-        return AddKeyGuide(button, key, new(0.48f, 0.48f),removeExistingGuide);
+        return AddKeyGuide(button, key, new(0.48f, 0.48f), removeExistingGuide, action: action);
     }
 
-    static public GameObject? SetSubKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide)
+    static public GameObject? SetSubKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide, string? action = null)
     {
-        return AddKeyGuide(button, key, new(0.48f, 0.13f),removeExistingGuide);
+        return AddKeyGuide(button, key, new(0.48f, 0.13f), removeExistingGuide, true, action);
     }
 
     static public GameObject? SetKeyGuideOnSmallButton(GameObject button, KeyCode key)
@@ -519,7 +526,25 @@ public static class ButtonEffect
         return AddKeyGuide(button, key, new(0.28f, 0.28f), true);
     }
 
-    static public GameObject? SetMouseActionIcon(GameObject button,bool show)
+    public static void SetHintOverlay(GameObject gameObj, bool isAidAction, KeyCode keyCode, string? action = null)
+    {
+        var button = gameObj.SetUpButton();
+        var collider = gameObj.AddComponent<CircleCollider2D>();
+        collider.isTrigger = true;
+        collider.radius = 0.125f;
+        button.OnMouseOver.AddListener(() => {
+            string str = keyCode != KeyCode.None ? Language.Translate(isAidAction ? "ui.button.aidAction" : "ui.button.mainAction") + " : " + ButtonEffect.KeyCodeInfo.GetKeyDisplayName(keyCode) : "";
+            if(action != null)
+            {
+                if (str.Length > 0) str += "<br>";
+                str += "<line-indent=0.8em>" + Language.Translate("ui.action." + action!);
+            }
+            NebulaManager.Instance.SetHelpWidget(button, str);
+        });
+        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+    }
+
+    static public GameObject? SetMouseActionIcon(GameObject button,bool show, ActionIconType actionType = ActionIconType.ClickAction, string? action = "mouseClick", bool atBottom = true)
     {
         if (!show)
         {
@@ -533,10 +558,23 @@ public static class ButtonEffect
             obj.transform.SetParent(button.transform);
             obj.layer = button.layer;
             SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
-            renderer.transform.localPosition = new(0.48f, -0.29f, -10f);
-            renderer.sprite = mouseActionSprite.GetSprite();
+            renderer.transform.localPosition = new(0.48f, atBottom ? -0.29f : 0.48f, -10f);
+            renderer.sprite = actionType switch
+            {
+                ActionIconType.ClickAction => mouseActionSprite.GetSprite(),
+                ActionIconType.NonclickAction => mouseDisableActionSprite.GetSprite(),
+                _ => null
+            };
+
+            if(action != null) SetHintOverlay(obj, false, KeyCode.None, action);
+
             return obj;
-        }
-        
+        }   
+    }
+
+    public enum ActionIconType
+    {
+        ClickAction,
+        NonclickAction
     }
 }

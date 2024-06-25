@@ -52,7 +52,7 @@ public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 var cleanTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => true));
 
-                cleanButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                cleanButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "cleaner.clean");
                 cleanButton.SetSprite(buttonSprite.GetSprite());
                 cleanButton.Availability = (button) => cleanTracker.CurrentTarget != null && MyPlayer.VanillaPlayer.CanMove;
                 cleanButton.Visibility = (button) => !MyPlayer.IsDead;

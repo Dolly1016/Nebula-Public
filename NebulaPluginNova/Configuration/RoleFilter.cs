@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.UIElements;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -29,7 +30,7 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
 
             currentValue = filter.ToSharableValueFromLocal(this.index);
 
-            ConfigurationValues.AllEntries.Add(this);
+            ConfigurationValues.RegisterEntry(this);
         }
 
         string ISharableEntry.Name => name;
@@ -66,8 +67,8 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
     private StringArrayDataEntry dataEntry;
     abstract protected IEnumerable<T> AllAssignables { get; }
     private ISharableVariable<int>[] sharableVariables;
-    private HashSet<T> myLocalExcludedAssignableCache;
-    private int ToSharableValueFromLocal(int index) => myLocalExcludedAssignableCache.Aggregate(0, (val, a) => { if (a.Id >= index * UnitSize && a.Id < (index + 1) * UnitSize) return val | (1 << (index % UnitSize)); else return val; });
+    private HashSet<T> myLocalCache;
+    private int ToSharableValueFromLocal(int index) => myLocalCache.Aggregate(0, (val, a) => { if (a.Id >= index * UnitSize && a.Id < (index + 1) * UnitSize) return val | (1 << (a.Id % UnitSize)); else return val; });
     
     public string Id { get; private set; }
     public AssignableFilterConfigurationValue(string id)
@@ -77,7 +78,12 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
 
         void RefreshCache()
         {
-            myLocalExcludedAssignableCache = new(dataEntry.Value.Select(code => AllAssignables.FirstOrDefault(a => a.CodeName == code)).Where(a => a != null)!);
+            myLocalCache = new(dataEntry.Value.Select(code => AllAssignables.FirstOrDefault(a => a.CodeName == code)).Where(a => a != null)!);
+        }
+
+        void GenerateSharable()
+        {
+            RefreshCache();
 
             int length = (AllAssignables.Max(a => a.Id) + 1) / UnitSize + 1;
 
@@ -88,8 +94,7 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
             }
         }
 
-        NebulaAPI.Preprocessor?.SchedulePreprocess(PreprocessPhase.PostFixStructure, RefreshCache);
-        ConfigurationValues.Reloaders.Add(RefreshCache);
+        NebulaAPI.Preprocessor?.SchedulePreprocess(PreprocessPhase.FixStructureRoleFilter, GenerateSharable);
 
     }
 
@@ -100,7 +105,7 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
     public void RemoveWithLocal(T assignable, bool saveLocal = true)
     {
         sharableVariables[assignable.Id / UnitSize].CurrentValue |= (1 << assignable.Id % UnitSize);
-        myLocalExcludedAssignableCache.Add(assignable);
+        myLocalCache.Add(assignable);
 
         if (saveLocal) Save();
     }
@@ -112,14 +117,14 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
     public void AddWithLocal(T assignable, bool saveLocal = true)
     {
         sharableVariables[assignable.Id / UnitSize].CurrentValue &= ~(1 << assignable.Id % UnitSize);
-        myLocalExcludedAssignableCache.Remove(assignable);
+        myLocalCache.Remove(assignable);
 
         if (saveLocal) Save();
     }
 
     public void Save()
     {
-        dataEntry.Value = myLocalExcludedAssignableCache.Select(a => a.CodeName).ToArray();
+        dataEntry.Value = myLocalCache.Select(a => a.CodeName).ToArray();
     }
 
     public void ToggleAndShare(T assignable)

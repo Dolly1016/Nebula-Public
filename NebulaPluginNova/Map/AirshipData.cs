@@ -60,4 +60,10 @@ public class AirshipData : MapData
     protected override Vector2[] NonMapArea => [];
 
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.HeliSabotage, SystemTypes.Comms, SystemTypes.Electrical };
+    override public Vector2[][] RaiderIgnoreArea { get => [
+        [new(9.87f,9.78f),new(9.87f,7.8f), new(5.81f,7.8f),new(5.81f,9.78f)],//昇降機上
+        [new(10.64f,6.39f), new(10.64f, 5.49f), new(10.1f, 5.49f), new(10.1f, 6.39f)],//昇降機下
+        [new(26.66f,1.16f),new(28.17f,1.16f),new(28.17f,-2.5f),new(26.66f,-2.5f)],//通気口
+        [new(3.92f,14.25f),new(5.13f,14.25f), new(5.13f, 13.85f),new(3.92f,13.85f)],//ミーティング
+        ]; }
 }

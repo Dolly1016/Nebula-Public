@@ -6,7 +6,7 @@ public static class EmergencyPatch
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
     class ReportDeadBodyPatch
     {
-        static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo target)
+        static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo target)
         {
             if (__instance.GetModData().role != Roles.Roles.VOID) return true;
 

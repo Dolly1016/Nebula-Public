@@ -1,4 +1,5 @@
 ﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
@@ -48,14 +49,19 @@ public class Agent : DefinedRoleTemplate, DefinedRole
         [Local]
         void OnTaskUpdated(PlayerTaskUpdateEvent ev)
         {
-            if (!MyPlayer.IsDead)
+            if (SuicideIfSomeoneElseCompletesTasksBeforeAgentOption)
             {
-                int tasks = AmongUsUtil.NumOfAllTasks;
-                if (ev.Player.AmOwner) return;
-                if (!ev.Player.IsDead && SuicideIfSomeoneElseCompletesTasksBeforeAgentOption && ev.Player.Tasks.IsCrewmateTask && ev.Player.Tasks.TotalTasks >= tasks && ev.Player.Tasks.IsCompletedTotalTasks)
+                //生存している、ノルマ未達成かつ非LoversのAgentが対象
+                if (!MyPlayer.IsDead && !MyPlayer.TryGetModifier<Lover.Instance>(out _) && !MyPlayer.Tasks.IsAchievedQuota)
                 {
-                    MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Layoff, KillParameter.NormalKill);
-                    new StaticAchievementToken("agent.another1");
+                    int tasks = AmongUsUtil.NumOfAllTasks;
+                    if (ev.Player.AmOwner) return;
+                    //自分以外の通常以上のノルマを持つ生存者
+                    if (!ev.Player.IsDead && ev.Player.Tasks.IsCrewmateTask && ev.Player.Tasks.Quota >= tasks && ev.Player.Tasks.IsAchievedQuota)
+                    {
+                        MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Layoff, KillParameter.NormalKill);
+                        new StaticAchievementToken("agent.another1");
+                    }
                 }
             }
         }

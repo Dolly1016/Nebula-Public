@@ -215,7 +215,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
             {
                 AttributeAsset.OblongHeader => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.Oblong), Virial.Text.FontStyle.Normal, new(5.2f, false), new(0.45f, 3f), new(255, 255, 255), true),
                 AttributeAsset.StandardMediumMasked => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.6f, 0.8f, 1.6f), new(1.45f, 0.3f), new(255, 255, 255), false),
-                AttributeAsset.StandardLargeWideMasked => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.7f, 1f, 1.7f), new(2.9f, 0.45f), new(255, 255, 255), false),
+                AttributeAsset.StandardLargeWideMasked => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.7f, 1f, 1.7f), new(2.9f, 0.45f), new(255, 255, 255), false),
                 AttributeAsset.CenteredBold => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(8f, 8f), new(255, 255, 255), true),
                 AttributeAsset.CenteredBoldFixed => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(1.1f, 0.32f), new(255, 255, 255), false),
                 AttributeAsset.OverlayTitle => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f) },
@@ -326,6 +326,14 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     {
         RoleOptionHelper.OpenFilterScreen<R>(scrollerTag, allRoles, test, toggleAndShare);
     }
+
+
+
+    public void ShowOverlay(Virial.Media.GUIWidget widget, GUIClickable? clickable = null) => NebulaManager.Instance?.SetHelpWidget(clickable?.uiElement, widget);
+
+    public void HideOverlay() => NebulaManager.Instance.HideHelpWidget();
+
+    public void HideOverlayIf(GUIClickable? clickable) => NebulaManager.Instance.HideHelpWidgetIf(clickable?.uiElement);
 }
 
 public class GUIScreenImpl : GUIScreen

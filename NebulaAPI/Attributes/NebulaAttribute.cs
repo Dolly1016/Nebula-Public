@@ -61,6 +61,8 @@ public enum PreprocessPhase
     /// 共有可能変数等のデータ構造を確定させるフェイズです。
     /// </summary>
     FixStructure,
+    FixStructureRoleFilter,
+    FixStructureConfig,
     /// <summary>
     /// 共有可能変数等のデータ構造を確定させた直後のフェイズです。
     /// </summary>
@@ -118,3 +120,17 @@ public class Local : Attribute
 {
 
 }
+
+/// <summary>
+/// ID付きドキュメントを表すクラスです。
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public class AddonDocumentAttribute : Attribute
+{
+    public string DocumentId { get; private init; }
+    public AddonDocumentAttribute(string documentId)
+    {
+        this.DocumentId = documentId;
+    }
+}
+

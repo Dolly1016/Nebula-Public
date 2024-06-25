@@ -3,6 +3,7 @@ using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -39,8 +40,8 @@ public static class GeneralConfigurations
     static public GameModeDefinition CurrentGameMode => GameModes.GetGameMode(GameModeOption.GetValue());
     static public IntegerConfiguration GameModeOption = NebulaAPI.Configurations.Configuration("options.gamemode", Helpers.Sequential(GameModes.AllGameModes.Count()), 0);
 
-    static internal IntegerConfiguration AssignmentCrewmateOption = new RoleCountConfiguration("options.assignment.crewmate", 15, -1);
-    static internal IntegerConfiguration AssignmentImpostorOption = new RoleCountConfiguration("options.assignment.impostor", 3, -1);
+    static internal IntegerConfiguration AssignmentCrewmateOption = new RoleCountConfiguration("options.assignment.crewmate", 16, -1);
+    static internal IntegerConfiguration AssignmentImpostorOption = new RoleCountConfiguration("options.assignment.impostor", 4, -1);
     static internal IntegerConfiguration AssignmentNeutralOption = NebulaAPI.Configurations.Configuration("options.assignment.neutral", (0,15), 0);
     static internal BoolConfiguration AssignOpToHostOption = new BoolConfigurationImpl("options.assignment.assignOpToHost", false);
     static internal ValueConfiguration<int> GhostAssignmentOption = NebulaAPI.Configurations.Configuration("options.assignment.ghostAssignmentMethod", ["options.assignment.ghostAssignmentMethod.normal", "options.assignment.ghostAssignmentMethod.thrilling"], 0);
@@ -146,9 +147,12 @@ public static class GeneralConfigurations
     static public FloatConfiguration DeathPenaltyOption = NebulaAPI.Configurations.Configuration("options.meeting.deathPenalty", (0f, 20f, 0.5f), 0f, FloatConfigurationDecorator.Second);
     static public BoolConfiguration NoticeExtraVictimsOption = NebulaAPI.Configurations.Configuration("options.meeting.noticeExtraVictims", false);
     static public IntegerConfiguration NumOfMeetingsOption = NebulaAPI.Configurations.Configuration("options.meeting.numOfMeeting", (0, 15), 10);
+    static public BoolConfiguration EmergencyCooldownAtGameStart = NebulaAPI.Configurations.Configuration("options.meeting.emergencyCooldownAtGameStart", true);
     static public BoolConfiguration ShowRoleOfExiled = NebulaAPI.Configurations.Configuration("options.meeting.showRoleOfExiled", false, () => GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor);
+    static public FloatConfiguration EarlyExtraEmergencyCoolDownOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarly", (0f, 20f, 2.5f), 0f, FloatConfigurationDecorator.Second);
+    static public IntegerConfiguration EarlyExtraEmergencyCoolDownCondOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarlyCondition", (1, 10), 2, () => EarlyExtraEmergencyCoolDownOption > 0f);
     static internal IConfigurationHolder MeetingOptions = NebulaAPI.Configurations.Holder("options.meeting", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        DeathPenaltyOption, NoticeExtraVictimsOption, NumOfMeetingsOption, ShowRoleOfExiled
+        DeathPenaltyOption, NoticeExtraVictimsOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart, ShowRoleOfExiled, EarlyExtraEmergencyCoolDownOption, EarlyExtraEmergencyCoolDownCondOption
         ]);
 
     static public ExclusiveAssignmentConfiguration[] exclusiveAssignmentOptions = Helpers.Sequential(10).Select(i => new ExclusiveAssignmentConfiguration("options.exclusiveAssignment.category." + i)).ToArray();
@@ -331,7 +335,7 @@ public static class GeneralConfigurations
 
                 currentValue = config.ToSharableValueFromLocal(this.index);
 
-                ConfigurationValues.AllEntries.Add(this);
+                ConfigurationValues.RegisterEntry(this);
             }
 
             string ISharableEntry.Name => name;
@@ -371,8 +375,14 @@ public static class GeneralConfigurations
 
             void RefreshCache()
             {
-                sharableVariables = new ISharableVariable<int>[Roles.Roles.AllRoles.Count / UnitSize + 1];
                 localExclusibeRolesCache = new(dataEntry.Value.Select(name => Roles.Roles.AllRoles.FirstOrDefault(a => a.InternalName == name)).Where(a => a != null)!);
+            }
+
+            void GenerateSharable()
+            {
+                sharableVariables = new ISharableVariable<int>[Roles.Roles.AllRoles.Count / UnitSize + 1];
+
+                RefreshCache();
 
                 int length = Roles.Roles.AllRoles.Count / UnitSize + 1;
 
@@ -383,9 +393,7 @@ public static class GeneralConfigurations
                 }
             }
 
-            NebulaAPI.Preprocessor?.SchedulePreprocess(PreprocessPhase.PostRoles, RefreshCache);
-
-            ConfigurationValues.Reloaders.Add(RefreshCache);
+            NebulaAPI.Preprocessor?.SchedulePreprocess(PreprocessPhase.FixStructureRoleFilter, GenerateSharable);
         }
 
         bool IConfiguration.IsShown => true;

@@ -75,7 +75,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                 acTokenCommon2 = new("marionette.common2", (false,-100f),(val,_) => val.cleared);
                 acTokenChallenge = new("marionette.challenge", (false,-100f),(val,_)=>val.cleared);
 
-                placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "marionette.place");
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) => MyPlayer.CanMove;
                 placeButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy == null;
@@ -98,7 +98,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                 };
                 placeButton.SetLabel("place");
 
-                destroyButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                destroyButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "marionette.destroy");
                 destroyButton.SetSprite(destroyButtonSprite.GetSprite());
                 destroyButton.Availability = (button) => MyPlayer.CanMove;
                 destroyButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
@@ -116,7 +116,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                 };
                 destroyButton.SetLabel("destroy");
 
-                swapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                swapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.swap").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
                 swapButton.SetSprite(swapButtonSprite.GetSprite());
                 swapButton.Availability = (button) => (MyPlayer.CanMove || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour) && (!MyPlayer.VanillaPlayer.inVent && !MyPlayer.VanillaPlayer.onLadder && !MyPlayer.VanillaPlayer.inMovingPlat);
                 swapButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
@@ -139,8 +139,8 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         swapButton.ResetKeyBind();
-                        monitorButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
-                        monitorButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                        monitorButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.monitor");
+                        monitorButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
                     });
                 };
                 swapButton.SetLabel("swap");
@@ -158,8 +158,8 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         monitorButton.ResetKeyBind();
-                        swapButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
-                        swapButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction);
+                        swapButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.swap");
+                        swapButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
                     });
                 };
                 monitorButton.SetLabel("monitor");

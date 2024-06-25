@@ -72,7 +72,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
             yield return null;
         }
 
-        deadBody.transform.position = pos;
+        deadBody.transform.position = pos.AsVector3(pos.y / 1000f);
 
         yield break;
     }

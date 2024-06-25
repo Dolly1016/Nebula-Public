@@ -5,7 +5,7 @@
 			"IsVariable" : True
 		},
 		{
-			"Image" : "Images.SilentVent",
+			"Image" : "Images.SilentVent.png",
 			"Width" : 1.6
 		}
 	]

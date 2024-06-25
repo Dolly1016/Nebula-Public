@@ -137,3 +137,30 @@ class BlockInitializeAbilityButtonPatch
         return false;
     }
 }
+
+//アドミンボタンだけつけないように変更
+[HarmonyPatch(typeof(RoleBehaviour), nameof(RoleBehaviour.Initialize))]
+class BlockInitializePatch
+{
+    static bool Prefix(RoleBehaviour __instance, [HarmonyArgument(0)] PlayerControl player)
+    {
+        __instance.Player = player;
+        if (!player.AmOwner) return false;
+        
+        if (__instance.IsImpostor)
+        {
+            if (__instance.CanUseKillButton)
+            {
+                DestroyableSingleton<HudManager>.Instance.KillButton.Show();
+                player.SetKillTimer(10f);
+            }
+            DestroyableSingleton<HudManager>.Instance.SabotageButton.Show();
+            DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.Show();
+        }
+        DestroyableSingleton<HudManager>.Instance.SetHudActive(player, __instance, true);
+        PlayerNameColor.SetForRoleDirectly(player, __instance);
+        __instance.InitializeAbilityButton();
+
+        return false;
+    }
+}

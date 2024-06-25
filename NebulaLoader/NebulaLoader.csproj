@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<OutputType>Library</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
+  </ItemGroup>
+
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+	<Message Text="Second occurrence" />
+	<Copy SourceFiles="bin\Release\net6.0\NebulaLoader.dll" DestinationFolder="$(AmongUsRelease)\Nebula\BepInEx\plugins" />
+	<Copy SourceFiles="bin\Release\net6.0\NebulaLoader.dll" DestinationFolder="$(AmongUsMod)\BepInEx\plugins\" />
+  </Target>
+</Project>

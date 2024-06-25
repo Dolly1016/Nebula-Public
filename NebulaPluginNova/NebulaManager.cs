@@ -314,12 +314,21 @@ public class NebulaManager : MonoBehaviour
         File.WriteAllBytesAsync(GetPicturePath(out string displayPath), tex.EncodeToPNG());
     }
 
+    
     public void Update()
     {
         if (PreloadManager.FinishedPreload)
         {
+            if (Input.GetKeyDown(KeyCode.K))
+            {
+                string txt = "";
+                for (int i = 0; i < ConfigurationValues.AllEntries.Count; i++)
+                {
+                    txt += $"\n{i}: {ConfigurationValues.AllEntries[i].Name}";
+                }
+                NebulaPlugin.Log.Print(txt);
+            }
 
-            
             //スクリーンショット
             if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDownForAction) StartCoroutine(CaptureAndSave().WrapToIl2Cpp());
 

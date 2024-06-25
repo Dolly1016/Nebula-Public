@@ -13,7 +13,7 @@ public class ExemptTasks : Role
     protected bool UseExemptTasksOption { get; set; } = true;
 
 
-    public override void OnSetTasks(ref List<GameData.TaskInfo> initialTasks, ref List<GameData.TaskInfo>? actualTasks)
+    public override void OnSetTasks(ref List<NetworkedPlayerInfo.TaskInfo> initialTasks, ref List<NetworkedPlayerInfo.TaskInfo>? actualTasks)
     {
         int exempt = UseExemptTasksOption ? (int)exemptTasksOption.getFloat() : CustomExemptTasks;
         int cutTasks = initialTasks.Count < exempt ? initialTasks.Count : exempt;

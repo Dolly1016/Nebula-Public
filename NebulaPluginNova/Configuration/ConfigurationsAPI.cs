@@ -82,6 +82,13 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
         if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage();
     }
 
+
+    ISharableVariable<T>? Configurations.GetSharableVariable<T>(string id)
+    {
+        var entry = ConfigurationValues.AllEntries.Find(e => e.Name == id);
+        return entry as ISharableVariable<T>;
+    }
+
     IVentConfiguration Configurations.VentConfiguration(string id, bool isOptional, IntegerSelection? usesSelection, int usesDefaultValue, FloatSelection? coolDownSelection, float coolDownDefaultValue, FloatSelection? durationSelection, float durationDefaultValue)
      => new VentConfiguration(id, isOptional, usesSelection?.Selection, usesDefaultValue, coolDownSelection?.Selection, coolDownDefaultValue, durationSelection?.Selection, durationDefaultValue);
 

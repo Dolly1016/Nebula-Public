@@ -92,7 +92,7 @@ public static class AmongUsUtil
     public static float VanillaKillDistance => GameManager.Instance.LogicOptions.GetKillDistance();
     public static bool InCommSab => PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer);
     public static PoolablePlayer PoolablePrefab => HudManager.Instance.IntroPrefab.PlayerPrefab;
-    public static PoolablePlayer GetPlayerIcon(GameData.PlayerOutfit outfit, Transform parent,Vector3 position,Vector3 scale,bool flip = false)
+    public static PoolablePlayer GetPlayerIcon(NetworkedPlayerInfo.PlayerOutfit outfit, Transform parent,Vector3 position,Vector3 scale,bool flip = false)
     {
         var player = GameObject.Instantiate(PoolablePrefab);
 
@@ -118,7 +118,7 @@ public static class AmongUsUtil
 
     public static float GetAlpha(this PoolablePlayer player)=> player.cosmetics.currentBodySprite.BodySprite.color.a;
 
-    public static PoolablePlayer GetPlayerIcon(GameData.PlayerOutfit outfit, Transform parent, Vector3 position, Vector2 scale, float nameScale,Vector3 namePos,bool flip = false)
+    public static PoolablePlayer GetPlayerIcon(NetworkedPlayerInfo.PlayerOutfit outfit, Transform parent, Vector3 position, Vector2 scale, float nameScale,Vector3 namePos,bool flip = false)
     {
         var player = GetPlayerIcon(outfit, parent, position, scale, flip);
 
@@ -239,15 +239,17 @@ public static class AmongUsUtil
         NebulaManager.Instance.StartCoroutine(CoShowFootprint().WrapToIl2Cpp());
     }
 
+    
     public static PlayerControl SpawnDummy()
     {
+        
         var playerControl = UnityEngine.Object.Instantiate(AmongUsClient.Instance.PlayerPrefab);
         var i = playerControl.PlayerId = (byte)GameData.Instance.GetAvailableId();
 
         playerControl.isDummy = true;
 
-        GameData.Instance.AddPlayer(playerControl);
-
+        var playerInfo = GameData.Instance.AddDummy(playerControl);
+        
         playerControl.transform.position = PlayerControl.LocalPlayer.transform.position;
         playerControl.GetComponent<DummyBehaviour>().enabled = true;
         playerControl.isDummy = true;
@@ -260,10 +262,12 @@ public static class AmongUsUtil
         playerControl.GetComponent<UncertifiedPlayer>().Certify();
 
         AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);
-        GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
+        playerInfo.RpcSetTasks(new byte[0]);
 
         return playerControl;
+        
     }
+    
 
     public static readonly string[] AllVanillaOptions =
     {
@@ -369,4 +373,27 @@ public static class AmongUsUtil
     static public int NumOfAllTasks => NumOfShortTasks + NumOfLongTasks + NumOfCommonTasks;
 
     public static bool IsInGameScene => HudManager.InstanceExists;
+
+    public static R? GetRolePrefab<R>() where R : RoleBehaviour
+    {
+        foreach (RoleBehaviour role in RoleManager.Instance.AllRoles)
+        {
+            R? r = role.TryCast<R>();
+            if (r != null)
+            {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    public static void SetEmergencyCoolDown(float coolDown, bool addOptionCoolDown)
+    {
+        if (addOptionCoolDown) coolDown += (float)GameManager.Instance.LogicOptions.GetEmergencyCooldown();
+
+        if ((NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0) < GeneralConfigurations.EarlyExtraEmergencyCoolDownCondOption)
+            coolDown += GeneralConfigurations.EarlyExtraEmergencyCoolDownOption;
+
+        ShipStatus.Instance.EmergencyCooldown = coolDown;
+    }
 }
