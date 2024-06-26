@@ -33,18 +33,24 @@ public class PresetSettingMenu : MonoBehaviour
                         void Load()
                         {
                             bool success = preset.LoadPreset();
-                            if(success) ConfigurationValues.RpcSharePresetName.Invoke(preset.DisplayName);
+                            if (success) ConfigurationValues.RpcSharePresetName.Invoke(preset.DisplayName);
                             //値を再読み込み
                             foreach (var child in GameSettingMenu.GameSettingsTab.Children) child.Initialize();
 
                             MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent(success ? "preset.loadSuccess" : "preset.loadFailed"));
-                            NebulaSettingMenu.Instance?.OpenFirstPage();
-                        }
 
-                        if (preset.IsOldType || preset.IsUnknownType) {
-                            MetaUI.ShowYesOrNoDialog(HudManager.Instance.transform, Load, () => { }, Language.Translate(preset.IsOldType ? "preset.confirmLoadOld" : "preset.confirmLoadUnknown"), true);
-                        } else Load();
-                        
+                            try
+                            {
+                                NebulaSettingMenu.Instance?.OpenFirstPage();
+                            }
+                            catch { }
+
+                            if (preset.IsOldType || preset.IsUnknownType)
+                            {
+                                MetaUI.ShowYesOrNoDialog(HudManager.Instance.transform, Load, () => { }, Language.Translate(preset.IsOldType ? "preset.confirmLoadOld" : "preset.confirmLoadUnknown"), true);
+                            }
+                            else Load();
+                        }    
                     }, elem => NebulaManager.Instance.SetHelpWidget(elem.uiElement, preset.Detail), elem => NebulaManager.Instance.HideHelpWidgetIf(elem.uiElement)));
             }
             

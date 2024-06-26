@@ -20,6 +20,7 @@ public class ClientOption
         ForceSkeldMeetingSE,
         SpoilerAfterDeath,
         PlayLobbyMusic,
+        ButtonArrangement
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
@@ -128,6 +129,11 @@ public class ClientOption
                 }
             }
         };
+        new ClientOption(ClientOptionType.ButtonArrangement, "buttonArrangement", new string[] {
+            "config.client.buttonArrangement.default", 
+            "config.client.buttonArrangement.raiseOnlyLeft",
+            "config.client.buttonArrangement.raiseBoth",
+        }, 0);
 
         ReflectProcessorAffinity();
     }

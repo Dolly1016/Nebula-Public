@@ -110,6 +110,16 @@ public class GameStartManagerUpdatePatch
     }
 }
 
+file static class GameStartNotification
+{
+    static public void Notification()
+    {
+        if (GeneralConfigurations.CurrentGameMode == GameModes.FreePlay) AmongUsUtil.AddLobbyNotification(Language.Translate("notification.lobby.noTitleForFreeplay"), HudManager.Instance.Notifier.disconnectColor);
+        else if (GeneralConfigurations.AssignOpToHostOption) AmongUsUtil.AddLobbyNotification(Language.Translate("notification.lobby.noTitleForOP"), HudManager.Instance.Notifier.disconnectColor);
+
+    }
+}
+
 [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.BeginGame))]
 public class GameStartManagerBeginGame
 {
@@ -131,7 +141,19 @@ public class GameStartManagerBeginGame
             }
         }
 
+        GameStartNotification.Notification();
+
         return true;
+    }
+}
+
+[HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.SetStartCounter))]
+public class GameStartManagerSetStartCounterPatch
+{
+    public static void Prefix(GameStartManager __instance, [HarmonyArgument(0)] sbyte sec)
+    {
+        if (sec == -1) return;
+        if (!__instance.GameStartTextParent.activeSelf) GameStartNotification.Notification();
     }
 }
 

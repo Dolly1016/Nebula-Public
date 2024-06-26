@@ -2,6 +2,7 @@
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
+using static Il2CppSystem.Xml.XmlWellFormedWriter.AttributeValueCache;
 
 namespace Nebula.Utilities;
 
@@ -395,5 +396,19 @@ public static class AmongUsUtil
             coolDown += GeneralConfigurations.EarlyExtraEmergencyCoolDownOption;
 
         ShipStatus.Instance.EmergencyCooldown = coolDown;
+    }
+
+    public static void AddLobbyNotification(string message,UnityEngine.Color? color, Sprite? sprite = null,bool playSound = true)
+    {
+        var notifier = HudManager.Instance.Notifier;
+
+        LobbyNotificationMessage newMessage = GameObject.Instantiate<LobbyNotificationMessage>(notifier.notificationMessageOrigin, Vector3.zero, Quaternion.identity, notifier.transform);
+        newMessage.transform.localPosition = new Vector3(0f, 0f, -2f);
+        newMessage.SetUp(message, sprite ?? notifier.settingsChangeSprite, color ?? notifier.settingsChangeColor, (Il2CppSystem.Action)(()=> notifier.OnMessageDestroy(newMessage)));
+        notifier.ShiftMessages();
+        notifier.AddMessageToQueue(newMessage);
+
+
+        if (playSound) SoundManager.Instance.PlaySoundImmediate(notifier.settingsChangeSound, false, 1f, 1f, null);
     }
 }

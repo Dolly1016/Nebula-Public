@@ -174,7 +174,14 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
 
     void OnEndVoting(MeetingVoteEndEvent ev)
     {
-        allButtons.Do(b => GameObject.Destroy(b.gameObject));
+        allButtons.Do(b =>
+        {
+            try
+            {
+                GameObject.Destroy(b.gameObject);
+            }
+            catch { }
+        });
         allButtons.Clear();
     }
 

@@ -331,6 +331,28 @@ class VelocityPatch
     }
 }
 
+//アップデートの影響でSetNormalizedVelocityがインライン化してしまったので、これの呼び出しにもパッチをあてる
+[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.FixedUpdate))]
+class PlayerPhysicsFixedUpdatePatch
+{
+    public static bool Prefix(PlayerPhysics __instance)
+    {
+        NetworkedPlayerInfo data = __instance.myPlayer.Data;
+        bool amDead = data != null && data.IsDead;
+        __instance.HandleAnimation(amDead);
+        if (__instance.AmOwner)
+        {
+            if (__instance.myPlayer.CanMove && GameData.Instance && DestroyableSingleton<HudManager>.InstanceExists && DestroyableSingleton<HudManager>.Instance.joystick != null)
+            {
+                __instance.SetNormalizedVelocity(DestroyableSingleton<HudManager>.Instance.joystick.DeltaL);
+            }
+            __instance.CheckCancelPetting();
+        }
+
+        return false;
+    }
+}
+
 [HarmonyPatch(typeof(KillOverlay), nameof(KillOverlay.ShowKillAnimation), typeof(NetworkedPlayerInfo), typeof(NetworkedPlayerInfo))]
 public static class KillOverlayPatch
 {

@@ -116,6 +116,11 @@
 "gamemode.hostMode" : "Host Mode"
 "gamemode.freeplay" : "Free Play"
 
+# Notification
+
+"notification.lobby.noTitleForFreeplay" : "Titles cannot be earned in free play."
+"notification.lobby.noTitleForOP" : "Titles cannot be earned in games where the host has the OP permission."
+
 # Options
 
 "options.switch.off" : "Off"
@@ -1143,6 +1148,10 @@
 "config.client.forceSkeldMeetingSE" : "Force The Skeld SE"
 "config.client.spoilerAfterDeath" : "Spoiler After Death"
 "config.client.playLobbyMusic" : "Play Lobby Music"
+"config.client.buttonArrangement" : "Button Arrangement"
+"config.client.buttonArrangement.default" : "Default"
+"config.client.buttonArrangement.raiseOnlyLeft" : "Raise Only Left"
+"config.client.buttonArrangement.raiseBoth" : "Raise Both Bottoms"
 "config.client.webhook" : "Discord Webhook"
 
 # Preset

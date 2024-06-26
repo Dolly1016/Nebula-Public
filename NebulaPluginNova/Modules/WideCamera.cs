@@ -1,4 +1,5 @@
-﻿using Virial.Game;
+﻿using Rewired.Utils.Platforms.Windows;
+using Virial.Game;
 
 namespace Nebula.Modules;
 
@@ -51,7 +52,27 @@ public class WideCamera
         var collider = UnityHelper.CreateObject<BoxCollider2D>("ClickGuard", myCamera.transform, new(0f, 0f, -1f));
         collider.size = new(100f, 100f);
         collider.isTrigger = true;
-        collider.gameObject.SetUpButton();
+        collider.gameObject.layer = LayerExpansion.GetShipLayer();
+        var button = collider.gameObject.SetUpButton();
+        button.OnClick.AddListener(() => {
+            var cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            var worldPos = ConvertToWorldPos(cameraPos);
+            int layer = (1 << LayerExpansion.GetShortObjectsLayer()) | (1 << LayerExpansion.GetObjectsLayer());
+
+            PassiveUiElement? passiveButton = null;
+            foreach (var button in PassiveButtonManager.Instance.Buttons)
+            {
+                //船およびオブジェクトレイヤーのボタンが対象
+                if (((1 << button.gameObject.layer) & layer) == 0) continue;
+                if (!button.Colliders.Any(c => c.OverlapPoint(worldPos))) continue;
+                if (passiveButton != null && passiveButton.transform.position.z < button.transform.position.z) continue;
+                
+                //Debug.Log("Button");
+                passiveButton = button;
+            }
+
+            if (passiveButton != null) passiveButton.ReceiveClickDown();
+        });
 
         myCamera.gameObject.SetActive(false);
 
@@ -123,6 +144,29 @@ public class WideCamera
         localPos.x *= ViewerTransform.localScale.x;
         localPos.y *= ViewerTransform.localScale.y;
         return Camera.transform.position + localPos.RotateZ(ViewerTransform.localEulerAngles.z);
+    }
+
+    public Vector2 ConvertToWorldPos(Vector2 cameraWorldPosition)
+    {
+        var localPos = cameraWorldPosition - (Vector2)Camera.transform.position;
+        localPos = localPos.Rotate(-ViewerTransform.localEulerAngles.z);
+        try
+        {
+            localPos.x /= ViewerTransform.localScale.x;
+        }
+        catch
+        {
+            localPos.x = 0f;
+        }
+        try
+        {
+            localPos.y /= ViewerTransform.localScale.y;
+        }
+        catch
+        {
+            localPos.y = 0f;
+        }
+        return (Vector2)Camera.transform.position + localPos;
     }
 
     private void FixVentArrow()

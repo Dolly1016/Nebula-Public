@@ -78,7 +78,20 @@ public class VirtualInput
 public class NebulaInput
 {
     private static bool SomeUiIsActive => (ControllerManager.Instance && ControllerManager.Instance.CurrentUiState?.BackButton != null) || NebulaManager.Instance.HasSomeUI || TextField.AnyoneValid;
-    private static bool SomeInputUiIsActive => (HudManager.InstanceExists && HudManager.Instance.Chat.freeChatField.textArea.hasFocus) || TextField.AnyoneValid;
+    private static bool SomeInputUiIsActive
+    {
+        get
+        {
+            try
+            {
+                return (HudManager.InstanceExists && HudManager.Instance.Chat.freeChatField.textArea.hasFocus) || TextField.AnyoneValid;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
 
     public static bool GetKeyDown(KeyCode keyCode)
     {

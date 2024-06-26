@@ -127,9 +127,15 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
             if (acTokenCommon != null) acTokenCommon.Value.triggered = currentVote >= 2;
         }
 
+        [Local]
         void OnEndVoting(MeetingVoteEndEvent ev)
         {
-            if (MeetingHud.Instance.playerStates.FirstOrDefault(v => v.TargetPlayerId == MyPlayer.PlayerId)?.DidVote ?? false) myVote -= currentVote;
+            if (MeetingHud.Instance.playerStates.FirstOrDefault(v => v.TargetPlayerId == MyPlayer.PlayerId)?.DidVote ?? false)
+            {
+                Debug.Log($"Mayor: current:{myVote},voted:{currentVote}");
+                myVote -= currentVote;
+                Debug.Log($"Mayor: after:{myVote}");
+            }
         }
 
         [Local]

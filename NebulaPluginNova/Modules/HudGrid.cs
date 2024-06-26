@@ -124,7 +124,18 @@ public class HudContent : MonoBehaviour
     public bool OccupiesLine = false;
     public bool IsStaticContent = false;
 
-    public Vector3 ToLocalPos => new Vector3((4.5f - CurrentPos.x) * (isLeftSide ? -1 : 1), -2.3f + CurrentPos.y, 0f);
+    public Vector3 ToLocalPos
+    {
+        get
+        {
+            var pos = new Vector3((4.5f - CurrentPos.x) * (isLeftSide ? -1 : 1), -2.3f + CurrentPos.y, 0f);
+
+            var arrangement = ClientOption.AllOptions[ClientOption.ClientOptionType.ButtonArrangement].Value;
+            if (!MeetingHud.Instance && ((arrangement == 1 && isLeftSide) || arrangement == 2)) pos.y += 0.85f;
+
+            return pos;
+        }
+    }
     public bool MarkedAsKillButtonContent => onKillButtonPos;
     public void MarkAsKillButtonContent(bool mark = true)
     {

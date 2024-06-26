@@ -115,6 +115,11 @@
 "gamemode.hostMode" : "Host Mode"
 "gamemode.freeplay" : "フリープレイ"
 
+# Notification
+
+"notification.lobby.noTitleForFreeplay" : "フリープレイでは称号は獲得できません。"
+"notification.lobby.noTitleForOP" : "ホストにOP権限が付与されるゲームでは称号は獲得できません。"
+
 # Options
 
 "options.switch.off" : "Off"

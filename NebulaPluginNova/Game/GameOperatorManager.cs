@@ -110,8 +110,12 @@ public class GameOperatorManager
         {
             operators.RemoveAll(o =>
             {
-                if (o.lifespan.IsDeadObject)
-                    return true;
+                try
+                {
+                    if (o.lifespan.IsDeadObject) return true;
+                }
+                catch { return true; }
+
                 try
                 {
                     o.action.Invoke(e);

@@ -119,21 +119,8 @@ public static class MeetingModRpc
         meetingHud.SkipVoteButton.gameObject.SetActive(false);
         meetingHud.SkippedVoting.gameObject.SetActive(true);
         AmongUsClient.Instance.DisconnectHandlers.Remove(meetingHud.TryCast<IDisconnectHandler>());
-        for (int i = 0; i < GameData.Instance.PlayerCount; i++)
-        {
-            PlayerControl @object = GameData.Instance.AllPlayers[i].Object;
-            if (@object != null && @object.Data != null && @object.Data.Role) @object.Data.Role.OnVotingComplete();
-        }
         meetingHud.PopulateResults(states.ToArray());
         meetingHud.SetupProceedButton();
-        try
-        {
-            MeetingHud.VoterState voterState = states.FirstOrDefault((MeetingHud.VoterState s) => s.VoterId == PlayerControl.LocalPlayer.PlayerId);
-            NetworkedPlayerInfo playerById = GameData.Instance.GetPlayerById(voterState.VotedForId);
-        }
-        catch 
-        {
-        }
 
         if (DestroyableSingleton<HudManager>.Instance.Chat.IsOpenOrOpening)
         {
