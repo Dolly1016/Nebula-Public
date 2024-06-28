@@ -289,7 +289,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
 
     public Virial.Media.GUIWidget VerticalHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, float? fixedWidth = null) => new VerticalWidgetsHolder(alignment, inner) { FixedWidth = fixedWidth };
 
-    public Virial.Media.GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) => new NoSGUIImage(alignment, image, size, null, onClick, overlay);
+    public Virial.Media.GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) => new NoSGUIImage(alignment, image, size, null, onClick, overlay) { IsMasked = true };
 
     public Virial.Media.GUIWidget ScrollView(GUIAlignment alignment, Size size, string? scrollerTag, Virial.Media.GUIWidget? inner, out Artifact<GUIScreen> artifact) {
         var result = new GUIScrollView(alignment, size.ToUnityVector(), inner) { ScrollerTag = scrollerTag, WithMask = true };
