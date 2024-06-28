@@ -8,6 +8,7 @@ using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Impostor;
 
@@ -91,6 +92,8 @@ public class Raider : DefinedRoleTemplate, DefinedRole
 
                                 if (PlayerControl.LocalPlayer.ModKill(p, PlayerState.Beaten, EventDetail.Kill, KillParameter.RemoteKill) == KillResult.Kill)
                                 {
+                                    if (p.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
+
                                     killed |= 1 << p.PlayerId;
 
                                     if (killed >= 3)

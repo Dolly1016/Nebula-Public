@@ -197,8 +197,9 @@ public static class GeneralConfigurations
     static public FloatConfiguration AdminRestrictionOption = NebulaAPI.Configurations.Configuration("options.consoleRestriction.adminRestriction", RestrictionSelections().ToArray(), -1f, RestrictionDecorator);
     static public FloatConfiguration VitalsRestrictionOption = NebulaAPI.Configurations.Configuration("options.consoleRestriction.vitalsRestriction", RestrictionSelections().ToArray(), -1f, RestrictionDecorator);
     static public FloatConfiguration CameraRestrictionOption = NebulaAPI.Configurations.Configuration("options.consoleRestriction.cameraRestriction", RestrictionSelections().ToArray(), -1f, RestrictionDecorator);
+    static public BoolConfiguration ShowDeadBodiesOnAdminOption = NebulaAPI.Configurations.Configuration("options.consoleRestriction.showDeadBodiesOnAdmin", true);
     static public IConfigurationHolder ConsoleRestrictionOptions = NebulaAPI.Configurations.Holder("options.consoleRestriction", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        ResetRestrictionsOption, AdminRestrictionOption, VitalsRestrictionOption, CameraRestrictionOption
+        ResetRestrictionsOption, AdminRestrictionOption, VitalsRestrictionOption, CameraRestrictionOption, ShowDeadBodiesOnAdminOption
         ]);
 
 

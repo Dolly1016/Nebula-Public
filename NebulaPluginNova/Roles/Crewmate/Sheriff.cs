@@ -9,7 +9,7 @@ namespace Nebula.Roles.Crewmate;
 
 public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Sheriff():base("sheriff", new(240,191,0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [KillCoolDownOption, NumOfShotsOption, CanKillMadmateOption, CanKillHidingPlayerOption])
+    private Sheriff():base("sheriff", new(240,191,0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [KillCoolDownOption, NumOfShotsOption, CanKillMadmateOption, CanKillHidingPlayerOption, SealAbilityUntilReportingDeadBodiesOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
@@ -22,6 +22,7 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
     static private IntegerConfiguration NumOfShotsOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.numOfShots", (1, 15), 3);
     static private BoolConfiguration CanKillMadmateOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillMadmate", false);
     static private BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillHidingPlayer", false);
+    static private BoolConfiguration SealAbilityUntilReportingDeadBodiesOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.sealAbilityUntilReportingDeadBodies", false);
 
     static public Sheriff MyRole = new Sheriff();
 
@@ -72,7 +73,15 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
                 leftText.text = leftShots.ToString();
 
                 killButton.SetSprite(buttonSprite.GetSprite());
-                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
+
+                SpriteRenderer? lockSprite = null;
+                //封印設定が有効かつ死者がいない場合に能力を一時的に封印する。
+                if (SealAbilityUntilReportingDeadBodiesOption && !NebulaGameManager.Instance!.AllPlayerInfo().Any(p => p.IsDead))
+                {
+                    lockSprite = killButton.VanillaButton.AddLockedOverlay();
+                }
+
+                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove && lockSprite == null;
                 killButton.Visibility = (button) => !MyPlayer.IsDead && leftShots > 0;
                 killButton.OnClick = (button) => {
                     if (CanKill(killTracker.CurrentTarget!))
@@ -95,6 +104,14 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
                 };
                 killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
                 killButton.SetLabel("kill");
+                killButton.OnMeeting = button =>
+                {
+                    if(lockSprite && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => p.IsDead))
+                    {
+                        GameObject.Destroy(lockSprite!.gameObject);
+                        lockSprite = null;
+                    }
+                };
             }
         }
 

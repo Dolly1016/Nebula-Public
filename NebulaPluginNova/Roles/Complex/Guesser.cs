@@ -197,7 +197,7 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
 
 
         [Local]
-        void OnGameEnd(EndState endState) => GuesserSystem.OnGameEnd(MyPlayer);
+        void OnGameEnd(GameEndEvent ev) => GuesserSystem.OnGameEnd(MyPlayer);
 
         bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
     }
@@ -222,7 +222,7 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
 
 
         [Local]
-        void OnGameEnd(EndState endState) => GuesserSystem.OnGameEnd(MyPlayer);
+        void OnGameEnd(GameEndEvent ev) => GuesserSystem.OnGameEnd(MyPlayer);
 
         bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
     }

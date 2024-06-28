@@ -30,7 +30,7 @@ public class JailerAbility : IGameOperator
     void OnOpenSabotageMap(MapOpenSabotageEvent ev)
     {
         MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
-        MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false, Palette.ImpostorRed);
+        MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false, true, Palette.ImpostorRed);
         MapBehaviour.Instance.countOverlay.SetOptions(true, true);
         ConsoleTimer.MarkAsNonConsoleMinigame();
 

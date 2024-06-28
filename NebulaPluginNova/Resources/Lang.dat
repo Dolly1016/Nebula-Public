@@ -219,6 +219,7 @@
 "options.consoleRestriction.vitalsRestriction" : "Vitals"
 "options.consoleRestriction.cameraRestriction" : "Security Cams & Logs"
 "options.consoleRestriction.resetRestrictions" : "Reset Restrictions Per Meetings"
+"options.consoleRestriction.showDeadBodiesOnAdmin" : "Show Dead Bodies On Admin"
 
 "options.voiceChat" : "Voice Chat Options"
 "options.voiceChat.detail" : "Let's play while talking with nearby players!"
@@ -461,6 +462,7 @@
 "options.role.sheriff.killCoolDown" : "Kill Cooldown"
 "options.role.sheriff.numOfShots" : "Num Of Shots"
 "options.role.sheriff.canKillHidingPlayer" : "Can Kill Hiding Player"
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "Seal Ability Until Reporting Dead Bodies"
 
 "role.ubiquitous.name" : "Ubiquitous"
 "role.ubiquitous.short" : "U"

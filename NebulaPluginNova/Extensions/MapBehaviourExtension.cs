@@ -6,6 +6,7 @@ public static class MapBehaviourExtension
     public static bool CanIdentifyDeadBodies = false;
     public static bool AffectedByCommSab = true;
     public static bool AffectedByFakeAdmin = true;
+    public static bool ShowDeadBodies = true;
     public static Color? MapColor = null;
     public static void InitializeModOption(this MapCountOverlay overlay)
     {
@@ -13,15 +14,17 @@ public static class MapBehaviourExtension
         CanIdentifyDeadBodies = false;
         AffectedByCommSab = true;
         AffectedByFakeAdmin = true;
+        ShowDeadBodies = GeneralConfigurations.ShowDeadBodiesOnAdminOption;
         MapColor = null;
     }
 
-    public static void SetModOption(this MapCountOverlay overlay, bool? canIdentifyImpostors = null, bool? canIdentifyDeadBodies = null, bool? affectedByCommSab = null, bool? affectedByFakeAdmin = null, Color ? mapColor = null)
+    public static void SetModOption(this MapCountOverlay overlay, bool? canIdentifyImpostors = null, bool? canIdentifyDeadBodies = null, bool? affectedByCommSab = null, bool? affectedByFakeAdmin = null, bool? showDeadBodies = null, Color ? mapColor = null)
     {
         if (canIdentifyImpostors.HasValue) CanIdentifyImpostors = canIdentifyImpostors.Value;
         if (canIdentifyDeadBodies.HasValue) CanIdentifyDeadBodies = canIdentifyDeadBodies.Value;
         if (affectedByCommSab.HasValue) AffectedByCommSab = affectedByCommSab.Value;
         if (affectedByFakeAdmin.HasValue) AffectedByFakeAdmin = affectedByFakeAdmin.Value;
+        if (showDeadBodies.HasValue) ShowDeadBodies = showDeadBodies.Value;
         if (mapColor.HasValue)
         {
             MapColor = mapColor.Value;

@@ -96,6 +96,7 @@ public static class CountOverlayUpdatePatch
                     //タスクターン中のアドミン
                     foreach(var p in admin.Players)
                     {
+                        if (p.isDead && !MapBehaviourExtension.ShowDeadBodies) continue;
                         if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetPlayer(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
 
                         if (AlreadyAdded(p.playerId)) continue;
