@@ -42,7 +42,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
         {
         }
 
-        NetworkedPlayerInfo.PlayerOutfit? sample = null;
+        Outfit? sample = null;
 
         void RuntimeAssignable.OnActivated()
         {
@@ -58,11 +58,11 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
                 sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead;
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker!.CurrentTarget!.Unbox().GetOutfit(75);
+                    sample = sampleTracker!.CurrentTarget!.GetOutfit(75);
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
-                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample, morphButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample.outfit, morphButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
@@ -127,7 +127,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (acTokenChallenge != null && ev.Player.Unbox()!.DefaultOutfit.ColorId == (sample?.ColorId ?? -1))
+            if (acTokenChallenge != null && ev.Player.Unbox()!.DefaultOutfit.ColorId == (sample?.outfit.ColorId ?? -1))
                 acTokenChallenge.Value.exile = true;
         }
 
@@ -135,7 +135,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
             var targetId = ev.Dead.Unbox()?.GetOutfit(75).ColorId;
-            var sampleId = sample?.ColorId;
+            var sampleId = sample?.outfit.ColorId;
             if (targetId.HasValue && sampleId.HasValue && targetId.Value == sampleId.Value)
                 acTokenAnother1 ??= new("morphing.another1");
 

@@ -137,7 +137,7 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
     static public Trapper MyEvilRole = new(true);
 
 
-    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
+    [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class Trap : NebulaSyncStandardObject, IGameOperator
     {
         public static string MyGlobalTag = "TrapGlobal";

@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Roles.Abilities;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
@@ -12,6 +13,8 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
 {
     private Necromancer() : base("necromancer", new(108,50,160), RoleCategory.CrewmateRole, Crewmate.MyTeam, [ReviveCoolDownOption, ReviveDurationOption, DetectedRangeOption, ReviveMinRangeOption, ReviveMaxRangeOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+
+        MetaAbility.RegisterCircle(new("role.necromancer.reviveRange", () => DetectedRangeOption, () => null, UnityColor));
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -56,7 +59,6 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
         {
             bool flag = MyPlayer.HoldingAnyDeadBody;
 
-            if (myArrow != null) myArrow.IsActive = flag;
             message.gameObject.SetActive(flag);
             if (flag) message.color = MyRole.UnityColor.AlphaMultiplied(MathF.Sin(Time.time * 2.4f) * 0.2f + 0.8f);
 
@@ -104,6 +106,18 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
                 myArrow.IsActive = false;
                 myArrow.SetColor(MyRole.UnityColor);
 
+                GameOperatorManager.Instance?.Register<GameUpdateEvent>((ev) => {
+                    if (MyPlayer.HoldingAnyDeadBody && currentTargetRoom.HasValue && !canReviveHere())
+                    {
+                        myArrow.IsActive = true;
+                        myArrow.TargetPos = ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.ClosestPoint(MyPlayer.VanillaPlayer.transform.position);
+                    }
+                    else
+                    {
+                        myArrow.IsActive = false;
+                    }
+                }, this);
+
                 draggable!.OnHoldingDeadBody = (deadBody) =>
                 {
                     if (!resurrectionRoom.ContainsKey(deadBody.ParentId))
@@ -130,12 +144,10 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
                     }
 
                     currentTargetRoom = resurrectionRoom[deadBody.ParentId];
-                    myArrow.TargetPos = ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.bounds.center;
+                    //myArrow.TargetPos = ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.bounds.center;
                     message.text = Language.Translate("role.necromancer.phantomMessage").Replace("%ROOM%", AmongUsUtil.ToDisplayString(currentTargetRoom.Value));
                 };
 
-
-                StaticAchievementToken? acTokenCommon = null;
                 AchievementToken<(bool cleared, int bitFlag)> acTokenChalenge = new("necromancer.challenge", (false, 0), (val, _) => val.cleared);
 
                 reviveButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
@@ -149,7 +161,8 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
                     {
                         var currentHolding = MyPlayer.HoldingDeadBody!;
 
-                        acTokenCommon ??= new("necromancer.common1");
+                        new StaticAchievementToken("necromancer.common1");
+                        if (!currentHolding.IsCrewmate) new StaticAchievementToken("necromancer.another1");
                         acTokenChalenge.Value.cleared |= (acTokenChalenge.Value.bitFlag & (1 << currentHolding.PlayerId)) != 0;
                         acTokenChalenge.Value.bitFlag |= 1 << currentHolding.PlayerId;
 
@@ -165,6 +178,7 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
                     if (!button.EffectActive) return;
                     if (!canReviveHere()) button.InactivateEffect();
                 };
+                reviveButton.PlayFlash = () => MyPlayer.HoldingAnyDeadBody && canReviveHere() && !reviveButton.EffectActive;
                 reviveButton.CoolDownTimer = Bind(new Timer(ReviveCoolDownOption).SetAsAbilityCoolDown().Start());
                 reviveButton.EffectTimer = Bind(new Timer(ReviveDurationOption));
                 reviveButton.SetLabel("revive");

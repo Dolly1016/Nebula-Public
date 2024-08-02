@@ -85,12 +85,12 @@ public class NebulaPreprocess : Attribute
     internal PreprocessPhase MyPhase { get; init; }
 
 
-    /*
-    public NebulaPreprocess(Phase phase)
+    
+    public NebulaPreprocess(PreprocessPhase phase)
     {
         MyPhase = phase;
     }
-    */
+    
 }
 
 
@@ -124,13 +124,14 @@ public class Local : Attribute
 /// <summary>
 /// ID付きドキュメントを表すクラスです。
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class,AllowMultiple =true)]
 public class AddonDocumentAttribute : Attribute
 {
-    public string DocumentId { get; private init; }
-    public AddonDocumentAttribute(string documentId)
+    public string DocumentId { get; private init; }    
+    public object[] Arguments { get; private init; }
+    public AddonDocumentAttribute(string documentId, params object[] args)
     {
         this.DocumentId = documentId;
+        this.Arguments = args;
     }
 }
-

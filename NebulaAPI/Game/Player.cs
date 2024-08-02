@@ -119,8 +119,9 @@ public static class PlayerAttributes
 public class Outfit
 {
     internal NetworkedPlayerInfo.PlayerOutfit outfit { get; private set; }
+    internal OutfitTag[] tags { get; private set; }
 
-    internal Outfit(NetworkedPlayerInfo.PlayerOutfit outfit, bool clone = false)
+    internal Outfit(NetworkedPlayerInfo.PlayerOutfit outfit, OutfitTag[] tags, bool clone = false)
     {
         if (clone)
         {
@@ -137,6 +138,8 @@ public class Outfit
         {
             this.outfit = outfit;
         }
+
+        this.tags = tags;
     }
 
     public override bool Equals(object? obj)
@@ -156,21 +159,56 @@ public class Outfit
     }
 }
 
+public record OutfitTag {
+    public Virial.Media.Image TagImage { get;private init; }
+    private string TranslationKey { get; init; }
+    public string DisplayName => NebulaAPI.Language.Translate("outfit.tag." + TranslationKey);
+    public int Id { get; private init; }
+
+    internal Predicate<NetworkedPlayerInfo.PlayerOutfit> Checker { get; private init; }
+
+    internal OutfitTag(Virial.Media.Image tagImage, string translationKey, Predicate<NetworkedPlayerInfo.PlayerOutfit> checker)
+    {
+        TagImage = tagImage;
+        TranslationKey = translationKey;
+        Id = NebulaAPI.Hasher.GetIntegerHash(translationKey);
+        Checker = checker;
+        AllTags[Id] = this;
+    }
+
+
+    private static Dictionary<int, OutfitTag> AllTags = new();
+    public static OutfitTag GetTagById(int id) => AllTags[id];
+    public static IEnumerable<OutfitTag> GetAllTags() => AllTags.Values;
+}
 public class OutfitCandidate
 {
     public string Tag { get; private set; }
     public int Priority { get; private set; }
     public bool SelfAware { get; private set; }
+    public OutfitTag[] OutfitTags { get; private set; }
     internal NetworkedPlayerInfo.PlayerOutfit outfit { get; private set; }
 
-    internal OutfitCandidate(string tag, int priority, bool selfAware, NetworkedPlayerInfo.PlayerOutfit outfit)
+    internal OutfitCandidate(string tag, int priority, bool selfAware, NetworkedPlayerInfo.PlayerOutfit outfit, OutfitTag[] outfitTags)
     {
         this.Tag = tag;
         this.Priority = priority;
         this.SelfAware = selfAware;
         this.outfit = outfit;
+        this.OutfitTags = outfitTags;
+    }
+
+    internal OutfitCandidate(string tag, int priority, bool selfAware, Outfit outfit)
+    {
+        Tag = tag;
+        Priority = priority;
+        SelfAware = selfAware;
+        OutfitTags = outfit.tags;
+        this.outfit = outfit.outfit;
     }
 }
+
+public record PlayerDiving();
 
 [Flags]
 public enum KillParameter
@@ -209,6 +247,12 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// 死亡しているとき、Trueを返します。
     /// </summary>
     public bool IsDead { get; }
+
+    public PlayerDiving? CurrentDiving { get; }
+    /// <summary>
+    /// ダイブしているとき、Trueを返します。
+    /// </summary>
+    public bool IsDived => CurrentDiving != null;
 
     /// <summary>
     /// 死亡時刻をゲーム開始からの経過時間で返します。

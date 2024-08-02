@@ -5,13 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using Virial.DI;
 using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Game.Achievements;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.BuildNoSModule)]
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
 internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     static AchievementManagerModule()
@@ -105,6 +108,25 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
                     }
                 };
             }
+        }
+
+        if (Helpers.CurrentMonth == 8)
+        {
+            if (AmongUsUtil.CurrentMapId is 5)
+            {
+                GameOperatorManager.Instance?.Register<PlayerKillPlayerEvent>(ev =>
+                {
+                    if (ev.Murderer.AmOwner && ev.Dead.TryGetModifier<Bloody.Instance>(out _) && ev.Dead.Position.x < -8f && ev.Murderer.Position.x < -8f && ColorHelper.IsGreenOrBlack(Palette.PlayerColors[ev.Dead.PlayerId]))
+                        new StaticAchievementToken("watermelon");
+                }, NebulaAPI.CurrentGame!);
+            }
+        }
+
+        //会議なしで勝利
+        {
+            //会議が始まったらフラグを下げる
+            var token = new AchievementToken<bool>("noMeeting", true, (val, _) => val && NebulaGameManager.Instance!.EndState!.Winners.Test(NebulaGameManager.Instance.LocalPlayerInfo));
+            GameOperatorManager.Instance?.Register<MeetingStartEvent>(ev => token.Value = false, NebulaAPI.CurrentGame);
         }
     }
 }

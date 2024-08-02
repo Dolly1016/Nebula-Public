@@ -20,18 +20,9 @@ internal class GameOperatorBuilder
     /// <summary>
     /// ゲーム作用素を登録します。
     /// </summary>
-    public void Register(Dictionary<Type, List<GameOperatorInstance>> runtimeOperators, ILifespan lifespan, IGameOperator operation)
+    public void Register(Action<Type, GameOperatorInstance> registerFunc, ILifespan lifespan, IGameOperator operation)
     {
-        foreach(var action in allActions)
-        {
-            List<GameOperatorInstance>? instanceList;
-            if(!runtimeOperators.TryGetValue(action.type, out instanceList))
-            {
-                instanceList = new();
-                runtimeOperators.Add(action.type, instanceList);
-            }
-            instanceList.Add(new(lifespan, action.action.Invoke(operation)));
-        }
+        foreach(var action in allActions) registerFunc.Invoke(action.type, new(lifespan, action.action.Invoke(operation)));
     }
 
     static public GameOperatorBuilder GetBuilderFromType(Type entityType)
@@ -191,6 +182,7 @@ public class GameOperatorManager
 
     // 反復中に作用素が追加されないよう、一時的に退避する
     private List<(IGameOperator entity, ILifespan lifespan)> newOperations = new();
+    private List<(Type eventType, Action<object> operation, ILifespan lifespan)> newFuncOperations = new();
 
     private void RegisterEntity(IGameOperator operation, ILifespan lifespan)
     {
@@ -203,19 +195,37 @@ public class GameOperatorManager
             builder = GameOperatorBuilder.GetBuilderFromType(operationType);
             allBuildersCache.Add(operationType, builder);
         }
-        builder.Register(allOperatorInstance, lifespan, operation);
+        builder.Register(RegisterImpl, lifespan, operation);
     }
+
+    private void RegisterImpl(Type eventType, GameOperatorInstance instance) {
+        List<GameOperatorInstance>? instanceList;
+        if (!allOperatorInstance.TryGetValue(eventType, out instanceList))
+        {
+            instanceList = new();
+            allOperatorInstance.Add(eventType, instanceList);
+        }
+        instanceList.Add(instance);
+    }
+    
 
     //退避されていた作用素をゲームに追加する
     private void RegisterAll()
     {
         foreach (var entry in newOperations) RegisterEntity(entry.entity, entry.lifespan);
+        foreach (var op in newFuncOperations) RegisterImpl(op.eventType, new(op.lifespan, op.operation));
         newOperations.Clear();
+        newFuncOperations.Clear();
     }
 
     public void Register(IGameOperator entity, ILifespan lifespan)
     {
         newOperations.Add((entity, lifespan));
+    }
+
+    public void Register<Event>(Action<Event> operation, ILifespan lifespan)
+    {
+        newFuncOperations.Add((typeof(Event), obj => operation.Invoke((Event)obj), lifespan));
     }
 
     public GameOperatorManager()

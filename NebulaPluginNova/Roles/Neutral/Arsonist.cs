@@ -114,7 +114,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     CheckIgnitable();
                 }
 
-                var douseTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)));
+                var douseTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)));
 
                 douseButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
                 douseButton.SetSprite(douseButtonSprite.GetSprite());

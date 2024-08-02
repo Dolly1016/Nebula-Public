@@ -164,6 +164,7 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
         }
 
 
+        [OnlyMyPlayer]
         void OnMurdered(PlayerMurderedEvent ev)
         {
             if (ev.Murderer.AmOwner) new StaticAchievementToken("chainShifter.common1");

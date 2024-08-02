@@ -109,6 +109,8 @@ public class HashSetMask<T> : EditableBitMask<T>
         return this;
     }
 
+    public int Count => set.Count;
+
     uint BitMask<T>.AsRawPattern => throw new NotImplementedException();
     ulong BitMask<T>.AsRawPatternLong => throw new NotImplementedException();
 }

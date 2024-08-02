@@ -151,9 +151,16 @@ class ExileControllerBeginPatch
 
     public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref NetworkedPlayerInfo exiled, [HarmonyArgument(1)] bool tie)
     {
+        //MeetingHudがなぜか真になってしまうので、nullに書き換え
+        MeetingHud.Instance = null;
+
         if (exiled == null) return;
 
-        if((MeetingHudExtension.ExiledAll?.Length ?? 0) > 1)
+        if (MeetingHudExtension.IsObvious)
+        {
+            __instance.completeString = Language.Translate("game.meeting.obvious");
+        }
+        else if((MeetingHudExtension.ExiledAll?.Length ?? 0) > 1)
         {
             __instance.completeString = Language.Translate("game.meeting.multiple");
         }

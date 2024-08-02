@@ -15,7 +15,7 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
     static public Crewmate MyRole = new Crewmate();
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-    bool DefinedSingleAssignable.IsSpawnable => true;
+    bool ISpawnable.IsSpawnable => true;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -28,7 +28,7 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.BuildNoSModule)]
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
 public class CrewmateGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 {
     static CrewmateGameRule() => DIManager.Instance.RegisterModule(() => new CrewmateGameRule());

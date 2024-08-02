@@ -100,11 +100,14 @@ public class VanillaAsset
             MapAsset[i] = handle.Result.GetComponent<ShipStatus>();
         }
 
+        //マップの部屋名フォントを読み込んだうえで再度フォントを適用
+        Language.ReflectFallBackFont();
+
         //Polus
         //handle = AmongUsClient.Instance.ShipPrefabs[2].InstantiateAsync(null, false);
         //yield return handle;
         //var polus = handle.Result.GetComponent<PolusShipStatus>();
-        
+
 
         /*
         //Airship

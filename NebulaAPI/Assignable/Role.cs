@@ -36,6 +36,28 @@ public interface ICodeName
     string CodeName { get; }
 }
 
+public interface ISpawnable
+{
+    bool IsSpawnable { get; }
+}
+
+public interface ICategorizedRoleAllocator<R> where R : DefinedAssignable
+{
+    R MyRole { get; }
+    /// <summary>
+    /// 割り当て確率を0～100の間で返します。
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
+    int GetChance(RoleCategory category);
+    void ConsumeCount(RoleCategory category);
+}
+
+public interface IHasCategorizedRoleAllocator<R> where R : DefinedAssignable
+{
+    ICategorizedRoleAllocator<R> GenerateRoleAllocator();
+}
+
 /// <summary>
 /// 引用元を持つオブジェクトを表します。
 /// </summary>
@@ -89,7 +111,12 @@ public interface DefinedAssignable : IRoleID
     /// 役職の表示名
     /// </summary>
     string DisplayName => NebulaAPI.Language.Translate("role." + LocalizedName + ".name");
-    string DisplayColordName => DisplayName.Color(UnityColor);
+    string DisplayColoredName => DisplayName.Color(UnityColor);
+
+    /// <summary>
+    /// 一般的な二つ名テキスト
+    /// </summary>
+    string GeneralColoredBlurb => NebulaAPI.Language.Translate("role." + LocalizedName + ".blurb").Color(UnityColor);
 
 
     /// <summary>
@@ -101,25 +128,31 @@ public interface DefinedAssignable : IRoleID
     IConfigurationHolder? ConfigurationHolder { get; }
 }
 
-public interface DefinedSingleAssignable : DefinedAssignable
+public interface DefinedCategorizedAssignable : DefinedAssignable
 {
     /// <summary>
     /// 役職の種別 役職割り当て時に使用します
     /// </summary>
     RoleCategory Category { get; }
-    /// <summary>
-    /// 役職の属する陣営 おもに勝敗判定に使用されます
-    /// </summary>
-    RoleTeam Team { get; }
-
-    AllocationParameters? AllocationParameters { get; }
-    bool IsSpawnable { get; }
 
     /// <summary>
     /// 役職の省略名
     /// </summary>
     string DisplayShort => NebulaAPI.Language.Translate("role." + LocalizedName + ".short");
     string DisplayColoredShort => DisplayShort.Color(UnityColor);
+}
+
+/// <summary>
+/// 単一のチームに属する役職の定義
+/// </summary>
+public interface DefinedSingleAssignable : DefinedCategorizedAssignable, ISpawnable
+{
+    /// <summary>
+    /// 役職の属する陣営 おもに勝敗判定に使用されます
+    /// </summary>
+    RoleTeam Team { get; }
+
+    AllocationParameters? AllocationParameters { get; }
 }
 
 public interface RuntimeAssignableGenerator<T> where T : RuntimeAssignable
@@ -175,7 +208,20 @@ public interface AllocationParameters
 {
     IEnumerable<IConfiguration> Configurations { get; }
 
-    int RoleCount { get; }
+    //割り当て数の総和を返します。
+    int RoleCountSum { get; }
+
+    //100%割り当て数を返します。
+    int RoleCount100 { get; }
+    //確率的な割り当て数を返します。
+    int RoleCountRandom { get; }
+
+    /// <summary>
+    /// 割り当て数を取得します。100%か確率的な割り当てか真偽値で選択できます。
+    /// </summary>
+    /// <param name="get100"></param>
+    /// <returns></returns>
+    int GetRoleCountWhich(bool get100) => get100 ? RoleCount100 : RoleCountRandom;
 
     /// <summary>
     /// count人目のプレイヤーの割り当て確率を0～100の値で取得します。
@@ -194,21 +240,26 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// <summary>
     /// 役職のゲーム開始時の表示
     /// </summary>
-    string DisplayIntroBlurb => NebulaAPI.Language.Translate("role." + LocalizedName + ".blurb");
+    string DisplayIntroBlurb => GeneralColoredBlurb;
 }
 
 /// <summary>
 /// プレイヤーに割り当てられる幽霊役職の定義を表します。
 /// </summary>
-public interface DefinedGhostRole : DefinedSingleAssignable, RuntimeAssignableGenerator<RuntimeGhostRole>, ICodeName, HasRoleFilter
+public interface DefinedGhostRole : DefinedCategorizedAssignable, RuntimeAssignableGenerator<RuntimeGhostRole>, ICodeName, HasRoleFilter, IHasCategorizedRoleAllocator<DefinedGhostRole>, IAssignToCategorizedRole
 {
 }
 
+public interface IAssignToCategorizedRole
+{
+    void GetAssignProperties(RoleCategory category, out int assign100, out int assignRandom, out int assignChance);
+}
 /// <summary>
 /// プレイヤーに割り当てられる追加役職の定義を表します。
 /// </summary>
 public interface DefinedModifier : DefinedAssignable, RuntimeAssignableGenerator<RuntimeModifier>
 {
+    string DefinedAssignable.GeneralColoredBlurb => NebulaAPI.Language.Translate("role." + LocalizedName + ".generalBlurb").Color(UnityColor);
 }
 
 /// <summary>
@@ -220,7 +271,7 @@ public interface HasAssignmentRoutine
     void TryAssign(IRoleTable roleTable);
 }
 
-public interface DefinedAllocatableModifier : DefinedModifier, ICodeName, HasRoleFilter, HasAssignmentRoutine
+public interface DefinedAllocatableModifier : DefinedModifier, ICodeName, HasRoleFilter, HasAssignmentRoutine, ISpawnable, IAssignToCategorizedRole
 {
 }
 
@@ -277,7 +328,7 @@ public interface RuntimeAssignable : IBinder, ILifespan, IReleasable, IBindPlaye
     string? OverrideRoleName(string lastRoleName, bool isShort) => null;
 
     string DisplayName => Assignable.DisplayName;
-    string DisplayColoredName => Assignable.DisplayColordName;
+    string DisplayColoredName => Assignable.DisplayColoredName;
 
     /// <summary>
     /// 現在の状態を役職引数に変換します。
@@ -374,6 +425,11 @@ public interface RuntimeRole : RuntimeAssignable
     /// 他人のフェイクサボタージュが確認できる場合はtrueを返します。
     /// </summary>
     bool CanSeeOthersFakeSabotage => Role.Category == RoleCategory.ImpostorRole;
+
+    /// <summary>
+    /// ノイズメーカーの通知を拒否する場合はtrueを返します。
+    /// </summary>
+    bool IgnoreNoisemakerNotification => false;
 
     /// <summary>
     /// 役職の省略名です。

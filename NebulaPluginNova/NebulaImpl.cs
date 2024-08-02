@@ -7,6 +7,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Text;
+using Virial.Utilities;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula;
@@ -25,7 +26,7 @@ public class NebulaImpl : INebula
     {
         Instance = this;
 
-        allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API]);
+        allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API, NebulaHasher.API]);
         allDefinitions.AddRange([
             (typeof(ModAbilityButton), () => new ModAbilityButton()), 
             (typeof(Timer), () => new Timer())
@@ -71,6 +72,7 @@ public class NebulaImpl : INebula
     Virial.Configuration.Configurations Configurations => ConfigurationsAPI.API;
     Virial.Media.GUI GUILibrary => GUI.API;
     Virial.Media.Translator Language => Nebula.Modules.Language.API;
+    Virial.Utilities.IHasher Hasher => NebulaHasher.API;
 }
 
 internal static class UnboxExtension
@@ -87,4 +89,12 @@ public static class ComponentHolderHelper
         holder.BindComponent(new GameObjectBinding(gameObject));
         return gameObject;
     }
+}
+
+public class NebulaHasher : Virial.Utilities.IHasher
+{
+    internal static NebulaHasher API = new();
+    int IHasher.GetIntegerHash(string text) => text.ComputeConstantHash();
+
+    long IHasher.GetLongHash(string text) => text.ComputeConstantLongHash();
 }

@@ -22,7 +22,7 @@ static file class GuesserSystem
         MetaWidgetOld widget = new();
 
         MetaWidgetOld inner = new();
-        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess && r.IsSpawnable), r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColordName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess && r.IsSpawnable), r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
         MetaWidgetOld.ScrollView scroller = new(new(6.6f, 3.8f), inner, true) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
         widget.Append(scroller);
 
@@ -174,7 +174,7 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
 
     private static void OpenFilterEditor()
     {
-        RoleOptionHelper.OpenFilterScreen("guessableFilter", Roles.AllRoles.Where(r => r.CanBeGuessDefault), r => r.CanBeGuess, r => r.CanBeGuessVariable!.CurrentValue = !r.CanBeGuess);
+        RoleOptionHelper.OpenFilterScreen("guessableFilter", Roles.AllRoles.Where(r => r.CanBeGuessDefault), r => r.CanBeGuess, (r, val) => r.CanBeGuessVariable!.CurrentValue = val,  r => r.CanBeGuessVariable!.CurrentValue = !r.CanBeGuess);
     }
 
     public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole

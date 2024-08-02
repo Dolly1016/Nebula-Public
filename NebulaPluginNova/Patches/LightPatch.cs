@@ -9,6 +9,7 @@ namespace Nebula.Patches;
 public class LightPatch
 {
     public static float lastRange = 1f;
+    public static float lastRangeForDive = 1f;
 
     public static bool Prefix(ref float __result, ShipStatus __instance, [HarmonyArgument(0)] NetworkedPlayerInfo? player)
     {
@@ -44,6 +45,13 @@ public class LightPatch
 
         lastRange -= (lastRange - rate).Delta(0.7f, 0.005f);
         __result = radiusRate * range * lastRange;
+
+        if (info?.IsDived ?? false)
+            lastRangeForDive = 0f;
+        else
+            lastRangeForDive += (1f - lastRangeForDive).Delta(6f, 0.005f);
+
+        __result *= lastRangeForDive;
 
         return false;
     }
@@ -84,5 +92,18 @@ public static class LightSourceRaycastRendererPatch
     public static void Postfix(LightSourceGpuRenderer __instance)
     {
         if (__instance.hits != origArray) __instance.hits = origArray;
+    }
+}
+
+[HarmonyPatch(typeof(OneWayShadows), nameof(OneWayShadows.IsIgnored))]
+public static class OneWayShadowsPatch
+{
+    public static bool Prefix(OneWayShadows __instance, ref bool __result, [HarmonyArgument(0)] LightSource lightSource)
+    {
+        var info = NebulaGameManager.Instance?.LocalPlayerInfo;
+        if (info == null) return true;
+
+        __result = (__instance.IgnoreImpostor && info.Role.HasImpostorVision) || __instance.RoomCollider.OverlapPoint(lightSource.transform.position);
+        return false;
     }
 }

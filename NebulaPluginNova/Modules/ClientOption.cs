@@ -9,7 +9,7 @@ using Virial.Runtime;
 namespace Nebula.Modules;
 
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.LoadAddons)]
+[NebulaPreprocess(PreprocessPhase.LoadAddons)]
 public class ClientOption
 {
     public enum ClientOptionType
@@ -20,7 +20,9 @@ public class ClientOption
         ForceSkeldMeetingSE,
         SpoilerAfterDeath,
         PlayLobbyMusic,
-        ButtonArrangement
+        ButtonArrangement,
+        ShowNoSLogoInLobby,
+        ShowOnlySpawnableAssignableOnFilter
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
@@ -43,7 +45,7 @@ public class ClientOption
 
     static public void ShowWebhookSetting(Action? onDetermine = null)
     {
-        var window = MetaScreen.GenerateWindow(new(4.2f, 2.3f), HudManager.InstanceExists ? HudManager.Instance.transform : null, Vector3.zero, true, true, true, true);
+        var window = MetaScreen.GenerateWindow(new(4.2f, 2.3f), HudManager.InstanceExists ? HudManager.Instance.transform : null, Vector3.zero, true, true, withMask: true);
 
         string GetCurrentWebhookString() => (Language.Translate("ui.discordWebhook.current") + ": ").Bold() + WebhookOption.urlShorten;
         bool SetWebhookStringFromClipboard() {
@@ -96,6 +98,7 @@ public class ClientOption
     public string DisplayValue => Language.Translate(selections[configEntry.Value]);
     public int Value => configEntry.Value;
     public Action? OnValueChanged;
+    public bool ShowOnClientSetting { get; set; } = true;
     public void Increament()
     {
         configEntry.Value = (configEntry.Value + 1) % selections.Length;
@@ -134,7 +137,8 @@ public class ClientOption
             "config.client.buttonArrangement.raiseOnlyLeft",
             "config.client.buttonArrangement.raiseBoth",
         }, 0);
-
+        new ClientOption(ClientOptionType.ShowNoSLogoInLobby, "showNebulaLogoInLobby", new string[] { "options.switch.off", "options.switch.on" }, 1);
+        new ClientOption(ClientOptionType.ShowOnlySpawnableAssignableOnFilter, "showOnlySpawnableAssignableOnFilter", new string[] { "options.switch.off", "options.switch.on" }, 0) { ShowOnClientSetting = false };
         ReflectProcessorAffinity();
     }
 
@@ -210,7 +214,7 @@ public static class StartOptionMenuPatch
         {
             var buttonAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(2.05f, 0.26f) };
             MetaWidgetOld nebulaWidget = new();
-            nebulaWidget.Append(ClientOption.AllOptions.Values, (option) => new MetaWidgetOld.Button(()=> {
+            nebulaWidget.Append(ClientOption.AllOptions.Values.Where(o => o.ShowOnClientSetting), (option) => new MetaWidgetOld.Button(()=> {
                 option.Increament();
                 SetNebulaWidget();
             }, buttonAttr) { RawText = option.DisplayName + " : " + option.DisplayValue }, 2, -1, 0, 0.55f);

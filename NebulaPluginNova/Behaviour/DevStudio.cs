@@ -762,7 +762,7 @@ public class DevStudio : MonoBehaviour
                 new MetaWidgetOld.Button(() =>
                 {
                     NebulaManager.Instance.HideHelpWidget();
-                    var screen = MetaScreen.GenerateWindow(new(7f, 4.5f), transform, UnityEngine.Vector3.zero, true, true, true);
+                    var screen = MetaScreen.GenerateWindow(new(7f, 4.5f), transform, UnityEngine.Vector3.zero, true, true);
 
                     Virial.Compat.Artifact<GUIScreen>? inner = null;
                     var scrollView = new GUIScrollView(Virial.Media.GUIAlignment.Left, new(7f, 4.5f), () => doc.Build(inner, nameSpace: addon) ?? GUIEmptyWidget.Default);
@@ -969,7 +969,7 @@ public class DevStudio : MonoBehaviour
 
     //Cosmetics
     private static readonly string[][] ImageContentTranslationKey = {
-        new string[]{ "devStudio.ui.cosmetics.contents.main", "devStudio.ui.cosmetics.contents.climbUp" },
+        new string[]{ "devStudio.ui.cosmetics.contents.main", "devStudio.ui.cosmetics.contents.climbUp", "devStudio.ui.cosmetics.contents.image" },
         new string[]{ "devStudio.ui.cosmetics.contents.back", "devStudio.ui.cosmetics.contents.climbUpBack" },
         new string[]{ "devStudio.ui.cosmetics.contents.flipped", "devStudio.ui.cosmetics.contents.climbDown" },
         new string[]{ "devStudio.ui.cosmetics.contents.backFlipped", "devStudio.ui.cosmetics.contents.climbDownBack" },
@@ -1066,7 +1066,7 @@ public class DevStudio : MonoBehaviour
             new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(2.5f, 0.4f) }) { RawText = costume.Package, PostBuilder = text=>myText=text },
             new MetaWidgetOld.HorizonalMargin(0.2f),
             new MetaWidgetOld.Button(() => {
-                var window = MetaScreen.GenerateWindow(new(3.3f, 2.4f), null, Vector3.zero, true, false, true);
+                var window = MetaScreen.GenerateWindow(new(3.3f, 2.4f), null, Vector3.zero, true, false);
                 MetaWidgetOld widget = new();
                 IEnumerable<CosmicPackage> packages = MoreCosmic.AllPackages.Values;
                 if (addon.MyBundle?.Packages != null) packages = packages.Concat(addon.MyBundle!.Packages.Where(package => !MoreCosmic.AllPackages.ContainsKey(package.Package)));
@@ -1131,16 +1131,23 @@ public class DevStudio : MonoBehaviour
 
         var widgets = widget.Split(0.35f, 0.1f, 0.55f);
 
-        SpriteRenderer? myRenderer = null;
+        SpriteRenderer? myRenderer = null, myAdaptive = null;
         widgets[0].Append(new MetaWidgetOld.VerticalMargin(0.9f));
         widgets[0].Append(new MetaWidgetOld.CustomWidget(new(2f, 4f), IMetaWidgetOld.AlignmentOption.Center, (transform, center) => {
             myRenderer = UnityHelper.CreateObject<SpriteRenderer>("Nameplate", transform, center);
             myRenderer.sprite = nameplate.Plate?.GetSprite(0);
+
+            myAdaptive = UnityHelper.CreateObject<SpriteRenderer>("NameplateAdaptive", myRenderer.transform, new(0f, 0f, nameplate.AdaptiveInFront ? -1f : 1f));
+            myAdaptive.sprite = nameplate.Adaptive?.GetSprite(0);
+            myAdaptive.sharedMaterial = HatManager.Instance.PlayerMaterial;
+            PlayerMaterial.SetColors(NebulaPlayerTab.PreviewColorId, myAdaptive);
         }));
 
         void UpdateNameplate()
         {
             myRenderer!.sprite = nameplate.Plate?.GetSprite(0);
+            myAdaptive!.sprite = nameplate.Adaptive?.GetSprite(0);
+            myAdaptive.transform.localPosition = new(0f, 0f, nameplate.AdaptiveInFront ? -1f : 1f);
         }
 
         Reference<TextField> titleRef = new(), authorRef = new();
@@ -1306,15 +1313,18 @@ public class DevStudio : MonoBehaviour
         void OpenVisorEditor(CosmicVisor visor) => OpenScreen(() => ShowCostumeEditorScreen(addon, visor,
             ("devStudio.ui.cosmetics.attributes.adaptive", nameof(CosmicVisor.Adaptive), null, null, null, -1),
             ("devStudio.ui.cosmetics.attributes.behindHat", nameof(CosmicVisor.BehindHat), null, null, null, -1),
-            ("devStudio.ui.cosmetics.attributes.idle", nameof(CosmicVisor.Main), null, nameof(CosmicVisor.Flip), null, 0),
-            ("devStudio.ui.cosmetics.attributes.move", nameof(CosmicVisor.Move), null, nameof(CosmicVisor.MoveFlip), null, 0),
+            ("devStudio.ui.cosmetics.attributes.backmostBack", nameof(CosmicVisor.BackmostBack), null, null, null, -1),
+            ("devStudio.ui.cosmetics.attributes.idle", nameof(CosmicVisor.Main), nameof(CosmicVisor.Back), nameof(CosmicVisor.Flip), nameof(CosmicVisor.BackFlip), 0),
+            ("devStudio.ui.cosmetics.attributes.move", nameof(CosmicVisor.Move), nameof(CosmicVisor.MoveBack), nameof(CosmicVisor.MoveFlip), nameof(CosmicVisor.MoveBackFlip), 0),
             ("devStudio.ui.cosmetics.attributes.climb", nameof(CosmicVisor.Climb), nameof(CosmicVisor.ClimbFlip), nameof(CosmicVisor.ClimbDown), nameof(CosmicVisor.ClimbDownFlip), 1),
-            ("devStudio.ui.cosmetics.attributes.enterVent", nameof(CosmicVisor.EnterVent), null, nameof(CosmicVisor.EnterVentFlip), null, 0),
-            ("devStudio.ui.cosmetics.attributes.exitVent", nameof(CosmicVisor.ExitVent), null, nameof(CosmicVisor.ExitVentFlip), null, 0),
+            ("devStudio.ui.cosmetics.attributes.enterVent", nameof(CosmicVisor.EnterVent), nameof(CosmicVisor.EnterVentBack), nameof(CosmicVisor.EnterVentFlip), nameof(CosmicVisor.EnterVentBackFlip), 0),
+            ("devStudio.ui.cosmetics.attributes.exitVent", nameof(CosmicVisor.ExitVent), nameof(CosmicVisor.ExitVentBack), nameof(CosmicVisor.ExitVentFlip), nameof(CosmicVisor.ExitVentBackFlip), 0),
             ("devStudio.ui.cosmetics.attributes.preview", nameof(CosmicVisor.Preview), null, null, null, 0)
             ));
         void OpenNameplateEditor(CosmicNameplate nameplate) => OpenScreen(() => ShowNameplateEditorScreen(addon, nameplate,
-            ("devStudio.ui.cosmetics.attributes.image", nameof(CosmicNameplate.Plate), null, null, null, 0)
+            ("devStudio.ui.cosmetics.attributes.adaptiveInFront", nameof(CosmicNameplate.AdaptiveInFront), null, null, null, -1),
+            ("devStudio.ui.cosmetics.attributes.image", nameof(CosmicNameplate.Plate), null, null, null, 0),
+            ("devStudio.ui.cosmetics.attributes.adaptiveImage", nameof(CosmicNameplate.Adaptive), null, null, null, 2)
             ));
         void OpenPackageEditor(CosmicPackage package) => OpenScreen(() => ShowPackageEditorScreen(addon, package));
 
@@ -1382,7 +1392,7 @@ public class DevStudio : MonoBehaviour
 
             button.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked += () =>
             {
-                var confirmWindow = MetaScreen.GenerateWindow(new Vector2(2f, 2.7f), null, Vector3.zero, true, true, true, true);
+                var confirmWindow = MetaScreen.GenerateWindow(new Vector2(2f, 2.7f), null, Vector3.zero, true, true, withMask: true);
                 confirmWindow.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center,
                     GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBold), name),
                     GUI.API.VerticalMargin(0.4f),

@@ -1,4 +1,5 @@
 ﻿using Hazel;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nebula.Game.Statistics;
 using System.Text;
 using Virial.Game;
@@ -223,6 +224,25 @@ public static class HeliSystemTypeDeterioratePatch
         if (NebulaGameManager.Instance?.LocalFakeSabotage?.HasFakeSabotage(SystemTypes.HeliSabotage) ?? false)
         {
             __instance.Countdown -= Time.deltaTime;
+            return false;
+        }
+        return true;
+    }
+}
+
+
+[HarmonyPatch(typeof(SabotageSystemType), nameof(SabotageSystemType.UpdateSystem))]
+public static class SwitchSabotagePatch
+{
+    static bool Prefix(SabotageSystemType __instance, [HarmonyArgument(1)] MessageReader msgReader)
+    {
+        if (!(__instance.Timer > 0f) && !MeetingHud.Instance && (SystemTypes)msgReader.PeekByte() == SystemTypes.Electrical && AmongUsClient.Instance.AmHost)
+        {
+            __instance.IsDirty = true;
+            byte b = (byte)(System.Random.Shared.Next((1 << 6) - 1) + 1);
+            ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Electrical, (byte)(b | 128));
+            __instance.Timer = 30f;
+            __instance.IsDirty = true;
             return false;
         }
         return true;

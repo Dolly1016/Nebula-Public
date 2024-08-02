@@ -69,6 +69,13 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             return false;
         }
 
+        public bool IsSameTeam(GamePlayer? player)
+        {
+            if (IsMySidekick(player)) return true;
+            if (player?.Role is Instance jackal && jackal.JackalTeamId == JackalTeamId) return true;
+            return false;
+        }
+
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
 
@@ -81,7 +88,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 bool hasSidekick = false;
 
-                var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => p.PlayerId != MyPlayer.PlayerId && !p.IsDead && !IsMySidekick(p), null, Impostor.Impostor.CanKillHidingPlayerOption));
+                var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !IsMySidekick(p), null, Impostor.Impostor.CanKillHidingPlayerOption));
 
                 SpriteRenderer? lockSprite = null;
                 TMPro.TextMeshPro? leftText = null;
@@ -194,7 +201,13 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             foreach (var player in NebulaGameManager.Instance!.AllPlayerInfo())
             {
                 if (player.IsDead) continue;
-                if (IsMySidekick(player)) player.Unbox().RpcInvokerSetRole(Jackal.MyRole, [JackalTeamId, killingTotal]).InvokeSingle();
+                if (IsMySidekick(player))
+                {
+                    using(RPCRouter.CreateSection("Sidekick")){
+                        player.Unbox().RpcInvokerSetRole(Jackal.MyRole, [JackalTeamId, killingTotal]).InvokeSingle();
+                        player.Unbox().RpcInvokerUnsetModifier(SidekickModifier.MyRole).InvokeSingle();
+                    }
+                }
 
             }
         }
@@ -252,7 +265,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
     static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sidekick.killCoolDown", CoolDownType.Relative, (2.5f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
 
     static public Sidekick MyRole = new Sidekick();
-    bool DefinedSingleAssignable.IsSpawnable { get => (Jackal.MyRole as DefinedSingleAssignable).IsSpawnable && Jackal.CanCreateSidekickOption && !IsModifierOption; }
+    bool ISpawnable.IsSpawnable { get => (Jackal.MyRole as DefinedSingleAssignable).IsSpawnable && Jackal.CanCreateSidekickOption && !IsModifierOption; }
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {

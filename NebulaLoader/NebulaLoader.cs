@@ -145,7 +145,8 @@ public class NebulaLoader : BasePlugin
                 long size = GetVanillaSize();
                 if (size == -1)
                 {
-                    Log.LogWarning("Assembly Is Not Found.\nNoS will not load to the game.");
+                    Log.LogWarning("Assembly Is Not Found.\nAttempts to load an existing NoS.");
+                    TryLoadNebula(dllFilePath);
                     return;
                 }
                 Log.LogInfo("Assembly Size: " + size.ToString());
@@ -160,7 +161,8 @@ public class NebulaLoader : BasePlugin
 
                 if (assemblyCandidates.Length == 0 && !IgnoringVersionConsistencyOnUpdate.Value)
                 {
-                    Log.LogWarning("Unknown assembly detected.\nNoS will not load to the game.");
+                    Log.LogWarning("Unknown assembly detected.\nAttempts to load an existing NoS.");
+                    TryLoadNebula(dllFilePath);
                     return;
                 }
 
@@ -176,7 +178,8 @@ public class NebulaLoader : BasePlugin
 
                 if (candidates.Length == 0)
                 {
-                    Log.LogWarning("There is no NoS that can be implemented in the current environment.\nNoS will not load to the game.");
+                    Log.LogWarning("There is no NoS that can be implemented in the current environment.\nAttempts to load an existing NoS.");
+                    TryLoadNebula(dllFilePath);
                     return;
                 }
 
@@ -211,6 +214,11 @@ public class NebulaLoader : BasePlugin
             }
         }
 
+        TryLoadNebula(dllFilePath);
+    }
+
+    static void TryLoadNebula(string dllFilePath)
+    {
         string dllFullFilePath = System.IO.Path.GetFullPath(dllFilePath);
         if (System.IO.File.Exists(dllFullFilePath))
         {

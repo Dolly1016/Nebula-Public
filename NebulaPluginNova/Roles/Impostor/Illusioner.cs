@@ -1,6 +1,7 @@
 ﻿using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Game;
 using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
@@ -50,7 +51,7 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                     NebulaGameManager.Instance!.AllPlayerInfo().Where(p => (p.MyKiller?.AmOwner ?? false) && (val & (1 << p.PlayerId)) != 0).Count() > 0;
                 });
 
-                NetworkedPlayerInfo.PlayerOutfit? sample = null;
+                Outfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
@@ -59,12 +60,12 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 sampleButton.Availability = (button) => MyPlayer.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead;
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker.CurrentTarget?.Unbox().GetOutfit(SampleOriginalLookOption ? 35 : 75) ?? null;
-                    if (sample != null) acTokenChallenge.Value |= 1 << sample.ColorId;
+                    sample = sampleTracker.CurrentTarget?.GetOutfit(SampleOriginalLookOption ? 35 : 75) ?? null;
+                    if (sample != null) acTokenChallenge.Value |= 1 << sample.outfit.ColorId;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
-                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample, sampleButton.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample.outfit, sampleButton.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
@@ -113,11 +114,11 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 morphButton.SetLabel("morph");
 
                 paintButton = Bind(new ModAbilityButton());
-                paintButton.SetSprite(Morphing.Instance.MorphButtonSprite.GetSprite());
+                paintButton.SetSprite(Painter.Instance.PaintButtonSprite.GetSprite());
                 paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
                 paintButton.Visibility = (button) => !MyPlayer.IsDead;
                 paintButton.OnClick = (button) => {
-                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, sample ?? MyPlayer.Unbox().GetOutfit(75))));
+                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, sample ?? MyPlayer.GetOutfit(75))));
                     if (TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else

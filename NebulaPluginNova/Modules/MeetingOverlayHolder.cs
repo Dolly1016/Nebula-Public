@@ -14,7 +14,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
     static Image NotificationSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingNotificationDot.png", 135f);
     static public Image[] IconsSprite = Helpers.Sequential(IconSprite.Length).Select(num => new WrapSpriteLoader(()=>IconSprite.GetSprite(num))).ToArray();
 
-    List<(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color,bool isNew)> icons = new();
+    List<(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color,Reference<bool> isNew)> icons = new();
     Transform? shower;
 
     //常駐エンティティ
@@ -27,7 +27,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
 
     public void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color)
     {
-        icons.Add((overlay, icon, color, true));
+        icons.Add((overlay, icon, color, new Reference<bool>() { Value = true }));
         Generate(icons.Count - 1);
     }
     public void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, Virial.Color color) => RegisterOverlay(overlay, icon, color.ToUnityColor());
@@ -48,7 +48,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
 
         var notification = UnityHelper.CreateObject<SpriteRenderer>("Notification", renderer.transform, new(0.19f, 0.19f, -1.5f));
         notification.sprite = NotificationSprite.GetSprite();
-        notification.gameObject.SetActive(icon.isNew);
+        notification.gameObject.SetActive(icon.isNew.Value);
 
         IEnumerator CoAppear()
         {
@@ -68,14 +68,14 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
             renderer.transform.localScale = Vector3.one;
         }
 
-        if (icon.isNew) NebulaManager.Instance.StartCoroutine(CoAppear().WrapToIl2Cpp());
+        if (icon.isNew.Value) NebulaManager.Instance.StartCoroutine(CoAppear().WrapToIl2Cpp());
 
         var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
         collider.isTrigger = true;
         collider.size = new(0.4f, 0.4f);
 
         var button = renderer.gameObject.SetUpButton(false, [renderer], icon.color);
-        button.OnMouseOver.AddListener(() => { VanillaAsset.PlayHoverSE(); NebulaManager.Instance.SetHelpWidget(button, icon.overlay.Invoke()); notification.gameObject.SetActive(false); });
+        button.OnMouseOver.AddListener(() => { VanillaAsset.PlayHoverSE(); NebulaManager.Instance.SetHelpWidget(button, icon.overlay.Invoke()); notification.gameObject.SetActive(false); icon.isNew.Set(false); });
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
     }
 

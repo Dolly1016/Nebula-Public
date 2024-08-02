@@ -2,6 +2,7 @@
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
+using UnityEngine;
 using static Il2CppSystem.Xml.XmlWellFormedWriter.AttributeValueCache;
 
 namespace Nebula.Utilities;
@@ -92,18 +93,19 @@ public static class AmongUsUtil
     public static float VanillaKillCoolDown => GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
     public static float VanillaKillDistance => GameManager.Instance.LogicOptions.GetKillDistance();
     public static bool InCommSab => PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer);
+    public static bool InAnySab => PlayerTask.PlayerHasTaskOfType<SabotageTask>(PlayerControl.LocalPlayer);
     public static PoolablePlayer PoolablePrefab => HudManager.Instance.IntroPrefab.PlayerPrefab;
-    public static PoolablePlayer GetPlayerIcon(NetworkedPlayerInfo.PlayerOutfit outfit, Transform parent,Vector3 position,Vector3 scale,bool flip = false)
+    public static PoolablePlayer GetPlayerIcon(NetworkedPlayerInfo.PlayerOutfit outfit, Transform? parent,Vector3 position,Vector3 scale,bool flip = false, bool includePet = true)
     {
         var player = GameObject.Instantiate(PoolablePrefab);
 
-        player.transform.SetParent(parent);
+        if(parent != null)player.transform.SetParent(parent);
 
         player.name = outfit.PlayerName;
         player.SetFlipX(flip);
         player.transform.localPosition = position;
         player.transform.localScale = scale;
-        player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, true);
+        player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, includePet);
         player.ToggleName(false);
         player.SetNameColor(Color.white);
         
@@ -130,33 +132,43 @@ public static class AmongUsUtil
 
         return player;
     }
-    public static void PlayCustomFlash(Color color, float fadeIn, float fadeOut, float maxAlpha = 0.5f)
+    public static void PlayCustomFlash(Color color, float fadeIn, float fadeOut, float maxAlpha = 0.5f, float maxDuration = 0f)
     {
         float duration = fadeIn + fadeOut;
 
         var flash = GameObject.Instantiate(HudManager.Instance.FullScreen, HudManager.Instance.transform);
-        flash.color = color;
+        flash.color = color.AlphaMultiplied(0f);
         flash.enabled = true;
         flash.gameObject.active = true;
 
-        HudManager.Instance.StartCoroutine(Effects.Lerp(duration, new Action<float>((p) =>
+        IEnumerator CoPlayFlash()
         {
-            if (p < (fadeIn / duration))
+            float t;
+            
+            t = 0f;
+            while(t < fadeIn)
             {
-                if (flash != null)
-                    flash.color = new Color(color.r, color.g, color.b, color.a * Mathf.Clamp01(maxAlpha * p / (fadeIn / duration)));
+                flash.color = color.AlphaMultiplied(Mathf.Clamp01(maxAlpha * t / fadeIn));
+                t += Time.deltaTime;
+                yield return null;
             }
-            else
+            flash.color = color.AlphaMultiplied(Mathf.Clamp01(maxAlpha));
+
+            yield return Effects.Wait(maxDuration);
+
+            t = 0f;
+            while (t < fadeOut)
             {
-                if (flash != null)
-                    flash.color = new Color(color.r, color.g, color.b, color.a * Mathf.Clamp01(maxAlpha * (1 - p) / (fadeOut / duration)));
+                flash.color = color.AlphaMultiplied(Mathf.Clamp01(maxAlpha * (1f - t / fadeIn)));
+                t += Time.deltaTime;
+                yield return null;
             }
-            if (p == 1f && flash != null)
-            {
-                flash.enabled = false;
-                GameObject.Destroy(flash.gameObject);
-            }
-        })));
+
+            flash.enabled = false;
+            GameObject.Destroy(flash.gameObject);
+        }
+
+        NebulaManager.Instance.StartCoroutine(CoPlayFlash().WrapToIl2Cpp());
     }
 
     public static void PlayFlash(Color color)
@@ -388,11 +400,11 @@ public static class AmongUsUtil
         return null;
     }
 
-    public static void SetEmergencyCoolDown(float coolDown, bool addOptionCoolDown)
+    public static void SetEmergencyCoolDown(float coolDown, bool addVanillaCoolDown, bool addExtraCoolDown = true)
     {
-        if (addOptionCoolDown) coolDown += (float)GameManager.Instance.LogicOptions.GetEmergencyCooldown();
+        if (addVanillaCoolDown) coolDown += (float)GameManager.Instance.LogicOptions.GetEmergencyCooldown();
 
-        if ((NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0) < GeneralConfigurations.EarlyExtraEmergencyCoolDownCondOption)
+        if (addExtraCoolDown && (NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0) < GeneralConfigurations.EarlyExtraEmergencyCoolDownCondOption)
             coolDown += GeneralConfigurations.EarlyExtraEmergencyCoolDownOption;
 
         ShipStatus.Instance.EmergencyCooldown = coolDown;
@@ -410,5 +422,77 @@ public static class AmongUsUtil
 
 
         if (playSound) SoundManager.Instance.PlaySoundImmediate(notifier.settingsChangeSound, false, 1f, 1f, null);
+    }
+
+    public static (GameObject obj, NoisemakerArrow arrow) InstantiateNoisemakerArrow(Vector2 targetPos, bool withSound = false, float? hue = null)
+    {
+        var noisemaker = AmongUsUtil.GetRolePrefab<NoisemakerRole>();
+        if (noisemaker != null)
+        {
+            if (withSound && Constants.ShouldPlaySfx())
+            {
+                SoundManager.Instance.PlayDynamicSound("NoisemakerAlert", noisemaker.deathSound, false, (DynamicSound.GetDynamicsFunction)((source, dt) =>
+                {
+                    if (!PlayerControl.LocalPlayer)
+                    {
+                        source.volume = 0f;
+                        return;
+                    }
+                    source.volume = 1f;
+                    Vector2 truePosition = PlayerControl.LocalPlayer.GetTruePosition();
+                    source.volume = SoundManager.GetSoundVolume(targetPos, truePosition, 7f, 50f, 0.5f);
+                }), SoundManager.Instance.SfxChannel);
+                VibrationManager.Vibrate(1f, PlayerControl.LocalPlayer.GetTruePosition(), 7f, 1.2f, VibrationManager.VibrationFalloff.None, null, false);
+            }
+            GameObject gameObject = GameObject.Instantiate<GameObject>(noisemaker.deathArrowPrefab, Vector3.zero, Quaternion.identity);
+            var deathArrow = gameObject.GetComponent<NoisemakerArrow>();
+            deathArrow.SetDuration(3f);
+            deathArrow.gameObject.SetActive(true);
+            deathArrow.target = targetPos;
+
+            if (hue.HasValue)
+            {
+                deathArrow.GetComponentsInChildren<SpriteRenderer>().Do(renderer =>
+                {
+                    renderer.material = new Material(NebulaAsset.HSVShader);
+                    renderer.sharedMaterial.SetFloat("_Hue", 314);
+                });
+            }
+            return (gameObject, deathArrow);
+        }
+
+        return (null, null)!;
+    }
+
+    public static void Ping(Vector2[] pos, bool smallenNearPing, bool playSE = true, float pitch = 1f)
+    {
+        if (!HudManager.InstanceExists) return;
+
+        var prefab = GameManagerCreator.Instance.HideAndSeekManagerPrefab.PingPool.Prefab.CastFast<PingBehaviour>();
+
+        PingBehaviour[] pings = new PingBehaviour[pos.Length];
+        int i = 0;
+        foreach (var p in pos)
+        {
+            var ping = GameObject.Instantiate(prefab);
+            ping.target = p;
+            ping.AmSeeker = smallenNearPing;
+            ping.UpdatePosition();
+            ping.gameObject.SetActive(true);
+
+            ping.image.enabled = true;
+            if (playSE) SoundManager.Instance.PlaySound(ping.soundOnEnable, false, 1f, null).pitch = pitch;
+
+            pings[i++] = ping;
+        }
+
+        IEnumerator GetEnumarator()
+        {
+            yield return new WaitForSeconds(2f);
+
+            foreach (var p in pings) GameObject.Destroy(p.gameObject);
+        }
+
+        HudManager.Instance.StartCoroutine(GetEnumarator().WrapToIl2Cpp());
     }
 }

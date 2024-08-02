@@ -8,7 +8,7 @@ public class JsonSerializableField : Attribute
 {
     public bool SkipSerializeIfIsNull { get; private init; } = false;
 
-    public JsonSerializableField(bool skipSerializeIfIsNull = false)
+    public JsonSerializableField(bool skipSerializeIfIsNull = false, bool withTypeName = false)
     {
         SkipSerializeIfIsNull = skipSerializeIfIsNull;
     }
@@ -63,6 +63,19 @@ public static class JsonStructure
             return int.Parse(trimmed);
         if (type.Equals(typeof(long)))
             return long.Parse(trimmed);
+        if (type.Equals(typeof(char)))
+        {
+            if (json.Length >= 2 && json.StartsWith("%"))
+            {
+                try
+                {
+                    return (char)Convert.ToInt32(json.Substring(1), 16);
+                }catch (Exception) {
+                    return (char)0;
+                }
+            }
+            return char.Parse(trimmed);
+        }
         if (type.Equals(typeof(byte)))
             return byte.Parse(trimmed);
         if (type.Equals(typeof(string)))
@@ -94,7 +107,7 @@ public static class JsonStructure
             if (current == null) break;
 
             addMethod.Invoke(instance, new object?[] { Deserialize(current, containedType) });
-
+            
             if (follower == null) break;
             json = follower;
         }
@@ -334,8 +347,10 @@ public static class JsonStructure
         {
             if (!f.IsDefined(typeof(JsonSerializableField))) continue;
 
+            var attr = f.GetCustomAttribute<JsonSerializableField>();
+
             var val = f.GetValue(obj);
-            if (val == null && f.GetCustomAttribute<JsonSerializableField>()!.SkipSerializeIfIsNull) continue;
+            if (val == null && attr!.SkipSerializeIfIsNull) continue;
 
             if (!isFirst) result += ",";
             result += "\n\t";

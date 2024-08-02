@@ -4,7 +4,7 @@ using Virial.Text;
 
 namespace Nebula.Utilities;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
+[NebulaPreprocess(PreprocessPhase.FixStructure)]
 public class TranslatableTag : CommunicableTextTag
 {
     static public List<TranslatableTag> AllTag = new();

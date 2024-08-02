@@ -27,7 +27,7 @@ public class ModTitleShower : MonoBehaviour
         text.transform.localPosition = new Vector3(0, player ? 0.245f : 0.155f, -0.01f);
         text.fontSize = player ? 1.7f : 1.2f;
 
-        text.text = "TEST";
+        text.text = "";
 
         collider = UnityHelper.CreateObject<BoxCollider2D>("Button", text.transform, Vector3.zero);
         collider.isTrigger = true;

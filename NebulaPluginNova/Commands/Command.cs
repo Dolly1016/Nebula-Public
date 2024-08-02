@@ -106,7 +106,7 @@ public class CommandResource : INebulaResource
     ICommand? INebulaResource.AsCommand() => command;
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
+[NebulaPreprocess(PreprocessPhase.PostLoadAddons)]
 public class CommandManager
 {
     private class AddonCommand : ICommand, INebulaResource

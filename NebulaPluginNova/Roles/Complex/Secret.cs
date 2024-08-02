@@ -132,6 +132,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
             }
         }
 
+        [OnlyMyPlayer]
         public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
             if (MyPlayer.Tasks.IsCompletedCurrentTasks)
@@ -154,7 +155,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
 
     public class EvilInstance : RuntimeAssignableTemplate, RuntimeRole
     {
-        DefinedRole RuntimeRole.Role => MyNiceRole;
+        DefinedRole RuntimeRole.Role => MyEvilRole;
         public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
             this.savedArgs = savedArgs;

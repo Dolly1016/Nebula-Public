@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
+using UnityEngine;
 using UnityEngine.Rendering;
 using Virial.Media;
 using static Nebula.Modules.IMetaWidgetOld;
@@ -1149,6 +1150,21 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         catch { }
     }
 
+    static public PassiveButton InstantiateCloseButton(MetaScreen target, Vector3 localPos) {
+        var collider = UnityHelper.CreateObject<CircleCollider2D>("CloseButton", target.transform.parent, localPos);
+        collider.isTrigger = true;
+        collider.gameObject.layer = LayerExpansion.GetUILayer();
+        collider.radius = 0.25f;
+        SpriteRenderer? renderer = null;
+        renderer = collider.gameObject.AddComponent<SpriteRenderer>();
+        renderer.sprite = VanillaAsset.CloseButtonSprite;
+        var button = collider.gameObject.SetUpButton(true, renderer);
+        var targetObj = target.combinedObject;
+        button.OnClick.AddListener(() => GameObject.Destroy(targetObj));
+
+        return button;
+    }
+
     static public MetaScreen GenerateScreen(Vector2 size,Transform? parent,Vector3 localPos,bool withBackground,bool withBlackScreen,bool withClickGuard)
     {
         var window = UnityHelper.CreateObject("MetaWindow", parent, localPos);
@@ -1184,24 +1200,32 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         return screen;
     }
 
-    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen,bool closeOnClickOutside,bool withCloseButton = true, bool withMask = false)
+    /// <summary>
+    /// 枠線および不透明な黒い領域を持たない透明ウィンドウを生成します。
+    /// このウィンドウはほかのウィンドウと同様に順番に整列します。
+    /// </summary>
+    /// <param name="size"></param>
+    /// <param name="parent"></param>
+    /// <param name="localPos"></param>
+    /// <param name="closeButtonPos"></param>
+    /// <param name="withBlackScreen"></param>
+    /// <returns></returns>
+    static public MetaScreen GenerateBlankWindow(Vector2 size, Transform? parent, Vector3 localPos, Vector2 closeButtonPos, bool withBlackScreen)
+    {
+        var screen = GenerateScreen(size, parent, localPos, true, withBlackScreen, true);
+        var obj = screen.transform.parent.gameObject;
+        var button = InstantiateCloseButton(screen, closeButtonPos);
+        NebulaManager.Instance.RegisterUI(obj, button);
+        return screen;
+    }
+
+    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen,bool closeOnClickOutside, bool withMask = false)
     {
         var screen = GenerateScreen(size, parent, localPos, true, withBlackScreen, true);
         
         var obj = screen.transform.parent.gameObject;
 
-        var collider = UnityHelper.CreateObject<CircleCollider2D>("CloseButton", obj.transform, new Vector3(-size.x / 2f - 0.6f, size.y / 2f + 0.25f, 0f));
-        collider.isTrigger = true;
-        collider.gameObject.layer = LayerExpansion.GetUILayer();
-        collider.radius = 0.25f;
-        SpriteRenderer? renderer = null;
-        if (withCloseButton)
-        {
-            renderer = collider.gameObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = VanillaAsset.CloseButtonSprite;
-        }
-        var button = collider.gameObject.SetUpButton(true, renderer);
-        button.OnClick.AddListener(() => GameObject.Destroy(obj));
+        var button = InstantiateCloseButton(screen, new Vector3(-size.x / 2f - 0.6f, size.y / 2f + 0.25f, 0f));
         NebulaManager.Instance.RegisterUI(obj, button);
 
         if (closeOnClickOutside)

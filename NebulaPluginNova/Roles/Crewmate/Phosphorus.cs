@@ -13,7 +13,7 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
 {
     private Phosphorus():base("phosphorus", new(249,188,81), RoleCategory.CrewmateRole, Crewmate.MyTeam, [NumOfLampsOption, PlaceCoolDownOption, LampCoolDownOption, LampDurationOption, LampStrengthOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
-        //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Phosphorus.png");
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Phosphorus.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
@@ -28,7 +28,7 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
 
     private static IDividedSpriteLoader lanternSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Lantern.png", 100f, 4);
 
-    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
+    [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class Lantern : NebulaSyncStandardObject
     {
         public static string MyGlobalTag = "LanternGlobal";

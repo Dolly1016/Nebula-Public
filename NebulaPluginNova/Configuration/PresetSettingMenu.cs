@@ -44,13 +44,13 @@ public class PresetSettingMenu : MonoBehaviour
                                 NebulaSettingMenu.Instance?.OpenFirstPage();
                             }
                             catch { }
+                        }
 
-                            if (preset.IsOldType || preset.IsUnknownType)
-                            {
-                                MetaUI.ShowYesOrNoDialog(HudManager.Instance.transform, Load, () => { }, Language.Translate(preset.IsOldType ? "preset.confirmLoadOld" : "preset.confirmLoadUnknown"), true);
-                            }
-                            else Load();
-                        }    
+                        if (preset.IsOldType || preset.IsUnknownType)
+                        {
+                            MetaUI.ShowYesOrNoDialog(HudManager.Instance.transform, Load, () => { }, Language.Translate(preset.IsOldType ? "preset.confirmLoadOld" : "preset.confirmLoadUnknown"), true);
+                        }
+                        else Load();
                     }, elem => NebulaManager.Instance.SetHelpWidget(elem.uiElement, preset.Detail), elem => NebulaManager.Instance.HideHelpWidgetIf(elem.uiElement)));
             }
             

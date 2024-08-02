@@ -306,7 +306,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     //天界視点フラグ
     public bool CanBeSpectator { get; private set; }
     public bool CanSeeAllInfo => CanBeSpectator && (ClientOption.AllOptions[ClientOption.ClientOptionType.SpoilerAfterDeath].Value == 1 || !HudManager.InstanceExists);
-    public void ChangeToSpectator()
+    public void ChangeToSpectator(bool tryGhostAssignment = true)
     {
         if (CanBeSpectator) return;
         CanBeSpectator = true;
@@ -513,8 +513,15 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
         {
-            KillButtonTracker ??= ObjectTrackers.ForPlayer(null, NebulaGameManager.Instance!.LocalPlayerInfo, p => !p.AmOwner && !p.IsDead && !p.Unbox().IsInvisible && !p.IsImpostor && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
-            HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
+            if (NebulaGameManager.Instance?.LocalPlayerInfo?.IsDived ?? false)
+            {
+                HudManager.Instance.KillButton.SetTarget(null);
+            }
+            else
+            {
+                KillButtonTracker ??= ObjectTrackers.ForPlayer(null, NebulaGameManager.Instance!.LocalPlayerInfo, p => ObjectTrackers.ImpostorKillPredicate(p) && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
+                HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
+            }
         }
 
     }

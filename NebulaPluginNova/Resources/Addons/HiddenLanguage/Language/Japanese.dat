@@ -74,6 +74,10 @@
 "achievement.mayor.another1.goal" : "すべての票を保持したまま死亡する。"
 "achievement.mayor.another1.cond" : "3回以上会議に参加している"
 
+"achievement.mayor.common2.title" : "秘すれば花"
+"achievement.mayor.common2.goal" : "初回の会議から連続して3回以上、一票だけの投票を続けて<br>メイヤーの存在を秘匿する。"
+"achievement.mayor.common2.cond" : "秘匿ののち、1回以上複数票を投じて誰かを追放する"
+
 "achievement.mayor.challenge.title" : "孤立無援の為政者"
 "achievement.mayor.challenge.goal" : "自身の票だけで敵陣営のプレイヤーを追放に付させる。"
 "achievement.mayor.challenge.cond" : "追放が有利にはたらく相手(ジェスター)は除く"
@@ -358,6 +362,11 @@
 "achievement.paparazzo.common4.goal" : "死体とそのキルの犯人を一枚に収める。"
 "achievement.paparazzo.common4.cond" : ""
 
+"achievement.paparazzo.another1.title" : "インポスター・イン・ポスター"
+"achievement.paparazzo.another1.goal" : "インポスターがパパラッチに撮影され、会議で写真を開示される。"
+"achievement.paparazzo.another1.cond" : ""
+"achievement.paparazzo.another1.flavor" : "Say Hello! 3年前のあなたへ"
+
 "achievement.paparazzo.challenge.title" : "揺れる輿論"
 "achievement.paparazzo.challenge.goal" : "写真を公開した会議内で、何らかの理由で4人以上死亡する。"
 "achievement.paparazzo.challenge.cond" : "自身がその会議で死亡してしまった場合は無効"
@@ -511,6 +520,11 @@
 "achievement.tanabata.title" : "天の川渡航不能"
 "achievement.tanabata.goal" : "昇降機を使用中のプレイヤーを、斧かスナイパーライフルでキルする。"
 "achievement.tanabata.cond" : "7月限定+Airship限定"
+
+"achievement.watermelon.title" : "スイカ・スプラッタ"
+"achievement.watermelon.goal" : "The Fungleの浜辺で緑色か黒色の<b>ブラッディ</b>をキルする。"
+"achievement.watermelon.cond" : "8月限定"
+"achievement.watermelon.flavor" : "ほのかに甘い、赤の味。"
 
 "achievement.christmas.title" : "末永くご爆発下さい"
 "achievement.christmas.goal" : "ラバーズで追放される。"

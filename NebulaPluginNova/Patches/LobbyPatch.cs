@@ -6,6 +6,12 @@ using Virial.Game;
 using Nebula.Modules;
 using Il2CppSystem.Collections;
 using UnityEngine.SceneManagement;
+using Virial.Assignable;
+using Nebula.Roles;
+using Virial.Events.Game;
+using TMPro;
+using Nebula.Modules.GUIWidget;
+using UnityEngine.Rendering;
 
 namespace Nebula.Patches;
 
@@ -14,6 +20,7 @@ namespace Nebula.Patches;
 public class GameStartManagerUpdatePatch
 {
     public static bool LastChecked = false;
+    public static float ShareOnLobbyTimer = 10f;
     public static bool Prefix(GameStartManager __instance)
     {
         if (!GameData.Instance) return false;
@@ -272,6 +279,31 @@ public class DelayPlayDropshipAmbiencePatch
             __instance.StopAllCoroutines();
             __instance.StartCoroutine(CoDelayPlayWithoutMusic(__instance).WrapToIl2Cpp());
         }
+
+
+        var logoHolder = UnityHelper.CreateObject("NebulaLogoHolder", HudManager.Instance.transform, new(-4.15f, 2.75f));
+        logoHolder.AddComponent<SortingGroup>();
+        var logo = UnityHelper.CreateObject<SpriteRenderer>("NebulaLogo", logoHolder.transform, Vector3.zero);
+        logo.sprite = Citations.NebulaOnTheShip.LogoImage!.GetSprite();
+        logo.color = new(1f, 1f, 1f, 0.75f);
+        logo.transform.localScale = new(0.45f, 0.45f, 1f);
+
+        var versionText = new NoSGUIText(Virial.Media.GUIAlignment.Right, GUI.API.GetAttribute(Virial.Text.AttributeAsset.VersionShower), new RawTextComponent(NebulaPlugin.VisualVersion)) { PostBuilder = t => t.color = new(1f, 1f, 1f, 0.75f) };
+        var instantiatedVersionText = versionText.Instantiate(new Virial.Media.Anchor(new(1f,0.5f), new(0f,0f,0f)), new(100f,100f), out _)!;
+        instantiatedVersionText.transform.SetParent(logoHolder.transform, false);
+        instantiatedVersionText.transform.localPosition += new Vector3(1f, -0.26f, -0.1f);
+        
+
+        System.Collections.IEnumerator CoUpdateLogo()
+        {
+            while (logoHolder)
+            {
+                logoHolder.SetActive(ClientOption.AllOptions[ClientOption.ClientOptionType.ShowNoSLogoInLobby].Value == 1);
+                yield return null;
+            }
+        }
+        __instance.StartCoroutine(CoUpdateLogo().WrapToIl2Cpp());
+        GameOperatorManager.Instance!.Register<GameStartEvent>(_ => GameObject.Destroy(logoHolder), Virial.NebulaAPI.CurrentGame!);
     }
 }
 
@@ -282,5 +314,41 @@ public class LobbyViewSettingsPanePatch
     {
         //役職タブを隠す
         __instance.rolesTabButton.gameObject.SetActive(false);
+    }
+}
+
+[HarmonyPatch(typeof(ChatNotification), nameof(ChatNotification.Awake))]
+public class ChatNotificationPatch
+{
+    public static void Postfix(ChatNotification __instance)
+    {
+        NebulaManager.Instance.ScheduleDelayAction(() =>
+        {
+            __instance.maskArea.gameObject.SetActive(false);
+            __instance.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
+
+            __instance.player.gameObject.AddComponent<SortingGroup>();
+            foreach(var renderer in __instance.player.GetComponentsInChildren<SpriteRenderer>())
+            {
+                if (!renderer.gameObject.TryGetComponent<ZOrderedSortingGroup>(out _))
+                {
+                    renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                    var group = renderer.gameObject.AddComponent<ZOrderedSortingGroup>();
+                    group.SetConsiderParentsTo(__instance.player.transform);
+                }
+            }
+            var mask = UnityHelper.CreateObject<SpriteMask>("Mask", __instance.player.gameObject.transform, new(0f,1.3f,0f));
+            mask.sprite = VanillaAsset.FullScreenSprite;
+            mask.transform.localScale = new Vector3(10f, 3f);
+        });
+    }
+}
+
+[HarmonyPatch(typeof(ChatNotification), nameof(ChatNotification.SetUp))]
+public class ChatNotificationSetUpPatch
+{
+    public static void Postfix(ChatNotification __instance)
+    {
+        foreach (var renderer in __instance.player.GetComponentsInChildren<SpriteRenderer>()) renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
     }
 }

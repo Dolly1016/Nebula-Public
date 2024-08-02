@@ -1,11 +1,14 @@
-﻿using Nebula.Behaviour;
+﻿using Hazel.Dtls;
+using Nebula.Behaviour;
 using Nebula.Game.Statistics;
+using UnityEngine.SceneManagement;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
 using Virial.Helpers;
+using static UnityEngine.ProBuilder.AutoUnwrapSettings;
 
 namespace Nebula.Roles.Impostor;
 
@@ -25,7 +28,7 @@ public class DestroyerAssets
 }
 public class Destroyer : DefinedRoleTemplate, DefinedRole
 {
-    private Destroyer() : base("destroyer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [KillCoolDownOption, PhasesOfDestroyingOption, KillSEStrengthOption,LeaveKillEvidenceOption]) {
+    private Destroyer() : base("destroyer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [KillCoolDownOption, PhasesOfDestroyingOption, KillSEStrengthOption,LeaveKillEvidenceOption, CanReportKillSceneOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagBeginner);
     }
 
@@ -35,7 +38,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
     static private IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.phasesOfDestroying", (1, 10), 3, decorator: val => val + ($" ({string.Format("{0:#.#}",3.2f + (2.05f * val))}{Language.Translate("options.sec")})").Color(Color.gray));
     static private FloatConfiguration KillSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.killSEStrength", (1f,20f,0.5f),3.5f, FloatConfigurationDecorator.Ratio);
     static private BoolConfiguration LeaveKillEvidenceOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.leaveKillEvidence", true);
-
+    static private BoolConfiguration CanReportKillSceneOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.canReportKillScene", true);
     static public Destroyer MyRole = new Destroyer();
 
     [NebulaRPCHolder]
@@ -97,7 +100,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                 NebulaManager.Instance.StopCoroutine(targetCoroutine);
             }
             catch { }
-            
+
             target.NetTransform.SnapTo((Vector2)targetPos - target.Collider.offset);
             myPlayer.MyPhysics.body.velocity = Vector2.zero;
             target.MyPhysics.body.velocity = Vector2.zero;
@@ -143,8 +146,10 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             yield return new WaitForSeconds(0.15f);
 
             //死体を生成
-            var deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.DeadBodyPrefab);
-            deadBody.enabled = true;
+            DeadBody deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.DeadBodyPrefab);
+            GameObject deadBodyObj = deadBody.gameObject;
+            deadBody.enabled = CanReportKillSceneOption;
+            deadBody.Reported = !CanReportKillSceneOption;
             deadBody.ParentId = target.PlayerId;
             deadBody.transform.localPosition = target.GetTruePosition();
             foreach (var r in deadBody.bodyRenderers) r.enabled = false;
@@ -157,6 +162,8 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             var modSplatter = modSplatterRenderer.gameObject.AddComponent<ModAnimator>();
 
             var targetModInfo =  target.GetModInfo()!;
+            target.Visible = true;
+            target.inVent = false;
 
             IEnumerator CoScale(float startScale, float goalScale, float duration, NebulaAudioClip audioClip, bool playKillSE = false)
             {
@@ -257,7 +264,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             }
 
             GameObject.Destroy(handRenderer.gameObject);
-            if(deadBody) GameObject.Destroy(deadBody.gameObject);
+            if(deadBodyObj) GameObject.Destroy(deadBodyObj);
 
             myPlayer.moveable = true;
             
@@ -265,6 +272,9 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             while (!targetModInfo.IsDead) yield return null;
 
             target.moveable = true;
+            target.inVent = false;
+            target.onLadder = false;
+            target.inMovingPlat = false;
 
             yield return new WaitForSeconds(0.2f);
 

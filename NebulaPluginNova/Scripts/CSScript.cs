@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+using Virial;
 using Virial.Runtime;
 
 namespace Nebula.Scripts;
@@ -12,12 +13,15 @@ internal class AddonBehaviour
 {
     [JsonSerializableField]
     public bool LoadRoles = false;
+
+    [JsonSerializableField]
+    public bool UseHiddenMembers = false;
 }
 
 internal record AddonScript(Assembly Assembly, NebulaAddon Addon, MetadataReference Reference, AddonBehaviour Behaviour);
 
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.CompileAddons)]
+[NebulaPreprocess(PreprocessPhase.CompileAddons)]
 internal static class AddonScriptManagerLoader
 {
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
@@ -51,8 +55,8 @@ internal static class AddonScriptManager
         var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             .WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic")
             .WithNullableContextOptions(NullableContextOptions.Enable)
-            .WithOptimizationLevel(OptimizationLevel.Release);
-        
+            .WithOptimizationLevel(OptimizationLevel.Release)
+            .WithMetadataImportOptions(MetadataImportOptions.All);
 
         foreach (var addon in NebulaAddon.AllAddons)
         {
@@ -86,7 +90,16 @@ internal static class AddonScriptManager
             Patches.LoadPatch.LoadingText = "Compiling Addon Scripts\n" + addon.Id;
             yield return null;
 
-            var compilation = CSharpCompilation.Create("Script." + addon.Id.HeadUpper(), trees, ReferenceAssemblies, compilationOptions.WithModuleName("Script." + addon.Id.HeadUpper()))
+            var myCompilationOptions = compilationOptions.WithModuleName("Script." + addon.Id.HeadUpper());
+
+            if (addonBehaviour?.UseHiddenMembers ?? false)
+            {
+                //全Internal, Privateメンバにアクセスできるようにする
+                var topLevelBinderFlagsProperty = typeof(CSharpCompilationOptions).GetProperty("TopLevelBinderFlags", BindingFlags.Instance | BindingFlags.NonPublic)!;
+                topLevelBinderFlagsProperty.SetValue(compilationOptions, (uint)1 << 22);
+            }
+
+            var compilation = CSharpCompilation.Create("Script." + addon.Id.HeadUpper(), trees, ReferenceAssemblies, myCompilationOptions)
                 .AddReferences(scriptAssemblies.Where(a => addon.Dependency.Contains(a.Addon)).Select(a => a.Reference));
             
             Assembly? assembly = null;
@@ -116,10 +129,12 @@ internal static class AddonScriptManager
                     NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Scripting, "Compile Error! Scripts is ignored (Addon: " + addon.Id + ")");
                 }
             }
-            
-            if (assembly != null) scriptAssemblies.Add(new(assembly, addon, compilation.ToMetadataReference(), addonBehaviour ?? new()));
 
-            assembly?.GetType("TestClass")?.GetMethod("Func")?.Invoke(null, []);
+            if (assembly != null)
+            {
+                scriptAssemblies.Add(new(assembly, addon, compilation.ToMetadataReference(), addonBehaviour ?? new()));
+                NebulaAPI.Preprocessor?.PickUpPreprocess(assembly);
+            }
         }
 
         yield break;

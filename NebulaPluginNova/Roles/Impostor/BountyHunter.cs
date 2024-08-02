@@ -111,7 +111,7 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
                 bountyTimer = Bind(new Timer(ChangeBountyIntervalOption)).Start();
                 arrowTimer = Bind(new Timer(ArrowUpdateIntervalOption)).Start();
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.IsImpostor && !p.IsDead, null, Impostor.CanKillHidingPlayerOption));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.ImpostorKillPredicate(p), null, Impostor.CanKillHidingPlayerOption));
 
                 killButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;

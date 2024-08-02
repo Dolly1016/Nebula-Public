@@ -38,11 +38,14 @@ public class PlayerDisplay : MonoBehaviour
         Cosmetics.SetEnabledColorblind(false);
     }
 
+
     public void UpdateFromPlayerOutfit(PlayerControl player, bool isDead, bool includePet)
     {
         NetworkedPlayerInfo.PlayerOutfit outfit = player.Data.Outfits[player.CurrentOutfitType];
+        UpdateFromPlayerOutfit(outfit, isDead, includePet);
+    }
 
-
+    public void UpdateFromPlayerOutfit(NetworkedPlayerInfo.PlayerOutfit outfit, bool isDead, bool includePet) { 
         Cosmetics.SetMaskType(PlayerMaterial.MaskType.None);
         Cosmetics.SetBodyColor(outfit.ColorId);
 

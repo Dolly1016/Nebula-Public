@@ -1,6 +1,7 @@
 ﻿using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Game;
 using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
@@ -26,7 +27,7 @@ public class Painter : DefinedRoleTemplate, DefinedRole
         private ModAbilityButton? paintButton = null;
 
         static public Image sampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
-        static public Image paintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
+        static public Image PaintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PaintButton.png", 115f);
         
         public Instance(GamePlayer player) : base(player)
         {
@@ -41,7 +42,7 @@ public class Painter : DefinedRoleTemplate, DefinedRole
             {
                 acTokenChallenge = new("painter.challenge", new int[15], (val, _) => val.Count(v => v >= 2) >= 3);
 
-                NetworkedPlayerInfo.PlayerOutfit? sample = null;
+                Outfit? sample = null;
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
@@ -50,24 +51,24 @@ public class Painter : DefinedRoleTemplate, DefinedRole
                 sampleButton.Availability = (button) => MyPlayer.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead;
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker.CurrentTarget?.Unbox()?.GetOutfit(75) ?? null;
+                    sample = sampleTracker.CurrentTarget?.GetOutfit(75) ?? null;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
-                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample!, paintButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample!.outfit, paintButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
                 
                 paintButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.paint");
-                paintButton.SetSprite(paintButtonSprite.GetSprite());
+                paintButton.SetSprite(PaintButtonSprite.GetSprite());
                 paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
                 paintButton.Visibility = (button) => !MyPlayer.IsDead;
                 paintButton.OnClick = (button) => {
-                    var outfit = sample ?? MyPlayer.Unbox().GetOutfit(75);
+                    var outfit = sample ?? MyPlayer.GetOutfit(75);
 
                     acTokenCommon ??= new("painter.common1");
-                    if (sampleTracker.CurrentTarget!.Unbox()!.GetOutfit(75).ColorId != outfit.ColorId)
+                    if (sampleTracker.CurrentTarget!.Unbox()!.GetOutfit(75).ColorId != outfit.outfit.ColorId)
                         acTokenChallenge.Value[sampleTracker.CurrentTarget!.PlayerId]++;
 
                     var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, outfit)));

@@ -2,6 +2,7 @@
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -25,7 +26,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
 
     static public Marionette MyRole = new Marionette();
 
-    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
+    [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class Decoy : NebulaSyncStandardObject
     {
         public static string MyTag = "Decoy";
@@ -57,7 +58,8 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
         static private Image destroyButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyDestroyButton.png", 115f);
         static private Image swapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoySwapButton.png", 115f);
         static private Image monitorButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMonitorButton.png", 115f);
-        
+        static private Image decoyArrowSprite = SpriteLoader.FromResource("Nebula.Resources.DecoyArrow.png", 180f);
+
         public Decoy? MyDecoy = null;
         public Instance(GamePlayer player) : base(player)
         {
@@ -67,10 +69,15 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<(bool cleared, float swapTime)>? acTokenCommon2 = null;
         AchievementToken<(bool cleared, float killTime)>? acTokenChallenge = null;
+        Arrow? decoyArrow = null;
+
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
+                decoyArrow = Bind(new Arrow(decoyArrowSprite.GetSprite(), false, true) { IsAffectedByComms = false, FixedAngle = true });
+                decoyArrow.IsActive = false;
+
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("marionette.another1");
                 acTokenCommon2 = new("marionette.common2", (false,-100f),(val,_) => val.cleared);
                 acTokenChallenge = new("marionette.challenge", (false,-100f),(val,_)=>val.cleared);
@@ -84,10 +91,11 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
-                        MyDecoy = (NebulaSyncObject.RpcInstantiate(Decoy.MyTag, new float[] {
+                        MyDecoy = (NebulaSyncObject.RpcInstantiate(Decoy.MyTag, [
                         PlayerControl.LocalPlayer.transform.localPosition.x,
                         PlayerControl.LocalPlayer.transform.localPosition.y,
-                        PlayerControl.LocalPlayer.cosmetics.FlipX ? -1f : 1f }) as Decoy);
+                        PlayerControl.LocalPlayer.cosmetics.FlipX ? -1f : 1f 
+                        ]) as Decoy);
 
                         destroyButton!.ActivateEffect();
                         destroyButton.EffectTimer?.Start();
@@ -163,6 +171,20 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                     });
                 };
                 monitorButton.SetLabel("monitor");
+            }
+        }
+
+        void OnUpdate(GameUpdateEvent ev)
+        {
+            if(AmOwner && decoyArrow != null)
+            {
+                if (MyDecoy == null)
+                    decoyArrow.IsActive = false;
+                else
+                {
+                    decoyArrow.IsActive = true;
+                    decoyArrow.TargetPos = MyDecoy.Position;
+                }
             }
         }
 

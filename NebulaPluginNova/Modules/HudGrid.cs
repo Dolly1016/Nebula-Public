@@ -27,6 +27,7 @@ public class HudGrid : MonoBehaviour
         {
             var content = obj.AddComponent<HudContent>();
             content.SetPriority(priority);
+            content.ActiveFunc = () => obj.activeSelf && !(MapBehaviour.Instance && MapBehaviour.Instance.IsOpen);
             RegisterContentToRight(content);
 
             return content;
@@ -64,8 +65,8 @@ public class HudGrid : MonoBehaviour
             int row = 0, column = 0;
             foreach(var c in Contents[i])
             {
-                if (!c.Value.gameObject.activeSelf) continue;
-                if (MeetingHud.Instance && !c.Value.gameObject.active) continue;
+                if (!c.Value.IsActive) continue;
+                if (MeetingHud.Instance && !c.Value.gameObject.active) continue; //会議中はstaticContents以外除外する
 
                 if(!killButtonPosArranged && c.Value.MarkedAsKillButtonContent)
                 {
@@ -123,7 +124,8 @@ public class HudContent : MonoBehaviour
     private bool isDirty = true;
     public bool OccupiesLine = false;
     public bool IsStaticContent = false;
-
+    public Func<bool>? ActiveFunc = null;
+    public bool IsActive => ActiveFunc?.Invoke() ?? gameObject.activeSelf;
     public Vector3 ToLocalPos
     {
         get

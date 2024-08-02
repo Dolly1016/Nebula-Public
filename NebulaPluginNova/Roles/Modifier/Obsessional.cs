@@ -6,8 +6,10 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Modifier;
+
 
 public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
@@ -26,6 +28,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
 
 
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
         DefinedModifier RuntimeModifier.Modifier => MyRole;
@@ -74,8 +77,9 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
                 }
                 if (limitted.Count() > 0) cands = limitted;
 
-                var cand = cands.ToArray().Random();
-                if(cand != null) RpcSetObsessionalTarget.Invoke((MyPlayer.PlayerId, cand.PlayerId));
+                obsession = cands.ToArray().Random();
+
+                if (obsession != null) NebulaManager.Instance.StartDelayAction(5f, () => RpcSetObsessionalTarget.Invoke((MyPlayer.PlayerId, obsession.PlayerId)));
             }
         }
 
@@ -120,6 +124,12 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
                 ev.SetWin(true);
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraObsessionalWin);
             }
+        }
+
+        [Local]
+        void AppendExtraTaskText(PlayerTaskTextLocalEvent ev)
+        {
+            ev.AppendText(Language.Translate("role.obsessional.taskText").Replace("%PLAYER%", obsession?.Name ?? "ERROR").Color(MyRole.UnityColor));
         }
 
         string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.obsessional.blurb").Replace("%NAME%", (obsession?.Name ?? "ERROR").Color(MyRole.UnityColor));

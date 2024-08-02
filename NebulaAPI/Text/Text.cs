@@ -202,6 +202,21 @@ public enum AttributeAsset
     /// マーケットプレイスで四角いボタンに使われているテキスト属性です。
     /// </summary>
     MarketplacePublishButton,
+
+    /// <summary>
+    /// 会議中に表示される称号で使用されているテキスト属性です。
+    /// </summary>
+    MeetingTitle,
+
+    /// <summary>
+    /// ロビーでのバージョン表示で使用されているテキスト属性です。
+    /// </summary>
+    VersionShower,
+
+    /// <summary>
+    /// フリープレイの役職選択ボタンで使用されているテキスト属性です。
+    /// </summary>
+    MetaRoleButton,
 }
 
 [Flags]

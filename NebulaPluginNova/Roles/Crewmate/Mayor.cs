@@ -1,6 +1,7 @@
 ﻿using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -45,6 +46,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
 
         AchievementToken<(bool cleared, byte myVotedFor, bool triggered)>? acTokenCommon = null;
         AchievementToken<(int meetings, bool clearable)>? acTokenAnother = null;
+        AchievementToken<(bool cleared, int leftMeeting, bool triggered)>? acTokenCommon2 = null;
         AchievementToken<(bool cleared, byte myVotedFor, bool triggered)>? acTokenChallenge = null;
 
         void RuntimeAssignable.OnActivated()
@@ -53,6 +55,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 acTokenCommon = new("mayor.common1", (false, 0, false), (val, _) => val.cleared);
                 acTokenAnother = new("mayor.another1", (0, true), (val, _) => val.meetings >= 3 && val.clearable);
+                acTokenCommon2 = new("mayor.common2", (false, 3, false), (val, _) => val.cleared);
                 acTokenChallenge = new("mayor.challenge", (false,0,false), (val, _) => val.cleared);
             }
         }
@@ -68,7 +71,12 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 if (acTokenAnother != null) acTokenAnother.Value.meetings++;
 
-                var countText = UnityEngine.Object.Instantiate(MeetingHud.Instance.TitleText, MeetingHud.Instance.SkipVoteButton.transform);
+                var binder = UnityHelper.CreateObject("MayorButtons", MeetingHud.Instance.SkipVoteButton.transform.parent, MeetingHud.Instance.SkipVoteButton.transform.localPosition);
+                GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev=> {
+                    binder.gameObject.SetActive(!MyPlayer.IsDead && MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted);
+                }, new GameObjectLifespan(binder));
+
+                var countText = UnityEngine.Object.Instantiate(MeetingHud.Instance.TitleText, binder.transform);
                 countText.gameObject.SetActive(true);
                 countText.gameObject.GetComponent<TextTranslatorTMP>().enabled = false;
                 countText.alignment = TMPro.TextAlignmentOptions.Center;
@@ -94,7 +102,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
                 var myArea = MeetingHud.Instance.playerStates.FirstOrDefault(v=>v.TargetPlayerId == MyPlayer.PlayerId);
                 if (myArea is null) return;
 
-                var leftRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Minus", MeetingHud.Instance.SkipVoteButton.transform, new Vector3(2f, 0f));
+                var leftRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Minus", binder.transform, new Vector3(2f, 0f));
                 leftRenderer.sprite = leftButtonSprite.GetSprite();
                 var leftButton = leftRenderer.gameObject.SetUpButton(true);
                 leftButton.OnMouseOver.AddListener(() => leftRenderer.color = Color.gray);
@@ -105,7 +113,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
                 });
                 leftRenderer.gameObject.AddComponent<BoxCollider2D>().size = new Vector2(0.6f, 0.6f);
 
-                var rightRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Plus", MeetingHud.Instance.SkipVoteButton.transform, new Vector3(3.6f, 0f));
+                var rightRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Plus", binder.transform, new Vector3(3.6f, 0f));
                 rightRenderer.sprite = rightButtonSprite.GetSprite();
                 var rightButton = rightRenderer.gameObject.SetUpButton(true);
                 rightButton.OnMouseOver.AddListener(() => rightRenderer.color = Color.gray);
@@ -134,6 +142,20 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 Debug.Log($"Mayor: current:{myVote},voted:{currentVote}");
                 myVote -= currentVote;
+                if(acTokenCommon2 != null)
+                {
+                    if(acTokenCommon2.Value.leftMeeting > 0)
+                    {
+                        if (currentVote != 1)
+                            acTokenCommon2.Value.leftMeeting = 0;
+                        else
+                        {
+                            acTokenCommon2.Value.leftMeeting--;
+                            if (acTokenCommon2.Value.leftMeeting == 0) acTokenCommon2.Value.triggered = true;
+                        }
+
+                    }
+                }
                 Debug.Log($"Mayor: after:{myVote}");
             }
         }
@@ -148,7 +170,11 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
             acTokenCommon!.Value.myVotedFor = myVotedFor;
             acTokenChallenge!.Value.myVotedFor = myVotedFor;
 
-            if (!ev.VoteStates.Any(v => v.VoterId != MyPlayer.PlayerId && v.VotedForId == myVotedFor)) acTokenChallenge!.Value.triggered = true;
+            if (!ev.VoteStates.Any(v => v.VoterId != MyPlayer.PlayerId && v.VotedForId == myVotedFor))
+            {
+                if (acTokenChallenge != null) acTokenChallenge.Value.triggered = true;
+                if (acTokenCommon2 != null) acTokenCommon2.Value.cleared |= acTokenCommon2.Value.triggered;
+            }
         }
 
         [Local]

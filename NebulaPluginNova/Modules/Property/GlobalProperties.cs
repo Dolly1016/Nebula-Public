@@ -2,7 +2,7 @@
 
 namespace Nebula.Modules.Property;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 static public class GlobalProperties
 {
     static void Preprocess(NebulaPreprocessor preprocessor)

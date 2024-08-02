@@ -47,6 +47,7 @@ internal interface INebula
     Configuration.Configurations Configurations => Get<Configuration.Configurations>()!;
     Media.GUI GUILibrary => Get<Media.GUI>()!;
     Media.Translator Language => Get<Media.Translator>()!;
+    Utilities.IHasher Hasher => Get<Utilities.IHasher>()!;
 
     //AssignableAPI
 
@@ -86,6 +87,10 @@ public static class NebulaAPI
     /// </summary>
     static public Configuration.Configurations Configurations => instance.Configurations;
 
+    /// <summary>
+    /// 不変なハッシュ値を生成するモジュールです。
+    /// </summary>
+    static public Utilities.IHasher Hasher => instance.Hasher;
 
 
 

@@ -122,13 +122,19 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
             //インポスター判別のチャンスだけ繰り返す
             while (CanIdentifyImpostorsOption > impostors.Count && MyPlayer.Tasks.CurrentCompleted >= NumOfTasksToIdentifyImpostorsOptions[impostors.Count].Value)
             {
-                var pool = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole && !impostors.Contains(p.PlayerId)).ToArray();
+                var pool = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.Role.Role.Category == RoleCategory.ImpostorRole && !impostors.Contains(p.PlayerId)).ToArray();
                 //候補が残っていなければ何もしない
                 if (pool.Length == 0) return;
+                //生存しているインポスターだけに絞っても候補がいるなら、そちらを優先する。
+                if (pool.Any(p => !p.IsDead)) pool = pool.Where(p => !p.IsDead).ToArray();
+
                 impostors.Add(pool[System.Random.Shared.Next(pool.Length)].PlayerId);
+
+                if (MyPlayer.Tasks.CurrentCompleted > 0) new StaticAchievementToken("madmate.common2");
             }
         }
 
+        [OnlyMyPlayer]
         public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev) => IdentifyImpostors();
 
 
@@ -136,6 +142,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
         {
             if (impostors.Contains(ev.Player.PlayerId) && ev.Player.IsImpostor) ev.Color = new(Palette.ImpostorRed);
+            
         }
 
         [Local, OnlyMyPlayer]
@@ -161,8 +168,12 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local, OnlyMyPlayer]
         void OnMurdered(PlayerMurderedEvent ev)
         {
-            if(ev.Murderer?.Role.Role.Category == RoleCategory.ImpostorRole)
+            if (ev.Murderer?.Role.Role.Category == RoleCategory.ImpostorRole)
+            {
                 new StaticAchievementToken("madmate.another1");
+                if (ev.Murderer != null && impostors.Contains(ev.Murderer.PlayerId)) new StaticAchievementToken("madmate.another2");
+                if (ev.Murderer != null && !impostors.Contains(ev.Murderer.PlayerId) && impostors.Count > 0) new StaticAchievementToken("madmate.another3");
+            }
         }
 
         [Local]

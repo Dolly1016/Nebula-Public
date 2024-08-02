@@ -286,6 +286,15 @@ public interface GUI
     GUIWidget HorizontalHolder(GUIAlignment alignment, float fixedHeight, params GUIWidget?[] inner) => HorizontalHolder(alignment, inner, null);
 
     /// <summary>
+    /// ウィジットを指定の個数ずつ縦方向に伸ばしながら配置します。
+    /// </summary>
+    /// <param name="alignment"></param>
+    /// <param name="inner"></param>
+    /// <param name="perLine"></param>
+    /// <returns></returns>
+    GUIWidget Arrange(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, int perLine);
+
+    /// <summary>
     /// 縦方向にウィジェットを並べます。
     /// 呼び出しを簡素化するためのオーバーロードです。
     /// </summary>

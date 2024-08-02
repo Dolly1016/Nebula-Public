@@ -44,6 +44,8 @@ public class Agent : DefinedRoleTemplate, DefinedRole
             if (argument.Length >= 1) leftVent = argument[0];
         }
 
+        AchievementToken<(bool useVent, float lastTask, bool cleared)>? acTokenCommon2 = null;
+
         int[]? RuntimeAssignable.RoleArguments => [leftVent];
 
         [Local]
@@ -66,6 +68,16 @@ public class Agent : DefinedRoleTemplate, DefinedRole
             }
         }
 
+        [OnlyMyPlayer]
+        public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
+        {
+            if (acTokenCommon2 != null) {
+                acTokenCommon2.Value.cleared |= (NebulaGameManager.Instance!.CurrentTime - acTokenCommon2.Value.lastTask) < 15f && acTokenCommon2.Value.useVent;
+                acTokenCommon2.Value.lastTask = NebulaGameManager.Instance.CurrentTime;
+                acTokenCommon2.Value.useVent = false;
+            }
+        }
+
         [Local, OnlyMyPlayer]
         void OnEnterVent(PlayerVentEnterEvent ev)
         {
@@ -74,6 +86,8 @@ public class Agent : DefinedRoleTemplate, DefinedRole
             leftVent--;
             UsesText.text = leftVent.ToString();
             if (leftVent <= 0) UsesText.transform.parent.gameObject.SetActive(false);
+
+            if (acTokenCommon2 != null) acTokenCommon2.Value.useVent = true;
         }
 
 
@@ -88,6 +102,8 @@ public class Agent : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
+                acTokenCommon2 = new("agent.common2", (false, -100f, false), (val, _) => val.cleared);
+
                 if (NumOfExtraTasksOption > 0)
                 {
                     var taskButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));

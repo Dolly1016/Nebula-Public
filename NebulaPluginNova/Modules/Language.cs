@@ -52,7 +52,7 @@ public class EastAsianFontChanger
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostFixStructure)]
+[NebulaPreprocess(PreprocessPhase.PostFixStructure)]
 public static class AddonDefaultLanguageLoader
 {
     static AddonDefaultLanguageLoader()
@@ -65,7 +65,7 @@ public static class AddonDefaultLanguageLoader
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class Language
 {
     private class LanguageAPI : Virial.Media.Translator
@@ -151,6 +151,12 @@ public class Language
         DefaultLanguage.translationMap["empty"] = "";
 
         EastAsianFontChanger.LoadFont();
+    }
+
+    public static void ReflectFallBackFont()
+    {
+        string lang = GetLanguage((uint)AmongUs.Data.DataManager.Settings.Language.CurrentLanguage);
+        EastAsianFontChanger.SetUpFont(lang);
     }
 
     public static void OnChangeLanguage(uint language)

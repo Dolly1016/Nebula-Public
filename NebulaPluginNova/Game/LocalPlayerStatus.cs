@@ -8,7 +8,7 @@ public class FakeSabotageStatus
     public IEnumerable<SystemTypes> MyFakeTasks => fictitiousTasks;
     public bool HasFakeSabotage(params SystemTypes[] types) => types.Any(fictitiousTasks.Contains);
     private bool PushFakeSabotage(SystemTypes type) => fictitiousTasks.Add(type);
-    private void RemoveFakeSabotage(params SystemTypes[] types) => types.Do(type => fictitiousTasks.Remove(type));
+    internal void RemoveFakeSabotage(params SystemTypes[] types) => types.Do(type => fictitiousTasks.Remove(type));
     public void OnMeetingStart()
     {
         fictitiousTasks.Remove(SystemTypes.Reactor);

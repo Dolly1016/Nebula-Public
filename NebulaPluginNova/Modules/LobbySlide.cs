@@ -146,7 +146,7 @@ public class LobbySlideTemplate
 }
 
 [NebulaRPCHolder]
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
+[NebulaPreprocess(PreprocessPhase.PostLoadAddons)]
 public class LobbySlideManager
 {
     public Dictionary<string,LobbySlide> allSlides = new();

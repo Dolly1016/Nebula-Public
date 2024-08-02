@@ -6,7 +6,7 @@ using Virial.Runtime;
 
 namespace Nebula.Modules;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class NebulaResourceManager
 {
     static IVariableNamespaceAllocator baseAllocator = new NamespaceAllocator();

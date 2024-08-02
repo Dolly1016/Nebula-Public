@@ -15,7 +15,11 @@ public static class MeetingHudExtension
     static public int VotingMask = 0;
     static public bool CanSkip = true;
     static public bool ExileEvenIfTie = false;
-    
+    static public bool IsObvious = false;
+    static public bool CanShowPhotos = true;
+    static public float ActionCoolDown = 0f;
+    static public bool CanInvokeSomeAction => !(ActionCoolDown > 0f);
+    static public int LastSharedCount = 110;
 
     //直近の投票の結果吊られるプレイヤー
     static public PlayerControl[]? ExiledAll = null;
@@ -31,7 +35,11 @@ public static class MeetingHudExtension
         VotingMask = 0xFFFFFF;
         CanSkip = true;
         ExileEvenIfTie = false;
+        IsObvious = false;
         ExiledAll = null;
+        CanShowPhotos = true;
+        ActionCoolDown = 0f;
+        LastSharedCount = 110;
 
         var deathPenalty = (int)(GeneralConfigurations.DeathPenaltyOption * (float)(NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0f));
 
@@ -105,7 +113,6 @@ public static class MeetingHudExtension
         LastVotedForMap.Clear();
         WeightMap.Clear();
         ExtraVictims.Clear();
-        LeftContents.Clear();
     }
 
     public static void AddLeftContent(GameObject obj)
@@ -114,6 +121,7 @@ public static class MeetingHudExtension
         obj.layer = LayerExpansion.GetUILayer();
         obj.transform.localPosition = new Vector3(-4.8f, 1.8f - 1.2f * (float)LeftContents.Count, -40f);
         LeftContents.Add(obj);
+        ActionCoolDown = 0.8f;
     }
 
     public static void ExileExtraVictims()

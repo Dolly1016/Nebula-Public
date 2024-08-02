@@ -378,7 +378,7 @@ public class VoiceChatManager : IDisposable
 
         if (!AllowedUsingMic /*&& !AmongUsClient.Instance.AmHost*/)
         {
-            var screen = MetaScreen.GenerateWindow(new(2.4f, 1f), HudManager.Instance.transform, Vector3.zero, true, true, false);
+            var screen = MetaScreen.GenerateWindow(new(2.4f, 1f), HudManager.Instance.transform, Vector3.zero, true, true);
 
             MetaWidgetOld widget = new();
 
@@ -549,7 +549,7 @@ public class VoiceChatManager : IDisposable
 
     public void OpenSettingScreen(OptionsMenuBehaviour menu)
     {
-        var screen = MetaScreen.GenerateWindow(new Vector2(8f,4.5f), HudManager.Instance.transform, Vector3.zero, true, false, true, true);
+        var screen = MetaScreen.GenerateWindow(new Vector2(8f,4.5f), HudManager.Instance.transform, Vector3.zero, true, false, withMask: true);
 
         MetaWidgetOld widget = new();
 
@@ -582,7 +582,7 @@ public class VoiceChatManager : IDisposable
             GUI.API.HorizontalMargin(0.5f),
             GUI.API.Button(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DeviceButton), new RawTextComponent(VCPlayerEntry.Value.Length > 0 ? VCPlayerEntry.Value : Language.Translate("voiceChat.settings.device.default")), _ =>
             {
-                var phonesScreen = MetaScreen.GenerateWindow(new Vector2(3f, 4.2f), HudManager.Instance.transform, Vector3.zero, true, false, true, true);
+                var phonesScreen = MetaScreen.GenerateWindow(new Vector2(3f, 4.2f), HudManager.Instance.transform, Vector3.zero, true, false, withMask: true);
 
                 var inner = new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center,
                     GetAllSpeakerDevice()!.Prepend((null, null)).Select(d =>
@@ -609,7 +609,7 @@ public class VoiceChatManager : IDisposable
             GUI.API.HorizontalMargin(0.5f),
             GUI.API.Button(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DeviceButton), new RawTextComponent(VCMicEntry.Value.Length > 0 ? VCMicEntry.Value : Language.Translate("voiceChat.settings.device.default")), _ =>
             {
-                var micsScreen = MetaScreen.GenerateWindow(new Vector2(3f, 4.2f), HudManager.Instance.transform, Vector3.zero, true, false, true, true);
+                var micsScreen = MetaScreen.GenerateWindow(new Vector2(3f, 4.2f), HudManager.Instance.transform, Vector3.zero, true, false, withMask: true);
 
                 var inner = new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center,
                     GetAllMicDevice()!.Prepend((null, 0)).Select(d =>

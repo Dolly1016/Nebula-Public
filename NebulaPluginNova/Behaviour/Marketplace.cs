@@ -81,7 +81,7 @@ public class MyMarketplaceStructure
     public List<DevMarketplaceItem> DevAddons = [];
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 internal class MarketplaceData
 {
     static private JsonDataSaver<MyMarketplaceStructure> DataSaver = new JsonDataSaver<MyMarketplaceStructure>("Marketplace");
@@ -357,7 +357,7 @@ public class Marketplace : MonoBehaviour
 
     void EditContent(bool isAddon, DevMarketplaceItem item)
     {
-        var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, true, true);
+        var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
         waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.fetch")), new(0.5f, 0.5f), out _);
 
         StartCoroutine(OnlineMarketplace.CoGetContent(item.EntryId, result =>
@@ -369,7 +369,7 @@ public class Marketplace : MonoBehaviour
                     MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent("marketplace.ui.edit.fetch.error"));
                 else
                     ShowEditWindow(isAddon, edited => {
-                        var waitUpdateWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, true, true);
+                        var waitUpdateWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
                         waitUpdateWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.wait")), new(0.5f, 0.5f), out _);
 
                         StartCoroutine(OnlineMarketplace.CoEditContent(edited.EntryId, edited.Key, edited.Title, edited.Blurb, edited.Detail, edited.Author, edited.Url, success => {
@@ -393,7 +393,7 @@ public class Marketplace : MonoBehaviour
 
     void ShowEditWindow(bool isAddon, Action<DeveloperMarketplaceItem> callback, DeveloperMarketplaceItem? item = null)
     {
-        var window = MetaScreen.GenerateWindow(new(8f, 4.8f), transform, Vector3.zero, true, true, true, true);
+        var window = MetaScreen.GenerateWindow(new(8f, 4.8f), transform, Vector3.zero, true, true, withMask: true);
 
         (GUIWidget widget, GUITextField textField) TextField(bool isMultiple, float width, string translateKey, string? defaultText = null)
         {
@@ -468,14 +468,14 @@ public class Marketplace : MonoBehaviour
     void ShowPublishWindow()
     {
 
-        var typeWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, true, true);
+        var typeWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
         GUIWidget TypeButton(bool isAddon) => GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), "marketplace.type." + (isAddon ? "addons" : "cosmetics"),
             clickable =>
             {
                 typeWindow.CloseScreen();
                 ShowEditWindow(isAddon, item =>
                 {
-                    var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, true, true);
+                    var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
                     waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.publish.wait")), new(0.5f, 0.5f), out _);
 
                     IEnumerator CoFinishPublish(bool success)

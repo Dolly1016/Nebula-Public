@@ -24,7 +24,7 @@ public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
     static private FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
     static private IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("options.role.alien.numOfInvalidations", (1, 10), 1);
 
-    static public Alien MyRole = null!;//new Alien();
+    static public Alien MyRole = new Alien();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

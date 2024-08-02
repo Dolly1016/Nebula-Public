@@ -88,7 +88,17 @@ public static class PlayerUpdatePatch
 
         NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().Update();
 
-        if (__instance.AmOwner) NebulaGameManager.Instance.OnFixedUpdate();
+        if (__instance.AmOwner)
+        {
+            NebulaGameManager.Instance.OnFixedUpdate();
+
+            //ペット・レポートボタンの使用可否
+            if (HudManager.InstanceExists && NebulaGameManager.Instance.LocalPlayerInfo.IsDived)
+            {
+                HudManager.Instance.ReportButton.SetDisabled();
+                HudManager.Instance.PetButton.SetDisabled();
+            }
+        }
         
 
         if(__instance.cosmetics.transform.localScale.z < 100f)
@@ -223,6 +233,7 @@ class SetTaskPAtch
         var info = __instance.GetModInfo();
         int num = tasks.Count;
 
+        GameOperatorManager.Instance?.Update(); //イベントがあれば追加する(ゲーム開始の瞬間と被って、ホストでは通常のタイミングでの作用素の追加では間に合わない)
         var result = GameOperatorManager.Instance!.Run(new PlayerTasksTrySetLocalEvent(info, tasks.ToArray()));
         var tasksList = result.VanillaTasks.ToArray();
 

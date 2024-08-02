@@ -1,7 +1,9 @@
 ﻿using Cpp2IL.Core.Extensions;
+using Nebula.Behaviour;
 using Nebula.Utilities;
 using System.Reflection;
 using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula;
 
@@ -17,9 +19,13 @@ public enum NebulaAudioClip {
     Destroyer1,
     Destroyer2,
     Destroyer3,
+    HadarDive,
+    HadarGush,
+    Justice1,
+    Justice2,
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 [NebulaRPCHolder]
 public static class NebulaAsset
 {
@@ -39,6 +45,8 @@ public static class NebulaAsset
         WhiteShader = Load<Shader>("Sprites-White");
         ProgressShader = Load<Shader>("Sprites-Progress");
         HSVShader = Load<Shader>("Sprites-HSV");
+        MeshRendererShader = Load<Shader>("Sprites-ForMeshRenderer");
+        MeshRendererMaskedShader = Load<Shader>("Sprites-ForMeshRendererMasked");
 
         DivMap[0] = Load<GameObject>("SkeldDivMap");
         DivMap[1] = Load<GameObject>("MIRADivMap");
@@ -58,8 +66,14 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.Destroyer1] = Load<AudioClip>("Destroyer1.ogg");
         audioMap[NebulaAudioClip.Destroyer2] = Load<AudioClip>("Destroyer2.ogg");
         audioMap[NebulaAudioClip.Destroyer3] = Load<AudioClip>("Destroyer3.ogg");
+        audioMap[NebulaAudioClip.HadarDive] = Load<AudioClip>("HadarDive.wav");
+        audioMap[NebulaAudioClip.HadarGush] = Load<AudioClip>("HadarReappear.wav");
+        audioMap[NebulaAudioClip.Justice1] = Load<AudioClip>("Justice1.mp3");
+        audioMap[NebulaAudioClip.Justice2] = Load<AudioClip>("Justice2.mp3");
 
         PaparazzoShot = Load<GameObject>("PhotoObject");
+
+        JusticeFont = new FontAssetNoS(JsonStructure.Deserialize<FontAssetNoSInfo>(StreamHelper.OpenFromResource("Nebula.Resources.JusticeFont.json")!)!, new ResourceTextureLoader("Nebula.Resources.JusticeFont.png"));
     }
 
     private static T LoadAsset<T>(this AssetBundle assetBundle, string name) where T : UnityEngine.Object
@@ -123,12 +137,15 @@ public static class NebulaAsset
         return texture2D.ToSprite(100f);
     }
 
+    static public FontAssetNoS JusticeFont { get; private set; } = null!;
     static public Shader MultiplyBackShader { get; private set; } = null!;
     static public Shader StoreBackShader { get; private set; } = null!;
     static public Shader GuageShader { get; private set; } = null!;
     static public Shader WhiteShader { get; private set; } = null!;
     static public Shader ProgressShader { get; private set; } = null!;
     static public Shader HSVShader { get; private set; } = null!;
+    static public Shader MeshRendererShader { get; private set; } = null!;
+    static public Shader MeshRendererMaskedShader { get; private set; } = null!;
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public GameObject PaparazzoShot { get; private set; } = null!;
@@ -195,4 +212,17 @@ public static class NebulaAsset
         "PlaySE",
         (message, _) => PlaySE(message.clip, message.pos, message.minDistance, message.maxDistance)
     );
+
+    public static TextMeshNoS InstantiateText(string objName, Transform? parent, Vector3 localPos, FontAssetNoS font, float size, Virial.Text.TextAlignment textAlignment, Vector2 pivot,string text,UnityEngine.Color color, bool showOnlyInMask = false)
+    {
+        var textObj = UnityHelper.CreateObject<TextMeshNoS>(objName, parent, localPos);
+        textObj.Font = font;
+        textObj.FontSize = size;
+        textObj.TextAlignment = textAlignment;
+        textObj.Pivot = pivot;
+        textObj.Text = text;
+        textObj.Material = new(showOnlyInMask ? MeshRendererMaskedShader : MeshRendererShader);
+        textObj.Color = color;
+        return textObj;
+    }
 }

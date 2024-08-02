@@ -1,5 +1,6 @@
 ﻿using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
+using UnityEngine.UI;
 
 namespace Nebula.Patches;
 
@@ -16,6 +17,7 @@ public static class MainMenuSetUpPatch
 
     static void Postfix(MainMenuManager __instance)
     {
+
         __instance.PlayOnlineButton.OnClick.AddListener(() => IsLocalGame = false);
         __instance.playLocalButton.OnClick.AddListener(() => IsLocalGame = true);
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Il2CppSystem.Runtime.CompilerServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -127,13 +128,14 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
         dataEntry.Value = myLocalCache.Select(a => a.CodeName).ToArray();
     }
 
-    public void ToggleAndShare(T assignable)
+    public void ToggleAndShare(T assignable) => SetAndShare(assignable, !Test(assignable));
+
+    public void SetAndShare(T assignable, bool val)
     {
-        bool contains = Test(assignable);
-        if (contains)
-            RemoveWithLocal(assignable);
-        else
+        if (val)
             AddWithLocal(assignable);
+        else
+            RemoveWithLocal(assignable);
     }
 
 
@@ -153,6 +155,7 @@ public class ModifierFilterImpl : AssignableFilterConfigurationValue<DefinedAllo
     protected override IEnumerable<DefinedAllocatableModifier> AllAssignables => Roles.Roles.AllModifiers.Select(a => a as DefinedAllocatableModifier).Where(a => a is not null)!;
 
     bool Virial.Configuration.AssignableFilter<DefinedModifier>.Test(DefinedModifier assignable) => assignable is DefinedAllocatableModifier adm ? Test(adm) : false;
+    void Virial.Configuration.AssignableFilter<DefinedModifier>.SetAndShare(Virial.Assignable.DefinedModifier assignable, bool val) { if (assignable is DefinedAllocatableModifier adm) SetAndShare(adm, val); }
     void Virial.Configuration.AssignableFilter<DefinedModifier>.ToggleAndShare(Virial.Assignable.DefinedModifier assignable) { if (assignable is DefinedAllocatableModifier adm) ToggleAndShare(adm); }
 }
 
@@ -166,4 +169,107 @@ public class GhostRoleFilterImpl : AssignableFilterConfigurationValue<DefinedGho
 
     bool Virial.Configuration.AssignableFilter<DefinedGhostRole>.Test(DefinedGhostRole assignable) => Test(assignable);
     void Virial.Configuration.AssignableFilter<DefinedGhostRole>.ToggleAndShare(Virial.Assignable.DefinedGhostRole assignable) => ToggleAndShare(assignable);
+    void Virial.Configuration.AssignableFilter<DefinedGhostRole>.SetAndShare(Virial.Assignable.DefinedGhostRole assignable, bool val) => SetAndShare(assignable, val);
+}
+
+
+public static class RoleFilterHelper
+{
+    /// <summary>
+    /// フィルターの内容を表示用の文字列で表現します。
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <returns></returns>
+    public static string GetFilterDisplayString(DefinedAssignable roleFilter, bool canAssignToCrewmate, bool canAssignToImpostor, bool canAssignToNeutral)
+    {
+        List<DefinedRole> assignableCrewmate = new();
+        List<DefinedRole> nonAssignableCrewmate = new();
+        List<DefinedRole> assignableImpostor = new();
+        List<DefinedRole> nonAssignableImpostor = new();
+        List<DefinedRole> assignableNeutral = new();
+        List<DefinedRole> nonAssignableNeutral = new();
+        foreach(var r in Roles.Roles.AllRoles)
+        {
+            //ヘルプ画面に出現しない役職はスルー
+            if (!r.ShowOnHelpScreen) continue;
+
+            bool assignable = true;
+
+            switch (r.Category)
+            {
+                case RoleCategory.CrewmateRole:
+                    assignable &= canAssignToCrewmate;
+                    assignable &= r.CanLoad(roleFilter);
+                    (assignable ? assignableCrewmate : nonAssignableCrewmate).Add(r);
+                    break;
+                case RoleCategory.ImpostorRole:
+                    assignable &= canAssignToImpostor;
+                    assignable &= r.CanLoad(roleFilter);
+                    (assignable ? assignableImpostor : nonAssignableImpostor).Add(r);
+                    break;
+                case RoleCategory.NeutralRole:
+                    assignable &= canAssignToNeutral;
+                    assignable &= r.CanLoad(roleFilter);
+                    (assignable ? assignableNeutral : nonAssignableNeutral).Add(r);
+                    break;
+            }
+        }
+
+        int allAssignableSum = assignableCrewmate.Count + assignableImpostor.Count + assignableNeutral.Count;
+        int allNonAssignableSum = nonAssignableCrewmate.Count + nonAssignableImpostor.Count + nonAssignableNeutral.Count;
+        int byCategorySum = Math.Min(assignableCrewmate.Count, nonAssignableCrewmate.Count) + Math.Min(assignableImpostor.Count, nonAssignableImpostor.Count) + Math.Min(assignableNeutral.Count, nonAssignableNeutral.Count);
+
+        if(allAssignableSum == 0)
+        {
+            //出現なし
+            return Language.Translate("roleFilter.none");
+        }
+        if(allNonAssignableSum == 0)
+        {
+            //割り当て不可能なし
+            return Language.Translate("roleFilter.allPattern.all");
+        }
+        if(allAssignableSum <= 8) {
+            //割当先が比較的少ない場合
+            return string.Join(Language.Translate("roleFilter.separator"), assignableImpostor.Concat(assignableCrewmate).Concat(assignableNeutral).Select(r => r.DisplayColoredName));
+        }
+        if (allNonAssignableSum <= 8)
+        {
+            //割当不可能な対象が比較的少ない場合
+            string roles = string.Join(Language.Translate("roleFilter.separator"), nonAssignableImpostor.Concat(nonAssignableCrewmate).Concat(nonAssignableNeutral).Select(r => r.DisplayColoredName));
+            return Language.Translate("roleFilter.exceptPattern.all").Replace("%ROLES%", roles);
+        }
+        if(byCategorySum <= 6)
+        {
+            //陣営ごとに最適な表示をした方が良い場合
+            string separator = Language.Translate("roleFilter.separator");
+            string impostorStr, crewmateStr, neutralStr;
+
+            string GetCategoryString(string category, List<DefinedRole> assignable, List<DefinedRole> nonAssignable)
+            {
+                if (assignable.Count == 0) return "";
+                if (nonAssignable.Count == 0) return Language.Translate("roleFilter.allPattern." + category);
+                if (assignable.Count <= nonAssignable.Count)
+                    return string.Join(separator, assignable.Select(r => r.DisplayColoredName));
+                else
+                    return Language.Translate("roleFilter.exceptPattern." + category).Replace("%ROLES%", string.Join(separator, nonAssignable.Select(r => r.DisplayColoredName)));
+            }
+
+            impostorStr = GetCategoryString("impostor", assignableImpostor, nonAssignableImpostor);
+            crewmateStr = GetCategoryString("crewmate", assignableCrewmate, nonAssignableCrewmate);
+            neutralStr = GetCategoryString("neutral", assignableNeutral, nonAssignableNeutral);
+
+            return string.Join(Language.Translate("roleFilter.categorySeparator"), ((string[])[impostorStr, crewmateStr, neutralStr]).Where(s => s.Length > 0));
+        }
+
+        //どうしようもない場合は略称で表示
+        if(allAssignableSum <= allNonAssignableSum)
+        {
+            return string.Join(Language.Translate("roleFilter.separator"), assignableImpostor.Concat(assignableCrewmate).Concat(assignableNeutral).Select(r => r.DisplayColoredShort));
+        }
+        else
+        {
+            return string.Join(Language.Translate("roleFilter.separator"), assignableImpostor.Concat(assignableCrewmate).Concat(assignableNeutral).Select(r => r.DisplayColoredShort));
+        }
+    }
 }

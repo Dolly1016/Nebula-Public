@@ -6,7 +6,7 @@ using Virial.Runtime;
 
 namespace Nebula.Modules;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
+[NebulaPreprocess(PreprocessPhase.PostLoadAddons)]
 [NebulaRPCHolder]
 public class DynamicPalette
 {
@@ -495,7 +495,7 @@ public class DynamicPalette
     public static SpriteLoader colorBackSprite = SpriteLoader.FromResource("Nebula.Resources.ColorFullBase.png", 100f);
     public static void OpenCatalogue(SpriteRenderer TargetRenderer,Action ShownColor, bool isBodyColor = true)
     {
-        var screen = MetaScreen.GenerateWindow(new Vector2(6.7f, 4.2f), PlayerCustomizationMenu.Instance.transform, new Vector3(0f, 0f, 0f), true, false, true);
+        var screen = MetaScreen.GenerateWindow(new Vector2(6.7f, 4.2f), PlayerCustomizationMenu.Instance.transform, new Vector3(0f, 0f, 0f), true, false);
         screen.transform.parent.FindChild("Background").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.85f);
 
         MetaWidgetOld widget = new();
@@ -922,6 +922,7 @@ public class NebulaPlayerTab : MonoBehaviour
             {
                 //複製を伴わない色更新
                 SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.visor.Image);
+                SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.GetComponent<NebulaCosmeticsLayer>().VisorBackRenderer);
                 SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.skin.layer);
                 SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.hat.FrontLayer);
                 if(playerTab.PlayerPreview.cosmetics.hat.BackLayer) SetSharedColors(PreviewColorId, playerTab.PlayerPreview.cosmetics.hat.BackLayer);
@@ -934,6 +935,10 @@ public class NebulaPlayerTab : MonoBehaviour
             {
                 if (ColorHelper.IsLightGreen(Palette.PlayerColors[PreviewColorId])) AddIcon(0, "help.color.icon.april0");
                 else if (ColorHelper.IsPink(Palette.PlayerColors[PreviewColorId])) AddIcon(1, "help.color.icon.april1");
+            }
+            if(Helpers.CurrentMonth == 8)
+            {
+                if (ColorHelper.IsGreenOrBlack(Palette.PlayerColors[PreviewColorId])) AddIcon(2, "help.color.icon.august");
             }
         }
         catch { }

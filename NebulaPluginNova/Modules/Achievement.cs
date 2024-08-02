@@ -396,7 +396,7 @@ public class CompleteAchievement : SumUpAchievement
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
 static public class NebulaAchievementManager
 {
     static public DataSaver AchievementDataSaver = new("Achievements");
@@ -501,6 +501,7 @@ static public class NebulaAchievementManager
             bool secret = false;
             bool seasonal = false;
             bool isNotChallenge = false;
+            bool isRecord = false;
             IEnumerable<ProgressRecord>? records = recordsList;
 
             int rarity = int.Parse(args[1]);
@@ -535,6 +536,9 @@ static public class NebulaAchievementManager
                     case "builtIn-death":
                         records = deathRecord;
                         break;
+                    case "isRecord":
+                        isRecord = true;
+                        break;
                     case string a when a.StartsWith("record-"):
                         if (allRecords.TryGetValue(a.Substring(7), out var r))
                             recordsList.Add(r);
@@ -562,10 +566,12 @@ static public class NebulaAchievementManager
             if (type == null && secret) type = AchievementType.Secret;
             else if (seasonal) type = AchievementType.Seasonal;
 
-            if(records.Count() > 0)
+            if (isRecord)
+                new DisplayProgressRecord(args[0], goal, "record." + args[0]);
+            else if (records.Count() > 0)
                 new CompleteAchievement(records.ToArray(), secret, noHint, args[0], (relatedRole, type), rarity);
             else if (goal > 1)
-                new SumUpAchievement(secret,noHint,args[0], goal, (relatedRole, type),rarity);
+                new SumUpAchievement(secret, noHint, args[0], goal, (relatedRole, type), rarity);
             else
                 new StandardAchievement(clearOnce, secret, noHint, args[0], goal, (relatedRole, type), rarity);
 

@@ -1,5 +1,9 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behaviour;
+using UnityEngine;
+using Virial;
+using Virial.Events.Game;
+using Virial.Events.Game.Minimap;
 
 namespace Nebula.Extensions;
 
@@ -186,11 +190,70 @@ public static class ShipExtension
         }
     }
 
-    private static void ModifyEarlierFungle() { }
+    private static SpriteLoader fungleLight1Sprite = SpriteLoader.FromResource("Nebula.Resources.FungleLightConsole1.png", 100f);
+    private static SpriteLoader fungleLight2Sprite = SpriteLoader.FromResource("Nebula.Resources.FungleLightConsole2.png", 100f);
+    private static SpriteLoader fungleLight3Sprite = SpriteLoader.FromResource("Nebula.Resources.FungleLightConsole3.png", 100f);
+
+    private static void ModifyEarlierFungle() {
+        int lightConsoleId = 0;
+        Console SetUpAsLightConsole(Console console)
+        {
+            console.AllowImpostor = true;
+            console.GhostsIgnored = true;
+            console.TaskTypes = new TaskTypes[] { TaskTypes.FixLights };
+            console.ConsoleId = lightConsoleId++;
+            return console;
+        }
+        if (GeneralConfigurations.FungleLightJungleOption.Value) SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightJungle", fungleLight1Sprite.GetSprite(), new(-6.9618f, -5.9982f), 0f));
+        if(GeneralConfigurations.FungleLightDropshipOption.Value) SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightDropship", fungleLight2Sprite.GetSprite(), new(-7.8f, 13.46f), 0f));
+        if (GeneralConfigurations.FungleLightMiningPitOption.Value)
+        {
+            var miningConsole = SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightMining", fungleLight3Sprite.GetSprite(), new(13.68f, 7.83f), 0f));
+            UnityHelper.CreateObject<BoxCollider2D>("Collider", miningConsole.transform, new(0f, 0f, 0f)).size = new(0.6f, 0.3f);
+        }
+    }
+
+    private static bool FungleHasLightSabotage => GeneralConfigurations.FungleLightJungleOption.Value || GeneralConfigurations.FungleLightDropshipOption.Value || GeneralConfigurations.FungleLightMiningPitOption.Value;
     private static void ModifyFungle()
     {
         //しばらくの措置として見た目チェンジサボ廃止
         ShipStatus.Instance.MapPrefab.infectedOverlay.transform.GetChild(6).GetChild(0).gameObject.SetActive(false);
+
+        //停電サボタージュ
+        if(FungleHasLightSabotage)
+        {
+            GameOperatorManager.Instance.Register<MapInstantiateEvent>(ev =>
+            {
+                var infected = MapBehaviour.Instance.infectedOverlay;
+                var lightOut = GameObject.Instantiate(VanillaAsset.MapAsset[0].MapPrefab.infectedOverlay.transform.GetChild(3).GetChild(1).gameObject, infected.transform);
+                lightOut.transform.localPosition = new(-1.2788f, 1.5801f, -2f);
+                lightOut.transform.localScale = new(0.8f, 0.8f, 1f);
+                var renderer = lightOut.GetComponent<SpriteRenderer>();
+                renderer.SetCooldownNormalizedUvs();
+                var button = lightOut.GetComponent<ButtonBehavior>();
+                button.OnClick = new();
+                button.OnClick.AddListener(() =>
+                {
+                    if (!infected.CanUseSabotage) return;
+                    ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Sabotage, (byte)SystemTypes.Electrical);
+                });
+                var allButtons = infected.allButtons.ToList();
+                allButtons.Add(button);
+                infected.allButtons = allButtons.ToArray();
+
+                GameOperatorManager.Instance.Register<GameHudUpdateEvent>(ev =>
+                {
+                    var perc = infected.DoorsPreventingSabotage ? 1f : infected.sabSystem.PercentCool;
+                    renderer.material.SetFloat("_Percent", perc);
+                }, new GameObjectLifespan(MapBehaviour.Instance.gameObject));
+            }, Virial.NebulaAPI.CurrentGame!);
+            var switchSystem = new SwitchSystem();
+            ShipStatus.Instance.Systems[SystemTypes.Electrical] = switchSystem.CastFast<ISystemType>();
+            ShipStatus.Instance.Systems[SystemTypes.Sabotage].CastFast<SabotageSystemType>().specials.Add(switchSystem.CastFast<IActivatable>());
+            var specialTasks = ShipStatus.Instance.SpecialTasks.ToList();
+            specialTasks.Add(VanillaAsset.MapAsset[0].SpecialTasks[1]);
+            ShipStatus.Instance.SpecialTasks = specialTasks.ToArray();
+        }
 
         if (GeneralConfigurations.FungleSimpleLaboratoryOption.CurrentValue) ModifyLaboratory();
 
@@ -297,9 +360,8 @@ public static class ShipExtension
 
     private static Console CreateConsole(SystemTypes room, string objectName, Sprite sprite, Vector2 pos, float z)
     {
-        if (!ShipStatus.Instance.FastRooms.ContainsKey(room)) return null!;
         GameObject obj = new GameObject(objectName);
-        obj.transform.SetParent(ShipStatus.Instance.FastRooms[room].transform);
+        obj.transform.SetParent(ShipStatus.Instance.FastRooms.TryGetValue(room, out var roomObj) ? roomObj.transform : ShipStatus.Instance.transform);
         obj.transform.localPosition = (Vector3)pos - new Vector3(0, 0, z);
         SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;

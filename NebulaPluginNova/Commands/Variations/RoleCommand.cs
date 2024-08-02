@@ -20,7 +20,7 @@ public class RoleCommand : ICommand
 
         IEnumerable<GamePlayer> players = null!;
         CoTask<ICommandToken> task = arguments[0].AsEnumerable(env).AsParallel<GamePlayer>(env).Action(p => players = p);
-
+        
         if(arguments.Count == 1)
         {
             return task.Chain(_ =>

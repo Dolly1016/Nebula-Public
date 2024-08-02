@@ -60,7 +60,7 @@ internal class PlayersIconHolder : INebulaScriptComponent, IGameOperator
 
     public void Remove(PlayerIconInfo icon)
     {
-        if (icons.Remove(icon)) GameObject.Destroy(icon.Icon);
+        if (icons.Remove(icon)) GameObject.Destroy(icon.Icon.gameObject);
         UpdateIcons();
     }
 

@@ -284,7 +284,7 @@ static public class ArgumentTableHelper
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class FunctionalSpace
 {
     private Dictionary<string, TextFunction> allFunctions = new();

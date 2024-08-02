@@ -1,14 +1,17 @@
 ﻿using NAudio.CoreAudioApi;
 using Nebula.Compat;
+using Nebula.Modules.GUIWidget;
 using Nebula.Scripts;
 using System.Reflection;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Runtime;
+using Virial.Text;
+using static Nebula.Configuration.ConfigurationValues;
 
 namespace Nebula.Roles;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PreRoles)]
+[NebulaPreprocess(PreprocessPhase.PreRoles)]
 internal class NoSRoleSetUp
 {
     static private void SetTabs()
@@ -49,7 +52,7 @@ internal class NoSRoleSetUp
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixRoles)]
+[NebulaPreprocess(PreprocessPhase.FixRoles)]
 public class Roles
 {
     static public IReadOnlyList<DefinedRole> AllRoles { get; private set; } = null!;
@@ -141,18 +144,18 @@ public class Roles
         {
             if (role.ConfigurationHolder != null && role.AllocationParameters != null)
             {
-                if(role.ModifierFilter != null) role.ConfigurationHolder.AppendRelatedAction(new TranslateTextComponent("options.role.modifierFilter"), () => true, () => RoleOptionHelper.OpenFilterScreen("ModifierFilter", AllAllocatableModifiers().Where(m => role.CanLoadDefault(m)), m => role.ModifierFilter!.Test(m), m => role.ModifierFilter.ToggleAndShare(m)));
-                if (role.GhostRoleFilter != null) role.ConfigurationHolder.AppendRelatedAction(new TranslateTextComponent("options.role.ghostRoleFilter"), () => true, () => RoleOptionHelper.OpenFilterScreen("GhostRoleFilter", AllGhostRoles.Where(m => role.CanLoadDefault(m)), g => role.GhostRoleFilter!.Test(g), g => role.GhostRoleFilter.ToggleAndShare(g)));
+                if(role.ModifierFilter != null) role.ConfigurationHolder.AppendRelatedAction(new TranslateTextComponent("options.role.modifierFilter"), () => true, () => RoleOptionHelper.OpenFilterScreen<DefinedModifier>("ModifierFilter", AllAllocatableModifiers().Where(m => role.CanLoadDefault(m)), m => role.ModifierFilter));
+                if (role.GhostRoleFilter != null) role.ConfigurationHolder.AppendRelatedAction(new TranslateTextComponent("options.role.ghostRoleFilter"), () => true, () => RoleOptionHelper.OpenFilterScreen("GhostRoleFilter", AllGhostRoles.Where(m => role.CanLoadDefault(m)), g => role.GhostRoleFilter));
             }
         }
 
         foreach(var modifier in AllAllocatableModifiers())
             if (modifier.ConfigurationHolder != null)
-                modifier.ConfigurationHolder.AppendRelatedAction(new TranslateTextComponent("options.role.modifierFilter"), () => true, () => RoleOptionHelper.OpenFilterScreen("RoleFilter", AllRoles.Where(r => r.CanLoadDefault(modifier)), r => (r.ModifierFilter?.Test(modifier) ?? false), r => r.ModifierFilter?.ToggleAndShare(modifier)));
+                modifier.ConfigurationHolder.AppendRelatedAction(new TranslateTextComponent("options.role.modifierFilter"), () => true, () => RoleOptionHelper.OpenFilterScreen("RoleFilter", AllRoles.Where(r => r.CanLoadDefault(modifier)), r => modifier.RoleFilter));
 
         foreach (var ghostRole in AllGhostRoles)
             if (ghostRole.ConfigurationHolder != null)
-                ghostRole.ConfigurationHolder.AppendRelatedAction(new TranslateTextComponent("options.role.ghostRoleFilter"), () => true, () => RoleOptionHelper.OpenFilterScreen("RoleFilter", AllRoles.Where(r => r.CanLoadDefault(ghostRole)), r => (r.GhostRoleFilter?.Test(ghostRole) ?? false), r => r.GhostRoleFilter?.ToggleAndShare(ghostRole)));
+                ghostRole.ConfigurationHolder.AppendRelatedAction(new TranslateTextComponent("options.role.ghostRoleFilter"), () => true, () => RoleOptionHelper.OpenFilterScreen("RoleFilter", AllRoles.Where(r => r.CanLoadDefault(ghostRole)), r => ghostRole.RoleFilter));
 
         //AllAssignables().Do(a => a.Load());
 
@@ -169,21 +172,77 @@ public class Roles
 
 internal static class RoleOptionHelper
 {
-    private static TextAttributeOld RelatedInsideButtonAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(1.1f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
+    private static TextAttribute RelatedOutsideButtonAttr = new TextAttribute(GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed)) { Size = new(1.2f, 0.29f) };
+    private static TextAttribute RelatedInsideButtonAttr = new TextAttribute(GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed)) { Size = new(1.14f, 0.26f), Font = GUI.API.GetFont(FontAsset.GothicMasked) };
 
-    static internal void OpenFilterScreen<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R,bool> test, Action<R> toggleAndShare, MetaScreen? screen = null) where R : DefinedAssignable
+    static internal void OpenFilterScreen<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, AssignableFilter<R>> filter, MetaScreen? screen = null) where R : DefinedAssignable
+        => OpenFilterScreen(scrollerTag, allRoles, r => filter.Invoke(r).Test(r), (r, val) => filter.Invoke(r).SetAndShare(r, val), r => filter.Invoke(r).ToggleAndShare(r), screen);
+    static internal void OpenFilterScreen<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R,bool>? setAndShare, Action<R> toggleAndShare, MetaScreen? screen = null) where R : DefinedAssignable
     {
-        if (!screen) screen = MetaScreen.GenerateWindow(new Vector2(5f, 3.2f), HudManager.Instance.transform, Vector3.zero, true, true);
+        if (!screen) screen = MetaScreen.GenerateWindow(new Vector2(6.7f, setAndShare != null ? 4.5f : 3.7f), HudManager.Instance.transform, Vector3.zero, true, true);
 
-        MetaWidgetOld inner = new();
-        inner.Append(allRoles, (r) => new MetaWidgetOld.Button(() => { toggleAndShare(r); OpenFilterScreen(scrollerTag, allRoles, test, toggleAndShare, screen); }, RelatedInsideButtonAttr)
+        bool showOnlySpawnable = ClientOption.AllOptions[ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter].Value == 1;
+
+        IEnumerable<R> allRolesFiltered = showOnlySpawnable ? allRoles.Where(r => (r as ISpawnable)?.IsSpawnable ?? true) : allRoles;
+
+        List<GUIWidget> shortcutButtons = new();
+        if(setAndShare != null)
         {
-            RawText = r.DisplayColordName,
-            PostBuilder = (button, renderer, text) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask,
-            Alignment = IMetaWidgetOld.AlignmentOption.Center,
-            Color = test(r) ? Color.white : new Color(0.14f, 0.14f, 0.14f)
-        }, 3, -1, 0, 0.6f);
+            void Append(string translationKey, Func<bool> isInvalid, Action<bool> onClicked)
+            {
+                var invalid = isInvalid.Invoke();
+                shortcutButtons.Add(new GUIButton(Virial.Media.GUIAlignment.Center, RelatedOutsideButtonAttr, GUI.API.LocalizedTextComponent(translationKey))
+                {
+                    Color = invalid ? Color.gray : Color.white,
+                    OnClick = _ =>
+                    {
+                        {
+                            //データのセーブと共有を一括で行う
+                            using var segment = new DataSaveSegment();
+                            using var shareSegment = new ConfigurationUpdateBlocker();
+                            onClicked.Invoke(invalid);
+                        }
+                        OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen);
+                    },
+                    AsMaskedButton = false
+                });
+            }
 
-        screen!.SetWidget(new MetaWidgetOld.ScrollView(new(5f, 3.1f), inner, true) { ScrollerTag = scrollerTag });
+            Append("roleFilter.shortcut.all", () => allRolesFiltered.Any(r => !test.Invoke(r)), val => allRolesFiltered.Do(r => setAndShare.Invoke(r, val)));
+
+            if (typeof(R).IsAssignableTo(typeof(DefinedRole)))
+            {
+                if (allRolesFiltered.Any(r => (r as DefinedRole)!.Category == RoleCategory.ImpostorRole))
+                {
+                    var impostors = allRolesFiltered.Where(r => (r as DefinedRole)!.Category == RoleCategory.ImpostorRole);
+                    Append("roleFilter.shortcut.allImpostor", () => impostors.Any(r => !test.Invoke(r)), val => impostors.Do(r => setAndShare.Invoke(r, val)));
+                }
+                if (allRolesFiltered.Any(r => (r as DefinedRole)!.Category == RoleCategory.NeutralRole))
+                {
+                    var neutrals = allRolesFiltered.Where(r => (r as DefinedRole)!.Category == RoleCategory.NeutralRole);
+                    Append("roleFilter.shortcut.allNeutral", () => neutrals.Any(r => !test.Invoke(r)), val => neutrals.Do(r => setAndShare.Invoke(r, val)));
+                }
+                if (allRolesFiltered.Any(r => (r as DefinedRole)!.Category == RoleCategory.CrewmateRole))
+                {
+                    var crewmates = allRolesFiltered.Where(r => (r as DefinedRole)!.Category == RoleCategory.CrewmateRole);
+                    Append("roleFilter.shortcut.allCrewmate", () => crewmates.Any(r => !test.Invoke(r)), val => crewmates.Do(r => setAndShare.Invoke(r, val)));
+                }
+            }
+        }
+
+        screen!.SetWidget(new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center,
+            new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, shortcutButtons),
+            new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, new NoSGUICheckbox(Virial.Media.GUIAlignment.Center, showOnlySpawnable) { OnValueChanged = val =>
+            {
+                ClientOption.AllOptions[ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter].Increament();
+                OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen);
+            } }, GUI.API.HorizontalMargin(0.2f), GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), "roleFilter.showOnlySpawnable")),
+            new GUIScrollView(Virial.Media.GUIAlignment.Center, new(6.5f, 3.1f), GUI.API.Arrange(Virial.Media.GUIAlignment.Center,
+            allRolesFiltered.Select(r => new GUIButton(Virial.Media.GUIAlignment.Center, RelatedInsideButtonAttr, GUI.API.RawTextComponent(r.DisplayColoredName)) { 
+                OnClick = _ => { toggleAndShare(r); OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen); },
+                Color = test(r) ? Color.white : new Color(0.14f, 0.14f, 0.14f),
+                AsMaskedButton = true,
+            })
+            , 4)) { ScrollerTag = scrollerTag, WithMask = true}), out _);
     }
 }

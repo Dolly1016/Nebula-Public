@@ -40,6 +40,8 @@
 "ui.citation.openUrl" : "Click to open the link."
 "ui.meeting.leftClick" : "LeftClick: Use Ability"
 "ui.meeting.rightClick": "RightClick: Change Ability"
+"ui.configuration.click" : "LeftClick: Open Configurations<br>RightClick: Copy Role Summary"
+"ui.configuration.copied" : "Copied!"
 "ui.discordWebhook.title" : "Discord Webhook"
 "ui.discordWebhook.current" : "Current URL"
 "ui.discordWebhook.urlFromClipboard" : "Paste URL"
@@ -92,6 +94,7 @@
 "ui.action.paparazzo.toggle" : "Change the direction of the viewfinder."
 "ui.action.mouseClick" : "Actions can also be triggered by clicking near the player."
 "ui.action.danceAction" : "Triggered by small, wiggling movements."
+"ui.action.cannon.mark" : "Mark where the air cannon will fire.<br>You open the map to fire the air cannon."
 
 # Versions
 
@@ -172,7 +175,7 @@
 "options.map.ziplineCoolDown" : "Zipline Cooldown"
 "options.map.customization" : "Map Customization"
 "options.map.customization.skeld.useAdmin" : "Admin Console"
-"options.map.customization.skeld.cafeteriaVent" : "Extra Vent (Cafeteria)"
+"options.map.customization.skeld.cafeVent" : "Extra Vent (Cafeteria)"
 "options.map.customization.skeld.storageVent" : "Extra Vent (Storage)"
 "options.map.customization.skeld.reactorDuration" : "Reactor Sabo."
 "options.map.customization.skeld.lifeSupportDuration" : "O2 Sabo."
@@ -201,6 +204,9 @@
 "options.map.customization.fungle.glowingMushroom" : "Glowing Mushroom"
 "options.map.customization.fungle.quickPaceDoorMinigame" : "Quick Pace Door Minigame"
 "options.map.customization.fungle.reactorDuration" : "Reactor Sabo."
+"options.map.customization.fungle.blackOutDropship" : "Blackout Console (Dropship)"
+"options.map.customization.fungle.blackOutJungle" : "Blackout Console (Jungle)"
+"options.map.customization.fungle.blackOutMiningPit" : "Blackout Console (Mining Pit)"
 
 "options.meeting" : "Meeting Options"
 "options.meeting.detail" : "About meeting"
@@ -211,6 +217,7 @@
 "options.meeting.showRoleOfExiled" : "Confirm Role Of Exiled"
 "options.meeting.extraEmergencyCooldownInTheEarly" : "Extra Emergency Cooldown In The Early"
 "options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "# Deaths Required To End The Early"
+"options.meeting.waitingForHost" : "Please Wait..."
 
 "options.consoleRestriction" : "Console Restriction"
 "options.consoleRestriction.detail" : "About restriction for vitals, admin and cameras"
@@ -245,6 +252,8 @@
 "options.role.neutralCount" : "Neutral Assignment"
 "options.role.definiteCount" : "Definitely"
 "options.role.randomCount" : "Randomly"
+"options.role.maxCount" : "Max Assignment"
+"options.role.maxCount.unlimited" : "Unlimited"
 
 "options.killCoolDown.type.immediate" : "Immediate"
 "options.killCoolDown.type.relative" : "Relative"
@@ -281,6 +290,7 @@
 "role.category.impostor" : "Impostor Roles"
 "role.category.neutral" : "Neutral Roles"
 "role.category.ghost" : "Ghost Roles"
+"role.category.modifier" : "Modifiers"
 
 # Complex Roles
 
@@ -337,6 +347,15 @@
 "options.role.busker.pseudocideDuration" : "Pseudocide Duration"
 "options.role.busker.hidePseudocideFromVitals" : "Hide Pseudocide From Vitals"
 
+"role.cannon.name" : "Cannon"
+"role.cannon.short" : "C"
+"role.cannon.blurb" : "Blow It Away!"
+"options.role.cannon.detail" : "Canon's air cannon blows away surrounding players."
+"options.role.cannon.markCoolDown" : "Mark Cooldown"
+"options.role.cannon.numOfMarks" : "# Marks Can Be Placed At The Same Time"
+"options.role.cannon.cannonPower" : "Cannon Power"
+"options.role.cannon.cannonPowerAttenuation" : "Cannon Power Attenuation"
+
 "role.collator.name" : "Collator"
 "role.collator.short" : "C"
 "role.collator.blurb" : "Do Experiments"
@@ -345,8 +364,9 @@
 "options.role.collator.selectiveCollating" : "Selective Collating"
 "options.role.collator.maxTrials" : "Max Trials"
 "options.role.collator.maxTrialsPerMeeting" : "Max Trials Per Meeting"
-"options.role.collator.numOfTubes" : "Num Of Tubes"
+"options.role.collator.numOfTubes" : "# Tubes"
 "options.role.collator.carringOverSamples" : "Carring Over Samples"
+"options.role.collator.canTakeDuplicateSample" : "Can Take Duplicate Samples"
 "options.role.collator.strictClassificationForNeutralRoles" : "Strict Classification For Neutral Roles"
 "options.role.collator.madmateIsClassifiedAs" : "Madmate Is Classified As..."
 "options.role.collator.madmateIsClassifiedAs.impostor" : "Impostor"
@@ -381,36 +401,14 @@
 "role.justice.blurb" : "Achieve Justice"
 "options.role.justice.detail" : "Justice can put two players on the balance<br>and begin a special meeting."
 "options.role.justice.putJusticeOnTheBalance" : "Put Justice On The Balance"
-
-"role.necromancer.name" : "Necromancer"
-"role.necromancer.short" : "N"
-"role.necromancer.blurb" : "Revive Phantoms"
-"options.role.necromancer.detail" : "Necromancer can raise dead bodies from the dead!<br>They drags a corpse for a resurrection ritual."
-"options.role.necromancer.reviveCoolDown" : "Revive Cooldown"
-"options.role.necromancer.reviveDuration" : "Revive Duration"
-"options.role.necromancer.detectedRange" : "Detected Range"
-"options.role.necromancer.reviveMinRange" : "Revive Room Min Distance"
-"options.role.necromancer.reviveMaxRange" : "Revive Room Max Distance"
-"role.necromancer.phantomMessage" : "Please take me to %ROOM%..."
-
-"role.niceGuesser.name" : "Nice Guesser"
-"role.niceGuesser.short" : "G"
-"role.niceGuesser.blurb" : "Guess and Shoot"
-"options.role.niceGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
-
-"role.niceTrapper.name" : "Nice Trapper"
-"role.niceTrapper.short" : "T"
-"role.niceTrapper.blurb" : "Entrap and Find the Impostors"
-"options.role.niceTrapper.detail" : "Nice Trapper sets traps with various effects."
-"options.role.niceTrapper.costOfCommTrap" : "Cost Of Comm. Trap"
-"options.role.niceTrapper.commTrapSize" : "Comm. Trap Size"
+"options.role.justice.justiceMeetingTime" : "Justice Meeting Time"
 
 "role.madmate.name" : "Madmate"
 "role.madmate.short" : "Ma"
 "role.madmate.blurb" : "Assist Impostors"
 "options.role.madmate.detail" : "Madmate is on the side of imposters.<br>Obstruct crewmates to help imposters win."
 "options.role.madmate.canIdentifyImpostors" : "Can Identify Impostors"
-"options.role.madmate.requiredTasksForIdentifying" : "Can Identify Impostors"
+"options.role.madmate.requiredTasksForIdentifying" : "# Tasks To Identify Impostors"
 "options.role.madmate.embroilPlayersOnExile" : "Embroil Players On Exile"
 "options.role.madmate.limitEmbroiledPlayersToVoters" : "Limit Embroiled Players To Voters"
 "options.role.madmate.canFixLight" : "Can Fix Light"
@@ -429,6 +427,36 @@
 "options.role.mayor.maxVotesStock" : "# Max Votes Stock"
 "options.role.mayor.voteAssignment" : "# Vote Assignment On Meeting"
 
+"role.necromancer.name" : "Necromancer"
+"role.necromancer.short" : "N"
+"role.necromancer.blurb" : "Revive Phantoms"
+"options.role.necromancer.detail" : "Necromancer can raise dead bodies from the dead!<br>They drags a corpse for a resurrection ritual."
+"options.role.necromancer.reviveCoolDown" : "Revive Cooldown"
+"options.role.necromancer.reviveDuration" : "Revive Duration"
+"options.role.necromancer.detectedRange" : "Detected Range"
+"options.role.necromancer.reviveMinRange" : "Revive Room Min Distance"
+"options.role.necromancer.reviveMaxRange" : "Revive Room Max Distance"
+"role.necromancer.phantomMessage" : "Please take me to %ROOM%..."
+"role.necromancer.reviveRange" : "Necromancer<color=white>: Detected Range</color>"
+
+"role.niceGuesser.name" : "Nice Guesser"
+"role.niceGuesser.short" : "G"
+"role.niceGuesser.blurb" : "Guess and Shoot"
+"options.role.niceGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+
+"role.niceTrapper.name" : "Nice Trapper"
+"role.niceTrapper.short" : "T"
+"role.niceTrapper.blurb" : "Entrap and Find the Impostors"
+"options.role.niceTrapper.detail" : "Nice Trapper sets traps with various effects."
+"options.role.niceTrapper.costOfCommTrap" : "Cost Of Comm. Trap"
+"options.role.niceTrapper.commTrapSize" : "Comm. Trap Size"
+
+"role.noisemaker.name" : "Noisemaker"
+"role.noisemaker.short" : "N"
+"role.noisemaker.blurb" : "Send out an alert when killed"
+"options.role.noisemaker.detail" : "Noisemaker send out an alert when killed."
+"options.role.noisemaker.noiseDuration" : "Noise Duration"
+
 "role.phosphorus.name" : "Phosphorus"
 "role.phosphorus.short" : "P"
 "role.phosphorus.blurb" : "Pierce the Darkness"
@@ -438,6 +466,22 @@
 "options.role.phosphorus.lampCoolDown" : "Lamp Cooldown"
 "options.role.phosphorus.lampDuration" : "Lamp Duration"
 "options.role.phosphorus.lampStrength" : "Lamp Strength"
+
+"role.psychic.name" : "Psychic"
+"role.psychic.short" : "P"
+"role.psychic.blurb" : "Let Me Hear More"
+"options.role.psychic.detail" : "Psychics can obtain more information about reported bodies."
+"options.role.psychic.searchCooldown" : "Search Cooldown"
+"options.role.psychic.searchDuration" : "Search Duration"
+"options.role.psychic.message.elapsedTime" : "I died about %SEC%s ago..."
+"options.role.psychic.message.killersColor" : "My killer color was %COLOR%"
+"options.role.psychic.message.killersRole" : "My killer's role is %ROLE%"
+"options.role.psychic.message.killerIsDead" : "私をキルしたプレイヤーはもう死んでいる"
+"options.role.psychic.message.myRole" : "My role is %ROLE%"
+"options.role.psychic.message.myState" : "I have been %STATE%..."
+"options.role.psychic.message.inner.darkColor" : "dark"
+"options.role.psychic.message.inner.lightColor" : "light"
+"options.role.psychic.message.header" : "Sprit Message"
 
 "role.provocateur.name" : "Provocateur"
 "role.provocateur.short" : "P"
@@ -459,6 +503,7 @@
 "role.sheriff.blurb" : "Shoot the Impostor"
 "options.role.sheriff.detail" : "Sheriff can kill other members.<br>Attempting to kill a Crewmate will die instead."
 "options.role.sheriff.canKillMadmate" : "Can Kill Madmate"
+"options.role.sheriff.canKillLovers" : "Can Kill Lovers"
 "options.role.sheriff.killCoolDown" : "Kill Cooldown"
 "options.role.sheriff.numOfShots" : "Num Of Shots"
 "options.role.sheriff.canKillHidingPlayer" : "Can Kill Hiding Player"
@@ -474,6 +519,7 @@
 "options.role.ubiquitous.detectionRadious" : "Detection Radious"
 "options.role.ubiquitous.doorHackCoolDown" : "Door Hacking Cooldown"
 "options.role.ubiquitous.doorHackRadious" : "Door Hacking Radious"
+"role.ubiquitous.droneRange" : "Ubiquitous<color=white>: Drone Detection Radious</color>"
 
 # Impostor Roles
 
@@ -525,6 +571,7 @@
 "options.role.destroyer.phasesOfDestroying" : "Phases Of Destroying"
 "options.role.destroyer.killSEStrength" : "Kill SE Strength"
 "options.role.destroyer.leaveKillEvidence" : "Leave Kill Evidence"
+"options.role.destroyer.canReportKillScene" : "Can Report Kill Scene"
 
 "role.disturber.name" : "Disturber"
 "role.disturber.short" : "Di"
@@ -560,8 +607,11 @@
 "options.role.evilTracker.taskTracking.on" : "On"
 "options.role.evilTracker.updateArrowInterval" : "Update Arrow Interval"
 "options.role.evilTracker.canChangeTarget" : "Can Change Target"
+"options.role.evilTracker.canChangeTargetOnMeeting" : "Can Change Target On Meeting"
 "options.role.evilTracker.trackImpostors" : "Track Impostors"
 "options.role.evilTracker.showTrackingTargetOnMap" : "Show Tracking Target On Map"
+"options.role.evilTracker.canCheckTrackingTasksInTaskPhase" : "Can Check Tracking Tasks In Task Phase"
+"options.role.evilTracker.showWhereTrackingIs" : "Show Where Tracking Is"
 
 "role.evilTrapper.name" : "Evil Trapper"
 "role.evilTrapper.short" : "Tp"
@@ -570,6 +620,16 @@
 "options.role.evilTrapper.killTrapSoundDistance" : "Kill Trap Sound Distance"
 "options.role.evilTrapper.costOfKillTrap" : "Cost Of Kill Trap"
 "options.role.evilTrapper.killTrapSize" : "Kill Trap Size"
+
+"role.hadar.name" : "Hadar"
+"role.hadar.short" : "H"
+"role.hadar.blurb" : "Crawling Darkness"
+"options.role.hadar.detail" : "Hadar can move freely underground.<br>Underground Hadar is invisible to other players."
+"options.role.hadar.diveCooldown" : "Dive Cooldown"
+"options.role.hadar.accelRateUnderground" : "Accel Rate Underground"
+"options.role.hadar.gushFromVents" : "Gush From Vents"
+"options.role.hadar.ventDetectionRange" : "Vent Detection Range"
+"options.role.hadar.leftDivingEvidence" : "Left Diving Evidence"
 
 "role.illusioner.name" : "Illusioner"
 "role.illusioner.short" : "Il"
@@ -588,6 +648,7 @@
 "role.jailer.blurb" : "Be Under the Control"
 "options.role.jailer.detail" : "Jailer is an impostor who commits crimes in a planned way.<br>They has the portable admin."
 "options.role.jailer.canMoveWithMapWatching" : "Can Move With Map Watching"
+"options.role.jailer.canUseAdminOnMeeting" : "Can Use Admin On Meeting"
 "options.role.jailer.canIdentifyDeadBodies" : "Can Identify Dead Bodies"
 "options.role.jailer.canIdentifyImpostors" : "Can Identify Impostors"
 "options.role.jailer.inheritAbilityOnDying" : "Inherit Ability On Dying"
@@ -627,6 +688,7 @@
 "options.role.raider.axeSize" : "Axe Size"
 "options.role.raider.axeSpeed" : "Axe Speed"
 "options.role.raider.canKillImpostor" : "Can Kill Impostor"
+"role.raider.axeSize" : "Raider<color=white>: Axe Size</color>"
 
 "role.reaper.name" : "Reaper"
 "role.reaper.short" : "Re"
@@ -648,6 +710,9 @@
 "options.role.sniper.aimAssist" : "Aim Assist"
 "options.role.sniper.delayInAimAssistActivation" : "Delay In Aim Assist Activation"
 "options.role.sniper.canKillImpostor" : "Can Kill Impostor"
+"role.sniper.shotRange" : "Sniper: <color=white>Shot Effective Range</color>"
+"role.sniper.soundRange" : "Sniper: <color=white>Shot Notice Effective Range</color>"
+"role.sniper.shotSize" : "Sniper<color=white>: Shot Size</color>"
 
 "role.stirrer.name" : "Stirrer"
 "role.stirrer.short" : "St"
@@ -695,9 +760,11 @@
 "options.role.dancer.numOfSuccessfulForecastToWin" : "Num Of Successful Forecast To Win"
 "options.role.dancer.danceCoolDown" : "Dance Cooldown"
 "options.role.dancer.danceDuration" : "Dance Duration"
+"options.role.dancer.danceRange" : "Dance Range"
 "options.role.dancer.forecastDuration" : "Forecast Duration"
 "options.role.dancer.finalDance" : "Last Dance Mode"
 "options.role.dancer.deathNotification" : "Death Notification"
+"options.role.dancer.forecastedFollowingSuicide" : "Following Suicide Of The Forecasted"
 "role.dancer.taskDanceText" : "Predict Death with Dance"
 "role.dancer.taskFinalText" : "Show Players The Last Dance To Win"
 
@@ -746,11 +813,39 @@
 
 # Ghost Roles
 
+"role.grudge.name" : "Grudge"
+"role.grudge.short" : "G"
+"options.role.grudge.detail" : "Grudge is a ghost that appears nearby."
+"options.role.grudge.totalStandingTimeToWin" : "Total Standing Time To Win"
+"role.grudge.taskText" : "Stand Beside Players"
+
+"role.clog.name" : "Clog"
+"role.clog.short" : "C"
+"options.role.clog.detail" : "Clog can invoke the ghost with collider."
+"options.role.clog.ghostDuration" : "Ghost Duration"
+"options.role.clog.numOfGhost" : "# Of Ghost"
+"options.role.clog.ghostSize" : "Ghost Size"
+"role.clog.ghostSize" : "Clog<color=white>: Ghost Size</color>"
+
+"role.hallucination.name" : "Hallucination"
+"role.hallucination.blurb" : "False Memory"
+"role.hallucination.short" : "H"
+"options.role.hallucination.detail" : "Hallucination invokes false-player and operates."
+"options.role.hallucination.hallucinationCooldown" : "Hallucination Cooldown"
+"options.role.hallucination.hallucinationDuration" : "Hallucination Duration"
+
 "role.lumine.name" : "Lumine"
 "role.lumine.short" : "L"
 "options.role.lumine.detail" : "Lumine can emit light once during the game."
 "options.role.lumine.lightSize" : "Light Size"
 "options.role.lumine.lightDuration" : "Light Duration"
+
+"role.noiseghost.name" : "Noiseghost"
+"role.noiseghost.short" : "N"
+"options.role.noiseghost.detail" : "Noiseghost can send an alert anywhere."
+"options.role.noiseghost.noiseDuration" : "Noise Duration"
+"options.role.noiseghost.numOfNoise" : "# Noises"
+"options.role.noiseghost.noiseCooldown" : "Noise Cooldown"
 
 "role.poltergeist.name" : "Poltergeist"
 "role.poltergeist.short" : "P"
@@ -808,6 +903,7 @@
 "options.role.obsessional.impostorObsessionalObsessesOver.default" : "Default"
 "options.role.obsessional.impostorObsessionalObsessesOver.neutralOnly" : "Neutral Only"
 "options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate" : "Non-Crewmate"
+"role.obsessional.taskText" : "[Obsessional] Target is %PLAYER%."
 
 "role.secret.name" : "Secret"
 "role.secret.short" : "?"
@@ -891,7 +987,9 @@
 "location.airship.mainHall" : "Main Hall"
 "location.airship.kitchen" : "Kitchen"
 "location.airship.record" : "Records"
+"location.airship.records" : "Records"
 "location.airship.storage" : "Cargo Bay"
+"location.airship.cargoBay" : "Cargo Bay"
 "location.airship.armory" : "Armory"
 "location.airship.cockpit" : "Cockpit"
 "location.airship.comms" : "Comms."
@@ -902,10 +1000,12 @@
 "location.airship.meetingRoom" : "Meeting Room"
 "location.airship.security" : "Security"
 "location.airship.shower" : "Shower"
+"location.airship.showers" : "Shower"
 "location.airship.toilet" : "Toilet"
 "location.airship.vault" : "Vault"
 "location.airship.vaultRoom" : "Vault"
 "location.airship.viewingDeck" : "Viewing Deck"
+"location.airship.hallOfPortraits" : "Hall of Portraits"
 "location.fungle.beach" : "Beach"
 "location.fungle.cafeteria" : "Cafeteria"
 "location.fungle.campfire" : "Campfire"
@@ -926,6 +1026,7 @@
 "location.fungle.storage" : "Storage"
 "location.fungle.sleepingQuarters" : "The Dorm"
 "location.fungle.upperEngine" : "Upper Engine"
+"location.outside" : "Outside"
 
 # Button
 
@@ -944,9 +1045,12 @@
 "button.label.embroil" : "embroil"
 "button.label.equip" : "equip"
 "button.label.fakeSabotage" : "fake sabo"
+"button.label.ghost" : "ghost"
+"button.label.hallucination" : "hallucination"
 "button.label.ignite" : "ignite"
 "button.label.kill" : "kill"
 "button.label.lantern" : "lantern"
+"button.label.mark" : "mark"
 "button.label.monitor" : "monitor"
 "button.label.morph" : "morph"
 "button.label.operate" : "operate"
@@ -957,8 +1061,10 @@
 "button.label.release" : "release"
 "button.label.revive" : "revive"
 "button.label.sample" : "sample"
+"button.label.search" : "search"
 "button.label.shift" : "shift"
 "button.label.shot" : "shot"
+"button.label.show" : "show"
 "button.label.sidekick" : "sidekick"
 "button.label.snipe" : "snipe"
 "button.label.stir" : "stir"
@@ -978,6 +1084,10 @@
 "button.label.poltergeist" : "poltergeist"
 "button.label.dance" : "dance"
 "button.label.suicide" : "suicide"
+"button.label.noise" : "noise"
+"button.label.dive" : "dive"
+"button.label.gush" : "gush"
+"button.label.task" : "task"
 
 # Game
 
@@ -990,6 +1100,14 @@
 "game.meeting.roleText" : "%PLAYER% is %ROLE%."
 "game.meeting.roleJesterText" : "Hahaha..."
 "game.meeting.multiple" : "Both were exiled."
+"game.meeting.obvious" : "The result is as clear as day."
+"game.meeting.justiceMeeting" : "Which Will Be Exiled?"
+
+"game.metaAbility.tabs.roles" : "Roles"
+"game.metaAbility.tabs.modifiers" : "Modifiers"
+"game.metaAbility.tabs.ghostRoles" : "Ghost Roles"
+"game.metaAbility.equipped" : "Equipped"
+"game.metaAbility.unequipped" : "Unequipped"
 
 # Statistics
 
@@ -1053,12 +1171,14 @@
 
 "end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
 "end.extra.obsessional" : " <color=#FFFFFF>with</color> Obsessional"
+"end.extra.grudge" : " <color=#FFFFFF>with</color> Grudge"
 
 # Help
 
 "help.tabs.myInfo" : "My Role"
 "help.tabs.roles" : "Roles"
 "help.tabs.modifiers" : "Modifiers"
+"help.tabs.overview" : "Overview"
 "help.tabs.options" : "Options"
 "help.tabs.slides" : "Slides"
 "help.tabs.achievements" : "Titles"
@@ -1154,6 +1274,7 @@
 "config.client.buttonArrangement.default" : "Default"
 "config.client.buttonArrangement.raiseOnlyLeft" : "Raise Only Left"
 "config.client.buttonArrangement.raiseBoth" : "Raise Both Bottoms"
+"config.client.showNebulaLogoInLobby" : "Show NoS Logo"
 "config.client.webhook" : "Discord Webhook"
 
 # Preset
@@ -1256,12 +1377,15 @@
 "devStudio.ui.cosmetics.attributes.climb" : "Climb"
 "devStudio.ui.cosmetics.attributes.enterVent" : "Enter Vent"
 "devStudio.ui.cosmetics.attributes.exitVent" : "Exit Vent"
+"devStudio.ui.cosmetics.attributes.adaptiveImage" : "Adaptive Image"
 "devStudio.ui.cosmetics.attributes.preview" : "Preview"
 "devStudio.ui.cosmetics.attributes.adaptive" : "Adaptive"
 "devStudio.ui.cosmetics.attributes.bounce" : "Bounce"
 "devStudio.ui.cosmetics.attributes.hideHands" : "Hide Hands"
 "devStudio.ui.cosmetics.attributes.isSkinny" : "Is Skinny"
 "devStudio.ui.cosmetics.attributes.behindHat" : "Behind Hat"
+"devStudio.ui.cosmetics.attributes.backmostBack" : "Backmost Back"
+"devStudio.ui.cosmetics.attributes.adaptiveInFront" : "Adaptive In Front"
 "devStudio.ui.cosmetics.hint.needToSetTitle" : "Enter the costume's name!"
 "devStudio.ui.cosmetics.failedToCopy" : "Failed to copy the file."
 "devStudio.ui.cosmetics.confirmOverwrite" : "A file with the same name already exists.<br>Are you sure you want to overwrite it?"
@@ -1300,6 +1424,20 @@
 
 "help.color.icon.april0" : "This color is eligible for the April title."
 "help.color.icon.april1" : "This color is eligible for the April title."
+"help.color.icon.august" : "This color is eligible for the August title."
+"help.rolePreview.header" : "Role Categories"
+"help.rolePreview.modImpostor" : "Impostor (Mod)"
+"help.rolePreview.vanillaImpostor" : "Impostor"
+"help.rolePreview.modNeutral" : "Neutral (Mod)"
+"help.rolePreview.modCrewmate" : "Crewmate (Mod)"
+"help.rolePreview.vanillaCrewmate" : "Crewmate"
+"help.rolePreview.category.impostor" : "Impostor"
+"help.rolePreview.category.neutral" : "Neutral"
+"help.rolePreview.category.crewmate" : "Crewmate"
+"help.rolePreview.inner.100" : "100%"
+"help.rolePreview.inner.random" : "Random"
+"help.rolePreview.inner.modifiers" : "Modifiers"
+"help.rolePreview.inner.ghostRoles" : "Ghost Roles"
 
 # Tag
 
@@ -1307,6 +1445,7 @@
 "configuration.tag.beginner" : "This role is recommended for beginners too."
 "configuration.tag.funny" : "This role has unique abilities."
 "configuration.tag.difficult" : "This role requires difficult operations."
+"configuration.tag.superNewRoles" : "This is a role in SNR collab."
 
 # Hint
 
@@ -1382,3 +1521,22 @@
 "marketplace.type.cosmetics" : "Cosmetics"
 "marketplace.searchMore.addons" : "Search more addons by "%QUERY%""
 "marketplace.searchMore.cosmetics" : "Search more cosmetics by "%QUERY%""
+
+# Role Filter
+
+"roleFilter.none" : "None"
+"roleFilter.separator" : ", "
+"roleFilter.categorySeparator" : "; "
+"roleFilter.exceptPattern.all" : "All roles except %ROLES%"
+"roleFilter.exceptPattern.crewmate" : "Crewmates except %ROLES%"
+"roleFilter.exceptPattern.impostor" : "Impostors except %ROLES%"
+"roleFilter.exceptPattern.neutral" : "Neutral except %ROLES%"
+"roleFilter.allPattern.all" : "All"
+"roleFilter.allPattern.crewmate" : "All Crewmates"
+"roleFilter.allPattern.impostor" : "All Impostors"
+"roleFilter.allPattern.neutral" : "All Neutral"
+"roleFilter.shortcut.all" : "All"
+"roleFilter.shortcut.allImpostor" : "Impostor"
+"roleFilter.shortcut.allNeutral" : "Neutral"
+"roleFilter.shortcut.allCrewmate" : "Crewmates"
+"roleFilter.showOnlySpawnable" : "Show only spawnable roles"

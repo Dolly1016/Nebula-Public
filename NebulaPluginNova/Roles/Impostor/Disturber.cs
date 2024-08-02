@@ -1,19 +1,23 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
+using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using TMPro;
+using UnityEngine.UIElements;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Game.Minimap;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
+using static Nebula.Roles.Crewmate.Cannon;
 
 namespace Nebula.Roles.Impostor;
 
 public class Disturber : DefinedRoleTemplate, DefinedRole
 {
-    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
+    [NebulaPreprocess(PreprocessPhase.PostRoles)]
     [NebulaRPCHolder]
     public class DisturbPole : NebulaSyncStandardObject
     {
@@ -75,6 +79,30 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
 
     static public Disturber MyRole = new Disturber();
 
+    
+    public class DisturberMapLayer : MonoBehaviour
+    {
+        public record DisturbPolesSet(LineRenderer renderer, DisturbPole[] poles);
+        static DisturberMapLayer() => ClassInjector.RegisterTypeInIl2Cpp<DisturberMapLayer>();
+
+        private List<DisturbPolesSet> poles = null!;
+        
+        void Awake()
+        {
+            poles = new();
+        }
+        void Update()
+        {
+            //z: -10くらいのところに閉じるボタンがあるので、背景のクリックガードは-5くらいに置けばよい
+            // 背景クリックガード :-5, 線及び点のクリック: -10
+            // EdgeCollider2D.EdgeRadiousが使えそう
+        }
+
+        private void AddPoles(DisturbPolesSet polesSet) { }
+        public void AddPoles(DisturbPole[] poles) { }
+    }
+
+
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -89,6 +117,8 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
 
         static private Image elecAnimHSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnim.png", 100f);
         static private Image elecAnimVSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnimSub.png", 100f);
+
+        private DisturberMapLayer mapLayer = null!;
 
         public Instance(GamePlayer player) : base(player)
         {
@@ -166,6 +196,30 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 TextMeshPro polesText = null!;
                 int GetNumOfLeftPoles() =>MaxNumOfPolesOption - (newPoles.Count + poles.Count);
 
+                /*
+                var openMapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
+                openMapButton.SetSprite(placeButtonSprite.GetSprite());
+                openMapButton.Availability = (button) => MyPlayer.CanMove || MeetingHud.Instance;
+                openMapButton.Visibility = (button) => !MyPlayer.IsDead && (!MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
+                openMapButton.OnClick = button => {
+                    NebulaManager.Instance.ScheduleDelayAction(() =>
+                    {
+                        HudManager.Instance.InitMap();
+                        MapBehaviour.Instance.ShowNormalMap();
+                        MapBehaviour.Instance.taskOverlay.gameObject.SetActive(false);
+                    });
+                };
+                openMapButton.SetLabel("place");
+
+                var placeButton = Bind(new ModAbilityButton(alwaysShow: true)).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
+                placeButton.SetSprite(placeButtonSprite.GetSprite());
+                placeButton.Availability = (button) => true;
+                placeButton.Visibility = (button) => !MyPlayer.IsDead && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && mapLayer && mapLayer.gameObject.active;
+                placeButton.OnClick = button => {
+                };
+                placeButton.SetLabel("place");
+                */
+                
                 var placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) =>
@@ -202,6 +256,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 placeButton.SetLabel("place");
                 polesText = placeButton.ShowUsesIcon(0);
                 polesText.text = GetNumOfLeftPoles().ToString();
+                
 
                 disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "disturber.disturb");
                 disturbButton.SetSprite(disturbButtonSprite.GetSprite());
@@ -237,6 +292,24 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 disturbButton.CoolDownTimer = Bind(new Timer(DisturbCoolDownOption).SetAsAbilityCoolDown().Start());
                 disturbButton.EffectTimer = Bind(new Timer(DisturbDurationOption));
                 disturbButton.SetLabel("disturb");
+            }
+        }
+
+        [Local]
+        void OnOpenMap(AbstractMapOpenEvent ev)
+        {
+            if (ev is MapOpenNormalEvent)
+            {
+                if (!mapLayer)
+                {
+                    mapLayer = UnityHelper.CreateObject<DisturberMapLayer>("DisturberLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
+                    this.Bind(mapLayer.gameObject);
+                }
+                mapLayer.gameObject.SetActive(true);
+            }
+            else
+            {
+                if(mapLayer) mapLayer.gameObject.SetActive(false);
             }
         }
 
@@ -299,7 +372,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
             UpdateUV(0);
             meshFilter.mesh.SetIndices((int[])[0, 1, 2, 2, 3, 0], MeshTopology.Triangles, 0);
 
-            meshRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            meshRenderer.material = UnityHelper.GetMeshRendererMaterial(); //new Material(Shader.Find("Sprites/Default"));
             meshRenderer.material.mainTexture = (isVertical ? elecAnimVSprite : elecAnimHSprite).GetSprite().texture;
             meshRenderer.gameObject.layer = LayerExpansion.GetObjectsLayer();
 

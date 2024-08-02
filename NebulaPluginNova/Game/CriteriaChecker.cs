@@ -10,7 +10,7 @@ using Virial.Game;
 
 namespace Nebula.Game;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class NebulaEndCriteria
 {
     static NebulaEndCriteria()
@@ -154,7 +154,7 @@ public class NebulaEndCriteria
                 var jRole = (jackal.Role as Roles.Neutral.Jackal.Instance);
                 if (!(jRole?.CanWinDueToKilling ?? false)) continue;
 
-                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && jRole!.IsMySidekick(p)) + 1;
+                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && (jRole!.IsSameTeam(p)));
                 
                 //他のJackal陣営が生きていたら勝利できない
                 if (aliveJackals < totalAliveAllJackals) continue;

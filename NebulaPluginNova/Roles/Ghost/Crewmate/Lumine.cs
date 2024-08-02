@@ -9,7 +9,7 @@ namespace Nebula.Roles.Ghost.Crewmate;
 [NebulaRPCHolder]
 public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
 {
-    public Lumine(): base("lumine", new(241, 237, 184),RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam, [LightSizeOption, LightDurationOption]) {}
+    public Lumine(): base("lumine", new(241, 237, 184),RoleCategory.CrewmateRole, [LightSizeOption, LightDurationOption]) {}
 
     string ICodeName.CodeName => "LMN";
 

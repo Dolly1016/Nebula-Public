@@ -15,7 +15,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
 {
     private Busker() : base("busker", new(255, 172, 117), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PseudocideCoolDownOption, PseudocideDurationOption, HidePseudocideFromVitalsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
-        //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Busker.png");
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Busker.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -49,7 +49,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
             if (AmOwner)
             {
                 var pseudocideButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
-                var reviveButon = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
+                var reviveButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
 
                 pseudocideButton.SetSprite(pseudocideButtonSprite.GetSprite());
                 pseudocideButton.Availability = (button) => MyPlayer.CanMove;
@@ -62,31 +62,32 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                             if(HidePseudocideFromVitalsOption) PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.BuskerEffect, 10000f, false, 0), true));
                             MyPlayer.Suicide(PlayerState.Pseudocide, null, KillParameter.WithDeadBody);
                         }
-                        reviveButon.ActivateEffect();
+                        reviveButton.ActivateEffect();
                     });
                 };
                 pseudocideButton.SetLabel("pseudocide");
 
                 StaticAchievementToken? acTokenCommon1 = null;
 
-                reviveButon.SetSprite(reviveButtonSprite.GetSprite());
-                reviveButon.Availability = (button) => MyPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.GetTruePosition());
-                reviveButon.Visibility = (button) => button.EffectActive && Helpers.AllDeadBodies().Any(deadBody => deadBody.ParentId == MyPlayer.PlayerId);
-                reviveButon.EffectTimer = Bind(new Timer(0f, PseudocideDurationOption));
-                reviveButon.OnClick = (button) => {
+                reviveButton.SetSprite(reviveButtonSprite.GetSprite());
+                reviveButton.Availability = (button) => MyPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.GetTruePosition());
+                reviveButton.Visibility = (button) => button.EffectActive && Helpers.AllDeadBodies().Any(deadBody => deadBody.ParentId == MyPlayer.PlayerId);
+                reviveButton.EffectTimer = Bind(new Timer(0f, PseudocideDurationOption));
+                reviveButton.PlayFlash = () => reviveButton.EffectActive;
+                reviveButton.OnClick = (button) => {
                     using (RPCRouter.CreateSection("ReviveBusker"))
                     {
                         PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
                         MyPlayer.Revive(null, MyPlayer.Position, true, false);
                         MyPlayer.VanillaPlayer.ModDive(false);
                     }
-                    reviveButon.InactivateEffect();
+                    reviveButton.InactivateEffect();
                     pseudocideButton.StartCoolDown();
                     acTokenCommon1 ??= new("busker.common1");
                     acTokenChallenge ??= new("busker.challenge", (false, 0f), (val, _) => val.isCleared);
                     acTokenChallenge.Value.lastRevive = NebulaGameManager.Instance!.CurrentTime;
                 };
-                reviveButon.OnEffectEnd = (button) =>
+                reviveButton.OnEffectEnd = (button) =>
                 {
                     if (MyPlayer.IsDead)
                     {
@@ -96,7 +97,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                         NebulaGameManager.RpcTryAssignGhostRole.Invoke(MyPlayer.Unbox());
                     }
                 };
-                reviveButon.SetLabel("revive");
+                reviveButton.SetLabel("revive");
 
             }
         }

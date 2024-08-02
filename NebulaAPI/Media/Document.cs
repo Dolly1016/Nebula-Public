@@ -16,3 +16,8 @@ public interface IDocument
     /// <returns></returns>
     GUIWidget? Build(Artifact<GUIScreen>? target);
 }
+
+public interface IDocumentWithId : IDocument
+{
+    void OnSetId(string documentId);
+}

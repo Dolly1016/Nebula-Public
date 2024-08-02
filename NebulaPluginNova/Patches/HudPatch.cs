@@ -61,7 +61,7 @@ public static class HudManagerCoStartGamePatch
             yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform, GameStatistics.EventVariation.GameStart, EventDetail.GameStart);
 
             PlayerControl.LocalPlayer.killTimer = 10f;
-            if(GeneralConfigurations.EmergencyCooldownAtGameStart) AmongUsUtil.SetEmergencyCoolDown(10f, false);
+            if (GeneralConfigurations.EmergencyCooldownAtGameStart) AmongUsUtil.SetEmergencyCoolDown(10f, false, false);
 
             HudManager.Instance.KillButton.SetCoolDown(10f, AmongUsUtil.VanillaKillCoolDown);
 

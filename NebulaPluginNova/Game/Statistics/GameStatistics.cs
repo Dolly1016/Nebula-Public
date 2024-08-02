@@ -15,7 +15,7 @@ using Virial.Utilities;
 
 namespace Nebula.Game.Statistics;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public static class EventDetail
 {
     static public TranslatableTag Kill = new("statistics.events.kill");
@@ -71,7 +71,7 @@ public enum GameStatisticsGatherTag
     Spawn
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.BuildNoSModule)]
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
 internal class GameTracker : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     static public GameTracker? Instance { get; private set; } = null;

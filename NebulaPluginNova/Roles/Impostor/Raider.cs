@@ -1,5 +1,6 @@
 ﻿using Nebula.Game.Statistics;
 using Nebula.Map;
+using Nebula.Roles.Abilities;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -17,6 +18,8 @@ public class Raider : DefinedRoleTemplate, DefinedRole
 {
     private Raider() : base("raider", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ThrowCoolDownOption, AxeSizeOption, AxeSpeedOption,CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+
+        MetaAbility.RegisterCircle(new("role.raider.axeSize", () => AxeSizeOption * 0.4f, () => null, UnityColor));
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -28,7 +31,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
 
     static public Raider MyRole = new Raider();
 
-    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
+    [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class RaiderAxe : NebulaSyncStandardObject, IGameOperator
     {
         public static string MyTag = "RaiderAxe";
@@ -40,7 +43,9 @@ public class Raider : DefinedRoleTemplate, DefinedRole
         private float thrownAngle = 0f;
         private int state = 0;
         private float speed = AxeSpeedOption;
-        private int killed = 0;
+        private int killedMask = 0;
+        private int tryKillMask = 0;
+        private int killedNum = 0;
         private float thrownTime = 0f;
         private float thrownDistance = 0f;
         AchievementToken<int>? acTokenChallenge = null;
@@ -85,6 +90,13 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                             if (p.Data.IsDead || p.AmOwner) continue;
                             if (!CanKillImpostorOption && p.Data.Role.IsImpostor) continue;
 
+                            var modInfo = p.GetModInfo()!;
+
+                            //ベント内および地底のプレイヤーを無視
+                            if (modInfo.IsDived || p.inVent) continue;
+
+                            if ((tryKillMask & (1 << p.PlayerId)) != 0) continue;//一度キルを試行しているならなにもしない。
+
                             if (!Helpers.AnyNonTriggersBetween(p.GetTruePosition(),pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
@@ -94,18 +106,19 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                                 {
                                     if (p.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
 
-                                    killed |= 1 << p.PlayerId;
-
-                                    if (killed >= 3)
+                                    killedMask |= 1 << p.PlayerId;
+                                    killedNum++;
+                                    if (killedNum >= 3)
                                     {
-                                        acTokenChallenge ??= new("raider.challenge", killed, (val, _) =>
+                                        acTokenChallenge ??= new("raider.challenge", killedMask, (val, _) =>
                                         /*人数都合でゲームが終了している*/ NebulaGameManager.Instance!.EndState!.EndReason == GameEndReason.Situation &&
                                         /*勝利している*/ NebulaGameManager.Instance.EndState!.Winners.Test(Owner) &&
-                                        /*最後の死亡者がこの斧によってキルされている*/ (killed & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
+                                        /*最後の死亡者がこの斧によってキルされている*/ (killedMask & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
                                         );
-                                        acTokenChallenge.Value = killed;
+                                        acTokenChallenge.Value = killedMask;
                                     }
                                 }
+                                tryKillMask |= 1 << p.PlayerId;
                             }
                         }
                     }
@@ -124,7 +137,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                     MyRenderer.sprite = stuckAxeSprite.GetSprite();
                     MyRenderer.transform.eulerAngles = new Vector3(0f, 0f, thrownAngle * 180f / Mathf.PI);
 
-                    if (AmOwner && killed == 0)
+                    if (AmOwner && killedMask == 0)
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Missed, NebulaGameManager.Instance.CurrentTime - thrownTime, PlayerControl.LocalPlayer, 0);
                 }
                 else

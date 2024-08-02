@@ -46,7 +46,7 @@ public class OutfitCommand : ICommand
                         {
                             using (RPCRouter.CreateSection("CommandOutfit"))
                             {
-                                targets.Do(p => PlayerModInfo.RpcAddOutfit.Invoke((p.PlayerId, new Virial.Game.OutfitCandidate("", priority, selfAware, outfit))));
+                                targets.Do(p => PlayerModInfo.RpcAddOutfit.Invoke((p.PlayerId, new Virial.Game.OutfitCandidate("", priority, selfAware, outfit, []))));
                             }
                         }
                     });

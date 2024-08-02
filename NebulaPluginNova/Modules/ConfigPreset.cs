@@ -55,7 +55,7 @@ public class ScriptPreset : IConfigPreset{
     }
     
 }
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.Roles)]
+[NebulaPreprocess(PreprocessPhase.Roles)]
 public class ConfigPreset : IConfigPreset
 {
 

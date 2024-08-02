@@ -11,8 +11,14 @@ namespace Nebula.Extensions;
 public static class PlayerExtension
 {
 
-    public static IEnumerator CoDive(this PlayerControl player)
+    public static IEnumerator CoDive(this PlayerControl player, bool playAnim)
     {
+        if (!playAnim)
+        {
+            player.MyPhysics.myPlayer.Visible = false;
+            player.GetModInfo()!.Unbox().CurrentDiving = new();
+            yield break;
+        }
 
         player.MyPhysics.body.velocity = Vector2.zero;
         if (player.AmOwner) player.MyPhysics.inputHandler.enabled = true;
@@ -28,16 +34,25 @@ public static class PlayerExtension
 
         player.currentRoleAnimations.ForEach((Action<RoleEffectAnimation>)((an) => an.ToggleRenderer(false)));
         if (player.AmOwner) player.MyPhysics.inputHandler.enabled = false;
+        player.GetModInfo()!.Unbox().CurrentDiving = new();
     }
 
-    public static IEnumerator CoGush(this PlayerControl player)
+    public static IEnumerator CoGush(this PlayerControl player, bool playAnim)
     {
+        if (!playAnim)
+        {
+            player.MyPhysics.myPlayer.Visible = true;
+            player.GetModInfo()!.Unbox().CurrentDiving = null;
+            yield break;
+        }
 
         player.MyPhysics.body.velocity = Vector2.zero;
         if (player.AmOwner) player.MyPhysics.inputHandler.enabled = true;
         player.moveable = false;
         player.MyPhysics.myPlayer.Visible = true;
         player.cosmetics.AnimateSkinExitVent();
+
+        player.GetModInfo()!.Unbox().CurrentDiving = null;
 
         yield return player.MyPhysics.Animations.CoPlayExitVentAnimation();
 
@@ -282,9 +297,9 @@ public static class PlayerExtension
 
     }
 
-    static public void ModDive(this PlayerControl player, bool isDive = true)
+    static public void ModDive(this PlayerControl player, bool isDive = true, bool playAnim = true)
     {
-        RpcDive.Invoke((player.PlayerId,isDive));
+        RpcDive.Invoke((player.PlayerId,isDive, playAnim));
     }
 
     static RemoteProcess<(byte sourceId, byte targetId, Vector2 revivePos, bool cleanDeadBody,bool recordEvent)> RpcRivive = new(
@@ -304,13 +319,13 @@ public static class PlayerExtension
         }
         );
 
-    static RemoteProcess<(byte playerId, bool isDive)> RpcDive = new(
+    static RemoteProcess<(byte playerId, bool isDive, bool playAnim)> RpcDive = new(
         "Dive",
         (message, _) =>
         {
             var player = Helpers.GetPlayer(message.playerId);
             if (!player) return;
-            player?.StartCoroutine(message.isDive ? player.CoDive() : player.CoGush());
+            player?.StartCoroutine(message.isDive ? player.CoDive(message.playAnim) : player.CoGush(message.playAnim));
         }
         );
 

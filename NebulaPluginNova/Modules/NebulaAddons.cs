@@ -12,7 +12,7 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Modules;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.LoadAddons)]
+[NebulaPreprocess(PreprocessPhase.LoadAddons)]
 public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllocator
 {
     static private MD5 md5 = MD5.Create();

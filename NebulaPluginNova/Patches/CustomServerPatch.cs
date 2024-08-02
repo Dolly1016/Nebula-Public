@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace Nebula.Patches;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 [HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.Open))]
 public static class RegionMenuOpenPatch
 {

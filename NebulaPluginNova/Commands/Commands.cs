@@ -5,7 +5,7 @@ using Virial.Compat;
 
 namespace Nebula.Commands;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
+[NebulaPreprocess(PreprocessPhase.PostLoadAddons)]
 static public class Commands
 {
 

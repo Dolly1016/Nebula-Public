@@ -51,6 +51,11 @@ public static class AdminButtonPatch
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.SetHudActive), typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
 public static class HudActivePatch
 {
+    internal class HudActiveChangeEvent : Virial.Events.Event
+    {
+        public HudActiveChangeEvent() { }
+    }
+
     static bool Prefix(HudManager __instance,[HarmonyArgument(0)]PlayerControl localPlayer, [HarmonyArgument(1)]RoleBehaviour role, [HarmonyArgument(2)]bool isActive)
     {
         __instance.UpdateHudContent();
@@ -60,6 +65,8 @@ public static class HudActivePatch
         __instance.roomTracker.gameObject.SetActive(isActive);
         __instance.joystick?.ToggleVisuals(isActive);
         __instance.ToggleRightJoystick(isActive);
+
+        GameOperatorManager.Instance?.Run(new HudActiveChangeEvent());
         return false;
     }
 }
@@ -152,7 +159,7 @@ class BlockInitializePatch
             if (__instance.CanUseKillButton)
             {
                 DestroyableSingleton<HudManager>.Instance.KillButton.Show();
-                player.SetKillTimer(10f);
+                if(player.killTimer < 10f) player.SetKillTimer(10f);
             }
             DestroyableSingleton<HudManager>.Instance.SabotageButton.Show();
             DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.Show();
@@ -162,5 +169,15 @@ class BlockInitializePatch
         __instance.InitializeAbilityButton();
 
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(ReportButton), nameof(ReportButton.DoClick))]
+public static class ReportButtonClickPatch
+{
+    static bool Prefix(ReportButton __instance)
+    {
+        if (NebulaGameManager.Instance?.LocalPlayerInfo?.IsDived ?? false) return false;
+        return true;
     }
 }

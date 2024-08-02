@@ -7,24 +7,28 @@ namespace Nebula.Roles.Abilities;
 public class JailerAbility : IGameOperator
 {
     bool canIdentifyImpostors, canIdentifyDeadBodies;
-    bool canMoveWithMapWatching;
-    public JailerAbility(bool canIdentifyImpostors,bool canIdentifyDeadBodies, bool canMoveWithMapWatching)
+    bool canMoveWithMapWatching, canUseAdminOnMeeting;
+    public JailerAbility(bool canIdentifyImpostors,bool canIdentifyDeadBodies, bool canMoveWithMapWatching,bool canUseAdminOnMeeting)
     {
         this.canIdentifyImpostors = canIdentifyImpostors;
         this.canIdentifyDeadBodies = canIdentifyDeadBodies;
         this.canMoveWithMapWatching = canMoveWithMapWatching;
+        this.canUseAdminOnMeeting = canUseAdminOnMeeting;
 
         if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
     }
 
     void OnOpenNormalMap(MapOpenNormalEvent ev)
     {
-        MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
-        MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false);
-        MapBehaviour.Instance.countOverlay.SetOptions(true, true);
-        ConsoleTimer.MarkAsNonConsoleMinigame();
+        if (canUseAdminOnMeeting)
+        {
+            MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
+            MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false);
+            MapBehaviour.Instance.countOverlay.SetOptions(true, true);
+            ConsoleTimer.MarkAsNonConsoleMinigame();
 
-        MapBehaviour.Instance.taskOverlay.Hide();
+            MapBehaviour.Instance.taskOverlay.Hide();
+        }
     }
 
     void OnOpenSabotageMap(MapOpenSabotageEvent ev)

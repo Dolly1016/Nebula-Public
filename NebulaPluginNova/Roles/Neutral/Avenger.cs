@@ -140,10 +140,18 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         [Local]
         void OnTargetDead(PlayerDieEvent ev)
         {
-            if (!CheckKillCondition && ev.Player == target && !MyPlayer.IsDead)
+            if (!CheckKillCondition && ev.Player == target && !MyPlayer.IsDead && ev is PlayerMurderedEvent)
             {
-                MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
+                if (MeetingHud.Instance || ExileController.Instance)
+                {
+                    MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.WithAssigningGhostRole);
+                }
+                else
+                {
+                    MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
+                }
                 new StaticAchievementToken("avenger.another1");
+
             }
         }
     }

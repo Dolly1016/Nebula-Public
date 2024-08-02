@@ -8,9 +8,9 @@ public abstract class MapData
     abstract protected SystemTypes[] SabotageTypes { get; }
 
     public SystemTypes[] GetSabotageSystemTypes() => SabotageTypes;
-    public bool CheckMapArea(Vector2 position)
+    public bool CheckMapArea(Vector2 position, float radious = 0.1f)
     {
-        int num = Physics2D.OverlapCircleNonAlloc(position, 0.1f, PhysicsHelpers.colliderHits, Constants.ShipAndAllObjectsMask);
+        int num = Physics2D.OverlapCircleNonAlloc(position, radious, PhysicsHelpers.colliderHits, Constants.ShipAndAllObjectsMask);
         if (num > 0) for (int i = 0; i < num; i++) if (!PhysicsHelpers.colliderHits[i].isTrigger) return false;
 
         return CheckMapAreaInternal(position);

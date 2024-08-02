@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine.AddressableAssets;
+using Virial.Game;
 using Virial.Runtime;
 
 namespace Nebula.Modules;
@@ -29,6 +30,9 @@ public abstract class CustomCosmicItem : CustomItemGrouped
     public string Package = "None";
     [JsonSerializableField(true)]
     public string? TranslationKey = null;
+
+    [JsonSerializableField(true)]
+    public string[]? Tags = null;
 
     public string UnescapedName => Regex.Unescape(Name).Replace('_', ' ');
     public string UnescapedAuthor => Regex.Unescape(Author).Replace('_', ' ');
@@ -55,41 +59,58 @@ public abstract class CustomCosmicItem : CustomItemGrouped
     public async Task Preactivate()
     {
         string holder = SubholderPath;
-        foreach (var image in AllImage())
+
+        async Task CheckAndDownload(string? hash, string address)
         {
-            var stream = MyBundle.OpenStream(Category + "/" + holder + "/" + image.Address);
-            string? hash = null;
+            var stream = MyBundle.OpenStream(Category + "/" + holder + "/" + address);
+            string? existingHash = null;
             if (stream != null)
             {
-                hash = CosmicImage.ComputeImageHash(stream);
+                existingHash = CosmicImage.ComputeImageHash(stream);
                 stream.Close();
             }
-            if(MyBundle.RelatedRemoteAddress != null &&( hash == null || !(image.Hash?.Equals(hash) ?? true)))
+            if (MyBundle.RelatedRemoteAddress != null && (existingHash == null || !(hash?.Equals(existingHash) ?? true)))
             {
                 //更新を要する場合
-                await MyBundle.DownloadAsset(Category, holder, image.Address);
-            }   
+                await MyBundle.DownloadAsset(Category, holder, address);
+            }
+        }
+
+        foreach (var image in AllImage())
+        {
+            if(image.Address != null) await CheckAndDownload(image.Hash, image.Address);
+            if(image.ExAddress != null) await CheckAndDownload(image.ExHash, image.ExAddress);
         }
     }
 
     public virtual IEnumerator Activate(bool addToMoreCosmic = true)
     {
         string holder = SubholderPath;
-        foreach (var image in AllImage())
-        {
-            var loader = MyBundle.GetTextureLoader(Category, SubholderPath, image.Address);
-            yield return loader.LoadAsync((ex) => {
+
+        (UnloadTextureLoader.AsyncLoader loader, Action<Exception> exHandler) GetLoader(string? address) => 
+            address == null ? (null!, _ => { }) :
+            (MyBundle.GetTextureLoader(Category, SubholderPath, address), (ex) =>
+            {
                 string? message = null;
                 if (ex is DirectoryNotFoundException)
                     message = "Missed Directory (" + ex.ToString() + ")";
                 if (ex is FileNotFoundException)
-                    message = "Missed File ("+ ex.ToString()+")";
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Warning , NebulaLog.LogCategory.MoreCosmic, "Failed to load images. ( \"" + image.Address + "\" in \"" + Name + "\" )\nReason: " + (message ?? "Others (" + ex.ToString() + ")"));
-            });
-            
+                    message = "Missed File (" + ex.ToString() + ")";
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Warning, NebulaLog.LogCategory.MoreCosmic, "Failed to load images. ( \"" + address + "\" in \"" + Name + "\" )\nReason: " + (message ?? "Others (" + ex.ToString() + ")"));
+            }
+        );
+
+        foreach (var image in AllImage())
+        {
+            var loader = GetLoader(image.Address);
+            yield return loader.loader.LoadAsync(loader.exHandler);
+
+            var exLoader = GetLoader(image.ExAddress);
+            yield return exLoader.loader?.LoadAsync(exLoader.exHandler);
+
             try
             {
-                if (!image.TryLoadImage(loader?.Result!))
+                if (!image.TryLoadImage(loader.loader?.Result!, exLoader.loader?.Result))
                 {
                     IsValid = false;
                     break;
@@ -111,6 +132,8 @@ public abstract class CustomCosmicItem : CustomItemGrouped
     }
 
     abstract public Sprite? PreviewSprite { get; }
+    virtual public Sprite? PreviewAdditionalSprite { get => null; }
+    virtual public bool PreviewAdditionalInFront { get => false; }
 }
 
 public class CosmicImage
@@ -119,6 +142,14 @@ public class CosmicImage
     public string? Hash = null;
     [JsonSerializableField]
     public string Address = "";
+
+    [JsonSerializableField(true)]
+    public string? ExHash = null;
+    [JsonSerializableField(true)]
+    public string? ExAddress = null;
+    [JsonSerializableField]
+    public bool ExIsFront = false;
+
     [JsonSerializableField(true)]
     public int? Length = null;
 
@@ -134,19 +165,33 @@ public class CosmicImage
 
     public bool RequirePlayFirstState = false;
     private IDividedSpriteLoader? spriteLoader { get; set; }
+    private IDividedSpriteLoader? exSpriteLoader { get; set; }
 
+    public bool HasExImage => ExAddress != null;
 
-    public bool TryLoadImage(ITextureLoader textureLoader)
+    public bool TryLoadImage(ITextureLoader textureLoader, ITextureLoader? exTextureLoader)
     {
         int length = GetLength();
         this.spriteLoader = new DividedSpriteLoader(textureLoader, PixelsPerUnit, X ?? Length ?? 1, Y ?? 1) { Pivot = Pivot };
         for (int i = 0; i < length; i++) if (!spriteLoader.GetSprite(i)) return false;
+
+        if (ExAddress != null)
+        {
+            this.exSpriteLoader = new DividedSpriteLoader(exTextureLoader!, PixelsPerUnit, X ?? Length ?? 1, Y ?? 1) { Pivot = Pivot };
+            for (int i = 0; i < length; i++) if (!exSpriteLoader!.GetSprite(i)) return false;
+        }
+
         return true;
     }
 
     public Sprite? GetSprite(int index)
     {
         return spriteLoader?.GetSprite(index) ?? null;
+    }
+
+    public Sprite? GetExSprite(int index)
+    {
+        return exSpriteLoader?.GetSprite(index) ?? null;
     }
 
     public static string ComputeImageHash(Stream stream)
@@ -265,6 +310,8 @@ public class CosmicHat : CustomCosmicItem
     public override string Category { get => "hats"; }
 
     public override Sprite? PreviewSprite => Preview?.GetSprite(0) ?? Main?.GetSprite(0) ?? Back?.GetSprite(0) ?? Move?.GetSprite(0);
+    public override Sprite? PreviewAdditionalSprite => Preview?.GetExSprite(0);
+    public override bool PreviewAdditionalInFront => Preview?.ExIsFront ?? false;
 }
 
 public class CosmicVisor : CustomCosmicItem
@@ -274,17 +321,33 @@ public class CosmicVisor : CustomCosmicItem
     [JsonSerializableField(true)]
     public CosmicImage? Flip;
     [JsonSerializableField(true)]
+    public CosmicImage? Back;
+    [JsonSerializableField(true)]
+    public CosmicImage? BackFlip;
+    [JsonSerializableField(true)]
     public CosmicImage? Move;
     [JsonSerializableField(true)]
     public CosmicImage? MoveFlip;
+    [JsonSerializableField(true)]
+    public CosmicImage? MoveBack;
+    [JsonSerializableField(true)]
+    public CosmicImage? MoveBackFlip;
     [JsonSerializableField(true)]
     public CosmicImage? EnterVent;
     [JsonSerializableField(true)]
     public CosmicImage? EnterVentFlip;
     [JsonSerializableField(true)]
+    public CosmicImage? EnterVentBack;
+    [JsonSerializableField(true)]
+    public CosmicImage? EnterVentBackFlip;
+    [JsonSerializableField(true)]
     public CosmicImage? ExitVent;
     [JsonSerializableField(true)]
     public CosmicImage? ExitVentFlip;
+    [JsonSerializableField(true)]
+    public CosmicImage? ExitVentBack;
+    [JsonSerializableField(true)]
+    public CosmicImage? ExitVentBackFlip;
     [JsonSerializableField(true)]
     public CosmicImage? Preview;
     [JsonSerializableField(true)]
@@ -299,6 +362,8 @@ public class CosmicVisor : CustomCosmicItem
     public bool Adaptive = false;
     [JsonSerializableField(true)]
     public bool BehindHat = false;
+    [JsonSerializableField(true)]
+    public bool BackmostBack = false;
     [JSFieldAmbiguous]
     public int FPS = 1;
 
@@ -344,8 +409,12 @@ public class CosmicVisor : CustomCosmicItem
 
         if (EnterVent != null) EnterVent.RequirePlayFirstState = true;
         if (EnterVentFlip != null) EnterVentFlip.RequirePlayFirstState = true;
+        if (EnterVentBack != null) EnterVentBack.RequirePlayFirstState = true;
+        if (EnterVentBackFlip != null) EnterVentBackFlip.RequirePlayFirstState = true;
         if (ExitVent != null) ExitVent.RequirePlayFirstState = true;
         if (ExitVentFlip != null) ExitVentFlip.RequirePlayFirstState = true;
+        if (ExitVentBack != null) ExitVentBack.RequirePlayFirstState = true;
+        if (ExitVentBackFlip != null) ExitVentBackFlip.RequirePlayFirstState = true;
         if (Climb != null) Climb.RequirePlayFirstState = true;
         if (ClimbFlip != null) ClimbFlip.RequirePlayFirstState = true;
         if (ClimbDown != null) ClimbDown.RequirePlayFirstState = true;
@@ -356,12 +425,18 @@ public class CosmicVisor : CustomCosmicItem
     public override string Category { get => "visors"; }
 
     public override Sprite? PreviewSprite => Preview?.GetSprite(0) ?? Main?.GetSprite(0);
+    public override Sprite? PreviewAdditionalSprite => Preview?.GetExSprite(0);
+    public override bool PreviewAdditionalInFront => Preview?.ExIsFront ?? false;
 }
 
 public class CosmicNameplate : CustomCosmicItem
 {
     [JsonSerializableField(true)]
     public CosmicImage? Plate;
+    [JsonSerializableField(true)]
+    public CosmicImage? Adaptive;
+    [JsonSerializableField(true)]
+    public bool AdaptiveInFront = true;
 
     public NamePlateData MyPlate { get; private set; } = null!;
     public NamePlateViewData MyView { get; private set; } = null!;
@@ -590,7 +665,7 @@ public class CustomItemBundle
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostLoadAddons)]
+[NebulaPreprocess(PreprocessPhase.PostLoadAddons)]
 public static class MoreCosmic
 {
     public static Dictionary<string, CosmicHat> AllHats = new();
@@ -720,7 +795,7 @@ public static class MoreCosmic
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public static class WrappedAddressableAssetLoader
 {
     public static void Preprocess(NebulaPreprocessor preprocessor)
@@ -961,6 +1036,23 @@ public class SetVisorPatch
     }
 }
 
+[HarmonyPatch(typeof(VisorLayer), nameof(VisorLayer.UpdateMaterial))]
+public class SetVisorMaterialPatch
+{
+    public static void Postfix(VisorLayer __instance)
+    {
+        if (__instance.transform.parent.TryGetComponent<NebulaCosmeticsLayer>(out var layer))
+        {
+            try
+            {
+                PlayerMaterial.SetColors(__instance.matProperties.ColorId, layer.VisorBackRenderer);
+                if (__instance.matProperties.MaskLayer <= 0)
+                    PlayerMaterial.SetMaskLayerBasedOnLocalPlayer(layer.VisorBackRenderer, __instance.matProperties.IsLocalPlayer);
+            }catch(Exception e) { }
+        }
+    }
+}
+
 
 [HarmonyPatch(typeof(VisorData), nameof(VisorData.CoLoadIcon))]
 public class CoLoadIconPatch
@@ -1074,6 +1166,42 @@ public enum PlayerAnimState
     ExitVent
 }
 
+public class NebulaNameplate : MonoBehaviour
+{
+    public SpriteRenderer AdaptiveRenderer;
+
+    static NebulaNameplate()
+    {
+        ClassInjector.RegisterTypeInIl2Cpp<NebulaNameplate>();
+    }
+
+    public void Awake()
+    {
+        var voteArea = GetComponent<PlayerVoteArea>();
+        AdaptiveRenderer = GameObject.Instantiate(voteArea.Background, voteArea.Background.transform);
+        if (MeetingHud.Instance)
+        {
+            //ゲーム内だとマスク不要
+            AdaptiveRenderer.material = HatManager.Instance.PlayerMaterial;
+            AdaptiveRenderer.maskInteraction = SpriteMaskInteraction.None;
+        }
+        else
+        {
+            //ゲーム外だとマスク
+            AdaptiveRenderer.material = HatManager.Instance.MaskedPlayerMaterial;
+            AdaptiveRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        }
+        AdaptiveRenderer.sprite = null;
+
+        UpdateColor();
+    }
+
+    public void UpdateColor()
+    {
+        var voteArea = GetComponent<PlayerVoteArea>();
+        PlayerMaterial.SetColors(voteArea.TargetPlayerId, AdaptiveRenderer);
+    }
+}
 public class NebulaCosmeticsLayer : MonoBehaviour
 {
     public CosmeticsLayer MyLayer = null!;
@@ -1090,10 +1218,37 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
     public float VisorTimer = 0f;
     public int VisorIndex = 0;
+    public int VisorBackIndex = 0;
 
     private CosmicImage? lastHatFrontImage = null;
     private CosmicImage? lastHatBackImage = null;
     private CosmicImage? lastVisorImage = null;
+    private CosmicImage? lastVisorBackImage = null;
+
+    private SpriteRenderer hatFrontExRenderer;
+    private SpriteRenderer hatBackExRenderer;
+    private SpriteRenderer visorFrontExRenderer;
+    private SpriteRenderer visorBackRenderer;
+    private SpriteRenderer visorBackExRenderer;
+    public SpriteRenderer VisorBackRenderer => visorBackRenderer;
+    public IEnumerable<SpriteRenderer> AdditionalRenderers()
+    {
+        foreach (var r in AdditionalHatRenderers()) yield return r;
+        foreach (var r in AdditionalVisorRenderers()) yield return r;
+    }
+    public IEnumerable<SpriteRenderer> AdditionalHatRenderers()
+    {
+        yield return hatFrontExRenderer;
+        yield return hatBackExRenderer;
+    }
+    public IEnumerable<SpriteRenderer> AdditionalVisorRenderers()
+    {
+        yield return visorBackRenderer;
+        yield return visorFrontExRenderer;
+        yield return visorBackExRenderer;
+    }
+    private bool useDefaultShader = true;//追加したRendererのマテリアルを変更する必要があるか否か調べるために使用
+    private bool usePlayerShaderOnVisor = false;//追加したRendererのマテリアルを変更する必要があるか否か調べるために使用
 
     static NebulaCosmeticsLayer()
     {
@@ -1103,7 +1258,37 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     public void Awake()
     {
         MyLayer = gameObject.GetComponent<CosmeticsLayer>();
-        MyAnimations =transform.parent.GetComponentInChildren<PlayerAnimations>();
+
+        //PoolablePlayer相手には取得できない
+        try
+        {
+            MyAnimations = transform.parent.GetComponentInChildren<PlayerAnimations>();
+
+            hatFrontExRenderer = GameObject.Instantiate(MyLayer.hat.FrontLayer, MyLayer.hat.FrontLayer.transform);
+            hatFrontExRenderer.transform.localPosition = new(0f, 0f, 0f);
+            hatFrontExRenderer.transform.localEulerAngles = new(0f, 0f, 0f);
+
+            hatBackExRenderer = GameObject.Instantiate(MyLayer.hat.BackLayer, MyLayer.hat.BackLayer.transform);
+            hatBackExRenderer.transform.localPosition = new(0f, 0f, 0f);
+            hatBackExRenderer.transform.localEulerAngles = new(0f, 0f, 0f);
+
+            visorBackRenderer = UnityHelper.CreateObject<SpriteRenderer>("Back", MyLayer.visor.Image.transform, new(0f, 0f, 1f));
+            visorBackRenderer.size = MyLayer.visor.Image.size;
+            visorBackRenderer.transform.localPosition = new(0f, 0f, 0f);
+            visorBackRenderer.transform.localEulerAngles = new(0f, 0f, 0f);
+
+            visorFrontExRenderer = GameObject.Instantiate(visorBackRenderer, MyLayer.visor.Image.transform);
+            visorFrontExRenderer.transform.localPosition = new(0f, 0f, 0f);
+            visorFrontExRenderer.transform.localEulerAngles = new(0f, 0f, 0f);
+
+            visorBackExRenderer = GameObject.Instantiate(visorBackRenderer, visorBackRenderer.transform);
+            visorBackExRenderer.transform.localPosition = new(0f, 0f, 0f);
+            visorBackExRenderer.transform.localEulerAngles = new(0f, 0f, 0f);
+
+            useDefaultShader = true;
+            usePlayerShaderOnVisor = false;
+        }
+        catch { }
     }
 
     public void LateUpdate()
@@ -1121,7 +1306,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             {
                 CurrentVisor = MyLayer.visor.visorData;
                 MoreCosmic.AllVisors.TryGetValue(MyLayer.visor.visorData.ProductId, out CurrentModVisor);
-                VisorIndex = 0;
+                VisorIndex = VisorBackIndex = 0;
             }
 
             PlayerAnimState animState = PlayerAnimState.Idle;
@@ -1211,10 +1396,27 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 MyLayer.hat!.BackLayer.enabled = true;
 
                 MyLayer.hat!.FrontLayer.transform.SetLocalZ(MyLayer.zIndexSpacing * (CurrentModHat.IsSkinny ? -1f : -3f));
+
+                AdditionalRenderers().Do(r => r.flipX = MyLayer.FlipX);
+
+                //追加レイヤー
+                var frontHasExImage = frontImage?.HasExImage ?? false;
+                hatFrontExRenderer.gameObject.SetActive(frontHasExImage);
+                if(frontHasExImage) hatFrontExRenderer.sprite = frontImage?.GetExSprite(HatFrontIndex) ?? null;
+
+                var backHasExImage = backImage?.HasExImage ?? false;
+                hatBackExRenderer.gameObject.SetActive(backImage?.HasExImage ?? false);
+                if (backHasExImage) hatBackExRenderer.sprite = backImage?.GetExSprite(HatBackIndex) ?? null;
+
+                hatFrontExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * ((frontImage?.ExIsFront ?? false) ? -0.125f : 0.125f));
+                hatBackExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * ((backImage?.ExIsFront ?? false) ? -0.125f : 0.125f));
             }
             else
             {
                 MyLayer.hat!.FrontLayer.transform.SetLocalZ(MyLayer.zIndexSpacing * -3f);
+
+                hatFrontExRenderer.gameObject.SetActive(false);
+                hatBackExRenderer.gameObject.SetActive(false);
             }
             if (CurrentModVisor != null)
             {
@@ -1224,24 +1426,31 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 {
                     VisorTimer = 1f / (float)CurrentModVisor.FPS;
                     VisorIndex++;
+                    VisorBackIndex++;
                 }
 
                 //表示する画像の選定
                 CosmicImage? image = null;
+                CosmicImage? backImage = null;
 
                 if (animState is not PlayerAnimState.ClimbUp and not PlayerAnimState.ClimbDown)
+                {
                     SetImage(ref image, CurrentModVisor.Main, CurrentModVisor.Flip);
-
+                    SetImage(ref backImage, CurrentModVisor.Back, CurrentModVisor.BackFlip);
+                }
                 switch (animState)
                 {
                     case PlayerAnimState.Run:
                         SetImage(ref image, CurrentModVisor.Move, CurrentModVisor.MoveFlip);
+                        SetImage(ref backImage, CurrentModVisor.MoveBack, CurrentModVisor.MoveBackFlip);
                         break;
                     case PlayerAnimState.EnterVent:
                         SetImage(ref image, CurrentModVisor.EnterVent, CurrentModVisor.EnterVentFlip);
+                        SetImage(ref backImage, CurrentModVisor.EnterVentBack, CurrentModVisor.EnterVentBackFlip);
                         break;
                     case PlayerAnimState.ExitVent:
                         SetImage(ref image, CurrentModVisor.ExitVent, CurrentModVisor.ExitVentFlip);
+                        SetImage(ref backImage, CurrentModVisor.ExitVentBack, CurrentModVisor.ExitVentBackFlip);
                         break;
                     case PlayerAnimState.ClimbUp:
                         SetImage(ref image, CurrentModVisor.Climb, CurrentModVisor.ClimbFlip);
@@ -1254,17 +1463,61 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
                 //インデックスの調整
                 VisorIndex %= image?.GetLength() ?? 1;
+                VisorBackIndex %= backImage?.GetLength() ?? 1;
                 if (lastVisorImage != image && (image?.RequirePlayFirstState ?? true)) VisorIndex = 0;
+                if (lastVisorBackImage != backImage && (backImage?.RequirePlayFirstState ?? true)) VisorBackIndex = 0;
                 lastVisorImage = image;
+                lastVisorBackImage = backImage;
 
                 MyLayer.visor!.Image.sprite = image?.GetSprite(VisorIndex) ?? null;
+                visorBackRenderer.gameObject.SetActive(true);
+                visorBackRenderer.sprite = backImage?.GetSprite(VisorBackIndex) ?? null;
 
-                MyLayer.visor!.Image.transform.SetLocalZ(MyLayer.zIndexSpacing * (CurrentModVisor.BehindHat ? -2f : -4f));
+                float frontZ = MyLayer.zIndexSpacing * (CurrentModVisor.BehindHat ? -2f : -4f);
+                MyLayer.visor!.Image.transform.SetLocalZ(frontZ);
+                visorBackRenderer.transform.SetLocalZ(-frontZ + MyLayer.zIndexSpacing * (CurrentModVisor.BackmostBack ? 1.5f : 0.5f)); //背景は前面の子なので、位置関係の計算に注意
+
+                //追加レイヤー
+                var frontHasExImage = image?.HasExImage ?? false;
+                visorFrontExRenderer.gameObject.SetActive(frontHasExImage);
+                visorFrontExRenderer.sprite = image?.GetExSprite(VisorIndex) ?? null;
+
+                var backHasExImage = backImage?.HasExImage ?? false;
+                visorBackExRenderer.gameObject.SetActive(backImage?.HasExImage ?? false);
+                visorBackExRenderer.sprite = backImage?.GetExSprite(VisorBackIndex) ?? null;
+
+                visorFrontExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * ((image?.ExIsFront ?? false) ? -0.125f : 0.125f));
+                visorBackExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * ((backImage?.ExIsFront ?? false) ? -0.125f : 0.125f));
             }
             else
             {
                 MyLayer.visor!.Image.transform.SetLocalZ(MyLayer.zIndexSpacing * (MyLayer.visor.visorData.behindHats ? -2f : -4f));
+
+                visorBackRenderer.gameObject.SetActive(false);
+                visorFrontExRenderer.gameObject.SetActive(false);
+                visorBackExRenderer.gameObject.SetActive(false);
             }
+
+            var shouldUseDefault = !(MyLayer.bodyMatProperties.MaskType is PlayerMaterial.MaskType.ComplexUI or PlayerMaterial.MaskType.SimpleUI);
+            var shouldUsePlayerVisor = CurrentModVisor?.Adaptive ?? false;
+            if (shouldUseDefault != useDefaultShader || shouldUsePlayerVisor != usePlayerShaderOnVisor)
+            {
+                useDefaultShader = shouldUseDefault;
+                usePlayerShaderOnVisor = shouldUsePlayerVisor;
+
+                Material exShader = shouldUseDefault ? HatManager.Instance.DefaultShader : HatManager.Instance.MaskedMaterial;
+                Material visorShader = shouldUsePlayerVisor ? (shouldUseDefault ? HatManager.Instance.PlayerMaterial : HatManager.Instance.MaskedPlayerMaterial) : exShader;
+
+                hatFrontExRenderer.sharedMaterial = exShader;
+                hatBackExRenderer.sharedMaterial = exShader;
+                visorFrontExRenderer.sharedMaterial = exShader;
+                visorBackExRenderer.sharedMaterial = exShader;
+                visorBackRenderer.sharedMaterial = visorShader;
+
+                PlayerMaterial.SetColors(MyLayer.ColorId, visorBackRenderer);
+            }
+
+            AdditionalRenderers().Do(r => r.enabled = MyLayer.visible);
         }
         catch { }
     }
@@ -1353,11 +1606,67 @@ public static class TabEnablePatch
                     __instance.UpdateMaterials(colorChip.Inner.FrontLayer, vanillaItem);
                     int colorId = __instance.HasLocalPlayer() ? PlayerControl.LocalPlayer.Data.DefaultOutfit.ColorId : ((int)DataManager.Player.Customization.Color);
                     vanillaItem.SetPreview(colorChip.Inner.FrontLayer, colorId);
-                    if(modItem is CosmicHat mHat && mHat.Preview == null && mHat.Main != null && mHat.Back != null)
+
+                    var previewAdditionalSprite = modItem?.PreviewAdditionalSprite;
+                    if(previewAdditionalSprite != null)
                     {
-                        __instance.UpdateMaterials(colorChip.Inner.BackLayer, vanillaItem);
-                        colorChip.Inner.BackLayer.sprite = mHat.Back.GetSprite(0)!;
-                        if (Application.isPlaying) PlayerMaterial.SetColors(colorId, colorChip.Inner.BackLayer);
+                        var ex = GameObject.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
+                        ex.sharedMaterial = HatManager.Instance.DefaultShader;
+                        ex.sprite = previewAdditionalSprite;
+                        ex.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f, 0f, modItem!.PreviewAdditionalInFront ? -0.1f : 0.1f);
+                    }
+
+                    if (modItem is CosmicHat mHat && mHat.Preview == null && mHat.Main != null)
+                    {
+                        if (mHat.Main.HasExImage)
+                        {
+                            var exFront = GameObject.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
+                            exFront.sharedMaterial = HatManager.Instance.DefaultShader;
+                            exFront.sprite = mHat.Main.GetExSprite(0);
+                            exFront.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f,0f,mHat.Main.ExIsFront ? -0.1f : 0.1f);
+                        }
+
+
+                        if (mHat.Back != null)
+                        {
+                            __instance.UpdateMaterials(colorChip.Inner.BackLayer, vanillaItem);
+                            colorChip.Inner.BackLayer.sprite = mHat.Back.GetSprite(0)!;
+                            if (Application.isPlaying) PlayerMaterial.SetColors(colorId, colorChip.Inner.BackLayer);
+
+                            if (mHat.Back.HasExImage)
+                            {
+                                var exFront = GameObject.Instantiate(colorChip.Inner.BackLayer, colorChip.Inner.BackLayer.transform.parent);
+                                exFront.sharedMaterial = HatManager.Instance.DefaultShader;
+                                exFront.sprite = mHat.Back.GetExSprite(0);
+                                exFront.transform.localPosition = colorChip.Inner.BackLayer.transform.localPosition + new Vector3(0f, 0f, mHat.Back.ExIsFront ? -0.1f : 0.1f);
+                            }
+                        }
+                    }
+                    else if(modItem is CosmicVisor mVisor && mVisor.Preview == null && mVisor.Main != null)
+                    {
+                        if (mVisor.Main.HasExImage)
+                        {
+                            var exFront = GameObject.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
+                            exFront.sharedMaterial = HatManager.Instance.DefaultShader;
+                            exFront.sprite = mVisor.Main.GetExSprite(0);
+                            exFront.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f, 0f, mVisor.Main.ExIsFront ? -0.1f : 0.1f);
+                        }
+
+
+                        if (mVisor.Back != null)
+                        {
+                            __instance.UpdateMaterials(colorChip.Inner.BackLayer, vanillaItem);
+                            colorChip.Inner.BackLayer.sprite = mVisor.Back.GetSprite(0)!;
+                            if (Application.isPlaying) PlayerMaterial.SetColors(colorId, colorChip.Inner.BackLayer);
+
+                            if (mVisor.Back.HasExImage)
+                            {
+                                var exFront = GameObject.Instantiate(colorChip.Inner.BackLayer, colorChip.Inner.BackLayer.transform.parent);
+                                exFront.sharedMaterial = HatManager.Instance.DefaultShader;
+                                exFront.sprite = mVisor.Back.GetExSprite(0);
+                                exFront.transform.localPosition = colorChip.Inner.BackLayer.transform.localPosition + new Vector3(0f, 0f, mVisor.Back.ExIsFront ? -0.1f : 0.1f);
+                            }
+                        }
                     }
                 }
                 else
@@ -1436,13 +1745,26 @@ public static class TabEnablePatch
         {
             (NamePlateData, CosmicNameplate?)[] unlockedNamePlates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(nameplate => MoreCosmic.AllNameplates.TryGetValue(nameplate.ProductId, out var modNameplate) ? (nameplate, modNameplate) : (nameplate, null)).ToArray();
 
+            __instance.previewArea.TargetPlayerId = NebulaPlayerTab.PreviewColorId;
             SetUpTab(__instance, HatManager.Instance.allNamePlates.First(v => v.IsEmpty), unlockedNamePlates,
                 () => HatManager.Instance.GetNamePlateById(DataManager.Player.Customization.NamePlate),
                 (nameplate) => __instance.SelectNameplate(nameplate),
                 (item, chip) => {
                     __instance.StartCoroutine(AddressableAssetExtensions.CoLoadAssetAsync(__instance, item.Cast<IAddressableAssetProvider<NamePlateViewData>>(), (Il2CppSystem.Action<NamePlateViewData>)((viewData) =>
                     {
-                        chip.CastFast<NameplateChip>().image.sprite = ((viewData != null) ? viewData.Image : null);
+                        var plateChip = chip.CastFast<NameplateChip>().image;
+                        plateChip.sprite = ((viewData != null) ? viewData.Image : null);
+
+                        if (MoreCosmic.AllNameplates.TryGetValue(item.ProductId, out var mPlate)) {
+                            var adaptiveChip = GameObject.Instantiate(plateChip, plateChip.transform.parent);
+                            GameObject.Destroy(adaptiveChip.GetComponent<PassiveButton>());
+                            GameObject.Destroy(adaptiveChip.GetComponent<CircleCollider2D>());
+                            adaptiveChip.sprite = mPlate.Adaptive?.GetSprite(0);
+                            adaptiveChip.transform.localPosition = plateChip.transform.localPosition + new Vector3(0f, 0f, mPlate.AdaptiveInFront ? -0.1f : 0.1f) ;
+                            adaptiveChip.transform.localScale = plateChip.transform.localScale;
+                            adaptiveChip.material = HatManager.Instance.PlayerMaterial;
+                            PlayerMaterial.SetColors(NebulaPlayerTab.PreviewColorId, adaptiveChip);
+                        }
                     })));
                 }
             );
@@ -1479,6 +1801,54 @@ public static class TabEnablePatch
                 return true;
             }
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.PreviewNameplate))]
+    public class PreviewNameplatePatch
+    {
+        public static void Postfix(PlayerVoteArea __instance, [HarmonyArgument(0)] string plateID)
+        {
+            if(!__instance.gameObject.TryGetComponent<NebulaNameplate>(out var nebulaPlate))
+                nebulaPlate = __instance.gameObject.AddComponent<NebulaNameplate>();
+            else nebulaPlate.UpdateColor();
+
+            var plate = HatManager.Instance.GetNamePlateById(plateID);
+            if (plate != null && MoreCosmic.AllNameplates.TryGetValue(plate.ProductId, out var mPlate))
+            {
+                nebulaPlate.AdaptiveRenderer.sprite = mPlate.Adaptive?.GetSprite(0);
+                nebulaPlate.AdaptiveRenderer.transform.localPosition = new Vector3(0, 0, mPlate.AdaptiveInFront ? -0.1f : 0.1f);
+                PlayerMaterial.SetColors(__instance.TargetPlayerId, nebulaPlate.AdaptiveRenderer);
+
+            }
+            else
+            {
+                nebulaPlate.AdaptiveRenderer.sprite = null;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.SetCosmetics))]
+    public class NameplateSetCosmeticsPatch
+    {
+        public static void Postfix(PlayerVoteArea __instance, [HarmonyArgument(0)] NetworkedPlayerInfo playerInfo)
+        {
+
+            if (!__instance.gameObject.TryGetComponent<NebulaNameplate>(out var nebulaPlate))
+                nebulaPlate = __instance.gameObject.AddComponent<NebulaNameplate>();
+
+            var plate = HatManager.Instance.GetNamePlateById(playerInfo.DefaultOutfit.NamePlateId);
+            if (plate != null && MoreCosmic.AllNameplates.TryGetValue(plate.ProductId, out var mPlate))
+            {
+                nebulaPlate.AdaptiveRenderer.sprite = mPlate.Adaptive?.GetSprite(0);
+                nebulaPlate.AdaptiveRenderer.transform.localPosition = new Vector3(0, 0, mPlate.AdaptiveInFront ? -0.1f : 0.1f);
+                PlayerMaterial.SetColors(playerInfo.PlayerId, nebulaPlate.AdaptiveRenderer);
+            }
+            else
+            {
+                nebulaPlate.AdaptiveRenderer.sprite = null;
+            }
+            
         }
     }
 }

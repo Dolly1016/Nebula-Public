@@ -14,7 +14,7 @@ namespace Nebula.Configuration;
 /// <summary>
 /// ゲーム内設定のオプション値を管理します。
 /// </summary>
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructureConfig)]
+[NebulaPreprocess(PreprocessPhase.FixStructureConfig)]
 [NebulaRPCHolder]
 internal static class ConfigurationValues
 {
@@ -54,20 +54,19 @@ internal static class ConfigurationValues
     {
         public ConfigurationUpdateBlocker()
         {
-            if (CurrentBlocker == null) CurrentBlocker = new ConfigurationUpdateBlocker();
+            if (CurrentBlocker == null) CurrentBlocker = this;
         }
 
         public void Dispose()
         {
             if (CurrentBlocker == this)
             {
+                CurrentBlocker = null;
                 using (RPCRouter.CreateSection("ShareConfigurationValue"))
                 {
                     ChangedEntryIdList.Do(e => RpcShare.Invoke((e, AllEntries[e].RpcValue)));
                 }
                 ChangedEntryIdList.Clear();
-
-                CurrentBlocker = null;
             }
         }
     }
@@ -88,7 +87,7 @@ internal static class ConfigurationValues
 
     static public void FlushLocal()
     {
-        ConfigurationSaver.Save();
+        ConfigurationSaver.TrySave();
     }
 
     static public void RestoreAll()

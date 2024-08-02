@@ -448,7 +448,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
 
                 IEnumerator CoWaitSharing()
                 {
-                    while (!shareFlag && timer > 0f) {
+                    while (!shareFlag && timer > 0f && MeetingHudExtension.CanShowPhotos) {
                         timer -= Time.deltaTime;
                         hourText.text = Mathf.CeilToInt(timer).ToString();
 
@@ -490,7 +490,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                         RpcShareState.Invoke((MyPlayer.PlayerId, CapturedMask, DisclosedMask));
 
                         CheckPaparazzoWin();
-                        SharePicture(shot.shot.centerRenderer.transform.localScale.x, shot.shot.transform.localEulerAngles.z, shot.shot.centerRenderer.sprite.texture);
+                        SharePicture((shot.playerMask & aliveMask), shot.shot.centerRenderer.transform.localScale.x, shot.shot.transform.localEulerAngles.z, shot.shot.centerRenderer.sprite.texture);
                         shareFlag = true;
 
                         if(acTokenChallenge != null) acTokenChallenge.Value.lastAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead);
@@ -532,11 +532,18 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         }
     }
 
-    public static void SharePicture(float scale,float angle,Texture2D texture)
+    public static void SharePicture(int playersMask, float scale,float angle,Texture2D texture)
     {
         RpcSharePicture.Invoke((scale,angle,UnityEngine.ImageConversion.EncodeToJPG(texture, 60)));
+        RpcShareDisclosedPlayers.Invoke(playersMask);
     }
 
+    public static RemoteProcess<int> RpcShareDisclosedPlayers = new("ShareDisclosed",
+        (message, _) =>
+        {
+            bool takenSelf = (message & (1 << PlayerControl.LocalPlayer.PlayerId)) != 0;
+            if (takenSelf && (NebulaGameManager.Instance?.LocalPlayerInfo.IsImpostor ?? false)) new StaticAchievementToken("paparazzo.another1");
+        });
     public static DivisibleRemoteProcess<(float, float, byte[]), (int id, float scale, float angle, int length, int index, byte[] bytes)> RpcSharePicture = new("SharePicture",
         (message) =>
         {

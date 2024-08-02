@@ -21,9 +21,11 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
     string ICodeName.CodeName => "LVR";
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
-    bool AssignableFilter<DefinedRole>.Test(DefinedRole role) => role.ModifierFilter?.Test((this as DefinedModifier)!) ?? false;
-    void AssignableFilter<DefinedRole>.ToggleAndShare(DefinedRole role) => role.ModifierFilter?.ToggleAndShare((this as DefinedModifier)!);
+    bool AssignableFilter<DefinedRole>.Test(DefinedRole role) => role.ModifierFilter?.Test(this) ?? false;
+    void AssignableFilter<DefinedRole>.ToggleAndShare(DefinedRole role) => role.ModifierFilter?.ToggleAndShare(this);
+    void AssignableFilter<DefinedRole>.SetAndShare(Virial.Assignable.DefinedRole role, bool val) => role.ModifierFilter?.SetAndShare(this, val);
     RoleFilter HasRoleFilter.RoleFilter => this;
+    bool ISpawnable.IsSpawnable => NumOfPairsOption > 0;
 
     int HasAssignmentRoutine.AssignPriority => 1;
 
@@ -70,6 +72,13 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
                 break;
             }
         }
+    }
+
+    void IAssignToCategorizedRole.GetAssignProperties(RoleCategory category, out int assign100, out int assignRandom, out int assignChance)
+    {
+        assign100 = 0;
+        assignRandom = 0;
+        assignChance = 0;
     }
 
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
@@ -149,7 +158,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             }
             else
             {   
-                myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
+                myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.WithAssigningGhostRole);
             }
         }
 

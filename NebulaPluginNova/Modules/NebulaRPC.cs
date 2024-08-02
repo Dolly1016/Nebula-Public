@@ -138,7 +138,7 @@ public static class RPCRouter
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
+[NebulaPreprocess(PreprocessPhase.FixStructure)]
 public class RemoteProcessBase
 {
     static public Dictionary<int, RemoteProcessBase> AllNebulaProcess = new();
@@ -278,13 +278,19 @@ public static class RemoteProcessAsset
                 writer.Write(cand.outfit.VisorId);
                 writer.Write(cand.outfit.PetId);
                 writer.Write(cand.outfit.ColorId);
+
+                writer.Write(cand.OutfitTags.Length);
+                foreach (var tag in cand.OutfitTags) writer.Write(tag.Id);
+
                 writer.Write(cand.Tag);
                 writer.Write(cand.Priority);
                 writer.Write(cand.SelfAware);
             },
             (reader) => {
                 NetworkedPlayerInfo.PlayerOutfit outfit = new() { PlayerName = reader.ReadString(), HatId = reader.ReadString(), SkinId = reader.ReadString(), VisorId = reader.ReadString(), PetId = reader.ReadString(), ColorId = reader.ReadInt32() };
-                return new OutfitCandidate(reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean(), outfit);
+                OutfitTag[] tags = new OutfitTag[reader.ReadInt32()];
+                for (int i = 0; i < tags.Length; i++) tags[i] = OutfitTag.GetTagById(reader.ReadInt32());
+                return new OutfitCandidate(reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean(), outfit, tags);
             }
         );
         defaultProcessDic[typeof(TimeLimitedModulator)] = (

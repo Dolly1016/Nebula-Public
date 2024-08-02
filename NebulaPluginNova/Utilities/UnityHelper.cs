@@ -21,6 +21,14 @@ public static class UnityHelper
         return CreateObject(objName, parent, localPosition, layer).AddComponent<T>();
     }
 
+    //SortingGroupOrderを10に固定します。
+    public static SpriteRenderer CreateSpriteRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer = null)
+    {
+        var renderer = CreateObject<SpriteRenderer>(objName, parent, localPosition, layer);
+        renderer.sortingGroupOrder = 10;
+        return renderer;
+    }
+
     public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer,Color? color = null)
     {
         var meshFilter = UnityHelper.CreateObject<MeshFilter>("mesh", parent, localPosition, layer);
@@ -207,6 +215,30 @@ public static class UnityHelper
         Vector3 result = vec;
         result.z = z;
         return result;
+    }
+
+    public static Material GetMeshRendererMaterial() => new(NebulaAsset.MeshRendererShader);
+    public static Material GetMeshRendererMaskedMaterial() => new(NebulaAsset.MeshRendererMaskedShader);
+
+    /// <summary>
+    /// 自分自身と、すべての子に対して手続きを実行します。
+    /// </summary>
+    /// <param name="obj"></param>
+    public static void DoForAllChildren(GameObject obj, Action<GameObject> procedure, bool doSelf = true)
+    {
+        if(doSelf) procedure.Invoke(obj);
+
+        void _sub__DoForAllChildren(GameObject parent)
+        {
+            for(int i = 0;i < parent.transform.childCount; i++)
+            {
+                var child = parent.transform.GetChild(i).gameObject;
+                procedure.Invoke(child);
+                _sub__DoForAllChildren(child);
+            }
+        }
+
+        _sub__DoForAllChildren(obj);
     }
 }
 

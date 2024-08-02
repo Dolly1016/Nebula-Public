@@ -35,7 +35,7 @@ public class ShowCommand : ICommand
                     return task.Chain(_ => arguments[arguments.Count - 1].AsValue<GUIWidget>(env))
                     .Action(widget =>
                     {
-                        var window = MetaScreen.GenerateWindow(new(width, height),  HudManager.Instance.transform, UnityEngine.Vector3.zero, true, true, true, true);
+                        var window = MetaScreen.GenerateWindow(new(width, height),  HudManager.Instance.transform, UnityEngine.Vector3.zero, true, true, withMask: true);
                         window.SetWidget(widget, new(pivotX, pivotY), out _);
                     });
                 }},

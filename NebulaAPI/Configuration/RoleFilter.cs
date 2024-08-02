@@ -10,6 +10,7 @@ namespace Virial.Configuration;
 public interface AssignableFilter<T> where T : DefinedAssignable {
     bool Test(T assignable);
     void ToggleAndShare(T assignable);
+    void SetAndShare(T assignable, bool val);
 }
 
 /// <summary>

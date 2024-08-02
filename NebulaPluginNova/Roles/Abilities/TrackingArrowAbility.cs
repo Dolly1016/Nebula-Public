@@ -36,8 +36,9 @@ public class TrackingArrowAbility : ComponentHolder, IGameOperator
             {
                 if (arrow == null)
                 {
-                    arrow = Bind(new Arrow());
-                    arrow.SetColor(color);
+                    arrow = Bind(new Arrow(null, false, true) { IsAffectedByComms = false }.HideArrowSprite());
+                    arrow.SetSmallColor(color);
+                    AmongUsUtil.GetPlayerIcon(target.DefaultOutfit.outfit, arrow.ArrowObject.transform, new(0f, 0f, -1f), new(0.24f, 0.24f, 1f));
                 }
 
                 arrow.TargetPos = target.Position;

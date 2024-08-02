@@ -13,7 +13,7 @@ using Virial.Text;
 
 namespace Nebula.Modules.ScriptComponents;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbilityButton, IGameOperator
 {
     public class AbilityButtonStructure
@@ -115,7 +115,54 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
     public bool IsAvailable => IsVisible && IsAvailableUnsafe;
     private bool IsAvailableUnsafe => Availability?.Invoke(this) ?? true;
 
-    void HudUpdate(GameHudUpdateEvent ev)
+    public Func<bool>? PlayFlash { get; set; } = null;
+    private float playFlashTimer = 0f;
+    void PlayFlashUpdate(GameHudUpdateEvent ev)
+    {
+        IEnumerator CoFlash()
+        {
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("Flash", VanillaButton.transform, new(0f, 0f, -1f));
+            renderer.sprite = VanillaButton.graphic.sprite;
+            renderer.material = new(NebulaAsset.WhiteShader);
+            renderer.material.SetColor("_Color", new(1f, 1f, 1f, 1f));
+            yield return null;
+
+            float a = 1f;
+            while(a > 0f)
+            {
+                renderer.transform.localScale = UnityEngine.Vector3.one * (2f - a);
+                renderer.material.SetColor("_Color", new(1f, 1f, 1f, a * 0.85f));
+                a -= Time.deltaTime * 1.5f;
+                yield return null;
+            }
+
+            GameObject.Destroy(renderer.gameObject);
+
+        }
+
+        if (IsVisible)
+        {
+            if (PlayFlash?.Invoke() ?? false)
+            {
+                playFlashTimer -= Time.deltaTime;
+                if(playFlashTimer < 0f)
+                {
+                    playFlashTimer = 0.9f;
+                    NebulaManager.Instance.StartCoroutine(CoFlash().WrapToIl2Cpp());
+                }
+            }
+            else
+            {
+                playFlashTimer = 0f;
+            }
+        }
+        else
+        {
+            playFlashTimer = 0f;
+        }
+    }
+
+    public void UpdateVisibility()
     {
         //表示・非表示切替
         VanillaButton.gameObject.SetActive(IsVisible);
@@ -124,6 +171,13 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
             VanillaButton.SetEnabled();
         else
             VanillaButton.SetDisabled();
+    }
+
+    void OnHudActiveChange(Patches.HudActivePatch.HudActiveChangeEvent ev) => UpdateVisibility();
+
+    void OnHudUpdate(GameHudUpdateEvent ev)
+    {
+        UpdateVisibility();
 
         OnUpdate?.Invoke(this);
 
@@ -386,7 +440,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
 
 public static class ButtonEffect
 {
-    [NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+    [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
     public class KeyCodeInfo
     {
         public static string? GetKeyDisplayName(KeyCode keyCode)

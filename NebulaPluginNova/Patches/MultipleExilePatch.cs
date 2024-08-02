@@ -173,7 +173,7 @@ internal class AirshipMultipleExilePatch
             {
                 float num3 = t / d;
                 Vector2 vector2 = Effects.Bezier(num3, sourcePos, targetPos, anchor);
-                p.transform.localPosition = vector2.AsVector3(i * 0.1f);
+                p.transform.localPosition = vector2.AsVector3(i * 0.5f);
                 float num4 = Mathf.Lerp(0f, 80f, num3);
                 p.transform.localEulerAngles = new Vector3(0f, 0f, num4);
                 yield return null;

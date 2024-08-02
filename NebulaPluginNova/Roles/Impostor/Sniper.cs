@@ -1,5 +1,7 @@
-﻿using Nebula.Behaviour;
+﻿using Epic.OnlineServices.Mods;
+using Nebula.Behaviour;
 using Nebula.Game.Statistics;
+using Nebula.Roles.Abilities;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -16,6 +18,10 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     private Sniper() : base("sniper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,AimAssistOption,DelayInAimAssistOption, CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+
+        MetaAbility.RegisterCircle(new("role.sniper.shotRange", () => ShotEffectiveRangeOption, () => null, UnityColor));
+        MetaAbility.RegisterCircle(new("role.sniper.soundRange", () => ShotNoticeRangeOption, () => null, UnityColor));
+        MetaAbility.RegisterCircle(new("role.sniper.shotSize", () => ShotSizeOption * 0.25f, () => null, UnityColor));
     }
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
 
@@ -74,7 +80,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
 
             foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
-                if (p.IsDead || p.AmOwner || ((!CanKillHidingPlayerOption) && p.VanillaPlayer.inVent)) continue;
+                if (p.IsDead || p.AmOwner || ((!CanKillHidingPlayerOption) && p.VanillaPlayer.inVent || p.IsDived)) continue;
 
                 //インポスターは無視
                 if (!CanKillImpostorOption && p.IsImpostor) continue;
@@ -88,7 +94,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 //移動と回転を施したベクトル
                 var vec = diff.Rotate(-Renderer.transform.eulerAngles.z);
 
-                if(vec.x>0 && vec.x< minLength && Mathf.Abs(vec.y) < width / 2f)
+                if(vec.x>0 && vec.x< minLength && Mathf.Abs(vec.y) < width * 0.5f)
                 {
                     result = p;
                     minLength= vec.x;
@@ -336,7 +342,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if ((message - (Vector2)PlayerControl.LocalPlayer.transform.position).magnitude < ShotNoticeRangeOption)
             {
-                var arrow = new Arrow(snipeNoticeSprite.GetSprite(), false) { IsSmallenNearPlayer = false, IsAffectedByComms = false, FixedAngle = true };
+                var arrow = new Arrow(snipeNoticeSprite.GetSprite(), false) { IsSmallenNearPlayer = false, IsAffectedByComms = false, FixedAngle = true, OnJustPoint = true };
                 arrow.TargetPos = message;
                 NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
             }

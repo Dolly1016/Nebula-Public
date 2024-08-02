@@ -1,4 +1,5 @@
 ﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Abilities;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
@@ -49,32 +50,6 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
         }
         int[]? RuntimeAssignable.RoleArguments => new int[] { leftEaten };
 
-        private List<(DeadBody deadBody, Arrow arrow)> AllArrows = new();
-
-        [Local]
-        void OnDeadBodyGenerated(DeadBodyInstantiateEvent ev)
-        {
-            AllArrows.Add((ev.DeadBody, Bind(new Arrow(null) { TargetPos = ev.DeadBody.TruePosition }.SetColor(Color.blue))));
-        }
-
-        [Local]
-        void LocalUpdate(GameUpdateEvent ev)
-        {
-            AllArrows.RemoveAll((tuple) =>
-            {
-                if (tuple.deadBody)
-                {
-                    tuple.arrow.TargetPos = tuple.deadBody.TruePosition;
-                    return false;
-                }
-                else
-                {
-                    tuple.arrow.ReleaseIt();
-                    return true;
-                }
-            });
-        }
-
         void OnReported(ReportDeadBodyEvent ev)
         {
             if (acTokenChallenge != null) acTokenChallenge.Value = false;
@@ -85,6 +60,10 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
             if (AmOwner)
             {
                 acTokenChallenge = new("vulture.challenge", true, (val, _) =>  val && NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.VultureWin && NebulaGameManager.Instance!.EndState!.Winners.Test(MyPlayer) );
+
+                //死体を指す矢印を表示する
+                var ability = new DeadbodyArrowAbility().Register(this);
+                GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev => ability.ShowArrow = !MyPlayer.IsDead, this);
 
                 StaticAchievementToken? acTokenCommon = null;
 

@@ -11,5 +11,7 @@ public class PlayerKillPlayerEvent : AbstractPlayerEvent
     public Virial.Game.Player Murderer => Player;
     public Virial.Game.Player Dead { get; private init; }
 
-    internal PlayerKillPlayerEvent(Virial.Game.Player killer, Virial.Game.Player dead) : base(killer) { }
+    internal PlayerKillPlayerEvent(Virial.Game.Player killer, Virial.Game.Player dead) : base(killer) {
+        Dead = dead;
+    }
 }

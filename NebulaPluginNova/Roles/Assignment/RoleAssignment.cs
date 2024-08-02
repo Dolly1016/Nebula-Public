@@ -52,15 +52,13 @@ public class FreePlayRoleAllocator : IRoleAllocator
 
 public class StandardRoleAllocator : IRoleAllocator
 {
+    private record RoleChance(DefinedRole role) { public int count = role.AllocationParameters?.RoleCountSum ?? 0; public int left = role.AllocationParameters?.RoleCountSum ?? 0; public int cost = 1; public int otherCost = 0; }
 
-    private record GhostRoleChance(DefinedGhostRole role) { public int count = role.AllocationParameters?.RoleCount ?? 0; public int left = role.AllocationParameters?.RoleCount ?? 0; }
-    private record RoleChance(DefinedRole role) { public int count = role.AllocationParameters?.RoleCount ?? 0; public int left = role.AllocationParameters?.RoleCount ?? 0; public int cost = 1; public int otherCost = 0; }
-
-    private List<GhostRoleChance> ghostRolePool;
+    private List<ICategorizedRoleAllocator<DefinedGhostRole>> ghostRolePool;
 
     public StandardRoleAllocator()
     {
-        ghostRolePool = new(Roles.AllGhostRoles.Where(r => (r.AllocationParameters?.RoleCount ?? 0) > 0).Select(r => new GhostRoleChance(r)));
+        ghostRolePool = new(Roles.AllGhostRoles.Select(r => r.GenerateRoleAllocator()));
     }
 
     private void OnSetRole(DefinedRole role,params List<RoleChance>[] pool)
@@ -136,7 +134,7 @@ public class StandardRoleAllocator : IRoleAllocator
         RoleTable table = new();
 
         //ロールプールを作る
-        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCount ?? 0) > 0).Select(r =>
+        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r =>
         new RoleChance(r) { cost = 1,otherCost = 0 }));
 
         List<RoleChance> crewmateRoles = GetRolePool(RoleCategory.CrewmateRole);
@@ -158,24 +156,25 @@ public class StandardRoleAllocator : IRoleAllocator
 
     public DefinedGhostRole? AssignToGhost(GamePlayer player)
     {
-        var pool = ghostRolePool.Where(g => g.role.Category == player.Role.Role.Category && player.Role.Role.CanLoad(g.role)).ToArray();
+        var category = player.Role.Role.Category;
+        var pool = ghostRolePool.Where(g => (g.MyRole.Category & category) != 0 && player.Role.Role.CanLoad(g.MyRole)).ToArray();
 
         //まずは100%割り当て役職を抽出
-        var cand = pool.Where(g => g.left > 0 && g.role.AllocationParameters!.GetRoleChance(g.count - g.left) == 100f).ToArray();
+        var cand = pool.Where(g => g.GetChance(category) == 100).ToArray();
         //100%割り当て役職がいなければ
         if (cand.Length == 0)
         {
             //Normal
             if(GeneralConfigurations.GhostAssignmentOption.GetValue() == 0) {
-                float sum = pool.Sum(g => g.role.AllocationParameters!.GetRoleChance(g.count - g.left));
+                int sum = pool.Sum(g => g.GetChance(category));
+                int random = System.Random.Shared.Next(sum);
                 foreach(var p in pool)
                 {
-                    sum -= p.role.AllocationParameters!.GetRoleChance(p.count - p.left);
-                    if(sum < 0f)
+                    random -= p.GetChance(category);
+                    if(random < 0)
                     {
-                        p.left--;
-                        if (p.left == 0) ghostRolePool.Remove(p);
-                        return p.role;
+                        p.ConsumeCount(category);
+                        return p.MyRole;
                     }
                 }
 
@@ -183,15 +182,18 @@ public class StandardRoleAllocator : IRoleAllocator
             }
 
             //Thrilling
-            cand = pool.Where(g => System.Random.Shared.NextSingle() * 100f < g.role.AllocationParameters!.GetRoleChance(g.count - g.left)).ToArray();
+            var thCand = pool.Where(p => System.Random.Shared.Next(100) < p.GetChance(category)).ToArray();
+            if (thCand.Length == 0) return null;
+            var selected = thCand.Random();
+            selected.ConsumeCount(category);
+            return selected.MyRole;
         }
 
         if (cand.Length > 0)
         {
             var selected = cand.Random();
-            selected.left--;
-            if (selected.left == 0) ghostRolePool.Remove(selected);
-            return selected.role;
+            selected.ConsumeCount(category);
+            return selected.MyRole;
         }
 
         return null;

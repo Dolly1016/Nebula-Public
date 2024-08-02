@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Patches;
+using Nebula.Roles.Abilities;
 using Nebula.Utilities;
 using Nebula.VoiceChat;
 using Virial;
@@ -263,7 +264,9 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
     private Ubiquitous(): base("ubiquitous", new(56,155,223), RoleCategory.CrewmateRole, Crewmate.MyTeam, [droneCoolDownOption, droneDurationOption, droneMicrophoneRadiousOption, droneDetectionRadiousOption, doorHackCoolDownOption, doorHackRadiousOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
-        //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Ubiquitous.png");
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Ubiquitous.png");
+
+        MetaAbility.RegisterCircle(new("role.ubiquitous.droneRange", () => droneDetectionRadiousOption, () => null, UnityColor));
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);

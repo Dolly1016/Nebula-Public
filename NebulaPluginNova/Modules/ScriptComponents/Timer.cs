@@ -13,7 +13,10 @@ class PlayerIsKillTimerEnabledPatch
 {
     public static void Postfix(PlayerControl __instance, ref bool __result)
     {
-        if(Minigame.Instance && Minigame.Instance.TryCast<SwitchMinigame>())
+        //地下にダイブ中、あるいは停電スイッチを直している間はキルクールは進まない
+        if (
+            (__instance.GetModInfo()?.IsDived ?? false) ||
+            (Minigame.Instance && Minigame.Instance.TryCast<SwitchMinigame>()))
         {
             __result = false;
         }

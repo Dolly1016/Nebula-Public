@@ -12,36 +12,6 @@ using static Virial.Attributes.NebulaPreprocess;
 
 namespace Nebula.Modules;
 
-//IL Repackの都合で、APIの引数付き属性を使用できないので、この属性と引数をNoS内で用意する。NoSではこちらを使うこと。
-public enum PreprocessPhaseForNoS
-{
-    BuildNoSModuleContainer,
-    BuildNoSModule,
-    PostBuildNoS,
-    LoadAddons,
-    CompileAddons,
-    PostLoadAddons,
-    PreRoles,
-    Roles,
-    FixRoles,
-    PostRoles,
-    PreFixStructure,
-    FixStructure,
-    FixStructureRoleFilter,
-    FixStructureConfig,
-    PostFixStructure
-}
-
-//IL Repackの都合で、APIの引数付き属性を使用できないので、この属性をNoS内で用意する。NoSではこちらを使うこと。
-[AttributeUsage(AttributeTargets.Class)]
-internal class NebulaPreprocessForNoS : NebulaPreprocess
-{
-    public NebulaPreprocessForNoS(PreprocessPhaseForNoS phase)
-    {
-        this.MyPhase = Enum.Parse<PreprocessPhase>(phase.ToString());
-    }
-}
-
 internal class NebulaPreprocessorImpl : NebulaPreprocessor
 {
     static internal NebulaPreprocessor Instance { get; private set; } = new NebulaPreprocessorImpl();
@@ -68,7 +38,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
             if (method == null)
             {
                 preprocessList[(int)attr.MyPhase].Add(((Action)(() => System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle))).ToCoroutine());
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, t.Name + " doesn't have preprocessor. its static constructor is called instead.");
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, t.Name + " doesn't have preprocessor. its static constructor is called instead.");
             }
             else if(method.ReturnType == typeof(void))
                 preprocessList[(int)attr.MyPhase].Add(((Action)(() => method.Invoke(null, [this]))).ToCoroutine());
@@ -117,7 +87,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
 }
 
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public static class ToolsInstaller
 {
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)

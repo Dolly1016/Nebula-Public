@@ -57,6 +57,7 @@ public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
                 cleanButton.Availability = (button) => cleanTracker.CurrentTarget != null && MyPlayer.VanillaPlayer.CanMove;
                 cleanButton.Visibility = (button) => !MyPlayer.IsDead;
                 cleanButton.OnClick = (button) => {
+                    if (cleanTracker.CurrentTarget?.MyKiller == MyPlayer) new StaticAchievementToken("cleaner.common2");
                     AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.PlayerId,MyPlayer.PlayerId,EventDetail.Clean);
                     if (SyncKillAndCleanCoolDownOption) PlayerControl.LocalPlayer.killTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
                     cleanButton.StartCoolDown();

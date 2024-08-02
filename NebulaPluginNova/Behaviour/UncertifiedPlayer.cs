@@ -113,7 +113,7 @@ namespace Nebula.Behaviour
             //MyControl?.OwnerId == AmongUsClient.Instance.HostId
             if (MyControl?.AmOwner ?? false && !AmongUsClient.Instance.AmHost)
             {
-                var screen = MetaScreen.GenerateWindow(new(3.8f,1.78f),HudManager.Instance.transform,Vector3.zero, true,false,true);
+                var screen = MetaScreen.GenerateWindow(new(3.8f,1.78f),HudManager.Instance.transform,Vector3.zero, true,false);
                 var widget = new MetaWidgetOld();
                 widget.Append(new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = ReasonToTranslationKey(State) });
                 widget.Append(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Top, Size = new(3.7f, 0.9f) }.EditFontSize(1.5f, 0.7f, 1.5f)) { TranslationKey = ReasonToTranslationKey(State) + ".client", Alignment = IMetaWidgetOld.AlignmentOption.Center });

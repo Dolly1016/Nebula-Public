@@ -13,7 +13,7 @@ namespace Nebula.Roles.Crewmate;
 
 public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Collator():base("collator",new(37, 159, 148), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SampleCoolDownOption, SelectiveCollatingOption, MaxTrialsOption, MaxTrialsPerMeetingOption, NumOfTubesOption, CarringOverSamplesOption, StrictClassificationOfNeutralRolesOption, MadmateIsClassifiedAsOption]) {
+    private Collator():base("collator",new(37, 159, 148), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SampleCoolDownOption, SelectiveCollatingOption, MaxTrialsOption, MaxTrialsPerMeetingOption, NumOfTubesOption, CarringOverSamplesOption, CanTakeDuplicateSampleOption, StrictClassificationOfNeutralRolesOption, MadmateIsClassifiedAsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Collator.png");
     }
@@ -27,10 +27,11 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
     static private IntegerConfiguration MaxTrialsPerMeetingOption = NebulaAPI.Configurations.Configuration("options.role.collator.maxTrialsPerMeeting", (1, 5), 1, () => SelectiveCollatingOption);
     static private IntegerConfiguration NumOfTubesOption = NebulaAPI.Configurations.Configuration("options.role.collator.numOfTubes", (3, 14), 5, () => SelectiveCollatingOption);
     static private BoolConfiguration CarringOverSamplesOption = NebulaAPI.Configurations.Configuration("options.role.collator.carringOverSamples", false, () => SelectiveCollatingOption);
+    static private BoolConfiguration CanTakeDuplicateSampleOption = NebulaAPI.Configurations.Configuration("options.role.collator.canTakeDuplicateSample", false, () => SelectiveCollatingOption);
     static private BoolConfiguration StrictClassificationOfNeutralRolesOption = NebulaAPI.Configurations.Configuration("options.role.collator.strictClassificationForNeutralRoles", false);
     static private ValueConfiguration<int> MadmateIsClassifiedAsOption = NebulaAPI.Configurations.Configuration("options.role.collator.madmateIsClassifiedAs", ["options.role.collator.madmateIsClassifiedAs.impostor", "options.role.collator.madmateIsClassifiedAs.crewmate"], 0);
-
-    static public Collator MyRole = null!;// new Collator();
+    
+    static public Collator MyRole = new Collator();
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -45,7 +46,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
 
         private List<(GamePlayer player, RoleTeam team)> sampledPlayers = new();
         private (SpriteRenderer tube, SpriteRenderer sample)[] allSamples = null!;
-
+        private int ActualSampledPlayers => sampledPlayers.DistinctBy(p => p.player.PlayerId).Count();
         private int trials = MaxTrialsOption;
         void UpdateSamples()
         {
@@ -86,7 +87,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (sampledPlayers.Count >= 2)
+            if (ActualSampledPlayers >= 2)
             {
                 if (SelectiveCollatingOption)
                 {
@@ -125,7 +126,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                             }
                         }
                     },
-                    p => sampledPlayers.Any(s => s.player == p.MyPlayer) && leftTest > 0 && trials > 0 && sampledPlayers.Count >= 2
+                    p => sampledPlayers.Any(s => s.player == p.MyPlayer) && leftTest > 0 && trials > 0 && ActualSampledPlayers >= 2 && !MyPlayer.IsDead
                     ));
                 }
                 else
@@ -183,13 +184,27 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                 acTokenAnother1 = new("collator.another1", (null, 0f, false), (value, _) => value.clear);
 
                 //サンプル一覧の表示
-                var IconsHolder = HudContent.InstantiateContent("CollatorIcons", true, true, false);
+                var IconsHolder = HudContent.InstantiateContent("CollatorIcons", true, true, false, true);
                 this.Bind(IconsHolder.gameObject);
+                var ajust = UnityHelper.CreateObject<ScriptBehaviour>("Ajust", IconsHolder.transform, Vector3.zero);
+                ajust.UpdateHandler += () =>
+                {
+                    if (MeetingHud.Instance)
+                    {
+                        ajust.transform.localScale = new(0.65f, 0.65f, 1f);
+                        ajust.transform.localPosition = new(-0.45f, -0.37f, 0f);
+                    }
+                    else
+                    {
+                        ajust.transform.localScale = Vector3.one;
+                        ajust.transform.localPosition = Vector3.zero;
+                    }
+                };
 
                 allSamples = new (SpriteRenderer tube, SpriteRenderer sample)[SelectiveCollatingOption ? NumOfTubesOption : 2];
                 for(int i = 0;i<allSamples.Length;i++)
                 {
-                    var tube = UnityHelper.CreateObject<SpriteRenderer>("SampleTube", IconsHolder.transform, Vector3.zero, LayerExpansion.GetUILayer());
+                    var tube = UnityHelper.CreateObject<SpriteRenderer>("SampleTube", ajust.transform, Vector3.zero, LayerExpansion.GetUILayer());
                     tube.sprite = tubeSprite.GetSprite(0);
 
                     var sample = UnityHelper.CreateObject<SpriteRenderer>("SampleColored", tube.transform, new(0, 0, 0.1f));
@@ -203,7 +218,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 UpdateSamples();
 
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => !p.AmOwner && !p.IsDead && !sampledPlayers.Any(s => s.player.PlayerId == p.PlayerId)));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && ((CanTakeDuplicateSampleOption && (sampledPlayers.Count + 1 < allSamples.Length || ActualSampledPlayers >= 2)) || !sampledPlayers.Any(s => s.player.PlayerId == p.PlayerId))));
                 var sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
 
                 AchievementToken<int> achCommon1Token = new("collator.common1", 0, (val, _) => val >= 5);
@@ -225,7 +240,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                     acTokenAnother1.Value.player = p;
                     acTokenAnother1.Value.time = NebulaGameManager.Instance!.CurrentTime;
                 };
-                sampleButton.OnStartTaskPhase = (button) => { if (!SelectiveCollatingOption || CarringOverSamplesOption) sampledPlayers.Clear(); UpdateSamples(); };
+                sampleButton.OnStartTaskPhase = (button) => { if (!SelectiveCollatingOption || !CarringOverSamplesOption) sampledPlayers.Clear(); UpdateSamples(); };
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("collatorSample");
             }

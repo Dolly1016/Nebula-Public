@@ -29,6 +29,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
         private bool hasGuard = true;
         DefinedRole? nextRole = null;
+        int[]? nextArgs = null;
         bool RuntimeAssignable.CanBeAwareAssignment => NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
         public Instance(GamePlayer player) : base(player)
         {
@@ -58,22 +59,26 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                 //インポスター⇒クルーメイト
                 RpcNoticeCurse.Invoke((MyPlayer.PlayerId, 2));
 
+            if (MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && myNextRole.Category != Virial.Assignable.RoleCategory.ImpostorRole)
+                //インポスター⇒非インポスター
+                RpcNoticeCurse.Invoke((MyPlayer.PlayerId, 3));
 
             if (MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.CrewmateRole && myNextRole.Category == Virial.Assignable.RoleCategory.ImpostorRole)
                 //クルーメイト⇒インポスター
                 RpcNoticeCurse.Invoke((MyPlayer.PlayerId, 0));
-
 
             if (MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.NeutralRole && myNextRole.Category == Virial.Assignable.RoleCategory.ImpostorRole)
                 //第三陣営⇒インポスター
                 RpcNoticeCurse.Invoke((MyPlayer.PlayerId, 1));
         }
 
+        [OnlyMyPlayer]
         void OnGuard(PlayerGuardEvent ev)
         {
             hasGuard = false;
             nextRole = ev.Murderer.Role.Role;
-
+            nextArgs = ev.Murderer.Role.RoleArguments;
+            
             if (ev.Murderer.AmOwner && DamnedMurderMyKillerOption)
             {
                 IEnumerator CoDelayKill()
@@ -81,6 +86,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                     yield return Effects.Wait(KillDelayOption);
 
                     DefinedRole myNextRole = TakeOverRoleOfKillerOption ? nextRole! : Impostor.DamnedImpostor.MyRole;
+                    var myNextArgs = TakeOverRoleOfKillerOption ? nextArgs! : null;
                     CheckAchievement(myNextRole);
 
 
@@ -89,7 +95,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                         if (MyPlayer.MurderPlayer(ev.Murderer, PlayerState.Cursed, EventDetail.Curse, KillParameter.RemoteKill) == KillResult.Kill)
                         {
                             MyPlayer.Unbox().RpcInvokerUnsetModifier(MyRole).InvokeSingle();
-                            MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, null).InvokeSingle();
+                            MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, myNextArgs).InvokeSingle();
                         }
                     }
                 }
@@ -107,12 +113,13 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                 NebulaManager.Instance.ScheduleDelayAction(() =>
                 {
                     DefinedRole myNextRole = TakeOverRoleOfKillerOption ? nextRole! : Impostor.DamnedImpostor.MyRole;
+                    var myNextArgs = TakeOverRoleOfKillerOption ? nextArgs! : null;
                     CheckAchievement(myNextRole);
 
                     using (RPCRouter.CreateSection("DamnedAction"))
                     {
                         MyPlayer.Unbox().RpcInvokerUnsetModifier(MyRole).InvokeSingle();
-                        MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, null).InvokeSingle();
+                        MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, myNextArgs).InvokeSingle();
                     }
                 });
             }
@@ -131,6 +138,9 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                 if (param.type == 1) new StaticAchievementToken("damned.common3");
                 if (param.type == 2) new AchievementToken<int>("damned.challenge", 0, (_, _) => 
                     NebulaGameManager.Instance!.EndState!.Winners.Test(NebulaGameManager.Instance.GetPlayer(param.playerId)) && NebulaGameManager.Instance!.EndState.EndCondition == NebulaGameEnd.CrewmateWin
+                );
+                if (param.type == 3) new AchievementToken<int>("damned.another1", 0, (_, _) =>
+                    NebulaGameManager.Instance?.LocalPlayerInfo.MyKiller?.IsImpostor ?? false || NebulaGameManager.Instance?.LocalPlayerInfo.PlayerState == PlayerStates.Guessed || NebulaGameManager.Instance?.LocalPlayerInfo.PlayerState == PlayerStates.Exiled
                 );
             }
         });

@@ -3,6 +3,19 @@ namespace Nebula.Utilities;
 
 public static class ManagedEffects
 {
+    //actionはt=0,1の両方の場合で必ず実行されます。
+    static public IEnumerator Lerp(float duration, Action<float> action)
+    {
+        float t = 0f;
+        while(t < duration)
+        {
+            action.Invoke(t / duration);
+            t += Time.deltaTime;
+            yield return null;
+        }
+        action.Invoke(1f);
+    }
+
     static public void Do(this IEnumerator coroutine)
     {
         while (coroutine.MoveNext()) { }

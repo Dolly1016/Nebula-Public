@@ -41,6 +41,14 @@ public static class VentCanUsePatch
         PlayerControl @object = pc.Object;
         GamePlayer? modInfo = NebulaGameManager.Instance?.GetPlayer(pc.PlayerId);
 
+        //ダイブ中はベント使用不可
+        if (modInfo?.IsDived ?? false)
+        {
+            canUse = couldUse = false;
+            __result = num;
+            return false;
+        }
+
         if (@object.inVent && Vent.currentVent == __instance)
         {
             //既にベント内にいる場合
@@ -103,6 +111,7 @@ public static class ExitVentPatch
 {
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
+        pc.moveable = false;
         var p = pc.GetModInfo();
         if (p == null) return;
         GameOperatorManager.Instance?.Run(new PlayerVentExitEvent(p, __instance));
@@ -137,14 +146,89 @@ public static class VentUsePatch
 
         PlayerControl localPlayer = PlayerControl.LocalPlayer;
         bool isNotEnter = localPlayer.inVent && !localPlayer.walkingToVent;
+
+        var info = localPlayer.GetModInfo();
+
         if (isNotEnter)
             localPlayer.MyPhysics.RpcExitVent(__instance.Id);
         if (!localPlayer.walkingToVent)
             localPlayer.MyPhysics.RpcEnterVent(__instance.Id);
 
-        __instance.SetButtons(!isNotEnter && localPlayer.GetModInfo()!.Role.CanMoveInVent);
+        __instance.SetButtons(!isNotEnter && info!.Role.CanMoveInVent);
         return false;
     }
+}
+
+public static class CommonCanUsePatch
+{
+    public static bool CanUse(MonoBehaviour target, NetworkedPlayerInfo pc)
+    {
+        var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
+        if (info == null) return true;
+
+        //ダイブ中は使用不可
+        if (info.IsDived) return false;
+
+        return true;
+    }
+
+    public static bool Prefix(ref float __result, MonoBehaviour __instance, NetworkedPlayerInfo pc, out bool canUse, out bool couldUse)
+    {
+        canUse = couldUse = false;
+
+        var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
+        if (info == null) return true;
+
+        if (!CanUse(__instance, pc))
+        {
+            __result = float.MaxValue;
+            return false;
+        }
+
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(Ladder), nameof(Ladder.CanUse))]
+public static class LadderCanUsePatch
+{
+    public static bool Prefix(ref float __result, Ladder __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse) => CommonCanUsePatch.Prefix(ref __result, __instance, pc, out canUse, out couldUse);
+}
+
+[HarmonyPatch(typeof(ZiplineConsole), nameof(ZiplineConsole.CanUse))]
+public static class ZiplineCanUsePatch
+{
+    public static bool Prefix(ref float __result, ZiplineConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse) => CommonCanUsePatch.Prefix(ref __result, __instance, pc, out canUse, out couldUse);
+}
+
+[HarmonyPatch(typeof(PlatformConsole), nameof(PlatformConsole.CanUse))]
+public static class PlatformCanUsePatch
+{
+    public static bool Prefix(ref float __result, PlatformConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse) => CommonCanUsePatch.Prefix(ref __result, __instance, pc, out canUse, out couldUse);
+}
+
+[HarmonyPatch(typeof(DoorConsole), nameof(DoorConsole.CanUse))]
+public static class DoorConsoleCanUsePatch
+{
+    public static bool Prefix(ref float __result, DoorConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse) => CommonCanUsePatch.Prefix(ref __result, __instance, pc, out canUse, out couldUse);
+}
+
+[HarmonyPatch(typeof(OpenDoorConsole), nameof(OpenDoorConsole.CanUse))]
+public static class OpenDoorConsoleCanUsePatch
+{
+    public static bool Prefix(ref float __result, OpenDoorConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse) => CommonCanUsePatch.Prefix(ref __result, __instance, pc, out canUse, out couldUse);
+}
+
+[HarmonyPatch(typeof(DeconControl), nameof(DeconControl.CanUse))]
+public static class DeconControlConsoleCanUsePatch
+{
+    public static bool Prefix(ref float __result, DeconControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse) => CommonCanUsePatch.Prefix(ref __result, __instance, pc, out canUse, out couldUse);
+}
+
+[HarmonyPatch(typeof(MapConsole), nameof(MapConsole.CanUse))]
+public static class MapConsoleCanUsePatch
+{
+    public static bool Prefix(ref float __result, MapConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse) => CommonCanUsePatch.Prefix(ref __result, __instance, pc, out canUse, out couldUse);
 }
 
 [HarmonyPatch(typeof(Console), nameof(Console.CanUse))]
@@ -156,6 +240,12 @@ public static class ConsoleCanUsePatch
 
         var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
         if (info == null) return true;
+
+        if (!CommonCanUsePatch.CanUse(__instance, pc))
+        {
+            __result = float.MaxValue;
+            return false;
+        }
 
         if (ShipStatus.Instance.SpecialTasks.Any((task) => __instance.TaskTypes.Contains(task.TaskType)))
         {
@@ -189,8 +279,14 @@ public static class SystemConsoleCanUsePatch
         var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
         if (info == null) return;
 
+        if (!CommonCanUsePatch.CanUse(__instance, pc))
+        {
+            canUse = false;
+            couldUse = false;
+        }
+
         //緊急会議コンソールの使用をブロック
-        if(__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting))
+        if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting))
         {
             canUse = false;
             couldUse = false;

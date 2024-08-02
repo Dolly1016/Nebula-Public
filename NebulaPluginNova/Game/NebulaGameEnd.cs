@@ -53,7 +53,7 @@ public class CustomExtraWin : ExtraWin
 }
 
 [NebulaRPCHolder]
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
 public class NebulaGameEnd
 {
     static private Color InvalidColor = new Color(72f / 255f, 78f / 255f, 84f / 255f);
@@ -71,6 +71,7 @@ public class NebulaGameEnd
 
     static public CustomExtraWin ExtraLoversWin = new(0, "lover", Roles.Modifier.Lover.MyRole.UnityColor);
     static public CustomExtraWin ExtraObsessionalWin = new(1, "obsessional", Roles.Modifier.Obsessional.MyRole.UnityColor);
+    static public CustomExtraWin ExtraGrudgeWin = new(2, "grudge", Roles.Ghost.Neutral.Grudge.MyRole.UnityColor);
 
     static void Preprocess(NebulaPreprocessor preprocessor)
     {

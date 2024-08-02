@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using Nebula.Map;
+using Nebula.Roles.Assignment;
 using UnityEngine.Rendering;
 using Virial.Runtime;
 
@@ -186,7 +187,7 @@ public class MouseOverPopup : MonoBehaviour
     }
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 [NebulaRPCHolder]
 public class NebulaManager : MonoBehaviour
 {
@@ -319,28 +320,19 @@ public class NebulaManager : MonoBehaviour
     {
         if (PreloadManager.FinishedPreload)
         {
-            if (Input.GetKeyDown(KeyCode.K))
-            {
-                string txt = "";
-                for (int i = 0; i < ConfigurationValues.AllEntries.Count; i++)
-                {
-                    txt += $"\n{i}: {ConfigurationValues.AllEntries[i].Name}";
-                }
-                NebulaPlugin.Log.Print(txt);
-            }
 
             //スクリーンショット
             if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDownForAction) StartCoroutine(CaptureAndSave().WrapToIl2Cpp());
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
-                /*
+                
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;
-                    File.WriteAllBytesAsync("SpawnableMap" + NebulaPreSpawnLocation.MapName[AmongUsUtil.CurrentMapId] +".png", MapData.GetCurrentMapData().OutputMap(center, new Vector2(10f, 7f) * ShipStatus.Instance.MapScale, 40f).EncodeToPNG());
+                    //Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;
+                    //File.WriteAllBytesAsync("SpawnableMap" + NebulaPreSpawnLocation.MapName[AmongUsUtil.CurrentMapId] +".png", MapData.GetCurrentMapData().OutputMap(center, new Vector2(10f, 7f) * ShipStatus.Instance.MapScale, 40f).EncodeToPNG());
                 }
-                */
+                
 
                 //コマンド
                 if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyDownForAction)
@@ -413,6 +405,10 @@ public class NebulaManager : MonoBehaviour
         mouseOverPopup = UnityHelper.CreateObject<MouseOverPopup>("MouseOverPopup",transform,Vector3.zero);
     }
 
+    public void StartDelayAction(float delay, Action action)
+    {
+        StartCoroutine(Effects.Sequence(Effects.Wait(delay), Effects.Action(action)));
+    }
     public void SetHelpWidget(PassiveUiElement? related, IMetaWidgetOld? widget) => mouseOverPopup.SetWidgetOld(related, widget);
     public void SetHelpWidget(PassiveUiElement? related, Virial.Media.GUIWidget? widget) => mouseOverPopup.SetWidget(related, widget);
     public void SetHelpWidget(PassiveUiElement? related, string? rawText)

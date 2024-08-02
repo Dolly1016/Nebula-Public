@@ -8,7 +8,7 @@ namespace Nebula.Roles.Ghost.Crewmate;
 [NebulaRPCHolder]
 public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
 {
-    public Poltergeist() : base("poltergeist", new(210, 220, 234), RoleCategory.CrewmateRole, Nebula.Roles.Crewmate.Crewmate.MyTeam, [PoltergeistCoolDownOption]) { }
+    public Poltergeist() : base("poltergeist", new(210, 220, 234), RoleCategory.CrewmateRole, [PoltergeistCoolDownOption]) { }
 
     string ICodeName.CodeName => "PLT";
 
@@ -59,7 +59,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
         float p = 0f;
         Vector2 beginPos = deadBody.transform.position;
 
-        while (true)
+        while (deadBody)
         {
             p += Time.deltaTime * 0.85f;
             if (!(p < 1f)) break;
@@ -72,7 +72,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
             yield return null;
         }
 
-        deadBody.transform.position = pos.AsVector3(pos.y / 1000f);
+        if(deadBody) deadBody.transform.position = pos.AsVector3(pos.y / 1000f);
 
         yield break;
     }

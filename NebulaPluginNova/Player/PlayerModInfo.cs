@@ -24,7 +24,7 @@ public enum RoleType
     GhostRole = 2,
 }
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public static class PlayerState
 {
     public static TranslatableTag Alive = new("state.alive");
@@ -63,7 +63,7 @@ public static class PlayerState
 }
 
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class PlayerAttributeImpl : IPlayerAttribute
 {
     public int Id { get; init; }
@@ -122,7 +122,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public byte PlayerId { get; private set; }
     public bool AmOwner { get; private set; }
     public bool IsDisconnected { get; set; } = false;
-    public bool IsDead => IsDisconnected || (MyControl.Data?.IsDead ?? false);
+    public bool IsDead => IsDisconnected || (MyControl ? MyControl.Data.IsDead : ((this as GamePlayer).PlayerState != PlayerStates.Alive && (this as GamePlayer).PlayerState != PlayerStates.Revived));
+    public PlayerDiving? CurrentDiving { get; set; }
+
     public float MouseAngle { get; private set; }
     private bool requiredUpdateMouseAngle { get; set; }
     public void RequireUpdateMouseAngle() => requiredUpdateMouseAngle = true;
@@ -196,7 +198,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public IEnumerable<RuntimeAssignable> AllAssigned()
     {
         if (Role != null) yield return Role;
-
+        if (GhostRole != null) yield return GhostRole;
         foreach (var m in myModifiers) yield return m;
     }
 
@@ -240,6 +242,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         AmOwner = myPlayer.AmOwner;
         
         DefaultOutfit = myPlayer.Data.DefaultOutfit;
+        DefaultOutfitTags = OutfitTag.GetAllTags().Where(tag => tag.Checker.Invoke(DefaultOutfit)).ToArray();
         roleText = GameObject.Instantiate(myPlayer.cosmetics.nameText, myPlayer.cosmetics.nameText.transform);
         roleText.transform.localPosition = new Vector3(0, 0.185f, -0.01f);
         roleText.fontSize = 1.7f;
@@ -254,6 +257,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public string ColoredDefaultName => DefaultName.Color(Color.Lerp(Palette.PlayerColors[PlayerId], Color.white, 0.3f));
     public NetworkedPlayerInfo.PlayerOutfit DefaultOutfit { get; private set; }
     public NetworkedPlayerInfo.PlayerOutfit CurrentOutfit => outfits.Count > 0 ? outfits[0].outfit : DefaultOutfit;
+    public OutfitTag[] DefaultOutfitTags { get; private set; } = [];
 
     private void UpdateOutfit()
     {
@@ -282,10 +286,11 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 MyControl.cosmetics.StopAllAnimations();
             }
 
-            var o = new Outfit(newOutfit);
+            var o = new Outfit(newOutfit, outfits.Count > 0 ? outfits[0].OutfitTags : DefaultOutfitTags);
             GameOperatorManager.Instance?.Run(new PlayerOutfitChangeEvent(this, o));
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             Debug.LogError("Outfit Error: Error occurred on changing " + DefaultName + " 's outfit");
             if (!MyControl) Debug.LogError(" - PlayerControl is INVALID.");
             Debug.LogError(e.ToString());
@@ -326,9 +331,18 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         UpdateOutfit();
     }
 
-    public NetworkedPlayerInfo.PlayerOutfit GetOutfit(int maxPriority)
+    public NetworkedPlayerInfo.PlayerOutfit GetOutfit(int maxPriority) => GetOutfit(maxPriority, out _);
+    public NetworkedPlayerInfo.PlayerOutfit GetOutfit(int maxPriority, out OutfitTag[] tags)
     {
-        foreach (var outfit in outfits) if (outfit.Priority <= maxPriority) return outfit.outfit;
+        foreach (var outfit in outfits)
+        {
+            if (outfit.Priority <= maxPriority)
+            {
+                tags = outfit.OutfitTags;
+                return outfit.outfit;
+            }
+        }
+        tags = [];
         return DefaultOutfit;
     }
 
@@ -940,6 +954,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = Color.clear;
                 }
 
+                MyControl.cosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = new(1f, 1f, 1f, 0.5f));
+
                 return;
             }
 
@@ -994,6 +1010,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             }
 
             if (MyControl.cosmetics.visor != null) MyControl.cosmetics.visor.Image.color = color;
+
+            MyControl.cosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = color);
         }
         catch (Exception e){ }
     }
@@ -1100,9 +1118,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     // Virial::OutfitAPI
 
-    Virial.Game.Outfit GamePlayer.GetOutfit(int maxPriority) => new(GetOutfit(maxPriority));
-    Virial.Game.Outfit GamePlayer.CurrentOutfit => new(CurrentOutfit);
-    Virial.Game.Outfit GamePlayer.DefaultOutfit => new(DefaultOutfit);
+    Virial.Game.Outfit GamePlayer.GetOutfit(int maxPriority) => new(GetOutfit(maxPriority, out var tags), tags);
+    Virial.Game.Outfit GamePlayer.CurrentOutfit => new(CurrentOutfit, outfits.Count > 0 ? outfits[0].OutfitTags : DefaultOutfitTags);
+    Virial.Game.Outfit GamePlayer.DefaultOutfit => new(DefaultOutfit, DefaultOutfitTags);
 
     // Virial::Internal
 

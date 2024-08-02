@@ -80,7 +80,7 @@ public class PlayersOverlay : IGameOperator
                         player.cosmetics.visor.Image.gameObject.AddComponent<ZOrderedSortingGroup>();
                         player.cosmetics.currentBodySprite.BodySprite.gameObject.AddComponent<ZOrderedSortingGroup>();
 
-                        allIcons.Add(new(p.PlayerId, obj, player, p) { LastColor = Palette.PlayerColors[player.ColorId], LastOutfit = new(p.CurrentOutfit) });
+                        allIcons.Add(new(p.PlayerId, obj, player, p) { LastColor = Palette.PlayerColors[player.ColorId], LastOutfit = new(p.CurrentOutfit, []) });
                     }
                 }
             }
@@ -91,7 +91,7 @@ public class PlayersOverlay : IGameOperator
                 {
                     i.display.UpdateFromPlayerOutfit(i.relatedControl.CurrentOutfit, PlayerMaterial.MaskType.ComplexUI, false, false);
                     i.display.TogglePet(false);
-                    i.LastOutfit = new(i.relatedControl.CurrentOutfit, true);
+                    i.LastOutfit = new(i.relatedControl.CurrentOutfit, [], true);
                     i.LastColor = Palette.PlayerColors[i.LastOutfit.outfit.ColorId];
                 }
             }

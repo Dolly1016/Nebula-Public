@@ -1,0 +1,127 @@
+{
+	"X" : 19,
+	"Y" : 3,
+	"DefaultHeight" : 0.9,
+	"WhitespaceWidth" : 0.6,
+	"LowercaseSequenceBegin" : 0,
+	"UppercaseSequenceBegin" : 0,
+	"NumberSequenceBegin" : 26,
+	"Characters" : [
+		{
+			"Character" : !,
+			"Index" : 36
+		},
+		{
+			"Character" : %22,
+			"Index" : 37
+		},
+		{
+			"Character" : %27,
+			"Index" : 37
+		},
+		{
+			"Character" : %60,
+			"Index" : 37
+		},
+		{
+			"Character" : #,
+			"Index" : 38
+		},
+		{
+			"Character" : $,
+			"Index" : 39
+		},
+		{
+			"Character" : %,
+			"Index" : 40
+		},
+		{
+			"Character" : &,
+			"Index" : 41
+		},
+		{
+			"Character" : (,
+			"Index" : 42,
+			"Ratio" : 0.8
+		},
+		{
+			"Character" : %7b,
+			"Index" : 42,
+			"Ratio" : 0.8
+		},
+		{
+			"Character" : %5b,
+			"Index" : 42,
+			"Ratio" : 0.8
+		},
+		{
+			"Character" : ),
+			"Index" : 43,
+			"Ratio" : 0.8
+		},
+		{
+			"Character" : %7d,
+			"Index" : 43,
+			"Ratio" : 0.8
+		},
+		{
+			"Character" : %5d,
+			"Index" : 43,
+			"Ratio" : 0.8
+		},
+		{
+			"Character" : *,
+			"Index" : 44
+		},
+		{
+			"Character" : +,
+			"Index" : 45
+		},
+		{
+			"Character" : %2c,
+			"Index" : 46
+		},
+		{
+			"Character" : -,
+			"Index" : 47
+		},
+		{
+			"Character" : .,
+			"Index" : 48
+		},
+		{
+			"Character" : /,
+			"Index" : 49
+		},
+		{
+			"Character" : %3a,
+			"Index" : 50,
+			"Ratio" : 0.5
+		},
+		{
+			"Character" : ;,
+			"Index" : 51,
+			"Ratio" : 0.5
+		},
+		{
+			"Character" : %3c,
+			"Index" : 52
+		},
+		{
+			"Character" : =,
+			"Index" : 53
+		},
+		{
+			"Character" : %3e,
+			"Index" : 54
+		},
+		{
+			"Character" : ?,
+			"Index" : 55
+		},
+		{
+			"Character" : _,
+			"Index" : 56
+		}
+	]
+}

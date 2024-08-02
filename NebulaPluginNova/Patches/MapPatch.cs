@@ -139,7 +139,7 @@ public static class OpenNormalMapPatch
         __instance.ColorControl.SetColor(new Color(0.05f, 0.2f, 1f, 1f));
         DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
 
-        GameOperatorManager.Instance?.Run(new MapOpenNormalEvent());
+        GameOperatorManager.Instance?.Run(new MapOpenNormalEvent(), true);
         return false;
     }
 }
@@ -165,7 +165,7 @@ public static class OpenSabotageMapPatch
         DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
         ConsoleJoystick.SetMode_Sabotage();
 
-        GameOperatorManager.Instance?.Run(new MapOpenSabotageEvent());
+        GameOperatorManager.Instance?.Run(new MapOpenSabotageEvent(), true);
         return false;
     }
 }
@@ -177,7 +177,7 @@ public static class OpenAdminMapPatch
 
     static void Postfix(MapCountOverlay __instance)
     {
-        GameOperatorManager.Instance?.Run(new MapOpenAdminEvent());
+        GameOperatorManager.Instance?.Run(new MapOpenAdminEvent(), true);
     }
 }
 

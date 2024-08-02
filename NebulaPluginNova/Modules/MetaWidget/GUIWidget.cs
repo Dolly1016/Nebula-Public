@@ -237,6 +237,9 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.MarketplaceDeveloper => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Normal, new(1.4f, 1f, 1.4f), new(2f, 0.32f), new(255, 255, 255), false),
                 AttributeAsset.MarketplaceBlurb => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Normal, new(1.4f, 1f, 1.4f), new(6f, 0.3f), new(255, 255, 255), false),
                 AttributeAsset.MarketplacePublishButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBold)) { FontSize = new(2.2f, 0.6f, 2.2f), Size = new(0.95f, 0.17f) },
+                AttributeAsset.MeetingTitle => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f,0.6f,1.8f), Size = new(2f,0.5f) },
+                AttributeAsset.VersionShower => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.Barlow), Virial.Text.FontStyle.Normal, new(1.28f, false), new(1f, 0.4f), new(255, 255, 255), true),
+                AttributeAsset.MetaRoleButton => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1.4f, 0.26f), new(255, 255, 255), false),
                 _ => null!
             };
         }
@@ -285,6 +288,26 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
         };
     }
 
+    public Virial.Media.GUIWidget Arrange(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, int perLine)
+    {
+        List<Virial.Media.GUIWidget> widgets = new();
+        List<Virial.Media.GUIWidget> horizontalWidgets = new();
+        foreach(var widget in inner)
+        {
+            if (widget == null) continue;
+
+            horizontalWidgets.Add(widget);
+            if (horizontalWidgets.Count == perLine)
+            {
+                widgets.Add(HorizontalHolder(alignment, horizontalWidgets.ToArray()));
+                horizontalWidgets.Clear();
+            }
+        }
+        if(horizontalWidgets.Count > 0) widgets.Add(HorizontalHolder(alignment, horizontalWidgets));
+
+        return VerticalHolder(alignment, widgets);
+    }
+
     public Virial.Media.GUIWidget HorizontalHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, float? fixedHeight = null) => new HorizontalWidgetsHolder(alignment, inner) { FixedHeight = fixedHeight };
 
     public Virial.Media.GUIWidget VerticalHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, float? fixedWidth = null) => new VerticalWidgetsHolder(alignment, inner) { FixedWidth = fixedWidth };
@@ -324,7 +347,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
 
     public void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable
     {
-        RoleOptionHelper.OpenFilterScreen<R>(scrollerTag, allRoles, test, toggleAndShare);
+        RoleOptionHelper.OpenFilterScreen<R>(scrollerTag, allRoles, test, null, toggleAndShare);
     }
 
 

@@ -1,4 +1,6 @@
-﻿namespace Virial.Compat;
+﻿using MS.Internal.Xml.XPath;
+
+namespace Virial.Compat;
 
 public struct Size
 {
@@ -59,6 +61,8 @@ public struct Vector2
     internal UnityEngine.Vector2 ToUnityVector() => new(x, y);
 
     static public implicit operator UnityEngine.Vector2(Vector2 v) => v.ToUnityVector();
+    static public Compat.Vector2 operator +(Vector2 v1, Vector2 v2) => new(v1.x + v2.x, v1.y + v2.y);
+    static public Compat.Vector2 operator -(Vector2 v1, Vector2 v2) => new(v1.x - v2.x, v1.y - v2.y);
 }
 
 

@@ -10,8 +10,16 @@ class VitalsMinigameBeginPatch
     static void Postfix(VitalsMinigame __instance)
     {
         NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Vitals, __instance.transform, new Vector3(3.4f, 2f, -50f));
-
+        __instance.BatteryText.gameObject.SetActive(false);
         VitalsMinigameUpdatePatch.UpdateVitals(__instance,true);
+
+        //バイタルパネルではスキンを透明にしない
+        foreach (var panel in __instance.vitals)
+        {
+            panel.PlayerIcon.cosmetics.SetSkin(panel.PlayerInfo.DefaultOutfit.SkinId, panel.PlayerInfo.DefaultOutfit.ColorId);
+            panel.PlayerIcon.cosmetics.SetHatColor(Palette.White);
+            panel.PlayerIcon.cosmetics.SetVisorAlpha(Palette.White.a);
+        }
     }
 }
 

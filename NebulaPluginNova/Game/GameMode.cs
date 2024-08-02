@@ -14,7 +14,7 @@ using Virial.Text;
 namespace Nebula.Game;
 
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 internal class GameModeDefinitionImpl : GameModeDefinition
 {
     static GameModeDefinitionImpl()

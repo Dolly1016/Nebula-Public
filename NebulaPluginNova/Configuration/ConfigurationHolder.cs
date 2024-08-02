@@ -12,7 +12,7 @@ using Virial.Text;
 
 namespace Nebula.Configuration;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
+[NebulaPreprocess(PreprocessPhase.FixStructure)]
 internal class ConfigurationHolder : IConfigurationHolder
 {
     TextComponent title, detail;

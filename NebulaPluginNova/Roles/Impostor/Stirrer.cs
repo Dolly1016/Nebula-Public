@@ -1,4 +1,5 @@
 ﻿using Nebula.Map;
+using TMPro;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -43,7 +44,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => p.PlayerId != MyPlayer.PlayerId && !p.IsDead && !p.IsImpostor));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.ImpostorKillPredicate(p)));
 
                 stirButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir");
                 stirButton.SetSprite(StirButtonSprite.GetSprite());
@@ -91,6 +92,11 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
                 sabotageButton.UseCoolDownSupport = false;
                 sabotageButton.OnStartTaskPhase = (button) => button.CoolDownTimer?.Start(SabotageCoolDownOption);
             }
+
+            GameOperatorManager.Instance?.Register<PlayerDieEvent>(ev =>
+            {
+                ev.Player.Unbox().FakeSabotage.RemoveFakeSabotage(SystemTypes.Electrical, SystemTypes.Comms);
+            }, NebulaAPI.CurrentGame!);
         }
 
         [Local]

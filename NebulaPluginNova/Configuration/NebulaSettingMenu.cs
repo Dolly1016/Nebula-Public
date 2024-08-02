@@ -7,6 +7,8 @@ using Nebula.Modules.GUIWidget;
 using Virial.Media;
 using Virial.Configuration;
 using Nebula.Compat;
+using UnityEngine;
+using System.Text.RegularExpressions;
 
 namespace Nebula.Configuration;
 
@@ -275,6 +277,20 @@ public class NebulaSettingMenu : MonoBehaviour
                         {
                             ShowOptionsOnRightViewer(copiedHolder);
                         });
+
+                        if(CurrentTab != ConfigurationTab.Settings)
+                        {
+                            var exButton = button.gameObject.AddComponent<ExtraPassiveBehaviour>();
+                            exButton.OnRightClicked = () =>
+                            {
+                                var text = "【" + holder.Title.GetString() + "】\n" + holder.Detail.GetString();
+                                text = text.Replace("<br>", "\n");
+                                ClipboardHelper.PutClipboardString(Regex.Replace(text, "<[^<>]*>", ""));
+                                NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.copied"));
+                            };
+                            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.click")));
+                            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                        }
                     },
                     Alignment = IMetaWidgetOld.AlignmentOption.Center,
                     Color = HolderToColor(copiedHolder)

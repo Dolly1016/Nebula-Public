@@ -169,6 +169,37 @@ public class StringArrayDataEntry : DataEntry<string[]>
     public StringArrayDataEntry(string name, DataSaver saver, string[] defaultValue) : base(name, saver, defaultValue) { }
 }
 
+public class DataSaveSegment : IDisposable
+{
+    private static DataSaveSegment? CurrentSegment = null;
+    private HashSet<DataSaver> SaveQueue = new();
+
+    public DataSaveSegment()
+    {
+        if (CurrentSegment == null) CurrentSegment = this;
+    }
+
+    void IDisposable.Dispose()
+    {
+        if(CurrentSegment == this)
+        {
+            CurrentSegment = null;
+            SaveQueue.Do(s => s.WriteToFile());
+        }
+    }
+
+    public static void TrySave(DataSaver saver)
+    {
+        if(CurrentSegment == null)
+        {
+            saver.WriteToFile();
+        }
+        else
+        {
+            CurrentSegment.SaveQueue.Add(saver);
+        }
+    }
+}
 public class DataSaver
 {
     private Dictionary<string, string> contents = new();
@@ -194,7 +225,7 @@ public class DataSaver
     public void SetValue(string name, object value, bool skipSave = false)
     {
         contents[name] = value.ToString()!;
-        if (!skipSave) Save();
+        if (!skipSave) TrySave();
     }
 
     public DataSaver(string filename)
@@ -222,7 +253,7 @@ public class DataSaver
         }
     }
 
-    public void Save()
+    public void WriteToFile()
     {
         string strContents = "";
         foreach (var entry in contents)
@@ -230,6 +261,11 @@ public class DataSaver
             strContents += entry.Key + ":" + entry.Value + "\n";
         }
         FileIO.WriteAllText(ToDataSaverPath(filename), strContents);
+    }
+
+    public void TrySave()
+    {
+        DataSaveSegment.TrySave(this);
     }
 
     public IEnumerable<(string,string)> AllEntries()

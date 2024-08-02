@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Il2CppSystem.Net.NetworkInformation;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
@@ -9,23 +10,33 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.PostRoles)]
-file class Ghost : INebulaScriptComponent, IGameOperator
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+public class Ghost : INebulaScriptComponent, IGameOperator
 {
     SpriteRenderer renderer;
     static XOnlyDividedSpriteLoader ghostSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Ghost.png", 160f, 9);
+    static XOnlyDividedSpriteLoader ghostWSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.GhostW.png", 160f, 9);
+    static XOnlyDividedSpriteLoader ghostBSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.GhostB.png", 160f, 9);
     private float time;
     private float indexTime;
     private int index;
     private AchievementToken<bool>? commonToken;
-    public Ghost(Vector2 pos, float time, AchievementToken<bool>? commonToken, bool canSeeGhostsInShadow) : base()
+    private bool isWhiteGhost;
+    public Ghost(Vector2 pos, float time, AchievementToken<bool>? commonToken, bool canSeeGhostsInShadow, float colliderSize = 0f) : base()
     {
         this.commonToken = commonToken;
+        this.isWhiteGhost = !(colliderSize > 0f);
 
         renderer = UnityHelper.CreateObject<SpriteRenderer>("Ghost", null, (Vector3)pos + new Vector3(0, 0, -1f));
         this.time = time;
         renderer.gameObject.layer = canSeeGhostsInShadow ? LayerExpansion.GetObjectsLayer() : LayerExpansion.GetDefaultLayer();
-        renderer.sprite = ghostSprite.GetSprite(0);
+        renderer.sprite = (isWhiteGhost ? ghostWSprite : ghostBSprite).GetSprite(0);
+
+        if (colliderSize > 0f)
+        {
+            var collider = UnityHelper.CreateObject<CircleCollider2D>("Collider", renderer.transform, Vector3.zero, LayerExpansion.GetObjectsLayer());
+            collider.radius = colliderSize;
+        }
     }
 
     void Update(GameUpdateEvent ev)
@@ -44,7 +55,7 @@ file class Ghost : INebulaScriptComponent, IGameOperator
             index = time > 0f ? (index + 1) % 3 : index + 1;
             indexTime = 0.2f;
 
-            if (index < 9) renderer.sprite = ghostSprite.GetSprite(index);
+            if (index < 9) renderer.sprite = (isWhiteGhost ? ghostWSprite : ghostBSprite).GetSprite(index);
             else this.ReleaseIt();
         }
     }
@@ -85,7 +96,7 @@ public class Seer : DefinedRoleTemplate, HasCitation, DefinedRole
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("options.role.seer.ghostDuration", (15f,300f,15f),90f,FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("options.role.seer.canSeeGhostsInShadow", false);
+    static public BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("options.role.seer.canSeeGhostsInShadow", false);
 
     static public Seer MyRole = new Seer();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

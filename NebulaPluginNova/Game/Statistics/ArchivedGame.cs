@@ -278,7 +278,7 @@ internal class ArchivedGame
 /// <summary>
 /// イベントのアイコン画像を数値ID(ランタイム用)・テキストID(保存用)と紐づけるオブジェクト
 /// </summary>
-[NebulaPreprocessForNoS(PreprocessPhaseForNoS.FixStructure)]
+[NebulaPreprocess(PreprocessPhase.FixStructure)]
 internal class TrackedEventImage
 {
     public string TextId { get; private init; }

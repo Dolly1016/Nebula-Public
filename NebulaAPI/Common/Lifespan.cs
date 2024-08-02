@@ -18,6 +18,13 @@ public interface ILifespan
     bool IsAliveObject { get => !IsDeadObject; }
 }
 
+internal class GameObjectLifespan : ILifespan
+{
+    UnityEngine.GameObject obj;
+    public GameObjectLifespan(UnityEngine.GameObject obj) { this.obj = obj; }
+    public bool IsDeadObject => !obj;
+}
+
 /// <summary>
 /// 関数によって定義される寿命付きオブジェクトです。
 /// </summary>
