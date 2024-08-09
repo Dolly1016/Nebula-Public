@@ -1,9 +1,13 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
+﻿using AmongUs.GameOptions;
+using BepInEx.Unity.IL2CPP.Utils;
+using Hazel;
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
+using Nebula.Player;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Extensions;
 
@@ -178,7 +182,7 @@ public static class PlayerExtension
 
     static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, KillParameter parameter)> RpcMeetingKill = new(
         "NonPhysicalKill",
-       (message, _) =>
+       (message, calledByMe) =>
        {
            var recordTag = TranslatableTag.ValueOf(message.recordId);
            if (recordTag != null)
@@ -304,7 +308,7 @@ public static class PlayerExtension
 
     static RemoteProcess<(byte sourceId, byte targetId, Vector2 revivePos, bool cleanDeadBody,bool recordEvent)> RpcRivive = new(
         "Revive",
-        (message, _) =>
+        (message, calledByMe) =>
         {
             var player = Helpers.GetPlayer(message.targetId);
             if (!player) return;

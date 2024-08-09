@@ -213,7 +213,6 @@ class MapBehaviourShowNormalMapPatch
         if (ExileController.Instance || Minigame.Instance) return false;
 
 
-
         if (!PlayerControl.LocalPlayer.CanMove && !MeetingHud.Instance) {
             //会議中でなく動けないとき
 

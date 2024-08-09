@@ -13,13 +13,15 @@ public class TrackingArrowAbility : ComponentHolder, IGameOperator
     float timer;
     Arrow arrow = null!;
     Color color;
+    bool showPlayerIcon;
 
-    public TrackingArrowAbility(GamePlayer target, float interval, Color color)
+    public TrackingArrowAbility(GamePlayer target, float interval, Color color, bool showPlayerIcon = true)
     {
         this.target = target;
         this.interval = interval;
         this.timer = -1f;
         this.color = color;
+        this.showPlayerIcon = showPlayerIcon;
     }
 
     void Update(GameUpdateEvent ev)
@@ -36,9 +38,16 @@ public class TrackingArrowAbility : ComponentHolder, IGameOperator
             {
                 if (arrow == null)
                 {
-                    arrow = Bind(new Arrow(null, false, true) { IsAffectedByComms = false }.HideArrowSprite());
-                    arrow.SetSmallColor(color);
-                    AmongUsUtil.GetPlayerIcon(target.DefaultOutfit.outfit, arrow.ArrowObject.transform, new(0f, 0f, -1f), new(0.24f, 0.24f, 1f));
+                    if (showPlayerIcon)
+                    {
+                        arrow = Bind(new Arrow(null, false, true) { IsAffectedByComms = false }.HideArrowSprite());
+                        arrow.SetSmallColor(color);
+                        AmongUsUtil.GetPlayerIcon(target.DefaultOutfit.outfit, arrow.ArrowObject.transform, new(0f, 0f, -1f), new(0.24f, 0.24f, 1f));
+                    }
+                    else
+                    {
+                        arrow = Bind(new Arrow(null, true) { IsAffectedByComms = false }).SetColor(color);
+                    }
                 }
 
                 arrow.TargetPos = target.Position;

@@ -254,20 +254,24 @@ public class Marketplace : MonoBehaviour
 
                         viewer.InnerArtifact.Do(a => a.SetStaticWidget(new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, new(0.5f, 0.5f), out _));
                         var text = textField.Artifact.FirstOrDefault()?.Text ?? "";
-                        if (text.Length == 0)
-                        {
-                            textField.Artifact.Do(field => field.SetHint("Please enter a keyword".Color(Color.Lerp(Color.red, Color.gray, 0.35f))));
-                        }
-                        else
-                        {
+                        
+                        
                             lastContents.Clear();
 
                             lastIsAddon = isAddon;
                             lastQuery = text!.Trim();
                             lastPage = 0;
                             searching = true;
+
+                        if (text.Length == 0)
+                        {
+                            StartCoroutine(OnlineMarketplace.CoGetRecommendedContents(isAddon, 0, result => CoSetToViewer(result)).WrapToIl2Cpp());
+                        }
+                        else
+                        {
                             StartCoroutine(OnlineMarketplace.CoSearchContents(isAddon, lastQuery, 0, result => CoSetToViewer(result)).WrapToIl2Cpp());
                         }
+                        
                     }
                 }
             )),
@@ -507,7 +511,7 @@ public class Marketplace : MonoBehaviour
 
 internal static class OnlineMarketplace
 {
-    private const string APIURL = "https://script.google.com/macros/s/AKfycbwjneZc7ThM3Y3Hq5EprYDgeUX0Ey2HwSGaxkiuVzZN7Ctw14UA5xZtCMTjWHNuaToMTQ/exec";
+    private const string APIURL = "https://script.google.com/macros/s/AKfycbxc8jEhQBH7L4UeJinWxAmh3ziUYbtWnUfNiYsFGu9tj5KQVTApY67ObNNLOTNtKstPag/exec";
 
     private class OnlineResponse<T>
     {
@@ -591,6 +595,11 @@ internal static class OnlineMarketplace
     {
         [JsonSerializableField]
         public bool success;
+    }
+
+    static public IEnumerator CoGetRecommendedContents(bool isAddon, int page, Func<SearchContentResult[]?, IEnumerator> callback)
+    {
+        yield return CoGetResponse<SearchResult>("recommended", s => callback.Invoke(s.success ? s.result.ToArray() : null), ("type", isAddon ? "addon" : "cosmetics"), ("page", page.ToString()));
     }
 
     static public IEnumerator CoSearchContents(bool isAddon, string query, int page, Func<SearchContentResult[]?,IEnumerator> callback)

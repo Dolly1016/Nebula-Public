@@ -32,7 +32,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration CannonPowerAttenuationOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonPowerAttenuation", (0.25f, 2f, 0.125f), 0.75f, FloatConfigurationDecorator.Ratio);
     static private IntegerConfiguration NumOfMarksOption = NebulaAPI.Configurations.Configuration("options.role.cannon.numOfMarks", (1, 10), 3);
 
-    static public Cannon MyRole = new Cannon();
+    static public Cannon MyRole = null;// new Cannon();
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class CannonMark : NebulaSyncStandardObject, IGameOperator

@@ -92,7 +92,7 @@ static public class RoleDocumentHelper
                 new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(AbstractAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, false, false, a.IsCleared) }
                 ));
 
-        var achievements = Nebula.Modules.NebulaAchievementManager.AllAchievements.Where(a => a.Category.role == assignable && !a.IsHidden).Select(AchievementTitleWidget);
+        var achievements = Nebula.Modules.NebulaAchievementManager.AllAchievements.Where(a => assignable.AchievementGroups.Any(role => role == a.Category.role) && !a.IsHidden).Select(AchievementTitleWidget);
 
         return GetChapter("document.titles", [NebulaAPI.GUI.VerticalHolder(GUIAlignment.Left, achievements)]);
     }

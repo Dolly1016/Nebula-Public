@@ -349,7 +349,8 @@ public class ServerVersionPatch
 
     static void Postfix(ref int __result)
     {
-        if(!MainMenuSetUpPatch.IsLocalGame && !IsCustomServer()) __result += 25;
+        //if(!MainMenuSetUpPatch.IsLocalGame && !IsCustomServer()) __result += 25;
+        __result += 25;
     }
 }
 

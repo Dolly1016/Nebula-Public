@@ -38,6 +38,7 @@ public class ShownSecret : DefinedAllocatableModifierTemplate, DefinedAllocatabl
             rawTable.modifiers.RemoveAll(m => m.modifier == GuesserModifier.MyRole && m.playerId == playerId);
         }
         var args = tuple.arguments.Prepend(exArg).Prepend(tuple.role.Id).ToArray();
+        if (tuple.role.Category == RoleCategory.CrewmateRole) args = args.Prepend(0).ToArray();
         roleTable.SetRole(playerId, tuple.role.Category == RoleCategory.ImpostorRole ? Secret.MyEvilRole : Secret.MyNiceRole, args);
     }
 }
@@ -108,14 +109,21 @@ public class Secret : DefinedRoleTemplate, DefinedRole
 
         public NiceInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
-            this.savedArgs = savedArgs;
-            this.savedRole = Roles.AllRoles.First(r => r.Id == savedArgs[0]);
+            //Niceはタスクの引数を先頭に含む
+            int taskNum = savedArgs[0];
+
+            savedTasks = Helpers.Sequential(taskNum).Select(index => new NetworkedPlayerInfo.TaskInfo((byte)savedArgs[1 + index * 2], (uint)savedArgs[1 + index * 2 + 1])).ToList();
+
+            this.savedRawArgs = savedArgs;
+            this.savedRoleArgs = savedArgs.Skip(1 + savedArgs[0] * 2).ToArray();
+            this.savedRole = Roles.AllRoles.First(r => r.Id == savedRoleArgs[0]);
         }
 
-        int[]? RuntimeAssignable.RoleArguments => savedArgs;
+        int[]? RuntimeAssignable.RoleArguments => savedRawArgs;
         
         List<NetworkedPlayerInfo.TaskInfo> savedTasks = new();
-        int[] savedArgs;
+        int[] savedRawArgs;
+        int[] savedRoleArgs;
         DefinedRole savedRole;
 
         [OnlyMyPlayer]
@@ -130,13 +138,17 @@ public class Secret : DefinedRoleTemplate, DefinedRole
                 savedTasks.Add(task.MyTask);
                 ev.AddExtraQuota(1);
             }
+
+            savedRawArgs = [savedTasks.Count, ..savedTasks.SelectMany(task => (int[])[(int)task.TypeId, (int)task.Id]), .. savedRoleArgs];
+
+            MyPlayer.Tasks.Unbox().ReplaceTasks(taskCount, -savedTasks.Count);
         }
 
         [OnlyMyPlayer]
         public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
             if (MyPlayer.Tasks.IsCompletedCurrentTasks)
-                ScheduleSendArousalRpc(MyPlayer.Unbox(), savedArgs, savedTasks);
+                ScheduleSendArousalRpc(MyPlayer.Unbox(), savedRoleArgs, savedTasks);
         }
 
         string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort)

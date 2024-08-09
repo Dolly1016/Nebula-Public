@@ -64,7 +64,7 @@ public class NebulaGameEnd
     static public CustomEndCondition JackalWin = new(26, "jackal", Roles.Neutral.Jackal.MyRole.UnityColor, 18);
     static public CustomEndCondition ArsonistWin = new(27, "arsonist", Roles.Neutral.Arsonist.MyRole.UnityColor, 32);
     static public CustomEndCondition LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.UnityColor, 18);
-    static public CustomEndCondition PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.UnityColor, 32);
+    static public CustomEndCondition PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.UnityColor, 31);
     static public CustomEndCondition AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.UnityColor, 64);
     static public CustomEndCondition DancerWin = new(31, "dancer", Roles.Neutral.Dancer.MyRole.UnityColor, 32);
     static public CustomEndCondition NoGame = new(128, "nogame", InvalidColor, 128);

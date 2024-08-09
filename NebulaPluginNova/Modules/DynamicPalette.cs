@@ -26,6 +26,9 @@ public class DynamicPalette
     public static Dictionary<string, List<RestorableColor>> ColorCatalogue = new();
     public static Dictionary<string, List<RestorableColor>> VisorColorCatalogue = new();
 
+    //バニラカラー(他Mod連携表示用の控え)
+    public static Color[] VanillaColorsPalette;
+
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         yield return preprocessor.SetLoadingText("Loading Color Catalogue");
@@ -35,6 +38,8 @@ public class DynamicPalette
         MyVisorColor = new ColorEntry("myColor.visor");
         SavedColor = new (ModColor, ColorEntry)[5];
         for (int i = 0; i < SavedColor.Length; i++) SavedColor[i] = (new("savedColor" + i), new("savedColor" + i + ".visor"));
+
+        VanillaColorsPalette = Palette.PlayerColors.Select(c => (Color)c).ToArray();
 
         List<RestorableColor> vanilaCatalogue = new();
         for (int i = 0; i < 18; i++)

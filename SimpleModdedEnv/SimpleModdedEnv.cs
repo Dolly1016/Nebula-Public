@@ -8,28 +8,22 @@ namespace SimpleModdedEnv;
 [BepInProcess("Among Us.exe")]
 public class SimpleModdedEnv : BasePlugin
 {
+    static public BasePlugin MyPlugin;
     public override void Load()
     {
+        MyPlugin = this;
         new Harmony("jp.dreamingpig.amongus.nebula.simpleEnv").PatchAll();
     }
 }
 
-[HarmonyPatch(typeof(Constants), nameof(Constants.GetBroadcastVersion))]
-class ServerVersionPatch
+[HarmonyPatch(typeof(NetworkedPlayerInfo), nameof(NetworkedPlayerInfo.Deserialize))]
+class NetworkedPlayerInfoDeserializePatch
 {
-    static void Postfix(ref int __result)
-    {
-        __result += 25;
+    static void Prefix(NetworkedPlayerInfo __instance) {
     }
-}
-
-[HarmonyPatch(typeof(Constants), nameof(Constants.IsVersionModded))]
-class IsVersionModdedPatch
-{
-    static bool Prefix(ref bool __result)
+    static void Postfix(NetworkedPlayerInfo __instance)
     {
-        int broadcastVersion = Constants.GetBroadcastVersion();
-        __result = Constants.GetVersionComponents(broadcastVersion).Item4 >= 25;
-        return false;
+        SimpleModdedEnv.MyPlugin.Log.LogInfo("Called: NetworkedPlayerInfo");
+        SimpleModdedEnv.MyPlugin.Log.LogInfo("RoleWhenAlive Has Value: " + __instance.RoleWhenAlive.HasValue);
     }
 }

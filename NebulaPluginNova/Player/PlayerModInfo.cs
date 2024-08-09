@@ -14,6 +14,7 @@ using Virial.DI;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Player;
 
@@ -374,7 +375,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
             AssignableAction(r => { var newName = r.OverrideRoleName(text, false); if (newName != null) text = newName; });
 
-            if (HasAnyTasks && (this as GamePlayer).Tasks.Quota > 0)
+            if (HasAnyTasks && ((this as GamePlayer).Tasks.Quota > 0 || (this as GamePlayer).Tasks.TotalTasks > 0))
                 text += (" (" + (this as GamePlayer).Tasks.Unbox().ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((FeelLikeHaveCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
         }
 
@@ -980,9 +981,14 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     var isAcrossWalls = VisibilityCheckVectors.All(v => Helpers.AnyNonTriggersBetween(pos, myPos + v * 0.22f, out _, objectMask));
 
                     var mag = isAcrossWalls ? 0.22f : 0.4f;
-                    isInShadow = VisibilityCheckVectors.All(v => Helpers.AnyCustomNonTriggersBetween(pos, myPos + v * mag,
-                        collider => LightSource.OneWayShadows.TryGetValue(collider.gameObject, out var oneWayShadows) ? !oneWayShadows.IsIgnored(light) : true,
-                        shadowMask));
+
+                    //いずれかの追加ライトの範囲内にいない場合
+                    if (!LightInfo.AllLightInfo.Any(info => VisibilityCheckVectors.Any(vec => info.CheckPoint(vec))))
+                    {
+                        isInShadow = VisibilityCheckVectors.All(v => Helpers.AnyCustomNonTriggersBetween(pos, myPos + v * mag,
+                            collider => LightSource.OneWayShadows.TryGetValue(collider.gameObject, out var oneWayShadows) ? !oneWayShadows.IsIgnored(light) : true,
+                            shadowMask));
+                    }
                 }
 
                 IsInShadowCache = isInShadow;
@@ -1038,6 +1044,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         UpdateHoldingDeadBody();
         UpdateMouseAngle();
         UpdateModulators();
+
+        LightInfo.UpdateLightInfo();
         UpdateVisibility(true, !NebulaGameManager.Instance.WideCamera.DrawShadow);
     }
 

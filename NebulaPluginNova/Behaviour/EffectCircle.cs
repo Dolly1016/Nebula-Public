@@ -19,6 +19,7 @@ public class EffectCircle : MonoBehaviour
     static EffectCircle() => ClassInjector.RegisterTypeInIl2Cpp<EffectCircle>();
     static private Image innerCircleSprite = SpriteLoader.FromResource("Nebula.Resources.EffectCircleInner.png",100f);
     static private Image outerCircleSprite = SpriteLoader.FromResource("Nebula.Resources.EffectCircle.png", 250f);
+    static public Image OuterCircleImage => outerCircleSprite;
     private bool isActive = true;
 
     public void Update()

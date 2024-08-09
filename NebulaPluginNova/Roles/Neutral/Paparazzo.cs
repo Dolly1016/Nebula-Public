@@ -238,8 +238,6 @@ public class PaparazzoShot : MonoBehaviour
 
                 if (num >= 4) new StaticAchievementToken("paparazzo.common2");
 
-                if (paparazzo.CheckPaparazzoWin()) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PaparazzoWin, 1 << PlayerControl.LocalPlayer.PlayerId);
-
                 players.transform.localScale = new Vector3(0f, 0f, 1f);
 
                 yield return Effects.Wait(2f);
@@ -290,7 +288,6 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         bool RuntimeRole.CanUseVent => canUseVent;
         private List<(Transform holder,PaparazzoShot shot,int playerMask)> shots = new();
         private HudContent? shotsHolder = null;
-        private bool canWin = false;
 
         AchievementToken<(bool cleared, int? lastAlive)>? acTokenChallenge = null;
 
@@ -322,14 +319,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         }
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.PaparazzoWin && canWin);
-
-
-        [Local]
-        void OnExiled(MeetingEndEvent ev)
-        {
-            if (CheckPaparazzoWin()) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PaparazzoWin, 1 << MyPlayer.PlayerId);
-        }
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.PaparazzoWin && CheckPaparazzoWin());
 
         void RuntimeAssignable.OnActivated()
         {
@@ -489,11 +479,10 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                         DisclosedMask |= (shot.playerMask & aliveMask);
                         RpcShareState.Invoke((MyPlayer.PlayerId, CapturedMask, DisclosedMask));
 
-                        CheckPaparazzoWin();
                         SharePicture((shot.playerMask & aliveMask), shot.shot.centerRenderer.transform.localScale.x, shot.shot.transform.localEulerAngles.z, shot.shot.centerRenderer.sprite.texture);
                         shareFlag = true;
 
-                        if(acTokenChallenge != null) acTokenChallenge.Value.lastAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead);
+                        if(acTokenChallenge != null) acTokenChallenge.Value.lastAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead || !p.AmOwner);
                     });
 
 
@@ -506,7 +495,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         {
             if (acTokenChallenge != null)
             {
-                acTokenChallenge.Value.cleared |= acTokenChallenge.Value.lastAlive - NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead) >= 4;
+                acTokenChallenge.Value.cleared |= acTokenChallenge.Value.lastAlive - NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead || !p.AmOwner) >= 4;
                 acTokenChallenge.Value.lastAlive = null;
             }
         }
@@ -529,6 +518,12 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
             }
 
             ev.AppendText(text.Replace("%DETAIL%", detail));
+        }
+
+        [OnlyHost]
+        void CheckWin(GameUpdateEvent ev)
+        {
+            if(CheckPaparazzoWin() && !MeetingHud.Instance) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.PaparazzoWin, GameEndReason.Situation);
         }
     }
 

@@ -72,6 +72,15 @@ internal class GameOperatorBuilder
                 };
             }
 
+            if (method.GetCustomAttribute<OnlyHost>() != null)
+            {
+                var lastAction = procedure;
+                procedure = (instance, e) =>
+                {
+                    if (AmongUsClient.Instance.AmHost) lastAction.Invoke(instance, e);
+                };
+            }
+
             builderActions.Add((eventType, (instance) => (e) => procedure.Invoke(instance,e)));
         }
 

@@ -15,6 +15,9 @@ public class MouseOverPopup : MonoBehaviour
     private PassiveUiElement? relatedButton;
     private SpriteMask mask = null!;
     public PassiveUiElement? RelatedObject => relatedButton;
+
+    private Virial.Compat.Size lastSize = new(0f, 0f);
+    private bool followMouseCursor = false;
     static MouseOverPopup()
     {
         ClassInjector.RegisterTypeInIl2Cpp<MouseOverPopup>();
@@ -49,6 +52,8 @@ public class MouseOverPopup : MonoBehaviour
     public void SetWidgetOld(PassiveUiElement? related, IMetaWidgetOld? widget)
     {
         myScreen.SetWidget(null);
+
+        followMouseCursor = false;
 
         if (widget == null) {
             gameObject.SetActive(false);
@@ -119,7 +124,7 @@ public class MouseOverPopup : MonoBehaviour
         mask.transform.localScale = localScale;
     }
 
-    public void SetWidget(PassiveUiElement? related, Virial.Media.GUIWidget? widget)
+    public void SetWidget(PassiveUiElement? related, Virial.Media.GUIWidget? widget, bool followMouseCursor = false)
     {
         myScreen.SetWidget(null);
 
@@ -135,18 +140,26 @@ public class MouseOverPopup : MonoBehaviour
         relatedButton = related;
         transform.SetParent(UnityHelper.FindCamera(LayerExpansion.GetUILayer())!.transform);
 
+        myScreen.SetWidget(widget, new Vector2(0.5f, 0.5f), out var size);
+
+        this.followMouseCursor = followMouseCursor;
+        this.lastSize = size;
+
+        UpdateArea(new(0f, 0f), new(lastSize.Width + 0.22f, lastSize.Height + 0.1f));
+        UpdatePosition();
+
+        Update();
+    }
+
+    private void UpdatePosition() { 
         bool isLeft = Input.mousePosition.x < Screen.width / 2f;
         bool isLower = Input.mousePosition.y < Screen.height / 2f;
 
-        myScreen.SetWidget(widget, new Vector2(0.5f, 0.5f), out var size);
-
-        
-
         float[] xRange = new float[2], yRange = new float[2];
-        xRange[0] = -size.Width * 0.5f - 0.15f;
-        xRange[1] = size.Width * 0.5f + 0.15f;
-        yRange[0] = -size.Height * 0.5f - 0.15f;
-        yRange[1] = size.Height * 0.5f + 0.15f;
+        xRange[0] = -lastSize.Width * 0.5f - 0.15f;
+        xRange[1] = lastSize.Width * 0.5f + 0.15f;
+        yRange[0] = -lastSize.Height * 0.5f - 0.15f;
+        yRange[1] = lastSize.Height * 0.5f + 0.15f;
 
         Vector2 anchorPoint = new(xRange[isLeft ? 0 : 1], yRange[isLower ? 0 : 1]);
 
@@ -172,9 +185,6 @@ public class MouseOverPopup : MonoBehaviour
             diff = (transform.position.y + yRange[1]) - upper.y;
             if (diff > 0f) transform.position -= new Vector3(0f, diff);
         }
-
-        UpdateArea(new(0f,0f),new(size.Width + 0.22f, size.Height + 0.1f));
-        Update();
     }
 
     public void Update()
@@ -184,6 +194,7 @@ public class MouseOverPopup : MonoBehaviour
             SetWidget(null, null);
         }
 
+        if (followMouseCursor) UpdatePosition();
     }
 }
 
@@ -332,7 +343,6 @@ public class NebulaManager : MonoBehaviour
                     //Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;
                     //File.WriteAllBytesAsync("SpawnableMap" + NebulaPreSpawnLocation.MapName[AmongUsUtil.CurrentMapId] +".png", MapData.GetCurrentMapData().OutputMap(center, new Vector2(10f, 7f) * ShipStatus.Instance.MapScale, 40f).EncodeToPNG());
                 }
-                
 
                 //コマンド
                 if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Command).KeyDownForAction)
@@ -410,7 +420,7 @@ public class NebulaManager : MonoBehaviour
         StartCoroutine(Effects.Sequence(Effects.Wait(delay), Effects.Action(action)));
     }
     public void SetHelpWidget(PassiveUiElement? related, IMetaWidgetOld? widget) => mouseOverPopup.SetWidgetOld(related, widget);
-    public void SetHelpWidget(PassiveUiElement? related, Virial.Media.GUIWidget? widget) => mouseOverPopup.SetWidget(related, widget);
+    public void SetHelpWidget(PassiveUiElement? related, Virial.Media.GUIWidget? widget, bool followMouseCursor = false) => mouseOverPopup.SetWidget(related, widget, followMouseCursor);
     public void SetHelpWidget(PassiveUiElement? related, string? rawText)
     {
         if (rawText != null)

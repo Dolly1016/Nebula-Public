@@ -81,14 +81,11 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, IInjectable, PlayerTa
     //いま保持しているタスクを新たなものに切り替えます。
     public void ReplaceTasks(int tasks, int unacquired = 0)
     {
-        TotalTasks -= CurrentTasks;
-        Quota -= CurrentTasks;
-        TotalCompleted -= CurrentCompleted;
-
         CurrentTasks = tasks;
         CurrentCompleted = 0;
-        TotalTasks += tasks;
-        Quota += tasks + unacquired;
+        TotalTasks = tasks;
+        TotalCompleted = 0;
+        Quota = tasks + unacquired;
         RpcSyncTaskState.Invoke(this);
     }
 

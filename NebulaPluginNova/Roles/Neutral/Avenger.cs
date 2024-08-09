@@ -78,12 +78,12 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
                 killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 
-                if (target != null) Bind(new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor())).Register();
+                if (target != null) Bind(new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor(), false)).Register();
             }
 
             if (target?.AmOwner ?? false)
             {
-                if (TargetCanKnowAvengerOption) Bind(new TrackingArrowAbility(MyPlayer, NotificationForMurdererIntervalOption, MyRole.RoleColor.ToUnityColor())).Register();
+                if (TargetCanKnowAvengerOption) Bind(new TrackingArrowAbility(MyPlayer, NotificationForMurdererIntervalOption, MyRole.RoleColor.ToUnityColor(), false)).Register();
                 if (AvengerFlashForMurdererOption) AmongUsUtil.PlayFlash(MyRole.RoleColor.ToUnityColor());
             }
         }

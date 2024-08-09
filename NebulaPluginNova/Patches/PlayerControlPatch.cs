@@ -1,4 +1,5 @@
 ﻿using AmongUs.Data.Player;
+using Hazel;
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
 using PowerTools;
@@ -84,7 +85,17 @@ public static class PlayerUpdatePatch
     static void Postfix(PlayerControl __instance)
     {
         if (NebulaGameManager.Instance == null) return;
-        if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted) return;
+        if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted)
+        {
+            bool showVanillaColor = ClientOption.AllOptions[ClientOption.ClientOptionType.ShowVanillaColor].Value == 1;
+            try
+            {
+                if (showVanillaColor) __instance.cosmetics.nameText.text = __instance.Data.PlayerName + " ■".Color(DynamicPalette.VanillaColorsPalette[__instance.PlayerId]);
+                else __instance.cosmetics.nameText.text = __instance.Data.PlayerName;
+            }
+            catch { }
+            return;
+        }
 
         NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().Update();
 
@@ -536,3 +547,18 @@ public static class UseZiplinePatch
     }
 }
 
+[HarmonyPatch(typeof(NetworkedPlayerInfo), nameof(NetworkedPlayerInfo.Deserialize))]
+internal class RPCSealingPatch
+{
+    static private bool lastIsDead = false;
+    static void Prefix(NetworkedPlayerInfo __instance, [HarmonyArgument(1)] ref bool initialState)
+    {
+        lastIsDead = __instance.IsDead;
+        initialState = true;
+    }
+
+    static void Postfix(NetworkedPlayerInfo __instance)
+    {
+        __instance.IsDead = lastIsDead || __instance.Disconnected;
+    }
+}

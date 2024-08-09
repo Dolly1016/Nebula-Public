@@ -111,10 +111,11 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                     Debug.Log("Test1");
                     //タスクに関する書き換え
                     int leftCrewmateTask = 0;
+                    int leftQuota = 0;
                     if (shiftTarget.Tasks.IsCrewmateTask && shiftTarget.Tasks.HasExecutableTasks)
                     {
-                        leftCrewmateTask = Mathf.Max(0, shiftTarget.Tasks.Quota - shiftTarget.Tasks.TotalCompleted);
-
+                        leftCrewmateTask = Mathf.Max(0, shiftTarget.Tasks.CurrentTasks - shiftTarget.Tasks.CurrentCompleted);
+                        leftQuota = Mathf.Max(0, shiftTarget.Tasks.Quota - shiftTarget.Tasks.TotalCompleted);
                     }
 
                     if (leftCrewmateTask > 0)
@@ -130,6 +131,7 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
 
                         MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(leftCrewmateTask - actualLongTasks - actualcommonTasks, actualLongTasks, actualcommonTasks);
                         MyPlayer.Tasks.Unbox().BecomeToCrewmate();
+                        MyPlayer.Tasks.Unbox().ReplaceTasks(leftCrewmateTask, leftQuota - leftCrewmateTask);
                     }
                     else
                     {

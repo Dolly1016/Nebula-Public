@@ -56,7 +56,7 @@ public class Noisemaker : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (isDeadAtLastTaskpPhase)
             {
-                if (ev.Exiled.Contains(MyPlayer)) new StaticAchievementToken("noisemaker.challenge");
+                if (ev.Exiled.Contains(MyPlayer.MyKiller)) new StaticAchievementToken("noisemaker.challenge");
                 isDeadAtLastTaskpPhase = false;
             }
         }

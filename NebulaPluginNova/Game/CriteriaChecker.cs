@@ -39,6 +39,7 @@ public class NebulaEndCriteria
 
     private class SabotageCriteria : IModule, IGameOperator
     {
+        [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
             if (ShipStatus.Instance != null)
@@ -73,6 +74,7 @@ public class NebulaEndCriteria
 
     private class CrewmateCriteria : IModule, IGameOperator
     {
+        [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
             if (NebulaGameManager.Instance?.AllPlayerInfo().Any(p =>
@@ -86,6 +88,7 @@ public class NebulaEndCriteria
             NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Situation);
         }
 
+        [OnlyHost]
         void OnTaskUpdate(PlayerTaskUpdateEvent ev)
         {
             int quota = 0;
@@ -104,6 +107,7 @@ public class NebulaEndCriteria
 
     private class ImpostorCriteria : IModule, IGameOperator
     {
+        [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
             int impostors = 0;
@@ -127,6 +131,7 @@ public class NebulaEndCriteria
 
     private class JackalCriteria : IModule, IGameOperator
     {
+        [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
             int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead);
@@ -166,6 +171,7 @@ public class NebulaEndCriteria
 
     private class LoversCriteria : IModule, IGameOperator
     {
+        [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
             int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count((p) => !p.IsDead);
@@ -189,6 +195,7 @@ public class NebulaEndCriteria
 
     private class JesterCriteria : IModule, IGameOperator
     {
+        [OnlyHost]
         void OnExiled(PlayerExiledEvent ev) 
         {
             if (ev.Player?.Role.Role == Roles.Neutral.Jester.MyRole) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JesterWin, GameEndReason.Special, BitMasks.AsPlayer(1u << ev.Player.PlayerId));

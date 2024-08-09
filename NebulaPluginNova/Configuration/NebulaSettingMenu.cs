@@ -37,8 +37,8 @@ public class NebulaSettingMenu : MonoBehaviour
         FirstPage = UnityHelper.CreateObject("FirstPage",transform,Vector3.zero);
         LeftHolder = UnityHelper.CreateObject<MetaScreen>("LeftHolder", FirstPage.transform, new Vector3(-3.8f, 0.5f));
         RightHolder = UnityHelper.CreateObject<MetaScreen>("RightHolder", FirstPage.transform, new Vector3(2.8f, 0f));
-        
-        var rightHolder = UnityHelper.CreateObject("RightImage", transform, Vector3.zero);
+
+        var rightHolder = UnityHelper.CreateObject("RightImage", transform, new Vector3(0f, 0f, 1f));
         rightHolder.AddComponent<SortingGroup>();
         var rightPos = UnityHelper.CreateObject("Mover", rightHolder.transform, new Vector3(3.4f, -1.1f, 1f));
         RightImage = UnityHelper.CreateObject<SpriteRenderer>("Image", rightPos.transform, Vector3.zero);

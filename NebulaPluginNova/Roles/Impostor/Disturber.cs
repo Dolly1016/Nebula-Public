@@ -1,6 +1,9 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behaviour;
+using Nebula.Map;
+using Nebula.Modules.GUIWidget;
 using TMPro;
 using UnityEngine.UIElements;
 using Virial;
@@ -24,13 +27,19 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         public static string MyTag = "DisturbPole";
 
         static SpriteLoader mySprite = SpriteLoader.FromResource("Nebula.Resources.ElecPole.png", 145f);
-
+        static public Image PoleImage => mySprite;
         private bool isActivated = false;
         public bool IsActivated => isActivated;
         private void Activate()
         {
             Color = Color.white;
             isActivated = true;
+
+            try
+            {
+                NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(LayerExpansion.GetObjectsLayer(), null, Position.AsVector3(-1f)));
+            }
+            catch { }
         }
 
         public DisturbPole(Vector2 pos) : base(pos, ZOption.Just, true, mySprite.GetSprite(), true)
@@ -49,7 +58,8 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
             try
             {
                 NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(LayerExpansion.GetObjectsLayer(), null, Position.AsVector3(-1f)));
-            }catch { }
+            }
+            catch { }
         }
 
         static DisturbPole()
@@ -74,7 +84,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.disturber.placeCoolDown", (0f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration DisturbCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration DisturbDurationOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration MaxNumOfPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxNumOfPoles", (2, 10), 5);
+    static private IntegerConfiguration MaxNumOfPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxNumOfPoles", (2, 15), 7);
     static private FloatConfiguration MaxDistanceBetweenPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxDistanceBetweenPoles", (2f, 6f, 1f), 5f, FloatConfigurationDecorator.Ratio);
 
     static public Disturber MyRole = new Disturber();
@@ -86,20 +96,199 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         static DisturberMapLayer() => ClassInjector.RegisterTypeInIl2Cpp<DisturberMapLayer>();
 
         private List<DisturbPolesSet> poles = null!;
-        
+        private Camera camera;
+
+        private LineRenderer lineRenderer;
+        private CircleCollider2D collider;
+        private SpriteRenderer circleRenderer;
+        private SpriteRenderer poleRenderer;
+        public List<(Vector3 minimapPos, Vector3 worldPos, DisturbPole pole)> Positions;
+        private PassiveButton clickButton;
+        private Disturber.Instance disturber;
+
+        static private Image whiteCircleSprite = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
+
+        private int CurrentPolesIncludingUnactivated => MaxNumOfPolesOption - disturber.CurrentPoles - (Positions?.Count ?? 0);
+        public void SetDisturber(Disturber.Instance disturber)
+        {
+            this.disturber = disturber;
+            disturber.UpdatePoleText(CurrentPolesIncludingUnactivated);
+        }
         void Awake()
         {
             poles = new();
+            Positions = new();
+
+            float scale = MaxDistanceBetweenPolesOption / VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+            collider = UnityHelper.CreateObject<CircleCollider2D>("Click", transform, new(0f, 0f, -5f));
+            collider.radius = scale;
+            collider.isTrigger = true;
+            circleRenderer = UnityHelper.CreateObject<SpriteRenderer>("CircleRenderer", collider.transform, new(0f, 0f, -20f));
+            circleRenderer.transform.localScale = Vector3.one * scale;
+            circleRenderer.sprite = EffectCircle.OuterCircleImage.GetSprite();
+            circleRenderer.gameObject.SetActive(false);
+            var dotRenderer = UnityHelper.CreateObject<SpriteRenderer>("DotRenderer", collider.transform, new(0f, 0f, -25f));
+            dotRenderer.sprite = whiteCircleSprite.GetSprite();
+            dotRenderer.color = Color.green;
+            dotRenderer.transform.localScale = Vector3.one * 0.45f;
+
+            clickButton = collider.gameObject.SetUpButton(false);
+
+            clickButton.OnMouseOver.AddListener(() =>
+            {
+                NebulaManager.Instance.SetHelpWidget(clickButton, 
+                new NoSGameObjectGUIWrapper(Virial.Media.GUIAlignment.Center, () =>
+                {
+                    var mesh = UnityHelper.CreateMeshRenderer("MeshRenderer", transform, new(0, -0.08f, -1), null);
+                    mesh.filter.CreateRectMesh(new(2f, 1.2f));
+                    mesh.renderer.sharedMaterial.mainTexture = camera.SetCameraRenderTexture(200, 120);
+                    return (mesh.renderer.gameObject, new(2f, 1.2f));
+                }), true);
+            });
+            clickButton.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(clickButton));
+            var exButton = clickButton.gameObject.AddComponent<ExtraPassiveBehaviour>();
+            exButton.OnRightClicked = () =>
+            {
+                if (Positions.Count > 0)
+                {
+                    NebulaSyncObject.RpcDestroy(Positions[Positions.Count - 1].pole.ObjectId);
+                    Positions.RemoveAt(Positions.Count - 1);
+                    UpdateLine();
+                }
+            };
+
+            void TryPlacePoleHere()
+            {
+                if (CurrentPolesIncludingUnactivated <= 0) return;
+
+                var screenPosAsWorld = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer());
+                var worldPosOnMinimap = transform.InverseTransformPoint(screenPosAsWorld);
+                worldPosOnMinimap.z = -5f;
+                var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, AmongUsUtil.CurrentMapId);
+
+                bool canPlace = MapData.GetCurrentMapData().CheckMapArea(worldPos, 0.06f);
+                if (canPlace)
+                {
+                    Positions.Add((worldPosOnMinimap, worldPos.AsVector3(0f), DisturbPole.GeneratePole(worldPos)));
+                    lineRenderer.SetColors(Color.green, Color.green);
+                    UpdateLine();
+
+                    collider.transform.localPosition = worldPosOnMinimap;
+
+                    disturber.UpdatePoleText(CurrentPolesIncludingUnactivated);
+                }
+            }
+
+            void UpdateLine()
+            {
+                lineRenderer.positionCount = Positions.Count;
+                lineRenderer.SetPositions(Positions.Select(p => p.minimapPos).ToArray());
+                disturber.UpdatePoleText(CurrentPolesIncludingUnactivated);
+            }
+
+            clickButton.OnClick.AddListener(() => TryPlacePoleHere());
+            camera = UnityHelper.CreateRenderingCamera("DisturberCamera", null, Vector3.zero, 1.6f, LayerExpansion.GetLayerMask(LayerExpansion.GetDefaultLayer(), LayerExpansion.GetObjectsLayer(), LayerExpansion.GetShortObjectsLayer(), LayerExpansion.GetShipLayer()));
+            poleRenderer = UnityHelper.CreateObject<SpriteRenderer>("PoleImage", camera.transform, new(0f, 0f, -10f), LayerExpansion.GetDefaultLayer());
+            poleRenderer.sprite = DisturbPole.PoleImage.GetSprite();
+            lineRenderer = UnityHelper.SetUpLineRenderer("PoleLine", transform, new(0f, 0f, -10f), LayerExpansion.GetUILayer(), width: 0.035f);
         }
         void Update()
         {
             //z: -10くらいのところに閉じるボタンがあるので、背景のクリックガードは-5くらいに置けばよい
             // 背景クリックガード :-5, 線及び点のクリック: -10
             // EdgeCollider2D.EdgeRadiousが使えそう
+
+            var screenPosAsWorld = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer());
+            var worldPosOnMinimap = transform.InverseTransformPoint(screenPosAsWorld);
+            var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, AmongUsUtil.CurrentMapId);
+            camera.transform.position = worldPos;
+
+            if(Positions.Count == 0)
+            {
+                worldPosOnMinimap.z = -5f;
+                collider.transform.localPosition = worldPosOnMinimap;
+                circleRenderer.gameObject.SetActive(false);
+
+                collider.gameObject.SetActive(MapData.GetCurrentMapData().CheckMapArea(worldPos, 0f));
+            }
+            else
+            {
+                circleRenderer.gameObject.SetActive(true);
+                collider.gameObject.SetActive(true);
+                collider.transform.localPosition = ((Vector2)Positions[Positions.Count - 1].minimapPos).AsVector3(-5f);
+            }
+
+            bool canPlace = MapData.GetCurrentMapData().CheckMapArea(worldPos, 0.06f);
+            poleRenderer.color = (canPlace ? Color.Lerp(Color.cyan, Color.green, 0.3f) : Color.red).AlphaMultiplied(0.5f);
         }
 
-        private void AddPoles(DisturbPolesSet polesSet) { }
-        public void AddPoles(DisturbPole[] poles) { }
+        public void Clear(bool destroyPoles)
+        {
+            if(destroyPoles) foreach (var p in Positions) NebulaSyncObject.RpcDestroy(p.pole.ObjectId);
+            Positions.Clear();
+            lineRenderer.positionCount = 0;
+        }
+
+        public void RegisterPoles(DisturbPole[] poles, List<DisturbPole[]> list)
+        {
+            var positions = poles.Select(p => VanillaAsset.ConvertToMinimapPos(p.Position, AmongUsUtil.CurrentMapId)).ToArray();
+
+            var renderer = UnityHelper.SetUpLineRenderer("PoleLine", transform, new(0f, 0f, -8f), LayerExpansion.GetUILayer(), width: 0.035f);
+            renderer.positionCount = poles.Length;
+            renderer.SetPositions(positions.Select(p => p.AsVector3(0f)).ToArray());
+            Color col = Color.green.RGBMultiplied(0.65f);
+            renderer.SetColors(col, col);
+
+            var collider = UnityHelper.CreateObject<EdgeCollider2D>("LineButton", renderer.transform, new(0f, 0f, -4f));
+            
+            Il2CppSystem.Collections.Generic.List<Vector2> points = new();
+            foreach (var pos in positions) points.Add(pos);
+            collider.SetPoints(points);
+            collider.edgeRadius = 0.1f;
+
+            var button = collider.gameObject.SetUpButton(true);
+            Color hovered = Color.Lerp(Color.green.RGBMultiplied(0.9f), Color.yellow, 0.5f);
+            button.OnMouseOver.AddListener(() =>
+            {
+                renderer.SetColors(hovered, hovered);
+                NebulaManager.Instance.SetHelpWidget(button, Language.Translate("role.disturber.ui.removePoles"));
+            });
+            button.OnMouseOut.AddListener(() =>
+            {
+                renderer.SetColors(col, col);
+                NebulaManager.Instance.HideHelpWidgetIf(button);
+            });
+
+            button.OnClick.AddListener(() =>
+            {
+                using (RPCRouter.CreateSection("DisturberDestroy"))
+                {
+                    poles.Do(p => NebulaSyncObject.RpcDestroy(p.ObjectId));
+                }
+                list.Remove(poles);
+                GameObject.Destroy(renderer.gameObject);
+
+                disturber.UpdatePoleText(CurrentPolesIncludingUnactivated);
+            });
+        }
+
+        void OnDestroy()
+        {
+            if (camera) GameObject.Destroy(camera.gameObject);
+            Clear(true);
+        }
+
+        void OnEnable()
+        {
+            poleRenderer.enabled = true;
+        }
+
+        void OnDisable()
+        {
+            poleRenderer.enabled = false;
+
+            if (Positions.Count >= 2) disturber.PlacePoles();
+        }
     }
 
 
@@ -180,26 +369,34 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         private AchievementToken<(IHudOverrideTask? cmTask, ElectricTask? elTask, float time, int dead, bool ability, bool isCleared)>? acTokenChallenge = null;
         private ModAbilityButton? disturbButton = null;
 
+        List<DisturbPole[]> poles = new();
+        public int CurrentPoles => poles.Sum(p => p.Length);
+        private TextMeshPro poleText;
+        public void UpdatePoleText(int num) => poleText.text = num.ToString();
+
+        public void PlacePoles()
+        {
+            foreach (var p in mapLayer.Positions)
+            {
+                DisturbPole.RpcActivate.Invoke(p.pole.ObjectId);
+            }
+            if (mapLayer.Positions.Count >= 6) new StaticAchievementToken("disturber.common2");
+
+            var array = mapLayer.Positions.Select(p => p.pole).ToArray();
+            poles.Add(array);
+            mapLayer.RegisterPoles(array, poles);
+            mapLayer.Clear(false);
+        }
+
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
                 acTokenChallenge = new("disturber.challenge", (null, null, 0f, 0, false, false), (val, _) => val.isCleared);
 
-                List<DisturbPole> newPoles = new();
-                List<DisturbPole> poles = new();
-                
-                DisturbPole? GetLastPole() => newPoles.Count > 0 ? newPoles[newPoles.Count - 1] : poles.Count > 0 ? poles[poles.Count - 1] : null;
-
-                EffectCircle? effectCircle = null;
-
-                TextMeshPro polesText = null!;
-                int GetNumOfLeftPoles() =>MaxNumOfPolesOption - (newPoles.Count + poles.Count);
-
-                /*
                 var openMapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
                 openMapButton.SetSprite(placeButtonSprite.GetSprite());
-                openMapButton.Availability = (button) => MyPlayer.CanMove || MeetingHud.Instance;
+                openMapButton.Availability = (button) => (MyPlayer.CanMove || MeetingHud.Instance) && !disturbButton!.EffectActive;
                 openMapButton.Visibility = (button) => !MyPlayer.IsDead && (!MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
                 openMapButton.OnClick = button => {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
@@ -213,13 +410,17 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
 
                 var placeButton = Bind(new ModAbilityButton(alwaysShow: true)).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
-                placeButton.Availability = (button) => true;
+                placeButton.Availability = (button) => true && mapLayer.Positions.Count >= 2;
                 placeButton.Visibility = (button) => !MyPlayer.IsDead && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && mapLayer && mapLayer.gameObject.active;
-                placeButton.OnClick = button => {
+                placeButton.OnClick = button =>
+                {
+                    PlacePoles();
                 };
+                poleText = placeButton.ShowUsesIcon(0);
                 placeButton.SetLabel("place");
-                */
                 
+
+                /*
                 var placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
                 placeButton.Availability = (button) =>
@@ -256,11 +457,12 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 placeButton.SetLabel("place");
                 polesText = placeButton.ShowUsesIcon(0);
                 polesText.text = GetNumOfLeftPoles().ToString();
+                */
                 
 
                 disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "disturber.disturb");
                 disturbButton.SetSprite(disturbButtonSprite.GetSprite());
-                disturbButton.Availability = (button) => poles.Count >= 2;
+                disturbButton.Availability = (button) => poles.Count > 0 && (!MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
                 disturbButton.Visibility = (button) => !MyPlayer.IsDead;
                 disturbButton.OnClick = (button) => {
                     button.ActivateEffect();
@@ -268,25 +470,18 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 disturbButton.OnEffectStart = (button) =>
                 {
                     new StaticAchievementToken("disturber.common1");
-                    if (poles.Count >= 6) new StaticAchievementToken("disturber.common2");
 
-                    RpcDisturb.Invoke(poles.Select(p => p.Position).ToArray());
+                    using (RPCRouter.CreateSection("Disturb"))
+                    {
+                        foreach(var p in poles) RpcDisturb.Invoke(p.Select(pole => pole.Position).ToArray());
+                    }
 
                     if (acTokenChallenge != null) acTokenChallenge.Value.ability = true;
                     CheckChallengeAchievement();
                 };
                 disturbButton.OnEffectEnd = (button) =>
                 {
-                    NebulaSyncObject.RpcDestroy(poles[0].ObjectId);
-                    poles.RemoveAt(0);
                     button.StartCoolDown();
-
-                    polesText.text = GetNumOfLeftPoles().ToString();
-                    if (poles.Count == 0 && newPoles.Count == 0)
-                    {
-                        GameObject.Destroy(effectCircle);
-                        effectCircle = null;
-                    }
                 };
                 
                 disturbButton.CoolDownTimer = Bind(new Timer(DisturbCoolDownOption).SetAsAbilityCoolDown().Start());
@@ -304,6 +499,8 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 {
                     mapLayer = UnityHelper.CreateObject<DisturberMapLayer>("DisturberLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                     this.Bind(mapLayer.gameObject);
+                    mapLayer.SetDisturber(this);
+                    poles.Do(p => mapLayer.RegisterPoles(p, poles));
                 }
                 mapLayer.gameObject.SetActive(true);
             }

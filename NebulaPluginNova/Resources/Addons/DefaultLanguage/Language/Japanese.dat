@@ -773,6 +773,7 @@
 "role.sidekick.name" : "サイドキック"
 "role.sidekick.short" : "S"
 "role.sidekick.blurb" : "おれたちはタッグだ！"
+"role.sidekick.generalBlurb" : "おれたちはタッグだ！"
 "options.role.sidekick.detail" : "サイドキックはジャッカルの仲間です。<br>ジャッカルが死亡すると、自身がサイドキックに昇格します。"
 "options.role.sidekick.canKill" : "キル可能"
 "options.role.sidekick.killCoolDown" : "キルクールダウン"

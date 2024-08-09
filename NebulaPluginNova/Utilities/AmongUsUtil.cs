@@ -224,6 +224,7 @@ public static class AmongUsUtil
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light", null, (Vector3)position + new Vector3(0, 0, -50f), LayerExpansion.GetDrawShadowsLayer());
         renderer.sprite = lightSprite ?? lightMaskSprite.GetSprite();
         renderer.material.shader = NebulaAsset.MultiplyBackShader;
+        new LightInfo(renderer);
 
         return renderer;
     }
@@ -494,5 +495,10 @@ public static class AmongUsUtil
         }
 
         HudManager.Instance.StartCoroutine(GetEnumarator().WrapToIl2Cpp());
+    }
+
+    public static bool IsCustomServer()
+    {
+        return ServerManager.Instance?.CurrentRegion.TranslateName is StringNames.NoTranslation or null;
     }
 }

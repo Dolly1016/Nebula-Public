@@ -122,6 +122,15 @@ public class Local : Attribute
 }
 
 /// <summary>
+/// ホストのみ呼び出される手続きを表します。
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class OnlyHost : Attribute
+{
+
+}
+
+/// <summary>
 /// ID付きドキュメントを表すクラスです。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class,AllowMultiple =true)]

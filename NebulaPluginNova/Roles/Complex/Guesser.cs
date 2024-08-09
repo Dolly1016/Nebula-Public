@@ -177,6 +177,7 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
         RoleOptionHelper.OpenFilterScreen("guessableFilter", Roles.AllRoles.Where(r => r.CanBeGuessDefault), r => r.CanBeGuess, (r, val) => r.CanBeGuessVariable!.CurrentValue = val,  r => r.CanBeGuessVariable!.CurrentValue = !r.CanBeGuess);
     }
 
+    IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [MyNiceRole, MyNiceRole, GuesserModifier.MyRole];
     public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyNiceRole;
@@ -234,7 +235,9 @@ public class GuesserModifier : DefinedAllocatableModifierTemplate, DefinedAlloca
     private GuesserModifier() : base("guesser", "GSR", new(255, 255, 0), [Guesser.NumOfGuessOption, Guesser.NumOfGuessPerMeetingOption, Guesser.GuessableFilterEditorOption]) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Guesser.MyNiceRole.ConfigurationHolder!, Guesser.MyEvilRole.ConfigurationHolder!]);
     }
-    
+
+    IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Guesser.MyNiceRole, Guesser.MyNiceRole, MyRole];
+
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 

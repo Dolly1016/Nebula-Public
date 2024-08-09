@@ -1,6 +1,7 @@
 ﻿using Nebula.Behaviour;
 using TMPro;
 using Twitch;
+using UnityEngine;
 
 namespace Nebula;
 
@@ -61,6 +62,8 @@ public class VanillaAsset
     static public float GetMapScale(byte mapId) => VanillaAsset.MapAsset[mapId].MapScale;
     static public Vector2 ConvertToMinimapPos(Vector2 pos,Vector2 center, float scale)=> (pos / scale) + center;
     static public Vector2 ConvertToMinimapPos(Vector2 pos, byte mapId) => ConvertToMinimapPos(pos, GetMapCenter(mapId), GetMapScale(mapId));
+    static public Vector2 ConvertFromMinimapPosToWorld(Vector2 minimapPos, Vector2 center, float scale) => (minimapPos - center) * scale;
+    static public Vector2 ConvertFromMinimapPosToWorld(Vector2 minimapPos, byte mapId) => ConvertFromMinimapPosToWorld(minimapPos, GetMapCenter(mapId), GetMapScale(mapId));
 
     static public void LoadAssetAtInitialize()
     {

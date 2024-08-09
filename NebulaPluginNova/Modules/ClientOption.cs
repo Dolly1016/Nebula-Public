@@ -22,7 +22,8 @@ public class ClientOption
         PlayLobbyMusic,
         ButtonArrangement,
         ShowNoSLogoInLobby,
-        ShowOnlySpawnableAssignableOnFilter
+        ShowOnlySpawnableAssignableOnFilter,
+        ShowVanillaColor
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
@@ -139,6 +140,7 @@ public class ClientOption
         }, 0);
         new ClientOption(ClientOptionType.ShowNoSLogoInLobby, "showNebulaLogoInLobby", new string[] { "options.switch.off", "options.switch.on" }, 1);
         new ClientOption(ClientOptionType.ShowOnlySpawnableAssignableOnFilter, "showOnlySpawnableAssignableOnFilter", new string[] { "options.switch.off", "options.switch.on" }, 0) { ShowOnClientSetting = false };
+        new ClientOption(ClientOptionType.ShowVanillaColor, "externalModColor", new string[] { "options.switch.off", "options.switch.on" }, 0);
         ReflectProcessorAffinity();
     }
 

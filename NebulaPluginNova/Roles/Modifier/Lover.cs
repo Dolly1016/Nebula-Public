@@ -172,7 +172,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         }
 
         [OnlyMyPlayer, Local]
-        void OnExiled(PlayerExtraExiledEvent ev)
+        void OnExiled(PlayerExiledEvent ev)
         {
             if (!(MyLover?.IsDead ?? false))
             {
@@ -195,7 +195,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         void CheckExtraWins(PlayerCheckExtraWinEvent ev)
         {
             if (ev.Phase != ExtraWinCheckPhase.LoversPhase) return;
-            if (!AllowExtraWinOption) return;
+            if (!AllowExtraWinOption && ev.GameEnd != NebulaGameEnd.AvengerWin) return;
 
             var myLover = MyLover;
             if (myLover == null) return;

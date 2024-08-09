@@ -582,6 +582,7 @@
 "options.role.disturber.disturbDuration" : "Disturb Duration"
 "options.role.disturber.maxNumOfPoles" : "# Max Poles"
 "options.role.disturber.maxDistanceBetweenPoles" : "Max Distance Between Poles"
+"role.disturber.ui.removePoles" : "<b>Left Click</b>: Destroy the poles."
 
 "role.effacer.name" : "Effacer"
 "role.effacer.short" : "E"
@@ -1275,6 +1276,7 @@
 "config.client.buttonArrangement.raiseOnlyLeft" : "Raise Only Left"
 "config.client.buttonArrangement.raiseBoth" : "Raise Both Bottoms"
 "config.client.showNebulaLogoInLobby" : "Show NoS Logo"
+"config.client.externalModColor" : "External Mod Color Support"
 "config.client.webhook" : "Discord Webhook"
 
 # Preset

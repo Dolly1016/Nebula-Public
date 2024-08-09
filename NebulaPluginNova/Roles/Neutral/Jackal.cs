@@ -1,5 +1,6 @@
 ﻿using Nebula.Compat;
 using Nebula.Game.Statistics;
+using Nebula.Roles.Complex;
 using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
 using Virial;
@@ -249,11 +250,11 @@ file static class SidekickAchievementChecker
 
 public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption], false, optionHolderPredicate: ()=>Jackal.CanCreateSidekickOption ) {
+    private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption], false, optionHolderPredicate: ()=> (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.CanCreateSidekickOption ) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Jackal.MyRole.ConfigurationHolder!]);
         ConfigurationHolder!.Title = ConfigurationHolder.Title.WithComparison("role.jackal.sidekick.name");
     }
-
+    IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Sidekick.MyRole, MyRole];
     string DefinedAssignable.InternalName => "jackal.sidekick";
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
@@ -314,7 +315,7 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
 {
     static public SidekickModifier MyRole = new SidekickModifier();
     private SidekickModifier() : base("sidekick", Jackal.MyTeam.Color, withConfigurationHolder: false) { }
-
+    IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Sidekick.MyRole, MyRole];
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier

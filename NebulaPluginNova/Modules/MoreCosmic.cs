@@ -1612,6 +1612,7 @@ public static class TabEnablePatch
                     {
                         var ex = GameObject.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
                         ex.sharedMaterial = HatManager.Instance.DefaultShader;
+                        ex.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                         ex.sprite = previewAdditionalSprite;
                         ex.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f, 0f, modItem!.PreviewAdditionalInFront ? -0.1f : 0.1f);
                     }
@@ -1622,6 +1623,7 @@ public static class TabEnablePatch
                         {
                             var exFront = GameObject.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
                             exFront.sharedMaterial = HatManager.Instance.DefaultShader;
+                            exFront.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                             exFront.sprite = mHat.Main.GetExSprite(0);
                             exFront.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f,0f,mHat.Main.ExIsFront ? -0.1f : 0.1f);
                         }
@@ -1635,10 +1637,11 @@ public static class TabEnablePatch
 
                             if (mHat.Back.HasExImage)
                             {
-                                var exFront = GameObject.Instantiate(colorChip.Inner.BackLayer, colorChip.Inner.BackLayer.transform.parent);
-                                exFront.sharedMaterial = HatManager.Instance.DefaultShader;
-                                exFront.sprite = mHat.Back.GetExSprite(0);
-                                exFront.transform.localPosition = colorChip.Inner.BackLayer.transform.localPosition + new Vector3(0f, 0f, mHat.Back.ExIsFront ? -0.1f : 0.1f);
+                                var exBack = GameObject.Instantiate(colorChip.Inner.BackLayer, colorChip.Inner.BackLayer.transform.parent);
+                                exBack.sharedMaterial = HatManager.Instance.DefaultShader;
+                                exBack.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                                exBack.sprite = mHat.Back.GetExSprite(0);
+                                exBack.transform.localPosition = colorChip.Inner.BackLayer.transform.localPosition + new Vector3(0f, 0f, mHat.Back.ExIsFront ? -0.1f : 0.1f);
                             }
                         }
                     }
@@ -1648,6 +1651,7 @@ public static class TabEnablePatch
                         {
                             var exFront = GameObject.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
                             exFront.sharedMaterial = HatManager.Instance.DefaultShader;
+                            exFront.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                             exFront.sprite = mVisor.Main.GetExSprite(0);
                             exFront.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f, 0f, mVisor.Main.ExIsFront ? -0.1f : 0.1f);
                         }
@@ -1661,10 +1665,11 @@ public static class TabEnablePatch
 
                             if (mVisor.Back.HasExImage)
                             {
-                                var exFront = GameObject.Instantiate(colorChip.Inner.BackLayer, colorChip.Inner.BackLayer.transform.parent);
-                                exFront.sharedMaterial = HatManager.Instance.DefaultShader;
-                                exFront.sprite = mVisor.Back.GetExSprite(0);
-                                exFront.transform.localPosition = colorChip.Inner.BackLayer.transform.localPosition + new Vector3(0f, 0f, mVisor.Back.ExIsFront ? -0.1f : 0.1f);
+                                var exBack = GameObject.Instantiate(colorChip.Inner.BackLayer, colorChip.Inner.BackLayer.transform.parent);
+                                exBack.sharedMaterial = HatManager.Instance.DefaultShader;
+                                exBack.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                                exBack.sprite = mVisor.Back.GetExSprite(0);
+                                exBack.transform.localPosition = colorChip.Inner.BackLayer.transform.localPosition + new Vector3(0f, 0f, mVisor.Back.ExIsFront ? -0.1f : 0.1f);
                             }
                         }
                     }
@@ -1763,6 +1768,7 @@ public static class TabEnablePatch
                             adaptiveChip.transform.localPosition = plateChip.transform.localPosition + new Vector3(0f, 0f, mPlate.AdaptiveInFront ? -0.1f : 0.1f) ;
                             adaptiveChip.transform.localScale = plateChip.transform.localScale;
                             adaptiveChip.material = HatManager.Instance.PlayerMaterial;
+                            adaptiveChip.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                             PlayerMaterial.SetColors(NebulaPlayerTab.PreviewColorId, adaptiveChip);
                         }
                     })));
