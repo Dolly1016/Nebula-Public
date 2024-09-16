@@ -130,6 +130,12 @@ public class Seer : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (acTokenChallenge != null && !MyPlayer.IsDead) acTokenChallenge.Value.meetings++;
         }
+
+        [Local, OnlyMyPlayer]
+        void OnSeerDead(PlayerDieEvent ev)
+        {
+            if (NebulaGameManager.Instance.AllPlayerInfo().All(p => !p.IsDead || p.AmOwner)) new StaticAchievementToken("seer.another1");
+        }
     }
 }
 

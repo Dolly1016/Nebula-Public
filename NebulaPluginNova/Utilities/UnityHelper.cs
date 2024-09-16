@@ -2,6 +2,11 @@
 
 namespace Nebula.Utilities;
 
+public static class ModSingleton<T> where T : class
+{
+    static public T Instance { get; set; } = null;
+}
+
 public static class UnityHelper
 {
 

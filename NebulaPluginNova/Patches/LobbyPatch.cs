@@ -12,6 +12,8 @@ using Virial.Events.Game;
 using TMPro;
 using Nebula.Modules.GUIWidget;
 using UnityEngine.Rendering;
+using Sentry.Internal.Extensions;
+using Virial;
 
 namespace Nebula.Patches;
 
@@ -65,7 +67,7 @@ public class GameStartManagerUpdatePatch
         if (__instance.LastPlayerCount > __instance.MinPlayers) arg = "<color=#00FF00FF>";
         if (__instance.LastPlayerCount == __instance.MinPlayers) arg = "<color=#FFFF00FF>";
 
-        int max = 15;
+        int max = 24;
         if (AmongUsClient.Instance.NetworkMode != NetworkModes.LocalGame) max = GameManager.Instance.LogicOptions.MaxPlayers;    
         var text = string.Format("{0}{1}/{2}", arg, __instance.LastPlayerCount, max);
 
@@ -183,47 +185,12 @@ public class SetUpCertificationPatch
 {
     public static void Postfix(PlayerControl __instance)
     {
-        if(LobbyBehaviour.Instance) __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
+        //ゲーム中であればなにもしない
+        if (AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started) return;
+
+        __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
     }
 }
-
-[HarmonyPatch(typeof(OptionsConsole), nameof(OptionsConsole.CanUse))]
-public class OptionsConsoleCanUsePatch
-{
-    public static void Prefix(OptionsConsole __instance)
-    {
-        __instance.HostOnly = false;
-    }
-}
-
-[HarmonyPatch(typeof(OptionsConsole), nameof(OptionsConsole.Use))]
-public class OptionsConsoleUsePatch
-{
-    public static bool Prefix(OptionsConsole __instance)
-    {
-        if (!__instance.MenuPrefab.TryGetComponent<GameSettingMenu>(out _)) return true;
-
-        __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
-        if (!flag) return false;
-        
-        PlayerControl.LocalPlayer.NetTransform.Halt();
-
-        if (AmongUsClient.Instance.AmHost)
-        {
-            GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.MenuPrefab);
-            gameObject.transform.SetParent(Camera.main.transform, false);
-            gameObject.transform.localPosition = __instance.CustomPosition;
-            DestroyableSingleton<TransitionFade>.Instance.DoTransitionFade(null, gameObject.gameObject, null);
-        }
-        else
-        {
-            Modules.HelpScreen.TryOpenHelpScreen(HelpScreen.HelpTab.Options);
-        }
-
-        return false;
-    }
-}
-
 
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoJoinOnlineGameFromCode))]
 public class JoinGameLoadingPatch
@@ -352,3 +319,118 @@ public class ChatNotificationSetUpPatch
         foreach (var renderer in __instance.player.GetComponentsInChildren<SpriteRenderer>()) renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
     }
 }
+
+//Lobbyコンソール
+
+[HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.Start))]
+public class MarketplaceConsolePatch
+{
+    private static IDividedSpriteLoader lobbyConsoleSprite = DividedSpriteLoader.FromResource("Nebula.Resources.LobbyMarketplace.png", 100f, 4, 1);
+    public static void Postfix(LobbyBehaviour __instance)
+    {
+        var leftBox = __instance.transform.FindChild("Leftbox");
+        if (leftBox)
+        {
+            leftBox.transform.localPosition = new(-1.51f, 0.2336f, 0f);
+            var pos = leftBox.transform.position;
+            pos.z = pos.y / 1000f;
+            leftBox.transform.position = pos;
+        }
+
+        var wardrobe = __instance.transform.FindChild("panel_Wardrobe").GetChild(0);
+        if(wardrobe.gameObject.TryGetComponent<OptionsConsole>(out var wardrobeConsole))
+        {
+            MainMenuManagerInstance.SetPrefab(wardrobeConsole.MenuPrefab);
+
+            var marketPlace = GameObject.Instantiate(wardrobeConsole, __instance.transform);
+            marketPlace.MenuPrefab = null;
+            marketPlace.Outline = null;
+
+            marketPlace.transform.position = new Vector3(-1.44f,0.53f);
+
+            var renderer = marketPlace.gameObject.AddComponent<SpriteRenderer>();
+            renderer.material = wardrobeConsole.Outline.material;
+            renderer.transform.localScale = new(0.7f, 0.7f, 1f);
+            System.Collections.IEnumerator CoAnim()
+            {
+                while (true)
+                {
+                    renderer.transform.localEulerAngles = new(0, 0, System.Random.Shared.NextSingle() * 360f);
+                    renderer.sprite = lobbyConsoleSprite.GetSprite(Helpers.Prob(0.15f) ? 2 : Helpers.Prob(0.2f) ? 3 : Helpers.Prob(0.5f) ? 0 : 1);
+
+                    yield return Effects.Wait(0.2f);
+                }
+            }
+            marketPlace.StartCoroutine(CoAnim().WrapToIl2Cpp());
+            marketPlace.Outline = renderer;
+
+            GameOperatorManager.Instance?.RegisterReleasedAction(()=> {
+                if (ModSingleton<Marketplace>.Instance) ModSingleton<Marketplace>.Instance.Close();
+            }, new GameObjectLifespan(__instance.gameObject));
+
+            var origSettings = HudManager.Instance.UseButton.fastUseSettings[ImageNames.WardrobeButton];
+            HudManager.Instance.UseButton.fastUseSettings[(ImageNames)ModImageNames.Marketplace] = new() { ButtonType = origSettings.ButtonType, FontMaterial = origSettings.FontMaterial, Image = origSettings.Image, Text = (StringNames)ModStringNames.Marketplace };
+            marketPlace.CustomUseIcon = (ImageNames)ModImageNames.Marketplace;
+
+        }
+        else
+        {
+            NebulaPlugin.Log.Print("Wardrobe console was not found ");
+        }
+
+    }
+}
+
+[HarmonyPatch(typeof(OptionsConsole), nameof(OptionsConsole.CanUse))]
+public class OptionsConsoleCanUsePatch
+{
+    public static void Prefix(OptionsConsole __instance)
+    {
+        __instance.HostOnly = false;
+    }
+}
+
+public static class ModStringNames
+{
+    public const int Marketplace = 20000;
+}
+
+public static class ModImageNames
+{
+    public const int Marketplace = 100;
+}
+
+[HarmonyPatch(typeof(OptionsConsole), nameof(OptionsConsole.Use))]
+public class OptionsConsoleUsePatch
+{
+    public static bool Prefix(OptionsConsole __instance)
+    {
+        if (__instance.MenuPrefab != null && !__instance.MenuPrefab.TryGetComponent<GameSettingMenu>(out _)) return true;
+
+        __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
+        if (!flag) return false;
+
+        PlayerControl.LocalPlayer.NetTransform.Halt();
+
+        if (__instance.MenuPrefab == null)
+        {
+            Marketplace.OpenInLobby();
+            return false;
+        }
+
+        if (AmongUsClient.Instance.AmHost)
+        {
+            GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.MenuPrefab);
+            gameObject.transform.SetParent(Camera.main.transform, false);
+            gameObject.transform.localPosition = __instance.CustomPosition;
+            DestroyableSingleton<TransitionFade>.Instance.DoTransitionFade(null, gameObject.gameObject, null);
+        }
+        else
+        {
+            Modules.HelpScreen.TryOpenHelpScreen(HelpScreen.HelpTab.Options);
+        }
+
+        return false;
+    }
+}
+

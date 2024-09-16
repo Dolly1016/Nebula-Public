@@ -101,7 +101,7 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
                 placeButton.Visibility = (button) => !MyPlayer.IsDead && globalLanterns == null && left > 0;
                 placeButton.OnClick = (button) => {
                     var pos = PlayerControl.LocalPlayer.GetTruePosition();
-                    localLanterns.Add(Bind<NebulaSyncStandardObject>((NebulaSyncObject.LocalInstantiate(Lantern.MyLocalTag, new float[] { pos.x, pos.y }) as NebulaSyncStandardObject)!));
+                    localLanterns.Add(Bind<NebulaSyncStandardObject>((NebulaSyncObject.LocalInstantiate(Lantern.MyLocalTag, new float[] { pos.x, pos.y }).SyncObject as NebulaSyncStandardObject)!));
 
                     left--;
                     usesText.text = left.ToString();
@@ -127,7 +127,7 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
             {
                 globalLanterns = new int[localLanterns.Count];
                 for (int i = 0;i<localLanterns.Count;i++) {
-                    globalLanterns[i] = NebulaSyncObject.RpcInstantiate(Lantern.MyGlobalTag, new float[] { localLanterns[i].Position.x, localLanterns[i].Position.y })!.ObjectId;
+                    globalLanterns[i] = NebulaSyncObject.RpcInstantiate(Lantern.MyGlobalTag, new float[] { localLanterns[i].Position.x, localLanterns[i].Position.y }).ObjectId;
                     NebulaSyncObject.LocalDestroy(localLanterns[i].ObjectId);
                 }
                 localLanterns = null!;

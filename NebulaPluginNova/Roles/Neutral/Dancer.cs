@@ -1,4 +1,5 @@
-﻿using Nebula.Game.Statistics;
+﻿using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
@@ -88,6 +89,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
         if (IsDancing)
         {
             if (DancingProgress < 0.1f) DanceStartPos = currentPos;
+            
             DancingProgress += Time.deltaTime;
             NotDancingProgress = 0f;
 
@@ -205,7 +207,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         //死の預言が完遂されたプレイヤー
         List<GamePlayer> completedDanceLooked = new();
         //Dancer本人だけが使用する。死の預言の有効時間
-        float[] danceLookedTimer = new float[15];
+        float[] danceLookedTimer = new float[24];
         int danceShareVersion = 0;
         public void UpdateDanceState(int version, GamePlayer[] active, GamePlayer[] completed)
         {
@@ -258,6 +260,13 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
             dancerDanceChecker = MyPlayer.GetModule<DanceModule>()!;
         }
 
+        EffectCircle? circleEffect = null;
+
+        void RuntimeAssignable.OnInactivated()
+        {
+            if (circleEffect != null) circleEffect.Disappear();
+        }
+
         //ダンスの進捗について、クールダウンを考慮する
         [Local]
         void OnHudUpdate(GameHudUpdateEvent ev)
@@ -265,6 +274,16 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
             if(AmOwner && (danceCoolDownTimer?.IsProgressing ?? false))
             {
                 dancerDanceChecker.ResetState();
+            }
+
+            if(dancerDanceChecker.DancingProgress > 0f && circleEffect == null)
+            {
+                circleEffect = EffectCircle.SpawnEffectCircle(null, MyPlayer.Position.ToUnityVector(), Dancer.MyRole.UnityColor, DanceRangeOption, null, true);
+            }
+            if(!(dancerDanceChecker.DancingProgress > 0f) && circleEffect != null)
+            {
+                circleEffect.Disappear();
+                circleEffect = null;
             }
 
             if (AmOwner)
@@ -309,7 +328,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
             Debug.Log("Dance:" + string.Join(",", players.Select(p => p.Name)));
 
             //ダンスをしたのがDancer、自分自身がダンスの目撃者である
-            if (!AmOwner && ev.Player == MyPlayer && players.Any(p => p.AmOwner)) new StaticAchievementToken("dancer.commmon3");
+            if (!AmOwner && ev.Player == MyPlayer && players.Any(p => p.AmOwner)) new StaticAchievementToken("dancer.common3");
 
             //ダンスをしたのがDancer
             if(ev.Player == MyPlayer)
@@ -332,11 +351,11 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                     else
                     {
                         //通常のダンス
-                        if (ev.Players.AsRawPattern != 0) new StaticAchievementToken("dancer.commmon1");
-                        if (ev.Corpses.AsRawPattern != 0) new StaticAchievementToken("dancer.commmon2");
+                        if (ev.Players.AsRawPattern != 0) new StaticAchievementToken("dancer.common1");
+                        if (ev.Corpses.AsRawPattern != 0) new StaticAchievementToken("dancer.common2");
                         int playerCount = players.Count();
                         if (playerCount >= 2) new StaticAchievementToken("dancer.another2");
-                        for (int i = 0; i < playerCount; i++) new StaticAchievementToken("dancer.commmon8");
+                        for (int i = 0; i < playerCount; i++) new StaticAchievementToken("dancer.common8");
                         //死の舞踏によるダンサーキル
                         using (RPCRouter.CreateSection("Dance"))
                         {
@@ -347,7 +366,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                                 if (!p.IsDead)
                                 {
                                     MyPlayer.MurderPlayer(p, PlayerState.Frenzied, EventDetail.Dance, KillParameter.RemoteKill);
-                                    (successPlayers as EditableBitMask<GamePlayer>).Add(p);
+                                    completedDanceLooked.Add(p);
                                     canKillLeft--;
                                 }
                                 //自身がキルした死体は使用できないようにする。
@@ -416,8 +435,6 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
             }
         }
 
-        //この値はキルの瞬間に限ると
-        HashSetMask<GamePlayer> successPlayers = new HashSetMask<GamePlayer>();
         void OnPlayerDead(PlayerDieEvent ev)
         {
             if(AmongUsClient.Instance.AmHost && ev.Player == MyPlayer && ForecastedFollowingSuicideOption)
@@ -490,10 +507,10 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         [Local]
         void AppendExtraTaskText(PlayerTaskTextLocalEvent ev)
         {
-            bool isCompleted = successPlayers.Count >= (int)NumOfSuccessfulForecastToWinOption;
+            bool isCompleted = completedDanceLooked.Count >= (int)NumOfSuccessfulForecastToWinOption;
             var text = Language.Translate("role.dancer.taskDanceText");
-            if(!isCompleted) text += $" ({successPlayers.Count}/{(int)NumOfSuccessfulForecastToWinOption})";
-            text = text.Color(isCompleted ? Color.green : successPlayers.Count > 0 ? Color.yellow : Color.white);
+            if(!isCompleted) text += $" ({completedDanceLooked.Count}/{(int)NumOfSuccessfulForecastToWinOption})";
+            text = text.Color(isCompleted ? Color.green : completedDanceLooked.Count > 0 ? Color.yellow : Color.white);
 
             ev.AppendText(text);
 

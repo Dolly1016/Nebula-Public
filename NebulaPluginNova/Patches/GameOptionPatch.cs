@@ -1,4 +1,8 @@
-﻿using Nebula.Modules.GUIWidget;
+﻿using AmongUs.Data;
+using AmongUs.GameOptions;
+using Il2CppInterop.Runtime.Injection;
+using Nebula.Modules.GUIWidget;
+using TMPro;
 
 namespace Nebula.Patches;
 
@@ -107,5 +111,140 @@ class GameOptionsMenuStartPatch
 
         var longTasksOption = __instance.Children.Find((Il2CppSystem.Predicate<OptionBehaviour>)(x => x.TryGetComponent<NumberOption>(out var op) && op.intOptionName == AmongUs.GameOptions.Int32OptionNames.NumLongTasks))?.TryCast<NumberOption>();
         if (longTasksOption != null) longTasksOption.ValidRange = new FloatRange(0f, 15f);
+
+        //インポスターの人数の上限解放はローカル or カスタムサーバーのみ
+        if (AmongUsUtil.IsCustomServer() || (AmongUsClient.Instance?.AmLocalHost ?? false))
+        {
+            var impostorsOption = __instance.Children.Find((Il2CppSystem.Predicate<OptionBehaviour>)(x => x.TryGetComponent<NumberOption>(out var op) && op.intOptionName == AmongUs.GameOptions.Int32OptionNames.NumImpostors))?.TryCast<NumberOption>();
+            if (impostorsOption != null) impostorsOption.ValidRange = new FloatRange(0f, 6f);
+        }
+    }
+}
+
+class CreateGameOptionsNoSBehaviour : MonoBehaviour
+{
+    static CreateGameOptionsNoSBehaviour() => ClassInjector.RegisterTypeInIl2Cpp<CreateGameOptionsNoSBehaviour>();
+
+    public CreateOptionsPicker MyPicker;
+
+    void Awake()
+    {
+        MyPicker = gameObject.GetComponent<CreateOptionsPicker>();
+
+        MyPicker.transform.FindChild("Game Mode").gameObject.SetActive(false);
+
+        var impostorsRoot = MyPicker.transform.FindChild("Impostors");
+        if (impostorsRoot)
+        {
+            impostorsRoot.transform.localPosition = new(-1.955f, -0.44f, 0f);
+
+            var temp = impostorsRoot.transform.GetChild(1);
+
+            var list = MyPicker.ImpostorButtons.ToList();
+            for (int i = 4; i <= 6; i++) {
+                var obj = GameObject.Instantiate(temp, impostorsRoot);
+                obj.name = i.ToString();
+                obj.transform.localPosition = new((i - 1) * 0.6f, 0f, 0f);
+                obj.GetChild(0).GetComponent<TextMeshPro>().text = i.ToString();
+                var passiveButton = obj.gameObject.GetComponent<PassiveButton>();
+                passiveButton.OnClick = new();
+                int impostors = i;
+                passiveButton.OnClick.AddListener(() => MyPicker.SetImpostorButtons(impostors));
+
+                list.Add(obj.GetComponent<ImpostorsOptionButton>());
+            }
+
+            MyPicker.ImpostorButtons = list.ToArray();
+        }
+    }
+
+    void OnEnable()
+    {
+        if (!MyPicker) return;
+
+        bool isCustomServer = AmongUsUtil.IsCustomServer();
+
+        if (MyPicker.MaxPlayersRoot)
+        {
+            //以前のボタンを削除する
+            MyPicker.optionsMenu.ControllerSelectable.Clear();
+            MyPicker.MaxPlayerButtons.Clear();
+
+            Helpers.Sequential(MyPicker.MaxPlayersRoot.childCount).Skip(1).Select(i => MyPicker.MaxPlayersRoot.GetChild(i).gameObject).ToArray().Do(GameObject.Destroy);
+            
+            for (int i = 4; i <= (isCustomServer ? 24 : 15); i++)
+            {
+                SpriteRenderer spriteRenderer = GameObject.Instantiate<SpriteRenderer>(MyPicker.MaxPlayerButtonPrefab, MyPicker.MaxPlayersRoot);
+                spriteRenderer.transform.localPosition = new Vector3((float)((i - 4) % 12) * 0.5f, (float)(i/16) * -0.47f, 0f);
+                int numPlayers = i;
+                spriteRenderer.name = numPlayers.ToString();
+                PassiveButton component = spriteRenderer.GetComponent<PassiveButton>();
+                component.OnClick.AddListener(() => MyPicker.SetMaxPlayersButtons(numPlayers));
+                spriteRenderer.GetComponentInChildren<TextMeshPro>().text = numPlayers.ToString();
+                MyPicker.MaxPlayerButtons.Add(spriteRenderer);
+                MyPicker.optionsMenu.ControllerSelectable.Add(component);
+            }
+        }
+
+        var subMenu = MyPicker.transform.FindChild("SubMenu");
+        subMenu.transform.localPosition = new(1.11f, isCustomServer ? -0.4f : 0f, 0f);
+        subMenu.GetComponent<ShiftButtonsCrossplayEnabled>().enabled = false;
+
+        //4人以上のオプションはカスタムサーバーのみ使用可能
+        for (int i = 4; i <= 6; i++) MyPicker.ImpostorButtons[i - 1].gameObject.SetActive(isCustomServer);
+
+        var options = MyPicker.GetTargetOptions();
+        if (!isCustomServer)
+        {
+            if (options.MaxPlayers > 15) MyPicker.SetMaxPlayersButtons(15);
+            if (options.NumImpostors > 3) MyPicker.SetImpostorButtons(3);
+        }
+
+        MyPicker.Refresh();
+    }
+}
+
+[HarmonyPatch(typeof(CreateOptionsPicker), nameof(CreateOptionsPicker.Awake))]
+class CreateGameOptionsShowPatch
+{
+    public static bool Prefix(CreateOptionsPicker __instance)
+    {
+        //各種設定の配列長を24人分まで伸ばす
+        NormalGameOptionsV07.MaxImpostors = NormalGameOptionsV08.MaxImpostors = new int[] {
+            0,
+            0, 0, 0, 1, 1,
+            1, 2, 2, 3, 3,
+            3, 3, 4, 4, 5,
+            5, 5, 6, 6, 6,
+            6, 6, 6, 6
+        };
+        NormalGameOptionsV07.RecommendedImpostors = NormalGameOptionsV08.RecommendedImpostors = new int[] {
+            0,
+            0, 0, 0, 1, 1,
+            1, 2, 2, 2, 2,
+            2, 3, 3, 3, 3,
+            3, 4, 4, 4, 4,
+            5, 5, 5, 5
+        };
+        NormalGameOptionsV07.RecommendedKillCooldown = NormalGameOptionsV08.RecommendedKillCooldown = new int[] {
+            0,
+            0, 0, 0, 45, 30,
+            15, 35, 30, 25, 20,
+            20, 20, 20, 20, 20,
+            20, 20, 20, 20, 20,
+            20, 20, 20, 20
+        };
+        NormalGameOptionsV07.MinPlayers = NormalGameOptionsV08.MinPlayers = new int[] {
+            4, 4, 7, 9, 13, 15, 18
+        };
+
+        //ゲームモードはノーマル固定
+        DataManager.Settings.Multiplayer.LastPlayedGameMode = AmongUs.GameOptions.GameModes.Normal;
+        DataManager.Settings.Save();
+        GameOptionsManager.Instance.SwitchGameMode(AmongUs.GameOptions.GameModes.Normal);
+
+        __instance.gameObject.AddComponent<CreateGameOptionsNoSBehaviour>();
+
+        return false;
     }
 }

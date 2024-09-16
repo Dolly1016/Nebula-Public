@@ -1,4 +1,6 @@
-﻿namespace Nebula.Map;
+﻿using Virial.Game;
+
+namespace Nebula.Map;
 
 public class AirshipData : MapData
 {
@@ -56,6 +58,44 @@ public class AirshipData : MapData
         new(6.5f, 15.3f), new(11.8f, 14.1f), new(11.8f, 16f), new(16.3f, 15.2f),
         };
 
+    static private MapObjectPoint[] mapObjectPoints = [
+        new(-9.9f, 12.0f, MapObjectType.SmallInCorner), //金庫上
+        new(-5.8f, 5.5f, MapObjectType.SmallInCorner), //金庫右下
+        new(1.5f, 8.0f, MapObjectType.SmallInCorner), //宿舎右下
+        new(5.5f, 9.7f, MapObjectType.SmallInCorner), //昇降機左
+        new(3.4f, 14.8f, MapObjectType.SmallInCorner), //ミーティング左
+        new(14.0f, 14.0f, MapObjectType.SmallInCorner), //ミーティング
+        new(-0.2f, 4.0f, MapObjectType.SmallInCorner), //エンジン上
+        new(-5.9f, -0.5f, MapObjectType.SmallInCorner), //エンジン左
+        new(-15.7f, -0.2f, MapObjectType.SmallInCorner), //コミュ左下外
+        new(-12.1f, 0.8f, MapObjectType.SmallInCorner), //コミュ右下
+        new(-17.1f, 1.2f, MapObjectType.SmallInCorner), //コックピット右上
+        new(-20.7f, -3.7f, MapObjectType.SmallInCorner), //コックピット下
+        new(-12.5f, -3.8f, MapObjectType.SmallInCorner), //武器庫上
+        new(-12.6f, -9.6f, MapObjectType.SmallInCorner), //武器庫下
+        new(-6.9f, -6.0f, MapObjectType.SmallInCorner), //キッチン上
+        new(-6.1f, -12.7f, MapObjectType.SmallInCorner), //キッチン下
+        new(-11.6f, -11.2f, MapObjectType.SmallInCorner), //展望デッキ上
+        new(-13.0f, -14.8f, MapObjectType.SmallInCorner), //展望デッキ下
+        new(3.9f, -11.6f, MapObjectType.SmallInCorner), //ポートレート右
+        new(5.6f, -14.7f, MapObjectType.SmallInCorner), //セキュ下デッキ
+        new(9.6f, -6.0f, MapObjectType.SmallInCorner), //電気室左上
+        new(19.8f, -11.3f, MapObjectType.SmallInCorner), //電気室右下
+        new(23.3f, -10.2f, MapObjectType.SmallInCorner), //医務室下
+        new(34.3f, -1.7f, MapObjectType.SmallInCorner), //貨物中央
+        new(39.6f, 0.0f, MapObjectType.SmallInCorner), //貨物右
+        new(34.7f, 5.0f, MapObjectType.SmallInCorner), //ラウンジ右
+        new(24.5f, 6.3f, MapObjectType.SmallInCorner), //ラウンジ左
+        new(22.6f, 10.5f, MapObjectType.SmallInCorner), //アーカイブ右
+        new(15.2f, 8.3f, MapObjectType.SmallInCorner), //昇降機右端
+        new(24.5f, 0.8f, MapObjectType.SmallInCorner), //シャワー右
+        new(17.9f, 4.9f, MapObjectType.SmallInCorner), //シャワー上
+        new(8.5f, 1.8f, MapObjectType.SmallInCorner), //メイン中央上
+        new(5.7f, 2.5f, MapObjectType.SmallInCorner), //メイン左上
+        new(5.8f, -3.7f, MapObjectType.SmallInCorner), //メイン左下
+        new(1.7f, -1.9f, MapObjectType.SmallInCorner), //エンジン右下
+        ];
+    public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;
     protected override Vector2[] NonMapArea => [];
 

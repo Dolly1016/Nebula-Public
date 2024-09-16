@@ -1,9 +1,10 @@
-﻿namespace Nebula.Map;
+﻿using Virial.Game;
+
+namespace Nebula.Map;
 
 public class PolusData : MapData
 {
-    static private Vector2[] MapPositions = new Vector2[]
-    {
+    static private Vector2[] MapPositions = [
         //ドロップシップ
         new(16.7f, -2.6f),
         //ドロップシップ下
@@ -46,8 +47,47 @@ public class PolusData : MapData
         new(24.2f, -4.5f),
         //ストレージ・ラボ下・オフィス右
         new(24f, -14.6f), new(26f, -12.2f), new(29.8f, -15.7f)
-    };
+    ];
 
+    static private MapObjectPoint[] mapObjectPoints = [
+        new(18.5f, -5.6f,MapObjectType.SmallInCorner), //ドロップシップ右下
+        new(14.7f, -3.9f,MapObjectType.SmallInCorner), //ドロップシップ左下
+        new(18.5f, -5.6f,MapObjectType.SmallInCorner), //ドロップシップ右下外
+        new(20.6f, -7.9f,MapObjectType.SmallInCorner), //ドロップシップ左下外
+        new(3.7f, -7.5f,MapObjectType.SmallInCorner), //左リアクター下
+        new(7.0f, -13.1f,MapObjectType.SmallInCorner), //セキュリティ
+        new(4.9f, -16.7f,MapObjectType.SmallInCorner), //配電盤
+        new(4.9f, -16.7f,MapObjectType.SmallInCorner), //O2上通路
+        new(1.2f, -17.5f,MapObjectType.SmallInCorner), //O2グリーン
+        new(1.9f, -20.3f,MapObjectType.SmallInCorner), //O2缶タスク
+        new(2.3f, -24.5f,MapObjectType.SmallInCorner), //ボイラー
+        new(8.8f, -25.4f,MapObjectType.SmallInCorner), //O2,Weapon間
+        new(9.5f, -17.1f,MapObjectType.SmallInCorner), //コミュ左
+        new(12.7f, -17.4f,MapObjectType.SmallInCorner), //コミュ中
+        new(14.2f, -21.2f,MapObjectType.SmallInCorner), //武器庫上
+        new(17.9f, -13.2f,MapObjectType.SmallInCorner), //ストレージ下
+        new(19.9f, -10.8f,MapObjectType.SmallInCorner), //ストレージ中
+        new(25.2f, -7.8f,MapObjectType.SmallInCorner), //ラボドリル
+        new(32.1f, -10.0f,MapObjectType.SmallInCorner), //ラボ中央左
+        new(29.6f, -8.2f,MapObjectType.SmallInCorner), //ラボドリル右の部屋
+        new(34.9f, -10.4f,MapObjectType.SmallInCorner), //望遠鏡
+        new(40.6f, -8.0f,MapObjectType.SmallInCorner), //ラボ右端
+        new(34.9f, -10.4f,MapObjectType.SmallInCorner), //ラボトイレ
+        new(32.0f, -13.5f,MapObjectType.SmallInCorner), //溶岩湖上
+        new(30.9f, -17.2f,MapObjectType.SmallInCorner), //オフィス右
+        new(18.7f, -18.7f, MapObjectType.SmallInCorner), //会議室
+        new(16.9f, -25.9f,MapObjectType.SmallInCorner), //オフィス左下
+        new(22.2f, -25.2f, MapObjectType.SmallInCorner), //アドミン下
+        new(22.4f, -20.6f, MapObjectType.SmallInCorner), //アドミン上
+        new(25.0f, -25.2f, MapObjectType.SmallInCorner), //下除染
+        new(28.1f, -24.9f, MapObjectType.SmallInCorner), //スペシメン左通路下
+        new(27.3f, -20.3f, MapObjectType.SmallInCorner), //スペシメン左通路上
+        new(35.1f, -22.0f, MapObjectType.SmallInCorner), //スペシメン左下
+        new(37.4f, -22.1f, MapObjectType.SmallInCorner), //スペシメン右下
+        new(39.4f, -18.5f, MapObjectType.SmallInCorner), //スペシメン上通路下
+        new(40.6f, -10.4f, MapObjectType.SmallInCorner), //上除染
+    ];
+    public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;
     protected override Vector2[] NonMapArea => [];
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Laboratory, SystemTypes.Comms, SystemTypes.Electrical };

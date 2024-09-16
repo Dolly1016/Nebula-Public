@@ -194,7 +194,6 @@ public class WideCamera
                         var transform = vent.Buttons[i].transform;
                         transform.position = pos;
                         transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x) / Mathf.PI * 180f);
-
                     }
                 }
             }

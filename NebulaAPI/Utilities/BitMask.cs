@@ -16,6 +16,8 @@ public interface BitMask<T>
 
     uint AsRawPattern { get; }
     ulong AsRawPatternLong { get; }
+
+    IEnumerable<T> ForEach(IEnumerable<T> all) => all.Where(t => Test(t));
 }
 
 public interface EditableBitMask<T> : BitMask<T>

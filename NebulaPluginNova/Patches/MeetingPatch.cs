@@ -9,19 +9,33 @@ namespace Nebula.Patches;
 [NebulaRPCHolder]
 public static class MeetingModRpc
 {
-    private static Vector3 ToVoteAreaPos(int index)
+    static private float[] VotingAreaScale = [1f, 0.95f, 0.76f];
+    static private (int x, int y)[] VotingAreaSize = [(3, 5), (3, 6), (4, 6)];
+    static private Vector3[] VotingAreaOffset = [Vector3.zero, new(0.1f, 0.145f, 0f), new(-0.355f, 0f, 0f)];
+    static private (float x, float y)[] VotingAreaMultiplier = [(1f, 1f), (1f, 0.89f), (0.974f, 1f)];
+    static private int GetVotingAreaType(int players) => players <= 15 ? 0 : players <= 18 ? 1 : 2;
+    private static Vector3 ToVoteAreaPos(int index, int arrangeType)
     {
-        int x = index % 3;
-        int y = index / 3;
-        return MeetingHud.Instance.VoteOrigin + new Vector3(MeetingHud.Instance.VoteButtonOffsets.x * (float)x, MeetingHud.Instance.VoteButtonOffsets.y * (float)y, -0.9f - (float)y * 0.01f);
+        int x = index % VotingAreaSize[arrangeType].x;
+        int y = index / VotingAreaSize[arrangeType].x;
+        return 
+            MeetingHud.Instance.VoteOrigin + VotingAreaOffset[arrangeType] + 
+            new Vector3(
+                MeetingHud.Instance.VoteButtonOffsets.x * VotingAreaScale[arrangeType] * VotingAreaMultiplier[arrangeType].x * (float)x, 
+                MeetingHud.Instance.VoteButtonOffsets.y * VotingAreaScale[arrangeType] * VotingAreaMultiplier[arrangeType].y * (float)y,
+                -0.9f - (float)y * 0.01f);
     }
 
-    public static void SortVotingArea(this MeetingHud __instance, Func<GamePlayer, int> rank)
+    public static void SortVotingArea(this MeetingHud __instance, Func<GamePlayer, int> rank, float speed = 1f)
     {
+        int length = __instance.playerStates.Length;
+        int type = GetVotingAreaType(length);
+        __instance.playerStates.Do(p => p.transform.localScale = new(VotingAreaScale[type], VotingAreaScale[type], 1f));
+        
         var ordered = __instance.playerStates.OrderBy(p => p.TargetPlayerId + 32 * rank.Invoke(NebulaGameManager.Instance!.GetPlayer(p.TargetPlayerId)!)).ToArray();
 
-        for(int i = 0; i < ordered.Length; i++)
-            __instance.StartCoroutine(ordered[i].transform.Smooth(ToVoteAreaPos(i), 1.6f).WrapToIl2Cpp());
+        for (int i = 0; i < ordered.Length; i++)
+            __instance.StartCoroutine(ordered[i].transform.Smooth(ToVoteAreaPos(i, type), 1.6f / speed).WrapToIl2Cpp());
     }
 
     public static readonly RemoteProcess RpcBreakEmergencyButton = new("BreakEmergencyButton",
@@ -124,7 +138,7 @@ public static class MeetingModRpc
         meetingHud.SkipVoteButton.gameObject.SetActive(false);
         meetingHud.SkippedVoting.gameObject.SetActive(MeetingHudExtension.CanSkip);
         AmongUsClient.Instance.DisconnectHandlers.Remove(meetingHud.TryCast<IDisconnectHandler>());
-        meetingHud.PopulateResults(states.ToArray());
+        meetingHud.PopulateResults(readonlyStates);
         meetingHud.SetupProceedButton();
 
         if (DestroyableSingleton<HudManager>.Instance.Chat.IsOpenOrOpening)
@@ -137,6 +151,15 @@ public static class MeetingModRpc
     }
 }
 
+[HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.ServerStart))]
+class MeetingHudServerStartPatch
+{
+    public static void Postfix(MeetingHud __instance)
+    {
+        MeetingHud.Instance.SortVotingArea(p => p.IsDead ? 2 : 1, 10f);
+    }
+
+}
 [HarmonyPatch(typeof(MeetingCalledAnimation), nameof(MeetingCalledAnimation.CoShow))]
 class MeetingCalledAnimationPatch
 {
@@ -626,7 +649,11 @@ static class CheckForEndVotingPatch
                     voteForMap[state.TargetPlayerId] = NebulaGameManager.Instance?.GetPlayer(state.VotedFor);
                 }
 
-                foreach (var target in GameOperatorManager.Instance?.Run(new MeetingTieVoteEvent(voteForMap))?.ExtraVotes ?? []) dictionary.AddValue(target?.PlayerId ?? 253, 1);
+                foreach (var target in GameOperatorManager.Instance?.Run(new MeetingTieVoteEvent(voteForMap))?.ExtraVotes ?? [])
+                {
+                    dictionary.AddValue(target?.PlayerId ?? 253, 1);
+                    extraVotes.Add(target?.PlayerId ?? 253);
+                }
 
                 //再計算する
                 max = dictionary.MaxPair(out tie);

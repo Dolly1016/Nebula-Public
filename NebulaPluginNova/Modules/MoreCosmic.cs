@@ -10,7 +10,6 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine.AddressableAssets;
-using Virial.Game;
 using Virial.Runtime;
 
 namespace Nebula.Modules;
@@ -32,7 +31,7 @@ public abstract class CustomCosmicItem : CustomItemGrouped
     public string? TranslationKey = null;
 
     [JsonSerializableField(true)]
-    public string[]? Tags = null;
+    public List<string>? Tags = null;
 
     public string UnescapedName => Regex.Unescape(Name).Replace('_', ' ');
     public string UnescapedAuthor => Regex.Unescape(Author).Replace('_', ' ');
@@ -100,28 +99,32 @@ public abstract class CustomCosmicItem : CustomItemGrouped
             }
         );
 
-        foreach (var image in AllImage())
+        yield return AllImage().Select(image =>
         {
-            var loader = GetLoader(image.Address);
-            yield return loader.loader.LoadAsync(loader.exHandler);
-
-            var exLoader = GetLoader(image.ExAddress);
-            yield return exLoader.loader?.LoadAsync(exLoader.exHandler);
-
-            try
+            IEnumerator CoLoad()
             {
-                if (!image.TryLoadImage(loader.loader?.Result!, exLoader.loader?.Result))
+                var loader = GetLoader(image.Address);
+                yield return loader.loader.LoadAsync(loader.exHandler);
+
+                var exLoader = GetLoader(image.ExAddress);
+                yield return exLoader.loader?.LoadAsync(exLoader.exHandler);
+
+                try
+                {
+                    if (!image.TryLoadImage(loader.loader?.Result!, exLoader.loader?.Result))
+                    {
+                        IsValid = false;
+                    }
+                }
+                catch
                 {
                     IsValid = false;
-                    break;
                 }
             }
-            catch 
-            {
-                IsValid = false;
-                break;
-            }
-        }
+
+            return CoLoad();
+        }).WaitAll();
+
         yield break;
     }
 
@@ -364,6 +367,8 @@ public class CosmicVisor : CustomCosmicItem
     public bool BehindHat = false;
     [JsonSerializableField(true)]
     public bool BackmostBack = false;
+    [JsonSerializableField(true)]
+    public bool Fixed = false;
     [JSFieldAmbiguous]
     public int FPS = 1;
 
@@ -424,7 +429,7 @@ public class CosmicVisor : CustomCosmicItem
     }
     public override string Category { get => "visors"; }
 
-    public override Sprite? PreviewSprite => Preview?.GetSprite(0) ?? Main?.GetSprite(0);
+    public override Sprite? PreviewSprite => Preview?.GetSprite(0) ?? Main?.GetSprite(0) ?? Back?.GetSprite(0);
     public override Sprite? PreviewAdditionalSprite => Preview?.GetExSprite(0);
     public override bool PreviewAdditionalInFront => Preview?.ExIsFront ?? false;
 }
@@ -672,6 +677,7 @@ public static class MoreCosmic
     public static Dictionary<string, CosmicVisor> AllVisors = new();
     public static Dictionary<string, CosmicNameplate> AllNameplates = new();
     public static Dictionary<string, CosmicPackage> AllPackages = new();
+    public static Dictionary<string, HashSet<string>> VanillaTags = new();
 
     internal static string DebugProductId = "NEBULA_DEBUG";
     public static void RegisterDebugHat(CosmicHat hat)
@@ -711,7 +717,7 @@ public static class MoreCosmic
     private static List<string> allRepos = new();
     private static async Task LoadOnline()
     {
-        var response = await NebulaPlugin.HttpClient.GetAsync(new System.Uri("https://raw.githubusercontent.com/Dolly1016/MoreCosmic/master/UserCosmics.dat"), HttpCompletionOption.ResponseContentRead);
+        var response = await NebulaPlugin.HttpClient.GetAsync(new System.Uri(Helpers.ConvertUrl("https://raw.githubusercontent.com/Dolly1016/MoreCosmic/master/UserCosmics.dat")), HttpCompletionOption.ResponseContentRead);
         if (response.StatusCode != HttpStatusCode.OK) return;
 
         string repos = await response.Content.ReadAsStringAsync();
@@ -755,7 +761,7 @@ public static class MoreCosmic
 
 
 
-    static private Queue<StackfullCoroutine> ActivateQueue = new Queue<StackfullCoroutine>();
+    static private Queue<IEnumerator> ActivateQueue = new();
     
     public static void Update()
     {
@@ -767,7 +773,7 @@ public static class MoreCosmic
         {
             if (loadedBundles.Count > 0)
             {
-                foreach (var bundle in loadedBundles) if(bundle != null) ActivateQueue.Enqueue(new(bundle!.Activate(true)));
+                foreach (var bundle in loadedBundles) if(bundle != null) ActivateQueue.Enqueue(bundle!.Activate(true).HighSpeedEnumerator());
                 loadedBundles.Clear();
             }
         }
@@ -775,7 +781,21 @@ public static class MoreCosmic
         if (ActivateQueue.Count > 0)
         {
             var current = ActivateQueue.Peek();
-            if (!(current?.MoveNext() ?? false)) ActivateQueue.Dequeue();
+            if (!(current?.MoveNext() ?? false))
+            {
+                ActivateQueue.Dequeue();
+
+                //ゲーム内ならば見た目を更新する
+                if (LobbyBehaviour.Instance)
+                {
+                    foreach(var p in PlayerControl.AllPlayerControls)
+                    {
+                        var outfit = p.CurrentOutfit;
+                        p.cosmetics.SetHat(outfit.HatId, p.PlayerId);
+                        p.cosmetics.SetVisor(outfit.VisorId, p.PlayerId);
+                    }
+                }
+            }
         }
     }
 
@@ -792,6 +812,28 @@ public static class MoreCosmic
         var detached = LoadAll();
 
         isLoaded = true;
+
+        VanillaTags = JsonStructure.Deserialize<Dictionary<string, HashSet<string>>>(StreamHelper.OpenFromResource("Nebula.Resources.VanillaTags.json")!) ?? [];
+    }
+
+    public static IEnumerable<string> GetTags(NetworkedPlayerInfo.PlayerOutfit outfit)
+    {
+        if(AllHats.TryGetValue(outfit.HatId, out var hat))
+        {
+            foreach (var tag in hat.Tags ?? []) yield return "hat." + tag;
+        }else if(VanillaTags.TryGetValue(outfit.HatId, out var vanillaTags))
+        {
+            foreach (var tag in vanillaTags ?? []) yield return "hat." + tag;
+        }
+
+        if (AllVisors.TryGetValue(outfit.VisorId, out var visor))
+        {
+            foreach (var tag in visor.Tags ?? []) yield return "visor." + tag;
+        }
+        else if (VanillaTags.TryGetValue(outfit.VisorId, out var vanillaTags))
+        {
+            foreach (var tag in vanillaTags ?? []) yield return "visor." + tag;
+        }
     }
 }
 
@@ -1169,7 +1211,7 @@ public enum PlayerAnimState
 public class NebulaNameplate : MonoBehaviour
 {
     public SpriteRenderer AdaptiveRenderer;
-
+    
     static NebulaNameplate()
     {
         ClassInjector.RegisterTypeInIl2Cpp<NebulaNameplate>();
@@ -1192,7 +1234,7 @@ public class NebulaNameplate : MonoBehaviour
             AdaptiveRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         }
         AdaptiveRenderer.sprite = null;
-
+        
         UpdateColor();
     }
 
@@ -1202,6 +1244,17 @@ public class NebulaNameplate : MonoBehaviour
         PlayerMaterial.SetColors(voteArea.TargetPlayerId, AdaptiveRenderer);
     }
 }
+
+public class NebulaCosmeticsLayerVisorLink : MonoBehaviour
+{
+    static NebulaCosmeticsLayerVisorLink()
+    {
+        ClassInjector.RegisterTypeInIl2Cpp<NebulaCosmeticsLayerVisorLink>();
+    }
+
+    public Reference<NebulaCosmeticsLayer> NebulaLayer;
+}
+
 public class NebulaCosmeticsLayer : MonoBehaviour
 {
     public CosmeticsLayer MyLayer = null!;
@@ -1249,7 +1302,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     }
     private bool useDefaultShader = true;//追加したRendererのマテリアルを変更する必要があるか否か調べるために使用
     private bool usePlayerShaderOnVisor = false;//追加したRendererのマテリアルを変更する必要があるか否か調べるために使用
-
+    public PlayerAnimState LastAnimState = PlayerAnimState.Idle;
     static NebulaCosmeticsLayer()
     {
         ClassInjector.RegisterTypeInIl2Cpp<NebulaCosmeticsLayer>();
@@ -1258,6 +1311,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     public void Awake()
     {
         MyLayer = gameObject.GetComponent<CosmeticsLayer>();
+
+        MyLayer.visor.gameObject.AddComponent<NebulaCosmeticsLayerVisorLink>().NebulaLayer = new() { Value = this };
 
         //PoolablePlayer相手には取得できない
         try
@@ -1309,22 +1364,22 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 VisorIndex = VisorBackIndex = 0;
             }
 
-            PlayerAnimState animState = PlayerAnimState.Idle;
+            LastAnimState = PlayerAnimState.Idle;
             bool flip = MyLayer.FlipX;
 
             if (MyAnimations)
             {
                 var current = MyAnimations!.Animator.m_currAnim;
                 if (current == MyAnimations!.group.ClimbUpAnim)
-                    animState = PlayerAnimState.ClimbUp;
+                    LastAnimState = PlayerAnimState.ClimbUp;
                 else if (current == MyAnimations!.group.ClimbDownAnim)
-                    animState = PlayerAnimState.ClimbDown;
+                    LastAnimState = PlayerAnimState.ClimbDown;
                 else if (current == MyAnimations!.group.RunAnim)
-                    animState = PlayerAnimState.Run;
+                    LastAnimState = PlayerAnimState.Run;
                 else if (current == MyAnimations!.group.EnterVentAnim)
-                    animState = PlayerAnimState.EnterVent;
+                    LastAnimState = PlayerAnimState.EnterVent;
                 else if (current == MyAnimations!.group.ExitVentAnim)
-                    animState = PlayerAnimState.ExitVent;
+                    LastAnimState = PlayerAnimState.ExitVent;
             }
 
             void SetImage(ref CosmicImage? current, CosmicImage? normal, CosmicImage? flipped)
@@ -1346,13 +1401,13 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 //表示する画像の選定
                 CosmicImage? frontImage = null;
                 CosmicImage? backImage = null;
-                if (animState is not PlayerAnimState.ClimbUp and not PlayerAnimState.ClimbDown)
+                if (LastAnimState is not PlayerAnimState.ClimbUp and not PlayerAnimState.ClimbDown)
                 {
                     SetImage(ref frontImage, CurrentModHat.Main, CurrentModHat.Flip);
                     SetImage(ref backImage, CurrentModHat.Back, CurrentModHat.BackFlip);
                 }
 
-                switch (animState)
+                switch (LastAnimState)
                 {
                     case PlayerAnimState.Run:
                         SetImage(ref frontImage, CurrentModHat.Move, CurrentModHat.MoveFlip);
@@ -1397,7 +1452,6 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
                 MyLayer.hat!.FrontLayer.transform.SetLocalZ(MyLayer.zIndexSpacing * (CurrentModHat.IsSkinny ? -1f : -3f));
 
-                AdditionalRenderers().Do(r => r.flipX = MyLayer.FlipX);
 
                 //追加レイヤー
                 var frontHasExImage = frontImage?.HasExImage ?? false;
@@ -1433,12 +1487,12 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 CosmicImage? image = null;
                 CosmicImage? backImage = null;
 
-                if (animState is not PlayerAnimState.ClimbUp and not PlayerAnimState.ClimbDown)
+                if (LastAnimState is not PlayerAnimState.ClimbUp and not PlayerAnimState.ClimbDown)
                 {
                     SetImage(ref image, CurrentModVisor.Main, CurrentModVisor.Flip);
                     SetImage(ref backImage, CurrentModVisor.Back, CurrentModVisor.BackFlip);
                 }
-                switch (animState)
+                switch (LastAnimState)
                 {
                     case PlayerAnimState.Run:
                         SetImage(ref image, CurrentModVisor.Move, CurrentModVisor.MoveFlip);
@@ -1518,8 +1572,31 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             }
 
             AdditionalRenderers().Do(r => r.enabled = MyLayer.visible);
+            AdditionalRenderers().Do(r => r.flipX = MyLayer.FlipX);
         }
         catch { }
+    }
+
+    public void FixVisor()
+    {
+        if (CurrentModVisor?.Fixed ?? false)
+        {
+            if (LastAnimState is PlayerAnimState.EnterVent or PlayerAnimState.ExitVent) return;
+            var z = MyLayer.visor.transform.localPosition.z;
+            MyLayer.visor.transform.localPosition = new(MyLayer.FlipX ? 0.04f : -0.04f, 0.575f, z);
+        }
+    }
+}
+
+[HarmonyPatch(typeof(SpriteAnimNodeSync), nameof(SpriteAnimNodeSync.LateUpdate))]
+public class SpriteAnimNodeSyncUpdatePatch
+{
+    public static void Postfix(SpriteAnimNodeSync __instance)
+    {
+        if(__instance.gameObject.TryGetComponent<NebulaCosmeticsLayerVisorLink>(out var layer))
+        {
+            layer.NebulaLayer.Value?.FixVisor();
+        }
     }
 }
 

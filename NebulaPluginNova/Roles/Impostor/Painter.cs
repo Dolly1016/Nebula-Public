@@ -40,7 +40,7 @@ public class Painter : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                acTokenChallenge = new("painter.challenge", new int[15], (val, _) => val.Count(v => v >= 2) >= 3);
+                acTokenChallenge = new("painter.challenge", new int[24], (val, _) => val.Count(v => v >= 2) >= 3);
 
                 Outfit? sample = null;
                 PoolablePlayer? sampleIcon = null;

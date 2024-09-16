@@ -60,7 +60,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
 
         public StandardAssignmentParameters(string id, bool isImpostor)
         {
-            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 5 : 15), 0, title: NebulaAPI.GUI.LocalizedTextComponent("options.role.count"));
+            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 6 : 24), 0, title: NebulaAPI.GUI.LocalizedTextComponent("options.role.count"));
 
             roleChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".chance", (10, 100, 10), 100);
             roleSecondaryChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".secondaryChance", (0, 100, 10), 0);
@@ -326,9 +326,9 @@ public class ByCategoryAllocatorOptions : IAssignToCategorizedRole
 
     public ByCategoryAllocatorOptions(string internalName, IConfigurationHolder holder, bool canAssignToCrewmate, bool canAssignToImpostor, bool canAssignToNeutral)
     {
-        if (canAssignToCrewmate) crewmates = new(15, "crewmate", internalName, holder);
-        if (canAssignToImpostor) impostors = new(5, "impostor", internalName, holder);
-        if (canAssignToNeutral) neutral = new(15, "neutral", internalName, holder);
+        if (canAssignToCrewmate) crewmates = new(24, "crewmate", internalName, holder);
+        if (canAssignToImpostor) impostors = new(6, "impostor", internalName, holder);
+        if (canAssignToNeutral) neutral = new(24, "neutral", internalName, holder);
 
         //2カテゴリ以上に割り当てられるなら、最大数を設定できる。
         if ((canAssignToCrewmate ? 1 : 0) + (canAssignToImpostor ? 1 : 0) + (canAssignToNeutral ? 1 : 0) >= 2)
@@ -402,7 +402,7 @@ public class DefinedAllocatableModifierTemplate : DefinedModifierTemplate, HasAs
         for (int i = 0; i < categories.Length; i++) if (num[i] > assignables[i]) num[i] = assignables[i];
         int randomMax = LessenRandomly(num, allocatorOptions.MaxCount);
 
-        if (randomMax > 0)
+        if (randomMax != 0)
         {
             int[] randomNum = categories.Select(c => allocatorOptions.GetOptions(c)?.CalcedRandomAssignment ?? 0).ToArray();
             for (int i = 0; i < categories.Length; i++) if (num[i] + randomNum[i] > assignables[i]) randomNum[i] = assignables[i] - num[i];

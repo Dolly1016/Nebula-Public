@@ -1,4 +1,7 @@
 ﻿using Nebula.Behaviour;
+using Rewired.ControllerExtensions;
+using Steamworks;
+using Virial.Runtime;
 
 namespace Nebula.Utilities;
 
@@ -72,12 +75,16 @@ public class VirtualInput
 
     public KeyCode TypicalKey => assignments[0].Invoke();
 
+    public static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+    }
+
 }
 
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class NebulaInput
 {
-    private static bool SomeUiIsActive => (ControllerManager.Instance && ControllerManager.Instance.CurrentUiState?.BackButton != null) || NebulaManager.Instance.HasSomeUI || TextField.AnyoneValid;
+    public static bool SomeUiIsActive => (ControllerManager.Instance && ControllerManager.Instance.CurrentUiState?.BackButton != null) || NebulaManager.Instance.HasSomeUI || TextField.AnyoneValid;
     private static bool SomeInputUiIsActive
     {
         get

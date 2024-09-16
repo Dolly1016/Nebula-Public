@@ -42,6 +42,7 @@ public static class EventDetail
     static public TranslatableTag Layoff = new("statistics.events.layoff");
     static public TranslatableTag DestroyKill = new("statistics.events.destroy");
     static public TranslatableTag Dance = new("statistics.events.dance");
+    static public TranslatableTag Gassed = new("statistics.events.gassed");
 
     static EventDetail()
     {
@@ -63,6 +64,7 @@ public static class EventDetail
         EventDetails.Embroil = Embroil;
         EventDetails.Trap = Trap;
         EventDetails.Accident = Accident;
+        EventDetails.Gassed = Gassed;
     }
 }
 

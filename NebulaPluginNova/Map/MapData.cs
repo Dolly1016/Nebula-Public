@@ -1,4 +1,134 @@
-﻿namespace Nebula.Map;
+﻿using Nebula.Roles.Impostor;
+using Virial;
+using Virial.DI;
+using Virial.Game;
+using static UnityEngine.RemoteConfigSettingsHelper;
+
+namespace Nebula.Map;
+
+/// <summary>
+/// マップ上に出現するオブジェクトのスポーン位置
+/// </summary>
+public class MapObjectPoint
+{
+    Virial.Compat.Vector2 point;
+    MapObjectType type;
+
+    public MapObjectPoint(float x, float y, MapObjectType type)
+    {
+        point = new(x,y);
+        this.type = type;
+    }
+
+    public Virial.Compat.Vector2 Point => point;
+    public MapObjectType Type => type;
+    public int Id = -1;
+}
+
+[NebulaRPCHolder]
+internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSpawner
+{
+    static MapObjectSpawner() => DIManager.Instance.RegisterModule(() => new MapObjectSpawner());
+
+    List<MapObjectPoint>? unusedPoints;
+    Dictionary<string, List<Virial.Compat.Vector2>> usedPoints = new();
+
+    bool TryGetPoint(string tag, string? objectTag, float distance, MapObjectType type, out Virial.Compat.Vector2 point, out NebulaSyncObjectReference? reference)
+    {
+        reference = null;
+
+        if ((unusedPoints?.Count ?? 0) == 0)
+        {
+            point = new();
+            return false;
+        }
+
+        if (!usedPoints.TryGetValue(tag, out var used))
+        {
+            used = new();
+            usedPoints[tag] = used;
+        }
+
+        var squaredDistance = distance * distance;
+        var cand = unusedPoints!.Where(p => (p.Type & type) != 0 && used.All(u =>  p.Point.SquaredDistance(u) > squaredDistance)).ToArray();
+        if (cand.Length == 0)
+        {
+            point = new();
+            return false;
+        }
+
+        int random = System.Random.Shared.Next(cand.Length);
+
+        var selected = cand[random];
+
+        unusedPoints?.Remove(selected);
+        used.Add(selected.Point);
+
+        using (RPCRouter.CreateSection("MapObject"))
+        {
+            RpcSpawn.Invoke((selected.Id, tag));
+            if (objectTag != null) reference = NebulaSyncObject.RpcInstantiate(objectTag!, [selected.Point.x, selected.Point.y]);
+        }
+
+        point = selected.Point;
+        
+        return true;
+    }
+
+    void TryInitialize()
+    {
+        if (!ShipStatus.Instance) return;
+
+        if (unusedPoints == null)
+        {
+            unusedPoints = new(MapData.GetCurrentMapData().MapObjectPoints);
+            for (int i = 0; i < unusedPoints.Count; i++) unusedPoints[i].Id = i;
+        }
+    }
+
+    Virial.Compat.Vector2[] IMapObjectSpawner.Spawn(int num, float distance, string reason, string? objectConstructor, MapObjectType type)
+    {
+        IEnumerable<Virial.Compat.Vector2> subroutineSpawn()
+        {
+            if (!ShipStatus.Instance) yield break;
+
+            TryInitialize();
+
+            for (int i = 0; i < num; i++)
+            {
+                if (TryGetPoint(reason, objectConstructor, distance, type, out var point, out var reference)) yield return point;
+                else yield break;
+            }
+        }
+
+        var result = subroutineSpawn().ToArray();
+        return result;
+    }
+
+    void IMapObjectSpawner.Spawn(int id, string reason)
+    {
+        TryInitialize();
+
+        var selected = unusedPoints?.FirstOrDefault(p => p.Id == id);
+        if (selected != null)
+        {
+            unusedPoints?.Remove(selected);
+
+            if (!usedPoints.TryGetValue(reason, out var used))
+            {
+                used = new();
+                usedPoints[reason] = used;
+            }
+
+            used.Add(selected.Point);
+        }
+    }
+
+    static RemoteProcess<(int id, string reason)> RpcSpawn = new("SpawnMapObject", (message, calledByMe) =>
+    {
+        if(!calledByMe) NebulaAPI.CurrentGame?.GetModule<IMapObjectSpawner>()?.Spawn(message.id, message.reason);
+    });
+}
 
 public abstract class MapData
 {
@@ -6,6 +136,7 @@ public abstract class MapData
     abstract protected Vector2[] NonMapArea { get; }
     virtual public Vector2[][] RaiderIgnoreArea { get => []; }
     abstract protected SystemTypes[] SabotageTypes { get; }
+    abstract public MapObjectPoint[] MapObjectPoints { get; }
 
     public SystemTypes[] GetSabotageSystemTypes() => SabotageTypes;
     public bool CheckMapArea(Vector2 position, float radious = 0.1f)

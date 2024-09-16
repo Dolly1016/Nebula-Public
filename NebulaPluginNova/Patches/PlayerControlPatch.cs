@@ -21,6 +21,9 @@ public static class PlayerStartPatch
                 if (PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
             }))
             );
+
+        //人数が多いと近くのコンソールも追跡できなくなるので、上限を緩和
+        __instance.hitBuffer = new Collider2D[120];
     }
 }
 
@@ -29,7 +32,7 @@ public static class PlayerGetColorPatch
 {
     static bool Prefix(PlayerCustomizationData __instance)
     {
-        __instance.colorID = 15;
+        __instance.colorID = NebulaPlayerTab.PreviewColorId;
         return false;
     }
 }
@@ -49,7 +52,7 @@ public static class PlayerSetColorPatch
 {
     static void Postfix(PlayerData __instance)
     {
-        __instance.customization.colorID = 15;
+        __instance.customization.colorID = NebulaPlayerTab.PreviewColorId;
     }
 }
 
@@ -203,11 +206,11 @@ class CurrentOutfitPatch
 [HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.Initialize))]
 class OverlayKillAnimationPatch
 {
-    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] NetworkedPlayerInfo kInfo, [HarmonyArgument(1)] NetworkedPlayerInfo vInfo)
+    public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] KillOverlayInitData initData)
     {
         if (__instance.killerParts)
         {
-            NetworkedPlayerInfo.PlayerOutfit? currentOutfit = NebulaGameManager.Instance?.GetPlayer(kInfo.PlayerId)?.Unbox().CurrentOutfit;
+            NetworkedPlayerInfo.PlayerOutfit? currentOutfit = initData.killerOutfit;
             if (currentOutfit != null)
             {
                 __instance.killerParts.SetBodyType(PlayerBodyTypes.Normal);
@@ -217,9 +220,9 @@ class OverlayKillAnimationPatch
                 __instance.LoadKillerPet(currentOutfit);
             }
         }
-        if (vInfo != null && __instance.victimParts)
+        if (__instance.victimParts)
         {
-            NetworkedPlayerInfo.PlayerOutfit? defaultOutfit = NebulaGameManager.Instance?.GetPlayer(vInfo.PlayerId)?.Unbox().DefaultOutfit;
+            NetworkedPlayerInfo.PlayerOutfit? defaultOutfit = initData.victimOutfit;
             if (defaultOutfit != null)
             {
                 __instance.victimHat = defaultOutfit.HatId;
@@ -308,7 +311,7 @@ class PlayerCanMovePatch
     {
         if (__instance != PlayerControl.LocalPlayer) return;
 
-        __result &= !TextField.AnyoneValid && HudManager.Instance.PlayerCam.Target == PlayerControl.LocalPlayer;
+        __result &= !TextField.AnyoneValid && HudManager.Instance.PlayerCam.Target == PlayerControl.LocalPlayer && !ModSingleton<Marketplace>.Instance;
     }
 }
 
@@ -378,11 +381,16 @@ class PlayerPhysicsFixedUpdatePatch
 [HarmonyPatch(typeof(KillOverlay), nameof(KillOverlay.ShowKillAnimation), typeof(NetworkedPlayerInfo), typeof(NetworkedPlayerInfo))]
 public static class KillOverlayPatch
 {
+    public static bool NextIsSelfKill = false;
     public static bool Prefix(KillOverlay __instance, NetworkedPlayerInfo killer, NetworkedPlayerInfo victim)
     {
+        NextIsSelfKill = false;
+
         if (killer == null ||  killer.PlayerId == victim.PlayerId)
         {
+            NextIsSelfKill = true;
             __instance.ShowKillAnimation(__instance.KillAnims[3], killer, victim);
+            NextIsSelfKill = false;
             return false;
         }
         return true;
@@ -392,9 +400,9 @@ public static class KillOverlayPatch
 [HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.Initialize))]
 public static class OverlayKillAnimationInitializePatch
 {
-    public static void Postfix(OverlayKillAnimation __instance, NetworkedPlayerInfo kInfo, NetworkedPlayerInfo vInfo)
+    public static void Postfix(OverlayKillAnimation __instance)
     {
-        if (kInfo.PlayerId == vInfo.PlayerId)
+        if (KillOverlayPatch.NextIsSelfKill)
         {
             __instance.transform.GetChild(0).gameObject.SetActive(false);
             __instance.transform.GetChild(2).gameObject.SetActive(false);

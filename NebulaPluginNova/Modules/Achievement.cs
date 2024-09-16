@@ -82,6 +82,7 @@ public class AchievementType
     static public AchievementType Challenge = new("challenge");
     static public AchievementType Secret = new("secret");
     static public AchievementType Seasonal = new("seasonal");
+    static public AchievementType Costume = new("costume");
 
     private AchievementType(string key)
     {
@@ -500,6 +501,7 @@ static public class NebulaAchievementManager
             bool noHint = false;
             bool secret = false;
             bool seasonal = false;
+            bool costume = false;
             bool isNotChallenge = false;
             bool isRecord = false;
             IEnumerable<ProgressRecord>? records = recordsList;
@@ -523,6 +525,9 @@ static public class NebulaAchievementManager
                         break;
                     case "seasonal":
                         seasonal = true;
+                        break;
+                    case "costume":
+                        costume = true;
                         break;
                     case "nonChallenge":
                         isNotChallenge = true;
@@ -565,6 +570,7 @@ static public class NebulaAchievementManager
 
             if (type == null && secret) type = AchievementType.Secret;
             else if (seasonal) type = AchievementType.Seasonal;
+            else if (costume) type = AchievementType.Costume;
 
             if (isRecord)
                 new DisplayProgressRecord(args[0], goal, "record." + args[0]);

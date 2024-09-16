@@ -78,31 +78,52 @@ public class Roles
     static private List<DefinedModifier>? allModifiers = new();
     static private List<Team>? allTeams = new();
 
-    static public void Register(DefinedRole role) {
-        if(allRoles == null)
+    static public void CheckNeedingHandshake(object assignable)
+    {
+        var assembly = assignable.GetType().Assembly;
+        var addon = AddonScriptManager.ScriptAssemblies.FirstOrDefault(addon => assembly == addon.Assembly);
+        if (addon != null)
+        {
+            addon.Addon.MarkAsNeedingHandshake();
+        }
+    }
+
+    static public void Register(DefinedRole role)
+    {
+        if (allRoles == null)
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register role \"{role.LocalizedName}\".\nRole registration is only possible at load phase.");
         else
             allRoles?.Add(role);
+
+        CheckNeedingHandshake(role);
     }
+
     static public void Register(DefinedGhostRole role)
     {
         if (allRoles == null)
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register role \"{role.LocalizedName}\".\nRole registration is only possible at load phase.");
         else
             allGhostRoles?.Add(role);
+
+        CheckNeedingHandshake(role);
     }
+
     static public void Register(DefinedModifier role)
     {
         if(allModifiers == null)
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register modifier \"{role.LocalizedName}\".\nModifier registration is only possible at load phase.");
         else
             allModifiers?.Add(role);
+
+        CheckNeedingHandshake(role);
     }
     static public void Register(Team team) {
         if(allTeams == null)
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Role, $"Failed to register team \"{team.TranslationKey}\".\nTeam registration is only possible at load phase.");
         else
             allTeams.Add(team);
+
+        CheckNeedingHandshake(team);
     }
 
     static public IEnumerator Preprocess(NebulaPreprocessor preprocessor)

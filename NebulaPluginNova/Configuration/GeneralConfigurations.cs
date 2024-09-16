@@ -41,16 +41,16 @@ public static class GeneralConfigurations
     static public GameModeDefinition CurrentGameMode => GameModes.GetGameMode(GameModeOption.GetValue());
     static public IntegerConfiguration GameModeOption = NebulaAPI.Configurations.Configuration("options.gamemode", Helpers.Sequential(GameModes.AllGameModes.Count()), 0);
 
-    static internal IntegerConfiguration AssignmentCrewmateOption = new RoleCountConfiguration("options.assignment.crewmate", 16, -1);
-    static internal IntegerConfiguration AssignmentImpostorOption = new RoleCountConfiguration("options.assignment.impostor", 4, -1);
-    static internal IntegerConfiguration AssignmentNeutralOption = NebulaAPI.Configurations.Configuration("options.assignment.neutral", (0,15), 0);
+    static internal IntegerConfiguration AssignmentCrewmateOption = new RoleCountConfiguration("options.assignment.crewmate", 24 + 1, -1);
+    static internal IntegerConfiguration AssignmentImpostorOption = new RoleCountConfiguration("options.assignment.impostor", 6 + 1, -1);
+    static internal IntegerConfiguration AssignmentNeutralOption = NebulaAPI.Configurations.Configuration("options.assignment.neutral", (0,24), 0);
     static internal BoolConfiguration AssignOpToHostOption = new BoolConfigurationImpl("options.assignment.assignOpToHost", false);
     static internal ValueConfiguration<int> GhostAssignmentOption = NebulaAPI.Configurations.Configuration("options.assignment.ghostAssignmentMethod", ["options.assignment.ghostAssignmentMethod.normal", "options.assignment.ghostAssignmentMethod.thrilling"], 0);
     static internal IConfigurationHolder AssignmentOptions = NebulaAPI.Configurations.Holder("options.assignment", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
         AssignmentCrewmateOption, AssignmentImpostorOption, AssignmentNeutralOption, AssignOpToHostOption
         ]);
 
-    static internal IntegerConfiguration NumOfDummiesOption = NebulaAPI.Configurations.Configuration("options.soloFreePlay.numOfDummies",(0, 14), 0);
+    static internal IntegerConfiguration NumOfDummiesOption = NebulaAPI.Configurations.Configuration("options.soloFreePlay.numOfDummies",(0, 23), 0);
     static internal IConfigurationHolder SoloFreePlayOptions = NebulaAPI.Configurations.Holder("options.soloFreePlay", [ConfigurationTab.Settings], [GameModes.FreePlay]).AppendConfigurations([
         NumOfDummiesOption
         ]);
@@ -151,7 +151,7 @@ public static class GeneralConfigurations
     static public FloatConfiguration DeathPenaltyOption = NebulaAPI.Configurations.Configuration("options.meeting.deathPenalty", (0f, 20f, 0.5f), 0f, FloatConfigurationDecorator.Second);
     static public BoolConfiguration NoticeExtraVictimsOption = NebulaAPI.Configurations.Configuration("options.meeting.noticeExtraVictims", false);
     static public IntegerConfiguration NumOfMeetingsOption = NebulaAPI.Configurations.Configuration("options.meeting.numOfMeeting", (0, 15), 10);
-    static public BoolConfiguration EmergencyCooldownAtGameStart = NebulaAPI.Configurations.Configuration("options.meeting.emergencyCooldownAtGameStart", true);
+    static public BoolConfiguration EmergencyCooldownAtGameStart = NebulaAPI.Configurations.Configuration("options.meeting.emergencyCooldownAtGameStart", false);
     static public BoolConfiguration ShowRoleOfExiled = NebulaAPI.Configurations.Configuration("options.meeting.showRoleOfExiled", false, () => GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor);
     static public FloatConfiguration EarlyExtraEmergencyCoolDownOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarly", (0f, 20f, 2.5f), 0f, FloatConfigurationDecorator.Second);
     static public IntegerConfiguration EarlyExtraEmergencyCoolDownCondOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarlyCondition", (1, 10), 2, () => EarlyExtraEmergencyCoolDownOption > 0f);
@@ -460,3 +460,37 @@ public static class GeneralConfigurations
         private int ToSharableValueFromLocal(int index) => localExclusibeRolesCache.Aggregate(0, (val, a) => { if ((int)(a.Id / UnitSize) == index) return val | (1 << (a.Id % UnitSize)); else return val; });
     }
 }
+
+/*
+[HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.Serialize))]
+public static class GameOptionsSerializePatch
+{
+    static private int NumImpostors = GameOptionsManager.Instance.CurrentGameOptions.NumImpostors;
+    public static bool Prefix(GameOptionsData __instance)
+    {
+        try
+        {
+            NumImpostors = GameOptionsManager.Instance.CurrentGameOptions.NumImpostors;
+            if (NumImpostors == 0)
+            {
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.NumImpostors, 1);
+            }
+            else if (NumImpostors > 3)
+            {
+                GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.NumImpostors, 3);
+            }
+        }
+        catch { }
+        return true;
+    }
+
+    public static void Postfix(GameOptionsData __instance)
+    {
+        try
+        {
+            GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.NumImpostors, NumImpostors);
+        }
+        catch { }
+    }
+}
+*/

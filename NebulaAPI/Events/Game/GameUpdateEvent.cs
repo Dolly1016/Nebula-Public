@@ -18,3 +18,13 @@ public class GameHudUpdateEvent : AbstractGameEvent
 {
     internal GameHudUpdateEvent(Virial.Game.Game game) : base(game) { }
 }
+
+public class GameHudUpdateFasterEvent : AbstractGameEvent
+{
+    internal GameHudUpdateFasterEvent(Virial.Game.Game game) : base(game) { }
+}
+
+public class GameHudUpdateLaterEvent : AbstractGameEvent
+{
+    internal GameHudUpdateLaterEvent(Virial.Game.Game game) : base(game) { }
+}

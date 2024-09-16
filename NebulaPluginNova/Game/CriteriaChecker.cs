@@ -175,12 +175,11 @@ public class NebulaEndCriteria
         void OnUpdate(GameUpdateEvent ev)
         {
             int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count((p) => !p.IsDead);
-            if (totalAlive != 3) return;
+            if (totalAlive > 3) return;
 
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
             {
                 if (p.IsDead) continue;
-                totalAlive++;
                 if (p.Unbox().TryGetModifier<Lover.Instance>(out var lover)){
                     if (lover.MyLover?.IsDead ?? true) continue;
 

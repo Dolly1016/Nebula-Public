@@ -14,18 +14,30 @@ namespace Nebula.Behaviour;
 
 internal static class MainMenuManagerInstance { 
     internal static MainMenuManager? MainMenu;
-
-    internal static MetaScreen SetUpScreen(Transform transform, Action closeScreen)
+    internal static GameObject? CustomizationMenu;
+    
+    internal static void SetPrefab(MainMenuManager mainMenu)
     {
-        if (MainMenuManagerInstance.MainMenu != null)
+        MainMenu = mainMenu;
+        CustomizationMenu = mainMenu.playerCustomizationPrefab.gameObject;
+    }
+    internal static void SetPrefab(GameObject customizationMenu)
+    {
+        MainMenu = null;
+        CustomizationMenu = customizationMenu;
+    }
+
+    internal static MetaScreen SetUpScreen(Transform transform, Action closeScreen, bool withoutBackground = false)
+    {
+        if (MainMenuManagerInstance.CustomizationMenu != null && !withoutBackground)
         {
-            var backBlackPrefab = MainMenuManagerInstance.MainMenu.playerCustomizationPrefab.transform.GetChild(1);
+            var backBlackPrefab = MainMenuManagerInstance.CustomizationMenu.transform.GetChild(1);
             GameObject.Instantiate(backBlackPrefab.gameObject, transform);
-            var backGroundPrefab = MainMenuManagerInstance.MainMenu.playerCustomizationPrefab.transform.GetChild(2);
+            var backGroundPrefab = MainMenuManagerInstance.CustomizationMenu.transform.GetChild(2);
             var backGround = GameObject.Instantiate(backGroundPrefab.gameObject, transform);
             GameObject.Destroy(backGround.transform.GetChild(2).gameObject);
 
-            var closeButtonPrefab = MainMenuManagerInstance.MainMenu.playerCustomizationPrefab.transform.GetChild(0).GetChild(0);
+            var closeButtonPrefab = MainMenuManagerInstance.CustomizationMenu.transform.GetChild(0).GetChild(0);
             var closeButton = GameObject.Instantiate(closeButtonPrefab.gameObject, transform);
             GameObject.Destroy(closeButton.GetComponent<AspectPosition>());
             var button = closeButton.GetComponent<PassiveButton>();
@@ -100,7 +112,7 @@ public class DevStudio : MonoBehaviour
 
     static public void Open(MainMenuManager mainMenu)
     {
-        MainMenuManagerInstance.MainMenu = mainMenu;
+        MainMenuManagerInstance.SetPrefab(mainMenu);
 
         var obj = UnityHelper.CreateObject<DevStudio>("DevStudioMenu", Camera.main.transform, new Vector3(0, 0, -30f));
         TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, obj.OnShown);
@@ -403,7 +415,7 @@ public class DevStudio : MonoBehaviour
                 }, color : Virial.Color.Red)
             );
 
-            window.SetWidget(holder, new(0.5f,1f), out _);
+            window.SetWidget(holder, new Vector2(0.5f,1f), out _);
 
         }
         
@@ -767,7 +779,7 @@ public class DevStudio : MonoBehaviour
                     Virial.Compat.Artifact<GUIScreen>? inner = null;
                     var scrollView = new GUIScrollView(Virial.Media.GUIAlignment.Left, new(7f, 4.5f), () => doc.Build(inner, nameSpace: addon) ?? GUIEmptyWidget.Default);
                     inner = scrollView.Artifact;
-                    screen.SetWidget(scrollView, new(0f, 1f), out _);
+                    screen.SetWidget(scrollView, new Vector2(0f, 1f), out _);
                 }, TextAttributeOld.BoldAttr)
                 { TranslationKey = "devStudio.ui.common.preview" }
             )
@@ -1399,7 +1411,7 @@ public class DevStudio : MonoBehaviour
                     GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.cosmetics.action.edit", _ => editAction.Invoke()),
                     outputAction != null ? GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.cosmetics.action.output", _ => outputAction!.Invoke(confirmWindow)) : null,
                     GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.cosmetics.action.delete", _ => deleteAction.Invoke(confirmWindow))
-                    ), new(0.5f, 0.5f), out var _);
+                    ), new Vector2(0.5f, 0.5f), out var _);
             };
         }
 

@@ -23,14 +23,14 @@ internal class PlayerIconInfo
         Icon.ToggleName(false);
     }
 
-    public void SetText(string? text)
+    public void SetText(string? text, float size = 4f)
     {
         if (text == null)
             Icon.ToggleName(false);
         else
         {
             Icon.ToggleName(true);
-            Icon.SetName("", Vector3.one * 4f, Color.white, -1f);
+            Icon.SetName("", Vector3.one * size, Color.white, -1f);
             Icon.cosmetics.nameText.text = text;
         }
     }

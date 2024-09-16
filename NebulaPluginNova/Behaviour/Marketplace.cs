@@ -2,10 +2,12 @@
 using LibCpp2IL.Wasm;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.MetaWidget;
+using Nebula.Utilities;
 using Sentry.Unity.NativeUtils;
 using System.Text;
 using TMPro;
 using Virial.Media;
+using Virial.Runtime;
 using Virial.Text;
 
 namespace Nebula.Behaviour;
@@ -53,8 +55,8 @@ public class LocalMarketplaceItem
     [JsonSerializableField]
     public bool AutoUpdate = false;
 
-    public string ToCostumeUrl => "https://raw.githubusercontent.com/" + Url;
-    public string ToAddonUrl => "https://api.github.com/repos/" + Url + "/releases/latest";
+    public string ToCostumeUrl => Helpers.ConvertUrl("https://raw.githubusercontent.com/" + Url);
+    public string ToAddonUrl => Helpers.ConvertUrl("https://api.github.com/repos/" + Url + "/releases/latest");
 }
 
 public class DevMarketplaceItem : LocalMarketplaceItem
@@ -89,9 +91,47 @@ internal class MarketplaceData
     static internal void Save() => DataSaver.Save();
 }
 
+[NebulaPreprocess(PreprocessPhase.BuildNoSModuleContainer)]
+public class MarketplaceCache
+{
+    static internal OnlineMarketplace.SearchContentResult[] AddonResult = [];
+    static internal OnlineMarketplace.SearchContentResult[] CosmeticsResult = [];
+    static private bool IsDone = false;
+    static private float BeginTime = 0f;
+    public static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        BeginTime = Time.time;
+        NebulaManager.Instance.StartCoroutine(ManagedEffects.Sequence(
+            OnlineMarketplace.CoGetRecommendedContents(true, 0, result => ManagedEffects.Action(() => AddonResult = result ?? [])),
+            OnlineMarketplace.CoGetRecommendedContents(false, 0, result => ManagedEffects.Action(() => CosmeticsResult = result ?? [])),
+            ManagedEffects.Action(() => IsDone = true)
+            ).WrapToIl2Cpp());
+    }
+
+    [NebulaPreprocess(PreprocessPhase.PostFixStructure)]
+    public class MarketplaceCacheWaiter
+    {
+        //マーケットプレイスとの通信終了を待つ
+        public static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
+        {
+            if (IsDone) yield break;
+
+            yield return preprocessor.SetLoadingText("Gain Pick-Up Marketplace Items");
+
+            while (true)
+            {
+                //最大で10秒まつ
+                if (Time.time - 10f > BeginTime || IsDone) break;
+                yield return null;
+            }
+        }
+    }
+}
+
 public class Marketplace : MonoBehaviour
 {
     static Marketplace() => ClassInjector.RegisterTypeInIl2Cpp<Marketplace>();
+    static bool IsInLobby = false;
 
     private MetaScreen MarketplaceScreen = null!;
     private MetaScreen MyItemsScreen = null!;
@@ -100,17 +140,28 @@ public class Marketplace : MonoBehaviour
     private Func<bool>? currentConfirm = null;
     private const float ScreenWidth = 9f;
 
-    protected void Close()
+    public void Close()
     {
         TransitionFade.Instance.DoTransitionFade(gameObject, null!, () => MainMenuManagerInstance.MainMenu?.mainMenuUI.SetActive(true), () => GameObject.Destroy(gameObject));
     }
 
     static public void Open(MainMenuManager mainMenu)
     {
-        MainMenuManagerInstance.MainMenu = mainMenu;
+        IsInLobby = false;
+        MainMenuManagerInstance.SetPrefab(mainMenu);
 
         var obj = UnityHelper.CreateObject<Marketplace>("MarketplaceMenu", Camera.main.transform, new Vector3(0, 0, -30f));
+        ModSingleton<Marketplace>.Instance = obj;
         TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, () => { obj.SetUp(); obj.ShowMarketplaceScreen(); });
+    }
+
+    static public void OpenInLobby()
+    {
+        IsInLobby = true;
+        var obj = UnityHelper.CreateObject<Marketplace>("MarketplaceMenu", Camera.main.transform, new Vector3(0, 0, -30f));
+
+        ModSingleton<Marketplace>.Instance = obj;
+        TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { }, () => { obj.SetUp(); obj.ShowMarketplaceScreen(); });
     }
 
     void SetUp()
@@ -138,7 +189,7 @@ public class Marketplace : MonoBehaviour
     private MetaScreen OpenDetailWindow(bool isAddon, int entryId)
     {
         var window = MetaScreen.GenerateWindow(new(7f, 3.6f), transform, Vector3.zero, true, true);
-        window.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.3f }, new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayTitle), new TranslateTextComponent("marketplace.ui.loading"))), new(0.5f,0.5f), out _);
+        window.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.3f }, new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayTitle), new TranslateTextComponent("marketplace.ui.loading"))), new Vector2(0.5f,0.5f), out _);
 
         void ShowDetail(OnlineMarketplace.GetContentResult? result)
         {
@@ -157,8 +208,12 @@ public class Marketplace : MonoBehaviour
                     GUI.API.Button(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplacePublishButton), GUI.API.TextComponent(color, owning ? "marketplace.ui.marketplace.deactivate" : "marketplace.ui.marketplace.activate"), clickable =>
                     {
                         if (owning)
+                        {
                             owningItems.RemoveAll(item => item.EntryId == entryId);
-                        else {
+                            MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent("marketplace.ui.marketplace.inactivated"));
+                        }
+                        else
+                        {
                             LocalMarketplaceItem item = new LocalMarketplaceItem() { EntryId = entryId, Title = Uri.UnescapeDataString(result.title), Url = Uri.UnescapeDataString(result.url) };
                             owningItems.Add(item);
                             if (!isAddon)
@@ -191,6 +246,9 @@ public class Marketplace : MonoBehaviour
         TextMeshPro buttonText = null!;
 
         bool searching = false;
+        
+        //一度でも検索したらtrue
+        bool searchedAlready = false;
 
         bool lastIsAddon = false;
         string lastQuery = "";
@@ -219,6 +277,7 @@ public class Marketplace : MonoBehaviour
                         var button = renderer.gameObject.SetUpButton(true, renderer, Color.clear, UnityEngine.Color.Lerp(UnityEngine.Color.cyan, UnityEngine.Color.green, 0.4f).AlphaMultiplied(0.3f));
                         var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
                         collider.size = renderer.size;
+                        collider.isTrigger = true;
                         button.OnClick.AddListener(() =>
                         {
                             if (int.TryParse(r.entryId, out var id))
@@ -243,6 +302,11 @@ public class Marketplace : MonoBehaviour
                     {
                         isAddon = !isAddon;
                         buttonText.text = (isAddon ? TextAddons : TextCosmetics).GetString();
+                        if (!searchedAlready)
+                        {
+                            lastContents.Clear();
+                            StartCoroutine(CoSetToViewer(isAddon ? MarketplaceCache.AddonResult : MarketplaceCache.CosmeticsResult).WrapToIl2Cpp());
+                        }
                     }
                 },
                 textField,
@@ -256,13 +320,14 @@ public class Marketplace : MonoBehaviour
                         var text = textField.Artifact.FirstOrDefault()?.Text ?? "";
                         
                         
-                            lastContents.Clear();
+                        lastContents.Clear();
 
-                            lastIsAddon = isAddon;
-                            lastQuery = text!.Trim();
-                            lastPage = 0;
-                            searching = true;
+                        lastIsAddon = isAddon;
+                        lastQuery = text!.Trim();
+                        lastPage = 0;
+                        searching = true;
 
+                        searchedAlready = true;
                         if (text.Length == 0)
                         {
                             StartCoroutine(OnlineMarketplace.CoGetRecommendedContents(isAddon, 0, result => CoSetToViewer(result)).WrapToIl2Cpp());
@@ -279,7 +344,8 @@ public class Marketplace : MonoBehaviour
             );
 
         MarketplaceScreen.SetBorder(new(9f, 5f));
-        MarketplaceScreen.SetWidget(widget, new(0f, 1f), out _);
+        MarketplaceScreen.SetWidget(widget, new Vector2(0f, 1f), out _);
+        StartCoroutine(CoSetToViewer(isAddon ? MarketplaceCache.AddonResult : MarketplaceCache.CosmeticsResult).WrapToIl2Cpp());
     }
 
     (Func<bool, IEnumerable<LocalMarketplaceItem>> items, Action<LocalMarketplaceItem> action) currentItemsAction;
@@ -341,7 +407,7 @@ public class Marketplace : MonoBehaviour
             );
 
         MyItemsScreen.SetBorder(new(9f, 5f));
-        MyItemsScreen.SetWidget(widget, new(0f, 1f), out _);
+        MyItemsScreen.SetWidget(widget, new Vector2(0f, 1f), out _);
     }
 
     public void Awake()
@@ -352,17 +418,21 @@ public class Marketplace : MonoBehaviour
             ("contents", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.DevAddons : MarketplaceData.Data?.DevCostumes) ?? [], item => EditContent(isAddonOnItemsScreen, (item as DevMarketplaceItem)!))); }),
             ("publish", () => { ShowPublishWindow(); })
             ];
+        
+        //ロビー内では公開・管理機能はナシ。
+        if(IsInLobby) buttons = buttons.Take(2).ToArray();
+
         var tabScreen = MetaScreen.GenerateScreen(new(8f, 1f), transform, new(2.2f, 1.9f, -10f), false, false, false);
-        tabScreen.SetWidget(new GUIFixedView(GUIAlignment.Center, new(8f,1f), new HorizontalWidgetsHolder(GUIAlignment.Center, buttons.Select(b => new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new TranslateTextComponent("marketplace.tab." + b.key)) { OnClick = _ => b.action.Invoke() }))),new(0f,0.5f),out _);
+        tabScreen.SetWidget(new GUIFixedView(GUIAlignment.Center, new Vector2(8f,1f), new HorizontalWidgetsHolder(GUIAlignment.Center, buttons.Select(b => new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new TranslateTextComponent("marketplace.tab." + b.key)) { OnClick = _ => b.action.Invoke() }))), new Vector2(0f,0.5f),out _);
         
         MarketplaceScreen = MainMenuManagerInstance.SetUpScreen(transform, () => Close());
-        MyItemsScreen = MainMenuManagerInstance.SetUpScreen(transform, () => Close());
+        MyItemsScreen = MainMenuManagerInstance.SetUpScreen(transform, () => Close(), true);
     }
 
     void EditContent(bool isAddon, DevMarketplaceItem item)
     {
         var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
-        waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.fetch")), new(0.5f, 0.5f), out _);
+        waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.fetch")), new Vector2(0.5f, 0.5f), out _);
 
         StartCoroutine(OnlineMarketplace.CoGetContent(item.EntryId, result =>
         {
@@ -374,7 +444,7 @@ public class Marketplace : MonoBehaviour
                 else
                     ShowEditWindow(isAddon, edited => {
                         var waitUpdateWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
-                        waitUpdateWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.wait")), new(0.5f, 0.5f), out _);
+                        waitUpdateWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.wait")), new Vector2(0.5f, 0.5f), out _);
 
                         StartCoroutine(OnlineMarketplace.CoEditContent(edited.EntryId, edited.Key, edited.Title, edited.Blurb, edited.Detail, edited.Author, edited.Url, success => {
                             waitUpdateWindow.CloseScreen();
@@ -480,7 +550,7 @@ public class Marketplace : MonoBehaviour
                 ShowEditWindow(isAddon, item =>
                 {
                     var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
-                    waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.publish.wait")), new(0.5f, 0.5f), out _);
+                    waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.publish.wait")), new Vector2(0.5f, 0.5f), out _);
 
                     IEnumerator CoFinishPublish(bool success)
                     {
@@ -504,7 +574,7 @@ public class Marketplace : MonoBehaviour
                 });
             });
 
-        typeWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent),"marketplace.ui.publish.selectTypes"), new NoSGUIMargin(GUIAlignment.Center, new(0f,0.2f)), new HorizontalWidgetsHolder(GUIAlignment.Center, TypeButton(true), TypeButton(false))), new(0.5f, 0.5f), out _);
+        typeWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent),"marketplace.ui.publish.selectTypes"), new NoSGUIMargin(GUIAlignment.Center, new(0f,0.2f)), new HorizontalWidgetsHolder(GUIAlignment.Center, TypeButton(true), TypeButton(false))), new Vector2(0.5f, 0.5f), out _);
     }
 
 }
@@ -526,7 +596,7 @@ internal static class OnlineMarketplace
     {
         var json = contents.Prepend(("request", method)).Select(tuple => (tuple.Item1, Uri.EscapeDataString(tuple.Item2))).Join(tuple => $"\"{tuple.Item1}\" : \"{tuple.Item2}\"", ",");
         var content = new StringContent("{" + json + "}", Encoding.UTF8, @"application/json");
-        var task = NebulaPlugin.HttpClient.PostAsync(APIURL, content);
+        var task = NebulaPlugin.HttpClient.PostAsync(Helpers.ConvertUrl(APIURL), content);
         yield return task.WaitAsCoroutine();
         var strTask = task.Result.Content.ReadAsStringAsync();
         yield return strTask.WaitAsCoroutine();

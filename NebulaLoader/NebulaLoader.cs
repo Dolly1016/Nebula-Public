@@ -32,7 +32,7 @@ public class NebulaLoader : BasePlugin
         return file.Length;
     }
 
-    static string GetTagsUrl(int page) => "https://api.github.com/repos/Dolly1016/Nebula/tags?per_page=100&page=" + (page);
+    static string GetTagsUrl(int page) => ConvertUrl("https://api.github.com/repos/Dolly1016/Nebula/tags?per_page=100&page=" + (page));
     private async Task<List<(string Tag, string Category, int Epoch, int Build, string VisualName)>> FetchAsync(HttpClient http)
     {
         List<(string Tag, string Category, int Epoch, int Build, string VisualName)> releases = new();
@@ -78,7 +78,7 @@ public class NebulaLoader : BasePlugin
 
     private async Task UpdateAsync(HttpClient http, string tag, string dllFilePath)
     {
-        string url = $"https://github.com/Dolly1016/Nebula/releases/download/{tag}/Nebula.dll";
+        string url = ConvertUrl($"https://github.com/Dolly1016/Nebula/releases/download/{tag}/Nebula.dll");
         var response = await http.GetAsync(url);
         if (response.StatusCode != HttpStatusCode.OK) return;
         var dllStream = await response.Content.ReadAsStreamAsync();
@@ -99,7 +99,7 @@ public class NebulaLoader : BasePlugin
 
     private async Task<List<(int Epoch, long Size)>> GetAssemblyInfoAsync(HttpClient http)
     {
-        string url = "https://raw.githubusercontent.com/Dolly1016/Nebula/master/epoch.dat";
+        string url = ConvertUrl("https://raw.githubusercontent.com/Dolly1016/Nebula/master/epoch.dat");
         var response = await http.GetAsync(url);
         if (response.StatusCode != HttpStatusCode.OK) return [];
         string result = await response.Content.ReadAsStringAsync();
@@ -120,14 +120,25 @@ public class NebulaLoader : BasePlugin
     static public ConfigEntry<bool> UseSnapshot { get; private set; } = null!;
     static public ConfigEntry<bool> AutoUpdate { get; private set; } = null!;
     static public ConfigEntry<bool> AutoUpdateIfVersionMismatch { get; private set; } = null!;
+    static public ConfigEntry<string> UrlConverter { get; private set; } = null!;
     static public bool UpdateIsDone = false;
+
+    static public string ConvertUrl(string url)
+    {
+        var converter = UrlConverter.Value;
+        if(converter.Length <= 1) return url;
+        else return UrlConverter.Value.Replace("<url>", url);
+    }
+    static private NebulaLoader MyPlugin = null!;
     public override void Load()
     {
+        MyPlugin = this;
         SkipCheckingConsistency = Config.Bind("Options", "SkipCheckingConsistency", false, "When enabled, All checking routines will be skipped.");
         IgnoringVersionConsistencyOnUpdate = Config.Bind("Options", "IgnoringVersionConsistency", false, "When enabled, this allows for combinations of NoS and Among Us versions that are not guaranteed.");
         UseSnapshot = Config.Bind("Options", "UseSnapshot", false, "When enabled, Get the latest snapshot or stable version.");
         AutoUpdate = Config.Bind("Options", "AutoUpdate", false, "When enabled, the automatic update feature is enabled.");
         AutoUpdateIfVersionMismatch = Config.Bind("Options", "AutoUpdateIfVersionMismatching", true, "Automatically updates when a version mismatch of Among Us is detected. This setting is ignored when AutoUpdate is enabled.");
+        UrlConverter = Config.Bind("Options", "UrlConverter", "<url>", "You can convert the URL used by NoS to access the Internet into a specified format.");
 
         bool autoUpdate = AutoUpdate.Value;
         bool autoUpdateIfVersionMismatch = AutoUpdateIfVersionMismatch.Value;
@@ -224,7 +235,9 @@ public class NebulaLoader : BasePlugin
         {
             Assembly NebulaAssembly = Assembly.LoadFile(dllFullFilePath);
 
-            NebulaAssembly.GetType("Nebula.NebulaPlugin")?.GetMethod("Load", BindingFlags.Static | BindingFlags.Public)?.Invoke(null, null);
+            var nebulaPluginType = NebulaAssembly.GetType("Nebula.NebulaPlugin");
+            nebulaPluginType?.GetMethod("Load", BindingFlags.Static | BindingFlags.Public)?.Invoke(null, null);
+            nebulaPluginType?.GetField("LoaderPlugin", BindingFlags.Static | BindingFlags.Public)?.SetValue(null, MyPlugin);
         }
     }
 }

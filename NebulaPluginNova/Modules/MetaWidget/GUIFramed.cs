@@ -30,6 +30,7 @@ public class NoSGUIFramed : AbstractGUIWidget
         }
 
         var renderer = NebulaAsset.CreateSharpBackground(new(actualSize.Width + Margin.x * 1.8f, actualSize.Height + Margin.y * 1.8f), Color ?? UnityEngine.Color.white, frame.transform);
+        renderer.gameObject.layer = LayerExpansion.GetUILayer();
 
         actualSize.Width += Margin.x * 2f;
         actualSize.Height += Margin.y * 2f;

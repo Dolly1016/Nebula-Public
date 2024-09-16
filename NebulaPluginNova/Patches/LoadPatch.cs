@@ -81,12 +81,16 @@ public static class LoadPatch
                 infoText.text = errorText;
                 infoText.color = Color.white;
 
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+                string detailText = $"--STACKTRACE--\n{infoText}\n\n--ASSEMBLIES--\n{assemblies.Join(a => a.GetName().Name, "\n")}";
+
                 var infoTextHolder = UnityHelper.CreateObject("InfoTextHolder",__instance.errorPopup.transform,infoText.transform.localPosition);
                 infoText.transform.SetParent(infoTextHolder.transform, true);
                 var textButton = infoTextHolder.SetUpButton(true);
                 textButton.OnMouseOut.AddListener(() => infoText.color = Color.white);
                 textButton.OnMouseOver.AddListener(() => infoText.color = Color.green);
-                textButton.OnClick.AddListener(() => ClipboardHelper.PutClipboardString(infoText.text));
+                textButton.OnClick.AddListener(() => ClipboardHelper.PutClipboardString(detailText));
                 textButton.gameObject.AddComponent<BoxCollider2D>().size = new Vector2(11f,4f);
 
                 //停止

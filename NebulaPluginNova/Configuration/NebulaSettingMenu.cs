@@ -58,7 +58,7 @@ public class NebulaSettingMenu : MonoBehaviour
 
         var firstScroller = new GUIScrollView(Virial.Media.GUIAlignment.Left, new Vector2(4f, 4.1f), null) { ScrollerTag = "RoleSettingFirst" };
         FirstInnerScreen = firstScroller.Artifact;
-        MainHolder.SetWidget(firstScroller, new(0.5f, 0.5f), out _);
+        MainHolder.SetWidget(firstScroller, new Vector2(0.5f, 0.5f), out _);
         //FirstScroller = VanillaAsset.GenerateScroller(new Vector2(4f, 4.5f), MainHolderParent.transform, new Vector3(2.2f, -0.05f, -1f), MainHolder.transform, new FloatRange(0f, 1f),4.6f);
         
         UpdateLeftTab();
@@ -74,7 +74,7 @@ public class NebulaSettingMenu : MonoBehaviour
 
         var secondScroller = new GUIScrollView(Virial.Media.GUIAlignment.Left, new Vector2(8f, 3.5f), null) { ScrollerTag = "RoleSettingSecond" };
         SecondInnerScreen = secondScroller.Artifact;
-        SecondScreen.SetWidget(secondScroller, new(0.5f, 0.5f), out _);
+        SecondScreen.SetWidget(secondScroller, new Vector2(0.5f, 0.5f), out _);
         //SecondScroller = VanillaAsset.GenerateScroller(new Vector2(8f, 4.1f), SecondParent.transform, new Vector3(4.2f, -0.05f, -1f), SecondScreen.transform, new FloatRange(0f, 1f), 4.2f);
         
 

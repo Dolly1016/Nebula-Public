@@ -541,6 +541,7 @@ public class JusticeMeetingHud : MonoBehaviour
                 {
                     playerState.gameObject.SetActive(true);
                     playerState.gameObject.transform.localPosition = localPos + new Vector3(0.11f, -1.08f, -0.9f);
+                    playerState.gameObject.transform.localScale = Vector3.one;
                 }
             }
 
@@ -651,7 +652,7 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
                            }
                        }
                    },
-                   p => !usedBalance && !p.MyPlayer.IsDead && !MeetingHudExtension.ExileEvenIfTie && !MyPlayer.IsDead
+                   p => !usedBalance && !p.MyPlayer.IsDead && !MeetingHudExtension.ExileEvenIfTie && !MyPlayer.IsDead && (!p.MyPlayer.AmOwner || !PutJusticeOnTheBalanceOption)
                    ));
             }
         }

@@ -1232,7 +1232,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         {
             obj.transform.FindChild("ClickGuard").GetComponent<PassiveButton>().OnClick.AddListener(() => GameObject.Destroy(obj));
             var myCollider = UnityHelper.CreateObject<BoxCollider2D>("MyScreenCollider", obj.transform, new Vector3(0f, 0f, 0.1f));
-            myCollider.isTrigger = false;
+            myCollider.isTrigger = true;
             myCollider.size = size;
             myCollider.gameObject.SetUpButton();
         }
@@ -1255,7 +1255,8 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         this.border = border;
     }
 
-    public void SetWidget(Virial.Media.GUIWidget widget, out Virial.Compat.Size actualSize) => SetWidget(widget, new(0f, 1f), out actualSize);
+    public void SetWidget(Virial.Media.GUIWidget widget, out Virial.Compat.Size actualSize) => SetWidget(widget, new Vector2(0f, 1f), out actualSize);
+    public void SetWidget(Virial.Media.GUIWidget widget, Image? image, out Virial.Compat.Size actualSize) => SetWidget(widget, new(0f, 1f), image, out actualSize);
     public void SetWidget(Virial.Media.GUIWidget widget, UnityEngine.Vector2 anchor, out Virial.Compat.Size actualSize)
     {
         ClearWidget();
@@ -1265,6 +1266,29 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         {
             obj.transform.SetParent(transform, false);
         }
+    }
+
+    public void SetWidget(Virial.Media.GUIWidget widget, UnityEngine.Vector2 anchor, Image? image, out Virial.Compat.Size actualSize)
+    {
+        SetWidget(widget, anchor, out actualSize);
+        SetBackImage(image);
+    }
+
+    //既存のコンテンツを削除せずに背景画像を追加します。
+    public void SetBackImage(Image? image, float brightness = 0.15f)
+    {
+        if (image?.GetSprite() == null) return;
+
+        var group = UnityHelper.CreateObject<SortingGroup>("Image", this.transform, new(0f, 0f, 0.05f));
+        group.sortingOrder = -10;
+        var mask = UnityHelper.CreateObject<SpriteMask>("Mask", group.transform, Vector3.zero);
+        mask.sprite = VanillaAsset.FullScreenSprite;
+        mask.transform.localScale = new(border.x * 0.974f + 0.45f, border.y * 0.96f + 0.35f);
+
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("MaskedImage", group.transform, new Vector3(border.x, -border.y) * 0.27f);
+        renderer.sprite = image.GetSprite();
+        renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        renderer.color = new(brightness, brightness, brightness, 1f);
     }
 }
 

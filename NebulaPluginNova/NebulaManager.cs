@@ -2,6 +2,7 @@
 using Nebula.Behaviour;
 using Nebula.Map;
 using Nebula.Roles.Assignment;
+using System.Reflection;
 using UnityEngine.Rendering;
 using Virial.Runtime;
 
@@ -340,6 +341,22 @@ public class NebulaManager : MonoBehaviour
                 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
+                    
+                    if (PlayerControl.LocalPlayer)
+                    {
+                        var outfit = PlayerControl.LocalPlayer.CurrentOutfit;
+                        Debug.Log("[Cosmetics]");
+                        Debug.Log(outfit.HatId);
+                        Debug.Log(outfit.VisorId);
+                        Debug.Log(outfit.SkinId);
+                        Debug.Log("[Tags]");
+                        foreach(var tag in MoreCosmic.GetTags(outfit))
+                        {
+                            Debug.Log(tag);
+                        }
+
+                    }
+                    
                     //Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;
                     //File.WriteAllBytesAsync("SpawnableMap" + NebulaPreSpawnLocation.MapName[AmongUsUtil.CurrentMapId] +".png", MapData.GetCurrentMapData().OutputMap(center, new Vector2(10f, 7f) * ShipStatus.Instance.MapScale, 40f).EncodeToPNG());
                 }

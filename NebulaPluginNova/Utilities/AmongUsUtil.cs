@@ -56,6 +56,22 @@ public class ResetIgnoreShadowCamera : MonoBehaviour
 [NebulaRPCHolder]
 public static class AmongUsUtil
 {
+    public static void SetHighlight(Renderer renderer, bool on, Color? color = null)
+    {
+        if (on)
+        {
+            renderer.material.SetFloat("_Outline", 1f);
+            renderer.material.SetColor("_OutlineColor", color ?? Color.yellow);
+            renderer.material.SetColor("_AddColor", color ?? Color.yellow);
+        }
+        else
+        {
+            renderer.material.SetFloat("_Outline", 0f);
+            renderer.material.SetColor("_OutlineColor", Color.clear);
+            renderer.material.SetColor("_AddColor", Color.clear);
+        }
+    }
+
     public static IDisposable IgnoreShadow(bool showNameText = true) => new IgnoreShadowScope(showNameText);
 
     public static MonoBehaviour CurrentCamTarget => HudManager.Instance.PlayerCam.Target;

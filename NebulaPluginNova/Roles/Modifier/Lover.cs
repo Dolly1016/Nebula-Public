@@ -29,7 +29,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
 
     int HasAssignmentRoutine.AssignPriority => 1;
 
-    static internal IntegerConfiguration NumOfPairsOption = NebulaAPI.Configurations.Configuration("options.role.lover.numOfPairs", (0, 7), 0);
+    static internal IntegerConfiguration NumOfPairsOption = NebulaAPI.Configurations.Configuration("options.role.lover.numOfPairs", (0, 12), 0);
     static private IntegerConfiguration RoleChanceOption = NebulaAPI.Configurations.Configuration("options.role.lover.roleChance", (10, 100, 10), 100, decorator: num => num + "%",title: new TranslateTextComponent("options.role.chance"));
     static private IntegerConfiguration ChanceOfAssigningImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.lover.chanceOfAssigningImpostors", (0,100,10), 0, decorator: num => num + "%");
     static private BoolConfiguration AllowExtraWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.allowExtraWin", true);
@@ -87,11 +87,16 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
 
         static private Color[] colors = new Color[] { MyRole.UnityColor,
         (Color)new Color32(254, 132, 3, 255) ,
-        (Color)new Color32(3, 254, 188, 255) ,
-        (Color)new Color32(255, 255, 0, 255) ,
+        (Color)new Color32(3, 254, 131, 255) ,
+        (Color)new Color32(164, 96, 203, 255) ,
         (Color)new Color32(3, 183, 254, 255) ,
         (Color)new Color32(8, 255, 10, 255) ,
-        (Color)new Color32(132, 3, 254, 255) };
+        (Color)new Color32(132, 3, 254, 255),
+        (Color)new Color32(177, 241, 64, 255),
+        (Color)new Color32(255, 255, 255, 255),
+        (Color)new Color32(255, 255, 40, 255),
+        (Color)new Color32(211, 129, 142, 255),
+        (Color)new Color32(255, 189, 99, 255),};
         private int loversId; 
         public Instance(GamePlayer player,int loversId) : base(player)
         {
@@ -148,13 +153,10 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
 
             if (ev is PlayerMurderedEvent pme)
             {
-                if (!pme.Murderer.AmOwner)
-                {
-                    if (AvengerModeOption)
-                        myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [pme.Murderer.PlayerId]).InvokeSingle();
-                    else
-                        myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
-                }
+                if (!pme.Murderer.AmOwner && AvengerModeOption)
+                    myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [pme.Murderer.PlayerId]).InvokeSingle();
+                else 
+                    myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
             }
             else
             {   

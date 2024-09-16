@@ -141,20 +141,20 @@ public static class AirshipExileWrapUpPatch
 [HarmonyPatch(typeof(ExileController), nameof(ExileController.Begin))]
 class ExileControllerBeginPatch
 {
-    public static void Prefix(ExileController __instance, [HarmonyArgument(0)] ref NetworkedPlayerInfo exiled, [HarmonyArgument(1)] ref bool tie)
+    public static void Prefix(ExileController __instance, [HarmonyArgument(0)] ref ExileController.InitProperties init)
     {
-        exiled = MeetingHudExtension.ExiledAll?.FirstOrDefault()?.Data!;
-        tie = MeetingHudExtension.WasTie;
+        init.voteTie = MeetingHudExtension.WasTie;
+        var first = MeetingHudExtension.ExiledAll?.FirstOrDefault();
+        init.networkedPlayer = first?.Data!;
+        init.outfit = first?.GetModInfo()!.DefaultOutfit.outfit;
+        init.isImpostor = first?.GetModInfo()!.IsImpostor ?? false;
 
-        Debug.Log("Rewrite Exiled: " + (exiled?.PlayerName ?? "None"));
+        Debug.Log("Rewrite Exiled: " + (init.networkedPlayer?.PlayerName ?? "None"));
     }
 
-    public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref NetworkedPlayerInfo exiled, [HarmonyArgument(1)] bool tie)
+    public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref ExileController.InitProperties init)
     {
-        //MeetingHudがなぜか真になってしまうので、nullに書き換え
-        MeetingHud.Instance = null;
-
-        if (exiled == null) return;
+        if (init.networkedPlayer == null) return;
 
         if (MeetingHudExtension.IsObvious)
         {
@@ -166,10 +166,10 @@ class ExileControllerBeginPatch
         }
         else if (GeneralConfigurations.ShowRoleOfExiled)
         {
-            var role = NebulaGameManager.Instance.GetPlayer(exiled.PlayerId)?.Role;
+            var role = NebulaGameManager.Instance.GetPlayer(init.networkedPlayer.PlayerId)?.Role;
             if (role != null)
             {
-                __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", exiled.PlayerName).Replace("%ROLE%", role.Role.DisplayName);
+                __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", init.networkedPlayer.PlayerName).Replace("%ROLE%", role.Role.DisplayName);
                 if (role.Role == Roles.Neutral.Jester.MyRole) __instance.ImpostorText.text = Language.Translate("game.meeting.roleJesterText");
             }
         }

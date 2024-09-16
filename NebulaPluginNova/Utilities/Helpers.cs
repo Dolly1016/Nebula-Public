@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using Steamworks;
+using System.Runtime.InteropServices;
 using System.Text;
 
 
@@ -29,8 +30,24 @@ public class Reference<T>
 
 public static class Helpers
 {
+    private static Func<string, string>? urlConverter = null;
+    static public string ConvertUrl(string url)
+    {
+        if(urlConverter == null)
+        {
+            var converter = NebulaPlugin.LoaderPlugin?.GetType().GetMethod("ConvertUrl", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            if (converter != null)
+                urlConverter = u => (converter.Invoke(null, [u]) as string)!;
+            else
+                urlConverter = u => u;
+        }
+
+        return urlConverter.Invoke(url);
+    }
+
     public static bool AmHost(this PlayerControl player) => AmongUsClient.Instance.HostId == player.OwnerId;
 
+    public static bool Prob(float prob) => System.Random.Shared.NextSingle() < prob;
     public static float Delta(this float val, float speed, float threshold)
     {
         var smooth = val* Mathf.Clamp01(Time.deltaTime * speed);

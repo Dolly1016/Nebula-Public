@@ -14,7 +14,7 @@ using Virial.Events.Game.Minimap;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
-using static Nebula.Roles.Crewmate.Cannon;
+using static Nebula.Roles.Impostor.Cannon;
 
 namespace Nebula.Roles.Impostor;
 
@@ -69,7 +69,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
 
         static public DisturbPole GeneratePole(Vector2 pos)
         {
-            return (NebulaSyncObject.RpcInstantiate(MyTag, new float[] { pos.x, pos.y }) as DisturbPole)!;
+            return (NebulaSyncObject.RpcInstantiate(MyTag, new float[] { pos.x, pos.y }).SyncObject as DisturbPole)!;
         }
 
         static public RemoteProcess<int> RpcActivate = new("ActivatePole", (id, _) => NebulaSyncObject.GetObject<DisturbPole>(id)?.Activate());
@@ -287,7 +287,10 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         {
             poleRenderer.enabled = false;
 
-            if (Positions.Count >= 2) disturber.PlacePoles();
+            NebulaManager.Instance.ScheduleDelayAction(() =>
+            {
+                if (Positions.Count >= 2) disturber.PlacePoles();
+            });
         }
     }
 
@@ -418,46 +421,6 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 };
                 poleText = placeButton.ShowUsesIcon(0);
                 placeButton.SetLabel("place");
-                
-
-                /*
-                var placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
-                placeButton.SetSprite(placeButtonSprite.GetSprite());
-                placeButton.Availability = (button) =>
-                {
-                    var distance = (GetLastPole()?.Position.Distance(MyPlayer.Position.ToUnityVector()) ?? (PoleDistanceMin + 0.1f));
-                    return MyPlayer.CanMove && newPoles.Count + poles.Count < MaxNumOfPolesOption && distance > PoleDistanceMin && distance < PoleDistanceMax;
-                };
-                placeButton.Visibility = (button) => !MyPlayer.IsDead;
-                placeButton.OnClick = (button) => {
-                    var pole = DisturbPole.GeneratePole(MyPlayer.Position.ToUnityVector());
-                    pole.Color = new(1f, 1f, 1f, 0.5f);
-                    newPoles.Add(pole);
-                    polesText.text = GetNumOfLeftPoles().ToString();
-
-                    button.StartCoolDown();
-
-                    if (effectCircle == null)
-                    {
-                        effectCircle = EffectCircle.SpawnEffectCircle(null, pole.Position.AsVector3(-10f), Palette.ImpostorRed, PoleDistanceMax, PoleDistanceMin, true);
-                        this.Bind(effectCircle.gameObject);
-                    }
-                    effectCircle.TargetLocalPos = pole.Position;
-                };
-                placeButton.OnMeeting = (button) =>
-                {
-                    foreach(var p in newPoles)
-                    {
-                        DisturbPole.RpcActivate.Invoke(p.ObjectId);
-                        poles.Add(p);
-                    }
-                    newPoles.Clear();
-                };
-                placeButton.CoolDownTimer = Bind(new Timer(PlaceCoolDownOption).SetAsAbilityCoolDown().Start());
-                placeButton.SetLabel("place");
-                polesText = placeButton.ShowUsesIcon(0);
-                polesText.text = GetNumOfLeftPoles().ToString();
-                */
                 
 
                 disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "disturber.disturb");

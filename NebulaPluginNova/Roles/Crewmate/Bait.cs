@@ -52,6 +52,12 @@ public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
             acTokenChallenge ??= new("bait.challenge", (false, true), (val, _) => val.cleared);
         }
 
+        [Local,OnlyMyPlayer]
+        void OnExiled(PlayerExiledEvent ev)
+        {
+            new StaticAchievementToken("bait.another1");
+        }
+
         [OnlyMyPlayer]
         void BaitReportOnMurdered(PlayerMurderedEvent ev)
         { 

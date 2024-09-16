@@ -36,7 +36,7 @@ file static class MultipleExileHelper
         int num = 0;
         foreach (var p in MeetingHudExtension.ExiledAll ?? [])
         {
-            if (p.PlayerId == __instance.exiled.PlayerId) continue;
+            if (p.PlayerId == (__instance.initData.networkedPlayer?.PlayerId ?? byte.MaxValue)) continue;
             var display = MultipleExileHelper.SpawnMultiplePlayer(__instance, p);
             setup.Invoke(display, num);
             num++;

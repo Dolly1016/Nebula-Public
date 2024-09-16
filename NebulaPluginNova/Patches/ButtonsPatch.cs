@@ -1,4 +1,6 @@
 ﻿using Nebula.Game.Statistics;
+using Virial.Events;
+using Virial.Events.Player;
 
 namespace Nebula.Patches;
 
@@ -119,7 +121,12 @@ public static class KillButtonClickPatch
     {
         if (__instance.enabled && __instance.currentTarget && !__instance.isCoolingDown && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
         {
-            PlayerControl.LocalPlayer.ModKill(__instance.currentTarget, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
+            ICancelableEvent? cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(NebulaGameManager.Instance!.LocalPlayerInfo, __instance.currentTarget.GetModInfo()!));
+            if (!(cancelable?.IsCanceled ?? false))
+            {
+                //キャンセルされなければキルを実行する
+                PlayerControl.LocalPlayer.ModKill(__instance.currentTarget, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
+            }
             __instance.SetTarget(null);
         }
         return false;
@@ -177,7 +184,22 @@ public static class ReportButtonClickPatch
 {
     static bool Prefix(ReportButton __instance)
     {
-        if (NebulaGameManager.Instance?.LocalPlayerInfo?.IsDived ?? false) return false;
+        var info = NebulaGameManager.Instance?.LocalPlayerInfo;
+        if (info == null) return true;
+
+        if (info.IsDived || info.IsBlown) return false;
         return true;
+    }
+}
+
+[HarmonyPatch(typeof(UseButton), nameof(UseButton.SetFromSettings))]
+class UseButtonSettingsPatch
+{
+    public static void Postfix(UseButton __instance, [HarmonyArgument(0)] UseButtonSettings settings)
+    {
+        if((int)settings.Text == ModStringNames.Marketplace)
+        {
+            __instance.buttonLabelText.text = Language.Translate("button.label.marketplace");
+        }
     }
 }

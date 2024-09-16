@@ -183,7 +183,7 @@ public class EndGameManagerSetUpPatch
             using MultipartFormDataContent content = new();
             content.Add(new FormUrlEncodedContent([new("content", "テスト")]));
             content.Add(new ByteArrayContent(pngImage), "file", "image.png");
-            var awaiter = NebulaPlugin.HttpClient.PostAsync(ClientOption.WebhookOption.url, content).GetAwaiter();
+            var awaiter = NebulaPlugin.HttpClient.PostAsync(Helpers.ConvertUrl(ClientOption.WebhookOption.url), content).GetAwaiter();
             awaiter.GetResult();
             return true;
         }catch(Exception e)

@@ -159,6 +159,15 @@ public static class VentUsePatch
     }
 }
 
+[HarmonyPatch(typeof(Vent), nameof(Vent.UpdateArrows))]
+public static class VentUpdateArrowPatch
+{
+    public static void Postfix(Vent __instance)
+    {
+        if(!NebulaGameManager.Instance!.LocalPlayerInfo.Role.CanMoveInVent) __instance.SetButtons(false);
+    }
+}
+
 public static class CommonCanUsePatch
 {
     public static bool CanUse(MonoBehaviour target, NetworkedPlayerInfo pc)

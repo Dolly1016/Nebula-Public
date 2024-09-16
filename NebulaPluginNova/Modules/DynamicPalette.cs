@@ -10,8 +10,9 @@ namespace Nebula.Modules;
 [NebulaRPCHolder]
 public class DynamicPalette
 {
+    public const int ColorsLength = 32;
     //PlayerIdと紐づけられたバイザーのゲーム内カラーパレット
-    static public Color[] VisorColors = new UnityEngine.Color[18];
+    static public Color[] VisorColors = new UnityEngine.Color[ColorsLength];
 
     static public ColorPalette[] AllColorPalette = { new DefaultColorPalette() };
     static public ShadowPattern[] AllShadowPattern = { new DefaultShadowPattern() };
@@ -64,11 +65,20 @@ public class DynamicPalette
         ColorCatalogue.Add("innersloth",vanilaCatalogue);
         VisorColorCatalogue.Add("innersloth", vanilaVisorCatalogue);
 
+        var oldPlayerColors = Palette.PlayerColors;
+        var oldShadowColors = Palette.ShadowColors;
+        Palette.PlayerColors = new Color32[ColorsLength];
+        Palette.ShadowColors = new Color32[ColorsLength];
+        for(int i = 0; i < ColorsLength; i++)
+        {
+            Palette.PlayerColors[i] = oldPlayerColors[i >= oldPlayerColors.Count ? 0 : i];
+            Palette.ShadowColors[i] = oldShadowColors[i >= oldPlayerColors.Count ? 0 : i];
+        }
         for (int i = 0; i < VisorColors.Length; i++) VisorColors[i] = Palette.VisorColor;
 
         //カモフラージャーカラー
-        Palette.PlayerColors[16] = Palette.PlayerColors[6].Multiply(new Color32(180, 180, 180, 255));
-        Palette.ShadowColors[16] = Palette.ShadowColors[6].Multiply(new Color32(180, 180, 180, 255));
+        Palette.PlayerColors[NebulaPlayerTab.CamouflageColorId] = Palette.PlayerColors[6].Multiply(new Color32(180, 180, 180, 255));
+        Palette.ShadowColors[NebulaPlayerTab.CamouflageColorId] = Palette.ShadowColors[6].Multiply(new Color32(180, 180, 180, 255));
         
         //プレビューカラーを設定しておく(Dev. Studio用)
         Palette.PlayerColors[NebulaPlayerTab.PreviewColorId] = DynamicPalette.MyColor.MainColor;
@@ -869,8 +879,9 @@ public class NebulaPlayerTab : MonoBehaviour
         }
     }
 
-    static public readonly byte PreviewColorId = 15;
-    static public readonly byte ArchiveColorId = 16;
+    static public readonly byte PreviewColorId = 28;
+    static public readonly byte ArchiveColorId = 29;
+    static public readonly byte CamouflageColorId = 30;
 
     //SetColorの複製をしない版
     private static void SetSharedColors(int colorId, Renderer renderer)
@@ -1008,7 +1019,7 @@ public static class ColorNamePatch
 
     static bool Prefix(ref string __result, [HarmonyArgument(0)]int colorId)
     {
-        if (colorId < 15)
+        if (colorId < NebulaPlayerTab.PreviewColorId)
         {
             if (DynamicPalette.ColorNameDic.TryGetValue(colorId, out var tuple))
             {
@@ -1020,7 +1031,7 @@ public static class ColorNamePatch
             else
                 __result = "";
         }
-        else if (colorId == 15)
+        else if (colorId == NebulaPlayerTab.PreviewColorId)
         {
             DynamicPalette.MyColor.GetMainParam(out var h, out var d, out var b);
             __result = Language.Translate(ToTranslationKey(h, d));

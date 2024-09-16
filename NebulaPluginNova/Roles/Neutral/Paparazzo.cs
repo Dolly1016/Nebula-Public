@@ -461,14 +461,11 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                     var button = shot.shot.gameObject.SetUpButton(true);
                     button.OnMouseOut.AddListener(() =>
                     {
-                        shot.shot.centerRenderer.material.SetFloat("_Outline", 0f);
-                        shot.shot.centerRenderer.material.SetColor("_AddColor", Color.clear);
+                        AmongUsUtil.SetHighlight(shot.shot.centerRenderer, false);
                     });
                     button.OnMouseOver.AddListener(() =>
                     {
-                        shot.shot.centerRenderer.material.SetFloat("_Outline", 1f);
-                        shot.shot.centerRenderer.material.SetColor("_OutlineColor", Color.yellow);
-                        shot.shot.centerRenderer.material.SetColor("_AddColor", Color.yellow);
+                        AmongUsUtil.SetHighlight(shot.shot.centerRenderer, true);
                     });
                     button.OnClick.AddListener(() =>
                     {
@@ -482,7 +479,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                         SharePicture((shot.playerMask & aliveMask), shot.shot.centerRenderer.transform.localScale.x, shot.shot.transform.localEulerAngles.z, shot.shot.centerRenderer.sprite.texture);
                         shareFlag = true;
 
-                        if(acTokenChallenge != null) acTokenChallenge.Value.lastAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead || !p.AmOwner);
+                        if(acTokenChallenge != null) acTokenChallenge.Value.lastAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && !p.AmOwner);
                     });
 
 
@@ -495,7 +492,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         {
             if (acTokenChallenge != null)
             {
-                acTokenChallenge.Value.cleared |= acTokenChallenge.Value.lastAlive - NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead || !p.AmOwner) >= 4;
+                acTokenChallenge.Value.cleared |= (acTokenChallenge.Value.lastAlive ?? 0) - NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && !p.AmOwner) >= 4;
                 acTokenChallenge.Value.lastAlive = null;
             }
         }

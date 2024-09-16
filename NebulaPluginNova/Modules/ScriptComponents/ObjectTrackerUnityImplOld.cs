@@ -25,7 +25,7 @@ public static class HighlightHelpers
 
 public static class ObjectTrackers
 {
-    static public Predicate<GamePlayer> StandardPredicate = p => !p.AmOwner && !p.IsDead && !p.Unbox().IsInvisible && !p.IsDived;
+    static public Predicate<GamePlayer> StandardPredicate = p => !p.AmOwner && !p.IsDead && !p.Unbox().IsInvisible && !p.IsDived && !p.IsBlown;
     static public Predicate<GamePlayer> ImpostorKillPredicate = p => StandardPredicate(p) && !p.IsImpostor;
 
 
@@ -37,25 +37,25 @@ public static class ObjectTrackers
             var lastPredicate = predicate;
             predicate = p => !p.VanillaPlayer.inVent && lastPredicate(p);
         }
-        IEnumerable<PlayerControl> FastPlayers() => PlayerControl.AllPlayerControls.GetFastEnumerator();
+        IEnumerable<PlayerControl> FastPlayers() => PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => p);
 
-        return new ObjectTrackerUnityImpl<GamePlayer, PlayerControl>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, FastPlayers, predicate, predicateHeavier, p => p.GetModInfo(), p => p.GetTruePosition(), p => p.cosmetics.currentBodySprite.BodySprite, color, ignoreCollider);
+        return new ObjectTrackerUnityImpl<GamePlayer, PlayerControl>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, FastPlayers, predicate, predicateHeavier, p => p.GetModInfo(), p => [p.GetTruePosition()], p => p.cosmetics.currentBodySprite.BodySprite, color, ignoreCollider);
     }
 
     public static ObjectTracker<GamePlayer> ForDeadBody(float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier = null, UnityEngine.Color? color = null, bool ignoreCollider = false)
     {
-        return new ObjectTrackerUnityImpl<GamePlayer, DeadBody>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => Helpers.AllDeadBodies().Where(d => d.bodyRenderers.Any(r => r.enabled)), predicate, predicateHeavier, d => NebulaGameManager.Instance.GetPlayer(d.ParentId), d => d.TruePosition, d => d.bodyRenderers[0], color, ignoreCollider);
+        return new ObjectTrackerUnityImpl<GamePlayer, DeadBody>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => Helpers.AllDeadBodies().Where(d => d.bodyRenderers.Any(r => r.enabled)), predicate, predicateHeavier, d => NebulaGameManager.Instance.GetPlayer(d.ParentId), d => [d.TruePosition], d => d.bodyRenderers[0], color, ignoreCollider);
     }
 
     public static ObjectTracker<Vent> ForVents(float? distance, GamePlayer tracker, Predicate<Vent> predicate, UnityEngine.Color color, bool ignoreColliders = false)
     {
-        return new ObjectTrackerUnityImpl<Vent, Vent>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => ShipStatus.Instance.AllVents, predicate, _ => true, v => v, v => v.transform.position, v => v.myRend, color, ignoreColliders);
+        return new ObjectTrackerUnityImpl<Vent, Vent>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => ShipStatus.Instance.AllVents, predicate, _ => true, v => v, v => [v.transform.position], v => v.myRend, color, ignoreColliders);
     }
 }
 
 
 
-public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker<V>, IGameOperator where T : MonoBehaviour where V : class
+public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker<V>, IGameOperator where V : class
 {
     V? ObjectTracker<V>.CurrentTarget => currentTarget?.Item2;
     bool ObjectTracker<V>.IsLocked { get => isLocked; set => isLocked = value; }
@@ -67,14 +67,15 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
     Predicate<V> predicate;
     Predicate<V>? predicateHeavier = null;
     Func<T, V> converter;
-    Func<T, UnityEngine.Vector2> positionConverter;
+    Func<T, IEnumerable<UnityEngine.Vector2>> positionConverter;
     Func<T, SpriteRenderer> rendererConverter;
     UnityEngine.Color color = UnityEngine.Color.yellow;
     bool ignoreColliders;
     float maxDistance;
     private bool isLocked = false;
+    public bool MoreHighlight = false;
 
-    public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, Vector2> positionConverter, Func<T, SpriteRenderer> rendererConverter, Color? color = null, bool ignoreColliders = false)
+    public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Func<T, SpriteRenderer> rendererConverter, Color? color = null, bool ignoreColliders = false)
     {
         this.tracker = tracker;
         this.allTargets = allTargets;
@@ -92,7 +93,10 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
     {
         if (currentTarget == null) return;
 
-        HighlightHelpers.SetHighlight(rendererConverter.Invoke(currentTarget!.Item1), color);
+        if (MoreHighlight)
+            AmongUsUtil.SetHighlight(rendererConverter.Invoke(currentTarget!.Item1), true, color);
+        else
+            HighlightHelpers.SetHighlight(rendererConverter.Invoke(currentTarget!.Item1), color);
     }
 
     void HudUpdate(GameHudUpdateEvent ev)
@@ -116,19 +120,23 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
 
         foreach (var t in allTargets())
         {
-            if (!t) continue;
-
             var v = converter(t);
             if (v == null) continue;
 
             if (!predicate(v)) continue;
 
-            Vector2 pos = positionConverter(t);
-            Vector2 dVec = pos - myPos;
+            Vector2[] pos = positionConverter(t).ToArray();
+
+            if (pos.Length == 0) continue;//点を持たないオブジェクトは無視する
+
+            Vector2 dVec = pos[0] - myPos; //先頭を最たる中心として扱う
             float magnitude = dVec.magnitude;
+
+            if (MoreHighlight && magnitude < 4.5f) HighlightHelpers.SetHighlight(rendererConverter.Invoke(t), color);
+
             if (distance < magnitude) continue;
 
-            if (!ignoreColliders && PhysicsHelpers.AnyNonTriggersBetween(myPos, dVec.normalized, magnitude, Constants.ShipAndObjectsMask)) continue;
+            if (!ignoreColliders && pos.All(p => PhysicsHelpers.AnyNonTriggersBetween(myPos, (p - myPos).normalized, magnitude, Constants.ShipAndObjectsMask))) continue;
             if (!(predicateHeavier?.Invoke(v) ?? true)) continue;
 
             candidate = new(t,v);

@@ -84,7 +84,7 @@ public class ModNewsHistory
             System.Uri uri;
             try
             {
-                uri = new($"https://raw.githubusercontent.com/Dolly1016/Nebula/master/Announcement_{lang}.json");
+                uri = new(Helpers.ConvertUrl($"https://raw.githubusercontent.com/Dolly1016/Nebula/master/Announcement_{lang}.json"));
             }
             catch
             {

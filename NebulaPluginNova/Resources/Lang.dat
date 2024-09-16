@@ -13,6 +13,9 @@
 
 # Certification
 
+"certification.waiting" : "Checking..."
+"certification.waiting.detail" : "Checking the player version and installed NoS."
+"certification.waiting.client" : "Checking the player version and installed NoS."
 "certification.uncertified" : "Uncertified"
 "certification.uncertified.detail" : "This player does not have NoS installed."
 "certification.uncertified.client" : "Do not participate in vanilla games<br>with NoS installed."
@@ -63,6 +66,7 @@
 "ui.attribute.screenSize" : "The field of view reflected on the screen expands."
 "ui.attribute.eyesight" : "Your field of vision will expand."
 "ui.attribute.rough" : "Your screen will look rough."
+"ui.attribute.thurifer" : "You are affected by the smoke of the thuribulum."
 
 "ui.button.mainAction" : "Action"
 "ui.button.aidAction" : "Sub Action"
@@ -94,7 +98,8 @@
 "ui.action.paparazzo.toggle" : "Change the direction of the viewfinder."
 "ui.action.mouseClick" : "Actions can also be triggered by clicking near the player."
 "ui.action.danceAction" : "Triggered by small, wiggling movements."
-"ui.action.cannon.mark" : "Mark where the air cannon will fire.<br>You open the map to fire the air cannon."
+"ui.action.cannon.mark" : "Mark where the air cannon will fire."
+"ui.action.cannon.cannon" : "Open the special map to fire the air cannon."
 
 # Versions
 
@@ -347,15 +352,6 @@
 "options.role.busker.pseudocideDuration" : "Pseudocide Duration"
 "options.role.busker.hidePseudocideFromVitals" : "Hide Pseudocide From Vitals"
 
-"role.cannon.name" : "Cannon"
-"role.cannon.short" : "C"
-"role.cannon.blurb" : "Blow It Away!"
-"options.role.cannon.detail" : "Canon's air cannon blows away surrounding players."
-"options.role.cannon.markCoolDown" : "Mark Cooldown"
-"options.role.cannon.numOfMarks" : "# Marks Can Be Placed At The Same Time"
-"options.role.cannon.cannonPower" : "Cannon Power"
-"options.role.cannon.cannonPowerAttenuation" : "Cannon Power Attenuation"
-
 "role.collator.name" : "Collator"
 "role.collator.short" : "C"
 "role.collator.blurb" : "Do Experiments"
@@ -556,6 +552,16 @@
 "options.role.camouflager.camoDuration" : "Camo. Duration"
 "options.role.camouflager.canInvokeCamoAfterDeath" : "Can Invoke Camo. After Death"
 
+"role.cannon.name" : "Cannon"
+"role.cannon.short" : "C"
+"role.cannon.blurb" : "Blow It Away!"
+"options.role.cannon.detail" : "Canon's air cannon blows away surrounding players."
+"options.role.cannon.markCooldown" : "Mark Cooldown"
+"options.role.cannon.numOfMarks" : "# Marks Can Be Placed At The Same Time"
+"options.role.cannon.cannonCooldown" : "Cannon Cooldown"
+"options.role.cannon.cannonPower" : "Cannon Power"
+"options.role.cannon.cannonPowerAttenuation" : "Cannon Power Attenuation"
+
 "role.cleaner.name" : "Cleaner"
 "role.cleaner.short" : "Cl"
 "role.cleaner.blurb" : "Kill Everyone and Leave No Traces"
@@ -717,13 +723,25 @@
 
 "role.stirrer.name" : "Stirrer"
 "role.stirrer.short" : "St"
-"role.stirrer.blurb" : "Hallucination Kills You"
+"role.stirrer.blurb" : "Fiction Kills You"
 "options.role.stirrer.detail" : "Stirrer inflicts fake sabotage on players.<br>Unsolved fake emergency sabotage would eventually kill them."
 "options.role.stirrer.stirCoolDown" : "Stir Cooldown"
 "options.role.stirrer.sabotageCharge" : "Sabotage Charge"
 "options.role.stirrer.sabotageMaxCharge" : "Sabotage Max Charge"
 "options.role.stirrer.sabotageCoolDown" : "Sabotage Cooldown"
 "options.role.stirrer.sabotageInterval" : "Sabotage Interval"
+
+"role.thurifer.name" : "Thurifer"
+"role.thurifer.short" : "T"
+"role.thurifer.blurb" : "The One Who Edifies"
+"options.role.thurifer.detail" : "Thurifer uses Thuribulum for delayed kills."
+"options.role.thurifer.maxIntoxication" : "Max Intoxication"
+"options.role.thurifer.curseDuration" : "Curse Duration"
+"options.role.thurifer.numOfThuribulums" : "# Thuribulums"
+"options.role.thurifer.thuribulumRange" : "Thuribulum Range"
+"options.role.thurifer.maxKillDelay" : "Max Kill Delay"
+"options.role.thurifer.showBlink" : "Show Blink"
+"options.role.thurifer.activationDelay" : "Activation Delay"
 
 # Neutral Roles
 
@@ -1035,6 +1053,7 @@
 "button.label.blaze" : "blaze"
 "button.label.callBack" : "call back"
 "button.label.camo" : "camo"
+"button.label.cannon" : "cannon"
 "button.label.clean" : "clean"
 "button.label.destroy" : "destroy"
 "button.label.disturb" : "disturb"
@@ -1089,6 +1108,9 @@
 "button.label.dive" : "dive"
 "button.label.gush" : "gush"
 "button.label.task" : "task"
+"button.label.marketplace" : "marketplace"
+"button.label.thurifer.curse" : "curse"
+"button.label.thurifer.impute" : "impute"
 
 # Game
 
@@ -1135,6 +1157,7 @@
 "statistics.events.destroy" : "Destroy"
 "statistics.events.accident" : "Accident"
 "statistics.events.dance" : "Dance"
+"statistics.events.gassed" : "Gassed"
 
 # States
 
@@ -1155,6 +1178,7 @@
 "state.cursed" : "Cursed"
 "state.crushed" : "Crushed"
 "state.frenzied" : "Frenzied"
+"state.gassed" : "Gassed"
 
 # Endings
 
@@ -1416,6 +1440,7 @@
 "achievement.type.challenge" : "Challenge"
 "achievement.type.secret" : "Secret"
 "achievement.type.seasonal" : "Seasonal"
+"achievement.type.costume" : "Cosmetics"
 
 "achievement.filter.all" : "All"
 "achievement.filter.achieved" : "Cleared"
@@ -1487,6 +1512,7 @@
 "marketplace.ui.marketplace.activate" : "Activate"
 "marketplace.ui.marketplace.activated.addons" : "The add-on will be downloaded on next startup."
 "marketplace.ui.marketplace.activated.cosmetics" : "Start loading the costume!"
+"marketplace.ui.marketplace.inactivated" : "The add-on will be deleted on next startup."
 "marketplace.ui.marketplace.autoUpdate" : "Auto-Update"
 "marketplace.ui.edit.fetch" : "Please wait..."
 "marketplace.ui.edit.fetch.error" : "It is failed to fetch the content."

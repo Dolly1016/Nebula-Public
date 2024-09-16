@@ -31,7 +31,7 @@ public class GUITextField : AbstractGUIWidget
         field.InputPredicate = TextPredicate;
         if (WithMaskMaterial) field.AsMaskedText();
 
-        var background = UnityHelper.CreateObject<SpriteRenderer>("Background", obj.transform, UnityEngine.Vector3.zero);
+        var background = UnityHelper.CreateObject<SpriteRenderer>("Background", obj.transform, UnityEngine.Vector3.zero, LayerExpansion.GetUILayer());
         background.sprite = IsSharpField ? NebulaAsset.SharpWindowBackgroundSprite.GetSprite() : VanillaAsset.TextButtonSprite;
         background.drawMode = SpriteDrawMode.Sliced;
         background.tileMode = SpriteTileMode.Continuous;

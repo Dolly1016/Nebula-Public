@@ -81,7 +81,7 @@ public class ClientOption
                 onDetermine?.Invoke();
                 window.CloseScreen();
             })
-        ),new(0.5f,0.5f), out _);
+        ),new Vector2(0.5f,0.5f), out _);
 
         
     }

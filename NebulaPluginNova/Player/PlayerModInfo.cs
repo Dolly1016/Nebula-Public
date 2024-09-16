@@ -6,6 +6,7 @@ using Nebula.Compat;
 using Nebula.Game.Statistics;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
+using Nebula.Roles.Impostor;
 using System.Diagnostics.CodeAnalysis;
 using Virial.Assignable;
 using Virial.Command;
@@ -45,6 +46,7 @@ public static class PlayerState
     public static TranslatableTag Cursed = new("state.cursed");
     public static TranslatableTag Crushed = new("state.crushed");
     public static TranslatableTag Frenzied = new("state.frenzied");
+    public static TranslatableTag Gassed = new("state.gassed");
 
     static PlayerState()
     {
@@ -60,6 +62,7 @@ public static class PlayerState
         Virial.Text.PlayerStates.Suicide = Suicide;
         Virial.Text.PlayerStates.Revived = Revived;
         Virial.Text.PlayerStates.Pseudocide = Pseudocide;
+        Virial.Text.PlayerStates.Gassed = Gassed;
     }
 }
 
@@ -111,6 +114,8 @@ public class PlayerAttributeImpl : IPlayerAttribute
         PlayerAttributes.ScreenSize = new PlayerAttributeImpl(8, "$screenSize", "screenSize");
         PlayerAttributes.Eyesight = new PlayerAttributeImpl(9, "$eyesight", "eyesight");
         PlayerAttributes.Roughening = new PlayerAttributeImpl(10, "$rough", "rough");
+
+        PlayerAttributes.Thurifer = new PlayerAttributeImpl(11, "$thurifer", "thurifer");
     }
 }
 
@@ -125,6 +130,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public bool IsDisconnected { get; set; } = false;
     public bool IsDead => IsDisconnected || (MyControl ? MyControl.Data.IsDead : ((this as GamePlayer).PlayerState != PlayerStates.Alive && (this as GamePlayer).PlayerState != PlayerStates.Revived));
     public PlayerDiving? CurrentDiving { get; set; }
+    public bool IsBlown => MyControl.MyPhysics.Animations.IsPlayingSpawnAnimation();
 
     public float MouseAngle { get; private set; }
     private bool requiredUpdateMouseAngle { get; set; }
@@ -310,11 +316,21 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         if (lastColor != currentColor)
         {
             //色が変化したとき
-
             if (AmOwner && Helpers.CurrentMonth == 4 && ColorHelper.IsLightGreen(Palette.PlayerColors[lastColor]) && ColorHelper.IsPink(Palette.PlayerColors[currentColor]))
             {
                 Debug.Log("sakura");
                 new StaticAchievementToken("sakura");
+            }
+
+            if(AmOwner && lastColor == NebulaPlayerTab.CamouflageColorId && currentColor != NebulaPlayerTab.CamouflageColorId && MoreCosmic.GetTags(newOutfit).Any(tag => tag == "hat.party" || tag == "visor.party"))
+            {
+                //カモフラージュが解けたら、次の瞬間にパーティーメンバーをチェックする
+                NebulaManager.Instance.ScheduleDelayAction(() => {
+
+                    var localPos = PlayerControl.LocalPlayer.transform.position;
+                    var count = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.AmOwner && p.VanillaPlayer.transform.position.Distance(localPos) < 1f && MoreCosmic.GetTags(p.CurrentOutfit.outfit).Any(tag => tag == "hat.party" || tag == "visor.party"));
+                    if (count >= 2) new StaticAchievementToken("costume.partyCamo");
+                });
             }
         }
     }
@@ -711,6 +727,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             if (max > 0f && current > 0f) yield return isPermanent ? (a, 0f) : (a, current / max);
         }
 
+        //香気の表示
+        if(ModSingleton<Thurifer.ThuribulumManager>.Instance != null)
+        {
+            var percentage = ModSingleton<Thurifer.ThuribulumManager>.Instance.LocalInhalationPercentage;
+            if(percentage > 0f) yield return (PlayerAttributes.Thurifer, percentage);
+        }
     }
 
     public void OnSetAttribute(IPlayerAttribute attribute)

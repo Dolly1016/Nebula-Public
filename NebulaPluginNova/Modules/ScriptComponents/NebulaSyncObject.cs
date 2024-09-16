@@ -3,6 +3,21 @@ using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
 
+public class NebulaSyncObjectReference
+{
+    int id;
+    NebulaSyncObject? referTo = null;
+
+    public NebulaSyncObjectReference(int id) {  this.id = id; }
+
+    public NebulaSyncObject? SyncObject { get { 
+            if(referTo == null) referTo = NebulaSyncObject.GetObject<NebulaSyncObject>(id);
+            return referTo;
+        }
+    }
+    public int ObjectId => id;
+}
+
 [NebulaRPCHolder]
 public abstract class NebulaSyncObject : INebulaScriptComponent, IGameOperator
 {
@@ -14,6 +29,8 @@ public abstract class NebulaSyncObject : INebulaScriptComponent, IGameOperator
         int hash = tag.ComputeConstantHash();
         if (instantiaters.ContainsKey(hash)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, $"Duplicated Instantiater Error ({tag})");
         instantiaters[hash] = instantiater;
+
+        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Sync Object \"{tag}\" has been registered. ({hash})");
     }
 
     public int ObjectId { get; private set; }
@@ -69,18 +86,23 @@ public abstract class NebulaSyncObject : INebulaScriptComponent, IGameOperator
            if (allObjects.TryGetValue(message, out var obj)) obj.ReleaseIt();
        });
 
-    static public NebulaSyncObject? RpcInstantiate(string tag, float[]? arguments)
+    static public NebulaSyncObjectReference RpcInstantiate(string tag, float[]? arguments)
     {
         int id = AvailableId(PlayerControl.LocalPlayer.PlayerId);
-        RpcInstantiateDef.Invoke(new(id, tag.ComputeConstantHash(), arguments ?? Array.Empty<float>(), false));
-        return allObjects[id];
+        int hash = tag.ComputeConstantHash();
+        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Try Instantiate Sync GLOBAL Object (tag: {tag}, hash: {hash})");
+        
+        RpcInstantiateDef.Invoke(new(id, hash, arguments ?? Array.Empty<float>(), false));
+        return new(id);
     }
 
-    static public NebulaSyncObject? LocalInstantiate(string tag, float[]? arguments)
+    static public NebulaSyncObjectReference LocalInstantiate(string tag, float[]? arguments)
     {
         int id = AvailableId(PlayerControl.LocalPlayer.PlayerId);
-        RpcInstantiateDef.LocalInvoke(new(id, tag.ComputeConstantHash(), arguments ?? Array.Empty<float>(), false));
-        return allObjects[id];
+        int hash = tag.ComputeConstantHash();
+        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Try Instantiate Sync LOCAL Object (tag: {tag}, hash: {hash})");
+        RpcInstantiateDef.LocalInvoke(new(id, hash, arguments ?? Array.Empty<float>(), false));
+        return new(id);
     }
 
     //ローカルでの生成を全体に反映させます。
@@ -195,5 +217,23 @@ public class NebulaSyncStandardObject : NebulaSyncObject, IReleasable
     {
         base.OnReleased();
         if(MyRenderer) GameObject.Destroy(MyRenderer.gameObject);
+    }
+}
+
+public class NebulaSyncShadowObject : NebulaSyncStandardObject, IReleasable
+{
+    public SpriteRenderer ShadowRenderer { get; private set; }
+
+    public NebulaSyncShadowObject(Vector2 pos, ZOption zOrder, Sprite sprite, Color color)
+        :base(pos, zOrder, false, sprite)
+    {
+        ShadowRenderer = UnityHelper.CreateObject<SpriteRenderer>("NebulaObject", MyRenderer.transform, Vector3.zero, LayerExpansion.GetShadowLayer());
+        ShadowSprite = sprite;
+    }
+
+    public Sprite ShadowSprite
+    {
+        get => ShadowRenderer.sprite;
+        set => ShadowRenderer.sprite = value;
     }
 }

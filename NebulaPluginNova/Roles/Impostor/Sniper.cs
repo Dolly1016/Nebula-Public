@@ -18,6 +18,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     private Sniper() : base("sniper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,AimAssistOption,DelayInAimAssistOption, CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Sniper.png");
 
         MetaAbility.RegisterCircle(new("role.sniper.shotRange", () => ShotEffectiveRangeOption, () => null, UnityColor));
         MetaAbility.RegisterCircle(new("role.sniper.soundRange", () => ShotNoticeRangeOption, () => null, UnityColor));
@@ -85,6 +86,8 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 //インポスターは無視
                 if (!CanKillImpostorOption && p.IsImpostor) continue;
 
+                //吹っ飛ばされているプレイヤーは無視しない
+
                 //不可視なプレイヤーは無視
                 if (p.Unbox().IsInvisible) continue;
 
@@ -151,7 +154,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 {
                     if (MyRifle == null)
                     {
-                        NebulaAsset.PlaySE(NebulaAudioClip.SniperEquip);
+                        NebulaAsset.PlaySE(NebulaAudioClip.SniperEquip, true);
                         equipButton.SetLabel("unequip");
                     }
                     else
@@ -177,14 +180,16 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) =>
                 {
-                    NebulaAsset.PlaySE(NebulaAudioClip.SniperShot);
+                    NebulaAsset.PlaySE(NebulaAudioClip.SniperShot, true);
                     var target = MyRifle?.GetTarget(ShotSizeOption, ShotEffectiveRangeOption);
                     if (target != null)
                     {
+                        bool isBlown = target.IsBlown;
                         if (MyPlayer.MurderPlayer(target, PlayerState.Sniped, EventDetail.Kill, KillParameter.RemoteKill) == KillResult.Kill)
                         {
                             if (target.VanillaPlayer.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
                             acTokenCommon ??= new("sniper.common1");
+                            if (isBlown) new StaticAchievementToken("sniper.common2");
                             if (MyPlayer.VanillaPlayer.GetTruePosition().Distance(target!.VanillaPlayer.GetTruePosition()) > 20f) acTokenChallenge.Value++;
                         }
                     }

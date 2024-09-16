@@ -92,6 +92,16 @@ internal class GameOperatorBuilder
 
 public class GameOperatorManager
 {
+    private class LambdaOnReleaseOperator : IGameOperator
+    {
+        Action onReleased;
+        void IGameOperator.OnReleased() => onReleased?.Invoke();
+        public LambdaOnReleaseOperator(Action onReleased)
+        {
+            this.onReleased = onReleased;
+        }
+    }
+
     static private GameOperatorManager? instance;
     static public GameOperatorManager? Instance => instance;
 
@@ -237,6 +247,10 @@ public class GameOperatorManager
         newFuncOperations.Add((typeof(Event), obj => operation.Invoke((Event)obj), lifespan));
     }
 
+    public void RegisterReleasedAction(Action onReleased, ILifespan lifespan)
+    {
+        newOperations.Add((new LambdaOnReleaseOperator(onReleased), lifespan));
+    }
     public GameOperatorManager()
     {
         instance = this;

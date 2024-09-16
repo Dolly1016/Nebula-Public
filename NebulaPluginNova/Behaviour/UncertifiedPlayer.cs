@@ -54,8 +54,6 @@ namespace Nebula.Behaviour
             {
                 yield return new WaitForSeconds(0.5f);
                 RpcRequireHandshake.Invoke();
-                yield return new WaitForSeconds(3f);
-                RpcRequireHandshake.Invoke();
             }
 
             AmongUsClient.Instance.StartCoroutine(CoWaitAndRequireHandshake().WrapToIl2Cpp());
@@ -93,10 +91,24 @@ namespace Nebula.Behaviour
                 NebulaManager.Instance.SetHelpWidget(button, new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = ReasonToTranslationKey(State) + (AmongUsClient.Instance.AmHost ? ".detail" : ".client") });
             });
             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+            OnStateChanged();
 
             IEnumerator CoWaitAndUpdate()
             {
-                yield return new WaitForSeconds(1.5f);
+                yield return new WaitForSeconds(0.8f);
+
+                int tried = 0;
+
+                do
+                {
+                    if (tried > 0)
+                    {
+                        Certification.RequireHandshake();
+                    }
+                    yield return new WaitForSeconds(0.5f);
+                    tried++;
+                } while (tried < 10 && State == UncertifiedReason.Waiting);
+
                 if (State == UncertifiedReason.Waiting) Reject(UncertifiedReason.Uncertified);
             }
             StartCoroutine(CoWaitAndUpdate().WrapToIl2Cpp());
@@ -130,7 +142,7 @@ namespace Nebula.Behaviour
 
         public void Update()
         {
-            myShower.SetActive((AmongUsClient.Instance.AmHost || (MyControl?.AmOwner ?? false)) && State != UncertifiedReason.Waiting);
+            myShower.SetActive((AmongUsClient.Instance.AmHost || (MyControl?.AmHost() ?? false) || (MyControl?.AmOwner ?? false)));
         }
 
         public void OnDestroy()

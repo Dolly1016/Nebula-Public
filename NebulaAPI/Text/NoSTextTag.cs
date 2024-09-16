@@ -57,6 +57,10 @@ public static class PlayerStates
     /// Buskerが偽装死した状態を表します。今後Buskerは復活する可能性があります。
     /// </summary>
     public static CommunicableTextTag Pseudocide { get; internal set; } = null!;
+    /// <summary>
+    /// Buskerが偽装死した状態を表します。今後Buskerは復活する可能性があります。
+    /// </summary>
+    public static CommunicableTextTag Gassed { get; internal set; } = null!;
 }
 
 /// <summary>
@@ -136,4 +140,8 @@ public static class EventDetails
     /// Buskerによる復活の失敗を表します。
     /// </summary>
     public static CommunicableTextTag Accident { get; internal set; } = null!;
+    /// <summary>
+    /// Thuriferの遅延キルを表します。
+    /// </summary>
+    public static CommunicableTextTag Gassed { get; internal set; } = null!;
 }

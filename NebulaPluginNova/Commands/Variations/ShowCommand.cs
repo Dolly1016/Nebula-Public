@@ -36,7 +36,7 @@ public class ShowCommand : ICommand
                     .Action(widget =>
                     {
                         var window = MetaScreen.GenerateWindow(new(width, height),  HudManager.Instance.transform, UnityEngine.Vector3.zero, true, true, withMask: true);
-                        window.SetWidget(widget, new(pivotX, pivotY), out _);
+                        window.SetWidget(widget, new UnityEngine.Vector2(pivotX, pivotY), out _);
                     });
                 }},
                 { "title", () =>

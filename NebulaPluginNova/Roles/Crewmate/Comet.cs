@@ -13,6 +13,7 @@ public class Comet : DefinedRoleTemplate, DefinedRole
     public Comet() : base("comet", new(121,175,206), RoleCategory.CrewmateRole, Crewmate.MyTeam, [BlazeCoolDownOption, BlazeDurationOption, BlazeSpeedOption, BlazeVisionOption, BlazeScreenOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Comet.png");
     }
     
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);

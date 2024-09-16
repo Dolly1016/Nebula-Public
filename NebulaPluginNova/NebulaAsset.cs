@@ -2,8 +2,10 @@
 using Nebula.Behaviour;
 using Nebula.Utilities;
 using System.Reflection;
+using UnityEngine.Audio;
 using Virial.Runtime;
 using Virial.Text;
+using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 
 namespace Nebula;
 
@@ -23,6 +25,36 @@ public enum NebulaAudioClip {
     HadarGush,
     Justice1,
     Justice2,
+}
+
+public static class SoundManagerHelper
+{
+    public static AudioSource PlayOneShot(this SoundManager soundManager, AudioClip clip, bool loop, float volume = 1f, AudioMixerGroup? audioMixer = null)
+    {
+        if (clip == null) return null!;
+        audioMixer ??= loop ? soundManager.MusicChannel : soundManager.SfxChannel;
+        
+        AudioSource audioSource;
+        if (soundManager.allSources.TryGetValue(clip, out audioSource))
+        {
+            audioSource.volume = volume;
+            audioSource.outputAudioMixerGroup = audioMixer;
+            audioSource.loop = loop;
+            audioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            audioSource = soundManager.gameObject.AddComponent<AudioSource>();
+            audioSource.outputAudioMixerGroup = audioMixer;
+            audioSource.playOnAwake = false;
+            audioSource.volume = volume;
+            audioSource.loop = loop;
+            audioSource.clip = clip;
+            audioSource.PlayOneShot(clip);
+            soundManager.allSources.Add(clip, audioSource);
+        }
+        return audioSource;
+    }
 }
 
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
@@ -169,9 +201,12 @@ public static class NebulaAsset
     public static GameObject[] DivMap { get; private set; } = new GameObject[6];
     private static Dictionary<NebulaAudioClip, AudioClip> audioMap = new();
 
-    public static void PlaySE(NebulaAudioClip clip)
+    public static void PlaySE(NebulaAudioClip clip, bool oneshot = false)
     {
-        SoundManager.Instance.PlaySound(audioMap[clip],false,0.8f);
+        if (oneshot)
+            SoundManager.Instance.PlayOneShot(audioMap[clip], false, 0.8f);
+        else
+            SoundManager.Instance.PlaySound(audioMap[clip],false,0.8f);
     }
 
     public static void PlaySE(NebulaAudioClip clip, Vector2 pos, float minDistance, float maxDistance, float volume = 1f) => PlaySE(audioMap[clip], pos, minDistance, maxDistance);

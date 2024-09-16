@@ -109,7 +109,7 @@ public static class ManagedEffects
         obj.transform.localScale = new Vector3(scale, scale, 1f);
 
         List<IEnumerator> coroutines = new();
-
+        
         //円を描くように7つの煙を配置
         for (int i = 0; i < 7; i++)
         {
@@ -127,6 +127,26 @@ public static class ManagedEffects
         }
 
         yield return Effects.All(coroutines.Select(r => r.WrapToIl2Cpp()).ToArray());
+        GameObject.Destroy(obj);
+    }
+
+    public static IEnumerator CoPlayAnimEffect(int layer, string name, IDividedSpriteLoader sprite, Transform? parent, Vector3 pos, float scale, Color color, float spf, bool flip = false)
+    {
+        var obj = new GameObject(name);
+        if (parent != null) obj.transform.SetParent(parent);
+        obj.transform.localPosition = pos;
+        obj.transform.localScale = new Vector3(scale * (flip ? -1f : 1f), scale, 1f);
+        obj.transform.localEulerAngles = new Vector3(0, 0, System.Random.Shared.NextSingle() * 360f);
+        obj.layer = layer;
+        var renderer = obj.AddComponent<SpriteRenderer>();
+
+        int i = 0;
+        while (i < sprite.Length)
+        {
+            renderer.sprite = sprite.GetSprite(i++);
+            yield return Effects.Wait(spf);
+        }
+
         GameObject.Destroy(obj);
     }
 }

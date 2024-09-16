@@ -50,4 +50,10 @@ public static class ColorHelper
         color.ToHSV(out var h, out var s, out var v);
         return (98f < h && h < 146f && v < 0.8f && s > 0.56f) || (v < 0.22f && s < 0.08f);
     }
+
+    static public bool IsVividColor(Color color)
+    {
+        color.ToHSV(out _, out var s, out _);
+        return s > 0.85f;
+    }
 }

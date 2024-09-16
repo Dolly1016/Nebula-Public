@@ -468,7 +468,7 @@ public class SerializableDocument : IDocument
 
             if(citation == null) return new NoSGUIMargin(GetAlignment(), UnityEngine.Vector2.zero);
 
-            GUIClickableAction? onClick = (buildHyperLink && citation.RelatedUrl != null) ? _ => Application.OpenURL(citation.RelatedUrl) : null;
+            GUIClickableAction? onClick = (buildHyperLink && citation.RelatedUrl != null) ? _ => Application.OpenURL(Helpers.ConvertUrl(citation.RelatedUrl)) : null;
             var overlay = (buildHyperLink && citation.RelatedUrl != null) ? GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), "ui.citation.openUrl") : null;
 
             if (citation?.LogoImage != null) return GUI.Instance.Image(GetAlignment(), citation.LogoImage, new(1.5f, 0.37f), onClick, overlay);

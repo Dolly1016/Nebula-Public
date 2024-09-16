@@ -82,14 +82,17 @@ public class SpectatorsAbility : IGameOperator
 
     void HudUpdate(GameHudUpdateEvent ev)
     {
-        float axis = Input.GetAxis("Mouse ScrollWheel");
+        if (!Utilities.NebulaInput.SomeUiIsActive)
+        {
+            float axis = Input.GetAxis("Mouse ScrollWheel");
 
-        float rate = NebulaGameManager.Instance!.WideCamera.TargetRate;
-        if (axis < 0f) rate -= 0.25f;
-        if (axis > 0f) rate += 0.25f;
-        rate = Mathf.Clamp(rate, 1f, 6f);
+            float rate = NebulaGameManager.Instance!.WideCamera.TargetRate;
+            if (axis < 0f) rate -= 0.25f;
+            if (axis > 0f) rate += 0.25f;
+            rate = Mathf.Clamp(rate, 1f, 6f);
 
-        NebulaGameManager.Instance!.WideCamera.TargetRate = rate;
+            NebulaGameManager.Instance!.WideCamera.TargetRate = rate;
+        }
     }
 
     public SpectatorsAbility()

@@ -79,6 +79,7 @@ public static class HelpScreen
     private static void ShowScreen(MetaScreen screen, HelpTab tab,HelpTab validTabs)
     {
         MetaWidgetOld widget = new();
+        Image? backImage = null;
 
         widget.Append(GetTabsWidget(screen, tab, validTabs));
         widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
@@ -98,7 +99,7 @@ public static class HelpScreen
                     ));
                 break;
             case HelpTab.Overview:
-                widget.Append(ShowPreviewSrceen());
+                widget.Append(ShowPreviewSrceen(out backImage));
                 break;
             case HelpTab.Options:
                 widget.Append(ShowOptionsScreen());
@@ -112,9 +113,10 @@ public static class HelpScreen
         }
 
         screen.SetWidget(widget);
+        screen.SetBackImage(backImage, 0.09f);
     }
 
-    static private void ShowDocumentScreen(IDocument doc)
+    static private void ShowDocumentScreen(IDocument doc, Image? illustlation)
     {
         var screen = MetaScreen.GenerateWindow(new(7f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, true);
 
@@ -123,7 +125,7 @@ public static class HelpScreen
         inner = scrollView.Artifact;
         Reference<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
 
-        screen.SetWidget(scrollView, out _);
+        screen.SetWidget(scrollView, illustlation, out _);
     }
 
     private static TextAttributeOld RoleTitleAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
@@ -156,8 +158,7 @@ public static class HelpScreen
             Debug.Log("Not Existed: " + "role." + assignable.InternalName);
             return;
         }
-
-        ShowDocumentScreen(doc);
+        ShowDocumentScreen(doc, assignable.ConfigurationHolder?.Illustration);
     }
 
     private static IMetaWidgetOld ShowAssignableScreen(params (IEnumerable<DefinedAssignable> assignable, IMetaWidgetOld? header)[] contents)
@@ -319,8 +320,11 @@ public static class HelpScreen
         { AssignmentPreview.AssignmentFlag.VanillaCrewmate, 9}
     };
 
-    private static IMetaWidgetOld ShowPreviewSrceen()
+    private static NebulaSpriteLoader previewSpriteRaiderAndSniper = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Combinations/SniperRaider.png");
+    private static IMetaWidgetOld ShowPreviewSrceen(out Image? backImage)
     {
+        backImage = null;
+
         var textAttr = GUI.API.GetAttribute(AttributeAsset.OverlayContent);
         var maskedAttr = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
         Virial.Media.GUIWidget GetAssignableText(DefinedAssignable assignable) => new NoSGUIText(GUIAlignment.Center, maskedAttr, new RawTextComponent(assignable.DisplayColoredName))
@@ -402,6 +406,15 @@ public static class HelpScreen
 
 
         var view = new GUIScrollView(GUIAlignment.Center, new(7.4f, HelpHeight - 0.68f), GUI.API.HorizontalHolder(GUIAlignment.Center, GetRoleOverview(RoleCategory.ImpostorRole,"impostor"), GetRoleOverview(RoleCategory.NeutralRole, "neutral"), GetRoleOverview(RoleCategory.CrewmateRole, "crewmate")));
+
+        //背景画像の選定
+        bool CheckSpawnable(params ISpawnable[] spawnables)
+        {
+            return spawnables.All(s => s.IsSpawnable && (s is not DefinedRole dr || GeneralConfigurations.exclusiveAssignmentOptions.All(option => !option.OnAssigned(dr).Any(r => spawnables.Contains(r)))));
+        }
+
+        if (CheckSpawnable(Roles.Impostor.Sniper.MyRole, Roles.Impostor.Raider.MyRole))
+            backImage = previewSpriteRaiderAndSniper;
 
         return new MetaWidgetOld.WrappedWidget(new VerticalWidgetsHolder(GUIAlignment.Center, iconHolder, new NoSGUIMargin(GUIAlignment.Center, new(0f, 0.2f)), view));
     }

@@ -114,6 +114,11 @@ public static class PlayerAttributes
     /// モザイク効果を表します。
     /// </summary>
     static public IPlayerAttribute Roughening { get; internal set; }
+
+    /// <summary>
+    /// Thuriferの感染状態を表します。
+    /// </summary>
+    static public IPlayerAttribute Thurifer { get; internal set; }
 }
 
 public class Outfit
@@ -253,6 +258,11 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// ダイブしているとき、Trueを返します。
     /// </summary>
     public bool IsDived => CurrentDiving != null;
+
+    /// <summary>
+    /// 吹き飛ばされているとき、Trueを返します。
+    /// </summary>
+    public bool IsBlown { get; }
 
     /// <summary>
     /// 死亡時刻をゲーム開始からの経過時間で返します。
