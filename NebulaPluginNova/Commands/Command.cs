@@ -332,7 +332,7 @@ public class CommandManager
                 result.Add(
                     arg switch
                     {
-                        "@a" => new ArrayCommandToken(new ReadOnlyArray<ICommandToken>(NebulaGameManager.Instance?.AllPlayerInfo().OrderBy(p => p.PlayerId).Select(p => new PlayerCommandToken(p)))),
+                        "@a" => new ArrayCommandToken(new ReadOnlyArray<ICommandToken>(NebulaGameManager.Instance?.AllPlayerInfo.OrderBy(p => p.PlayerId).Select(p => new PlayerCommandToken(p)))),
                         _ => new StringCommandToken(arg)
                     }
                     );

@@ -16,6 +16,8 @@ public class Bloody : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
     static private FloatConfiguration CurseDurationOption = NebulaAPI.Configurations.Configuration("options.role.bloody.curseDuration", (2.5f,30f,2.5f),10f, FloatConfigurationDecorator.Second);
 
     static public Bloody MyRole = new Bloody();
+    static internal GameStatsEntry StatsBloody = NebulaAPI.CreateStatsEntry("stats.bloody.bloody", GameStatsCategory.Roles, MyRole);
+    static internal GameStatsEntry StatsKiller = NebulaAPI.CreateStatsEntry("stats.bloody.killer", GameStatsCategory.Roles, MyRole);
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
@@ -33,14 +35,21 @@ public class Bloody : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
             if (AmOwner || canSeeAllInfo) name += " †".Color(MyRole.UnityColor);
         }
 
-        [Local, OnlyMyPlayer]
+        [OnlyMyPlayer]
         void OnMurdered(PlayerMurderedEvent ev)
         {
-            if (!ev.Murderer.AmOwner)
+            if (ev.Murderer != MyPlayer)
             {
-                PlayerModInfo.RpcAttrModulator.Invoke((ev.Murderer.PlayerId, new AttributeModulator(PlayerAttributes.CurseOfBloody, CurseDurationOption, false, 1), true));
-                new StaticAchievementToken("bloody.common1");
-                acTokenChallenge = new("bloody.challenge",(false,true),(val,_)=>val.cleared);
+                if (AmOwner)
+                {
+                    PlayerModInfo.RpcAttrModulator.Invoke((ev.Murderer.PlayerId, new AttributeModulator(PlayerAttributes.CurseOfBloody, CurseDurationOption, false, 1), true));
+                    new StaticAchievementToken("bloody.common1");
+                    StatsBloody.Progress();
+                    acTokenChallenge = new("bloody.challenge", (false, true), (val, _) => val.cleared);
+                }else if (ev.Murderer.AmOwner)
+                {
+                    StatsKiller.Progress();
+                }
             }
         }
 

@@ -84,12 +84,10 @@ public class TrackerPlayerMapLayer : MonoBehaviour
     }
 }
 
-public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
+public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>, HasCitation, DefinedRole
 {
     private EvilTracker() : base("evilTracker", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ShowKillFlashOption, TaskTrackingOption, TrackCoolDownOption, CanChangeTargetOption, CanChangeTargetOnMeetingOption, UpdateArrowIntervalOption, TrackImpostorsOption,ShowTrackingTargetOnMapOption, CanCheckTrackingTasksInTaskPhaseOption, ShowWhereTrackingIsOption]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGMH;
-
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.showKillFlash", false);
     static private ValueConfiguration<int> TaskTrackingOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.taskTracking", ["options.role.evilTracker.taskTracking.off", "options.role.evilTracker.taskTracking.onlyTarget", "options.role.evilTracker.taskTracking.on"], 0);
@@ -103,22 +101,20 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration ShowWhereTrackingIsOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.showWhereTrackingIs", false);
     //private NebulaConfiguration ShowRoomWhereTrackingTargetIsOption = null!;
 
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
+
     static public EvilTracker MyRole = new EvilTracker();
 
     [NebulaRPCHolder]
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerAbility, IPlayerAbility 
     {
-        DefinedRole RuntimeRole.Role => MyRole;
 
         private ModAbilityButton? trackButton = null;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TrackButton.png", 115f);
         static private Image taskButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TaskTrackButton.png", 115f);
 
-
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
 
         GamePlayer? trackingTarget = null;
 
@@ -134,7 +130,7 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnSetRole(PlayerRoleSetEvent ev)
         {
-            if (TrackImpostorsOption)
+            if (TrackImpostorsOption && MyPlayer.IsImpostor)
             {
                 if (!ev.Player.AmOwner && ev.Player.IsImpostor)
                     TryRegisterArrow(ev.Player);
@@ -160,7 +156,7 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
         }
 
         PoolablePlayer? TrackingIcon = null;
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player) : base(player)
         {
             if (AmOwner)
             {
@@ -185,14 +181,14 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
                             }
 
                             if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + GetRoomName(trackingTarget)).Color(Color.Lerp(Palette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
-                            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.AmOwner && p.IsImpostor && !p.IsDead)) text.AppendLine((p.Name + ": " + GetRoomName(p)).Color(Palette.ImpostorRed));
+                            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostor && !p.IsDead)) text.AppendLine((p.Name + ": " + GetRoomName(p)).Color(Palette.ImpostorRed));
 
                             tmPro.text = text.ToString();
                         }
                     }, this);
                 }
                 //インポスターに矢印を付ける
-                if (TrackImpostorsOption) NebulaGameManager.Instance?.AllPlayerInfo().Where(p => !p.AmOwner && p.Role.Role.Category == RoleCategory.ImpostorRole).Do(p => TryRegisterArrow(p));
+                if (TrackImpostorsOption && MyPlayer.IsImpostor) NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.AmOwner && p.Role.Role.Category == RoleCategory.ImpostorRole).Do(p => TryRegisterArrow(p));
 
                 var trackTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p)));
 
@@ -227,8 +223,7 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
             }
         }
 
-        static private SpriteLoader trackSprite = SpriteLoader.FromResource("Nebula.Resources.TrackIcon.png", 115f);
-
+        
         TrackerTaskMapLayer? mapLayer = null;
         TrackerPlayerMapLayer? playerMapLayer = null;
 
@@ -240,7 +235,7 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 GamePlayer? isChecked = null;
                 NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new Behaviour.MeetingPlayerAction(
-                    trackSprite,
+                    MeetingPlayerButtonManager.Icons.AsLoader(1),
                     p =>
                     {
                         if (isChecked == null)
@@ -277,35 +272,38 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
             if(ShowKillFlashOption && !ev.Murderer.AmOwner) AmongUsUtil.PlayQuickFlash(Palette.ImpostorRed);   
         }
 
-        [Local]
-        void OnOpenNormalMap(MapOpenNormalEvent ev)
-        {
-            if (AmOwner && mapLayer) mapLayer!.gameObject.SetActive(false);
-            if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
-        }
 
         [Local]
-        void OnOpenAdminMap(MapOpenAdminEvent ev) {
-            if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
-            if (mapLayer) mapLayer!.gameObject.SetActive(false);
-        }
-
-        [Local]
-        void OnOpenSabotageMap(MapOpenSabotageEvent ev)
+        void OnOpenSabotageMap(AbstractMapOpenEvent ev)
         {
-            if (ShowTrackingTargetOnMapOption)
+            if(ev is MapOpenAdminEvent)
             {
-                if (!playerMapLayer)
-                {
-                    playerMapLayer = UnityHelper.CreateObject<TrackerPlayerMapLayer>("TrackerPlayerLayer", MapBehaviour.Instance.transform, new(0f, 0f, -1f));
-                    this.Bind(playerMapLayer.gameObject);
-                }
-
-                playerMapLayer!.ClearPool();
-                playerMapLayer!.Target = trackingTarget;
-                playerMapLayer!.gameObject.SetActive(trackingTarget != null);
+                if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
+                if (mapLayer) mapLayer!.gameObject.SetActive(false);
+                return;
             }
-            if (mapLayer) mapLayer!.gameObject.SetActive(false);
+
+            if (MeetingHud.Instance)
+            {
+                if (AmOwner && mapLayer) mapLayer!.gameObject.SetActive(false);
+                if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
+            }
+            else
+            {
+                if (ShowTrackingTargetOnMapOption)
+                {
+                    if (!playerMapLayer)
+                    {
+                        playerMapLayer = UnityHelper.CreateObject<TrackerPlayerMapLayer>("TrackerPlayerLayer", MapBehaviour.Instance.transform, new(0f, 0f, -1f));
+                        this.Bind(playerMapLayer.gameObject);
+                    }
+
+                    playerMapLayer!.ClearPool();
+                    playerMapLayer!.Target = trackingTarget;
+                    playerMapLayer!.gameObject.SetActive(trackingTarget != null);
+                }
+                if (mapLayer) mapLayer!.gameObject.SetActive(false);
+            }
         }
 
 
@@ -345,7 +343,8 @@ public class EvilTracker : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (MapBehaviour.Instance.IsOpen) MapBehaviour.Instance.Close();
                     MapBehaviour.Instance.ShowNormalMap();
 
-                    if(NebulaGameManager.Instance?.LocalPlayerInfo.Role is EvilTracker.Instance eTracker)
+                    var eTracker = NebulaGameManager.Instance?.LocalPlayerInfo.Role.GetAbility<Ability>();
+                    if (eTracker != null)
                     {
                         if (!eTracker.mapLayer)
                         {

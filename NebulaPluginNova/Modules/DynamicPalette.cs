@@ -510,7 +510,7 @@ public class DynamicPalette
     public static SpriteLoader colorBackSprite = SpriteLoader.FromResource("Nebula.Resources.ColorFullBase.png", 100f);
     public static void OpenCatalogue(SpriteRenderer TargetRenderer,Action ShownColor, bool isBodyColor = true)
     {
-        var screen = MetaScreen.GenerateWindow(new Vector2(6.7f, 4.2f), PlayerCustomizationMenu.Instance.transform, new Vector3(0f, 0f, 0f), true, false);
+        var screen = MetaScreen.GenerateWindow(new Vector2(6.7f, 4.2f), HudManager.InstanceExists ? HudManager.Instance.transform : PlayerCustomizationMenu.Instance.transform, new Vector3(0f, 0f, 0f), true, false);
         screen.transform.parent.FindChild("Background").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.85f);
 
         MetaWidgetOld widget = new();
@@ -622,8 +622,11 @@ public class NebulaPlayerTab : MonoBehaviour
 
     SpriteRenderer BrightnessRenderer = null!;
     SpriteRenderer BrightnessTargetRenderer = null!;
-    UIKnob BrTargetKnob = null!;
+    SpriteRenderer BrightnessTargetPreviewRenderer = null!;
+    GameObject BrTargetKnob = null!;
     ObjectPool<SpriteRenderer> ColorIcons = null!;
+
+    PassiveButton BrPaletteBackButton = null!;
 
     public PlayerTab playerTab = null!;
 
@@ -705,12 +708,17 @@ public class NebulaPlayerTab : MonoBehaviour
         BrightnessTargetRenderer.sprite = spriteBrTarget.GetSprite();
         BrightnessTargetRenderer.gameObject.layer = LayerExpansion.GetUILayer();
 
+        BrightnessTargetPreviewRenderer = UnityHelper.CreateObject<SpriteRenderer>("BrightnessPalette", BrightnessRenderer.transform, new Vector3(0f, 0.0f, -1.5f));
+        BrightnessTargetPreviewRenderer.sprite = spriteBrTarget.GetSprite();
+        BrightnessTargetPreviewRenderer.color = new(0f, 0.6f, 1f, 0.5f);
+        BrightnessTargetPreviewRenderer.gameObject.layer = LayerExpansion.GetUILayer();
+        BrightnessTargetPreviewRenderer.gameObject.SetActive(false);
+
         var BrPaletteCollider = BrightnessRenderer.gameObject.AddComponent<BoxCollider2D>();
         BrPaletteCollider.size = new Vector2(0.31f, BrightnessHeight);
         BrPaletteCollider.isTrigger = true;
 
-        var BrPaletteBackButton = BrightnessRenderer.gameObject.SetUpButton();
-
+        BrPaletteBackButton = BrightnessRenderer.gameObject.SetUpButton(true);
         BrPaletteBackButton.OnClick.AddListener(() => {
             if (DynamicPalette.MyColor.GetShadowPattern() == byte.MaxValue) return;
 
@@ -727,38 +735,10 @@ public class NebulaPlayerTab : MonoBehaviour
             PreviewColor(null, null, null);
         });
 
-        var BrTargetCollider = BrightnessTargetRenderer.gameObject.AddComponent<BoxCollider2D>();
-        BrTargetCollider.size = new Vector2(0.38f, 0.18f);
-        BrTargetCollider.isTrigger = true;
+        BrTargetKnob = BrightnessTargetRenderer.gameObject;
 
-        BrTargetKnob = BrightnessTargetRenderer.gameObject.AddComponent<UIKnob>();
-        BrTargetKnob.IsVert = true;
-        BrTargetKnob.Range = (-BrightnessHeight * 0.5f, BrightnessHeight * 0.5f);
-        BrTargetKnob.Renderer = BrightnessTargetRenderer;
-        BrTargetKnob.OnRelease = () => {
-            if (DynamicPalette.MyColor.GetShadowPattern() == byte.MaxValue) DynamicPalette.MyColor.SetShadowPattern(0);
 
-            float b = ToBrightness(BrTargetKnob.transform.localPosition.y);
-
-            DynamicPalette.MyColor.EditColor(edittingShadowColor,null, null, b, null);
-
-            if (AmongUsClient.Instance && AmongUsClient.Instance.IsInGame && PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
-
-            PreviewColor(null, null, null);
-        };
-
-        float lastB = -1f;
-        float lastBTime = 0f;
-        BrTargetKnob.OnDragging = (y) => {
-            float b = (y + (BrightnessHeight * 0.5f)) / BrightnessHeight;
-            if (lastB == b || Mathf.Abs(Time.time - lastBTime) < 0.05f) return;
-            lastBTime = Time.time;
-            lastB = b;
-
-            PreviewColor(null, null, b);
-        };
-
-        for(int i = 0; i < DynamicPalette.SavedColor.Length; i++)
+        for (int i = 0; i < DynamicPalette.SavedColor.Length; i++)
         {
             int copiedIndex = i;
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("SavedColor", transform, new(4.45f + (float)i * 0.81f, 2.25f, -50f));
@@ -824,6 +804,7 @@ public class NebulaPlayerTab : MonoBehaviour
 
     public void OnEnable()
     {
+        Helpers.RefreshMemory();
         PreviewColor(null, null, null);
     }
 
@@ -851,9 +832,33 @@ public class NebulaPlayerTab : MonoBehaviour
     byte lastH = 0, lastD = 0;
     float lastTime = 0f;
 
+    float lastPreviewB = -1f;
     public void Update()
     {
-        BrTargetKnob.gameObject.SetActive(DynamicPalette.MyColor.GetShadowPattern() != byte.MaxValue);
+        BrTargetKnob.SetActive(DynamicPalette.MyColor.GetShadowPattern() != byte.MaxValue);
+
+        //マウスボタン押下中でカーソルが明度パレット上にある
+        if(Input.GetMouseButton(0) && PassiveButtonManager.Instance.currentOver == BrPaletteBackButton)
+        {
+            var currentPos = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer()) - BrPaletteBackButton.transform.position;
+            var b = ToBrightness(currentPos.y);
+            if (Mathf.Abs(lastPreviewB - b) > 0.001f)
+            {
+                PreviewColor(null, null, b);
+                lastPreviewB = b;
+            }
+
+            var targetLocPos = BrightnessTargetPreviewRenderer.transform.localPosition;
+            targetLocPos.y = Mathf.Clamp(currentPos.y, -BrightnessHeight * 0.5f, BrightnessHeight * 0.5f);
+            BrightnessTargetPreviewRenderer.transform.localPosition = targetLocPos;
+
+            BrightnessTargetPreviewRenderer.gameObject.SetActive(true);
+        }
+        else
+        {
+            BrightnessTargetPreviewRenderer.gameObject.SetActive(false);
+        }
+
 
         var pos = GetOnPalettePosition();
         float distance = pos.magnitude;
@@ -1040,7 +1045,7 @@ public static class ColorNamePatch
         {
             __result = "";
         }
-           
+
         return false;
     }
 }
@@ -1051,8 +1056,8 @@ public static class SetColorPatch
     static void Postfix([HarmonyArgument(0)] int colorId, [HarmonyArgument(1)] Renderer rend)
     {
         if (!rend || colorId < 0 || colorId >= DynamicPalette.VisorColors.Length) return;
+        
 
         rend.material.SetColor(PlayerMaterial.VisorColor, DynamicPalette.VisorColors[colorId]);
-
     }
 }

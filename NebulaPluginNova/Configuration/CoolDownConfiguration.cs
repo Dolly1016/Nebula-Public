@@ -1,11 +1,5 @@
-﻿using Il2CppSystem;
-using Nebula.Modules.GUIWidget;
+﻿using Nebula.Modules.GUIWidget;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Virial;
 using Virial.Configuration;
 using Virial.Media;
@@ -25,28 +19,34 @@ internal class KillCoolDownConfiguration : IRelativeCoolDownConfiguration
     string CurrentCoolDownStr => coolDownTypeEntry.Value switch { 2 => ratioCoolDownStr, 1 => relativeCoolDownStr, _ => immediateCoolDownStr };
     IOrderedSharableVariable<float> CurrentEntry => coolDownTypeEntry.Value switch { 2 => ratioEntry, 1 => relativeEntry, _ => immediateEntry };
     TextComponent title;
+    Func<bool>? predicate;
+    Func<float>? baseKillCooldown;
 
-    internal KillCoolDownConfiguration(TextComponent title, string id, CoolDownType defaultType, float[] immediateSelection, float immediateDefaultValue, float[] relativeSelection, float relativeDefaultValue, float[] ratioSelection, float ratioDefaultValue)
+    internal KillCoolDownConfiguration(TextComponent title, string id, CoolDownType defaultType, float[] immediateSelection, float immediateDefaultValue, float[] relativeSelection, float relativeDefaultValue, float[] ratioSelection, float ratioDefaultValue, Func<bool>? predicate, Func<float>? baseKillCooldown)
     {
         this.title = title;
         coolDownTypeEntry = new IntegerConfigurationValue(id + ".type", [0, 1, 2], (int)defaultType);
         immediateEntry = new FloatConfigurationValue(id + ".immediate", immediateSelection, immediateDefaultValue);
         relativeEntry = new FloatConfigurationValue(id + ".relative", relativeSelection, relativeDefaultValue);
         ratioEntry = new FloatConfigurationValue(id + ".ratio", ratioSelection, ratioDefaultValue);
+        this.predicate = predicate;
+        this.baseKillCooldown = baseKillCooldown;
     }
 
     string immediateCoolDownStr => immediateEntry.Value + Language.Translate("options.sec");
     string relativeCoolDownStr => relativeEntry.Value switch { < 0 => "", > 0 => "+", _ => "±" } + relativeEntry.Value + Language.Translate("options.sec");
     string ratioCoolDownStr => ratioEntry.Value + Language.Translate("options.cross");
 
-    float IRelativeCoolDownConfiguration.CoolDown => coolDownTypeEntry.Value switch
+    float IRelativeCoolDownConfiguration.CoolDown => (this as IRelativeCoolDownConfiguration).GetCoolDown(baseKillCooldown?.Invoke() ?? AmongUsUtil.VanillaKillCoolDown);
+    float IRelativeCoolDownConfiguration.GetCoolDown(float baseCooldown) => coolDownTypeEntry.Value switch
     {
-        2 => ratioEntry.Value * AmongUsUtil.VanillaKillCoolDown,
-        1 => System.Math.Max(0f, relativeEntry.Value + AmongUsUtil.VanillaKillCoolDown),
+        2 => ratioEntry.Value * baseCooldown,
+        1 => System.Math.Max(0f, relativeEntry.Value + baseCooldown),
         _ => immediateEntry.Value
     };
 
-    bool IConfiguration.IsShown => true;
+
+    bool IConfiguration.IsShown => predicate?.Invoke() ?? true;
 
     string? IConfiguration.GetDisplayText() => title.GetString() + ": " + CurrentCoolDownStr +( " (" + (this as IRelativeCoolDownConfiguration).CoolDown + Language.Translate("options.sec") + ")").Color(Color.gray);
 

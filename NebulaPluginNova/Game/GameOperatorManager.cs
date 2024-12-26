@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
 using Virial;
 using Virial.Attributes;
 using Virial.Events.Player;
@@ -6,12 +7,12 @@ using Virial.Game;
 
 namespace Nebula.Game;
 
-internal record GameOperatorInstance(ILifespan lifespan, Action<object> action);
+internal record GameOperatorInstance(ILifespan lifespan, Action<object> action, int Priority);
 internal class GameOperatorBuilder
 {
-    List<(Type type, Func<object, Action<object>> action)> allActions;
+    List<(Type type, Func<object, (Action<object> generator, int priority)> action)> allActions;
 
-    private GameOperatorBuilder(List<(Type type, Func<object, Action<object>> action)> actions)
+    private GameOperatorBuilder(List<(Type type, Func<object, (Action<object> generator, int priority)> action)> actions)
     {
         this.allActions = actions;
     }
@@ -22,12 +23,15 @@ internal class GameOperatorBuilder
     /// </summary>
     public void Register(Action<Type, GameOperatorInstance> registerFunc, ILifespan lifespan, IGameOperator operation)
     {
-        foreach(var action in allActions) registerFunc.Invoke(action.type, new(lifespan, action.action.Invoke(operation)));
+        foreach (var action in allActions) {
+            var result = action.action.Invoke(operation);
+            registerFunc.Invoke(action.type, new(lifespan, result.generator, result.priority));
+        }
     }
 
     static public GameOperatorBuilder GetBuilderFromType(Type entityType)
     {
-        List<(Type type, Func<object, Action<object>> action)> builderActions = new();
+        List<(Type type, Func<object, (Action<object> generator, int priority)> action)> builderActions = new();
 
         //公開メソッドをすべて拾い上げる
         IEnumerable<MethodInfo> methods = entityType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
@@ -39,7 +43,6 @@ internal class GameOperatorBuilder
             methods = methods.Concat(baseType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly));
             baseType = baseType.BaseType;
         }
-        
 
         foreach(var method in methods)
         {
@@ -48,18 +51,29 @@ internal class GameOperatorBuilder
 
             if (!parameters[0].ParameterType.IsAssignableTo(typeof(Virial.Events.Event))) continue;
 
+            //Debug.Log($"{method.Name} (Event: {parameters[0].ParameterType.Name})");
+            
+            //メソッドとして抽出された匿名関数を除外 (意図して作ったメソッドではない)
+            if (method.Name.StartsWith("<")) continue;
+
             var eventType = parameters[0].ParameterType;
 
+            var instanceParam = Expression.Parameter(typeof(object), "instance");
+            var eventParam = Expression.Parameter(typeof(object), "ev");
+            var convertEv = Expression.Convert(eventParam, eventType);
+            var convertInstance = Expression.Convert(instanceParam, entityType);
+            var call = Expression.Call(convertInstance, method, convertEv);
+            var exp = Expression.Lambda<Action<object, object>>(call, instanceParam, eventParam).Compile();
 
-            Action<object, object> procedure = (instance, e) => method.Invoke(instance, [e]);
-
+            Action<object, object> procedure = exp/*(instance, e) => method.Invoke(instance, [e])*/;
 
             if (method.GetCustomAttribute<OnlyMyPlayer>() != null)
             {
                 var lastAction = procedure;
                 procedure = (instance, e) =>
                 {
-                    if ((e as AbstractPlayerEvent)?.Player == (instance as IBindPlayer)?.MyPlayer) lastAction.Invoke(instance, e);
+                    byte? p = (e as AbstractPlayerEvent)?.Player.PlayerId;
+                    if (p.HasValue && p.Value == ((instance as IBindPlayer)?.MyPlayer.PlayerId ?? byte.MaxValue)) lastAction.Invoke(instance, e);
                 };
             }
 
@@ -81,7 +95,9 @@ internal class GameOperatorBuilder
                 };
             }
 
-            builderActions.Add((eventType, (instance) => (e) => procedure.Invoke(instance,e)));
+            int priority = method.GetCustomAttribute<EventPriority>()?.Priority ?? 100;
+
+            builderActions.Add((eventType, (instance) => ((e) => procedure.Invoke(instance, e), priority)));
         }
 
         return new(builderActions);
@@ -201,7 +217,7 @@ public class GameOperatorManager
 
     // 反復中に作用素が追加されないよう、一時的に退避する
     private List<(IGameOperator entity, ILifespan lifespan)> newOperations = new();
-    private List<(Type eventType, Action<object> operation, ILifespan lifespan)> newFuncOperations = new();
+    private List<(Type eventType, Action<object> operation, ILifespan lifespan, int priority)> newFuncOperations = new();
 
     private void RegisterEntity(IGameOperator operation, ILifespan lifespan)
     {
@@ -224,7 +240,16 @@ public class GameOperatorManager
             instanceList = new();
             allOperatorInstance.Add(eventType, instanceList);
         }
-        instanceList.Add(instance);
+
+        int index = instanceList.FindIndex(0, existed => existed.Priority < instance.Priority);
+        if (index != -1)
+        {
+            instanceList.Insert(index, instance);
+        }
+        else
+        {
+            instanceList.Add(instance);
+        }
     }
     
 
@@ -232,7 +257,7 @@ public class GameOperatorManager
     private void RegisterAll()
     {
         foreach (var entry in newOperations) RegisterEntity(entry.entity, entry.lifespan);
-        foreach (var op in newFuncOperations) RegisterImpl(op.eventType, new(op.lifespan, op.operation));
+        foreach (var op in newFuncOperations) RegisterImpl(op.eventType, new(op.lifespan, op.operation, op.priority));
         newOperations.Clear();
         newFuncOperations.Clear();
     }
@@ -242,9 +267,9 @@ public class GameOperatorManager
         newOperations.Add((entity, lifespan));
     }
 
-    public void Register<Event>(Action<Event> operation, ILifespan lifespan)
+    public void Register<Event>(Action<Event> operation, ILifespan lifespan, int priority = 100)
     {
-        newFuncOperations.Add((typeof(Event), obj => operation.Invoke((Event)obj), lifespan));
+        newFuncOperations.Add((typeof(Event), obj => operation.Invoke((Event)obj), lifespan, priority));
     }
 
     public void RegisterReleasedAction(Action onReleased, ILifespan lifespan)

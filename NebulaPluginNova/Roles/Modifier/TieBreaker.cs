@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
 
@@ -12,6 +13,7 @@ public class TieBreaker : DefinedAllocatableModifierTemplate, DefinedAllocatable
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
     static public TieBreaker MyRole = new TieBreaker();
+    static internal GameStatsEntry StatsTieBreaking = NebulaAPI.CreateStatsEntry("stats.tieBreaker.tieBreaking", GameStatsCategory.Roles, MyRole);
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
@@ -46,6 +48,7 @@ public class TieBreaker : DefinedAllocatableModifierTemplate, DefinedAllocatable
             if(message.playerId == PlayerControl.LocalPlayer.PlayerId && (NebulaGameManager.Instance?.GetPlayer(message.playerId)?.TryGetModifier<Instance>(out var role) ?? false)) { 
                 if (role.acTokenCommon != null) role.acTokenCommon.Value = true;
                 if (role.acTokenChallenge != null) role.acTokenChallenge.Value.lastTieVoted = message.votedFor;
+                StatsTieBreaking.Progress();
             }
         });
 

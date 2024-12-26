@@ -1,6 +1,7 @@
 ﻿using Nebula.Commands.Tokens;
 using Virial.Command;
 using Virial.Compat;
+using Virial.Game;
 
 namespace Nebula.Commands.Variations;
 
@@ -33,8 +34,8 @@ public class OutfitCommand : ICommand
                     if (arguments.Count < 3)
                         return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " set <target> <outfit> [<priority>] [<selfAware>]");
 
-                    NetworkedPlayerInfo.PlayerOutfit? outfit = null;
-                    task = task.Chain(_ => arguments[2].AsValue<NetworkedPlayerInfo.PlayerOutfit>(env).Action(val => outfit = val));
+                    OutfitDefinition? outfit = null;
+                    task = task.Chain(_ => arguments[2].AsValue<OutfitDefinition>(env).Action(val => outfit = val));
                     if (arguments.Count >= 4) task = task.Chain(_ => arguments[3].AsValue<int>(env).Action(val => priority = val));
                     if (arguments.Count == 5) task = task.Chain(_ => arguments[4].AsValue<bool>(env).Action(val => selfAware = val));
 
@@ -46,7 +47,7 @@ public class OutfitCommand : ICommand
                         {
                             using (RPCRouter.CreateSection("CommandOutfit"))
                             {
-                                targets.Do(p => PlayerModInfo.RpcAddOutfit.Invoke((p.PlayerId, new Virial.Game.OutfitCandidate("", priority, selfAware, outfit, []))));
+                                targets.Do(p => PlayerModInfo.RpcAddOutfit.Invoke((p.PlayerId, new(outfit, "", priority, selfAware))));
                             }
                         }
                     });
@@ -56,7 +57,7 @@ public class OutfitCommand : ICommand
                     if (arguments.Count == 3) task = task.Chain(_ => arguments[2].AsValue<int>(env).Action(val => priority = val));
 
                     return task.ChainFast(_ => (targets.Count() == 0 ? EmptyCommandToken.Token
-                    : new ObjectCommandToken<NetworkedPlayerInfo.PlayerOutfit>(targets.First().Unbox().GetOutfit(priority))));
+                    : new ObjectCommandToken<OutfitDefinition>(targets.First().Unbox().GetOutfit(priority).Outfit)));
                 }
             });
     }

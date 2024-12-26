@@ -9,6 +9,7 @@ public interface IDataEntry
 {
     string Serialize();
     void DeserializeAndSetWithoutSave(string val);
+    bool ShouldWrite { get; }
     string Id { get; }
 }
 
@@ -17,7 +18,7 @@ public abstract class DataEntry<T> : IDataEntry where T : notnull
     private T value;
     string name;
     DataSaver saver;
-
+    public bool ShouldWrite { get; private init; }
     public T Value
     {
         get { return value; }
@@ -36,11 +37,23 @@ public abstract class DataEntry<T> : IDataEntry where T : notnull
         saver.SetValue(name, Serialize(value), true);
     }
 
-    public DataEntry(string name, DataSaver saver, T defaultValue)
+    abstract protected bool Equals(T val1, T val2);
+
+    public DataEntry(string name, DataSaver saver, T defaultValue, string? defaultSource = null, bool shouldWrite = true)
     {
         this.name = name;
         this.saver = saver;
-        value = Parse(saver.GetValue(name, Serialize(defaultValue)));
+
+        if (defaultSource != null && !saver.TryGetValue(name, out _) && saver.TryGetValue(defaultSource, out var existedDefault))
+        {
+            //デフォルトの参照元があり、値が格納されておらず、デフォルトの参照元が値を持っている場合
+            value = Parse(existedDefault);
+            saver.SetValue(name, Serialize(value));
+        }
+        else {
+            value = Parse(saver.GetValue(name, Serialize(defaultValue)));
+            if (Equals(value, defaultValue) && !shouldWrite) saver.RemoveValue(name);
+        }
         saver.allEntries.Add(this);
     }
 
@@ -55,31 +68,36 @@ public abstract class DataEntry<T> : IDataEntry where T : notnull
 public class StringDataEntry : DataEntry<string>
 {
     public override string Parse(string str) { return str; }
-    public StringDataEntry(string name, DataSaver saver, string defaultValue) : base(name, saver, defaultValue) { }
+    protected override bool Equals(string val1, string val2) => val1 == val2;
+    public StringDataEntry(string name, DataSaver saver, string defaultValue, string? defaultSource = null, bool shouldWrite = true) : base(name, saver, defaultValue, defaultSource, shouldWrite) { }
 }
 
 public class FloatDataEntry : DataEntry<float>
 {
     public override float Parse(string str) { return float.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0f; }
-    public FloatDataEntry(string name, DataSaver saver, float defaultValue) : base(name, saver, defaultValue) { }
+    protected override bool Equals(float val1, float val2) => val1 == val2;
+    public FloatDataEntry(string name, DataSaver saver, float defaultValue, string? defaultSource = null, bool shouldWrite = true) : base(name, saver, defaultValue, defaultSource, shouldWrite) { }
 }
 
 public class ByteDataEntry : DataEntry<byte>
 {
     public override byte Parse(string str) { return byte.TryParse(str, out var result) ? result : (byte)0; }
-    public ByteDataEntry(string name, DataSaver saver, byte defaultValue) : base(name, saver, defaultValue) { }
+    protected override bool Equals(byte val1, byte val2) => val1 == val2;
+    public ByteDataEntry(string name, DataSaver saver, byte defaultValue, string? defaultSource = null, bool shouldWrite = true) : base(name, saver, defaultValue, defaultSource, shouldWrite) { }
 }
 
 public class IntegerDataEntry : DataEntry<int>
 {
     public override int Parse(string str) { return int.TryParse(str, out var result) ? result : 0; }
-    public IntegerDataEntry(string name, DataSaver saver, int defaultValue) : base(name, saver, defaultValue) { }
+    protected override bool Equals(int val1, int val2) => val1 == val2;
+    public IntegerDataEntry(string name, DataSaver saver, int defaultValue, string? defaultSource = null, bool shouldWrite = true) : base(name, saver, defaultValue, defaultSource, shouldWrite) { }
 }
 
 public class BooleanDataEntry : DataEntry<bool>
 {
     public override bool Parse(string str) { return bool.TryParse(str, out var result) ? result : false; }
-    public BooleanDataEntry(string name, DataSaver saver, bool defaultValue) : base(name, saver, defaultValue) { }
+    protected override bool Equals(bool val1, bool val2) => val1 == val2;
+    public BooleanDataEntry(string name, DataSaver saver, bool defaultValue, string? defaultSource = null, bool shouldWrite = true) : base(name, saver, defaultValue, defaultSource, shouldWrite) { }
 }
 
 public class IntegerTupleAryDataEntry : DataEntry<(int,int)[]>
@@ -108,7 +126,7 @@ public class IntegerTupleAryDataEntry : DataEntry<(int,int)[]>
         }
         return builder.ToString();
     }
-
+    protected override bool Equals((int, int)[] val1, (int, int)[] val2) => false;
     public IntegerTupleAryDataEntry(string name, DataSaver saver, (int,int)[] defaultValue) : base(name, saver, defaultValue) { }
 }
 
@@ -140,6 +158,7 @@ public class StringTupleAryDataEntry : DataEntry<(string, string)[]>
         }
         return builder.ToString();
     }
+    protected override bool Equals((string, string)[] val1, (string, string)[] val2) => false;
 
     public StringTupleAryDataEntry(string name, DataSaver saver, (string, string)[] defaultValue) : base(name, saver, defaultValue) { }
 }
@@ -165,6 +184,7 @@ public class StringArrayDataEntry : DataEntry<string[]>
         }
         return builder.ToString();
     }
+    protected override bool Equals(string[] val1, string[] val2) => false;
 
     public StringArrayDataEntry(string name, DataSaver saver, string[] defaultValue) : base(name, saver, defaultValue) { }
 }
@@ -228,6 +248,11 @@ public class DataSaver
         if (!skipSave) TrySave();
     }
 
+    public void RemoveValue(string name)
+    {
+        contents.Remove(name);
+    }
+
     public DataSaver(string filename)
     {
         this.filename = filename;
@@ -260,7 +285,13 @@ public class DataSaver
         {
             strContents += entry.Key + ":" + entry.Value + "\n";
         }
-        FileIO.WriteAllText(ToDataSaverPath(filename), strContents);
+        try
+        {
+            FileIO.WriteAllText(ToDataSaverPath(filename), strContents);
+        }catch (Exception e)
+        {
+            Debug.LogError($"DataOutputError ({filename})");
+        }
     }
 
     public void TrySave()
@@ -275,6 +306,8 @@ public class DataSaver
             yield return (entry.Key, entry.Value);
         }
     }
+
+    public bool TryGetEntry(string key, [MaybeNullWhen(false)]out IDataEntry entry) =>  allEntries.Find(e => e.Id == key, out entry);
 }
 
 public class JsonDataSaver<T> where T : class, new()

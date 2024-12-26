@@ -127,7 +127,7 @@ public static class VentStartPatch
         foreach (var b in __instance.Buttons)
         {
             b.spriteRenderer.gameObject.layer = LayerExpansion.GetUILayer();
-            b.spriteRenderer.sortingOrder = 10;
+            b.spriteRenderer.sortingOrder = 0;
         }
         var scale = __instance.transform.localScale;
         scale.z = 1f;
@@ -316,10 +316,13 @@ class MovingPlatformBehaviourMeetingCalledPatch
 [HarmonyPatch(typeof(MovingPlatformBehaviour), nameof(MovingPlatformBehaviour.InUse), MethodType.Getter)]
 class CanUseMovingPlayformPatch
 {
-    static bool Prefix(MovingPlatformBehaviour __instance)
+    static bool Prefix(MovingPlatformBehaviour __instance, out bool __result)
     {
+        __result = false;
         if (AmongUsUtil.CurrentMapId != 4) return true;
-        return !GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue;
+        else {
+            return !GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue;
+        }
     }
 }
 
@@ -353,51 +356,60 @@ public static class ArrowUpdatePatch
 {
     public static bool Prefix(ArrowBehaviour __instance)
     {
-        __instance.gameObject.layer = LayerExpansion.GetArrowLayer();
-        __instance.image.sortingOrder = 10;
-
-        //表示するのはUIカメラ
-        Camera main = NebulaGameManager.Instance?.WideCamera.Camera ?? UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
-        //距離を測るのは表示用のカメラ
-        Camera worldCam = (NebulaGameManager.Instance?.WideCamera.IsShown ?? false) ? NebulaGameManager.Instance.WideCamera.Camera : Camera.main;
-
-        Vector2 del = __instance.target - main.transform.position;
-
-        float num = del.magnitude / (worldCam.orthographicSize * __instance.perc);
-        if (__instance.image != null) __instance.image.enabled = (num > __instance.minDistanceToShowArrow);
-
-        Vector2 vector = worldCam.WorldToViewportPoint(__instance.target);
-
-        //カメラに合わせて見かけ上の位置に偽装させる
-        var tempTarget = __instance.target;
-        var diff = __instance.target - HudManager.Instance.transform.position;
-        var pos = HudManager.Instance.transform.position + diff / (worldCam.orthographicSize / 3f);
-        pos.z = tempTarget.z;
-        __instance.target = pos;
-
-        if (__instance.Between(vector.x, 0f, 1f) && __instance.Between(vector.y, 0f, 1f))
+        try
         {
-            Vector2 temp = worldCam.transform.position + (__instance.target - worldCam.transform.position) * (worldCam.orthographicSize / Camera.main.orthographicSize);
-            __instance.transform.position = temp - del.normalized * 0.6f;
-            __instance.transform.localScale = Vector3.one * Mathf.Clamp(num, 0f, 1f);
-        }
-        else
-            __instance.DistancedBehaviour(vector, del, num, main);
+            __instance.gameObject.layer = LayerExpansion.GetArrowLayer();
+            __instance.image.sortingOrder = 10;
 
-        __instance.transform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
+            //表示するのはUIカメラ
+            Camera main = NebulaGameManager.Instance?.WideCamera.Camera ?? UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
+            //距離を測るのは表示用のカメラ
+            Camera worldCam = (NebulaGameManager.Instance?.WideCamera.IsShown ?? false) ? NebulaGameManager.Instance.WideCamera.Camera : Camera.main;
 
-        __instance.target = tempTarget;
+            Vector2 del = __instance.target - main.transform.position;
 
-        __instance.transform.LookAt2d(__instance.target);
+            float num = del.magnitude / (worldCam.orthographicSize * __instance.perc);
+            if (__instance.image != null) __instance.image.enabled = (num > __instance.minDistanceToShowArrow);
 
-        //Zの位置を調整
-        var localPos = __instance.transform.localPosition;
-        localPos.z = -50f;
-        __instance.transform.localPosition = localPos;
+            Vector2 vector = worldCam.WorldToViewportPoint(__instance.target);
 
+            //カメラに合わせて見かけ上の位置に偽装させる
+            var tempTarget = __instance.target;
+            var diff = __instance.target - HudManager.Instance.transform.position;
+            var pos = HudManager.Instance.transform.position + diff / (worldCam.orthographicSize / 3f);
+            pos.z = tempTarget.z;
+            __instance.target = pos;
+
+            if (__instance.Between(vector.x, 0f, 1f) && __instance.Between(vector.y, 0f, 1f))
+            {
+                Vector2 temp = worldCam.transform.position + (__instance.target - worldCam.transform.position) * (worldCam.orthographicSize / Camera.main.orthographicSize);
+                __instance.transform.position = temp - del.normalized * 0.6f;
+                __instance.transform.localScale = Vector3.one * Mathf.Clamp(num, 0f, 1f);
+            }
+            else
+                __instance.DistancedBehaviour(vector, del, num, main);
+
+            __instance.transform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
+
+            __instance.target = tempTarget;
+
+            __instance.transform.LookAt2d(__instance.target);
+
+            //Zの位置を調整
+            var localPos = __instance.transform.localPosition;
+            localPos.z = -100f;
+            __instance.transform.localPosition = localPos;
+        }catch(System.Exception e) { }
         return false;
     }
 }
+
+[HarmonyPatch(typeof(PingBehaviour), nameof(PingBehaviour.UpdatePosition))]
+public static class PingUpdatePatch
+{
+    public static bool Prefix(PingBehaviour __instance) => ArrowUpdatePatch.Prefix(__instance);
+}
+
 
 [HarmonyPatch(typeof(Ladder), nameof(Ladder.MaxCoolDown), MethodType.Getter)]
 class LadderCoolDownPatch

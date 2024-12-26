@@ -30,14 +30,16 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
     void OnGameStart(GameStartEvent ev)
     {
         //実績
-        new AchievementToken<int>("challenge.death2", 0, (exileAnyone, _) => (NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.IsDead && p.MyKiller == NebulaGameManager.Instance.LocalPlayerInfo && p != NebulaGameManager.Instance.LocalPlayerInfo).Select(p => p.PlayerState).Distinct().Count() + exileAnyone) >= 4);
+        var challengeDeath2Token = new AchievementToken<int>("challenge.death2", 0, (exileAnyone, _) => (NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p.IsDead && p.MyKiller == NebulaGameManager.Instance.LocalPlayerInfo && p != NebulaGameManager.Instance.LocalPlayerInfo).Select(p => p.PlayerState).Distinct().Count() + exileAnyone) >= 4);
+        GameOperatorManager.Instance?.Register<PlayerVoteDisclosedLocalEvent>(ev => { if (ev.VoteToWillBeExiled) challengeDeath2Token.Value = 1; }, NebulaAPI.CurrentGame!);
+        
         if (Helpers.CurrentMonth == 3) new AchievementToken<int>("graduation2", 0, (exileAnyone, _) => exileAnyone >= 3);
 
         if (Helpers.CurrentMonth == 5 && (AmongUsUtil.CurrentMapId is 1 or 4))
         {
             if (NebulaGameManager.Instance!.LocalPlayerInfo.Unbox().TryGetModifier<Lover.Instance>(out var lover))
             {
-                var myLover = lover.MyLover;
+                var myLover = lover.MyLover.Get();
                 float time = 0f;
                 bool isCleared = false;
                 new NebulaGameScript()
@@ -122,6 +124,28 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
             }
         }
 
+        if (Helpers.CurrentMonth == 10)
+        {
+            AchievementToken<float> acToken10 = new("halloween", 0f, (a, _) => (int)a);
+            byte lastDeadBody = byte.MaxValue;
+            Vector2 lastPos = Vector2.zeroVector;
+            var myPlayer = NebulaGameManager.Instance!.LocalPlayerInfo!;
+            GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev =>
+            {
+                byte currentBody = myPlayer.HoldingDeadBody?.PlayerId ?? byte.MaxValue;
+                if (currentBody != byte.MaxValue && currentBody == lastDeadBody && !myPlayer.VanillaPlayer.inVent)
+                {
+                    float val = lastPos.Distance(myPlayer.Position);
+                    if(val < 1f) acToken10.Value += val; //大きすぎる値は加算しない。
+                }
+
+                //位置を更新する。
+                lastDeadBody = currentBody;
+                lastPos = myPlayer.Position;
+                
+            }, NebulaAPI.CurrentGame!);
+        }
+
         //会議なしで勝利
         {
             //会議が始まったらフラグを下げる
@@ -135,13 +159,13 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
             bool HasTag(GamePlayer player, string tag) => MoreCosmic.GetTags(player.DefaultOutfit.outfit).Any(t => t == "hat." + tag || t == "visor." + tag);
             bool HasAnyTag(GamePlayer player, params string[] tags) => tags.Any(t => HasTag(player, t));
 
-            if (HasTag(NebulaGameManager.Instance!.LocalPlayerInfo, "animal") && NebulaGameManager.Instance.AllPlayerInfo().Count(p => HasTag(p, "animal")) >= 5)
+            if (HasTag(NebulaGameManager.Instance!.LocalPlayerInfo, "animal") && NebulaGameManager.Instance.AllPlayerInfo.Count(p => HasTag(p, "animal")) >= 5)
                 new StaticAchievementToken("costume.animals");
-            if (HasAnyTag(NebulaGameManager.Instance!.LocalPlayerInfo, "music.instrument", "music.conductor") && NebulaGameManager.Instance.AllPlayerInfo().Count(p => HasTag(p, "music.instrument")) >= 3 && NebulaGameManager.Instance.AllPlayerInfo().Count(p => HasTag(p, "music.conductor")) == 1)
+            if (HasAnyTag(NebulaGameManager.Instance!.LocalPlayerInfo, "music.instrument", "music.conductor") && NebulaGameManager.Instance.AllPlayerInfo.Count(p => HasTag(p, "music.instrument")) >= 3 && NebulaGameManager.Instance.AllPlayerInfo.Count(p => HasTag(p, "music.conductor")) == 1)
                 new StaticAchievementToken("costume.music");
             if (HasVisorTag(NebulaGameManager.Instance!.LocalPlayerInfo, "party") && ColorHelper.IsVividColor(Palette.PlayerColors[NebulaGameManager.Instance.LocalPlayerInfo.PlayerId]))
             {
-                var partyMembers = NebulaGameManager.Instance.AllPlayerInfo().Where(p => HasVisorTag(p, "party") && ColorHelper.IsVividColor(Palette.PlayerColors[p.PlayerId])).DistinctBy(p => p.DefaultOutfit.outfit.VisorId).ToArray();
+                var partyMembers = NebulaGameManager.Instance.AllPlayerInfo.Where(p => HasVisorTag(p, "party") && ColorHelper.IsVividColor(Palette.PlayerColors[p.PlayerId])).DistinctBy(p => p.DefaultOutfit.outfit.VisorId).ToArray();
                 if(partyMembers.Length >= 3) new StaticAchievementToken("costume.party");
             }
         }

@@ -26,50 +26,83 @@ public class DestroyerAssets
     })).ToArray();
 
 }
-public class Destroyer : DefinedRoleTemplate, DefinedRole
+
+public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, DefinedRole
 {
     private Destroyer() : base("destroyer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [KillCoolDownOption, PhasesOfDestroyingOption, KillSEStrengthOption,LeaveKillEvidenceOption, CanReportKillSceneOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagBeginner);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Destroyer.png");
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.destroyer.destroyCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 35f, (-30f, 30f, 2.5f), 10f, (0.5f, 5f, 0.125f), 1.5f);
-    static private IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.phasesOfDestroying", (1, 10), 3, decorator: val => val + ($" ({string.Format("{0:#.#}",3.2f + (2.05f * val))}{Language.Translate("options.sec")})").Color(Color.gray));
+    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.destroyer.destroyCoolDown", CoolDownType.Immediate, (0f, 60f, 2.5f), 35f, (-30f, 30f, 2.5f), 10f, (0.5f, 5f, 0.125f), 1.5f);
+    static private IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.phasesOfDestroying", (1, 10), 3, decorator: val => val + ($" ({string.Format("{0:#.#}",3.2f + (2.05f * (val - 1)))}{Language.Translate("options.sec")})").Color(Color.gray));
     static private FloatConfiguration KillSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.killSEStrength", (1f,20f,0.5f),3.5f, FloatConfigurationDecorator.Ratio);
     static private BoolConfiguration LeaveKillEvidenceOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.leaveKillEvidence", true);
     static private BoolConfiguration CanReportKillSceneOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.canReportKillScene", true);
     static public Destroyer MyRole = new Destroyer();
+    static private GameStatsEntry StatsReported = NebulaAPI.CreateStatsEntry("stats.destroyer.reported", GameStatsCategory.Roles, MyRole);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
 
     [NebulaRPCHolder]
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
+        static private float DestroyKillDistance = 0.65f;
+        public Ability(GamePlayer player) : base(player) {
+            if (AmOwner)
+            {
+                AchievementToken<int> achChallengeToken = new("destroyer.challenge", 0, (val, _) => val >= 3 && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
 
-        private ModAbilityButton? destroyButton = null;
-        
-        bool RuntimeRole.HasVanillaKillButton => false;
-        public Instance(GamePlayer player) : base(player)
-        {
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer), p => CheckDestroyKill(MyPlayer.VanillaPlayer, p.VanillaPlayer.transform.position), null));
+                var destroyButton = Bind(new ModAbilityButton(false, true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "destroyer.kill");
+                destroyButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && killTracker.CurrentTarget != null;
+                destroyButton.Visibility = (button) => !MyPlayer.VanillaPlayer.Data.IsDead;
+                destroyButton.OnClick = (button) => {
+                    //左右どちらでキルすればよいか考える
+                    var targetTruePos = killTracker.CurrentTarget!.VanillaPlayer.GetTruePosition();
+                    var targetPos = killTracker.CurrentTarget!.VanillaPlayer.transform.position;
+                    var canMoveToLeft = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, true), out var leftDis);
+                    var canMoveToRight = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, false), out var rightDis);
+                    bool moveToLeft = false;
+                    if (canMoveToLeft && canMoveToRight && leftDis < rightDis) moveToLeft = true;
+                    else if (!canMoveToRight) moveToLeft = true;
+
+                    lastKilling = killTracker.CurrentTarget;
+
+                    RpcCoDestroyKill.Invoke((MyPlayer, killTracker.CurrentTarget!, targetTruePos, moveToLeft));
+
+                    new StaticAchievementToken("destroyer.common1");
+                    new StaticAchievementToken("destroyer.common2");
+                    achChallengeToken.Value++;
+
+                    NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
+                };
+                destroyButton.OnMeeting = button => button.StartCoolDown();
+                destroyButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
+                destroyButton.SetLabel("destroyerKill");
+                destroyButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
+                NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(destroyButton.GetKillButtonLike());
+            }
         }
 
-        static private float DestroyKillDistance = 0.65f;
+        bool IPlayerAbility.HideKillButton => true;
+
         static private bool CheckCanMove(PlayerControl myPlayer, Vector3 position, out float distance)
         {
             distance = myPlayer.transform.position.Distance(position);
             return !PhysicsHelpers.AnythingBetween(myPlayer.Collider, myPlayer.Collider.transform.position, position, Constants.ShipAndAllObjectsMask, false);
         }
-        static private Vector3 GetDestroyKillPosition(Vector3 target,bool left)
+        static private Vector3 GetDestroyKillPosition(Vector3 target, bool left)
         {
             return target + new Vector3(left ? -DestroyKillDistance : DestroyKillDistance, 0f, 0f);
         }
         static private bool CheckDestroyKill(PlayerControl myPlayer, Vector3 target)
         {
-            return CheckCanMove(myPlayer, GetDestroyKillPosition(target,true), out _) || CheckCanMove(myPlayer, GetDestroyKillPosition(target, false), out _);
+            return CheckCanMove(myPlayer, GetDestroyKillPosition(target, true), out _) || CheckCanMove(myPlayer, GetDestroyKillPosition(target, false), out _);
         }
 
-        static private IDividedSpriteLoader spriteModBlood = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.DestroyerBlood.png",136f,6);
-        static private Image spriteBloodPuddle = SpriteLoader.FromResource("Nebula.Resources.BloodPuddle.png",130f);
+        static private IDividedSpriteLoader spriteModBlood = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.DestroyerBlood.png", 136f, 6);
+        static private Image spriteBloodPuddle = SpriteLoader.FromResource("Nebula.Resources.BloodPuddle.png", 130f);
         private const string destroyerAttrTag = "nebula::destroyer";
         static private IEnumerator CoDestroyKill(PlayerControl myPlayer, PlayerControl target, Vector3 targetPos, bool moveToLeft)
         {
@@ -161,9 +194,10 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             modSplatterRenderer.sharedMaterial = splatter.sharedMaterial;
             var modSplatter = modSplatterRenderer.gameObject.AddComponent<ModAnimator>();
 
-            var targetModInfo =  target.GetModInfo()!;
+            var targetModInfo = target.GetModInfo()!;
             target.Visible = true;
             target.inVent = false;
+            targetModInfo.Unbox().WillDie = true;
 
             IEnumerator CoScale(float startScale, float goalScale, float duration, NebulaAudioClip audioClip, bool playKillSE = false)
             {
@@ -179,7 +213,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                 float randomX = 0f;
                 float randomTimer = 0f;
 
-                if (!MeetingHud.Instance) NebulaAsset.PlaySE(audioClip, target.transform.position, 0.8f, KillSEStrengthOption, 0.46f);
+                if (!MeetingHud.Instance) NebulaAsset.PlaySE(audioClip, target.transform.position, 0.8f, KillSEStrengthOption, 1f);
 
                 int sePhase = 0;
                 float[] seTime = [0.45f, 0.62f, 0.98f];
@@ -188,10 +222,10 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                 {
                     scale = startScale + (goalScale - startScale) * p;
                     handRenderer.transform.localPosition = targetPos + new Vector3(randomX + (moveToLeft ? -0.15f : 0.15f), scale * 0.55f + 0.4f, -1f);
-                    if(!targetModInfo.IsDead) sizeModulator.Size.y = scale;
+                    if (!targetModInfo.IsDead) sizeModulator.Size.y = scale;
 
                     randomTimer -= Time.deltaTime;
-                    if(randomTimer < 0f)
+                    if (randomTimer < 0f)
                     {
                         randomX = ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.07f;
                         randomTimer = 0.05f;
@@ -199,21 +233,21 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
 
                     if (playKillSE && !MeetingHud.Instance)
                     {
-                        if(sePhase < seTime.Length && p > seTime[sePhase])
+                        if (sePhase < seTime.Length && p > seTime[sePhase])
                         {
-                            if(sePhase < 2)
+                            if (sePhase < 2)
                             {
                                 //血を出す
                                 splatter.gameObject.SetActive(false);
                                 deadBody.transform.localScale = new(sePhase == 0 ? 0.7f : -0.7f, 0.7f, 0.7f);
                                 splatter.gameObject.SetActive(true);
                             }
-                            else if(sePhase == 2)
+                            else if (sePhase == 2)
                             {
-                                modSplatter.PlayOneShot(spriteModBlood, 12f,true);
+                                modSplatter.PlayOneShot(spriteModBlood, 12f, true);
                             }
 
-                            NebulaAsset.PlaySE(target.KillSfx, target.transform.position + new Vector3(((float)System.Random.Shared.NextDouble() - 0.5f) * 0.05f, ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.05f, 0f), 0.6f, 1.4f, 0.45f);
+                            NebulaAsset.PlaySE(target.KillSfx, target.transform.position + new Vector3(((float)System.Random.Shared.NextDouble() - 0.5f) * 0.05f, ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.05f, 0f), 0.6f, 1.4f, 1f);
                             sePhase++;
                         }
                     }
@@ -231,7 +265,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
 
             int phases = PhasesOfDestroyingOption - 1;
 
-            for (int i = 0;i < phases; i++)
+            for (int i = 0; i < phases; i++)
             {
                 yield return CoScale(
                     1f - 0.4f / phases * i,
@@ -239,7 +273,7 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
                     1.2f, (i % 2 == 0) ? NebulaAudioClip.Destroyer1 : NebulaAudioClip.Destroyer2);
                 yield return new WaitForSeconds(0.7f);
             }
-            
+
             yield return CoScale(phases == 0 ? 1f : 0.6f, 0f, 3.2f, NebulaAudioClip.Destroyer3, true);
 
             if (myPlayer.AmOwner && !target.Data.IsDead)
@@ -251,7 +285,8 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             {
                 NebulaManager.Instance.StopCoroutine(monitorMeetingCoroutine);
             }
-            catch { 
+            catch
+            {
                 //会議に入って停止に失敗しても何もしない
             }
 
@@ -264,10 +299,10 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
             }
 
             GameObject.Destroy(handRenderer.gameObject);
-            if(deadBodyObj) GameObject.Destroy(deadBodyObj);
+            if (deadBodyObj) GameObject.Destroy(deadBodyObj);
 
             myPlayer.moveable = true;
-            
+
             //こちらの目線で死ぬまで待つ
             while (!targetModInfo.IsDead) yield return null;
 
@@ -287,54 +322,21 @@ public class Destroyer : DefinedRoleTemplate, DefinedRole
 
         private GamePlayer? lastKilling = null;
 
-        void RuntimeAssignable.OnActivated()
-        {
-            if (AmOwner)
-            {
-                AchievementToken<int> achChallengeToken = new("destroyer.challenge", 0, (val, _) => val >= 3 && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
-
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer,ObjectTrackers.ImpostorKillPredicate, p => CheckDestroyKill(MyPlayer.VanillaPlayer, p.VanillaPlayer.transform.position), null));
-                destroyButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "destroyer.kill");
-                destroyButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && killTracker.CurrentTarget != null;
-                destroyButton.Visibility = (button) => !MyPlayer.VanillaPlayer.Data.IsDead;
-                destroyButton.OnClick = (button) => {
-                    //左右どちらでキルすればよいか考える
-                    var targetTruePos = killTracker.CurrentTarget!.VanillaPlayer.GetTruePosition();
-                    var targetPos = killTracker.CurrentTarget!.VanillaPlayer.transform.position;
-                    var canMoveToLeft = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, true), out var leftDis);
-                    var canMoveToRight = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, false), out var rightDis);
-                    bool moveToLeft = false;
-                    if (canMoveToLeft && canMoveToRight && leftDis < rightDis) moveToLeft = true;
-                    else if (!canMoveToRight) moveToLeft = true;
-
-                    lastKilling = killTracker.CurrentTarget;
-
-                    RpcCoDestroyKill.Invoke((MyPlayer, killTracker.CurrentTarget!, targetTruePos, moveToLeft));
-
-                    new StaticAchievementToken("destroyer.common1");
-                    new StaticAchievementToken("destroyer.common2");
-                    achChallengeToken.Value++;
-
-                    destroyButton.StartCoolDown();
-                };
-                destroyButton.OnMeeting = button => button.StartCoolDown();
-                destroyButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
-                destroyButton.SetLabel("destroyerKill");
-                destroyButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
-            }
-        }
-
         [Local]
         void OnReported(ReportDeadBodyEvent ev)
         {
-            if (AmOwner && lastKilling != null && ev.Reported == lastKilling) new StaticAchievementToken("destroyer.another1");
+            if (AmOwner && lastKilling != null && ev.Reported == lastKilling)
+            {
+                new StaticAchievementToken("destroyer.another1");
+                StatsReported.Progress();
+            }
         }
 
         static public RemoteProcess<(GamePlayer player, GamePlayer target, Vector2 targetPosition, bool moveToLeft)> RpcCoDestroyKill = new(
             "DestroyerKill",
             (message, _) =>
             {
-                NebulaManager.Instance.StartCoroutine(CoDestroyKill(message.player.VanillaPlayer, message.target.VanillaPlayer,message.targetPosition,message.moveToLeft).WrapToIl2Cpp());
+                NebulaManager.Instance.StartCoroutine(CoDestroyKill(message.player.VanillaPlayer, message.target.VanillaPlayer, message.targetPosition, message.moveToLeft).WrapToIl2Cpp());
             }
             );
     }

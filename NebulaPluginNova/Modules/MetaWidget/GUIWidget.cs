@@ -218,6 +218,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.StandardLargeWideMasked => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.7f, 1f, 1.7f), new(2.9f, 0.45f), new(255, 255, 255), false),
                 AttributeAsset.CenteredBold => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(8f, 8f), new(255, 255, 255), true),
                 AttributeAsset.CenteredBoldFixed => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(1.1f, 0.32f), new(255, 255, 255), false),
+                AttributeAsset.LeftBoldFixed => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(1.1f, 0.32f), new(255, 255, 255), false),
                 AttributeAsset.OverlayTitle => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f) },
                 AttributeAsset.OverlayContent => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredLeft)) { FontSize = new(1.5f, 1.1f, 1.5f), Size = new(5f, 6f) },
                 AttributeAsset.DocumentStandard => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardLeft)) { FontSize = new(1.2f, 0.6f, 1.2f), Size = new(7f, 6f) },
@@ -343,6 +344,9 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     public TextComponent RawTextComponent(string rawText) => new RawTextComponent(rawText);
     public TextComponent LocalizedTextComponent(string translationKey) => new TranslateTextComponent(translationKey);
     public TextComponent ColorTextComponent(Virial.Color color, TextComponent component) => new ColorTextComponent(color.ToUnityColor(), component);
+    public TextComponent SizedTextComponent(float size, TextComponent component) => new SizedTextComponent((int)(size * 100f), component);
+    public TextComponent BoldTextComponent(TextComponent component) => new LazyTextComponent(() => component.GetString().Bold());
+    public TextComponent ItalicTextComponent(TextComponent component) => new LazyTextComponent(()=> component.GetString().Italic());
     public TextComponent FunctionalTextComponent(Func<string> supplier) => new LazyTextComponent(supplier);
 
     public void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable

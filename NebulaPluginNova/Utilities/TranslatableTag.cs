@@ -11,8 +11,11 @@ public class TranslatableTag : CommunicableTextTag
 
     public string TranslateKey { get; private set; }
     string CommunicableTextTag.TranslationKey => TranslateKey;
+    public Color? Color
+    { get; set; } = null;
 
-    public string Text => Language.Translate(TranslateKey);
+    private string UncoloredText => Language.Translate(TranslateKey);
+    public string Text => Color.HasValue ? UncoloredText.Color(Color.Value) : UncoloredText;
     public int Id { get;private set; }
 
     

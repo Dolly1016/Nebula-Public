@@ -1,6 +1,8 @@
-﻿using Virial;
+﻿using Nebula.Patches;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
@@ -25,7 +27,7 @@ public class Comet : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration BlazeScreenOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeScreenRate", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
 
     static public Comet MyRole = new Comet();
-
+    static private GameStatsEntry StatsBlazing = NebulaAPI.CreateStatsEntry("stats.comet.blazing", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -60,6 +62,9 @@ public class Comet : DefinedRoleTemplate, DefinedRole
                     }
                     acTokenCommon.Value = true;
                     if(acTokenCommon2 != null) acTokenCommon2.Value.pos = MyPlayer.VanillaPlayer.GetTruePosition();
+
+                    if (MyPlayer.Unbox().HasAttributeByTag("nebula.trap0") && MyPlayer.Unbox().HasAttributeByTag("perkAccel")) new StaticAchievementToken("comet.common4");
+                    StatsBlazing.Progress();
                 };
                 boostButton.OnEffectEnd = (button) =>
                 {

@@ -104,7 +104,7 @@ public class NoSGUIText : AbstractGUIWidget
 
 public class NoSGUICheckbox : AbstractGUIWidget
 {
-    internal ListArtifact<Func<bool>> Artifact = new();
+    internal ListArtifact<(Func<bool> getter, Action toggle)> Artifact = new();
     private bool defaultValue;
     public Action<bool>? OnValueChanged = null;
     public NoSGUICheckbox(GUIAlignment alignment, bool defaultValue) : base(alignment)
@@ -157,7 +157,7 @@ public class NoSGUICheckbox : AbstractGUIWidget
         button.OnMouseOut.AddListener(() => backText.color = Color.white);
         button.OnClick.AddListener(() => { currentValue = !currentValue; UpdateText(); OnValueChanged?.Invoke(currentValue); });
 
-        Artifact.Values.Add(() => currentValue);
+        Artifact.Values.Add((() => currentValue, button.OnClick.Invoke));
 
         actualSize = new Size(text.rectTransform.sizeDelta);
         return backText.gameObject;

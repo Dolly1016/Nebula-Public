@@ -9,7 +9,7 @@ public class ModTitleShower : MonoBehaviour
     static ModTitleShower() => ClassInjector.RegisterTypeInIl2Cpp<ModTitleShower>();
 
     private TMPro.TextMeshPro text = null!;
-    private AbstractAchievement? achievement = null;
+    private INebulaAchievement? achievement = null;
     private BoxCollider2D collider = null!;
 
     private PlayerControl player = null!;
@@ -29,13 +29,13 @@ public class ModTitleShower : MonoBehaviour
 
         text.text = "";
 
-        collider = UnityHelper.CreateObject<BoxCollider2D>("Button", text.transform, Vector3.zero);
+        collider = UnityHelper.CreateObject<BoxCollider2D>("Button", text.transform, new(0f, 0f, -10f));
         collider.isTrigger = true;
         var button = collider.gameObject.SetUpButton(false);
         button.OnMouseOver.AddListener(() =>
             {
                 if (achievement != null) NebulaManager.Instance.SetHelpWidget(button, achievement.GetOverlayWidget(false, true, false, true, achievement.IsCleared));
-                else if (AmOwner) NebulaManager.Instance.SetHelpWidget(button, GUI.Instance.LocalizedText(Virial.Media.GUIAlignment.Left, AbstractAchievement.DetailTitleAttribute, "achievement.ui.unselected.detail"));
+                else if (AmOwner) NebulaManager.Instance.SetHelpWidget(button, GUI.Instance.LocalizedText(Virial.Media.GUIAlignment.Left, INebulaAchievement.DetailTitleAttribute, "achievement.ui.unselected.detail"));
                 else return;
                 VanillaAsset.PlayHoverSE();
             }
@@ -60,19 +60,19 @@ public class ModTitleShower : MonoBehaviour
 
     }
 
-    public AbstractAchievement? SetAchievement(string achievement)
+    public INebulaAchievement? SetAchievement(string achievement)
     {
         if(NebulaAchievementManager.GetAchievement(achievement,out var ach)){
             text.text = Language.Translate(ach.TranslationKey);
             text.ForceMeshUpdate();
-            collider.size = text.bounds.size;
+            collider.size = (Vector2)text.bounds.size + new Vector2(0.1f, 0.1f);
             this.achievement = ach;
         }
         else if(AmOwner)
         {
             text.text = Language.Translate("achievement.ui.unselected");
             text.ForceMeshUpdate();
-            collider.size = text.bounds.size;
+            collider.size = (Vector2)text.bounds.size + new Vector2(0.1f, 0.1f);
             text.color = Color.gray;
             this.achievement = null;
             this.time = -1f;

@@ -24,6 +24,9 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
     static private FloatConfiguration ChangeBountyIntervalOption = NebulaAPI.Configurations.Configuration("options.role.bountyHunter.changeBountyInterval", (5f, 120f, 5f), 45f, FloatConfigurationDecorator.Second);
 
     static public BountyHunter MyRole = new BountyHunter();
+
+    static private GameStatsEntry StatsBountyKill = NebulaAPI.CreateStatsEntry("stats.bountyHunter.bountyKill", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsOthersKill = NebulaAPI.CreateStatsEntry("stats.bountyHunter.othersKill", GameStatsCategory.Roles, MyRole);
     float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CoolDown, OthersKillCoolDownOption.CoolDown, AmongUsUtil.VanillaKillCoolDown);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -47,13 +50,10 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
         Timer bountyTimer = null!;
         Timer arrowTimer = null!;
         Arrow bountyArrow = null!;
-        bool CanBeBounty(PlayerControl target, GamePlayer? myLover) => !target.Data.Role.IsImpostor && myLover != target.GetModInfo();
+        
         void ChangeBounty()
         {
-            GamePlayer? myLover = null;
-            if (MyPlayer.Unbox().TryGetModifier<Lover.Instance>(out var lover)) myLover = lover.MyLover;
-
-            var arr = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && !p.Data.IsDead && CanBeBounty(p, myLover)).ToArray();
+            var arr = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && !p.Data.IsDead && MyPlayer.CanKill(p.GetModInfo()!)).ToArray();
             if (arr.Length == 0) currentBounty = byte.MaxValue;
             else currentBounty = arr[System.Random.Shared.Next(arr.Length)].PlayerId;
 
@@ -62,7 +62,7 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
             else
             {
                 bountyIcon.gameObject.SetActive(true);
-                bountyIcon.UpdateFromPlayerOutfit(NebulaGameManager.Instance!.GetPlayer(currentBounty)!.Unbox().DefaultOutfit, PlayerMaterial.MaskType.None, false, true);
+                bountyIcon.UpdateFromPlayerOutfit(NebulaGameManager.Instance!.GetPlayer(currentBounty)!.Unbox().DefaultOutfit.Outfit.outfit, PlayerMaterial.MaskType.None, false, true);
             }
 
             if (ShowBountyArrowOption) UpdateArrow();
@@ -111,8 +111,8 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
                 bountyTimer = Bind(new Timer(ChangeBountyIntervalOption)).Start();
                 arrowTimer = Bind(new Timer(ArrowUpdateIntervalOption)).Start();
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.ImpostorKillPredicate(p), null, Impostor.CanKillHidingPlayerOption));
-
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer), null, Impostor.CanKillHidingPlayerOption));
+                 
                 killButton = Bind(new ModAbilityButton(false,true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -124,11 +124,13 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
                         ChangeBounty();
                         button.CoolDownTimer!.Start(BountyKillCoolDownOption.CoolDown);
                         acTokenKillBounty.Value = true;
+                        StatsBountyKill.Progress();
                     }
                     else
                     {
                         button.CoolDownTimer!.Start(OthersKillCoolDownOption.CoolDown);
                         acTokenKillNonBounty.Value = true;
+                        StatsOthersKill.Progress();
                     }
 
                     acTokenChallenge.Value.history.Enqueue(Time.time);
@@ -146,7 +148,7 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 var iconHolder = HudContent.InstantiateContent("BountyHolder",true);
                 this.Bind(iconHolder.gameObject);
-                bountyIcon = AmongUsUtil.GetPlayerIcon(MyPlayer.Unbox().DefaultOutfit, iconHolder.transform, Vector3.zero, Vector3.one * 0.5f);
+                bountyIcon = AmongUsUtil.GetPlayerIcon(MyPlayer.Unbox().DefaultOutfit.Outfit.outfit, iconHolder.transform, Vector3.zero, Vector3.one * 0.5f);
                 bountyIcon.ToggleName(true);
                 bountyIcon.SetName("", Vector3.one * 4f, Color.white, -1f);
 

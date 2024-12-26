@@ -151,6 +151,7 @@ public class Arrow : INebulaScriptComponent, IGameOperator
                 a = 0f;
             }
             arrowRenderer.color = new Color(arrowRenderer.color.r, arrowRenderer.color.g, arrowRenderer.color.b, a);
+            if (smallRenderer != null) smallRenderer.color = new(1f, 1f, 1f, a);
         }
     }
 

@@ -105,11 +105,13 @@ public static class NebulaExileWrapUp
         GamePlayer[] exiledArray = MeetingHudExtension.ExiledAll?.Select(p => p.GetModInfo()!).ToArray() ?? new GamePlayer[0];
         GameOperatorManager.Instance?.Run(new MeetingEndEvent(exiledArray));
 
+        NebulaGameManager.Instance?.AllPlayerInfo.Do(p => p.VanillaPlayer.MyPhysics.DoingCustomAnimation = false);
+
         yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform.parent, GameStatistics.EventVariation.MeetingEnd, EventDetail.MeetingEnd);
 
 
 
-        GameOperatorManager.Instance?.Run(new TaskPhaseRestartEvent());
+        GameOperatorManager.Instance?.Run(new TaskPhaseRestartEvent(NebulaGameManager.Instance!), true);
 
         __instance.ReEnableGameplay();
         AmongUsUtil.SetEmergencyCoolDown(0f, true);

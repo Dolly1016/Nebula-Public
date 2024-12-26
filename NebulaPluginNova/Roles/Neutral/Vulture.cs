@@ -14,7 +14,9 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public RoleTeam MyTeam = new Team("teams.vulture", new(140, 70, 18), TeamRevealType.OnlyMe);
     
-    private Vulture() : base("vulture", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [EatCoolDownOption, NumOfEatenToWinOption, VentConfiguration]) { }
+    private Vulture() : base("vulture", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [EatCoolDownOption, NumOfEatenToWinOption, VentConfiguration]) {
+        GameActionTypes.EatCorpseAction = new("vulture.eat", this, isCleanDeadBodyAction: true);
+    }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
@@ -24,7 +26,7 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("options.role.vulture.vent", true);
 
     static public Vulture MyRole = new Vulture();
-
+    static private GameStatsEntry StatsEaten = NebulaAPI.CreateStatsEntry("stats.vulture.eaten", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -75,12 +77,15 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
                 eatButton.Availability = (button) => eatTracker.CurrentTarget != null && MyPlayer.CanMove;
                 eatButton.Visibility = (button) => !MyPlayer.IsDead;
                 eatButton.OnClick = (button) => {
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.EatCorpseAction);
+
                     AmongUsUtil.RpcCleanDeadBody(eatTracker.CurrentTarget!.PlayerId, MyPlayer.PlayerId,EventDetail.Eat);
                     leftEaten--;
                     usesIcon.text=leftEaten.ToString();
                     eatButton.StartCoolDown();
 
                     acTokenCommon ??= new("vulture.common1");
+                    StatsEaten.Progress();
 
                     if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId);
                 };

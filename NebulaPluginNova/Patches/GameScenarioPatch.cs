@@ -34,7 +34,7 @@ public static class StartGamePatch
 {
     static void Postfix(GameManager __instance)
     {
-        __instance.ShouldCheckForGameEnd = false; 
+        __instance.ShouldCheckForGameEnd = false;
     }
 }
 

@@ -80,7 +80,8 @@ public static class ReactorSabotagePatch
         {
             if(!(__instance.reactor.Countdown > 0f))
             {
-                if(!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
+                var localPlayer = NebulaGameManager.Instance.LocalPlayerInfo;
+                if(!localPlayer.IsDead) localPlayer.Suicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.Reactor, SystemTypes.Laboratory);
                 __instance.reactor.ClearSabotage();
             }
@@ -100,7 +101,8 @@ public static class NoOxySabotagePatch
         {
             if (!(__instance.reactor.Countdown > 0f))
             {
-                if (!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
+                var localPlayer = NebulaGameManager.Instance.LocalPlayerInfo;
+                if (!localPlayer.IsDead) localPlayer.Suicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.LifeSupp);
                 __instance.reactor.Countdown = 10000f;
             }
@@ -120,7 +122,8 @@ public static class HeliSabotagePatch
         {
             if (!(__instance.sabotage.Countdown > 0f))
             {
-                if (!PlayerControl.LocalPlayer.Data.IsDead) PlayerControl.LocalPlayer.ModSuicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
+                var localPlayer = NebulaGameManager.Instance.LocalPlayerInfo;
+                if (!localPlayer.IsDead) localPlayer.Suicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.HeliSabotage);
                 __instance.sabotage.ClearSabotage();
             }
@@ -205,7 +208,7 @@ public static class ReactorSystemTypeDeterioratePatch
 [HarmonyPatch(typeof(LifeSuppSystemType), nameof(LifeSuppSystemType.Deteriorate))]
 public static class LifeSuppSystemTypeDeterioratePatch
 {
-    static bool Prefix(ReactorSystemType __instance)
+    static bool Prefix(LifeSuppSystemType __instance)
     {
         if (NebulaGameManager.Instance?.LocalFakeSabotage?.HasFakeSabotage(SystemTypes.LifeSupp) ?? false)
         {

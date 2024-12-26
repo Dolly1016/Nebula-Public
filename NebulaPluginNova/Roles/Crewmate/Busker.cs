@@ -16,6 +16,8 @@ public class Busker : DefinedRoleTemplate, DefinedRole
     private Busker() : base("busker", new(255, 172, 117), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PseudocideCoolDownOption, PseudocideDurationOption, HidePseudocideFromVitalsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Busker.png");
+
+        GameActionTypes.BuskerRevivingAction = new("busker.revive", this, isPhysicalAction: true);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -25,6 +27,8 @@ public class Busker : DefinedRoleTemplate, DefinedRole
     static private BoolConfiguration HidePseudocideFromVitalsOption = NebulaAPI.Configurations.Configuration("options.role.busker.hidePseudocideFromVitals", false);
 
     static public Busker MyRole = new Busker();
+    static private GameStatsEntry StatsPseudocide = NebulaAPI.CreateStatsEntry("stats.busker.pseudocide", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsMissed = NebulaAPI.CreateStatsEntry("stats.busker.missed", GameStatsCategory.Roles, MyRole);
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable is not Lover;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -61,6 +65,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                         {
                             if(HidePseudocideFromVitalsOption) PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.BuskerEffect, 10000f, false, 0), true));
                             MyPlayer.Suicide(PlayerState.Pseudocide, null, KillParameter.WithDeadBody);
+                            StatsPseudocide.Progress();
                         }
                         reviveButton.ActivateEffect();
                     });
@@ -77,6 +82,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                 reviveButton.OnClick = (button) => {
                     using (RPCRouter.CreateSection("ReviveBusker"))
                     {
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.BuskerRevivingAction);
                         PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
                         MyPlayer.Revive(null, MyPlayer.Position, true, false);
                         MyPlayer.VanillaPlayer.ModDive(false);
@@ -94,6 +100,7 @@ public class Busker : DefinedRoleTemplate, DefinedRole
                         PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
                         NebulaGameManager.Instance!.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Accident, null, 1 << MyPlayer.PlayerId);
                         new StaticAchievementToken("busker.another1");
+                        StatsMissed.Progress();
                         NebulaGameManager.RpcTryAssignGhostRole.Invoke(MyPlayer.Unbox());
                     }
                 };

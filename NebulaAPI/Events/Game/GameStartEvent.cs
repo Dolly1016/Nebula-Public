@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Game;
 
-public class GameStartEvent : AbstractGameEvent
+public class GameStartEvent : TaskPhaseStartEvent
 {
     internal GameStartEvent(Virial.Game.Game game) : base(game){ }
 }

@@ -27,7 +27,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.agent.vent", false, (0, 16), 3, null, -1f, (2.5f, 30f, 2.5f), 10f);
 
     static public Agent MyRole = new Agent();
-
+    static private GameStatsEntry StatsAgent = NebulaAPI.CreateStatsEntry("stats.agent.agent", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -113,6 +113,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
                     taskButton.OnClick = (button) =>
                     {
                         MyPlayer.Tasks.Unbox().GainExtraTasksAndRecompute(NumOfExtraTasksOption, 0, 0, false);
+                        StatsAgent.Progress();
                     };
                     taskButton.SetLabel("agent");
                 }

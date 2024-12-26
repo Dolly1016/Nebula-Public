@@ -23,7 +23,8 @@ public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration CanSeeVentFlashOption = NebulaAPI.Configurations.Configuration("options.role.bait.canSeeVentFlash", false);
 
     static public Bait MyRole = new Bait();
-
+    static private GameStatsEntry StatsBait = NebulaAPI.CreateStatsEntry("stats.bait.bait", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsKiller = NebulaAPI.CreateStatsEntry("stats.bait.killer", GameStatsCategory.Roles, MyRole);
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -40,7 +41,10 @@ public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
 
             float t = Mathf.Max(0.1f, ReportDelayOption) + ReportDelayDispersionOption * (float)System.Random.Shared.NextDouble();
             yield return new WaitForSeconds(t);
+            if (MeetingHud.Instance) yield break;
+            
             murderer.CmdReportDeadBody(MyPlayer.VanillaPlayer.Data);
+            StatsKiller.Progress();
         }
 
         [Local, OnlyMyPlayer]
@@ -48,6 +52,7 @@ public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (ev.Murderer.AmOwner) return; //自殺の場合は何もしない
 
+            StatsBait.Progress();
             new StaticAchievementToken("bait.common1");
             acTokenChallenge ??= new("bait.challenge", (false, true), (val, _) => val.cleared);
         }

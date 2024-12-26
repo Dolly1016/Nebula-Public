@@ -82,7 +82,7 @@ public static class CountOverlayUpdatePatch
                 if (MeetingHud.Instance)
                 {
                     //会議中のアドミン (PreMeetingPointを参照する)
-                    foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                    foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                     {
                         if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.Unbox().PreMeetingPoint) && !AlreadyAdded(p.PlayerId)) {
                             AddToMask(p.PlayerId);
@@ -187,6 +187,7 @@ public static class InitMapPatch
     static void Postfix(MapBehaviour __instance)
     {
         GameOperatorManager.Instance?.Run(new MapInstantiateEvent());
+        __instance.fadedBackground.transform.localScale *= 2f;
     }
 }
 
@@ -195,7 +196,7 @@ static class MapBehaviourGenericShowPatch
 {
     static void Postfix(MapBehaviour __instance)
     {
-        __instance.transform.localPosition = new Vector3(0, 0, -30f);
+        __instance.transform.localPosition = new Vector3(0, 0, -50f);
     }
 }
 

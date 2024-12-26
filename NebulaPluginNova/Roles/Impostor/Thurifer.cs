@@ -1,29 +1,19 @@
-﻿using AmongUs.GameOptions;
-using Nebula.Game.Statistics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Behaviour;
+using Nebula.Roles.Neutral;
+using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
+using Virial.DI;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
-using Virial;
-using Virial.DI;
 using Virial.Game;
-using Virial.Events.Game;
-using static Nebula.Roles.Impostor.Raider;
 using Virial.Text;
-using Nebula.Modules.ScriptComponents;
-using Virial.Components;
-using Nebula.Behaviour;
-using static UnityEngine.GraphicsBuffer;
-using static Nebula.Roles.Impostor.Thurifer;
 
 namespace Nebula.Roles.Impostor;
 
-public class Thurifer : DefinedRoleTemplate, DefinedRole
+public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, DefinedRole
 {
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class Thuribulum : NebulaSyncShadowObject
@@ -158,7 +148,7 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
         private float lastShared = 0f;
         private float shareTimer = 0f;
         public float LocalInhalationPercentage => localInhalation / MaxInhalation;
-        private float MaxInhalation => MaxIntoxicationOption * 30f;
+        private float MaxInhalation => 30f / InhalationSpeedOption;
 
         public float GetInhalation(byte playerId) => inhalationMap.TryGetValue(playerId, out var value) ? value : 0f;
         public float GetInhalationAsPercentage(byte playerId) => GetInhalation(playerId) / MaxInhalation;
@@ -174,7 +164,7 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
         public bool IsAvailable { get; private set; } = false;
         void OnGameStarted(GameStartEvent _)
         {
-            IsAvailable = GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.FreePlay || (Thurifer.MyRole as ISpawnable).IsSpawnable;
+            IsAvailable = GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.FreePlay || (Thurifer.MyRole as ISpawnable).IsSpawnable || ((Jackal.MyRole as ISpawnable).IsSpawnable && Jackal.JackalizedImpostorOption && (Thurifer.MyRole as DefinedRole).JackalAllocationParameters!.RoleCountSum > 0);
 
             if (!IsAvailable) return;
 
@@ -197,8 +187,12 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
             imputeButton.Availability = (button) => thuribulumTracker.CurrentTarget != null;
             imputeButton.Visibility = (button) => !localPlayer.IsDead && LocalInhalationPercentage > 0.5f && localPlayer.Role.Role != Thurifer.MyRole && !used;
             imputeButton.OnClick = (button) => {
+                NebulaGameManager.Instance?.RpcDoGameAction(localPlayer, thuribulumTracker.CurrentTarget!.Position, GameActionTypes.ThuriferImputeAction);
+
                 ModSingleton<ThuribulumManager>.Instance.ImputeTo(thuribulumTracker.CurrentTarget!);
                 used = true;
+                new StaticAchievementToken("thurifer.common2");
+                StatsImpute.Progress();
             };
             imputeButton.SetLabel("thurifer.impute");
         }
@@ -238,6 +232,9 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
                             localInhalation += Mathf.Pow(temp, 0.4f) * Time.deltaTime; //そこそこ遠くなると急激に上がらなくなる
                         }
                     }
+
+                    //上限を設ける
+                    localInhalation = Mathf.Min(MaxInhalation, localInhalation);
 
                     if (shareTimer < 0f)
                     {
@@ -280,11 +277,12 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
         }
     }
 
-    private Thurifer() : base("thurifer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [NumOfThuribulumsOption, ActivateDurationOption, MaxIntoxicationOption, ThuribulumRangeOption, MaxKillDelayOption, ShowBlinkOption, ActivationDelayOption]) { }
+    private Thurifer() : base("thurifer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [NumOfThuribulumsOption, ActivateDurationOption, InhalationSpeedOption, ThuribulumRangeOption, MaxKillDelayOption, ShowBlinkOption, ActivationDelayOption]) {
+        GameActionTypes.ThuriferActivateAction = new("thurifer.activate", this, isPlacementAction: true);
+        GameActionTypes.ThuriferImputeAction = new("thurifer.impute", null, isPlacementAction: true);
+    }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-
-    static private FloatConfiguration MaxIntoxicationOption = NebulaAPI.Configurations.Configuration("options.role.thurifer.maxIntoxication", (0.25f, 3f, 0.125f), 1f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration InhalationSpeedOption = NebulaAPI.Configurations.Configuration("options.role.thurifer.inhalationSpeed", (0.25f, 3f, 0.125f), 1f, FloatConfigurationDecorator.Ratio);
     static private IntegerConfiguration NumOfThuribulumsOption = NebulaAPI.Configurations.Configuration("options.role.thurifer.numOfThuribulums", (1, 20), 12);
     static private FloatConfiguration ThuribulumRangeOption = NebulaAPI.Configurations.Configuration("options.role.thurifer.thuribulumRange", (2f, 20f, 1f), 5f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration MaxKillDelayOption = NebulaAPI.Configurations.Configuration("options.role.thurifer.maxKillDelay", (5f, 50f, 2.5f), 15f, FloatConfigurationDecorator.Second);
@@ -293,25 +291,29 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration ActivationDelayOption = NebulaAPI.Configurations.Configuration("options.role.thurifer.activationDelay", (0f,60f,2.5f),5f, FloatConfigurationDecorator.Second);
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ThuriferButton.png", 115f);
 
-    static public Thurifer MyRole = new Thurifer();
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
-    {
-        DefinedRole RuntimeRole.Role => MyRole;
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
 
+    static public Thurifer MyRole = new Thurifer();
+
+    static private GameStatsEntry StatsActivate = NebulaAPI.CreateStatsEntry("stats.thurifer.activate", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsImpute = NebulaAPI.CreateStatsEntry("stats.thurifer.impute", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    {
         //画面左下のホルダ
         PlayersIconHolder iconHolder;
 
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
+        AchievementToken<(EditableBitMask<GamePlayer> more50Players, int killed, bool inMeetingKill, bool maxDelayKill)>? acTokenChallenge = null;
 
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player) : base(player)
         {
             if (AmOwner)
             {
+                acTokenChallenge = new("thurifer.challenge", (BitMasks.AsPlayer(), 0, false, false), (a, _) => a.more50Players.ForEach(NebulaGameManager.Instance!.AllPlayerInfo).Count() >= 8 && a.maxDelayKill && a.inMeetingKill && a.killed >= 4);
+
                 iconHolder = Bind(new PlayersIconHolder());
                 iconHolder.XInterval = 0.35f;
-                NebulaGameManager.Instance?.AllPlayerInfo().Do(p => {
+                NebulaGameManager.Instance?.AllPlayerInfo.Do(p => {
                     if (!p.AmOwner)
                     {
                         var icon = iconHolder.AddPlayer(p);
@@ -327,7 +329,10 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
                 activateButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && thuribulumTracker.CurrentTarget != null;
                 activateButton.Visibility = (button) => !MyPlayer.IsDead;
                 activateButton.OnClick = (button) => {
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, thuribulumTracker.CurrentTarget!.Position, GameActionTypes.ThuriferActivateAction);
                     thuribulumTracker.CurrentTarget?.ScheduleActivate(ActivationDelayOption, ActivateDurationOption);
+                    new StaticAchievementToken("thurifer.common1");
+                    StatsActivate.Progress();
                 };
                 activateButton.CoolDownTimer = Bind(new Timer(10f).SetAsAbilityCoolDown().Start());
                 activateButton.SetLabel("thurifer.curse");
@@ -353,6 +358,8 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
                         icon.SetAlpha(false);
                     }
                 }
+
+                if (inhalation >= 50) acTokenChallenge.DoIf(a => a.Value.more50Players.Add(icon.Player));
             }
         }
 
@@ -382,14 +389,29 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
                     while(t  < delay)
                     {
                         //アニメーション中、追放中は何もしない
-                        if (MeetingHud.Instance && MeetingHud.Instance.state < MeetingHud.VoteStates.Discussion) yield return null;
-                        if (ExileController.Instance) yield return null;
-
-                        t += Time.deltaTime;
-                        yield return null;
+                        if (MeetingHud.Instance && MeetingHud.Instance.state < MeetingHud.VoteStates.Discussion)
+                        {
+                            yield return null;
+                        }
+                        else if (ExileController.Instance)
+                        {
+                            yield return null;
+                        }
+                        else
+                        {
+                            t += Time.deltaTime;
+                            yield return null;
+                        }
                     }
 
-                    MyPlayer.MurderPlayer(ev.Target, PlayerStates.Gassed, EventDetails.Gassed, KillParameter.RemoteKill);
+                    if (!ev.Target.IsDead)
+                    {
+                        if (MeetingHud.Instance) acTokenChallenge.DoIf(a => a.Value.inMeetingKill = true);
+                        if (!(inhalation < 1f)) acTokenChallenge.DoIf(a => a.Value.maxDelayKill = true);
+                        acTokenChallenge.DoIf(a => a.Value.killed++);
+
+                        MyPlayer.MurderPlayer(ev.Target, PlayerStates.Gassed, EventDetails.Gassed, KillParameter.RemoteKill);
+                    }
                 }
 
                 if (ShowBlinkOption || delay < 3f)
@@ -400,7 +422,7 @@ public class Thurifer : DefinedRoleTemplate, DefinedRole
 
                 NebulaManager.Instance.StartCoroutine(CoDelayKill().WrapToIl2Cpp());
 
-                ev.Cancel();
+                ev.Cancel(true);
             }
         }
     }

@@ -2,6 +2,7 @@
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
 using Nebula.Roles.Abilities;
+using Nebula.Roles.Neutral;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -14,7 +15,7 @@ using Virial.Helpers;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitation, DefinedRole
 {
     private Sniper() : base("sniper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,AimAssistOption,DelayInAimAssistOption, CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
@@ -23,12 +24,12 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
         MetaAbility.RegisterCircle(new("role.sniper.shotRange", () => ShotEffectiveRangeOption, () => null, UnityColor));
         MetaAbility.RegisterCircle(new("role.sniper.soundRange", () => ShotNoticeRangeOption, () => null, UnityColor));
         MetaAbility.RegisterCircle(new("role.sniper.shotSize", () => ShotSizeOption * 0.25f, () => null, UnityColor));
+
+        GameActionTypes.SniperEquippingAction = new("sniper.equipping", this, isEquippingAction: true);
     }
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-
-    static private IRelativeCoolDownConfiguration SnipeCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sniper.snipeCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
+    static private IRelativeCoolDownConfiguration SnipeCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sniper.snipeCoolDown", CoolDownType.Immediate, (0f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
     static private FloatConfiguration ShotSizeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration ShotEffectiveRangeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotEffectiveRange", (2.5f, 50f, 2.5f), 25f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration ShotNoticeRangeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotNoticeRange", (2.5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Ratio);
@@ -40,38 +41,20 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
     static private FloatConfiguration DelayInAimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.delayInAimAssistActivation", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second, () => AimAssistOption);
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillImpostor", false);
 
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, player.IsImpostor ? AmongUsUtil.VanillaKillCoolDown : Jackal.KillCooldown);
+    bool DefinedRole.IsJackalizable => true;
+
     static public Sniper MyRole = new Sniper();
 
+    static private GameStatsEntry StatsShot = NebulaAPI.CreateStatsEntry("stats.sniper.shot", GameStatsCategory.Roles, MyRole, null, 10);
+    static private GameStatsEntry StatsMisshot = NebulaAPI.CreateStatsEntry("stats.sniper.misshot", GameStatsCategory.Roles, MyRole, null, 9);
     [NebulaRPCHolder]
-    public class SniperRifle : INebulaScriptComponent, IGameOperator
+    public class SniperRifle : EquipableAbility, IGameOperator
     {
-        public GamePlayer Owner { get; private set; }
-        public SpriteRenderer Renderer { get; private set; }
         private static SpriteLoader rifleSprite = SpriteLoader.FromResource("Nebula.Resources.SniperRifle.png", 100f);
-        public SniperRifle(GamePlayer owner) : base()
+        public SniperRifle(GamePlayer owner) : base(owner, CanSeeRifleInShadowOption, "SniperRifle")
         {
-            Owner = owner;
-            Renderer = UnityHelper.CreateObject<SpriteRenderer>("SniperRifle", null, owner.VanillaPlayer.transform.position, LayerExpansion.GetObjectsLayer());
             Renderer.sprite = rifleSprite.GetSprite();
-            Renderer.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
-            Renderer.gameObject.layer = CanSeeRifleInShadowOption ? LayerExpansion.GetObjectsLayer() : LayerExpansion.GetDefaultLayer();
-        }
-
-        void HudUpdate(GameHudUpdateEvent ev)
-        {
-            var o = Owner.Unbox();
-            if (Owner.AmOwner) o.RequireUpdateMouseAngle();
-            Renderer.transform.localEulerAngles = new Vector3(0, 0, o.MouseAngle * 180f / Mathf.PI);
-            var pos = Owner.VanillaPlayer.transform.position + new Vector3(Mathf.Cos(o.MouseAngle), Mathf.Sin(o.MouseAngle), -1f) * 0.87f;
-            var diff = (pos - Renderer.transform.position) * Time.deltaTime * 7.5f;
-            Renderer.transform.position += diff;
-            Renderer.flipY = Mathf.Cos(o.MouseAngle) < 0f;
-        }
-
-        void IGameOperator.OnReleased()
-        {
-            if (Renderer) GameObject.Destroy(Renderer.gameObject);
-            Renderer = null!;
         }
 
         public GamePlayer? GetTarget(float width,float maxLength)
@@ -79,17 +62,17 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
             float minLength = maxLength;
             GamePlayer? result = null;
 
-            foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo())
+            foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDead || p.AmOwner || ((!CanKillHidingPlayerOption) && p.VanillaPlayer.inVent || p.IsDived)) continue;
 
-                //インポスターは無視
-                if (!CanKillImpostorOption && p.IsImpostor) continue;
+                //仲間は無視
+                if (!CanKillImpostorOption && !Owner.CanKill(p)) continue;
 
                 //吹っ飛ばされているプレイヤーは無視しない
 
                 //不可視なプレイヤーは無視
-                if (p.Unbox().IsInvisible) continue;
+                if (p.Unbox().IsInvisible || p.WillDie) continue;
 
                 var pos = p.VanillaPlayer.GetTruePosition();
                 Vector2 diff = pos - (Vector2)Renderer.transform.position;
@@ -109,25 +92,20 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
     }
 
     [NebulaRPCHolder]
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
 
-        private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnipeButton.png", 115f);
         static private Image aimAssistSprite = SpriteLoader.FromResource("Nebula.Resources.SniperGuide.png", 100f);
         
         public SniperRifle? MyRifle = null;
-        bool RuntimeRole.HasVanillaKillButton => false;
+        bool IPlayerAbility.HideKillButton => true;
 
         AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
         StaticAchievementToken? acTokenCommon = null;
 
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
 
         [Local]
         void LocalUpdate(GameUpdateEvent ev)
@@ -139,14 +117,14 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
             }
         }
 
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player, float defaultCooldown) :base(player)
         {
             if (AmOwner)
             {
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("sniper.another1");
                 AchievementToken<int> acTokenChallenge = new("sniper.challenge", 0, (val, _) => val >= 2);
 
-                equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "sniper.equip");
+                var equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "sniper.equip");
                 equipButton.SetSprite(buttonSprite.GetSprite());
                 equipButton.Availability = (button) => MyPlayer.CanMove;
                 equipButton.Visibility = (button) => !MyPlayer.IsDead;
@@ -154,6 +132,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 {
                     if (MyRifle == null)
                     {
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.SniperEquippingAction);
                         NebulaAsset.PlaySE(NebulaAudioClip.SniperEquip, true);
                         equipButton.SetLabel("unequip");
                     }
@@ -173,6 +152,7 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                         Bind(new GameObjectBinding(circle.gameObject));
                     }
                 };
+                equipButton.OnMeeting = (button) => button.SetLabel("equip");
                 equipButton.SetLabel("equip");
 
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "sniper.kill");
@@ -180,36 +160,42 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) =>
                 {
+                    StatsShot.Progress();
                     NebulaAsset.PlaySE(NebulaAudioClip.SniperShot, true);
                     var target = MyRifle?.GetTarget(ShotSizeOption, ShotEffectiveRangeOption);
                     if (target != null)
                     {
                         bool isBlown = target.IsBlown;
-                        if (MyPlayer.MurderPlayer(target, PlayerState.Sniped, EventDetail.Kill, KillParameter.RemoteKill) == KillResult.Kill)
+                        MyPlayer.MurderPlayer(target, PlayerState.Sniped, EventDetail.Kill, KillParameter.RemoteKill, result =>
                         {
-                            if (target.VanillaPlayer.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
-                            acTokenCommon ??= new("sniper.common1");
-                            if (isBlown) new StaticAchievementToken("sniper.common2");
-                            if (MyPlayer.VanillaPlayer.GetTruePosition().Distance(target!.VanillaPlayer.GetTruePosition()) > 20f) acTokenChallenge.Value++;
-                        }
+                            if (result == KillResult.Kill)
+                            {
+                                if (target.VanillaPlayer.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
+                                acTokenCommon ??= new("sniper.common1");
+                                if (isBlown) new StaticAchievementToken("sniper.common2");
+                                if (MyPlayer.VanillaPlayer.GetTruePosition().Distance(target!.VanillaPlayer.GetTruePosition()) > 20f) acTokenChallenge.Value++;
+                            }
+                        });
                     }
                     else
                     {
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Missed, MyPlayer.VanillaPlayer, 0);
+                        StatsMisshot.Progress();
                     }
-                    Sniper.RpcShowNotice.Invoke(MyPlayer.VanillaPlayer.GetTruePosition());
+                    Sniper.RpcShowNotice.Invoke(MyPlayer.Position);
 
-                    button.StartCoolDown();
+                    NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
 
                     if (StoreRifleOnFireOption) RpcEquip.Invoke((MyPlayer.PlayerId, false));
 
                     acTokenAnother.Value.triggered = true;
 
                 };
-                killButton.CoolDownTimer = Bind(new Timer(SnipeCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(SnipeCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetLabel("snipe");
                 killButton.SetCanUseByMouseClick();
+                NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
             }
         }
 
@@ -226,7 +212,6 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
         void OnMeetingStart(MeetingStartEvent ev)
         {
             if (MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
-            equipButton?.SetLabel("equip");
         }
 
         void OnMeetingEnd(GamePlayer[] exiled)
@@ -329,7 +314,8 @@ public class Sniper : DefinedRoleTemplate, HasCitation, DefinedRole
         (message, _) =>
         {
             var role = NebulaGameManager.Instance?.GetPlayer(message.playerId)?.Role;
-            if (role is Sniper.Instance sniper)
+            var sniper = role.GetAbility<Ability>();
+            if (sniper != null)
             {
                 if (message.equip)
                     sniper.EquipRifle();

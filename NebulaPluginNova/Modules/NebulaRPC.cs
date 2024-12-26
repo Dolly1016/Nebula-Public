@@ -1,9 +1,7 @@
 ﻿using Hazel;
-using InnerNet;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Virial.Attributes;
 using Virial.Game;
 using Virial.Runtime;
 using Virial.Text;
@@ -49,6 +47,10 @@ public class NebulaRPCInvoker
         localBodyProcess.Invoke();
     }
 
+    /// <summary>
+    /// RPCプロセスやダミーのRPCプロセスを送信します。
+    /// 送信のタイミングはRouterの都合に準じます。
+    /// </summary>
     public void InvokeSingle()
     {
         if (IsDummy)
@@ -57,6 +59,9 @@ public class NebulaRPCInvoker
             RPCRouter.SendRpc("Invoker", hash, (writer) => sender.Invoke(writer), () => localBodyProcess.Invoke());
     }
 
+    /// <summary>
+    /// Routerの都合を無視して、プロセスをローカルでのみ実行します。
+    /// </summary>
     public void InvokeLocal()
     {
         localBodyProcess.Invoke();
@@ -127,13 +132,13 @@ public static class RPCRouter
                 NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.System, $"Error in RPC(Invoke: {name})\n" + ex.ToString());
             }
 
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Called RPC : {name}");
+            //NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Called RPC : {name}");
         }
         else
         {
             evacuateds.Add(new(hash, sender, localBodyProcess));
 
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Evacuated RPC : {name} (by {currentSection!.Name})");
+            //NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Evacuated RPC : {name} (by {currentSection!.Name})");
         }
     }
 }
@@ -254,6 +259,7 @@ public static class RemoteProcessAsset
         defaultProcessDic[typeof(string)] = ((writer, obj) => writer.Write((string)obj), (reader) => reader.ReadString());
         defaultProcessDic[typeof(Vector2)] = ((writer, obj) => { var vec = (Vector2)obj; writer.Write(vec.x); writer.Write(vec.y); }, (reader) => new Vector2(reader.ReadSingle(), reader.ReadSingle()));
         defaultProcessDic[typeof(Vector3)] = ((writer, obj) => { var vec = (Vector3)obj; writer.Write(vec.x); writer.Write(vec.y); writer.Write(vec.z); }, (reader) => new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
+        defaultProcessDic[typeof(Vector4)] = ((writer, obj) => { var vec = (Vector4)obj; writer.Write(vec.x); writer.Write(vec.y); writer.Write(vec.z); writer.Write(vec.w); }, (reader) => new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
         defaultProcessDic[typeof(Vector2[])] = ((writer, obj) => { 
             var ary = (Vector2[])obj;
             writer.Write(ary.Length);
@@ -272,25 +278,17 @@ public static class RemoteProcessAsset
         defaultProcessDic[typeof(OutfitCandidate)] = (
             (writer, obj) => {
                 var cand = (OutfitCandidate)obj;
-                writer.Write(cand.outfit.PlayerName);
-                writer.Write(cand.outfit.HatId);
-                writer.Write(cand.outfit.SkinId);
-                writer.Write(cand.outfit.VisorId);
-                writer.Write(cand.outfit.PetId);
-                writer.Write(cand.outfit.ColorId);
-
-                writer.Write(cand.OutfitTags.Length);
-                foreach (var tag in cand.OutfitTags) writer.Write(tag.Id);
+                writer.Write(cand.Outfit.Id.ownerId);
+                writer.Write(cand.Outfit.Id.outfitId);
 
                 writer.Write(cand.Tag);
                 writer.Write(cand.Priority);
                 writer.Write(cand.SelfAware);
             },
             (reader) => {
-                NetworkedPlayerInfo.PlayerOutfit outfit = new() { PlayerName = reader.ReadString(), HatId = reader.ReadString(), SkinId = reader.ReadString(), VisorId = reader.ReadString(), PetId = reader.ReadString(), ColorId = reader.ReadInt32() };
-                OutfitTag[] tags = new OutfitTag[reader.ReadInt32()];
-                for (int i = 0; i < tags.Length; i++) tags[i] = OutfitTag.GetTagById(reader.ReadInt32());
-                return new OutfitCandidate(reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean(), outfit, tags);
+                OutfitDefinition? outfit = null;
+                NebulaGameManager.Instance?.TryGetOutfit(new(reader.ReadInt32(), reader.ReadInt32()), out outfit);
+                return new OutfitCandidate(outfit!, reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean());
             }
         );
         defaultProcessDic[typeof(TimeLimitedModulator)] = (
@@ -308,6 +306,8 @@ public static class RemoteProcessAsset
                     writer.Write(sm.Num);
                     writer.Write(sm.DirectionalNum.x);
                     writer.Write(sm.DirectionalNum.y);
+                    writer.Write(sm.DirectionalNum.z);
+                    writer.Write(sm.DirectionalNum.w);
                     writer.Write(sm.IsMultiplier);
                 }
                 else if (mod is SizeModulator sim)
@@ -343,7 +343,7 @@ public static class RemoteProcessAsset
                 int type = reader.ReadInt32();
 
                 if (type == 1)
-                    return new SpeedModulator(reader.ReadSingle(), new(reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag);
+                    return new SpeedModulator(reader.ReadSingle(), new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag);
                 else if (type == 2)
                     return new SizeModulator(new(reader.ReadSingle(), reader.ReadSingle()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean(), reader.ReadBoolean());
                 else if (type == 3)
@@ -354,10 +354,11 @@ public static class RemoteProcessAsset
                 return null!;
             }
         );
-        defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj).Id), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
+        defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj)?.Id ?? int.MaxValue), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
         defaultProcessDic[typeof(CommunicableTextTag)] = defaultProcessDic[typeof(TranslatableTag)];
         defaultProcessDic[typeof(PlayerModInfo)] = ((writer, obj) => writer.Write(((PlayerModInfo)obj).PlayerId), (reader) => NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())!);
         defaultProcessDic[typeof(GamePlayer)] = defaultProcessDic[typeof(PlayerModInfo)];
+        defaultProcessDic[typeof(INebulaAchievement)] = ((writer, obj) => writer.Write((ulong)((INebulaAchievement)obj).Id.ComputeConstantLongHash()), (reader) => (NebulaAchievementManager.TryGetAchievement((long)reader.ReadUInt64(), out var ach) ? ach : null)!);
     }
 
     static public (Action<MessageWriter, object>, Func<MessageReader, object>) GetProcess(Type type)
@@ -512,8 +513,6 @@ public class CombinedRemoteProcess : RemoteProcessBase
 
         for (int i = 0; i < num; i++)
         {
-            Tuple<double, double, double, double, double, double> a;
-
             int id = reader.ReadInt32();
             if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id,out var rpc)){
                 rpc.Receive(reader);

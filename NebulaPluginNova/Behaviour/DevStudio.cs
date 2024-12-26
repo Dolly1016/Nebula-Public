@@ -27,6 +27,17 @@ internal static class MainMenuManagerInstance {
         CustomizationMenu = customizationMenu;
     }
 
+    internal static void Open<T>(string objectName, MainMenuManager mainMenu, Action<T> callback) where T : MonoBehaviour
+    {
+        MainMenuManagerInstance.SetPrefab(mainMenu);
+        var obj = UnityHelper.CreateObject<T>(objectName, Camera.main.transform, new Vector3(0, 0, -30f));
+        TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, () => callback.Invoke(obj));
+    }
+    internal static void Close(MonoBehaviour viewer)
+    {
+        TransitionFade.Instance.DoTransitionFade(viewer.gameObject, null!, () => MainMenuManagerInstance.MainMenu?.mainMenuUI.SetActive(true), () => GameObject.Destroy(viewer.gameObject));
+    }
+
     internal static MetaScreen SetUpScreen(Transform transform, Action closeScreen, bool withoutBackground = false)
     {
         if (MainMenuManagerInstance.CustomizationMenu != null && !withoutBackground)
@@ -105,18 +116,9 @@ public class DevStudio : MonoBehaviour
         OpenFrontScreen();
     }
 
-    protected void Close()
-    {
-        TransitionFade.Instance.DoTransitionFade(gameObject, null!, () => MainMenuManagerInstance.MainMenu?.mainMenuUI.SetActive(true), () => GameObject.Destroy(gameObject));
-    }
+    protected void Close() => MainMenuManagerInstance.Close(this);
 
-    static public void Open(MainMenuManager mainMenu)
-    {
-        MainMenuManagerInstance.SetPrefab(mainMenu);
-
-        var obj = UnityHelper.CreateObject<DevStudio>("DevStudioMenu", Camera.main.transform, new Vector3(0, 0, -30f));
-        TransitionFade.Instance.DoTransitionFade(null!, obj.gameObject, () => { mainMenu.mainMenuUI.SetActive(false); }, obj.OnShown);
-    }
+    static public void Open(MainMenuManager mainMenu) => MainMenuManagerInstance.Open<DevStudio>("DevStudioMenu", mainMenu, viewer => viewer.OnShown());
 
     public void OnShown() => OpenScreen(ShowMainScreen);
 

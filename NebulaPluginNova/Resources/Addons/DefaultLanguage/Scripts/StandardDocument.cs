@@ -14,6 +14,8 @@ using Virial.Runtime;
 namespace DefaultLang.Documents;
 
 [AddonDocument("role.alien", RoleType.Role, (string[])["Buttons.EMIButton.png;role.alien.ability.emi", "Buttons.AlienButton.png;role.alien.ability.invalidate"], false, true)]
+[AddonDocument("role.berserker", RoleType.Role, (string[])["Buttons.BerserkButton.png;role.berserker.ability.berserk", "Buttons.BerserkCalmButton.png;role.berserker.ability.calmDown"], false, false)]
+[AddonDocument("role.bubblegun", RoleType.Role, (string[])["Buttons.BubblegunButton.png;role.bubblegun.ability.equip", "Buttons.BubblegunKillButton.png;role.bubblegun.ability.kill"], false, false)]
 [AddonDocument("role.effacer", RoleType.Role, (string[])["Buttons.EffaceButton.png;role.effacer.ability.efface"], false, true)]
 [AddonDocument("role.evilTrapper", RoleType.Role, (string[])["AccelTrap.png;role.trapper.ability.accelTrap", "DecelTrap.png;role.trapper.ability.decelTrap", "KillTrap.png;role.trapper.ability.killTrap"], false, true)]
 [AddonDocument("role.niceTrapper", RoleType.Role, (string[])["AccelTrap.png;role.trapper.ability.accelTrap", "DecelTrap.png;role.trapper.ability.decelTrap", "CommTrap.png;role.trapper.ability.commTrap"], false, true)]
@@ -28,6 +30,7 @@ namespace DefaultLang.Documents;
 [AddonDocument("role.raider", RoleType.Role, (string[])["Buttons.AxeButton.png;role.raider.ability.axe"], false, true)]
 [AddonDocument("role.thurifer", RoleType.Role, (string[])["Buttons.ThuriferButton.png;role.thurifer.ability.curse", "Buttons.ThuriferButton.png;role.thurifer.ability.impute"], false, false)]
 [AddonDocument("role.ubiquitous", RoleType.Role, (string[])["Buttons.DroneButton.png;role.ubiquitous.ability.drone", "Buttons.DroneCallBackButton.png;role.ubiquitous.ability.callBack", "Buttons.DroneHackButton.png;role.ubiquitous.ability.doorHack"], false, true)]
+[AddonDocument("role.scarlet", RoleType.Role, (string[])["Buttons.FlirtatiousMainButton.png;role.scarlet.ability.favorite", "Buttons.FlirtatiousSubButton.png;role.scarlet.ability.kept", "Buttons.HourglassButton.png;role.scarlet.ability.hourglass", "Buttons.FlirtatiousMeetingButton.png;role.scarlet.ability.meeting"], true, false)]
 [AddonDocument("role.extraMission", RoleType.Modifier, (string[])[], true, false)]
 [AddonDocument("role.confused", RoleType.Modifier, (string[])[], false, false)]
 public class StandardDocument : IDocumentWithId

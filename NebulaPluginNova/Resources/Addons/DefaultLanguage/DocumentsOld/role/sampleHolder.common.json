@@ -1,4 +1,0 @@
-﻿{
-	"TranslationKey" : "#IfConfig(nConfig,'role.sampleHolder.doc.canHoldSample','role.sampleHolder.doc.cannotHoldSample')",
-	"IsVariable" : True
-}

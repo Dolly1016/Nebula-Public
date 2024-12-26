@@ -72,9 +72,6 @@
 		<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
 		<Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
 		<Compile Remove="Resources\**" />
-		<Compile Remove="Roles\Perks\**" />
-		<EmbeddedResource Remove="Roles\Perks\**" />
-		<None Remove="Roles\Perks\**" />
 	</ItemGroup>
 
 	<ItemGroup>

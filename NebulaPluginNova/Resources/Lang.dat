@@ -10,6 +10,7 @@
 "title.buttons.addons" : "Add-ons"
 "title.buttons.developersStudio" : "Dev. Studio"
 "title.buttons.marketplace" : "Marketplace"
+"title.buttons.stats" : "Stats"
 
 # Certification
 
@@ -28,6 +29,9 @@
 "certification.unmatchedAddon" : "Unmatched Addon"
 "certification.unmatchedAddon.detail" : "This player's add-on configuration is different.<br>Some add-ons must be installed by everyone."
 "certification.unmatchedAddon.client" : "The add-on configuration is different.<br>Some add-ons must be installed by everyone."
+"certification.unmatchedVanilla" : "Unmatched Vanilla"
+"certification.unmatchedVanilla.detail" : "The version of Among Us is far from ours."
+"certification.unmatchedVanilla.client" : "The version of Among Us is different."
 
 # UI
 
@@ -35,6 +39,8 @@
 "ui.dialog.no" : "No"
 "ui.dialog.ok" : "OK"
 "ui.dialog.exit" : "Exit"
+"ui.dialog.search" : "Search"
+"ui.dialog.keyword" : "Keyword"
 "ui.common.loading" : "Now Loading..."
 "ui.update.waitFinishing" : "Wait for updating..."
 "ui.update.finishUpdate" : "Update finished!<br>Please restart the game."
@@ -53,6 +59,8 @@
 "ui.discordWebhook.determine" : "Determine"
 "ui.discordWebhook.send" : "Send"
 "ui.dragAndDrop" : "Drag & Drop The File Here"
+"ui.costume.missedCostume" : "Unowned global costume"
+"ui.costume.unownedCostume" : "Unowned global costume"
 
 "ui.attribute.accel" : "You can move faster."
 "ui.attribute.decel" : "You move more slowly."
@@ -100,6 +108,17 @@
 "ui.action.danceAction" : "Triggered by small, wiggling movements."
 "ui.action.cannon.mark" : "Mark where the air cannon will fire."
 "ui.action.cannon.cannon" : "Open the special map to fire the air cannon."
+"ui.action.scarlet.suicide" : "You will die if you do not decide your favorite in time.<br>The timer will not run during the meeting or immediately after the meeting ends."
+"ui.action.bubblegun.equip" : "Equip and store the bubblegun. While the bubblegun is equipped,<br>the kill button will change to a bubble firing button."
+"ui.action.bubblegun.kill" : "Shoot bubbles. <br>After shooting, the bubblegun will automatically retract."
+
+# Tutorial
+
+"tutorial.guide.canClose" : "This tutorial remains while the cursor is hovering.<br>Click to close the tutorial."
+"tutorial.guide.cannotClose" : "This tutorial remains while the cursor is hovering."
+"tutorial.variations.subAction" : "There are subactions that can be activated by keystrokes."
+"tutorial.variations.helpInGame.title" : "Game Help"
+"tutorial.variations.helpInGame.caption" : "Press the %KEY% key to open the help screen.<br>Check your abilities and goals!"
 
 # Versions
 
@@ -129,6 +148,11 @@
 "notification.lobby.noTitleForFreeplay" : "Titles cannot be earned in free play."
 "notification.lobby.noTitleForOP" : "Titles cannot be earned in games where the host has the OP permission."
 
+# Logs
+
+"log.loadCostume" : "Costume loaded!"
+"log.awaiting" : "Waiting for response... (Tag: %TAG%)"
+
 # Options
 
 "options.switch.off" : "Off"
@@ -138,6 +162,10 @@
 "options.sec" : "s"
 "options.followPrimaryChance" : "-"
 "options.inactivated" : "Inactivated"
+
+"options.values.short" : "Short"
+"options.values.middle" : "Middle"
+"options.values.long" : "Long"
 
 "options.gamemode" : "Game Mode"
 
@@ -174,6 +202,8 @@
 "options.map.spawnCandidatesFilter" : "Spawn Candidates Filter"
 "options.map.silentVents" : "Silent Vents"
 "options.map.canOpenMapWhileUsingUtility" : "Can Open Map While Using Utility"
+"options.map.numOfTeleporter" : "# Of Teleporter Pairs"
+"options.map.nonCrewmateCanUseTeleporterImmediately" : "Non-crewmate Can Use Teleporter Immediately"
 "options.map.randomizedWiring" : "Randomized Wiring"
 "options.map.stepsOfWiringGame" : "Steps Of Wiring Game"
 "options.map.ladderCoolDown" : "Ladder Cooldown"
@@ -223,6 +253,7 @@
 "options.meeting.extraEmergencyCooldownInTheEarly" : "Extra Emergency Cooldown In The Early"
 "options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "# Deaths Required To End The Early"
 "options.meeting.waitingForHost" : "Please Wait..."
+"options.meeting.showVoteState" : "Show Vote State"
 
 "options.consoleRestriction" : "Console Restriction"
 "options.consoleRestriction.detail" : "About restriction for vitals, admin and cameras"
@@ -232,6 +263,25 @@
 "options.consoleRestriction.cameraRestriction" : "Security Cams & Logs"
 "options.consoleRestriction.resetRestrictions" : "Reset Restrictions Per Meetings"
 "options.consoleRestriction.showDeadBodiesOnAdmin" : "Show Dead Bodies On Admin"
+
+"options.perk" : "Perk Options"
+"options.perk.detail" : "Plants that appear all over the map provide perks.<br>Perks provide benefits to their owners."
+"options.perk.numOfPlants" : "# Plants"
+"options.perk.numOfWarpedPlants" : "# Warped Plants"
+"options.perk.maxBloomsPerPlant" : "Max Blooms (Per Plant)"
+"options.perk.growSpeed" : "Plant Growing Speed"
+"options.perk.shortcut.standard" : "Shortcut (Common Perks)"
+"options.perk.shortcut.standard.0" : "Set Spawn Rate To 0"
+"options.perk.shortcut.standard.100" : "Set Spawn Rate To 100"
+"options.perk.shortcut.warped" : "Shortcut (Non-crewmate Perks)"
+"options.perk.shortcut.warped.0" : "Set Spawn Rate To 0"
+"options.perk.shortcut.warped.100" : "Set Spawn Rate To 100"
+"options.perk.movementRestrictionPerksAlsoAffectCasters" : "Movement Restriction Perks Also Affect Casters"
+"options.perk.movementRotationPerksAlsoAffectCasters" : "Movement Rotation Perks Also Affect Casters"
+
+"options.quality" : "Quality Options"
+"options.quality.detail" : "About game quality settings"
+"options.quality.lowLatencyPlayerSync" : "Low Latency Player Sync"
 
 "options.voiceChat" : "Voice Chat Options"
 "options.voiceChat.detail" : "Let's play while talking with nearby players!"
@@ -250,6 +300,8 @@
 "options.role.count" : "Role Assignment"
 "options.role.chance" : "Assignment Chance"
 "options.role.secondaryChance" : "2nd Onward"
+"options.role.count.jackalized" : "Jacalized Assignment"
+"options.role.chance.jackalized" : "Jackalized Assignment Chance"
 "options.role.count.short" : "Assignment"
 "options.modifier.chance" : "Assignment Chance"
 "options.role.crewmateCount" : "Crewmate Assignment"
@@ -306,6 +358,7 @@
 "options.role.guesser.guessableFilter" : "Guessable Filter"
 "role.guesser.guessableFilter" : "Guessable Filter"
 "options.role.guesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+"role.guesser.leftGuess" : "Left Guess"
 
 "options.role.trapper.placeCoolDown" : "Place Cooldown"
 "options.role.trapper.placeDuration" : "Place Duration"
@@ -334,6 +387,7 @@
 "options.role.agent.numOfExemptedTasks" : "# Exempted Tasks"
 "options.role.agent.numOfExtraTasks" : "# Extra Tasks"
 "options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent" : "Suicide If Someone Else Completes Tasks Before Agent"
+"stats.agent.agent" : "Num of Gaining Extra Tasks"
 
 "role.bait.name" : "Bait"
 "role.bait.short" : "B"
@@ -343,6 +397,8 @@
 "options.role.bait.reportDelay" : "Report Delay"
 "options.role.bait.reportDelayDispersion" : "Report Delay Dispersion"
 "options.role.bait.canSeeVentFlash" : "Can See Vent Flash"
+"stats.bait.bait" : "Num of Bait Report as Bait"
+"stats.bait.killer" : "Num of Bait Report as Killer"
 
 "role.busker.name" : "Busker"
 "role.busker.short" : "B"
@@ -351,6 +407,8 @@
 "options.role.busker.pseudocideCoolDown" : "Pseudocide Cooldown"
 "options.role.busker.pseudocideDuration" : "Pseudocide Duration"
 "options.role.busker.hidePseudocideFromVitals" : "Hide Pseudocide From Vitals"
+"stats.busker.pseudocide" : "Num of Pseudocide"
+"stats.busker.missed" : "Num of Missed"
 
 "role.collator.name" : "Collator"
 "role.collator.short" : "C"
@@ -372,6 +430,9 @@
 "role.collator.ui.result" : "Result:"
 "role.collator.ui.matched" : "Matched"
 "role.collator.ui.unmatched" : "Unmatched"
+"stats.collator.collating" : "Num of Collations"
+"stats.collator.matched" : "Num of Matched Collations"
+"stats.collator.unmatched" : "Num of Unmatched Collations"
 
 "role.comet.name" : "Comet"
 "role.comet.short" : "C"
@@ -382,6 +443,7 @@
 "options.role.comet.blazeDuration" : "Blaze Duration"
 "options.role.comet.blazeVisionRate" : "Blaze Vision Rate"
 "options.role.comet.blazeScreenRate" : "Blaze Screen Rate"
+"stats.comet.blazing" : "Num of Blazing"
 
 "role.doctor.name" : "Doctor"
 "role.doctor.short" : "D"
@@ -392,12 +454,23 @@
 "options.role.doctor.chargesPerTasks" : "Charges Per Tasks" 
 "role.doctor.gadgetLeft" : "%SECOND%s"
 
+"role.echo.name" : "Echo"
+"role.echo.short" : "E"
+"role.echo.blurb" : "Listen Carefully"
+"options.role.echo.detail" : "Echo is a Crewmate who can detect players."
+"options.role.echo.echoCooldown" : "Echo Cooldown"
+"options.role.echo.echoRange" : "Echo Range"
+"stats.echo.players" : "Num of Players Detected"
+"stats.echo.actions" : "Num of Actions Detected"
+
 "role.justice.name" : "Justice"
 "role.justice.short" : "J"
 "role.justice.blurb" : "Achieve Justice"
 "options.role.justice.detail" : "Justice can put two players on the balance<br>and begin a special meeting."
 "options.role.justice.putJusticeOnTheBalance" : "Put Justice On The Balance"
 "options.role.justice.justiceMeetingTime" : "Justice Meeting Time"
+"stats.justice.exiled" : "Num of Exiled on Justice Meeting"
+"stats.justice.nonCrewmates" : "Num of Non-crewmate Exiled on Justice Meeting"
 
 "role.madmate.name" : "Madmate"
 "role.madmate.short" : "Ma"
@@ -412,6 +485,8 @@
 "options.role.madmate.hasImpostorVision" : "Has Impostor Vision"
 "options.role.madmate.canUseVents" : "Can Use Vents"
 "options.role.madmate.canMoveInVents" : "Can Move In Vents"
+"stats.madmate.foundImpostors" : "Num of Impostors Found"
+"stats.madmate.embroil" : "Num of Embroil"
 
 "role.mayor.name" : "Mayor"
 "role.mayor.short" : "M"
@@ -422,6 +497,7 @@
 "options.role.mayor.maxVote" : "# Max Vote"
 "options.role.mayor.maxVotesStock" : "# Max Votes Stock"
 "options.role.mayor.voteAssignment" : "# Vote Assignment On Meeting"
+"stats.mayor.votes" : "Num of Used Votes"
 
 "role.necromancer.name" : "Necromancer"
 "role.necromancer.short" : "N"
@@ -434,6 +510,7 @@
 "options.role.necromancer.reviveMaxRange" : "Revive Room Max Distance"
 "role.necromancer.phantomMessage" : "Please take me to %ROOM%..."
 "role.necromancer.reviveRange" : "Necromancer<color=white>: Detected Range</color>"
+"stats.necromancer.revive" : "Num of Reviving"
 
 "role.niceGuesser.name" : "Nice Guesser"
 "role.niceGuesser.short" : "G"
@@ -462,6 +539,8 @@
 "options.role.phosphorus.lampCoolDown" : "Lamp Cooldown"
 "options.role.phosphorus.lampDuration" : "Lamp Duration"
 "options.role.phosphorus.lampStrength" : "Lamp Strength"
+"stats.phosphorus.lantern" : "Num of Lamp Placed"
+"stats.phosphorus.lighting" : "Num of Lighting"
 
 "role.psychic.name" : "Psychic"
 "role.psychic.short" : "P"
@@ -478,6 +557,8 @@
 "options.role.psychic.message.inner.darkColor" : "dark"
 "options.role.psychic.message.inner.lightColor" : "light"
 "options.role.psychic.message.header" : "Sprit Message"
+"stats.psychic.searching" : "Num of Searching"
+"stats.psychic.messages" : "Num of Hearing Messages"
 
 "role.provocateur.name" : "Provocateur"
 "role.provocateur.short" : "P"
@@ -486,6 +567,8 @@
 "options.role.provocateur.embroilCoolDown" : "Embroil Cooldown"
 "options.role.provocateur.embroilAdditionalCoolDown" : "Embroil Additional Cooldown"
 "options.role.provocateur.embroilDuration" : "Embroil Duration"
+"stats.provocateur.taskPhase" : "Num of Embroiling on Task Phase"
+"stats.provocateur.exile" : "Num of Embroiling on Exile"
 
 "role.seer.name" : "Seer"
 "role.seer.short" : "S"
@@ -504,6 +587,8 @@
 "options.role.sheriff.numOfShots" : "Num Of Shots"
 "options.role.sheriff.canKillHidingPlayer" : "Can Kill Hiding Player"
 "options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "Seal Ability Until Reporting Dead Bodies"
+"stats.sheriff.shot" : "Num of Trying Kill"
+"stats.sheriff.misshot" : "Num of Misshot"
 
 "role.ubiquitous.name" : "Ubiquitous"
 "role.ubiquitous.short" : "U"
@@ -516,6 +601,7 @@
 "options.role.ubiquitous.doorHackCoolDown" : "Door Hacking Cooldown"
 "options.role.ubiquitous.doorHackRadious" : "Door Hacking Radious"
 "role.ubiquitous.droneRange" : "Ubiquitous<color=white>: Drone Detection Radious</color>"
+"stats.ubiquitous.drones" : "Num of Used Drones"
 
 # Impostor Roles
 
@@ -534,8 +620,21 @@
 "options.role.alien.invalidateCoolDown" : "Invalidate Cooldown"
 "options.role.alien.numOfInvalidations" : "# Invalidations"
 
+"role.berserker.name" : "Berserker"
+"role.berserker.short" : "Be"
+"role.berserker.blurb" : "[FATAL ERROR] Out of Control!!"
+"options.role.berserker.detail" : "Berserk and get lots of kills!<br>Berserker is an imposter who reveals its true identity and powers up."
+"options.role.berserker.killCooldown" : "Kill Cooldown"
+"options.role.berserker.accelRate" : "Accel Rate"
+"options.role.berserker.canCalmDown" : "Can Calm Down"
+"options.role.berserker.berserkCooldown" : "Berserk Cooldown"
+"options.role.berserker.maxBerserkDuration" : "Max Berserk Duration"
+"options.role.berserker.killingForTrance" : "Killing For Trance"
+"options.role.berserker.bersekSEStrength" : "Berserk SE Distance"
+"stats.berserker.berserk" : "Num of Berserk"
+
 "role.bountyHunter.name" : "Bounty Hunter"
-"role.bountyHunter.short" : "B"
+"role.bountyHunter.short" : "Bo"
 "role.bountyHunter.blurb" : "Get Rich Quick!"
 "options.role.bountyHunter.detail" : "Bounty Hunter can gain a special Cooldown.<br>If they kill them but the bounty, they'll gain penalty Cooldown."
 "options.role.bountyHunter.bountyKillCoolDown" : "Bounty Kill Cooldown"
@@ -543,6 +642,22 @@
 "options.role.bountyHunter.changeBountyInterval" : "Change Bounty Interval"
 "options.role.bountyHunter.showBountyArrow" : "Show Bounty Arrow"
 "options.role.bountyHunter.arrowUpdateInterval" : "Arrow Update Interval"
+"stats.bountyHunter.bountyKill" : "Num of Bounty Kill"
+"stats.bountyHunter.othersKill" : "Num of Non-bounty Kill"
+
+"role.bubblegun.name" : "Bubblegun"
+"role.bubblegun.short" : "Bu"
+"role.bubblegun.blurb" : "Silence Even the Crying"
+"options.role.bubblegun.detail" : "Bubblegun has a gun that shoots bubbles that trap and kill players."
+"options.role.bubblegun.bubbleCooldown" : "Bubble Cooldown"
+"options.role.bubblegun.bubbleSize" : "Bubble Size"
+"options.role.bubblegun.bubbleSpeed" : "Bubble Speed"
+"options.role.bubblegun.bubbleDuration" : "Bubble Duration"
+"options.role.bubblegun.maxBubbles" : "Max Bubbles"
+"options.role.bubblegun.eraseBubblesOnMeeting" : "Erase Bubbles On Meeting"
+"options.role.bubblegun.canKillImpostor" : "Can Kill Impostor"
+"options.role.bubblegun.bubblePopWhenHitWall" : "Bubble Pop When Hit Wall"
+"stats.bubblegun.bubble" : "Num of Bubblegun Firing"
 
 "role.camouflager.name" : "Camouflager"
 "role.camouflager.short" : "Ca"
@@ -551,6 +666,7 @@
 "options.role.camouflager.camoCoolDown" : "Camo. Cooldown"
 "options.role.camouflager.camoDuration" : "Camo. Duration"
 "options.role.camouflager.canInvokeCamoAfterDeath" : "Can Invoke Camo. After Death"
+"stats.camouflager.camo" : "Num of Camo"
 
 "role.cannon.name" : "Cannon"
 "role.cannon.short" : "C"
@@ -561,6 +677,8 @@
 "options.role.cannon.cannonCooldown" : "Cannon Cooldown"
 "options.role.cannon.cannonPower" : "Cannon Power"
 "options.role.cannon.cannonPowerAttenuation" : "Cannon Power Attenuation"
+"stats.cannon.fire" : "Num of Cannon Firing"
+"stats.cannon.players" : "Num of the Blown by Cannon"
 
 "role.cleaner.name" : "Cleaner"
 "role.cleaner.short" : "Cl"
@@ -568,6 +686,7 @@
 "options.role.cleaner.detail" : "Cleaner can obliterate corpses."
 "options.role.cleaner.cleanCoolDown" : "Clean Cooldown"
 "options.role.cleaner.syncKillAndCleanCoolDown" : "Sync Kill And Clean Cooldown"
+"stats.cleaner.clean" : "Num of Cleaned Corpses"
 
 "role.destroyer.name" : "Destroyer"
 "role.destroyer.short" : "De"
@@ -578,6 +697,7 @@
 "options.role.destroyer.killSEStrength" : "Kill SE Strength"
 "options.role.destroyer.leaveKillEvidence" : "Leave Kill Evidence"
 "options.role.destroyer.canReportKillScene" : "Can Report Kill Scene"
+"stats.destroyer.reported" : "Num of Reported During Kill"
 
 "role.disturber.name" : "Disturber"
 "role.disturber.short" : "Di"
@@ -589,6 +709,8 @@
 "options.role.disturber.maxNumOfPoles" : "# Max Poles"
 "options.role.disturber.maxDistanceBetweenPoles" : "Max Distance Between Poles"
 "role.disturber.ui.removePoles" : "<b>Left Click</b>: Destroy the poles."
+"stats.disturber.pole" : "Num of Poles Placed"
+"stats.disturber.disturb" : "Num of Disturb"
 
 "role.effacer.name" : "Effacer"
 "role.effacer.short" : "E"
@@ -596,6 +718,7 @@
 "options.role.effacer.detail" : "Effacer turns other players invisible to confuse crewmates."
 "options.role.effacer.effaceCoolDown" : "Efface Cooldown"
 "options.role.effacer.effaceDuration" : "Efface Duration"
+"stats.effacer.efface" : "Num of Effaced Players"
 
 "role.evilGuesser.name" : "Evil Guesser"
 "role.evilGuesser.short" : "G"
@@ -637,6 +760,7 @@
 "options.role.hadar.gushFromVents" : "Gush From Vents"
 "options.role.hadar.ventDetectionRange" : "Vent Detection Range"
 "options.role.hadar.leftDivingEvidence" : "Left Diving Evidence"
+"stats.hadar.dive" : "Num of Diving"
 
 "role.illusioner.name" : "Illusioner"
 "role.illusioner.short" : "Il"
@@ -649,6 +773,9 @@
 "options.role.illusioner.loseSampleOnMeeting" : "Lose Sample On Meeting"
 "options.role.illusioner.transformAfterMeeting" : "Transform After Meeting"
 "options.role.illusioner.sampleOriginalLook" : "Sample Original Look"
+"stats.illusioner.sample" : "Num of Taking Samples"
+"stats.illusioner.morph" : "Num of Morphing"
+"stats.illusioner.paint" : "Num of Painting"
 
 "role.jailer.name" : "Jailer"
 "role.jailer.short" : "J"
@@ -668,6 +795,8 @@
 "options.role.marionette.swapCoolDown" : "Swap Cooldown"
 "options.role.marionette.decoyDuration" : "Decoy Duration"
 "options.role.marionette.canSeeDecoyInShadow" : "Can See Decoy In Shadow"
+"stats.marionette.decoy" : "Num of Placing Decoy"
+"stats.marionette.swap" : "Num of Swapping"
 
 "role.morphing.name" : "Morphing"
 "role.morphing.short" : "Mo"
@@ -677,6 +806,8 @@
 "options.role.morphing.morphCoolDown" : "Morph Cooldown"
 "options.role.morphing.morphDuration" : "Morph Duration"
 "options.role.morphing.loseSampleOnMeeting" : "Lose Sample On Meeting"
+"stats.morphing.sample" : "Num of Taking Samples"
+"stats.morphing.morph" : "Num of Morphing"
 
 "role.painter.name" : "Painter"
 "role.painter.short" : "P"
@@ -686,6 +817,8 @@
 "options.role.painter.paintCoolDown" : "Paint Cooldown"
 "options.role.painter.loseSampleOnMeeting" : "Lose Sample On Meeting"
 "options.role.painter.transformAfterMeeting" : "Transform After Meeting"
+"stats.painter.sample" : "Num of Taking Samples"
+"stats.painter.paint" : "Num of Painting"
 
 "role.raider.name" : "Raider"
 "role.raider.short" : "Ra"
@@ -696,11 +829,13 @@
 "options.role.raider.axeSpeed" : "Axe Speed"
 "options.role.raider.canKillImpostor" : "Can Kill Impostor"
 "role.raider.axeSize" : "Raider<color=white>: Axe Size</color>"
+"stats.raider.thrown" : "Num of Axes Thrown"
 
 "role.reaper.name" : "Reaper"
 "role.reaper.short" : "Re"
 "role.reaper.blurb" : "Kill and Deceive the Crewmates"
 "options.role.reaper.detail" : "Reaper can drag dead bodies."
+"stats.reaper.ventWithDeadBody" : "Num of Using Vents With Corpses"
 
 "role.sniper.name" : "Sniper"
 "role.sniper.short" : "Sn"
@@ -720,6 +855,8 @@
 "role.sniper.shotRange" : "Sniper: <color=white>Shot Effective Range</color>"
 "role.sniper.soundRange" : "Sniper: <color=white>Shot Notice Effective Range</color>"
 "role.sniper.shotSize" : "Sniper<color=white>: Shot Size</color>"
+"stats.sniper.misshot" : "Num of Misshot"
+"stats.sniper.shot" : "Num of Firing"
 
 "role.stirrer.name" : "Stirrer"
 "role.stirrer.short" : "St"
@@ -730,18 +867,22 @@
 "options.role.stirrer.sabotageMaxCharge" : "Sabotage Max Charge"
 "options.role.stirrer.sabotageCoolDown" : "Sabotage Cooldown"
 "options.role.stirrer.sabotageInterval" : "Sabotage Interval"
+"stats.stirrer.stir" : "Num of Stirring"
+"stats.stirrer.sabo" : "Num of Fake Sabotage"
 
 "role.thurifer.name" : "Thurifer"
 "role.thurifer.short" : "T"
 "role.thurifer.blurb" : "The One Who Edifies"
 "options.role.thurifer.detail" : "Thurifer uses Thuribulum for delayed kills."
-"options.role.thurifer.maxIntoxication" : "Max Intoxication"
+"options.role.thurifer.inhalationSpeed" : "Inhalation Speed"
 "options.role.thurifer.curseDuration" : "Curse Duration"
 "options.role.thurifer.numOfThuribulums" : "# Thuribulums"
 "options.role.thurifer.thuribulumRange" : "Thuribulum Range"
 "options.role.thurifer.maxKillDelay" : "Max Kill Delay"
 "options.role.thurifer.showBlink" : "Show Blink"
 "options.role.thurifer.activationDelay" : "Activation Delay"
+"stats.thurifer.activate" : "Num of Activated Thuribulums"
+"stats.thurifer.impute" : "Num of Imputing"
 
 # Neutral Roles
 
@@ -751,6 +892,7 @@
 "options.role.arsonist.detail" : "Arsonist douses all of the alive to burn."
 "options.role.arsonist.douseCoolDown" : "Douse Cooldown"
 "options.role.arsonist.douseDuration" : "Douse Duration"
+"stats.arsonist.doused" : "Num of Doused Players"
 
 "role.avenger.name" : "Avenger"
 "role.avenger.short" : "A"
@@ -764,6 +906,9 @@
 "options.role.avenger.showAvengerFlashForTarget" : "Show Avenger Flash"
 "options.role.avenger.notificationForAvengerInterval" : "Notification For Avenger Interval"
 "options.role.avenger.notificationForTargetInterval" : "Notification For Target Interval"
+"stats.avenger.killTarget" : "Num of Killing Target"
+"stats.avenger.failed" : "Num of Killed By Target"
+"stats.avenger.defend" : "Num of Killing Avenger"
 
 "role.chainShifter.name" : "Chain Shifter"
 "role.chainShifter.short" : "C"
@@ -771,6 +916,7 @@
 "options.role.chainShifter.detail" : "Chain Shifter has no way to win."
 "options.role.chainShifter.shiftCoolDown" : "Shift Cooldown"
 "options.role.chainShifter.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
+"stats.chainShifter.shift" : "Num of Shifting Roles"
 
 "role.dancer.name" : "Dancer"
 "role.dancer.short" : "D"
@@ -786,6 +932,12 @@
 "options.role.dancer.forecastedFollowingSuicide" : "Following Suicide Of The Forecasted"
 "role.dancer.taskDanceText" : "Predict Death with Dance"
 "role.dancer.taskFinalText" : "Show Players The Last Dance To Win"
+"stats.dancer.dance" : "Num of Dancing"
+
+"role.ember.name" : "Ember"
+"role.ember.short" : "E"
+"role.ember.blurb" : "The Demise"
+"options.role.ember.detail" : "Ember was defeated in a decisive battle with the Avengers<br>and burned by the curse of the Damned."
 
 "role.jackal.name" : "Jackal"
 "role.jackal.short" : "J"
@@ -795,6 +947,8 @@
 "options.role.jackal.canCreateSidekick" : "Can Create Sidekick"
 "options.role.jackal.numOfKillingToCreateSidekick" : "# Killing to Create Sidekick"
 "options.role.jackal.numOfKillingToWin" : "# Killing to Win"
+"options.role.jackal.jacklizedImpostor" : "Impostor Jackalization"
+"stats.jackal.sidekick" : "Num of Creating Sidekick"
 
 "role.sidekick.name" : "Sidekick"
 "role.sidekick.short" : "S"
@@ -822,6 +976,17 @@
 "options.role.paparazzo.shotCoolDown" : "Shot Cooldown"
 "options.role.paparazzo.requiredSubjects" : "Required Subjects"
 "options.role.paparazzo.requiredDisclosed" : "Required Disclosed"
+"stats.paparazzo.photo" : "Num of Taking Photos"
+"stats.paparazzo.players" : "Num of Players Taken Photos"
+
+"role.scarlet.name" : "Scarlet"
+"role.scarlet.short" : "S"
+"role.scarlet.blurb" : ""I'm still in Love""
+"options.role.scarlet.detail" : "Scarlet is a strategic neutral who aims for victory<br>by skillfully manipulating favorites and keeps."
+"options.role.scarlet.graceUntilDecidingFavorite" : "Grace Until Deciding Favorite"
+"options.role.scarlet.numOfKept" : "# Of Kept"
+"options.role.scarlet.numOfCommand" : "# Of Commands"
+"stats.scarlet.kept" : "Num of Kept"
 
 "role.vulture.name" : "Vulture"
 "role.vulture.short" : "V"
@@ -829,6 +994,7 @@
 "options.role.vulture.detail" : "Vulture eats dead bodies to win.<br>Crewmates must report before the corpse is eaten."
 "options.role.vulture.eatCoolDown" : "Eat Cooldown"
 "options.role.vulture.numOfTheEatenToWin" : "# the Eaten to Win"
+"stats.vulture.eaten" : "Num of Eaten Corpses"
 
 # Ghost Roles
 
@@ -845,6 +1011,7 @@
 "options.role.clog.numOfGhost" : "# Of Ghost"
 "options.role.clog.ghostSize" : "Ghost Size"
 "role.clog.ghostSize" : "Clog<color=white>: Ghost Size</color>"
+"stats.clog.ghosts" : "Num of Summoned Ghosts"
 
 "role.hallucination.name" : "Hallucination"
 "role.hallucination.blurb" : "False Memory"
@@ -852,6 +1019,7 @@
 "options.role.hallucination.detail" : "Hallucination invokes false-player and operates."
 "options.role.hallucination.hallucinationCooldown" : "Hallucination Cooldown"
 "options.role.hallucination.hallucinationDuration" : "Hallucination Duration"
+"stats.hallucination.hallucinations" : "Num of Hallucinations"
 
 "role.lumine.name" : "Lumine"
 "role.lumine.short" : "L"
@@ -865,24 +1033,29 @@
 "options.role.noiseghost.noiseDuration" : "Noise Duration"
 "options.role.noiseghost.numOfNoise" : "# Noises"
 "options.role.noiseghost.noiseCooldown" : "Noise Cooldown"
+"stats.noiseghost.alert" : "Num of Noises"
 
 "role.poltergeist.name" : "Poltergeist"
 "role.poltergeist.short" : "P"
 "options.role.poltergeist.detail" : "Poltergeists can draw corpses close to them."
 "options.role.poltergeist.poltergeistCoolDown" : "Poltergeist Cooldown"
+"stats.poltergeist.poltergeist" : "Num of Poltergeist"
 
 # Modifiers
 
+"role.metaRole.name" : "Free Play Modifier"
 "role.metaRole.ui.roles" : "Roles"
 
 "role.guesser.name" : "Guesser"
 "role.guesser.blurb" : "and You Can Guess Anyone"
-
-"role.metaRole.name" : "Free Play Modifier"
+"stats.guesser.allGuess" : "Num of Guess"
+"stats.guesser.misguessed" : "Num of Misguessed"
 
 "role.bloody.name" : "Bloody"
 "options.role.bloody.detail" : "When Bloody is murdered, the killer lefts bloody footprints for a while."
 "options.role.bloody.curseDuration" : "Curse Duration"
+"stats.bloody.bloody" : "Num of Invoking Bloody Curse"
+"stats.bloody.killer" : "Num of Received Bloody Curse"
 
 "role.confused.name" : "Confused"
 "options.role.confused.detail" : "Every emergency meetings, the appearance of others changes."
@@ -890,12 +1063,19 @@
 "options.role.confused.numOfMaxShuffledPairs" : "# Max Shuffled Pairs"
 
 "role.damned.name" : "Damned"
+"role.damnedImpostor.name" : "Damned"
 "role.damned.short" : "Da"
 "options.role.damned.detail" : "Damned is unconscious modifier.<br>The curse of Damned prevents one kill and has a dynamic effect for game."
 "role.damned.prefix" : "Damned"
+"role.damned.generalBlurb" : "The creeping"
 "options.role.damned.takeOverRoleOfKiller" : "Take Over Role Of Killer"
 "options.role.damned.damnedMurderMyKiller" : "Damned Murder My Killer"
 "options.role.damned.killDelay" : "Kill Delay"
+
+"role.disclosure.name" : "Disclosure"
+"options.role.disclosure.detail" : "Disclosure makes their cursor visible to everyone during an emergency meeting."
+"options.role.disclosure.anonymousCursor" : "Anonymous Cursor"
+"options.role.disclosure.showCursorAtLateVoting" : "Show Cursor At Late Voting"
 
 "role.extraMission.name" : "Extra Mission"
 "options.role.extraMission.detail" : "Your mission is to make certain players die.<br>Otherwise you won't win."
@@ -903,6 +1083,7 @@
 
 "role.tieBreaker.name" : "Tie Breaker"
 "options.role.tieBreaker.detail" : "When the vote results in a tie, Tie Breaker cast an additional vote."
+"stats.tieBreaker.tieBreaking" : "Num of Tie Breaking"
 
 "role.lover.name" : "Lover"
 "options.role.lover.detail" : "While the number of ways to win increases, so does the risk of death."
@@ -923,6 +1104,10 @@
 "options.role.obsessional.impostorObsessionalObsessesOver.neutralOnly" : "Neutral Only"
 "options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate" : "Non-Crewmate"
 "role.obsessional.taskText" : "[Obsessional] Target is %PLAYER%."
+
+"role.scarletLover.name" : "Scarlet Lover"
+"options.role.scarletLover.detail" : "A lover who was seduced by Scarlet. they don't know if I'm a favorite or a keep."
+"role.scarletLover.generalBlurb" : "Love As It Is"
 
 "role.secret.name" : "Secret"
 "role.secret.short" : "?"
@@ -947,7 +1132,79 @@
 "teams.jackal" : "Jackal"
 "teams.jester" : "Jester"
 "teams.paparazzo" : "Paparazzo"
+"teams.scarlet" : "Scarlet"
 "teams.vulture" : "Vulture"
+
+# Perks
+
+"perkui.message.noncrew" : "Crewmates cannot acquire non-crewmate-only perks."
+"perkui.message.swap" : "Obtain it by exchanging it with the park you own."
+"perkui.message.obtain" : "Interact to earn perks."
+
+"perk.empty.name" : "Empty Perk"
+"perk.empty.detail" : "Get perks from blooming <b>plants</b>."
+
+"perk.empty.noncrewmate.name" : "Empty NON-CREWMATE-ONLY Perk"
+"perk.empty.noncrewmate.detail" : "Get the perk from the blooming <b>Warped Plant</b>."
+
+"perk.acceleration.name" : "Agile"
+"perk.acceleration.detail" : "You can move %R% times faster for %D% seconds.<br>This perk has a %CD% second cooldown. "
+
+"perk.flipX.name" : "Behind the Mirror"
+"perk.flipX.detail" : "All players' screens are flipped horizontally."
+
+"perk.flipY.name" : "Revolution"
+"perk.flipY.detail" : "All players' screens are flipped vertically."
+
+"perk.flipXY.name" : "Plot Twist"
+"perk.flipXY.detail" : "All players' screens are flipped."
+
+"perk.sniperIcon.name" : "Blank Shot"
+"perk.sniperIcon.detail" : "Shoot blanks on the spot.<br>This perk has a %CD% second cooldown. "
+
+"perk.raiderEvidence.name" : "Rampage"
+"perk.raiderEvidence.detail" : "Punch the axe into the nearby wall.<br>This perk has a %CD% second cooldown.<br>Raider CANNOT use this perk."
+
+"perk.accelTrap.name" : "Amplifying"
+"perk.accelTrap.detail" : "Place an acceleration trap. <br>The placed traps will be activated after the meeting. "
+
+"perk.decelTrap.name" : "Restraint"
+"perk.decelTrap.detail" : "Place an deceleration trap. <br>The placed traps will be activated after the meeting. "
+
+"perk.taskReduction.name" : "Recalculation"
+"perk.taskReduction.detail" : "Reduces task quota by 1.<br>For players without crewmate tasks, nothing happens."
+
+"perk.emergencyButton.name" : "Emergency Call"
+"perk.emergencyButton.detail" : "You can press the emergency button from anywhere. <br>This perk does not change the limit on<br>the number of times the emergency button can be used."
+
+"perk.teamLook.name" : "Crystal Gazing"
+"perk.teamLook.detail" : "During an emergency meeting,<br>you can learn the faction of one selected survivor."
+"perk.teamLook.ui.title" : "Crystal Gazing"
+"perk.teamLook.ui.team" : "%TEAM% Team"
+
+"perk.ghostLook.name" : "Detective Report"
+"perk.ghostLook.detail" : "During an emergency meeting,<br>you can learn the cause of death of one selected deceased."
+"perk.ghostLook.ui.title" : "Detective Report"
+
+"perk.invisible.name" : "Transcendent"
+"perk.invisible.detail" : "When activated, it makes itself invisible for %D% seconds.<br>This perk can only be activated once."
+
+"perk.doubleVote.name" : "Insistence"
+"perk.doubleVote.detail" : "Only once, double the number of votes other than blank votes or skip votes."
+
+"perk.monowayX.name" : "Crab Walking"
+"perk.monowayX.detail" : "When activated, vertical movement is prohibited for %D% seconds.<br>This perk has a %CD% second cooldown."
+
+"perk.monowayY.name" : "Heaven Or Hell"
+"perk.monowayY.detail" : "When activated, lateral movement is prohibited for %D% seconds.<br>This perk has a %CD% second cooldown."
+
+"perk.monowayRotate.name" : "Disorder"
+"perk.monowayRotate.detail" : "When activated, the direction of movement will randomly rotate for %D% seconds.<br>This perk has a %CD% second cooldown."
+
+"perk.meteor.name" : "Meteor Storm"
+"perk.meteor.detail" : "10 seconds after activation, meteorites will be dropped.<br>This perk can only be activated once.<br>From activation to the time the meteor crashes, the emergency button will be blocked and<br>players near the crash site will be alerted by a red flash.<br><br>Valture can not use this perk."
+"perk.meteor.sabotageText" : "Meteorite Warning: Run to a safe place!"
+"perk.meteor.meetingButtonText" : "The emergency meeting cannot be started<br>due to the warning of a meteorite."
 
 # Location
 
@@ -1111,6 +1368,17 @@
 "button.label.marketplace" : "marketplace"
 "button.label.thurifer.curse" : "curse"
 "button.label.thurifer.impute" : "impute"
+"button.label.berserk" : "berserk"
+"button.label.calmDown" : "calm down"
+"button.label.echo" : "echo"
+"button.label.scarlet.grance" : "grance"
+"button.label.favorite" : "favorite"
+"button.label.seduce" : "seduce"
+"button.label.scarlet.command" : "command"
+"button.label.costume" : "costume"
+"button.label.bubble" : "bubble"
+"button.label.appeal" : "appeal"
+"button.label.playAchievement" : "recap"
 
 # Game
 
@@ -1129,6 +1397,9 @@
 "game.metaAbility.tabs.roles" : "Roles"
 "game.metaAbility.tabs.modifiers" : "Modifiers"
 "game.metaAbility.tabs.ghostRoles" : "Ghost Roles"
+"game.metaAbility.tabs.perks" : "Perks"
+"game.metaAbility.perks.standard" : "Common Perks"
+"game.metaAbility.perks.noncrewmateOnly" : "Non-crewmate Only Perks"
 "game.metaAbility.equipped" : "Equipped"
 "game.metaAbility.unequipped" : "Unequipped"
 
@@ -1158,11 +1429,14 @@
 "statistics.events.accident" : "Accident"
 "statistics.events.dance" : "Dance"
 "statistics.events.gassed" : "Gassed"
+"statistics.events.bubbled" : "Bubbled"
+"statistics.events.meteor" : "Meteor"
 
 # States
 
 "state.alive" : "Alive"
 "state.dead" : "Dead"
+"state.disconnected" : "Disconnected"
 "state.exiled" : "Exiled"
 "state.misfired" : "Misfired"
 "state.sniped" : "Sniped"
@@ -1179,6 +1453,8 @@
 "state.crushed" : "Crushed"
 "state.frenzied" : "Frenzied"
 "state.gassed" : "Gassed"
+"state.bubbled" : "Bubbled"
+"state.meteor" : "Meteor"
 
 # Endings
 
@@ -1190,8 +1466,9 @@
 "end.jester" : "Jester Wins%EXTRA%"
 "end.vulture" : "Vulture Wins%EXTRA%"
 "end.lover" : "Lovers Win%EXTRA%"
-"end.paparazzo" : "Paparazzo Win%EXTRA%"
-"end.avenger" : "Avenger Win%EXTRA%"
+"end.paparazzo" : "Paparazzo Wins%EXTRA%"
+"end.avenger" : "Avenger Wins%EXTRA%"
+"end.scarlet" : "Scarlet Wins%EXTRA%"
 "end.nogame" : "No Game"
 
 "end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
@@ -1214,6 +1491,7 @@
 "help.command.cancelStarting" : "Cancel Starting"
 "help.command.console" : "Console"
 "help.command.saveResult" : "Save Result Image"
+"help.command.toggleSocial" : "Toggle Appealing"
 
 # Voice Chat
 
@@ -1269,7 +1547,11 @@
 "input.kill" : "Kill (Additional)"
 "input.ability" : "Ability"
 "input.secondaryAbility" : "Secondary Ability"
+"input.sidekickAction" : "Sidekick Action"
+"input.freeplayAction" : "Freeplay Action"
 "input.aidAction" : "Aid Action"
+"input.perkAction1" : "Perk Action 1"
+"input.perkAction2" : "Perk Action 2"
 "input.command" : "Command"
 "input.screenshot" : "Screenshot"
 "input.mute" : "Mute"
@@ -1302,6 +1584,10 @@
 "config.client.showNebulaLogoInLobby" : "Show NoS Logo"
 "config.client.externalModColor" : "External Mod Color Support"
 "config.client.webhook" : "Discord Webhook"
+"config.client.social" : "Social Settings"
+"config.client.social.showAppealSettings" : "Show Appeal Settings"
+"config.client.social.appealDuration" : "Appeal Duration"
+"config.client.social.note" : "Changes will be reflected in the next room built."
 
 # Preset
 
@@ -1429,6 +1715,7 @@
 "achievement.ui.cond" : "[Constraint]"
 "achievement.ui.allAchievements" : "All"
 "achievement.ui.shown" : "Shown"
+"achievement.ui.shown.search" : "Search results for "%KEYWORD%""
 "achievement.ui.cleared" : "[Cleared]"
 "achievement.ui.equipped" : "[Equipped]"
 "achievement.ui.setTitle" : "CLICK To Set This Title."
@@ -1441,11 +1728,60 @@
 "achievement.type.secret" : "Secret"
 "achievement.type.seasonal" : "Seasonal"
 "achievement.type.costume" : "Cosmetics"
+"achievement.type.innersloth" : "Among Us"
+"achievement.type.perk" : "Perk"
+
+"achievement.group.recently" : "Recently Achieved"
+"achievement.group.roles" : "Roles"
+"achievement.group.seasonal" : "Seasonal"
+"achievement.group.perk" : "Perk"
+"achievement.group.costume" : "Costume"
+"achievement.group.others" : "Others"
+"achievement.group.innersloth" : "Innersloth"
+
 
 "achievement.filter.all" : "All"
 "achievement.filter.achieved" : "Cleared"
-"achievement.filter.notAchieved" : "Not Cleared"
+"achievement.filter.nonAchieved" : "Not Cleared"
+"achievement.filter.search" : "Search"
 "achievement.filter.myRole" : "My Role"
+
+"achievement.social.firstClear" : "%PLAYER% got"
+"achievement.social.clear" : "%PLAYER% got"
+"achievement.social.clearMultiple" : "%PLAYER% and %OTHERS% players got"
+"achievement.social.noAchievement" : "There are no titles to mention..."
+
+# Stats
+
+"stats.ui.title" : "Stats"
+"stats.ui.caption" : "*Statistics from v2.13 onwards has been aggregated."
+"stats.group.kill" : "Kills"
+"stats.group.death" : "Deaths"
+"stats.group.game" : "Game"
+"stats.group.roles" : "Roles"
+"stats.group.perks" : "Perks"
+"stats.role.common.assigned" : "Played %ROLE%"
+"stats.role.common.won" : "Won as %ROLE%"
+"stats.modifier.common.assigned" : "Played %MODIFIER%"
+"stats.modifier.common.won" : "Won as %MODIFIER%"
+"stats.ghostRole.common.assigned" : "Played %GHOSTROLE%"
+"stats.ghostRole.common.won" : "Won as %GHOSTROLE%"
+"stats.common.kill" : "%STATE%"
+"stats.common.death" : "%STATE%"
+"stats.common.win" : "Won with %END%"
+"stats.common.defeat" : "Defeated with %END%"
+"stats.gamePlay" : "Play Games"
+"stats.plants.gain.normal" : "Num of Gained Perks from Normal Plants"
+"stats.plants.gain.warped" : "Num of Gained Perks from Warped Plants"
+"stats.perk.common.gain" : "Gained %PERK%"
+
+# Social
+
+"social.appeal.detail" : "Appeals can be used to introduce yourself.<br>Should not be used for actual games!"
+"social.appeal.lobby" : "Appeal In Lobby"
+"social.appeal.lobby.detail" : "When turned on, you can use <b>Appeal</b> to draw attention to yourself in the lobby."
+"social.appeal.game" : "Appeal In Game"
+"social.appeal.game.detail" : "When turned on, you can use <b>Appeal</b> to draw attention to yourself in-game. <br>Note that use it as an opening for self-introduction, not a regular game!"
 
 # Help
 
@@ -1465,6 +1801,8 @@
 "help.rolePreview.inner.random" : "Random"
 "help.rolePreview.inner.modifiers" : "Modifiers"
 "help.rolePreview.inner.ghostRoles" : "Ghost Roles"
+"help.rolePreview.inner.jackalized.100" : "Jackalized 100%"
+"help.rolePreview.inner.jackalized.random" : "Jackalized Random"
 
 # Tag
 
@@ -1549,6 +1887,9 @@
 "marketplace.type.cosmetics" : "Cosmetics"
 "marketplace.searchMore.addons" : "Search more addons by "%QUERY%""
 "marketplace.searchMore.cosmetics" : "Search more cosmetics by "%QUERY%""
+"marketplace.ui.marketplace.state" : "State"
+"marketplace.ui.marketplace.state.owning" : "Activated"
+"marketplace.ui.marketplace.state.unowning" : "Unactivated"
 
 # Role Filter
 

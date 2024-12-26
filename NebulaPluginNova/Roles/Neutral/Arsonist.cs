@@ -23,6 +23,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.arsonist.vent", true);
 
     static public Arsonist MyRole = new Arsonist();
+    static private GameStatsEntry StatsDouse = NebulaAPI.CreateStatsEntry("stats.arsonist.doused", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -96,7 +97,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                         ajust.transform.localPosition = Vector3.zero;
                     }
                 };
-                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                 {
                     if (p.AmOwner) continue;
 
@@ -130,6 +131,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (!button.EffectTimer!.IsProgressing)
                         foreach (var icon in playerIcons) if (icon.playerId == douseTracker.CurrentTarget.PlayerId) icon.icon.SetAlpha(1f);
 
+                    StatsDouse.Progress();
                     CheckIgnitable();
                     douseButton.StartCoolDown();
                 };

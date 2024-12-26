@@ -57,16 +57,18 @@ public static class GeneralConfigurations
 
     static internal ValueConfiguration<int> SpawnMethodOption = NebulaAPI.Configurations.Configuration("options.map.spawnMethod", ["options.map.spawnMethod.default", "options.map.spawnMethod.selective", "options.map.spawnMethod.random"], 0);
     static internal IntegerConfiguration SpawnCandidatesOption = NebulaAPI.Configurations.Configuration("options.map.spawnCandidates", (1, 8), 1, () => (SpawnMethodOption.GetValue() == 1));
-    static internal IConfiguration SpawnCandidateFilterOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.spawnCandidatesFilter", _ => OpenCandidatesFilter(MetaScreen.GenerateWindow(new(7.5f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, false))),() => SpawnMethodOption.GetValue() > 0);
+    static internal IConfiguration SpawnCandidateFilterOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.spawnCandidatesFilter", _ => OpenCandidatesFilter(null)),() => SpawnMethodOption.GetValue() > 0);
     static internal BoolConfiguration SilentVentOption = NebulaAPI.Configurations.Configuration("options.map.silentVents", false);
     static internal BoolConfiguration CanOpenMapWhileUsingUtilityOption = NebulaAPI.Configurations.Configuration("options.map.canOpenMapWhileUsingUtility", false);
+    static internal IntegerConfiguration NumOfTeleportationPortalOption = NebulaAPI.Configurations.Configuration("options.map.numOfTeleporter", (0, TeleportationSystem.MaxTeleporterKind), 0);
+    static internal BoolConfiguration NonCrewmateCanUseTeleporterImmediatelyOption = NebulaAPI.Configurations.Configuration("options.map.nonCrewmateCanUseTeleporterImmediately", true, () => NumOfTeleportationPortalOption > 0);
     static internal BoolConfiguration RandomizedWiringOption = NebulaAPI.Configurations.Configuration("options.map.randomizedWiring", false);
     static internal IntegerConfiguration StepsOfWiringGameOption = NebulaAPI.Configurations.Configuration("options.map.stepsOfWiringGame", (1, 12), 3);
     static internal FloatConfiguration LadderCoolDownOption = NebulaAPI.Configurations.Configuration("options.map.ladderCoolDown", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second);
     static internal FloatConfiguration ZiplineCoolDownOption = NebulaAPI.Configurations.Configuration("options.map.ziplineCoolDown", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second);
-    static internal IConfiguration MapEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.customization", _ => OpenMapEditor(MetaScreen.GenerateWindow(new(7.5f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, false))));
+    static internal IConfiguration MapEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.customization", _ => OpenMapEditor(null)));
     static internal IConfigurationHolder MapOptions = NebulaAPI.Configurations.Holder("options.map", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        SpawnMethodOption, SpawnCandidatesOption, SpawnCandidateFilterOption, SilentVentOption, CanOpenMapWhileUsingUtilityOption, RandomizedWiringOption, StepsOfWiringGameOption, LadderCoolDownOption, ZiplineCoolDownOption, MapEditorOption
+        SpawnMethodOption, SpawnCandidatesOption, SpawnCandidateFilterOption, SilentVentOption, CanOpenMapWhileUsingUtilityOption, NumOfTeleportationPortalOption, NonCrewmateCanUseTeleporterImmediatelyOption, RandomizedWiringOption, StepsOfWiringGameOption, LadderCoolDownOption, ZiplineCoolDownOption, MapEditorOption
         ]);
 
     static private T MapCustomization<T>(byte mapId, MapOptionType mapOptionType, Vector2 pos,T config) where T : ISharableEntry
@@ -148,6 +150,37 @@ public static class GeneralConfigurations
     static public ISharableVariable<float> AirshipHeliDurationOption = MapCustomization(4, MapOptionType.Float, new(1.7f, 6.2f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.heliDuration", SabotageCoolDown, 60f));
     static public ISharableVariable<float> FungleReactorDurationOption = MapCustomization(5, MapOptionType.Float, new(22.4f, -6.8f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.reactorDuration", SabotageCoolDown, 60f));
 
+    static public IntegerConfiguration NumOfPlantsOption = NebulaAPI.Configurations.Configuration("options.perk.numOfPlants", (0, 5), 0);
+    static public IntegerConfiguration NumOfWarpedPlantsOption = NebulaAPI.Configurations.Configuration("options.perk.numOfWarpedPlants", (0, 5), 0);
+    static public IntegerConfiguration MaxBloomsPerPlantOption = NebulaAPI.Configurations.Configuration("options.perk.maxBloomsPerPlant", (1, 5), 3);
+    static public IntegerConfiguration GrowSpeedOption = NebulaAPI.Configurations.Configuration("options.perk.growSpeed", (1, 8), 3);
+    static public BoolConfiguration MovementRestrictionPerksAlsoAffectCastersOption = NebulaAPI.Configurations.Configuration("options.perk.movementRestrictionPerksAlsoAffectCasters", true);
+    static public BoolConfiguration MovementRotationPerksAlsoAffectCastersOption = NebulaAPI.Configurations.Configuration("options.perk.movementRotationPerksAlsoAffectCasters", true);
+    static private Virial.Media.GUIWidget GeneratePerkShortcutButton(string translationKey, Action action) => GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonLonger), translationKey, _ => { action.Invoke(); NebulaAPI.Configurations.RequireUpdateSettingScreen(); });
+    static internal IConfigurationHolder PerkOptions = NebulaAPI.Configurations.Holder("options.perk", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
+        NumOfPlantsOption, NumOfWarpedPlantsOption, MaxBloomsPerPlantOption, GrowSpeedOption,
+        MovementRestrictionPerksAlsoAffectCastersOption, MovementRotationPerksAlsoAffectCastersOption,
+        /*ショートカットボタン*/
+        NebulaAPI.Configurations.Configuration(()=>null, () => NebulaAPI.GUI.VerticalHolder(GUIAlignment.Left,
+             NumOfPlantsOption > 0 ? GUI.API.HorizontalHolder(GUIAlignment.Left,
+                 GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), "options.perk.shortcut.standard"),
+                 ConfigurationAssets.Semicolon,
+                 GUI.API.HorizontalMargin(0.1f),
+                 GeneratePerkShortcutButton("options.perk.shortcut.standard.0", () => Roles.Roles.AllPerks.Where(p => p.PerkCategory is PerkFunctionalDefinition.Category.Standard).Do(p => p.SpawnRate.CurrentValue = 0)),
+                 GeneratePerkShortcutButton("options.perk.shortcut.standard.100", () => Roles.Roles.AllPerks.Where(p => p.PerkCategory is PerkFunctionalDefinition.Category.Standard).Do(p => p.SpawnRate.CurrentValue = 100))
+                 ) : GUI.API.EmptyWidget,
+             NumOfWarpedPlantsOption > 0 ? GUI.API.HorizontalHolder(GUIAlignment.Left,
+                 GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), "options.perk.shortcut.warped"),
+                 ConfigurationAssets.Semicolon,
+                 GUI.API.HorizontalMargin(0.1f),
+                 GeneratePerkShortcutButton("options.perk.shortcut.warped.0", () => Roles.Roles.AllPerks.Where(p => p.PerkCategory is PerkFunctionalDefinition.Category.NoncrewmateOnly).Do(p => p.SpawnRate.CurrentValue = 0)),
+                 GeneratePerkShortcutButton("options.perk.shortcut.warped.100", () => Roles.Roles.AllPerks.Where(p => p.PerkCategory is PerkFunctionalDefinition.Category.NoncrewmateOnly).Do(p => p.SpawnRate.CurrentValue = 100))
+                 ) : GUI.API.EmptyWidget
+            ), () => NumOfPlantsOption > 0 || NumOfWarpedPlantsOption > 0),
+        ..Roles.Roles.AllPerks.Where(p => p.PerkCategory is PerkFunctionalDefinition.Category.Standard).Select(p => p.SpawnRateConfiguration),
+        ..Roles.Roles.AllPerks.Where(p => p.PerkCategory is PerkFunctionalDefinition.Category.NoncrewmateOnly).Select(p => p.SpawnRateConfiguration)
+        ]);
+
     static public FloatConfiguration DeathPenaltyOption = NebulaAPI.Configurations.Configuration("options.meeting.deathPenalty", (0f, 20f, 0.5f), 0f, FloatConfigurationDecorator.Second);
     static public BoolConfiguration NoticeExtraVictimsOption = NebulaAPI.Configurations.Configuration("options.meeting.noticeExtraVictims", false);
     static public IntegerConfiguration NumOfMeetingsOption = NebulaAPI.Configurations.Configuration("options.meeting.numOfMeeting", (0, 15), 10);
@@ -155,8 +188,9 @@ public static class GeneralConfigurations
     static public BoolConfiguration ShowRoleOfExiled = NebulaAPI.Configurations.Configuration("options.meeting.showRoleOfExiled", false, () => GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor);
     static public FloatConfiguration EarlyExtraEmergencyCoolDownOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarly", (0f, 20f, 2.5f), 0f, FloatConfigurationDecorator.Second);
     static public IntegerConfiguration EarlyExtraEmergencyCoolDownCondOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarlyCondition", (1, 10), 2, () => EarlyExtraEmergencyCoolDownOption > 0f);
+    static public BoolConfiguration ShowVoteStateOption = NebulaAPI.Configurations.Configuration("options.meeting.showVoteState", true);
     static internal IConfigurationHolder MeetingOptions = NebulaAPI.Configurations.Holder("options.meeting", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        DeathPenaltyOption, NoticeExtraVictimsOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart, ShowRoleOfExiled, EarlyExtraEmergencyCoolDownOption, EarlyExtraEmergencyCoolDownCondOption
+        DeathPenaltyOption, NoticeExtraVictimsOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart, ShowRoleOfExiled, EarlyExtraEmergencyCoolDownOption, EarlyExtraEmergencyCoolDownCondOption, ShowVoteStateOption
         ]);
 
     static public ExclusiveAssignmentConfiguration[] exclusiveAssignmentOptions = Helpers.Sequential(10).Select(i => new ExclusiveAssignmentConfiguration("options.exclusiveAssignment.category." + i)).ToArray();
@@ -175,6 +209,10 @@ public static class GeneralConfigurations
         UseVoiceChatOption, CanTalkInWandaringPhaseOption, WallsBlockAudioOption, KillersHearDeadOption, ImpostorsRadioOption, JackalRadioOption, LoversRadioOption, AffectedByCommsSabOption, IsolateGhostsStrictlyOption
         ]);
 
+    static public BoolConfiguration LowLatencyPlayerSyncOption = NebulaAPI.Configurations.Configuration("options.quality.lowLatencyPlayerSync", true);
+    static internal IConfigurationHolder QualityOptions = NebulaAPI.Configurations.Holder("options.quality", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
+        LowLatencyPlayerSyncOption
+        ]);
     static IEnumerable<float> RestrictionSelections()
     {
         yield return -1f;
@@ -209,8 +247,10 @@ public static class GeneralConfigurations
 
     static private XOnlyDividedSpriteLoader mapCustomizationSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.MapCustomizations.png", 100f, 50, true);
     
-    static void OpenMapConfigurationEditor(MetaScreen screen, byte? mapId, Func<byte,IEnumerable<(IMetaParallelPlacableOld button, Vector2 pos)>> widgetBuilder)
+    static void OpenMapConfigurationEditor(MetaScreen? screen, byte? mapId, Func<byte,IEnumerable<(IMetaParallelPlacableOld button, Vector2 pos)>> widgetBuilder)
     {
+        if (screen == null) screen = MetaScreen.GenerateWindow(new(7.5f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, false);
+
         mapId ??= AmongUsUtil.CurrentMapId;
 
         MetaWidgetOld widget = new();
@@ -255,7 +295,7 @@ public static class GeneralConfigurations
         screen.SetWidget(widget);
     }
 
-    static void OpenMapEditor(MetaScreen screen, byte? mapId = null) => OpenMapConfigurationEditor(screen, mapId, mapId =>
+    static public void OpenMapEditor(MetaScreen? screen, byte? mapId = null, bool asEditor = true) => OpenMapConfigurationEditor(screen, mapId, mapId =>
         MapCustomizations[mapId].Select(
             c =>
             {
@@ -266,7 +306,7 @@ public static class GeneralConfigurations
                     return ((IMetaParallelPlacableOld)new CombinedWidgetOld(new MetaWidgetOld(
                         new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttrLeft) { Size = new(0.55f, 0.15f) }) { MyText = new TranslateTextComponent(c.Entry.Name) },
                         new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Size = new(0.55f, 0.28f) }) { RawText = variable.Value.ToString() + Language.Translate("options.sec"), PostBuilder = text => valueText = text }
-                        ), MetaWidgetOld.Button.GetTwoWayButton(increament => { variable.ChangeValue(increament); valueText.text = variable.Value.ToString() + Language.Translate("options.sec"); }))
+                        ), asEditor ? MetaWidgetOld.Button.GetTwoWayButton(increament => { variable.ChangeValue(increament); valueText.text = variable.Value.ToString() + Language.Translate("options.sec"); }) : new MetaWidgetOld.VerticalMargin(0f))
                     { PostBuilder = obj => obj.AddComponent<SortingGroup>().sortingOrder = 12 }, c.Position);
                 }
                 else
@@ -286,7 +326,7 @@ public static class GeneralConfigurations
                                 NebulaManager.Instance.SetHelpWidget(button, widget);
                             });
                             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-                            button.OnClick.AddListener(() => { variable.ChangeValue(true); renderer.color = variable.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.45f); });
+                            if(asEditor) button.OnClick.AddListener(() => { variable.ChangeValue(true); renderer.color = variable.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.45f); });
                             var collider = button.gameObject.AddComponent<BoxCollider2D>();
                             collider.isTrigger = true;
                             collider.size = new(0.5f, 0.5f);
@@ -296,8 +336,8 @@ public static class GeneralConfigurations
             })
     );
 
-    static void OpenCandidatesFilter(MetaScreen screen, byte? mapId = null) => OpenMapConfigurationEditor(screen, mapId, mapId =>
-            NebulaPreSpawnLocation.Locations[mapId].Select(
+    static public void OpenCandidatesFilter(MetaScreen? screen, byte? mapId = null, bool asEditor = true) => OpenMapConfigurationEditor(screen, mapId, mapId =>
+            NebulaPreSpawnLocation.Locations[mapId].Where(l => asEditor || l.Configuration.Value).Select(
                 l => ((IMetaParallelPlacableOld)new MetaWidgetOld.Image(mapCustomizationSprite.GetSprite(5))
                 {
                     Width = 0.5f,
@@ -312,7 +352,7 @@ public static class GeneralConfigurations
                             NebulaManager.Instance.SetHelpWidget(button, widget);
                         });
                         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-                        button.OnClick.AddListener(() => { l.Configuration.ChangeValue(true); renderer.color = l.Configuration.Value ? Color.white : Color.red.RGBMultiplied(0.65f); });
+                        if(asEditor) button.OnClick.AddListener(() => { l.Configuration.ChangeValue(true); renderer.color = l.Configuration.Value ? Color.white : Color.red.RGBMultiplied(0.65f); });
                         var collider = button.gameObject.AddComponent<BoxCollider2D>();
                         collider.isTrigger = true;
                         collider.size = new(0.5f, 0.5f);
@@ -418,7 +458,7 @@ public static class GeneralConfigurations
         GUIWidgetSupplier IConfiguration.GetEditor()
         {
             return () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), new TranslateTextComponent(this.dataEntry.Name)) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(this.dataEntry.Name) },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), new TranslateTextComponent(this.dataEntry.Name)) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(this.dataEntry.Name), OnClickText = ConfigurationAssets.GetCopyAction(this.dataEntry.Name) },
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), new LazyTextComponent(() => ValueAsDisplayString ?? "None")),
             new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), new TranslateTextComponent("options.exclusiveAssignment.edit")) { OnClick = _ => RoleOptionHelper.OpenFilterScreen("exclusiveRole", Roles.Roles.AllRoles, Contains, null, r => { ToggleAndShare(r); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }) }
             );

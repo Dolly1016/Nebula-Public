@@ -6,6 +6,7 @@ using static Nebula.Modules.HelpScreen;
 
 namespace Nebula.Patches;
 
+
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.Start))]
 public static class HudManagerStartPatch
 {
@@ -16,12 +17,12 @@ public static class HudManagerStartPatch
     static void Postfix(HudManager __instance)
     {
         DIManager.Instance.Instantiate<Virial.Game.Game>();
-
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light(Dummy)", Camera.main.transform, new Vector3(0, 0, -1.5f), LayerExpansion.GetDrawShadowsLayer());
+        
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light(Dummy)", AmongUsUtil.GetShadowCollab().ShadowCamera.transform, new Vector3(0, 0, -1.5f), LayerExpansion.GetDrawShadowsLayer());
         renderer.sprite = VanillaAsset.FullScreenSprite;
         renderer.material.shader = NebulaAsset.StoreBackShader;
         renderer.color = Color.clear;
-
+        
         __instance.TaskPanel.transform.localPosition = new(0, 0, 0);
     }
 }
@@ -32,6 +33,7 @@ public static class HudManagerUpdatePatch
 {
     static void Postfix(HudManager __instance)
     {
+        __instance.UpdateHudContent();
         NebulaGameManager.Instance?.OnUpdate();
 
         if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDownForAction && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
@@ -48,6 +50,9 @@ public static class HudManagerCoStartGamePatch
     static bool Prefix(HudManager __instance,ref Il2CppSystem.Collections.IEnumerator __result)
     {
         IEnumerator GetEnumerator(){
+            //UIを閉じる
+            NebulaManager.Instance.CloseAllUI();
+
             while (!ShipStatus.Instance)
             {
                 yield return null;

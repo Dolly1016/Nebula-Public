@@ -104,6 +104,7 @@ public interface DefinedAssignable : IRoleID
     /// ヘルプ画面上で表示するかどうか設定できます。
     /// </summary>
     bool ShowOnHelpScreen { get => true; }
+    bool ShowOnFreeplayScreen { get => true; }
 
     /// <summary>
     /// 役職の内部名
@@ -119,8 +120,8 @@ public interface DefinedAssignable : IRoleID
     /// <summary>
     /// 一般的な二つ名テキスト
     /// </summary>
-    string GeneralColoredBlurb => NebulaAPI.Language.Translate("role." + LocalizedName + ".blurb").Color(UnityColor);
-
+    string GeneralBlurb => NebulaAPI.Language.Translate("role." + LocalizedName + ".blurb");
+    string GeneralColoredBlurb => GeneralBlurb.Color(UnityColor);
 
     /// <summary>
     /// 役職の色
@@ -158,6 +159,7 @@ public interface DefinedSingleAssignable : DefinedCategorizedAssignable, ISpawna
     RoleTeam Team { get; }
 
     AllocationParameters? AllocationParameters { get; }
+    AllocationParameters? JackalAllocationParameters { get => null; }
 }
 
 public interface RuntimeAssignableGenerator<T> where T : RuntimeAssignable
@@ -245,7 +247,29 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// <summary>
     /// 役職のゲーム開始時の表示
     /// </summary>
-    string DisplayIntroBlurb => GeneralColoredBlurb;
+    string DisplayIntroBlurb => GeneralBlurb;
+
+    /// <summary>
+    /// ジャッカル化可能な場合はtrueを返します。
+    /// ジャッカル用作用素を生成できる必要があります。
+    /// </summary>
+    bool IsJackalizable => false;
+
+    /// <summary>
+    /// ジャッカル化可能な場合はジャッカル用作用素を生成します。
+    /// ジャッカル化可能でない場合の動作は未定義です。
+    /// </summary>
+    /// <param name="jackal"></param>
+    /// <param name="arguments"></param>
+    /// <returns></returns>
+    IPlayerAbility GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => null!;
+}
+
+public interface DefinedSingleAbilityRole<Ability> : DefinedRole, RuntimeAssignableGenerator<RuntimeRole> where Ability : class, IPlayerAbility
+{
+    Ability CreateAbility(Virial.Game.Player player, int[] arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new RuntimeSingleAbilityAssignable<Ability>(player, this, arguments);
+    IPlayerAbility DefinedRole.GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => IsJackalizable ? CreateAbility(jackal, arguments) : null!;
 }
 
 /// <summary>
@@ -264,7 +288,7 @@ public interface IAssignToCategorizedRole
 /// </summary>
 public interface DefinedModifier : DefinedAssignable, RuntimeAssignableGenerator<RuntimeModifier>
 {
-    string DefinedAssignable.GeneralColoredBlurb => NebulaAPI.Language.Translate("role." + LocalizedName + ".generalBlurb").Color(UnityColor);
+    string DefinedAssignable.GeneralBlurb => NebulaAPI.Language.Translate("role." + LocalizedName + ".generalBlurb");
 }
 
 /// <summary>
@@ -313,6 +337,23 @@ public interface RuntimeAssignable : IBinder, ILifespan, IReleasable, IBindPlaye
     bool CanBeAwareAssignment => true;
 
     /// <summary>
+    /// 自身の能力が追加するアビリティを取得します。
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<IPlayerAbility?> MyAbilities => [];
+    public Ability? GetAbility<Ability>() where Ability : class, IPlayerAbility
+    {
+        foreach(var a in MyAbilities) if (a is Ability returned) return returned;
+        return null;
+    }
+
+    /// <summary>
+    /// ヘルプ画面上での表示に使用する役職です。
+    /// CanBeAwareAssignmentがfalseの場合、この値は使用されません。
+    /// </summary>
+    IEnumerable<DefinedAssignable> AssignableOnHelp => [Assignable];
+
+    /// <summary>
     /// 緊急ボタンを押すことができる場合trueを返します。
     /// </summary>
     bool CanCallEmergencyMeeting => true;
@@ -333,7 +374,7 @@ public interface RuntimeAssignable : IBinder, ILifespan, IReleasable, IBindPlaye
     string? OverrideRoleName(string lastRoleName, bool isShort) => null;
 
     string DisplayName => Assignable.DisplayName;
-    string DisplayColoredName => Assignable.DisplayColoredName;
+    string DisplayColoredName => DisplayName.Color(Assignable.UnityColor);
 
     /// <summary>
     /// 現在の状態を役職引数に変換します。
@@ -365,6 +406,8 @@ public interface RuntimeAssignable : IBinder, ILifespan, IReleasable, IBindPlaye
     /// <param name="name"></param>
     /// <param name="canSeeAllInfo"></param>
     void DecorateNameConstantly(ref string name, bool canSeeAllInfo) { }
+
+    bool CanKill(Virial.Game.Player player) => true;
 }
 
 /// <summary>
@@ -443,6 +486,14 @@ public interface RuntimeRole : RuntimeAssignable
 
     RoleTaskType TaskType => Role.Category == RoleCategory.CrewmateRole ? RoleTaskType.CrewmateTask : RoleTaskType.NoTask;
 
+    string DisplayIntroBlurb => Role.DisplayIntroBlurb;
+    string DisplayIntroRoleName => Role.DisplayName;
+
+    /// <summary>
+    /// チームの関係でキルできるか否かを調べます。ここで生死や距離を考慮する必要はありません。
+    /// </summary>
+    /// <returns></returns>
+    bool RuntimeAssignable.CanKill(Virial.Game.Player player) => Role.Category is RoleCategory.ImpostorRole ? player.Role.Role.Category != RoleCategory.ImpostorRole : true;
 }
 
 /// <summary>

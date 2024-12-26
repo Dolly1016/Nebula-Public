@@ -5,6 +5,7 @@ namespace Nebula.Behaviour
     public enum UncertifiedReason
     {
         Waiting,
+        UnmatchedVanilla,
         UnmatchedEpoch,
         UnmatchedBuild,
         UnmatchedAddon,
@@ -14,12 +15,14 @@ namespace Nebula.Behaviour
     [NebulaRPCHolder]
     public class Certification
     {
-        private static RemoteProcess<(byte playerId, int epoch, int build, int addonHash)> RpcHandshake = new(
+        private static RemoteProcess<(byte playerId, int epoch, int build, int addonHash, string vanilla)> RpcHandshake = new(
             "Handshake", (message, calledByMe) => {
                 var player = Helpers.GetPlayer(message.playerId);
                 if (player?.gameObject.TryGetComponent<UncertifiedPlayer>(out var certification) ?? false)
                 {
-                    if (message.epoch != NebulaPlugin.PluginEpoch)
+                    if(message.vanilla != Application.version)
+                        certification.Reject(UncertifiedReason.UnmatchedVanilla);
+                    else if (message.epoch != NebulaPlugin.PluginEpoch)
                         certification.Reject(UncertifiedReason.UnmatchedEpoch);
                     else if (message.build != NebulaPlugin.PluginBuildNum)
                         certification.Reject(UncertifiedReason.UnmatchedBuild);
@@ -44,8 +47,10 @@ namespace Nebula.Behaviour
 
         private static void Handshake()
         {
-            RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash));
+            RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash, Application.version));
             RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaAchievementManager.MyTitle?.Id ?? "-"));
+            NebulaAchievementManager.SendLastClearedAchievements();
+            if (AmongUsClient.Instance.AmHost) ModSingleton<ShowUp>.Instance?.ShareSocialSettingsAsHost();
         }
 
         public static void RequireHandshake()

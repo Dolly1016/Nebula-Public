@@ -16,7 +16,10 @@ namespace Nebula.Roles.Crewmate;
 
 public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, CanIdentifyImpostorsOptionEditor]) { }
+    private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, CanIdentifyImpostorsOptionEditor]) 
+    {
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Madmate.png");
+    }
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -72,7 +75,8 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         );
 
     static public Madmate MyRole = new Madmate();
-
+    static private GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -122,13 +126,14 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
             //インポスター判別のチャンスだけ繰り返す
             while (CanIdentifyImpostorsOption > impostors.Count && MyPlayer.Tasks.CurrentCompleted >= NumOfTasksToIdentifyImpostorsOptions[impostors.Count].Value)
             {
-                var pool = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.Role.Role.Category == RoleCategory.ImpostorRole && !impostors.Contains(p.PlayerId)).ToArray();
+                var pool = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p.Role.Role.Category == RoleCategory.ImpostorRole && !impostors.Contains(p.PlayerId)).ToArray();
                 //候補が残っていなければ何もしない
                 if (pool.Length == 0) return;
                 //生存しているインポスターだけに絞っても候補がいるなら、そちらを優先する。
                 if (pool.Any(p => !p.IsDead)) pool = pool.Where(p => !p.IsDead).ToArray();
 
                 impostors.Add(pool[System.Random.Shared.Next(pool.Length)].PlayerId);
+                StatsFound.Progress();
 
                 if (MyPlayer.Tasks.CurrentCompleted > 0) new StaticAchievementToken("madmate.common2");
             }
@@ -148,16 +153,18 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local, OnlyMyPlayer]
         void OnExiled(PlayerExiledEvent ev)
         {
-            if (NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole))
+            if (NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole))
                 new StaticAchievementToken("madmate.common1");
 
             if (!EmbroilVotersOnExileOption) return;
+
+            StatsEmbroil.Progress();
 
             if (LimitEmbroiledPlayersToVotersOption)
                 ExtraExileRoleSystem.MarkExtraVictim(MyPlayer.Unbox(), false, true);
             else
             {
-                var voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && p.Role.Role.Category != RoleCategory.ImpostorRole).ToArray();
+                var voters = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.IsDead && !p.AmOwner && p.Role.Role.Category != RoleCategory.ImpostorRole).ToArray();
                 if (voters.Length > 0) voters.Random().VanillaPlayer.ModMarkAsExtraVictim(MyPlayer.VanillaPlayer, PlayerState.Embroiled, EventDetail.Embroil);
             }
 
@@ -179,7 +186,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if(ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && NebulaGameManager.Instance!.AllPlayerInfo().All(p=>p.Role.Role.Category != RoleCategory.ImpostorRole || !p.IsDead))
+            if(ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && NebulaGameManager.Instance!.AllPlayerInfo.All(p=>p.Role.Role.Category != RoleCategory.ImpostorRole || !p.IsDead))
                 new StaticAchievementToken("madmate.challenge");
         }
 

@@ -1,4 +1,8 @@
-﻿using Rewired.Utils.Platforms.Windows;
+﻿using Il2CppInterop.Runtime.Injection;
+using Rewired.Utils.Platforms.Windows;
+using UnityEngine;
+using Virial;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Modules;
@@ -8,8 +12,51 @@ public interface INoisedCamera
     int CameraRoughness { get; }
 }
 
+public interface CameraAttention : ILifespan
+{
+    public record Attention(float eulerAngle, float view, Vector2 center);
+    public Attention GetAttention();
+}
+
+public class SimpleAttention : CameraAttention
+{
+    private float eulerAngle, view;
+    private Vector2 center;
+    private ILifespan myLifespan;
+    public SimpleAttention(float eulerAngle, float view, Vector2 center, ILifespan lifespan)
+    {
+        this.eulerAngle = eulerAngle;
+        this.view = view;
+        this.center = center;
+        this.myLifespan = lifespan;
+    }
+
+    public bool IsDeadObject => myLifespan.IsDeadObject;
+
+    CameraAttention.Attention CameraAttention.GetAttention() => new(eulerAngle, view, center);
+}
+
+public class FunctionalAttention : CameraAttention
+{
+    private Func<float> eulerAngle, view;
+    private Func<Vector2> center;
+    private ILifespan myLifespan;
+    public FunctionalAttention(Func<float> eulerAngle, Func<float> view, Func<Vector2> center, ILifespan lifespan)
+    {
+        this.eulerAngle = eulerAngle;
+        this.view = view;
+        this.center = center;
+        this.myLifespan = lifespan;
+    }
+
+    public bool IsDeadObject => myLifespan.IsDeadObject;
+
+    CameraAttention.Attention CameraAttention.GetAttention() => new(eulerAngle(), view(), center());
+}
+
 public class WideCamera
 {
+    private GameObject myHolder;
     private Camera myCamera;
 
     private float targetRate = 1f; // エフェクト効果に依らない目標拡大率 Wideカメラを有効にしている時のみ掛け合わせられる。
@@ -20,12 +67,25 @@ public class WideCamera
     private MeshRenderer meshRenderer;
     private MeshFilter meshFilter;
     private float meshAngleZ = 0f;
+    private float orthographicCache = 3f;
+    private Camera shadowCamera = null!;
 
+    private CameraAttention? attention = null;
+    private CameraAttention.Attention? attentionCache = null;
+    private float attentionRate = 0f;
+
+    public void SetAttention(CameraAttention attention)
+    {
+        this.attention = attention;
+    }
+        
     public Transform ViewerTransform => meshRenderer.transform;
 
     public WideCamera()
     {
-        myCamera = UnityHelper.CreateObject<Camera>("SubCam", HudManager.Instance.transform.parent, Vector3.zero);
+        myHolder = UnityHelper.CreateObject("WideCam", HudManager.Instance.transform.parent, Vector3.zero);
+
+        myCamera = UnityHelper.CreateObject<Camera>("SubCam", myHolder.transform, Vector3.zero);
         myCamera.backgroundColor = Color.black;
         myCamera.allowHDR = false;
         myCamera.allowMSAA = false;
@@ -33,12 +93,12 @@ public class WideCamera
         myCamera.depth = 5;
         myCamera.nearClipPlane = -1000f;
         myCamera.orthographic = true;
-        myCamera.orthographicSize = 3;
+        orthographicCache = myCamera.orthographicSize = 3;
         var customIgnoreShadow = myCamera.gameObject.AddComponent<CustomIgnoreShadowCamera>();
         customIgnoreShadow.IgnoreShadow = () => !DrawShadow;
         SetDrawShadow(true);
 
-        var blackCam = UnityHelper.CreateObject<Camera>("BlackCam", myCamera.transform, Vector3.zero);
+        var blackCam = UnityHelper.CreateObject<Camera>("BlackCam", myHolder.transform, Vector3.zero);
         blackCam.backgroundColor = Color.black;
         blackCam.allowHDR = false;
         blackCam.allowMSAA = false;
@@ -49,7 +109,7 @@ public class WideCamera
         blackCam.orthographic = true;
         blackCam.orthographicSize = 3;
 
-        var collider = UnityHelper.CreateObject<BoxCollider2D>("ClickGuard", myCamera.transform, new(0f, 0f, -1f));
+        var collider = UnityHelper.CreateObject<BoxCollider2D>("ClickGuard", myHolder.transform, new(0f, 0f, -1f));
         collider.size = new(100f, 100f);
         collider.isTrigger = true;
         collider.gameObject.layer = LayerExpansion.GetShipLayer();
@@ -74,9 +134,12 @@ public class WideCamera
             if (passiveButton != null) passiveButton.ReceiveClickDown();
         });
 
-        myCamera.gameObject.SetActive(false);
+        myHolder.gameObject.SetActive(false);
 
-        (meshRenderer, meshFilter) = UnityHelper.CreateMeshRenderer("mesh", myCamera.transform, Vector3.zero, LayerExpansion.GetUILayer());
+        (meshRenderer, meshFilter) = UnityHelper.CreateMeshRenderer("mesh", myHolder.transform, new(0f, 0f, 10f), LayerExpansion.GetUILayer());
+        meshRenderer.material = new Material(NebulaAsset.HSVNAShader);
+
+        SetUp();
     }
 
     public bool DrawShadow => drawShadow && !(NebulaGameManager.Instance?.IgnoreWalls ?? false);
@@ -89,13 +152,21 @@ public class WideCamera
         this.drawShadow = drawShadow;
     }
 
+    private void SetUp()
+    {
+        myCamera.backgroundColor = Color.black;
+        myHolder.gameObject.SetActive(true);
+        var shadowCollab = AmongUsUtil.GetShadowCollab();
+        shadowCollab.ShadowQuad.transform.SetParent(myCamera.transform, false);
+        shadowCollab.ShadowCamera.transform.SetParent(myCamera.transform, false);
+        shadowCamera = shadowCollab.ShadowCamera;
+
+        Roughness = 1;
+    }
+
     public void OnGameStart()
     {
         myCamera.backgroundColor = ShipStatus.Instance.CameraColor;
-        myCamera.gameObject.SetActive(true);
-
-        //Roughness = 20;
-        Roughness = 1;
     }
 
     private static int gcd(int n1, int n2)
@@ -141,6 +212,9 @@ public class WideCamera
     public Vector3 ConvertToWideCameraPos(Vector3 worldPosition)
     {
         var localPos = (worldPosition - Camera.transform.position);
+        //カメラの拡大縮小
+        localPos /= myCamera.orthographicSize / 3f;
+        //反転エフェクトの効果
         localPos.x *= ViewerTransform.localScale.x;
         localPos.y *= ViewerTransform.localScale.y;
         return Camera.transform.position + localPos.RotateZ(ViewerTransform.localEulerAngles.z);
@@ -166,6 +240,7 @@ public class WideCamera
         {
             localPos.y = 0f;
         }
+        localPos *= myCamera.orthographicSize / 3f;
         return (Vector2)Camera.transform.position + localPos;
     }
 
@@ -200,18 +275,25 @@ public class WideCamera
         }
     }
 
-    public void LateUpdate()
-    {
-        if (myCamera.gameObject.active)
-        {
-            FixVentArrow();
-        }
-    }
-
     public void Update()
     {
         if (myCamera.gameObject.active) {
+            //カメラの注目を制御する
+            if (attention?.IsDeadObject ?? false) attention = null;
 
+            bool hasAttention = attention != null;
+            if (attention != null) attentionCache = attention.GetAttention();
+
+            //注目の寄与の程度を更新
+            if (attentionCache == null)
+                attentionRate = 0f;
+            else {
+                attentionRate += ((hasAttention ? 1f : 0f) - attentionRate).Delta(hasAttention ? 12f : 6f, 0.05f);
+                myCamera.transform.localPosition = ((Vector3)attentionCache.center - myHolder.transform.position) * attentionRate;
+                myCamera.transform.localEulerAngles = new(0f, 0f, attentionCache.eulerAngle * attentionRate);
+            }
+
+            //
             if (!myCamera.targetTexture || myCamera.targetTexture.width != consideredWidth || myCamera.targetTexture.height != consideredHeight)
             {
                 //割り切れないときは再設定
@@ -233,7 +315,7 @@ public class WideCamera
 
             float targetRateByEffect = NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.ScreenSize, true) ?? 1f;
 
-            float currentOrth = myCamera.orthographicSize;
+            float currentOrth = orthographicCache;
             float targetOrth = targetRate * targetRateByEffect * 3f;
             float diff = currentOrth - targetOrth;
             bool reached = Mathf.Abs(diff) < 0.001f;
@@ -243,17 +325,13 @@ public class WideCamera
             else
                 currentOrth -= (currentOrth - targetOrth) * Time.deltaTime * 5f;
 
-            myCamera.orthographicSize = currentOrth;
-
-            if (drawShadow)
-            {
-                float currentShadow = AmongUsUtil.GetShadowSize();
-                
-                if (targetOrth > currentShadow)
-                    AmongUsUtil.ChangeShadowSize(targetOrth);
-                else if((reached && currentShadow > currentOrth) || currentShadow > currentOrth * 1.5f)
-                    AmongUsUtil.ChangeShadowSize(currentOrth);
-            }
+            orthographicCache = currentOrth;
+            float attentionViewRate = 3f * (attentionCache?.view ?? 1f);
+            float actualOrth = Mathf.Lerp(currentOrth, attentionViewRate, attentionRate);
+            float actualTargetOrth = Mathf.Lerp(targetOrth, attentionViewRate, attentionRate);
+            myCamera.orthographicSize = actualOrth;
+            shadowCamera.orthographicSize = actualOrth;
+            myCamera.transform.localScale = new Vector3(actualOrth / 3f, actualOrth / 3f, 1f);
 
             //コマンドによるモザイクの設定値に変化が生じたら再計算する
             int currentCommandRoughness =  Mathf.Max(1, (int?)NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.Roughening, true) ?? 1);
@@ -262,6 +340,12 @@ public class WideCamera
                 lastCommandRoughness = currentCommandRoughness;
                 Roughness = lastCommandRoughness;
             }
+
+            var camUpdateEv = GameOperatorManager.Instance?.Run<CameraUpdateEvent>(new CameraUpdateEvent());
+            meshRenderer.sharedMaterial.SetFloat("_Sat", camUpdateEv?.GetSaturation() ?? 1f);
+            meshRenderer.sharedMaterial.SetFloat("_Hue", camUpdateEv?.GetHue() ?? 0f);
+
+            FixVentArrow();
         }
     }
 

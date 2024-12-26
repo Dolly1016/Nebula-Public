@@ -33,7 +33,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
     List<MapObjectPoint>? unusedPoints;
     Dictionary<string, List<Virial.Compat.Vector2>> usedPoints = new();
 
-    bool TryGetPoint(string tag, string? objectTag, float distance, MapObjectType type, out Virial.Compat.Vector2 point, out NebulaSyncObjectReference? reference)
+    bool TryGetPoint(string tag, string? objectTag, float distance, MapObjectType type, out Virial.Compat.Vector2 point, out NebulaSyncObjectReference? reference, MapObjectCondition[] conditions)
     {
         reference = null;
 
@@ -49,8 +49,19 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
             usedPoints[tag] = used;
         }
 
+        bool Met(MapObjectCondition condition, Vector2 point)
+        {
+            return !usedPoints.TryGetValue(condition.Tag, out var used) || used.All(u => u.SquaredDistance(point) > condition.Distance * condition.Distance);
+        }
+
+        var squared2 = 2 * 2;
         var squaredDistance = distance * distance;
-        var cand = unusedPoints!.Where(p => (p.Type & type) != 0 && used.All(u =>  p.Point.SquaredDistance(u) > squaredDistance)).ToArray();
+        var cand = unusedPoints!.Where(p => 
+            (p.Type & type) != 0 && //タイプが一致
+            used.All(u =>  p.Point.SquaredDistance(u) > squaredDistance) && //指定の距離だけ離れている
+            usedPoints.Values.All(points => points.All(u => p.Point.SquaredDistance(u) > squared2)) && //使用済みの全点から多少離れている
+            conditions.All(c => Met(c, p.Point)) //その他の条件をすべて満たしている
+            ).ToArray();
         if (cand.Length == 0)
         {
             point = new();
@@ -86,7 +97,8 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
         }
     }
 
-    Virial.Compat.Vector2[] IMapObjectSpawner.Spawn(int num, float distance, string reason, string? objectConstructor, MapObjectType type)
+
+    Virial.Compat.Vector2[] IMapObjectSpawner.Spawn(int num, float distance, string reason, string? objectConstructor, MapObjectType type, MapObjectCondition[]? conditions = null)
     {
         IEnumerable<Virial.Compat.Vector2> subroutineSpawn()
         {
@@ -96,7 +108,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
 
             for (int i = 0; i < num; i++)
             {
-                if (TryGetPoint(reason, objectConstructor, distance, type, out var point, out var reference)) yield return point;
+                if (TryGetPoint(reason, objectConstructor, distance, type, out var point, out var reference, conditions ?? [])) yield return point;
                 else yield break;
             }
         }

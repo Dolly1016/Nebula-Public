@@ -82,10 +82,10 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
     public virtual float Percentage { get => max > min ? (currentTime - min) / (max - min) : 0f; }
     public bool IsProgressing => CurrentTime > min;
 
-    void Update(GameUpdateEvent ev)
+    void Update(UpdateEvent ev)
     {
         if (isActive && (predicate?.Invoke() ?? true))
-            currentTime = Mathf.Clamp(currentTime - Time.deltaTime, min, max);
+            currentTime = Mathf.Clamp(currentTime - Time.fixedDeltaTime, min, max);
     }
 
     public Timer() : this(0f, 0f) { }

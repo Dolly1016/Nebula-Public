@@ -43,6 +43,8 @@ public static class EventDetail
     static public TranslatableTag DestroyKill = new("statistics.events.destroy");
     static public TranslatableTag Dance = new("statistics.events.dance");
     static public TranslatableTag Gassed = new("statistics.events.gassed");
+    static public TranslatableTag Bubbled = new("statistics.events.bubbled");
+    static public TranslatableTag Meteor = new("statistics.events.meteor");
 
     static EventDetail()
     {
@@ -65,6 +67,8 @@ public static class EventDetail
         EventDetails.Trap = Trap;
         EventDetails.Accident = Accident;
         EventDetails.Gassed = Gassed;
+        EventDetails.Bubbled = Bubbled;
+        EventDetails.Meteor = Meteor;
     }
 }
 
@@ -133,7 +137,7 @@ internal class GameTracker : AbstractModule<Virial.Game.Game>, IGameOperator
 
     public ArchivedGame Output()
     {
-        return new ArchivedGame() { MapId = AmongUsUtil.CurrentMapId, Players = NebulaGameManager.Instance!.AllPlayerInfo().Select(p => ArchivedPlayer.FromPlayer(p)).ToArray(), TaskPhases = TaskPhases.ToArray(), Events = [], AssignmentHistory = [] };
+        return new ArchivedGame() { MapId = AmongUsUtil.CurrentMapId, Players = NebulaGameManager.Instance!.AllPlayerInfo.Select(p => ArchivedPlayer.FromPlayer(p)).ToArray(), TaskPhases = TaskPhases.ToArray(), Events = [], AssignmentHistory = [] };
     }
 
 
@@ -614,7 +618,7 @@ public class GameStatisticsViewer : MonoBehaviour
             {
                 PoolablePlayer player = Instantiate(PlayerPrefab, detail.transform);
                 var info = NebulaGameManager.Instance?.GetPlayer(id);
-                player.UpdateFromPlayerOutfit(info?.Unbox().DefaultOutfit!, PlayerMaterial.MaskType.None, false, true, null);
+                player.UpdateFromPlayerOutfit(info?.Unbox().DefaultOutfit.Outfit.outfit!, PlayerMaterial.MaskType.None, false, true, null);
                 player.ToggleName(true);
                 player.SetName(info?.Name!, new Vector3(3.1f, 3.1f, 1f), Color.white, -15f);
                 player.transform.localScale = new Vector3(0.24f, 0.24f, 1f);
@@ -639,7 +643,7 @@ public class GameStatisticsViewer : MonoBehaviour
             }
             objects.Add(icon.gameObject);
 
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                 if ((target.TargetIdMask & 1 << p.PlayerId) != 0)
                     objects.Add(GeneratePlayerView(p.PlayerId).Value.gameObject);
 

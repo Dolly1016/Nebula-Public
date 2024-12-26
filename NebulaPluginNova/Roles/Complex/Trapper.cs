@@ -29,7 +29,7 @@ file static class TrapperSystem
         Vector2? pos = null;
         int buttonIndex = 0;
         int leftCost = Trapper.NumOfChargesOption;
-        var placeButton = myRole.Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "trapper.place").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "trapper.switch");
+        var placeButton = myRole.Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "trapper.place").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "trapper.switch", true);
         placeButton.SetSprite(buttonSprites[buttonVariation[0].id]?.GetSprite());
         placeButton.Availability = (button) => myRole.MyPlayer.CanMove && leftCost >= buttonVariation[buttonIndex].cost;
         placeButton.Visibility = (button) => !myRole.MyPlayer.IsDead && leftCost > 0;
@@ -44,11 +44,13 @@ file static class TrapperSystem
             float duration = Trapper.PlaceDurationOption;
             NebulaAsset.PlaySE(duration < 3f ? NebulaAudioClip.Trapper2s : NebulaAudioClip.Trapper3s);
 
-            pos = myRole.MyPlayer.TruePosition + new Vector2(0f, 0.085f);
+            pos = (Vector2)myRole.MyPlayer.TruePosition + new Vector2(0f, 0.085f);
             PlayerModInfo.RpcAttrModulator.Invoke((myRole.MyPlayer.PlayerId, new SpeedModulator(0f, Vector2.one, true, duration, false, 10), true));
         };
         placeButton.OnEffectEnd = (button) => 
         {
+            NebulaGameManager.Instance?.RpcDoGameAction(myRole.MyPlayer, myRole.MyPlayer.Position, myRole.MyPlayer.IsImpostor ? GameActionTypes.EvilTrapPlacementAction : GameActionTypes.NiceTrapPlacementAction);
+
             placeButton.StartCoolDown();
             localTraps.Add(Trapper.Trap.GenerateTrap(buttonVariation[buttonIndex].id, pos!.Value));
             leftCost -= buttonVariation[buttonIndex].cost;
@@ -111,6 +113,11 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
 
         if(IsEvil) ConfigurationHolder?.AppendConfiguration(KillTrapSoundDistanceOption);
         ConfigurationHolder?.ScheduleAddRelated(() => [isEvil ? MyNiceRole.ConfigurationHolder! : MyEvilRole.ConfigurationHolder!]);
+
+        if (IsEvil)
+            GameActionTypes.EvilTrapPlacementAction = new("trapper.placement.evil", this, isPlacementAction: true);
+        else
+            GameActionTypes.NiceTrapPlacementAction = new("trapper.placement.nice", this, isPlacementAction: true);
     }
 
 
@@ -241,7 +248,7 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
             uint commMask = 0;
             foreach(var commTrap in commTraps)
             {
-                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                 {
                     if (p.AmOwner) continue;
                     if (p.IsDead || p.Unbox().IsInvisible) continue;
@@ -252,12 +259,12 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
                         if ((lastCommPlayersMask & (1u << p.PlayerId)) != 0) continue;
 
                         //Camo貫通(Morphingまで効果を受ける)
-                        var arrow = new Arrow().SetColorByOutfit(p.Unbox().GetOutfit(75));
+                        var arrow = new Arrow().SetColorByOutfit(p.Unbox().GetOutfit(75).Outfit.outfit);
                         arrow.TargetPos = commTrap.Position;
                         NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
 
                         acTokenChallenge!.Value.playerMask |= 1 << p.PlayerId;
-                        if(!acTokenChallenge.Value.cleared && NebulaGameManager.Instance.AllPlayerInfo().Count(p => (acTokenChallenge!.Value.playerMask & (1 << p.PlayerId)) != 0) >= 8)
+                        if(!acTokenChallenge.Value.cleared && NebulaGameManager.Instance.AllPlayerInfo.Count(p => (acTokenChallenge!.Value.playerMask & (1 << p.PlayerId)) != 0) >= 8)
                             acTokenChallenge.Value.cleared = true;
                     }
                 }
@@ -303,7 +310,7 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
 
             if (!(PlayerControl.LocalPlayer.killTimer > 0f)) {
                 killTraps.RemoveAll((killTrap) => {
-                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                 {
                     if (p.AmOwner) continue;
                     if (p.IsDead || p.VanillaPlayer.Data.Role.IsImpostor) continue;
@@ -312,7 +319,8 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
                     {
                             using (RPCRouter.CreateSection("TrapKill"))
                             {
-                                PlayerControl.LocalPlayer.ModKill(p.VanillaPlayer,PlayerState.Trapped,EventDetail.Trap, KillParameter.RemoteKill);
+                                MyPlayer.MurderPlayer(p, PlayerState.Trapped,EventDetail.Trap, KillParameter.RemoteKill);
+                                NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                                 RpcTrapKill.Invoke(killTrap.ObjectId);
                                 acTokenChallenge!.Value++;
                             }

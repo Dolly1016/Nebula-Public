@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial;
+using Virial.Game;
 
 namespace Nebula.Roles.Ghost.Complex;
 
@@ -21,6 +22,7 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
     static private FloatConfiguration NoiseCooldownOption = NebulaAPI.Configurations.Configuration("options.role.noiseghost.noiseCooldown", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => NumOfNoiseOption >= 2);
 
     static public Noiseghost MyRole = new Noiseghost();
+    static internal GameStatsEntry StatsAlert = NebulaAPI.CreateStatsEntry("stats.noiseghost.alert", GameStatsCategory.Roles, MyRole);
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
@@ -47,6 +49,7 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
                 {
                     new StaticAchievementToken("noiseghost.common1");
                     new StaticAchievementToken("noiseghost.common2");
+                    StatsAlert.Progress();
                     RpcGhostNoise.Invoke((MyPlayer, MyPlayer.VanillaPlayer.transform.position));
                     left--;
 

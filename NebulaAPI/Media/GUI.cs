@@ -84,6 +84,7 @@ public delegate void GUIClickableAction(GUIClickable clickable);
 public abstract class GUIWidget
 {
     internal abstract GUIAlignment Alignment { get; init; }
+    internal Image? BackImage { get; set; } = null!;
     internal abstract GameObject? Instantiate(Size size, out Size actualSize);
     internal abstract GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize);
 
@@ -424,6 +425,10 @@ public interface GUI
     /// <returns>色付きのテキストコンポーネント</returns>
     TextComponent ColorTextComponent(Virial.Color color, TextComponent component);
 
+    TextComponent SizedTextComponent(float size, TextComponent component);
+    TextComponent ItalicTextComponent(TextComponent component);
+    TextComponent BoldTextComponent(TextComponent component);
+
     TextComponent FunctionalTextComponent(Func<string> supplier);
 
     internal void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable;
@@ -444,4 +449,3 @@ public interface GUI
     /// <param name="clickable"></param>
     void HideOverlayIf(GUIClickable? clickable);
 }
-

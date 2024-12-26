@@ -1,6 +1,7 @@
 ﻿using Virial.Command;
 using Virial;
 using System.Runtime.CompilerServices;
+using Virial.Game;
 
 namespace Nebula.Commands.Tokens;
 
@@ -82,10 +83,11 @@ public class StringCommandToken : ICommandToken
             var temp = NebulaAPI.CurrentGame?.GetAllPlayers().FirstOrDefault(p => p.Name == myStr);
             if (temp != null) return new CoImmediateTask<T>(Unsafe.As<Virial.Game.Player, T>(ref temp));
         }
-        else if (type == typeof(NetworkedPlayerInfo.PlayerOutfit))
+        else if (type == typeof(OutfitDefinition))
         {
-            var temp = NebulaAPI.CurrentGame?.GetAllPlayers().FirstOrDefault(p => p.Name == myStr)?.Unbox().DefaultOutfit;
-            if (temp != null) return new CoImmediateTask<T>(Unsafe.As<NetworkedPlayerInfo.PlayerOutfit, T>(ref temp));
+            var player = NebulaAPI.CurrentGame?.GetAllPlayers().FirstOrDefault(p => p.Name == myStr);
+            NebulaGameManager.Instance.TryGetOutfit(OutfitDefinition.OutfitId.PlayersDefault(player?.PlayerId ?? 0), out var temp);
+            if (temp != null) return new CoImmediateTask<T>(Unsafe.As<OutfitDefinition, T>(ref temp));
         }
         else if (type == typeof(Virial.Assignable.DefinedRole))
         {

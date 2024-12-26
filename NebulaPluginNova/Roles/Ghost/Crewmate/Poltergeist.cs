@@ -1,6 +1,7 @@
 ﻿using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Game;
 using Virial.Helpers;
 
 namespace Nebula.Roles.Ghost.Crewmate;
@@ -15,8 +16,8 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
     static private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.poltergeist.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 
     static public Poltergeist MyRole = new Poltergeist();
+    static internal GameStatsEntry StatsPoltergeist = NebulaAPI.CreateStatsEntry("stats.poltergeist.poltergeist", GameStatsCategory.Roles, MyRole);
 
-    
 
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
@@ -44,6 +45,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
                 {
                     RpcPoltergeist.Invoke((deadBodyTracker.CurrentTarget!.PlayerId, MyPlayer.VanillaPlayer.GetTruePosition()));
                     new StaticAchievementToken("poltergeist.common1");
+                    StatsPoltergeist.Progress();
                     poltergeistButton.StartCoolDown();
                 };
                 poltergeistButton.CoolDownTimer = Bind(new Timer(0f, PoltergeistCoolDownOption).SetAsAbilityCoolDown().Start());

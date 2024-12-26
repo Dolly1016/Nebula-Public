@@ -21,7 +21,7 @@ public class HudGrid : MonoBehaviour
         GameObject.Destroy(buttonParent.gameObject.GetComponent<GridArrange>());
         GameObject.Destroy(buttonParent.gameObject.GetComponent<AspectPosition>());
         ButtonsHolder = buttonParent;
-        StaticButtonsHolder = UnityHelper.CreateObject("StaticButtons", buttonParent.parent, new Vector3(0, 0, -40f)).transform;
+        StaticButtonsHolder = UnityHelper.CreateObject("StaticButtons", buttonParent.parent, new Vector3(0, 0, -90f)).transform;
 
         HudContent AddVanillaButtons(GameObject obj,int priority)
         {

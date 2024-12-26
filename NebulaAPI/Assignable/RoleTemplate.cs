@@ -58,9 +58,9 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
         private IOrderedSharableVariable<int>? roleSecondaryChanceEntry;
         private IConfiguration roleChanceEditor;
 
-        public StandardAssignmentParameters(string id, bool isImpostor)
+        public StandardAssignmentParameters(string id, bool isImpostor, bool jacalized = false)
         {
-            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 6 : 24), 0, title: NebulaAPI.GUI.LocalizedTextComponent("options.role.count"));
+            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 6 : 24), 0, title: NebulaAPI.GUI.TextComponent(jacalized ? NebulaTeams.JackalTeam.Color : Color.White, jacalized ? "options.role.count.jackalized" : "options.role.count"), predicate: ()=> !jacalized || NebulaAPI.Configurations.CanJackalize);
 
             roleChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".chance", (10, 100, 10), 100);
             roleSecondaryChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".secondaryChance", (0, 100, 10), 0);
@@ -68,7 +68,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
             roleChanceEditor = NebulaAPI.Configurations.Configuration(
                 () =>
                 {
-                    string str = NebulaAPI.Language.Translate("options.role.chance") + ": " + roleChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage");
+                    string str = NebulaAPI.Language.Translate(jacalized ? "options.role.chance.jackalized" : "options.role.chance").Color(jacalized ? NebulaTeams.JackalTeam.UnityColor : UnityEngine.Color.white) + ": " + roleChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage");
                     if (roleCountOption.GetValue() > 1 && roleSecondaryChanceEntry.CurrentValue > 0) str += (" (" + roleSecondaryChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage") + ")").Color(UnityEngine.Color.gray);
                     return str;
                 },
@@ -77,7 +77,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                     if (roleCountOption.GetValue() <= 1)
                     {
                         return gui.HorizontalHolder(Media.GUIAlignment.Left,
-                        gui.LocalizedText(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), "options.role.chance"),
+                        gui.Text(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), gui.TextComponent(jacalized ? NebulaTeams.JackalTeam.Color : Color.White, jacalized ? "options.role.chance.jackalized" : "options.role.chance")),
                         gui.HorizontalMargin(0.1f),
                         gui.RawText(GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsFlexible), ":"),
                         gui.HorizontalMargin(0.1f),
@@ -88,7 +88,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                     else
                     {
                         return gui.HorizontalHolder(Media.GUIAlignment.Left,
-                        gui.LocalizedText(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), "options.role.chance"),
+                        gui.Text(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), gui.TextComponent(jacalized ? NebulaTeams.JackalTeam.Color : Color.White, jacalized ? "options.role.chance.jackalized" : "options.role.chance")),
                         gui.HorizontalMargin(0.1f),
                         gui.RawText(GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsFlexible), ":"),
                         gui.HorizontalMargin(0.1f),
@@ -104,7 +104,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                         );
                     }
                 },
-                () => roleCountOption.GetValue() > 0);
+                () => roleCountOption.GetValue() > 0　&& (!jacalized || NebulaAPI.Configurations.CanJackalize));
         }
 
         IEnumerable<IConfiguration> AllocationParameters.Configurations => [roleCountOption, roleChanceEditor];
@@ -124,6 +124,9 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
     private AllocationParameters? myAssignmentParameters = null;
     AllocationParameters? DefinedSingleAssignable.AllocationParameters => myAssignmentParameters;
 
+    private AllocationParameters? myJackalAssignmentParameters = null;
+    AllocationParameters? DefinedSingleAssignable.JackalAllocationParameters => myJackalAssignmentParameters;
+
     protected RoleCategory Category { get; private init; }
     RoleCategory DefinedCategorizedAssignable.Category => Category;
 
@@ -140,7 +143,31 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
             myAssignmentParameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName, category == RoleCategory.ImpostorRole);
             ConfigurationHolder?.AppendConfigurations(myAssignmentParameters.Configurations);
 
-            ConfigurationHolder?.SetDisplayState(() => myAssignmentParameters.RoleCountSum == 0 ? ConfigurationHolderState.Inactivated : myAssignmentParameters.GetRoleChance(1) == 100 ? ConfigurationHolderState.Emphasized : ConfigurationHolderState.Activated);
+            ConfigurationHolder?.SetDisplayState(() =>
+            {
+                bool spawnRandom = false;
+                bool spawn100 = false;
+                if (myJackalAssignmentParameters != null && NebulaAPI.Configurations.CanJackalize && myJackalAssignmentParameters.RoleCountSum > 0)
+                {
+                    spawnRandom = true;
+                    if (myJackalAssignmentParameters.GetRoleChance(1) == 100) spawn100 = true;
+                }
+                if(myAssignmentParameters.RoleCountSum > 0)
+                {
+                    spawnRandom = true;
+                    if (myAssignmentParameters.GetRoleChance(1) == 100) spawn100 = true;
+                }
+
+                if (spawn100) return ConfigurationHolderState.Emphasized;
+                if (spawnRandom) return ConfigurationHolderState.Activated;
+                return ConfigurationHolderState.Inactivated;
+            });
+
+            if((this as DefinedRole)?.IsJackalizable ?? false)
+            {
+                myJackalAssignmentParameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName + ".jackalized", false, true);
+                ConfigurationHolder?.AppendConfigurations(myJackalAssignmentParameters.Configurations);
+            }
         }
     }
 
@@ -203,6 +230,17 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
         {
             if (configurations != null) ConfigurationHolder!.AppendConfigurations(configurations);
         }
+    }
+}
+
+public abstract class DefinedSingleAbilityRoleTemplate<Ability> : DefinedRoleTemplate, DefinedSingleAbilityRole<Ability> where Ability : class, IPlayerAbility
+{
+    public abstract Ability CreateAbility(Virial.Game.Player player, int[] arguments);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new RuntimeSingleAbilityAssignable<Ability>(player, this, arguments);
+    IPlayerAbility DefinedRole.GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => (this as DefinedRole).IsJackalizable ? CreateAbility(jackal, arguments) : null!;
+
+    public DefinedSingleAbilityRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true, Func<bool>? optionHolderPredicate = null) : base(localizedName, color, category, team, configurations, withAssignmentOption, withOptionHolder, optionHolderPredicate)
+    {
     }
 }
 
@@ -511,4 +549,26 @@ public class RuntimeAssignableTemplate : ComponentHolder, IBindPlayer
     {
         MyPlayer = myPlayer;
     }
+}
+
+public class RuntimeSingleAbilityAssignable<Ability> : RuntimeAssignableTemplate, RuntimeRole where Ability : class, IPlayerAbility
+{
+    public Ability MyAbility { get;protected set; }
+
+    DefinedRole RuntimeRole.Role => role;
+    private DefinedSingleAbilityRole<Ability> role;
+    private int[] cachedArguments;
+    public RuntimeSingleAbilityAssignable(Player myPlayer, DefinedSingleAbilityRole<Ability> role, int[] arguments) : base(myPlayer)
+    {
+        this.role = role;
+        this.cachedArguments = arguments;
+    }
+
+    public virtual void OnActivated()
+    {
+        MyAbility = Bind(role.CreateAbility(MyPlayer, cachedArguments)).Register();
+    }
+
+    int[] RuntimeAssignable.RoleArguments => MyAbility.RoleArguments;
+    IEnumerable<IPlayerAbility> RuntimeAssignable.MyAbilities => [MyAbility];
 }

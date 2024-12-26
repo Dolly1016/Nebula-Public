@@ -11,7 +11,7 @@ public class SpectatorsAbility : IGameOperator
 
     GamePlayer? currentTarget = null;
 
-    GamePlayer[] AvailableTargets => NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead || p.AmOwner).OrderBy(p => p.AmOwner ? -1 : p.PlayerId).ToArray();
+    GamePlayer[] AvailableTargets => NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.IsDead || p.AmOwner).OrderBy(p => p.AmOwner ? -1 : p.PlayerId).ToArray();
     
     void OnChangeTarget()
     {

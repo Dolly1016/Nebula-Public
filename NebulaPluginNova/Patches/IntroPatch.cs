@@ -129,8 +129,8 @@ public static class ShowIntroPatch
 
     static IEnumerator CoShowRole(IntroCutscene __instance, GamePlayer myInfo)
     {
-        var role = myInfo.Role.Role;
-        __instance.RoleText.text = role.DisplayName;
+        var role = myInfo.Role;
+        __instance.RoleText.text = role.DisplayIntroRoleName;
         __instance.RoleBlurbText.text = role.DisplayIntroBlurb;
         __instance.RoleBlurbText.transform.localPosition = new(0.0965f, -2.12f, -36f);
         __instance.RoleBlurbText.rectTransform.sizeDelta = new(12.8673f, 0.7f);
@@ -141,9 +141,9 @@ public static class ShowIntroPatch
             string? mBlurb = m.DisplayIntroBlurb;
             if (mBlurb != null) __instance.RoleBlurbText.text += "\n" + mBlurb;
         }
-        __instance.RoleText.color = role.UnityColor;
-        __instance.YouAreText.color = role.UnityColor;
-        __instance.RoleBlurbText.color = role.UnityColor;
+        __instance.RoleText.color = role.Role.UnityColor;
+        __instance.YouAreText.color = role.Role.UnityColor;
+        __instance.RoleBlurbText.color = role.Role.UnityColor;
         SoundManager.Instance.PlaySound(PlayerControl.LocalPlayer.Data.Role.IntroSound, false, 1f, null);
         __instance.YouAreText.gameObject.SetActive(true);
         __instance.RoleText.gameObject.SetActive(true);

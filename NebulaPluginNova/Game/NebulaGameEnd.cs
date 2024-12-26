@@ -11,6 +11,7 @@ namespace Nebula.Game;
 public class CustomEndCondition : Virial.Game.GameEnd
 {
     static private HashSet<CustomEndCondition> allEndConditions= new();
+    static internal IEnumerable<CustomEndCondition> AllEndConditions => allEndConditions;
     static public CustomEndCondition? GetEndCondition(byte id) => allEndConditions.FirstOrDefault(end => end.Id == id);
     
     public byte Id { get; init; }
@@ -18,6 +19,7 @@ public class CustomEndCondition : Virial.Game.GameEnd
     public string DisplayText => Language.Translate("end." + LocalizedName);
     public Color Color { get; init; }
     public int Priority { get; init; }
+    public bool AllowWin { get; set; }
 
     //優先度が高いほど他の勝利を無視して勝利する
     public CustomEndCondition(byte id,string localizedName,Color color,int priority)
@@ -26,6 +28,7 @@ public class CustomEndCondition : Virial.Game.GameEnd
         LocalizedName = localizedName;
         Color = color;
         Priority = priority;
+        AllowWin = true;
 
         allEndConditions.Add(this);
     }
@@ -65,9 +68,10 @@ public class NebulaGameEnd
     static public CustomEndCondition ArsonistWin = new(27, "arsonist", Roles.Neutral.Arsonist.MyRole.UnityColor, 32);
     static public CustomEndCondition LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.UnityColor, 18);
     static public CustomEndCondition PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.UnityColor, 31);
-    static public CustomEndCondition AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.UnityColor, 64);
+    static public CustomEndCondition AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.UnityColor, 63);
     static public CustomEndCondition DancerWin = new(31, "dancer", Roles.Neutral.Dancer.MyRole.UnityColor, 32);
-    static public CustomEndCondition NoGame = new(128, "nogame", InvalidColor, 128);
+    static public CustomEndCondition ScarletWin = new(32, "scarlet", Roles.Neutral.Scarlet.MyRole.UnityColor, 64);
+    static public CustomEndCondition NoGame = new(128, "nogame", InvalidColor, 128) { AllowWin = false };
 
     static public CustomExtraWin ExtraLoversWin = new(0, "lover", Roles.Modifier.Lover.MyRole.UnityColor);
     static public CustomExtraWin ExtraObsessionalWin = new(1, "obsessional", Roles.Modifier.Obsessional.MyRole.UnityColor);
@@ -204,7 +208,7 @@ public class EndGameManagerSetUpPatch
 
         NebulaGameManager.Instance?.ChangeToSpectator();
 
-        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
         {
             //Name Text
             string nameText = p.Name.Color(NebulaGameManager.Instance.EndState!.Winners.Test(p) ? Color.yellow : Color.white);
@@ -266,7 +270,7 @@ public class EndGameManagerSetUpPatch
         //勝利メンバーを載せる
         List<byte> winners = new List<byte>();
         bool amWin = false;
-        foreach(var p in NebulaGameManager.Instance.AllPlayerInfo())
+        foreach(var p in NebulaGameManager.Instance.AllPlayerInfo)
         {
             if (endState.Winners.Test(p))
             {
@@ -307,7 +311,7 @@ public class EndGameManagerSetUpPatch
             {
                 poolablePlayer.SetFlipX(i % 2 == 0);
             }
-            poolablePlayer.UpdateFromPlayerOutfit(player.Unbox().DefaultOutfit, PlayerMaterial.MaskType.None, player.IsDead, true);
+            poolablePlayer.UpdateFromPlayerOutfit(player.Unbox().DefaultOutfit.Outfit.outfit, PlayerMaterial.MaskType.None, player.IsDead, true);
 
             poolablePlayer.SetName(player.Name, new Vector3(1f / vector.x, 1f / vector.y, 1f / vector.z), Color.white, -15f); ;
             poolablePlayer.SetNamePosition(new Vector3(0f, -1.31f, -0.5f));
@@ -371,9 +375,10 @@ public class EndGameManagerSetUpPatch
         else
         {
             SendDiscordWebhook(LastGameHistory.GenerateTexture().EncodeToPNG());
-        }    
-
+        }
+;
         //Achievements
+        NebulaAchievementManager.ClearHistory();
         //標準ゲームモードで廃村でない、かつOP権限が誰にも付与されていないゲームの場合
         if (GeneralConfigurations.CurrentGameMode == GameModes.Standard && endCondition != NebulaGameEnd.NoGame && !GeneralConfigurations.AssignOpToHostOption)
         {

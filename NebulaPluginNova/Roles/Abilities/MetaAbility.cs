@@ -1,6 +1,7 @@
 ﻿using NAudio.CoreAudioApi;
 using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
+using Nebula.Roles.Neutral;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -23,7 +24,7 @@ public class MetaAbility : ComponentHolder, IGameOperator, IModule
         this.Register(NebulaAPI.CurrentGame!);
         NebulaGameManager.Instance?.ChangeToSpectator(false);
 
-        var roleButton = Bind(new ModAbilityButton(true, false, 100)).KeyBind(new VirtualInput(KeyCode.Z));
+        var roleButton = Bind(new ModAbilityButton(true, false, 100)).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.FreeplayAction));
         roleButton.SetSprite(buttonSprite.GetSprite());
         roleButton.Availability = (button) => true;
         roleButton.Visibility = (button) => true;
@@ -90,25 +91,30 @@ public class MetaAbility : ComponentHolder, IGameOperator, IModule
         //widget.Append(new MetaWidgetOld.Text(TextAttributeOld.TitleAttr) { RawText = Language.Translate("role.metaRole.ui.roles") });
 
         var roleMaskedTittleAttr = GUI.API.GetAttribute(Virial.Text.AttributeAsset.MetaRoleButton);
-        var roleTittleAttr = new Virial.Text.TextAttribute(roleMaskedTittleAttr) { Font = GUI.API.GetFont(Virial.Text.FontAsset.Gothic) };
+        var roleTitleAttr = new Virial.Text.TextAttribute(roleMaskedTittleAttr) { Font = GUI.API.GetFont(Virial.Text.FontAsset.Gothic), Size = new(1.1f, 0.22f) };
         
         void SetWidget(int tab) {
 
             var holder = GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,
-                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, roleTittleAttr, "game.metaAbility.tabs.roles", (button) => SetWidget(0), color: tab == 0 ? Virial.Color.Yellow : null),
-                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, roleTittleAttr, "game.metaAbility.tabs.modifiers", (button) => SetWidget(1), color: tab == 1 ? Virial.Color.Yellow : null),
-                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, roleTittleAttr, "game.metaAbility.tabs.ghostRoles", (button) => SetWidget(2), color: tab == 2 ? Virial.Color.Yellow : null)
+                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, roleTitleAttr, "game.metaAbility.tabs.roles", (button) => SetWidget(0), color: tab == 0 ? Virial.Color.Yellow : null),
+                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, roleTitleAttr, "game.metaAbility.tabs.modifiers", (button) => SetWidget(1), color: tab == 1 ? Virial.Color.Yellow : null),
+                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, roleTitleAttr, "game.metaAbility.tabs.ghostRoles", (button) => SetWidget(2), color: tab == 2 ? Virial.Color.Yellow : null),
+                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, roleTitleAttr, "game.metaAbility.tabs.perks", (button) => SetWidget(3), color: tab == 3 ? Virial.Color.Yellow : null)
                 );
 
             GUIWidget inner = GUIEmptyWidget.Default;
 
             if (tab == 0)
             {
-                inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllRoles.Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
+                inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllRoles.Where(r => r.ShowOnFreeplayScreen).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
                 {
                     NebulaGameManager.Instance!.LocalPlayerInfo.Unbox().RpcInvokerSetRole(r, null).InvokeSingle();
                     window.CloseScreen();
-                })), 4);
+                })).Concat(Roles.AllRoles.Where(r => r.IsJackalizable).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayName.Color(Jackal.MyRole.UnityColor), button =>
+                {
+                    NebulaGameManager.Instance!.LocalPlayerInfo.Unbox().RpcInvokerSetRole(Jackal.MyRole, Jackal.GenerateArgument(0, r)).InvokeSingle();
+                    window.CloseScreen();
+                }))), 4);
             }
             else if (tab == 1)
             {
@@ -120,7 +126,7 @@ public class MetaAbility : ComponentHolder, IGameOperator, IModule
                         SetWidget(1);
                     })), 4),
                     GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, "game.metaAbility.unequipped"),
-                    GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllModifiers.Where(r => !NebulaGameManager.Instance!.LocalPlayerInfo.Unbox().AllModifiers.Any(m => m.Modifier == r)).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
+                    GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllModifiers.Where(r => r.ShowOnFreeplayScreen && !NebulaGameManager.Instance!.LocalPlayerInfo.Unbox().AllModifiers.Any(m => m.Modifier == r)).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
                     {
                         NebulaGameManager.Instance!.LocalPlayerInfo.Unbox().RpcInvokerSetModifier(r, null).InvokeSingle();
                         SetWidget(1);
@@ -129,13 +135,30 @@ public class MetaAbility : ComponentHolder, IGameOperator, IModule
             }
             else if (tab == 2)
             {
-                inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllGhostRoles.Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
+                inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllGhostRoles.Where(r => r.ShowOnFreeplayScreen).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
                 {
                     NebulaGameManager.Instance!.LocalPlayerInfo.Unbox().RpcInvokerSetGhostRole(r, null).InvokeSingle();
                     window.CloseScreen();
                 })), 4);
             }
-            
+            else if (tab == 3)
+            {
+                Virial.Media.GUIWidget GetPerksWidget(IEnumerable<PerkFunctionalDefinition> perks) => GUI.API.Arrange(Virial.Media.GUIAlignment.Center, perks.Select(p => p.PerkDefinition.GetPerkImageWidget(true, 
+                    () => {
+                        ModSingleton<ItemSupplierManager>.Instance?.SetPerk(p);
+                        window.CloseScreen();
+                    },
+                    ()=> p.PerkDefinition.GetPerkWidget())), 8);
+
+                inner = GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
+                    GUI.API.HorizontalMargin(7.4f),
+                    GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, "game.metaAbility.perks.standard"),
+                    GetPerksWidget(Roles.AllPerks.Where(p => p.PerkCategory == PerkFunctionalDefinition.Category.Standard)),
+                    GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, "game.metaAbility.perks.noncrewmateOnly"),
+                    GetPerksWidget(Roles.AllPerks.Where(p => p.PerkCategory == PerkFunctionalDefinition.Category.NoncrewmateOnly))
+                    );
+            }
+
 
             window.SetWidget(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center, holder, GUI.API.VerticalMargin(0.15f), GUI.API.ScrollView(Virial.Media.GUIAlignment.Center, new(7.4f, 3.5f), null, inner, out _)), out _);
         }

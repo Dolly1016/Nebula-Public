@@ -1,4 +1,5 @@
 ﻿using Nebula.Behaviour;
+using UnityEngine.UIElements;
 using Virial.Game;
 
 namespace Nebula.Patches;
@@ -7,6 +8,14 @@ namespace Nebula.Patches;
 [HarmonyPatch(typeof(VitalsMinigame), nameof(VitalsMinigame.Begin))]
 class VitalsMinigameBeginPatch
 {
+    static private float[] PanelAreaScale = [1f, 0.95f, 0.76f];
+    static private (int x, int y)[] PanelAreaSize = [(3, 5), (3, 6), (4, 6)];
+    static private Vector3[] PanelAreaOffset = [new(0f, 0f, -1f), new(0.1f, 0.145f, -1f), new(-0.555f, 0f, -1f)];
+    static private (float x, float y)[] PanelAreaMultiplier = [(1f, 1f), (1f, 0.89f), (0.974f, 1f)];
+    //static private int GetVotingAreaType(int players) => players <= 15 ? 0 : players <= 18 ? 1 : 2;
+    private static Vector3 ToVoteAreaPos(VitalsMinigame minigame, int index, int arrangeType) => 
+        More15Helpers.ConvertPos(index, arrangeType, PanelAreaSize, new(minigame.XStart, minigame.YStart, -1f), PanelAreaOffset, new(minigame.XOffset, minigame.YOffset), PanelAreaScale, PanelAreaMultiplier);
+
     static void Postfix(VitalsMinigame __instance)
     {
         NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Vitals, __instance.transform, new Vector3(3.4f, 2f, -50f));
@@ -14,11 +23,17 @@ class VitalsMinigameBeginPatch
         VitalsMinigameUpdatePatch.UpdateVitals(__instance,true);
 
         //バイタルパネルではスキンを透明にしない
+        int n = 0;
+        int displayType = More15Helpers.GetDisplayType(__instance.vitals.Count);
         foreach (var panel in __instance.vitals)
         {
             panel.PlayerIcon.cosmetics.SetSkin(panel.PlayerInfo.DefaultOutfit.SkinId, panel.PlayerInfo.DefaultOutfit.ColorId);
             panel.PlayerIcon.cosmetics.SetHatColor(Palette.White);
             panel.PlayerIcon.cosmetics.SetVisorAlpha(Palette.White.a);
+
+            panel.transform.localPosition = ToVoteAreaPos(__instance, n, displayType);
+            panel.transform.localScale *= PanelAreaScale[displayType];
+            n++;
         }
     }
 }

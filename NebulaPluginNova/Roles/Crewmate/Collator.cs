@@ -33,6 +33,9 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
     
     static public Collator MyRole = new Collator();
 
+    static private GameStatsEntry StatsCollating = NebulaAPI.CreateStatsEntry("stats.collator.collating", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsMatched = NebulaAPI.CreateStatsEntry("stats.collator.matched", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsUnmatched = NebulaAPI.CreateStatsEntry("stats.collator.unmatched", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -71,6 +74,9 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
             if (!matched) new StaticAchievementToken("collator.common3");
             if (acTokenChallenge != null) acTokenChallenge.Value.Add(player1.player).Add(player2.player);
 
+            StatsCollating.Progress();
+            (matched ? StatsMatched : StatsUnmatched).Progress();
+
             NebulaAPI.CurrentGame?.GetModule<MeetingOverlayHolder>()?.RegisterOverlay(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
                 new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), new TranslateTextComponent("role.collator.ui.title")),
                 new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), 
@@ -96,7 +102,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                     int leftTest = MaxTrialsPerMeetingOption;
 
                     var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
-                    buttonManager?.RegisterMeetingAction(new(meetingSprite,
+                    buttonManager?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(3),
                     p =>
                     {
                         if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
@@ -180,7 +186,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (AmOwner)
             {
-                acTokenChallenge = new("collator.challenge", BitMasks.AsPlayer(), (value, _) => NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnds.CrewmateGameEnd && (NebulaGameManager.Instance?.AllPlayerInfo().Where(p => (p as GamePlayer).IsImpostor).All(p => p.PlayerState == PlayerStates.Exiled && value.Test(p)) ?? false));
+                acTokenChallenge = new("collator.challenge", BitMasks.AsPlayer(), (value, _) => NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnds.CrewmateGameEnd && (NebulaGameManager.Instance?.AllPlayerInfo.Where(p => (p as GamePlayer).IsImpostor).All(p => p.PlayerState == PlayerStates.Exiled && value.Test(p)) ?? false));
                 acTokenAnother1 = new("collator.another1", (null, 0f, false), (value, _) => value.clear);
 
                 //サンプル一覧の表示

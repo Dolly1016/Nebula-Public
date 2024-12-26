@@ -17,4 +17,9 @@ static public class FollowerCameraPatch
         }
         catch { }
     }
+
+    public static void Postfix(FollowerCamera __instance)
+    {
+        NebulaGameManager.Instance?.OnFollowerCameraUpdate();
+    }
 }

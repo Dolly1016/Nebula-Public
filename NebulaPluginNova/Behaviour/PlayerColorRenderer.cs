@@ -26,9 +26,9 @@ public class PlayerColorRenderer : MonoBehaviour
     {
         if (player == null) return;
 
-        if(player.Unbox().CurrentOutfit.ColorId != lastColorId)
+        if(player.Unbox().CurrentOutfit.Outfit.outfit.ColorId != lastColorId)
         {
-            lastColorId = player.Unbox().CurrentOutfit.ColorId;
+            lastColorId = player.Unbox().CurrentOutfit.Outfit.outfit.ColorId;
 
             PlayerMaterial.SetColors(lastColorId, renderer.sharedMaterial);
         }

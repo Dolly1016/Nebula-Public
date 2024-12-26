@@ -193,7 +193,9 @@ public class JusticeMeetingHud : MonoBehaviour
 
     public void Begin(GamePlayer player1, GamePlayer player2, Action onMeetingStart)
     {
-        StartCoroutine(SetUpJusticeMeeting(MeetingHud.Instance, player1, player2, onMeetingStart).WrapToIl2Cpp());
+        int photoIndex1 = player1.PlayerId % PhotoData.Length;
+        int photoIndex2 = (photoIndex1 + ((player2.PlayerId + 1) % (PhotoData.Length - 2))) % PhotoData.Length;
+        StartCoroutine(SetUpJusticeMeeting(MeetingHud.Instance, player1, player2, onMeetingStart, photoIndex1, photoIndex2).WrapToIl2Cpp());
     }
 
     private static string[] RandomTexts = ["(despired)", "terminus", "<revolt>", "solitary", "bona vacantia", "despotism", "pizza", "elitism", "suspicion", "justice", "outsider", "discrepancy", "purge", "uniformity", "conviction", "tribunal", "triumph", "heroism", "u - majority"];
@@ -274,7 +276,9 @@ public class JusticeMeetingHud : MonoBehaviour
             yield return Effects.Wait(1.0f + 0.3f);
         }
     }
-    IEnumerator SetUpJusticeMeeting(MeetingHud meetingHud, GamePlayer player1, GamePlayer player2, Action onMeetingStart)
+
+    static (int photoIndex, Vector2 localPos, float scale)[] PhotoData = [/*(0, new(-1.04f, 0.62f), 0.52f),*/ (1, new(-0.845f, 0.816f), 0.76f), (2, new(-1.04f, 0.77f), 0.7f), (3, new(-1.06f, 0.805f), 0.73f), (4, new(-1.06f, 0.89f), 0.9f), (5, new(-1.07f, 0.81f), 0.75f), (6, new(-0.93f, 0.73f), 0.65f), (7, new(-1.06f, 0.77f), 0.7f)];
+    IEnumerator SetUpJusticeMeeting(MeetingHud meetingHud, GamePlayer player1, GamePlayer player2, Action onMeetingStart, int imageIndex1, int imageIndex2)
     {
         meetingHud.TimerText.gameObject.SetActive(false);
         NebulaAsset.PlaySE(NebulaAudioClip.Justice1);
@@ -419,12 +423,9 @@ public class JusticeMeetingHud : MonoBehaviour
 
         var boardPassGame = VanillaAsset.MapAsset[2].CommonTasks.FirstOrDefault(p => p.MinigamePrefab.name == "BoardingPassGame")?.MinigamePrefab.TryCast<BoardPassGame>();
 
-        (int photoIndex, Vector2 localPos, float scale)[] PhotoData = [/*(0, new(-1.04f, 0.62f), 0.52f),*/ (1, new(-0.845f, 0.816f), 0.76f), (2, new(-1.04f, 0.77f), 0.7f), (3, new(-1.06f, 0.805f), 0.73f), (4, new(-1.06f, 0.89f), 0.9f), (5, new(-1.07f, 0.81f), 0.75f), (6, new(-0.93f, 0.73f), 0.65f), (7, new(-1.06f, 0.77f), 0.7f)];
-
-        int lastPhotoIndex = 0;
         int lastNumberIndex = 0;
         int lastAltIndex = 0;
-        void SpawnVotingArea(GamePlayer player, Vector3 localPos, Image holder)
+        void SpawnVotingArea(GamePlayer player, Vector3 localPos, Image holder, int photoIndex)
         {
             var flashHolder = UnityHelper.CreateObject("FlashHolder", transform, Vector3.zero);
             var flash = UnityHelper.CreateSpriteRenderer("Flash", flashHolder.transform, localPos + new Vector3(0f, 0f, -19.5f));
@@ -469,7 +470,7 @@ public class JusticeMeetingHud : MonoBehaviour
             StartCoroutine(CoAnimFlash().WrapToIl2Cpp());
             StartCoroutine(CoShake(1.3f).WrapToIl2Cpp());
 
-            IEnumerator CoSpawnPlayerArea()
+            IEnumerator CoSpawnPlayerArea(int photoIndex)
             {
                 yield return Effects.Wait(1.3f);
                 var back = UnityHelper.CreateSpriteRenderer("JusticePlayerArea", transform, localPos + new Vector3(0f, 0f, 6f));
@@ -528,11 +529,9 @@ public class JusticeMeetingHud : MonoBehaviour
 
 
                 //重複した画像を回避する
-                lastPhotoIndex = (lastPhotoIndex + 1 + System.Random.Shared.Next(PhotoData.Length - 1)) % PhotoData.Length;
-
-                var photo = UnityHelper.CreateSpriteRenderer("JusticeHolderPhoto", back.transform, PhotoData[lastPhotoIndex].localPos.AsVector3(-0.5f));
-                photo.transform.localScale = Vector3.one * PhotoData[lastPhotoIndex].scale;
-                photo.sprite = boardPassGame!.Photos[PhotoData[lastPhotoIndex].photoIndex];
+                var photo = UnityHelper.CreateSpriteRenderer("JusticeHolderPhoto", back.transform, PhotoData[photoIndex].localPos.AsVector3(-0.5f));
+                photo.transform.localScale = Vector3.one * PhotoData[photoIndex].scale;
+                photo.sprite = boardPassGame!.Photos[PhotoData[photoIndex].photoIndex];
                 photo.material = HatManager.Instance.PlayerMaterial;
                 PlayerMaterial.SetColors(player.PlayerId, photo.material);
 
@@ -545,11 +544,11 @@ public class JusticeMeetingHud : MonoBehaviour
                 }
             }
 
-            StartCoroutine(CoSpawnPlayerArea().WrapToIl2Cpp());
+            StartCoroutine(CoSpawnPlayerArea(photoIndex).WrapToIl2Cpp());
         }
 
-        SpawnVotingArea(player1, new(-2f, 0f, 0f), votingHolderLeftSprite);
-        SpawnVotingArea(player2, new(2f, 0f, 0f), votingHolderRightSprite);
+        SpawnVotingArea(player1, new(-2f, 0f, 0f), votingHolderLeftSprite, imageIndex1);
+        SpawnVotingArea(player2, new(2f, 0f, 0f), votingHolderRightSprite, imageIndex2);
 
 
         yield break;
@@ -574,6 +573,9 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
 
     static public Justice MyRole = new Justice();
 
+    static private GameStatsEntry StatsExiled = NebulaAPI.CreateStatsEntry("stats.justice.exiled", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsNonCrewmates = NebulaAPI.CreateStatsEntry("stats.justice.nonCrewmates", GameStatsCategory.Roles, MyRole);
+
     static RemoteProcess<(GamePlayer p1, GamePlayer p2)> RpcJusticeMeeting = new("JusticeMeeting",
         (message, _) => {
             MeetingModRpc.RpcChangeVotingStyle.LocalInvoke((0xFFFFFF, false, JusticeMeetingTimeOption, true, false));
@@ -591,7 +593,7 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
         DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player) { }
 
-        static private SpriteLoader meetingSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeIcon.png", 115f);
+        
 
         void RuntimeAssignable.OnActivated() { }
 
@@ -614,7 +616,7 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
             if (!usedBalance)
             {
                 var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
-                buttonManager?.RegisterMeetingAction(new(meetingSprite,
+                buttonManager?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(2),
                    p =>
                    {
                        if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
@@ -668,6 +670,9 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
                     new StaticAchievementToken("justice.common3");
                     if(ev.Exiled.All(e => e.IsImpostor)) new StaticAchievementToken("justice.challenge");
                 }
+
+                StatsExiled.Progress(ev.Exiled.Count());
+                StatsNonCrewmates.Progress(ev.Exiled.Count(p => !p.IsCrewmate));
 
                 isMyJusticeMeeting = false;
             }

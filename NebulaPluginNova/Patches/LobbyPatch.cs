@@ -115,6 +115,9 @@ public class GameStartManagerUpdatePatch
             }
         }
 
+        if (__instance.LobbyInfoPane.gameObject.activeSelf && HudManager.Instance.Chat.IsOpenOrOpening) __instance.LobbyInfoPane.DeactivatePane();
+        __instance.LobbyInfoPane.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !HudManager.Instance.Chat.IsOpenOrOpening);
+        __instance.HostInfoPanel.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp);
         return false;
     }
 }
@@ -187,7 +190,6 @@ public class SetUpCertificationPatch
     {
         //ゲーム中であればなにもしない
         if (AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started) return;
-
         __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
     }
 }
@@ -434,3 +436,81 @@ public class OptionsConsoleUsePatch
     }
 }
 
+
+[HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.Start))]
+public class GlobalCosMismatchShowerPatch
+{
+    private static IDividedSpriteLoader icons = DividedSpriteLoader.FromResource("Nebula.Resources.GlobalCosButton.png", 100f, 2, 1);
+    public static void Postfix(GameStartManager __instance)
+    {
+        __instance.gameObject.ForEachAllChildren(c => c.layer = LayerExpansion.GetUILayer());
+
+        //過去の未所持データをクリアする
+        MoreCosmic.UnacquiredItems.Clear();
+
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("UnacquiredItemsIcon", __instance.LobbyInfoPane.transform, new(-3.7f, -7f, -1f));
+        renderer.transform.localScale = new(1.2f, 1.2f, 1.2f);
+        renderer.sprite = icons.GetSprite(0);
+
+        var animRenderer = UnityHelper.CreateObject<SpriteRenderer>("Anim", renderer.transform, new(0.2f, 0.2f, -0.1f));
+        animRenderer.transform.localScale = Vector3.one;
+        animRenderer.sprite = icons.GetSprite(1);
+
+        void UpdateUnacquiredItems() => MoreCosmic.UnacquiredItems.RemoveAll(entry => MarketplaceData.Data.OwningCostumes.Any(c => c.EntryId == entry.id));
+
+        void OpenScreen()
+        {
+            var window = MetaScreen.GenerateWindow(new(5f, 3.5f), HudManager.Instance.transform, Vector3.zero, true, true, true);
+            window.SetWidget(
+                GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
+                GUI.API.LocalizedText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentTitle), "ui.costume.unownedCostume"),
+                GUI.API.ScrollView(Virial.Media.GUIAlignment.Center, new(4.8f, 3f), "unacquiredItems", null, out var artifact))
+                , out _);
+            void UpdateContents()
+            {
+                artifact.Do(a => a.SetWidget(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
+                    MoreCosmic.UnacquiredItems.Select(item => new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.MarketplaceTitle), GUI.API.RawTextComponent("・" + item.title)) { 
+                        OnClickText = (() =>
+                        {
+                            Marketplace.OpenDetailWindow(false, item.id, HudManager.Instance.transform, ()=> { UpdateUnacquiredItems(); UpdateContents(); });
+                        },false),
+                        PostBuilder = text =>
+                        {
+                            var button = text.GetComponent<PassiveButton>();
+                            button.OnMouseOver.AddListener(() => text.color = Color.green);
+                            button.OnMouseOut.AddListener(() => text.color = Color.white);
+                        }
+                    })), out _));
+            }
+
+            UpdateContents();
+        }
+
+        var button = renderer.gameObject.SetUpButton(true, renderer);
+        button.OnClick.AddListener(OpenScreen);
+        button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.costume.missedCostume")));
+        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+        var collider = renderer.gameObject.AddComponent<CircleCollider2D>();
+        collider.isTrigger = true;
+        collider.radius = 0.3f;
+        
+        renderer.gameObject.SetActive(false);
+
+        System.Collections.IEnumerator CoUpdate()
+        {
+            while (true)
+            {
+                UpdateUnacquiredItems();
+                bool show = MoreCosmic.UnacquiredItems.Count > 0;
+                renderer.gameObject.SetActive(show);
+
+                //たまに大きくなるアニメーション
+                var t = Mathf.Repeat(Time.time, 2.4f);
+                animRenderer.transform.localScale = Vector3.one * (1f + Helpers.MountainCurve(Mathf.Clamp01(t / 0.25f), 0.6f));
+
+                yield return null;
+            }
+        }
+        __instance.StartCoroutine(CoUpdate().WrapToIl2Cpp());
+    }
+}

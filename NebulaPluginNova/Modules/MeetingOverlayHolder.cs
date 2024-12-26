@@ -10,7 +10,7 @@ namespace Nebula.Modules;
 
 internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayHolder, IGameOperator
 {
-    static IDividedSpriteLoader IconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.MeetingNotification.png", 100f, 4, 1);
+    static IDividedSpriteLoader IconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.MeetingNotification.png", 100f, 6, 1);
     static Image NotificationSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingNotificationDot.png", 135f);
     static public Image[] IconsSprite = Helpers.Sequential(IconSprite.Length).Select(num => new WrapSpriteLoader(()=>IconSprite.GetSprite(num))).ToArray();
 

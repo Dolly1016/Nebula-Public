@@ -8,6 +8,7 @@ public class ShipStatusPatch
 {
     static public void Postfix(ShipStatus __instance)
     {
+        if (__instance.Type == (ShipStatus.MapType)6) return;
         ModifyEarlier();
         __instance.StartCoroutine(Effects.Sequence(Effects.Wait(0.1f),ManagedEffects.Action(Modify).WrapToIl2Cpp()));
     }

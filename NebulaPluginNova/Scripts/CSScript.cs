@@ -35,7 +35,7 @@ internal static class AddonScriptManagerLoader
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Reflection.Metadata.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.CSharp.dll")!.ReadBytes());
-
+        
         yield return AddonScriptManager.CoLoad(assemblies);
     }
 }
@@ -48,6 +48,7 @@ internal static class AddonScriptManager
     static private List<AddonScript> scriptAssemblies = new();
     static public IEnumerator CoLoad(Assembly[] assemblies)
     {
+
         //参照可能なアセンブリを抽出する
         ReferenceAssemblies = assemblies.Where(a => { try { return ((a.Location?.Length ?? 0) > 0); } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).Append(MetadataReference.CreateFromImage(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes())).ToArray();
         

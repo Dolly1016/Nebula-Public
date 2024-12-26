@@ -22,10 +22,11 @@ public static class HudManagerExtension
         }
 
         bool flag = PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.IsDead;
-        RuntimeRole? modRole = PlayerControl.LocalPlayer.GetModInfo()?.Role;
+        var modPlayer = PlayerControl.LocalPlayer.GetModInfo();
+        RuntimeRole? modRole = modPlayer?.Role;
 
         manager.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && GameManager.Instance.CanReportBodies() && ShipStatus.Instance != null);
-        manager.KillButton.ToggleVisible((modRole?.HasVanillaKillButton ?? false) && !flag);
+        manager.KillButton.ToggleVisible((modPlayer?.ShowKillButton ?? true) && !flag);
         manager.SabotageButton.ToggleVisible((modRole?.CanInvokeSabotage ?? false));
         manager.ImpostorVentButton.ToggleVisible(!flag && ((modRole?.CanUseVent ?? false) || PlayerControl.LocalPlayer.walkingToVent || PlayerControl.LocalPlayer.inVent));
         manager.MapButton.gameObject.SetActive(true);
@@ -46,7 +47,13 @@ public static class HudManagerExtension
             ButtonEffect.SetKeyGuideOnSmallButton(HudManager.Instance.MapButton.gameObject, actionMap.keyCode);
             ButtonEffect.SetKeyGuide(HudManager.Instance.SabotageButton.gameObject, actionMap.keyCode);
         }
-        HudManager.Instance.MapButton.transform.localPosition += new Vector3(0, 0, -15f);
+        HudManager.Instance.MapButton.transform.SetLocalZ(-60f);
+        if(HudManager.Instance.MapButton.gameObject.TryGetComponent<AspectPosition>(out var aspectPosition))
+        {
+            var distance = aspectPosition.DistanceFromEdge;
+            distance.z = -60f;
+            aspectPosition.DistanceFromEdge = distance;
+        }
 
         //使用
         actionArray = keyboardMap.GetButtonMapsWithAction(6);

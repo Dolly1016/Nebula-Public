@@ -93,7 +93,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
             DancingProgress += Time.deltaTime;
             NotDancingProgress = 0f;
 
-            NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p != MyContainer && !p.IsDead && DanceStartPos.Distance(p.VanillaPlayer.transform.position) < DanceRange).Do(p => playerMask |= 1u << p.PlayerId);
+            NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p != MyContainer && !p.IsDead && DanceStartPos.Distance(p.VanillaPlayer.transform.position) < DanceRange).Do(p => playerMask |= 1u << p.PlayerId);
             Helpers.AllDeadBodies().Where(p => p.ParentId != MyContainer.PlayerId && DanceStartPos.Distance(p.transform.position) < DanceRange).Do(p => corpseMask |= 1u << p.ParentId);
 
 
@@ -101,7 +101,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
             {
                 eventInvoked = true;
                 RpcDance.Invoke((MyContainer, DanceStartPos, playerMask, corpseMask));
-                if((Dancer.MyRole as ISpawnable).IsSpawnable || NebulaGameManager.Instance.AllPlayerInfo().Any(p => p.Role.Role == Dancer.MyRole))
+                if((Dancer.MyRole as ISpawnable).IsSpawnable || NebulaGameManager.Instance.AllPlayerInfo.Any(p => p.Role.Role == Dancer.MyRole))
                 {
                     AmongUsUtil.PlayQuickFlash(Dancer.MyRole.UnityColor.RGBMultiplied(0.5f));
                 }
@@ -148,7 +148,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
     }
     
     static public Dancer MyRole = new Dancer();
-
+    static private GameStatsEntry StatsDance = NebulaAPI.CreateStatsEntry("stats.dancer.dance", GameStatsCategory.Roles, MyRole);
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     
     static public float DanceDuration => DanceDurationOption;
@@ -321,7 +321,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
 
         void OnDance(PlayerDanceEvent ev)
         {
-            var allPlayers = NebulaGameManager.Instance!.AllPlayerInfo();
+            var allPlayers = NebulaGameManager.Instance!.AllPlayerInfo;
             var players = allPlayers.Where(ev.Players.Test);
             var corpses = allPlayers.Where(ev.Corpses.Test);
 
@@ -388,6 +388,8 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                         RpcShareDanceState.Invoke((MyPlayer, ++danceShareVersion, activeDanceLooked.ToArray(), completedDanceLooked.ToArray()));
                     }
 
+                    StatsDance.Progress();
+
                     //クールダウンリセット
                     danceCoolDownTimer?.Start();
                     UpdateButtonGraphic();
@@ -443,9 +445,9 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                 if(ev is PlayerExiledEvent)
                     activeDanceLooked.Where(p => !p.IsDead).Do(p => p.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide));
                 else if(MeetingHud.Instance || ExileController.Instance)
-                    activeDanceLooked.Where(p => !p.IsDead).Do(p => p.VanillaPlayer.ModSuicide(PlayerState.Suicide, null, KillParameter.MeetingKill));
+                    activeDanceLooked.Where(p => !p.IsDead).Do(p => p.Suicide(PlayerState.Suicide, null, KillParameter.MeetingKill));
                 else
-                    activeDanceLooked.Where(p => !p.IsDead).Do(p => p.VanillaPlayer.ModSuicide(PlayerState.Suicide, null, KillParameter.RemoteKill));
+                    activeDanceLooked.Where(p => !p.IsDead).Do(p => p.Suicide(PlayerState.Suicide, null, KillParameter.RemoteKill));
             }
 
             if (AmOwner)
@@ -465,7 +467,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
             }
 
             //自身は生存している必要がある
-            if (!MyPlayer.IsDead && NebulaGameManager.Instance!.AllPlayerInfo().Count(p => (p.PlayerState == PlayerState.Frenzied && p.MyKiller == MyPlayer) || completedDanceLooked.Contains(p)) >= NumOfSuccessfulForecastToWinOption)
+            if (!MyPlayer.IsDead && NebulaGameManager.Instance!.AllPlayerInfo.Count(p => (p.PlayerState == PlayerState.Frenzied && p.MyKiller == MyPlayer) || completedDanceLooked.Contains(p)) >= NumOfSuccessfulForecastToWinOption)
             {
                 if (FinalDanceOption)
                 {

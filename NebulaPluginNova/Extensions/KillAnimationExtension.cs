@@ -11,6 +11,9 @@ public static class KillAnimationExtension
         PlayerPhysics sourcePhys = source.MyPhysics;
         if (blink) KillAnimation.SetMovement(source, false);
         KillAnimation.SetMovement(target, false);
+
+        var existedBodies = Helpers.AllDeadBodies().ToArray();
+
         DeadBody deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.DeadBodyPrefab);
         deadBody.enabled = false;
         deadBody.ParentId = target.PlayerId;
@@ -23,6 +26,33 @@ public static class KillAnimationExtension
         if(target.inMovingPlat || target.onLadder) deadBodyPlayerPos = target.GetModInfo()?.Unbox().GoalPos ?? deadBodyPlayerPos;
 
         Vector3 vector = (Vector3)deadBodyPlayerPos + killAnim.BodyOffset;
+
+        //至近距離に死体がある場合
+        if(existedBodies.Any(b => b.transform.position.Distance(vector) < 0.05f))
+        {
+            void TryShift()
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        var dir = Vector2.right.Rotate(15 + 45 * i + 90 * j);
+                        var cand = (Vector2)vector + dir * 0.12f;
+
+                        if (
+                            !Helpers.AnyNonTriggersBetween(vector, cand, out _, Constants.ShipAndAllObjectsMask) &&
+                            !existedBodies.Any(b => b.transform.position.Distance(cand) < 0.05f)
+                            )
+                        {
+                            vector = cand;
+                            break;
+                        }
+                    }
+                }
+            }
+            TryShift();
+        }
+
         vector.z = vector.y / 1000f;
         deadBody.transform.position = vector;
         if (isParticipant)
@@ -40,15 +70,14 @@ public static class KillAnimationExtension
 
         target.Die(DeathReason.Kill, false);
 
-        if(!source.Data.IsDead) yield return source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);
-
         if (blink)
         {
+            if (!source.Data.IsDead) yield return source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);
             source.NetTransform.SnapTo(target.transform.position);
             sourcePhys.Animations.PlayIdleAnimation();
+            KillAnimation.SetMovement(source, true);
         }
 
-        KillAnimation.SetMovement(source, true);
         KillAnimation.SetMovement(target, true);
 
         deadBody.enabled = true;

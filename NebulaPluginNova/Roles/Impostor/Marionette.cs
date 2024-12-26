@@ -11,20 +11,26 @@ using Virial.Helpers;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Marionette : DefinedRoleTemplate, DefinedRole
+public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, DefinedRole
 {
     private Marionette() : base("marionette", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [PlaceCoolDownOption, SwapCoolDownOption, DecoyDurationOption, CanSeeDecoyInShadowOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+
+        GameActionTypes.DecoyPlacementAction = new("marionette.placement", this, isEquippingAction: true);
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.marionette.placeCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration SwapCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.marionette.swapCoolDown", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration DecoyDurationOption = NebulaAPI.Configurations.Configuration("options.role.marionette.decoyDuration", (5f, 180f, 5f), 40f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration CanSeeDecoyInShadowOption = NebulaAPI.Configurations.Configuration("options.role.marionette.canSeeDecoyInShadow", false);
 
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
+
     static public Marionette MyRole = new Marionette();
+    static private GameStatsEntry StatsDecoy = NebulaAPI.CreateStatsEntry("stats.marionette.decoy", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsSwap = NebulaAPI.CreateStatsEntry("stats.marionette.swap", GameStatsCategory.Roles, MyRole);
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class Decoy : NebulaSyncStandardObject
@@ -45,10 +51,8 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
         }
     }
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-
         private ModAbilityButton? placeButton = null;
         private ModAbilityButton? destroyButton = null;
         private ModAbilityButton? swapButton = null;
@@ -61,9 +65,6 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
         static private Image decoyArrowSprite = SpriteLoader.FromResource("Nebula.Resources.DecoyArrow.png", 180f);
 
         public Decoy? MyDecoy = null;
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
 
         AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
         StaticAchievementToken? acTokenCommon = null;
@@ -71,7 +72,14 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
         AchievementToken<(bool cleared, float killTime)>? acTokenChallenge = null;
         Arrow? decoyArrow = null;
 
-        void RuntimeAssignable.OnActivated()
+        //デコイの撤去
+        void IGameOperator.OnReleased()
+        {
+            if (MyDecoy != null) NebulaSyncObject.RpcDestroy(MyDecoy!.ObjectId);
+            MyDecoy = null;
+        }
+
+        public Ability(GamePlayer player) : base(player)
         {
             if (AmOwner)
             {
@@ -91,6 +99,8 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.DecoyPlacementAction);
+
                         MyDecoy = (NebulaSyncObject.RpcInstantiate(Decoy.MyTag, [
                         PlayerControl.LocalPlayer.transform.localPosition.x,
                         PlayerControl.LocalPlayer.transform.localPosition.y,
@@ -103,6 +113,7 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                     placeButton.StartCoolDown();
                     swapButton?.StartCoolDown();
                     acTokenCommon ??= new("marionette.common1");
+                    StatsDecoy.Progress();
                 };
                 placeButton.SetLabel("place");
 
@@ -141,6 +152,8 @@ public class Marionette : DefinedRoleTemplate, DefinedRole
                     acTokenAnother!.Value.triggered = true;
                     if (currentTime - acTokenChallenge.Value.killTime < 1f && MyPlayer.VanillaPlayer.GetTruePosition().Distance(MyDecoy!.Position) > 30f)
                         acTokenChallenge.Value.cleared = true;
+
+                    StatsSwap.Progress();
                 };
                 swapButton.OnSubAction = (button) =>
                 {

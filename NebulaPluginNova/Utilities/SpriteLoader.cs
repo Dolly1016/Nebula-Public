@@ -345,6 +345,12 @@ public class DividedSpriteLoader : Image, IDividedSpriteLoader
         texture = textureLoader;
     }
 
+    public DividedSpriteLoader SetPivot(Vector2 pivot)
+    {
+        Pivot = pivot;
+        return this;
+    }
+
     public Sprite GetSprite(int index)
     {
         if (size == null || division == null || sprites == null)

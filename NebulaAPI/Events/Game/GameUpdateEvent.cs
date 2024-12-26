@@ -11,6 +11,11 @@ public class GameUpdateEvent : AbstractGameEvent
     internal GameUpdateEvent(Virial.Game.Game game) : base(game) { }
 }
 
+public class UpdateEvent : Event
+{
+    internal UpdateEvent() { }
+}
+
 /// <summary>
 /// ここでプレイヤーの輪郭を変更すると、変更が画面に正しく反映されます。
 /// </summary>

@@ -8,9 +8,9 @@ namespace Virial.Events.Player;
 
 public class PlayerOutfitChangeEvent : AbstractPlayerEvent
 {
-    public Virial.Game.Outfit Outfit { get; private init; }
+    public Virial.Game.OutfitCandidate Outfit { get; private init; }
 
-    public PlayerOutfitChangeEvent(Virial.Game.Player player, Virial.Game.Outfit outfit) : base(player)
+    public PlayerOutfitChangeEvent(Virial.Game.Player player, Virial.Game.OutfitCandidate outfit) : base(player)
     {
         this.Outfit = outfit;
     }

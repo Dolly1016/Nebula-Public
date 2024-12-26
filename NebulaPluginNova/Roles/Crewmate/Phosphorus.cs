@@ -14,6 +14,8 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
     private Phosphorus():base("phosphorus", new(249,188,81), RoleCategory.CrewmateRole, Crewmate.MyTeam, [NumOfLampsOption, PlaceCoolDownOption, LampCoolDownOption, LampDurationOption, LampStrengthOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Phosphorus.png");
+
+        GameActionTypes.LanternPlacementAction = new("phosphorus.placement", this, isPlacementAction: true);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
@@ -25,6 +27,8 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration LampStrengthOption = NebulaAPI.Configurations.Configuration("options.role.phosphorus.lampStrength", (0.25f, 5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
 
     static public Phosphorus MyRole = new Phosphorus();
+    static private GameStatsEntry StatsLantern = NebulaAPI.CreateStatsEntry("stats.phosphorus.lantern", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsLighting = NebulaAPI.CreateStatsEntry("stats.phosphorus.lighting", GameStatsCategory.Roles, MyRole);
 
     private static IDividedSpriteLoader lanternSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Lantern.png", 100f, 4);
 
@@ -80,6 +84,7 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
                 {
                     CombinedRemoteProcess.CombinedRPC.Invoke(globalLanterns!.Select((id)=>RpcLantern.GetInvoker(id)).ToArray());
 
+                    StatsLighting.Progress();
                     if (acTokenChallenge == null)
                     {
                         var lanterns = globalLanterns!.Select(id => NebulaSyncObject.GetObject<Lantern>(id)!);
@@ -101,6 +106,9 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
                 placeButton.Visibility = (button) => !MyPlayer.IsDead && globalLanterns == null && left > 0;
                 placeButton.OnClick = (button) => {
                     var pos = PlayerControl.LocalPlayer.GetTruePosition();
+                    
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, pos, GameActionTypes.LanternPlacementAction);
+
                     localLanterns.Add(Bind<NebulaSyncStandardObject>((NebulaSyncObject.LocalInstantiate(Lantern.MyLocalTag, new float[] { pos.x, pos.y }).SyncObject as NebulaSyncStandardObject)!));
 
                     left--;
@@ -108,6 +116,7 @@ public class Phosphorus : DefinedRoleTemplate, DefinedRole
 
                     placeButton.StartCoolDown();
 
+                    StatsLantern.Progress();
                     new StaticAchievementToken("phosphorus.common1");
                     new StaticAchievementToken("phosphorus.common2");
                 };

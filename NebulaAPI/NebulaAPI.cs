@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events;
 using Virial.Game;
 using Virial.Media;
 using Virial.Runtime;
@@ -54,6 +55,12 @@ internal interface INebula
     Assignable.DefinedRole? GetRole(string internalName);
     Assignable.DefinedModifier? GetModifier(string internalName);
     Assignable.DefinedGhostRole? GetGhostRole(string internalName);
+
+    //GameStatsAPI
+    GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority = 0);
+    void IncrementStatsEntry(string id, int num);
+
+    E RunEvent<E>(E ev) where E : class, Event;
 }
 
 public static class NebulaAPI
@@ -124,4 +131,15 @@ public static class NebulaAPI
     /// <param name="internalName"></param>
     /// <returns></returns>
     static public Assignable.DefinedGhostRole? GetGhostRole(string internalName) => instance.GetGhostRole(internalName);
+
+    /// <summary>
+    /// イベントを実行します。
+    /// </summary>
+    /// <typeparam name="E"></typeparam>
+    /// <param name="ev"></param>
+    /// <returns></returns>
+    static public E RunEvent<E>(E ev) where E : class, Event => instance.RunEvent(ev);
+    static public GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable = null, TextComponent? displayTitle = null, int innerPriority = 0) => instance.CreateStatsEntry(id, category, assignable, displayTitle, innerPriority);
+    static public void Progress(this GameStatsEntry entry, int num = 1) => instance.IncrementStatsEntry(entry.Id, num);
+    static public void IncrementStatsEntry(string  entryId, int num = 1) => instance.IncrementStatsEntry(entryId, num);
 }

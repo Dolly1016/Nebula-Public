@@ -10,12 +10,16 @@ public class Team : RoleTeam
     public Virial.Color Color { get;private init; }
     public int Id { get; set; }
     public TeamRevealType RevealType { get; set; }
-    public Team(string translationKey, Virial.Color color, TeamRevealType revealType)
+    private Func<float>? killCooldownSupplier;
+    public float KillCooldown => killCooldownSupplier?.Invoke() ?? AmongUsUtil.VanillaKillCoolDown;
+    public Team(string translationKey, Virial.Color color, TeamRevealType revealType, Func<float> killCooldown = null)
     {
         TranslationKey = translationKey;
         UnityColor = color.ToUnityColor();
         Color = color;
-        Roles.Register(this);
         RevealType = revealType;
+        this.killCooldownSupplier = killCooldown;
+
+        Roles.Register(this);
     }
 }

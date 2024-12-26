@@ -1,4 +1,5 @@
-﻿using Virial.DI;
+﻿using Virial.Components;
+using Virial.DI;
 
 namespace Virial.Game;
 
@@ -26,6 +27,8 @@ public interface Game : IModuleContainer, ILifespan
     /// <returns>ゲーム中の全プレイヤー</returns>
     IEnumerable<Player> GetAllPlayers();
 
+    KillButtonLikeHandler KillButtonLikeHandler { get; }
+
     internal void RegisterEntity(IGameOperator entity, ILifespan lifespan);
 
     /// <summary>
@@ -44,9 +47,4 @@ public interface Game : IModuleContainer, ILifespan
     /// <param name="gameEnd"></param>
     /// <param name="additionalWinners"></param>
     void RequestGameEnd(GameEnd gameEnd, BitMask<Virial.Game.Player> additionalWinners);
-
-    /// <summary>
-    /// 現在のHUD。
-    /// </summary>
-    HUD CurrentHud { get; }
 }

@@ -25,9 +25,10 @@ public static class HighlightHelpers
 
 public static class ObjectTrackers
 {
-    static public Predicate<GamePlayer> StandardPredicate = p => !p.AmOwner && !p.IsDead && !p.Unbox().IsInvisible && !p.IsDived && !p.IsBlown;
-    static public Predicate<GamePlayer> ImpostorKillPredicate = p => StandardPredicate(p) && !p.IsImpostor;
-
+    static public Predicate<GamePlayer> StandardPredicateIgnoreOwner = p => !p.IsDead && !p.WillDie && !p.Unbox().IsInvisible && !p.IsDived && !p.IsBlown;
+    static public Predicate<GamePlayer> StandardPredicate = p => !p.AmOwner && StandardPredicateIgnoreOwner.Invoke(p);
+    static public Predicate<GamePlayer> KillablePredicate(GamePlayer myPlayer) => p => StandardPredicate(p) && myPlayer.CanKill(p);
+    static public Predicate<GamePlayer> LocalKillablePredicate = p => StandardPredicate(p) && (NebulaGameManager.Instance?.LocalPlayerInfo.CanKill(p) ?? true);
 
     public static ObjectTracker<GamePlayer> ForPlayer(float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, UnityEngine.Color? color = null, bool canTrackInVent = false, bool ignoreCollider = false) => ForPlayer(distance, tracker, predicate, null, color ?? UnityEngine.Color.yellow, canTrackInVent, ignoreCollider);
     public static ObjectTracker<GamePlayer> ForPlayer(float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier, UnityEngine.Color? color, bool canTrackInVent = false, bool ignoreCollider = false)

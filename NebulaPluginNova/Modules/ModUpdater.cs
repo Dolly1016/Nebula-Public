@@ -8,7 +8,9 @@ public class ModUpdater
     class ReleaseContent
     {
         [JsonSerializableField]
-        public string? name = null!;
+        public string? tag_name = null!;
+        [JsonSerializableField]
+        public string? body = null!;
     }
 
     public class ReleasedInfo
@@ -44,10 +46,13 @@ public class ModUpdater
         public string? Version;
         public string RawTag => rawTag;
         private string rawTag;
+        public string? Body => body;
+        private string? body;
 
-        public ReleasedInfo(string tag)
+        public ReleasedInfo(string tag, string? body)
         {
             rawTag = tag;
+            this.body = body;
 
             string[] strings = tag.Split(",");
             if (strings.Length != 4) return;
@@ -67,7 +72,7 @@ public class ModUpdater
                     Category = ReleaseCategory.Custom;
                     break;
                 default:
-                    Category= ReleaseCategory.Unknown;
+                    Category = ReleaseCategory.Unknown;
                     break;
             }
 
@@ -118,7 +123,7 @@ public class ModUpdater
         }
     }
 
-    static string GetTagsUrl(int page) => Helpers.ConvertUrl("https://api.github.com/repos/Dolly1016/Nebula/tags?per_page=100&page=" + (page));
+    static string GetTagsUrl(int page) => Helpers.ConvertUrl("https://api.github.com/repos/Dolly1016/Nebula/releases?per_page=100&page=" + (page));
     private static async Task FetchAsync()
     {
         List<ReleasedInfo> releases = new();
@@ -131,7 +136,7 @@ public class ModUpdater
             string json = await response.Content.ReadAsStringAsync();
 
             var tags = JsonStructure.Deserialize<List<ReleaseContent>>(json);
-            if (tags != null) foreach (var tag in tags) if (tag.name != null) releases.Add(new(tag.name));
+            if (tags != null) foreach (var tag in tags) if (tag.tag_name != null) releases.Add(new(tag.tag_name, tag.body?.Replace("\\n", "\n").Replace("\\r", "")));
             NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, releases.Count.ToString() + " releases have got from GitHub.");
             if (tags == null || tags.Count < 100 || tags.Count == 0) break;
             page++;

@@ -13,11 +13,13 @@ public class PlayerBlockWinEvent : AbstractPlayerEvent
     public bool IsWin { get; private init; }
     public bool IsBlocked { get; set; } = false;
     public void SetBlockedIf(bool blocked) => IsBlocked |= blocked;
+    public BitMask<Virial.Game.Player> LastWinners { get; private init; }
 
-    internal PlayerBlockWinEvent(Virial.Game.Player player, BitMask<Virial.Game.Player> winners, Virial.Game.GameEnd gameEnd) : base(player)
+    internal PlayerBlockWinEvent(Virial.Game.Player player, BitMask<Virial.Game.Player> winners, Virial.Game.GameEnd gameEnd, BitMask<Virial.Game.Player> lastWinners) : base(player)
     {
         this.GameEnd = gameEnd;
         this.IsWin = winners.Test(player);
         this.WinnersMask = winners;
+        this.LastWinners = lastWinners;
     }
 }

@@ -73,6 +73,8 @@ public class FakeSabotageStatus
                     }else if (message.task == SystemTypes.LifeSupp)
                     {
                         var reactor = ShipStatus.Instance.Systems[message.task].CastFast<LifeSuppSystemType>();
+                        Debug.Log(reactor.Countdown);
+                        Debug.Log(reactor.LifeSuppDuration);
                         reactor.Countdown = Mathf.Min(reactor.Countdown, reactor.LifeSuppDuration);
                     }
                     else if (message.task == SystemTypes.HeliSabotage)

@@ -58,6 +58,20 @@ public class ColorTextComponent : TextComponent
     string TextComponent.TextForCompare => Inner.TextForCompare;
 }
 
+public class SizedTextComponent : TextComponent
+{
+    public int percentageSize { get; set; }
+    TextComponent Inner { get; set; }
+    public string GetString() => $"<size={percentageSize}%>" + Inner.GetString() + "</size>";
+    public SizedTextComponent(int percentageSize, TextComponent inner)
+    {
+        this.percentageSize = percentageSize;
+        Inner = inner;
+    }
+
+    string TextComponent.TextForCompare => Inner.TextForCompare;
+}
+
 public class TranslateTextComponent : TextComponent
 {
     public string TranslationKey { get; set; }

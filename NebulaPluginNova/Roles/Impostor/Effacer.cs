@@ -8,7 +8,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCitation, DefinedRole
 {
     private Effacer() : base("effacer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EffaceCoolDownOption, EffaceDurationOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
@@ -17,32 +17,26 @@ public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
 
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
-
     static private FloatConfiguration EffaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.effacer.effaceCoolDown", (10f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration EffaceDurationOption = NebulaAPI.Configurations.Configuration("options.role.effacer.effaceDuration", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
 
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => false;
     static public Effacer MyRole = new Effacer();
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
-    {
-        DefinedRole RuntimeRole.Role => MyRole;
-
+    static private GameStatsEntry StatsEfface = NebulaAPI.CreateStatsEntry("stats.effacer.efface", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerAbility, IPlayerAbility 
+    { 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
-        
-
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
-
+      
         AchievementToken<EditableBitMask<GamePlayer>>? achChallengeToken = null;
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player) :base(player)
         {
             if (AmOwner)
             {
                 //全プレイヤーが、　インポスターでない　あるいは　自分自身　あるいは　生存かつ条件達成済み　→　自身のぞくインポスターが全員生存 & 条件達成済み
                 achChallengeToken = new("effacer.challenge", BitMasks.AsPlayer(0), (val, _) =>
                     NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnds.ImpostorGameEnd &&
-                    (NebulaGameManager.Instance?.AllPlayerInfo().All(p => !(p as GamePlayer).IsImpostor || p.AmOwner || (!p.IsDead && val.Test(p))) ?? false)
+                    (NebulaGameManager.Instance?.AllPlayerInfo.All(p => !(p as GamePlayer).IsImpostor || p.AmOwner || (!p.IsDead && val.Test(p))) ?? false)
                 );
                 Bind(achChallengeToken);
                 
@@ -58,7 +52,8 @@ public class Effacer : DefinedRoleTemplate, HasCitation, DefinedRole
                     effaceButton.StartCoolDown();
 
                     new StaticAchievementToken("effacer.common1");
-                    if(effaceTracker.CurrentTarget!.IsImpostor) new StaticAchievementToken("effacer.common2");
+                    StatsEfface.Progress();
+                    if (effaceTracker.CurrentTarget!.IsImpostor) new StaticAchievementToken("effacer.common2");
 
                     achChallengeToken.Value.Add(effaceTracker.CurrentTarget);
                 };

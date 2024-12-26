@@ -73,7 +73,7 @@ internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameOperator
         {
             List<FakeAdminParam> param = new();
             foreach(var d in Helpers.AllDeadBodies()) param.Add(new(d.ParentId, d.TruePosition, false, true));
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) if (!p.IsDead) param.Add(new(p.PlayerId, p.VanillaPlayer.GetTruePosition(), p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole, false));
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) if (!p.IsDead) param.Add(new(p.PlayerId, p.VanillaPlayer.GetTruePosition(), p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole, false));
             return new(param.ToArray());
         } }
 
@@ -83,7 +83,7 @@ internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameOperator
         {
             List<FakeVitalsParam> param = new();
             var deadBodies = Helpers.AllDeadBodies();
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 VitalsState state = VitalsState.Alive;
                 if(p.IsDead)

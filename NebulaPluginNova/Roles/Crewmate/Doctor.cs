@@ -75,7 +75,7 @@ public class Doctor : DefinedRoleTemplate, DefinedRole
                     {
                         acTokenCommon ??= new("doctor.common1");
 
-                        int lastAliveCount = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead);
+                        int lastAliveCount = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead);
 
                         while (vitalsMinigame.amClosing != Minigame.CloseState.Closing)
                         {
@@ -92,7 +92,7 @@ public class Doctor : DefinedRoleTemplate, DefinedRole
                         }
 
                         //生存者の数に変化がある
-                        if(lastAliveCount != NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead))
+                        if(lastAliveCount != NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead))
                             acTokenChallenge = new("doctor.challenge");
                         
 

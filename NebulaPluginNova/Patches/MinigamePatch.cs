@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Virial.Events.Game.Meeting;
 
 namespace Nebula.Patches;
 
@@ -232,12 +233,12 @@ public static class EmergencyUpdatePatch
         __instance.OpenLid.gameObject.SetActive(false);
     }
 
-    private static void ClosedForModOptionButtonUpdate(EmergencyMinigame __instance)
+    private static void ClosedForModOptionButtonUpdate(EmergencyMinigame __instance, string? translationKey)
     {
         if (__instance.state == 3) return;
         __instance.state = 3;
         __instance.ButtonActive = false;
-        __instance.StatusText.text = Language.Translate("game.meeting.cannotUseEmergencyButton");
+        __instance.StatusText.text = Language.Translate(translationKey ?? "game.meeting.cannotUseEmergencyButton");
         __instance.NumberText.text = string.Empty;
         __instance.ClosedLid.gameObject.SetActive(true);
         __instance.OpenLid.gameObject.SetActive(false);
@@ -246,6 +247,9 @@ public static class EmergencyUpdatePatch
     public static bool Prefix(EmergencyMinigame __instance)
     {
         float Cooldown = Mathf.Max(GeneralConfigurations.EmergencyCooldownAtGameStart ? 15f - ShipStatus.Instance.Timer : 0f, ShipStatus.Instance.EmergencyCooldown);
+
+        var checkCanPushEv = GameOperatorManager.Instance!.Run<CheckCanPushEmergencyButtonEvent>(new());
+
         //クールダウン中はボタンを押せない
         if (Cooldown > 0f)
             WaitingButtonUpdate(__instance, Cooldown);
@@ -259,6 +263,8 @@ public static class EmergencyUpdatePatch
                 (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.All(
                     type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true)))
             ClosedButtonUpdate(__instance);
+        else if (!checkCanPushEv.CanPushButton)
+            ClosedForModOptionButtonUpdate(__instance, checkCanPushEv.CannotPushReason);
         else
             OpenedButtonUpdate(__instance);
 

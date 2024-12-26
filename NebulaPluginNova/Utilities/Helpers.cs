@@ -1,6 +1,9 @@
-﻿using Steamworks;
+﻿using Hazel;
+using InnerNet;
+using Steamworks;
 using System.Runtime.InteropServices;
 using System.Text;
+using Virial.Text;
 
 
 namespace Nebula.Utilities;
@@ -47,7 +50,18 @@ public static class Helpers
 
     public static bool AmHost(this PlayerControl player) => AmongUsClient.Instance.HostId == player.OwnerId;
 
+    /// <summary>
+    /// 確率で真偽値を返します。
+    /// </summary>
+    /// <param name="prob">0から1までの確率</param>
+    /// <returns></returns>
     public static bool Prob(float prob) => System.Random.Shared.NextSingle() < prob;
+    public static float MountainCurve(float p, float max)
+    {
+        float x = p - 0.5f;
+        return max - x * x * 4f * max;
+    }
+
     public static float Delta(this float val, float speed, float threshold)
     {
         var smooth = val* Mathf.Clamp01(Time.deltaTime * speed);
@@ -277,6 +291,16 @@ public static class Helpers
         return queue.Dequeue();
     }
 
+    static public bool CircleContainsAnyNonTriggers(Vector2 pos, float radious, int? layerMask = null)
+    {
+        int num = Physics2D.OverlapCircleNonAlloc(pos, radious, PhysicsHelpers.colliderHits, layerMask ?? Constants.ShipAndAllObjectsMask);
+        for (int i = 0; i < num; i++)
+        {
+            if (!PhysicsHelpers.colliderHits[i].isTrigger) return true;
+        }
+        return false;
+    }
+
     static public bool AnyNonTriggersBetween(Vector2 pos1, Vector2 pos2, out Vector2 vector, int? layerMask = null)
     {
         layerMask ??= Constants.ShipAndAllObjectsMask;
@@ -314,4 +338,45 @@ public static class Helpers
     }
 
     static public bool IsEmpty<T>(this IEnumerable<T> enumerable) => !enumerable.Any(_ => true);
+
+    static public void DoIf<T>(this T? nullableObj, Action<T> action)
+    {
+        if(nullableObj != null) action.Invoke(nullableObj!);
+    }
+
+    static public void SyncSingleNetObject(InnerNetObject obj)
+    {
+        MessageWriter messageWriter = MessageWriter.Get(obj.sendMode);
+        messageWriter.StartMessage(1);
+        messageWriter.WritePacked(obj.NetId);
+        try
+        {
+            if (obj.Serialize(messageWriter, false))
+            {
+                messageWriter.EndMessage();
+                AmongUsClient.Instance.SendOrDisconnect(messageWriter);
+                messageWriter.Recycle();
+            }
+            else messageWriter.CancelMessage();
+
+            if (obj.Chunked && obj.IsDirty) return;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.ToString());
+            messageWriter.CancelMessage();
+        }
+    }
+
+    static public void PlayKillStingerSE()
+    {
+        var vanillaAnim = HudManager.Instance.KillOverlay.KillAnims[0];
+        SoundManager.Instance.PlaySound(vanillaAnim.Stinger, false, 1f, null).volume = vanillaAnim.StingerVolume;
+    }
+
+    static public void RefreshMemory()
+    {
+        Resources.UnloadUnusedAssets();
+        GC.Collect();
+    }
 }

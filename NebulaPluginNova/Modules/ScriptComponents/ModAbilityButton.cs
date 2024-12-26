@@ -68,6 +68,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
     public Action<ModAbilityButton>? OnSubAction { get; set; } = null;
     public Action<ModAbilityButton>? OnMeeting { get; set; } = null;
     public Action<ModAbilityButton>? OnStartTaskPhase { get; set; } = null;
+    public Action<ModAbilityButton>? OnReleased { get; set; } = null;
     public Predicate<ModAbilityButton>? Availability { get; set; } = null;
     public Predicate<ModAbilityButton>? Visibility { get; set; } = null;
     private VirtualInput? keyCode { get; set; } = null;
@@ -93,12 +94,15 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
         NebulaGameManager.Instance?.HudGrid.RegisterContent(gridContent, isLeftSideButton);
 
         SetLabelType(Virial.Components.ModAbilityButton.LabelType.Standard);
-
     }
 
     void IGameOperator.OnReleased()
     {
-        if (VanillaButton) UnityEngine.Object.Destroy(VanillaButton.gameObject);
+        if (VanillaButton)
+        {
+            OnReleased?.Invoke(this);
+            UnityEngine.Object.Destroy(VanillaButton.gameObject);
+        }
     }
 
     private bool CheckMouseClick()
@@ -332,8 +336,8 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
     }
 
     private static SpriteLoader aidActionSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindOption.png", 100f);
-    public ModAbilityButton SubKeyBind(Virial.Compat.VirtualKeyInput keyCode, string? action = null) => SubKeyBind(NebulaInput.GetInput(keyCode), action);
-    public ModAbilityButton SubKeyBind(VirtualInput keyCode, string? action = null)
+    public ModAbilityButton SubKeyBind(Virial.Compat.VirtualKeyInput keyCode, string? action = null, bool isCriticalSubAction = false) => SubKeyBind(NebulaInput.GetInput(keyCode), action, isCriticalSubAction);
+    public ModAbilityButton SubKeyBind(VirtualInput keyCode, string? action = null, bool isCriticalSubAction = false)
     {
         this.subKeyCode = keyCode;
         var guideObj = ButtonEffect.SetSubKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, false, action);
@@ -342,6 +346,15 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
         {
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("HotKeyOption", guideObj.transform, new UnityEngine.Vector3(0.12f, 0.07f, -2f));
             renderer.sprite = aidActionSprite.GetSprite();
+
+            if (isCriticalSubAction)
+            {
+                Tutorial.WaitAndShowTutorial(() => !VanillaButton.gameObject.activeSelf || !PlayerControl.LocalPlayer.CanMove,
+                    new TutorialBuilder(() => renderer.transform.position, true)
+                    .ShowWhile(()=>VanillaButton && renderer)
+                    .BindHistory("subaction")
+                    .AsGraphicalWidget(aidActionSprite, new(0.3f, 0.3f), Language.Translate("tutorial.variations.subAction")));
+            }
         }
 
         return this;
@@ -352,6 +365,12 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
     {
         if(!onlyLook)canUseByMouseClick = true;
         ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, iconType, action, atBottom);
+        return this;
+    }
+
+    public ModAbilityButton SetInfoIcon(string action, bool atBottom = false)
+    {
+        ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, ButtonEffect.ActionIconType.Info, action, atBottom);
         return this;
     }
 
@@ -370,6 +389,7 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
         return this;
     }
 
+    public IKillButtonLike GetKillButtonLike() => new ModKillButtonHandler(this);
     IVisualTimer? Virial.Components.ModAbilityButton.GetCoolDownTimer() => CoolDownTimer;
 
     IVisualTimer? Virial.Components.ModAbilityButton.GetEffectTimer() => EffectTimer;
@@ -493,7 +513,7 @@ public static class ButtonEffect
                 new KeyCodeInfo(KeyCode.Mouse1 + i, "Mouse " + (i == 0 ? "Right" : i == 1 ? "Middle" : (i + 1).ToString()), spriteLoader, i);
             spriteLoader = DividedSpriteLoader.FromResource("Nebula.Resources.KeyBindCharacters5.png", 100f, 18, 19, true);
             for (int i = 0; i < 10; i++)
-                new KeyCodeInfo(KeyCode.Alpha0 + i, "0" + (i + 1), spriteLoader, i);
+                new KeyCodeInfo(KeyCode.Alpha0 + i, "Num" + (i), spriteLoader, i);
         }
     }
 
@@ -536,6 +556,7 @@ public static class ButtonEffect
     static Image keyBindBackgroundSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindBackground.png", 100f);
     static Image mouseActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionIcon.png", 100f);
     static Image mouseDisableActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionDisableIcon.png", 100f);
+    static Image infoSprite = SpriteLoader.FromResource("Nebula.Resources.ButtonInfoIcon.png", 100f);
 
     static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide, bool isAidAction = false, string? action = null)
     {
@@ -617,6 +638,7 @@ public static class ButtonEffect
             {
                 ActionIconType.ClickAction => mouseActionSprite.GetSprite(),
                 ActionIconType.NonclickAction => mouseDisableActionSprite.GetSprite(),
+                ActionIconType.Info => infoSprite.GetSprite(),
                 _ => null
             };
 
@@ -629,6 +651,7 @@ public static class ButtonEffect
     public enum ActionIconType
     {
         ClickAction,
-        NonclickAction
+        NonclickAction,
+        Info
     }
 }

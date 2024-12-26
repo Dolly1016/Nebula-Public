@@ -1,4 +1,5 @@
 ﻿using Hazel;
+using Nebula.Roles.Neutral;
 using Virial.Assignable;
 
 namespace Nebula.Roles.Assignment;
@@ -8,6 +9,17 @@ internal class RoleTable : IRoleTable
     public List<(DefinedRole role, int[] arguments, byte playerId)> roles = new();
     public List<(DefinedModifier modifier, int[] arguments, byte playerId)> modifiers = new();
 
+    public void EditRole(byte player, Func<(DefinedRole role,int[] argument), (DefinedRole role, int[]? argument)> editor)
+    {
+        int index = roles.FindIndex(entry => entry.playerId == player);
+        if(index != -1)
+        {
+            var current = roles[index];
+            var next = editor.Invoke((current.role, current.arguments));
+            roles[index] = (next.role, next.argument ?? [], player);
+        }
+        
+    }
     public void SetRole(byte player, DefinedRole role, int[]? arguments = null)
     {
         roles.Add(new(role, arguments ?? Array.Empty<int>(), player));
@@ -52,7 +64,13 @@ public class FreePlayRoleAllocator : IRoleAllocator
 
 public class StandardRoleAllocator : IRoleAllocator
 {
-    private record RoleChance(DefinedRole role) { public int count = role.AllocationParameters?.RoleCountSum ?? 0; public int left = role.AllocationParameters?.RoleCountSum ?? 0; public int cost = 1; public int otherCost = 0; }
+    private record RoleChance(DefinedRole role, AllocationParameters? param = null) {
+        public int count = (param ?? role.AllocationParameters)?.RoleCountSum ?? 0; 
+        public int left = (param ?? role.AllocationParameters)?.RoleCountSum ?? 0; 
+        public int cost = 1; 
+        public int otherCost = 0;
+        public AllocationParameters? Param => param ?? role.AllocationParameters;
+    }
 
     private List<ICategorizedRoleAllocator<DefinedGhostRole>> ghostRolePool;
 
@@ -67,13 +85,17 @@ public class StandardRoleAllocator : IRoleAllocator
     }
 
 
-    private void CategoryAssign(RoleTable table, int left,List<byte> main, List<byte> others, List<RoleChance> rolePool, params List<RoleChance>[] allRolePool)
+    private void CategoryAssign(RoleTable table, int left,List<byte> main, List<byte> others, List<RoleChance> rolePool, List<RoleChance>[] allRolePool, Action<DefinedRole, byte>? onSelected = null)
     {
         if (left < 0) left = 15;
 
         void OnSelected(RoleChance selected)
         {
-            table.SetRole(main[0], selected.role);
+            if (onSelected != null)
+                onSelected.Invoke(selected.role, main[0]);
+            else
+                table.SetRole(main[0], selected.role);
+
             main.RemoveAt(0);
             left -= selected.cost;
 
@@ -100,7 +122,7 @@ public class StandardRoleAllocator : IRoleAllocator
             //100%割り当て役職が残っている場合
             if (left100Roles)
             {
-                var roles100 = rolePool.Where(r => r.role.AllocationParameters!.GetRoleChance(r.count - r.left) == 100f);
+                var roles100 = rolePool.Where(r => r.Param!.GetRoleChance(r.count - r.left + 1) == 100f);
                 if (roles100.Any(r => true))
                 {
                     //役職を選択する
@@ -114,11 +136,11 @@ public class StandardRoleAllocator : IRoleAllocator
             }
 
             //100%役職がもう残っていない場合
-            var sum = rolePool.Sum(r => r.role.AllocationParameters!.GetRoleChance(r.count - r.left));
+            var sum = rolePool.Sum(r => r.Param!.GetRoleChance(r.count - r.left + 1));
             var random = System.Random.Shared.NextSingle() * sum;
             foreach(var r in rolePool)
             {
-                random -= r.role.AllocationParameters!.GetRoleChance(r.count - r.left);
+                random -= r.Param!.GetRoleChance(r.count - r.left + 1);
                 if(random < 0f)
                 {
                     //役職を選択する
@@ -134,20 +156,36 @@ public class StandardRoleAllocator : IRoleAllocator
         RoleTable table = new();
 
         //ロールプールを作る
-        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r =>
-        new RoleChance(r) { cost = 1,otherCost = 0 }));
+        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r) { cost = 1,otherCost = 0 }));
+        List<RoleChance> GetJackalizedRolePool() => new(Roles.AllRoles.Where(r => r.IsJackalizable && (r.JackalAllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.JackalAllocationParameters) { cost = 1, otherCost = 0 }));
 
         List<RoleChance> crewmateRoles = GetRolePool(RoleCategory.CrewmateRole);
         List<RoleChance> impostorRoles = GetRolePool(RoleCategory.ImpostorRole);
         List<RoleChance> neutralRoles = GetRolePool(RoleCategory.NeutralRole);
-        List<RoleChance>[] allRoles = [crewmateRoles, impostorRoles, neutralRoles];
+        List<RoleChance> jackalizedRoles = GetJackalizedRolePool();
+        List<RoleChance>[] allRoles = [crewmateRoles, impostorRoles, neutralRoles, jackalizedRoles];
 
         CategoryAssign(table, GeneralConfigurations.AssignmentImpostorOption, impostors, others, impostorRoles, allRoles);
         CategoryAssign(table, GeneralConfigurations.AssignmentNeutralOption, others, others, neutralRoles, allRoles);
+
+        var jackals = table.roles.Where(r => r.role == Jackal.MyRole).Select(r => r.playerId).ToList();
+        //ジャッカルIDの割り振り
+        for (int i = 0; i < jackals.Count; i++) table.EditRole(jackals[i], (last) => (last.role, [i]));
+        //ジャッカル化役職の割り当て
+        if (Jackal.JackalizedImpostorOption)
+        {
+            CategoryAssign(table, jackals.Count, jackals, jackals, jackalizedRoles, allRoles, (role, player) =>
+            {
+                table.EditRole(player, last => (last.role,  Jackal.GenerateArgument(last.argument[0], role)));
+            });
+        }
+
         CategoryAssign(table, GeneralConfigurations.AssignmentCrewmateOption, others, others, crewmateRoles, allRoles);
 
         foreach (var p in impostors) table.SetRole(p, Impostor.Impostor.MyRole);
         foreach (var p in others) table.SetRole(p, Crewmate.Crewmate.MyRole);
+
+        
 
         foreach (var m in Roles.AllAllocatableModifiers().OrderBy(im => im.AssignPriority)) m.TryAssign(table);
 

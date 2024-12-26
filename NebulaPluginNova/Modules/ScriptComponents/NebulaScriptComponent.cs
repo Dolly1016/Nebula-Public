@@ -43,7 +43,7 @@ public class GameObjectBinding : INebulaScriptComponent, IGameOperator
     }
 }
 
-public class ComponentBinding<T> : INebulaScriptComponent, IGameOperator where T : MonoBehaviour 
+public class ComponentBinding<T> : INebulaScriptComponent, IGameOperator where T : Component
 {
     public T? MyObject { get; private set; }
 

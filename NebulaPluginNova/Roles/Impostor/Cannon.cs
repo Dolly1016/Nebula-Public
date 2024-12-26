@@ -17,6 +17,8 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
     public Cannon() : base("cannon", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MarkCoolDownOption, CannonCoolDownOption, NumOfMarksOption, CannonPowerOption, CannonPowerAttenuationOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+
+        GameActionTypes.CannonMarkPlacementAction = new("cannon.placement", this, isPlacementAction: true);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -28,6 +30,8 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
     static private IntegerConfiguration NumOfMarksOption = NebulaAPI.Configurations.Configuration("options.role.cannon.numOfMarks", (1, 10), 3);
 
     static public Cannon MyRole = new Cannon();
+    static private GameStatsEntry StatsFire = NebulaAPI.CreateStatsEntry("stats.cannon.fire", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsBlow = NebulaAPI.CreateStatsEntry("stats.cannon.players", GameStatsCategory.Roles, MyRole);
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class CannonMark : NebulaSyncStandardObject, IGameOperator
@@ -72,6 +76,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
                 NebulaSyncObject.LocalDestroy(obj.ObjectId);
                 Destroy(button.gameObject);
                 onFired.Invoke();
+                StatsFire.Progress();
                 GameOperatorManager.Instance?.Run(new CannonFireLocalEvent());
                 MapBehaviour.Instance.Close();
             });
@@ -105,6 +110,8 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
                 markButtom.Visibility = (button) => !MyPlayer.IsDead;
                 markButtom.OnClick = (button) =>
                 {
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.CannonMarkPlacementAction);
+
                     var mark = Bind(NebulaSyncObject.LocalInstantiate(CannonMark.MyTag, [
                                 PlayerControl.LocalPlayer.transform.localPosition.x,
                                 PlayerControl.LocalPlayer.transform.localPosition.y - 0.25f
@@ -192,6 +199,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
             }
 
             cannonAchievementData[num].Players.Add(player);
+            StatsBlow.Progress();
         }
 
         [Local, OnlyMyPlayer]
@@ -213,7 +221,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
 
                 if (data.Sum >= 3)
                 {
-                    var players = data.Players.ForEach(NebulaGameManager.Instance!.AllPlayerInfo()).ToArray();
+                    var players = data.Players.ForEach(NebulaGameManager.Instance!.AllPlayerInfo).ToArray();
                     int count = players.Select(p => p.PlayerState).Distinct().Count();
                     if (players.All(p => p.IsDead) && players.Length == count) new StaticAchievementToken("cannon.challenge");
                 }
@@ -359,12 +367,12 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
         var modPlayer = myPlayer.GetModInfo()!;
 
         //空気砲の対象外
-        if (modPlayer.IsDead || myPlayer.inVent || myPlayer.inMovingPlat || myPlayer.onLadder || modPlayer.IsDived || modPlayer.IsBlown) return;
+        if (modPlayer.IsDead || myPlayer.inVent || myPlayer.inMovingPlat || myPlayer.onLadder || modPlayer.IsDived || modPlayer.IsBlown || modPlayer.IsTeleporting) return;
 
         var powerVec = CalcPowerVector(message.pos, modPlayer.Position, CannonPowerOption, CannonPowerAttenuationOption);
         if (powerVec.magnitude < 0.5f) return; //たいして移動しない場合は何もしない。(計算の量を減らすための早期リターン)
-        var moveTo = SuggestMoveToPos(modPlayer.TruePosition, powerVec) - (modPlayer.TruePosition - modPlayer.Position);
-        if ((moveTo - modPlayer.Position).magnitude < 0.5f) return; //たいして移動しない場合は何もしない。
+        var moveTo = SuggestMoveToPos(modPlayer.TruePosition, powerVec) - (UnityEngine.Vector2)(modPlayer.TruePosition - modPlayer.Position);
+        if ((moveTo - (UnityEngine.Vector2)modPlayer.Position).magnitude < 0.5f) return; //たいして移動しない場合は何もしない。
 
         //ミニゲームを開いている場合は閉じてから考える
         bool isPlayerTask = false;

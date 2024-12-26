@@ -1,21 +1,38 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Behaviour;
-using Nebula.Map;
-using Nebula.Roles.Assignment;
-using System.Reflection;
+using Il2CppSystem.Xml.Schema;
+using TMPro;
 using UnityEngine.Rendering;
+using Virial;
+using Virial.Helpers;
 using Virial.Runtime;
+using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
+using static Nebula.Modules.INebulaAchievement;
 
 namespace Nebula;
+
+public class MouseOverPopupParameters
+{
+    public PassiveUiElement? RelatedButton { get; set; } = null;
+    public Func<bool>? RelatedPredicate { get; set; } = null;
+    public Func<Vector2>? RelatedPosition { get; set; } = null;
+    public Func<float>? RelatedValue { get; set; } = null;
+    public bool CanPileCursor { get; set; } = false;
+    public Action? OnClick { get; set; } = null;
+    public Image? Icon { get; set; } = null;
+}
 
 public class MouseOverPopup : MonoBehaviour
 {
     private MetaScreen myScreen = null!;
     private SpriteRenderer background = null!;
+    private SpriteRenderer icon = null!;
+    private SpriteRenderer valueViewer = null!;
     private Vector2 screenSize;
-    private PassiveUiElement? relatedButton;
+    public MouseOverPopupParameters Parameters { get; set; } = new MouseOverPopupParameters();
     private SpriteMask mask = null!;
-    public PassiveUiElement? RelatedObject => relatedButton;
+    public bool Piled { get; private set; }
+    private BoxCollider2D Collider { get; set; }
+    public PassiveUiElement? RelatedObject => Parameters.RelatedButton;
 
     private Virial.Compat.Size lastSize = new(0f, 0f);
     private bool followMouseCursor = false;
@@ -32,6 +49,21 @@ public class MouseOverPopup : MonoBehaviour
         background.tileMode = SpriteTileMode.Continuous;
         background.color = new Color(0.14f, 0.14f, 0.14f, 1f);
 
+        var button = background.gameObject.SetUpButton(false);
+        button.OnMouseOver.AddListener(() => Piled = true);
+        button.OnMouseOut.AddListener(() => Piled = false);
+        button.OnClick.AddListener(() => Parameters.OnClick?.Invoke());
+        Collider = button.gameObject.AddComponent<BoxCollider2D>();
+        this.Collider.isTrigger = true;
+
+        valueViewer = UnityHelper.CreateObject<SpriteRenderer>("Value", transform, new(0f,0f,-1f), LayerExpansion.GetUILayer());
+        valueViewer.sprite = VanillaAsset.FullScreenSprite;
+        valueViewer.gameObject.SetActive(false);
+        valueViewer.transform.localScale = new(1f, 0.03f);
+
+        icon = UnityHelper.CreateObject<SpriteRenderer>("Icon", transform, new(0f, 0f, -1f), LayerExpansion.GetUILayer());
+        icon.gameObject.SetActive(false);
+
         var group = UnityHelper.CreateObject<SortingGroup>("Group", transform, Vector3.zero);
         mask = UnityHelper.CreateObject<SpriteMask>("Mask", group.transform, Vector3.zero);
         mask.sprite = VanillaAsset.FullScreenSprite;
@@ -47,7 +79,7 @@ public class MouseOverPopup : MonoBehaviour
 
     public void Irrelevantize()
     {
-        relatedButton = null;
+        Parameters = new();
     }
 
     public void SetWidgetOld(PassiveUiElement? related, IMetaWidgetOld? widget)
@@ -55,16 +87,16 @@ public class MouseOverPopup : MonoBehaviour
         myScreen.SetWidget(null);
 
         followMouseCursor = false;
+        Parameters = new();
 
         if (widget == null) {
             gameObject.SetActive(false);
-            relatedButton = null;
             return;
         }
 
         gameObject.SetActive(true);
 
-        relatedButton = related;
+        Parameters.RelatedButton = related;
         transform.SetParent(UnityHelper.FindCamera(LayerExpansion.GetUILayer())!.transform);
 
         bool isLeft = Input.mousePosition.x < Screen.width / 2f;
@@ -121,6 +153,8 @@ public class MouseOverPopup : MonoBehaviour
         background.transform.localPosition = localPos3;
         background.size = localScale;
 
+        this.Collider.size = localScale;
+
         mask.transform.localPosition = localPos;
         mask.transform.localScale = localScale;
     }
@@ -129,32 +163,56 @@ public class MouseOverPopup : MonoBehaviour
     {
         myScreen.SetWidget(null);
 
+        Parameters = new();
+
         if (widget == null)
         {
             gameObject.SetActive(false);
-            relatedButton = null;
             return;
         }
 
         gameObject.SetActive(true);
 
-        relatedButton = related;
+        Parameters.RelatedButton = related;
         transform.SetParent(UnityHelper.FindCamera(LayerExpansion.GetUILayer())!.transform);
 
         myScreen.SetWidget(widget, new Vector2(0.5f, 0.5f), out var size);
 
         this.followMouseCursor = followMouseCursor;
         this.lastSize = size;
+        var scale = new Vector2(lastSize.Width + 0.22f, lastSize.Height + 0.1f);
 
-        UpdateArea(new(0f, 0f), new(lastSize.Width + 0.22f, lastSize.Height + 0.1f));
+        var imagePos = scale * 0.5f - new Vector2(0.55f,0.55f);
+        var imageScale = 0.38f;
+        if (imagePos.y < 0f)
+        {
+            imageScale = Math.Max(0.15f, imageScale + (imagePos.y * 0.6f));
+            imagePos.y = 0f;
+        }
+        else imagePos.y *= -1f;
+        myScreen.SetBackImage(widget.BackImage, 0.6f, 0.4f, imagePos, scale, imageScale);
+
+
+        UpdateArea(new(0f, 0f), scale);
         UpdatePosition();
 
         Update();
     }
 
-    private void UpdatePosition() { 
-        bool isLeft = Input.mousePosition.x < Screen.width / 2f;
-        bool isLower = Input.mousePosition.y < Screen.height / 2f;
+    public void UpdatePosition(Vector2? screenPosition = null, bool smoothedCenter = false) {
+        Vector2 screenPos = screenPosition ?? Input.mousePosition;
+        bool isLeft = screenPos.x < Screen.width / 2f;
+        bool isLower = screenPos.y < Screen.height / 2f;
+
+        float smoothX = 0f;
+        float smoothY = 0f;
+        if (smoothedCenter)
+        {
+            float xCenter = (Screen.width / 2f - screenPos.x) / 200f;
+            float yCenter = (Screen.height / 2f - screenPos.y) / 200f;
+            smoothX = Math.Max(0f, 1f - Math.Abs(xCenter));
+            smoothY = Math.Max(0f, 1f - Math.Abs(yCenter));
+        }
 
         float[] xRange = new float[2], yRange = new float[2];
         xRange[0] = -lastSize.Width * 0.5f - 0.15f;
@@ -162,9 +220,9 @@ public class MouseOverPopup : MonoBehaviour
         yRange[0] = -lastSize.Height * 0.5f - 0.15f;
         yRange[1] = lastSize.Height * 0.5f + 0.15f;
 
-        Vector2 anchorPoint = new(xRange[isLeft ? 0 : 1], yRange[isLower ? 0 : 1]);
+        Vector2 anchorPoint = new(Mathf.Lerp(xRange[isLeft ? 0 : 1], 0f, smoothX), Mathf.Lerp(yRange[isLower ? 0 : 1], 0f, smoothY));
 
-        var pos = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer());
+        var pos = UnityHelper.ScreenToWorldPoint(screenPos, LayerExpansion.GetUILayer());
         pos.z = -800f;
         transform.position = pos - (Vector3)anchorPoint;
 
@@ -188,21 +246,66 @@ public class MouseOverPopup : MonoBehaviour
         }
     }
 
+    public void SetRelatedPredicate(Func<bool> predicate)
+    {
+        this.Parameters.RelatedPredicate = predicate;
+    }
+    public void SetRelatedPosition(Func<Vector2> position)
+    {
+        this.Parameters.RelatedPosition = position;
+    }
+
+    public void SetRelatedValue(Func<float> value)
+    {
+        this.Parameters.RelatedValue = value;
+    }
+
     public void Update()
     {
-        if(relatedButton is not null && !relatedButton)
+        if((Parameters.RelatedButton is not null && !Parameters.RelatedButton) || !(Parameters.RelatedPredicate?.Invoke() ?? true))
         {
             SetWidget(null, null);
         }
 
-        if (followMouseCursor) UpdatePosition();
+        if (followMouseCursor)
+            UpdatePosition(Parameters.RelatedPosition?.Invoke());
+        else if(Parameters.RelatedPosition != null)
+            UpdatePosition(Parameters.RelatedPosition?.Invoke(), true);
+
+        valueViewer.gameObject.SetActive(Parameters.RelatedValue != null);
+        if (Parameters.RelatedValue != null)
+        {
+            float value = Math.Clamp(Parameters.RelatedValue.Invoke(), 0f, 1f);
+            Vector3 valuePos = background.transform.localPosition;
+            valuePos.z = -1f;
+            valuePos.y -= (background.bounds.size.y * 0.5f);
+            valuePos.x += (background.bounds.size.x * (value - 1f) * 0.5f);
+            valueViewer.transform.localPosition = valuePos;
+            valueViewer.transform.localScale = new(value * background.bounds.size.x, 0.03f, 1f);
+        }
+
+        icon.gameObject.SetActive(Parameters.Icon != null);
+        if(Parameters.Icon != null)
+        {
+            Vector3 valuePos = background.transform.localPosition;
+            valuePos.z = -1f;
+            valuePos.y += (background.bounds.size.y * 0.5f);
+            valuePos.x -= (background.bounds.size.x * 0.5f);
+            icon.transform.localPosition = valuePos;
+            icon.sprite = Parameters.Icon.GetSprite();
+        }
+
+        Collider.enabled = Parameters.CanPileCursor;
     }
+
+    public bool ShowAnyOverlay => gameObject.activeSelf;
 }
 
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 [NebulaRPCHolder]
 public class NebulaManager : MonoBehaviour
 {
+    private record PopupProvider(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callBack)> supplier);
     public class MetaCommand
     {
         public Virial.Compat.VirtualKeyInput? KeyAssignmentType = null;
@@ -219,13 +322,17 @@ public class NebulaManager : MonoBehaviour
             CommandAction = commandAction;
         }
     }
-
+    List<PopupProvider> PopupProviders = null!;
     private List<Tuple<GameObject, PassiveButton?>> allModUi = new();
     static private List<MetaCommand> commands = new();
     static public NebulaManager Instance { get; private set; } = null!;
 
+    public DebugScreen DebugScreen => debugScreen;
+
     //テキスト情報表示
     private MouseOverPopup mouseOverPopup = null!;
+    internal MouseOverPopup MouseOverPopup => mouseOverPopup;
+    private DebugScreen debugScreen = null!;
 
     //コンソール
     private CommandConsole? console = null;
@@ -273,9 +380,28 @@ public class NebulaManager : MonoBehaviour
 
         commands.Add(new("help.command.saveResult",
             () => LastGameHistory.LastWidget != null,
-            () => LastGameHistory.SaveResult(GetPicturePath(out string displayPath))
+            () =>
+            {
+                LastGameHistory.SaveResult(GetPicturePath(out string displayPath));
+                /*
+                var window = MetaScreen.GenerateWindow(new(7f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, true, true);
+                window.SetWidget(new MetaWidgetOld(LastGameHistory.LastWidget, new MetaWidgetOld.VerticalMargin(0.15f), new MetaWidgetOld.Button(() =>
+                {
+                    LastGameHistory.SaveResult(GetPicturePath(out string displayPath));
+                    window.CloseScreen();
+                }, new(Utilities.TextAttributeOld.NormalAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial })
+                { TranslationKey = "help.command.showResult.save", Alignment = IMetaWidgetOld.AlignmentOption.Center })
+                );
+                */
+            }
         )
         { DefaultKeyInput = new(KeyCode.F3) });
+
+        commands.Add(new("help.command.toggleSocial",
+            () => AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && AmongUsClient.Instance.AmHost && (ModSingleton<ShowUp>.Instance?.ShouldBeShownSocialSettings ?? false),
+            () => ShowUp.RpcShareSocialSettings.Invoke((false, !ModSingleton<ShowUp>.Instance.CanAppealInGame))
+        )
+        { DefaultKeyInput = new(KeyCode.F4) });
 
 
     }
@@ -342,21 +468,6 @@ public class NebulaManager : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.K))
                 {
                     
-                    if (PlayerControl.LocalPlayer)
-                    {
-                        var outfit = PlayerControl.LocalPlayer.CurrentOutfit;
-                        Debug.Log("[Cosmetics]");
-                        Debug.Log(outfit.HatId);
-                        Debug.Log(outfit.VisorId);
-                        Debug.Log(outfit.SkinId);
-                        Debug.Log("[Tags]");
-                        foreach(var tag in MoreCosmic.GetTags(outfit))
-                        {
-                            Debug.Log(tag);
-                        }
-
-                    }
-                    
                     //Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;
                     //File.WriteAllBytesAsync("SpawnableMap" + NebulaPreSpawnLocation.MapName[AmongUsUtil.CurrentMapId] +".png", MapData.GetCurrentMapData().OutputMap(center, new Vector2(10f, 7f) * ShipStatus.Instance.MapScale, 40f).EncodeToPNG());
                 }
@@ -410,18 +521,26 @@ public class NebulaManager : MonoBehaviour
         for (int i = 0; i < allModUi.Count; i++)
         {
             var lPos = allModUi[i].Item1.transform.localPosition;
-            allModUi[i].Item1.transform.localPosition = new Vector3(lPos.x, lPos.y, -500f - i * 50f);
+            allModUi[i].Item1.transform.localPosition = new Vector3(lPos.x, lPos.y, -750f - i * 30f);
             allModUi[i].Item2?.gameObject.SetActive(i == allModUi.Count - 1);
         }
 
         if (allModUi.Count > 0 && Input.GetKeyDown(KeyCode.Escape))
             allModUi[allModUi.Count - 1].Item2?.OnClick.Invoke();
 
+        //静的に表示されるオーバーレイ
+        PopupProviders.RemoveAll(p => p.isFinallyDead());
+        if (!mouseOverPopup.ShowAnyOverlay && PopupProviders.Find(popup => popup.predicate.Invoke(), out var found))
+        {
+            var parameters = found.supplier.Invoke();
+            SetHelpWidget(null, parameters.widget);
+            mouseOverPopup.SetRelatedPredicate(found.predicate);
+            mouseOverPopup.SetRelatedPosition(parameters.screenPosition);
+            parameters.callBack?.Invoke();
+            mouseOverPopup.UpdatePosition(parameters.screenPosition.Invoke(), true);
+        }
+
         MoreCosmic.Update();
-    }
-    public void LateUpdate()
-    {
-        NebulaGameManager.Instance?.LateUpdate();
     }
 
     public void Awake()
@@ -430,6 +549,21 @@ public class NebulaManager : MonoBehaviour
         gameObject.layer = LayerExpansion.GetUILayer();
 
         mouseOverPopup = UnityHelper.CreateObject<MouseOverPopup>("MouseOverPopup",transform,Vector3.zero);
+        debugScreen = new DebugScreen(transform);
+
+        PopupProviders = new();
+    }
+
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="isFinallyDead">この表示が完全に不要になったらtrueを返してください。</param>
+    /// <param name="predicate">オーバーレイが表示される間はtrueを返してください。</param>
+    /// <param name="supplier">表示されるGUIと表示位置(スクリーン座標)の関数、表示時に実行されるコールバックのタプル</param>
+    public void RegsiterStaticPopup(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callback)> supplier)
+    {
+        PopupProviders.Add(new(isFinallyDead, predicate, supplier));
     }
 
     public void StartDelayAction(float delay, Action action)

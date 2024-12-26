@@ -8,24 +8,23 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasCitation, DefinedRole
 {
     private Morphing() : base("morphing", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption, MorphDurationOption, LoseSampleOnMeetingOption]) { }
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
     static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.morphing.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.morphing.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("options.role.morphing.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.morphing.loseSampleOnMeeting", false);
 
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
     static public Morphing MyRole = new Morphing();
-
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.morphing.sample", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.morphing.morph", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
 
@@ -38,13 +37,9 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
         StaticAchievementToken? acTokenAnother2 = null;
         AchievementToken<(bool kill,bool exile)>? acTokenChallenge = null;
 
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
+        OutfitDefinition? sample = null;
 
-        Outfit? sample = null;
-
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player): base(player)
         {
             if (AmOwner)
             {
@@ -63,6 +58,7 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
                     sampleIcon = AmongUsUtil.GetPlayerIcon(sample.outfit, morphButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    StatsSample.Progress();
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
@@ -76,8 +72,9 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
                 };
                 morphButton.OnEffectStart = (button) =>
                 {
-                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new("Morphing", 50, true, sample!)));
+                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", 50, true)));
                     acTokenCommon ??= new("morphing.common1");
+                    StatsMorph.Progress();
                 };
                 morphButton.OnEffectEnd = (button) =>
                 {
@@ -90,10 +87,10 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (button.EffectActive && acTokenAnother2 == null)
                     {
                         int colorId = MyPlayer.GetOutfit(75).outfit.ColorId;
-                        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                         {
                             if (p.AmOwner) continue;
-                            if (p.Unbox().CurrentOutfit.ColorId != colorId) continue;
+                            if (p.Unbox().CurrentOutfit.Outfit.outfit.ColorId != colorId) continue;
                             if (p.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) < 0.8f)
                             {
                                 acTokenAnother2 ??= new("morphing.another2");
@@ -127,14 +124,14 @@ public class Morphing : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (acTokenChallenge != null && ev.Player.Unbox()!.DefaultOutfit.ColorId == (sample?.outfit.ColorId ?? -1))
+            if (acTokenChallenge != null && ev.Player.Unbox()!.DefaultOutfit.Outfit.outfit.ColorId == (sample?.outfit.ColorId ?? -1))
                 acTokenChallenge.Value.exile = true;
         }
 
         [OnlyMyPlayer, Local]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            var targetId = ev.Dead.Unbox()?.GetOutfit(75).ColorId;
+            var targetId = ev.Dead.Unbox()?.GetOutfit(75).Outfit.outfit.ColorId;
             var sampleId = sample?.outfit.ColorId;
             if (targetId.HasValue && sampleId.HasValue && targetId.Value == sampleId.Value)
                 acTokenAnother1 ??= new("morphing.another1");

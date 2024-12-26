@@ -15,6 +15,12 @@ public class PlayerTryVanillaKillLocalEventAbstractPlayerEvent : AbstractPlayerE
     }
     private bool isCanceled = false;
     public bool IsCanceled => isCanceled;
-    public void Cancel() => isCanceled = true;
+    private bool resetCooldown = true;
+    public bool ResetCooldown => resetCooldown;
+    public void Cancel(bool resetCooldown = false)
+    {
+        isCanceled = true;
+        this.resetCooldown = resetCooldown;
+    }
     
 }

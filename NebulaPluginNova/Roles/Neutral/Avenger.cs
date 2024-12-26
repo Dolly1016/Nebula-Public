@@ -36,6 +36,9 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
 
     static public Avenger MyRole = new Avenger();
 
+    static private GameStatsEntry StatsKillTarget = NebulaAPI.CreateStatsEntry("stats.avenger.killTarget", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsFailed = NebulaAPI.CreateStatsEntry("stats.avenger.failed", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsDefendAsKiller = NebulaAPI.CreateStatsEntry("stats.avenger.defend", GameStatsCategory.Roles, MyRole);
     bool IGuessed.CanBeGuessDefault => false;
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -65,7 +68,8 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
                 NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText("You became AVENGER.", MyRole.RoleColor.ToUnityColor(), 5.5f, true);
                 AmongUsUtil.PlayCustomFlash(MyRole.RoleColor.ToUnityColor(), 0f, 0.8f, 0.7f);
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
+                var killable = ObjectTrackers.KillablePredicate(MyPlayer);
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, p => killable(p) || target == p));
 
                 var killButton = Bind(new Modules.ScriptComponents.ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
@@ -74,11 +78,30 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
                     MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                     killButton.StartCoolDown();
                 };
-                killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
                 killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 
                 if (target != null) Bind(new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor(), false)).Register();
+
+                if((target?.TryGetModifier<Damned.Instance>(out var damned) ?? false) && MyPlayer.TryGetModifier<Lover.Instance>(out var lover))
+                {
+                    var myLover = lover.MyLover.Get();
+                    var targetRole = target.Role.Role;
+                    if (myLover != null) {
+                        GameOperatorManager.Instance?.Register<GameEndEvent>(ev =>
+                        {
+                            var winners = ev.EndState.Winners;
+                            if (
+                            target.IsDead && target.MyKiller == MyPlayer &&
+                            MyPlayer.Role.Role == targetRole &&
+                            winners.Test(MyPlayer) && !winners.Test(myLover))
+                            {
+                                new StaticAchievementToken("combination.2.damned.avenger.hard");
+                            }
+                        }, NebulaAPI.CurrentGame!);
+                    }
+                }
             }
 
             if (target?.AmOwner ?? false)
@@ -104,8 +127,16 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         {
             if (ev.Murderer == target)
             {
-                if (ev.Murderer.AmOwner) new StaticAchievementToken("avenger.common2");
-                if (AmOwner) new StaticAchievementToken("avenger.another1");
+                if (ev.Murderer.AmOwner)
+                {
+                    new StaticAchievementToken("avenger.common2");
+                    StatsDefendAsKiller.Progress();
+                }
+                if (AmOwner)
+                {
+                    new StaticAchievementToken("avenger.another1");
+                    StatsFailed.Progress();
+                }
             }
         }
 
@@ -118,7 +149,11 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         [Local, OnlyMyPlayer]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            if(ev.Dead == this.target) new StaticAchievementToken("avenger.common1");
+            if (ev.Dead == this.target)
+            {
+                new StaticAchievementToken("avenger.common1");
+                StatsKillTarget.Progress();
+            }
         }
 
         [Local]
@@ -133,7 +168,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         {
             if(ev.EndState.EndCondition == NebulaGameEnd.AvengerWin && ev.EndState.Winners.Test(MyPlayer))
             {
-                if(MyPlayer.Unbox().GetModifiers<Lover.Instance>().Any(l => l.MyLover?.Role.Role is Avenger)) new StaticAchievementToken("avenger.challenge");
+                if(MyPlayer.Unbox().GetModifiers<Lover.Instance>().Any(l => l.MyLover.Get()?.Role.Role is Avenger)) new StaticAchievementToken("avenger.challenge");
             }
         }
 

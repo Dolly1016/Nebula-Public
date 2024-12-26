@@ -85,3 +85,27 @@ class PlanetSurveillanceMinigameNextCameraPatch
 }
 
 //Door Log
+//Camera (Others)
+[HarmonyPatch(typeof(SecurityLogGame), nameof(SecurityLogGame.Awake))]
+class SecurityLogGameBeginPatch
+{
+    public static void Prefix(SecurityLogGame __instance)
+    {
+        NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Camera, __instance.transform, new Vector3(3.4f, 1.5f, -50f));
+    }
+}
+
+[HarmonyPatch(typeof(SecurityLogGame), nameof(SecurityLogGame.Update))]
+class SecurityLogGameUpdatePatch
+{
+    public static bool Prefix(SecurityLogGame __instance)
+    {
+        if (ConsoleTimer.IsOpenedByAvailableWay()) return true;
+
+        __instance.SabText.gameObject.SetActive(true);
+        __instance.SabText.text = Language.Translate("console.notAvailable");
+        __instance.EntryPool.ReclaimAll();
+
+        return false;
+    }
+}

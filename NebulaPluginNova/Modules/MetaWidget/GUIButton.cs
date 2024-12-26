@@ -74,7 +74,11 @@ public class GUISpinButton : AbstractGUIWidget
     public bool AsMaskedButton { get; init; } = true;
     public float TextMargin { get; init; } = 0.26f;
     
-
+    /// <summary>
+    /// 値の増減ボタンです。
+    /// </summary>
+    /// <param name="alignment"></param>
+    /// <param name="onClick">値が大きくなるときtrueが渡されるコールバック</param>
     public GUISpinButton(GUIAlignment alignment, Action<bool> onClick) : base(alignment)
     {
         OnClick = onClick;

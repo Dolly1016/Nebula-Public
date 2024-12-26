@@ -50,7 +50,7 @@ public class KillCommand : ICommand
                             {
                                 if (player.IsDead && !evenIfDead) continue;
 
-                                (killer ?? player).VanillaPlayer.ModFlexibleKill(player.VanillaPlayer, PlayerState.Dead, EventDetail.Kill, param);
+                                (killer ?? player).MurderPlayer(player, PlayerState.Dead, EventDetail.Kill, param, KillCondition.NoCondition);
 
                                 count++;
                             }

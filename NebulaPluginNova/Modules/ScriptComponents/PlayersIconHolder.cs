@@ -19,7 +19,7 @@ internal class PlayerIconInfo
     public PlayerIconInfo(GamePlayer player, Transform parent)
     {
         Player = player;
-        Icon = AmongUsUtil.GetPlayerIcon(player.Unbox().DefaultOutfit, parent, Vector3.zero, Vector3.one * 0.31f);
+        Icon = AmongUsUtil.GetPlayerIcon(player.Unbox().DefaultOutfit.Outfit.outfit, parent, Vector3.zero, Vector3.one * 0.31f);
         Icon.ToggleName(false);
     }
 

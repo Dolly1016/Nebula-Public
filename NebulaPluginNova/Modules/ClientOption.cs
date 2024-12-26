@@ -4,7 +4,9 @@ using Nebula.Modules.GUIWidget;
 using Rewired.UI.ControlMapper;
 using System.Diagnostics;
 using TMPro;
+using Virial.Media;
 using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Modules;
 
@@ -23,11 +25,14 @@ public class ClientOption
         ButtonArrangement,
         ShowNoSLogoInLobby,
         ShowOnlySpawnableAssignableOnFilter,
-        ShowVanillaColor
+        ShowVanillaColor,
     }
 
     static private DataSaver ClientOptionSaver = new("ClientOption");
     static public BooleanDataEntry UseSimpleConfigurationViewerEntry = new("useSimpleConfig", ClientOptionSaver, false);
+    static public BooleanDataEntry ShowSocialSettingsOnLobby = new("showSocialSettings", ClientOptionSaver, true);
+    static public BooleanDataEntry CanAppealInLobbyDefault = new("canAppealInLobbyDefault", ClientOptionSaver, true);
+    static public IntegerDataEntry AppealDuration = new("appealDuration", ClientOptionSaver, 0);
     static public Dictionary<ClientOptionType,ClientOption> AllOptions = new();
     DataEntry<int> configEntry;
     string id;
@@ -35,6 +40,7 @@ public class ClientOption
     ClientOptionType type;
 
     private static string DiscordWebhookPrefix = "https://discord.com/api/webhooks/";
+    private static string DiscordWebhookOtherPrefix = "https://discordapp.com/api/webhooks/";
     public record DiscordWebhookOption(StringDataEntry urlEntry, BooleanDataEntry autoSendEntry) { 
         public string url => DiscordWebhookPrefix + urlEntry.Value; 
         public string urlShorten => urlEntry.Value.Length == 0 ? "    -    ".Color(Color.gray) : urlEntry.Value.Substring(0,3) + " ... " + urlEntry.Value.Substring(urlEntry.Value.Length - 4);
@@ -51,11 +57,18 @@ public class ClientOption
         string GetCurrentWebhookString() => (Language.Translate("ui.discordWebhook.current") + ": ").Bold() + WebhookOption.urlShorten;
         bool SetWebhookStringFromClipboard() {
             string copied = Helpers.GetClipboardString();
-            if (!copied.StartsWith(DiscordWebhookPrefix)) return false; //先頭がおかしい場合
-            if (copied.Length < DiscordWebhookPrefix.Length + 8) return false; //短すぎる場合
-            WebhookOption.urlEntry.Value = copied.Substring(DiscordWebhookPrefix.Length);
+            if (copied.StartsWith(DiscordWebhookPrefix))
+            {
+                WebhookOption.urlEntry.Value = copied.Substring(DiscordWebhookPrefix.Length);
+                return true;
+            }
+            if (copied.StartsWith(DiscordWebhookOtherPrefix))
+            {
+                WebhookOption.urlEntry.Value = copied.Substring(DiscordWebhookOtherPrefix.Length);
+                return true;
+            }
 
-            return true;
+            return false;
         }
 
         TextMeshPro? currentText = null;
@@ -85,6 +98,52 @@ public class ClientOption
 
         
     }
+
+    static public void ShowSocialSetting()
+    {
+        var window = MetaScreen.GenerateWindow(new(3.8f, 2.4f), HudManager.InstanceExists ? HudManager.Instance.transform : null, Vector3.zero, true, true, withMask: true);
+
+        //アピール時間
+        TextMeshPro appealText = null!;
+        var appealTextWidget = new NoSGUIText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsValueShorter), new RawTextComponent("Appeal")) { PostBuilder = text => appealText = text };
+        void UpdateAppealText() => appealText.text = AppealDuration.Value switch
+        {
+            0 => Language.Translate("options.values.short"),
+            1 => Language.Translate("options.values.middle"),
+            2 => Language.Translate("options.values.long"),
+            _ => "INVALID",
+        };
+
+        //アピール設定の表示
+        string ShowAppealSettingsText() => Language.Translate(ShowSocialSettingsOnLobby.Value ? "options.switch.on" : "options.switch.off");
+        TextMeshPro showSocialText = null!;
+        var showSocialSettingsButton = new GUIButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsButtonMedium), new RawTextComponent(ShowAppealSettingsText()))
+        {
+            OnClick = button => { ShowSocialSettingsOnLobby.Value = !ShowSocialSettingsOnLobby.Value; showSocialText.text = ShowAppealSettingsText(); },
+            PostBuilder = text => showSocialText = text
+        };
+
+        Virial.Media.GUIWidget GetRow(string translationKey, params Virial.Media.GUIWidget[] contents) => GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,
+            [
+            GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "config.client.social." + translationKey),
+            GUI.API.RawText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), ":"),
+            ..contents
+            ]
+            );
+
+
+        window.SetWidget(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
+            GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentTitle), "config.client.social"),
+            GUI.API.VerticalMargin(0.1f),
+            GetRow("showAppealSettings", showSocialSettingsButton),
+            GetRow("appealDuration", appealTextWidget, new GUISpinButton(Virial.Media.GUIAlignment.Center, (increase) => { AppealDuration.Value = (3 + AppealDuration.Value + (increase ? 1 : -1)) % 3; UpdateAppealText(); })),
+            GUI.API.VerticalMargin(0.35f),
+            GUI.API.Text(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentStandard), GUI.API.TextComponent(Virial.Color.Gray, "config.client.social.note").Italic())
+            ), new Vector2(0.5f, 1f), out _);
+
+        UpdateAppealText();
+    }
+
 
     public ClientOption(ClientOptionType type,string name,string[] selections,int defaultValue)
     {
@@ -188,7 +247,7 @@ public static class StartOptionMenuPatch
 {
     public static void Postfix(OptionsMenuBehaviour __instance)
     {
-        __instance.transform.localPosition = new(0, 0, -300);
+        __instance.transform.localPosition = new(0, 0, -700f);
 
         foreach (var button in __instance.GetComponentsInChildren<CustomButton>(true))
         {
@@ -214,45 +273,40 @@ public static class StartOptionMenuPatch
 
         void SetNebulaWidget()
         {
-            var buttonAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(2.05f, 0.26f) };
+            var buttonAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(2.05f, 0.22f) };
             MetaWidgetOld nebulaWidget = new();
             nebulaWidget.Append(ClientOption.AllOptions.Values.Where(o => o.ShowOnClientSetting), (option) => new MetaWidgetOld.Button(()=> {
                 option.Increament();
                 SetNebulaWidget();
-            }, buttonAttr) { RawText = option.DisplayName + " : " + option.DisplayValue }, 2, -1, 0, 0.55f);
+            }, buttonAttr) { RawText = option.DisplayName + " : " + option.DisplayValue }, 2, -1, 0, 0.51f);
             nebulaWidget.Append(new MetaWidgetOld.VerticalMargin(0.2f));
+
+            List<MetaWidgetOld.Button> bottomButtons = new();
+            void AddBottomButton(string translationKey, Action action)
+            {
+                bottomButtons.Add(new MetaWidgetOld.Button(action, buttonAttr)
+                { TranslationKey = "config.client." + translationKey, Alignment = IMetaWidgetOld.AlignmentOption.Center });
+            }
+            
+            if(NebulaGameManager.Instance?.VoiceChatManager != null)
+            {
+                AddBottomButton("vcSettings", () => NebulaGameManager.Instance?.VoiceChatManager?.OpenSettingScreen(__instance));
+                AddBottomButton("vcRejoin", () => NebulaGameManager.Instance?.VoiceChatManager?.Rejoin());
+            }
 
             if (!AmongUsClient.Instance || AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started)
             {
-                nebulaWidget.Append(new MetaWidgetOld.Button(() =>
+                AddBottomButton("keyBindings", () =>
                 {
                     __instance.OpenTabGroup(tabs.Count - 1);
                     SetKeyBindingWidget();
-                }, buttonAttr)
-                { TranslationKey = "config.client.keyBindings", Alignment = IMetaWidgetOld.AlignmentOption.Center });
+                });
             }
 
-            if(NebulaGameManager.Instance?.VoiceChatManager != null)
-            {
-                nebulaWidget.Append(new MetaWidgetOld.Button(() =>
-                {
-                    //__instance.Close();
-                    NebulaGameManager.Instance?.VoiceChatManager?.OpenSettingScreen(__instance);
-                }, buttonAttr)
-                { TranslationKey = "config.client.vcSettings", Alignment = IMetaWidgetOld.AlignmentOption.Center });
+            AddBottomButton("webhook", ()=>ClientOption.ShowWebhookSetting());
+            AddBottomButton("social", () => ClientOption.ShowSocialSetting());
 
-                nebulaWidget.Append(new MetaWidgetOld.Button(() =>
-                {
-                    NebulaGameManager.Instance?.VoiceChatManager?.Rejoin();
-                }, buttonAttr)
-                { TranslationKey = "config.client.vcRejoin", Alignment = IMetaWidgetOld.AlignmentOption.Center });
-            }
-
-            nebulaWidget.Append(new MetaWidgetOld.Button(() =>
-            {
-                ClientOption.ShowWebhookSetting();
-            }, buttonAttr)
-            { TranslationKey = "config.client.webhook", Alignment = IMetaWidgetOld.AlignmentOption.Center });
+            nebulaWidget.Append(bottomButtons, b => b, 2, -1, 0, 0.51f);
 
             nebulaScreen.SetWidget(nebulaWidget);
         }

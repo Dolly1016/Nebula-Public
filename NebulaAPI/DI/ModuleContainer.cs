@@ -38,7 +38,10 @@ public abstract class AbstractModule<Container> : IGenericModule<Container>, IIn
     void IInjectable.OnInjectTo(object container)
     {
         this.container = (container as Container)!;
+        OnInjected(MyContainer);
     }
+
+    virtual protected void OnInjected(Container container) { }
 }
 
 internal abstract class AbstractModuleContainer : IModuleContainer

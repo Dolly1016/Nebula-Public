@@ -68,7 +68,7 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (ev.Voters.Any(v => !(v.AmOwner)))
                 acTokenCommon ??= new StaticAchievementToken("jester.common1");
-            if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || ev.Voters.Any(v => v.PlayerId == p.PlayerId)) ?? false)
+            if (NebulaGameManager.Instance?.AllPlayerInfo.All(p => p.IsDead || ev.Voters.Any(v => v.PlayerId == p.PlayerId)) ?? false)
                 new StaticAchievementToken("jester.challenge");
 
         }

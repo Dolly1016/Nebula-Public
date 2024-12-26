@@ -5,6 +5,7 @@ using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
 
@@ -15,6 +16,7 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
     private Sheriff():base("sheriff", new(240,191,0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [KillCoolDownOption, NumOfShotsOption, CanKillMadmateOption, CanKillLoversOption, CanKillHidingPlayerOption, SealAbilityUntilReportingDeadBodiesOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Sheriff.png");
     }
 
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
@@ -29,7 +31,8 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration SealAbilityUntilReportingDeadBodiesOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.sealAbilityUntilReportingDeadBodies", false);
 
     static public Sheriff MyRole = new Sheriff();
-
+    static private GameStatsEntry StatsShot = NebulaAPI.CreateStatsEntry("stats.sheriff.shot", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsMisshot = NebulaAPI.CreateStatsEntry("stats.sheriff.misshot", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -52,7 +55,7 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnGameStart(GameStartEvent ev)
         {
-            int impostors = NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.Role.Role.Category == RoleCategory.ImpostorRole) ?? 0;
+            int impostors = NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.Role.Role.Category == RoleCategory.ImpostorRole) ?? 0;
             if (impostors > 0) acTokenChallenge = new("sheriff.challenge", impostors, (val, _) => val == 0);
         }
 
@@ -74,10 +77,14 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (AmOwner)
             {
+                var acTokenAnother3 = AbstractAchievement.GenerateSimpleTriggerToken("sheriff.another3");
+                GameOperatorManager.Instance?.Register<MeetingEndEvent>(ev => { acTokenAnother3.Value.triggered = false; }, this);
+                GameOperatorManager.Instance?.Register<PlayerExiledEvent>(ev => { if(ev.Player.AmOwner) acTokenAnother3.Value.isCleared |= acTokenAnother3.Value.triggered; }, this);
+
                 acTokenCommon2 = new("sheriff.common2", (byte.MaxValue,false), (val,_) => val.Item2);
                 acTokenAnother2 = new("sheriff.another2", true, (val, _) => val && NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnds.CrewmateGameEnd && !MyPlayer.IsDead);
 
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p), null, CanKillHidingPlayerOption));
+                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer), null, CanKillHidingPlayerOption));
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
 
                 var leftText = killButton.ShowUsesIcon(3);
@@ -87,7 +94,7 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 SpriteRenderer? lockSprite = null;
                 //封印設定が有効かつ死者がいない場合に能力を一時的に封印する。
-                if (SealAbilityUntilReportingDeadBodiesOption && !NebulaGameManager.Instance!.AllPlayerInfo().Any(p => p.IsDead))
+                if (SealAbilityUntilReportingDeadBodiesOption && !NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.IsDead))
                 {
                     lockSprite = killButton.VanillaButton.AddLockedOverlay();
                 }
@@ -96,6 +103,7 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
                 killButton.Visibility = (button) => !MyPlayer.IsDead && leftShots > 0;
                 killButton.OnClick = (button) => {
                     acTokenAnother2.Value = false;
+                    StatsShot.Progress();
                     if (CanKill(killTracker.CurrentTarget!))
                     {
                         new StaticAchievementToken("sheriff.common1");
@@ -103,6 +111,8 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
                         if (acTokenChallenge != null && killTracker.CurrentTarget!.IsImpostor) acTokenChallenge!.Value--;
 
                         MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
+
+                        acTokenAnother3.Value.triggered = true;
                     }
                     else
                     {
@@ -110,16 +120,17 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.VanillaPlayer, killTracker.CurrentTarget!.VanillaPlayer);
 
                         new StaticAchievementToken("sheriff.another1");
+                        StatsMisshot.Progress();
                     }
                     button.StartCoolDown();
 
                     leftText.text = (--leftShots).ToString();
                 };
-                killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
                 killButton.SetLabel("kill");
                 killButton.OnMeeting = button =>
                 {
-                    if(lockSprite && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => p.IsDead))
+                    if(lockSprite && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.IsDead))
                     {
                         GameObject.Destroy(lockSprite!.gameObject);
                         lockSprite = null;

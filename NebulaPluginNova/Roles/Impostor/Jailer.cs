@@ -18,6 +18,7 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         ConfigurationHolder?.ScheduleAddRelated(() => [JailerModifier.MyRole.ConfigurationHolder!]);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Jailer.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -120,9 +121,10 @@ public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocat
     private JailerModifier() : base("jailer", "JLR", new(Palette.ImpostorRed), [Jailer.CanMoveWithMapWatchingOption, Jailer.CanUseAdminOnMeetingOption, Jailer.CanIdentifyDeadBodiesOption, Jailer.CanIdentifyImpostorsOption], allocateToNeutral: false, allocateToCrewmate: false)
     {
         ConfigurationHolder?.ScheduleAddRelated(() => [Jailer.MyRole.ConfigurationHolder!]);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Jailer.png");
     }
     string DefinedAssignable.InternalName => "jailerModifier";
-    string DefinedAssignable.GeneralColoredBlurb => (Jailer.MyRole as DefinedAssignable).GeneralColoredBlurb;
+    string DefinedAssignable.GeneralBlurb => (Jailer.MyRole as DefinedAssignable).GeneralBlurb;
 
     //割り当てる役職が変更されてしまうので、一番最後に割り当てる
     int HasAssignmentRoutine.AssignPriority => 2;

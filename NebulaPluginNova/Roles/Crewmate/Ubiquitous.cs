@@ -97,7 +97,13 @@ public class UbiquitousDrone : MonoBehaviour
     {
         bool isOperating = HudManager.Instance.PlayerCam.Target == this;
         if (isOperating)
-            myRigidBody.velocity = DestroyableSingleton<HudManager>.Instance.joystick.DeltaL * 3.5f * NebulaGameManager.Instance!.LocalPlayerInfo!.Unbox().DirectionalPlayerSpeed;
+        {
+            var vec = DestroyableSingleton<HudManager>.Instance.joystick.DeltaL * 3.5f;
+            var mat = NebulaGameManager.Instance!.LocalPlayerInfo!.Unbox().DirectionalPlayerSpeed;
+            vec = new(vec.x * mat.x + vec.y * mat.y, vec.x * mat.z + vec.y * mat.w);
+            
+            myRigidBody.velocity = vec;
+        }
         else
             myRigidBody.velocity = Vector2.zero;
 
@@ -232,7 +238,7 @@ public class UbiquitousMapLayer : MonoBehaviour
 
         int alive = 0, shown = 0;
 
-        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
         {
             //自分自身、死んでいる場合は何もしない
             if (p.AmOwner || p.IsDead) continue;
@@ -267,6 +273,8 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Ubiquitous.png");
 
         MetaAbility.RegisterCircle(new("role.ubiquitous.droneRange", () => droneDetectionRadiousOption, () => null, UnityColor));
+
+        GameActionTypes.UbiquitousInvokeDroneAction = new("ubiquitous.invoke", this, isPlacementAction: true);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -280,6 +288,7 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration doorHackRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.doorHackRadious", (0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
 
     static public Ubiquitous MyRole = new Ubiquitous();
+    static private GameStatsEntry StatsDrones = NebulaAPI.CreateStatsEntry("stats.ubiquitous.drones", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -367,7 +376,9 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                     {
                         if (!myDrone)
                         {
+                            NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.UbiquitousInvokeDroneAction);
                             myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.TruePosition.ToUnityVector());
+                            StatsDrones.Progress();
 
                             droneCam = UnityHelper.CreateRenderingCamera("Camera", myDrone.transform, Vector3.zero, 1.4f);
                             var isc = droneCam.gameObject.AddComponent<IgnoreShadowCamera>();

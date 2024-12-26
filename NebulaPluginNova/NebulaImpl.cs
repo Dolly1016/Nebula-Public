@@ -6,6 +6,7 @@ using System.Reflection;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Game;
 using Virial.Text;
 using Virial.Utilities;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
@@ -19,7 +20,7 @@ public class NebulaImpl : INebula
     private static List<object> allModules = new();
     private static Dictionary<Type, object> moduleFastMap = new();
 
-    private static List<(Type type,Func<object> generator)> allDefinitions = new();
+    private static List<(Type type, Func<object> generator)> allDefinitions = new();
     private static Dictionary<Type, Func<object>> definitionFastMap = new();
 
     public NebulaImpl()
@@ -28,7 +29,7 @@ public class NebulaImpl : INebula
 
         allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API, NebulaHasher.API]);
         allDefinitions.AddRange([
-            (typeof(ModAbilityButton), () => new ModAbilityButton()), 
+            (typeof(ModAbilityButton), () => new ModAbilityButton()),
             (typeof(Timer), () => new Timer())
             ]);
     }
@@ -40,7 +41,7 @@ public class NebulaImpl : INebula
     public Virial.Media.IResourceAllocator InnerslothAsset => NebulaResourceManager.InnerslothNamespace;
 
     public Virial.Media.IResourceAllocator? GetAddonResource(string addonId) => NebulaAddon.GetAddon(addonId);
-    public Virial.Media.IResourceAllocator GetCallingAddonResource(Assembly assembly) => AddonScriptManager.ScriptAssemblies.FirstOrDefault(a => a.Assembly == assembly )?.Addon!;
+    public Virial.Media.IResourceAllocator GetCallingAddonResource(Assembly assembly) => AddonScriptManager.ScriptAssemblies.FirstOrDefault(a => a.Assembly == assembly)?.Addon!;
 
     T? INebula.Get<T>() where T : class
     {
@@ -67,6 +68,17 @@ public class NebulaImpl : INebula
     Virial.Assignable.DefinedRole? INebula.GetRole(string internalName) => Roles.Roles.AllRoles.FirstOrDefault(r => r.InternalName == internalName);
     Virial.Assignable.DefinedModifier? INebula.GetModifier(string internalName) => Roles.Roles.AllModifiers.FirstOrDefault(r => r.InternalName == internalName);
     Virial.Assignable.DefinedGhostRole? INebula.GetGhostRole(string internalName) => Roles.Roles.AllGhostRoles.FirstOrDefault(r => r.InternalName == internalName);
+
+    E INebula.RunEvent<E>(E ev) => GameOperatorManager.Instance?.Run(ev)!;
+
+    GameStatsEntry INebula.CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority) => NebulaAchievementManager.RegisterStats(id, category, assignable, displayTitle, innerPriority);
+
+    void INebula.IncrementStatsEntry(string id, int num) {
+        if (num == 1)
+            new StaticAchievementToken(id);
+        else if(num > 0)
+            new AchievementToken<int>(id, num, (num, _) => num); 
+    }
 
     //ショートカット
     Virial.Configuration.Configurations Configurations => ConfigurationsAPI.API;

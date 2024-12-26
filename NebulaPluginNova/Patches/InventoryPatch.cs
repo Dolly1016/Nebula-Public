@@ -20,7 +20,7 @@ public static class ColorTabEnablePatch
             
             __instance.gameObject.AddComponent<NebulaPlayerTab>().playerTab = __instance;
         }
-        
+
         return false;
     }
 }

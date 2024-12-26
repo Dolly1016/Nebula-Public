@@ -4,6 +4,7 @@ public interface GameEnd
 {
     internal int Priority { get; }
     internal byte Id { get; }
+    bool AllowWin { get; }
 }
 
 public interface ExtraWin
@@ -14,9 +15,27 @@ public interface ExtraWin
 
 public enum GameEndReason
 {
+    /// <summary>
+    /// タスク完遂によるゲーム終了です。
+    /// </summary>
     Task,
+    /// <summary>
+    /// 人数都合によるゲーム終了です。
+    /// ゲーム終了が無視されるケースがあるため、終了条件を満たしているならば常時ゲーム終了を要求する必要があります。
+    /// </summary>
     Situation,
+    /// <summary>
+    /// 人数都合と同様、追放中はゲーム終了を要求しないシチュエーション都合のゲーム終了です。
+    /// ゲーム終了が無視されるケースがあるため、終了条件を満たしているならば常時ゲーム終了を要求する必要があります。
+    /// </summary>
+    SpecialSituation,
+    /// <summary>
+    /// 特殊な条件によるゲーム終了です。
+    /// </summary>
     Special,
+    /// <summary>
+    /// サボタージュによるゲーム終了です。
+    /// </summary>
     Sabotage
 }
 

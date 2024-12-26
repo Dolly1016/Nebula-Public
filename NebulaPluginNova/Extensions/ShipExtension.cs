@@ -101,6 +101,9 @@ public static class ShipExtension
         }
 
         ShipStatus.Instance.Systems[SystemTypes.Laboratory].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.PolusReactorDurationOption.CurrentValue;
+
+        //崩壊したオブジェクトの前後関係を修正
+        ShipStatus.Instance.FastRooms[SystemTypes.Electrical].transform.FindChild("fencebot").SetLocalZ(-1.0136f);
     }
 
     private static SpriteLoader medicalWiringSprite = SpriteLoader.FromResource("Nebula.Resources.AirshipWiringM.png",100f);
@@ -188,6 +191,9 @@ public static class ShipExtension
             //上下両方から見えないように
             if (GeneralConfigurations.AirshipShadedLowerFloorOption.CurrentValue) ledgeShadow.RoomCollider.enabled = false;
         }
+
+        //エンジンの影を無視したオブジェクトを修正
+        ShipStatus.Instance.FastRooms[SystemTypes.Engine].transform.FindChild("engine_pipewheel").SetLocalZ(-2f);
     }
 
     private static SpriteLoader fungleLight1Sprite = SpriteLoader.FromResource("Nebula.Resources.FungleLightConsole1.png", 100f);
@@ -294,6 +300,14 @@ public static class ShipExtension
         }
 
         ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.FungleReactorDurationOption.CurrentValue;
+
+        //Storageの見た目がおかしい問題を修正
+        {
+            var storageBarrels = ShipStatus.Instance.FastRooms[SystemTypes.Storage].transform.GetChild(0).GetChild(3);
+            var localPos = storageBarrels.localPosition;
+            localPos.z = -1.095f;
+            storageBarrels.localPosition = localPos;
+        }
     }
 
 
@@ -464,6 +478,7 @@ public static class ShipExtension
         ladderObj.name = "ladder_meeting_custom";
         ladderObj.transform.position += new Vector3(10.9f, 0);
         ladderObj.GetComponent<SpriteRenderer>().sprite = customMeetingLadderSprite.GetSprite();
+        ladderObj.GetComponentsInChildren<Ladder>().Do(l => { l.Id = (byte)(l.Id + 8); ShipStatus.Instance.Ladders = new Il2CppReferenceArray<Ladder>(ShipStatus.Instance.Ladders.Append(l).ToArray()); }) ;
 
         //MeetingRoomの当たり判定に手を加える
         var collider = meetingRoom.FindChild("Walls").GetComponents<EdgeCollider2D>().Where((c) => c.pointCount == 43).FirstOrDefault();

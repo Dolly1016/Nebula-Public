@@ -1,16 +1,17 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Game.Statistics;
 using TMPro;
+using Virial;
 using Virial.Configuration;
 
 namespace Nebula.Behaviour;
 
 public class NebulaPreSpawnLocation
 {
-    static public string[] MapName = new string[] { "Skeld", "Mira", "Polus", "Invalid", "Airship", "Fungle" };
+    static public string[] MapName = new string[] { "Skeld", "Mira", "Polus", "Invalid", "Airship", "Fungle", "Submerged" };
 
-    static public NebulaPreSpawnLocation[][] Locations = new NebulaPreSpawnLocation[][]{
-        new NebulaPreSpawnLocation[]{ 
+    static public NebulaPreSpawnLocation[][] Locations = [
+        [ 
             new("Admin", new Vector2(2.9753f, -7.4595f)),
             new("Cafeteria", new Vector2(-0.8721f, 3.6115f)),
             new("Comms", new Vector2(4.5986f, -15.618f)),
@@ -25,8 +26,8 @@ public class NebulaPreSpawnLocation
             new("Storage", new Vector2(-2.3901f, -15.1296f)),
             new("UpperEngine", new Vector2(-17.6972f, -0.9157f)),
             new("Weapons", new Vector2(9.5354f, 1.3911f))
-        },
-        new NebulaPreSpawnLocation[]{
+        ],
+        [
             new("Admin", new Vector2(19.4462f, 19.0366f)),
             new("Balcony", new Vector2(26.7091f, -1.9142f)),
             new("Cafeteria", new Vector2(25.433f, 2.553f)),
@@ -41,8 +42,8 @@ public class NebulaPreSpawnLocation
             new("Reactor", new Vector2(2.4809f, 13.2443f)),
             new("Rendezvous", new Vector2(17.8176f, 11.3095f)),
             new("Storage", new Vector2(19.9159f, 4.718f))
-        },
-        new NebulaPreSpawnLocation[]{
+        ],
+        [
             new("Abditory", new Vector2(25.7226f, -12.8779f)),
             new("Admin", new Vector2(21.1384f, -22.7731f)),
             new("Drill", new Vector2(27.5518f, -7.3609f)),
@@ -57,9 +58,9 @@ public class NebulaPreSpawnLocation
             new("Specimens", new Vector2(36.5f, -21.2f)),
             new("Storage", new Vector2(20.6f, -11.7f)),
             new("Weapons", new Vector2(12.2f, -23.3f))
-        },
-        new NebulaPreSpawnLocation[0],
-        new NebulaPreSpawnLocation[]{ 
+        ],
+        [],
+        [
             new("Brig",0,140,new(-0.5f,8.5f)),
             new("Engine",1,180,new(0f,-1f)),
             new("Hallway",2,226, new(15.5f,0f)),
@@ -79,9 +80,8 @@ public class NebulaPreSpawnLocation
             new("Toilet", new Vector2(32.3184f, 7.0118f)),
             new("Vault", new Vector2(-8.789f, 8.049f)),
             new("ViewingDeck", new Vector2(-13.9798f, -15.8316f))
-        },
-        new NebulaPreSpawnLocation[]
-        {
+        ],
+        [
             new("Campfire", new Vector2(-9.79f, 3.0949f)),
             new("Comms", new Vector2(24.0248f, 13.625f)),
             new("Laboratory", new Vector2(-5.2573f, -9.1099f)),
@@ -104,8 +104,9 @@ public class NebulaPreSpawnLocation
                 new Vector2(2.3421f, -12.0085f),//グリーンハウス・ラボ間
                 new Vector2(15.2272f, -6.1833f)//リアクター左
                 })
-        }
-        };
+        ],
+        []
+        ];
 
     public string LocationName { get; private init; }
     public string GetDisplayName(byte mapId)
@@ -174,6 +175,8 @@ public class NebulaPreSpawnMinigame : Minigame
     public IEnumerator CoClose()
     {
         var gathering = NebulaGameManager.Instance!.GameStatistics.Gathering[GameStatisticsGatherTag.Spawn];
+        NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.ResetSyncOnlyHistory(SynchronizeTag.PreSpawnMinigame);
+
         foreach (var p in PlayerControl.AllPlayerControls)
         {
             if (p.Data.IsDead) continue;
@@ -377,7 +380,7 @@ public class NebulaPreSpawnMinigame : Minigame
             text.fontSizeMin = 1f;
             text.text = Language.Translate(loc.GetDisplayName(mapId));
             text.font = VanillaAsset.PreSpawnFont;
-            AudioClip hoverClip = VanillaAsset.HoverClip;
+            AudioClip hoverClip = VanillaAsset.HoverClip.Clip;
 
             if (loc.VanillaIndex.HasValue)
                 hoverClip = minigamePrefab!.Locations[loc.VanillaIndex.Value].RolloverSfx;

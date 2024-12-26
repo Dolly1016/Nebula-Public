@@ -71,6 +71,7 @@ public interface IRelativeCoolDownConfiguration : IConfiguration{
     /// 現在のクールダウンです。
     /// </summary>
     float CoolDown { get; }
+    float GetCoolDown(float baseCooldown);
 }
 
 public interface Configurations
@@ -153,9 +154,9 @@ public interface Configurations
     IVentConfiguration NeutralVentConfiguration(string id, bool isOptional) => VentConfiguration(id, isOptional, null, -1, (0f, 60f, 5f), 15f, (2.5f, 30f, 2.5f), 10f);
 
 
-    IRelativeCoolDownConfiguration KillConfiguration(string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue)
-        => KillConfiguration(NebulaAPI.GUI.LocalizedTextComponent(id), id, defaultType, immediateSelection, immediateDefaultValue, relativeSelection, relativeDefaultValue, ratioSelection, ratioDefaultValue);
-    IRelativeCoolDownConfiguration KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue);
+    IRelativeCoolDownConfiguration KillConfiguration(string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate = null, Func<float>? baseKillCooldown = null)
+        => KillConfiguration(NebulaAPI.GUI.LocalizedTextComponent(id), id, defaultType, immediateSelection, immediateDefaultValue, relativeSelection, relativeDefaultValue, ratioSelection, ratioDefaultValue, predicate, baseKillCooldown);
+    IRelativeCoolDownConfiguration KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate = null, Func<float>? baseKillCooldown = null);
 
     /// <summary>
     /// ゲーム内設定画面を開いているとき、画面の更新を要求します。
@@ -169,4 +170,9 @@ public interface Configurations
     /// <param name="id"></param>
     /// <returns></returns>
     ISharableVariable<T>? GetSharableVariable<T>(string id);
+
+    /// <summary>
+    /// 現在、ジャッカライズ可能であればtrueを返します。
+    /// </summary>
+    bool CanJackalize { get; }
 }

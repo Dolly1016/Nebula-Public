@@ -1,4 +1,5 @@
 ﻿using Nebula.Game.Statistics;
+using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Text;
 
@@ -41,7 +42,7 @@ public static class MeetingHudExtension
         ActionCoolDown = 0f;
         LastSharedCount = 110;
 
-        var deathPenalty = (int)(GeneralConfigurations.DeathPenaltyOption * (float)(NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0f));
+        var deathPenalty = (int)(GeneralConfigurations.DeathPenaltyOption * (float)(NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.IsDead) ?? 0f));
 
         //DiscussionTimerを引けるだけ引いておいて、引き過ぎた分をVotingTimerに繰り越し
         DiscussionTimer -= deathPenalty;
@@ -138,7 +139,7 @@ public static class MeetingHudExtension
             player.Unbox().MyState = victims.playerState;
 
             //Entityイベント発火
-            GameOperatorManager.Instance?.Run(new PlayerExtraExiledEvent(player, killer));
+            GameOperatorManager.Instance?.Run(new PlayerExtraExiledEvent(player, killer), true);
 
             if (player.AmOwner && NebulaAchievementManager.GetRecord("death." + player.PlayerState.TranslationKey, out var recDeath)) new StaticAchievementToken(recDeath);
             if ((killer?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + player.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
@@ -162,6 +163,9 @@ public static class MeetingHudExtension
         (message, _) =>
         {
             WeightMap[message.source] = message.weight;
+
+            GameOperatorManager.Instance?.Run(new PlayerVoteCastEvent(NebulaGameManager.Instance!.LocalPlayerInfo, NebulaGameManager.Instance!.GetPlayer(message.target), message.weight));
+
             if (AmongUsClient.Instance.AmHost)
             {
                 //MeetingHud.CastVote
@@ -175,8 +179,13 @@ public static class MeetingHudExtension
                     playerVoteArea.SetVote(message.target);
                     MeetingHud.Instance.SetDirtyBit(1U);
                     MeetingHud.Instance.CheckForEndVoting();
-                    PlayerControl.LocalPlayer.RpcSendChatNote(message.source, ChatNoteTypes.DidVote);
+                    if(GeneralConfigurations.ShowVoteStateOption) PlayerControl.LocalPlayer.RpcSendChatNote(message.source, ChatNoteTypes.DidVote);
                 }
+            }
+
+            if (!GeneralConfigurations.ShowVoteStateOption)
+            {
+                SoundManager.Instance.PlaySound(HudManager.Instance.Chat.messageSound, false, 1f, null).pitch = 0.5f + System.Random.Shared.NextSingle() * 0.6f;
             }
         }
         );

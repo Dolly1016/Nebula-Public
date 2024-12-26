@@ -194,13 +194,8 @@ class CreateGameOptionsNoSBehaviour : MonoBehaviour
         for (int i = 4; i <= 6; i++) MyPicker.ImpostorButtons[i - 1].gameObject.SetActive(isCustomServer);
 
         var options = MyPicker.GetTargetOptions();
-        if (!isCustomServer)
-        {
-            if (options.MaxPlayers > 15) MyPicker.SetMaxPlayersButtons(15);
-            if (options.NumImpostors > 3) MyPicker.SetImpostorButtons(3);
-        }
 
-        MyPicker.Refresh();
+        MyPicker.SetMaxPlayersButtons(isCustomServer ? 24 : 15);
     }
 }
 
@@ -246,5 +241,22 @@ class CreateGameOptionsShowPatch
         __instance.gameObject.AddComponent<CreateGameOptionsNoSBehaviour>();
 
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(CreateOptionsPicker), nameof(CreateOptionsPicker.Refresh))]
+class CreateGameOptionsStartPatch
+{
+    static int impostors = 1;
+    public static void Prefix(CreateOptionsPicker __instance)
+    {
+        impostors = AmongUsUtil.NumOfImpostors;
+        Debug.Log("Impostors(A): " + impostors);
+    }
+    public static void Postfix(CreateOptionsPicker __instance)
+    {
+        impostors = Math.Min(impostors, AmongUsUtil.IsCustomServer() ? 6 : 3);
+        __instance.SetImpostorButtons(impostors);
+        Debug.Log("Impostors(B): " + impostors);
     }
 }

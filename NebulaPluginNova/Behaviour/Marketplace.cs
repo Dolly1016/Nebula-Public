@@ -186,14 +186,15 @@ public class Marketplace : MonoBehaviour
     static private TextComponent TextAddons = new TranslateTextComponent("marketplace.type.addons");
     static private TextComponent TextSearch = new RawTextComponent(">");
 
-    private MetaScreen OpenDetailWindow(bool isAddon, int entryId)
+    static public MetaScreen OpenDetailWindow(bool isAddon, int entryId, Transform? parent = null, Action? onUpdate = null)
     {
-        var window = MetaScreen.GenerateWindow(new(7f, 3.6f), transform, Vector3.zero, true, true);
+        var window = MetaScreen.GenerateWindow(new(7f, 3.6f), parent, Vector3.zero, true, true);
         window.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.3f }, new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayTitle), new TranslateTextComponent("marketplace.ui.loading"))), new Vector2(0.5f,0.5f), out _);
 
         void ShowDetail(OnlineMarketplace.GetContentResult? result)
         {
             if (result == null) return;
+            if (!window) return;
 
             List<LocalMarketplaceItem> owningItems = (isAddon ? MarketplaceData.Data.OwningAddons : MarketplaceData.Data.OwningCostumes);
             var localItem = owningItems.FirstOrDefault(item => item.EntryId == entryId);
@@ -205,12 +206,16 @@ public class Marketplace : MonoBehaviour
                 GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.blurb)),
                 GUI.API.VerticalMargin(0.1f),
                 new HorizontalWidgetsHolder(GUIAlignment.Left,
+                    GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.marketplace.state"),
+                    GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), ":"),
+                    new NoSGUIMargin(GUIAlignment.Center, new(0.12f, 0f)),
+                    GUI.API.Text(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.LeftBoldFixed), GUI.API.TextComponent(owning ? Virial.Color.Green : Virial.Color.Red, owning ? "marketplace.ui.marketplace.state.owning" : "marketplace.ui.marketplace.state.unowning")),
                     GUI.API.Button(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplacePublishButton), GUI.API.TextComponent(color, owning ? "marketplace.ui.marketplace.deactivate" : "marketplace.ui.marketplace.activate"), clickable =>
                     {
                         if (owning)
                         {
                             owningItems.RemoveAll(item => item.EntryId == entryId);
-                            MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent("marketplace.ui.marketplace.inactivated"));
+                            MetaUI.ShowConfirmDialog(parent, new TranslateTextComponent("marketplace.ui.marketplace.inactivated"));
                         }
                         else
                         {
@@ -218,15 +223,16 @@ public class Marketplace : MonoBehaviour
                             owningItems.Add(item);
                             if (!isAddon)
                             {
-                                var _ = MoreCosmic.LoadOnlineExtra(item.ToCostumeUrl);
+                                var _ = MoreCosmic.LoadOnlineExtra(item, item.ToCostumeUrl);
                             }
 
-                            MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent("marketplace.ui.marketplace.activated" + (isAddon ? ".addons" : ".cosmetics")));
+                            MetaUI.ShowConfirmDialog(parent, new TranslateTextComponent("marketplace.ui.marketplace.activated" + (isAddon ? ".addons" : ".cosmetics")));
                         }
                     
                         MarketplaceData.Save();
                         ShowDetail(result);
-                        if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen();
+
+                        onUpdate?.Invoke();
                     }, color: color),
                     new NoSGUIMargin(GUIAlignment.Center, new(0.25f,0f)),
                     (isAddon && owning) ? new HorizontalWidgetsHolder(GUIAlignment.Center, new NoSGUICheckbox(GUIAlignment.Left, localItem!.AutoUpdate) { OnValueChanged = val => { localItem.AutoUpdate = val; MarketplaceData.Save(); } }, GUI.API.HorizontalMargin(0.1f),  GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentBold), "marketplace.ui.marketplace.autoUpdate")) : GUIEmptyWidget.Default
@@ -235,7 +241,7 @@ public class Marketplace : MonoBehaviour
                 )), out _);
         }
 
-        StartCoroutine(OnlineMarketplace.CoGetContent(entryId, result => ManagedEffects.Action(()=>ShowDetail(result))).WrapToIl2Cpp());
+        NebulaManager.Instance.StartCoroutine(OnlineMarketplace.CoGetContent(entryId, result => ManagedEffects.Action(()=>ShowDetail(result))).WrapToIl2Cpp());
 
         return window;
     }
@@ -281,7 +287,7 @@ public class Marketplace : MonoBehaviour
                         button.OnClick.AddListener(() =>
                         {
                             if (int.TryParse(r.entryId, out var id))
-                                OpenDetailWindow(isAddon, id);
+                                OpenDetailWindow(isAddon, id, transform, () => { if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen(); });
                         });
                     }
                 }));
@@ -414,7 +420,7 @@ public class Marketplace : MonoBehaviour
     {
         (string key, Action action)[] buttons = [
             ("marketplace", () => ShowMarketplaceScreen()), 
-            ("inventory", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.OwningAddons : MarketplaceData.Data?.OwningCostumes) ?? [], item =>OpenDetailWindow(isAddonOnItemsScreen, item.EntryId))); }), 
+            ("inventory", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.OwningAddons : MarketplaceData.Data?.OwningCostumes) ?? [], item =>OpenDetailWindow(isAddonOnItemsScreen, item.EntryId, transform, () => { if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen(); }))); }), 
             ("contents", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.DevAddons : MarketplaceData.Data?.DevCostumes) ?? [], item => EditContent(isAddonOnItemsScreen, (item as DevMarketplaceItem)!))); }),
             ("publish", () => { ShowPublishWindow(); })
             ];

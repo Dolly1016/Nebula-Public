@@ -2,12 +2,14 @@
 using Nebula.Roles.Assignment;
 using Nebula.Roles.Neutral;
 using Nebula.VoiceChat;
+using System.Linq;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Utilities;
 
 namespace Nebula.Roles.Modifier;
 
@@ -81,11 +83,8 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         assignChance = 0;
     }
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
-    {
-        DefinedModifier RuntimeModifier.Modifier => MyRole;
-
-        static private Color[] colors = new Color[] { MyRole.UnityColor,
+    static public Color[] Colors => colors;
+    static private Color[] colors = new Color[] { MyRole.UnityColor,
         (Color)new Color32(254, 132, 3, 255) ,
         (Color)new Color32(3, 254, 131, 255) ,
         (Color)new Color32(164, 96, 203, 255) ,
@@ -97,10 +96,17 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         (Color)new Color32(255, 255, 40, 255),
         (Color)new Color32(211, 129, 142, 255),
         (Color)new Color32(255, 189, 99, 255),};
+
+    public class Instance : RuntimeAssignableTemplate, RuntimeModifier
+    {
+        DefinedModifier RuntimeModifier.Modifier => MyRole;
+
         private int loversId; 
         public Instance(GamePlayer player,int loversId) : base(player)
         {
             this.loversId = loversId;
+
+            MyLover = new(() => NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault(player => player.PlayerId != MyPlayer.PlayerId && player.Modifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId))!);
         }
 
         [OnlyMyPlayer]
@@ -108,11 +114,11 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            Color loverColor = colors[loversId];
-            var myLover = MyLover;
+            Color loverColor = colors[canSeeAllInfo ? loversId : 0];
+            var myLover = MyLover.Get();
             bool canSee = false;
 
-            if (AmOwner || canSeeAllInfo || (MyLover?.AmOwner ?? false))
+            if (AmOwner || canSeeAllInfo || (myLover?.AmOwner ?? false))
             {
                 canSee = true;
             }else if (myLover?.Role.Role == Avenger.MyRole && !myLover.IsDead && MyPlayer.IsDead)
@@ -134,7 +140,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             {
                 if (!MyPlayer.IsDead) new StaticAchievementToken("lover.common1");
 
-                if (MyPlayer.Role.Role.Category != RoleCategory.ImpostorRole && NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole) == 2)
+                if (MyPlayer.Role.Role.Category != RoleCategory.ImpostorRole && NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && p.Role.Role.Category == RoleCategory.ImpostorRole) == 2)
                     new StaticAchievementToken("lover.challenge");
             }
         }
@@ -148,7 +154,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         [OnlyMyPlayer, Local]
         void OnMurdered(PlayerDieEvent ev)
         {
-            var myLover = MyLover;
+            var myLover = MyLover.Get();
             if (myLover?.IsDead ?? true) return;
 
             if (ev is PlayerMurderedEvent pme)
@@ -158,12 +164,13 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
                 else 
                     myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
             }
-            else
+            else /* PlayerExtraExiledEvent, PlayerExiledEvent */
             {   
                 myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.WithAssigningGhostRole);
             }
         }
 
+        /*
         [OnlyMyPlayer, Local]
         void OnExtraExiled(PlayerExtraExiledEvent ev)
         {
@@ -172,13 +179,14 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
                 MyLover?.VanillaPlayer.ModMeetingKill(MyLover.VanillaPlayer, PlayerState.Suicide, PlayerState.Suicide, KillParameter.NormalKill);
             }
         }
+        */
 
         [OnlyMyPlayer, Local]
         void OnExiled(PlayerExiledEvent ev)
         {
-            if (!(MyLover?.IsDead ?? false))
+            if (!(MyLover.Get()?.IsDead ?? false))
             {
-                MyLover?.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+                MyLover.Get()?.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
 
                 if(Helpers.CurrentMonth == 12) new StaticAchievementToken("christmas");
             }
@@ -199,7 +207,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             if (ev.Phase != ExtraWinCheckPhase.LoversPhase) return;
             if (!AllowExtraWinOption && ev.GameEnd != NebulaGameEnd.AvengerWin) return;
 
-            var myLover = MyLover;
+            var myLover = MyLover.Get();
             if (myLover == null) return;
             if (myLover.IsDead && myLover.Role.Role != Jester.MyRole) return;
             if (!ev.WinnersMask.Test(myLover)) return;
@@ -209,9 +217,13 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             ev.IsExtraWin = true;
         }
 
-        public GamePlayer? MyLover => NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault(p => p.PlayerId != MyPlayer.PlayerId && p.Modifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId));
-        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover?.Name ?? "ERROR").Color(MyRole.UnityColor));
+        //相方は一度決定したら変更されないため、キャッシュさせる。
+        public Cache<GamePlayer> MyLover;
+        
+        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover.Get()?.Name ?? "ERROR").Color(MyRole.UnityColor));
         bool RuntimeModifier.InvalidateCrewmateTask => true;
         bool RuntimeModifier.MyCrewmateTaskIsIgnored => true;
+
+        bool RuntimeAssignable.CanKill(Virial.Game.Player player) => MyLover.Get() != player;
     }
 }

@@ -21,7 +21,7 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.reaper.vent", false, null, -1, (0f, 60f, 2.5f), 15f, (2.5f, 30f, 2.5f), 10f);
 
     static public Reaper MyRole = new Reaper();
-
+    static private GameStatsEntry StatsVent = NebulaAPI.CreateStatsEntry("stats.reaper.ventWithDeadBody", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -189,7 +189,10 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
         void OnEnterVent(PlayerVentEnterEvent ev)
         {
             if (MyPlayer.HoldingAnyDeadBody)
+            {
                 acTokenCommon ??= new("reaper.common1");
+                StatsVent.Progress();
+            }
         }
 
         //キルのたびに加算、発見されるたびに減算してレポートされていない死体を計上する

@@ -88,8 +88,10 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration MaxDistanceBetweenPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxDistanceBetweenPoles", (2f, 6f, 1f), 5f, FloatConfigurationDecorator.Ratio);
 
     static public Disturber MyRole = new Disturber();
+    static private GameStatsEntry StatsPole = NebulaAPI.CreateStatsEntry("stats.disturber.pole", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsDisturb = NebulaAPI.CreateStatsEntry("stats.disturber.disturb", GameStatsCategory.Roles, MyRole);
 
-    
+
     public class DisturberMapLayer : MonoBehaviour
     {
         public record DisturbPolesSet(LineRenderer renderer, DisturbPole[] poles);
@@ -384,6 +386,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                 DisturbPole.RpcActivate.Invoke(p.pole.ObjectId);
             }
             if (mapLayer.Positions.Count >= 6) new StaticAchievementToken("disturber.common2");
+            StatsPole.Progress(mapLayer.Positions.Count);
 
             var array = mapLayer.Positions.Select(p => p.pole).ToArray();
             poles.Add(array);
@@ -441,6 +444,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
 
                     if (acTokenChallenge != null) acTokenChallenge.Value.ability = true;
                     CheckChallengeAchievement();
+                    StatsDisturb.Progress();
                 };
                 disturbButton.OnEffectEnd = (button) =>
                 {

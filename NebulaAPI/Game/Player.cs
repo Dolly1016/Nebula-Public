@@ -2,6 +2,7 @@
 using Virial.Assignable;
 using Virial.Command;
 using Virial.DI;
+using Virial.Helpers;
 using Virial.Text;
 
 namespace Virial.Game;
@@ -10,7 +11,8 @@ public enum KillResult
 {
     Kill,
     Guard,
-    ObviousGuard
+    ObviousGuard,
+    Rejected,
 }
 
 public interface IPlayerAttribute
@@ -186,30 +188,46 @@ public record OutfitTag {
     public static OutfitTag GetTagById(int id) => AllTags[id];
     public static IEnumerable<OutfitTag> GetAllTags() => AllTags.Values;
 }
-public class OutfitCandidate
+public class OutfitDefinition
 {
-    public string Tag { get; private set; }
-    public int Priority { get; private set; }
-    public bool SelfAware { get; private set; }
-    public OutfitTag[] OutfitTags { get; private set; }
-    internal NetworkedPlayerInfo.PlayerOutfit outfit { get; private set; }
-
-    internal OutfitCandidate(string tag, int priority, bool selfAware, NetworkedPlayerInfo.PlayerOutfit outfit, OutfitTag[] outfitTags)
+    public record OutfitId(int ownerId, int outfitId)
     {
-        this.Tag = tag;
-        this.Priority = priority;
-        this.SelfAware = selfAware;
+        static public OutfitId PlayersDefault(int playerId) => new(playerId, 0);
+    }
+    public OutfitId Id { get; private init; }
+    public OutfitTag[] OutfitTags { get; private init; }
+    internal NetworkedPlayerInfo.PlayerOutfit outfit { get; private init; }
+    public string? HatArgument { get; internal set; } = null;
+    public string? VisorArgument { get; internal set; } = null;
+
+    internal OutfitDefinition(OutfitId id, NetworkedPlayerInfo.PlayerOutfit outfit, OutfitTag[] outfitTags)
+    {
+        this.Id = id;
         this.outfit = outfit;
         this.OutfitTags = outfitTags;
     }
 
-    internal OutfitCandidate(string tag, int priority, bool selfAware, Outfit outfit)
+    internal OutfitDefinition(OutfitId id, Outfit outfit)
     {
+        this.Id = id;
+        OutfitTags = outfit.tags;
+        this.outfit = outfit.outfit;
+    }
+}
+
+public class OutfitCandidate
+{
+    public OutfitDefinition Outfit { get; private set; }
+    public string Tag { get; private set; }
+    public int Priority { get; private set; }
+    public bool SelfAware { get; private set; }
+
+    public OutfitCandidate(OutfitDefinition definition, string tag, int priority, bool selfAware)
+    {
+        this.Outfit = definition;
         Tag = tag;
         Priority = priority;
         SelfAware = selfAware;
-        OutfitTags = outfit.tags;
-        this.outfit = outfit.outfit;
     }
 }
 
@@ -253,11 +271,22 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// </summary>
     public bool IsDead { get; }
 
+    /// <summary>
+    /// 死が確定しているとき、Trueを返します。
+    /// 死亡していても、Trueを返さないときがあります。IsDeadと併用して使用する必要があります。
+    /// </summary>
+    public bool WillDie { get; }
+
     public PlayerDiving? CurrentDiving { get; }
     /// <summary>
     /// ダイブしているとき、Trueを返します。
     /// </summary>
     public bool IsDived => CurrentDiving != null;
+
+    /// <summary>
+    /// テレポート中、Trueを返します。
+    /// </summary>
+    public bool IsTeleporting { get; }
 
     /// <summary>
     /// 吹き飛ばされているとき、Trueを返します。
@@ -304,8 +333,10 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// </summary>
     public CommunicableTextTag PlayerState { get; }
 
-
-
+    /// <summary>
+    /// 陣営の基本的なキルクールダウンです。
+    /// </summary>
+    public float TeamKillCooldown => Role.Role.Team.KillCooldown;
 
     // HoldingAPI
 
@@ -344,7 +375,12 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// </summary>
     public void ReleaseHoldingPlayer();
 
-
+    /// <summary>
+    /// 役職の関係性でキルできるかどうかをチェックします。
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    public bool CanKill(Player player) => AllAssigned().All(a => a.CanKill(player));
 
 
     // MurderAPI
@@ -356,8 +392,10 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// <param name="playerState"></param>
     /// <param name="eventDetail"></param>
     /// <returns></returns>
-    public KillResult MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams);
-    public KillResult Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail,KillParameter killParams);
+    public void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack = null);
+    public void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null)
+        => MurderPlayer(player, playerState, eventDetail, killParams, KillCondition.BothAlive, callBack);
+    public void Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null);
     public void Revive(Player? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent = true);
     public Player? MyKiller { get; }
 
@@ -381,7 +419,7 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// </summary>
     /// <param name="speedRate">加減速の倍率</param>
     /// <param name="duration">効果時間</param>
-    /// <param name="canPassMeeting">会議を超えて高価が持続するかどうか</param>
+    /// <param name="canPassMeeting">会議を超えて効果が持続するかどうか</param>
     /// <param name="priority">優先度</param>
     /// <param name="duplicateTag">重複チェック用タグ</param>
     public void GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
@@ -405,11 +443,12 @@ public interface Player : IModuleContainer, ICommandExecutor
     // AssignableAPI
 
     public RuntimeRole Role { get; }
+    public RuntimeGhostRole? GhostRole { get; }
     public IEnumerable<RuntimeModifier> Modifiers { get; }
     public IEnumerable<RuntimeAssignable> AllAssigned();
     public bool TryGetModifier<Modifier>([MaybeNullWhen(false)] out Modifier modifier) where Modifier : class, RuntimeModifier;
     public bool AttemptedGhostAssignment { get; internal set; }
-
+    public IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth();
 
 
     // PlayerRoleCategoryAPI
@@ -427,17 +466,17 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// </summary>
     /// <param name="maxPriority">優先度の最大値</param>
     /// <returns></returns>
-    public Outfit GetOutfit(int maxPriority);
+    public OutfitDefinition GetOutfit(int maxPriority);
 
     /// <summary>
     /// プレイヤーの現在の見た目を取得します。
     /// </summary>
-    public Outfit CurrentOutfit { get; }
+    public OutfitDefinition CurrentOutfit { get; }
 
     /// <summary>
     /// プレイヤーの本来の見た目を取得します。
     /// </summary>
-    public Outfit DefaultOutfit { get; }
+    public OutfitDefinition DefaultOutfit { get; }
 
 
 
@@ -447,4 +486,7 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// プレイヤーのタスク進捗を取得します。
     /// </summary>
     public PlayerTasks Tasks => GetModule<PlayerTasks>()!;
+
+    public bool ShowKillButton => (Role?.HasVanillaKillButton ?? false) && AllowToShowKillButtonByAbilities;
+    public bool AllowToShowKillButtonByAbilities => AllAssigned().All(assigned => assigned.MyAbilities.All(ability => !(ability?.HideKillButton ?? false)));
 }

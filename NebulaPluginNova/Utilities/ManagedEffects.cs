@@ -38,6 +38,13 @@ public static class ManagedEffects
         yield break;
     }
 
+    static public IEnumerator Wait(Func<bool> waitWhile, Action then)
+    {
+        while (waitWhile()) yield return null;
+        then.Invoke();
+        yield break;
+    }
+
     static public IEnumerator WaitAsCoroutine(this Task task)
     {
         while (!task.IsCompleted) yield return null;

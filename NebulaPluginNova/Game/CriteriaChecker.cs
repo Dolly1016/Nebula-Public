@@ -77,7 +77,7 @@ public class NebulaEndCriteria
         [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
-            if (NebulaGameManager.Instance?.AllPlayerInfo().Any(p =>
+            if (NebulaGameManager.Instance?.AllPlayerInfo.Any(p =>
             {
                 if (p.IsDead) return false;
                 if (p.Role.Role.Team == Impostor.MyTeam) return true;
@@ -93,7 +93,7 @@ public class NebulaEndCriteria
         {
             int quota = 0;
             int completed = 0;
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDisconnected) continue;
 
@@ -113,7 +113,7 @@ public class NebulaEndCriteria
             int impostors = 0;
             int totalAlive = 0;
             
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDead) continue;
                 totalAlive++;
@@ -134,14 +134,14 @@ public class NebulaEndCriteria
         [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
-            int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead);
+            int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead);
 
             bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
 
             int totalAliveAllJackals = 0;
 
             //全体の生存しているジャッカルの人数を数えると同時に、ジャッカル陣営が勝利できない状況なら調べるのをやめる
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDead) continue;
 
@@ -154,12 +154,12 @@ public class NebulaEndCriteria
             }
 
             //全ジャッカルに対して、各チームごとに勝敗を調べる
-            foreach (var jackal in NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && p.Role.Role == Roles.Neutral.Jackal.MyRole))
+            foreach (var jackal in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.IsDead && p.Role.Role == Roles.Neutral.Jackal.MyRole))
             {
                 var jRole = (jackal.Role as Roles.Neutral.Jackal.Instance);
                 if (!(jRole?.CanWinDueToKilling ?? false)) continue;
 
-                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && (jRole!.IsSameTeam(p)));
+                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && (jRole!.IsSameTeam(p)));
                 
                 //他のJackal陣営が生きていたら勝利できない
                 if (aliveJackals < totalAliveAllJackals) continue;
@@ -174,14 +174,14 @@ public class NebulaEndCriteria
         [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
-            int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count((p) => !p.IsDead);
+            int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo.Count((p) => !p.IsDead);
             if (totalAlive > 3) return;
 
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDead) continue;
                 if (p.Unbox().TryGetModifier<Lover.Instance>(out var lover)){
-                    if (lover.MyLover?.IsDead ?? true) continue;
+                    if (lover.MyLover.Get()?.IsDead ?? true) continue;
 
                     NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.LoversWin, GameEndReason.Situation);
                 }
@@ -219,7 +219,7 @@ public class CriteriaManager
         //終了条件が確定済みなら何もしない
         if (NebulaGameManager.Instance?.EndState != null) return;
 
-        if ((ExileController.Instance) && !Minigame.Instance) triggeredGameEnds.RemoveAll(t => t.reason == GameEndReason.Situation);
+        if ((ExileController.Instance) && !Minigame.Instance) triggeredGameEnds.RemoveAll(t => t.reason is GameEndReason.Situation or GameEndReason.SpecialSituation);
 
         if(triggeredGameEnds.Count == 0) return;
 
@@ -228,6 +228,6 @@ public class CriteriaManager
 
         if (end == null) return;
 
-        NebulaGameManager.Instance?.InvokeEndGame(end.gameEnd, end.reason, end.additionalWinners != null ? (NebulaGameManager.Instance.AllPlayerInfo().Aggregate(0, (v, p) => end.additionalWinners.Test(p) ? (v | (1 << p.PlayerId)) : v)) : 0);
+        NebulaGameManager.Instance?.InvokeEndGame(end.gameEnd, end.reason, end.additionalWinners != null ? (NebulaGameManager.Instance.AllPlayerInfo.Aggregate(0, (v, p) => end.additionalWinners.Test(p) ? (v | (1 << p.PlayerId)) : v)) : 0);
     }
 }

@@ -89,6 +89,13 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, IInjectable, PlayerTa
         RpcSyncTaskState.Invoke(this);
     }
 
+    //タスクノルマを削減します。
+    public void QuotaReduction(int reduction)
+    {
+        Quota = Math.Max(Quota - reduction, 0);
+        RpcSyncTaskState.Invoke(this);
+    }
+
     public void GainExtraTasks(int tasks, bool addQuota = false, int unacquired = 0, bool sync = true)
     {
         TotalTasks += tasks;

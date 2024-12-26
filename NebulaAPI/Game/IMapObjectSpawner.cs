@@ -11,7 +11,10 @@ namespace Virial.Game;
 public enum MapObjectType
 {
     SmallInCorner = 0x0001,
+    Reachable = 0x0002,
 }
+
+public record MapObjectCondition(string Tag, float Distance);
 
 public interface IMapObjectSpawner : IModule
 {
@@ -21,7 +24,7 @@ public interface IMapObjectSpawner : IModule
     /// </summary>
     /// <param name="num"></param>
     /// <returns></returns>
-    Virial.Compat.Vector2[] Spawn(int num, float distance, string reason, string? objectConstructor, MapObjectType type);
+    Virial.Compat.Vector2[] Spawn(int num, float distance, string reason, string? objectConstructor, MapObjectType type, MapObjectCondition[]? conditions = null);
 
     /// <summary>
     /// 同期のためのSpawnメソッド

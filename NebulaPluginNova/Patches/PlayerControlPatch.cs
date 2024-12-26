@@ -3,7 +3,11 @@ using Hazel;
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
 using PowerTools;
+using UnityEngine;
 using Virial.Events.Player;
+using static DynamicSound;
+using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Patches;
 
@@ -88,6 +92,8 @@ public static class PlayerUpdatePatch
     static void Postfix(PlayerControl __instance)
     {
         if (NebulaGameManager.Instance == null) return;
+        if (__instance.AmOwner) NebulaGameManager.Instance.OnFixedAlwaysUpdate();
+
         if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted)
         {
             bool showVanillaColor = ClientOption.AllOptions[ClientOption.ClientOptionType.ShowVanillaColor].Value == 1;
@@ -95,6 +101,8 @@ public static class PlayerUpdatePatch
             {
                 if (showVanillaColor) __instance.cosmetics.nameText.text = __instance.Data.PlayerName + " ■".Color(DynamicPalette.VanillaColorsPalette[__instance.PlayerId]);
                 else __instance.cosmetics.nameText.text = __instance.Data.PlayerName;
+
+                __instance.cosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp);
             }
             catch { }
             return;
@@ -114,7 +122,7 @@ public static class PlayerUpdatePatch
             }
         }
         
-
+        
         if(__instance.cosmetics.transform.localScale.z < 100f)
         {
             var scale = __instance.cosmetics.transform.localScale;
@@ -153,8 +161,11 @@ public static class PlayerRemoveTaskPatch
 {
     static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerTask task)
     {
-        if(__instance.AmOwner)
+        if (__instance.AmOwner)
+        {
             GameOperatorManager.Instance?.Run(new PlayerTaskRemoveLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, task));
+            Debug.Log("Remove Task");
+        }
     }
 }
 
@@ -198,7 +209,7 @@ class CurrentOutfitPatch
 {
     public static bool Prefix(PlayerControl __instance, ref NetworkedPlayerInfo.PlayerOutfit __result)
     {
-        __result = __instance.GetModInfo()?.Unbox().CurrentOutfit!;
+        __result = __instance.GetModInfo()?.Unbox().CurrentOutfit.Outfit.outfit!;
         return __result == null;
     }
 }
@@ -213,7 +224,7 @@ class OverlayKillAnimationPatch
             NetworkedPlayerInfo.PlayerOutfit? currentOutfit = initData.killerOutfit;
             if (currentOutfit != null)
             {
-                __instance.killerParts.SetBodyType(PlayerBodyTypes.Normal);
+                __instance.killerParts.SetBodyType(initData.killerBodyType);
                 __instance.killerParts.UpdateFromPlayerOutfit(currentOutfit, PlayerMaterial.MaskType.None, false, false);
                 __instance.killerParts.ToggleName(false);
                 __instance.LoadKillerSkin(currentOutfit);
@@ -226,7 +237,7 @@ class OverlayKillAnimationPatch
             if (defaultOutfit != null)
             {
                 __instance.victimHat = defaultOutfit.HatId;
-                __instance.killerParts.SetBodyType(PlayerBodyTypes.Normal);
+                __instance.victimParts.SetBodyType(PlayerBodyTypes.Normal);
                 __instance.victimParts.UpdateFromPlayerOutfit(defaultOutfit, PlayerMaterial.MaskType.None, false, false);
                 __instance.victimParts.ToggleName(false);
                 __instance.LoadVictimSkin(defaultOutfit);
@@ -250,7 +261,7 @@ class SetTaskPAtch
         GameOperatorManager.Instance?.Update(); //イベントがあれば追加する(ゲーム開始の瞬間と被って、ホストでは通常のタイミングでの作用素の追加では間に合わない)
         var result = GameOperatorManager.Instance!.Run(new PlayerTasksTrySetLocalEvent(info, tasks.ToArray()));
         var tasksList = result.VanillaTasks.ToArray();
-
+        
         if (num != tasksList.Length || result.ExtraQuota > 0) info?.Tasks.Unbox().ReplaceTasks(tasksList.Length, result.ExtraQuota);
 
         __instance.StartCoroutine(CoSetTasks().WrapToIl2Cpp());
@@ -288,7 +299,9 @@ class PlayerDisconnectPatch
     {
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.NotStarted) return;
 
-        player.GetModInfo()!.Unbox().IsDisconnected = true;
+        var unboxed = player.GetModInfo()!.Unbox();
+        unboxed.IsDisconnected = true;
+        unboxed.MyState = PlayerState.Disconnected;
 
         NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Disconnect, player.PlayerId, 0){ RelatedTag = EventDetail.Disconnect }) ;
     }
@@ -311,7 +324,9 @@ class PlayerCanMovePatch
     {
         if (__instance != PlayerControl.LocalPlayer) return;
 
-        __result &= !TextField.AnyoneValid && HudManager.Instance.PlayerCam.Target == PlayerControl.LocalPlayer && !ModSingleton<Marketplace>.Instance;
+        var modPlayer = __instance.GetModInfo();
+
+        __result &= !TextField.AnyoneValid && HudManager.Instance.PlayerCam.Target == PlayerControl.LocalPlayer  && !ModSingleton<Marketplace>.Instance && !(modPlayer?.IsTeleporting ?? false);
     }
 }
 
@@ -325,7 +340,7 @@ class WalkPatch
         if (info == null) return;
 
         var orig = __result;
-        Vector2 temp = Vector2.zero;
+        Vector4 temp = Vector2.zero;
         IEnumerator CoWalk()
         {
             while (true)
@@ -352,7 +367,14 @@ class VelocityPatch
 {
     public static void Postfix(PlayerPhysics __instance)
     {
-        if (__instance.AmOwner) __instance.body.velocity *= NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().DirectionalPlayerSpeed ?? Vector2.one;
+        if (__instance.AmOwner && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
+        {
+            var vec = __instance.body.velocity;
+            var mat = NebulaGameManager.Instance!.LocalPlayerInfo!.Unbox().DirectionalPlayerSpeed;
+            vec = new(vec.x * mat.x + vec.y * mat.y, vec.x * mat.z + vec.y * mat.w);
+
+            __instance.body.velocity = vec;
+        }
     }
 }
 
@@ -397,9 +419,23 @@ public static class KillOverlayPatch
     }
 }
 
+[HarmonyPatch(typeof(KillOverlay), nameof(KillOverlay.ShowKillAnimation), typeof(OverlayKillAnimation), typeof(NetworkedPlayerInfo), typeof(NetworkedPlayerInfo))]
+public static class KillOverlayBodyTypePatch
+{
+    public static bool NextIsSelfKill = false;
+    public static bool Prefix(KillOverlay __instance, [HarmonyArgument(0)]OverlayKillAnimation killAnimation, [HarmonyArgument(1)] NetworkedPlayerInfo killer, [HarmonyArgument(2)] NetworkedPlayerInfo victim)
+    {
+        var info = new KillOverlayInitData(killer, victim);
+        info.killerBodyType = Helpers.GetPlayer(killer.PlayerId)?.MyPhysics.bodyType ?? PlayerBodyTypes.Normal;
+        __instance.ShowKillAnimation(killAnimation, info);
+        return false;
+    }
+}
+
 [HarmonyPatch(typeof(OverlayKillAnimation), nameof(OverlayKillAnimation.Initialize))]
 public static class OverlayKillAnimationInitializePatch
 {
+
     public static void Postfix(OverlayKillAnimation __instance)
     {
         if (KillOverlayPatch.NextIsSelfKill)
@@ -509,14 +545,79 @@ public static class LoadKillerSkinPatch
 [HarmonyPatch(typeof(MovingPlatformBehaviour), nameof(MovingPlatformBehaviour.UsePlatform))]
 public static class UsePlatformPatch
 {
-    public static void Postfix(MovingPlatformBehaviour __instance, [HarmonyArgument(0)]PlayerControl target)
+    private static void SetGoalPos(PlayerControl target, Vector2 pos)
     {
         try
         {
-            target.GetModInfo()!.Unbox().GoalPos = __instance.transform.parent.TransformPoint((!__instance.IsLeft) ? __instance.LeftUsePosition : __instance.RightUsePosition);
+            target.GetModInfo()!.Unbox().GoalPos = pos;
         }
-        catch {
+        catch
+        {
             Debug.Log($"Skipped presetting goal position on use MovingPlatform. (for {target.name})");
+        }
+    }
+    public static bool Prefix(MovingPlatformBehaviour __instance, ref Il2CppSystem.Collections.IEnumerator __result, [HarmonyArgument(0)]PlayerControl target)
+    {
+        __result = CoUsePlatform().WrapToIl2Cpp();
+        return false;
+        System.Collections.IEnumerator CoUsePlatform()
+        {
+            float platformTime = Time.time;
+            float totalTime = Time.time;
+            __instance.Target = target;
+            target.MyPhysics.ResetMoveState(true);
+            if (target.AmOwner) PlayerControl.HideCursorTemporarily();
+            target.moveable = false;
+            target.NetTransform.SetPaused(true);
+            target.NetTransform.ClearPositionQueues();
+            target.SetKinematic(true);
+            target.inMovingPlat = true;
+            target.ForceKillTimerContinue = true;
+            Vector3 vector = __instance.IsLeft ? __instance.LeftUsePosition : __instance.RightUsePosition;
+            Vector3 vector2 = (!__instance.IsLeft) ? __instance.LeftUsePosition : __instance.RightUsePosition;
+            Vector3 sourcePos = __instance.IsLeft ? __instance.LeftPosition : __instance.RightPosition;
+            Vector3 targetPos = (!__instance.IsLeft) ? __instance.LeftPosition : __instance.RightPosition;
+            Vector3 worldUseSourcePos = __instance.transform.parent.TransformPoint(vector);
+            Vector3 worldUseTargetPos = __instance.transform.parent.TransformPoint(vector2);
+            Vector3 worldSourcePos = __instance.transform.parent.TransformPoint(sourcePos);
+            Vector3 worldTargetPos = __instance.transform.parent.TransformPoint(targetPos);
+
+            SetGoalPos(target, worldUseSourcePos);
+
+            yield return target.MyPhysics.WalkPlayerTo(worldUseSourcePos, 0.01f, 1f, false);
+            yield return target.MyPhysics.WalkPlayerTo(worldSourcePos, 0.01f, 1f, false);
+
+            SetGoalPos(target, worldUseTargetPos);
+
+            yield return Effects.Wait(0.1f);
+            worldSourcePos -= (Vector3)target.Collider.offset;
+            worldTargetPos -= (Vector3)target.Collider.offset;
+            if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlayDynamicSound("PlatformMoving", __instance.MovingSound, true, (GetDynamicsFunction)__instance.SoundDynamics, SoundManager.Instance.SfxChannel);
+
+            __instance.IsLeft = !__instance.IsLeft;
+            yield return Effects.All(
+            (Il2CppSystem.Collections.IEnumerator[])[
+            Effects.Slide2D(__instance.transform, sourcePos, targetPos, target.MyPhysics.Speed),
+            Effects.Slide2DWorld(target.transform, worldSourcePos, worldTargetPos, target.MyPhysics.Speed)
+            ]);
+            if (Constants.ShouldPlaySfx()) SoundManager.Instance.StopNamedSound("PlatformMoving");
+            if (target == null)
+            {
+                __instance.ResetPlatform();
+                yield break;
+            }
+
+            yield return target.MyPhysics.WalkPlayerTo(worldUseTargetPos, 0.01f, 1f, false);
+            target.SetPetPosition(target.transform.position);
+            target.inMovingPlat = false;
+            target.moveable = true;
+            target.ForceKillTimerContinue = false;
+            target.NetTransform.SetPaused(false);
+            target.SetKinematic(false);
+            target.NetTransform.Halt();
+            yield return Effects.Wait(0.1f);
+            __instance.Target = null;
+            yield break;
         }
     }
 }
@@ -569,4 +670,44 @@ internal class RPCSealingPatch
     {
         __instance.IsDead = lastIsDead || __instance.Disconnected;
     }
+}
+
+
+[NebulaRPCHolder]
+[HarmonyPatch(typeof(CustomNetworkTransform), nameof(CustomNetworkTransform.FixedUpdate))]
+class CustomNetworkTransformPatch
+{
+
+    public static void Postfix(CustomNetworkTransform __instance)
+    {
+        if (GeneralConfigurations.LowLatencyPlayerSyncOption && AmongUsUtil.IsCustomServer())
+        {
+            if (__instance.myPlayer.AmOwner && __instance.sendQueue.Count == 1)
+            {
+                __instance.lastSequenceId++;
+                var pos = __instance.sendQueue.Dequeue();
+                RpcSendMovementImmediately.Invoke((__instance.myPlayer.PlayerId, pos, __instance.lastSequenceId));
+                __instance.lastPosSent = pos;
+                __instance.ClearDirtyBits();
+            }
+        }
+    }
+
+    private static RemoteProcess<(byte playerId, Vector2 pos, int sequenceId)> RpcSendMovementImmediately = new(
+        "SendNetTransformMovement",
+        (message, sendByMe) =>
+        {
+            if (sendByMe) return;
+
+            var player = Helpers.GetPlayer(message.playerId);
+            if (player)
+            {
+                if (NetHelpers.SidGreaterThan((ushort)message.sequenceId, player!.NetTransform.lastSequenceId))
+                {
+                    player.NetTransform.lastSequenceId = (ushort)message.sequenceId;
+                    player.NetTransform.incomingPosQueue.Enqueue(message.pos);
+                }
+            }
+        }
+        );
 }

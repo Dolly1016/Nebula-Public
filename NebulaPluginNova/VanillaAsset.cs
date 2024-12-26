@@ -7,13 +7,30 @@ namespace Nebula;
 
 public class VanillaAsset
 {
+    public class VanillaAudioClip
+    {
+        private string name;
+        private AudioClip? clip = null;
+        public AudioClip Clip { get
+            {
+                if (clip) return clip;
+                clip = UnityHelper.FindAsset<AudioClip>(name);
+                return clip!;
+            } }
+
+        public VanillaAudioClip(string name)
+        {
+            this.name = name;
+        }
+    }
     static public Sprite PopUpBackSprite { get; private set; } = null!;
     static public Sprite FullScreenSprite { get; private set; } = null!;
     static public Sprite TextButtonSprite { get; private set; } = null!;
     static public Sprite CloseButtonSprite { get; private set; } = null!;
     static public TMPro.TextMeshPro StandardTextPrefab { get; private set; } = null!;
-    static public AudioClip HoverClip { get; private set; } = null!;
-    static public AudioClip SelectClip { get; private set; } = null!;
+    static public VanillaAudioClip HoverClip { get; private set; } = new("UI_Hover");
+    static public VanillaAudioClip SelectClip { get; private set; } = new("UI_Select");
+    static public VanillaAudioClip HnSTransformClip { get; private set; } = new("HnS_ImpostorScream");
     static public Material StandardMaskedFontMaterial { get {
             if (standardMaskedFontMaterial == null) standardMaskedFontMaterial = UnityHelper.FindAsset<Material>("LiberationSans SDF - BlackOutlineMasked")!;
             return standardMaskedFontMaterial!;
@@ -66,15 +83,12 @@ public class VanillaAsset
     static public Vector2 ConvertFromMinimapPosToWorld(Vector2 minimapPos, byte mapId) => ConvertFromMinimapPosToWorld(minimapPos, GetMapCenter(mapId), GetMapScale(mapId));
 
     static public void LoadAssetAtInitialize()
-    {
-        HoverClip = UnityHelper.FindAsset<AudioClip>("UI_Hover")!;
-        SelectClip = UnityHelper.FindAsset<AudioClip>("UI_Select")!;
-
+    {   
         PlayerOptionsMenuPrefab = UnityHelper.FindAsset<PlayerCustomizationMenu>("LobbyPlayerCustomizationMenu")!;
     }
 
-    public static void PlaySelectSE() => SoundManager.Instance.PlaySound(SelectClip, false, 0.8f);
-    public static void PlayHoverSE() => SoundManager.Instance.PlaySound(HoverClip, false, 0.8f);
+    public static void PlaySelectSE() => SoundManager.Instance.PlaySound(SelectClip.Clip, false, 0.8f);
+    public static void PlayHoverSE() => SoundManager.Instance.PlaySound(HoverClip.Clip, false, 0.8f);
 
     static public IEnumerator CoLoadAssetOnTitle()
     {
@@ -187,6 +201,8 @@ public class VanillaAsset
         GameObject.Destroy(display.GetComponent<HnSImpostorScreamSfx>());
 
         display.gameObject.SetActive(true);
+
+        GameObject.Destroy(display.GetComponent<UncertifiedPlayer>());
 
         return display.AddComponent<PlayerDisplay>();
     }

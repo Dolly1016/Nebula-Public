@@ -17,6 +17,7 @@ public enum NebulaAudioClip {
     Trapper3s,
     TrapperKillTrap,
     Camera,
+    PaparazzoDisclose,
     FakeSabo,
     Destroyer1,
     Destroyer2,
@@ -24,7 +25,14 @@ public enum NebulaAudioClip {
     HadarDive,
     HadarGush,
     Justice1,
+    Bubble1,
+    Bubble2,
+    BubbleLong,
     Justice2,
+    ExplosionFar1,
+    ExplosionFar2,
+    ExplosionNear,
+    MeteorAlert,
 }
 
 public static class SoundManagerHelper
@@ -77,6 +85,7 @@ public static class NebulaAsset
         WhiteShader = Load<Shader>("Sprites-White");
         ProgressShader = Load<Shader>("Sprites-Progress");
         HSVShader = Load<Shader>("Sprites-HSV");
+        HSVNAShader = Load<Shader>("Sprites-HSV-NoAlpha");
         MeshRendererShader = Load<Shader>("Sprites-ForMeshRenderer");
         MeshRendererMaskedShader = Load<Shader>("Sprites-ForMeshRendererMasked");
 
@@ -102,6 +111,14 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.HadarGush] = Load<AudioClip>("HadarReappear.wav");
         audioMap[NebulaAudioClip.Justice1] = Load<AudioClip>("Justice1.mp3");
         audioMap[NebulaAudioClip.Justice2] = Load<AudioClip>("Justice2.mp3");
+        audioMap[NebulaAudioClip.PaparazzoDisclose] = Load<AudioClip>("PaparazzoDisclose.mp3");
+        audioMap[NebulaAudioClip.Bubble1] = Load<AudioClip>("Bubble1.mp3");
+        audioMap[NebulaAudioClip.Bubble2] = Load<AudioClip>("Bubble2.mp3");
+        audioMap[NebulaAudioClip.BubbleLong] = Load<AudioClip>("BubbleLong.mp3");
+        audioMap[NebulaAudioClip.ExplosionFar1] = Load<AudioClip>("ExplosionFar.mp3");
+        audioMap[NebulaAudioClip.ExplosionFar2] = Load<AudioClip>("ExplosionFar2.mp3");
+        audioMap[NebulaAudioClip.ExplosionNear] = Load<AudioClip>("ExplosionNear.mp3");
+        audioMap[NebulaAudioClip.MeteorAlert] = Load<AudioClip>("MeteorAlert.mp3");
 
         PaparazzoShot = Load<GameObject>("PhotoObject");
 
@@ -176,6 +193,7 @@ public static class NebulaAsset
     static public Shader WhiteShader { get; private set; } = null!;
     static public Shader ProgressShader { get; private set; } = null!;
     static public Shader HSVShader { get; private set; } = null!;
+    static public Shader HSVNAShader { get; private set; } = null!;
     static public Shader MeshRendererShader { get; private set; } = null!;
     static public Shader MeshRendererMaskedShader { get; private set; } = null!;
 
@@ -201,12 +219,12 @@ public static class NebulaAsset
     public static GameObject[] DivMap { get; private set; } = new GameObject[6];
     private static Dictionary<NebulaAudioClip, AudioClip> audioMap = new();
 
-    public static void PlaySE(NebulaAudioClip clip, bool oneshot = false)
+    public static void PlaySE(NebulaAudioClip clip, bool oneshot = false, float volume = 0.8f)
     {
         if (oneshot)
-            SoundManager.Instance.PlayOneShot(audioMap[clip], false, 0.8f);
+            SoundManager.Instance.PlayOneShot(audioMap[clip], false, volume);
         else
-            SoundManager.Instance.PlaySound(audioMap[clip],false,0.8f);
+            SoundManager.Instance.PlaySound(audioMap[clip],false,volume);
     }
 
     public static void PlaySE(NebulaAudioClip clip, Vector2 pos, float minDistance, float maxDistance, float volume = 1f) => PlaySE(audioMap[clip], pos, minDistance, maxDistance);
@@ -215,27 +233,33 @@ public static class NebulaAsset
     {
         var audioSource = UnityHelper.CreateObject<AudioSource>("SEPlayer", null, pos);
 
-        float v = (SoundManager.SfxVolume + 80) / 80f;
-        v = 1f - v;
-        v = v * v;
-        v = 1f - v;
-        audioSource.volume = v * volume;
+        audioSource.volume = volume;
 
         audioSource.transform.position = pos;
         audioSource.priority = 0;
-        audioSource.spatialBlend = 1;
+        audioSource.spatialBlend = 1f;
         audioSource.clip = clip;
         audioSource.loop = false;
         audioSource.playOnAwake = false;
         audioSource.maxDistance = maxDistance;
         audioSource.minDistance = minDistance;
         audioSource.rolloffMode = UnityEngine.AudioRolloffMode.Linear;
+        audioSource.outputAudioMixerGroup = SoundManager.Instance.SfxChannel;
         audioSource.PlayOneShot(audioSource.clip);
 
         IEnumerator CoPlay()
         {
-            yield return new WaitForSeconds(audioSource.clip.length);
-            while (audioSource.isPlaying) yield return null;
+            Camera.main.gameObject.TryGetComponent<AudioListener>(out var listener);
+            while (audioSource.isPlaying)
+            {
+                if (listener)
+                {
+                    //至近距離の音は指向性を無くす
+                    float distance = listener.transform.position.Distance(audioSource.transform.position);
+                    audioSource.spatialBlend = distance < 0.5f ? 0f : distance < 1.5f ? distance - 0.5f : 1f;
+                }
+                yield return null;
+            }
             GameObject.Destroy(audioSource.gameObject);
             yield break;
         }

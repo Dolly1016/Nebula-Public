@@ -218,6 +218,43 @@ public class NebulaSyncStandardObject : NebulaSyncObject, IReleasable
         base.OnReleased();
         if(MyRenderer) GameObject.Destroy(MyRenderer.gameObject);
     }
+
+    protected static SystemConsole SystemConsolize(GameObject obj, SpriteRenderer? renderer, ImageNames image, Minigame minigamePrefab, float usableDistance = 1f)
+    {
+        obj.layer = LayerMask.NameToLayer("ShortObjects");
+        PassiveButton button = obj.GetComponent<PassiveButton>();
+        Collider2D collider = obj.GetComponent<Collider2D>();
+        
+        var console = obj.AddComponent<SystemConsole>();
+        console.usableDistance = usableDistance;
+        console.MinigamePrefab = minigamePrefab;
+        console.useIcon = image;
+        
+        if (renderer != null)
+        {
+            console.Image = renderer;
+            console.Image.material = VanillaAsset.GetHighlightMaterial();
+        }
+
+
+        if (!button)
+        {
+            button = obj.AddComponent<PassiveButton>();
+            button.OnMouseOut = new UnityEngine.Events.UnityEvent();
+            button.OnMouseOver = new UnityEngine.Events.UnityEvent();
+            button._CachedZ_k__BackingField = 0.1f;
+            button.CachedZ = 0.1f;
+        }
+
+        if (!collider)
+        {
+            var cCollider = obj.AddComponent<CircleCollider2D>();
+            cCollider.radius = 0.4f;
+            cCollider.isTrigger = true;
+        }
+
+        return console;
+    }
 }
 
 public class NebulaSyncShadowObject : NebulaSyncStandardObject, IReleasable

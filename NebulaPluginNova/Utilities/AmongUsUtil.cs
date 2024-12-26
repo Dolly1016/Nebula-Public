@@ -1,8 +1,11 @@
 ﻿using AmongUs.GameOptions;
 using Il2CppInterop.Runtime.Injection;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
 using UnityEngine;
+using Virial.Events.Player;
+using Virial.Game;
 using static Il2CppSystem.Xml.XmlWellFormedWriter.AttributeValueCache;
 
 namespace Nebula.Utilities;
@@ -11,12 +14,12 @@ file static class IgnoreShadowHelpers
 {
     static public void SetIgnoreShadow(bool ignore = true, bool showNameText = true)
     {
-        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) p.Unbox().UpdateVisibility(false, ignore, showNameText);
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) p.Unbox().UpdateVisibility(false, ignore, showNameText);
     }
 
     static public void ResetIgnoreShadow()
     {
-        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) p.Unbox().UpdateVisibility(false, !NebulaGameManager.Instance.WideCamera.DrawShadow);
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) p.Unbox().UpdateVisibility(false, !NebulaGameManager.Instance.WideCamera.DrawShadow);
     }
 }
 file class IgnoreShadowScope : IDisposable
@@ -88,14 +91,14 @@ public static class AmongUsUtil
         SetCamTarget(CurrentCamTarget == target1 ? target2 : target1);
     }
 
-    public static float GetShadowSize()
-    {
-        var shadowCollab = Camera.main.GetComponentInChildren<ShadowCollab>();
-        return shadowCollab.ShadowCamera.orthographicSize;
-    }
+    public static ShadowCollab GetShadowCollab() => Camera.main.GetComponentInChildren<ShadowCollab>();
+    public static float GetShadowSize() => GetShadowCollab().ShadowCamera.orthographicSize;
+    
+    public static Vector2 ConvertPosFromGameWorldToScreen(Vector2 pos)=> UnityHelper.WorldToScreenPoint(NebulaGameManager.Instance?.WideCamera.ConvertToWideCameraPos(pos) ?? Vector2.zero, LayerExpansion.GetObjectsLayer());
+
     public static void ChangeShadowSize(float orthographicSize = 3f)
     {
-        var shadowCollab = Camera.main.GetComponentInChildren<ShadowCollab>();
+        var shadowCollab = GetShadowCollab();
         shadowCollab.ShadowCamera.orthographicSize = orthographicSize;
         shadowCollab.ShadowQuad.transform.localScale = new Vector3(orthographicSize * Camera.main.aspect, orthographicSize) * 2f;
     }
@@ -111,6 +114,10 @@ public static class AmongUsUtil
     public static bool InCommSab => PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer);
     public static bool InAnySab => PlayerTask.PlayerHasTaskOfType<SabotageTask>(PlayerControl.LocalPlayer);
     public static PoolablePlayer PoolablePrefab => HudManager.Instance.IntroPrefab.PlayerPrefab;
+    public static PoolablePlayer GetPlayerIcon(OutfitCandidate outfit, Transform? parent, Vector3 position, Vector3 scale, bool flip = false, bool includePet = true)
+        => GetPlayerIcon(outfit.Outfit.outfit, parent, position, scale, flip, includePet);
+    public static PoolablePlayer GetPlayerIcon(OutfitDefinition outfit, Transform? parent, Vector3 position, Vector3 scale, bool flip = false, bool includePet = true)
+        =>GetPlayerIcon(outfit.outfit, parent, position, scale, flip, includePet);
     public static PoolablePlayer GetPlayerIcon(NetworkedPlayerInfo.PlayerOutfit outfit, Transform? parent,Vector3 position,Vector3 scale,bool flip = false, bool includePet = true)
     {
         var player = GameObject.Instantiate(PoolablePrefab);
@@ -148,14 +155,21 @@ public static class AmongUsUtil
 
         return player;
     }
+
+    public static SpriteRenderer GenerateFullscreen(Color color)
+    {
+        var flash = GameObject.Instantiate(HudManager.Instance.FullScreen, HudManager.Instance.transform);
+        flash.color = color;
+        flash.enabled = true;
+        flash.gameObject.active = true;
+        return flash;
+    }
+
     public static void PlayCustomFlash(Color color, float fadeIn, float fadeOut, float maxAlpha = 0.5f, float maxDuration = 0f)
     {
         float duration = fadeIn + fadeOut;
 
-        var flash = GameObject.Instantiate(HudManager.Instance.FullScreen, HudManager.Instance.transform);
-        flash.color = color.AlphaMultiplied(0f);
-        flash.enabled = true;
-        flash.gameObject.active = true;
+        var flash = GenerateFullscreen(color);
 
         IEnumerator CoPlayFlash()
         {
@@ -225,12 +239,17 @@ public static class AmongUsUtil
 
     static public void RpcCleanDeadBody(byte bodyId,byte sourceId=byte.MaxValue,TranslatableTag? relatedTag = null)
     {
+        if (Helpers.CurrentMonth == 11)
+        {
+            var deadBodyPlayer = NebulaGameManager.Instance!.GetPlayer(bodyId);
+            if (!(deadBodyPlayer?.MyKiller?.AmOwner ?? true) && NebulaGameManager.Instance!.CurrentTime - (deadBodyPlayer.DeathTime ?? 0f) < 5f) new StaticAchievementToken("freshWine");
+        }
         RpcCleanDeadBodyDef.Invoke(new() { TargetId = bodyId, SourceId = sourceId, RelatedTag = relatedTag });
     }
 
     internal static GamePlayer? GetHolder(this DeadBody body)
     {
-        return NebulaGameManager.Instance?.AllPlayerInfo().FirstOrDefault((p) => p.HoldingAnyDeadBody && p.HoldingDeadBody?.PlayerId == body.ParentId);
+        return NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault((p) => p.HoldingAnyDeadBody && p.HoldingDeadBody?.PlayerId == body.ParentId);
     }
 
 
@@ -397,6 +416,7 @@ public static class AmongUsUtil
         return "Invalid";
     }
 
+    static public int NumOfImpostors => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumImpostors);
     static public int NumOfShortTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumShortTasks);
     static public int NumOfCommonTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumCommonTasks);
     static public int NumOfLongTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumLongTasks);
@@ -421,7 +441,7 @@ public static class AmongUsUtil
     {
         if (addVanillaCoolDown) coolDown += (float)GameManager.Instance.LogicOptions.GetEmergencyCooldown();
 
-        if (addExtraCoolDown && (NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0) < GeneralConfigurations.EarlyExtraEmergencyCoolDownCondOption)
+        if (addExtraCoolDown && (NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.IsDead) ?? 0) < GeneralConfigurations.EarlyExtraEmergencyCoolDownCondOption)
             coolDown += GeneralConfigurations.EarlyExtraEmergencyCoolDownOption;
 
         ShipStatus.Instance.EmergencyCooldown = coolDown;
@@ -441,6 +461,14 @@ public static class AmongUsUtil
         if (playSound) SoundManager.Instance.PlaySoundImmediate(notifier.settingsChangeSound, false, 1f, 1f, null);
     }
 
+    public static void SetHue(this GameObject rendererHolder, float hue)
+    {
+        rendererHolder.GetComponentsInChildren<Renderer>().Do(renderer =>
+        {
+            renderer.material = new Material(NebulaAsset.HSVShader);
+            renderer.sharedMaterial.SetFloat("_Hue", hue);
+        });
+    }
     public static (GameObject obj, NoisemakerArrow arrow) InstantiateNoisemakerArrow(Vector2 targetPos, bool withSound = false, float? hue = null)
     {
         var noisemaker = AmongUsUtil.GetRolePrefab<NoisemakerRole>();
@@ -467,21 +495,15 @@ public static class AmongUsUtil
             deathArrow.gameObject.SetActive(true);
             deathArrow.target = targetPos;
 
-            if (hue.HasValue)
-            {
-                deathArrow.GetComponentsInChildren<SpriteRenderer>().Do(renderer =>
-                {
-                    renderer.material = new Material(NebulaAsset.HSVShader);
-                    renderer.sharedMaterial.SetFloat("_Hue", 314);
-                });
-            }
+            if (hue.HasValue) deathArrow.gameObject.SetHue(hue.Value);
+            
             return (gameObject, deathArrow);
         }
 
         return (null, null)!;
     }
 
-    public static void Ping(Vector2[] pos, bool smallenNearPing, bool playSE = true, float pitch = 1f)
+    public static void Ping(Vector2[] pos, bool smallenNearPing, bool playSE = true, float pitch = 1f, Action<PingBehaviour>? postProcess = null)
     {
         if (!HudManager.InstanceExists) return;
 
@@ -501,6 +523,8 @@ public static class AmongUsUtil
             if (playSE) SoundManager.Instance.PlaySound(ping.soundOnEnable, false, 1f, null).pitch = pitch;
 
             pings[i++] = ping;
+
+            postProcess?.Invoke(ping);
         }
 
         IEnumerator GetEnumarator()

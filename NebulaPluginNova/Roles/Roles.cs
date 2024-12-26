@@ -3,6 +3,7 @@ using Nebula.Compat;
 using Nebula.Modules.GUIWidget;
 using Nebula.Scripts;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Runtime;
@@ -46,7 +47,7 @@ internal class NoSRoleSetUp
         SetNebulaTeams();
         foreach (var assembly in AddonScriptManager.ScriptAssemblies.Where(script => script.Behaviour.LoadRoles).Select(s => s.Assembly).Prepend(Assembly.GetAssembly(typeof(Roles))))
         {
-            var types = assembly?.GetTypes().Where((type) => type.IsAssignableTo(typeof(DefinedAssignable)));
+            var types = assembly?.GetTypes().Where((type) => type.IsAssignableTo(typeof(DefinedAssignable)) || type.IsAssignableTo(typeof(PerkFunctionalInstance)));
             foreach(var type in types ?? []) System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
         }
     }
@@ -55,9 +56,27 @@ internal class NoSRoleSetUp
 [NebulaPreprocess(PreprocessPhase.FixRoles)]
 public class Roles
 {
-    static public IReadOnlyList<DefinedRole> AllRoles { get; private set; } = null!;
-    static public IReadOnlyList<DefinedModifier> AllModifiers { get; private set; } = null!;
-    static public IReadOnlyList<DefinedGhostRole> AllGhostRoles { get; private set; } = null!;
+    static public IReadOnlyList<DefinedRole> AllRoles { get; private set; } = [];
+    static public IReadOnlyList<DefinedModifier> AllModifiers { get; private set; } = [];
+    static public IReadOnlyList<DefinedGhostRole> AllGhostRoles { get; private set; } = [];
+
+    static public DefinedRole? GetRole(int id)
+    {
+        if (id <= 0) return null;
+        return AllRoles[id];
+    }
+
+    static public DefinedModifier? GetModifier(int id)
+    {
+        if (id <= 0) return null;
+        return AllModifiers[id];
+    }
+
+    static public DefinedGhostRole? GetGhostRole(int id)
+    {
+        if (id <= 0) return null;
+        return AllGhostRoles[id];
+    }
 
     static public IEnumerable<DefinedAssignable> AllAssignables()
     {
@@ -77,6 +96,11 @@ public class Roles
     static private List<DefinedGhostRole>? allGhostRoles = new();
     static private List<DefinedModifier>? allModifiers = new();
     static private List<Team>? allTeams = new();
+
+    static private Dictionary<string, PerkFunctionalDefinition> allPerks = new();
+    static internal IEnumerable<PerkFunctionalDefinition> AllPerks => allPerks.Values;
+    static internal void Register(PerkFunctionalDefinition definition) => allPerks[definition.Id] = definition;
+    static internal PerkFunctionalDefinition GetPerk(string id) => allPerks[id];
 
     static public void CheckNeedingHandshake(object assignable)
     {

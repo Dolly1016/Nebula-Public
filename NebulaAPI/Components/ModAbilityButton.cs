@@ -4,7 +4,7 @@ using Virial.Media;
 namespace Virial.Components;
 
 
-public interface ModAbilityButton : IReleasable
+public interface ModAbilityButton : IReleasable, ILifespan
 {
     public enum LabelType
     {
@@ -40,4 +40,6 @@ public interface ModAbilityButton : IReleasable
 
     ModAbilityButton BindKey(VirtualKeyInput input);
     ModAbilityButton BindSubKey(VirtualKeyInput input);
+
+    IKillButtonLike GetKillButtonLike();
 }

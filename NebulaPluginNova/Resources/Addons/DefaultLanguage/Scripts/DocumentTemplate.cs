@@ -82,19 +82,20 @@ static public class RoleDocumentHelper
         var attr = new Virial.Text.TextAttribute(NebulaAPI.GUI.GetAttribute(AttributeParams.OblongLeft)) { FontSize = new(1.85f) };
         var headerAttr = new Virial.Text.TextAttribute(NebulaAPI.GUI.GetAttribute(AttributeParams.StandardLeft)) { FontSize = new(1.1f) };
 
-        GUIWidget AchievementTitleWidget(Nebula.Modules.AbstractAchievement a) => new HorizontalWidgetsHolder(GUIAlignment.Left,
+        GUIWidget AchievementTitleWidget(Nebula.Modules.INebulaAchievement a) => new HorizontalWidgetsHolder(GUIAlignment.Left,
                 NebulaAPI.GUI.Image(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(a.Trophy)), new Virial.Compat.FuzzySize(0.38f, 0.38f)),
                 NebulaAPI.GUI.Margin(new(0.15f,0.1f)),
                 NebulaAPI.GUI.VerticalHolder(GUIAlignment.Left,
                 NebulaAPI.GUI.VerticalMargin(0.12f),
                 new NoSGUIText(GUIAlignment.Left, headerAttr, a.GetHeaderComponent()),
                 NebulaAPI.GUI.VerticalMargin(-0.12f),
-                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(AbstractAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, false, false, a.IsCleared) }
+                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, false, false, a.IsCleared) }
                 ));
 
-        var achievements = Nebula.Modules.NebulaAchievementManager.AllAchievements.Where(a => assignable.AchievementGroups.Any(role => role == a.Category.role) && !a.IsHidden).Select(AchievementTitleWidget);
+        var achievements = Nebula.Modules.NebulaAchievementManager.AllAchievements.Where(a => assignable.AchievementGroups.Any(role => a.RelatedRole.Contains(role)) && !a.IsHidden).ToArray();
+        var widgets = achievements.Where(a => a.RelatedRole.Count() <= 1).Concat(achievements.Where(a => a.RelatedRole.Count() > 1)).Select(AchievementTitleWidget);
 
-        return GetChapter("document.titles", [NebulaAPI.GUI.VerticalHolder(GUIAlignment.Left, achievements)]);
+        return GetChapter("document.titles", [NebulaAPI.GUI.VerticalHolder(GUIAlignment.Left, widgets)]);
     }
     static private string ReplaceVariableText(string orig) => orig.Replace("<var>", "<b><color=#00ffffff>").Replace("</var>", "</color></b>");
     static public GUIWidget GetChapter(string chapterName) => GetChapter(chapterName, [NebulaAPI.GUI.RawText(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), ReplaceVariableText(NebulaAPI.Language.Translate(chapterName + ".main")))]);

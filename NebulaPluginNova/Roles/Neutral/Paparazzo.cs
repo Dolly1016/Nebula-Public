@@ -82,19 +82,22 @@ public class PaparazzoShot : MonoBehaviour
         GameObject camObj = new GameObject();
         camObj.transform.SetParent(transform);
         camObj.transform.localScale = new Vector3(1, 1);
-        camObj.transform.localPosition = new Vector3(0f, 0f, 0f);
+        camObj.transform.localPosition = new Vector3(0f, 0f, -10f);
         camObj.transform.localEulerAngles = new Vector3(0, 0, 0);
         
         //zを名前テキストより奥へ
         var pos = camObj.transform.position;
         pos.z = -0.4f;
         camObj.transform.position = pos;
+        centerRenderer.gameObject.SetActive(false);
 
         Camera cam = camObj.AddComponent<Camera>();
         cam.orthographic = true;
         cam.orthographicSize = transform.localScale.y * frameRenderer.size.y * 0.5f;
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.cullingMask = 0b1101100000001;
+        cam.nearClipPlane = -100;
+        cam.farClipPlane = 100;
         cam.enabled = true;
         RenderTexture rt = new RenderTexture((int)(frameRenderer.size.x * 100f * scale.x), (int)(frameRenderer.size.y * 100f * scale.y), 16);
         rt.Create();
@@ -116,6 +119,7 @@ public class PaparazzoShot : MonoBehaviour
         GameObject.Destroy(rt);
         GameObject.Destroy(camObj);
 
+        centerRenderer.gameObject.SetActive(true);
         centerRenderer.transform.localPosition = new(0f, 0f, 0.1f);
         centerRenderer.transform.localScale = new(1f / scale.x, 1f / scale.y, 0.1f);
         centerRenderer.sprite = sprite;
@@ -142,7 +146,9 @@ public class PaparazzoShot : MonoBehaviour
             }
         }
 
-        foreach(var body in Helpers.AllDeadBodies())
+        Paparazzo.StatsPlayers.Progress(playerNum);
+
+        foreach (var body in Helpers.AllDeadBodies())
         {
             if (collider.OverlapPoint(body.transform.position))
             {
@@ -266,6 +272,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
     private Paparazzo() : base("paparazzo", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [ShotCoolDownOption, RequiredSubjectsOption, RequiredDisclosedOption, VentConfiguration])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Paparazzo.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
@@ -276,6 +283,8 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.paparazzo.vent", true);
 
     static public Paparazzo MyRole = new Paparazzo();
+    static private GameStatsEntry StatsPhoto = NebulaAPI.CreateStatsEntry("stats.paparazzo.photo", GameStatsCategory.Roles, MyRole);
+    static internal GameStatsEntry StatsPlayers = NebulaAPI.CreateStatsEntry("stats.paparazzo.players", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -331,16 +340,24 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                 shotsHolder = HudContent.InstantiateContent("Pictures", true, true, false, true);
                 this.Bind(shotsHolder.gameObject);
 
-                shotButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "paparazzo.camera").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction,"paparazzo.toggle");
+                shotButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "paparazzo.camera").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction,"paparazzo.toggle", true);
                 shotButton.SetSprite(cameraButtonSprite.GetSprite());
                 shotButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && MyFinder != null;
                 shotButton.Visibility = (button) => !MyPlayer.IsDead;
                 shotButton.OnClick = (button) => {
                     GameObject.Destroy(MyFinder?.MyObject?.GetComponent<PassiveButton>());
-                    MyFinder?.MyObject?.TakePicture(shots, success => acTokenCommon.Value += success ? 1 : 0);
-                    MyFinder?.Detach();
+
+                    IEnumerator CoTakePicture(ComponentBinding<PaparazzoShot>? finder)
+                    {
+                        yield return new WaitForEndOfFrame();
+                        finder?.MyObject?.TakePicture(shots, success => acTokenCommon.Value += success ? 1 : 0);
+                        finder?.Detach();
+                    }
+                    NebulaManager.Instance.StartCoroutine(CoTakePicture(MyFinder).WrapToIl2Cpp());
                     MyFinder = null;
                     shotButton.StartCoolDown();
+
+                    StatsPhoto.Progress();
                 };
                 shotButton.OnSubAction= (button) => MyFinder?.MyObject!.ToggleDirection();
                 shotButton.CoolDownTimer = Bind(new Timer(0f, ShotCoolDownOption).SetAsAbilityCoolDown().Start());
@@ -472,14 +489,14 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                         if (MyPlayer.IsDead) return;
 
                         int aliveMask = 0;
-                        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) if (!p.IsDead) aliveMask |= 1 << p.PlayerId;
+                        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) if (!p.IsDead) aliveMask |= 1 << p.PlayerId;
                         DisclosedMask |= (shot.playerMask & aliveMask);
                         RpcShareState.Invoke((MyPlayer.PlayerId, CapturedMask, DisclosedMask));
 
                         SharePicture((shot.playerMask & aliveMask), shot.shot.centerRenderer.transform.localScale.x, shot.shot.transform.localEulerAngles.z, shot.shot.centerRenderer.sprite.texture);
                         shareFlag = true;
 
-                        if(acTokenChallenge != null) acTokenChallenge.Value.lastAlive = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && !p.AmOwner);
+                        if(acTokenChallenge != null) acTokenChallenge.Value.lastAlive = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && !p.AmOwner);
                     });
 
 
@@ -492,7 +509,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         {
             if (acTokenChallenge != null)
             {
-                acTokenChallenge.Value.cleared |= (acTokenChallenge.Value.lastAlive ?? 0) - NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && !p.AmOwner) >= 4;
+                acTokenChallenge.Value.cleared |= (acTokenChallenge.Value.lastAlive ?? 0) - NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && !p.AmOwner) >= 4;
                 acTokenChallenge.Value.lastAlive = null;
             }
         }
@@ -520,7 +537,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         [OnlyHost]
         void CheckWin(GameUpdateEvent ev)
         {
-            if(CheckPaparazzoWin() && !MeetingHud.Instance) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.PaparazzoWin, GameEndReason.Situation);
+            if(CheckPaparazzoWin() && !MeetingHud.Instance) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.PaparazzoWin, GameEndReason.SpecialSituation);
         }
     }
 
@@ -587,6 +604,8 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                 obj.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => obj.layer = LayerExpansion.GetUILayer()));
                 IEnumerator CoShow()
                 {
+                    NebulaAsset.PlaySE(NebulaAudioClip.PaparazzoDisclose, volume: 1f);
+
                     float scale = 0f;
                     while (scale < 0.4f)
                     {

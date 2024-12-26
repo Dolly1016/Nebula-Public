@@ -18,6 +18,12 @@ static internal class ConfigurationAssets
 {
     static internal TextComponent LeftArrow = new RawTextComponent("<<");
     static internal TextComponent RightArrow = new RawTextComponent(">>");
+    static internal Virial.Media.GUIWidget Semicolon = new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":"));
+    static internal (Action action, bool reopenOverlay)? GetCopyAction(string id) => DebugTools.ShowConfigurationId ? (() =>
+    {
+        ClipboardHelper.PutClipboardString(id);
+        NebulaManager.Instance.SetHelpWidget(PassiveButtonManager.Instance.currentOver, GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OverlayContent), "Copied!!"));
+    }, false) : null;
     static internal GUIWidgetSupplier? GetOptionOverlay(string id)
     {
         string detailId = id + ".detail";
@@ -30,7 +36,13 @@ static internal class ConfigurationAssets
             if (display != null) widget = new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentStandard), new RawTextComponent(display));
         }
 
-        if (widget == null) return null;
+        if (widget == null)
+        {
+            if (DebugTools.ShowConfigurationId)
+                return GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentStandard), "[NODOC] " + detailId);
+            else
+                return null;
+        }
         return widget;
     }
 }
@@ -46,8 +58,8 @@ internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
         this.Title = new TranslateTextComponent(id);
         this.val = new BoolConfigurationValue(id, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id), OnClickText = ConfigurationAssets.GetCopyAction(id) },
+            ConfigurationAssets.Semicolon,
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
             new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new LazyTextComponent(() => ValueAsDisplayString)) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }, Color = Color.Lerp(Color.white, GetValue() ? Color.cyan : Color.red ,0.65f) }
             );
@@ -79,8 +91,8 @@ internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfigurat
         this.Title = title ?? new TranslateTextComponent(id);
         this.val = new IntegerConfigurationValue(id, selection, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id), OnClickText = ConfigurationAssets.GetCopyAction(id) },
+            ConfigurationAssets.Semicolon,
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => ValueAsDisplayString)),
             new GUISpinButton(GUIAlignment.Center, v => { val.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
@@ -121,8 +133,8 @@ internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
         this.Title = title ?? new TranslateTextComponent(id);
         this.val = new FloatConfigurationValue(id, selection, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id), OnClickText = ConfigurationAssets.GetCopyAction(id) },
+            ConfigurationAssets.Semicolon,
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => ValueAsDisplayString)),
             new GUISpinButton(GUIAlignment.Center, v => { val.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
@@ -170,7 +182,7 @@ internal class StringConfigurationImpl : Virial.Configuration.ValueConfiguration
         this.Title = title ?? new TranslateTextComponent(id);
         this.val = new SelectionConfigurationValue(id, defaultIndex, selection.Length);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id) },
+            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id), OnClickText = ConfigurationAssets.GetCopyAction(id) },
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f,0f)),
             new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },

@@ -54,7 +54,7 @@ public class VoiceChatRadio
         get
         {
             int mask = 0;
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo()) if (predicate.Invoke(p)) mask |= 1 << p.PlayerId;
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) if (predicate.Invoke(p)) mask |= 1 << p.PlayerId;
             return mask;
         } 
     }

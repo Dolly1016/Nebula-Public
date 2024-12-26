@@ -14,6 +14,11 @@ public interface RoleTeam
     public Virial.Color Color { get; }
     public int Id { get; }
     public TeamRevealType RevealType { get; }
+
+    /// <summary>
+    /// 陣営ベースのキルクールダウンを取得します。
+    /// </summary>
+    public float KillCooldown { get; }
 }
 
 public static class NebulaTeams

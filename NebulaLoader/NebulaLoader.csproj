@@ -10,6 +10,7 @@
 
   <ItemGroup>
 	<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
+	  <Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
   </ItemGroup>
 
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">

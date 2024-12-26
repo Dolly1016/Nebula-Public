@@ -47,6 +47,7 @@ public class EffectCircle : MonoBehaviour
                     outerCircle = UnityHelper.CreateObject<SpriteRenderer>("OuterCircle", transform, new Vector3(0, 0, -10f), LayerExpansion.GetDefaultLayer());
                     outerCircle.sprite = outerCircleSprite.GetSprite();
                     outerCircle.color = Color;
+                    outerCircle.transform.localScale = Vector3.zero;
                 }
 
                 var scale = outerCircle.transform.localScale.x;
@@ -69,6 +70,7 @@ public class EffectCircle : MonoBehaviour
                     innerCircle = UnityHelper.CreateObject<SpriteRenderer>("InnerCircle", transform, new Vector3(0, 0, -10f), LayerExpansion.GetDefaultLayer());
                     innerCircle.sprite = innerCircleSprite.GetSprite();
                     innerCircle.color = Color;
+                    innerCircle.transform.localScale = Vector3.zero;
                 }
 
                 var scale = innerCircle.transform.localScale.x;

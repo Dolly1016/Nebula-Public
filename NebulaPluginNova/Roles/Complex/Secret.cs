@@ -100,12 +100,13 @@ public class Secret : DefinedRoleTemplate, DefinedRole
         new AchievementToken<int>("secret.challenge", 0, (_, achievement) =>
         {
             return NebulaGameManager.Instance!.AllAchievementTokens.Any(r =>
-            r.Achievement is AbstractAchievement a && a.Category.type == AchievementType.Challenge && a.Category.role != null && a.Id != "secret.challenge" && r.UniteTo(false) != AbstractAchievement.ClearState.NotCleared);
+            r.Achievement is AbstractAchievement a && a.AchievementType().Contains(AchievementType.Challenge) && !a.RelatedRole.IsEmpty() && a.Id != "secret.challenge" && r.UniteTo(false) != AbstractAchievement.ClearState.NotCleared);
         });
     }
     public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyNiceRole;
+        IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [ShownSecret.OptionRole];
 
         public NiceInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
@@ -168,6 +169,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
     public class EvilInstance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyEvilRole;
+        IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [ShownSecret.OptionRole];
         public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
             this.savedArgs = savedArgs;
@@ -205,9 +207,9 @@ public class Secret : DefinedRoleTemplate, DefinedRole
             if (AmongUsClient.Instance.AmHost && ShownSecret.EvilConditionTypeOption.GetValue() == 1)
             {
                 //死者、非インポスター、シークレットしかいないとき
-                if (NebulaGameManager.Instance?.AllPlayerInfo().All(p => p.IsDead || p.Role.Role.Category != RoleCategory.ImpostorRole || p.Role.Role == MyEvilRole) ?? false)
+                if (NebulaGameManager.Instance?.AllPlayerInfo.All(p => p.IsDead || p.Role.Role.Category != RoleCategory.ImpostorRole || p.Role.Role == MyEvilRole) ?? false)
                 {
-                    var selected = NebulaGameManager.Instance?.AllPlayerInfo().Where(p => p.Role.Role == MyEvilRole).ToArray().Random();
+                    var selected = NebulaGameManager.Instance?.AllPlayerInfo.Where(p => p.Role.Role == MyEvilRole).ToArray().Random();
                     if(selected != null && selected.Role is EvilInstance ei) ScheduleSendArousalRpc(selected, ei.savedArgs);
                 }
             }

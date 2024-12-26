@@ -17,7 +17,6 @@ public static class MainMenuSetUpPatch
 
     static void Postfix(MainMenuManager __instance)
     {
-
         __instance.PlayOnlineButton.OnClick.AddListener(() => IsLocalGame = false);
         __instance.playLocalButton.OnClick.AddListener(() => IsLocalGame = true);
 
@@ -117,6 +116,11 @@ public static class MainMenuSetUpPatch
         SetUpButton("title.buttons.developersStudio", () => {
             DevStudio.Open(__instance);
         });
+
+        SetUpButton("title.buttons.stats", () => {
+            StatsViewer.Open(__instance);
+        });
+
 
         var discordRenderer = UnityHelper.CreateObject<SpriteRenderer>("DiscordButton", NebulaScreen.transform, new Vector3(2.8f,-1.4f));
         discordRenderer.sprite = discordIconSprite.GetSprite();
@@ -281,10 +285,12 @@ public static class MainMenuSetUpPatch
                                 button.OnMouseOver.AddListener(() =>
                                 {
                                     text.color = Color.green;
+                                    if(version.Body!=null) NebulaManager.Instance.SetHelpWidget(button, version.Body);
                                 });
                                 button.OnMouseOut.AddListener(() =>
                                 {
                                     text.color = Color.white;
+                                    NebulaManager.Instance.HideHelpWidgetIf(button);
                                 });
                             }
                         });

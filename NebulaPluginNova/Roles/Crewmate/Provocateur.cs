@@ -20,7 +20,7 @@ public static class ExtraExileRoleSystem
         
         if(voters.Length == 0 && expandTargetWhenNobodyCanBeMarked)
         {
-            voters = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner && (includeImpostors || p.Role.Role.Category != RoleCategory.ImpostorRole)).ToArray();
+            voters = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.IsDead && !p.AmOwner && (includeImpostors || p.Role.Role.Category != RoleCategory.ImpostorRole)).ToArray();
         }
         if (voters.Length == 0) return;
         voters[System.Random.Shared.Next(voters.Length)]!.VanillaPlayer.ModMarkAsExtraVictim(player.VanillaPlayer, PlayerState.Embroiled, EventDetail.Embroil);
@@ -31,19 +31,25 @@ public class Provocateur : DefinedRoleTemplate, DefinedRole
 {
     private Provocateur() : base("provocateur", new(112, 225, 89), RoleCategory.CrewmateRole, Crewmate.MyTeam, [EmbroilCoolDownOption, EmbroilAdditionalCoolDownOption, EmbroilDurationOption]) { }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
 
     static private FloatConfiguration EmbroilCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration EmbroilAdditionalCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilAdditionalCoolDown", (0f, 30f, 2.5f), 5f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration EmbroilDurationOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilDuration", (1f, 20f, 1f), 5f, FloatConfigurationDecorator.Second);
 
     static public Provocateur MyRole = new Provocateur();
+    static private GameStatsEntry StatsTask = NebulaAPI.CreateStatsEntry("stats.provocateur.taskPhase", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsExile = NebulaAPI.CreateStatsEntry("stats.provocateur.exile", GameStatsCategory.Roles, MyRole);
 
-
+    [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player){}
+        public Instance(GamePlayer player, int embroilNum) : base(player){
+            this.embroilNum  = embroilNum;
+        }
+        private int embroilNum = 0;
+        int[] RuntimeAssignable.RoleArguments => [embroilNum];
 
         private ModAbilityButton embroilButton = null!;
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
@@ -57,32 +63,41 @@ public class Provocateur : DefinedRoleTemplate, DefinedRole
                 embroilButton.Availability = (button) => MyPlayer.CanMove;
                 embroilButton.Visibility = (button) => !MyPlayer.IsDead;
                 embroilButton.OnClick = (button) => {
-                    button.ActivateEffect();
+                    if (!button.EffectActive)
+                    {
+                        button.ActivateEffect();
+                        RpcShareEmbroilState.Invoke((MyPlayer, true));
+                    }
                 };
                 var coolDownTimer = Bind(new Timer(0f, EmbroilCoolDownOption).SetAsAbilityCoolDown().Start());
                 embroilButton.OnEffectEnd = (button) =>
                 {
+                    RpcShareEmbroilState.Invoke((MyPlayer, false));
                     coolDownTimer.Expand(EmbroilAdditionalCoolDownOption);
                     embroilButton.StartCoolDown();
                 };
                 embroilButton.CoolDownTimer = coolDownTimer;
-                embroilButton.EffectTimer = Bind(new Timer(0f, EmbroilDurationOption));
+                embroilButton.EffectTimer = Bind(new Timer(0f, EmbroilDurationOption + EmbroilAdditionalCoolDownOption * embroilNum));
                 embroilButton.SetLabel("embroil");
             }
         }
 
-        [Local, OnlyMyPlayer]
+        bool embroilActive = false;
+        [OnlyHost, OnlyMyPlayer]
         void OnMurdered(PlayerMurderedEvent ev)
         {
             if (ev.Murderer.AmOwner) return;
 
-            if (embroilButton.EffectActive && !ev.Murderer.IsDead)
+            if (embroilActive && !ev.Murderer.IsDead)
             {
-                MyPlayer.MurderPlayer(ev.Murderer,PlayerState.Embroiled,EventDetail.Embroil, KillParameter.NormalKill);
-                new StaticAchievementToken("provocateur.common2");
+
+
+                MyPlayer.MurderPlayer(ev.Murderer,PlayerState.Embroiled,EventDetail.Embroil, KillParameter.NormalKill, KillCondition.TargetAlive);
+                NebulaAchievementManager.RpcClearAchievement.Invoke(("provocateur.common2", MyPlayer));
+                NebulaAchievementManager.RpcProgressStats.Invoke((StatsTask.Id, MyPlayer));
 
                 var murdererRole = ev.Murderer.Role.Role;
-                if (murdererRole is Sniper or Raider && ev.Murderer.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) > 10f) new StaticAchievementToken("provocateur.challenge");
+                if (murdererRole is Sniper or Raider && ev.Murderer.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) > 10f) NebulaAchievementManager.RpcClearAchievement.Invoke(("provocateur.challenge", MyPlayer));
             }
         }
 
@@ -92,7 +107,20 @@ public class Provocateur : DefinedRoleTemplate, DefinedRole
 
             ExtraExileRoleSystem.MarkExtraVictim(MyPlayer);
             new StaticAchievementToken("provocateur.common1");
+            StatsExile.Progress();
         }
+
+        static private RemoteProcess<(GamePlayer player, bool isActive)> RpcShareEmbroilState = new(
+            "ShareEmbroilState",
+            (message, _) =>
+            {
+                if(message.player.Role is Instance provocateur)
+                {
+                    if (message.isActive) provocateur.embroilNum++;
+                    provocateur.embroilActive = message.isActive;
+                }
+            }
+            );
     }
 }
 

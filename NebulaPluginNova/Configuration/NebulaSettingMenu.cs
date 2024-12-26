@@ -143,7 +143,7 @@ public class NebulaSettingMenu : MonoBehaviour
         LeftHolder.SetWidget(new Vector2(2f, 3f), widget);
     }
 
-    private static TextAttributeOld RightTextAttr = new(TextAttributeOld.NormalAttr) { FontSize = 1.5f, FontMaxSize = 1.5f, FontMinSize = 0.7f, Size = new(3f, 5f), Alignment = TMPro.TextAlignmentOptions.TopLeft };
+    private static TextAttributeOld RightTextAttr = new(TextAttributeOld.NormalAttr) { FontSize = 1.5f, FontMaxSize = 1.5f, FontMinSize = 0.7f, Size = new(3f, 3.9f), Alignment = TMPro.TextAlignmentOptions.TopLeft };
 
     private void UpdateRightImage(Image? image)
     {

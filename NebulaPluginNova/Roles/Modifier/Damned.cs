@@ -1,4 +1,5 @@
 ﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Neutral;
 using Nebula.Utilities;
 using Virial;
 using Virial.Assignable;
@@ -15,6 +16,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 {
     private Damned() : base("damned", "DMD", new(Palette.ImpostorRed), [TakeOverRoleOfKillerOption, DamnedMurderMyKillerOption, KillDelayOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Damned.png");
     }
     
     static private BoolConfiguration TakeOverRoleOfKillerOption = NebulaAPI.Configurations.Configuration("options.role.damned.takeOverRoleOfKiller", true);
@@ -23,6 +25,8 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
     static public Damned MyRole = new Damned();
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+
+    [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
         DefinedModifier RuntimeModifier.Modifier => MyRole;
@@ -43,12 +47,15 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
         }
 
         [OnlyMyPlayer]
-        void CheckKill(PlayerCheckKillEvent ev)
+        void CheckKill(PlayerCheckKilledEvent ev)
         {
             //Damnedが反射するように発動することは無い
             if (ev.IsMeetingKill || ev.EventDetail == EventDetail.Curse) return;
             //自殺は考慮に入れない
             if (ev.Killer.PlayerId == MyPlayer.PlayerId) return;
+
+            //Avengerのキルは呪いを貫通する(このあと、Avengerに呪いを起こす)
+            if (ev.Killer.Role.Role == Avenger.MyRole && (ev.Killer.Role as Avenger.Instance)?.AvengerTarget == ev.Player) return;
 
             ev.Result = hasGuard ? KillResult.ObviousGuard : KillResult.Kill;
         }
@@ -72,6 +79,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                 RpcNoticeCurse.Invoke((MyPlayer.PlayerId, 1));
         }
 
+
         [OnlyMyPlayer]
         void OnGuard(PlayerGuardEvent ev)
         {
@@ -89,20 +97,58 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                     var myNextArgs = TakeOverRoleOfKillerOption ? nextArgs! : null;
                     CheckAchievement(myNextRole);
 
-
                     using (RPCRouter.CreateSection("DamedAction"))
                     {
-                        if (MyPlayer.MurderPlayer(ev.Murderer, PlayerState.Cursed, EventDetail.Curse, KillParameter.RemoteKill) == KillResult.Kill)
+                        if (ev.Murderer.IsDead)
                         {
                             MyPlayer.Unbox().RpcInvokerUnsetModifier(MyRole).InvokeSingle();
                             MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, myNextArgs).InvokeSingle();
+
+                        }
+                        else
+                        {
+                            ShareNextRole.Invoke((MyPlayer, myNextRole.Id, myNextArgs ?? []));
+                            MyPlayer.MurderPlayer(ev.Murderer, PlayerState.Cursed, EventDetail.Curse, KillParameter.RemoteKill);
                         }
                     }
+
                 }
                 NebulaManager.Instance.StartCoroutine(CoDelayKill().WrapToIl2Cpp());
             }
 
             if(AmOwner) AmongUsUtil.PlayQuickFlash(Palette.ImpostorRed);
+        }
+
+        [OnlyHost, OnlyMyPlayer]
+        void OnAnyoneCursed(PlayerKillPlayerEvent ev)
+        {
+            if(ev.Dead.PlayerState ==  PlayerState.Cursed)
+            {
+                using (RPCRouter.CreateSection("DamedAction"))
+                {
+                    MyPlayer.Unbox().RpcInvokerUnsetModifier(MyRole).InvokeSingle();
+                    MyPlayer.Unbox().RpcInvokerSetRole(nextRole ?? Impostor.DamnedImpostor.MyRole, nextArgs).InvokeSingle();
+                }
+            }
+        }
+
+        [OnlyHost, OnlyMyPlayer]
+        void OnMurdered(PlayerMurderedEvent ev) { 
+            if(ev.Murderer.Role.Role == Avenger.MyRole && (ev.Murderer.Role as Avenger.Instance)?.AvengerTarget == ev.Dead && ev.Dead.PlayerState == PlayerState.Dead)
+            {
+                nextRole = TakeOverRoleOfKillerOption ? ev.Dead.Role.Role : Impostor.DamnedImpostor.MyRole;
+                nextArgs = TakeOverRoleOfKillerOption ? ev.Dead.Role.RoleArguments : [];
+                GamePlayer? loverPair = null;
+                if (ev.Murderer.TryGetModifier<Lover.Instance>(out var lover)) loverPair = lover.MyLover.Get();
+
+                using (RPCRouter.CreateSection("DamedAction"))
+                {
+                    ev.Murderer.Unbox().RpcInvokerUnsetModifier(Lover.MyRole).InvokeSingle();
+                    loverPair?.Unbox().RpcInvokerUnsetModifier(Lover.MyRole).InvokeSingle();
+                    ev.Murderer.Unbox().RpcInvokerSetRole(nextRole, nextArgs).InvokeSingle();
+                    ev.Dead.Unbox().RpcInvokerSetRole(Ember.MyRole, null).InvokeSingle();
+                }
+            }
         }
 
         [Local]
@@ -124,8 +170,21 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                 });
             }
         }
+
+        public static RemoteProcess<(GamePlayer damnedPlayer, int roleId, int[] roleArg)> ShareNextRole = new(
+        "ShareDamnedNextRole",
+        (message, _) =>
+        {
+            if (message.damnedPlayer.TryGetModifier<Instance>(out var damned))
+            {
+                damned.nextRole = Roles.GetRole(message.roleId);
+                damned.nextArgs = message.roleArg;
+            }
+        }
+        );
     }
 
+    
 
     //Damnedであったプレイヤー本人が通知を受け取って実績を達成する
     public static RemoteProcess<(byte playerId, int type)> RpcNoticeCurse = new(

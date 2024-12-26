@@ -131,6 +131,19 @@ public class OnlyHost : Attribute
 }
 
 /// <summary>
+/// リスナに優先度を設定します。デフォルトの優先度は100で、値が大きいほど優先して実行されます。
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class EventPriority : Attribute
+{
+    public int Priority { get; private init; }
+    public EventPriority(int priority = 100)
+    {
+        Priority = priority;
+    }
+}
+
+/// <summary>
 /// ID付きドキュメントを表すクラスです。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class,AllowMultiple =true)]

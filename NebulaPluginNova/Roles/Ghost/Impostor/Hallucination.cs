@@ -59,25 +59,25 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
             scale.z = 0.001f;
             display.Cosmetics.transform.localScale = scale;
 
-            UpdateOutfit(originalPlayer.CurrentOutfit);
+            UpdateOutfit(originalPlayer.CurrentOutfit.outfit);
 
             allRenderers = display.gameObject.GetComponentsInChildren<SpriteRenderer>();
             allRenderers.Do(r => r.color = Color.clear);
         }
 
-        private void UpdateOutfit(Outfit outfit)
+        private void UpdateOutfit(NetworkedPlayerInfo.PlayerOutfit outfit)
         {
-            display.UpdateFromPlayerOutfit(outfit.outfit, false, true);
+            display.UpdateFromPlayerOutfit(outfit, false, true);
             display.Cosmetics.nameText.gameObject.SetActive(true);
             display.Cosmetics.nameText.transform.parent.localPosition = new(0f, 1f, -0.5f);
-            display.Cosmetics.nameText.text = outfit.outfit.PlayerName;
+            display.Cosmetics.nameText.text = outfit.PlayerName;
         }
 
         void OnOutfitChanged(PlayerOutfitChangeEvent ev)
         {
             if (ev.Player.PlayerId == originalPlayer.PlayerId)
             {
-                UpdateOutfit(ev.Outfit);
+                UpdateOutfit(ev.Outfit.Outfit.outfit);
             }
         }
 
@@ -170,6 +170,8 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
 
     public Hallucination() : base("hallucination", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, [HallucinationCooldownOption, HallucinationDurationOption])
     {
+        GameActionTypes.HallucinationAction = new("hallucination.hallucination", this, isPhysicalAction: true);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Hallucination.png");
     }
 
     string ICodeName.CodeName => "HLC";
@@ -179,6 +181,7 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
     
 
     static public Hallucination MyRole = new Hallucination();
+    static internal GameStatsEntry StatsHallucinations = NebulaAPI.CreateStatsEntry("stats.hallucination.hallucinations", GameStatsCategory.Roles, MyRole);
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
@@ -208,15 +211,17 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
                 };
                 hallucinationButton.OnEffectStart = (button) =>
                 {
-                    var cand = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.PlayerId != MyPlayer.PlayerId);
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.HallucinationAction);
+
+                    var cand = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p.PlayerId != MyPlayer.PlayerId);
                     if (cand.Any(p => !p.IsDead)) cand = cand.Where(p => !p.IsDead);
                     if (cand.IsEmpty()) cand = [MyPlayer]; //フリープレイ対策
 
                     var random = cand.ToArray().Random();
                     RpcShowHallucination.Invoke((MyPlayer, random, MyPlayer.VanillaPlayer.transform.position));
 
-                    new StaticAchievementToken("hallucination.common1");
-                    if (NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && ((Vector2)MyPlayer.VanillaPlayer.transform.position).Distance(p.Position) < 1f))
+                    StatsHallucinations.Progress();
+                    if (NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && ((Vector2)MyPlayer.VanillaPlayer.transform.position).Distance(p.Position) < 1f))
                         new StaticAchievementToken("hallucination.common2");
 
                     acTokenAnother1.Value.mask |= 1u << random.PlayerId;

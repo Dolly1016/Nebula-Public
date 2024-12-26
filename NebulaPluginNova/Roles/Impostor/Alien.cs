@@ -7,7 +7,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitation, DefinedRole
 {
     private Alien(): base("alien", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EMICoolDownOption, EMIDurationOption, InvalidateCoolDownOption, NumOfInvalidationsOption])
     {
@@ -17,28 +17,24 @@ public class Alien : DefinedRoleTemplate, HasCitation, DefinedRole
     
     Citation? HasCitation.Citaion => Citations.SuperNewRoles;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private FloatConfiguration EMICoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration EMIDurationOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiDuration", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
     static private IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("options.role.alien.numOfInvalidations", (1, 10), 1);
-
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
     static public Alien MyRole = new Alien();
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
         static private Image invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
-        
-
-        public Instance(GamePlayer player) : base(player){}
 
         ModAbilityButton? emiButton = null;
         AchievementToken<(int playerMask,bool clear)>? achCommon4Token = null;
         AchievementToken<(int killTotal,int killOnlyMe)>? achChallengeToken = null;
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player) : base(player)
         {
             if (AmOwner)
             {

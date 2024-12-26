@@ -13,5 +13,4 @@ public interface Event
 public interface ICancelableEvent
 {
     public bool IsCanceled { get; }
-    public void Cancel();
 }

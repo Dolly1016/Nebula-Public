@@ -1,6 +1,7 @@
 ﻿using Nebula.Game.Statistics;
 using Nebula.Map;
 using Nebula.Roles.Abilities;
+using UnityEngine;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -14,29 +15,35 @@ using static UnityEngine.GraphicsBuffer;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Raider : DefinedRoleTemplate, DefinedRole
+public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedRole
 {
     private Raider() : base("raider", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ThrowCoolDownOption, AxeSizeOption, AxeSpeedOption,CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Raider.png");
 
         MetaAbility.RegisterCircle(new("role.raider.axeSize", () => AxeSizeOption * 0.4f, () => null, UnityColor));
+
+        GameActionTypes.RaiderEquippingAction = new("raider.equipping", this, isEquippingAction: true);
+        GameActionTypes.RaiderThrowingAction = new("raider.throwing", this, isPhysicalAction: true);
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private IRelativeCoolDownConfiguration ThrowCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.raider.throwCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
     static private FloatConfiguration AxeSizeOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration AxeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSpeed", (0.5f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.raider.canKillImpostor", false);
 
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
     static public Raider MyRole = new Raider();
-
+    static private GameStatsEntry StatsThrown = NebulaAPI.CreateStatsEntry("stats.raider.thrown", GameStatsCategory.Roles, MyRole);
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class RaiderAxe : NebulaSyncStandardObject, IGameOperator
     {
         public static string MyTag = "RaiderAxe";
-        
+        public static string MyLocalFakeTag = "RaiderAxeLocalFake";
+        public static string MyGlobalFakeTag = "RaiderAxeGlobalFake";
+
         private static SpriteLoader staticAxeSprite = SpriteLoader.FromResource("Nebula.Resources.RaiderAxe.png", 150f);
         private static SpriteLoader thrownAxeSprite = SpriteLoader.FromResource("Nebula.Resources.RaiderAxeThrown.png", 150f);
         private static SpriteLoader stuckAxeSprite = SpriteLoader.FromResource("Nebula.Resources.RaiderAxeCrashed.png", 150f);
@@ -51,8 +58,30 @@ public class Raider : DefinedRoleTemplate, DefinedRole
         private float thrownDistance = 0f;
         AchievementToken<int>? acTokenChallenge = null;
 
+        private bool fakeLocal = false;
+        
+
         public RaiderAxe(PlayerControl owner) : base(owner.GetTruePosition(),ZOption.Front,false,staticAxeSprite.GetSprite())
         {
+        }
+
+        public RaiderAxe(PlayerControl owner, bool fakeLocal, Vector2? pos = null) : this(owner)
+        {
+            this.fakeLocal = fakeLocal;
+            this.state = 2;
+            MyRenderer.sprite = stuckAxeSprite.GetSprite();
+            CanSeeInShadow = true;
+
+            float thrownAngle = 0f;
+
+            if (pos.HasValue) {
+                Position = pos.Value;
+                var diff = (pos.Value - (Vector2)owner.transform.position);
+                thrownAngle = Mathf.Atan2(diff.y, diff.x);
+                MyRenderer.flipY = diff.x < 0f;
+            }
+
+            MyRenderer.transform.eulerAngles = new Vector3(0f, 0f, thrownAngle * 180f / Mathf.PI);
         }
 
         void HudUpdate(GameHudUpdateEvent ev)
@@ -86,39 +115,42 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                     var size = AxeSizeOption;
                     if (!MeetingHud.Instance)
                     {
-                        foreach (var p in PlayerControl.AllPlayerControls)
+                        foreach (var p in NebulaGameManager.Instance.AllPlayerInfo)
                         {
-                            if (p.Data.IsDead || p.AmOwner) continue;
-                            if (!CanKillImpostorOption && p.Data.Role.IsImpostor) continue;
+                            if (p.IsDead || p.AmOwner) continue;
 
-                            var modInfo = p.GetModInfo()!;
+                            if (!CanKillImpostorOption && !Owner.CanKill(p)) continue;
+
 
                             //ベント内、吹っ飛ばされ中、および地底のプレイヤーを無視
-                            if (modInfo.IsDived || p.inVent || modInfo.IsBlown) continue;
+                            if (p.IsDived || p.VanillaPlayer.inVent || p.IsBlown || p.WillDie) continue;
 
                             if ((tryKillMask & (1 << p.PlayerId)) != 0) continue;//一度キルを試行しているならなにもしない。
 
-                            if (!Helpers.AnyNonTriggersBetween(p.GetTruePosition(),pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
+                            if (!Helpers.AnyNonTriggersBetween(p.TruePosition,pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
-                                if (p.GetModInfo()?.Unbox().IsInvisible ?? false) continue;
+                                if (p.Unbox().IsInvisible) continue;
 
-                                if (PlayerControl.LocalPlayer.ModKill(p, PlayerState.Beaten, EventDetail.Kill, KillParameter.RemoteKill) == KillResult.Kill)
+                                Owner.MurderPlayer(p, PlayerState.Beaten, EventDetail.Kill, KillParameter.RemoteKill, KillCondition.TargetAlive, result =>
                                 {
-                                    if (p.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
-
-                                    killedMask |= 1 << p.PlayerId;
-                                    killedNum++;
-                                    if (killedNum >= 3)
+                                    if(result == KillResult.Kill)
                                     {
-                                        acTokenChallenge ??= new("raider.challenge", killedMask, (val, _) =>
-                                        /*人数都合でゲームが終了している*/ NebulaGameManager.Instance!.EndState!.EndReason == GameEndReason.Situation &&
-                                        /*勝利している*/ NebulaGameManager.Instance.EndState!.Winners.Test(Owner) &&
-                                        /*最後の死亡者がこの斧によってキルされている*/ (killedMask & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
-                                        );
-                                        acTokenChallenge.Value = killedMask;
+                                        if (p.VanillaPlayer.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
+
+                                        killedMask |= 1 << p.PlayerId;
+                                        killedNum++;
+                                        if (killedNum >= 3)
+                                        {
+                                            acTokenChallenge ??= new("raider.challenge", killedMask, (val, _) =>
+                                            /*人数都合でゲームが終了している*/ NebulaGameManager.Instance!.EndState!.EndReason == GameEndReason.Situation &&
+                                            /*勝利している*/ NebulaGameManager.Instance.EndState!.Winners.Test(Owner) &&
+                                            /*最後の死亡者がこの斧によってキルされている*/ (killedMask & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
+                                            );
+                                            acTokenChallenge.Value = killedMask;
+                                        }
                                     }
-                                }
+                                });
                                 tryKillMask |= 1 << p.PlayerId;
                             }
                         }
@@ -149,9 +181,33 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                 Position += vec * d;
                 thrownDistance += d;
             }
-            else if (state == 2) { }
+            else if (state == 2) {
+                if (fakeLocal)
+                {
+                    var angle = PlayerModInfo.LocalMouseInfo.angle;
+                    var dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    MyRenderer.flipY = dir.x < 0f;
+                    MyRenderer.transform.localEulerAngles = new Vector3(0, 0, angle * 180f / Mathf.PI);
+                    var hits = Physics2D.RaycastAll(Owner.Position, dir, 0.8f, Constants.ShipAndAllObjectsMask).Where(h => !h.collider.isTrigger).ToArray();
+
+                    if(hits.Length > 0)
+                    {
+                        var hit = hits.MinBy(h => h.distance);
+                        Position = hit.point;
+                        Color = Color.cyan;
+                        MyRenderer.sprite = stuckAxeSprite.GetSprite();
+                    }
+                    else
+                    {
+                        Position = (Vector2)Owner.Position + (dir * 0.8f);
+                        Color = Color.red;
+                        MyRenderer.sprite = staticAxeSprite.GetSprite();
+                    }
+                }
+            }
         }
 
+        public bool CanThrow => MyRenderer.color.b > 0.5f;
         public void Throw(Vector2 pos, float angle)
         {
             thrownAngle = angle;
@@ -164,32 +220,34 @@ public class Raider : DefinedRoleTemplate, DefinedRole
             MyRenderer.color = Color.white;
         }
 
-        static RaiderAxe() => NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new RaiderAxe(Helpers.GetPlayer((byte)args[0])!));
+        static RaiderAxe()
+        {
+            NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new RaiderAxe(Helpers.GetPlayer((byte)args[0])!));
+            NebulaSyncObject.RegisterInstantiater(MyLocalFakeTag, (args) => new RaiderAxe(Helpers.GetPlayer((byte)args[0])!, true));
+            NebulaSyncObject.RegisterInstantiater(MyGlobalFakeTag, (args) => new RaiderAxe(Helpers.GetPlayer((byte)args[0])!, false, new(args[1], args[2])));
+        }
         
     }
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-
         private ModAbilityButton? equipButton = null;
         private ModAbilityButton? killButton = null;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AxeButton.png", 115f);
         
         public RaiderAxe? MyAxe = null;
-        bool RuntimeRole.HasVanillaKillButton => false;
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
+        bool IPlayerAbility.HideKillButton => true;
 
         AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
         StaticAchievementToken? acTokenCommon = null;
 
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player):base(player)
         {
             if (AmOwner)
             {
+                new GuideLineAbility(MyPlayer, () => MyAxe != null).Register(this);
+
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("raider.another1");
 
                 equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "raider.equip");
@@ -199,7 +257,10 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                 equipButton.OnClick = (button) =>
                 {
                     if (MyAxe == null)
+                    {
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.RaiderEquippingAction);
                         equipButton.SetLabel("unequip");
+                    }
                     else
                         equipButton.SetLabel("equip");
 
@@ -208,25 +269,29 @@ public class Raider : DefinedRoleTemplate, DefinedRole
                 equipButton.SetLabel("equip");
 
                 killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "raider.kill");
-                killButton.Availability = (button) => MyAxe != null && MyPlayer.CanMove && MyAxe.MyRenderer.color.b > 0.5f;
+                killButton.Availability = (button) => MyAxe != null && MyPlayer.CanMove && MyAxe.CanThrow;
                 killButton.Visibility = (button) => !MyPlayer.IsDead;
                 killButton.OnClick = (button) =>
                 {
                     if (MyAxe != null)
                     {
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.RaiderThrowingAction);
                         RpcThrow.Invoke((MyAxe!.ObjectId, MyAxe!.Position, MyPlayer.Unbox().MouseAngle));
                         NebulaAsset.PlaySE(NebulaAudioClip.ThrowAxe, true);
+                        StatsThrown.Progress();
                     }
                     MyAxe = null;
-                    button.StartCoolDown();
+
+                    NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                     equipButton.SetLabel("equip");
 
                     acTokenAnother.Value.triggered = true;
                 };
-                killButton.CoolDownTimer = Bind(new Timer(ThrowCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
+                killButton.CoolDownTimer = Bind(new Timer(ThrowCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
                 killButton.SetLabel("throw");
                 killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetCanUseByMouseClick();
+                NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
             }
         }
 
@@ -268,7 +333,7 @@ public class Raider : DefinedRoleTemplate, DefinedRole
             MyAxe = null;
         }
 
-        void RuntimeAssignable.OnInactivated()
+        void IGameOperator.OnReleased()
         {
             UnequipAxe();
         }

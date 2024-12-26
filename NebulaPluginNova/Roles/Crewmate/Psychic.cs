@@ -29,6 +29,8 @@ public class Psychic : DefinedRoleTemplate, DefinedRole
 
 
     static public Psychic MyRole = new Psychic();
+    static private GameStatsEntry StatsSearching = NebulaAPI.CreateStatsEntry("stats.psychic.searching", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsMessages = NebulaAPI.CreateStatsEntry("stats.psychic.messages", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -53,6 +55,10 @@ public class Psychic : DefinedRoleTemplate, DefinedRole
                 searchButton.OnEffectEnd = (button) =>
                 {
                     button.StartCoolDown();
+                };
+                searchButton.OnEffectStart = (button) =>
+                {
+                    StatsSearching.Progress();
                 };
                 searchButton.CoolDownTimer = Bind(new Timer(0f, SearchCooldownOption).SetAsAbilityCoolDown().Start());
                 searchButton.EffectTimer = Bind(new Timer(SearchDurationOption));
@@ -81,6 +87,8 @@ public class Psychic : DefinedRoleTemplate, DefinedRole
             //Psychic自身が通報した死体であるとき
             if (ev.Reporter.AmOwner && ev.Reported != null)
             {
+                StatsMessages.Progress();
+
                 List<(string tag, string message)> cand = new();
 
                 //死亡時間(5秒単位)
@@ -114,7 +122,6 @@ public class Psychic : DefinedRoleTemplate, DefinedRole
                 new StaticAchievementToken("psychic.common2." + tag);
             }
         }
-
     }
 }
 

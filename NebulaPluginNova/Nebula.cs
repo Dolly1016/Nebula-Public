@@ -37,14 +37,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.9.1.1";
+    public const string PluginVersion = "2.13.0.1";
 
-    //public const string VisualVersion = "v2.9.1.1";
-    public const string VisualVersion = "Snapshot 24.09.15a";
-    //public const string VisualVersion = "DEMO";
+    public const string VisualVersion = "v2.13.0.1";
+    //public const string VisualVersion = "Snapshot 24.12.24d";
+    //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "105";
-    public const string PluginBuildNumStr = "1220";
+    public const string PluginBuildNumStr = "1279";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;

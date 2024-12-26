@@ -16,7 +16,9 @@ namespace Nebula.Roles.Ghost.Neutral;
 
 public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
 {
-    public Grudge() : base("grudge", new(154, 147, 80), RoleCategory.NeutralRole, [TotalStandingTimeToWin]) { }
+    public Grudge() : base("grudge", new(154, 147, 80), RoleCategory.NeutralRole, [TotalStandingTimeToWin]) {
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Grudge.png");
+    }
 
     string ICodeName.CodeName => "GRD";
 
@@ -134,7 +136,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
             var myPos = MyPlayer.Position.ToUnityVector();
             if(!canWin && standingTime > 0.8f)
             {
-                if (NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && p.VanillaPlayer.transform.position.Distance(myPos) < 1.5f))
+                if (NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && p.VanillaPlayer.transform.position.Distance(myPos) < 1.5f))
                 {
                     progress += Time.deltaTime;
                     if (TotalStandingTimeToWin < progress)

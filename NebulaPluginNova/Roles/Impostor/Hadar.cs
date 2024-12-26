@@ -10,11 +10,13 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Hadar : DefinedRoleTemplate, DefinedRole
+public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRole
 {
-    private Hadar() : base("hadar", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [DiveCoolDownOption, AccelRateUndergroundOption, GushFromVentsOption, VentDetectionRangeOption, LeftDivingEvidenceOption]) { }
+    private Hadar() : base("hadar", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [DiveCoolDownOption, AccelRateUndergroundOption, GushFromVentsOption, VentDetectionRangeOption, LeftDivingEvidenceOption]) {
+        GameActionTypes.HadarDisappearingAction = new("hadar.disappear", this, isPhysicalAction: true);
+        GameActionTypes.HadarAppearingAction = new("hadar.appear", this, isPhysicalAction: true);
+    }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private FloatConfiguration DiveCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.hadar.diveCooldown", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration GushFromVentsOption = NebulaAPI.Configurations.Configuration("options.role.hadar.gushFromVents", false);
@@ -22,7 +24,11 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
     static private BoolConfiguration LeftDivingEvidenceOption = NebulaAPI.Configurations.Configuration("options.role.hadar.leftDivingEvidence", false);
     static private FloatConfiguration AccelRateUndergroundOption = NebulaAPI.Configurations.Configuration("options.role.hadar.accelRateUnderground", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
 
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
+
     static public Hadar MyRole = new Hadar();
+    static private GameStatsEntry StatsDive = NebulaAPI.CreateStatsEntry("stats.hadar.dive", GameStatsCategory.Roles, MyRole);
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class HadarEvidence : NebulaSyncStandardObject, IGameOperator
@@ -47,10 +53,8 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
         }
     }
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-
         private ModAbilityButton? diveButton = null;
         private ModAbilityButton? gushButton = null;
 
@@ -60,13 +64,10 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
         AchievementToken<(float lastGush, bool cleared)> acToken1 = new("hadar.common1", (-100f, false), (a, _) => a.cleared);
         AchievementToken<(float lastKill, bool cleared)> acToken2 = new("hadar.common2", (-100f, false), (a, _) => a.cleared);
         AchievementToken<(bool cleared, bool triggered)> acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("hadar.another1");
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
 
         public bool IsDiving => MyPlayer.IsDived;
 
-        void RuntimeAssignable.OnInactivated()
+        void IGameOperator.OnReleased()
         {
             if (IsDiving)
             {
@@ -74,7 +75,7 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
                 if (!MyPlayer.IsDead) MyPlayer.VanillaPlayer.gameObject.layer = LayerExpansion.GetPlayersLayer();
             }
         }
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player) : base(player)
         {
             if (AmOwner)
             {
@@ -86,8 +87,11 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
                 diveButton.Visibility = _ => !MyPlayer.IsDead && !IsDiving;
                 diveButton.OnClick = (button) =>
                 {
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.HadarDisappearingAction);
+
                     if (NebulaGameManager.Instance!.CurrentTime - acToken2.Value.lastKill < 8f) acToken2.Value.cleared = true;
                     acTokenAnother.Value.triggered = true;
+                    StatsDive.Progress();
                     lastDivePoint = MyPlayer.VanillaPlayer.transform.position;
 
                     MyPlayer.VanillaPlayer.ModDive(true);
@@ -97,7 +101,7 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
                     NebulaManager.Instance.StartCoroutine(CoLight().WrapToIl2Cpp());
                     NebulaManager.Instance.StartCoroutine(CoPing().WrapToIl2Cpp());
 
-                    if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(AccelRateUndergroundOption, 1000000f, false, 0, "nebula.hadar");
+                    if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(AccelRateUndergroundOption, 1000000f, false, 0, "nebula::hadar");
 
                     if (LeftDivingEvidenceOption)
                     {
@@ -120,7 +124,7 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
                 {
                     new StaticAchievementToken("hadar.common3"); //通算称号
                     if (MyPlayer.VanillaPlayer.transform.position.Distance(lastDivePoint) > 30f) new StaticAchievementToken("hadar.common5");
-                    if (NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.AmOwner && !p.IsDead && p.VanillaPlayer.transform.position.Distance(MyPlayer.VanillaPlayer.transform.position) < 2f)) new StaticAchievementToken("hadar.common4");
+                    if (NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.AmOwner && !p.IsDead && p.VanillaPlayer.transform.position.Distance(MyPlayer.VanillaPlayer.transform.position) < 2f)) new StaticAchievementToken("hadar.common4");
                     acToken1.Value.lastGush = NebulaGameManager.Instance!.CurrentTime;
                 }
 
@@ -129,13 +133,15 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
                     gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.GetTruePosition());
                     gushButton.OnClick = (button) =>
                     {
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.HadarAppearingAction);
+
                         MyPlayer.VanillaPlayer.ModDive(false);
                         MyPlayer.VanillaPlayer.gameObject.layer = LayerExpansion.GetPlayersLayer();
                         NebulaAsset.PlaySE(NebulaAudioClip.HadarGush);
                         diveButton.StartCoolDown();
 
                         CheckGushAchievement();
-                        if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(1f, 0f, false, 0, "nebula.hadar");
+                        if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(1f, 0f, false, 0, "nebula::hadar");
                     };
                 }
                 else
@@ -147,6 +153,8 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
                     gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && tracker.CurrentTarget != null;
                     gushButton.OnClick = button =>
                     {
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, tracker.CurrentTarget!.transform.position, GameActionTypes.DecoyPlacementAction);
+
                         MyPlayer.VanillaPlayer.ModDive(false, false);
                         MyPlayer.VanillaPlayer.gameObject.layer = LayerExpansion.GetPlayersLayer();
                         MyPlayer.VanillaPlayer.moveable = false;
@@ -154,7 +162,7 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
                         diveButton.StartCoolDown();
 
                         CheckGushAchievement();
-                        if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(1f, 0f, false, 0, "nebula.hadar");
+                        if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(1f, 0f, false, 0, "nebula::hadar");
                     };
                     GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev =>
                     {
@@ -239,7 +247,7 @@ public class Hadar : DefinedRoleTemplate, DefinedRole
             while (true)
             {
                 bool playSE = true;
-                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo())
+                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                 {
                     if (!IsDiving) yield break;
                     if (p.AmOwner || p.IsDead) continue;

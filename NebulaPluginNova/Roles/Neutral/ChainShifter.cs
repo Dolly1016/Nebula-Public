@@ -25,6 +25,8 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration CanCallEmergencyMeetingOption = NebulaAPI.Configurations.Configuration("options.role.chainShifter.canCallEmergencyMeeting", true);
 
     static public ChainShifter MyRole = new ChainShifter();
+
+    static private GameStatsEntry StatsShift = NebulaAPI.CreateStatsEntry("stats.chainShifter.shift", GameStatsCategory.Roles, MyRole);
     bool IGuessed.CanBeGuessDefault => false;
 
 
@@ -148,11 +150,12 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (myGuess != -1) player.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { myGuess }).InvokeSingle();
                     if (targetGuess != -1) MyPlayer.Unbox().RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
 
-
+                    new NebulaRPCInvoker(() => MyPlayer.Unbox().UpdateTaskState()).InvokeSingle();
                 }
 
                 //会議終了からすぐにゲームが終了すればよい
                 new AchievementToken<float>("chainShifter.challenge", Time.time, (val, _) => Time.time - val < 15f && NebulaGameManager.Instance.EndState.Winners.Test(MyPlayer));
+                StatsShift.Progress();
 
                 yield return new WaitForSeconds(0.2f);
 

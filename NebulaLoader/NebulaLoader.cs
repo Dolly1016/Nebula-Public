@@ -10,6 +10,8 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using static System.Net.WebRequestMethods;
 
 namespace NebulaLoader;
@@ -240,4 +242,14 @@ public class NebulaLoader : BasePlugin
             nebulaPluginType?.GetField("LoaderPlugin", BindingFlags.Static | BindingFlags.Public)?.SetValue(null, MyPlugin);
         }
     }
+
+    /*
+    void RegisterErrorPopup()
+    {
+        SceneManager.sceneLoaded += (UnityAction<Scene, LoadSceneMode>)((scene, loadMode) =>
+        {
+            if (scene.name == "MainMenu") Log.LogInfo("TEST");
+        });
+    }
+    */
 }

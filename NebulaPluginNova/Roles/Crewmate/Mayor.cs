@@ -22,7 +22,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
     static private IntegerConfiguration VoteAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.mayor.voteAssignment", (1, 20), 1);
 
     static public Mayor MyRole = new Mayor();
-
+    static private GameStatsEntry StatsVotes = NebulaAPI.CreateStatsEntry("stats.mayor.votes", GameStatsCategory.Roles, MyRole);
     static private int MinVote => FixedVotesOption ? VoteAssignmentOption : MinVoteOption;
     static private int MaxVote => FixedVotesOption ? VoteAssignmentOption : MaxVoteOption;
     static private int VoteAssignment => VoteAssignmentOption;
@@ -142,6 +142,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 Debug.Log($"Mayor: current:{myVote},voted:{currentVote}");
                 myVote -= currentVote;
+                StatsVotes.Progress(currentVote);
                 if(acTokenCommon2 != null)
                 {
                     if(acTokenCommon2.Value.leftMeeting > 0)

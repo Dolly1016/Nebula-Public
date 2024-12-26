@@ -52,6 +52,13 @@ public class FunctionalLifespan : ILifespan
     {
         this.predicate = predicate;
     }
+
+    public static ILifespan GetTimeLifespan(float duration)
+    {
+        float end = UnityEngine.Time.time + duration;
+        return new FunctionalLifespan(() => UnityEngine.Time.time < end);
+
+    }
 }
 
 /// <summary>

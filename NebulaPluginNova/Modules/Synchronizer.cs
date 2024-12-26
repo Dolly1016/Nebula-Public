@@ -1,5 +1,6 @@
 ﻿using Virial;
 using Virial.DI;
+using static UnityEngine.RemoteConfigSettingsHelper;
 
 namespace Nebula.Modules;
 
@@ -14,10 +15,36 @@ public enum SynchronizeTag
 public class Synchronizer : AbstractModule<Virial.Game.Game>
 {
     public Dictionary<SynchronizeTag, uint> sync = new();
-    
+    public (SynchronizeTag tag, float time)? LastSync { get; private set; } = null;
+
+    protected override void OnInjected(Virial.Game.Game container)
+    {
+        DebugScreen.Push(new FunctionalDebugTextContent(() => {
+            if (LastSync == null) return null;
+            if (!PlayerControl.LocalPlayer) return null;
+
+            float wait = 3f;
+            if (LastSync.Value.tag == SynchronizeTag.PreSpawnMinigame && GeneralConfigurations.SpawnMethodOption.GetValue() == 1) wait = 10f;
+
+            if (Time.time - LastSync.Value.time < wait) return null;
+            if (!sync.TryGetValue(LastSync.Value.tag, out var val)) return null;
+
+            var waitFor = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => (val & (1 << p.PlayerId)) == 0).ToArray() ?? [];
+            if (waitFor.Length == 0 || waitFor.Any(p => p.AmOwner)) return null;
+
+            return Language.Translate("log.awaiting").Replace("%TAG%", LastSync.Value.tag.ToString()).Bold() + waitFor.Join(p => "\n -" + p.name);
+        }, container));
+    }
+
     public void ResetSync(SynchronizeTag tag)
     {
         sync[tag] = 0;
+        ResetSyncOnlyHistory(tag);
+    }
+
+    public void ResetSyncOnlyHistory(SynchronizeTag tag)
+    {
+        if (LastSync?.tag == tag) LastSync = null;
     }
 
     private void Sync(SynchronizeTag tag,byte playerId)
@@ -34,7 +61,12 @@ public class Synchronizer : AbstractModule<Virial.Game.Game>
 
     static public RemoteProcess<(SynchronizeTag, byte)> RpcSync = new(
         "Syncronize",
-        (message, calledByMe) => NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.Sync(message.Item1,message.Item2)
+        (message, calledByMe) =>
+        {
+            var synchronizer = NebulaAPI.CurrentGame?.GetModule<Synchronizer>();
+            synchronizer?.Sync(message.Item1, message.Item2);
+            if (calledByMe && synchronizer != null) synchronizer.LastSync = (message.Item1, Time.time);
+        }
         );
 
     public void SendSync(SynchronizeTag tag)

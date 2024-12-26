@@ -12,6 +12,8 @@ public record MeetingPlayerAction(Image icon, Action<MeetingPlayerButtonState> b
 
 public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGameOperator
 {
+    internal static DividedSpriteLoader Icons = DividedSpriteLoader.FromResource("Nebula.Resources.MeetingButtons.png", 115f, 100, 110, true);
+
     public record MeetingPlayerButton(GameObject gameObject, SpriteRenderer renderer, GamePlayer player, Reference<MeetingPlayerButtonState> state);
 
     public class MeetingPlayerButtonState
@@ -92,7 +94,7 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
             GameObject targetBox = UnityEngine.Object.Instantiate(template, playerVoteArea.transform);
 
             targetBox.name = "MeetingModButton";
-            targetBox.transform.localPosition = new Vector3(-0.95f, 0.03f, -1f);
+            targetBox.transform.localPosition = new Vector3(-0.95f, 0f, -2.5f);
 
             SpriteRenderer renderer = targetBox.GetComponent<SpriteRenderer>();
             renderer.sprite = null;

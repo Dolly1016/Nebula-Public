@@ -52,7 +52,9 @@ public static class JsonStructure
 {
     public static T? Deserialize<T>(Stream json) => (T?)Deserialize(json, typeof(T));
     public static T? Deserialize<T>(string json) => (T?)Deserialize(json, typeof(T));
-
+    private static List<(Type type, Func<string, object> converter)> converters = new();
+    public static void Register<T>(Func<string, object> converter) => converters.Add((typeof(T), converter));
+    
     private static object? DeserializePrimitive(string json, Type type)
     {
         if (type.IsGenericType) type = type.GetGenericArguments()[0];
@@ -60,9 +62,9 @@ public static class JsonStructure
         var trimmed = json.Trim('"');
 
         if (type.Equals(typeof(int)))
-            return int.Parse(trimmed);
+            return int.TryParse(trimmed, out var num) ? num : 0;
         if (type.Equals(typeof(long)))
-            return long.Parse(trimmed);
+            return long.TryParse(trimmed, out var num) ? num : 0L;
         if (type.Equals(typeof(char)))
         {
             if (json.Length >= 2 && json.StartsWith("%"))
@@ -70,22 +72,29 @@ public static class JsonStructure
                 try
                 {
                     return (char)Convert.ToInt32(json.Substring(1), 16);
-                }catch (Exception) {
+                } catch (Exception) {
                     return (char)0;
                 }
             }
             return char.Parse(trimmed);
         }
         if (type.Equals(typeof(byte)))
-            return byte.Parse(trimmed);
+            return byte.TryParse(trimmed, out var num) ? num : (byte)0;
         if (type.Equals(typeof(string)))
             return trimmed;
         if (type.Equals(typeof(float)))
-            return float.Parse(trimmed, CultureInfo.InvariantCulture);
+            return float.TryParse(trimmed, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var num) ? num : 0f;
         if (type.Equals(typeof(double)))
-            return double.Parse(trimmed, CultureInfo.InvariantCulture);
+            return double.TryParse(trimmed, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var num) ? num : 0.0;
         if (type.Equals(typeof(bool)))
-            return bool.Parse(trimmed);
+            return bool.TryParse(trimmed, out var result) ? result : false;
+
+        //プリミティヴからデータへのキャスト
+        foreach(var converter in converters)
+        {
+            if(type.Equals(converter.type)) return converter.converter.Invoke(trimmed);
+        }
+
         return null;
     }
 

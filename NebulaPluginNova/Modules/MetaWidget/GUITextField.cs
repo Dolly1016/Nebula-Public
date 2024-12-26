@@ -16,6 +16,7 @@ public class GUITextField : AbstractGUIWidget
     public string DefaultText { get; init; } = "";
     public bool WithMaskMaterial { get; init; } = true;
     public int MaxLines { get; init; } = 1;
+    public Predicate<string>? EnterAction { get; init; } = null;
     public GUITextField(GUIAlignment alignment, Size size) : base(alignment)
     {
         FieldSize = size;
@@ -29,6 +30,7 @@ public class GUITextField : AbstractGUIWidget
         var field = UnityHelper.CreateObject<TextField>("Text", obj.transform, new UnityEngine.Vector3(0, 0, -0.1f));
         field.SetSize(unitySize, FontSize, MaxLines);
         field.InputPredicate = TextPredicate;
+        field.EnterAction = EnterAction;
         if (WithMaskMaterial) field.AsMaskedText();
 
         var background = UnityHelper.CreateObject<SpriteRenderer>("Background", obj.transform, UnityEngine.Vector3.zero, LayerExpansion.GetUILayer());
@@ -47,7 +49,7 @@ public class GUITextField : AbstractGUIWidget
         Artifact.Values.Add(field);
         if (DefaultText.Length > 0) field.SetText(DefaultText);
         if (HintText != null) field.SetHint(HintText!);
-
+        
         actualSize = new Size(unitySize + new UnityEngine.Vector2(IsSharpField ? 0.1f : 0.22f, IsSharpField ? 0.1f : 0.22f));
         return obj;
     }

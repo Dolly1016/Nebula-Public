@@ -60,7 +60,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         {
             if (AmOwner)
             {
-                var cands = NebulaGameManager.Instance?.AllPlayerInfo().Where(p => !p.TryGetModifier<Obsessional.Instance>(out _))!;
+                var cands = NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.TryGetModifier<Obsessional.Instance>(out _))!;
                 
                 var limitted = cands;
                 if (MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole)
@@ -157,7 +157,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
                     new StaticAchievementToken("obsessional.lover1");
 
                 //勝者に自身と執着対象しかいない場合
-                if (NebulaGameManager.Instance!.AllPlayerInfo().Where(p => ev.EndState.Winners.Test(p)).All(p => p.AmOwner || p.PlayerId == (obsession?.PlayerId ?? 255)))
+                if (NebulaGameManager.Instance!.AllPlayerInfo.Where(p => ev.EndState.Winners.Test(p)).All(p => p.AmOwner || p.PlayerId == (obsession?.PlayerId ?? 255)))
                     new StaticAchievementToken("obsessional.challenge");
             }
             else
@@ -173,5 +173,6 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         }
 
         bool RuntimeModifier.MyCrewmateTaskIsIgnored => obsession?.Role.Role.Category != Virial.Assignable.RoleCategory.CrewmateRole || obsession?.Role.Role == Madmate.MyRole;
+        bool RuntimeAssignable.CanKill(Virial.Game.Player player) => player != obsession;
     }
 }

@@ -76,7 +76,7 @@ public static class PlayerExtension
     public static void SnapToSmoothly(this CustomNetworkTransform netTransform, Vector2 position)
     {
         //netTransform.ClearPositionQueues();
-        
+
         Transform transform = netTransform.transform;
         netTransform.body.position = position;
         transform.position = position;
@@ -96,204 +96,10 @@ public static class PlayerExtension
         catch { }
     }
 
-    static bool HasFlag(this KillParameter param, KillParameter flag) => (param & flag) != 0;
-
-    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, KillParameter parameter)> RpcKill = new(
-        "Kill",
-       (message, _) =>
-       {
-           var recordTag = TranslatableTag.ValueOf(message.recordId);
-           if (recordTag != null)
-               NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, message.killerId == byte.MaxValue ? null : message.killerId, 1 << message.targetId) { RelatedTag = recordTag });
-
-           var killer = Helpers.GetPlayer(message.killerId == byte.MaxValue ? message.targetId : message.killerId);
-           var target = Helpers.GetPlayer(message.targetId);
-
-           if (target == null) return;
-
-           // MurderPlayer ここから
-
-           if (((!target.AmOwner && message.parameter.HasFlag(KillParameter.WithKillSEWidely)) || (killer?.AmOwner ?? false)) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(target.KillSfx, false, 0.8f, null);
-
-           if (killer && killer!.AmOwner) killer.SetKillTimer(AmongUsUtil.VanillaKillCoolDown);
-           
-
-           target.gameObject.layer = LayerMask.NameToLayer("Ghost");
-
-           if (target.AmOwner)
-           {
-               StatsManager.Instance.IncrementStat(StringNames.StatsTimesMurdered);
-               if (Minigame.Instance)
-               {
-                   try
-                   {
-                       Minigame.Instance.Close();
-                       Minigame.Instance.Close();
-                   }
-                   catch
-                   {
-                   }
-               }
-               if (message.parameter.HasFlag(KillParameter.WithOverlay)) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
-               target.cosmetics.SetNameMask(false);
-               target.RpcSetScanner(false);
-           }
-           if (killer) killer!.MyPhysics.StartCoroutine(killer.KillAnimations[System.Random.Shared.Next(killer.KillAnimations.Count)].CoPerformModKill(killer, target, message.parameter.HasFlag(KillParameter.WithBlink)).WrapToIl2Cpp());
-
-           // MurderPlayer ここまで
-
-
-           var targetInfo = target.GetModInfo();
-
-           var killerInfo = killer?.GetModInfo();
-
-           if (targetInfo != null)
-           {
-               targetInfo.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-               targetInfo.Unbox().MyKiller = killerInfo;
-               targetInfo.Unbox().MyState = TranslatableTag.ValueOf(message.stateId);
-               
-               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
-               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
-
-               targetInfo.VanillaPlayer.Data.IsDead = true;
-
-               //1ずつ加算するのでこれで十分
-               if (targetInfo.AmOwner && (NebulaGameManager.Instance?.AllPlayerInfo().Count(p => p.IsDead) ?? 0) == 1)
-                   new StaticAchievementToken("firstKill");
-
-               if (message.parameter.HasFlag(KillParameter.WithAssigningGhostRole) && targetInfo.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(targetInfo);
-
-           }
-
-           //Entityイベント発火
-           if (targetInfo != null)
-           {
-               if (killerInfo != null)
-               {
-                   GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
-                   GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo), true);
-               }
-               else
-                   GameOperatorManager.Instance?.Run(new PlayerDieEvent(targetInfo));
-           }
-       }
-       );
-
-    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, KillParameter parameter)> RpcMeetingKill = new(
-        "NonPhysicalKill",
-       (message, calledByMe) =>
-       {
-           var recordTag = TranslatableTag.ValueOf(message.recordId);
-           if (recordTag != null)
-               NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, message.killerId, 1 << message.targetId) { RelatedTag = recordTag });
-
-           var killer = Helpers.GetPlayer(message.killerId);
-           var target = Helpers.GetPlayer(message.targetId);
-
-           if (target == null) return;
-
-           if (!target.AmOwner && message.parameter.HasFlag(KillParameter.WithKillSEWidely) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(target.KillSfx, false, 0.8f, null);
-
-           target.Die(DeathReason.Exile, false);
-
-           if (target.AmOwner)
-           {
-               if(message.parameter.HasFlag(KillParameter.WithOverlay)) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
-
-               NebulaGameManager.Instance!.ChangeToSpectator();
-           }
-
-
-           if (MeetingHud.Instance != null) MeetingHud.Instance.ResetPlayerState();
-           
-
-
-           var targetInfo = target.GetModInfo();
-           var killerInfo = killer.GetModInfo();
-
-           if (targetInfo != null)
-           {
-               targetInfo.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-               targetInfo.Unbox().MyKiller = killerInfo;
-               targetInfo.Unbox().MyState = TranslatableTag.ValueOf(message.stateId);
-               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
-               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
-
-
-               //Entityイベント発火
-               if (killerInfo != null)
-               {
-                   GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
-                   GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo), true);
-               }
-               else
-                   GameOperatorManager.Instance?.Run(new PlayerDieEvent(targetInfo));
-
-               if (message.parameter.HasFlag(KillParameter.WithAssigningGhostRole) && targetInfo.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(targetInfo);
-           }
-
-           if (MeetingHud.Instance)
-           {
-               IEnumerator CoGainDiscussionTime()
-               {
-                   for(int i = 0; i < 10; i++)
-                   {
-                       MeetingHudExtension.VotingTimer += 1f;
-                       MeetingHud.Instance!.lastSecond = 11;
-                       yield return new WaitForSeconds(0.1f);
-                   }
-               }
-               NebulaManager.Instance!.StartCoroutine(CoGainDiscussionTime().WrapToIl2Cpp());
-           }
-       }
-       );
-
     static RemoteProcess<(byte exiledId, byte sourceId, CommunicableTextTag stateId, CommunicableTextTag recordId)> RpcMarkAsExtraVictim = new(
         "MarkAsExtraVictim",
         (message, _) => MeetingHudExtension.ExtraVictims.Add(message)
         );
-
-    static public KillResult ModFlexibleKill(this PlayerControl killer, PlayerControl target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParam)
-    {
-        bool isMeetingKill = MeetingHud.Instance || !killParam.HasFlag(KillParameter.WithDeadBody);
-        if (CheckKill(killer, target, playerState, recordState, isMeetingKill, out var result))
-        {
-            if (isMeetingKill)
-                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, killParam));
-            else
-                RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, killParam));
-        }
-        return result;
-
-    }
-
-    static private bool CheckKill(PlayerControl? killer, PlayerControl target, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool isMeetingKill, out KillResult result)
-    {
-        var targetInfo = target.GetModInfo()!;
-        var killerInfo = killer?.GetModInfo() ?? targetInfo;
-        result = GameOperatorManager.Instance?.Run(new PlayerCheckKillEvent(targetInfo, killerInfo, isMeetingKill, playerState, recordState)).Result ?? KillResult.Kill;
-           
-        if (result != KillResult.Kill) RpcOnGuard.Invoke((killerInfo.PlayerId, targetInfo.PlayerId, result == KillResult.ObviousGuard));
-        return result == KillResult.Kill;
-    }
-
-    static public KillResult ModSuicide(this PlayerControl target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParams)
-    => ModFlexibleKill(target,target, playerState, recordState, killParams);
-    
-    static public KillResult ModKill(this PlayerControl killer, PlayerControl target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParams)
-    {
-        if (CheckKill(killer, target, playerState, recordState, false, out var result))
-            RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, killParams));
-        return result;
-    }
-
-    static public KillResult ModMeetingKill(this PlayerControl killer, PlayerControl target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParams)
-    {
-        if (CheckKill(killer, target, playerState, recordState, true, out var result))
-            RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, killParams));
-        return result;
-    }
 
     static public void ModMarkAsExtraVictim(this PlayerControl exiled,PlayerControl? source, CommunicableTextTag playerState, CommunicableTextTag recordState)
     {
@@ -315,7 +121,10 @@ public static class PlayerExtension
 
             player!.Revive();
             player.NetTransform.SnapTo(message.revivePos);
-            player.GetModInfo()!.Unbox().MyState = PlayerState.Revived;
+            var modinfo = player.GetModInfo()!.Unbox();
+            modinfo.MyState = PlayerState.Revived;
+            modinfo.WillDie = false;
+            modinfo.CurrentDiving = null;
 
             if (message.cleanDeadBody) foreach (var d in Helpers.AllDeadBodies()) if (d.ParentId == player.PlayerId) GameObject.Destroy(d.gameObject);
 
@@ -330,22 +139,6 @@ public static class PlayerExtension
             var player = Helpers.GetPlayer(message.playerId);
             if (!player) return;
             player?.StartCoroutine(message.isDive ? player.CoDive(message.playAnim) : player.CoGush(message.playAnim));
-        }
-        );
-
-    static RemoteProcess<(byte killerId, byte targetId, bool targetCanSeeGuard)> RpcOnGuard = new(
-        "Guard",
-        (message, _) =>
-        {
-            var killer = NebulaGameManager.Instance?.GetPlayer(message.killerId)!;
-
-            GameOperatorManager.Instance?.Run(new PlayerGuardEvent(NebulaGameManager.Instance?.GetPlayer(message.targetId), killer));
-
-            if (message.killerId == PlayerControl.LocalPlayer.PlayerId || (message.targetCanSeeGuard && message.targetId == PlayerControl.LocalPlayer.PlayerId))
-            {
-                Helpers.GetPlayer(message.targetId)?.ShowFailedMurder();
-                PlayerControl.LocalPlayer.SetKillTimer(AmongUsUtil.VanillaKillCoolDown);
-            }
         }
         );
 

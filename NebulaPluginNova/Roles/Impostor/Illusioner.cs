@@ -6,14 +6,13 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Illusioner : DefinedRoleTemplate, DefinedRole
+public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, DefinedRole
 {
     private Illusioner() : base("illusioner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption,MorphDurationOption,PaintCoolDownOption, LoseSampleOnMeetingOption, TransformAfterMeetingOption,SampleOriginalLookOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic, ConfigurationTags.TagDifficult);
         //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Illusioner.png");
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[]? arguments) => new Instance(player);
 
     static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
@@ -23,11 +22,15 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
     static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.transformAfterMeeting", false);
     static private BoolConfiguration SampleOriginalLookOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleOriginalLook", false);
 
-    static public Illusioner MyRole = new Illusioner();
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static public Illusioner MyRole = new Illusioner();
+    static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.illusioner.sample", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.illusioner.morph", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsPaint = NebulaAPI.CreateStatsEntry("stats.illusioner.paint", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
 
         private ModAbilityButton? sampleButton = null;
         private ModAbilityButton? morphButton = null;
@@ -36,27 +39,23 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
         StaticAchievementToken? acTokenMorphingCommon = null, acTokenPainterCommon = null, acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
 
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
-
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player) : base(player)
         {
             if (AmOwner)
             {
                 acTokenChallenge = new("illusioner.challenge", 0, (val, _) =>
                 {
                     return
-                    NebulaGameManager.Instance!.AllPlayerInfo().Where(p => p.PlayerState == PlayerState.Exiled && (val & (1 << p.PlayerId)) != 0).Count() > 0 &&
-                    NebulaGameManager.Instance!.AllPlayerInfo().Where(p => (p.MyKiller?.AmOwner ?? false) && (val & (1 << p.PlayerId)) != 0).Count() > 0;
+                    NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p.PlayerState == PlayerState.Exiled && (val & (1 << p.PlayerId)) != 0).Count() > 0 &&
+                    NebulaGameManager.Instance!.AllPlayerInfo.Where(p => (p.MyKiller?.AmOwner ?? false) && (val & (1 << p.PlayerId)) != 0).Count() > 0;
                 });
 
-                Outfit? sample = null;
+                OutfitDefinition? sample = null;
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
 
                 sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample");
-                sampleButton.SetSprite(Morphing.Instance.SampleButtonSprite.GetSprite());
+                sampleButton.SetSprite(Morphing.Ability.SampleButtonSprite.GetSprite());
                 sampleButton.Availability = (button) => MyPlayer.CanMove;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead;
                 sampleButton.OnClick = (button) => {
@@ -66,12 +65,13 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
                     sampleIcon = AmongUsUtil.GetPlayerIcon(sample.outfit, sampleButton.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    StatsSample.Progress();
                 };
                 sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
                 sampleButton.SetLabel("sample");
 
                 morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction,"illusioner.switch");
-                morphButton.SetSprite(Morphing.Instance.MorphButtonSprite.GetSprite());
+                morphButton.SetSprite(Morphing.Ability.MorphButtonSprite.GetSprite());
                 morphButton.Availability = (button) => MyPlayer.CanMove && sample != null;
                 morphButton.Visibility = (button) => !MyPlayer.IsDead;
                 morphButton.OnClick = (button) => {
@@ -88,10 +88,11 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 };
                 morphButton.OnEffectStart = (button) =>
                 {
-                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new("Morphing", 50, true, sample!)));
+                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", 50, true)));
 
                     acTokenMorphingCommon ??= new("morphing.common1");
                     if (acTokenPainterCommon != null) acTokenCommon ??= new("illusioner.common1");
+                    StatsMorph.Progress();
                 };
                 morphButton.OnEffectEnd = (button) =>
                 {
@@ -114,11 +115,11 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
                 morphButton.SetLabel("morph");
 
                 paintButton = Bind(new ModAbilityButton());
-                paintButton.SetSprite(Painter.Instance.PaintButtonSprite.GetSprite());
+                paintButton.SetSprite(Painter.Ability.PaintButtonSprite.GetSprite());
                 paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
                 paintButton.Visibility = (button) => !MyPlayer.IsDead;
                 paintButton.OnClick = (button) => {
-                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new("Paint", 40, false, sample ?? MyPlayer.GetOutfit(75))));
+                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new(sample ?? MyPlayer.GetOutfit(75), "Paint", 40, false)));
                     if (TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else
@@ -127,6 +128,7 @@ public class Illusioner : DefinedRoleTemplate, DefinedRole
 
                     acTokenPainterCommon ??= new("painter.common1");
                     if (acTokenMorphingCommon != null) acTokenCommon ??= new("illusioner.common1");
+                    StatsPaint.Progress();
                 };
                 paintButton.OnSubAction = (button) =>
                 {

@@ -10,6 +10,7 @@
 "title.buttons.addons" : "アドオン"
 "title.buttons.developersStudio" : "デベロッパースタジオ"
 "title.buttons.marketplace" : "マーケットプレイス"
+"title.buttons.stats" : "統計"
 
 # Certification
 
@@ -28,6 +29,9 @@
 "certification.unmatchedAddon" : "アドオン不一致"
 "certification.unmatchedAddon.detail" : "このプレイヤーは必要なアドオンを導入していない、あるいは余分なアドオンを導入しています。<br>導入が必要なアドオンについて案内しましょう。"
 "certification.unmatchedAddon.client" : "ホストとアドオンの導入状況が一致していません。<br>ホストに必要なアドオンを確認してください。"
+"certification.unmatchedVanilla" : "本体不一致"
+"certification.unmatchedVanilla.detail" : "このプレイヤーは本体のバージョンが一致していません。<br>意図せぬ問題を回避するため、本体のバージョンを揃えてください。"
+"certification.unmatchedVanilla.client" : "ホストと本体バージョンが一致していません。<br>ホストにAmong Us本体のバージョンを確認してください。"
 
 # UI
 
@@ -35,6 +39,8 @@
 "ui.dialog.no" : "いいえ"
 "ui.dialog.ok" : "OK"
 "ui.dialog.exit" : "退出"
+"ui.dialog.search" : "検索"
+"ui.dialog.keyword" : "キーワード"
 "ui.common.loading" : "読み込み中"
 "ui.update.waitFinishing" : "バージョン変更中です"
 "ui.update.finishUpdate" : "処理が完了しました！<br>ゲームを再起動してください。"
@@ -52,6 +58,8 @@
 "ui.discordWebhook.determine" : "保存"
 "ui.discordWebhook.send" : "送信"
 "ui.dragAndDrop" : "ドラッグ&ドロップで画像を選択"
+"ui.costume.missedCostume" : "他プレイヤーのコスチュームを表示するには<br>グローバルコスチュームの有効化が必要です！<br><br>クリックして開く画面から不足したグローバルコスチュームを追加できます。"
+"ui.costume.unownedCostume" : "不足グローバルコス一覧"
 
 "ui.attribute.accel" : "移動速度上昇"
 "ui.attribute.decel" : "移動速度低下"
@@ -100,6 +108,17 @@
 "ui.action.cannon.mark" : "空気砲の発射先をマークします。"
 "ui.action.cannon.cannon" : "空気砲の発射先を選択して、発砲します。"
 "ui.action.thurifer.curse" : "香炉を活性化させます。"
+"ui.action.scarlet.suicide" : "時間内に本命を決定しないと死亡してしまいます！<br>会議中や会議終了直後はタイマーは進行しません。"
+"ui.action.bubblegun.equip" : "バブルガンを装備、格納します。バブルガンを装備している間は<br>キルボタンがバブル発砲ボタンに変化します。"
+"ui.action.bubblegun.kill" : "バブルを発射します。<br>発砲後、バブルガンは自動で格納されます。"
+
+# Tutorial
+
+"tutorial.guide.canClose" : "クリックでチュートリアルを閉じられます。"
+"tutorial.guide.cannotClose" : "カーソルを合わせている間、チュートリアルは表示されつづけます。"
+"tutorial.variations.subAction" : "キー入力によってのみ発動できる<b>サブアクション</b>があります。<br>キーの表示にカーソルを合わせると、アクションの詳細が確認できます。"
+"tutorial.variations.helpInGame.title" : "ゲーム内ヘルプ"
+"tutorial.variations.helpInGame.caption" : "%KEY%キーを押すとヘルプ画面が開きます。<br>自身の能力や勝利条件、配役や称号を確認しましょう。"
 
 # Versions
 
@@ -129,6 +148,11 @@
 "notification.lobby.noTitleForFreeplay" : "フリープレイでは称号は獲得できません。"
 "notification.lobby.noTitleForOP" : "ホストにOP権限が付与されるゲームでは称号は獲得できません。"
 
+# Logs
+
+"log.loadCostume" : "読み込みが完了しました。"
+"log.awaiting" : "応答を待っています... (Tag: %TAG%)"
+
 # Options
 
 "options.switch.off" : "Off"
@@ -138,6 +162,10 @@
 "options.sec" : "s"
 "options.followPrimaryChance" : "-"
 "options.inactivated" : "無効"
+
+"options.values.short" : "短め"
+"options.values.middle" : "普通"
+"options.values.long" : "長め"
 
 "options.gamemode" : "ゲームモード"
 
@@ -173,6 +201,8 @@
 "options.map.spawnCandidatesFilter" : "スポーン候補地フィルター"
 "options.map.silentVents" : "視界外のベント開閉不可視"
 "options.map.canOpenMapWhileUsingUtility" : "ユーティリティ使用中のマップ開閉"
+"options.map.numOfTeleporter" : "テレポーターのペア数"
+"options.map.nonCrewmateCanUseTeleporterImmediately" : "(非クルーのみ)即時テレポート"
 "options.map.randomizedWiring" : "配線タスクの順番ランダム化"
 "options.map.stepsOfWiringGame" : "配線タスクのステップ数"
 "options.map.ladderCoolDown" : "はしごの使用クールダウン"
@@ -222,6 +252,7 @@
 "options.meeting.extraEmergencyCooldownInTheEarly" : "ゲーム序盤の追加緊急クールダウン"
 "options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "ゲーム序盤終了までに必要な死者数"
 "options.meeting.waitingForHost" : "集計中"
+"options.meeting.showVoteState" : "投票状況の表示"
 
 "options.consoleRestriction" : "情報端末制限"
 "options.consoleRestriction.detail" : "アドミンやバイタルの使用時間に制限をかけることができます。"
@@ -230,6 +261,27 @@
 "options.consoleRestriction.vitalsRestriction" : "バイタル"
 "options.consoleRestriction.cameraRestriction" : "カメラ & ログ"
 "options.consoleRestriction.resetRestrictions" : "会議ごとの制限リセット"
+
+"options.quality" : "クオリティオプション"
+"options.quality.detail" : "ゲームのクオリティに関する設定です。<br>パフォーマンスに影響を及ぼす恐れがあります。参加者の様子を見て調整してください。"
+"options.quality.lowLatencyPlayerSync" : "低遅延のプレイヤー位置同期"
+
+"options.perk" : "パークオプション"
+"options.perk.detail" : "マップ中に不思議なプラントが現れます。<br>プラントからは、様々な能力を秘めたパークを手に入れることができます。"
+"options.perk.numOfPlants" : "プラントの最大出現数"
+"options.perk.numOfPlants.detail" : "プラントは会議を挟むたびに成長します。<br>全生存者は開花したプラントからパークを手に入れることができます。"
+"options.perk.numOfWarpedPlants" : "歪んだプラントの最大出現数"
+"options.perk.numOfWarpedPlants.detail" : "歪んだプラントは非クループレイヤーのみ使用することができます。<br>開花した歪んだプラントは妨害や錯乱に適したパークをもたらします。"
+"options.perk.maxBloomsPerPlant" : "最大開花回数"
+"options.perk.growSpeed" : "プラントの成長速度"
+"options.perk.shortcut.standard" : "共通パーク設定ショートカット"
+"options.perk.shortcut.standard.0" : "出現確率を0%に"
+"options.perk.shortcut.standard.100" : "出現確率を100%に"
+"options.perk.shortcut.warped" : "人外専用パーク設定ショートカット"
+"options.perk.shortcut.warped.0" : "出現確率を0%に"
+"options.perk.shortcut.warped.100" : "出現確率を100%に"
+"options.perk.movementRestrictionPerksAlsoAffectCasters" : "対パーク所持者の移動制限効果の作用"
+"options.perk.movementRotationPerksAlsoAffectCasters" : "対パーク所持者の移動回転効果の作用"
 
 "options.voiceChat" : "ボイスチャットオプション"
 "options.voiceChat.detail" : "通話しながら遊ぼう！ゲーム内VCの設定です。"
@@ -248,6 +300,8 @@
 "options.role.count" : "割当人数"
 "options.role.chance" : "割当確率"
 "options.role.secondaryChance" : "2回目～"
+"options.role.count.jackalized" : "ジャッカル割当人数"
+"options.role.chance.jackalized" : "ジャッカル割当確率"
 "options.role.count.short" : "割り当て"
 "options.modifier.chance" : "割り当て確率"
 "options.role.crewmateCount" : "クルーメイト割り当て"
@@ -302,6 +356,7 @@
 "options.role.guesser.leftGuess" : "のこり推察回数"
 "role.guesser.guessableFilter" : "推察可能フィルター"
 "options.role.guesser.detail" : "ゲッサーは会議中にプレイヤーの役職を推察してキルすることができます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
+"role.guesser.leftGuess" : "のこり推察回数"
 
 "options.role.trapper.placeCoolDown" : "設置クールダウン"
 "options.role.trapper.placeDuration" : "設置にかかる時間"
@@ -329,6 +384,7 @@
 "options.role.agent.numOfExemptedTasks" : "タスクの免除数"
 "options.role.agent.numOfExtraTasks" : "追加タスク数"
 "options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent" : "先んじてタスクを完遂されると自殺する"
+"stats.agent.agent" : "タスクの代行回数"
 
 "role.bait.name" : "ベイト"
 "role.bait.short" : "B"
@@ -338,6 +394,8 @@
 "options.role.bait.reportDelay" : "通報までの遅延"
 "options.role.bait.reportDelayDispersion" : "通報までの遅延のばらつき"
 "options.role.bait.canSeeVentFlash" : "ベントフラッシュの表示"
+"stats.bait.bait" : "ベイトレポートの発動回数"
+"stats.bait.killer" : "ベイトレポートを発動させた回数"
 
 "role.busker.name" : "バスカー"
 "role.busker.short" : "B"
@@ -346,6 +404,8 @@
 "options.role.busker.pseudocideCoolDown" : "偽装死クールダウン"
 "options.role.busker.pseudocideDuration" : "偽装死の有効時間"
 "options.role.busker.hidePseudocideFromVitals" : "バイタル上での偽装死の隠蔽"
+"stats.busker.pseudocide" : "偽装死の発動回数"
+"stats.busker.missed" : "復活失敗回数"
 
 "role.collator.name" : "コレイタ―"
 "role.collator.short" : "C"
@@ -367,6 +427,9 @@
 "role.collator.ui.result" : "照合結果"
 "role.collator.ui.matched" : "適合"
 "role.collator.ui.unmatched" : "不適合"
+"stats.collator.collating" : "照合回数"
+"stats.collator.matched" : "適合した回数"
+"stats.collator.unmatched" : "不適合の回数"
 
 "role.comet.name" : "コメット"
 "role.comet.short" : "C"
@@ -377,6 +440,7 @@
 "options.role.comet.blazeDuration" : "ブースト効果時間"
 "options.role.comet.blazeVisionRate" : "ブースト中の視界倍率"
 "options.role.comet.blazeScreenRate" : "ブースト中の画面倍率"
+"stats.comet.blazing" : "ブースト回数"
 
 "role.doctor.name" : "ドクター"
 "role.doctor.short" : "D"
@@ -387,12 +451,23 @@
 "options.role.doctor.chargesPerTasks" : "タスクによる使用可能時間チャージ" 
 "role.doctor.gadgetLeft" : "%SECOND%s"
 
+"role.echo.name" : "エコー"
+"role.echo.short" : "E"
+"role.echo.blurb" : "慟哭が谺する"
+"options.role.echo.detail" : "エコーは周囲のプレイヤーの存在を探知できるクルーメイトです。<br>船内で発生したアクションを感知することもできます。"
+"options.role.echo.echoCooldown" : "エコークールダウン"
+"options.role.echo.echoRange" : "エコーの効果範囲"
+"stats.echo.players" : "探知したプレイヤー人数"
+"stats.echo.actions" : "アクションの感知回数"
+
 "role.justice.name" : "ジャスティス"
 "role.justice.short" : "J"
 "role.justice.blurb" : "審判の時間"
 "options.role.justice.detail" : "ジャスティスは二人のプレイヤーを投票の対象に吊し上げ<br>いずれか、あるいは両方を追放するよう仕向けることができます。"
 "options.role.justice.putJusticeOnTheBalance" : "ジャスティス自身を審判に掛ける"
 "options.role.justice.justiceMeetingTime" : "ジャスティス会議時間"
+"stats.justice.exiled" : "ジャスティス会議で追放した人数"
+"stats.justice.nonCrewmates" : "ジャスティス会議で追放した非クルーの人数"
 
 "role.madmate.name" : "マッドメイト"
 "role.madmate.short" : "Ma"
@@ -407,6 +482,8 @@
 "options.role.madmate.hasImpostorVision" : "インポスター視界"
 "options.role.madmate.canUseVents" : "ベントの使用"
 "options.role.madmate.canMoveInVents" : "ベント間の移動"
+"stats.madmate.foundImpostors" : "インポスターの発見回数"
+"stats.madmate.embroil" : "生存者を道連れした回数"
 
 "role.mayor.name" : "メイヤー"
 "role.mayor.short" : "M"
@@ -417,6 +494,7 @@
 "options.role.mayor.maxVote" : "最大投票数"
 "options.role.mayor.maxVotesStock" : "投票ストック数"
 "options.role.mayor.voteAssignment" : "会議ごとの票の割り当て数"
+"stats.mayor.votes" : "投じた総票数"
 
 "role.necromancer.name" : "ネクロマンサー"
 "role.necromancer.short" : "N"
@@ -429,6 +507,7 @@
 "options.role.necromancer.reviveMaxRange" : "復活部屋までの最大距離"
 "role.necromancer.phantomMessage" : "%ROOM%に連れて行って..."
 "role.necromancer.reviveRange" : "ネクロマンサー<color=white>: 死体通知範囲</color>"
+"stats.necromancer.revive" : "復活させた回数"
 
 "role.niceGuesser.name" : "ナイスゲッサー"
 "role.niceGuesser.short" : "G"
@@ -457,6 +536,8 @@
 "options.role.phosphorus.lampCoolDown" : "ランプのクールダウン"
 "options.role.phosphorus.lampDuration" : "ランプの有効時間"
 "options.role.phosphorus.lampStrength" : "ランプの光の大きさ"
+"stats.phosphorus.lantern" : "ランプ設置回数"
+"stats.phosphorus.lighting" : "ランプ点灯回数"
 
 "role.psychic.name" : "サイキック"
 "role.psychic.short" : "P"
@@ -469,10 +550,12 @@
 "options.role.psychic.message.killersRole" : "私をキルしたのは%ROLE%だ..."
 "options.role.psychic.message.killerIsDead" : "私をキルしたプレイヤーはもう死んでいる"
 "options.role.psychic.message.myRole" : "私は%ROLE%だ..."
-"options.role.psychic.message.myState" : "私は%STATE%した..."
+"options.role.psychic.message.myState" : "私の死因は%STATE%だ..."
 "options.role.psychic.message.inner.darkColor" : "暗色"
 "options.role.psychic.message.inner.lightColor" : "明色"
 "options.role.psychic.message.header" : "霊界通信"
+"stats.psychic.searching" : "死体の探索回数"
+"stats.psychic.messages" : "霊界通信の獲得回数"
 
 "role.provocateur.name" : "プロヴォケーター"
 "role.provocateur.short" : "P"
@@ -481,6 +564,8 @@
 "options.role.provocateur.embroilCoolDown" : "巻き込みクールダウン"
 "options.role.provocateur.embroilAdditionalCoolDown" : "巻き込みの追加クールダウン"
 "options.role.provocateur.embroilDuration" : "巻き込み有効時間"
+"stats.provocateur.taskPhase" : "タスクフェイズ中の巻き込み回数"
+"stats.provocateur.exile" : "追放時の道連れ回数"
 
 "role.seer.name" : "シア"
 "role.seer.short" : "S"
@@ -498,6 +583,8 @@
 "options.role.sheriff.killCoolDown" : "キルクールダウン"
 "options.role.sheriff.numOfShots" : "キル可能回数"
 "options.role.sheriff.canKillHidingPlayer" : "隠れているプレイヤーをキル可能"
+"stats.sheriff.shot" : "発砲回数"
+"stats.sheriff.misshot" : "誤射回数"
 
 "role.ubiquitous.name" : "ユビキタス"
 "role.ubiquitous.short" : "U"
@@ -510,6 +597,7 @@
 "options.role.ubiquitous.doorHackCoolDown" : "ドアハッキングクールダウン"
 "options.role.ubiquitous.doorHackRadious" : "ドアハッキングの有効範囲"
 "role.ubiquitous.droneRange" : "ユビキタス<color=white>: デタッチ済ドローンの検出範囲</color>"
+"stats.ubiquitous.drones" : "呼び出したドローンの数"
 
 # Impostor Roles
 
@@ -528,8 +616,20 @@
 "options.role.alien.invalidateCoolDown" : "無効化クールダウン"
 "options.role.alien.numOfInvalidations" : "無効化使用可能回数"
 
+"role.berserker.name" : "バーサーカー"
+"role.berserker.short" : "Be"
+"role.berserker.blurb" : "[FATAL ERROR] 制御不能"
+"options.role.berserker.detail" : "バーサーカーは、その正体を明らかにしてパワーアップするインポスターです。<br>暴走中はキルクールが短くなり、移動速度が上昇します。"
+"options.role.berserker.killCooldown" : "暴走中のキルクールダウン"
+"options.role.berserker.accelRate" : "暴走中の加速倍率"
+"options.role.berserker.canCalmDown" : "鎮静化可能"
+"options.role.berserker.berserkCooldown" : "暴走クールダウン"
+"options.role.berserker.maxBerserkDuration" : "暴走の最大効果時間"
+"options.role.berserker.killingForTrance" : "忘我までのキル数"
+"stats.berserker.berserk" : "暴走回数"
+
 "role.bountyHunter.name" : "バウンティハンター"
-"role.bountyHunter.short" : "B"
+"role.bountyHunter.short" : "Bo"
 "role.bountyHunter.blurb" : "めざせ、一刻千金"
 "options.role.bountyHunter.detail" : "賞金首をキルするとキルクールが短くなります。<br>ただし、それ以外のプレイヤーをキルするとキルクールが長くなってしまいます。"
 "options.role.bountyHunter.bountyKillCoolDown" : "キルクールダウン(バウンティキル)"
@@ -537,6 +637,22 @@
 "options.role.bountyHunter.changeBountyInterval" : "バウンティの変更クールダウン"
 "options.role.bountyHunter.showBountyArrow" : "バウンティの矢印を表示"
 "options.role.bountyHunter.arrowUpdateInterval" : "矢印の位置更新間隔"
+"stats.bountyHunter.bountyKill" : "賞金首のキル回数"
+"stats.bountyHunter.othersKill" : "賞金首以外のキル回数"
+
+"role.bubblegun.name" : "バブルガン"
+"role.bubblegun.short" : "Bu"
+"role.bubblegun.blurb" : "札束と泡に黙する"
+"options.role.bubblegun.detail" : "プレイヤーを閉じ込める泡を放つバブルガンを撃てます。<br>泡に閉じ込められたプレイヤーは死亡しますが、この死体は通報できません。"
+"options.role.bubblegun.bubbleCooldown" : "バブル発砲クールダウン"
+"options.role.bubblegun.bubbleSize" : "バブルの大きさ"
+"options.role.bubblegun.bubbleSpeed" : "バブルの速度"
+"options.role.bubblegun.bubbleDuration" : "バブルの滞空時間"
+"options.role.bubblegun.maxBubbles" : "バブルの発砲可能回数"
+"options.role.bubblegun.eraseBubblesOnMeeting" : "会議時のバブル死体の消去"
+"options.role.bubblegun.canKillImpostor" : "インポスターのフレンドリーファイア"
+"options.role.bubblegun.bubblePopWhenHitWall" : "壁でバブルが弾ける"
+"stats.bubblegun.bubble" : "バブル発砲回数"
 
 "role.camouflager.name" : "カモフラージャー"
 "role.camouflager.short" : "Ca"
@@ -545,6 +661,7 @@
 "options.role.camouflager.camoCoolDown" : "カモフラージュクールダウン"
 "options.role.camouflager.camoDuration" : "カモフラージュ効果時間"
 "options.role.camouflager.canInvokeCamoAfterDeath" : "死亡後のカモフラージュ能力の発動"
+"stats.camouflager.camo" : "カモフラージュ発動回数" 
 
 "role.cannon.name" : "カノン"
 "role.cannon.short" : "C"
@@ -555,6 +672,8 @@
 "options.role.cannon.cannonCooldown" : "空気砲クールダウン"
 "options.role.cannon.cannonPower" : "空気砲の威力"
 "options.role.cannon.cannonPowerAttenuation" : "空気砲の威力減衰率"
+"stats.cannon.fire" : "空気砲の発砲回数"
+"stats.cannon.players" : "空気砲で吹き飛ばした人数"
 
 "role.cleaner.name" : "クリーナー"
 "role.cleaner.short" : "Cl"
@@ -562,6 +681,7 @@
 "options.role.cleaner.detail" : "クリーナーは死体を消し去ることができます。<br>消去能力のクールダウンはキルクールダウンと同期します。"
 "options.role.cleaner.cleanCoolDown" : "消去クールダウン"
 "options.role.cleaner.syncKillAndCleanCoolDown" : "キルと能力クールダウンの同期"
+"stats.cleaner.clean" : "消去した死体の数"
 
 "role.destroyer.name" : "デストロイヤー"
 "role.destroyer.short" : "De"
@@ -572,6 +692,7 @@
 "options.role.destroyer.killSEStrength" : "キルSEの可聴範囲"
 "options.role.destroyer.leaveKillEvidence" : "血痕の残存"
 "options.role.destroyer.canReportKillScene" : "キル現場をレポート可能"
+"stats.destroyer.reported" : "キル現場をレポートされた回数"
 
 "role.disturber.name" : "ディスターバー"
 "role.disturber.short" : "Di"
@@ -582,6 +703,8 @@
 "options.role.disturber.disturbDuration" : "妨害効果時間"
 "options.role.disturber.maxNumOfPoles" : "ポールの最大設置数"
 "options.role.disturber.maxDistanceBetweenPoles" : "ポール間の最大距離"
+"stats.disturber.pole" : "ポールの設置本数"
+"stats.disturber.disturb" : "障壁による妨害回数"
 
 "role.effacer.name" : "イフェイサー"
 "role.effacer.short" : "E"
@@ -589,6 +712,7 @@
 "options.role.effacer.detail" : "イフェイサーは仲間や他のプレイヤーに透明化能力を与えることができます。<br>視認がとりづらくなり、会議に混乱をもたらします。"
 "options.role.effacer.effaceCoolDown" : "透明化クールダウン"
 "options.role.effacer.effaceDuration" : "透明化効果時間"
+"stats.effacer.efface" : "透明化回数"
 
 "role.evilGuesser.name" : "イビルゲッサー"
 "role.evilGuesser.short" : "G"
@@ -629,6 +753,7 @@
 "options.role.hadar.gushFromVents" : "ベントからの顕現"
 "options.role.hadar.ventDetectionRange" : "ベント検出範囲"
 "options.role.hadar.leftDivingEvidence" : "潜入時の証拠の残存"
+"stats.hadar.dive" : "地底への潜入回数"
 
 "role.illusioner.name" : "イリュージョナー"
 "role.illusioner.short" : "Il"
@@ -641,6 +766,9 @@
 "options.role.illusioner.loseSampleOnMeeting" : "緊急会議でのサンプル放棄"
 "options.role.illusioner.transformAfterMeeting" : "会議後まで見た目を変化を遅延"
 "options.role.illusioner.sampleOriginalLook" : "本来の見た目を採取"
+"stats.illusioner.sample" : "サンプルの採取回数"
+"stats.illusioner.morph" : "変身回数"
+"stats.illusioner.paint" : "ペイント回数"
 
 "role.jailer.name" : "ジェイラー"
 "role.jailer.short" : "J"
@@ -660,6 +788,8 @@
 "options.role.marionette.swapCoolDown" : "入れ替えクールダウン"
 "options.role.marionette.decoyDuration" : "デコイの有効時間"
 "options.role.marionette.canSeeDecoyInShadow" : "視界外のデコイの視認"
+"stats.marionette.decoy" : "デコイの設置回数"
+"stats.marionette.swap" : "デコイとの位置スワップ回数"
 
 "role.morphing.name" : "モーフィング"
 "role.morphing.short" : "Mo"
@@ -669,6 +799,9 @@
 "options.role.morphing.morphCoolDown" : "変身クールダウン"
 "options.role.morphing.morphDuration" : "変身効果時間"
 "options.role.morphing.loseSampleOnMeeting" : "緊急会議でのサンプル放棄"
+"stats.morphing.sample" : "サンプルの採取回数"
+"stats.morphing.morph" : "変身回数"
+"stats.morphing.paint" : "ペイント回数"
 
 "role.painter.name" : "ペインター"
 "role.painter.short" : "P"
@@ -678,6 +811,9 @@
 "options.role.painter.paintCoolDown" : "ペイントクールダウン"
 "options.role.painter.loseSampleOnMeeting" : "緊急会議でのサンプル放棄"
 "options.role.painter.transformAfterMeeting" : "会議後まで見た目を変化を遅延"
+"stats.painter.sample" : "サンプルの採取回数"
+"stats.painter.morph" : "変身回数"
+"stats.painter.paint" : "ペイント回数"
 
 "role.raider.name" : "レイダー"
 "role.raider.short" : "Ra"
@@ -688,11 +824,13 @@
 "options.role.raider.axeSpeed" : "斧の投擲速度"
 "options.role.raider.canKillImpostor" : "インポスターのフレンドリーファイア"
 "role.raider.axeSize" : "レイダー<color=white>: 斧の当たり判定</color>"
+"stats.raider.thrown" : "斧の投擲回数"
 
 "role.reaper.name" : "リーパー"
 "role.reaper.short" : "Re"
 "role.reaper.blurb" : "ベント引き回しの上、磔獄門"
 "options.role.reaper.detail" : "死体を引きずって移動させてしまうインポスターです。<br>死体を持ったままベント間を自由に移動することができます。"
+"stats.reaper.ventWithDeadBody" : "死体と共にベントに潜入した回数"
 
 "role.sniper.name" : "スナイパー"
 "role.sniper.short" : "Sn"
@@ -712,6 +850,8 @@
 "role.sniper.shotRange" : "スナイパー<color=white>: ライフルの有効射程</color>"
 "role.sniper.soundRange" : "スナイパー<color=white>: 銃声の可聴範囲</color>"
 "role.sniper.shotSize" : "スナイパー<color=white>: 銃弾の当たり判定</color>"
+"stats.sniper.misshot" : "狙撃を外した回数"
+"stats.sniper.shot" : "狙撃回数"
 
 "role.stirrer.name" : "スターラー"
 "role.stirrer.short" : "St"
@@ -722,16 +862,22 @@
 "options.role.stirrer.sabotageMaxCharge" : "偽サボタージュチャージの最大数"
 "options.role.stirrer.sabotageCoolDown" : "偽サボタージュのクールダウン"
 "options.role.stirrer.sabotageInterval" : "偽サボタージュ発生後の追加クールダウン"
+"stats.stirrer.stir" : "幻惑回数"
+"stats.stirrer.sabo" : "偽サボタージュ発動回数"
 
 "role.thurifer.name" : "サリファー"
 "role.thurifer.short" : "T"
 "role.thurifer.blurb" : "汝は救世主なりや？"
 "options.role.thurifer.detail" : "香炉の煙を吸わせ、遅延キルを仕掛けるインポスターです。"
-"options.role.thurifer.maxIntoxication" : "香気の最大吸入量"
+"options.role.thurifer.inhalationSpeed" : "香気の吸入速度"
 "options.role.thurifer.curseDuration" : "活性化された香炉の効果時間"
 "options.role.thurifer.numOfThuribulums" : "香炉の最大出現数"
 "options.role.thurifer.thuribulumRange" : "香炉の効果範囲"
 "options.role.thurifer.maxKillDelay" : "最大キル遅延時間"
+"options.role.thurifer.showBlink" : "遅延キルのブリンク"
+"options.role.thurifer.activationDelay" : "香炉有効化までの遅延"
+"stats.thurifer.activate" : "香炉の使用回数"
+"stats.thurifer.impute" : "薫陶の転移回数"
 
 # Neutral Roles
 
@@ -741,6 +887,7 @@
 "options.role.arsonist.detail" : "生存者全員に油を塗り、発火させれば勝利します。<br>忍び寄るプレイヤーに気を付けましょう。"
 "options.role.arsonist.douseCoolDown" : "油塗りクールダウン"
 "options.role.arsonist.douseDuration" : "油塗りの所要時間"
+"stats.arsonist.doused" : "油を塗った回数"
 
 "role.avenger.name" : "アヴェンジャー"
 "role.avenger.short" : "A"
@@ -755,6 +902,9 @@
 "options.role.avenger.showAvengerFlashForTarget" : "アヴェンジャー発生通知フラッシュの表示"
 "options.role.avenger.notificationForAvengerInterval" : "復讐対象の位置の通知間隔"
 "options.role.avenger.notificationForTargetInterval" : "アヴェンジャーの位置の通知間隔"
+"stats.avenger.killTarget" : "復讐対象のキル回数"
+"stats.avenger.failed" : "返り討ちに遭った回数"
+"stats.avenger.defend" : "キラーとして返り討ちに成功した回数"
 
 "role.chainShifter.name" : "チェインシフター"
 "role.chainShifter.short" : "C"
@@ -762,6 +912,7 @@
 "options.role.chainShifter.detail" : "チェインシフターはそのままでは勝利できません。<br>役職を交換することで勝利条件を獲得できます。"
 "options.role.chainShifter.shiftCoolDown" : "シフトクールダウン"
 "options.role.chainShifter.canCallEmergencyMeeting" : "緊急ボタンを使用可能"
+"stats.chainShifter.shift" : "役職のシフト回数"
 
 "role.dancer.name" : "ダンサー"
 "role.dancer.short" : "D"
@@ -777,6 +928,12 @@
 "options.role.dancer.forecastedFollowingSuicide" : "ダンサー死亡時の後追い自殺"
 "role.dancer.taskDanceText" : "死の預言を完遂させる。"
 "role.dancer.taskFinalText" : "ラストダンスを生存者に見せて勝利せよ。"
+"stats.dancer.dance" : "ダンス回数"
+
+"role.ember.name" : "エンバー"
+"role.ember.short" : "E"
+"role.ember.blurb" : "惨憺たる運命の結末"
+"options.role.ember.detail" : "アヴェンジャーとの対決に敗北し、ダムドの呪詛によって燃え尽きた残骸。<br>ここに希望はない。"
 
 "role.jackal.name" : "ジャッカル"
 "role.jackal.short" : "J"
@@ -786,6 +943,8 @@
 "options.role.jackal.canCreateSidekick" : "サイドキック生成"
 "options.role.jackal.numOfKillingToCreateSidekick" : "サイドキック生成に必要なキル数"
 "options.role.jackal.numOfKillingToWin" : "勝利に必要なキル数"
+"options.role.jackal.jacklizedImpostor" : "インポスター能力のジャッカル化"
+"stats.jackal.sidekick" : "サイドキックを作った回数"
 
 "role.sidekick.name" : "サイドキック"
 "role.sidekick.short" : "S"
@@ -815,6 +974,17 @@
 "options.role.paparazzo.shotCoolDown" : "撮影クールダウン"
 "options.role.paparazzo.requiredSubjects" : "勝利に必要な撮影対象の数"
 "options.role.paparazzo.requiredDisclosed" : "勝利に必要な開示済みプレイヤー数"
+"stats.paparazzo.photo" : "撮影した写真の枚数"
+"stats.paparazzo.players" : "撮影したプレイヤー数"
+
+"role.scarlet.name" : "スカーレット"
+"role.scarlet.short" : "S"
+"role.scarlet.blurb" : ""それでも、愛してる""
+"options.role.scarlet.detail" : "スカーレットは本命とともに勝利を目指す第三陣営です。<br>誑かしたキープを巧みにつかってゲームをコントロールします。"
+"options.role.scarlet.graceUntilDecidingFavorite" : "本命決定までの猶予時間"
+"options.role.scarlet.numOfKept" : "キープの最大人数"
+"options.role.scarlet.numOfCommand" : "号令の最大使用回数"
+"stats.scarlet.kept" : "キープを誑かした回数"
 
 "role.vulture.name" : "ヴァルチャー"
 "role.vulture.short" : "V"
@@ -822,6 +992,7 @@
 "options.role.vulture.detail" : "ヴァルチャーは指定数の死体を捕食することで勝利します。<br>クルーメイトは素早く死体を発見する必要があります。"
 "options.role.vulture.eatCoolDown" : "捕食クールダウン"
 "options.role.vulture.numOfTheEatenToWin" : "勝利に必要な死体の捕食数"
+"stats.vulture.eaten" : "死体の捕食回数"
 
 # Ghost Roles
 
@@ -840,6 +1011,7 @@
 "options.role.clog.numOfGhost" : "出現可能な幽霊の数"
 "options.role.clog.ghostSize" : "幽霊の当たり判定"
 "role.clog.ghostSize" : "クロッグ<color=white>: 幽霊の当たり判定</color>"
+"stats.clog.ghosts" : "幽霊の召喚回数"
 
 "role.hallucination.name" : "ハルシネーション"
 "role.hallucination.blurb" : "偽りの記憶"
@@ -847,6 +1019,7 @@
 "options.role.hallucination.detail" : "ハルシネーションは生存者の幻像を作り出し、操作します。"
 "options.role.hallucination.hallucinationCooldown" : "幻像クールダウン"
 "options.role.hallucination.hallucinationDuration" : "幻像の操作可能時間"
+"stats.hallucination.hallucinations" : "幻像の召喚回数"
 
 "role.lumine.name" : "ルーミン"
 "role.lumine.blurb" : "いのちの燈火"
@@ -862,12 +1035,14 @@
 "options.role.noiseghost.noiseDuration" : "アラートの有効時間"
 "options.role.noiseghost.numOfNoise" : "アラートの使用可能回数"
 "options.role.noiseghost.noiseCooldown" : "アラートのクールダウン"
+"stats.noiseghost.alert" : "アラートの発動回数"
 
 "role.poltergeist.name" : "ポルターガイスト"
 "role.poltergeist.blurb" : "ワタシハココニイルヨ"
 "role.poltergeist.short" : "P"
 "options.role.poltergeist.detail" : "ポルターガイストは死体を引き寄せるように動かすことができます。"
 "options.role.poltergeist.poltergeistCoolDown" : "ポルターガイストクールダウン"
+"stats.poltergeist.poltergeist" : "ポルターガイスト発動回数"
 
 # Modifiers
 
@@ -876,11 +1051,15 @@
 "role.guesser.name" : "ゲッサー"
 "role.guesser.generalBlurb" : "正体見たり"
 "role.guesser.blurb" : "そして、推察せよ"
+"stats.guesser.allGuess" : "全推察回数"
+"stats.guesser.misguessed" : "推察失敗回数"
 
 "role.bloody.name" : "ブラッディ"
 "role.bloody.generalBlurb" : "連綿、その血に想い託して"
 "options.role.bloody.detail" : "あなたをキルした相手はしばらくの間、血の足跡を残すようになります。"
 "options.role.bloody.curseDuration" : "血の足跡の効果時間"
+"stats.bloody.bloody" : "血の足跡を発動させた回数"
+"stats.bloody.killer" : "血の足跡を付けさせられた回数"
 
 "role.confused.name" : "コンフューズド"
 "role.confused.generalBlurb" : "幸せの理由は"
@@ -889,6 +1068,7 @@
 "options.role.confused.numOfMaxShuffledPairs" : "会議ごとの最大シャッフル回数"
 
 "role.damned.name" : "ダムド"
+"role.damnedImpostor.name" : "ダムド"
 "role.damned.short" : "Da"
 "options.role.damned.detail" : "ダムドは自覚できないモディファイアです。<br>キルを一度だけ防ぐことができ、<b>呪い</b>が設定によって様々な効果をもたらします。"
 "role.damned.prefix" : "ダムド"
@@ -896,6 +1076,12 @@
 "options.role.damned.takeOverRoleOfKiller" : "キラーの役職を乗っ取る"
 "options.role.damned.damnedMurderMyKiller" : "呪いがキラーをキルする"
 "options.role.damned.killDelay" : "呪いによるキルの遅延"
+
+"role.disclosure.name" : "ディスクロージャ"
+"role.disclosure.generalBlurb" : "それは啓示ではない"
+"options.role.disclosure.detail" : "ディスクロージャは緊急会議中に自身のカーソルを全員に公開します。"
+"options.role.disclosure.anonymousCursor" : "匿名カーソル"
+"options.role.disclosure.showCursorAtLateVoting" : "投票終盤のカーソル表示"
 
 "role.extraMission.name" : "追加ミッション"
 "role.extraMission.generalBlurb" : "特別極秘任務"
@@ -905,6 +1091,7 @@
 "role.tieBreaker.name" : "タイブレイカー"
 "role.tieBreaker.generalBlurb" : "かませ、一発逆転"
 "options.role.tieBreaker.detail" : "タイ投票が発生すると、タイブレイカーは追加の票を投じます。"
+"stats.tieBreaker.tieBreaking" : "追加票を投じた回数"
 
 "role.lover.name" : "ラバー"
 "options.role.lover.detail" : "ラバーズは相方が死亡すると後追いして自殺します。<br>プレイヤーの勝利方法に変化をもたらします。"
@@ -928,9 +1115,14 @@
 "options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate" : "クルーメイト以外"
 "role.obsessional.taskText" : "[オブセッショナル] 追跡対象: %PLAYER%"
 
+"role.scarletLover.name" : "スカーレット ラバー"
+"options.role.scarletLover.detail" : "スカーレットに誑かされた恋人です。<br>自身が本命なのか、キープなのか知る由はありません。"
+"role.scarletLover.generalBlurb" : "夢は夢のまま、闇は闇のまま"
+
 "role.secret.name" : "シークレット"
 "role.secret.short" : "?"
 "role.secret.blurb" : "目を覚ませ！"
+"role.secret.generalBlurb" : "目を覚ませ！"
 "role.secretInGame.name" : "シークレット"
 "role.secretInGame.short" : "?"
 "role.secretInGame.blurb" : "目を覚ませ！"
@@ -951,7 +1143,79 @@
 "teams.jackal" : "ジャッカル"
 "teams.jester" : "ジェスター"
 "teams.paparazzo" : "パパラッチ"
+"teams.scarlet" : "スカーレット"
 "teams.vulture" : "ヴァルチャー"
+
+# Perks
+
+"perkui.message.noncrew" : "クルーメイトは人外専用パークを獲得できません。"
+"perkui.message.swap" : "所持しているパークと交換して獲得できます。"
+"perkui.message.obtain" : "インタラクトしてパークを獲得できます。"
+
+"perk.empty.name" : "パーク枠"
+"perk.empty.detail" : "開花した<b>プラント</b>からパークを手に入れることができます。"
+
+"perk.empty.noncrewmate.name" : "人外専用パーク枠"
+"perk.empty.noncrewmate.detail" : "開花した<b>歪んだプラント</b>からパークを手に入れることができます。"
+
+"perk.acceleration.name" : "俊敏"
+"perk.acceleration.detail" : "発動すると%D%秒間、通常の%R%倍の速度で移動できる。 <br>このパークには%CD%秒のクールダウンがある。"
+
+"perk.flipX.name" : "ようこそ鏡の世界へ"
+"perk.flipX.detail" : "全プレイヤーの画面が左右反転する。"
+
+"perk.flipY.name" : "下剋上の機"
+"perk.flipY.detail" : "全プレイヤーの画面が上下反転する。"
+
+"perk.flipXY.name" : "逆転劇"
+"perk.flipXY.detail" : "全プレイヤーの画面が上下左右反転する。"
+
+"perk.sniperIcon.name" : "空砲"
+"perk.sniperIcon.detail" : "その場で空砲を撃つ。<br>このパークには%CD%秒のクールダウンがある。"
+
+"perk.raiderEvidence.name" : "憤怒"
+"perk.raiderEvidence.detail" : "すぐ近くの壁に斧を突き刺す。<br>このパークには%CD%秒のクールダウンがある。<br>レイダーはこのパークを使用できない。"
+
+"perk.accelTrap.name" : "可能性の増幅"
+"perk.accelTrap.detail" : "その場に加速トラップを設置する。<br>設置したトラップは会議を挟んでから有効化する。"
+
+"perk.decelTrap.name" : "拘束"
+"perk.decelTrap.detail" : "その場に減速トラップを設置する。<br>設置したトラップは会議を挟んでから有効化する。"
+
+"perk.taskReduction.name" : "再計算"
+"perk.taskReduction.detail" : "タスクノルマを1だけ減少させる。<br>クルーメイトタスクを持たない場合は何も起こらない。"
+
+"perk.emergencyButton.name" : "緊急招集"
+"perk.emergencyButton.detail" : "どこからでも緊急ボタンを押すことができる。<br>このパークは緊急ボタンの使用回数制限を緩和させない。"
+
+"perk.teamLook.name" : "輝く水晶玉"
+"perk.teamLook.detail" : "緊急会議中、選択した生存者1人の陣営を知ることができる。"
+"perk.teamLook.ui.title" : "水晶玉 結果"
+"perk.teamLook.ui.team" : "%TEAM%陣営"
+
+"perk.ghostLook.name" : "刑事の薄汚れたレポート"
+"perk.ghostLook.detail" : "緊急会議中、選択した死者1人の死因を知ることができる。"
+"perk.ghostLook.ui.title" : "レポート詳細"
+
+"perk.invisible.name" : "並行宇宙の旅人"
+"perk.invisible.detail" : "%D%秒間、自身を透明化させる。<br>このパークは1度だけ発動できる。"
+
+"perk.doubleVote.name" : "声高な主張"
+"perk.doubleVote.detail" : "スキップや白票、0票投票以外で<br>投じる票数を一度だけ2倍にする。"
+
+"perk.monowayX.name" : "風見鶏 -赤-"
+"perk.monowayX.detail" : "発動すると%D%秒間、縦方向の移動を禁止する。<br>このパークには%CD%秒のクールダウンがある。<br>クールダウンはタスクフェイズの間のみ進み、会議が始まるたびにリセットされない。"
+
+"perk.monowayY.name" : "風見鶏 -青-"
+"perk.monowayY.detail" : "発動すると%D%秒間、横方向の移動を禁止する。<br>このパークには%CD%秒のクールダウンがある。<br>クールダウンはタスクフェイズの間のみ進み、会議が始まるたびにリセットされない。"
+
+"perk.monowayRotate.name" : "昏迷"
+"perk.monowayRotate.detail" : "発動すると%D%秒間、移動方向をランダムに回転させる。<br>このパークには%CD%秒のクールダウンがある。<br>クールダウンはタスクフェイズの間のみ進み、会議が始まるたびにリセットされない。"
+
+"perk.meteor.name" : "死のメテオストーム"
+"perk.meteor.detail" : "発動から10秒後に、周囲に多数の隕石を落とす。<br>このパークは一度だけ発動できる。<br>発動から隕石墜落の間、緊急ボタンはブロックされ、<br>墜落地点近辺にいるプレイヤーは赤いフラッシュで警告される。<br><br>ヴァルチャーはこのパークを使用できない。"
+"perk.meteor.sabotageText" : "隕石墜落警報: 安全な場所へ逃げろ"
+"perk.meteor.meetingButtonText" : "隕石墜落の警報が鳴っているため<br>緊急会議を始められません。"
 
 # Location
 
@@ -1114,7 +1378,18 @@
 "button.label.task" : "タスク"
 "button.label.marketplace" : "マーケットプレイス"
 "button.label.thurifer.curse" : "活性化"
-"button.label.thurifer.impute" : "転移
+"button.label.thurifer.impute" : "転移"
+"button.label.berserk" : "暴走"
+"button.label.calmDown" : "鎮静化"
+"button.label.echo" : "エコー"
+"button.label.scarlet.grance" : "残り時間"
+"button.label.favorite" : "本命"
+"button.label.seduce" : "キープ"
+"button.label.scarlet.command" : "号令"
+"button.label.costume" : "コスチューム"
+"button.label.bubble" : "バブル"
+"button.label.appeal" : "アピール"
+"button.label.playAchievement" : "称号ハイライト"
 
 # Game
 
@@ -1123,9 +1398,9 @@
 "game.prespawn.spawnIn" : "スポーンします"
 
 "game.meeting.cannotUseEmergencyButton" : "緊急会議はロックされている"
-"game.meeting.someoneDisappeared" : "誰かが船を去ったようだ"
-"game.meeting.roleText" : "%PLAYER%は%ROLE%だった"
-"game.meeting.roleJesterText" : "残念だったな"
+"game.meeting.someoneDisappeared" : "誰かが船を去ったようだ。"
+"game.meeting.roleText" : "%PLAYER%は%ROLE%だった。"
+"game.meeting.roleJesterText" : "残念だったな。"
 "game.meeting.multiple" : "どちらも追放された。"
 "game.meeting.obvious" : "ほかに選択肢などなかった。"
 "game.meeting.justiceMeeting" : "今、心を決めよ！"
@@ -1133,6 +1408,9 @@
 "game.metaAbility.tabs.roles" : "役職"
 "game.metaAbility.tabs.modifiers" : "モディファイア"
 "game.metaAbility.tabs.ghostRoles" : "幽霊役職"
+"game.metaAbility.tabs.perks" : "パーク"
+"game.metaAbility.perks.standard" : "共通パーク"
+"game.metaAbility.perks.noncrewmateOnly" : "非クルー専用パーク"
 "game.metaAbility.equipped" : "配役中"
 "game.metaAbility.unequipped" : "未配役"
 
@@ -1162,11 +1440,14 @@
 "statistics.events.accident" : "復活失敗"
 "statistics.events.dance" : "ダンス"
 "statistics.events.gassed" : "ガス中毒"
+"statistics.events.bubbled" : "バブル"
+"statistics.events.meteor" : "隕石墜落"
 
 # States
 
 "state.alive" : "生存"
 "state.dead" : "死亡"
+"state.disconnected" : "退出"
 "state.exiled" : "追放"
 "state.misfired" : "誤射"
 "state.sniped" : "狙撃"
@@ -1182,7 +1463,9 @@
 "state.cursed" : "呪殺"
 "state.crushed" : "圧死"
 "state.frenzied" : "狂乱"
-"state.gassed" : "ガス中毒"
+"state.gassed" : "中毒"
+"state.bubbled" : "バブル"
+"state.meteor" : "隕石直撃"
 
 # Endings
 
@@ -1196,6 +1479,7 @@
 "end.lover" : "ラバーズ%EXTRA%勝利"
 "end.paparazzo" : "パパラッチ%EXTRA%勝利"
 "end.avenger" : "アヴェンジャー%EXTRA%勝利"
+"end.scarlet" : "スカーレット%EXTRA%勝利"
 "end.nogame" : "無効なゲーム"
 
 "end.extra.lover" : " <color=#FFFFFF>+</color> ラバーズ"
@@ -1218,6 +1502,7 @@
 "help.command.cancelStarting" : "ゲームキャンセル"
 "help.command.console" : "コンソール"
 "help.command.saveResult" : "最後のゲーム結果を保存"
+"help.command.toggleSocial" : "ゲーム内アピール可否の切り替え"
 
 # Voice Chat
 
@@ -1270,7 +1555,11 @@
 "input.kill" : "キル (Additional)"
 "input.ability" : "アビリティ"
 "input.secondaryAbility" : "アビリティ(セカンダリ)"
+"input.sidekickAction" : "サイドキックアクション"
+"input.freeplayAction" : "フリープレイアクション"
 "input.aidAction" : "切り替えアクション"
+"input.perkAction1" : "パークアクション 1"
+"input.perkAction2" : "パークアクション 2"
 "input.command" : "コマンド"
 "input.screenshot" : "スクリーンショット"
 "input.mute" : "ミュート"
@@ -1302,6 +1591,10 @@
 "config.client.buttonArrangement.raiseBoth" : "全体的に上寄り"
 "config.client.showNebulaLogoInLobby" : "ロビーでのNoSロゴ表示"
 "config.client.webhook" : "Discord ウェブフック"
+"config.client.social" : "社交設定"
+"config.client.social.showAppealSettings" : "アピール設定の表示"
+"config.client.social.appealDuration" : "アピール時間"
+"config.client.social.note" : "変更は次に建てた部屋から反映されます。"
 
 # Preset
 
@@ -1427,6 +1720,7 @@
 "achievement.ui.cond" : "[制約]"
 "achievement.ui.allAchievements" : "全称号"
 "achievement.ui.shown" : "表示中"
+"achievement.ui.shown.search" : ""%KEYWORD%"の検索結果"
 "achievement.ui.cleared" : "[クリア済]"
 "achievement.ui.equipped" : "[装着中]"
 "achievement.ui.setTitle" : "クリックで称号を装着します。"
@@ -1439,11 +1733,59 @@
 "achievement.type.secret" : "シークレット"
 "achievement.type.seasonal" : "期間限定"
 "achievement.type.costume" : "コスチューム"
+"achievement.type.innersloth" : "Among Us"
+"achievement.type.perk" : "パーク"
+
+"achievement.group.recently" : "最近獲得した称号"
+"achievement.group.roles" : "役職"
+"achievement.group.seasonal" : "期間限定"
+"achievement.group.perk" : "パーク"
+"achievement.group.costume" : "コスチューム"
+"achievement.group.others" : "その他"
+"achievement.group.innersloth" : "Among Us"
 
 "achievement.filter.all" : "全称号"
 "achievement.filter.achieved" : "達成済"
-"achievement.filter.notAchieved" : "未達成"
+"achievement.filter.nonAchieved" : "未達成"
+"achievement.filter.search" : "検索"
 "achievement.filter.myRole" : "自役職"
+
+"achievement.social.firstClear" : "%PLAYER%が初獲得"
+"achievement.social.clear" : "%PLAYER%が獲得"
+"achievement.social.clearMultiple" : "%PLAYER%と%OTHERS%人が獲得"
+"achievement.social.noAchievement" : "ハイライトがありません。"
+
+# Stats
+
+"stats.ui.title" : "統計"
+"stats.ui.caption" : "※ v2.13 (2024/12/25公開) 以降のプレイデータが集計されています。"
+"stats.group.kill" : "死因別キル回数"
+"stats.group.death" : "死因別死亡回数"
+"stats.group.game" : "ゲーム"
+"stats.group.roles" : "ロール"
+"stats.group.perks" : "パーク"
+"stats.role.common.assigned" : "%ROLE% プレイ回数"
+"stats.role.common.won" : "%ROLE%として勝利"
+"stats.modifier.common.assigned" : "%MODIFIER% プレイ回数"
+"stats.modifier.common.won" : "%MODIFIER%として勝利"
+"stats.ghostRole.common.assigned" : "%GHOSTROLE% プレイ回数"
+"stats.ghostRole.common.won" : "%GHOSTROLE%として勝利"
+"stats.common.kill" : "%STATE%"
+"stats.common.death" : "%STATE%"
+"stats.common.win" : "%END%で勝利"
+"stats.common.defeat" : "%END%で敗北"
+"stats.gamePlay" : "総ゲーム数"
+"stats.plants.gain.normal" : "通常のプラントからのパーク獲得回数"
+"stats.plants.gain.warped" : "歪んだプラントからのパーク獲得回数"
+"stats.perk.common.gain" : "%PERK% 獲得回数"
+
+# Social
+
+"social.appeal.detail" : "アピールによってプレイヤーの視点を自身の元に集めることができます。<br>より魅力的な自己紹介のために活用しましょう！"
+"social.appeal.lobby" : "ロビー内アピール"
+"social.appeal.lobby.detail" : "オンにすると、今いるロビーで自身に<br>注目を集める<b>アピール</b>が使用できます。"
+"social.appeal.game" : "ゲーム内アピール"
+"social.appeal.game.detail" : "オンにすると、ゲーム内で自身に注目を集める<b>アピール</b>が使用できます。<br>通常のゲームではなく、自己紹介のためのオープニングにお使いください！"
 
 # Help
 
@@ -1463,6 +1805,8 @@
 "help.rolePreview.inner.random" : "ランダム出現"
 "help.rolePreview.inner.modifiers" : "モディファイア"
 "help.rolePreview.inner.ghostRoles" : "幽霊役職"
+"help.rolePreview.inner.jackalized.100" : "ジャッカル化 確定出現"
+"help.rolePreview.inner.jackalized.random" : "ジャッカル化 ランダム出現"
 
 # Tag
 
@@ -1547,6 +1891,9 @@
 "marketplace.type.cosmetics" : "コスチューム"
 "marketplace.searchMore.addons" : ""%QUERY%"でアドオンをさらに検索"
 "marketplace.searchMore.cosmetics" : ""%QUERY%"でコスチュームをさらに検索"
+"marketplace.ui.marketplace.state" : "状態"
+"marketplace.ui.marketplace.state.owning" : "有効"
+"marketplace.ui.marketplace.state.unowning" : "無効"
 
 # Role Filter
 
@@ -1569,30 +1916,79 @@
 
 # Documents
 
+"options.assignment.assignOpToHost.detail" : "オンにすると、ホストはゲーム中にコマンドを使用できるようになります。<br>特にコマンドを使用しない場合はオフにすることをお勧めします。"
 "options.assignment.ghostAssignmentMethod.detail" : "幽霊役職の割り当て方法を変更できます。<br> -<b>標準</b>: 死亡者には割り当てられる役職の何れかが必ず割り当てられます。<br> -<b>スリリング</b>: 割当確率が役職を割り当てられるか否かにまで影響を及ぼします。"
 "options.map.spawnMethod.detail" : "プレイヤーがスポーンする際のスポーン方法を設定できます。<br> -<b>標準</b>: マップそれぞれの従来のスポーン方法です。<br> -<b>選択式</b>: Airshipのように複数のスポーン場所からスポーン先を選びます。<br> -<b>ランダム</b>: 各プレイヤーはそれぞれに選ばれたランダムな場所でスポーンします。"
 "options.map.silentVents.detail" : "オンに設定することで視界外のベントの開閉が見えなくなります。"
+"options.map.canOpenMapWhileUsingUtility.detail" : "オンにすると、はしごや昇降機の使用中でも<br>マップが開けるようになります。" 
+"options.map.numOfTeleporter.detail" : "マップ上に、プレイヤーを転移させる宝石のペアが出現します。<br>プレイヤーは宝石を磨くことで対応する宝石の元へテレポートします。"
+"options.map.nonCrewmateCanUseTeleporterImmediately.detail" : "オンにするとインポスターおよび第三陣営は宝石を磨くミニゲーム無しに<br>テレポートができるようになります。"
+"options.map.customization.airship.oneWayMeetingRoom.detail" : "会議室左側のはしごを上り専用にし、<br>新たに会議室右側に下降専用のはしごを追加します。"
+"options.map.customization.airship.betterImpostorVision.detail" : "インポスター視界で昇降機の上下階の様子を双方から視認できるようにします。"
+"options.map.customization.airship.shadedLowerFloor.detail" : "非インポスター視界で昇降機上階から下の階が見えなくなります。"
+"options.map.customization.fungle.growingMushroom.detail" : "光るキノコの周囲の様子がぼんやりと見えるようになります。"
+"options.map.customization.fungle.thinFog.detail" : "ジャングルの影をより薄くします。"
+"options.map.customization.fungle.simpleLaboratory.detail" : "実験室下のガラスを撤去します。<br>部屋下側から実験室に直接侵入できます。"
+"options.meeting.deathPenalty.detail" : "会議時間は設定値と死者の人数をかけた秒数だけ減少します。"
+"options.meeting.noticeExtraVictims.detail" : "追放時、巻き込みや後追い自殺で追加の死者がいるとき通知します。"
+"options.meeting.options.meeting.extraEmergencyCooldownInTheEarly.detail" : "ある程度死者が発生するまで緊急クールダウンをさらに引き伸ばします。"
+"options.meeting.extraEmergencyCooldownInTheEarlyCondition.detail" : "設定した人数だけプレイヤーが死亡するとゲーム序盤の追加緊急クールダウンによる<br>緊急クールダウンの引き延ばしが終了します。"
+"options.quality.lowLatencyPlayerSync.detail" : "<b>カスタムサーバー限定</b><br>プレイヤーの位置を同期するタイミングをより短くします。"
+"options.perk.growSpeed.detail" : "プラントが成長する速度を調整できます。<br>大きな値にするほど早く成長します。"
 
 "options.role.agent.numOfExemptedTasks.detail" : "指定した数だけ、Agentの総タスク数が少なくなります。<br>総タスクが少なくなれば、追加タスクを手に入れるのにかかる時間は短縮します。"
 "options.role.agent.numOfExtraTasks.detail" : "一度のタスク代行で手に入れられるタスクの数を設定します。<br>死亡後はタスク代行による<b>さらなる</b>タスクの入手はできません。"
+"options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent.detail" : "他生存者がエージェントより早くタスクを全て完了させるとエージェントはその場で死亡します。<br>エージェントが全タスクをこなしている、あるいは既に追加タスクを獲得している場合は自殺しません。"
 "options.role.bait.showKillFlash.detail" : "オンに設定すると、キラーがベイトをキルしたとき、キラーの画面で水色のフラッシュが光ります。"
 "options.role.bait.reportDelay.detail" : "通報までの遅延を設けることで、キルとレポートの時間差によるベイトレポートの判断が難しくなります。"
 "options.role.bait.reportDelayDispersion.detail" : "通報までの遅延にばらつきを設けることで、キルとレポートの時間差によるベイトレポートの判断がより難しくなります。"
+"options.role.bait.canSeeVentFlash.detail" : "誰かがベントを使用するとベイト目線でフラッシュが光ります。"
+"options.role.busker.hidePseudocideFromVitals.detail" : "オンに設定すると、偽装死中、バイタルでは<br>バスカーが生存しているように見せます。"
+"options.role.collator.selectiveCollating.detail" : "オンにすると、採取した2本以上のサンプルから<br>自由に組を選んで照合ができます。"
+"options.role.collator.canTakeDuplicateSample.detail" : "オンにすると、同じプレイヤーから同時に2本以上のサンプルを採取できます。" 
+"options.role.collator.strictClassificationForNeutralRoles.detail" : "オンにすると、第三陣営を陣営ごとに区別して照合します。<br>オフの場合は第三陣営同士の照合結果は常に適合します。"
+"options.role.collator.madmateIsClassifiedAs.detail" : "マッドメイトのサンプルと適合する陣営を設定します。"
 "options.role.necromancer.reviveDuration.detail" : "復活部屋内で復活ボタンを押してから<br>死者が蘇生するまでにかかる時間です。"
 "options.role.necromancer.detectedRange.detail" : "ネクロマンサーは、死体にある程度近づくと画面が少し紫がかります。<br>これによって、ネクロマンサーは近くの死体の存在に気づくことができます。"
 "options.role.necromancer.reviveMinRange.detail" : "復活部屋は死体の発生位置に基づいて決定されます。<br>この設定では復活部屋と死体の発生位置の最小距離を指定できます。"
 "options.role.necromancer.reviveMaxRange.detail" : "復活部屋は死体の発生位置に基づいて決定されます。<br>この設定では復活部屋と死体の発生位置の最大距離を指定できます。"
-"options.role.madmate.limitEmbroiledPlayersToVoters.detail" : "追放時に他の生存者を一人、巻き込むことができます。<br>巻き込み対象は非インポスターに限られます。"
+"options.role.madmate.embroilPlayersOnExile.detail" : "追放時に他の生存者を一人、巻き込むことができます。<br>巻き込み対象は非インポスターに限られます。"
 "options.role.madmate.limitEmbroiledPlayersToVoters.detail" : "オンに設定することで、巻き込み対象を<br>自身に票を投じた非インポスターに限定することができます。"
+"options.role.madmate.canIdentifyImpostors.detail" : "タスクをこなすことで発見できるインポスターの最大人数を設定します。"
 "options.role.mayor.fixedVotes.detail" : "会議ごとに固定の票数を投じるメイヤーとして活用できるよう、<br>オプションを最適化します。"
 "options.role.mayor.minVote.detail" : "会議ごとに投じることができる最小の票数です。"
-"options.role.mayor.minVote.detail" : "会議ごとに投じることができる最大の票数です。"
+"options.role.mayor.maxVote.detail" : "会議ごとに投じることができる最大の票数です。"
 "options.role.mayor.maxVotesStock.detail" : "メイヤーはストックされた票を消費して投票します。<br>割り当てられた票のうち、投票に使用しなかった余りが次の会議のためにストックされます。"
 "options.role.mayor.voteAssignment.detail" : "メイヤーは会議が始まるたびに票のストックを獲得します。<br>この設定によってメイヤーが会議ごとに手に入れる票数を変更できます。"
 "options.role.provocateur.embroilAdditionalCoolDown.detail" : "巻き込み能力の効果時間中に巻き込みが発生しない場合があります。<br>この設定によって、巻き込みが不発に終わるたびに能力クールダウンをさらに引き延ばすことができます。<br>追加クールダウンが長くなるほど、プレイヤーは能力の使いどきをより見極める必要に迫られます。"
-"options.role.seer.canSeeGhostsInShadow.detail" : "オンに設定することで、視界外(影の部分)の幽霊も見えるようになります。"
+"options.role.seer.canSeeGhostsInShadow.detail" : "オンに設定すると、視界外(影の部分)の幽霊も見えるようになります。"
+"options.role.sheriff.canKillHidingPlayer.detail" : "オンに設定すると、ベントに潜っているプレイヤーをキルできるようになります。"
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies.detail" : "オンに設定すると、誰かが死亡した緊急会議が発生するまでキル能力を封印します。"
+"options.role.berserker.canCalmDown.detail" : "オンにすると、時間切れになるかボタンアクションによって<br>暴走状態を終了できるようになります。"
+"options.role.berserker.killingForTrance.detail" : "暴走中にキルを重ねると徐々に我を失います。忘我状態になると他人が区別できなくなります。<br>忘我状態では仲間のインポスターもキルできるようになってしまいます。"
+"options.role.camouflager.canInvokeCamoAfterDeath.detail" : "オンにすると、死亡後もカモフラージュ能力を発動できます。"
+"options.role.cannon.cannonPower.detail" : "この値を大きくすると、空気砲がプレイヤーを吹き飛ばす威力が強まります。"
+"options.role.cannon.cannonPowerAttenuation.detail" : "この値を大きくすると、空気砲の着弾点から離れたプレイヤーを<br>吹き飛ばしづらくなります。"
+"options.role.destroyer.phasesOfDestroying.detail" : "デストロイヤーのキルにかかる時間を設定します。<br>実際にキルに要する時間を括弧書きで示しています。"
+"options.role.destroyer.leaveKillEvidence.detail" : "オンに設定すると、キルの現場に被害者の色のシミが残ります。<br>シミは会議を跨いでも消えません。"
+"options.role.destroyer.canReportKillScene.detail" : "オンに設定すると、キルの現場で通報ボタンが光ります。<br>デストロイヤーがプレイヤーを潰しきると通報できなくなってしまいます。"
 "options.role.cleaner.syncKillAndCleanCoolDown.detail" : "オンに設定すると、キル時・能力使用時にキルクールダウンと能力クールダウンが共々リセットされます。"
+"options.role.hadar.gushFromVents.detail" : "オンにすると、ハダルは近辺のベントからのみ顕現できます。<br>オフの場合は、ハダルはマップ内のどこででも顕現できます。"
+"options.role.hadar.leftDivingEvidence.detail" : "オンにすると、地底への潜入時に地面に穴を残します。<br>穴は会議を跨ぐたびに小さくなり、やがて消えてしまいます。"
 "options.role.jailer.inheritAbilityOnDying.detail" : "オンに設定することで、ジェイラーの死亡時に仲間のインポスターに<br>ジェイラーの能力を継承させることができます。"
+"options.role.sniper.shotNoticeRange.detail" : "この範囲内にいるプレイヤーは、スナイパーの発砲時に<br>その発砲位置を示す通知を見ることができます。"
+"options.role.sniper.storeRifleOnUsingUtility.detail" : "オンにすると、はしご等の使用時に装備していたライフルをしまいます。"
+"options.role.sniper.aimAssist.detail" : "オンにすると、プレイヤーの位置を示すガイド線が表示されるようになります。"
+"options.role.stirrer.sabotageInterval.detail" : "偽サボタージュ発動後、再び偽サボタージュを発動させるまでの間に<br>追加のクールダウンを設けます。"
+"options.role.thurifer.numOfThuribulums.detail" : "マップ上に出現する香炉の最大数を設定します。<br>マップによっては実際の出現数が設定値を下回る場合があります。"
+"options.role.thurifer.inhalationSpeed.detail" : "プレイヤーが香気を吸入する速度を設定します。<br>値を大きくするほど早く香気を吸入します。"
+"options.role.thurifer.maxKillDelay.detail" : "最大まで香気を吸い込んだ時のキルの遅延時間を設定します。<br>キルの遅延はこの設定値と香気の吸入具合に応じて変化します。"
+"options.role.thurifer.showBlink.detail" : "オフにすると、3秒以上の遅延がある遅延キルでブリンクが発生しなくなります。"
+"options.role.thurifer.activationDelay.detail" : "香炉にインタラクトしてから、実際に香炉が有効化するまでに遅延を設けます。<br>この遅延によって、香炉にインタラクトしたプレイヤーを把握しづらくなります。"
+"options.role.paparazzo.requiredSubjects.detail" : "勝利のためには設定した人数だけ写真に収める必要があります。<br>同じプレイヤーを複数回撮影しても1人分としてカウントされます。"
+"options.role.paparazzo.requiredDisclosed.detail" : "勝利のためには設定した人数分だけプレイヤーを写真に収めて会議中に開示する必要があります。<br>同じプレイヤーが映った写真を複数回開示しても1人分としてカウントされます。"
+"options.role.scarlet.graceUntilDecidingFavorite.detail" : "設定した時間内に本命を決定しないとスカーレットは死亡してしまいます。<br>会議中や会議直後は猶予時間のタイマーは進行しません。<br>※ この時間を短く設定しすぎてしまうと、ゲーム終盤の誑かしがキープであることが透けてしまいます。"
+"options.role.scarlet.numOfCommand.detail" : "スカーレットは会議中に<b>深紅の号令</b>を発動することで、本命とキープの投票先を<br>自身の投票先に合わせさせることができます。"
 
 "role.guesser.doc.main" : "会議中に役職を<b>推察</b>することができます。推察された相手はキルされます。<br>ただし、推察に失敗すると<b>自身が死んでしまいます。</b>"
 "role.guesser.doc.guess" : "プレイヤーの上に表示されるアイコンをクリックすると推察画面が開きます。<br>表示された役職を選択することで<b>推察</b>を行います。"
@@ -1739,6 +2135,14 @@
 "role.alien.ability.emi" : "しばらくの間、アドミン・バイタル端末の情報更新を停止させます。"
 "role.alien.ability.invalidate" : "近くのプレイヤーをアドミン・バイタル端末上から消去します。"
 "role.alien.tips" : "・この役職は、<color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>コラボ役職 (元役職: コウモリ, クラッカー)です。"
+"role.berserker.ability.title" : "固有能力 "忘我の咆哮""
+"role.berserker.ability.main" : "インポスターの本性を顕し、姿を変えて暴走します。<br>暴走中はキルクールダウンが短くなり、移動速度が上昇します。<br>暴走状態でキルを重ねると我を失い、次第に他人を区別できなくなってしまいます。"
+"role.berserker.ability.berserk" : "暴走状態になり、姿が変化します。"
+"role.berserker.ability.calmDown" : "鎮静化可能な場合、鎮静化ボタンを押すか効果時間が終了すると元の姿に戻ります。<br>元の姿に戻る際はわずかな硬直時間があります。<br>このほか、会議や自身の死亡、役職の喪失によって暴走状態は設定を問わず解除されます。"
+"role.bubblegun.ability.title" : "固有能力 "うちぬけ！バブルガン""
+"role.bubblegun.ability.main" : "巨大な泡を撃ちだすバブルガンを持っています。<br>バブルガンから撃ちだされたバブルに当たったプレイヤーは泡に捕らわれて死亡します。<br>泡に捕らわれた死体は通報できません。"
+"role.bubblegun.ability.equip" : "バブルガンを構えます。<br>構えているバブルガンは他プレイヤーからも視認できます。"
+"role.bubblegun.ability.kill" : "バブルを撃ちだします。撃ちだす向きはマウスカーソルで調整できます。"
 "role.camouflager.ability.title" : "固有能力 "カモフラージュ""
 "role.camouflager.ability.main" : "全プレイヤーが同じ見た目になってしまう<b>カモフラージュ</b>を発生させられます。"
 "role.camouflager.ability.camo" : "<b>カモフラージュ</b>を発動します。"
@@ -1819,6 +2223,13 @@
 "role.paparazzo.ability.main" : "タスクフェイズ中、画面にはファインダーが現れ、写真を撮影することができます。<br>撮影した写真は画面左下にストックされます。誰も映っていない写真は破棄されます。<br><br>会議中に写真をクリックすると、全員に対しその写真を開示することができます。<br>砂時計に表示されたタイマーが時間切れになると、その会議では写真を開示できなくなります。"
 "role.paparazzo.ability.camera" : "写真を撮影します。画面中央付近ではクリック操作によっても撮影できます。"
 "role.paparazzo.tips" : "・サブアクションからファインダーの向きを変えることができます。<br>・マウス右ボタンを押下している間、ファインダーの向きが固定されます。"
+"role.scarlet.winCond" : "本命が生存しながらゲームに勝利する。スカーレット勝利に上書きしたうえで勝利します。"
+"role.scarlet.ability.title" : "固有能力 "魔性""
+"role.scarlet.ability.main" : "誑かしたキープをうまく使って、本命の勝利をサポートします。"
+"role.scarlet.ability.favorite" : "プレイヤーを本命にします。<br>スカーレットと本命は、どちらかが死亡するともう一方は後を追って自殺します。"
+"role.scarlet.ability.kept" : "プレイヤーを誑かしてキープにします。スカーレットはキープの役職を知ることができます。<br>スカーレットとキープは一方が死亡しても後を追って自殺することはありません。"
+"role.scarlet.ability.hourglass" : "時間内に本命を決定できないと、寂しさから死亡してしまいます。<br>このタイマーは会議中・会議終了直後は進行しません。"
+"role.scarlet.ability.meeting" : "<b>深紅の号令</b>によって、本命およびキープの投票先を自身の投票先に合わせさせます。"
 
 "role.extraMission.winCond" : "自身の勝利条件を満たしたうえで、ゲーム終了時、ターゲットが死亡していること。<br>ターゲットが生存している場合、強制的に敗北します。"
 "role.lover.winCond" : "全生存者が3人以下になった段階で、相方とともに生存していること。#ADD"

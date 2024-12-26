@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using Virial.Compat;
 
@@ -107,6 +108,11 @@ public enum AttributeAsset
     /// 中揃えの小見出しやボタン向けの固定サイズテキスト属性です。
     /// </summary>
     CenteredBoldFixed,
+
+    /// <summary>
+    /// 左揃えの小見出しやボタン向けの固定サイズテキスト属性です。
+    /// </summary>
+    LeftBoldFixed,
 
     /// <summary>
     /// 主にオーバーレイ向けの見出し用可変サイズテキスト属性です。
@@ -317,6 +323,15 @@ public interface TextComponent
 {
     string GetString();
     string TextForCompare => GetString();
+}
+
+public static class TextComponentHelper
+{
+    public static TextComponent Color(this TextComponent component, Virial.Color color) => NebulaAPI.GUI.ColorTextComponent(color, component);
+    public static TextComponent Size(this TextComponent component, float size) => NebulaAPI.GUI.SizedTextComponent(size, component);
+    public static TextComponent Lines(params TextComponent[] components) => NebulaAPI.GUI.FunctionalTextComponent(() => string.Join("<br>", components.Select(c => c.GetString())));
+    public static TextComponent Italic(this TextComponent component) => NebulaAPI.GUI.ItalicTextComponent(component);
+    public static TextComponent Bold(this TextComponent component) => NebulaAPI.GUI.BoldTextComponent(component);
 }
 
 public class CombinedTextComponent : TextComponent

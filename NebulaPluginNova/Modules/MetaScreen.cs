@@ -1277,18 +1277,36 @@ public class MetaScreen : MonoBehaviour, GUIScreen
     //既存のコンテンツを削除せずに背景画像を追加します。
     public void SetBackImage(Image? image, float brightness = 0.15f)
     {
+        SetBackImage(image, brightness, 1f, new Vector3(border.x, -border.y) * 0.27f, new Vector2(border.x * 0.974f + 0.45f, border.y * 0.96f + 0.35f), 1f);
+    }
+
+    public void ClearBackImage()
+    {
+        try
+        {
+            var image = transform.FindChild("BackImage");
+            if (image) GameObject.Destroy(image.gameObject);
+        }
+        catch
+        {
+        }
+    }
+
+    public void SetBackImage(Image? image, float brightness, float alpha, Vector2 imagePosition, Vector2 maskScale, float imageScale)
+    {
         if (image?.GetSprite() == null) return;
 
-        var group = UnityHelper.CreateObject<SortingGroup>("Image", this.transform, new(0f, 0f, 0.05f));
+        var group = UnityHelper.CreateObject<SortingGroup>("BackImage", this.transform, new(0f, 0f, 0.05f));
         group.sortingOrder = -10;
         var mask = UnityHelper.CreateObject<SpriteMask>("Mask", group.transform, Vector3.zero);
         mask.sprite = VanillaAsset.FullScreenSprite;
-        mask.transform.localScale = new(border.x * 0.974f + 0.45f, border.y * 0.96f + 0.35f);
+        mask.transform.localScale = maskScale;
 
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("MaskedImage", group.transform, new Vector3(border.x, -border.y) * 0.27f);
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("MaskedImage", group.transform, imagePosition);
         renderer.sprite = image.GetSprite();
+        renderer.transform.localScale = new(imageScale, imageScale);
         renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-        renderer.color = new(brightness, brightness, brightness, 1f);
+        renderer.color = new(brightness, brightness, brightness, alpha);
     }
 }
 

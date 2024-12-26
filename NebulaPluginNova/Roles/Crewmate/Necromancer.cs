@@ -15,6 +15,8 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
 
         MetaAbility.RegisterCircle(new("role.necromancer.reviveRange", () => DetectedRangeOption, () => null, UnityColor));
+
+        GameActionTypes.NecromancerRevivingAction = new("necromancer.revive", this, isPhysicalAction: true);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -26,7 +28,7 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration ReviveMaxRangeOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveMaxRange", (10f, 30f, 2.5f), 17.5f, FloatConfigurationDecorator.Ratio);
 
     static public Necromancer MyRole = new Necromancer();
-
+    static private GameStatsEntry StatsRevive = NebulaAPI.CreateStatsEntry("stats.necromancer.revive", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -167,7 +169,10 @@ public class Necromancer : DefinedRoleTemplate, DefinedRole
                         acTokenChalenge.Value.bitFlag |= 1 << currentHolding.PlayerId;
 
                         currentHolding.Revive(MyPlayer, new(MyPlayer.VanillaPlayer.transform.position), true);
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.NecromancerRevivingAction);
                         button.CoolDownTimer!.Start();
+
+                        StatsRevive.Progress();
                     }
                 };
                 reviveButton.OnMeeting = (button) =>

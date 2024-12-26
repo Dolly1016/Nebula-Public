@@ -1,9 +1,11 @@
 ﻿using Nebula.Map;
 using TMPro;
+using Unity.Services.Core.Internal;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Player;
+using Virial.Game;
 using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
@@ -23,6 +25,8 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration SabotageIntervalOption = NebulaAPI.Configurations.Configuration("options.role.stirrer.sabotageInterval", (10f, 120f, 5f), 60f, FloatConfigurationDecorator.Second);
 
     static public Stirrer MyRole = new Stirrer();
+    static private GameStatsEntry StatsStir = NebulaAPI.CreateStatsEntry("stats.stirrer.stir", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsSabotage = NebulaAPI.CreateStatsEntry("stats.stirrer.sabo", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -44,7 +48,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.ImpostorKillPredicate(p)));
+                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer)));
 
                 stirButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir");
                 stirButton.SetSprite(StirButtonSprite.GetSprite());
@@ -56,6 +60,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
                     sabotageChargeMap[sampleTracker.CurrentTarget!.PlayerId] = Mathf.Min(SabotageMaxChargeOption, charge + SabotageChargeOption);
 
                     stirButton.StartCoolDown();
+                    StatsStir.Progress();
                 };
                 stirButton.CoolDownTimer = Bind(new Timer(StirCoolDownOption).SetAsAbilityCoolDown().Start());
                 stirButton.SetLabel("stir");
@@ -85,6 +90,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
 
                     acTokenCommon ??= new("stirrer.common1");
                     if(count >= 7 && SabotageChargeOption <= 3 && !(StirCoolDownOption > 10f)) acTokenChallenge ??= new("stirrer.challenge");
+                    StatsSabotage.Progress();
 
                 };
                 sabotageButton.CoolDownTimer = Bind(new Timer(Mathf.Max(SabotageIntervalOption, SabotageCoolDownOption)).SetAsAbilityCoolDown().Start(SabotageCoolDownOption));

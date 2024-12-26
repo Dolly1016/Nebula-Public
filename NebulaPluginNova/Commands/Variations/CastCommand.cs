@@ -1,6 +1,7 @@
 ﻿using Nebula.Commands.Tokens;
 using Virial.Command;
 using Virial.Compat;
+using Virial.Game;
 
 namespace Nebula.Commands.Variations;
 
@@ -9,7 +10,7 @@ public class CastCommand : ICommand
     private static Dictionary<string, Func<ICommandToken, CommandEnvironment, CoTask<ICommandToken>>> objectDics = new()
     {
         {  "player", GetCastTask<GamePlayer> },
-        {  "outfit", GetCastTask<NetworkedPlayerInfo.PlayerOutfit> },
+        {  "outfit", GetCastTask<OutfitDefinition> },
     };
 
     public static CoTask<ICommandToken> GetCastTask<T>(ICommandToken argument, CommandEnvironment env)

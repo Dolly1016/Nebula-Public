@@ -39,7 +39,7 @@ internal class ArchivedMoment
     public static ArchivedMoment CaptureCurrent()
     {
         var trackingDataArray = new ArchivedPlayerMoment[NebulaGameManager.Instance!.AllPlayersNum];
-        foreach (var p in NebulaGameManager.Instance.AllPlayerInfo())
+        foreach (var p in NebulaGameManager.Instance.AllPlayerInfo)
         {
             PlayerTrackingFlags flag = 0;
             if (p.IsDead) flag |= PlayerTrackingFlags.IsDead;

@@ -90,9 +90,24 @@ public class FloatModulator : AttributeModulator
 
 public class SpeedModulator : TimeLimitedModulator
 {
+    internal class MatrixModifier
+    {
+        SpeedModulator Modulator;
+        public MatrixModifier(SpeedModulator modulator)
+        {
+            this.Modulator = modulator;
+        }
+
+        public void SetDirection(Vector4 dir)
+        {
+            Modulator.DirectionalNum = dir;
+            Modulator.AbsDirectionalNum = new(new Vector2(dir.x, dir.y).magnitude, new Vector2(dir.z, dir.w).magnitude);
+        }
+    }
+
     public float Num { get; private set; }
     public float AbsNum { get; private set; }
-    public Vector2 DirectionalNum { get; private set; }
+    public Vector4 DirectionalNum { get; private set; }
     public Vector2 AbsDirectionalNum { get; private set; }
     public bool IsMultiplier { get; private set; }
     public override bool CanBeAware => true;
@@ -108,27 +123,34 @@ public class SpeedModulator : TimeLimitedModulator
         return false;
     }
 
-    public void Calc(ref Vector2 directionalPlayerSpeed, ref float speed)
+    public void Calc(ref Vector4 directionalPlayerSpeed, ref float speed)
     {
         if (IsMultiplier)
             speed *= Num;
         else
             speed += Num;
 
-        directionalPlayerSpeed *= this.DirectionalNum;
+        Vector4 s = directionalPlayerSpeed;
+        directionalPlayerSpeed = new(
+            DirectionalNum.x * s.x + DirectionalNum.z * s.y, 
+            DirectionalNum.y * s.x + DirectionalNum.w * s.y,
+            DirectionalNum.x * s.z + DirectionalNum.z * s.w,
+            DirectionalNum.y * s.z + DirectionalNum.w * s.w);
     }
 
 
-    public SpeedModulator(float? num, Vector2 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null) : base(timer, canPassMeeting, priority, duplicateTag)
+    public SpeedModulator(float? num, Vector2 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null) : this(num, new Vector4(dirNum.x, 0f, 0f, dirNum.y), isMultiplier, timer, canPassMeeting, priority, duplicateTag) { }
+
+    public SpeedModulator(float? num, Vector4 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null) : base(timer, canPassMeeting, priority, duplicateTag)
     {
         this.Num = num ?? 10000f;
         this.AbsNum = Mathf.Abs(this.Num);
         this.DirectionalNum = dirNum;
-        this.AbsDirectionalNum = new(Mathf.Abs(dirNum.x), Mathf.Abs(dirNum.y));
+        this.AbsDirectionalNum = new(new Vector2(dirNum.x, dirNum.y).magnitude, new Vector2(dirNum.z, dirNum.w).magnitude);
         this.IsMultiplier = isMultiplier;
     }
 
     public bool IsAccelModulator => (IsMultiplier ? AbsNum > 1f : AbsNum > 0f) || AbsDirectionalNum.x > 1f || AbsDirectionalNum.y > 1f;
     public bool IsDecelModulator => (IsMultiplier ? AbsNum < 1f : AbsNum < 0f) || AbsDirectionalNum.x < 1f || AbsDirectionalNum.y < 1f;
-    public bool IsInverseModulator => (IsMultiplier ? Num < 0f : false) || DirectionalNum.x < 0f || DirectionalNum.y < 0f;
+    public bool IsInverseModulator => (IsMultiplier ? Num < 0f : false) || DirectionalNum.x < 0f || DirectionalNum.w < 0f || Mathf.Abs(DirectionalNum.y) > 0f || Mathf.Abs(DirectionalNum.z) > 0f;
 }

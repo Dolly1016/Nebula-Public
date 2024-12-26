@@ -44,7 +44,7 @@ public class Confused : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
         {
             if (MyPlayer.IsDead) return;
 
-            var alives = NebulaGameManager.Instance!.AllPlayerInfo().Where(p => !p.IsDead && !p.AmOwner).ToArray();
+            var alives = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.IsDead && !p.AmOwner).ToArray();
             var randomArray = Helpers.GetRandomArray(alives.Length);
             int maxPairs = Mathf.Min(NumOfMaxShuffledPairsOption, alives.Length / 2);
 
@@ -66,8 +66,8 @@ public class Confused : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
                 player1.Unbox().RemoveOutfit("Confused");
                 player2.Unbox().RemoveOutfit("Confused");
 
-                player1.Unbox().AddOutfit(new("Confused", 20, false, outfit2));
-                player2.Unbox().AddOutfit(new("Confused", 20, false, outfit1));
+                player1.Unbox().AddOutfit(new(outfit2, "Confused", 20, false));
+                player2.Unbox().AddOutfit(new(outfit1, "Confused", 20, false));
             }
 
             if (shuffled && !skipMeeting)
@@ -89,11 +89,11 @@ public class Confused : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
         {
             //無能本人で、生存していて、生存者が全員クルーで、クルーメイト勝利の場合
             if (
-                NebulaGameManager.Instance!.AllPlayerInfo().Count(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.NeutralRole) >= 2 &&
-                NebulaGameManager.Instance!.AllPlayerInfo().Count(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole) >= 2 &&
+                NebulaGameManager.Instance!.AllPlayerInfo.Count(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.NeutralRole) >= 2 &&
+                NebulaGameManager.Instance!.AllPlayerInfo.Count(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole) >= 2 &&
                 !MyPlayer.IsDead &&
                 ev.EndState.EndCondition == NebulaGameEnds.CrewmateGameEnd &&
-                NebulaGameManager.Instance!.AllPlayerInfo().All(p => p.IsDead || p.Role.Role.Category == Virial.Assignable.RoleCategory.CrewmateRole))
+                NebulaGameManager.Instance!.AllPlayerInfo.All(p => p.IsDead || p.Role.Role.Category == Virial.Assignable.RoleCategory.CrewmateRole))
                 new StaticAchievementToken("confused.challenge");
         }
 

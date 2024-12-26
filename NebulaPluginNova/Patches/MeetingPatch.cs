@@ -3,39 +3,60 @@ using Nebula.Behaviour;
 using static MeetingHud;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
+using UnityEngine;
 
 namespace Nebula.Patches;
+
+public static class More15Helpers
+{
+    static private float[] VotingAreaScale = [1f, 0.95f, 0.76f];
+    static private (int x, int y)[] VotingAreaSize = [(3, 5), (3, 6), (4, 6)];
+    static private Vector3[] VotingAreaOffset = [Vector3.zero, new(0.1f, 0.145f, 0f), new(-0.355f, 0f, 0f)];
+    static private (float x, float y)[] VotingAreaMultiplier = [(1f, 1f), (1f, 0.89f), (0.974f, 1f)];
+    static public int GetDisplayType(int players) => players <= 15 ? 0 : players <= 18 ? 1 : 2;
+    public static Vector3 ConvertPos(int index, int arrangeType, (int x, int y)[] arrangement, Vector3 origin, Vector3[] originOffset, Vector3 contentsOffset, float[] scale, (float x, float y)[] contentAreaMultiplier)
+    {
+        int x = index % arrangement[arrangeType].x;
+        int y = index / arrangement[arrangeType].x;
+        return
+            origin + originOffset[arrangeType] +
+            new Vector3(
+                contentsOffset.x * scale[arrangeType] * contentAreaMultiplier[arrangeType].x * (float)x,
+                contentsOffset.y * scale[arrangeType] * contentAreaMultiplier[arrangeType].y * (float)y,
+                -(float)y * 0.01f);
+    }
+
+}
 
 [NebulaRPCHolder]
 public static class MeetingModRpc
 {
     static private float[] VotingAreaScale = [1f, 0.95f, 0.76f];
     static private (int x, int y)[] VotingAreaSize = [(3, 5), (3, 6), (4, 6)];
-    static private Vector3[] VotingAreaOffset = [Vector3.zero, new(0.1f, 0.145f, 0f), new(-0.355f, 0f, 0f)];
+    static private Vector3[] VotingAreaOffset = [new(0f,0f,-0.9f), new(0.1f, 0.145f, -0.9f), new(-0.355f, 0f, -0.9f)];
     static private (float x, float y)[] VotingAreaMultiplier = [(1f, 1f), (1f, 0.89f), (0.974f, 1f)];
-    static private int GetVotingAreaType(int players) => players <= 15 ? 0 : players <= 18 ? 1 : 2;
-    private static Vector3 ToVoteAreaPos(int index, int arrangeType)
-    {
-        int x = index % VotingAreaSize[arrangeType].x;
-        int y = index / VotingAreaSize[arrangeType].x;
-        return 
-            MeetingHud.Instance.VoteOrigin + VotingAreaOffset[arrangeType] + 
-            new Vector3(
-                MeetingHud.Instance.VoteButtonOffsets.x * VotingAreaScale[arrangeType] * VotingAreaMultiplier[arrangeType].x * (float)x, 
-                MeetingHud.Instance.VoteButtonOffsets.y * VotingAreaScale[arrangeType] * VotingAreaMultiplier[arrangeType].y * (float)y,
-                -0.9f - (float)y * 0.01f);
-    }
+    //static private int GetVotingAreaType(int players) => players <= 15 ? 0 : players <= 18 ? 1 : 2;
+    private static Vector3 ToVoteAreaPos(int index, int arrangeType) => More15Helpers.ConvertPos(index, arrangeType, VotingAreaSize, MeetingHud.Instance.VoteOrigin, VotingAreaOffset, MeetingHud.Instance.VoteButtonOffsets, VotingAreaScale, VotingAreaMultiplier);
 
     public static void SortVotingArea(this MeetingHud __instance, Func<GamePlayer, int> rank, float speed = 1f)
     {
         int length = __instance.playerStates.Length;
-        int type = GetVotingAreaType(length);
+        int type = More15Helpers.GetDisplayType(length);
         __instance.playerStates.Do(p => p.transform.localScale = new(VotingAreaScale[type], VotingAreaScale[type], 1f));
         
         var ordered = __instance.playerStates.OrderBy(p => p.TargetPlayerId + 32 * rank.Invoke(NebulaGameManager.Instance!.GetPlayer(p.TargetPlayerId)!)).ToArray();
 
-        for (int i = 0; i < ordered.Length; i++)
-            __instance.StartCoroutine(ordered[i].transform.Smooth(ToVoteAreaPos(i, type), 1.6f / speed).WrapToIl2Cpp());
+        if (speed > 0f)
+        {
+            for (int i = 0; i < ordered.Length; i++)
+                __instance.StartCoroutine(ordered[i].transform.Smooth(ToVoteAreaPos(i, type), 1.6f / speed).WrapToIl2Cpp());
+        }
+        else
+        {
+            for (int i = 0; i < ordered.Length; i++)
+                ordered[i].transform.localPosition = ToVoteAreaPos(i, type);
+        }
     }
 
     public static readonly RemoteProcess RpcBreakEmergencyButton = new("BreakEmergencyButton",
@@ -151,8 +172,8 @@ public static class MeetingModRpc
     }
 }
 
-[HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.ServerStart))]
-class MeetingHudServerStartPatch
+[HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.PopulateButtons))]
+class MeetingArrangeButtonStartPatch
 {
     public static void Postfix(MeetingHud __instance)
     {
@@ -262,6 +283,17 @@ class MeetingStartPatch
 
         __instance.transform.localPosition = new Vector3(0f, 0f, -25f);
 
+        {
+            var role = NebulaGameManager.Instance!.LocalPlayerInfo.Role.Role;
+            if (role != Roles.Crewmate.Crewmate.MyRole && role != Roles.Impostor.Impostor.MyRole)
+            {
+                Tutorial.WaitAndShowTutorial(() => !MeetingHud.Instance || MeetingHud.Instance.state == VoteStates.Animating,
+                            new TutorialBuilder(() => HudManager.Instance.transform.position + new Vector3(0f, 4f), true)
+                            .BindHistory("helpKey")
+                            .ShowWhile(() => MeetingHud.Instance)
+                            .AsSimpleTitledTextWidget(Language.Translate("tutorial.variations.helpInGame.title"), Language.Translate("tutorial.variations.helpInGame.caption").Replace("%KEY%", ButtonEffect.KeyCodeInfo.GetKeyDisplayName(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).TypicalKey))));
+            }
+        }
 
         //色の明暗を表示
         foreach (var player in __instance.playerStates)
@@ -286,6 +318,7 @@ class MeetingStartPatch
             player.ConfirmButton.GetComponent<SpriteRenderer>().material = __instance.Glass.material;
             player.CancelButton.transform.GetChild(0).GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.None;
             player.ConfirmButton.transform.GetChild(0).GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.None;
+            player.Flag.gameObject.SetActive(GeneralConfigurations.ShowVoteStateOption || player.TargetPlayerId == PlayerControl.LocalPlayer.PlayerId);
 
             var button = player.PlayerButton.Cast<PassiveButton>();
             button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
@@ -328,6 +361,9 @@ class MeetingStartPatch
                 catch { }
             };
         }
+
+        //会議開始時に死亡したプレイヤーを考慮したソート
+        __instance.StartCoroutine(Effects.Sequence(Effects.Wait(2f), ManagedEffects.Action(() => MeetingHud.Instance.SortVotingArea(p => p.IsDead ? 2 : 1)).WrapToIl2Cpp()));
     }
 }
 
@@ -571,19 +607,25 @@ static class CheckForEndVotingPatch
         for (int i = 0; i < __instance.playerStates.Length; i++)
         {
             PlayerVoteArea playerVoteArea = __instance.playerStates[i];
-            if (!(NebulaGameManager.Instance?.GetPlayer(playerVoteArea.TargetPlayerId)?.IsDead ?? true) && playerVoteArea.VotedFor != 252 && playerVoteArea.VotedFor != 255 && playerVoteArea.VotedFor != 254)
+            var player = NebulaGameManager.Instance?.GetPlayer(playerVoteArea.TargetPlayerId);
+            if (player?.IsDead ?? true) continue;
+
+            bool didVote = playerVoteArea.VotedFor != 252 && playerVoteArea.VotedFor != 255 && playerVoteArea.VotedFor != 254;
+            if (!MeetingHudExtension.WeightMap.TryGetValue((byte)playerVoteArea.TargetPlayerId, out var vote)) vote = 1;
+            var ev = GameOperatorManager.Instance!.Run(new PlayerFixVoteHostEvent(player, didVote, NebulaGameManager.Instance?.GetPlayer(playerVoteArea.VotedFor), vote));
+
+            if (ev.DidVote)
             {
-                if (!MeetingHudExtension.WeightMap.TryGetValue((byte)playerVoteArea.TargetPlayerId, out var vote)) vote = 1;
-
-                dictionary.AddValue(playerVoteArea.VotedFor, vote);
-
-                string logText = $"Voter({i}) -> VoteFor({playerVoteArea.VotedFor}) x{vote}";
-                Debug.Log(logText);
-                log.Add(logText);
+                dictionary.AddValue(ev.VoteTo?.PlayerId ?? PlayerVoteArea.SkippedVote, ev.Vote);
+                playerVoteArea.VotedFor = ev.VoteTo?.PlayerId ?? PlayerVoteArea.SkippedVote;
+                MeetingHudExtension.WeightMap[player.PlayerId] = ev.Vote;
+            }
+            else
+            {
+                playerVoteArea.VotedFor = PlayerVoteArea.MissedVote;
             }
         }
 
-        NebulaPlugin.Log.Print("Voting Result\n" + log.Join(null,"\n"));
 
         return dictionary;
     }
@@ -611,13 +653,13 @@ static class CheckForEndVotingPatch
     {
         //投票結果が自明な場合、早回しで終わらせる。
         {
-            int canVoteTo = NebulaGameManager.Instance!.AllPlayerInfo().Count(p => !p.IsDead && (MeetingHudExtension.VotingMask & (1 << p.PlayerId)) != 0);
+            int canVoteTo = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && (MeetingHudExtension.VotingMask & (1 << p.PlayerId)) != 0);
             if (MeetingHudExtension.CanSkip) canVoteTo++;
             
             //選択肢が1つ以下の場合、結果は自明
             if (canVoteTo <= 1) 
             {
-                var exiled = NebulaGameManager.Instance!.AllPlayerInfo().FirstOrDefault(p => !p.IsDead && (MeetingHudExtension.VotingMask & (1 << p.PlayerId)) != 0);
+                var exiled = NebulaGameManager.Instance!.AllPlayerInfo.FirstOrDefault(p => !p.IsDead && (MeetingHudExtension.VotingMask & (1 << p.PlayerId)) != 0);
 
                 if (exiled == null)
                     MeetingModRpc.RpcModCompleteVoting.Invoke(([], byte.MaxValue, [], false, true));

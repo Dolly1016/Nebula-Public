@@ -10,22 +10,23 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCitation, DefinedRole
 {
-    private Cleaner() : base("cleaner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CleanCoolDownOption, SyncKillAndCleanCoolDownOption]){}
+    private Cleaner() : base("cleaner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CleanCoolDownOption, SyncKillAndCleanCoolDownOption]){
+        GameActionTypes.CleanCorpseAction = new("cleaner.clean", this, isCleanDeadBodyAction: true);
+    }
 
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private FloatConfiguration CleanCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cleaner.cleanCoolDown", (5f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration SyncKillAndCleanCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cleaner.syncKillAndCleanCoolDown", true);
 
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    bool DefinedRole.IsJackalizable => true;
     static public Cleaner MyRole = new Cleaner();
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static private GameStatsEntry StatsClean = NebulaAPI.CreateStatsEntry("stats.cleaner.clean", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-
         private ModAbilityButton? cleanButton = null;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CleanButton.png", 115f);
@@ -34,17 +35,13 @@ public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<(bool cleared, int removed)>? acTokenChallenge = null;
 
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
-
         [Local, OnlyMyPlayer]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
             cleanButton?.CoolDownTimer?.Start(SyncKillAndCleanCoolDownOption ? null : 5f);
         }
 
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player) : base(player)
         {
             if (AmOwner)
             {
@@ -57,13 +54,16 @@ public class Cleaner : DefinedRoleTemplate, HasCitation, DefinedRole
                 cleanButton.Availability = (button) => cleanTracker.CurrentTarget != null && MyPlayer.VanillaPlayer.CanMove;
                 cleanButton.Visibility = (button) => !MyPlayer.IsDead;
                 cleanButton.OnClick = (button) => {
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.CleanCorpseAction);
+
                     if (cleanTracker.CurrentTarget?.MyKiller == MyPlayer) new StaticAchievementToken("cleaner.common2");
                     AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.PlayerId,MyPlayer.PlayerId,EventDetail.Clean);
-                    if (SyncKillAndCleanCoolDownOption) PlayerControl.LocalPlayer.killTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
+                    if (SyncKillAndCleanCoolDownOption) NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                     cleanButton.StartCoolDown();
 
                     acTokenCommon ??= new("cleaner.common1");
                     acTokenChallenge.Value.removed++;
+                    StatsClean.Progress();
                 };
                 cleanButton.CoolDownTimer = Bind(new Timer(CleanCoolDownOption).SetAsAbilityCoolDown().Start());
                 cleanButton.SetLabel("clean");

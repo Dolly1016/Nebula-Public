@@ -1,4 +1,6 @@
-﻿using Nebula.Game.Statistics;
+﻿using MS.Internal.Xml.XPath;
+using Nebula.Game.Statistics;
+using Virial;
 using Virial.Events;
 using Virial.Events.Player;
 
@@ -121,12 +123,16 @@ public static class KillButtonClickPatch
     {
         if (__instance.enabled && __instance.currentTarget && !__instance.isCoolingDown && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
         {
-            ICancelableEvent? cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(NebulaGameManager.Instance!.LocalPlayerInfo, __instance.currentTarget.GetModInfo()!));
+            var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(NebulaGameManager.Instance!.LocalPlayerInfo, __instance.currentTarget.GetModInfo()!));
             if (!(cancelable?.IsCanceled ?? false))
             {
                 //キャンセルされなければキルを実行する
-                PlayerControl.LocalPlayer.ModKill(__instance.currentTarget, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
+                NebulaGameManager.Instance?.LocalPlayerInfo.MurderPlayer(__instance.currentTarget.GetModInfo()!, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
             }
+
+            //クールダウンをリセットする
+            if (cancelable?.ResetCooldown ?? false) NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
+
             __instance.SetTarget(null);
         }
         return false;

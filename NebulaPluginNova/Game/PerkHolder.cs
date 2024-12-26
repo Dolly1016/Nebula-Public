@@ -24,8 +24,9 @@ public class PerkHolder : AbstractModule<Virial.Game.Game>, IGameOperator
     public PerkInstance RegisterPerk(PerkDefinition perk) {
         var instance = new PerkInstance(perk, myHolder.transform);
         instance.RuntimeId = availableId++;
+        instance.RelatedGameObject.transform.localPosition = new(0f, -100f, 0f); //一瞬変な場所に表示されるのを隠す
         myPerks.Add(instance);
-        
+
         return instance;
     }
 

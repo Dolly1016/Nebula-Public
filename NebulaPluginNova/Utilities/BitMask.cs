@@ -75,6 +75,23 @@ public class FunctionalMask<T> : BitMask<T>
     ulong BitMask<T>.AsRawPatternLong => throw new NotImplementedException();
 }
 
+public class EmptyMask<T> : BitMask<T>
+{
+
+    public EmptyMask()
+    {
+    }
+
+    bool BitMask<T>.Test(T? value) => false;
+
+    bool BitMask<T>.TestAll(params T?[] values) => false;
+
+    bool BitMask<T>.TestAll(IEnumerable<T?> values) => false;
+
+    uint BitMask<T>.AsRawPattern => 0u;
+    ulong BitMask<T>.AsRawPatternLong => 0ul;
+}
+
 public class HashSetMask<T> : EditableBitMask<T>
 {
     HashSet<T> set = new();

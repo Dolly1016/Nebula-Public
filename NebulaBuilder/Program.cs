@@ -11,7 +11,7 @@ var githubClient = new GitHubClient(new ProductHeaderValue("lr")) { Credentials 
 bool exit = false;
 string? githubReleaseUrl = null;
 
-AllProcess.Add(Process.Start(GenerateShortcut() + "\\Among Us.exe"));
+AllProcess.Add(Process.Start(GenerateShortcut("AmongUsMod") + "\\Among Us.exe"));
 
 while (!exit)
 {
@@ -56,7 +56,7 @@ while (!exit)
             var dscr = Console.ReadLine() ?? "";
             if (dscr.Length > 0)
             {
-                var release = CreateRelease(dscr);
+                var release = CreateRelease(dscr.Replace("<br>","\r\n"));
                 if (release != null)
                 {
                     githubReleaseUrl = release.HtmlUrl;
@@ -76,12 +76,21 @@ while (!exit)
             }
             break;
         case ConsoleKey.G:
-            Console.WriteLine("\n\n[ゲームの実行] キーを入力して操作してください。\n数字: 同時立ち上げ数を指定して起動\nZ: 全ゲームを終了\nF: フォルダを開く\nSpace: もどる");
+            Console.WriteLine("\n\n[ゲームの実行] キーを入力して操作してください。\n数字: 同時立ち上げ数を指定して起動\nZ: 全ゲームを終了\nF: フォルダを開く\nV: バニラに切り替える\nSpace: もどる");
             var key = ReadKey();
+            string envPath = "AmongUsMod";
+
+            if(key == ConsoleKey.V)
+            {
+                envPath = "AmongUsVanilla";
+                Console.WriteLine("\n\n起動するゲームをバニラに切り替えます。引き続き操作してください。");
+                key = ReadKey();
+            }
+
             switch (key)
             {
                 case ConsoleKey.F:
-                    TryOpenDirectory("AmongUsMod");
+                    TryOpenDirectory(envPath);
                     break;
                 case ConsoleKey.Z:
                     Console.WriteLine("関連するゲームをすべて終了します。");
@@ -91,7 +100,7 @@ while (!exit)
                 case ConsoleKey.Spacebar:
                     break;
                 default:
-                    var path = GenerateShortcut();
+                    var path = GenerateShortcut(envPath);
                     var strNum = key.ToString();
                     if(strNum.Length == 2 && int.TryParse(strNum[1].ToString(), out var num))
                     {
@@ -124,9 +133,9 @@ while (!exit)
 
 foreach (var p in AllProcess) if (!p.HasExited) p.Kill();
 
-string GenerateShortcut()
+string GenerateShortcut(string envPath)
 {
-    var path = Environment.GetEnvironmentVariable("AmongUsMod");
+    var path = Environment.GetEnvironmentVariable(envPath);
 
     if (!Directory.Exists(path + "\\m"))
     {

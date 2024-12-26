@@ -116,6 +116,6 @@ public class PlayersOverlay : IGameOperator
 
     void OnOutfitChanged(PlayerOutfitChangeEvent ev)
     {
-        allIcons.FirstOrDefault(i => i.playerId == ev.Player.PlayerId)?.display.UpdateFromPlayerOutfit(ev.Outfit.outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
+        allIcons.FirstOrDefault(i => i.playerId == ev.Player.PlayerId)?.display.UpdateFromPlayerOutfit(ev.Outfit.Outfit.outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
     } 
 }

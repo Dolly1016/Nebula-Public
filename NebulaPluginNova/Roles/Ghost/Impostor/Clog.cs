@@ -11,6 +11,7 @@ using Nebula.Roles.Crewmate;
 using Nebula.Roles.Abilities;
 using Virial.Events.Player;
 using Virial.Events.Game;
+using Virial.Game;
 
 namespace Nebula.Roles.Ghost.Impostor;
 
@@ -18,6 +19,10 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
 {
     public Clog() : base("clog", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, [GhostDurationOption, NumOfGhostsOption, GhostSizeOption]) {
         MetaAbility.RegisterCircle(new("role.clog.ghostSize", () => GhostSizeOption, () => null, UnityColor));
+
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Clog.png");
+
+        GameActionTypes.ClogInvokingGhostAction = new("clog.ghost", this, isPlacementAction: true);
     }
 
     string ICodeName.CodeName => "CLG";
@@ -27,6 +32,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
     static private FloatConfiguration GhostSizeOption = NebulaAPI.Configurations.Configuration("options.role.clog.ghostSize", (0.125f, 1.5f, 0.125f), 0.5f, FloatConfigurationDecorator.Ratio);
 
     static public Clog MyRole = new Clog();
+    static internal GameStatsEntry StatsGhosts = NebulaAPI.CreateStatsEntry("stats.clog.ghosts", GameStatsCategory.Roles, MyRole);
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
@@ -46,7 +52,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
                 GameOperatorManager.Instance?.Register<PlayerTaskRemoveLocalEvent>(ev => {
                     try
                     {
-                        if (ev.Task.TryCast<SabotageTask>()) acTokenChallenge.Value = false;
+                        if (ev.Task.TryCast<SabotageTask>() != null) acTokenChallenge.Value = false;
                     }catch (Exception ex) { }
                 }, this);
 
@@ -57,7 +63,10 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
                 ghostButton.Visibility = (button) => MyPlayer.IsDead;
                 ghostButton.OnClick = (button) =>
                 {
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.ClogInvokingGhostAction);
+
                     RpcSpawnGhost.Invoke(MyPlayer.VanillaPlayer.transform.position);
+                    StatsGhosts.Progress();
 
                     new StaticAchievementToken("clog.common1");
                     if (AmongUsUtil.InAnySab) acTokenChallenge.Value = true;
@@ -83,7 +92,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
             {
                 bool achieved = false;
                 GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev => { 
-                    if(!achieved && NebulaGameManager.Instance!.AllPlayerInfo().Any(p => !p.IsDead && !p.AmOwner && p.IsImpostor && pos.Distance(p.Position) < 0.75f))
+                    if(!achieved && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && !p.AmOwner && p.IsImpostor && pos.Distance(p.Position) < 0.75f))
                     {
                         new StaticAchievementToken("clog.another1");
                         achieved = true;
