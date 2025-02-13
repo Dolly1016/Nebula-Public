@@ -56,6 +56,10 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
             config.DecorateAsRatioConfiguration();
         if (decorator == FloatConfigurationDecorator.Second)
             config.DecorateAsSecConfiguration();
+        if (decorator == FloatConfigurationDecorator.TaskPhase)
+            config.DecorateAsTaskPhaseConfiguration();
+        if (decorator == FloatConfigurationDecorator.Percentage)
+            config.DecorateAsPercentageConfiguration();
 
         return config;
     }

@@ -1,6 +1,6 @@
 ﻿using Epic.OnlineServices.Presence;
 using NAudio.CoreAudioApi;
-using Nebula.Compat;
+
 using Nebula.Game.Statistics;
 using Nebula.Roles.Complex;
 using Nebula.Roles.Modifier;
@@ -29,14 +29,21 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
     static public int[] GenerateArgument(int jackalTeamId, DefinedRole? jackalized) => [jackalTeamId, 0, 0, 0, jackalized?.Id ?? -1];
     static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.jackal.killCoolDown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static public BoolConfiguration CanCreateSidekickOption = NebulaAPI.Configurations.Configuration("options.role.jackal.canCreateSidekick", false);
-    static private IntegerConfiguration NumOfKillingToCreateSidekickOption = NebulaAPI.Configurations.Configuration("options.role.jackal.numOfKillingToCreateSidekick", (0, 10), 2);
+    static private IntegerConfiguration NumOfKillingToCreateSidekickOption = NebulaAPI.Configurations.Configuration("options.role.jackal.numOfKillingToCreateSidekick", (0, 10), 2, () => CanCreateSidekickOption);
     static public BoolConfiguration JackalizedImpostorOption = NebulaAPI.Configurations.Configuration("options.role.jackal.jacklizedImpostor", false);
 
     static public float KillCooldown => KillCoolDownOption.CoolDown;
 
     static public Jackal MyRole = new Jackal();
     static private GameStatsEntry StatsSidekick = NebulaAPI.CreateStatsEntry("stats.jackal.sidekick", GameStatsCategory.Roles, MyRole);
-    public static bool IsJackal(GamePlayer player, int teamId)
+    
+    public static bool IsJackalLeader(GamePlayer player, int teamId, bool excludeDefeatedJackal = false)
+    {
+        if (player.Role is Instance j) return j.JackalTeamId == teamId && (!excludeDefeatedJackal || !j.IsDefeatedJackal);
+        return false;
+    }
+
+    public static bool IsJackalTeam(GamePlayer player, int teamId)
     {
         if (player.Role is Instance j) return j.JackalTeamId == teamId;
         if(player.Role is Sidekick.Instance s) return s.JackalTeamId == teamId;
@@ -99,10 +106,10 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 var arg = (this as RuntimeAssignable).RoleArguments;
                 arg[3]++;
+                arg[2] = 0;
                 return arg;
             }
         }
-        public bool CanWinDueToKilling => /*killingTotal >= MyRole.NumOfKillingToWinOption*/ true;
         public bool IsMySidekick(GamePlayer? player)
         {
             if (player == null) return false;
@@ -118,8 +125,14 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             return false;
         }
 
+        //勝敗の決定時に使用
+        internal bool IsDefeatedJackal = false;
+
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)));
+        }
 
         void RuntimeAssignable.OnActivated()
         {
@@ -203,21 +216,18 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             JackalizedAbility = Bind(MyJackalized?.GetJackalizedAbility(MyPlayer, StoredJackalizedArgument))?.Register();
         }
 
-        //ジャッカルはサイドキックを識別できる
+        //ジャッカルはサイドキックとジャッカルを識別できる
         [Local]
         void DecorateSidekickColor(PlayerDecorateNameEvent ev)
         {
-            if (IsMySidekick(ev.Player)) ev.Color = Jackal.MyRole.RoleColor;
+            if (IsSameTeam(ev.Player) && !ev.Player.AmOwner) ev.Color = Jackal.MyRole.RoleColor;
         }
         
         //サイドキックはジャッカルを識別できる
         [OnlyMyPlayer]
         void DecorateJackalColor(PlayerDecorateNameEvent ev)
         {
-            var myInfo = PlayerControl.LocalPlayer.GetModInfo();
-            if (myInfo == null) return;
-
-            if (IsMySidekick(myInfo)) ev.Color = Jackal.MyRole.RoleColor;
+            if (IsMySidekick(GamePlayer.LocalPlayer) && !ev.Player.AmOwner) ev.Color = Jackal.MyRole.RoleColor;
         }
 
         string RuntimeAssignable.DisplayName { get { 
@@ -227,8 +237,8 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
         }
         string RuntimeRole.DisplayShort => Jackal.AppendTeamIdIfNecessary((MyRole as DefinedRole).DisplayShort, JackalTeamId, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, true);
 
-        [Local, OnlyMyPlayer]
-        void OnDead(PlayerDieEvent ev)
+        [OnlyHost, OnlyMyPlayer]
+        void OnDead(PlayerDieOrDisconnectEvent ev)
         {
             foreach (var player in NebulaGameManager.Instance!.AllPlayerInfo)
             {
@@ -314,7 +324,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
         int[]? RuntimeAssignable.RoleArguments => [JackalTeamId];
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)));
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
@@ -364,7 +374,7 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
         public int JackalTeamId;
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackal(p, JackalTeamId)));
+        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)));
 
         public Instance(GamePlayer player, int jackalTeamId) : base(player)
         {
@@ -395,5 +405,6 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
         }
 
         bool RuntimeAssignable.CanKill(Virial.Game.Player player) => !(player.Role is Jackal.Instance ji && ji.IsSameTeam(MyPlayer));
+        bool RuntimeModifier.MyCrewmateTaskIsIgnored => true;
     }
 }

@@ -80,7 +80,7 @@ public static class ReactorSabotagePatch
         {
             if(!(__instance.reactor.Countdown > 0f))
             {
-                var localPlayer = NebulaGameManager.Instance.LocalPlayerInfo;
+                var localPlayer = GamePlayer.LocalPlayer;
                 if(!localPlayer.IsDead) localPlayer.Suicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.Reactor, SystemTypes.Laboratory);
                 __instance.reactor.ClearSabotage();
@@ -101,7 +101,7 @@ public static class NoOxySabotagePatch
         {
             if (!(__instance.reactor.Countdown > 0f))
             {
-                var localPlayer = NebulaGameManager.Instance.LocalPlayerInfo;
+                var localPlayer = GamePlayer.LocalPlayer;
                 if (!localPlayer.IsDead) localPlayer.Suicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.LifeSupp);
                 __instance.reactor.Countdown = 10000f;
@@ -122,7 +122,7 @@ public static class HeliSabotagePatch
         {
             if (!(__instance.sabotage.Countdown > 0f))
             {
-                var localPlayer = NebulaGameManager.Instance.LocalPlayerInfo;
+                var localPlayer = GamePlayer.LocalPlayer;
                 if (!localPlayer.IsDead) localPlayer.Suicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
                 FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.HeliSabotage);
                 __instance.sabotage.ClearSabotage();
@@ -248,6 +248,36 @@ public static class SwitchSabotagePatch
             __instance.IsDirty = true;
             return false;
         }
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(PlainDoor), nameof(PlainDoor.SetDoorway))]
+public static class InvalidDoorPlainPatch
+{
+    static bool Prefix(PlainDoor __instance, [HarmonyArgument(0)] bool open)
+    {
+        if (!open && __instance.TryGetComponent<InvalidDoor>(out _)) return false;
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(AutoOpenDoor), nameof(AutoOpenDoor.SetDoorway))]
+public static class InvalidDoorAutoOpenPatch
+{
+    static bool Prefix(AutoOpenDoor __instance, [HarmonyArgument(0)] bool open)
+    {
+        if (!open && __instance.TryGetComponent<InvalidDoor>(out _)) return false;
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(MushroomWallDoor), nameof(MushroomWallDoor.SetDoorway))]
+public static class InvalidDoorMushroomPatch
+{
+    static bool Prefix(MushroomWallDoor __instance, [HarmonyArgument(0)] bool open)
+    {
+        if (!open && __instance.TryGetComponent<InvalidDoor>(out _)) return false;
         return true;
     }
 }

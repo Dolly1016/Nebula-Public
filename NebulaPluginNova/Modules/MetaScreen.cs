@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Virial.Media;
 using static Nebula.Modules.IMetaWidgetOld;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Modules;
 
@@ -70,7 +71,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
     public int Count => contents.Count;
     public AlignmentOption Alignment => AlignmentOption.Center;
     public float? MaxWidth = null;
-    public float Generate(GameObject screen, Vector2 cursor, Vector2 size,out (float,float) width)
+    public float Generate(GameObject screen, Vector2 cursor, Vector2 size,out (float min, float max) width)
     {
         if (contents.Count == 0)
         {
@@ -221,12 +222,12 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return mySize.y + 0.1f;
         }
 
-        public static Image AsMapImage(byte mapId,float width,IEnumerable<(IMetaParallelPlacableOld widget, Vector2 pos)> contents)
+        public static Image AsMapImage(byte mapId,float width,IEnumerable<(IMetaParallelPlacableOld widget, Vector2 pos)> contents, int mapMask = 0xFFFFFFF)
         {
             if (mapId == 1) width *= 0.96f;
             if (mapId == 4) width *= 1.2f;
             if (mapId == 5) width *= 1.1f;
-            return new Image(NebulaAsset.GetMapSprite(mapId, 0xFFFFFFF))
+            return new Image(NebulaAsset.GetMapSprite(mapId, mapMask))
             {
                 Width = width,
                 Alignment = AlignmentOption.Center,
@@ -1072,7 +1073,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         ClassInjector.RegisterTypeInIl2Cpp<MetaScreen>();
     }
 
-    public void Start()
+    public void Awake()
     {
         gameObject.AddComponent<SortingGroup>();
     }
@@ -1150,8 +1151,9 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         catch { }
     }
 
-    static public PassiveButton InstantiateCloseButton(MetaScreen target, Vector3 localPos) {
-        var collider = UnityHelper.CreateObject<CircleCollider2D>("CloseButton", target.transform.parent, localPos);
+    static public PassiveButton InstantiateCloseButton(Transform parent, Vector3 localPos)
+    {
+        var collider = UnityHelper.CreateObject<CircleCollider2D>("CloseButton", parent, localPos);
         collider.isTrigger = true;
         collider.gameObject.layer = LayerExpansion.GetUILayer();
         collider.radius = 0.25f;
@@ -1159,6 +1161,12 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         renderer = collider.gameObject.AddComponent<SpriteRenderer>();
         renderer.sprite = VanillaAsset.CloseButtonSprite;
         var button = collider.gameObject.SetUpButton(true, renderer);
+
+        return button;
+    }
+
+    static public PassiveButton InstantiateCloseButton(MetaScreen target, Vector3 localPos) {
+        var button = InstantiateCloseButton(target.transform.parent, localPos);
         var targetObj = target.combinedObject;
         button.OnClick.AddListener(() => GameObject.Destroy(targetObj));
 
@@ -1219,9 +1227,9 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         return screen;
     }
 
-    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen,bool closeOnClickOutside, bool withMask = false)
+    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen,bool closeOnClickOutside, bool withMask = false, bool withBackground = true)
     {
-        var screen = GenerateScreen(size, parent, localPos, true, withBlackScreen, true);
+        var screen = GenerateScreen(size, parent, localPos, withBackground, withBlackScreen, true);
         
         var obj = screen.transform.parent.gameObject;
 

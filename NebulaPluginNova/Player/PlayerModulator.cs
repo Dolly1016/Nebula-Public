@@ -27,7 +27,7 @@ public abstract class TimeLimitedModulator
     /// <param name="attribute">効果</param>
     /// <param name="watcher">視点</param>
     /// <returns></returns>
-    virtual public bool HasCategorizedAttribute(IPlayerAttribute attribute, GamePlayer watcher) => HasAttribute(attribute);
+    virtual public bool HasCategorizedAttribute(IPlayerAttribute attribute, GamePlayer watcher) => CanBeAware && HasAttribute(attribute);
 
     public void Update()
     {
@@ -110,7 +110,8 @@ public class SpeedModulator : TimeLimitedModulator
     public Vector4 DirectionalNum { get; private set; }
     public Vector2 AbsDirectionalNum { get; private set; }
     public bool IsMultiplier { get; private set; }
-    public override bool CanBeAware => true;
+    public override bool CanBeAware => canBeAware;
+    private bool canBeAware = true;
 
     public override bool HasAttribute(IPlayerAttribute attribute)
     {
@@ -139,15 +140,16 @@ public class SpeedModulator : TimeLimitedModulator
     }
 
 
-    public SpeedModulator(float? num, Vector2 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null) : this(num, new Vector4(dirNum.x, 0f, 0f, dirNum.y), isMultiplier, timer, canPassMeeting, priority, duplicateTag) { }
+    public SpeedModulator(float? num, Vector2 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null, bool canBeAware = true) : this(num, new Vector4(dirNum.x, 0f, 0f, dirNum.y), isMultiplier, timer, canPassMeeting, priority, duplicateTag, canBeAware) { }
 
-    public SpeedModulator(float? num, Vector4 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null) : base(timer, canPassMeeting, priority, duplicateTag)
+    public SpeedModulator(float? num, Vector4 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null, bool canBeAware = true) : base(timer, canPassMeeting, priority, duplicateTag)
     {
         this.Num = num ?? 10000f;
         this.AbsNum = Mathf.Abs(this.Num);
         this.DirectionalNum = dirNum;
         this.AbsDirectionalNum = new(new Vector2(dirNum.x, dirNum.y).magnitude, new Vector2(dirNum.z, dirNum.w).magnitude);
         this.IsMultiplier = isMultiplier;
+        this.canBeAware = canBeAware;
     }
 
     public bool IsAccelModulator => (IsMultiplier ? AbsNum > 1f : AbsNum > 0f) || AbsDirectionalNum.x > 1f || AbsDirectionalNum.y > 1f;

@@ -23,7 +23,15 @@ public enum FloatConfigurationDecorator
     /// <summary>
     /// 秒数を設定するオプションとして値を修飾します。
     /// </summary>
-    Second
+    Second,
+    /// <summary>
+    /// タスクフェイズを設定するオプションとして値を修飾します。
+    /// </summary>
+    TaskPhase,
+    /// <summary>
+    /// 確率を設定するオプションとして値を修飾します。
+    /// </summary>
+    Percentage,
 }
 
 /// <summary>

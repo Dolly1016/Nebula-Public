@@ -541,4 +541,18 @@ public static class AmongUsUtil
     {
         return ServerManager.Instance?.CurrentRegion.TranslateName is StringNames.NoTranslation or null;
     }
+
+    public static void SetPlayerMaterial(Renderer renderer, Color mainColor, Color shadowColor, Color visorColor)
+    {
+        renderer.material.SetColor(PlayerMaterial.BackColor, shadowColor);
+        renderer.material.SetColor(PlayerMaterial.BodyColor, mainColor);
+        renderer.material.SetColor(PlayerMaterial.VisorColor, visorColor);
+    }
+
+    public static Vector2 GetCorner(float xCoeff, float yCoeff, Vector2 offset, Camera camera)
+    {
+        return new((camera.orthographicSize / (float)Screen.height * (float)Screen.width - -offset.x) * xCoeff, (camera.orthographicSize - offset.y) * yCoeff);
+    }
+
+    public static Vector2 GetCorner(float xCoeff, float yCoeff) => GetCorner(xCoeff, yCoeff, Vector2.zero, Camera.main);
 }

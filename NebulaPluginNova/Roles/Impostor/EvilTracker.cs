@@ -124,7 +124,10 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
 
         List<TrackingArrowAbility> impostorArrows = new();
 
-        private void TryRegisterArrow(GamePlayer player) { if(!impostorArrows.Any(a => a.MyPlayer == player)) impostorArrows.Add(Bind(new TrackingArrowAbility(player.Unbox(), 0f, Palette.ImpostorRed)).Register()); }
+        private void TryRegisterArrow(GamePlayer player) {
+            if (!MyPlayer.IsImpostor) return;
+            if(!impostorArrows.Any(a => a.MyPlayer == player)) impostorArrows.Add(Bind(new TrackingArrowAbility(player.Unbox(), 0f, Palette.ImpostorRed)).Register());
+        }
 
         //役職変化に応じて矢印を付ける
         [Local]
@@ -162,30 +165,21 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
             {
                 if (ShowWhereTrackingIsOption)
                 {
-                    var TextHolder = HudContent.InstantiateContent("TrackingText", true, true, false, false);
-                    this.Bind(TextHolder.gameObject);
+                    Helpers.TextHudContent("TrackingText", this, (tmPro) =>
+                    {
+                        StringBuilder text = new();
 
-                    TextMeshPro tmPro = null!;
-                    var text = new NoSGUIText(Virial.Media.GUIAlignment.Left, new(GUI.API.GetAttribute(Virial.Text.AttributeParams.StandardBaredBoldLeftNonFlexible)) { Alignment = Virial.Text.TextAlignment.BottomLeft, FontSize = new(1.6f), Size = new(3f, 1f) }, new RawTextComponent("")) { PostBuilder = t => { tmPro = t; tmPro.sortingOrder = 0; } } ;
-                    text.Instantiate(new Virial.Media.Anchor(new(0f, 0f), new(-0.5f, -0.5f, 0f)), new(20f, 20f), out _)!.transform.SetParent(TextHolder.transform, false);
-                    
-                    GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev => {
-                        if (tmPro)
+                        string GetRoomName(GamePlayer player)
                         {
-                            StringBuilder text = new();
-
-                            string GetRoomName(GamePlayer player)
-                            {
-                                foreach (var entry in ShipStatus.Instance.FastRooms) if (entry.value.roomArea.OverlapPoint(player.TruePosition)) return AmongUsUtil.ToDisplayString(entry.Key);
-                                return Language.Translate("location.outside");
-                            }
-
-                            if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + GetRoomName(trackingTarget)).Color(Color.Lerp(Palette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
-                            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostor && !p.IsDead)) text.AppendLine((p.Name + ": " + GetRoomName(p)).Color(Palette.ImpostorRed));
-
-                            tmPro.text = text.ToString();
+                            foreach (var entry in ShipStatus.Instance.FastRooms) if (entry.value.roomArea.OverlapPoint(player.TruePosition)) return AmongUsUtil.ToDisplayString(entry.Key);
+                            return Language.Translate("location.outside");
                         }
-                    }, this);
+
+                        if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + GetRoomName(trackingTarget)).Color(Color.Lerp(Palette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
+                        if (MyPlayer.IsImpostor) foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostor && !p.IsDead)) text.AppendLine((p.Name + ": " + GetRoomName(p)).Color(Palette.ImpostorRed));
+
+                        tmPro.text = text.ToString();
+                    });
                 }
                 //インポスターに矢印を付ける
                 if (TrackImpostorsOption && MyPlayer.IsImpostor) NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.AmOwner && p.Role.Role.Category == RoleCategory.ImpostorRole).Do(p => TryRegisterArrow(p));
@@ -343,7 +337,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                     if (MapBehaviour.Instance.IsOpen) MapBehaviour.Instance.Close();
                     MapBehaviour.Instance.ShowNormalMap();
 
-                    var eTracker = NebulaGameManager.Instance?.LocalPlayerInfo.Role.GetAbility<Ability>();
+                    var eTracker = GamePlayer.LocalPlayer.Role.GetAbility<Ability>();
                     if (eTracker != null)
                     {
                         if (!eTracker.mapLayer)

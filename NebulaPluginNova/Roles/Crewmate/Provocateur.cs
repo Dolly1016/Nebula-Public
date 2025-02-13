@@ -10,11 +10,11 @@ namespace Nebula.Roles.Crewmate;
 
 public static class ExtraExileRoleSystem
 {
-    public static void MarkExtraVictim(GamePlayer player, bool includeImpostors = true, bool expandTargetWhenNobodyCanBeMarked = false)
+    public static void MarkExtraVictim(GamePlayer player, bool includeImpostors = true, bool expandTargetWhenNobodyCanBeMarked = false, GamePlayer[]? cand = null)
     {
-        var voters = MeetingHudExtension.LastVotedForMap
+        var voters = (cand ?? MeetingHudExtension.LastVotedForMap
                 .Where(entry => entry.Value == player.PlayerId && entry.Key != player.PlayerId)
-                .Select(entry => NebulaGameManager.Instance!.GetPlayer(entry.Key))
+                .Select(entry => NebulaGameManager.Instance!.GetPlayer(entry.Key)))
                 .Where(p => !p!.IsDead && (includeImpostors || p.Role.Role.Category != RoleCategory.ImpostorRole))
                 .ToArray();
         
@@ -86,18 +86,17 @@ public class Provocateur : DefinedRoleTemplate, DefinedRole
         [OnlyHost, OnlyMyPlayer]
         void OnMurdered(PlayerMurderedEvent ev)
         {
-            if (ev.Murderer.AmOwner) return;
+            if (ev.Murderer.PlayerId == MyPlayer.PlayerId) return;
 
             if (embroilActive && !ev.Murderer.IsDead)
             {
 
 
-                MyPlayer.MurderPlayer(ev.Murderer,PlayerState.Embroiled,EventDetail.Embroil, KillParameter.NormalKill, KillCondition.TargetAlive);
+                MyPlayer.MurderPlayer(ev.Murderer,PlayerState.Embroiled,EventDetail.Embroil, KillParameter.RemoteKill, KillCondition.TargetAlive);
                 NebulaAchievementManager.RpcClearAchievement.Invoke(("provocateur.common2", MyPlayer));
                 NebulaAchievementManager.RpcProgressStats.Invoke((StatsTask.Id, MyPlayer));
 
-                var murdererRole = ev.Murderer.Role.Role;
-                if (murdererRole is Sniper or Raider && ev.Murderer.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) > 10f) NebulaAchievementManager.RpcClearAchievement.Invoke(("provocateur.challenge", MyPlayer));
+                if ((MyPlayer.PlayerState == PlayerState.Sniped || MyPlayer.PlayerState == PlayerState.Beaten) && ev.Murderer.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) > 10f) NebulaAchievementManager.RpcClearAchievement.Invoke(("provocateur.challenge", MyPlayer));
             }
         }
 

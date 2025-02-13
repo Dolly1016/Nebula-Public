@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Player;
 
-public class PlayerDieEvent : AbstractPlayerEvent
+public class PlayerDieEvent : PlayerDieOrDisconnectEvent
 {
     internal PlayerDieEvent(Virial.Game.Player player) : base(player) { }
 }

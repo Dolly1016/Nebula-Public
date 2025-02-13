@@ -80,11 +80,11 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
                         Sprite = sprites.GetSprite(0);
                     }
 
-                    if (activatedCircle == null && NebulaGameManager.Instance?.LocalPlayerInfo.Role.Role == Thurifer.MyRole)
+                    if (activatedCircle == null && GamePlayer.LocalPlayer.Role.Role == Thurifer.MyRole)
                     {
                         activatedCircle = EffectCircle.SpawnEffectCircle(null, Position, new(202f / 255f, 1f, 0f), ThuribulumRangeOption, null, true);
                     }
-                    if(activatedCircle != null && NebulaGameManager.Instance?.LocalPlayerInfo.Role.Role != Thurifer.MyRole)
+                    if(activatedCircle != null && GamePlayer.LocalPlayer.Role.Role != Thurifer.MyRole)
                     {
                         activatedCircle.Disappear();
                         activatedCircle = null;
@@ -177,7 +177,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
 
             //解除ボタン
             bool used = false; //使用は一度きり
-            var localPlayer = NebulaGameManager.Instance!.LocalPlayerInfo;
+            var localPlayer = GamePlayer.LocalPlayer;
 
             Modules.ScriptComponents.ModAbilityButton imputeButton = null!;
             var thuribulumTracker = new ObjectTrackerUnityImpl<Thuribulum, Thuribulum>(localPlayer.VanillaPlayer, 1f, () => ModSingleton<ThuribulumManager>.Instance.AllThuribulums, t => (imputeButton!.IsVisible && t.CanInteract), null, t => t, t => [t.Position, new(t.Position.x, t.Position.y - 0.3f)], t => t.MyRenderer) { MoreHighlight = true } as ObjectTracker<Thuribulum>;
@@ -214,7 +214,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
             }
             else
             {
-                var localPlayer = NebulaGameManager.Instance!.LocalPlayerInfo;
+                var localPlayer = GamePlayer.LocalPlayer;
 
                 //生存中のみ進行する
                 if (!localPlayer.IsDead)
@@ -260,7 +260,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
             (message, _) =>
             {
                 ModSingleton<ThuribulumManager>.Instance.inhalationMap[message.playerId] = message.amount;
-            });
+            }, false);
 
         public void RpcActivate(Thuribulum thuribulum, float duration)
         {
@@ -271,8 +271,8 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         {
             localInhalation = 0f;
             lastShared = 0f;
-            thuribulum.ScheduleActivate(ActivationDelayOption, NebulaGameManager.Instance!.LocalPlayerInfo.IsCrewmate ? 999999f : ActivateDurationOption);
-            RpcUpdateInhalation.Invoke((NebulaGameManager.Instance!.LocalPlayerInfo.PlayerId, 0f));
+            thuribulum.ScheduleActivate(ActivationDelayOption, GamePlayer.LocalPlayer.IsCrewmate ? 999999f : ActivateDurationOption);
+            RpcUpdateInhalation.Invoke((GamePlayer.LocalPlayer.PlayerId, 0f));
             thuribulum.Ignore();
         }
     }

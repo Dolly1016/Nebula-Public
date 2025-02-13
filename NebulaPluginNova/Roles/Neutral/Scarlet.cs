@@ -161,7 +161,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                 bool usedInTheMeeting = true;
                 var meetingButton = Bind(new Modules.ScriptComponents.ModAbilityButton(alwaysShow: true));
                 meetingButton.SetSprite(meetingButtonSprite.GetSprite());
-                meetingButton.Availability = (button) => MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted;
+                meetingButton.Availability = (button) => MeetingHud.Instance && MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted;
                 meetingButton.Visibility = (button) => !MyPlayer.IsDead && LeftMeeting > 0 && MeetingHud.Instance && (MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted || MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.Discussion) && !usedInTheMeeting;
                 var meetingIcon = meetingButton.ShowUsesIcon(4);
                 meetingButton.OnClick = (button) =>
@@ -198,13 +198,13 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         }
 
 
-        [OnlyMyPlayer, Local]
-        void OnDead(PlayerDieEvent ev)
+        [OnlyMyPlayer, OnlyHost]
+        void OnDead(PlayerDieOrDisconnectEvent ev)
         {
             var myLover = GetMyFavorite();
             if (!(myLover?.IsDead ?? true))
             {
-                if (ev is PlayerMurderedEvent pme)
+                if (ev is PlayerMurderedEvent or PlayerDisconnectEvent)
                 {
                     myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
                 }
@@ -286,7 +286,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         {
             Color loverColor = Lover.Colors[0];
 
-            if (IsMyLover(NebulaGameManager.Instance!.LocalPlayerInfo)) name += " ♡".Color(loverColor);
+            if (IsMyLover(GamePlayer.LocalPlayer)) name += " ♡".Color(loverColor);
         }
 
         static private RemoteProcess<GamePlayer> RpcCommand = new("ScarletCommand", (p, _) =>
@@ -353,11 +353,14 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
                 new StaticAchievementToken("scarlet.another1");
                 return;
             }
+        }
 
+        [OnlyMyPlayer, OnlyHost]
+        void OnDeadHost(PlayerDieOrDisconnectEvent ev) { 
             var myScarlet = MyScarlet as RuntimeRole;
             if (!(myScarlet?.MyPlayer.IsDead ?? true))
             {
-                if (ev is PlayerMurderedEvent pme)
+                if (ev is PlayerMurderedEvent or PlayerDisconnectEvent)
                 {
                     myScarlet.MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
                 }

@@ -1,4 +1,5 @@
 ﻿using Cpp2IL.Core.Extensions;
+using Hazel;
 using Nebula.Behaviour;
 using Nebula.Utilities;
 using System.Reflection;
@@ -33,6 +34,7 @@ public enum NebulaAudioClip {
     ExplosionFar2,
     ExplosionNear,
     MeteorAlert,
+    SpectreEat,
 }
 
 public static class SoundManagerHelper
@@ -78,7 +80,7 @@ public static class NebulaAsset
 
         var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Nebula.Resources.Assets.nebula_asset");
         AssetBundle = AssetBundle.LoadFromMemory(resourceStream!.ReadBytes());
-
+        
         MultiplyBackShader = Load<Shader>("Sprites-MultiplyBackground");
         StoreBackShader = Load<Shader>("Sprites-StoreBackground");
         GuageShader = Load<Shader>("Sprites-Guage");
@@ -119,8 +121,10 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.ExplosionFar2] = Load<AudioClip>("ExplosionFar2.mp3");
         audioMap[NebulaAudioClip.ExplosionNear] = Load<AudioClip>("ExplosionNear.mp3");
         audioMap[NebulaAudioClip.MeteorAlert] = Load<AudioClip>("MeteorAlert.mp3");
+        audioMap[NebulaAudioClip.SpectreEat] = Load<AudioClip>("SpectreFriedSE.ogg");
 
         PaparazzoShot = Load<GameObject>("PhotoObject");
+        FriesMinigame = Load<GameObject>("SpectreFriedMinigame");
 
         JusticeFont = new FontAssetNoS(JsonStructure.Deserialize<FontAssetNoSInfo>(StreamHelper.OpenFromResource("Nebula.Resources.JusticeFont.json")!)!, new ResourceTextureLoader("Nebula.Resources.JusticeFont.png"));
     }
@@ -199,6 +203,7 @@ public static class NebulaAsset
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public GameObject PaparazzoShot { get; private set; } = null!;
+    static public GameObject FriesMinigame { get; private set; } = null!;
 
     static public SpriteRenderer CreateSharpBackground(Vector2 size, Color color, Transform transform)
     {
@@ -219,12 +224,12 @@ public static class NebulaAsset
     public static GameObject[] DivMap { get; private set; } = new GameObject[6];
     private static Dictionary<NebulaAudioClip, AudioClip> audioMap = new();
 
-    public static void PlaySE(NebulaAudioClip clip, bool oneshot = false, float volume = 0.8f)
+    public static void PlaySE(NebulaAudioClip clip, bool oneshot = false, float volume = 0.8f, float pitch = 1.0f)
     {
         if (oneshot)
-            SoundManager.Instance.PlayOneShot(audioMap[clip], false, volume);
+            SoundManager.Instance.PlayOneShot(audioMap[clip], false, volume).pitch = pitch;
         else
-            SoundManager.Instance.PlaySound(audioMap[clip],false,volume);
+            SoundManager.Instance.PlaySound(audioMap[clip],false,volume).pitch = pitch;
     }
 
     public static void PlaySE(NebulaAudioClip clip, Vector2 pos, float minDistance, float maxDistance, float volume = 1f) => PlaySE(audioMap[clip], pos, minDistance, maxDistance);

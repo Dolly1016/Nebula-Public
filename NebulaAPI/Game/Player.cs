@@ -246,7 +246,7 @@ public enum KillParameter
     MeetingKill = WithOverlay | WithAssigningGhostRole | WithKillSEWidely
 }
 
-public interface Player : IModuleContainer, ICommandExecutor
+public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer
 {
     // Internal
 
@@ -449,6 +449,15 @@ public interface Player : IModuleContainer, ICommandExecutor
     public bool TryGetModifier<Modifier>([MaybeNullWhen(false)] out Modifier modifier) where Modifier : class, RuntimeModifier;
     public bool AttemptedGhostAssignment { get; internal set; }
     public IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth();
+    public bool TryGetAbility<Ability>([MaybeNullWhen(false)]out Ability ability) where Ability : class, IPlayerAbility
+    {
+        bool result = AllAbilities.Find(ability => ability is Ability, out var pAbility);
+        if (pAbility == null)
+            ability = null;
+        else
+            ability = pAbility as Ability;
+        return result;
+    }
 
 
     // PlayerRoleCategoryAPI
@@ -477,6 +486,7 @@ public interface Player : IModuleContainer, ICommandExecutor
     /// プレイヤーの本来の見た目を取得します。
     /// </summary>
     public OutfitDefinition DefaultOutfit { get; }
+    Virial.Game.OutfitDefinition IArchivedPlayer.DefaultOutfit => DefaultOutfit;
 
 
 
@@ -489,4 +499,10 @@ public interface Player : IModuleContainer, ICommandExecutor
 
     public bool ShowKillButton => (Role?.HasVanillaKillButton ?? false) && AllowToShowKillButtonByAbilities;
     public bool AllowToShowKillButtonByAbilities => AllAssigned().All(assigned => assigned.MyAbilities.All(ability => !(ability?.HideKillButton ?? false)));
+
+
+    /// <summary>
+    /// 自身が操作するプレイヤーを取得します。
+    /// </summary>
+    public static Player? LocalPlayer => NebulaAPI.instance.CurrentGame?.LocalPlayer;
 }

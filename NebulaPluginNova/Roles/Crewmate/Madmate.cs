@@ -6,6 +6,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
@@ -16,7 +17,11 @@ namespace Nebula.Roles.Crewmate;
 
 public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, CanIdentifyImpostorsOptionEditor]) 
+    private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, 
+        [CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, 
+        new GroupConfiguration("options.role.madmate.group.embroil", [EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, EmbroilDelayOption], GroupConfigurationColor.ImpostorRed), 
+        new GroupConfiguration("options.role.madmate.group.identification", [CanIdentifyImpostorsOptionEditor], GroupConfigurationColor.ImpostorRed)
+        ]) 
     {
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Madmate.png");
     }
@@ -25,7 +30,8 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private BoolConfiguration EmbroilVotersOnExileOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilPlayersOnExile", false);
-    static private BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("options.role.madmate.limitEmbroiledPlayersToVoters", true);
+    static private BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("options.role.madmate.limitEmbroiledPlayersToVoters", true, ()=>EmbroilVotersOnExileOption);
+    static private FloatConfiguration EmbroilDelayOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilDelay", (0f, 5f, 1f), 0f,FloatConfigurationDecorator.TaskPhase, () => EmbroilVotersOnExileOption);
 
     static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixLight", false);
     static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixComms", false);
@@ -51,24 +57,19 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 
             if (CanIdentifyImpostorsOption.GetValue() > 0)
             {
-                List<GUIWidget> inner = new([
-                    GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), "options.role.madmate.requiredTasksForIdentifying"),
-                    GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OptionsFlexible), ":"),
-                    GUI.API.HorizontalMargin(0.05f)
-                    ]);
                 int length = CanIdentifyImpostorsOption.GetValue();
+                
                 for (int i = 0; i < length; i++)
                 {
-                    if (i != 0) inner.AddRange([GUI.API.HorizontalMargin(0.05f), GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), ",")]);
-
                     var option = NumOfTasksToIdentifyImpostorsOptions[i];
 
-                    inner.AddRange([
+                    widgets.Add(new HorizontalWidgetsHolder(GUIAlignment.Left,
+                        GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), "options.role.madmate.requiredTasksForIdentifying" + i),
+                        GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OptionsFlexible), ":"),
                         GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsValueShorter), option.CurrentValue.ToString()),
                         GUI.API.SpinButton(GUIAlignment.Center, v => { option.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
-                        ]);
+                        ));
                 }
-                widgets.Add(new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Left, inner));
             }
             return new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, widgets);
         }
@@ -158,19 +159,32 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 
             if (!EmbroilVotersOnExileOption) return;
 
-            StatsEmbroil.Progress();
+            GamePlayer[] voters = MeetingHudExtension.LastVotedForMap
+                .Where(entry => entry.Value == MyPlayer.PlayerId && entry.Key != MyPlayer.PlayerId)
+                .Select(entry => NebulaGameManager.Instance!.GetPlayer(entry.Key)).ToArray()!;
 
-            if (LimitEmbroiledPlayersToVotersOption)
-                ExtraExileRoleSystem.MarkExtraVictim(MyPlayer.Unbox(), false, true);
-            else
+            void Embroil()
             {
-                var voters = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.IsDead && !p.AmOwner && p.Role.Role.Category != RoleCategory.ImpostorRole).ToArray();
-                if (voters.Length > 0) voters.Random().VanillaPlayer.ModMarkAsExtraVictim(MyPlayer.VanillaPlayer, PlayerState.Embroiled, EventDetail.Embroil);
+                StatsEmbroil.Progress();
+
+                ExtraExileRoleSystem.MarkExtraVictim(MyPlayer.Unbox(), false, true, LimitEmbroiledPlayersToVotersOption ? voters : []);
+
             }
 
-            
-
+            if (EmbroilDelayOption == 0)
+                Embroil();
+            else
+            {
+                int left = (int)(float)EmbroilDelayOption;
+                GameOperatorManager.Instance?.Register<MeetingPreSyncEvent>(ev => {
+                    left--;
+                    if (left == 0) Embroil();
+                }, new FunctionalLifespan(() => left > 0));
+            }
         }
+
+
+
 
         [Local, OnlyMyPlayer]
         void OnMurdered(PlayerMurderedEvent ev)

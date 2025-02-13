@@ -51,9 +51,9 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
         Timer arrowTimer = null!;
         Arrow bountyArrow = null!;
         
-        void ChangeBounty()
+        void ChangeBounty(GamePlayer? excluded = null)
         {
-            var arr = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && !p.Data.IsDead && MyPlayer.CanKill(p.GetModInfo()!)).ToArray();
+            var arr = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && p.PlayerId != excluded?.PlayerId && !p.Data.IsDead && MyPlayer.CanKill(p.GetModInfo()!)).ToArray();
             if (arr.Length == 0) currentBounty = byte.MaxValue;
             else currentBounty = arr[System.Random.Shared.Next(arr.Length)].PlayerId;
 
@@ -121,7 +121,7 @@ public class BountyHunter : DefinedRoleTemplate, HasCitation, DefinedRole
 
                     if(killTracker.CurrentTarget!.PlayerId == currentBounty)
                     {
-                        ChangeBounty();
+                        ChangeBounty(killTracker.CurrentTarget);
                         button.CoolDownTimer!.Start(BountyKillCoolDownOption.CoolDown);
                         acTokenKillBounty.Value = true;
                         StatsBountyKill.Progress();

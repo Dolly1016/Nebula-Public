@@ -14,6 +14,7 @@ using Nebula.Modules.GUIWidget;
 using UnityEngine.Rendering;
 using Sentry.Internal.Extensions;
 using Virial;
+using BepInEx.Unity.IL2CPP.Utils;
 
 namespace Nebula.Patches;
 
@@ -153,6 +154,7 @@ public class GameStartManagerBeginGame
             }
         }
 
+        DynamicPalette.RpcShareMyColor();
         GameStartNotification.Notification();
 
         return true;
@@ -261,7 +263,6 @@ public class DelayPlayDropshipAmbiencePatch
         var instantiatedVersionText = versionText.Instantiate(new Virial.Media.Anchor(new(1f,0.5f), new(0f,0f,0f)), new(100f,100f), out _)!;
         instantiatedVersionText.transform.SetParent(logoHolder.transform, false);
         instantiatedVersionText.transform.localPosition += new Vector3(1f, -0.26f, -0.1f);
-        
 
         System.Collections.IEnumerator CoUpdateLogo()
         {
@@ -485,6 +486,13 @@ public class GlobalCosMismatchShowerPatch
 
             UpdateContents();
         }
+
+        __instance.StartCoroutine(ManagedEffects.Wait(()=> !__instance.HostInfoPanel.content.active, () =>
+        {
+            __instance.HostInfoPanel.playerHolder.AddComponent<SortingGroup>();
+            __instance.HostInfoPanel.playerHolder.GetComponentInChildren<NebulaCosmeticsLayer>().SetSortingProperty(true, 10000f, 1000);
+        }).WrapToIl2Cpp());
+        
 
         var button = renderer.gameObject.SetUpButton(true, renderer);
         button.OnClick.AddListener(OpenScreen);

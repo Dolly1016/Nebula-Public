@@ -32,7 +32,7 @@ public class LightPatch
 
         float t = (float)(switchSystem?.Value ?? 255f) / 255f;
 
-        var info = PlayerControl.LocalPlayer.GetModInfo();
+        var info = GamePlayer.LocalPlayer;
         bool hasImpostorVision = info?.Unbox().Role.HasImpostorVision ?? false;
         bool ignoreBlackOut = info?.Unbox().Role.IgnoreBlackout ?? true;
 
@@ -41,7 +41,7 @@ public class LightPatch
         float radiusRate = Mathf.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, t);
         float range = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(hasImpostorVision ? FloatOptionNames.ImpostorLightMod : FloatOptionNames.CrewLightMod);
         float rate = GameOperatorManager.Instance?.Run(new LightRangeUpdateEvent(1f)).LightRange ?? 1f;
-        rate *= NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
+        rate *= GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
 
         lastRange -= (lastRange - rate).Delta(0.7f, 0.005f);
         __result = radiusRate * range * lastRange;
@@ -100,7 +100,7 @@ public static class OneWayShadowsPatch
 {
     public static bool Prefix(OneWayShadows __instance, ref bool __result, [HarmonyArgument(0)] LightSource lightSource)
     {
-        var info = NebulaGameManager.Instance?.LocalPlayerInfo;
+        var info = GamePlayer.LocalPlayer;
         if (info == null) return true;
 
         __result = (__instance.IgnoreImpostor && info.Role.HasImpostorVision) || __instance.RoomCollider.OverlapPoint(lightSource.transform.position);

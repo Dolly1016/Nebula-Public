@@ -199,7 +199,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                     NebulaGameManager.Instance!.EndState!.Winners.Test(NebulaGameManager.Instance.GetPlayer(param.playerId)) && NebulaGameManager.Instance!.EndState.EndCondition == NebulaGameEnd.CrewmateWin
                 );
                 if (param.type == 3) new AchievementToken<int>("damned.another1", 0, (_, _) =>
-                    NebulaGameManager.Instance?.LocalPlayerInfo.MyKiller?.IsImpostor ?? false || NebulaGameManager.Instance?.LocalPlayerInfo.PlayerState == PlayerStates.Guessed || NebulaGameManager.Instance?.LocalPlayerInfo.PlayerState == PlayerStates.Exiled
+                    GamePlayer.LocalPlayer.MyKiller?.IsImpostor ?? false || GamePlayer.LocalPlayer.PlayerState == PlayerStates.Guessed || GamePlayer.LocalPlayer.PlayerState == PlayerStates.Exiled
                 );
             }
         });

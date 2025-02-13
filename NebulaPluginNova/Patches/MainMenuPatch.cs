@@ -121,6 +121,14 @@ public static class MainMenuSetUpPatch
             StatsViewer.Open(__instance);
         });
 
+        if (DebugTools.DebugMode)
+        {
+            SetUpButton("title.buttons.rooms", () =>
+            {
+                RoomViewer.Open(__instance);
+            });
+        }
+
 
         var discordRenderer = UnityHelper.CreateObject<SpriteRenderer>("DiscordButton", NebulaScreen.transform, new Vector3(2.8f,-1.4f));
         discordRenderer.sprite = discordIconSprite.GetSprite();

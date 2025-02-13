@@ -144,6 +144,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
                     var mesh = UnityHelper.CreateMeshRenderer("MeshRenderer", transform, new(0, -0.08f, -1), null);
                     mesh.filter.CreateRectMesh(new(2f, 1.2f));
                     mesh.renderer.sharedMaterial.mainTexture = camera.SetCameraRenderTexture(200, 120);
+                    mesh.renderer.transform.localScale = MapBehaviourExtension.GetMinimapFlippedScale();
                     return (mesh.renderer.gameObject, new(2f, 1.2f));
                 }), true);
             });

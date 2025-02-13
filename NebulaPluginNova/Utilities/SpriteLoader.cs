@@ -303,12 +303,12 @@ public class ResourceExpandableSpriteLoader : Image
     float pixelsPerUnit;
     //端のピクセル数
     int x, y;
-    public ResourceExpandableSpriteLoader(string address, float pixelsPerUnit,int x,int y)
+    public ResourceExpandableSpriteLoader(string address, float pixelsPerUnit,int xSidePixels,int ySidePixels)
     {
         this.address = address;
         this.pixelsPerUnit = pixelsPerUnit;
-        this.x = x;
-        this.y = y;
+        this.x = xSidePixels;
+        this.y = ySidePixels;
     }
 
     public Sprite GetSprite()

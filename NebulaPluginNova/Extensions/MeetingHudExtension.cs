@@ -142,6 +142,8 @@ public static class MeetingHudExtension
             GameOperatorManager.Instance?.Run(new PlayerExtraExiledEvent(player, killer), true);
 
             if (player.AmOwner && NebulaAchievementManager.GetRecord("death." + player.PlayerState.TranslationKey, out var recDeath)) new StaticAchievementToken(recDeath);
+            if(player.AmOwner) new StaticAchievementToken("stats.death." + player.PlayerState.TranslationKey);
+
             if ((killer?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + player.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
             if (player.AmOwner) new StaticAchievementToken("extraVictim");
 
@@ -164,7 +166,7 @@ public static class MeetingHudExtension
         {
             WeightMap[message.source] = message.weight;
 
-            GameOperatorManager.Instance?.Run(new PlayerVoteCastEvent(NebulaGameManager.Instance!.LocalPlayerInfo, NebulaGameManager.Instance!.GetPlayer(message.target), message.weight));
+            GameOperatorManager.Instance?.Run(new PlayerVoteCastEvent(GamePlayer.LocalPlayer!, NebulaGameManager.Instance!.GetPlayer(message.target), message.weight));
 
             if (AmongUsClient.Instance.AmHost)
             {

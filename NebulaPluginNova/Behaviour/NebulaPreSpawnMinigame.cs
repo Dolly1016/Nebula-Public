@@ -192,6 +192,7 @@ public class NebulaPreSpawnMinigame : Minigame
             base.transform.localPosition = new Vector3(0f, Mathf.SmoothStep(0f, -8f, num), -50f);
             yield return null;
         }
+
         GameObject.Destroy(base.gameObject);
     }
 

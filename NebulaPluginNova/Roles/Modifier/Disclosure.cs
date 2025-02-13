@@ -63,6 +63,9 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                 }, this);
                 GameOperatorManager.Instance?.Register<MeetingEndEvent>(ev => {
                     if (voted != null && num >= 3 && MyPlayer.Role.Role.Team != voted.Role.Role.Team && ev.Exiled.Contains(voted)) challengeToken.Value++;
+
+                    num = 0;
+                    voted = null;
                 }, this);
             }
         }
@@ -164,7 +167,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                     modifier.lastPoint = (message.pos, message.speed);
                     modifier.sentSequentialId = message.sequentialId;
                 }
-            });
+            }, false);
 
         private (Vector2 pos, float speed)? lastPoint = null;
     }

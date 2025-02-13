@@ -139,7 +139,6 @@ public class GUIScrollView : AbstractGUIWidget
             scroller.Inner.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += () => { distDic[ScrollerTag] = scroller.Inner.transform.localPosition.y - scroller.ContentYBounds.min; };
 
         actualSize = new(Size.x + 0.15f, Size.y + 0.08f);
-
         scroller.UpdateScrollBars();
 
         return view;

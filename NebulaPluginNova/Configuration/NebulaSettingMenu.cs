@@ -6,7 +6,7 @@ using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
 using Virial.Media;
 using Virial.Configuration;
-using Nebula.Compat;
+
 using UnityEngine;
 using System.Text.RegularExpressions;
 

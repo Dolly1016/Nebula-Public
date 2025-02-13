@@ -1,5 +1,5 @@
 ﻿using NAudio.CoreAudioApi;
-using Nebula.Compat;
+
 using Nebula.Modules.GUIWidget;
 using Nebula.Scripts;
 using System.Reflection;

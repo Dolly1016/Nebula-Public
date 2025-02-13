@@ -1,4 +1,4 @@
-﻿using Nebula.Compat;
+﻿
 using Virial.Components;
 using Virial.Events.Game;
 using Virial.Game;
@@ -28,7 +28,7 @@ public static class ObjectTrackers
     static public Predicate<GamePlayer> StandardPredicateIgnoreOwner = p => !p.IsDead && !p.WillDie && !p.Unbox().IsInvisible && !p.IsDived && !p.IsBlown;
     static public Predicate<GamePlayer> StandardPredicate = p => !p.AmOwner && StandardPredicateIgnoreOwner.Invoke(p);
     static public Predicate<GamePlayer> KillablePredicate(GamePlayer myPlayer) => p => StandardPredicate(p) && myPlayer.CanKill(p);
-    static public Predicate<GamePlayer> LocalKillablePredicate = p => StandardPredicate(p) && (NebulaGameManager.Instance?.LocalPlayerInfo.CanKill(p) ?? true);
+    static public Predicate<GamePlayer> LocalKillablePredicate = p => StandardPredicate(p) && (GamePlayer.LocalPlayer?.CanKill(p) ?? true);
 
     public static ObjectTracker<GamePlayer> ForPlayer(float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, UnityEngine.Color? color = null, bool canTrackInVent = false, bool ignoreCollider = false) => ForPlayer(distance, tracker, predicate, null, color ?? UnityEngine.Color.yellow, canTrackInVent, ignoreCollider);
     public static ObjectTracker<GamePlayer> ForPlayer(float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier, UnityEngine.Color? color, bool canTrackInVent = false, bool ignoreCollider = false)
@@ -72,11 +72,12 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
     Func<T, SpriteRenderer> rendererConverter;
     UnityEngine.Color color = UnityEngine.Color.yellow;
     bool ignoreColliders;
+    bool ignoreShadows;
     float maxDistance;
     private bool isLocked = false;
     public bool MoreHighlight = false;
 
-    public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Func<T, SpriteRenderer> rendererConverter, Color? color = null, bool ignoreColliders = false)
+    public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Func<T, SpriteRenderer> rendererConverter, Color? color = null, bool ignoreColliders = false, bool ignoreShadows = true)
     {
         this.tracker = tracker;
         this.allTargets = allTargets;
@@ -87,9 +88,12 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
         this.rendererConverter = rendererConverter;
         this.maxDistance = maxDistance;
         this.ignoreColliders = ignoreColliders;
-        if(color.HasValue) this.color = color.Value;
+        this.ignoreShadows = ignoreShadows;
+        if (color.HasValue) this.color = color.Value;
+        this.ignoreShadows = ignoreShadows;
     }
 
+    public void SetColor(UnityEngine.Color color) => this.color = color;
     private void ShowTarget()
     {
         if (currentTarget == null) return;
@@ -138,6 +142,7 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
             if (distance < magnitude) continue;
 
             if (!ignoreColliders && pos.All(p => PhysicsHelpers.AnyNonTriggersBetween(myPos, (p - myPos).normalized, magnitude, Constants.ShipAndObjectsMask))) continue;
+            if (!ignoreShadows && pos.All(p => NebulaPhysicsHelpers.AnyShadowBetween(p, myPos, out _))) continue;
             if (!(predicateHeavier?.Invoke(v) ?? true)) continue;
 
             candidate = new(t,v);

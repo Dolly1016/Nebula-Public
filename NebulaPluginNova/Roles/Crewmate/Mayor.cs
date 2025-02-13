@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using System.Text;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game;
@@ -11,15 +12,17 @@ namespace Nebula.Roles.Crewmate;
 
 public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Mayor() : base("mayor", new(30,96,85), RoleCategory.CrewmateRole, Crewmate.MyTeam, [FixedVotesOption, MinVoteOption, MaxVoteOption, MaxVoteStockOption, VoteAssignmentOption]) { }
+    private Mayor() : base("mayor", new(30,96,85), RoleCategory.CrewmateRole, Crewmate.MyTeam, [FixedVotesOption, MinVoteOption, MaxVoteOption, MaxVoteStockOption, VoteAssignmentOption, VoteAssignmentOnReportingOption, VoteAssignmentPerTasksOption]) { }
     Citation? HasCitation.Citaion => Citations.TownOfImpostors;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
     static private BoolConfiguration FixedVotesOption = NebulaAPI.Configurations.Configuration("options.role.mayor.fixedVotes", false);
     static private IntegerConfiguration MinVoteOption = NebulaAPI.Configurations.Configuration("options.role.mayor.minVote", (0, 20), 1, () => !FixedVotesOption);
     static private IntegerConfiguration MaxVoteOption = NebulaAPI.Configurations.Configuration("options.role.mayor.maxVote", (1, 20), 2, () => !FixedVotesOption);
-    static private IntegerConfiguration MaxVoteStockOption = NebulaAPI.Configurations.Configuration("options.role.mayor.maxVotesStock", (1, 20), 8, () => !FixedVotesOption);
-    static private IntegerConfiguration VoteAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.mayor.voteAssignment", (1, 20), 1);
+    static private IntegerConfiguration MaxVoteStockOption = NebulaAPI.Configurations.Configuration("options.role.mayor.maxVotesStock", (int[])[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 40, 50], 8, () => !FixedVotesOption);
+    static private IntegerConfiguration VoteAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.mayor.voteAssignment", (-3, 20), 1);
+    static private IntegerConfiguration VoteAssignmentOnReportingOption = NebulaAPI.Configurations.Configuration("options.role.mayor.voteAssignmentOnReporting", (-3, 20), 0, () => !FixedVotesOption);
+    static private IntegerConfiguration VoteAssignmentPerTasksOption = NebulaAPI.Configurations.Configuration("options.role.mayor.voteAssignmentPerTasks", (-3, 20), 0, () => !FixedVotesOption);
 
     static public Mayor MyRole = new Mayor();
     static private GameStatsEntry StatsVotes = NebulaAPI.CreateStatsEntry("stats.mayor.votes", GameStatsCategory.Roles, MyRole);
@@ -28,6 +31,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
     static private int VoteAssignment => VoteAssignmentOption;
     static private int VotesStock => FixedVotesOption ? VoteAssignmentOption : MaxVoteStockOption;
 
+    [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -49,6 +53,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
         AchievementToken<(bool cleared, int leftMeeting, bool triggered)>? acTokenCommon2 = null;
         AchievementToken<(bool cleared, byte myVotedFor, bool triggered)>? acTokenChallenge = null;
 
+
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
@@ -57,7 +62,24 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
                 acTokenAnother = new("mayor.another1", (0, true), (val, _) => val.meetings >= 3 && val.clearable);
                 acTokenCommon2 = new("mayor.common2", (false, 3, false), (val, _) => val.cleared);
                 acTokenChallenge = new("mayor.challenge", (false,0,false), (val, _) => val.cleared);
+
+                if (!FixedVotesOption)
+                {
+                    string prefix = Language.Translate("role.mayor.hud.votes");
+                    Helpers.TextHudContent("MayorText", this, (tmPro) => tmPro.text = prefix + ": " + myVote);
+                }
             }
+        }
+
+        void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
+        {
+            if(VoteAssignmentPerTasksOption > 0 && !FixedVotesOption) UpdateMayorVotes(myVote + VoteAssignmentPerTasksOption);
+        }
+
+        [Local]
+        void OnReportDeadBody(ReportDeadBodyEvent ev)
+        {
+            if (ev.Reporter.AmOwner && VoteAssignmentOnReportingOption > 0 && !FixedVotesOption) UpdateMayorVotes(myVote + VoteAssignmentOnReportingOption);
         }
 
         [Local]
@@ -85,7 +107,8 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
                 countText.transform.localScale *= 0.8f;
                 countText.text = "";
 
-                myVote = Mathf.Min(myVote + VoteAssignment, VotesStock);
+                if(VoteAssignment > 0) UpdateMayorVotes(myVote + VoteAssignment);
+
                 int min = Mathf.Min(MinVote, myVote);
                 int max = Mathf.Min(MaxVote, myVote);
                 currentVote = Mathf.Clamp(currentVote, min, max);
@@ -140,8 +163,7 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (MeetingHud.Instance.playerStates.FirstOrDefault(v => v.TargetPlayerId == MyPlayer.PlayerId)?.DidVote ?? false)
             {
-                Debug.Log($"Mayor: current:{myVote},voted:{currentVote}");
-                myVote -= currentVote;
+                UpdateMayorVotes(myVote - currentVote);
                 StatsVotes.Progress(currentVote);
                 if(acTokenCommon2 != null)
                 {
@@ -195,5 +217,15 @@ public class Mayor : DefinedRoleTemplate, HasCitation, DefinedRole
                 }
             }
         }
+
+        private void UpdateMayorVotes(int vote)
+        {
+            myVote = Mathf.Clamp(vote, 0, VotesStock);
+            RpcUpdateVotes.Invoke((MyPlayer, myVote));
+        }
+        static private RemoteProcess<(GamePlayer player, int vote)> RpcUpdateVotes = new("UpdateMayorVotes", (message, _) =>
+        {
+            if (message.player.Role is Mayor.Instance mayor) mayor.myVote = message.vote;
+        });
     }
 }

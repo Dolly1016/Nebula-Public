@@ -1,4 +1,7 @@
-﻿namespace Nebula.Extensions;
+﻿using Nebula.Behaviour;
+using Virial.Game;
+
+namespace Nebula.Extensions;
 
 public static class MapBehaviourExtension
 {
@@ -68,5 +71,44 @@ public static class MapBehaviourExtension
                 PlayerMaterial.SetColors(new Color(224f / 255f, 255f / 255f, 0f / 255f), counterArea.myIcons[i].GetComponent<SpriteRenderer>());
             }
         }
+    }
+
+    public static void SetUpAsMinimapContent(GameObject obj)
+    {
+        obj.GetComponentsInChildren<Renderer>().Do(r => r.gameObject.AddComponent<MinimapScaler>());
+        obj.GetComponentsInChildren<TMPro.TextMeshPro>().Do(t => t.gameObject.AddComponent<MinimapScaler>());
+    }
+
+    public static Vector3 GetMinimapFlippedScale() {
+        var localPlayer = GamePlayer.LocalPlayer?.Unbox();
+        if (localPlayer == null) return Vector3.one;
+
+        Vector3 scale = new(1f, 1f, 1f);
+        if (localPlayer.CountAttribute(PlayerAttributes.FlipX) % 2 == 1) scale.x *= -1f;
+        if (localPlayer.CountAttribute(PlayerAttributes.FlipY) % 2 == 1) scale.y *= -1f;
+        if (localPlayer.CountAttribute(PlayerAttributes.FlipXY) % 2 == 1) scale *= -1f;
+
+        return scale;
+    }
+
+    public static void UpdateScale(MapBehaviour mapBehaviour)
+    {
+        Vector2 scale = GetMinimapFlippedScale();
+
+        Vector2 currentScale = mapBehaviour.transform.localScale;
+
+        bool flipX = currentScale.x * scale.x < 0f;
+        bool flipY = currentScale.y * scale.y < 0f;
+
+        void Flip(Transform transform)
+        {
+            if (!flipX && !flipY) return;
+            var scale = transform.localScale;
+            if (flipX) scale.x = -scale.x;
+            if (flipY) scale.y = -scale.y;
+            transform.localScale = scale;
+        }
+
+        Flip(mapBehaviour.transform);
     }
 }

@@ -147,9 +147,21 @@ internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
         return this;
     }
 
+    public FloatConfigurationImpl DecorateAsTaskPhaseConfiguration()
+    {
+        this.Decorator = (val) => val + Language.Translate("options.taskPhase");
+        return this;
+    }
+
     public FloatConfigurationImpl DecorateAsRatioConfiguration()
     {
         this.Decorator = (val) => val + Language.Translate("options.cross");
+        return this;
+    }
+
+    public FloatConfigurationImpl DecorateAsPercentageConfiguration()
+    {
+        this.Decorator = (val) => val + Language.Translate("options.percentage");
         return this;
     }
 
@@ -238,4 +250,32 @@ public class EditorConfiguration : IConfiguration
     string? IConfiguration.GetDisplayText() => shower.Invoke();
 
     GUIWidgetSupplier IConfiguration.GetEditor() => editor;
+}
+
+public static class GroupConfigurationColor
+{
+    readonly static public Color ImpostorRed = new(0.7f, 0.2f, 0.2f);
+    readonly static public Color Gray = Color.gray.RGBMultiplied(0.76f);
+}
+public class GroupConfiguration : IConfiguration
+{
+    private Func<bool> predicate;
+    private IConfiguration[] innerConfigurations;
+    internal TextComponent Title;
+    private Color color;
+
+    public GroupConfiguration(string id, IEnumerable<IConfiguration> configurations, Color color, Func<bool>? predicate = null) : this(new TranslateTextComponent(id), configurations, color, predicate) { }
+    public GroupConfiguration(TextComponent title, IEnumerable<IConfiguration> configurations, Color color, Func<bool>? predicate = null)
+    {
+        this.predicate = predicate ?? (() => true);
+        this.innerConfigurations = configurations.ToArray();
+        this.Title = title;
+        this.color = color;
+    }
+
+    bool IConfiguration.IsShown => predicate.Invoke();
+
+    string? IConfiguration.GetDisplayText() => Title.GetString() + (":\n" + string.Join('\n', innerConfigurations.Where(c => c.IsShown).Select(c => c.GetDisplayText()).Where(str => str != null))).Replace("\n", "\n   ");
+
+    GUIWidgetSupplier IConfiguration.GetEditor() => new NoSGUIFramedConfiguration(Title, GUI.API.VerticalHolder(GUIAlignment.Left, innerConfigurations.Where(c => c.IsShown).Select(c => c.GetEditor().Invoke())), color);
 }

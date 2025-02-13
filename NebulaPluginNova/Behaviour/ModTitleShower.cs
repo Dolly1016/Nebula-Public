@@ -46,7 +46,7 @@ public class ModTitleShower : MonoBehaviour
             if (AmOwner)
             {
                 VanillaAsset.PlaySelectSE();
-                HelpScreen.TryOpenHelpScreen(HelpTab.Achievements);
+                HelpScreen.TryOpenHelpScreen(HelpTab.Achievements, true);
             }
         });
 

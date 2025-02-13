@@ -45,7 +45,7 @@ public class Noisemaker : DefinedRoleTemplate, HasCitation, DefinedRole
                 isDeadAtLastTaskpPhase = true;
             }
 
-            if (!NebulaGameManager.Instance!.LocalPlayerInfo.Role.IgnoreNoisemakerNotification)
+            if (!GamePlayer.LocalPlayer.Role.IgnoreNoisemakerNotification)
             {
                 AmongUsUtil.InstantiateNoisemakerArrow(ev.Player.VanillaPlayer.transform.position, true).arrow.SetDuration(NoiseDurationOption);
             }

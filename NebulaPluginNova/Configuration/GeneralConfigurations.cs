@@ -41,6 +41,7 @@ public static class GeneralConfigurations
     static public GameModeDefinition CurrentGameMode => GameModes.GetGameMode(GameModeOption.GetValue());
     static public IntegerConfiguration GameModeOption = NebulaAPI.Configurations.Configuration("options.gamemode", Helpers.Sequential(GameModes.AllGameModes.Count()), 0);
 
+    static public bool NeutralSpawnable => AssignmentNeutralOption > 0;
     static internal IntegerConfiguration AssignmentCrewmateOption = new RoleCountConfiguration("options.assignment.crewmate", 24 + 1, -1);
     static internal IntegerConfiguration AssignmentImpostorOption = new RoleCountConfiguration("options.assignment.impostor", 6 + 1, -1);
     static internal IntegerConfiguration AssignmentNeutralOption = NebulaAPI.Configurations.Configuration("options.assignment.neutral", (0,24), 0);
@@ -67,8 +68,15 @@ public static class GeneralConfigurations
     static internal FloatConfiguration LadderCoolDownOption = NebulaAPI.Configurations.Configuration("options.map.ladderCoolDown", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second);
     static internal FloatConfiguration ZiplineCoolDownOption = NebulaAPI.Configurations.Configuration("options.map.ziplineCoolDown", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second);
     static internal IConfiguration MapEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.customization", _ => OpenMapEditor(null)));
+    static internal BoolConfiguration MapFlipXOption = NebulaAPI.Configurations.Configuration("options.map.flipX", false);
+    static internal BoolConfiguration MapFlipYOption = NebulaAPI.Configurations.Configuration("options.map.flipY", false);
     static internal IConfigurationHolder MapOptions = NebulaAPI.Configurations.Holder("options.map", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        SpawnMethodOption, SpawnCandidatesOption, SpawnCandidateFilterOption, SilentVentOption, CanOpenMapWhileUsingUtilityOption, NumOfTeleportationPortalOption, NonCrewmateCanUseTeleporterImmediatelyOption, RandomizedWiringOption, StepsOfWiringGameOption, LadderCoolDownOption, ZiplineCoolDownOption, MapEditorOption
+        new GroupConfiguration("options.map.group.spawning", [SpawnMethodOption, SpawnCandidatesOption, SpawnCandidateFilterOption], GroupConfigurationColor.Gray),
+        new GroupConfiguration("options.map.group.utilities", [SilentVentOption, CanOpenMapWhileUsingUtilityOption, LadderCoolDownOption, ZiplineCoolDownOption], GroupConfigurationColor.Gray),
+        new GroupConfiguration("options.map.group.teleporter", [NumOfTeleportationPortalOption, NonCrewmateCanUseTeleporterImmediatelyOption],GroupConfigurationColor.Gray),
+        new GroupConfiguration("options.map.group.wiring", [RandomizedWiringOption, StepsOfWiringGameOption], GroupConfigurationColor.Gray),
+        new GroupConfiguration("options.map.group.flip", [MapFlipXOption, MapFlipYOption], GroupConfigurationColor.Gray),
+        MapEditorOption
         ]);
 
     static private T MapCustomization<T>(byte mapId, MapOptionType mapOptionType, Vector2 pos,T config) where T : ISharableEntry

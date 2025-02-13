@@ -247,9 +247,17 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
     static private void ResetBody(GamePlayer player)
     {
         var lastFlipX = player.VanillaPlayer.MyPhysics.FlipX;
+
+        if(player.VanillaPlayer.MyPhysics.Animations.Animator.m_currAnim == HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim)
+        {
+            player.VanillaPlayer.moveable = true;
+            player.VanillaPlayer.MyPhysics.DoingCustomAnimation = false;
+        }
         player.VanillaPlayer.MyPhysics.SetBodyType(PlayerBodyTypes.Normal);
         player.VanillaPlayer.MyPhysics.FlipX = lastFlipX;
         player.VanillaPlayer.cosmetics.SetBodyCosmeticsVisible(true);
+        player.VanillaPlayer.cosmetics.UpdateVisibility();
+        
     }
 
     static private RemoteProcess<(GamePlayer player, bool immediately)> RpcCalmDown = new("calmDown", (message, _) =>
@@ -272,9 +280,13 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
             {
                 ResetBody(message.player);
 
-                RoleEffectAnimation poofAnim = GameObject.Instantiate<RoleEffectAnimation>(DestroyableSingleton<RoleManager>.Instance.vanish_PoofAnim, message.player.VanillaPlayer.transform);
-                poofAnim.SetMaterialColor(message.player.PlayerId);
-                poofAnim.Play(message.player.VanillaPlayer, (Il2CppSystem.Action)(() => { }), message.player.VanillaPlayer.cosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 0f, true, 0f);
+                if (!message.player.IsDead && !message.player.VanillaPlayer.inVent)
+                {
+                    RoleEffectAnimation poofAnim = GameObject.Instantiate<RoleEffectAnimation>(DestroyableSingleton<RoleManager>.Instance.vanish_PoofAnim, message.player.VanillaPlayer.transform);
+                    poofAnim.SetMaterialColor(message.player.PlayerId);
+                    poofAnim.Play(message.player.VanillaPlayer, (Il2CppSystem.Action)(() => { }), message.player.VanillaPlayer.cosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 0f, true, 0f);
+                }
+
             }), message.player.VanillaPlayer.cosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 1f, true, -0.05f);
         }
     });

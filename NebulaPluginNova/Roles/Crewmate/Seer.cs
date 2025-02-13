@@ -77,7 +77,7 @@ public class GhostAndFlashAbility : IGameOperator
     {
         if (MeetingHud.Instance || ExileController.Instance) return;
 
-        
+        if (ev.Player.AmOwner) return;
         if (!ev.Dead.HasAttribute(PlayerAttributes.BuskerEffect))
         {
             new Ghost(ev.Dead.VanillaPlayer.transform.position, GhostDuration, CommonToken, CanSeeGhostInShadow);

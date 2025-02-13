@@ -67,6 +67,8 @@ public static class ShipExtension
 
         ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.SkeldO2DurationOption.CurrentValue;
         ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.CurrentValue;
+
+        for (int i = 0; i < ShipStatus.Instance.AllDoors.Count; i++) ShipStatus.Instance.AllDoors[i].Id = i;
     }
 
     private static void ModifyEarierMira() { }
@@ -300,6 +302,8 @@ public static class ShipExtension
         }
 
         ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.FungleReactorDurationOption.CurrentValue;
+
+        if (ShipStatus.Instance.AllVents.Find(v => v.gameObject.name == "NorthWestJungleVent", out var vent)) vent.transform.SetLocalZ(-0.2f);
 
         //Storageの見た目がおかしい問題を修正
         {

@@ -256,7 +256,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                 danceButton.SetCanUseByMouseClick(true, ButtonEffect.ActionIconType.NonclickAction, "danceAction", false);
             }
 
-            localDanceChecker = NebulaGameManager.Instance?.LocalPlayerInfo.GetModule<DanceModule>()!;
+            localDanceChecker = GamePlayer.LocalPlayer.GetModule<DanceModule>()!;
             dancerDanceChecker = MyPlayer.GetModule<DanceModule>()!;
         }
 
@@ -417,8 +417,8 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         void OnUpdate(GameUpdateEvent ev)
         {
             //2人で踊る称号 互いに生存していて、近くでダンスを踊っている場合に進捗の進行度が進む
-            if (!AmOwner && !MyPlayer.IsDead && !NebulaGameManager.Instance!.LocalPlayerInfo.IsDead && dancerDanceChecker.IsDancing && localDanceChecker.IsDancing &&
-                NebulaGameManager.Instance!.LocalPlayerInfo.VanillaPlayer.transform.position.Distance(MyPlayer.VanillaPlayer.transform.position) < 2f)
+            if (!AmOwner && !MyPlayer.IsDead && !GamePlayer.LocalPlayer.IsDead && dancerDanceChecker.IsDancing && localDanceChecker.IsDancing &&
+                GamePlayer.LocalPlayer.VanillaPlayer.transform.position.Distance(MyPlayer.VanillaPlayer.transform.position) < 2f)
             {
                 pairDanceProgress += Time.deltaTime;
                 if (pairDanceProgress > 0.8f) acTokenCommon7.Value = true;
@@ -525,7 +525,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
 
         void OnGameEnd(GameEndEvent ev)
         {
-            var localPlayer = NebulaGameManager.Instance!.LocalPlayerInfo;
+            var localPlayer = GamePlayer.LocalPlayer;
             if (AmOwner && ev.EndState.EndCondition == NebulaGameEnd.DancerWin && ev.EndState.Winners.Test(MyPlayer) && completedDanceLooked.Any(p => p.IsImpostor || p.Role == Jackal.MyRole)) new StaticAchievementToken("dancer.challenge");
             if (danceLooked.Contains(localPlayer) && !localPlayer.IsDead && ev.EndState.Winners.Test(localPlayer)) new StaticAchievementToken("dancer.common4");
             if (completedDanceLooked.Contains(localPlayer) && localPlayer.IsDead && ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.EndState.Winners.Test(localPlayer)) new StaticAchievementToken("dancer.common5");

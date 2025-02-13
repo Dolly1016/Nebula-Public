@@ -601,6 +601,12 @@ public static class ButtonEffect
         return AddKeyGuide(button, key, new(0.28f, 0.28f), true);
     }
 
+    static public GameObject? SetKeyGuideOnVanillaSmallButton(GameObject button, KeyCode key)
+    {
+        var diff = 0.28f / 1.2f * UpperRightButtons.BackgroundScale;
+        return AddKeyGuide(button, key, new(diff, diff), true);
+    }
+
     public static void SetHintOverlay(GameObject gameObj, bool isAidAction, KeyCode keyCode, string? action = null)
     {
         var button = gameObj.SetUpButton();

@@ -1,33 +1,10 @@
 ﻿// 各種使用可能なオブジェクトに関するパッチ
 
-using Nebula.Compat;
+
 using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Patches;
-
-
-
-[HarmonyPatch(typeof(KeyboardJoystick),nameof(KeyboardJoystick.HandleHud))]
-public static class KeyboardInputPatch
-{
-    public static bool Prefix(KeyboardJoystick __instance)
-    {
-        if (!DestroyableSingleton<HudManager>.InstanceExists) return false;
-        
-        if (KeyboardJoystick.player.GetButtonDown(7)) HudManager.Instance.ReportButton.DoClick();
-        
-        if (KeyboardJoystick.player.GetButtonDown(6)) HudManager.Instance.UseButton.DoClick();
-        
-        if (KeyboardJoystick.player.GetButtonDown(4) && !HudManager.Instance.Chat.IsOpenOrOpening)
-            HudManager.Instance.ToggleMapVisible(GameManager.Instance.GetMapOptions());
-
-        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Kill).KeyDown && HudManager.Instance.KillButton.gameObject.active) HudManager.Instance.KillButton.DoClick();
-        if (KeyboardJoystick.player.GetButtonDown(50) && HudManager.Instance.ImpostorVentButton.gameObject.active) HudManager.Instance.ImpostorVentButton.DoClick();
-
-        return false;
-    }
-}
 
 
 [HarmonyPatch(typeof(Vent),nameof(Vent.CanUse))]
@@ -159,12 +136,27 @@ public static class VentUsePatch
     }
 }
 
+[HarmonyPatch(typeof(Vent), nameof(Vent.SetButtons))]
+public static class VentUpdateArrowPatch1
+{
+    public static void Prefix(Vent __instance, [HarmonyArgument(0)] ref bool enabled)
+    {
+        if (GamePlayer.LocalPlayer != null)
+        {
+            if (!GamePlayer.LocalPlayer.Role.CanMoveInVent) enabled = false;
+        }
+    }
+}
+
 [HarmonyPatch(typeof(Vent), nameof(Vent.UpdateArrows))]
-public static class VentUpdateArrowPatch
+public static class VentUpdateArrowPatch2
 {
     public static void Postfix(Vent __instance)
     {
-        if(!NebulaGameManager.Instance!.LocalPlayerInfo.Role.CanMoveInVent) __instance.SetButtons(false);
+        if (GamePlayer.LocalPlayer != null)
+        {
+            if (!GamePlayer.LocalPlayer.Role.CanMoveInVent) __instance.SetButtons(false);
+        }
     }
 }
 
@@ -383,7 +375,7 @@ public static class ArrowUpdatePatch
             if (__instance.Between(vector.x, 0f, 1f) && __instance.Between(vector.y, 0f, 1f))
             {
                 Vector2 temp = worldCam.transform.position + (__instance.target - worldCam.transform.position) * (worldCam.orthographicSize / Camera.main.orthographicSize);
-                __instance.transform.position = temp - del.normalized * 0.6f;
+                __instance.transform.position = temp - del.normalized * 0.6f * (worldCam.orthographicSize / Camera.main.orthographicSize);
                 __instance.transform.localScale = Vector3.one * Mathf.Clamp(num, 0f, 1f);
             }
             else

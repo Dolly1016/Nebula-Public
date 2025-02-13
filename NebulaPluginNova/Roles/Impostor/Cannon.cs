@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Nebula.Behaviour;
 using Nebula.Map;
 using Virial;
 using Virial.Assignable;
@@ -63,6 +64,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("CannonButton", transform, localPos.AsVector3(-0.5f));
             renderer.sprite = mapButtonSprite.GetSprite();
             var inner = UnityHelper.CreateObject<SpriteRenderer>("Inner", renderer.transform, new(0f, 0f, -0.1f));
+            inner.gameObject.AddComponent<MinimapScaler>();
             inner.sprite = mapButtonInnerSprite.GetSprite();
 
             var button = renderer.gameObject.SetUpButton(true, renderer);
@@ -328,7 +330,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
         NebulaManager.Instance.StartCoroutine(CoPlayJumpAnimation(message.player.VanillaPlayer, message.player.Position, message.to).WrapToIl2Cpp());
 
         //Cannon自身は称号に関する情報を更新する。
-        if(NebulaGameManager.Instance?.LocalPlayerInfo.PlayerId == message.cannonId && NebulaGameManager.Instance.LocalPlayerInfo.Role is Instance cannon)
+        if(GamePlayer.LocalPlayer.PlayerId == message.cannonId && GamePlayer.LocalPlayer.Role is Instance cannon)
         {
             cannon.UpdateAchievementData(message.num, message.player);
         }

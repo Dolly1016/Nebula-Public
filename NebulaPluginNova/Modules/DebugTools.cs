@@ -19,9 +19,11 @@ public class DebugTools
     private static BooleanDataEntry showConfigurationId = new("ShowConfigurationId", saver, false, shouldWrite: false);
     private static BooleanDataEntry releaseAllAchievement = new("ReleaseAllAchievement", saver, false, shouldWrite: false);
     private static BooleanDataEntry writeAllAchievementsData = new("WriteAllAchievementsData", saver, false, shouldWrite: false);
+    private static BooleanDataEntry showCostumeMetadata = new("ShowCostumeMetadata", saver, false, shouldWrite: false);
     public static bool ShowConfigurationId => DebugMode && showConfigurationId.Value;
     public static bool WriteAllAchievementsData => DebugMode && writeAllAchievementsData.Value;
     public static bool ReleaseAllAchievement => DebugMode && releaseAllAchievement.Value;
+    public static bool ShowCostumeMetadata => DebugMode && showCostumeMetadata.Value;
 
 
 }

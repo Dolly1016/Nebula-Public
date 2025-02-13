@@ -17,8 +17,9 @@ public static class RegionMenuOpenPatch
     public static IRegionInfo[] defaultRegions = null!;
 
     private static DataSaver customServerData = new DataSaver("CustomServer");
-    private static StaticHttpRegionInfo CustomRegion = null!;
-
+    private static StaticHttpRegionInfo CustomRegion = null!, NoSServerRegion = null!;
+    private static string NoSIP = "http://168.138.44.249";
+    private static ushort NoSPort = 22023;
     public static void UpdateRegions()
     {
         ServerManager serverManager = DestroyableSingleton<ServerManager>.Instance;
@@ -28,8 +29,17 @@ public static class RegionMenuOpenPatch
         
         CustomRegion = new StaticHttpRegionInfo("Custom", StringNames.NoTranslation, SaveIp.Value,
             new ServerInfo[] { new ServerInfo("Custom", SaveIp.Value, (ushort)SavePort.Value, false) });
-        
-        regions = regions.Concat(new IRegionInfo[] { CustomRegion.Cast<IRegionInfo>() }).ToArray();
+        NoSServerRegion = new StaticHttpRegionInfo("Nebula on the Ship JP", StringNames.NoTranslation, NoSIP,
+            new ServerInfo[] { new ServerInfo("Nebula on the Ship JP", NoSIP, NoSPort, false) });
+
+        var ModNARegion = new StaticHttpRegionInfo("Modded NA (MNA)", StringNames.NoTranslation, "www.aumods.us",
+            new ServerInfo[] { new ServerInfo("Http-1", "https://www.aumods.us", 443, false) });
+        var ModEURegion = new StaticHttpRegionInfo("Modded EU (MEU)", StringNames.NoTranslation, "au-eu.duikbo.at",
+            new ServerInfo[] { new ServerInfo("Http-1", "https://au-eu.duikbo.at", 443, false) });
+        var ModASRegion = new StaticHttpRegionInfo("Modded Asia (MAS)", StringNames.NoTranslation, "au-as.duikbo.at",
+            new ServerInfo[] { new ServerInfo("Http-1", "https://au-as.duikbo.at", 443, false) });
+
+        regions = regions.Concat(new IRegionInfo[] { ModNARegion.Cast<IRegionInfo>(), ModEURegion.Cast<IRegionInfo>(), ModASRegion.Cast<IRegionInfo>(), NoSServerRegion.Cast<IRegionInfo>() , CustomRegion.Cast<IRegionInfo>()}).ToArray();
         //マージ時、DefaultRegionsに含まれている要素のほうが優先される(重複時に生き残る方)
         ServerManager.DefaultRegions = regions;
         serverManager.LoadServers();
@@ -105,11 +115,28 @@ public static class RegionMenuOpenPatch
 [HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.OnEnable))]
 public static class RegionMenuOnEnablePatch
 {
+    private const int ButtonsPerColumn = 6;
     public static void Postfix(RegionMenu __instance)
     {
+        int activeButtons = 0;
+        bool IsAvailable(ServerListButton button) => button.textTranslator.TargetText == StringNames.NoTranslation;
+        foreach (var button in __instance.ButtonPool.activeChildren)
+        {
+            var active = IsAvailable(button.CastFast<ServerListButton>());
+            button.gameObject.SetActive(active);
+            if(active)activeButtons++;
+        }
+
+        int columns = (activeButtons - 1) / ButtonsPerColumn + 1;
+        int i = 0;
+
         foreach (var button in __instance.ButtonPool.activeChildren)
         {
             var serverButton = button.CastFast<ServerListButton>();
+            if (!IsAvailable(serverButton)) continue;
+
+            serverButton.transform.localPosition = new Vector3(((columns - 1) * -0.5f + (float)(int)(i / ButtonsPerColumn)) * 2.2f, 2f - 0.5f * (float)(i % ButtonsPerColumn), 0f);
+
             serverButton.Button.OnClick.RemoveAllListeners();
             serverButton.Button.OnClick.AddListener((UnityAction)(() =>
             {
@@ -120,6 +147,7 @@ public static class RegionMenuOnEnablePatch
                 if (region != null) __instance.ChooseOption(region);
             }));
 
+            i++;
         }
     }
 }

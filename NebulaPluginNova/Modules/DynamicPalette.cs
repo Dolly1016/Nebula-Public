@@ -399,6 +399,7 @@ public class DynamicPalette
         }
     }
 
+    public static void RpcShareMyColor() => RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
     public readonly static RemoteProcess<ShareColorMessage> RpcShareColor = new RemoteProcess<ShareColorMessage>(
         "ShareColor",
         (writer, message) =>

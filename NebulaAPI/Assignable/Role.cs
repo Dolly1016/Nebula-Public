@@ -213,6 +213,8 @@ public interface AssignableFilterHolder
 
 public interface AllocationParameters
 {
+    public delegate (DefinedRole role, int[]? argument) ExtraAssignment(DefinedRole assignable, int playerId);
+
     IEnumerable<IConfiguration> Configurations { get; }
 
     //割り当て数の総和を返します。
@@ -222,6 +224,13 @@ public interface AllocationParameters
     int RoleCount100 { get; }
     //確率的な割り当て数を返します。
     int RoleCountRandom { get; }
+
+    //同陣営への追加割り当て
+    ExtraAssignment[] TeamAssignment => [];
+    //別陣営への追加割り当て
+    ExtraAssignment[] OthersAssignment => [];
+    int TeamCost => 1 + TeamAssignment.Length;
+    int OtherCost => OthersAssignment.Length;
 
     /// <summary>
     /// 割り当て数を取得します。100%か確率的な割り当てか真偽値で選択できます。
@@ -374,7 +383,7 @@ public interface RuntimeAssignable : IBinder, ILifespan, IReleasable, IBindPlaye
     string? OverrideRoleName(string lastRoleName, bool isShort) => null;
 
     string DisplayName => Assignable.DisplayName;
-    string DisplayColoredName => DisplayName.Color(Assignable.UnityColor);
+    string DisplayColoredName => Assignable.DisplayColoredName;
 
     /// <summary>
     /// 現在の状態を役職引数に変換します。
@@ -437,6 +446,10 @@ public interface RuntimeRole : RuntimeAssignable
     /// ベントを使用できる場合はtrueを返します。
     /// </summary>
     bool CanUseVent => Role.Category == RoleCategory.ImpostorRole;
+    /// <summary>
+    /// ベントの使用を一時的に阻むときにtrueを返します。
+    /// </summary>
+    bool PreventUsingVent => false;
 
     /// <summary>
     /// ベントの使用にクールダウンを設けます。
@@ -483,11 +496,12 @@ public interface RuntimeRole : RuntimeAssignable
     /// 役職の省略名です。
     /// </summary>
     string DisplayShort => Role.DisplayShort;
+    string DisplayColoredShort => Role.DisplayColoredShort;
 
     RoleTaskType TaskType => Role.Category == RoleCategory.CrewmateRole ? RoleTaskType.CrewmateTask : RoleTaskType.NoTask;
 
     string DisplayIntroBlurb => Role.DisplayIntroBlurb;
-    string DisplayIntroRoleName => Role.DisplayName;
+    string DisplayIntroRoleName => Role.DisplayColoredName;
 
     /// <summary>
     /// チームの関係でキルできるか否かを調べます。ここで生死や距離を考慮する必要はありません。

@@ -2,7 +2,7 @@
 using Il2CppSystem.Text.Json;
 using NAudio.CoreAudioApi;
 using Nebula.Behaviour;
-using Nebula.Compat;
+
 using Nebula.Game.Statistics;
 using Nebula.Roles;
 using Nebula.Roles.Complex;
@@ -51,8 +51,9 @@ public static class PlayerState
     public static TranslatableTag Gassed = new("state.gassed");
     public static TranslatableTag Bubbled = new("state.bubbled");
     public static TranslatableTag Meteor = new("state.meteor");
+    public static TranslatableTag Starved = new("state.starved");
     public static TranslatableTag Disconnected = new("state.disconnected") { Color = Color.gray };
-    public static TranslatableTag[] AllDeadStates = [Dead, Exiled, Guessed, Misguessed, Embroiled, Suicide, Trapped, Pseudocide, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor];
+    public static TranslatableTag[] AllDeadStates = [Dead, Exiled, Guessed, Misguessed, Embroiled, Suicide, Trapped, Pseudocide, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved];
     static PlayerState()
     {
         Virial.Text.PlayerStates.Alive = Alive;
@@ -272,8 +273,10 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         roleText.text = "Unassigned";
 
         PlayerScaler = UnityHelper.CreateObject("Scaler", myPlayer.transform, myPlayer.Collider.offset).transform;
+        PlayerScaler.gameObject.AddComponent<SortingGroup>();
         myPlayer.cosmetics.transform.SetParent(PlayerScaler, true);
         myPlayer.transform.FindChild("BodyForms").SetParent(PlayerScaler, true);
+        myPlayer.cosmetics.GetComponent<NebulaCosmeticsLayer>().SetSortingProperty(true, 100f / MyControl.cosmetics.zIndexSpacing, 0);
 
         //PlayerScaler.gameObject.AddComponent<SortingGroup>();
         //PlayerScaler.gameObject.GetComponentsInChildren<SpriteRenderer>(true).Do(r => r.sortingOrder = 10);
@@ -283,7 +286,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             float lastUpdated = 0f;
             GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev =>
             {
-                if (NebulaGameManager.Instance!.CurrentTime - lastUpdated > 0.1f)
+                if (NebulaGameManager.Instance!.CurrentTime - lastUpdated > 0.8f)
                 {
                     RpcShareFlipX.Invoke((PlayerId, MyControl.cosmetics.FlipX));
                     lastUpdated = NebulaGameManager.Instance.CurrentTime;
@@ -358,13 +361,13 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 new StaticAchievementToken("sakura");
             }
 
-            if(AmOwner && lastColor == NebulaPlayerTab.CamouflageColorId && currentColor != NebulaPlayerTab.CamouflageColorId && MoreCosmic.GetTags(newOutfit).Any(tag => tag == "hat.party" || tag == "visor.party"))
+            if(AmOwner && !IsDead && lastColor == NebulaPlayerTab.CamouflageColorId && currentColor != NebulaPlayerTab.CamouflageColorId && MoreCosmic.GetTags(newOutfit).Any(tag => tag == "hat.party" || tag == "visor.party"))
             {
                 //カモフラージュが解けたら、次の瞬間にパーティーメンバーをチェックする
                 NebulaManager.Instance.ScheduleDelayAction(() => {
 
                     var localPos = PlayerControl.LocalPlayer.transform.position;
-                    var count = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.AmOwner && p.VanillaPlayer.transform.position.Distance(localPos) < 1f && MoreCosmic.GetTags(p.CurrentOutfit.outfit).Any(tag => tag == "hat.party" || tag == "visor.party"));
+                    var count = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.AmOwner && !p.IsDead && p.VanillaPlayer.transform.position.Distance(localPos) < 1f && MoreCosmic.GetTags(p.CurrentOutfit.outfit).Any(tag => tag == "hat.party" || tag == "visor.party"));
                     if (count >= 2) new StaticAchievementToken("costume.partyCamo");
                 });
             }
@@ -474,8 +477,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(this, myRole));
         }
 
-        NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myRole, IsDead));
-        GameTracker.Instance?.AddRoleHistory(new(NebulaGameManager.Instance!.CurrentTime, RoleType.Role, role.InternalName, PlayerId, arguments));
+        NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myRole, IsDead));
     }
 
     private void SetGhostRole(DefinedGhostRole role, int[] arguments)
@@ -489,8 +491,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             myGhostRole.OnActivated(); (myGhostRole as IGameOperator)?.Register(myGhostRole);
         }
 
-        NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, myGhostRole, IsDead));
-        GameTracker.Instance?.AddRoleHistory(new(NebulaGameManager.Instance!.CurrentTime, RoleType.GhostRole, role.InternalName, PlayerId, arguments));
+        NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myGhostRole, IsDead));
     }
 
     private void SetModifier(DefinedModifier role, int[] arguments)
@@ -503,8 +504,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             GameOperatorManager.Instance?.Run(new PlayerModifierSetEvent(this, modifier));
         }
 
-        NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, modifier, true, IsDead));
-        GameTracker.Instance?.AddRoleHistory(new(NebulaGameManager.Instance!.CurrentTime, RoleType.Modifier, role.InternalName, PlayerId, arguments));
+        NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, modifier, true, IsDead));
     }
 
     public NebulaRPCInvoker RpcInvokerSetRole(DefinedRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), RoleType.Role));
@@ -520,8 +520,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 m.Inactivate();
                 GameOperatorManager.Instance?.Run(new PlayerModifierRemoveEvent(this, m));
 
-                NebulaGameManager.Instance?.RoleHistory.Add(new(PlayerId, m, false, IsDead));
-                GameTracker.Instance?.AddRoleHistory(new(NebulaGameManager.Instance!.CurrentTime, RoleType.Role, m.Modifier.InternalName, PlayerId, [], false));
+                NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, m, false, IsDead));
                 return true;
             }
             return false;
@@ -729,7 +728,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
 
     public readonly static RemoteProcess<(byte playerId, float angle)> RpcUpdateAngle = new(
-       "UpdateAngle", (message, _) => NebulaGameManager.Instance!.GetPlayer(message.playerId)!.Unbox().MouseAngle = message.angle
+       "UpdateAngle", (message, _) => NebulaGameManager.Instance!.GetPlayer(message.playerId)!.Unbox().MouseAngle = message.angle, false
        );
 
     //////////////////////////////////////////
@@ -894,8 +893,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
            if (playerInfo == null) return;
 
            playerInfo.CachedFlipX = message.flipX;
-       }
-       );
+       }, false);
 
     //////////////////////////////////////////
     //                                      //
@@ -1011,7 +1009,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             {
                 //不可視度合を調べる
                 int invisibleLevel = 0;
-                PlayerModInfo localInfo = NebulaGameManager.Instance!.LocalPlayerInfo.Unbox();
+                PlayerModInfo localInfo = GamePlayer.LocalPlayer.Unbox();
 
                 //属性効果はより透明にする効果を優先する
                 if (!IsDead)
@@ -1065,7 +1063,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 UpdateVisibilityAlpha(visualInvisibleLevel);
 
                 bool isInShadow = false;
-                if (!NebulaGameManager.Instance!.LocalPlayerInfo.IsDead && !AmOwner)
+                if (!GamePlayer.LocalPlayer!.IsDead && !AmOwner)
                 {
                     //自身も生存している場合、影の中にいるプレイヤーは見えないようにする
 
@@ -1146,13 +1144,17 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         MyControl.cosmetics.nameText.transform.parent.localEulerAngles = textAngle;
         MyControl.cosmetics.nameText.transform.parent.localScale = textScale;
 
-        UpdateHoldingDeadBody();
         UpdateMouseAngle();
         UpdateModulators();
 
         LightInfo.UpdateLightInfo();
         UpdateVisibility(true, !NebulaGameManager.Instance.WideCamera.DrawShadow);
         UpdateFlipX();
+    }
+
+    public void HudUpdate()
+    {
+        UpdateHoldingDeadBody();
     }
 
     public void UpdateTaskState()

@@ -302,6 +302,7 @@ public class TextField : MonoBehaviour
         MaxLines = maxLines;
         GenerateAttribute(size, fontSize, AllowMultiLine ? TextAlignmentOptions.TopLeft : TextAlignmentOptions.Left).Reflect(myText);
         GenerateAttribute(new(0.3f, size.y), fontSize, AllowMultiLine ? TextAlignmentOptions.Top : TextAlignmentOptions.Center).Reflect(myCursor);
+        myText.enableWordWrapping = maxLines > 1;
         myText.font = VanillaAsset.VersionFont;
         myCursor.font = VanillaAsset.VersionFont;
 

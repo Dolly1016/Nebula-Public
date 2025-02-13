@@ -160,7 +160,7 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
         };
 
         public int TypeId;
-
+        private float lastAccelTime = 0f;
         public Trap(Vector2 pos,int type, bool isLocal) : base(pos, ZOption.Back, true, trapSprites[type].GetSprite(), isLocal) {
             TypeId = type;
 
@@ -198,8 +198,18 @@ public class Trapper : DefinedRoleTemplate, DefinedRole
 
                 if (Position.Distance(PlayerControl.LocalPlayer.transform.position) < SpeedTrapSizeOption*0.35f)
                 {
-                    PlayerModInfo.RpcAttrModulator.Invoke((PlayerControl.LocalPlayer.PlayerId,
+                    var invoker = PlayerModInfo.RpcAttrModulator.GetInvoker((PlayerControl.LocalPlayer.PlayerId,
                         new SpeedModulator(TypeId == 0 ? AccelRateOption : DecelRateOption, Vector2.one, true, Trapper.SpeedTrapDurationOption, false, 50, "nebula.trap" + TypeId), false));
+
+                    if(NebulaGameManager.Instance?.HavePassed(lastAccelTime, 0.3f) ?? false)
+                    {
+                        lastAccelTime = NebulaGameManager.Instance!.CurrentTime;
+                        invoker.InvokeSingle();
+                    }
+                    else
+                    {
+                        invoker.InvokeLocal();
+                    }
                 }
             }
         }

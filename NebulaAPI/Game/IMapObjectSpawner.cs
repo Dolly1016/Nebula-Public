@@ -12,6 +12,7 @@ public enum MapObjectType
 {
     SmallInCorner = 0x0001,
     Reachable = 0x0002,
+    SmallOrTabletopOutOfSight = 0x0004,
 }
 
 public record MapObjectCondition(string Tag, float Distance);

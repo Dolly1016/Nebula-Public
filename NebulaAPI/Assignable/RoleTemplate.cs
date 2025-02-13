@@ -57,9 +57,14 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
         private IOrderedSharableVariable<int> roleChanceEntry;
         private IOrderedSharableVariable<int>? roleSecondaryChanceEntry;
         private IConfiguration roleChanceEditor;
-
-        public StandardAssignmentParameters(string id, bool isImpostor, bool jacalized = false)
+        private Func<AllocationParameters.ExtraAssignment[]?>? teamAssignments, othersAssignments;
+        AllocationParameters.ExtraAssignment[] AllocationParameters.TeamAssignment => teamAssignments?.Invoke() ?? [];
+        AllocationParameters.ExtraAssignment[] AllocationParameters.OthersAssignment => othersAssignments?.Invoke() ?? [];
+        public StandardAssignmentParameters(string id, bool isImpostor, bool jacalized = false, Func<AllocationParameters.ExtraAssignment[]?>? teamAssignments = null, Func<AllocationParameters.ExtraAssignment[]?>? othersAssignments = null)
         {
+            this.teamAssignments = teamAssignments;
+            this.othersAssignments = othersAssignments;
+
             roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 6 : 24), 0, title: NebulaAPI.GUI.TextComponent(jacalized ? NebulaTeams.JackalTeam.Color : Color.White, jacalized ? "options.role.count.jackalized" : "options.role.count"), predicate: ()=> !jacalized || NebulaAPI.Configurations.CanJackalize);
 
             roleChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".chance", (10, 100, 10), 100);
@@ -133,14 +138,14 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
     protected RoleTeam Team { get; private init; }
     RoleTeam DefinedSingleAssignable.Team => Team;
 
-    public DefinedSingleAssignableTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, bool withAssignmentOption = true, ConfigurationTab? tab = null, Func<bool>? optionHolderPredicate = null) : base(localizedName, color, tab, optionHolderPredicate)
+    public DefinedSingleAssignableTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, bool withAssignmentOption = true, ConfigurationTab? tab = null, Func<bool>? optionHolderPredicate = null, Func<AllocationParameters.ExtraAssignment[]?>? teamAssignments = null, Func<AllocationParameters.ExtraAssignment[]?>? othersAssignments = null) : base(localizedName, color, tab, optionHolderPredicate)
     {
         this.Category = category;
         this.Team = team;
 
         if (withAssignmentOption)
         {
-            myAssignmentParameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName, category == RoleCategory.ImpostorRole);
+            myAssignmentParameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName, category == RoleCategory.ImpostorRole, teamAssignments: teamAssignments, othersAssignments: othersAssignments);
             ConfigurationHolder?.AppendConfigurations(myAssignmentParameters.Configurations);
 
             ConfigurationHolder?.SetDisplayState(() =>
@@ -218,7 +223,7 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
         return false;
     }
 
-    public DefinedRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true, Func<bool>? optionHolderPredicate = null) : base(localizedName, color, category, team, withAssignmentOption, withOptionHolder ? category : null, optionHolderPredicate)
+    public DefinedRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true, Func<bool>? optionHolderPredicate = null, Func<AllocationParameters.ExtraAssignment[]?>? teamAssignments = null, Func<AllocationParameters.ExtraAssignment[]?>? othersAssignments = null) : base(localizedName, color, category, team, withAssignmentOption, withOptionHolder ? category : null, optionHolderPredicate, teamAssignments, othersAssignments)
     {
         if ((this as IGuessed).CanBeGuessDefault)
             (this as IGuessed).CanBeGuessVariable = NebulaAPI.Configurations.SharableVariable("role." + (this as DefinedAssignable).InternalName + ".canBeGuess", true);
@@ -541,13 +546,13 @@ public class DefinedGhostRoleTemplate : DefinedAssignableTemplate, DefinedCatego
 /// </summary>
 public class RuntimeAssignableTemplate : ComponentHolder, IBindPlayer
 {
-    protected Virial.Game.Player MyPlayer { get; private init; }
-    protected bool AmOwner => MyPlayer.AmOwner;
-    Virial.Game.Player IBindPlayer.MyPlayer => MyPlayer;
+    private Virial.Game.Player myPlayer { get; init; }
+    protected bool AmOwner => myPlayer.AmOwner;
+    public Virial.Game.Player MyPlayer => myPlayer;
 
     public RuntimeAssignableTemplate(Player myPlayer)
     {
-        MyPlayer = myPlayer;
+        this.myPlayer = myPlayer;
     }
 }
 

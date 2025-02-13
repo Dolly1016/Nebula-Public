@@ -1,4 +1,5 @@
-﻿using Nebula.Behaviour;
+﻿using Il2CppSystem.Xml.Schema;
+using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
 using Nebula.Scripts;
 using System.Reflection;
@@ -7,9 +8,11 @@ using UnityEngine;
 using Virial;
 using Virial.Assignable;
 using Virial.Compat;
+using Virial.Game;
 using Virial.Media;
 using Virial.Runtime;
 using Virial.Text;
+using Virial.Utilities;
 
 namespace Nebula.Modules;
 
@@ -483,5 +486,15 @@ public class SerializableDocument : IDocument
         //無効なコンテンツ
         return null;
     }
+}
 
+static public class DocumentTipManager
+{
+    static private OrderedList<WinConditionTip, int> endConditionList = OrderedList<WinConditionTip, int>.AscendingList(end => end.End.Id);
+    static public IEnumerable<WinConditionTip> WinConditionTips => endConditionList.Where(e => e.IsActive);
+    public static void Register(IDocumentTip tip)
+    {
+        if(tip is WinConditionTip wct)
+            endConditionList.Add(wct);
+    }
 }

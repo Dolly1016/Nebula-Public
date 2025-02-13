@@ -164,8 +164,6 @@ public static class AmongUsClientAwakePatch
         }
         NebulaEvents.OnMapAssetLoaded();
 
-        __instance.PlayerPrefab.cosmetics.zIndexSpacing = 0.00001f;
-
         //言語データを読み込む
         Language.Language.LoadFont();
         Language.Language.LoadDefaultKey();

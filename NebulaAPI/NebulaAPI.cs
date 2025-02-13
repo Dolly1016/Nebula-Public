@@ -60,6 +60,9 @@ internal interface INebula
     GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority = 0);
     void IncrementStatsEntry(string id, int num);
 
+    //DocumentTipAPI
+    void RegisterTip(IDocumentTip tip);
+
     E RunEvent<E>(E ev) where E : class, Event;
 }
 
@@ -142,4 +145,6 @@ public static class NebulaAPI
     static public GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable = null, TextComponent? displayTitle = null, int innerPriority = 0) => instance.CreateStatsEntry(id, category, assignable, displayTitle, innerPriority);
     static public void Progress(this GameStatsEntry entry, int num = 1) => instance.IncrementStatsEntry(entry.Id, num);
     static public void IncrementStatsEntry(string  entryId, int num = 1) => instance.IncrementStatsEntry(entryId, num);
+
+    static public void RegisterTip(IDocumentTip tip) => instance.RegisterTip(tip);
 }

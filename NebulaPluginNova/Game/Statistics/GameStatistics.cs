@@ -77,87 +77,11 @@ public enum GameStatisticsGatherTag
     Spawn
 }
 
-[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
-internal class GameTracker : AbstractModule<Virial.Game.Game>, IGameOperator
-{
-    static public GameTracker? Instance { get; private set; } = null;
-
-    static GameTracker()
-    {
-        DIManager.Instance.RegisterModule(() => new GameTracker());
-    }
-
-    public GameTracker()
-    {
-        Instance = this;
-        this.Register(NebulaGameManager.Instance!);
-    }
-
-    public List<ArchivedTaskPhase> TaskPhases { get; private init; } = new();
-    public List<ArchivedEvent> Events { get; private init; } = new();
-    private List<ArchivedAssignmentHistory> assignmentHistories = new();
-
-    void AddTaskPhase()
-    {
-        TaskPhases.Add(new());
-        interval = 0f;
-    }
-
-    void OnTaskPhaseRestarted(TaskPhaseRestartEvent ev) => AddTaskPhase();
-    void OnGameStarted(GameStartEvent ev) => AddTaskPhase();
-
-    void FixTaskPhase()
-    {
-        if (TaskPhases.Count > 0) TaskPhases[TaskPhases.Count - 1].IsClosed = true;
-    }
-
-    void OnMeetingStart(MeetingPreStartEvent ev) => FixTaskPhase();
-    void OnGameEnd(GameEndEvent ev)
-    {
-        FixTaskPhase();
-    }
-
-    float interval = 0f;
-    void OnUpdate(GameUpdateEvent ev)
-    {
-        if (TaskPhases.Count > 0 && !TaskPhases[TaskPhases.Count - 1].IsClosed)
-        {
-            if (interval > 0f)
-            {
-                interval -= Time.deltaTime;
-            }
-            else
-            {
-                TaskPhases[TaskPhases.Count - 1].CaptureCurrent();
-            }
-        }
-    }
-
-    public void AddRoleHistory(ArchivedAssignmentHistory history) => assignmentHistories.Add(history);
-
-    public ArchivedGame Output()
-    {
-        return new ArchivedGame() { MapId = AmongUsUtil.CurrentMapId, Players = NebulaGameManager.Instance!.AllPlayerInfo.Select(p => ArchivedPlayer.FromPlayer(p)).ToArray(), TaskPhases = TaskPhases.ToArray(), Events = [], AssignmentHistory = [] };
-    }
-
-
-    static private RemoteProcess<(CommunicableTextTag eventDetail, int imageId, int leftMask, int rightMask)> RpcRecordEvent = new(
-            "RecordEvent",
-            (message, calledByMe) =>
-            {
-                Instance?.Events.Add(new(ArchivedMoment.CaptureCurrent(), TrackedEventImage.AllImages[message.imageId].TextId, message.eventDetail.TranslationKey, message.leftMask, message.rightMask));
-            }
-        );
-}
-
-/// <summary>
-/// 旧版のイベント記録
-/// </summary>
 
 [NebulaRPCHolder]
 public class GameStatistics
 {
-    public class EventVariation
+    public class EventVariation : IArchivedEventVariation
     {
         static Dictionary<int, EventVariation> AllEvents = new();
         static private DividedSpriteLoader iconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GameStatisticsIcon.png", 100f, 8, 1);
@@ -192,50 +116,50 @@ public class GameStatistics
 
     }
 
-    public class Event
+    public class Event : IArchivedEvent
     {
-        public EventVariation Variation { get; private init; }
+        public IArchivedEventVariation EventVariation { get; private init; }
         public float Time { get; private init; }
         public byte? SourceId { get; private init; }
         public int TargetIdMask { get; private set; }
-        public Tuple<byte, Vector2>[] Position { get; private init; }
+        public Tuple<byte, Virial.Compat.Vector2>[] Position { get; private init; }
         public CommunicableTextTag? RelatedTag { get; set; } = null;
 
 
-        public Event(EventVariation variation, byte? sourceId, int targetIdMask, GameStatisticsGatherTag? positionTag = null)
+        public Event(IArchivedEventVariation variation, byte? sourceId, int targetIdMask, GameStatisticsGatherTag? positionTag = null)
             : this(variation, NebulaGameManager.Instance!.CurrentTime, sourceId, targetIdMask, positionTag) { }
 
-        public Event(EventVariation variation, float time, byte? sourceId, int targetIdMask, GameStatisticsGatherTag? positionTag)
+        public Event(IArchivedEventVariation variation, float time, byte? sourceId, int targetIdMask, GameStatisticsGatherTag? positionTag)
         {
-            Variation = variation;
+            EventVariation = variation;
             Time = time;
             SourceId = sourceId;
             TargetIdMask = targetIdMask;
 
             if (variation.ShowPlayerPosition)
             {
-                List<Tuple<byte, Vector2>> list = new();
+                List<Tuple<byte, Virial.Compat.Vector2>> list = new();
                 foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
                 {
                     if (p.Data.IsDead && p.PlayerId != sourceId && (TargetIdMask & 1 << p.PlayerId) == 0) continue;
 
                     if (positionTag != null)
-                        list.Add(new Tuple<byte, Vector2>(p.PlayerId, NebulaGameManager.Instance!.GameStatistics.Gathering[positionTag.Value][p.PlayerId]));
+                        list.Add(new Tuple<byte, Virial.Compat.Vector2>(p.PlayerId, new(NebulaGameManager.Instance!.GameStatistics.Gathering[positionTag.Value][p.PlayerId])));
                     else
-                        list.Add(new Tuple<byte, Vector2>(p.PlayerId, p.transform.position));
+                        list.Add(new Tuple<byte, Virial.Compat.Vector2>(p.PlayerId, new(p.transform.position)));
                 }
                 Position = list.ToArray();
             }
             else
             {
-                Position = new Tuple<byte, Vector2>[0];
+                Position = [];
             }
         }
 
         public bool IsSimilar(Event target)
         {
-            if (!Variation.CanCombine) return false;
-            return Variation == target.Variation && SourceId == target.SourceId && RelatedTag == target.RelatedTag;
+            if (!EventVariation.CanCombine) return false;
+            return EventVariation == target.EventVariation && SourceId == target.SourceId && RelatedTag == target.RelatedTag;
         }
 
         public void Combine(Event target)
@@ -254,7 +178,7 @@ public class GameStatistics
     {
         int index = allEvents.Count;
 
-        if (statisticsEvent.Variation.CanCombine)
+        if (statisticsEvent.EventVariation.CanCombine)
         {
             //末尾から検索
             for (int i = allEvents.Count - 1; i >= 0; i--)
@@ -375,23 +299,39 @@ public class GameStatisticsViewer : MonoBehaviour
         ClassInjector.RegisterTypeInIl2Cpp<GameStatisticsViewer>();
     }
 
+    public void Initialize(IArchivedGame archivedGame, PoolablePlayer playerPrefab, MapBehaviour mapPrefab, float mapScale, TMPro.TextMeshPro endTextPrefab, bool showMapAlways, float? waitTime = null)
+    {
+        this.archivedGame = archivedGame;
+        this.playerPrefab = playerPrefab;
+        this.mapPrefab = mapPrefab;
+        this.mapScale = mapScale;
+        this.gameEndText = endTextPrefab;
+        this.waitTime = waitTime;
+        this.showMapAlways = showMapAlways;
+    }
+
     LineRenderer timelineBack = null!, timelineFront = null!;
     GameObject minimap = null!;
     GameObject baseOnMinimap = null!, detailHolder = null!;
     AlphaPulse mapColor = null!;
-    GameStatistics.Event[] allStatistics = null!;
-    GameStatistics.Event? eventPiled, eventSelected, currentShown;
+    IArchivedEvent[] allStatistics = null!;
+    IArchivedEvent? eventPiled, eventSelected, currentShown;
     GameObject CriticalPoints = null!;
-
+    
     public float? SelectedTime => eventSelected?.Time;
-
-    public PoolablePlayer PlayerPrefab = null!;
-    public TMPro.TextMeshPro GameEndText = null!;
+    private float? waitTime = null;
+    private IArchivedGame archivedGame = null!;
+    private MapBehaviour mapPrefab = null!;
+    private GameObject mapObjPrefab => mapPrefab.transform.GetChild(1).gameObject;
+    private float mapScale = 1f;
+    private PoolablePlayer playerPrefab = null!;
+    private TMPro.TextMeshPro gameEndText = null!;
+    private bool showMapAlways = false;
     static public GameStatisticsViewer Instance { get; private set; } = null!;
 
     public void Start()
     {
-        allStatistics = NebulaGameManager.Instance!.GameStatistics.Sealed;
+        allStatistics = archivedGame.ArchivedEvents;
         if (allStatistics.Length == 0) return;
 
         timelineBack = UnityHelper.SetUpLineRenderer("TimelineBack", transform, new Vector3(0, 0, -10f), LayerExpansion.GetUILayer(), 0.014f);
@@ -400,14 +340,14 @@ public class GameStatisticsViewer : MonoBehaviour
         minimap = UnityHelper.CreateObject("Minimap", transform, new Vector3(0, -1.62f, 0));
         var scaledMinimap = UnityHelper.CreateObject("Scaled", minimap.transform, new Vector3(0, 0, 0));
         scaledMinimap.transform.localScale = new Vector3(0.45f, 0.45f, 1);
-        var minimapRenderer = Instantiate(NebulaGameManager.Instance!.RuntimeAsset.MinimapObjPrefab, scaledMinimap.transform);
+        var minimapRenderer = Instantiate(mapObjPrefab, scaledMinimap.transform);
         minimapRenderer.gameObject.name = "MapGraphic";
         minimapRenderer.transform.localScale = new Vector3(1f, 1f, 1f);
         minimapRenderer.transform.localPosition = Vector3.zero;
         mapColor = minimapRenderer.GetComponent<AlphaPulse>();
         mapColor.SetColor(MainColor);
         NebulaAsset.CreateSharpBackground(new Vector2(4.6f, 2.8f), MainColor, minimap.transform);
-        baseOnMinimap = UnityHelper.CreateObject("Scaler", scaledMinimap.transform, NebulaGameManager.Instance.RuntimeAsset.MinimapPrefab.HerePoint.transform.parent.localPosition);
+        baseOnMinimap = UnityHelper.CreateObject("Scaler", scaledMinimap.transform, mapPrefab.HerePoint.transform.parent.localPosition);
         detailHolder = UnityHelper.CreateObject("Detail", transform, new Vector3(0, -3.5f, 0));
         Hide();
 
@@ -418,7 +358,7 @@ public class GameStatisticsViewer : MonoBehaviour
 
     public void Update()
     {
-        GameStatistics.Event? willShown = eventPiled ?? eventSelected;
+        var willShown = eventPiled ?? eventSelected;
         if (willShown != currentShown)
         {
             if (willShown == null)
@@ -467,7 +407,7 @@ public class GameStatisticsViewer : MonoBehaviour
     private IEnumerator CoShowTimeLine()
     {
         StartCoroutine(CoShowTimeBackLine().WrapToIl2Cpp());
-        yield return new WaitForSeconds(1.4f);
+        yield return new WaitForSeconds(waitTime ?? 1.4f);
 
         timelineFront.SetPosition(0, new Vector3(-LineHalfWidth, 0));
         timelineFront.SetPosition(1, new Vector3(-LineHalfWidth, 0));
@@ -529,10 +469,10 @@ public class GameStatisticsViewer : MonoBehaviour
 
     public void Hide()
     {
-        minimap.SetActive(false);
+        minimap.SetActive(showMapAlways);
         detailHolder.SetActive(false);
     }
-    public void Show(GameStatistics.Event statisticsEvent)
+    public void Show(IArchivedEvent statisticsEvent)
     {
         //対象となるCriticalPointを探す
         int index = 0, indexMin = 0, indexMax = 0;
@@ -558,9 +498,11 @@ public class GameStatisticsViewer : MonoBehaviour
         float p = 0f;
         foreach (var pos in statisticsEvent.Position)
         {
-            var renderer = Instantiate(NebulaGameManager.Instance!.RuntimeAsset.MinimapPrefab.HerePoint, baseOnMinimap.transform);
-            PlayerMaterial.SetColors(pos.Item1, renderer);
-            renderer.transform.localPosition = (Vector3)(pos.Item2 / NebulaGameManager.Instance!.RuntimeAsset.MapScale) + new Vector3(0, 0, -1f - p);
+            var renderer = Instantiate(mapPrefab.HerePoint, baseOnMinimap.transform);
+
+            Helpers.SetColors(archivedGame.GetColor(pos.Item1), renderer);
+
+            renderer.transform.localPosition = (Vector3)(pos.Item2.ToUnityVector() / mapScale) + new Vector3(0, 0, -1f - p);
             var button = renderer.gameObject.SetUpButton();
             button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
 
@@ -573,9 +515,9 @@ public class GameStatisticsViewer : MonoBehaviour
                     if (near.Item2.Distance(pos.Item2) > 0.6f) continue;
 
                     if (widget.Count > 0) widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
-                    var roleText = NebulaGameManager.Instance.RoleHistory.EachMoment(history => history.PlayerId == near.Item1 && !(history.Time > statisticsEvent.Time),
+                    var roleText = archivedGame.RoleHistory.EachMoment(history => history.PlayerId == near.Item1 && !(history.Time > statisticsEvent.Time),
                         (role, ghostRole, modifiers) => RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, false)).LastOrDefault();
-                    widget.Append(new MetaWidgetOld.Text(TextAttributeOld.BoldAttrLeft) { RawText = NebulaGameManager.Instance.GetPlayer(near.Item1)!.Name });
+                    widget.Append(new MetaWidgetOld.Text(TextAttributeOld.BoldAttrLeft) { RawText = archivedGame.GetPlayer(near.Item1)!.PlayerName });
                     widget.Append(new MetaWidgetOld.VariableText(new TextAttributeOld(TextAttributeOld.BoldAttrLeft) { Alignment = TMPro.TextAlignmentOptions.TopLeft }.EditFontSize(1.35f)) { RawText = roleText ?? "" });
 
                 }
@@ -591,7 +533,7 @@ public class GameStatisticsViewer : MonoBehaviour
         int num = 0;
         void EventToDetailShower(int eventIndex)
         {
-            GameStatistics.Event target = allStatistics[eventIndex];
+            var target = allStatistics[eventIndex];
 
             GameObject detail = UnityHelper.CreateObject("EventDetail", detailHolder.transform, new Vector3(0, -0.76f * num, -10f));
 
@@ -616,11 +558,18 @@ public class GameStatisticsViewer : MonoBehaviour
 
             Il2CppArgument<PoolablePlayer> GeneratePlayerView(byte id)
             {
-                PoolablePlayer player = Instantiate(PlayerPrefab, detail.transform);
-                var info = NebulaGameManager.Instance?.GetPlayer(id);
-                player.UpdateFromPlayerOutfit(info?.Unbox().DefaultOutfit.Outfit.outfit!, PlayerMaterial.MaskType.None, false, true, null);
-                player.ToggleName(true);
-                player.SetName(info?.Name!, new Vector3(3.1f, 3.1f, 1f), Color.white, -15f);
+                PoolablePlayer player = Instantiate(playerPrefab, detail.transform);
+                var aPlayer = archivedGame?.GetPlayer(id);
+                if (aPlayer != null)
+                {
+                    archivedGame!.GetColor(aPlayer.PlayerId).ReflectToArchivedPalette();
+                    var outfit = aPlayer.DefaultOutfit.outfit;
+                    outfit.ColorId = NebulaPlayerTab.ArchiveColorId;
+                    player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, true, null);
+                    
+                    player.ToggleName(true);
+                    player.SetName(aPlayer!.PlayerName, new Vector3(3.1f, 3.1f, 1f), Color.white, -15f);
+                }
                 player.transform.localScale = new Vector3(0.24f, 0.24f, 1f);
                 player.cosmetics.nameText.transform.parent.localPosition += new Vector3(0f, -1.05f, 0f);
                 return player;
@@ -629,21 +578,24 @@ public class GameStatisticsViewer : MonoBehaviour
             if (target.SourceId.HasValue) objects.Add(GeneratePlayerView(target.SourceId.Value).Value.gameObject);
 
             SpriteRenderer icon = UnityHelper.CreateObject<SpriteRenderer>("Icon", detail.transform, new Vector3(0, 0, -1f));
-            icon.sprite = target.Variation.InteractionIcon?.GetSprite()!;
+            icon.sprite = target.EventVariation.InteractionIcon?.GetSprite()!;
             icon.transform.localScale = new Vector3(0.7f, 0.7f, 1f);
             if (target.RelatedTag != null)
             {
-                var text = Instantiate(GameEndText, icon.transform);
+                var text = Instantiate(gameEndText, icon.transform);
                 text.text = target.RelatedTag.Text;
                 text.color = Color.white;
                 text.outlineWidth = 0.1f;
+                text.fontSize = 7.5f;
+                text.fontSizeMax = 7.5f;
+                text.fontSizeMin = 7.45f;
                 text.transform.localPosition = new Vector3(0f, -0.18f, -1f);
                 text.transform.localScale = new Vector3(0.2f / 0.7f, 0.2f / 0.7f, 1f);
                 icon.transform.localPosition += new Vector3(0f, 0.05f, 0f);
             }
             objects.Add(icon.gameObject);
 
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
+            foreach (var p in archivedGame.GetAllPlayers())
                 if ((target.TargetIdMask & 1 << p.PlayerId) != 0)
                     objects.Add(GeneratePlayerView(p.PlayerId).Value.gameObject);
 

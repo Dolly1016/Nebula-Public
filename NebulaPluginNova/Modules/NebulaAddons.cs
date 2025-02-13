@@ -147,6 +147,14 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
         yield return preprocessor.SetLoadingText("Fetching Addons");
 
+        //ローカルなアドオンを更新
+        foreach (var dir in Directory.GetDirectories("Addons", "*"))
+        {
+            string id = Path.GetFileName(dir);
+            string filePath = dir + "/" + id + ".zip";
+            if (File.Exists(filePath)) File.Move(filePath, "Addons/" + id + ".zip", true);
+        }
+
         List<int> existingEntry = new();
         foreach(var path in ExternalAddons())
         {
@@ -186,15 +194,6 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
 
         yield return preprocessor.SetLoadingText("Loading Addons");
-
-        //ローカルなアドオンを更新
-        foreach (var dir in Directory.GetDirectories("Addons", "*"))
-        {
-            string id = Path.GetFileName(dir);
-            string filePath = dir + "/" + id + ".zip";
-            if (File.Exists(filePath)) File.Move(filePath, "Addons/" + id + ".zip", true);
-        }
-
 
         //組込アドオンの読み込み
         Assembly assembly = Assembly.GetExecutingAssembly();

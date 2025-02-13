@@ -22,7 +22,7 @@ public static class HudManagerExtension
         }
 
         bool flag = PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.IsDead;
-        var modPlayer = PlayerControl.LocalPlayer.GetModInfo();
+        var modPlayer = GamePlayer.LocalPlayer;
         RuntimeRole? modRole = modPlayer?.Role;
 
         manager.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && GameManager.Instance.CanReportBodies() && ShipStatus.Instance != null);
@@ -44,7 +44,7 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuideOnSmallButton(HudManager.Instance.MapButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideOnVanillaSmallButton(HudManager.Instance.MapButton.gameObject, actionMap.keyCode);
             ButtonEffect.SetKeyGuide(HudManager.Instance.SabotageButton.gameObject, actionMap.keyCode);
         }
         HudManager.Instance.MapButton.transform.SetLocalZ(-60f);

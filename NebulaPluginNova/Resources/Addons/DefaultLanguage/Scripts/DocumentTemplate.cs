@@ -50,7 +50,7 @@ static public class RoleDocumentHelper
     {
         if (assignable.ConfigurationHolder == null) return NebulaAPI.GUI.EmptyWidget;
 
-        var text = string.Join("<br>", assignable.ConfigurationHolder.Configurations.Where(c => c.IsShown).Select(c => c.GetDisplayText()).Where(s => s != null));
+        var text = string.Join("\n", assignable.ConfigurationHolder.Configurations.Where(c => c.IsShown).Select(c => c.GetDisplayText()?.Replace("\n", "\n  ")).Where(s => s != null));
         return NebulaAPI.GUI.RawText(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), text);
     }
     static public GUIWidget GetConfigurationsChapter(DefinedAssignable assignable) => GetChapter("document.configurations", [GetConfigurationsWidget(assignable)]);

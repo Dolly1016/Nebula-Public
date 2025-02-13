@@ -18,7 +18,7 @@ internal class AchievementViewer : MonoBehaviour
     static public void Open(MainMenuManager mainMenu) => MainMenuManagerInstance.Open<AchievementViewer>("AchievementViewer", mainMenu, viewer => viewer.OnShown());
     
 
-    static public GUIWidget GenerateWidget(float scrollerHeight,float width, string? scrollerTag = null, bool showTrophySum = true, Predicate<INebulaAchievement>? predicate = null, string? shownText = null)
+    static public GUIWidget GenerateWidget(float scrollerHeight,float width, string? scrollerTag = null, bool showTrophySum = true, Predicate<INebulaAchievement>? predicate = null, string? shownText = null, Action<INebulaAchievement>? onClicked = null)
     {
         scrollerTag ??= "Achievements";
 
@@ -44,13 +44,13 @@ internal class AchievementViewer : MonoBehaviour
                     first = false;
                 }
 
-                if (inner.Count != 0) inner.Add(new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.08f)));
+                if (inner.Count != 0) inner.Add(new NoSGUIMargin(GUIAlignment.Left, new(0f, -0.07f)));
 
                 List<GUIWidget> widgets = new() {
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.12f)),
                 new NoSGUIText(GUIAlignment.Left, headerAttr, a.GetHeaderComponent()),
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, -0.12f)),
-                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, true,false,a.IsCleared), OnClickText = (() => { if (a.IsCleared) { NebulaAchievementManager.SetOrToggleTitle(a); VanillaAsset.PlaySelectSE(); } }, true) }};
+                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, true,false,a.IsCleared), OnClickText = (() => { if (a.IsCleared) { NebulaAchievementManager.SetOrToggleTitle(a); VanillaAsset.PlaySelectSE(); onClicked?.Invoke(a); } }, true) }};
                 var progress = a.GetDetailWidget();
                 if (progress != null) widgets.Add(progress);
 
@@ -58,7 +58,9 @@ internal class AchievementViewer : MonoBehaviour
 
 
                 var aContenxt = new HorizontalWidgetsHolder(GUIAlignment.Left,
-                    new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(a.Trophy)), new(0.38f, 0.38f), a.IsCleared ? Color.white : new UnityEngine.Color(0.2f, 0.2f, 0.2f)) { IsMasked = true },
+                    new VerticalWidgetsHolder(GUIAlignment.Center, GUI.API.VerticalMargin(0.05f),
+                        new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(a.Trophy)), new(0.38f, 0.38f), a.IsCleared ? Color.white : new UnityEngine.Color(0.2f, 0.2f, 0.2f)) { IsMasked = true }
+                        ),
                     new NoSGUIMargin(GUIAlignment.Left, new(0.15f, 0.1f)),
                     achievementContent
                     );
@@ -71,7 +73,7 @@ internal class AchievementViewer : MonoBehaviour
         AddGroup("seasonal", NebulaAchievementManager.AllAchievements.Where(a => a.RelatedRole.IsEmpty() && !a.AchievementType().IsEmpty() && a.AchievementType().First() == AchievementType.Seasonal));
         AddGroup("perk", NebulaAchievementManager.AllAchievements.Where(a => a.RelatedRole.IsEmpty() && !a.AchievementType().IsEmpty() && a.AchievementType().First() == AchievementType.Perk));
         AddGroup("costume", NebulaAchievementManager.AllAchievements.Where(a => a.RelatedRole.IsEmpty() && !a.AchievementType().IsEmpty() && a.AchievementType().First() == AchievementType.Costume));
-        AddGroup("others", NebulaAchievementManager.AllAchievements.Where(a => a.RelatedRole.IsEmpty() && (a.AchievementType().IsEmpty() || (!a.AchievementType().IsEmpty() && a.AchievementType().First() == AchievementType.Secret))));
+        AddGroup("others", NebulaAchievementManager.AllAchievements.Where(a => a.RelatedRole.IsEmpty() && (a.AchievementType().IsEmpty() || (!a.AchievementType().IsEmpty() && (a.AchievementType().First() == AchievementType.Secret || a.AchievementType().First() == AchievementType.Challenge)))));
         AddGroup("innersloth", NebulaAchievementManager.AllAchievements.Where(a => a.RelatedRole.IsEmpty() && !a.AchievementType().IsEmpty() && a.AchievementType().First() == AchievementType.Innersloth));
        
         var scroller = new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(4.7f, scrollerHeight), holder) { ScrollerTag = scrollerTag };

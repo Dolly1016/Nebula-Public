@@ -47,14 +47,15 @@ public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
             StatsKiller.Progress();
         }
 
-        [Local, OnlyMyPlayer]
-        void OnMurdered(PlayerMurderedEvent ev)
+        [Local]
+        void OnReported(ReportDeadBodyEvent ev)
         {
-            if (ev.Murderer.AmOwner) return; //自殺の場合は何もしない
-
-            StatsBait.Progress();
-            new StaticAchievementToken("bait.common1");
-            acTokenChallenge ??= new("bait.challenge", (false, true), (val, _) => val.cleared);
+            if((ev.Reported?.AmOwner ?? false) && ev.Reporter == MyPlayer.MyKiller && !ev.Reporter.AmOwner)
+            {
+                StatsBait.Progress();
+                new StaticAchievementToken("bait.common1");
+                acTokenChallenge ??= new("bait.challenge", (false, true), (val, _) => val.cleared);
+            }
         }
 
         [Local,OnlyMyPlayer]

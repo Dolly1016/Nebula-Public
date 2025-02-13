@@ -551,7 +551,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         (message, _) =>
         {
             bool takenSelf = (message & (1 << PlayerControl.LocalPlayer.PlayerId)) != 0;
-            if (takenSelf && (NebulaGameManager.Instance?.LocalPlayerInfo.IsImpostor ?? false)) new StaticAchievementToken("paparazzo.another1");
+            if (takenSelf && (GamePlayer.LocalPlayer?.IsImpostor ?? false)) new StaticAchievementToken("paparazzo.another1");
         });
     public static DivisibleRemoteProcess<(float, float, byte[]), (int id, float scale, float angle, int length, int index, byte[] bytes)> RpcSharePicture = new("SharePicture",
         (message) =>

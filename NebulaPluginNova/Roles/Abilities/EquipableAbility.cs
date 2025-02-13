@@ -26,6 +26,8 @@ namespace Nebula.Roles.Abilities
 
         protected virtual void HudUpdate(GameHudUpdateEvent ev)
         {
+            if (!Renderer) return;
+
             var o = Owner.Unbox();
             if (Owner.AmOwner) o.RequireUpdateMouseAngle();
 

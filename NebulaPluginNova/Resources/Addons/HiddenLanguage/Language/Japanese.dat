@@ -476,7 +476,7 @@
 "achievement.secret.common1.cond" : ""
 
 "achievement.secret.another1.title" : "微睡"
-"achievement.secret.another1.goal" : "覚醒せずに勝利する。"
+"achievement.secret.another1.goal" : "覚醒して勝利する。"
 "achievement.secret.another1.cond" : ""
 
 "achievement.secret.challenge.title" : "ローマは一日にして成れり"
@@ -494,6 +494,10 @@
 "achievement.firstKill.title" : "ヴァニタスに描く生命"
 "achievement.firstKill.goal" : "通算で10回初手キルされる。"
 "achievement.firstKill.cond" : ""
+
+"achievement.omikuji.title" : "超吉！おみくじ乱れ撃ち"
+"achievement.omikuji.goal" : "1ゲームでパークを3つ手に入れる。"
+"achievement.omikuji.cond" : "1月限定"
 
 "achievement.setsubun.title" : "笑門来福"
 "achievement.setsubun.goal" : "タスクをすべてこなし、最後まで生き残った上で<br>インポスターを全員追放し、勝利する。"

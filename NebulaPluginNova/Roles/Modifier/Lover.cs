@@ -34,7 +34,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
     static internal IntegerConfiguration NumOfPairsOption = NebulaAPI.Configurations.Configuration("options.role.lover.numOfPairs", (0, 12), 0);
     static private IntegerConfiguration RoleChanceOption = NebulaAPI.Configurations.Configuration("options.role.lover.roleChance", (10, 100, 10), 100, decorator: num => num + "%",title: new TranslateTextComponent("options.role.chance"));
     static private IntegerConfiguration ChanceOfAssigningImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.lover.chanceOfAssigningImpostors", (0,100,10), 0, decorator: num => num + "%");
-    static private BoolConfiguration AllowExtraWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.allowExtraWin", true);
+    static internal BoolConfiguration AllowExtraWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.allowExtraWin", true);
     static internal BoolConfiguration AvengerModeOption = NebulaAPI.Configurations.Configuration("options.role.lover.avengerMode", false);
 
     static public Lover MyRole = new Lover();
@@ -109,6 +109,8 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             MyLover = new(() => NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault(player => player.PlayerId != MyPlayer.PlayerId && player.Modifiers.Any(m => m is Lover.Instance lover && lover.loversId == loversId))!);
         }
 
+        public bool IsAloneLover => MyLover.Get().IsDead;
+
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.LoversWin && !MyPlayer.IsDead);
 
@@ -152,7 +154,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         }
 
         [OnlyMyPlayer, Local]
-        void OnMurdered(PlayerDieEvent ev)
+        void OnMurdered(PlayerDieOrDisconnectEvent ev)
         {
             var myLover = MyLover.Get();
             if (myLover?.IsDead ?? true) return;
@@ -163,6 +165,10 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
                     myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [pme.Murderer.PlayerId]).InvokeSingle();
                 else 
                     myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
+            }
+            else if(ev is PlayerDisconnectEvent)
+            {
+                myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
             }
             else /* PlayerExtraExiledEvent, PlayerExiledEvent */
             {   

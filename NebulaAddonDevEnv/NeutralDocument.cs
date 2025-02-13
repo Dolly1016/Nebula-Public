@@ -45,3 +45,21 @@ public class PaparazzoDocument : AbstractAssignableDocument
     }
     public override RoleType RoleType => RoleType.Role;
 }
+
+[AddonDocument("role.spectre")]
+public class SpectreDocument : AbstractAssignableDocument
+{
+    public override IEnumerable<GUIWidget> GetAbilityWidget()
+    {
+        yield return RoleDocumentHelper.GetImageLocalizedContent("SpectreDish.png", "role.spectre.rule.fries");
+        yield return RoleDocumentHelper.GetImageLocalizedContent("Buttons.SpectreButton.png", "role.spectre.ability.vanish");
+    }
+
+    public override bool WithWinCond => true;
+    public override GUIWidget GetCustomWinCondWidget()
+    {
+        var satiety = RoleDocumentHelper.Config<float>("options.role.spectre.requiredSatietyForWinning");
+        return RoleDocumentHelper.GetWinCondChapter(DocumentId, str => str.Replace("#NUM", satiety));
+    }
+    public override RoleType RoleType => RoleType.Role;
+}

@@ -96,7 +96,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         }
 
         [Local]
-        void OnPlayerDead(PlayerDieEvent ev)
+        void OnPlayerDead(PlayerDieOrDisconnectEvent ev)
         {
             if (!ObsessionalSuicideWhenObsessionalTargetDieOption) return;
 

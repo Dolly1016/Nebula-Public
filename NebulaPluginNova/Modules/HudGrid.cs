@@ -115,7 +115,7 @@ public class HudContent : MonoBehaviour
     public Vector2 CurrentPos { get; set; }
 
     //Priorityの大きいものから配置される
-    public int Priority { get => Math.Max(0, (OccupiesLine ? 20000 : onKillButtonPos ? 10000 : 0) + priority); }
+    public int Priority { get => (OccupiesLine ? 20000 : onKillButtonPos ? 10000 : 0) + priority; }
     public int SubPriority => subPriority;
     private int priority;
     private int subPriority;

@@ -639,7 +639,7 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
                                {
                                    var selected = buttonManager.AllStates.FirstOrDefault(p => p.IsSelected);
 
-                                   if (selected != null)
+                                   if (selected != null && !selected.MyPlayer.IsDead)
                                    {
                                        selected.SetSelect(false);
 
@@ -648,6 +648,7 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
                                    }
                                    else
                                    {
+                                       selected?.SetSelect(false);
                                        p.SetSelect(true);
                                    }
                                }

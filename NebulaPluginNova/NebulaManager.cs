@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Xml.Schema;
+using Nebula.Map;
 using TMPro;
 using UnityEngine.Rendering;
 using Virial;
@@ -368,7 +369,7 @@ public class NebulaManager : MonoBehaviour
         
         commands.Add(new("help.command.cancelStarting",
             () => NebulaGameManager.Instance != null && AmongUsClient.Instance && AmongUsClient.Instance.AmHost && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Joined && GameStartManager.Instance && GameStartManager.Instance.startState == GameStartManager.StartingStates.Countdown,
-            RpcResetGameStart.Invoke
+            () => RpcResetGameStart.Invoke()
         )
         { DefaultKeyInput = new(KeyCode.F2) });
 
@@ -453,7 +454,6 @@ public class NebulaManager : MonoBehaviour
         File.WriteAllBytesAsync(GetPicturePath(out string displayPath), tex.EncodeToPNG());
     }
 
-    
     public void Update()
     {
         if (PreloadManager.FinishedPreload)
@@ -467,7 +467,6 @@ public class NebulaManager : MonoBehaviour
                 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    
                     //Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;
                     //File.WriteAllBytesAsync("SpawnableMap" + NebulaPreSpawnLocation.MapName[AmongUsUtil.CurrentMapId] +".png", MapData.GetCurrentMapData().OutputMap(center, new Vector2(10f, 7f) * ShipStatus.Instance.MapScale, 40f).EncodeToPNG());
                 }

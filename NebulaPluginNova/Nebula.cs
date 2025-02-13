@@ -19,6 +19,7 @@ global using GUI = Nebula.Modules.GUIWidget.NebulaGUIWidgetEngine;
 global using Image = Virial.Media.Image;
 global using GamePlayer = Virial.Game.Player;
 
+
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using System.Runtime.InteropServices;
@@ -27,6 +28,8 @@ using Virial;
 using Cpp2IL.Core.Extensions;
 using System.Reflection;
 using System.Reflection.Metadata;
+using Nebula.Modules.CustomMap;
+using System.IO.Compression;
 
 [assembly: System.Reflection.AssemblyFileVersionAttribute(Nebula.NebulaPlugin.PluginEpochStr + "."  + Nebula.NebulaPlugin.PluginBuildNumStr)]
 
@@ -37,14 +40,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.13.0.1";
+    public const string PluginVersion = "2.15.3.4";
 
-    public const string VisualVersion = "v2.13.0.1";
-    //public const string VisualVersion = "Snapshot 24.12.24d";
+    public const string VisualVersion = "v2.15.3.4";
+    //public const string VisualVersion = "Snapshot 25.02.01a";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "105";
-    public const string PluginBuildNumStr = "1279";
+    public const string PluginBuildNumStr = "1310";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -93,11 +96,6 @@ public class NebulaPlugin
             new GameObject("NebulaManager").AddComponent<NebulaManager>();
         });
         SetUpNebulaImpl();
-
-        Debug.Log("Listeners:");
-        foreach (var listener in BepInEx.Logging.Logger.Listeners) Debug.Log(listener.GetType().Name);
-        Debug.Log("Sources:");
-        foreach (var source in BepInEx.Logging.Logger.Sources) Debug.Log(source.SourceName);
     }
 
     static private void SetUpNebulaImpl()

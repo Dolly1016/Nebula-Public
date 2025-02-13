@@ -67,8 +67,8 @@ public class StandardRoleAllocator : IRoleAllocator
     private record RoleChance(DefinedRole role, AllocationParameters? param = null) {
         public int count = (param ?? role.AllocationParameters)?.RoleCountSum ?? 0; 
         public int left = (param ?? role.AllocationParameters)?.RoleCountSum ?? 0; 
-        public int cost = 1; 
-        public int otherCost = 0;
+        public int cost = (param ?? role.AllocationParameters)?.TeamCost ?? 1;
+        public int otherCost = (param ?? role.AllocationParameters)?.OtherCost ?? 1;
         public AllocationParameters? Param => param ?? role.AllocationParameters;
     }
 
@@ -92,11 +92,31 @@ public class StandardRoleAllocator : IRoleAllocator
         void OnSelected(RoleChance selected)
         {
             if (onSelected != null)
+            {
                 onSelected.Invoke(selected.role, main[0]);
+                main.RemoveAt(0);
+            }
             else
+            {
+                var player = main[0];
                 table.SetRole(main[0], selected.role);
+                main.RemoveAt(0);
 
-            main.RemoveAt(0);
+                selected.Param?.TeamAssignment?.Do(assignment =>
+                {
+                    var param = assignment.Invoke(selected.role, player);
+                    table.SetRole(main[0], param.role, param.argument);
+                    main.RemoveAt(0);
+                });
+
+                selected.Param?.OthersAssignment?.Do(assignment =>
+                {
+                    var param = assignment.Invoke(selected.role, player);
+                    table.SetRole(others[0], param.role, param.argument);
+                    others.RemoveAt(0);
+                });
+            }
+
             left -= selected.cost;
 
             //割り当て済み役職を排除

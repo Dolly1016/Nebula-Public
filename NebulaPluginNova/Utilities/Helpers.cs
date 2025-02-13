@@ -1,8 +1,14 @@
 ﻿using Hazel;
 using InnerNet;
+using Nebula.Modules.GUIWidget;
 using Steamworks;
 using System.Runtime.InteropServices;
 using System.Text;
+using TMPro;
+using UnityEngine.Rendering;
+using Virial;
+using Virial.Events.Game;
+using Virial.Game;
 using Virial.Text;
 
 
@@ -56,6 +62,8 @@ public static class Helpers
     /// <param name="prob">0から1までの確率</param>
     /// <returns></returns>
     public static bool Prob(float prob) => System.Random.Shared.NextSingle() < prob;
+    public static float DegToRad(this float deg) => deg * (float)Math.PI / 180f;
+    public static float RadToDeg(this float rad) => rad * 180f / (float)Math.PI;
     public static float MountainCurve(float p, float max)
     {
         float x = p - 0.5f;
@@ -273,14 +281,32 @@ public static class Helpers
         return list[System.Random.Shared.Next(list.Count)];
     }
 
+    /// <summary>
+    /// 配列の範囲内なら配列の値を返します。
+    /// 範囲外ならデフォルト値を返します。例外は発しません。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="array"></param>
+    /// <param name="index"></param>
+    /// <param name="defaultValue"></param>
+    /// <returns></returns>
     static public T Get<T>(this T[] array, int index, T defaultValue) {
-        if (index < array.Length) return array[index];
+        if (index < array.Length && index >= 0) return array[index];
         return defaultValue;
     }
 
+    /// <summary>
+    /// リストの範囲内ならリストの値を返します。
+    /// 範囲外ならデフォルト値を返します。例外は発しません。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="array"></param>
+    /// <param name="index"></param>
+    /// <param name="defaultValue"></param>
+    /// <returns></returns>
     static public T Get<T>(this List<T> array, int index, T defaultValue)
     {
-        if (index < array.Count) return array[index];
+        if (index < array.Count && index >= 0) return array[index];
         return defaultValue;
     }
 
@@ -344,6 +370,17 @@ public static class Helpers
         if(nullableObj != null) action.Invoke(nullableObj!);
     }
 
+    static public Transform FindChild(this Transform transform, Predicate<Transform> predicate)
+    {
+        int num =transform.GetChildCount();
+        for(int i = 0; i < num; i++)
+        {
+            var child = transform.GetChild(i);
+            if (predicate.Invoke(child)) return child;
+        }
+        return null!;
+    }
+
     static public void SyncSingleNetObject(InnerNetObject obj)
     {
         MessageWriter messageWriter = MessageWriter.Get(obj.sendMode);
@@ -378,5 +415,38 @@ public static class Helpers
     {
         Resources.UnloadUnusedAssets();
         GC.Collect();
+    }
+
+    static public TMPro.TextMeshPro TextHudContent(string name, ComponentHolder binder, Action<TMPro.TextMeshPro> updater)
+    {
+        var TextHolder = HudContent.InstantiateContent(name, true, true, false, false);
+        binder.Bind(TextHolder.gameObject);
+
+        TextMeshPro tmPro = null!;
+        var text = new NoSGUIText(Virial.Media.GUIAlignment.Left, new(GUI.API.GetAttribute(Virial.Text.AttributeParams.StandardBaredBoldLeftNonFlexible)) { Alignment = Virial.Text.TextAlignment.BottomLeft, FontSize = new(1.6f), Size = new(3f, 1f) }, new RawTextComponent("")) { PostBuilder = t => { tmPro = t; tmPro.sortingOrder = 0; } };
+        text.Instantiate(new Virial.Media.Anchor(new(0f, 0f), new(-0.5f, -0.5f, 0f)), new(20f, 20f), out _)!.transform.SetParent(TextHolder.transform, false);
+
+        GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev => {
+            if (tmPro)
+            {
+                updater.Invoke(tmPro);
+            }
+        }, binder);
+
+        return tmPro;
+    }
+
+    static public Vector3 TransformPointLocalToLocal(this Transform transform, Vector3 vector, Transform toTransform)
+    {
+        return toTransform.InverseTransformPoint(transform.TransformPoint(vector));
+    }
+
+    internal static void SetColors(ArchivedColor color, SpriteRenderer renderer)
+    {
+        var material = renderer.material;
+
+        material.SetColor(PlayerMaterial.BackColor, color.ShadowColor.ToUnityColor());
+        material.SetColor(PlayerMaterial.BodyColor, color.MainColor.ToUnityColor());
+        material.SetColor(PlayerMaterial.VisorColor, color.VisorColor.ToUnityColor());
     }
 }

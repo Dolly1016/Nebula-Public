@@ -52,8 +52,8 @@ public class Busker : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                var pseudocideButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
-                var reviveButton = Bind(new ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
+                var pseudocideButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
+                var reviveButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
 
                 pseudocideButton.SetSprite(pseudocideButtonSprite.GetSprite());
                 pseudocideButton.Availability = (button) => MyPlayer.CanMove;

@@ -32,6 +32,13 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
 
     public float Max => max;
 
+    /// <summary>
+    /// タイマーの進行を強制的に止めます。
+    /// IsProgressingはfalseを返します。
+    /// </summary>
+    /// <returns></returns>
+    public Timer StopForcely() => SetTime(min);
+    
     public Timer Pause()
     {
         isActive = false;

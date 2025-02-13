@@ -1,4 +1,6 @@
-﻿using Nebula.Behaviour;
+﻿using NAudio.MediaFoundation;
+using Nebula.Behaviour;
+using System.Reflection.Metadata;
 using Virial.Events.Game.Minimap;
 using Virial.Game;
 
@@ -135,8 +137,8 @@ public static class OpenNormalMapPatch
         
         PlayerControl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
         __instance.GenericShow();
-        __instance.taskOverlay.Show();
         __instance.ColorControl.SetColor(new Color(0.05f, 0.2f, 1f, 1f));
+        __instance.taskOverlay.Show();
         DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
 
         GameOperatorManager.Instance?.Run(new MapOpenNormalEvent(), true);
@@ -159,8 +161,8 @@ public static class OpenSabotageMapPatch
         
         PlayerControl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
         __instance.GenericShow();
-        __instance.infectedOverlay.gameObject.SetActive(true);
         __instance.ColorControl.SetColor(Palette.ImpostorRed);
+        __instance.infectedOverlay.gameObject.SetActive(true);
         __instance.taskOverlay.Show();
         DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
         ConsoleJoystick.SetMode_Sabotage();
@@ -188,6 +190,12 @@ public static class InitMapPatch
     {
         GameOperatorManager.Instance?.Run(new MapInstantiateEvent());
         __instance.fadedBackground.transform.localScale *= 2f;
+
+        MapBehaviourExtension.SetUpAsMinimapContent(__instance.transform.FindChild(c => c.name.StartsWith("RoomNames")).gameObject);
+        MapBehaviourExtension.SetUpAsMinimapContent(__instance.HerePoint.gameObject);
+        MapBehaviourExtension.SetUpAsMinimapContent(__instance.infectedOverlay.gameObject);
+        __instance.countOverlay.CountAreas.FirstOrDefault()?.pool.Prefab.gameObject.GetOrAddComponent<MinimapScaler>();
+        __instance.taskOverlay.icons.Prefab.gameObject.GetOrAddComponent<MinimapScaler>();
     }
 }
 
@@ -197,6 +205,7 @@ static class MapBehaviourGenericShowPatch
     static void Postfix(MapBehaviour __instance)
     {
         __instance.transform.localPosition = new Vector3(0, 0, -50f);
+        MapBehaviourExtension.UpdateScale(__instance);
     }
 }
 
@@ -244,3 +253,16 @@ class MapBehaviourShowNormalMapPatch
     }
 
 }
+
+[HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.FixedUpdate))]
+public static class MapUpdatePatch
+{
+
+    //向きの調整
+    static void Postfix(MapBehaviour __instance)
+    {
+        MapBehaviourExtension.UpdateScale(__instance);
+    }
+}
+
+

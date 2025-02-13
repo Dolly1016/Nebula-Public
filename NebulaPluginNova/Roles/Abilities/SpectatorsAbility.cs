@@ -102,7 +102,7 @@ public class SpectatorsAbility : IGameOperator
             .KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.SpectatorRight)).SubKeyBind(Virial.Compat.VirtualKeyInput.SpectatorLeft);
         spectatorChangeButton.SetSprite(spectatorChangeSprite.GetSprite());
         spectatorChangeButton.Availability = button => true;
-        spectatorChangeButton.Visibility = button => !(NebulaGameManager.Instance?.LocalPlayerInfo.Tasks.IsCrewmateTask ?? false) || (NebulaGameManager.Instance?.LocalPlayerInfo.Tasks.IsCompletedCurrentTasks ?? true);
+        spectatorChangeButton.Visibility = button => !(GamePlayer.LocalPlayer?.Tasks.IsCrewmateTask ?? false) || (GamePlayer.LocalPlayer?.Tasks.IsCompletedCurrentTasks ?? true);
         spectatorChangeButton.OnClick = (button) =>
         {
             ChangeTarget(true);

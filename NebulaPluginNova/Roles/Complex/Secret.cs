@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Assignment;
+﻿using Hazel;
+using Nebula.Roles.Assignment;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -96,11 +97,12 @@ public class Secret : DefinedRoleTemplate, DefinedRole
     private static void SetUpChallengeAchievement(GamePlayer player)
     {
         new AchievementToken<int>("secret.another1", 0, (_, _) => (NebulaGameManager.Instance?.EndState?.Winners.Test(player) ?? false) && player.Role.Role != MyNiceRole && player.Role.Role != MyEvilRole);
+        new AchievementToken<int>("secret.another2", 0, (_, _) => (NebulaGameManager.Instance?.EndState?.Winners.Test(player) ?? false) && (player.Role.Role == MyNiceRole || player.Role.Role == MyEvilRole));
 
         new AchievementToken<int>("secret.challenge", 0, (_, achievement) =>
         {
             return NebulaGameManager.Instance!.AllAchievementTokens.Any(r =>
-            r.Achievement is AbstractAchievement a && a.AchievementType().Contains(AchievementType.Challenge) && !a.RelatedRole.IsEmpty() && a.Id != "secret.challenge" && r.UniteTo(false) != AbstractAchievement.ClearState.NotCleared);
+            r.Achievement is AbstractAchievement a && a.AchievementType().Contains(AchievementType.Challenge) && !a.RelatedRole.IsEmpty() && a.Id != "secret.challenge" && r.UniteTo(false) != AbstractAchievement.ClearDisplayState.None);
         });
     }
     public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
@@ -201,7 +203,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
             if (AmOwner) SetUpChallengeAchievement(MyPlayer);
         }
 
-        void OnPlayerDead(PlayerDieEvent ev)
+        void OnPlayerDead(PlayerDieOrDisconnectEvent ev)
         {
             //Covertモードはホストが割り当てを管理する
             if (AmongUsClient.Instance.AmHost && ShownSecret.EvilConditionTypeOption.GetValue() == 1)

@@ -18,7 +18,7 @@ public static class HudManagerStartPatch
     {
         DIManager.Instance.Instantiate<Virial.Game.Game>();
         
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light(Dummy)", AmongUsUtil.GetShadowCollab().ShadowCamera.transform, new Vector3(0, 0, -1.5f), LayerExpansion.GetDrawShadowsLayer());
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light(Dummy)", AmongUsUtil.GetShadowCollab().ShadowCamera.transform, new Vector3(0, 0, -4f), LayerExpansion.GetDrawShadowsLayer());
         renderer.sprite = VanillaAsset.FullScreenSprite;
         renderer.material.shader = NebulaAsset.StoreBackShader;
         renderer.color = Color.clear;
@@ -35,10 +35,14 @@ public static class HudManagerUpdatePatch
     {
         __instance.UpdateHudContent();
         NebulaGameManager.Instance?.OnUpdate();
+        NebulaGameManager.Instance?.AllPlayerInfo.Do(p => p.Unbox().HudUpdate());
 
         if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDownForAction && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
         {
-            HelpScreen.TryOpenHelpScreen(HelpTab.MyInfo);
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                Helpbot.TryOpenHelpbotScreen();
+            else
+                HelpScreen.TryOpenHelpScreen(HelpTab.MyInfo);
         }
     }
 }
@@ -70,7 +74,7 @@ public static class HudManagerCoStartGamePatch
 
             HudManager.Instance.KillButton.SetCoolDown(10f, AmongUsUtil.VanillaKillCoolDown);
 
-            ShipStatus.Instance.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>().SetInitialSabotageCooldown();
+            if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Sabotage, out var sabo)) sabo.TryCast<SabotageSystemType>()?.SetInitialSabotageCooldown();
             if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Doors, out var door)) door.TryCast<IDoorSystem>()?.SetInitialSabotageCooldown();
 
             PlayerControl.LocalPlayer.AdjustLighting();
@@ -94,7 +98,7 @@ class TaskTextPatch
     {
         try
         {
-            __instance.taskText.text = __instance.taskText.text + GameOperatorManager.Instance?.Run(new PlayerTaskTextLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo)).Text;
+            __instance.taskText.text = __instance.taskText.text + GameOperatorManager.Instance?.Run(new PlayerTaskTextLocalEvent(GamePlayer.LocalPlayer)).Text;
         }
         catch { }
     }

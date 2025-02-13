@@ -71,7 +71,7 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
 
     static public RemoteProcess<(GamePlayer, Vector2)> RpcGhostNoise = new(
         "GhostNoise", (message, _) => {
-            if (!NebulaGameManager.Instance!.LocalPlayerInfo.Role.IgnoreNoisemakerNotification)
+            if (!GamePlayer.LocalPlayer.Role.IgnoreNoisemakerNotification)
             {
                 var arrow = AmongUsUtil.InstantiateNoisemakerArrow(message.Item2, true);
                 arrow.arrow.SetDuration(Nebula.Roles.Crewmate.Noisemaker.NoiseDurationOption);

@@ -128,7 +128,7 @@ public class VCClient : IDisposable
             float distance = myPos.Distance(ownerPos);
 
             //幽霊の語りかけは壁を無視する
-            if (InputtedVoiceType != VoiceType.Ghost && GeneralConfigurations.WallsBlockAudioOption && PhysicsHelpers.AnyNonTriggersBetween(ownerPos, (myPos - ownerPos).normalized, distance, Constants.ShadowMask))
+            if (InputtedVoiceType != VoiceType.Ghost && GeneralConfigurations.WallsBlockAudioOption && NebulaPhysicsHelpers.AnyShadowBetween(ownerPos, (myPos - ownerPos).normalized, distance, out _))
                 wallRatio *= 0.9f;
             else
                 wallRatio += (1f - wallRatio) * 0.9f;

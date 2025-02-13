@@ -13,6 +13,7 @@ using System.Text;
 using TMPro;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Profiling;
+using UnityEngine.Rendering;
 using Virial;
 using Virial.Game;
 using Virial.Runtime;
@@ -149,7 +150,7 @@ public abstract class CustomCosmicItem : CustomItemGrouped
             }
         );
 
-        yield return AllImage().Select(image =>
+        var loaders = AllImage().Select(image =>
         {
             IEnumerator CoLoad()
             {
@@ -173,7 +174,16 @@ public abstract class CustomCosmicItem : CustomItemGrouped
             }
 
             return CoLoad();
-        }).WaitAll();
+        });
+        
+        if(MyBundle?.RelatedZip != null)
+        {
+            foreach (var e in loaders) yield return e;
+        }
+        else
+        {
+            yield return loaders.WaitAll();
+        }
 
         yield break;
     }
@@ -707,9 +717,12 @@ public class CustomItemBundle
     public UnloadTextureLoader.AsyncLoader GetTextureLoader(string category,string subholder,string address)
     {
         if (RelatedZip != null)
+        {
             return new UnloadTextureLoader.AsyncLoader(() => RelatedZip.GetEntry(RelatedLocalAddress + category + "/" + address)?.Open());
+        }
         else if (RelatedRemoteAddress == null)
-            return new UnloadTextureLoader.AsyncLoader(() => {
+            return new UnloadTextureLoader.AsyncLoader(() =>
+            {
                 var data = File.ReadAllBytes(RelatedLocalAddress + category + "/" + address);
                 return new MemoryStream(data);
             }, true);
@@ -1362,7 +1375,7 @@ public class NebulaCosmeticsLayerPatch
 {
     private static void Postfix(CosmeticsLayer __instance)
     {
-        if (!__instance.gameObject.TryGetComponent<NebulaCosmeticsLayer>(out var c))__instance.gameObject.AddComponent<NebulaCosmeticsLayer>();
+        __instance.gameObject.GetOrAddComponent<NebulaCosmeticsLayer>();
     }
 }
 
@@ -1459,6 +1472,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     private SpriteRenderer visorFrontExRenderer;
     private SpriteRenderer visorBackRenderer;
     private SpriteRenderer visorBackExRenderer;
+    private Renderer[] renderersCache = null!;
     public SpriteRenderer VisorBackRenderer => visorBackRenderer;
     public IEnumerable<SpriteRenderer> AdditionalRenderers()
     {
@@ -1479,6 +1493,11 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     private bool useDefaultShader = true;//追加したRendererのマテリアルを変更する必要があるか否か調べるために使用
     private bool usePlayerShaderOnVisor = false;//追加したRendererのマテリアルを変更する必要があるか否か調べるために使用
     public PlayerAnimState LastAnimState = PlayerAnimState.Idle;
+
+    public bool ShouldSort = false;
+    public int SortingBaseOrder = 0;
+    public float SortingScale = 1000f;
+
     static NebulaCosmeticsLayer()
     {
         ClassInjector.RegisterTypeInIl2Cpp<NebulaCosmeticsLayer>();
@@ -1486,6 +1505,11 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
     public void Awake()
     {
+        ShouldSort = false;
+        SortingBaseOrder = 0;
+        SortingScale = 1000f;
+        renderersCache = null!;
+
         MyLayer = gameObject.GetComponent<CosmeticsLayer>();
 
         MyLayer.visor.gameObject.AddComponent<NebulaCosmeticsLayerVisorLink>().NebulaLayer = new() { Value = this };
@@ -1609,7 +1633,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
             void SetMaterial(Material material, PlayerMaterial.Properties properties, params SpriteRenderer[] renderers)
             {
-                renderers.Do(r => { 
+                renderers.Do(r =>
+                {
                     r.material = material;
                     r.material.SetInt(PlayerMaterial.MaskLayer, properties.MaskLayer);
                     r.maskInteraction = properties.MaskType switch { MaskType.SimpleUI => SpriteMaskInteraction.VisibleInsideMask, MaskType.Exile => SpriteMaskInteraction.VisibleOutsideMask, _ => SpriteMaskInteraction.None };
@@ -1617,8 +1642,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 if (properties.MaskLayer <= 0) renderers.Do(r => PlayerMaterial.SetMaskLayerBasedOnLocalPlayer(r, properties.IsLocalPlayer));
             }
 
-            
-            T CheckAndUpdateCache<T>(T orig, ref T? cache, string? id, Func<string,string> productIdConverter, Func<string, T> itemProvider) where T : CustomCosmicItem
+
+            T CheckAndUpdateCache<T>(T orig, ref T? cache, string? id, Func<string, string> productIdConverter, Func<string, T> itemProvider) where T : CustomCosmicItem
             {
                 if (id != null)
                 {
@@ -1634,7 +1659,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 //機能的なハットを得る
                 var functionalHat = CurrentModHat;
                 var functionalHatId = GetModPlayer()?.CurrentOutfit.HatArgument;
-                functionalHat = CheckAndUpdateCache<CosmicHat>(functionalHat, ref CurrentFunctionalModHatCache, functionalHatId, CosmicHat.IdToProductId, pi => MoreCosmic.AllHats.TryGetValue(pi,out var h) ? h : null!);
+                functionalHat = CheckAndUpdateCache<CosmicHat>(functionalHat, ref CurrentFunctionalModHatCache, functionalHatId, CosmicHat.IdToProductId, pi => MoreCosmic.AllHats.TryGetValue(pi, out var h) ? h : null!);
 
                 //見た目上のハットを得る
                 var visualHat = functionalHat;
@@ -1708,7 +1733,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
                 lastHatFrontImage = frontImage;
                 lastHatBackImage = backImage;
-            
+
 
                 MyLayer.hat!.FrontLayer.sprite = frontImage?.GetSprite(HatFrontIndex) ?? null;
                 MyLayer.hat!.BackLayer.sprite = backImage?.GetSprite(HatBackIndex) ?? null;
@@ -1722,7 +1747,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 //追加レイヤー
                 var frontHasExImage = frontImage?.HasExImage ?? false;
                 hatFrontExRenderer.gameObject.SetActive(frontHasExImage);
-                if(frontHasExImage) hatFrontExRenderer.sprite = frontImage?.GetExSprite(HatFrontIndex) ?? null;
+                if (frontHasExImage) hatFrontExRenderer.sprite = frontImage?.GetExSprite(HatFrontIndex) ?? null;
 
                 var backHasExImage = backImage?.HasExImage ?? false;
                 hatBackExRenderer.gameObject.SetActive(backImage?.HasExImage ?? false);
@@ -1869,6 +1894,25 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             }
         }
         catch { }
+
+        if (ShouldSort)
+        {
+            if (renderersCache == null) renderersCache = transform.GetComponentsInChildren<Renderer>().Concat(MyLayer.bodySprites.ToArray().Select(r => r.BodySprite.CastFast<Renderer>())).ToArray();
+
+
+            foreach (var renderer in renderersCache)
+            {
+                var z = -renderer.transform.TransformPointLocalToLocal(Vector3.zero, transform).z;
+                renderer.sortingOrder = (int)(z * SortingScale) + SortingBaseOrder;
+            }
+        }
+    }
+
+    public void SetSortingProperty(bool shouldSort, float sortingScale, int sortingBaseOrder)
+    {
+        this.ShouldSort = shouldSort;
+        this.SortingScale = sortingScale;
+        this.SortingBaseOrder = sortingBaseOrder;
     }
 
     public void FixVisor()
@@ -1968,6 +2012,20 @@ public static class TabEnablePatch
                 colorChip.Button.OnMouseOver.AddListener(()=>selector.Invoke(vanillaItem));
                 colorChip.Button.OnMouseOut.AddListener(() => selector.Invoke(defaultProvider.Invoke()));
                 colorChip.Button.OnClick.AddListener(__instance.ClickEquip);
+
+                if (DebugTools.ShowCostumeMetadata)
+                {
+                    IEnumerable<string>? tags = modItem != null ? modItem.Tags : MoreCosmic.VanillaTags.TryGetValue(vanillaItem.ProductId, out var t) ? t : [];
+                    string name = modItem != null ? modItem.Name : vanillaItem.name;
+                    colorChip.Button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(colorChip.Button, name.Bold() + "<br>" + string.Join("<br>", (tags ?? []).Select(text => "  " + text))));
+                    colorChip.Button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(colorChip.Button));
+                    var extraButton = colorChip.Button.gameObject.AddComponent<ExtraPassiveBehaviour>();
+                    extraButton.OnRightClicked = () =>
+                    {
+                        ClipboardHelper.PutClipboardString(name);
+                        DebugScreen.Push("クリップボードにコピーしました。", 3f);
+                    };
+                }
 
                 colorChip.Button.ClickMask = __instance.scroller.Hitbox;
 

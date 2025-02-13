@@ -6,7 +6,7 @@ namespace Virial.Game;
 /// <summary>
 /// 現在プレイ中のゲームを表します。
 /// </summary>
-public interface Game : IModuleContainer, ILifespan
+public interface Game : IModuleContainer, ILifespan, IArchivedGame
 {
     /// <summary>
     /// プレイヤーを取得します。

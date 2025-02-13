@@ -12,13 +12,14 @@ namespace Nebula.Roles.Impostor;
 
 public class Reaper : DefinedRoleTemplate, DefinedRole
 {
-    private Reaper() : base("reaper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [VentConfiguration]) {
+    private Reaper() : base("reaper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [VentConfiguration, CanUseVentWhileHoldingDeadbodyOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.reaper.vent", false, null, -1, (0f, 60f, 2.5f), 15f, (2.5f, 30f, 2.5f), 10f);
+    static private BoolConfiguration CanUseVentWhileHoldingDeadbodyOption = NebulaAPI.Configurations.Configuration("options.role.reaper.useVentWhileHoldingDeadbody", true);
 
     static public Reaper MyRole = new Reaper();
     static private GameStatsEntry StatsVent = NebulaAPI.CreateStatsEntry("stats.reaper.ventWithDeadBody", GameStatsCategory.Roles, MyRole);
@@ -31,6 +32,7 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
         private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
         GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
         GameTimer? RuntimeRole.VentDuration => ventDuration;
+        bool RuntimeRole.PreventUsingVent => MyPlayer.HoldingAnyDeadBody && !CanUseVentWhileHoldingDeadbodyOption;
 
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;

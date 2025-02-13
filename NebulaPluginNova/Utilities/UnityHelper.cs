@@ -117,6 +117,8 @@ public static class UnityHelper
         return obj;
     }
 
+    public static T GetOrAddComponent<T>(this GameObject gameObject) where T : MonoBehaviour => gameObject.TryGetComponent<T>(out var component) ? component : gameObject.AddComponent<T>();
+    
     public static Camera? FindCamera(int cameraLayer) => Camera.allCameras.FirstOrDefault(c => (c.cullingMask & (1 << cameraLayer)) != 0);
 
     public static Vector3 ScreenToWorldPoint(Vector3 screenPos, int cameraLayer)
@@ -212,6 +214,13 @@ public static class UnityHelper
         gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => {
             todo.Invoke(obj);
             obj.ForEachAllChildren(todo);
+        }));
+    }
+
+    public static void ForEachChild(this GameObject gameObject, Action<GameObject> todo)
+    {
+        gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => {
+            todo.Invoke(obj);
         }));
     }
 

@@ -140,6 +140,16 @@ public enum AttributeAsset
     DocumentTitle,
 
     /// <summary>
+    /// DocumentTitleより小さく、DocumentSubtitle2より大きいテキスト属性です。
+    /// </summary>
+    DocumentSubtitle1,
+
+    /// <summary>
+    /// DocumentSubtitle1より小さく、DocumentStandardより大きいテキスト属性です。
+    /// </summary>
+    DocumentSubtitle2,
+
+    /// <summary>
     /// VC Settingsのデバイス設定で使用している横長のボタンです。
     /// </summary>
     DeviceButton,
@@ -188,6 +198,11 @@ public enum AttributeAsset
     /// オプション値やオプション名と同じフォントの可変テキスト属性です。
     /// </summary>
     OptionsFlexible,
+
+    /// <summary>
+    /// グループ化されたオプションのタイトルで使用される可変長テキスト属性です。
+    /// </summary>
+    OptionsGroupTitle,
 
     /// <summary>
     /// マーケットプレイスのタイトルで使われている固定長テキスト属性です。
@@ -295,8 +310,10 @@ public class TextAttribute
     public Size Size { get; init; }
     public Color Color { get; init; }
     public bool IsFlexible { get; init; }
+    public bool Wrapping { get; init; } = false;
+    public float? OutlineWidth { get; init; } = null;
 
-    public TextAttribute(TextAlignment alignment, Font font, FontStyle style, FontSize fontSize, Size size, Color color, bool isFlexible)
+    public TextAttribute(TextAlignment alignment, Font font, FontStyle style, FontSize fontSize, Size size, Color color, bool isFlexible, float? outlineWidth = null)
     {
         Alignment = alignment;
         Font = font;
@@ -305,6 +322,7 @@ public class TextAttribute
         Size = size;
         Color = color;
         IsFlexible = isFlexible;
+        OutlineWidth = outlineWidth;
     }
 
     public TextAttribute(TextAttribute original)
@@ -316,6 +334,7 @@ public class TextAttribute
         Size = original.Size;
         Color = original.Color;
         IsFlexible = original.IsFlexible;
+        OutlineWidth = original.OutlineWidth;
     }
 }
 

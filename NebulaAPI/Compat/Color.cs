@@ -32,6 +32,9 @@ public struct Color
         B = color.b;
         A = color.a;
     }
+
+    internal UnityEngine.Color ToUnityColor() => new UnityEngine.Color(R, G, B, A);
+
     static public Color ImpostorColor { get; internal set; } = new(global::Palette.ImpostorRed);
     static public Color CrewmateColor { get; internal set; } = new(global::Palette.CrewmateBlue);
     static public Color Red { get; internal set; } = new(1f,0f,0f,1f);

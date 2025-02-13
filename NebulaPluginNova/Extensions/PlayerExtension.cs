@@ -4,6 +4,7 @@ using Hazel;
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
 using Nebula.Player;
+using TMPro;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
@@ -29,8 +30,11 @@ public static class PlayerExtension
         player.cosmetics.skin.SetEnterVent(player.cosmetics.FlipX);
         player.moveable = false;
 
+        player.NetTransform.SetPaused(true);
+
         yield return player.MyPhysics.Animations.CoPlayEnterVentAnimation(0);
 
+        player.NetTransform.SetPaused(false);
         player.MyPhysics.myPlayer.Visible = false;
         player.cosmetics.skin.SetIdle(player.cosmetics.FlipX);
         player.MyPhysics.Animations.PlayIdleAnimation();
@@ -58,7 +62,11 @@ public static class PlayerExtension
 
         player.GetModInfo()!.Unbox().CurrentDiving = null;
 
+        player.NetTransform.SetPaused(true);
+
         yield return player.MyPhysics.Animations.CoPlayExitVentAnimation();
+
+        player.NetTransform.SetPaused(false);
 
         player.cosmetics.AnimateSkinIdle();
         player.MyPhysics.Animations.PlayIdleAnimation();
@@ -129,6 +137,8 @@ public static class PlayerExtension
             if (message.cleanDeadBody) foreach (var d in Helpers.AllDeadBodies()) if (d.ParentId == player.PlayerId) GameObject.Destroy(d.gameObject);
 
             if(message.recordEvent)NebulaGameManager.Instance?.GameStatistics.RecordEvent(new(GameStatistics.EventVariation.Revive, message.sourceId != byte.MaxValue ? message.sourceId : null, 1 << message.targetId) { RelatedTag = EventDetail.Revive });
+
+            GameOperatorManager.Instance?.Run(new PlayerReviveEvent(modinfo, NebulaGameManager.Instance?.GetPlayer(message.sourceId)));
         }
         );
 

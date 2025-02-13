@@ -106,7 +106,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
 
             if (!MeetingHud.Instance && moving)
             {
-                var localPlayer = NebulaGameManager.Instance!.LocalPlayerInfo;
+                var localPlayer = GamePlayer.LocalPlayer;
                 if (!used && !myPlayer.AmOwner && ObjectTrackers.StandardPredicateIgnoreOwner.Invoke(localPlayer) && (canKillImpostorOption || myPlayer.CanKill(localPlayer)))
                 {
                     if (localPlayer.Position.ToUnityVector().Distance(renderer.transform.position) < (1.7f / 2f * bubbleSizeOption))
@@ -237,7 +237,12 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                 };
                 equipButton.SetLabel("equip");
                 equipButton.CoolDownTimer = Bind(new Timer(BubbleCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
-                equipButton.OnMeeting = (button) => equipButton.SetLabel("equip");
+                equipButton.OnMeeting = (button) =>
+                {
+                    equipButton.SetLabel("equip");
+                    if(MyGun != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
+                    equipButton.StartCoolDown();
+                };
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(equipButton.GetKillButtonLike());
                 usesText = equipButton.ShowUsesIcon(0);
                 usesText.text = LeftUses.ToString();
@@ -344,6 +349,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
         player.VanillaPlayer.Visible = false;
         player.VanillaPlayer.NetTransform.Halt();
         player.VanillaPlayer.moveable = false;
+        player.Unbox().WillDie = true;
         NebulaManager.Instance.StartDelayAction(2f, () => player.VanillaPlayer.moveable = true);
         if (player.AmOwner && Minigame.Instance) Minigame.Instance.ForceClose();
 

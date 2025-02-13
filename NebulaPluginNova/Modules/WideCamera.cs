@@ -147,7 +147,7 @@ public class WideCamera
     public void SetDrawShadow(bool drawShadow)
     {
         myCamera.cullingMask = drawShadow ? 97047 : 31511;
-        myCamera.cullingMask |= 1 << 29;
+        myCamera.cullingMask |= 1 << LayerExpansion.GetArrowLayer();
 
         this.drawShadow = drawShadow;
     }
@@ -196,7 +196,7 @@ public class WideCamera
     {
         localScale = new(1f, 1f, 1f);
 
-        var p = NebulaGameManager.Instance?.LocalPlayerInfo;
+        var p = GamePlayer.LocalPlayer;
         if (p == null)
         {
             localRotateZ = 0f;
@@ -249,26 +249,29 @@ public class WideCamera
         if (PlayerControl.LocalPlayer && ShipStatus.Instance)
         {
             var playerPos = PlayerControl.LocalPlayer.transform.position;
-            var vent = ShipStatus.Instance.AllVents.MinBy(v => v.transform.position.Distance(playerPos));
-            if (vent)
+            if (ShipStatus.Instance.AllVents.Count > 0)
             {
-                var myVentPos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(vent!.transform.position);
-
-                int length = vent.NearbyVents.Length;
-                for (int i = 0; i < length; i++)
+                var vent = ShipStatus.Instance.AllVents.MinBy(v => v.transform.position.Distance(playerPos));
+                if (vent)
                 {
-                    var targetVent = vent.NearbyVents[i];
-                    if (targetVent)
-                    {
-                        var targetVentPos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(targetVent.transform.position);
+                    var myVentPos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(vent!.transform.position);
 
-                        var diff = (targetVentPos - myVentPos).normalized;
-                        diff *= 0.7f + vent.spreadShift;
-                        var pos = (myVentPos + diff);
-                        pos.z = -10f;
-                        var transform = vent.Buttons[i].transform;
-                        transform.position = pos;
-                        transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x) / Mathf.PI * 180f);
+                    int length = vent.NearbyVents.Length;
+                    for (int i = 0; i < length; i++)
+                    {
+                        var targetVent = vent.NearbyVents[i];
+                        if (targetVent)
+                        {
+                            var targetVentPos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(targetVent.transform.position);
+
+                            var diff = (targetVentPos - myVentPos).normalized;
+                            diff *= 0.7f + vent.spreadShift;
+                            var pos = (myVentPos + diff);
+                            pos.z = -10f;
+                            var transform = vent.Buttons[i].transform;
+                            transform.position = pos;
+                            transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x) / Mathf.PI * 180f);
+                        }
                     }
                 }
             }
@@ -313,7 +316,7 @@ public class WideCamera
             meshTransform.localScale -= (meshTransform.localScale - goalScale).Delta(2.4f, 0.003f);
             meshTransform.localEulerAngles = new(0f, 0f, meshAngleZ);
 
-            float targetRateByEffect = NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.ScreenSize, true) ?? 1f;
+            float targetRateByEffect = GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.ScreenSize, true) ?? 1f;
 
             float currentOrth = orthographicCache;
             float targetOrth = targetRate * targetRateByEffect * 3f;
@@ -334,7 +337,7 @@ public class WideCamera
             myCamera.transform.localScale = new Vector3(actualOrth / 3f, actualOrth / 3f, 1f);
 
             //コマンドによるモザイクの設定値に変化が生じたら再計算する
-            int currentCommandRoughness =  Mathf.Max(1, (int?)NebulaGameManager.Instance?.LocalPlayerInfo?.Unbox().CalcAttributeVal(PlayerAttributes.Roughening, true) ?? 1);
+            int currentCommandRoughness =  Mathf.Max(1, (int?)GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.Roughening, true) ?? 1);
             if(lastCommandRoughness != currentCommandRoughness)
             {
                 lastCommandRoughness = currentCommandRoughness;

@@ -104,12 +104,12 @@ public static class VentClickPatch
 {
     static bool Prefix(VentButton __instance)
     {
-        if ((!PlayerControl.LocalPlayer.inVent) && (PlayerControl.LocalPlayer?.GetModInfo()?.Unbox().Role?.VentCoolDown?.IsProgressing ?? false))
+        if ((!PlayerControl.LocalPlayer.inVent) && (GamePlayer.LocalPlayer?.Unbox().Role?.VentCoolDown?.IsProgressing ?? false))
             return false;
 
         if (__instance.currentTarget != null)
         {
-            var role = PlayerControl.LocalPlayer.GetModInfo()!.Role;
+            var role = GamePlayer.LocalPlayer!.Role;
         }
 
         return true;
@@ -123,11 +123,11 @@ public static class KillButtonClickPatch
     {
         if (__instance.enabled && __instance.currentTarget && !__instance.isCoolingDown && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
         {
-            var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(NebulaGameManager.Instance!.LocalPlayerInfo, __instance.currentTarget.GetModInfo()!));
+            var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(GamePlayer.LocalPlayer!, __instance.currentTarget.GetModInfo()!));
             if (!(cancelable?.IsCanceled ?? false))
             {
                 //キャンセルされなければキルを実行する
-                NebulaGameManager.Instance?.LocalPlayerInfo.MurderPlayer(__instance.currentTarget.GetModInfo()!, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
+                GamePlayer.LocalPlayer?.MurderPlayer(__instance.currentTarget.GetModInfo()!, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
             }
 
             //クールダウンをリセットする
@@ -190,7 +190,7 @@ public static class ReportButtonClickPatch
 {
     static bool Prefix(ReportButton __instance)
     {
-        var info = NebulaGameManager.Instance?.LocalPlayerInfo;
+        var info = GamePlayer.LocalPlayer;
         if (info == null) return true;
 
         if (info.IsDived || info.IsBlown) return false;

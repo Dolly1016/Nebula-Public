@@ -12,7 +12,7 @@ namespace Nebula.Roles.Perks;
 internal class Invisible : PerkFunctionalInstance
 {
     const float Duration = 15f;
-    static PerkFunctionalDefinition Def = new("invisible", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("invisible", 4, 48, (Crewmate.Comet.MyRole as DefinedAssignable).Color).DurationText("%D%", Duration), (def, instance) => new Invisible(def, instance));
+    static PerkFunctionalDefinition Def = new("invisible", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("invisible", 4, 48, (Crewmate.Comet.MyRole as DefinedAssignable).Color).DurationText("%D%", () => Duration), (def, instance) => new Invisible(def, instance));
 
     bool used = false;
     public Invisible(PerkDefinition def, PerkInstance instance) : base(def, instance)

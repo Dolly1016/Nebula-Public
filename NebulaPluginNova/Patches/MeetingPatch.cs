@@ -89,9 +89,9 @@ public static class MeetingModRpc
         }
         );
 
-    public static readonly RemoteProcess<float> RpcSyncMeetingTimer = new("SyncMeetingTimer", (timer, _) =>
+    public static readonly RemoteProcess<float> RpcSyncMeetingTimer = new("SyncMeetingTimer", (timer, amHost) =>
     {
-        MeetingHudExtension.VotingTimer = timer;
+        if(!amHost)MeetingHudExtension.VotingTimer = timer;
     });
     public static readonly RemoteProcess<(byte reporter,byte reported)> RpcNoticeStartMeeting = new("ModStartMeeting",
     (message,_) =>
@@ -143,9 +143,9 @@ public static class MeetingModRpc
 
         var votedLocal = NebulaGameManager.Instance!.GetPlayer(((VoterState?)states.FirstOrDefault(s => s.VoterId == PlayerControl.LocalPlayer.PlayerId))?.VotedForId ?? 255);
 
-        GameOperatorManager.Instance?.Run(new PlayerVoteDisclosedLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, votedLocal, exiledAll.Contains(votedLocal?.PlayerId ?? byte.MaxValue)));
+        GameOperatorManager.Instance?.Run(new PlayerVoteDisclosedLocalEvent(GamePlayer.LocalPlayer, votedLocal, exiledAll.Contains(votedLocal?.PlayerId ?? byte.MaxValue)));
         GamePlayer[] votedBy = states.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => NebulaGameManager.Instance.GetPlayer(id)).Where(p => p != null).ToArray()!;
-        GameOperatorManager.Instance?.Run(new PlayerVotedLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, votedBy!));
+        GameOperatorManager.Instance?.Run(new PlayerVotedLocalEvent(GamePlayer.LocalPlayer, votedBy!));
         GameOperatorManager.Instance?.Run(new MeetingVoteDisclosedEvent(readonlyStates));
 
         meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
@@ -284,7 +284,7 @@ class MeetingStartPatch
         __instance.transform.localPosition = new Vector3(0f, 0f, -25f);
 
         {
-            var role = NebulaGameManager.Instance!.LocalPlayerInfo.Role.Role;
+            var role = GamePlayer.LocalPlayer!.Role.Role;
             if (role != Roles.Crewmate.Crewmate.MyRole && role != Roles.Impostor.Impostor.MyRole)
             {
                 Tutorial.WaitAndShowTutorial(() => !MeetingHud.Instance || MeetingHud.Instance.state == VoteStates.Animating,
@@ -422,9 +422,9 @@ class MeetingHudUpdatePatch
                     }
 
                     //定期的に時間を同期させる。投票漏れを防ぐためにわずかに時間を短く見積もる。
-                    if (MeetingHudExtension.LastSharedCount > MeetingHudExtension.VotingTimer && AmongUsClient.Instance.AmHost && intCnt % 20 == 5)
+                    if (MeetingHudExtension.LastSharedCount > MeetingHudExtension.VotingTimer && AmongUsClient.Instance.AmHost && intCnt % 20 == 11)
                     {
-                        MeetingModRpc.RpcSyncMeetingTimer.Invoke(MeetingHudExtension.VotingTimer - 0.1f);
+                        MeetingModRpc.RpcSyncMeetingTimer.Invoke(MeetingHudExtension.VotingTimer - 0.05f);
                     }
                 }
                 else if(AmongUsClient.Instance.AmHost)
@@ -582,7 +582,7 @@ class CastVotePatch
         __instance.state = MeetingHud.VoteStates.Voted;
 
         //CmdCastVote(Mod)
-        int vote = GameOperatorManager.Instance?.Run(new PlayerVoteCastLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, NebulaGameManager.Instance!.GetPlayer(suspectStateIdx), 1)).Vote ?? 1;
+        int vote = GameOperatorManager.Instance?.Run(new PlayerVoteCastLocalEvent(GamePlayer.LocalPlayer, NebulaGameManager.Instance!.GetPlayer(suspectStateIdx), 1)).Vote ?? 1;
         __instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, suspectStateIdx, vote);
         return false;
     }

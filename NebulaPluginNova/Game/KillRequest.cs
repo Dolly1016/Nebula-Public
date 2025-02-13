@@ -29,16 +29,16 @@ internal class KillRequestHandler
     {
         int id = availableId++;
         myRequests.Add(new(id, killer, target, playerState, recordState, killParams, killCondition, callBack));
-        RpcRequestKill.Invoke((NebulaGameManager.Instance!.LocalPlayerInfo.PlayerId, id, killer, target, playerState, recordState, PackFlags(killParams, killCondition)));
+        RpcRequestKill.Invoke((GamePlayer.LocalPlayer!.PlayerId, id, killer, target, playerState, recordState, PackFlags(killParams, killCondition)));
     }
 
     private static RemoteProcess<(byte sender, int id, KillResult result)> RpcSendResult = new(
         "KillResult",
         (message, _) =>
         {
-            if (message.sender == NebulaGameManager.Instance?.LocalPlayerInfo.PlayerId)
+            if (message.sender == GamePlayer.LocalPlayer!.PlayerId)
             {
-                NebulaGameManager.Instance.KillRequestHandler.myRequests.RemoveFirst(request => request.Id == message.id)?.CallBack?.Invoke(message.result);
+                NebulaGameManager.Instance!.KillRequestHandler.myRequests.RemoveFirst(request => request.Id == message.id)?.CallBack?.Invoke(message.result);
             }
         }
         );
@@ -233,6 +233,8 @@ internal class KillRequestHandler
                targetInfo.Unbox().MyKiller = killerInfo;
                targetInfo.Unbox().MyState = TranslatableTag.ValueOf(message.stateId);
                if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+               if(targetInfo.AmOwner) new StaticAchievementToken("stats.death." + targetInfo!.PlayerState.TranslationKey);
+
                if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
 
 

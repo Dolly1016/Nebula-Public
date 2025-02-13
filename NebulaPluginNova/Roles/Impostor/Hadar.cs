@@ -149,7 +149,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                     Arrow? ventArrow = Bind(new Arrow(null, true));
                     ventArrow.SetColor(Palette.ImpostorRed);
                     ventArrow.IsActive = false;
-                    var tracker = Bind(ObjectTrackers.ForVents(VentDetectionRangeOption, MyPlayer, v => true, Palette.ImpostorRed, true));
+                    var tracker = Bind(ObjectTrackers.ForVents(VentDetectionRangeOption, MyPlayer, v => !v.TryGetComponent<InvalidVent>(out _), Palette.ImpostorRed, true));
                     gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && tracker.CurrentTarget != null;
                     gushButton.OnClick = button =>
                     {

@@ -148,7 +148,7 @@ public class VoiceChatManager : IDisposable
             return localInfo.Role.Role.Category == RoleCategory.ImpostorRole;
 
         if (killerHearDead == 1)
-            return ghost?.MyKiller == NebulaGameManager.Instance?.LocalPlayerInfo;
+            return ghost?.MyKiller == GamePlayer.LocalPlayer;
 
         return false;
     }

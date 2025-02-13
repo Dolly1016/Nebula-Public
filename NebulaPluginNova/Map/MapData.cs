@@ -149,7 +149,23 @@ public abstract class MapData
     virtual public Vector2[][] RaiderIgnoreArea { get => []; }
     abstract protected SystemTypes[] SabotageTypes { get; }
     abstract public MapObjectPoint[] MapObjectPoints { get; }
-
+    /// <summary>
+    /// 封鎖されたベントの画像を取得します。
+    /// </summary>
+    /// <param name="vent"></param>
+    /// <param name="level">0から3で指定</param>
+    /// <returns></returns>
+    virtual public Sprite GetSealedVentSprite(Vent vent, int level, bool remove) => SealedVentSprite.GetSprite(level + (remove ? (SealedVentSprite.Length / 2) : 0));
+    abstract protected IDividedSpriteLoader SealedVentSprite { get; }
+    virtual public Sprite GetSealedDoorSprite(OpenableDoor door, int level, bool isVert, bool remove)
+    {
+        IDividedSpriteLoader spriteLoader = GetSealedDoorSprite(isVert);
+        if (remove && spriteLoader.Length > 8) level += 8;
+        return spriteLoader.GetSprite(level);
+    }
+    virtual protected IDividedSpriteLoader GetSealedDoorSprite(bool isVert) => isVert ? SkeldData.SealedDoorSpriteSkeldV : SkeldData.SealedDoorSpriteSkeldH;
+    virtual public Vector3 GetDoorSealingPos(OpenableDoor door, bool isVert) => isVert ? new(-0.024f,0.52f,-0.01f) : new(0f, -0.1f, -0.01f);
+    virtual public bool IsSealableDoor(OpenableDoor door) => true;
     public SystemTypes[] GetSabotageSystemTypes() => SabotageTypes;
     public bool CheckMapArea(Vector2 position, float radious = 0.1f)
     {

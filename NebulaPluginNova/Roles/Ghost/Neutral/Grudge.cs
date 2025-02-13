@@ -70,7 +70,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
             }
 
             //死者目線では幻影は見えない
-            SetAlpha((NebulaGameManager.Instance?.LocalPlayerInfo?.IsDead ?? true) ? 0f : Alpha);
+            SetAlpha((GamePlayer.LocalPlayer?.IsDead ?? true) ? 0f : Alpha);
         }
 
         void IGameOperator.OnReleased()

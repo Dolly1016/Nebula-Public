@@ -10,7 +10,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-// if (IsMySidekick(player)) player.RpcInvokerSetRole(Jackal.MyRole, new int[] { JackalTeamId }).InvokeSingle();
+[NebulaRPCHolder]
 public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public RoleTeam MyTeam = new Team("teams.chainShifter", new(115, 115, 115), TeamRevealType.OnlyMe);
@@ -68,6 +68,7 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                 chainShiftButton.OnClick = (button) => {
                     shiftTarget = playerTracker.CurrentTarget;
                     shiftIcon = chainShiftButton.GeneratePlayerIcon(shiftTarget);
+                    RpcCheckShift.Invoke((MyPlayer, shiftTarget!));
                 };
                 chainShiftButton.OnMeeting = (button) =>
                 {
@@ -80,9 +81,11 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
         }
 
         //会議開始時に生きていればシフトは実行されうる
+        [Local]
         void OnMeetingStart(MeetingStartEvent ev)
         {
-            canExecuteShift = !MyPlayer.IsDead;
+            //自身が生存しかつ、シフトリストに登録されていて、相手がチェインシフターではない
+            canExecuteShift = !MyPlayer.IsDead && currentTargetList.Any(entry => entry.shifter.AmOwner) && shiftTarget?.Role.Role != ChainShifter.MyRole;
         }
 
 
@@ -166,6 +169,7 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
         void OnMeetingEnd(MeetingEndEvent ev)
         {
             shiftTarget = null;
+            currentTargetList.Clear();
         }
 
 
@@ -181,4 +185,14 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
 
         bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
     }
+
+    static private List<(GamePlayer shifter, GamePlayer target)> currentTargetList = [];
+    static private RemoteProcess<(GamePlayer shifter, GamePlayer target)> RpcFixShift = new("FixShift", (message, _) => currentTargetList.Add(message));
+    static private RemoteProcess<(GamePlayer shifter, GamePlayer target)> RpcCheckShift = new("CheckShift", (message, _) =>
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        if (currentTargetList.Any(entry => entry.target == message.target)) return;
+
+        RpcFixShift.Invoke(message);
+    });
 }

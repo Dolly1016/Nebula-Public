@@ -68,7 +68,7 @@ public static class PolishTeleportStoneStartPatch
         var rubyGame = Minigame.Instance.TryCast<PolishRubyGame>();
         if (!rubyGame) return;
 
-        if (GeneralConfigurations.NonCrewmateCanUseTeleporterImmediatelyOption && !NebulaGameManager.Instance!.LocalPlayerInfo.IsCrewmate)
+        if (GeneralConfigurations.NonCrewmateCanUseTeleporterImmediatelyOption && !GamePlayer.LocalPlayer.IsCrewmate)
         {
             ModSingleton<TeleportationSystem>.Instance.TryTeleport(PlayerControl.LocalPlayer.transform.position);
             rubyGame!.ForceClose();
@@ -168,7 +168,7 @@ public class TeleportationSystem : AbstractModule<Virial.Game.Game>, IGameOperat
             to = pair.pos1;
         }
 
-        RpcTeleport.Invoke((PlayerControl.LocalPlayer.GetModInfo()!, to));
+        RpcTeleport.Invoke((GamePlayer.LocalPlayer!, to));
         new StaticAchievementToken("teleportRecord");
 
         LastTeleport = NebulaGameManager.Instance!.CurrentTime;

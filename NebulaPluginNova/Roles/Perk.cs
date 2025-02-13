@@ -1,4 +1,4 @@
-﻿using Nebula.Compat;
+﻿
 using Nebula.Modules.GUIWidget;
 using UnityEngine.Rendering;
 using Virial;
@@ -74,32 +74,56 @@ public class PerkFunctionalDefinition
     public Category PerkCategory { get;private set; }
     public IOrderedSharableVariable<int> SpawnRate { get; private init; }
     public IConfiguration SpawnRateConfiguration { get; private init; }
-    public PerkFunctionalDefinition(string id, Category category, PerkDefinition definition, Func<PerkDefinition, PerkInstance, PerkFunctionalInstance> generator)
+    public IntegerConfiguration MaxSpawnConfiguration { get; private init; }
+    public IReadOnlyList<IConfiguration> RelatedConfigurations => relatedConfigurations;
+    private List<IConfiguration> relatedConfigurations;
+    public PerkFunctionalDefinition(string id, Category category, PerkDefinition definition, Func<PerkDefinition, PerkInstance, PerkFunctionalInstance> generator, IEnumerable<IConfiguration>? configurations = null)
     {
         this.PerkCategory = category;
         this.PerkDefinition = definition;
         this.InstanceGenerator = generator;
         this.Id = id;
+        this.relatedConfigurations = new(configurations ?? []);
         Roles.Register(this);
 
         SpawnRate = NebulaAPI.Configurations.SharableVariable("perk." + id + ".spawnRate", (0, 100, 10), 100);
-        SpawnRateConfiguration = NebulaAPI.Configurations.Configuration(()=> PerkDefinition.DisplayName.Color(Color.Lerp(PerkDefinition.perkColor, Color.white, 0.5f)) + ": " + SpawnRate.Value + "%", () => GUI.API.HorizontalHolder(GUIAlignment.Left, 
-            PerkDefinition.GetPerkImageWidget(true, overlay: ()=>PerkDefinition.GetPerkWidget()),
-            new NoSGUIMargin(GUIAlignment.Center, new(0.25f, 0f)),
-            GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), PerkDefinition.DisplayNameTranslationKey),
-            ConfigurationAssets.Semicolon,
-            new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => SpawnRate.Value + "%")),
-            new GUISpinButton(GUIAlignment.Center, v => { SpawnRate.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
-            )
-        , predicate: category == Category.Standard ? () => GeneralConfigurations.NumOfPlantsOption > 0 : () => GeneralConfigurations.NumOfWarpedPlantsOption > 0
+        MaxSpawnConfiguration = NebulaAPI.Configurations.Configuration("perk." + id + ".maxSpawn", (0, 10), 0, decorator: num => num == 0 ? Language.Translate("perk.common.maxSpawn.unlimited") : num.ToString(), title: GUI.API.LocalizedTextComponent("perk.common.maxSpawn"));
+        SpawnRateConfiguration = NebulaAPI.Configurations.Configuration(
+            ()=>
+            {
+                if (SpawnRate.Value == 0) return null;
+
+                string text = PerkDefinition.DisplayName.Color(Color.Lerp(PerkDefinition.perkColor, Color.white, 0.5f)) + ": " + SpawnRate.Value + "%";
+                string configText = string.Join("\n", RelatedConfigurations.Prepend(MaxSpawnConfiguration).Select(config => config.GetDisplayText()).Where(t => t != null).Select(t => "  " + t));
+                if (configText.Length > 0) text += "\n" + configText;
+                return text;
+            }, 
+            () =>
+            {
+                var rateEditor = GUI.API.HorizontalHolder(GUIAlignment.Left,
+                PerkDefinition.GetPerkImageWidget(true, overlay: () => PerkDefinition.GetPerkWidget()),
+                new NoSGUIMargin(GUIAlignment.Center, new(0.25f, 0f)),
+                GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), PerkDefinition.DisplayNameTranslationKey),
+                ConfigurationAssets.Semicolon,
+                new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
+                new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => SpawnRate.Value + "%")),
+                new GUISpinButton(GUIAlignment.Center, v => { SpawnRate.ChangeValue(v, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); })
+                );
+                if (SpawnRate.Value == 0) return rateEditor;
+                return GUI.API.VerticalHolder(GUIAlignment.TopLeft,
+                    [
+                    rateEditor,
+                    ..RelatedConfigurations.Prepend(MaxSpawnConfiguration).Select(config => GUI.API.HorizontalHolder(GUIAlignment.Left, GUI.API.HorizontalMargin(0.8f), config.GetEditor().Invoke()))
+                    ]
+                );
+            }, predicate: category == Category.Standard ? () => GeneralConfigurations.NumOfPlantsOption > 0 : () => GeneralConfigurations.NumOfWarpedPlantsOption > 0
         );
     }
 }
 
 public abstract class PerkFunctionalInstance : BindableGameOperator
 {
-    protected GamePlayer MyPlayer => NebulaGameManager.Instance!.LocalPlayerInfo!;
+    protected GamePlayer MyPlayer => GamePlayer.LocalPlayer!;
     public PerkDefinition PerkDefinition { get; private set; }
     public PerkInstance PerkInstance { get; private set; }
     public PerkFunctionalInstance(PerkDefinition perk, PerkInstance instance)
@@ -115,7 +139,7 @@ public abstract class PerkFunctionalInstance : BindableGameOperator
 
 public record PerkDefinition(string localizedName, Image? backSprite, Image? iconSprite, Color perkColor, Color? specialColor)
 {
-    private List<(string orig, string replaced)> allReplacement = new();
+    private List<(string orig, Func<string> replaced)> allReplacement = new();
     
     public PerkDefinition(string localizedName, int backId, int iconId, Virial.Color perkColor, Virial.Color? specialColor = null) : this(localizedName, GetPerkBackIcon(backId), GetPerkIcon(iconId), perkColor.ToUnityColor(), specialColor?.ToUnityColor()) { }
     public PerkDefinition(string localizedName) : this(localizedName, null, null, Color.white, null) { }
@@ -130,15 +154,15 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
         return perk;
     }
 
-    public PerkDefinition AppendReplacement(string orig, string replaced)
+    public PerkDefinition AppendReplacement(string orig, Func<string> replaced)
     {
         allReplacement.Add((orig, replaced));
         return this;
     }
 
-    public PerkDefinition CooldownText(string orig, float cooldown) => AppendReplacement(orig, cooldown.ToString().Color(Color.red).Bold());
-    public PerkDefinition DurationText(string orig, float cooldown) => AppendReplacement(orig, cooldown.ToString().Color(Color.yellow).Bold());
-    public PerkDefinition RateText(string orig, float cooldown) => AppendReplacement(orig, cooldown.ToString().Color(Color.cyan).Bold());
+    public PerkDefinition CooldownText(string orig, Func<float> cooldown) => AppendReplacement(orig, () => cooldown.Invoke().ToString().Color(Color.red).Bold());
+    public PerkDefinition DurationText(string orig, Func<float> duration) => AppendReplacement(orig, () => duration.Invoke().ToString().Color(Color.yellow).Bold());
+    public PerkDefinition RateText(string orig, Func<float> rate) => AppendReplacement(orig, () => rate.Invoke().ToString().Color(Color.cyan).Bold());
 
     static public Image GetPerkIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Front" + id + ".png", 100f);
     static public Image GetPerkBackIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Back" + id + ".png", 100f);
@@ -148,7 +172,7 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
     private TextComponent DetailTextComponent => GUI.API.FunctionalTextComponent(() =>
     {
         var str = Language.Translate("perk." + localizedName + ".detail");
-        foreach (var replacement in allReplacement) str = str.Replace(replacement.orig, replacement.replaced);
+        foreach (var replacement in allReplacement) str = str.Replace(replacement.orig, replacement.replaced.Invoke());
         return str;
     });
     public GUIWidget GetPerkWidget()

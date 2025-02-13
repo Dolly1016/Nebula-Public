@@ -1,4 +1,4 @@
-﻿using Nebula.Compat;
+﻿
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using Nebula.Scripts;
@@ -80,6 +80,7 @@ public class NebulaImpl : INebula
             new AchievementToken<int>(id, num, (num, _) => num); 
     }
 
+    void INebula.RegisterTip(IDocumentTip tip) => DocumentTipManager.Register(tip);
     //ショートカット
     Virial.Configuration.Configurations Configurations => ConfigurationsAPI.API;
     Virial.Media.GUI GUILibrary => GUI.API;

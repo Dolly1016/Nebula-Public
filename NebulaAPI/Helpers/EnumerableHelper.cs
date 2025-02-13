@@ -48,4 +48,13 @@ public static class EnumerableHelper
         found = enumerable.FirstOrDefault(predicate);
         return found != null;
     }
+
+    static public int FindIndex<T>(this IReadOnlyList<T> list, Func<T, bool> predicate)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (predicate.Invoke(list[i])) return i;
+        }
+        return -1;
+    }
 }

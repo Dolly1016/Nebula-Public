@@ -1,4 +1,4 @@
-﻿using Nebula.Compat;
+﻿
 using Nebula.Game.Statistics;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Modifier;
@@ -172,10 +172,10 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
             }
         }
 
-        [Local]
-        void OnTargetDead(PlayerDieEvent ev)
+        [OnlyHost]
+        void OnTargetDead(PlayerDieOrDisconnectEvent ev)
         {
-            if (!CheckKillCondition && ev.Player == target && !MyPlayer.IsDead && ev is PlayerMurderedEvent)
+            if (!CheckKillCondition && ev.Player == target && !MyPlayer.IsDead && ev is PlayerMurderedEvent or PlayerDisconnectEvent)
             {
                 if (MeetingHud.Instance || ExileController.Instance)
                 {
@@ -185,7 +185,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
                 {
                     MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
                 }
-                new StaticAchievementToken("avenger.another1");
+                NebulaAchievementManager.RpcClearAchievement.Invoke(("avenger.another1", MyPlayer));
 
             }
         }

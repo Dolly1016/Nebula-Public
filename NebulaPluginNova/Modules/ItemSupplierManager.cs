@@ -32,6 +32,7 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
     protected override void OnInjected(Virial.Game.Game container) => this.Register(container);
 
     private MapObjectCondition? condition;
+    private Dictionary<string, int> spawnedNum = [];
     public MapObjectCondition MapObjectCondition { get
         {
             condition ??= new MapObjectCondition("itemSupplier", 8f);
@@ -43,6 +44,8 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
     public ItemSupplier? GetNearbySupplier(UnityEngine.Vector2 pos) => allSuppliers.MinBy(supplier => supplier.Position.Distance(pos));
     public void OnSupplierInstantiated(ItemSupplier supplier) => allSuppliers.Add(supplier);
 
+    private AchievementToken<int>? achTokenOmikuji = null;
+
     [OnlyHost]
     void OnGameStart(GameStartEvent ev)
     {
@@ -51,6 +54,8 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
 
         if(PlantsAreSpawnable) spawner?.Spawn(GeneralConfigurations.NumOfPlantsOption, 8f, "itemSupplier", ItemSupplier.MyAllplayersTag, MapObjectType.Reachable, [MapObjectCondition]);
         if(WarpedPlantsAreSpawnable) spawner?.Spawn(GeneralConfigurations.NumOfWarpedPlantsOption, 8f, "itemSupplier", ItemSupplier.MyNoncrewmateTag, MapObjectType.Reachable, [MapObjectCondition]);
+
+        if (Helpers.CurrentMonth == 1) achTokenOmikuji = new("omikuji", 0, (val, _) => val >= 5);
     }
 
     [OnlyHost]
@@ -107,6 +112,8 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
             SetPerkInner(ref ActiveNoncrewPerk, 50);
         else
             SetPerkInner(ref ActivePerk, 100);
+
+        if (perk != null && achTokenOmikuji != null) achTokenOmikuji.Value++;
     }
 
     private VirtualInput perkInput1 = NebulaInput.GetInput(VirtualKeyInput.PerkAction1);
@@ -133,7 +140,37 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
         return (nonCrewmate ? ActiveNoncrewPerk : ActivePerk)?.functionalInstance != null;
     }
 
+    public PerkFunctionalDefinition? SelectPerk(bool nonCrewmateOnly)
+    {
+        PerkFunctionalDefinition.Category category = nonCrewmateOnly ? PerkFunctionalDefinition.Category.NoncrewmateOnly : PerkFunctionalDefinition.Category.Standard;
+        var cand = Roles.Roles.AllPerks.Where(p => p.PerkCategory == category && p.SpawnRate.Value > 0 && GetNumOfLeftSpawnablePerks(p) > 0).ToArray();
 
+        if (cand.Length == 0) return null;
+
+        var sum = cand.Sum(p => p.SpawnRate.Value);
+        int num = System.Random.Shared.Next(sum);
+        foreach (var perk in cand)
+        {
+            if (perk.SpawnRate.Value > num) return perk;
+            num -= perk.SpawnRate.Value;
+        }
+
+        return cand.Random();
+    }
+
+    public void OnPerkSpawned(string? perkId)
+    {
+        if (perkId == null) return;
+        if (!spawnedNum.TryGetValue(perkId, out var num)) num = 0;
+        spawnedNum[perkId] = num + 1;
+    }
+
+    public int GetNumOfLeftSpawnablePerks(PerkFunctionalDefinition perk)
+    {
+        if (perk.MaxSpawnConfiguration == 0) return 1000;
+        if (!spawnedNum.TryGetValue(perk.Id, out var num)) num = 0;
+        return perk.MaxSpawnConfiguration - num;
+    }
 }
 
 
@@ -170,7 +207,7 @@ public class ItemSupplier : NebulaSyncStandardObject
             var supplierManager = ModSingleton<ItemSupplierManager>.Instance!;
             Virial.Media.GUIWidget widget, origWidget = holdingPerk!.PerkDefinition.GetPerkWidgetWithImage();
             
-            if (NebulaGameManager.Instance!.LocalPlayerInfo.IsDead)
+            if (GamePlayer.LocalPlayer.IsDead)
             {
                 widget = origWidget;
             }
@@ -178,8 +215,12 @@ public class ItemSupplier : NebulaSyncStandardObject
                 bool havePerkAlready = ModSingleton<ItemSupplierManager>.Instance!.HasPerk(NoncrewmateOnly);
                 Virial.Color color = !CanObtainForRole ? Virial.Color.Red : Virial.Color.Green;
                 string translationKey = !CanObtainForRole ? "perkui.message.noncrew" : havePerkAlready ? "perkui.message.swap" : "perkui.message.obtain";
+
+                Virial.Media.GUIWidget GetTextWidget(Virial.Color color, string translationKey) => GUI.API.Text(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), GUI.API.TextComponent(color, translationKey).Bold());
+
                 widget = GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
-                    GUI.API.Text(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), GUI.API.TextComponent(color, translationKey).Bold()),
+                    (NoncrewmateOnly && CanObtainForRole) ? GetTextWidget(Virial.Color.Red, "perkui.message.noncrewWarning") : null,
+                    GetTextWidget(color, translationKey),
                     origWidget);
             }
 
@@ -193,22 +234,8 @@ public class ItemSupplier : NebulaSyncStandardObject
         NebulaSyncObject.RegisterInstantiater(MyNoncrewmateTag, (args) => new ItemSupplier(new(args[0], args[1]), true));
     }
     
-    public void TryGainPerk() => RpcRequestGainPerk.Invoke((ObjectId, NebulaGameManager.Instance!.LocalPlayerInfo));
-    private PerkFunctionalDefinition SelectPerk()
-    {
-        PerkFunctionalDefinition.Category category = NoncrewmateOnly ? PerkFunctionalDefinition.Category.NoncrewmateOnly : PerkFunctionalDefinition.Category.Standard;
-        var cand = Roles.Roles.AllPerks.Where(p => p.PerkCategory == category && p.SpawnRate.Value > 0).ToArray();
+    public void TryGainPerk() => RpcRequestGainPerk.Invoke((ObjectId, GamePlayer.LocalPlayer));
 
-        var sum = cand.Sum(p => p.SpawnRate.Value);
-        int num = System.Random.Shared.Next(sum);
-        foreach(var perk in cand)
-        {
-            if (perk.SpawnRate.Value > num) return perk;
-            num -= perk.SpawnRate.Value;
-        }
-
-        return cand.Random();
-    }
     public void UpdateAge(int age, string? perkId)
     {
         this.age = age;
@@ -237,19 +264,26 @@ public class ItemSupplier : NebulaSyncStandardObject
 
         if (age != nextAge) {
             string perkId = "";
-            if (nextAge == 3) perkId = SelectPerk().Id;
+            if (nextAge == 3)
+            {
+                var selected = ModSingleton<ItemSupplierManager>.Instance.SelectPerk(NoncrewmateOnly);
+                if (selected != null)
+                    perkId = selected.Id;
+                else
+                    nextAge = 2;
+            }
             
             RpcUpdateAge.Invoke((ObjectId, nextAge, perkId));
         }
     }
 
-    bool CanObtainForRole => !NoncrewmateOnly || (!NebulaGameManager.Instance!.LocalPlayerInfo.IsCrewmate || NebulaGameManager.Instance!.LocalPlayerInfo.Role.Role == Roles.Crewmate.Madmate.MyRole);
+    bool CanObtainForRole => !NoncrewmateOnly || (!GamePlayer.LocalPlayer!.IsCrewmate || GamePlayer.LocalPlayer.Role.Role == Roles.Crewmate.Madmate.MyRole);
 
     void OnUpdate(GameUpdateEvent ev)
     {
         bool enabled = age == 3;
 
-        var player = NebulaGameManager.Instance.LocalPlayerInfo;
+        var player = GamePlayer.LocalPlayer;
         if (player.IsDead) enabled = false;
         if (!CanObtainForRole) enabled = false;
 
@@ -263,6 +297,7 @@ public class ItemSupplier : NebulaSyncStandardObject
             if (supplier == null) return;
 
             supplier.UpdateAge(message.age, message.perkId.Length == 0 ? null : message.perkId);
+            ModSingleton<ItemSupplierManager>.Instance?.OnPerkSpawned(message.perkId);
         });
     private static RemoteProcess<(int objectId, GamePlayer player)> RpcGainPerkAsHost = new("gainPerk",
         (message, _) =>

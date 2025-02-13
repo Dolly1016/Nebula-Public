@@ -53,6 +53,6 @@ public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
     
     void DecoratePlayerColor(PlayerDecorateNameEvent ev)
     {
-        if (ev.Player.IsImpostor && (NebulaGameManager.Instance?.LocalPlayerInfo.IsImpostor ?? false)) ev.Color = new(Palette.ImpostorRed);
+        if (ev.Player.IsImpostor && (GamePlayer.LocalPlayer?.IsImpostor ?? false)) ev.Color = new(Palette.ImpostorRed);
     }
 }

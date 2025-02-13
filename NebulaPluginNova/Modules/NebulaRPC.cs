@@ -1,4 +1,5 @@
 ﻿using Hazel;
+using InnerNet;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -56,7 +57,7 @@ public class NebulaRPCInvoker
         if (IsDummy)
             RPCRouter.SendDummy(localBodyProcess);
         else
-            RPCRouter.SendRpc("Invoker", hash, (writer) => sender.Invoke(writer), () => localBodyProcess.Invoke());
+            RPCRouter.SendRpc("Invoker", hash, (writer) => sender.Invoke(writer), () => localBodyProcess.Invoke(), true);
     }
 
     /// <summary>
@@ -78,7 +79,7 @@ public static class RPCRouter
             if (currentSection != this) return;
 
             currentSection = null;
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"End Evacuating Rpcs ({Name}, Size = {evacuateds.Count})");
+            //NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"End Evacuating Rpcs ({Name}, Size = {evacuateds.Count})");
 
             var rpcArray = evacuateds.ToArray();
             evacuateds.Clear();
@@ -92,9 +93,9 @@ public static class RPCRouter
             if (currentSection == null)
             {
                 currentSection = this;
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log,  $"Start Evacuating Rpcs ({Name})");
+                //NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log,  $"Start Evacuating Rpcs ({Name})");
             }else {
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Rpc section \"{Name}\" is in \"{currentSection.Name}\"! It is ignored.");
+                //NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Rpc section \"{Name}\" is in \"{currentSection.Name}\"! It is ignored.");
             }
         }
     }
@@ -113,15 +114,18 @@ public static class RPCRouter
         }
     }
 
-    public static void SendRpc(string name, int hash, Action<MessageWriter> sender, Action localBodyProcess) {
+    public static void SendRpc(string name, int hash, Action<MessageWriter> sender, Action localBodyProcess, bool shouldBeReliable) {
         if(currentSection == null)
         {
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 128, Hazel.SendOption.Reliable, -1);
+            MessageWriter writer;
+
+            writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 128, shouldBeReliable ? SendOption.Reliable : SendOption.None, -1);
             writer.Write(hash);
             sender.Invoke(writer);
             //NebulaPlugin.Log.Print("sent RPC:" + name + "(size:" + writer.Length + ")");
+
             AmongUsClient.Instance.FinishRpcImmediately(writer);
-            
+
 
             try
             {
@@ -151,9 +155,9 @@ public class RemoteProcessBase
 
     public int Hash { get; private set; } = -1;
     public string Name { get; private set; }
+    public bool ShouldBeReliable { get; private init; } = true;
 
-
-    public RemoteProcessBase(string name)
+    public RemoteProcessBase(string name, bool shouldBeReliable)
     {
         Hash = name.ComputeConstantHash();
         Name = name;
@@ -162,6 +166,7 @@ public class RemoteProcessBase
         else NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.System, name + " is registered. (" + Hash + ")");
 
         AllNebulaProcess[Hash] = this;
+        ShouldBeReliable = shouldBeReliable;
     }
 
     static Dictionary<string, RemoteProcess<object[]>> harmonyRpcMap = new();
@@ -309,6 +314,7 @@ public static class RemoteProcessAsset
                     writer.Write(sm.DirectionalNum.z);
                     writer.Write(sm.DirectionalNum.w);
                     writer.Write(sm.IsMultiplier);
+                    writer.Write(sm.CanBeAware);
                 }
                 else if (mod is SizeModulator sim)
                 {
@@ -343,7 +349,7 @@ public static class RemoteProcessAsset
                 int type = reader.ReadInt32();
 
                 if (type == 1)
-                    return new SpeedModulator(reader.ReadSingle(), new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag);
+                    return new SpeedModulator(reader.ReadSingle(), new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
                 else if (type == 2)
                     return new SizeModulator(new(reader.ReadSingle(), reader.ReadSingle()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean(), reader.ReadBoolean());
                 else if (type == 3)
@@ -356,7 +362,7 @@ public static class RemoteProcessAsset
         );
         defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj)?.Id ?? int.MaxValue), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
         defaultProcessDic[typeof(CommunicableTextTag)] = defaultProcessDic[typeof(TranslatableTag)];
-        defaultProcessDic[typeof(PlayerModInfo)] = ((writer, obj) => writer.Write(((PlayerModInfo)obj).PlayerId), (reader) => NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())!);
+        defaultProcessDic[typeof(PlayerModInfo)] = ((writer, obj) => writer.Write(((PlayerModInfo)obj)?.PlayerId ?? 255), (reader) => NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())!);
         defaultProcessDic[typeof(GamePlayer)] = defaultProcessDic[typeof(PlayerModInfo)];
         defaultProcessDic[typeof(INebulaAchievement)] = ((writer, obj) => writer.Write((ulong)((INebulaAchievement)obj).Id.ComputeConstantLongHash()), (reader) => (NebulaAchievementManager.TryGetAchievement((long)reader.ReadUInt64(), out var ach) ? ach : null)!);
     }
@@ -447,25 +453,25 @@ public class RemoteProcess<Parameter> : RemoteProcessBase
     private Func<MessageReader, Parameter> Receiver { get; set; }
     private Process Body { get; set; }
 
-    public RemoteProcess(string name, Action<MessageWriter, Parameter> sender, Func<MessageReader, Parameter> receiver, RemoteProcess<Parameter>.Process process)
-    : base(name)
+    public RemoteProcess(string name, Action<MessageWriter, Parameter> sender, Func<MessageReader, Parameter> receiver, RemoteProcess<Parameter>.Process process, bool shouldBeReliable = true)
+    : base(name, shouldBeReliable)
     {
         Sender = sender;
         Receiver = receiver;
         Body = process;
     }
 
-    public RemoteProcess(string name, RemoteProcess<Parameter>.Process process) : base(name)  
+    public RemoteProcess(string name, RemoteProcess<Parameter>.Process process, bool shouldBeReliable = true) : base(name, shouldBeReliable)  
     {
         Body = process;
         RemoteProcessAsset.GetMessageTreater<Parameter>(out var sender,out var receiver);
         Sender = sender;
         Receiver = receiver;
     }
-    
+
     public void Invoke(Parameter parameter)
     {
-        RPCRouter.SendRpc(Name,Hash,(writer)=>Sender(writer,parameter),()=>Body.Invoke(parameter,true));
+        RPCRouter.SendRpc(Name,Hash,(writer)=>Sender(writer,parameter),()=>Body.Invoke(parameter,true), ShouldBeReliable);
     }
 
     public NebulaRPCInvoker GetInvoker(Parameter parameter)
@@ -505,7 +511,7 @@ public static class RemotePrimitiveProcess
 public class CombinedRemoteProcess : RemoteProcessBase
 {
     public static CombinedRemoteProcess CombinedRPC = new();
-    CombinedRemoteProcess() : base("CombinedRPC") { }
+    CombinedRemoteProcess() : base("CombinedRPC", true) { }
 
     public override void Receive(MessageReader reader)
     {
@@ -538,7 +544,7 @@ public class CombinedRemoteProcess : RemoteProcessBase
                     invoker.InvokeLocal();
             }
         },
-        () => { });
+        () => { }, ShouldBeReliable);
     }
 }
 
@@ -546,15 +552,15 @@ public class RemoteProcess : RemoteProcessBase
 {
     public delegate void Process(bool isCalledByMe);
     private Process Body { get; set; }
-    public RemoteProcess(string name, Process process)
-    : base(name)
+    public RemoteProcess(string name, Process process, bool shouldBeReliable = true)
+    : base(name, shouldBeReliable)
     {
         Body = process;
     }
 
     public void Invoke()
     {
-        RPCRouter.SendRpc(Name, Hash, (writer) => { }, () => Body.Invoke(true));
+        RPCRouter.SendRpc(Name, Hash, (writer) => { }, () => Body.Invoke(true), ShouldBeReliable);
     }
 
     public NebulaRPCInvoker GetInvoker()
@@ -585,7 +591,7 @@ public class DivisibleRemoteProcess<Parameter, DividedParameter> : RemoteProcess
     private Process Body { get; set; }
 
     public DivisibleRemoteProcess(string name, Func<Parameter,IEnumerator<DividedParameter>> divider, Action<MessageWriter, DividedParameter> dividedSender, Func<MessageReader, DividedParameter> receiver, DivisibleRemoteProcess<Parameter, DividedParameter>.Process process)
-    : base(name)
+    : base(name, true)
     {
         Divider = divider;
         DividedSender = dividedSender;
@@ -594,7 +600,7 @@ public class DivisibleRemoteProcess<Parameter, DividedParameter> : RemoteProcess
     }
 
     public DivisibleRemoteProcess(string name, Func<Parameter, IEnumerator<DividedParameter>> divider, DivisibleRemoteProcess<Parameter, DividedParameter>.Process process)
-    : base(name)
+    : base(name, true)
     {
         Divider = divider;
         RemoteProcessAsset.GetMessageTreater<DividedParameter>(out var sender,out var receiver);
@@ -607,7 +613,7 @@ public class DivisibleRemoteProcess<Parameter, DividedParameter> : RemoteProcess
     {
         void dividedSend(DividedParameter param)
         {
-            RPCRouter.SendRpc(Name, Hash, (writer) => DividedSender(writer, param), () => Body.Invoke(param, true));
+            RPCRouter.SendRpc(Name, Hash, (writer) => DividedSender(writer, param), () => Body.Invoke(param, true), false);
         }
         var enumerator = Divider.Invoke(parameter);
         while (enumerator.MoveNext()) dividedSend(enumerator.Current);
@@ -794,21 +800,26 @@ public class RPCScheduler
 }
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
-class NebulaRPCHandlerPatch
+class NebulaRPCInGameHandlerPatch
 {
-    static void Postfix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
+    static public void ReceiveMessage(MessageReader reader)
     {
-        if (callId != 128) return;
-
         int id = reader.ReadInt32();
-        if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id,out var rpc))
+        if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id, out var rpc))
         {
             rpc.Receive(reader);
         }
         else
         {
             NebulaPlugin.Log.Print("RPC NotFound Error. id: " + id);
-            throw new Exception("RPC Error Occurred.");
+            throw new Exception("RPC Error Occurred. (Not found: " + id + ")");
         }
+    }
+
+    static void Postfix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
+    {
+        if (callId != 128) return;
+
+        ReceiveMessage(reader);
     }
 }

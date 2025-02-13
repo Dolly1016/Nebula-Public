@@ -5,6 +5,8 @@ public interface GameEnd
     internal int Priority { get; }
     internal byte Id { get; }
     bool AllowWin { get; }
+    public string DisplayText { get; }
+    internal UnityEngine.Color Color { get; }
 }
 
 public interface ExtraWin
@@ -70,12 +72,16 @@ public class EndState
     public BitMask<ExtraWin> ExtraWins { get; private init; }
     public GameEndReason EndReason { get; private init; }
     public GameEnd EndCondition { get; private init; }
+    public GameEndReason OriginalEndReason { get; private init; }
+    public GameEnd OriginalEndCondition { get; private init; }
 
-    public EndState(BitMask<Virial.Game.Player> winners, GameEnd endCondition, GameEndReason reason, BitMask<ExtraWin> extraWins)
+    public EndState(BitMask<Virial.Game.Player> winners, GameEnd endCondition, GameEndReason reason, GameEnd originalEndCondition, GameEndReason originalReason, BitMask<ExtraWin> extraWins)
     {
         this.Winners = winners;
         this.EndCondition = endCondition;
         this.ExtraWins = extraWins;
         EndReason = reason;
+        this.OriginalEndCondition = originalEndCondition;
+        this.OriginalEndReason = originalReason;
     }
 }

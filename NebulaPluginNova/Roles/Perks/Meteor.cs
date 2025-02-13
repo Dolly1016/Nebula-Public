@@ -81,7 +81,7 @@ internal class Meteor : PerkFunctionalInstance
             }, FunctionalLifespan.GetTimeLifespan(duration + AfterFireDuration));
             GameOperatorManager.Instance?.Register<CheckCanPushEmergencyButtonEvent>(ev => ev.DenyButton("perk.meteor.meetingButtonText"), FunctionalLifespan.GetTimeLifespan(duration + AfterFireDuration));
 
-            var player = NebulaGameManager.Instance?.LocalPlayerInfo;
+            var player = GamePlayer.LocalPlayer;
             float alertTime = 0f;
 
             var fullscreen = AmongUsUtil.GenerateFullscreen(Palette.ImpostorRed.AlphaMultiplied(0.5f));
@@ -142,7 +142,7 @@ internal class Meteor : PerkFunctionalInstance
                 yield return Effects.Wait(0.05f);
             }
 
-            var localPlayer = NebulaGameManager.Instance!.LocalPlayerInfo;
+            var localPlayer = GamePlayer.LocalPlayer;
             var playerPos = localPlayer.Position;
             float distance = playerPos.Distance(pos);
             if (anotherPos.Length == 0 || distance < anotherPos.Min(p => playerPos.Distance(p)))

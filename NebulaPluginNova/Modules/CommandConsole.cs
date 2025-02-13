@@ -49,7 +49,7 @@ public class CommandConsole
             IEnumerator CoExecute()
             {
                 IsShown = false;
-                yield return CommandManager.CoExecute(CommandManager.ParseRawCommand(text), new(NebulaGameManager.Instance?.LocalPlayerInfo ?? Guest, ThroughCommandModifier.Modifier, myLogger)).CoWait().HighSpeedEnumerator();
+                yield return CommandManager.CoExecute(CommandManager.ParseRawCommand(text), new(GamePlayer.LocalPlayer ?? Guest, ThroughCommandModifier.Modifier, myLogger)).CoWait().HighSpeedEnumerator();
             }
             NebulaManager.Instance.StartCoroutine(CoExecute().WrapToIl2Cpp());
 

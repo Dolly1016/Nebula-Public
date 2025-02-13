@@ -22,7 +22,7 @@ public static class PlayerStartPatch
             Effects.Action((Il2CppSystem.Action)(()=>
             {
                 __instance.SetColor(__instance.PlayerId);
-                if (PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
+                if (PlayerControl.LocalPlayer) DynamicPalette.RpcShareMyColor();
             }))
             );
 
@@ -78,6 +78,8 @@ public static class PlayerUpdatePatch
     {
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) yield return p.cosmetics.currentBodySprite.BodySprite;
         foreach (var d in Helpers.AllDeadBodies()) foreach (var r in d.bodyRenderers) yield return r;
+        if (ShipStatus.Instance) foreach (var v in ShipStatus.Instance.AllVents) yield return v.myRend;
+        foreach (var cc in ModSingleton<CustomConsoleManager>.Instance.AllCustomConsoles) yield return cc.Renderer;
     }
 
     static void Prefix(PlayerControl __instance)
@@ -115,10 +117,18 @@ public static class PlayerUpdatePatch
             NebulaGameManager.Instance.OnFixedUpdate();
 
             //ペット・レポートボタンの使用可否
-            if (HudManager.InstanceExists && NebulaGameManager.Instance.LocalPlayerInfo.IsDived)
+            if (HudManager.InstanceExists && GamePlayer.LocalPlayer.IsDived)
             {
                 HudManager.Instance.ReportButton.SetDisabled();
                 HudManager.Instance.PetButton.SetDisabled();
+            }
+
+            if(__instance.inVent && Vent.currentVent)
+            {
+                Vector2 vector = Vent.currentVent.transform.position;
+                vector -= __instance.Collider.offset;
+
+                if(__instance.MyPhysics.body.transform.position.Distance(vector) > 0.001f) __instance.NetTransform.RpcSnapTo(vector);
             }
         }
         
@@ -152,7 +162,7 @@ public static class PlayerAddSystemTaskPatch
         if (!__instance.AmOwner) return;
 
         var task = __instance.myTasks[__instance.myTasks.Count - 1];
-        GameOperatorManager.Instance?.Run(new PlayerSabotageTaskAddLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, task));
+        GameOperatorManager.Instance?.Run(new PlayerSabotageTaskAddLocalEvent(GamePlayer.LocalPlayer, task));
     }
 }
 
@@ -163,7 +173,7 @@ public static class PlayerRemoveTaskPatch
     {
         if (__instance.AmOwner)
         {
-            GameOperatorManager.Instance?.Run(new PlayerTaskRemoveLocalEvent(NebulaGameManager.Instance!.LocalPlayerInfo, task));
+            GameOperatorManager.Instance?.Run(new PlayerTaskRemoveLocalEvent(GamePlayer.LocalPlayer, task));
             Debug.Log("Remove Task");
         }
     }
@@ -303,6 +313,7 @@ class PlayerDisconnectPatch
         unboxed.IsDisconnected = true;
         unboxed.MyState = PlayerState.Disconnected;
 
+        GameOperatorManager.Instance?.Run(new PlayerDisconnectEvent(unboxed), true);
         NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Disconnect, player.PlayerId, 0){ RelatedTag = EventDetail.Disconnect }) ;
     }
 }
@@ -369,8 +380,11 @@ class VelocityPatch
     {
         if (__instance.AmOwner && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
         {
+            var player = GamePlayer.LocalPlayer;
+            if (player == null) return;
+
             var vec = __instance.body.velocity;
-            var mat = NebulaGameManager.Instance!.LocalPlayerInfo!.Unbox().DirectionalPlayerSpeed;
+            var mat = GamePlayer.LocalPlayer!.Unbox().DirectionalPlayerSpeed;
             vec = new(vec.x * mat.x + vec.y * mat.y, vec.x * mat.z + vec.y * mat.w);
 
             __instance.body.velocity = vec;
@@ -680,15 +694,18 @@ class CustomNetworkTransformPatch
 
     public static void Postfix(CustomNetworkTransform __instance)
     {
-        if (GeneralConfigurations.LowLatencyPlayerSyncOption && AmongUsUtil.IsCustomServer())
+        if (PlayerControl.LocalPlayer)
         {
-            if (__instance.myPlayer.AmOwner && __instance.sendQueue.Count == 1)
+            if (GeneralConfigurations.LowLatencyPlayerSyncOption && AmongUsUtil.IsCustomServer())
             {
-                __instance.lastSequenceId++;
-                var pos = __instance.sendQueue.Dequeue();
-                RpcSendMovementImmediately.Invoke((__instance.myPlayer.PlayerId, pos, __instance.lastSequenceId));
-                __instance.lastPosSent = pos;
-                __instance.ClearDirtyBits();
+                if (__instance.myPlayer.AmOwner && __instance.sendQueue.Count == 1)
+                {
+                    __instance.lastSequenceId++;
+                    var pos = __instance.sendQueue.Dequeue();
+                    RpcSendMovementImmediately.Invoke((__instance.myPlayer.PlayerId, pos, __instance.lastSequenceId));
+                    __instance.lastPosSent = pos;
+                    __instance.ClearDirtyBits();
+                }
             }
         }
     }
@@ -708,6 +725,5 @@ class CustomNetworkTransformPatch
                     player.NetTransform.incomingPosQueue.Enqueue(message.pos);
                 }
             }
-        }
-        );
+        }, false);
 }

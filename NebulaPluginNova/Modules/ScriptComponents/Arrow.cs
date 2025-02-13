@@ -76,16 +76,17 @@ public class Arrow : INebulaScriptComponent, IGameOperator
         if (!arrowRenderer) return;
 
         //視点中心からのベクトル
-        Camera main = UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
+
+        //表示するカメラ
+        Camera main = NebulaGameManager.Instance?.WideCamera.Camera ?? UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
 
         //距離を測るための表示用のカメラ
         Camera worldCam = (NebulaGameManager.Instance?.WideCamera.IsShown ?? false) ? NebulaGameManager.Instance.WideCamera.Camera : Camera.main;
 
-        //見た目上の矢印の位置のベクトル
-        Vector2 vector = (TargetPos - (Vector2)main.transform.position) / (worldCam.orthographicSize / 3f);
+        Vector2 del = (TargetPos - (Vector2)main.transform.position);
 
         //目的地との見た目上の離れ具合
-        float num = vector.magnitude / (main.orthographicSize * perc);
+        float num = del.magnitude / (worldCam.orthographicSize * perc);
 
         //近くの矢印を隠す
         bool flag = IsActive && (!IsSmallenNearPlayer || (double)num > 0.3);
@@ -103,7 +104,7 @@ public class Arrow : INebulaScriptComponent, IGameOperator
             else
             {
                 //画面内を指す矢印
-                arrowRenderer.transform.localPosition = (vector - (OnJustPoint ? Vector2.zero : vector.normalized * (WithSmallArrow ? 0.9f : 0.6f))).AsVector3(2f);
+                arrowRenderer.transform.localPosition = (del - (OnJustPoint ? Vector2.zero : del.normalized * (WithSmallArrow ? 0.9f : 0.6f) * (worldCam.orthographicSize / Camera.main.orthographicSize))).AsVector3(2f);
                 arrowRenderer.transform.localScale = IsSmallenNearPlayer ? Vector3.one * Mathf.Clamp(num, 0f, 1f) : Vector3.one;
             }
         }
@@ -120,18 +121,22 @@ public class Arrow : INebulaScriptComponent, IGameOperator
             arrowRenderer.transform.localScale = Vector3.one;
         }
 
-        vector.Normalize();
+        arrowRenderer.transform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
+
+
+        //角度の計算のために正規化する(しなくてもいいのかも)
+        del.Normalize();
 
         if(FixedAngle)
             arrowRenderer.transform.eulerAngles = new Vector3(0f, 0f, 0f);
         else
-            arrowRenderer.transform.eulerAngles = new Vector3(0f, 0f, Mathf.Atan2(vector.y, vector.x) * 180f / Mathf.PI);
+            arrowRenderer.transform.eulerAngles = new Vector3(0f, 0f, Mathf.Atan2(del.y, del.x) * 180f / Mathf.PI);
 
         if(smallRenderer != null)
         {
             if (FixedAngle)
             {
-                var angle = Mathf.Atan2(vector.y, vector.x) * 180f / Mathf.PI;
+                var angle = Mathf.Atan2(del.y, del.x) * 180f / Mathf.PI;
                 smallRenderer.transform.localPosition = Vector3.right.RotateZ(angle) * 0.45f;
                 smallRenderer.transform.eulerAngles = new Vector3(0f, 0f, angle);
             }

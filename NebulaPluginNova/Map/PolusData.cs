@@ -50,49 +50,62 @@ public class PolusData : MapData
     ];
 
     static private MapObjectPoint[] mapObjectPoints = [
+        new(18.8f, -1.0f, MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ右上
         new(16.7f, -2.2f, MapObjectType.Reachable), //ドロップシップ中央
         new(18.5f, -5.6f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ドロップシップ右下
-        new(14.7f, -3.9f,MapObjectType.SmallInCorner), //ドロップシップ左下
+        new(14.7f, -3.9f,MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ左下
         new(20.6f, -7.9f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ドロップシップ右下外
-        new(3.7f, -7.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //左リアクター下
-        new(7.0f, -13.1f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //配電盤
-        new(3.6f, -11.4f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //セキュリティ
-        new(4.9f, -16.7f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //O2上通路
+        new(21.3f, -6.7f, MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ右下給油横
+        new(3.7f, -7.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //左リアクター下
+        new(7.0f, -13.1f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //配電盤
+        new(3.6f, -11.4f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //セキュリティ
+        new(4.9f, -16.7f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //O2上通路
         new(1.2f, -17.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //O2グリーン
+        new(0.6f, -15.7f, MapObjectType.SmallOrTabletopOutOfSight),//O2グリーン左上
         new(1.9f, -20.3f,MapObjectType.SmallInCorner), //O2缶タスク
+        new(1.2f, -18.7f, MapObjectType.SmallOrTabletopOutOfSight), //O2缶タスク上
         new(0.6f, -21.8f, MapObjectType.Reachable), //O2缶タスク前
-        new(2.3f, -24.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ボイラー
-        new(5.0f, -25.0f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //O2,Weapon間左
-        new(8.8f, -25.4f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //O2,Weapon間右
+        new(2.3f, -24.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ボイラー
+        new(5.0f, -25.0f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //O2,Weapon間左
+        new(8.8f, -25.4f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //O2,Weapon間右
         new(9.5f, -17.1f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //コミュ左
-        new(12.7f, -17.4f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //コミュ中
+        new(9.5f, -15.9f, MapObjectType.SmallOrTabletopOutOfSight), //コミュ左、上方
+        new(6.7f, -17.3f, MapObjectType.SmallOrTabletopOutOfSight), //コミュ左O2寄り
+        new(12.7f, -17.4f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //コミュ中
         new(14.2f, -21.2f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //武器庫上
-        new(12.5f, -24.6f, MapObjectType.Reachable), //武器庫中
+        new(12.5f, -24.6f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //武器庫中
         new(17.9f, -13.2f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ストレージ下
         new(19.9f, -10.8f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ストレージ中
+        new(19.8f, -12.4f, MapObjectType.SmallOrTabletopOutOfSight), //ストレージ左下
         new(25.2f, -7.8f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボドリル
-        new(32.1f, -10.0f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ中央左
+        new(28.1f, -7.4f, MapObjectType.SmallOrTabletopOutOfSight), //ラボドリル右
+        new(32.1f, -10.0f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ラボ中央左
         new(29.6f, -8.2f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボドリル右の部屋
         new(34.9f, -5.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //望遠鏡
-        new(40.6f, -8.0f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ右端
+        new(40.6f, -8.0f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ラボ右端
         new(34.9f, -10.4f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボトイレ
-        new(26.3f, -14.1f,MapObjectType.Reachable), //大岩前
-        new(32.0f, -13.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //溶岩湖上
+        new(26.3f, -14.1f,MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //大岩前
+        new(32.0f, -13.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //溶岩湖上
         new(30.9f, -17.2f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //オフィス右
         new(18.7f, -18.7f, MapObjectType.SmallInCorner), //会議室
-        new(16.9f, -25.9f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //オフィス左下
-        new(22.2f, -25.2f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //アドミン下
+        new(21.6f, -16.3f, MapObjectType.SmallOrTabletopOutOfSight), //会議室右上
+        new(16.9f, -25.9f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //オフィス左下
+        new(22.2f, -25.2f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //アドミン下
         new(22.4f, -20.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //アドミン上
-        new(25.0f, -25.2f, MapObjectType.SmallInCorner), //下除染
+        new(25.0f, -25.2f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //下除染
         new(28.1f, -24.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //スペシメン左通路下
-        new(27.3f, -20.3f, MapObjectType.SmallInCorner), //スペシメン左通路上
-        new(35.1f, -22.0f, MapObjectType.SmallInCorner), //スペシメン左下
-        new(37.4f, -22.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //スペシメン右下
+        new(27.3f, -20.5f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //スペシメン左通路上
+        new(35.1f, -22.0f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //スペシメン左下
+        new(37.4f, -22.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //スペシメン右下
         new(39.4f, -18.5f, MapObjectType.SmallInCorner), //スペシメン上通路下
-        new(40.6f, -10.4f, MapObjectType.SmallInCorner), //上除染
+        new(40.6f, -10.4f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //上除染
     ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;
     protected override Vector2[] NonMapArea => [];
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Laboratory, SystemTypes.Comms, SystemTypes.Electrical };
+
+    private static IDividedSpriteLoader SealedVentSpritePolus = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedVentPolus.png", 100f, 8, 2);
+    protected override IDividedSpriteLoader SealedVentSprite => SealedVentSpritePolus;
+    override public bool IsSealableDoor(OpenableDoor door) => !(door.name is "DeconDoorOuter" or "DeconDoorInner");
 }

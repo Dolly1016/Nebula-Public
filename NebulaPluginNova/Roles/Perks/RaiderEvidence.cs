@@ -11,7 +11,7 @@ namespace Nebula.Roles.Perks;
 internal class RaiderEvidence : PerkFunctionalInstance
 {
     const float CoolDown = 10f;
-    static PerkFunctionalDefinition Def = new("raiderEvidence", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("raiderEvidence", 3, 38, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", CoolDown), (def, instance) => new RaiderEvidence(def, instance));
+    static PerkFunctionalDefinition Def = new("raiderEvidence", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("raiderEvidence", 3, 38, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", () => CoolDown), (def, instance) => new RaiderEvidence(def, instance));
 
     public RaiderEvidence(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {
@@ -27,6 +27,7 @@ internal class RaiderEvidence : PerkFunctionalInstance
     {
         if (cooldownTimer.IsProgressing) return;
         if (!(axe?.CanThrow ?? false)) return;
+        if (MyPlayer.IsDead) return;
 
         NebulaSyncObject.RpcInstantiate(Raider.RaiderAxe.MyGlobalFakeTag, [MyPlayer.PlayerId, axe!.Position.x, axe!.Position.y]);
 
@@ -41,12 +42,12 @@ internal class RaiderEvidence : PerkFunctionalInstance
     void OnUpdate(GameHudUpdateEvent ev)
     {
         PerkInstance.SetDisplayColor(cooldownTimer.IsProgressing ? Color.gray : Color.white);
-        if(cooldownTimer.IsProgressing && axe != null)
+        if((cooldownTimer.IsProgressing || MyPlayer.IsDead) && axe != null)
         {
             NebulaSyncObject.LocalDestroy(axe.ObjectId);
             axe = null;
         }
-        if(!cooldownTimer.IsProgressing && axe == null && MyPlayer.Role.Role != Impostor.Raider.MyRole)
+        if(!cooldownTimer.IsProgressing && axe == null && MyPlayer.Role.Role != Impostor.Raider.MyRole && !MyPlayer.IsDead)
         {
             axe = (NebulaSyncObject.LocalInstantiate(Raider.RaiderAxe.MyLocalFakeTag, [MyPlayer.PlayerId]).SyncObject as Raider.RaiderAxe)!;
         }

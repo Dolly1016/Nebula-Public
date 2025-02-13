@@ -237,7 +237,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
                 while (true)
                 {
-                    if (MeetingHud.Instance || MyPlayer.IsDead || MyRifle == null) break;
+                    if (MeetingHud.Instance || MyPlayer.IsDead || MyRifle == null || IsDeadObject) break;
 
                     if (player.Data.IsDead && !deadBody) deadBody = Helpers.GetDeadBody(player.PlayerId);
 
@@ -252,6 +252,11 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
                     pos = player.Data.IsDead ? deadBody!.transform.position : player.transform.position;
                     tempDir = (pos - (Vector2)PlayerControl.LocalPlayer.transform.position).normalized;
+
+                    NebulaGameManager.Instance!.WideCamera.CheckPlayerState(out var localScale, out var localRotateZ);
+                    tempDir.x *= localScale.x;
+                    tempDir.y *= localScale.y;
+
                     if (isFirst)
                     {
                         dir = tempDir;
@@ -261,9 +266,9 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                     {
                         dir = (tempDir + dir).normalized;
                     }
-                    
-                    float angle = Mathf.Atan2(dir.y, dir.x);
-                    renderer.transform.eulerAngles = new Vector3(0, 0, angle * 180f / (float)Math.PI);
+
+                    float angle = Mathf.Atan2(dir.y, dir.x) + localRotateZ.DegToRad();
+                    renderer.transform.eulerAngles = new Vector3(0, 0, angle.RadToDeg());
                     renderer.transform.localPosition = new Vector3(Mathf.Cos(angle) * 2f, Mathf.Sin(angle) * 2f, -30f);
 
                     t += Time.deltaTime / 0.8f;

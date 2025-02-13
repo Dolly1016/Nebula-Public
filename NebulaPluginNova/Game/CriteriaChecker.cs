@@ -7,6 +7,7 @@ using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 
 namespace Nebula.Game;
 
@@ -21,6 +22,7 @@ public class NebulaEndCriteria
         DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new JackalCriteria().Register(NebulaAPI.CurrentGame!));
         DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new LoversCriteria().Register(NebulaAPI.CurrentGame!));
         DIManager.Instance.RegisterGeneralModule<IGameModeStandard>(() => new JesterCriteria().Register(NebulaAPI.CurrentGame!));
+
     }
 
 
@@ -118,8 +120,8 @@ public class NebulaEndCriteria
                 if (p.IsDead) continue;
                 totalAlive++;
 
-                //Loversではないインポスターのみカウントに入れる
-                if (p.Role.Role.Team == Impostor.MyTeam && !p.Unbox().TryGetModifier<Lover.Instance>(out _)) impostors++;
+                //相方生存Loversではないインポスターのみカウントに入れる
+                if (p.Role.Role.Team == Impostor.MyTeam && (!p.Unbox().TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover)) impostors++;
 
                 //ジャッカル陣営が生存している間は勝利できない
                 if (p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return;
@@ -131,40 +133,59 @@ public class NebulaEndCriteria
 
     private class JackalCriteria : IModule, IGameOperator
     {
+        List<Jackal.Instance> allAliveJackals = [];
         [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
-            int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead);
-
+            int totalAlive = 0;
+            bool leftImpostors = false;
             bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
 
-            int totalAliveAllJackals = 0;
-
-            //全体の生存しているジャッカルの人数を数えると同時に、ジャッカル陣営が勝利できない状況なら調べるのをやめる
+            //全生存者数を数えつつ、インポスターが生存していたらチェックをやめる
+            allAliveJackals.Clear();
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDead) continue;
 
-                if (isJackalTeam(p)) totalAliveAllJackals++;
-
-                //ラバーズが生存している間は勝利できない
-                if (p.Unbox().TryGetModifier<Lover.Instance>(out _)) return;
                 //インポスターが生存している間は勝利できない
-                if (p.Role.Role.Team == Impostor.MyTeam) return;
+                if (p.Role.Role.Team == Impostor.MyTeam) leftImpostors = true;
+                if (p.Role is Jackal.Instance jRole) allAliveJackals.Add(jRole);
+                totalAlive++;
             }
 
+            
+
+            ulong jackalMask = 0;
+            int teamCount = 0;
+            int winningJackalTeams = 0;
+            ulong completeWinningJackalMask = 0;
+
             //全ジャッカルに対して、各チームごとに勝敗を調べる
-            foreach (var jackal in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.IsDead && p.Role.Role == Roles.Neutral.Jackal.MyRole))
+            foreach (var jackal in allAliveJackals)
             {
-                var jRole = (jackal.Role as Roles.Neutral.Jackal.Instance);
-                if (!(jRole?.CanWinDueToKilling ?? false)) continue;
+                //ジャッカル陣営の数をカウントする
+                ulong myMask = 1ul << jackal!.JackalTeamId;
+                if ((jackalMask & myMask) == 0) teamCount++;
+                else continue; //既に考慮したチームはスキップしてよい
+                jackalMask |= myMask;
 
-                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && (jRole!.IsSameTeam(p)));
-                
-                //他のJackal陣営が生きていたら勝利できない
-                if (aliveJackals < totalAliveAllJackals) continue;
+                //死亡しておらず、同チーム、かつラバーズでないか相方死亡ラバー
+                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && jackal!.IsSameTeam(p) && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover));
 
-                if (aliveJackals * 2 >= totalAlive) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JackalWin, GameEndReason.Situation);
+
+                //完全殲滅勝利
+                if (aliveJackals == totalAlive) completeWinningJackalMask |= myMask;
+                //キル勝利
+                if (aliveJackals * 2 >= totalAlive && !leftImpostors) winningJackalTeams++;
+            }
+
+            //キル勝利のトリガー
+            if(teamCount == 1 && winningJackalTeams > 0) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JackalWin, GameEndReason.Situation);
+            //完全殲滅勝利のトリガー
+            if(completeWinningJackalMask != 0)
+            {
+                allAliveJackals.Do(j => j.IsDefeatedJackal = (completeWinningJackalMask & (1ul << j.JackalTeamId)) == 0ul);
+                NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JackalWin, GameEndReason.Situation);
             }
         }
     };

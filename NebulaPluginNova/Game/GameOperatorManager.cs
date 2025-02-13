@@ -147,7 +147,7 @@ public class GameOperatorManager
                     o.action.Invoke(e);
                 }catch (Exception ex)
                 {
-                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, ex.ToString());
+                    NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, ex.ToString());
                 }
                 return false;
             });

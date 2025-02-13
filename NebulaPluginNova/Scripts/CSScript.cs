@@ -1,6 +1,7 @@
 ﻿using Cpp2IL.Core.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
@@ -20,6 +21,21 @@ internal class AddonBehaviour
 
 internal record AddonScript(Assembly Assembly, NebulaAddon Addon, MetadataReference Reference, AddonBehaviour Behaviour);
 
+internal static class LibraryLoader
+{
+    private static ZipArchive? archive = null;
+    static public byte[]? OpenLibrary(string libraryName)
+    {
+        if(archive == null)
+        {
+            var libs = StreamHelper.OpenFromResource("Nebula.Resources.Libs.zip");
+            archive = new ZipArchive(libs!, ZipArchiveMode.Read);
+            archive.Entries.Do(e => Debug.Log(e.FullName));
+        }
+
+        return archive.GetEntry("Libs/" + libraryName)?.Open().ReadBytes();
+    }
+}
 
 [NebulaPreprocess(PreprocessPhase.CompileAddons)]
 internal static class AddonScriptManagerLoader
@@ -31,10 +47,10 @@ internal static class AddonScriptManagerLoader
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Collections.Immutable.dll")!.ReadBytes());
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.System.Reflection.Metadata.dll")!.ReadBytes());
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.dll")!.ReadBytes());
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.Scripting.Microsoft.CodeAnalysis.CSharp.dll")!.ReadBytes());
+        Assembly.Load(LibraryLoader.OpenLibrary("System.Collections.Immutable.dll")!);
+        Assembly.Load(LibraryLoader.OpenLibrary("System.Reflection.Metadata.dll")!);
+        Assembly.Load(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.dll")!);
+        Assembly.Load(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.CSharp.dll")!);
         
         yield return AddonScriptManager.CoLoad(assemblies);
     }
@@ -97,7 +113,7 @@ internal static class AddonScriptManager
             {
                 //全Internal, Privateメンバにアクセスできるようにする
                 var topLevelBinderFlagsProperty = typeof(CSharpCompilationOptions).GetProperty("TopLevelBinderFlags", BindingFlags.Instance | BindingFlags.NonPublic)!;
-                topLevelBinderFlagsProperty.SetValue(compilationOptions, (uint)1 << 22);
+                topLevelBinderFlagsProperty.SetValue(myCompilationOptions, (uint)1 << 22);
             }
 
             var compilation = CSharpCompilation.Create("Script." + addon.Id.HeadUpper(), trees, ReferenceAssemblies, myCompilationOptions)

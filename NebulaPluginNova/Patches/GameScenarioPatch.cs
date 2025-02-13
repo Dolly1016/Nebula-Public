@@ -1,4 +1,7 @@
-﻿using Virial;
+﻿using InnerNet;
+using Nebula.Behaviour;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using Virial;
 
 namespace Nebula.Patches;
 
@@ -83,5 +86,24 @@ static class CreateOnlineGamePatch
     static void Prefix(AmongUsClient __instance)
     {
         ConfigurationValues.RestoreAll();
+    }
+}
+
+[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoStartGameHost))]
+static class CoStartGameHostPatch
+{
+    static void Postfix(AmongUsClient __instance, ref Il2CppSystem.Collections.IEnumerator __result)
+    {
+        var original = __result;
+        System.Collections.IEnumerator CoStartGameHostMod()
+        {
+            byte originalMapId = GameOptionsManager.Instance.normalGameHostOptions.MapId;
+            //GameOptionsManager.Instance.normalGameHostOptions.MapId = 1;
+            //ここで、マップをスポーンさせる前にランダムマップ生成用のパラメータを共有する
+            yield return original;
+            GameOptionsManager.Instance.normalGameHostOptions.MapId = originalMapId;
+        }
+
+        __result = CoStartGameHostMod().WrapToIl2Cpp();
     }
 }

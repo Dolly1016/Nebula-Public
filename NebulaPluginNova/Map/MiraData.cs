@@ -43,36 +43,49 @@ public class MiraData : MapData
     };
 
     static private MapObjectPoint[] mapObjectPoints = [
-        new(-3.0f, 3.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ドロップシップ右上
-        new(-5.7f, -2.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ドロップシップ下外
-        new(1.4f, -0.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ドロップシップ下通路右方
+        new(-3.0f, 3.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ右上
+        new(-5.7f, -2.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ下外
+        new(1.4f, -0.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ下通路右方
+        new(8.5f, -1.9f,MapObjectType.SmallOrTabletopOutOfSight), //メッドベイ、O2復旧コンソール間
         new(13.2f, -1.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //メッドベイ左外
-        new(16.7f, -1.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //メッドベイ右下
-        new(14.1f, 2.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //コミュ左下
+        new(16.7f, -1.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //メッドベイ右下
+        new(14.1f, 2.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable| MapObjectType.SmallOrTabletopOutOfSight), //コミュ左下
+        new(16.3f, 2.8f, MapObjectType.SmallOrTabletopOutOfSight), //コミュ右下
         new(10.8f, 5.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ロッカー右上
         new(9.2f, 1.2f, MapObjectType.Reachable), //ロッカー中央
-        new(5.4f, 5.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //除染中央
-        new(4.5f, 12.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //リアクター右
+        new(5.4f, 5.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //除染中央
+        new(4.5f, 12.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //リアクター右
         new(11.0f, 12.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ右
-        new(16.0f, 10.9f, MapObjectType.SmallInCorner), //三叉路中央左下
-        new(20.6f, 9.6f, MapObjectType.SmallInCorner), //三叉路中央右下
+        new(11.8f, 10.0f, MapObjectType.SmallOrTabletopOutOfSight), //ラボ右下隅
+        new(16.0f, 10.9f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //三叉路中央左下
+        new(20.6f, 9.6f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //三叉路中央右下
         new(18.5f, 13.7f, MapObjectType.SmallInCorner), //三叉路中央上
         new(17.8f, 11.5f, MapObjectType.Reachable), //三叉路中央
-        new(14.1f, 20.9f, MapObjectType.SmallInCorner), //オフィス配電盤そば
+        new(14.1f, 20.9f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //オフィス配電盤そば
         new(13.4f, 17.2f, MapObjectType.SmallInCorner), //オフィス下
         new(17.1f, 18.6f, MapObjectType.Reachable), //オフィス前
-        new(19.5f, 20.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //アドミン左上
+        new(19.5f, 20.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //アドミン左上
+        new(22.4f, 19.7f, MapObjectType.SmallOrTabletopOutOfSight), //アドミン右上
         new(19.5f, 23.9f, MapObjectType.SmallInCorner), //グリーンハウス右上
-        new(13.7f, 24.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //グリーンハウス左
-        new(19.0f, 25.3f, MapObjectType.Reachable),//グリーンハウス上ベント横
-        new(26.3f, 5.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //カフェ上
-        new(28.3f, -0.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //カフェ右下
+        new(22.1f, 23.2f, MapObjectType.SmallOrTabletopOutOfSight), //グリーンハウス右端
+        new(13.7f, 24.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //グリーンハウス左
+        new(19.0f, 25.3f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight),//グリーンハウス上ベント横
+        new(26.3f, 5.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //カフェ上
+        new(28.3f, -0.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //カフェ右下
         new(23.7f, 0.0f, MapObjectType.Reachable), //カフェ下
-        new(21.6f, -2.3f, MapObjectType.SmallInCorner), //カフェ下展望
+        new(21.6f, -2.3f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //カフェ下展望
         new(20.2f, 2.0f, MapObjectType.SmallInCorner), //ストレージ下
+        new(19.8f, 4.1f, MapObjectType.SmallOrTabletopOutOfSight), //ストレージ中
         ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;
     protected override Vector2[] NonMapArea => [];
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };
+    protected override IDividedSpriteLoader SealedVentSprite => SkeldData.SealedVentSpriteSkeld;
+    private HashSet<string> altSealedVents = ["LaunchVent", "ReactorVent"];
+    public override Sprite GetSealedVentSprite(Vent vent, int level, bool remove)
+    {
+        return base.GetSealedVentSprite(vent, altSealedVents.Contains(vent.name) ? (8 + level) : level, remove);
+    }
+    override public bool IsSealableDoor(OpenableDoor door) => false;
 }

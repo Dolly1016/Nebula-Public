@@ -1,4 +1,5 @@
-﻿using Nebula.Behaviour;
+﻿using Epic.OnlineServices.Presence;
+using Nebula.Behaviour;
 using Nebula.Game.Statistics;
 using Virial;
 using Virial.Events.Game;
@@ -32,9 +33,11 @@ public static class NebulaExileWrapUp
 {
     static public IEnumerator WrapUpAndSpawn(ExileController __instance)
     {
-        if ((MeetingHudExtension.ExiledAll?.Length ?? 0) > 0)
+        using (RPCRouter.CreateSection("ExilePlayer"))
         {
-            using (RPCRouter.CreateSection("ExilePlayer"))
+            GameOperatorManager.Instance?.Run(new MeetingPreSyncEvent(), true);
+
+            if ((MeetingHudExtension.ExiledAll?.Length ?? 0) > 0)
             {
                 foreach (var exiled in MeetingHudExtension.ExiledAll!)
                 {
@@ -53,47 +56,47 @@ public static class NebulaExileWrapUp
                         info.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
                         info.Unbox().MyState = PlayerState.Exiled;
                         if (info.AmOwner && NebulaAchievementManager.GetRecord("death." + info.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+                        if(info.AmOwner) new StaticAchievementToken("stats.death." + info.PlayerState.TranslationKey);
 
                         //Entityイベント発火
                         GameOperatorManager.Instance?.Run(new PlayerExiledEvent(info), true);
                     }
                 }
-
-                NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.SendSync(SynchronizeTag.CheckExtraVictims);
             }
+            NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.SendSync(SynchronizeTag.CheckExtraVictims);
+        }
 
-            yield return NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.CoSyncAndReset(Modules.SynchronizeTag.CheckExtraVictims, true, true, false);
+        yield return NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.CoSyncAndReset(Modules.SynchronizeTag.CheckExtraVictims, true, true, false);
 
-            bool extraExile = MeetingHudExtension.ExtraVictims.Count > 0;
-            MeetingHudExtension.ExileExtraVictims();
+        bool extraExile = MeetingHudExtension.ExtraVictims.Count > 0;
+        MeetingHudExtension.ExileExtraVictims();
 
-            //誰かが追加でいなくなったとき
-            if (GeneralConfigurations.NoticeExtraVictimsOption && extraExile)
+        //誰かが追加でいなくなったとき
+        if (GeneralConfigurations.NoticeExtraVictimsOption && extraExile)
+        {
+            string str = Language.Translate("game.meeting.someoneDisappeared");
+            int num = 0;
+            var additionalText = GameObject.Instantiate(__instance.Text, __instance.transform);
+            additionalText.transform.localPosition = new Vector3(0, 0, -800f);
+            additionalText.text = "";
+
+            while (num < str.Length)
             {
-                string str = Language.Translate("game.meeting.someoneDisappeared");
-                int num = 0;
-                var additionalText = GameObject.Instantiate(__instance.Text, __instance.transform);
-                additionalText.transform.localPosition = new Vector3(0, 0, -800f);
-                additionalText.text = "";
-
-                while (num < str.Length)
-                {
-                    num++;
-                    additionalText.text = str.Substring(0, num);
-                    SoundManager.Instance.PlaySoundImmediate(__instance.TextSound, false, 0.8f, 0.92f);
-                    yield return new WaitForSeconds(Mathf.Min(2.8f / str.Length, 0.28f));
-                }
-                yield return new WaitForSeconds(1.9f);
-
-                float a = 1f;
-                while (a > 0f)
-                {
-                    a -= Time.deltaTime * 1.5f;
-                    additionalText.color = Color.white.AlphaMultiplied(a);
-                    yield return null;
-                }
-                yield return new WaitForSeconds(0.3f);
+                num++;
+                additionalText.text = str.Substring(0, num);
+                SoundManager.Instance.PlaySoundImmediate(__instance.TextSound, false, 0.8f, 0.92f);
+                yield return new WaitForSeconds(Mathf.Min(2.8f / str.Length, 0.28f));
             }
+            yield return new WaitForSeconds(1.9f);
+
+            float a = 1f;
+            while (a > 0f)
+            {
+                a -= Time.deltaTime * 1.5f;
+                additionalText.color = Color.white.AlphaMultiplied(a);
+                yield return null;
+            }
+            yield return new WaitForSeconds(0.3f);
         }
 
         yield return GameOperatorManager.Instance?.Run(new MeetingPreEndEvent()).Coroutines.WaitAll();
@@ -166,7 +169,7 @@ class ExileControllerBeginPatch
         {
             __instance.completeString = Language.Translate("game.meeting.multiple");
         }
-        else if (GeneralConfigurations.ShowRoleOfExiled)
+        else if (GeneralConfigurations.ShowRoleOfExiled && GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor)
         {
             var role = NebulaGameManager.Instance.GetPlayer(init.networkedPlayer.PlayerId)?.Role;
             if (role != null)

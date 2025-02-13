@@ -37,6 +37,12 @@ public static class ManagedEffects
         action.Invoke();
         yield break;
     }
+    static public IEnumerator DelayedAction(Action action)
+    {
+        yield return null;
+        action.Invoke();
+        yield break;
+    }
 
     static public IEnumerator Wait(Func<bool> waitWhile, Action then)
     {

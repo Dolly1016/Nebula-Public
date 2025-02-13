@@ -24,7 +24,7 @@ public class Synchronizer : AbstractModule<Virial.Game.Game>
             if (!PlayerControl.LocalPlayer) return null;
 
             float wait = 3f;
-            if (LastSync.Value.tag == SynchronizeTag.PreSpawnMinigame && GeneralConfigurations.SpawnMethodOption.GetValue() == 1) wait = 10f;
+            if (LastSync.Value.tag == SynchronizeTag.PreSpawnMinigame) return null;
 
             if (Time.time - LastSync.Value.time < wait) return null;
             if (!sync.TryGetValue(LastSync.Value.tag, out var val)) return null;

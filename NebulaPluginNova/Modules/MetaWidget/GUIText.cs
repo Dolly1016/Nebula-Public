@@ -1,4 +1,4 @@
-﻿using Nebula.Compat;
+﻿
 using TMPro;
 using Virial.Compat;
 using Virial.Media;
@@ -32,6 +32,7 @@ public class NoSGUIText : AbstractGUIWidget
         text.fontSizeMin = attr.FontSize.FontSizeMin;
         text.fontSizeMax = attr.FontSize.FontSizeMax;
         text.enableAutoSizing = attr.FontSize.AllowAutoSizing;
+        text.enableWordWrapping = attr.Wrapping;
         text.rectTransform.sizeDelta = new(Math.Min(width, attr.Size.Width), attr.Size.Height);
         text.rectTransform.anchorMin = new UnityEngine.Vector2(0.5f, 0.5f);
         text.rectTransform.anchorMax = new UnityEngine.Vector2(0.5f, 0.5f);
@@ -41,6 +42,7 @@ public class NoSGUIText : AbstractGUIWidget
             text.font = attr.Font.Font;
             if (attr.Font.FontMaterial != null) text.fontMaterial = attr.Font.FontMaterial;
         }
+        if (attr.OutlineWidth.HasValue) text.SetOutlineThickness(attr.OutlineWidth.Value);
     }
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)
@@ -57,14 +59,22 @@ public class NoSGUIText : AbstractGUIWidget
         ReflectMyAttribute(text, size.Width);
         text.text = Text.GetString();
         text.sortingOrder = 10;
-
         text.ForceMeshUpdate();
 
         if (Attr.IsFlexible)
         {
-            float prefferedWidth = Math.Min(text.rectTransform.sizeDelta.x, text.preferredWidth);
-            float prefferedHeight = Math.Min(text.rectTransform.sizeDelta.y, text.preferredHeight);
-            text.rectTransform.sizeDelta = new(prefferedWidth, prefferedHeight);
+            if (text.enableWordWrapping)
+            {
+                float width = Math.Min(text.rectTransform.sizeDelta.x, text.textBounds.size.x);
+                float height = text.textBounds.size.y;
+                text.rectTransform.sizeDelta = new(width, height);
+            }
+            else
+            {
+                float prefferedWidth = Math.Min(text.rectTransform.sizeDelta.x, text.preferredWidth);
+                float prefferedHeight = Math.Min(text.rectTransform.sizeDelta.y, text.preferredHeight);
+                text.rectTransform.sizeDelta = new(prefferedWidth, prefferedHeight);
+            }
 
             text.ForceMeshUpdate();
         }

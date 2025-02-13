@@ -1,5 +1,6 @@
-﻿using Nebula.Compat;
+﻿
 using Virial;
+using Virial.Game;
 
 namespace Nebula.Patches;
 
@@ -39,7 +40,7 @@ public static class ShowIntroPatch
         __instance.ImpostorText.gameObject.SetActive(false);
 
         IEnumerable<PlayerControl> shownPlayers = PlayerControl.AllPlayerControls.GetFastEnumerator().OrderBy(p => p.AmOwner ? 0 : 1);
-        var myInfo = PlayerControl.LocalPlayer.GetModInfo();
+        var myInfo = GamePlayer.LocalPlayer;
         switch (myInfo?.Role.Role.Team.RevealType)
         {
             case Virial.Assignable.TeamRevealType.OnlyMe:
@@ -48,6 +49,21 @@ public static class ShowIntroPatch
             case Virial.Assignable.TeamRevealType.Teams:
                 shownPlayers = shownPlayers.Where(p => p.GetModInfo()?.Role.Role.Team == myInfo.Role.Role.Team);
                 break;
+        }
+
+        if(GeneralConfigurations.MapFlipXOption || GeneralConfigurations.MapFlipYOption)
+        {
+            Vector2 vec = new(1f, 1f);
+            if (GeneralConfigurations.MapFlipXOption) {
+                PlayerModInfo.RpcAttrModulator.LocalInvoke((myInfo!.PlayerId, new AttributeModulator(PlayerAttributes.FlipX, 100000f, true, 0, null, false), true));
+                vec.x = -1f;
+            }
+            if (GeneralConfigurations.MapFlipYOption)
+            {
+                PlayerModInfo.RpcAttrModulator.LocalInvoke((myInfo!.PlayerId, new AttributeModulator(PlayerAttributes.FlipY, 100000f, true, 0, null, false), true));
+                vec.y = -1f;
+            }
+            PlayerModInfo.RpcAttrModulator.LocalInvoke((myInfo!.PlayerId, new SpeedModulator(1f, vec, true, 100000f, true, 0, null, false), true));
         }
 
         yield return CoShowTeam(__instance,myInfo!,shownPlayers.ToArray(), 3f);

@@ -196,6 +196,17 @@ public static class TaskStepPatch
     }
 }
 
+//DefaultレイヤーからUIレイヤーに変更
+[HarmonyPatch(typeof(BuildSandcastleMinigame), nameof(BuildSandcastleMinigame.Begin))]
+public static class FixSandcastleMinigamePatch
+{
+    public static void Postfix(BuildSandcastleMinigame __instance)
+    {
+        __instance.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetUILayer());
+    }
+}
+
+
 //緊急会議ボタン
 [HarmonyPatch(typeof(EmergencyMinigame), nameof(EmergencyMinigame.Update))]
 public static class EmergencyUpdatePatch

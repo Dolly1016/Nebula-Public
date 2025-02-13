@@ -1,11 +1,22 @@
 ﻿using Hazel;
+using Nebula.Behaviour;
 using Nebula.Map;
+using Nebula.Modules.CustomMap;
 
 namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(ShipStatus),nameof(ShipStatus.Awake))]
 public class ShipStatusPatch
 {
+    static public void Prefix(ShipStatus __instance)
+    {
+        //ModdedMap
+        if (false)
+        {
+            ModShipStatus.CleanOriginalShip(__instance);
+        }
+    }
+
     static public void Postfix(ShipStatus __instance)
     {
         if (__instance.Type == (ShipStatus.MapType)6) return;
