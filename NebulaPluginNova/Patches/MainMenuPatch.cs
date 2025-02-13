@@ -135,7 +135,7 @@ public static class MainMenuSetUpPatch
         var discordButton = discordRenderer.gameObject.SetUpButton(true, discordRenderer);
         discordButton.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(discordButton, Language.Translate("title.label.discord")));
         discordButton.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(discordButton));
-        discordButton.OnClick.AddListener(() => Application.OpenURL(Helpers.ConvertUrl("https://discord.gg/kHNZD4pq9E")));
+        discordButton.OnClick.AddListener(() => Application.OpenURL("https://discord.gg/kHNZD4pq9E"));
         discordButton.gameObject.AddComponent<CircleCollider2D>().radius = 0.25f;
 
         void CreateAddonsScreen()

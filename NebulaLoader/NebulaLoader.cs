@@ -123,13 +123,35 @@ public class NebulaLoader : BasePlugin
     static public ConfigEntry<bool> AutoUpdate { get; private set; } = null!;
     static public ConfigEntry<bool> AutoUpdateIfVersionMismatch { get; private set; } = null!;
     static public ConfigEntry<string> UrlConverter { get; private set; } = null!;
+    static public ConfigEntry<URLType> SupportedURLTypes { get; private set; } = null!;
     static public bool UpdateIsDone = false;
 
     static public string ConvertUrl(string url)
     {
         var converter = UrlConverter.Value;
-        if(converter.Length <= 1) return url;
-        else return UrlConverter.Value.Replace("<url>", url);
+        var supported = SupportedURLTypes.Value;
+        var type = getType(url);
+        if (converter.Length <= 1 || !supported.HasFlag(type)) 
+            return url;
+        
+        return UrlConverter.Value.Replace("<url>", url);
+
+        URLType getType(string _url)
+        {
+            if (_url.Contains("https://api.github.com"))
+                return URLType.GitHubApi;
+            
+            if (_url.StartsWith("https://github.com"))
+                return URLType.GitHubRelease;
+
+            if (_url.StartsWith("https://raw.githubusercontent.com"))
+                return URLType.GitHubRaw;
+
+            if (_url.Contains("https://script.google.com"))
+                return URLType.Google;
+
+            return URLType.Unknown;
+        }
     }
     static private NebulaLoader MyPlugin = null!;
     public override void Load()
@@ -141,6 +163,7 @@ public class NebulaLoader : BasePlugin
         AutoUpdate = Config.Bind("Options", "AutoUpdate", false, "When enabled, the automatic update feature is enabled.");
         AutoUpdateIfVersionMismatch = Config.Bind("Options", "AutoUpdateIfVersionMismatching", true, "Automatically updates when a version mismatch of Among Us is detected. This setting is ignored when AutoUpdate is enabled.");
         UrlConverter = Config.Bind("Options", "UrlConverter", "<url>", "You can convert the URL used by NoS to access the Internet into a specified format.");
+        SupportedURLTypes = Config.Bind("Options", "SupportedURLTypes", URLType.Unknown, "You can specify the URL type to use for NoS.");
 
         bool autoUpdate = AutoUpdate.Value;
         bool autoUpdateIfVersionMismatch = AutoUpdateIfVersionMismatch.Value;
