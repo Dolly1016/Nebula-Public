@@ -138,7 +138,7 @@ public class NebulaLoader : BasePlugin
 
         URLType getType(string _url)
         {
-            if (_url.Contains("https://api.github.com"))
+            if (_url.StartsWith("https://api.github.com"))
                 return URLType.GitHubApi;
             
             if (_url.StartsWith("https://github.com"))
@@ -147,7 +147,7 @@ public class NebulaLoader : BasePlugin
             if (_url.StartsWith("https://raw.githubusercontent.com"))
                 return URLType.GitHubRaw;
 
-            if (_url.Contains("https://script.google.com"))
+            if (_url.StartsWith("https://script.google.com"))
                 return URLType.Google;
 
             return URLType.Unknown;
