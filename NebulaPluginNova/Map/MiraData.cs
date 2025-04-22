@@ -42,6 +42,9 @@ public class MiraData : MapData
         new(13.2f, 22.3f), new(22.4f, 23.3f), new(20.2f, 24.3f), new(16.5f, 24.4f), new(20.7f, 22.2f), new(18f, 25.3f),
     };
 
+    static private (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [];
+    static private (SystemTypes room, AdditionalRoomArea area, string key)[] overrideRooms = [];
+
     static private MapObjectPoint[] mapObjectPoints = [
         new(-3.0f, 3.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ右上
         new(-5.7f, -2.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ下外
@@ -80,6 +83,8 @@ public class MiraData : MapData
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;
     protected override Vector2[] NonMapArea => [];
+    protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
+    protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };
     protected override IDividedSpriteLoader SealedVentSprite => SkeldData.SealedVentSpriteSkeld;
     private HashSet<string> altSealedVents = ["LaunchVent", "ReactorVent"];

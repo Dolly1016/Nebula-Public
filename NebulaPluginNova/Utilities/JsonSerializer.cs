@@ -63,8 +63,12 @@ public static class JsonStructure
 
         if (type.Equals(typeof(int)))
             return int.TryParse(trimmed, out var num) ? num : 0;
+        if (type.Equals(typeof(ushort)))
+            return ushort.TryParse(trimmed, out var num) ? num : (ushort)0;
         if (type.Equals(typeof(long)))
             return long.TryParse(trimmed, out var num) ? num : 0L;
+        if (type.Equals(typeof(ulong)))
+            return ulong.TryParse(trimmed, out var num) ? num : 0UL;
         if (type.Equals(typeof(char)))
         {
             if (json.Length >= 2 && json.StartsWith("%"))

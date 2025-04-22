@@ -20,6 +20,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         false, optionHolderPredicate: () => (Modifier.Lover.NumOfPairsOption > 0 && Modifier.Lover.AvengerModeOption))
     {
         ConfigurationHolder?.ScheduleAddRelated(() => [Modifier.Lover.MyRole.ConfigurationHolder!]);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Avenger.png");
     }
 
     AllocationParameters? DefinedSingleAssignable.AllocationParameters => null;

@@ -34,7 +34,7 @@ public class Ghost : INebulaScriptComponent, IGameOperator
 
         if (colliderSize > 0f)
         {
-            var collider = UnityHelper.CreateObject<CircleCollider2D>("Collider", renderer.transform, Vector3.zero, LayerExpansion.GetObjectsLayer());
+            var collider = UnityHelper.CreateObject<CircleCollider2D>("Collider", renderer.transform, Vector3.zero, LayerExpansion.GetShortObjectsLayer());
             collider.radius = colliderSize;
         }
     }

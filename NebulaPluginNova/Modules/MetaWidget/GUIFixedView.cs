@@ -1,4 +1,6 @@
-﻿using Nebula.Modules.GUIWidget;
+﻿using AsmResolver;
+using Nebula.Modules.GUIWidget;
+using UnityEngine;
 using UnityEngine.Rendering;
 using Virial.Compat;
 using Virial.Media;
@@ -78,6 +80,36 @@ public class GUIFixedView : AbstractGUIWidget
         float height = innerActualSize.Height;
 
         actualSize = new(Size.x + 0.15f, Size.y + 0.08f);
+
+        return view;
+    }
+}
+
+public class GUIMasking : AbstractGUIWidget
+{
+    public Virial.Media.GUIWidget? Inner { get; init; } = null;
+
+    public GUIMasking(Virial.Media.GUIWidget inner) : base(inner.Alignment)
+    {
+        this.Inner = inner;
+    }
+
+
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
+    {
+        var view = UnityHelper.CreateObject("Masked", null, new UnityEngine.Vector3(0f, 0f, 0f), LayerExpansion.GetUILayer());
+        var inner = UnityHelper.CreateObject("Inner", view.transform, new UnityEngine.Vector3(-0.2f, 0f, -0.1f));
+
+        Size innerSize = new(0f, 0f);
+        var obj = Inner?.Instantiate(new(100f,100f), out innerSize);
+        if (obj != null) obj.transform.SetParent(inner.transform, false);
+
+        view.AddComponent<SortingGroup>();
+            var mask = UnityHelper.CreateObject<SpriteMask>("Mask", view.transform, new UnityEngine.Vector3(-0.2f, 0, 0));
+            mask.sprite = VanillaAsset.FullScreenSprite;
+            mask.transform.localScale = innerSize.ToUnityVector();
+
+        actualSize = innerSize;
 
         return view;
     }

@@ -75,11 +75,13 @@ public class NebulaGameEnd
     static public CustomEndCondition DancerWin = new(31, "dancer", Roles.Neutral.Dancer.MyRole.UnityColor, 32);
     static public CustomEndCondition ScarletWin = new(32, "scarlet", Roles.Neutral.Scarlet.MyRole.UnityColor, 64);
     static public CustomEndCondition SpectreWin = new(33, "spectre", Roles.Neutral.Spectre.MyRole.UnityColor, 63);
+    static public CustomEndCondition TrilemmaWin = new(34, "trilemma", Roles.Modifier.Trilemma.MyRole.UnityColor, 61);
     static public CustomEndCondition NoGame = new(128, "nogame", InvalidColor, 128) { AllowWin = false };
 
     static public CustomExtraWin ExtraLoversWin = new(0, "lover", Roles.Modifier.Lover.MyRole.UnityColor);
     static public CustomExtraWin ExtraObsessionalWin = new(1, "obsessional", Roles.Modifier.Obsessional.MyRole.UnityColor);
     static public CustomExtraWin ExtraGrudgeWin = new(2, "grudge", Roles.Ghost.Neutral.Grudge.MyRole.UnityColor);
+    static public CustomExtraWin ExtraTrilemmaWin = new(3, "trilemma", Roles.Modifier.Trilemma.MyRole.UnityColor);
 
     static void Preprocess(NebulaPreprocessor preprocessor)
     {
@@ -98,7 +100,7 @@ public class NebulaGameEnd
         RegisterWinCondTip(CrewmateWin, () => true, "crewmate.task");
         RegisterWinCondTip(CrewmateWin, () => true, "crewmate.exile", text => ImpostorTeam(JackalTeam(text)));
         RegisterWinCondTip(ImpostorWin, () => true, "impostor.kill", text => ImpostorTeam(JackalTeam(LoverTeam(text))));
-        RegisterWinCondTip(ImpostorWin, () => true, "impostor.extinction", text => LoverTeam(text));
+        //RegisterWinCondTip(ImpostorWin, () => true, "impostor.extinction", text => LoverTeam(text));
         RegisterWinCondTip(ImpostorWin, () => true, "impostor.sabotage");
         RegisterWinCondTip(JackalWin, () => (Roles.Neutral.Jackal.MyRole as ISpawnable).IsSpawnable, "jackal.kill", text => ImpostorTeam(JackalTeam(LoverTeam(text))));
         RegisterWinCondTip(JackalWin, () => (Roles.Neutral.Jackal.MyRole as ISpawnable).IsSpawnable, "jackal.extinction", text => LoverTeam(text));
@@ -112,6 +114,7 @@ public class NebulaGameEnd
         RegisterWinCondTip(AvengerWin, () => (Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable && Roles.Modifier.Lover.AvengerModeOption, "avenger");
         RegisterWinCondTip(DancerWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Dancer.MyRole as ISpawnable).IsSpawnable, "dancer");
         RegisterWinCondTip(SpectreWin, () => (Roles.Neutral.Spectre.MyRole as ISpawnable).IsSpawnable, "spectre");
+        RegisterWinCondTip(TrilemmaWin, () => (Roles.Modifier.Trilemma.MyRole as ISpawnable).IsSpawnable && Roles.Modifier.Trilemma.WinConditionOption.GetValue() == 2, "trilemma");
     }
 
     private static void RegisterWinCondTip(GameEnd gameEnd, Func<bool> predicate, string name, Func<string,string>? decorator = null)
@@ -190,7 +193,7 @@ public class LastGameHistory
         RenderTexture.active = cam.targetTexture;
         Texture2D texture2D = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false, false);
         texture2D.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-        texture2D.Apply();
+        texture2D.Apply(false, false);
 
         RenderTexture.active = null;
         cam.targetTexture = null;
@@ -261,26 +264,30 @@ public class EndGameManagerSetUpPatch
     private static IMetaWidgetOld GetRoleContent(TMPro.TMP_FontAsset font)
     {
         MetaWidgetOld widget = new();
-        string text = "";
 
         NebulaGameManager.Instance?.ChangeToSpectator();
-
+        List<(string name, string state, string task, string role)> players = [];
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
         {
             //Name Text
             string nameText = p.Name.Color(NebulaGameManager.Instance.EndState!.Winners.Test(p) ? Color.yellow : Color.white);
             if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.Name ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.UnityColor);
+            if (p.TryGetModifier<Obsessional.Instance>(out var obsessional)) nameText += (" <size=60%>(" + (obsessional.Obsession?.Name ?? "ERROR") + ")</size>").Color(Obsessional.MyRole.UnityColor);
 
             string stateText = p.PlayerState.Text;
-            if (p.IsDead && p.MyKiller != null) stateText += "<color=#FF6666><size=75%> by " + (p.MyKiller?.Name ?? "ERROR") + "</size></color>";
-            string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $" ({p.Tasks.Unbox().ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
+            string stateExText = "";
+            if (p.PlayerStateExtraInfo != null && p.PlayerStateExtraInfo.State == p.PlayerState) stateExText = p.PlayerStateExtraInfo.ToStateText();
+            else if (p.IsDead && p.MyKiller != null) stateExText = "by " + (p.MyKiller?.Name ?? "ERROR");
+            if(stateExText.Length > 0) stateText += "<color=#FF6666><size=75%> " + stateExText + "</size></color>";
+            
+            string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $"({p.Tasks.Unbox().ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
 
             //Role Text
             string roleText = "";
             var entries = NebulaGameManager.Instance.RoleHistory.EachMoment(history => history.PlayerId == p.PlayerId,
                 (role, ghostRole, modifiers) => (RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, true), RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, false))).ToArray();
 
-            if (entries.Length < 8)
+            if (entries.Length < 5)
             {
                 for (int i = 0; i < entries.Length - 1; i++)
                 {
@@ -296,11 +303,42 @@ public class EndGameManagerSetUpPatch
             if (roleText.Length > 0) roleText += " → ";
             roleText += entries[entries.Length - 1].Item2;
 
-            text += $"{nameText}<indent=20px>{taskText}</indent><indent=29px>{stateText}</indent><indent=47px>{roleText}</indent>\n";
+            players.Add((nameText, stateText, taskText, roleText));
         }
 
-        widget.Append(new MetaWidgetOld.VariableText(new TextAttributeOld(TextAttributeOld.BoldAttr) { Font = font, Size = new(6f, 4.2f), Alignment = TMPro.TextAlignmentOptions.Left }.EditFontSize(1.4f, 1f, 1.4f))
-        { Alignment = IMetaWidgetOld.AlignmentOption.Left, RawText = text });
+        widget.Append(new MetaWidgetOld.VariableText(new TextAttributeOld(TextAttributeOld.BoldAttr) { Font = font, Size = new(8f, 5f), Alignment = TMPro.TextAlignmentOptions.Left }.EditFontSize(1.1f, 1.1f, 1.1f))
+        { Alignment = IMetaWidgetOld.AlignmentOption.Left,
+        PreResizeBuilder = t =>
+        {
+            
+            (float nameMax, float stateMax, float taskMax, float roleMax) = (0f, 0f, 0f, 0f);
+
+            LogUtils.WriteToConsole("FontSize: " + t.fontSize);
+            LogUtils.WriteToConsole("PointSize: " + t.font.faceInfo.pointSize);
+            LogUtils.WriteToConsole("Scale: " + t.font.faceInfo.scale);
+            float coeff = t.fontSize / t.font.faceInfo.pointSize * t.font.faceInfo.scale * 10f;
+            foreach (var p in players)
+            {
+                nameMax = Math.Max(t.GetPreferredValues(p.name).x / coeff, nameMax);
+                stateMax = Math.Max(t.GetPreferredValues(p.state).x / coeff, stateMax);
+                taskMax = Math.Max(t.GetPreferredValues(p.task).x / coeff, taskMax);
+                roleMax = Math.Max(t.GetPreferredValues(p.role).x / coeff, roleMax);
+            }
+
+            float indent = 0;
+            indent += (float)(nameMax) + 5.5f;
+            string afterNameIndent = $"<indent={indent:F3}em>";
+            indent += (float)(taskMax) + 2.3f;
+            string afterTaskIndent = $"<indent={indent:F3}em>";
+            indent += (float)(stateMax) + 6f;
+            string afterStateIndent = $"<indent={indent:F3}em>";
+
+            t.fontSizeMax = 1.4f;
+            t.fontSize = 1.4f;
+            t.text = string.Join("\n", players.Select(p => $"{p.name}{afterNameIndent}{p.task}</indent>{afterTaskIndent}{p.state}</indent>{afterStateIndent}{p.role}</indent>"));
+            //text += $"{nameText}<indent=20px>{taskText}</indent><indent=29px>{stateText}</indent><indent=47px>{roleText}</indent>\n";
+        }
+        });
 
         return widget;
     }

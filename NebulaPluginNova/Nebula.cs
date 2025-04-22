@@ -40,14 +40,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.15.3.4";
+    public const string PluginVersion = "2.19.0.0";
 
-    public const string VisualVersion = "v2.15.3.4";
-    //public const string VisualVersion = "Snapshot 25.02.01a";
+    public const string VisualVersion = "v2.19";
+    //public const string VisualVersion = "Snapshot 25.04.21a";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
-    public const string PluginEpochStr = "105";
-    public const string PluginBuildNumStr = "1310";
+    public const string PluginEpochStr = "106";
+    public const string PluginBuildNumStr = "1355";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -118,16 +118,26 @@ public static class AmongUsClientAwakePatch
         Language.OnChangeLanguage((uint)AmongUs.Data.DataManager.Settings.Language.CurrentLanguage);
 
         __instance.StartCoroutine(VanillaAsset.CoLoadAssetOnTitle().WrapToIl2Cpp());
-
-
     }
 }
 
+/*
 [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
 public static class AmBannedPatch
 {
     public static void Postfix(out bool __result)
     {
         __result = false;
+    }
+}
+*/
+
+[HarmonyPatch(typeof(AprilFoolsMode), nameof(AprilFoolsMode.ShouldFlipSkeld))]
+public static class AmBannedPatch
+{
+    public static bool Prefix(out bool __result)
+    {
+        __result = false;
+        return false;
     }
 }

@@ -1,7 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Patches;
 using Nebula.Roles.Abilities;
-using Nebula.Utilities;
 using Nebula.VoiceChat;
 using Virial;
 using Virial.Assignable;
@@ -11,7 +9,6 @@ using Virial.Events.Game.Meeting;
 using Virial.Events.Game.Minimap;
 using Virial.Events.Player;
 using Virial.Game;
-using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 

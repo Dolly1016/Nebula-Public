@@ -225,6 +225,16 @@ public enum AttributeAsset
     MarketplacePublishButton,
 
     /// <summary>
+    /// マーケットプレイスでアドオンとコスチュームの切り替えボタンに使われているテキスト属性です。
+    /// </summary>
+    MarketplaceCategoryButton,
+
+    /// <summary>
+    /// マーケットプレイスでタブボタンに使用されているテキスト属性です。
+    /// </summary>
+    MarketplaceTabButton,
+
+    /// <summary>
     /// 会議中に表示される称号で使用されているテキスト属性です。
     /// </summary>
     MeetingTitle,
@@ -238,6 +248,16 @@ public enum AttributeAsset
     /// フリープレイの役職選択ボタンで使用されているテキスト属性です。
     /// </summary>
     MetaRoleButton,
+
+    /// <summary>
+    /// 配役タブの人数設定で使用している横長の小さなテキスト属性です。
+    /// </summary>
+    SmallWideButton,
+
+    /// <summary>
+    /// 配役タブの人数設定で使用している小さな矢印のためのテキスト属性です。
+    /// </summary>
+    SmallArrowButton,
 }
 
 [Flags]
@@ -336,6 +356,9 @@ public class TextAttribute
         IsFlexible = original.IsFlexible;
         OutlineWidth = original.OutlineWidth;
     }
+
+    public static implicit operator TextAttribute(AttributeParams param) => NebulaAPI.GUI.GetAttribute(param);
+    public static implicit operator TextAttribute(AttributeAsset asset) => NebulaAPI.GUI.GetAttribute(asset);
 }
 
 public interface TextComponent

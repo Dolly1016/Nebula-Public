@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,12 +21,49 @@ public class CustomConsoleProperty
     {
         return console =>
         {
-            T minigame = GameObject.Instantiate(prefab).AddComponent<T>();
+            GameObject instantiated = prefab ? GameObject.Instantiate(prefab) : UnityHelper.CreateObject("Minigame", null, Vector3.zero);
+            instantiated.layer = LayerExpansion.GetUILayer();
+            T minigame = instantiated.AddComponent<T>();
             minigame.transform.SetParent(Camera.main.transform, false);
             minigame.transform.localPosition = new Vector3(0f, 0f, -50f);
             onInstantiated?.Invoke(minigame, console);
             minigame.Begin(null);
         };
+    }
+}
+
+public static class MinigameHelper
+{
+    static public void BeginInternal(this Minigame minigame, PlayerTask task)
+    {
+        Minigame.Instance = minigame;
+        minigame.MyTask = task;
+        if (task && task.TryGetComponent<NormalPlayerTask>(out var normalTask)) minigame.MyNormTask = normalTask;
+        minigame.timeOpened = Time.realtimeSinceStartup;
+        if (PlayerControl.LocalPlayer)
+        {
+            if (MapBehaviour.Instance) MapBehaviour.Instance.Close();
+            PlayerControl.LocalPlayer.MyPhysics.SetNormalizedVelocity(Vector2.zero);
+        }
+        minigame.StartCoroutine(minigame.CoAnimateOpen());
+        minigame.CloseSound = ShipStatus.Instance.ShortTasks.First().MinigamePrefab.CloseSound;
+        minigame.TransType = TransitionType.SlideBottom;
+    }
+
+    static public void CloseInternal(this Minigame minigame)
+    {
+        if (minigame.amClosing != Minigame.CloseState.Closing)
+        {
+            if (minigame.CloseSound && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(minigame.CloseSound, false, 1f, null);
+            if (PlayerControl.LocalPlayer) PlayerControl.HideCursorTemporarily();
+
+            minigame.amClosing = Minigame.CloseState.Closing;
+            minigame.StartCoroutine(minigame.CoDestroySelf());
+        }
+        else
+        {
+            GameObject.Destroy(minigame.gameObject);
+        }
     }
 }
 

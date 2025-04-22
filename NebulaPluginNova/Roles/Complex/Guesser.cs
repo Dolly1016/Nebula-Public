@@ -7,11 +7,24 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 
 namespace Nebula.Roles.Complex;
 
+
+[NebulaRPCHolder]
 static file class GuesserSystem
 {
+    private record MisguessedExtraDeadInfo(GamePlayer To, DefinedRole Role) : GamePlayer.ExtraDeadInfo(PlayerStates.Misguessed)
+    {
+        public override string ToStateText() => To.PlayerName + " as " + Role.DisplayColoredName;
+    }
+    static private RemoteProcess<(GamePlayer guesser, GamePlayer to, DefinedRole role)> RpcShareExtraInfo = new("ShareExInfoGuess",
+        (message, _) => {
+            message.guesser.PlayerStateExtraInfo = new MisguessedExtraDeadInfo(message.to, message.role);
+        }
+    );
+
     static TextAttributeOld ButtonAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new(1.3f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(2f, 1f, 2f);
     public static MetaScreen LastGuesserWindow = null!;
 
@@ -62,7 +75,7 @@ static file class GuesserSystem
                     if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
 
                     GuesserModifier.StatsAllGuessed.Progress();
-                    if (p?.Role.Role == r)
+                    if (p?.Role.ExternalRecognitionRole == r)
                     {
                         NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill);
                     }
@@ -70,6 +83,7 @@ static file class GuesserSystem
                     {
                         GuesserModifier.StatsMisguessed.Progress();
                         NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill);
+                        RpcShareExtraInfo.Invoke((NebulaAPI.CurrentGame!.LocalPlayer, p!, r));
                     }
 
                     //のこり推察数を減らす

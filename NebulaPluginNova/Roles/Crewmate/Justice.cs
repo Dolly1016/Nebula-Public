@@ -492,11 +492,11 @@ public class JusticeMeetingHud : MonoBehaviour
                 InstantiateBandGraph(24, back.transform, new(0.65f, -0.13f, -0.2f), graphColor);
 
                 var topText = NebulaAsset.InstantiateText("AchievementTopText", back.transform, new(0.67f, 0.87f, -0.5f), NebulaAsset.JusticeFont, 0.14f, Virial.Text.TextAlignment.Center, new(0.5f, 0.5f), "a.k.a.", Color.white.AlphaMultiplied(0.8f));
-                if ((NebulaGameManager.Instance?.TitleMap.TryGetValue(player.PlayerId, out var title) ?? false) && title != null)
+                if ((NebulaGameManager.Instance?.TryGetTitle(player.PlayerId, out var title) ?? false) && title != null)
                 {
                     var textComponent = new NoSGUIText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.MeetingTitle), title!.GetTitleComponent(null))
                     {
-                        OverlayWidget = title.GetOverlayWidget(false, true, false, true, title.IsCleared),
+                        OverlayWidget = title.GetOverlayWidget(false, true, false, true, true),
                         PostBuilder = text =>
                         {
                             text.outlineWidth = 0.1f;

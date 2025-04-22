@@ -47,6 +47,7 @@ namespace Nebula.Behaviour
 
         private static void Handshake()
         {
+            byte id = PlayerControl.LocalPlayer.PlayerId;
             RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash, Application.version));
             RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaAchievementManager.MyTitle?.Id ?? "-"));
             NebulaAchievementManager.SendLastClearedAchievements();
@@ -120,7 +121,7 @@ namespace Nebula.Behaviour
         }
         public void Certify()
         {
-            GameObject.Destroy(this);
+            if(this) GameObject.Destroy(this);
         }
         public void Reject(UncertifiedReason reason)
         {
@@ -128,7 +129,7 @@ namespace Nebula.Behaviour
             OnStateChanged();
 
             //MyControl?.OwnerId == AmongUsClient.Instance.HostId
-            if (MyControl?.AmOwner ?? false && !AmongUsClient.Instance.AmHost)
+            if ((MyControl?.AmOwner ?? false) && !AmongUsClient.Instance.AmHost)
             {
                 var screen = MetaScreen.GenerateWindow(new(3.8f,1.78f),HudManager.Instance.transform,Vector3.zero, true,false);
                 var widget = new MetaWidgetOld();

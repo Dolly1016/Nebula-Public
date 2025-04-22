@@ -199,39 +199,62 @@ class CreateGameOptionsNoSBehaviour : MonoBehaviour
     }
 }
 
-[HarmonyPatch(typeof(CreateOptionsPicker), nameof(CreateOptionsPicker.Awake))]
-class CreateGameOptionsShowPatch
+static internal class ModdedOptionValues
 {
-    public static bool Prefix(CreateOptionsPicker __instance)
-    {
-        //各種設定の配列長を24人分まで伸ばす
-        NormalGameOptionsV07.MaxImpostors = NormalGameOptionsV08.MaxImpostors = new int[] {
+    static public int[] MaxImpostors = [
             0,
             0, 0, 0, 1, 1,
             1, 2, 2, 3, 3,
             3, 3, 4, 4, 5,
             5, 5, 6, 6, 6,
             6, 6, 6, 6
-        };
-        NormalGameOptionsV07.RecommendedImpostors = NormalGameOptionsV08.RecommendedImpostors = new int[] {
+        ];
+
+    static public int[] RecommendedImpostors = [
             0,
             0, 0, 0, 1, 1,
             1, 2, 2, 2, 2,
             2, 3, 3, 3, 3,
             3, 4, 4, 4, 4,
             5, 5, 5, 5
-        };
-        NormalGameOptionsV07.RecommendedKillCooldown = NormalGameOptionsV08.RecommendedKillCooldown = new int[] {
+        ];
+
+    static public int[] RecommendedKillCondown = [
             0,
             0, 0, 0, 45, 30,
             15, 35, 30, 25, 20,
             20, 20, 20, 20, 20,
             20, 20, 20, 20, 20,
             20, 20, 20, 20
-        };
-        NormalGameOptionsV07.MinPlayers = NormalGameOptionsV08.MinPlayers = new int[] {
-            4, 4, 7, 9, 13, 15, 18
-        };
+        ];
+
+    static public int[] MinPlayers = [4, 4, 7, 9, 13, 15, 18];
+}
+
+[HarmonyPatch(typeof(CreateOptionsPicker), nameof(CreateOptionsPicker.Awake))]
+class CreateGameOptionsShowPatch
+{
+    public static bool Prefix(CreateOptionsPicker __instance)
+    {
+        //各種設定の配列長を24人分まで伸ばす
+        NormalGameOptionsV07.MaxImpostors = 
+            NormalGameOptionsV08.MaxImpostors = 
+            NormalGameOptionsV09.MaxImpostors =
+            LegacyGameOptions.MaxImpostors = ModdedOptionValues.MaxImpostors;
+
+        NormalGameOptionsV07.RecommendedImpostors = 
+            NormalGameOptionsV08.RecommendedImpostors =
+            NormalGameOptionsV09.RecommendedImpostors =
+            LegacyGameOptions.RecommendedImpostors = ModdedOptionValues.RecommendedImpostors;
+
+        NormalGameOptionsV07.RecommendedKillCooldown = 
+            NormalGameOptionsV08.RecommendedKillCooldown =
+            NormalGameOptionsV09.RecommendedKillCooldown =
+            LegacyGameOptions.RecommendedKillCooldown = ModdedOptionValues.RecommendedKillCondown;
+        NormalGameOptionsV07.MinPlayers =
+            NormalGameOptionsV08.MinPlayers =
+            NormalGameOptionsV09.MinPlayers =
+            LegacyGameOptions.MinPlayers = ModdedOptionValues.MinPlayers;
 
         //ゲームモードはノーマル固定
         DataManager.Settings.Multiplayer.LastPlayedGameMode = AmongUs.GameOptions.GameModes.Normal;

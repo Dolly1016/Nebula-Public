@@ -100,7 +100,8 @@ public class EffectCommand : ICommand
                 if(
                     CheckFloatEffect("screen", PlayerAttributes.ScreenSize) ||
                     CheckFloatEffect("eyesight", PlayerAttributes.Eyesight) ||
-                    CheckFloatEffect("grainy", PlayerAttributes.Roughening)
+                    CheckFloatEffect("grainy", PlayerAttributes.Roughening) ||
+                    CheckFloatEffect("cooldown", PlayerAttributes.CooldownSpeed)
                 ) return EmptyCommandToken.Token;
 
                 if(id == "flip")

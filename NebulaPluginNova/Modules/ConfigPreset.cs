@@ -58,7 +58,7 @@ public class ScriptPreset : IConfigPreset{
 [NebulaPreprocess(PreprocessPhase.Roles)]
 public class ConfigPreset : IConfigPreset
 {
-
+    public NebulaAddon? Addon => addon;
     NebulaAddon? addon;
     string path;
     public string Name { get; private set; }
@@ -245,9 +245,10 @@ public class ConfigPreset : IConfigPreset
         }
     }
 
+    static public string ToDisplayNameText(string name) => "#DISPLAY:" + name;
     static private string OutputCurrentSettings(string name)
     {
-        string result = "#DISPLAY:" + name + "\n#VERSION:2";
+        string result = ToDisplayNameText(name) + "\n#VERSION:2";
 
         foreach (var option in AmongUsUtil.AllVanillaOptions)
             result += "\nSET:" + option + ":'" + AmongUsUtil.GetOptionAsString(option) + "'";
@@ -264,16 +265,34 @@ public class ConfigPreset : IConfigPreset
         return result;
     }
 
-    static public bool OutputAndReloadSettings(string name)
+    static public bool OutputAndReloadSettings(string name, string? displayName = null)
     {
         try
         {
-            File.WriteAllText("Presets/" + name + ".dat", OutputCurrentSettings(name), Encoding.UTF8);
+            File.WriteAllText(GetPathFromId(name), OutputCurrentSettings(displayName ?? name), Encoding.UTF8);
             LoadLocal();
         }catch(Exception e)
         {
             return false;
         }
         return true;
+    }
+
+    static public string GetPathFromId(string id) => "Presets/" + id + ".dat";
+    static public bool DeleteAndReloadSettings(string name)
+    {
+        File.Delete(GetPathFromId(name));
+        LoadLocal();
+        return true;
+    }
+
+    static public string[]? ReadRawPreset(string name)
+    {
+        string path = GetPathFromId(name);
+        if (File.Exists(path))
+        {
+            return File.ReadAllLines(path);
+        }
+        return null;
     }
 }

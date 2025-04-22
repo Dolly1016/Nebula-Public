@@ -216,7 +216,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
             SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(Vector2.zero);
             lightRenderer.transform.SetParent(MyPlayer.VanillaPlayer.transform);
             lightRenderer.transform.localScale = new(1.8f, 1.8f, 1.8f);
-            lightRenderer.transform.localPosition = new(0f, 0f, -50f);
+            lightRenderer.transform.localPosition = new(0f, 0f, -10f);
 
             float p = 0f;
             while (p < 1f && MyPlayer.IsDived)

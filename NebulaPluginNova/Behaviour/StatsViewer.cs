@@ -10,7 +10,6 @@ using Virial.Text;
 using Virial;
 using Virial.Game;
 using Virial.Assignable;
-using static StatsManager;
 
 namespace Nebula.Behaviour;
 

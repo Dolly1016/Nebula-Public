@@ -1,4 +1,5 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
+﻿using AmongUs.GameOptions;
+using BepInEx.Unity.IL2CPP.Utils;
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
@@ -124,10 +125,19 @@ public class AchievementType
     static public AchievementType Innersloth = new("innersloth");
     static public AchievementType Perk = new("perk");
 
+    static public AchievementType Uljun = new("uljun");
+    static public AchievementType Mememura = new("meme");
+    static private Dictionary<string, AchievementType> CollabTypes;
+    static public bool TryGetCollabType(string id, [MaybeNullWhen(false)] out AchievementType type) => CollabTypes.TryGetValue(id, out type);
+    static AchievementType()
+    {
+        CollabTypes = [];
+        CollabTypes.Add("uljun", Uljun);
+        CollabTypes.Add("meme", Mememura);
+    }
     private AchievementType(string key)
     {
         TranslationKey = "achievement.type." + key;
-
     }
     public string TranslationKey { get; private set; }
 }
@@ -143,7 +153,7 @@ public class ProgressRecord
     public int Progress => entry.Value;
     public int Goal => goal;
 
-    public bool IsCleared => DebugTools.ReleaseAllAchievement || goal <= entry.Value;
+    public bool IsCleared => !DebugTools.LockAllAchievement && (DebugTools.ReleaseAllAchievement || goal <= entry.Value);
 
     public string OldEntryTag => "a." + key.ComputeConstantHashAsString();
     public string EntryTag => "a." + this.hashedKey;
@@ -235,6 +245,8 @@ public interface INebulaAchievement
     int Attention { get; }
     IEnumerable<DefinedAssignable> RelatedRole { get; }
     IEnumerable<AchievementType> AchievementType();
+    Image? BackImage { get => SpecifiedBackImage ?? RelatedRole.FirstOrDefault()?.ConfigurationHolder?.Illustration; }
+    Image? SpecifiedBackImage { get; }
 
     IEnumerable<string> GetKeywords()
     {
@@ -291,7 +303,7 @@ public interface INebulaAchievement
             (Language.Translate("achievement.ui.equipped").Color(Color.green).Bold() + "<br>" + Language.Translate("achievement.ui.unsetTitle")) :
             Language.Translate("achievement.ui.setTitle"))));
         }
-        return new VerticalWidgetsHolder(GUIAlignment.Left, list) { BackImage = (IsCleared || !hiddenNotClearedAchievement) ? RelatedRole.FirstOrDefault()?.ConfigurationHolder?.Illustration : null };
+        return new VerticalWidgetsHolder(GUIAlignment.Left, list) { BackImage = BackImage, GrayoutedBackImage = !(IsCleared || !hiddenNotClearedAchievement) };
     }
     TextComponent? GetHeaderComponent()
     {
@@ -299,7 +311,7 @@ public interface INebulaAchievement
         foreach(var r in RelatedRole)
         {
             if (list.Count != 0) list.Add(new RawTextComponent(" & "));
-            list.Add(NebulaGUIWidgetEngine.Instance.TextComponent(r.UnityColor, "role." + r.LocalizedName + ".name"));
+            list.Add(NebulaGUIWidgetEngine.Instance.RawTextComponent(r.DisplayColoredName));
         }
 
         foreach(var type in AchievementType())
@@ -377,7 +389,7 @@ public interface INebulaAchievement
         {
             var button = widget.SetUpButton(true);
             button.gameObject.layer = LayerExpansion.GetUILayer();
-            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, GetOverlayWidget(false, true, IsCleared, true, IsCleared)));
+            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, GetOverlayWidget(false, true, IsCleared, true, true)));
             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
             if (IsCleared)
             {
@@ -413,12 +425,13 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
     public bool NoHint => noHint;
     public IEnumerable<DefinedAssignable> RelatedRole => role;
     public IEnumerable<AchievementType> AchievementType() => type;
+    public Image? SpecifiedBackImage { get; set; } = null;
     public int Attention { get; private init; }
     public bool IsHidden { get {
             return isSecret && !IsCleared;
         } }
 
-    public AbstractAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention) : base(key, goal, canClearOnce) 
+    public AbstractAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage) : base(key, goal, canClearOnce) 
     {
         this.isSecret = isSecret;
         this.noHint = noHint;
@@ -426,6 +439,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
         this.role = role;
         this.Trophy = trophy;
         this.Attention = attention;
+        this.SpecifiedBackImage = specifiedImage;
     }
 
     /// <summary>
@@ -441,8 +455,8 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
 
 public class StandardAchievement : AbstractAchievement
 {
-    public StandardAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy,int attention)
-        : base(canClearOnce, isSecret, noHint, key, goal, role, type, trophy, attention)
+    public StandardAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy,int attention, Image? specifiedImage)
+        : base(canClearOnce, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage)
     {
     }
 }
@@ -458,13 +472,15 @@ public class InnerslothAchievement : INebulaAchievement
     int INebulaAchievement.Trophy => 3;
 
     bool INebulaAchievement.IsHidden => false;
+    Image? INebulaAchievement.SpecifiedBackImage => null;
 
+    bool IsClearedSteam => SteamUserStats.GetAchievement(Id.Split('.', 2)[1], out var cleared) ? cleared : false;
     bool INebulaAchievement.IsCleared
     {
         get
         {
             if (Constants.GetCurrentPlatformName() == "Steam")
-                return SteamUserStats.GetAchievement(Id.Split('.', 2)[1], out var cleared) ? cleared : false;
+                return IsClearedSteam;
             else
                 return false;
         }
@@ -487,7 +503,7 @@ public class InnerslothAchievement : INebulaAchievement
 
 public class SumUpReferenceAchievement : INebulaAchievement
 {
-    public SumUpReferenceAchievement(bool isSecret, string key, string reference, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention)
+    public SumUpReferenceAchievement(bool isSecret, string key, string reference, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage)
     {
         this.Id = key;
         this.Trophy = trophy;
@@ -497,6 +513,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
         this.RelatedRole = role;
         this.achievementType = type;
         this.Attention = attention;
+        this.SpecifiedBackImage = specifiedImage;
         NebulaAchievementManager.RegisterNonrecord(this, key);
     }
 
@@ -514,13 +531,14 @@ public class SumUpReferenceAchievement : INebulaAchievement
     private string reference { get; init; }
     private ProgressRecord? referenceRecord = null;
     private IEnumerable<AchievementType> achievementType =[];
+    public Image? SpecifiedBackImage { get; set; }
     public ProgressRecord? ReferenceRecord { get
         {
             if(referenceRecord == null) NebulaAchievementManager.GetRecord(reference, out referenceRecord);
             return referenceRecord;
         } }
 
-    public bool IsCleared => DebugTools.ReleaseAllAchievement || (ReferenceRecord?.Progress ?? 0) >= goal;
+    public bool IsCleared => !DebugTools.LockAllAchievement && (DebugTools.ReleaseAllAchievement || (ReferenceRecord?.Progress ?? 0) >= goal);
 
     private bool lastCleared = false;
     ClearDisplayState INebulaAchievement.CheckClear() {
@@ -573,8 +591,8 @@ public class SumUpReferenceAchievement : INebulaAchievement
 
 public class SumUpAchievement : AbstractAchievement, INebulaAchievement
 {
-    public SumUpAchievement(bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention)
-        : base(true, isSecret, noHint, key, goal, role, type, trophy, attention)
+    public SumUpAchievement(bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage)
+        : base(true, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage)
     {
     }
 
@@ -618,8 +636,8 @@ public class SumUpAchievement : AbstractAchievement, INebulaAchievement
 public class CompleteAchievement : SumUpAchievement, INebulaAchievement
 {
     ProgressRecord[] records;
-    public CompleteAchievement(ProgressRecord[] allRecords, bool isSecret, bool noHint, string key, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention)
-        : base(isSecret, noHint, key, allRecords.Length, role,type, trophy, attention) {
+    public CompleteAchievement(ProgressRecord[] allRecords, bool isSecret, bool noHint, string key, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage)
+        : base(isSecret, noHint, key, allRecords.Length, role,type, trophy, attention, specifiedImage) {
         this.records = allRecords;
     }
 
@@ -810,18 +828,16 @@ static public class NebulaAchievementManager
             bool clearOnce = false;
             bool noHint = false;
             bool secret = false;
-            bool seasonal = false;
-            bool costume = false;
             bool isNotChallenge = false;
             bool isRecord = false;
             bool innersloth = false;
-            bool perk = false;
             string? reference = null;
             string? defaultSource = null;
             int attention = 0;
             IEnumerable<ProgressRecord>? records = recordsList;
 
             IEnumerable<DefinedAssignable> relatedRoles = [];
+            Image? specifiedImage = null;
 
             int rarity = int.Parse(args[1]);
             int goal = 1;
@@ -841,13 +857,13 @@ static public class NebulaAchievementManager
                         secret = true;
                         break;
                     case "seasonal":
-                        seasonal = true;
+                        types.Add(AchievementType.Seasonal);
                         break;
                     case "costume":
-                        costume = true;
+                        types.Add(AchievementType.Costume);
                         break;
                     case "perk":
-                        perk = true;
+                        types.Add(AchievementType.Perk);
                         break;
                     case "nonChallenge":
                         isNotChallenge = true;
@@ -882,12 +898,23 @@ static public class NebulaAchievementManager
                     case string a when a.StartsWith("a-"):
                         if (int.TryParse(a.Substring(2), out var val)) attention = val;
                         break;
+                    case string a when a.StartsWith("image-role-"):
+                        var roleName = a.Substring(11);
+                        specifiedImage = Roles.Roles.AllAssignables().FirstOrDefault(a => a.LocalizedName == roleName)?.ConfigurationHolder?.Illustration;
+                        break;
+                    case string a when a.StartsWith("image-combi-"):
+                        var combiName = a.Substring(12);
+                        specifiedImage = CombiImageInfo.FastImages.TryGetValue(combiName.HeadUpper(), out var combiInfo) ? combiInfo.Image : null;
+                        break;
+                    case string a when a.StartsWith("image-"):
+                        specifiedImage = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Achievements/" + a.Substring(6) + ".png");
+                        break;
+                    case string a when a.StartsWith("collab-"):
+                        if(AchievementType.TryGetCollabType(a.Substring(7), out var aType)) types.Add(aType);
+                        break;
                 }
             }
 
-            if (seasonal) types.Add(AchievementType.Seasonal);
-            if (costume) types.Add(AchievementType.Costume);
-            if (perk) types.Add(AchievementType.Perk);
             if (secret) types.Add(AchievementType.Secret);
 
             var nameSplitted = args[0].Split('.');
@@ -923,13 +950,13 @@ static public class NebulaAchievementManager
             else if (isRecord)
                 new DisplayProgressRecord(args[0], goal, "record." + args[0], defaultSource);
             else if (records.Count() > 0)
-                new CompleteAchievement(records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention);
+                new CompleteAchievement(records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage);
             else if (reference != null)
-                new SumUpReferenceAchievement(secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention);
+                new SumUpReferenceAchievement(secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage);
             else if (goal > 1)
-                new SumUpAchievement(secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention);
+                new SumUpAchievement(secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage);
             else
-                new StandardAchievement(clearOnce, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention);
+                new StandardAchievement(clearOnce, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage);
 
             if (recordsList.Count > 0) recordsList.Clear();
         }

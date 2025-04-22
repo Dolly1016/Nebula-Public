@@ -5,7 +5,9 @@ using Nebula.Game.Statistics;
 using PowerTools;
 using UnityEngine;
 using Virial.Events.Player;
+using Virial.Game;
 using static DynamicSound;
+using static Il2CppSystem.Globalization.CultureInfo;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 using static UnityEngine.GraphicsBuffer;
 
@@ -23,6 +25,11 @@ public static class PlayerStartPatch
             {
                 __instance.SetColor(__instance.PlayerId);
                 if (PlayerControl.LocalPlayer) DynamicPalette.RpcShareMyColor();
+                if (__instance.AmOwner)
+                {
+                    __instance.lightSource.lightChild.layer = LayerExpansion.GetVanillaShadowLightLayer();
+                }
+
             }))
             );
 
@@ -82,8 +89,11 @@ public static class PlayerUpdatePatch
         foreach (var cc in ModSingleton<CustomConsoleManager>.Instance.AllCustomConsoles) yield return cc.Renderer;
     }
 
+    static private float lastKillTimer = 0f;
     static void Prefix(PlayerControl __instance)
     {
+        lastKillTimer = __instance.killTimer;
+
         if (__instance.AmOwner)
         {
             foreach(var r in AllHighlightable()) r.material.SetFloat("_Outline", 0f);
@@ -123,16 +133,28 @@ public static class PlayerUpdatePatch
                 HudManager.Instance.PetButton.SetDisabled();
             }
 
-            if(__instance.inVent && Vent.currentVent)
+            if (__instance.inVent && Vent.currentVent)
             {
                 Vector2 vector = Vent.currentVent.transform.position;
                 vector -= __instance.Collider.offset;
 
-                if(__instance.MyPhysics.body.transform.position.Distance(vector) > 0.001f) __instance.NetTransform.RpcSnapTo(vector);
+                if (__instance.MyPhysics.body.transform.position.Distance(vector) > 0.001f) __instance.NetTransform.RpcSnapTo(vector);
+            }
+
+            //キルボタンのクールダウン進行
+            {
+                var data = __instance.Data;
+                bool flag = data.Role.CanUseKillButton && !data.IsDead;
+                if ((__instance.IsKillTimerEnabled || __instance.ForceKillTimerContinue) && flag)
+                {
+                    float deltaTime = Time.fixedDeltaTime;
+                    float coeff = GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.CooldownSpeed, true) ?? 1f;
+                    deltaTime *= coeff;
+                    __instance.SetKillTimer(lastKillTimer - deltaTime);
+                }
             }
         }
-        
-        
+
         if(__instance.cosmetics.transform.localScale.z < 100f)
         {
             var scale = __instance.cosmetics.transform.localScale;
@@ -726,4 +748,70 @@ class CustomNetworkTransformPatch
                 }
             }
         }, false);
+}
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.PlayStepSound))]
+public static class PlayerFootstepPatch
+{
+    static bool Prefix(PlayerControl __instance)
+    {
+        if (!Constants.ShouldPlaySfx()) return false;
+        
+        if (LobbyBehaviour.Instance)
+        {
+            if (__instance.AmOwner)
+            {
+                for (int i = 0; i < LobbyBehaviour.Instance.AllRooms.Length; i++)
+                {
+                    SoundGroup soundGroup = LobbyBehaviour.Instance.AllRooms[i].MakeFootstep(__instance);
+                    if (soundGroup)
+                    {
+                        AudioClip clip = soundGroup.Random();
+                        __instance.FootSteps.clip = clip;
+                        __instance.FootSteps.Play();
+                        break;
+                    }
+                }
+            }
+            return false;
+        }
+        if (!ShipStatus.Instance) return false;
+
+        bool canHear = __instance.AmOwner;
+        if (!canHear && GeneralConfigurations.CanHearOthersFootstepOption)
+        {
+            var modPlayer = __instance.GetModInfo();
+            var modInfo = modPlayer?.Unbox();
+            canHear |= (modInfo?.VisibilityLevel ?? 2) <= 1 && !(modPlayer?.IsDived ?? false);
+            
+        }
+        if (canHear)
+        {
+            for (int j = 0; j < ShipStatus.Instance.AllStepWatchers.Length; j++)
+            {
+                SoundGroup soundGroup2 = ShipStatus.Instance.AllStepWatchers[j].MakeFootstep(__instance);
+                if (soundGroup2)
+                {
+                    AudioClip clip2 = soundGroup2.Random();
+                    __instance.FootSteps.clip = clip2;
+                    __instance.FootSteps.Play();
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(SkeldShipRoom), nameof(SkeldShipRoom.MakeFootstep))]
+public static class SkeldFootstepPatch
+{
+    static bool Prefix(SkeldShipRoom __instance, ref SoundGroup __result, [HarmonyArgument(0)]PlayerControl player)
+    {
+        if (player.AmOwner) return true;
+
+        if (__instance.roomArea.OverlapPoint(player.GetTruePosition())) __result = __instance.FootStepSounds;
+        
+        return false;
+    }
 }

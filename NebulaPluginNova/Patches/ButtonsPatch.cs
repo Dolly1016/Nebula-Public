@@ -13,7 +13,7 @@ public static class SabotageButtonPatch
     {
         try
         {
-            if (PlayerControl.LocalPlayer.inVent || !GameManager.Instance.SabotagesEnabled() || PlayerControl.LocalPlayer.petting)
+            if (!PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.inVent || !GameManager.Instance.SabotagesEnabled() || PlayerControl.LocalPlayer.petting)
                 __instance.SetDisabled();
             else
                 __instance.SetEnabled();

@@ -63,16 +63,21 @@ public static class HudManagerCoStartGamePatch
             }
             __instance.IsIntroDisplayed = true;
             DestroyableSingleton<HudManager>.Instance.FullScreen.transform.localPosition = new Vector3(0f, 0f, -250f);
+
+            //スタンプの位置を変更
+            StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -500f, () => !GameManager.Instance.GameHasStarted);
+
             yield return DestroyableSingleton<HudManager>.Instance.ShowEmblem(true);
             IntroCutscene introCutscene = GameObject.Instantiate<IntroCutscene>(__instance.IntroPrefab, __instance.transform);
             yield return introCutscene.CoBegin();
 
             yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform, GameStatistics.EventVariation.GameStart, EventDetail.GameStart);
 
-            PlayerControl.LocalPlayer.killTimer = 10f;
+            float killCooldown = GeneralConfigurations.ShortenCooldownAtGameStart ? 10f : AmongUsUtil.VanillaKillCoolDown;
+            PlayerControl.LocalPlayer.killTimer = killCooldown;
             if (GeneralConfigurations.EmergencyCooldownAtGameStart) AmongUsUtil.SetEmergencyCoolDown(10f, false, false);
 
-            HudManager.Instance.KillButton.SetCoolDown(10f, AmongUsUtil.VanillaKillCoolDown);
+            HudManager.Instance.KillButton.SetCoolDown(killCooldown, AmongUsUtil.VanillaKillCoolDown);
 
             if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Sabotage, out var sabo)) sabo.TryCast<SabotageSystemType>()?.SetInitialSabotageCooldown();
             if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Doors, out var door)) door.TryCast<IDoorSystem>()?.SetInitialSabotageCooldown();

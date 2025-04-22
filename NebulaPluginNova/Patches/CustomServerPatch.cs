@@ -1,10 +1,16 @@
-﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+﻿using AmongUs.Data;
+using AmongUs.HTTP;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behaviour;
+using Newtonsoft.Json;
 using UnityEngine.Events;
+using UnityEngine.Networking;
+using UnityEngine.ResourceManagement;
+using static HttpMatchmakerManager;
 
 namespace Nebula.Patches;
 
-[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
+[NebulaPreprocess(PreprocessPhase.PostLoadAddons)]
 [HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.Open))]
 public static class RegionMenuOpenPatch
 {
@@ -17,9 +23,42 @@ public static class RegionMenuOpenPatch
     public static IRegionInfo[] defaultRegions = null!;
 
     private static DataSaver customServerData = new DataSaver("CustomServer");
-    private static StaticHttpRegionInfo CustomRegion = null!, NoSServerRegion = null!;
+    private static StaticHttpRegionInfo /*CustomRegion = null!,*/ NoSServerRegion = null!;
     private static string NoSIP = "http://168.138.44.249";
     private static ushort NoSPort = 22023;
+
+    public static List<IRegionInfo> AddonRegions = [];
+    public static IRegionInfo GenerateRegion(string name, string ip, ushort port) => new StaticHttpRegionInfo(name, StringNames.NoTranslation, ip,
+            new ServerInfo[] { new ServerInfo("Http-1", ip, port, false) }).Cast<IRegionInfo>();
+
+    private class CustomServerData
+    {
+        [JsonSerializableField]
+        public string DisplayName = null!;
+        [JsonSerializableField]
+        public string Ip = null!;
+        [JsonSerializableField]
+        public ushort Port = 22023;
+
+        public bool IsValid => DisplayName != null && Ip != null;
+    }
+    public static void LoadAddonRegion()
+    {
+        foreach(var addon in NebulaAddon.AllAddons)
+        {
+            using var stream = addon.OpenRead("CustomServer.json");
+            if (stream == null) continue;
+            var servers = JsonStructure.Deserialize<List<CustomServerData>>(stream);
+
+            foreach(var server in servers ?? [])
+            {
+                if (server.IsValid)
+                {
+                    AddonRegions.Add(GenerateRegion(server.DisplayName, server.Ip, server.Port));
+                }
+            }
+        }
+    }
     public static void UpdateRegions()
     {
         ServerManager serverManager = DestroyableSingleton<ServerManager>.Instance;
@@ -27,10 +66,13 @@ public static class RegionMenuOpenPatch
 
         //var CustomRegion = new DnsRegionInfo(SaveIp.Value, "Custom", StringNames.NoTranslation, SaveIp.Value, (ushort)SavePort.Value, false);
         
+        /*
         CustomRegion = new StaticHttpRegionInfo("Custom", StringNames.NoTranslation, SaveIp.Value,
             new ServerInfo[] { new ServerInfo("Custom", SaveIp.Value, (ushort)SavePort.Value, false) });
+        */
+
         NoSServerRegion = new StaticHttpRegionInfo("Nebula on the Ship JP", StringNames.NoTranslation, NoSIP,
-            new ServerInfo[] { new ServerInfo("Nebula on the Ship JP", NoSIP, NoSPort, false) });
+            new ServerInfo[] { new ServerInfo("Http-1", NoSIP, NoSPort, false) });
 
         var ModNARegion = new StaticHttpRegionInfo("Modded NA (MNA)", StringNames.NoTranslation, "www.aumods.us",
             new ServerInfo[] { new ServerInfo("Http-1", "https://www.aumods.us", 443, false) });
@@ -39,7 +81,7 @@ public static class RegionMenuOpenPatch
         var ModASRegion = new StaticHttpRegionInfo("Modded Asia (MAS)", StringNames.NoTranslation, "au-as.duikbo.at",
             new ServerInfo[] { new ServerInfo("Http-1", "https://au-as.duikbo.at", 443, false) });
 
-        regions = regions.Concat(new IRegionInfo[] { ModNARegion.Cast<IRegionInfo>(), ModEURegion.Cast<IRegionInfo>(), ModASRegion.Cast<IRegionInfo>(), NoSServerRegion.Cast<IRegionInfo>() , CustomRegion.Cast<IRegionInfo>()}).ToArray();
+        regions = regions.Concat(AddonRegions).Concat([ModNARegion.Cast<IRegionInfo>(), ModEURegion.Cast<IRegionInfo>(), ModASRegion.Cast<IRegionInfo>(), NoSServerRegion.Cast<IRegionInfo>()]).ToArray();
         //マージ時、DefaultRegionsに含まれている要素のほうが優先される(重複時に生き残る方)
         ServerManager.DefaultRegions = regions;
         serverManager.LoadServers();
@@ -48,9 +90,7 @@ public static class RegionMenuOpenPatch
 
     static RegionMenuOpenPatch()
     {
-        SaveIp = new StringDataEntry("ServerIp", customServerData, "");
-        SavePort = new IntegerDataEntry("ServerPort", customServerData, 22023);
-
+        LoadAddonRegion();
         defaultRegions = ServerManager.DefaultRegions;
         UpdateRegions();
     }
@@ -62,6 +102,7 @@ public static class RegionMenuOpenPatch
         __instance.RegionText.text = DestroyableSingleton<TranslationController>.Instance.GetStringWithDefault(region.TranslateName, region.Name, new Il2CppReferenceArray<Il2CppSystem.Object>(new Il2CppSystem.Object[0]));
     }
 
+    /*
     public static void Postfix(RegionMenu __instance)
     {
         if (!__instance.TryCast<RegionMenu>()) return;
@@ -110,6 +151,7 @@ public static class RegionMenuOpenPatch
             };
         }
     }
+    */
 }
 
 [HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.OnEnable))]
@@ -119,7 +161,7 @@ public static class RegionMenuOnEnablePatch
     public static void Postfix(RegionMenu __instance)
     {
         int activeButtons = 0;
-        bool IsAvailable(ServerListButton button) => button.textTranslator.TargetText == StringNames.NoTranslation;
+        bool IsAvailable(ServerListButton button) => true /*button.textTranslator.TargetText == StringNames.NoTranslation*/;
         foreach (var button in __instance.ButtonPool.activeChildren)
         {
             var active = IsAvailable(button.CastFast<ServerListButton>());
@@ -152,3 +194,235 @@ public static class RegionMenuOnEnablePatch
     }
 }
 
+[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoFindGameInfoFromCode))]
+public static class FindGameInfoFromCodePatch
+{
+    public static bool Prefix(AmongUsClient __instance, ref Il2CppSystem.Collections.IEnumerator __result, [HarmonyArgument(0)]int gameId, [HarmonyArgument(1)]Il2CppSystem.Action<HttpMatchmakerManager.FindGameByCodeResponse, string> callback)
+    {
+        __instance.NetworkMode = NetworkModes.OnlineGame;
+        __instance.GameId = gameId;
+
+        __result = ModServerSearcher.CoFindRoomFromCode(HttpMatchmakerManager.Instance, gameId, callback.Invoke).WrapToIl2Cpp();
+        return false;
+    }
+}
+
+file static class ModServerSearcher
+{
+    static public System.Collections.IEnumerator CoFindRoomFromCode(HttpMatchmakerManager matchmaker, int gameId, Action<FindGameByCodeResponse, string> onFound)
+    {
+        while (!DestroyableSingleton<EOSManager>.InstanceExists) yield return null;
+        yield return DestroyableSingleton<EOSManager>.Instance.WaitForLoginFlow();
+
+        IRegionInfo initialRegion = DestroyableSingleton<ServerManager>.Instance.CurrentRegion;
+        List<IRegionInfo> regions = DestroyableSingleton<ServerManager>.Instance.AvailableRegions.ToList();
+        regions.RemoveAll(r => r.Name == initialRegion.Name);
+        List<string> errorRegions = [];
+
+        bool found = false;
+        yield return CoFindRoomFromCodeOnRegion(matchmaker, initialRegion, gameId, (response, token) =>
+        {
+            found = true;
+            onFound.Invoke(response, token);
+        });
+
+        if (found) yield break;
+
+        yield return Effects.All(regions.Select(region => CoFindRoomFromCodeOnRegion(matchmaker, region, gameId, (response, token) =>
+        {
+            if (found) return;
+            found = true;
+            DestroyableSingleton<ServerManager>.Instance.SetRegion(region);
+            onFound.Invoke(response, token);
+        }, (failure) =>
+        {
+            if (failure.Reason == DisconnectReasons.Custom)
+            {
+                errorRegions.Add(region.TranslateName == StringNames.NoTranslation ? region.Name.Replace("<br>", "") : DestroyableSingleton<TranslationController>.Instance.GetString(region.TranslateName));
+            }
+        }).WrapToIl2Cpp()).ToArray());
+
+        if (!found)
+        {
+            var errorTxt = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.ErrorNotFoundGame);
+            if (errorRegions.Count > 0)
+            {
+                errorTxt += "<br>" + Language.Translate("ui.error.failedToSearchRoom") + "<br>";
+                errorTxt += StringHelper.Join(num => num % 3 == 0 ? "<br>" : ",  ", errorRegions);
+            }
+
+            HttpMatchmakerManager.Instance.SetDisconnectInfoAndShowPopup(new MatchmakerFailure
+            {
+                Reason = DisconnectReasons.GameNotFound,
+                CustomDisconnect = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.ErrorNotFoundGame),
+                MatchmakerError = null,
+                ShouldGoOffline = false
+            });
+            try
+            {
+                DestroyableSingleton<DisconnectPopup>.Instance.SetText(errorTxt);
+            }
+            catch { }
+        }
+    }
+
+    static public System.Collections.IEnumerator CoRefreshToken(HttpMatchmakerManager matchmaker, ServerInfo udpServer, Action<string> onGetToken, Action<MatchmakerFailure>? onFailure = null)
+    {
+        if (string.IsNullOrEmpty(DestroyableSingleton<EOSManager>.Instance.UserIDToken)) yield break;
+
+        string text = udpServer.HttpUrl + "api/user";
+        string text2 = JsonConvert.SerializeObject(new HttpMatchmakerManager.UserTokenRequestData
+        {
+            Puid = DestroyableSingleton<EOSManager>.Instance.ProductUserId,
+            Username = DataManager.Player.Customization.Name,
+            ClientVersion = Constants.GetBroadcastVersion(),
+            Language = DataManager.Settings.Language.CurrentLanguage
+        });
+        var retryableWebRequest = RetryableWebRequest.Post(text, text2);
+        retryableWebRequest.SetOrReplaceRequestHeader("Content-Type", "application/json");
+        retryableWebRequest.SetOrReplaceRequestHeader("Accept", "text/plain");
+        retryableWebRequest.SetOrReplaceRequestHeader("Authorization", "Bearer " + DestroyableSingleton<EOSManager>.Instance.UserIDToken);
+        retryableWebRequest.SetOrReplaceSuccessCallback((Il2CppSystem.Action<string>)((string encodedToken) =>
+        {
+            if (!MatchmakerToken.TryParse(encodedToken, out _)) return;
+            onGetToken.Invoke(encodedToken);
+        }));
+        yield return CoSendRequest(matchmaker, udpServer, retryableWebRequest, "authenticate", 2, (failure) =>
+        {
+            onFailure?.Invoke(failure);
+        });
+    }
+
+    static public System.Collections.IEnumerator CoFindRoomFromCodeOnRegion(HttpMatchmakerManager matchmaker, IRegionInfo region, int gameId, Action<FindGameByCodeResponse, string> onFound, Action<MatchmakerFailure>? onFailure = null)
+    {
+        var udpServer = region.Servers.ToArray().Random();
+        RetryableWebRequest retryableWebRequest;
+
+        string uri = $"{udpServer.HttpUrl}api/games/{gameId}";
+        string matchmakerToken = string.Empty;
+
+        bool error = false;
+        yield return CoRefreshToken(matchmaker, udpServer, t => matchmakerToken = t, failure =>
+        {
+            error = true;
+            onFailure?.Invoke(failure);
+        }
+        );
+        if (error) yield break;
+
+        retryableWebRequest = RetryableWebRequest.Get(uri);
+        retryableWebRequest.SetOrReplaceRequestHeader("Accept", "application/json");
+        retryableWebRequest.SetOrReplaceRequestHeader("Authorization", "Bearer " + matchmakerToken);
+        retryableWebRequest.SetOrReplaceSuccessCallback((Il2CppSystem.Action<string>)((string response) =>
+        {
+            //IL_0074: Expected O, but got Unknown
+            try
+            {
+                FindGameByCodeResponse findGameByCodeResponse = JsonConvert.DeserializeObject<FindGameByCodeResponse>(response, matchmaker.jsonSettings);
+                findGameByCodeResponse.Region = region.TranslateName;
+                findGameByCodeResponse.UntranslatedRegion = region.Name;
+                onFound.Invoke(findGameByCodeResponse, matchmakerToken);
+            }
+            catch
+            {
+            }
+        }));
+
+        yield return CoSendRequest(matchmaker, udpServer, retryableWebRequest, "request gamecode server", 2, (failure) =>
+        {
+            onFailure?.Invoke(failure);
+        });
+    }
+
+    static public System.Collections.IEnumerator CoSendRequest(HttpMatchmakerManager matchmaker, ServerInfo udpServer, RetryableWebRequest request, string context, int maxRetries, Action<HttpMatchmakerManager.MatchmakerFailure> onFailure)
+    {
+        yield return CoSend(request, matchmaker.logger); //request.CoSend(matchmaker.logger);
+        if (request.IsSuccess) yield break;
+
+        if (request.IsAuthError && context == "authenticate")
+        {
+            onFailure?.Invoke(matchmaker.BundleFailureInfo(request, context));
+            yield break;
+        }
+        if (request.IsAuthError)
+        {
+            bool didRefreshToken = false;
+            yield return CoRefreshToken(matchmaker, udpServer, token =>
+            {
+                request.SetOrReplaceRequestHeader("Authorization", "Bearer " + token);
+                didRefreshToken = true;
+            });
+            if (!didRefreshToken)
+            {
+                onFailure?.Invoke(matchmaker.BundleFailureInfo(request, context));
+                yield break;
+            }
+        }
+        if (request.IsAuthError || request.IsTransientError)
+        {
+            float retryIntervalSeconds = 0.2f;
+            int retryBackoffFactor = 2;
+            for (int retries = 1; retries <= maxRetries; retries++)
+            {
+                float num = (float)((double)retryIntervalSeconds * Math.Pow(retryBackoffFactor, retries));
+                yield return new WaitForSeconds(num);
+                yield return CoSend(request, matchmaker.logger); //request.CoSend(matchmaker.logger);
+                if (request.IsSuccess)
+                {
+                    yield break;
+                }
+                if (!request.IsTransientError)
+                {
+                    break;
+                }
+            }
+        }
+        onFailure?.Invoke(matchmaker.BundleFailureInfo(request, context));
+    }
+
+    private static System.Collections.IEnumerator CoSend(RetryableWebRequest retryableRequest, Logger logger)
+    {
+        UnityWebRequest request = retryableRequest.BuildRequest();
+        var operation = request.SendWebRequest();
+        while (!operation.isDone) yield return null;
+
+        retryableRequest.ResponseCode = request.responseCode;
+        retryableRequest.ResponseText = request.downloadHandler.text;
+        retryableRequest.Error = request.error;
+        if (retryableRequest.IsSuccess)
+        {
+            try
+            {
+                var action = retryableRequest.successCallback;
+                if (action != null) action.Invoke(request.downloadHandler.text);
+
+                yield break;
+            }
+            catch (Exception ex)
+            {
+                if (logger != null)
+                {
+                    logger.Error("The success callback passed to RetryableWebRequest threw an exception: " + ex.Message, null);
+                }
+                retryableRequest.ResponseCode = 0L;
+                retryableRequest.ResponseText = null;
+                retryableRequest.Error = ex.Message;
+            }
+        }
+        try
+        {
+            var action2 = retryableRequest.errorCallback;
+            if (action2 != null) action2.Invoke(retryableRequest);
+
+            yield break;
+        }
+        catch (Exception ex2)
+        {
+            if (logger != null)
+            {
+                logger.Error("The error callback passed to RetryableWebRequest threw an exception: " + ex2.Message, null);
+            }
+            yield break;
+        }
+    }
+}

@@ -417,7 +417,7 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
 
                 var placeButton = Bind(new ModAbilityButton(alwaysShow: true)).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
                 placeButton.SetSprite(placeButtonSprite.GetSprite());
-                placeButton.Availability = (button) => true && mapLayer.Positions.Count >= 2;
+                placeButton.Availability = (button) => mapLayer && mapLayer.Positions.Count >= 2;
                 placeButton.Visibility = (button) => !MyPlayer.IsDead && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && mapLayer && mapLayer.gameObject.active;
                 placeButton.OnClick = button =>
                 {

@@ -170,5 +170,6 @@ public class NebulaInput
         modInput[Virial.Compat.VirtualKeyInput.Spectator] = new(GetModKeyCodeGetter("spectator", KeyCode.C));
         modInput[Virial.Compat.VirtualKeyInput.SpectatorRight] = new(GetModKeyCodeGetter("spectatorRight", KeyCode.Period));
         modInput[Virial.Compat.VirtualKeyInput.SpectatorLeft] = new(GetModKeyCodeGetter("spectatorLeft", KeyCode.Comma));
+        modInput[Virial.Compat.VirtualKeyInput.Stamp] = new(GetModKeyCodeGetter("stamp", KeyCode.R));
     }
 }

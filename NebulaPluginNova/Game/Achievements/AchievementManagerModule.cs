@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.Rendering;
 using Virial;
 using Virial.DI;
 using Virial.Events.Game;
@@ -25,10 +26,14 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
     private AchievementManagerModule()
     {
         this.Register(NebulaGameManager.Instance!);
+        ModSingleton<AchievementManagerModule>.Instance = this;
     }
-     
+
+    public AchievementToken<float> CorpseToken = null!;
     void OnGameStart(GameStartEvent ev)
     {
+        CorpseToken = new("dragCorpse", 0f, (dis, _) => (int)dis);
+
         //実績
         var challengeDeath2Token = new AchievementToken<int>("challenge.death2", 0, (exileAnyone, _) => (NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p.IsDead && p.MyKiller == GamePlayer.LocalPlayer && p != GamePlayer.LocalPlayer).Select(p => p.PlayerState).Distinct().Count() + exileAnyone) >= 4);
         GameOperatorManager.Instance?.Register<PlayerVoteDisclosedLocalEvent>(ev => { if (ev.VoteToWillBeExiled) challengeDeath2Token.Value = 1; }, NebulaAPI.CurrentGame!);

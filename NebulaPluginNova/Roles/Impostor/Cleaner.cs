@@ -38,7 +38,10 @@ public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCit
         [Local, OnlyMyPlayer]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            cleanButton?.CoolDownTimer?.Start(SyncKillAndCleanCoolDownOption ? null : 5f);
+            if (SyncKillAndCleanCoolDownOption)
+                cleanButton?.CoolDownTimer?.Start();
+            else if (((cleanButton?.CurrentTimer as Timer)?.CurrentTime ?? 99f) < 5f)
+                cleanButton?.CoolDownTimer?.Start(5f);
         }
 
         public Ability(GamePlayer player) : base(player)

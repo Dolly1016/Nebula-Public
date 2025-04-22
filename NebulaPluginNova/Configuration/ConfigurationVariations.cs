@@ -45,6 +45,29 @@ static internal class ConfigurationAssets
         }
         return widget;
     }
+
+    static internal NoSGUIText GetOptionTitle(TextComponent title, string id)
+    {
+        var overlayWidget = ConfigurationAssets.GetOptionOverlay(id);
+        return new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), title)
+        {
+            OverlayWidget = overlayWidget,
+            OnClickText = ConfigurationAssets.GetCopyAction(id),
+            PostBuilder = (text) =>
+            {
+                if (overlayWidget != null)
+                {
+                    Vector2 size = text.rectTransform.sizeDelta;
+                    Vector2 textSize = text.textBounds.size;
+                    float diffX = textSize.x - size.x * 0.5f;
+                    var renderer = UnityHelper.CreateObject<SpriteRenderer>("InfoIcon", text.transform, new(diffX + 0.11f, -size.y * 0.45f + 0.12f, -0.5f));
+                    renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                    renderer.sprite = ButtonEffect.InfoImage.GetSprite();
+                    renderer.transform.localScale = new(0.72f, 0.72f, 1f);
+                }
+            }
+        };
+    }
 }
 
 internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
@@ -58,7 +81,7 @@ internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
         this.Title = new TranslateTextComponent(id);
         this.val = new BoolConfigurationValue(id, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id), OnClickText = ConfigurationAssets.GetCopyAction(id) },
+            ConfigurationAssets.GetOptionTitle(Title, id),
             ConfigurationAssets.Semicolon,
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
             new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new LazyTextComponent(() => ValueAsDisplayString)) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }, Color = Color.Lerp(Color.white, GetValue() ? Color.cyan : Color.red ,0.65f) }
@@ -91,7 +114,7 @@ internal class IntegerConfigurationImpl : Virial.Configuration.IntegerConfigurat
         this.Title = title ?? new TranslateTextComponent(id);
         this.val = new IntegerConfigurationValue(id, selection, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id), OnClickText = ConfigurationAssets.GetCopyAction(id) },
+            ConfigurationAssets.GetOptionTitle(Title, id),
             ConfigurationAssets.Semicolon,
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => ValueAsDisplayString)),
@@ -133,7 +156,7 @@ internal class FloatConfigurationImpl : Virial.Configuration.FloatConfiguration
         this.Title = title ?? new TranslateTextComponent(id);
         this.val = new FloatConfigurationValue(id, selection, defaultValue);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id), OnClickText = ConfigurationAssets.GetCopyAction(id) },
+            ConfigurationAssets.GetOptionTitle(Title, id),
             ConfigurationAssets.Semicolon,
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), new LazyTextComponent(() => ValueAsDisplayString)),
@@ -194,7 +217,7 @@ internal class StringConfigurationImpl : Virial.Configuration.ValueConfiguration
         this.Title = title ?? new TranslateTextComponent(id);
         this.val = new SelectionConfigurationValue(id, defaultIndex, selection.Length);
         this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), this.Title) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(id), OnClickText = ConfigurationAssets.GetCopyAction(id) },
+            ConfigurationAssets.GetOptionTitle(Title, id),
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f,0f)),
             new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), ConfigurationAssets.LeftArrow) { OnClick = _ => { val.ChangeValue(false, true); NebulaAPI.Configurations.RequireUpdateSettingScreen(); } },
@@ -256,6 +279,7 @@ public static class GroupConfigurationColor
 {
     readonly static public Color ImpostorRed = new(0.7f, 0.2f, 0.2f);
     readonly static public Color Gray = Color.gray.RGBMultiplied(0.76f);
+    static public Color ToDarkenColor(Color color) => color.RGBMultiplied(0.65f);
 }
 public class GroupConfiguration : IConfiguration
 {

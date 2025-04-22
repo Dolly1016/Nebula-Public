@@ -92,7 +92,17 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
     void Update(UpdateEvent ev)
     {
         if (isActive && (predicate?.Invoke() ?? true))
-            currentTime = Mathf.Clamp(currentTime - Time.fixedDeltaTime, min, max);
+        {
+            float deltaTime = Time.fixedDeltaTime;
+            if (AffectedByCooldownEffect)
+            {
+                float coeff = GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.CooldownSpeed, true) ?? 1f;
+                //if (coeff < 0f) coeff = 0f;
+                deltaTime *= coeff;
+            }
+
+            currentTime = Mathf.Clamp(currentTime - deltaTime, min, max);
+        }
     }
 
     public Timer() : this(0f, 0f) { }
@@ -112,14 +122,17 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
     }
 
     public Func<bool>? Predicate => this.predicate;
+    public bool AffectedByCooldownEffect = false;
 
     public Timer SetAsKillCoolDown()
     {
+        AffectedByCooldownEffect = true;
         return SetPredicate(() => PlayerControl.LocalPlayer.IsKillTimerEnabled);
     }
 
     public Timer SetAsAbilityCoolDown()
     {
+        AffectedByCooldownEffect = true;
         return SetPredicate(() =>
         {
             if (PlayerControl.LocalPlayer.CanMove) return true;
@@ -131,6 +144,7 @@ public class Timer : INebulaScriptComponent, GameTimer, IGameOperator
             || Minigame.Instance.TryCast<IDoorMinigame>() != null
             || Minigame.Instance.TryCast<VitalsMinigame>() != null
             || Minigame.Instance.TryCast<MultistageMinigame>() != null
+            || Minigame.Instance.TryCast<AutoMultistageMinigame>() != null
             )) return true;
             return false;
         });

@@ -1,4 +1,6 @@
-﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+﻿using BepInEx.Unity.IL2CPP;
+using Cpp2IL.Core.Extensions;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behaviour;
 using UnityEngine;
 using Virial;
@@ -196,6 +198,13 @@ public static class ShipExtension
 
         //エンジンの影を無視したオブジェクトを修正
         ShipStatus.Instance.FastRooms[SystemTypes.Engine].transform.FindChild("engine_pipewheel").SetLocalZ(-2f);
+
+        //Raiderの斧対策で展望間に壁設置
+        {
+            var collider = UnityHelper.CreateObject<EdgeCollider2D>("DeckWall", null, Vector3.zero, LayerExpansion.GetShipLayer());
+            collider.SetPoints(((Vector2[])[new(-12.45f, -13.6f), new(6.0f, -13.6f)]).ToIl2CppList());
+        }
+
     }
 
     private static SpriteLoader fungleLight1Sprite = SpriteLoader.FromResource("Nebula.Resources.FungleLightConsole1.png", 100f);
@@ -230,7 +239,7 @@ public static class ShipExtension
         //停電サボタージュ
         if(FungleHasLightSabotage)
         {
-            GameOperatorManager.Instance.Register<MapInstantiateEvent>(ev =>
+            GameOperatorManager.Instance!.Register<MapInstantiateEvent>(ev =>
             {
                 var infected = MapBehaviour.Instance.infectedOverlay;
                 var lightOut = GameObject.Instantiate(VanillaAsset.MapAsset[0].MapPrefab.infectedOverlay.transform.GetChild(3).GetChild(1).gameObject, infected.transform);
@@ -251,8 +260,12 @@ public static class ShipExtension
 
                 GameOperatorManager.Instance.Register<GameHudUpdateEvent>(ev =>
                 {
-                    var perc = infected.DoorsPreventingSabotage ? 1f : infected.sabSystem.PercentCool;
-                    renderer.material.SetFloat("_Percent", perc);
+                    if (infected.sabSystem != null)
+                    {
+                        var perc = infected.DoorsPreventingSabotage ? 1f : infected.sabSystem.PercentCool;
+                        if (renderer) renderer.material.SetFloat("_Percent", perc);
+                    }
+
                 }, new GameObjectLifespan(MapBehaviour.Instance.gameObject));
             }, Virial.NebulaAPI.CurrentGame!);
             var switchSystem = new SwitchSystem();
@@ -295,7 +308,7 @@ public static class ShipExtension
                 light.transform.SetParent(obj.transform);
                 light.material.SetColor("_Color", Color.white.AlphaMultiplied(0.35f));
                 light.transform.localScale = Vector3.one * 1.9f;
-                light.transform.localPosition = new Vector3(0f, 0f, -50f);
+                light.transform.localPosition = new Vector3(0f, 0f, -10f);
             }
             ShipStatus.Instance.transform.FindChild("Outside").GetChild(0).GetChild(5).gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)SetUpGlowingMush);
             SetUpGlowingMush(ShipStatus.Instance.FastRooms[SystemTypes.Reactor].transform.FindChild("GlowingMushroom").gameObject);
@@ -311,6 +324,24 @@ public static class ShipExtension
             var localPos = storageBarrels.localPosition;
             localPos.z = -1.095f;
             storageBarrels.localPosition = localPos;
+        }
+
+        //Storageの影を調整
+        {
+            var outsideShadows = ShipStatus.Instance.transform.TryDig("Outside", "OutsideHighlands", "Shadows");
+            outsideShadows?.TryDig("OnewayShadow-Top")?.gameObject.SetActive(false);
+            outsideShadows?.TryDig("OnewayShadow-Top+Ledge")?.gameObject.SetActive(false);
+            var collider = ShipStatus.Instance.FastRooms[SystemTypes.Storage].transform.GetChild(1).GetComponent<EdgeCollider2D>();
+            Vector2[] points = collider.points;
+            var subArray1 = points.SubArray(0, 5);
+            var subArray2 = points.SubArray(20, 27);
+
+            collider.SetPoints(subArray1.ToIl2CppList());
+            var newCollider = collider.gameObject.AddComponent<EdgeCollider2D>();
+            newCollider.isTrigger = false;
+            newCollider.SetPoints(subArray2.ToIl2CppList());
+
+            //BepInEx.ConsoleManager.StandardOutStream.WriteLine("Colliders: " + collider.pointCount);
         }
     }
 

@@ -106,6 +106,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
 
     public bool CanAppealInLobby { get; private set; } = AmongUsClient.Instance.AmHost ? (ClientOption.ShowSocialSettingsOnLobby.Value && ClientOption.CanAppealInLobbyDefault.Value) : false;
     public bool CanAppealInGame { get; private set; } = false;
+    public bool CanUseStamps { get; private set; } = true;
     public Virial.Media.GUIWidget GetSettingWidget()
     {
         Virial.Media.GUIWidget GetCheckbox(Func<bool> getter, Action<bool> setter, string label)
@@ -124,9 +125,9 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         return GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,
             new NoSGUIImage(Virial.Media.GUIAlignment.Center, iconSprite, new(0.5f, null), overlay: ()=>GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), "social.appeal.detail")) { IsMasked = false },
             GUI.API.HorizontalMargin(0.05f),
-            GetCheckbox(() => CanAppealInLobby, val => { RpcShareSocialSettings.Invoke((val, CanAppealInGame)); ClientOption.CanAppealInLobbyDefault.Value = val; }, "lobby"),
+            GetCheckbox(() => CanAppealInLobby, val => { RpcShareSocialSettings.Invoke((val, CanAppealInGame, CanUseStamps)); ClientOption.CanAppealInLobbyDefault.Value = val; }, "lobby"),
             GUI.API.HorizontalMargin(0.15f),
-            GetCheckbox(() => CanAppealInGame, val => RpcShareSocialSettings.Invoke((CanAppealInLobby, val)), "game")
+            GetCheckbox(() => CanAppealInGame, val => RpcShareSocialSettings.Invoke((CanAppealInLobby, val, CanUseStamps)), "game")
             );
     }
 
@@ -243,7 +244,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         }));
     }
 
-    public void ShareSocialSettingsAsHost() => RpcShareSocialSettings.Invoke((CanAppealInLobby, CanAppealInGame));
+    public void ShareSocialSettingsAsHost() => RpcShareSocialSettings.Invoke((CanAppealInLobby, CanAppealInGame, ClientOption.ShowStamps.Value));
 
     private PriorityQueue<(INebulaAchievement achievement, string playerName), int> lastClearedAchievementsQueue = new();
     private HashSet<string> putPlayers = new HashSet<string>();
@@ -261,13 +262,14 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         pickedUpArchive?.TryAdd(playerName, achievements);
     }
 
-    public static RemoteProcess<(bool inLobby, bool inGame)> RpcShareSocialSettings = new(
+    public static RemoteProcess<(bool inLobby, bool inGame, bool canUseStamps)> RpcShareSocialSettings = new(
         "ShareSocialSetting",
         (message, _) =>
         {
             var instance = ModSingleton<ShowUp>.Instance;
             instance.CanAppealInLobby = message.inLobby;
             instance.CanAppealInGame = message.inGame;
+            instance.CanUseStamps = message.canUseStamps;
         });
     private static RemoteProcess<(byte playerId, float angle, float duration)> RpcShowUp = new(
         "PlayShowUp",

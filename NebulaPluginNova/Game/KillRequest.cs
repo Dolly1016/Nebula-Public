@@ -107,6 +107,8 @@ internal class KillRequestHandler
         "Kill",
        (message, _) =>
        {
+           var withBlink = message.parameter.HasFlag(KillParameter.WithBlink);
+
            var recordTag = TranslatableTag.ValueOf(message.recordId);
            if (recordTag != null)
                NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, message.killerId == byte.MaxValue ? null : message.killerId, 1 << message.targetId) { RelatedTag = recordTag });
@@ -125,7 +127,7 @@ internal class KillRequestHandler
 
            if (target.AmOwner)
            {
-               StatsManager.Instance.IncrementStat(StringNames.StatsTimesMurdered);
+               //StatsManager.Instance.IncrementStat(StringNames.StatsTimesMurdered);
                if (Minigame.Instance)
                {
                    try
@@ -141,7 +143,7 @@ internal class KillRequestHandler
                target.cosmetics.SetNameMask(false);
                target.RpcSetScanner(false);
            }
-           if (killer) killer!.MyPhysics.StartCoroutine(killer.KillAnimations[System.Random.Shared.Next(killer.KillAnimations.Count)].CoPerformModKill(killer, target, message.parameter.HasFlag(KillParameter.WithBlink)).WrapToIl2Cpp());
+           if (killer) killer!.MyPhysics.StartCoroutine(killer.KillAnimations[System.Random.Shared.Next(killer.KillAnimations.Count)].CoPerformModKill(killer, target, withBlink).WrapToIl2Cpp());
 
            // MurderPlayer ここまで
 
@@ -182,7 +184,7 @@ internal class KillRequestHandler
                if (killerInfo != null)
                {
                    GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
-                   GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo), true);
+                   GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, withBlink), true);
                }
                else
                {
@@ -242,7 +244,7 @@ internal class KillRequestHandler
                if (killerInfo != null)
                {
                    GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
-                   GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo), true);
+                   GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, false), true);
                }
                else
                    GameOperatorManager.Instance?.Run(new PlayerDieEvent(targetInfo));

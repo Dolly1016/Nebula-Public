@@ -214,7 +214,7 @@ public interface AssignableFilterHolder
 public interface AllocationParameters
 {
     public delegate (DefinedRole role, int[]? argument) ExtraAssignment(DefinedRole assignable, int playerId);
-
+    public record ExtraAssignmentInfo(ExtraAssignment Assigner, RoleCategory Category);
     IEnumerable<IConfiguration> Configurations { get; }
 
     //割り当て数の総和を返します。
@@ -226,9 +226,10 @@ public interface AllocationParameters
     int RoleCountRandom { get; }
 
     //同陣営への追加割り当て
-    ExtraAssignment[] TeamAssignment => [];
+    ExtraAssignmentInfo[] TeamAssignment => [];
     //別陣営への追加割り当て
-    ExtraAssignment[] OthersAssignment => [];
+    ExtraAssignmentInfo[] OthersAssignment => [];
+    bool HasExtraAssignment => TeamAssignment.Length > 0 || OthersAssignment.Length > 0;
     int TeamCost => 1 + TeamAssignment.Length;
     int OtherCost => OthersAssignment.Length;
 
@@ -246,7 +247,6 @@ public interface AllocationParameters
     /// <returns></returns>
     int GetRoleChance(int count);
 }
-
 
 /// <summary>
 /// プレイヤーに割り当てられる役職の定義を表します。
@@ -272,6 +272,16 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// <param name="arguments"></param>
     /// <returns></returns>
     IPlayerAbility GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => null!;
+
+    /// <summary>
+    /// Madmate系役職の場合trueを返します。
+    /// </summary>
+    bool IsMadmate => false;
+
+    /// <summary>
+    /// 追加割り当てされる役職を一覧で返します。割り当て数と一致する必要はありません。
+    /// </summary>
+    DefinedRole[] AdditionalRoles => [];
 }
 
 public interface DefinedSingleAbilityRole<Ability> : DefinedRole, RuntimeAssignableGenerator<RuntimeRole> where Ability : class, IPlayerAbility
@@ -428,6 +438,10 @@ public interface RuntimeRole : RuntimeAssignable
     /// 役職の定義
     /// </summary>
     DefinedRole Role { get; }
+    /// <summary>
+    /// 対外的な認識の役職定義
+    /// </summary>
+    DefinedRole ExternalRecognitionRole => Role;
     DefinedAssignable RuntimeAssignable.Assignable => Role;
 
     //AssignableAspectAPI
@@ -552,4 +566,6 @@ public interface RuntimeModifier : RuntimeAssignable
     /// クルーメイトタスクを持っていたとしても、クルーメイトタスクの総数に計上されない場合はtrue
     /// </summary>
     public virtual bool MyCrewmateTaskIsIgnored => false;
+
+    public virtual bool IsMadmate => false;
 }

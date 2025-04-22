@@ -28,6 +28,8 @@ public static class ShowIntroPatch
 
     static IEnumerator CoBegin(IntroCutscene __instance)
     {
+        IntroCutscene.Instance = __instance;
+
         HudManager.Instance.HideGameLoader();
 
         SoundManager.Instance.PlaySound(__instance.IntroStinger, false, 1f, null);

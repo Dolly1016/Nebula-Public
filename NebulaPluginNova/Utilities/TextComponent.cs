@@ -36,12 +36,15 @@ public class RawTextComponent : TextComponent
 public class LazyTextComponent : TextComponent
 {
     private Func<string> supplier;
-    public LazyTextComponent(Func<string> supplier)
+    private string? textForCompare;
+    public LazyTextComponent(Func<string> supplier, string? textForCompare = null)
     {
         this.supplier = supplier;
+        this.textForCompare = textForCompare;
     }
 
     public string GetString() => supplier.Invoke();
+    string TextComponent.TextForCompare => textForCompare ?? GetString();
 }
 
 public class ColorTextComponent : TextComponent

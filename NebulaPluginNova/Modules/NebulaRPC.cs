@@ -3,6 +3,7 @@ using InnerNet;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Virial.Assignable;
 using Virial.Game;
 using Virial.Runtime;
 using Virial.Text;
@@ -365,6 +366,9 @@ public static class RemoteProcessAsset
         defaultProcessDic[typeof(PlayerModInfo)] = ((writer, obj) => writer.Write(((PlayerModInfo)obj)?.PlayerId ?? 255), (reader) => NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())!);
         defaultProcessDic[typeof(GamePlayer)] = defaultProcessDic[typeof(PlayerModInfo)];
         defaultProcessDic[typeof(INebulaAchievement)] = ((writer, obj) => writer.Write((ulong)((INebulaAchievement)obj).Id.ComputeConstantLongHash()), (reader) => (NebulaAchievementManager.TryGetAchievement((long)reader.ReadUInt64(), out var ach) ? ach : null)!);
+        defaultProcessDic[typeof(DefinedRole)] = ((writer, obj) => writer.Write(((DefinedRole)obj)?.Id ?? -1), (reader) => Roles.Roles.GetRole(reader.ReadInt32())!);
+        defaultProcessDic[typeof(DefinedGhostRole)] = ((writer, obj) => writer.Write(((DefinedGhostRole)obj)?.Id ?? -1), (reader) => Roles.Roles.GetGhostRole(reader.ReadInt32())!);
+        defaultProcessDic[typeof(DefinedModifier)] = ((writer, obj) => writer.Write(((DefinedModifier)obj)?.Id ?? -1), (reader) => Roles.Roles.GetModifier(reader.ReadInt32())!);
     }
 
     static public (Action<MessageWriter, object>, Func<MessageReader, object>) GetProcess(Type type)

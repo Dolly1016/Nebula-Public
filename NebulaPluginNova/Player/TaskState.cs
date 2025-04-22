@@ -186,6 +186,27 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, IInjectable, PlayerTa
         }
     }
 
+    public void ReplaceTasksAndRecompute(int numOfTasks, bool containsCommonTasks)
+    {
+        if (numOfTasks <= 2) ReplaceTasksAndRecompute(numOfTasks, 0, 0);
+        else
+        {
+            int commonTasks = 0;
+            int shortTasks = 0;
+            int longTasks = 0;
+            for (int i = 0; i < numOfTasks; i++)
+            {
+                if (containsCommonTasks && Helpers.Prob(0.2f) && commonTasks < 2)
+                    commonTasks++;
+                else if (Helpers.Prob(0.3f))
+                    longTasks++;
+                else
+                    shortTasks++;
+            }
+            ReplaceTasksAndRecompute(shortTasks, longTasks, commonTasks);
+        }
+    }
+
     //実際に保持しているタスクも再計算します
     public void ReplaceTasksAndRecompute(int shortTasks,int longTasks,int commonTasks) {
         RecomputeTasks(shortTasks, longTasks, commonTasks);

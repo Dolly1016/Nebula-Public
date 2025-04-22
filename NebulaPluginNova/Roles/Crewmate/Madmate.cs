@@ -18,12 +18,13 @@ namespace Nebula.Roles.Crewmate;
 public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, 
-        [CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, 
+        [CanFixLightOption, CanFixCommsOption, CanSuicideOption, SuicideCoolDownOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, 
         new GroupConfiguration("options.role.madmate.group.embroil", [EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, EmbroilDelayOption], GroupConfigurationColor.ImpostorRed), 
         new GroupConfiguration("options.role.madmate.group.identification", [CanIdentifyImpostorsOptionEditor], GroupConfigurationColor.ImpostorRed)
         ]) 
     {
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Madmate.png");
+        ConfigurationHolder?.ScheduleAddRelated(() => [Modifier.Madmate.MyRole.ConfigurationHolder!]);
     }
     Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
 
@@ -33,6 +34,8 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("options.role.madmate.limitEmbroiledPlayersToVoters", true, ()=>EmbroilVotersOnExileOption);
     static private FloatConfiguration EmbroilDelayOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilDelay", (0f, 5f, 1f), 0f,FloatConfigurationDecorator.TaskPhase, () => EmbroilVotersOnExileOption);
 
+    static private BoolConfiguration CanSuicideOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canSuicide", false);
+    static private IRelativeCoolDownConfiguration SuicideCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.madmate.suicideCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => CanSuicideOption);
     static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixLight", false);
     static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixComms", false);
     static private BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.madmate.hasImpostorVision", false);
@@ -75,6 +78,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         }
         );
 
+    bool DefinedRole.IsMadmate => true;
     static public Madmate MyRole = new Madmate();
     static private GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
@@ -110,10 +114,26 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
             }
         }
 
+        static private Image suicideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MadmateSuicideButton.png", 115f);
         void RuntimeAssignable.OnActivated()
         {
             SetMadmateTask();
             if(AmOwner) IdentifyImpostors();
+
+            if (AmOwner && CanSuicideOption)
+            {
+                var suicideButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
+                suicideButton.SetSprite(suicideButtonSprite.GetSprite());
+                suicideButton.Availability = (button) => MyPlayer.CanMove;
+                suicideButton.Visibility = (button) => !MyPlayer.IsDead;
+                suicideButton.OnClick = (button) =>
+                {
+                    MyPlayer.Suicide(PlayerState.Suicide, null, KillParameter.RemoteKill);
+                };
+                suicideButton.CoolDownTimer = Bind(new Timer(SuicideCoolDownOption.CoolDown)).Start();
+                suicideButton.SetLabel("madmate.suicide");
+                suicideButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
+            }
         }
 
         public void OnGameStart(GameStartEvent ev)

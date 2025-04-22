@@ -8,7 +8,7 @@ public static class VersionShowerPatch
         string text = __instance.text.text;
         int last = text.IndexOf('(');
         if(last != -1)text = text.Substring(0, last);
-        __instance.text.text = NebulaPlugin.GetNebulaVersionString() + " on " + text;
+        __instance.text.text = NebulaPlugin.GetNebulaVersionString() + " on AU " + text;
 
 
         ModManager.Instance.ShowModStamp();

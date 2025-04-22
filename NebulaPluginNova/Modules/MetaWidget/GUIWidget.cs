@@ -1,4 +1,5 @@
 ﻿
+using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
 using Virial.Assignable;
 using Virial.Compat;
@@ -9,7 +10,8 @@ namespace Nebula.Modules.GUIWidget;
 
 public abstract class AbstractGUIWidget : Virial.Media.GUIWidget
 {
-    internal override GUIAlignment Alignment { get; init; }
+    internal override GUIAlignment Alignment => alignment;
+    private GUIAlignment alignment;
     internal override GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize)
     {
         var obj = Instantiate(size, out actualSize);
@@ -30,7 +32,7 @@ public abstract class AbstractGUIWidget : Virial.Media.GUIWidget
 
     public AbstractGUIWidget(GUIAlignment alignment)
     {
-        Alignment = alignment;
+        this.alignment = alignment;
     }
 
     protected static float CalcWidth(GUIAlignment alignment, float myWidth, float maxWidth)
@@ -184,6 +186,34 @@ public class NoSGameObjectGUIWrapper : AbstractGUIWidget
     }
 }
 
+public class LazyGUIWidget : AbstractGUIWidget
+{
+    private GUIWidgetSupplier supprier;
+    private Virial.Media.GUIWidget? evaluated = null;
+    private bool run = false;
+
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
+    {
+        if (!run)
+        {
+            evaluated = supprier.Invoke();
+            run = true;
+        }
+        if(evaluated != null)
+            return evaluated.Instantiate(size, out actualSize);
+        else
+        {
+            actualSize = new(0f, 0f);
+            return null;
+        }
+    }
+
+    public LazyGUIWidget(GUIAlignment alignment, GUIWidgetSupplier supplier) : base(alignment)
+    {
+        this.supprier = supplier;
+    }
+}
+
 public class NebulaGUIWidgetEngine : Virial.Media.GUI
 {
     public static NebulaGUIWidgetEngine Instance { get; private set; } = new();
@@ -246,10 +276,15 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.MarketplaceDeveloper => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Normal, new(1.4f, 1f, 1.4f), new(2f, 0.32f), new(255, 255, 255), false),
                 AttributeAsset.MarketplaceBlurb => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Normal, new(1.4f, 1f, 1.4f), new(6f, 0.3f), new(255, 255, 255), false),
                 AttributeAsset.MarketplacePublishButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBold)) { FontSize = new(2.2f, 0.6f, 2.2f), Size = new(0.95f, 0.17f) },
-                
+                AttributeAsset.MarketplaceCategoryButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBoldNonFlexible)) { FontSize = new(1.5f, 0.6f, 1.5f), Size = new(0.95f, 0.32f) },
+                AttributeAsset.MarketplaceTabButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBoldNonFlexible)) { FontSize = new(1.5f, 0.6f, 1.5f), Size = new(1.3f, 0.35f) },
+
                 AttributeAsset.MeetingTitle => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f,0.6f,1.8f), Size = new(2f,0.5f) },
                 AttributeAsset.VersionShower => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.Barlow), Virial.Text.FontStyle.Normal, new(1.28f, false), new(1f, 0.4f), new(255, 255, 255), true),
                 AttributeAsset.MetaRoleButton => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.GothicMasked), Virial.Text.FontStyle.Bold, new(1.8f, 1f, 2f), new(1.4f, 0.26f), new(255, 255, 255), false),
+                
+                AttributeAsset.SmallWideButton=> new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1f, 0.4f, 1f), Size = new(0.85f, 0.18f) },
+                AttributeAsset.SmallArrowButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1f, 0.4f, 1f), Size = new(0.22f, 0.18f) },
                 _ => null!
             };
         }
@@ -330,12 +365,12 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
         return result;
     }
 
-    public Virial.Media.GUIWidget LocalizedButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
-        => new GUIButton(alignment, attribute, new TranslateTextComponent(translationKey)) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor() };
-    public Virial.Media.GUIWidget RawButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
-        => new GUIButton(alignment, attribute, new RawTextComponent(rawText)) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor() };
-    public Virial.Media.GUIWidget Button(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null)
-        => new GUIButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor() };
+    public Virial.Media.GUIWidget LocalizedButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null)
+        => new GUIButton(alignment, attribute, new TranslateTextComponent(translationKey)) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor(), TextMargin = margin ?? 0.26f };
+    public Virial.Media.GUIWidget RawButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null)
+        => new GUIButton(alignment, attribute, new RawTextComponent(rawText)) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor(), TextMargin = margin ?? 0.26f };
+    public Virial.Media.GUIWidget Button(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null)
+        => new GUIButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor(), TextMargin = margin ?? 0.26f };
 
     public Virial.Media.GUIWidget SpinButton(GUIAlignment alignment, Action<bool> onClick) => new GUISpinButton(alignment, onClick);
 
@@ -357,6 +392,9 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     public TextComponent BoldTextComponent(TextComponent component) => new LazyTextComponent(() => component.GetString().Bold());
     public TextComponent ItalicTextComponent(TextComponent component) => new LazyTextComponent(()=> component.GetString().Italic());
     public TextComponent FunctionalTextComponent(Func<string> supplier) => new LazyTextComponent(supplier);
+    public TextComponent FunctionalTextComponent(Func<string> supplier, string textForCompare) => new LazyTextComponent(supplier, textForCompare);
+    public Virial.Media.GUIWidget Masked(Virial.Media.GUIWidget inner) => new GUIMasking(inner);
+    public Virial.Media.GUIWidget ButtonGrouped(Virial.Media.GUIWidget inner) => new GUIButtonGroup(inner);
 
     public void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable
     {

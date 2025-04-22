@@ -339,11 +339,11 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
     public Stream? OpenRead(string innerAddress)
     {
-        innerAddress = (InZipPath + innerAddress).Replace('/', '.');
+        innerAddress = (InZipPath + innerAddress).Replace('/', '.').ToLower();
         
         foreach (var entry in Archive.Entries)
         {
-            if (entry.FullName.Replace('/', '.').ToLower() == innerAddress.ToLower()) return entry.Open();
+            if (entry.FullName.Replace('/', '.').ToLower() == innerAddress) return entry.Open();
         }
         return null;
     }

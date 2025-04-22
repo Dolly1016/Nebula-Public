@@ -62,19 +62,19 @@ public class Roles
 
     static public DefinedRole? GetRole(int id)
     {
-        if (id <= 0) return null;
+        if (id < 0) return null;
         return AllRoles[id];
     }
 
     static public DefinedModifier? GetModifier(int id)
     {
-        if (id <= 0) return null;
+        if (id < 0) return null;
         return AllModifiers[id];
     }
 
     static public DefinedGhostRole? GetGhostRole(int id)
     {
-        if (id <= 0) return null;
+        if (id < 0) return null;
         return AllGhostRoles[id];
     }
 

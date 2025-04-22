@@ -69,6 +69,7 @@ public class WideCamera
     private float meshAngleZ = 0f;
     private float orthographicCache = 3f;
     private Camera shadowCamera = null!;
+    public Camera SubShadowCam { get; private set; } = null!;
 
     private CameraAttention? attention = null;
     private CameraAttention.Attention? attentionCache = null;
@@ -124,7 +125,7 @@ public class WideCamera
             {
                 //船およびオブジェクトレイヤーのボタンが対象
                 if (((1 << button.gameObject.layer) & layer) == 0) continue;
-                if (!button.Colliders.Any(c => c.OverlapPoint(worldPos))) continue;
+                if (!button.Colliders.Any(c => c && c.OverlapPoint(worldPos))) continue;
                 if (passiveButton != null && passiveButton.transform.position.z < button.transform.position.z) continue;
                 
                 //Debug.Log("Button");
@@ -140,6 +141,7 @@ public class WideCamera
         meshRenderer.material = new Material(NebulaAsset.HSVNAShader);
 
         SetUp();
+        SetUpShadowCam();
     }
 
     public bool DrawShadow => drawShadow && !(NebulaGameManager.Instance?.IgnoreWalls ?? false);
@@ -162,6 +164,19 @@ public class WideCamera
         shadowCamera = shadowCollab.ShadowCamera;
 
         Roughness = 1;
+    }
+
+    private void SetUpShadowCam()
+    {
+        var shadowCam = AmongUsUtil.GetShadowCollab().ShadowCamera;
+        var newCam = UnityHelper.CreateRenderingCamera("SubShadowCam", shadowCam.transform, Vector3.zero, shadowCam.orthographicSize, shadowCam.cullingMask);
+        newCam.depth = shadowCam.depth;
+        shadowCam.cullingMask |= 1 << LayerExpansion.GetVanillaShadowLightLayer();
+        var origTexture = shadowCam.targetTexture;
+        var newTexture = new RenderTexture(origTexture.width, origTexture.height, origTexture.depth, origTexture.format, origTexture.mipmapCount);
+        newCam.targetTexture = newTexture;
+        newCam.backgroundColor = new(0f, 0f, 0f, 0f);
+        SubShadowCam = newCam;
     }
 
     public void OnGameStart()
@@ -191,6 +206,8 @@ public class WideCamera
 
     private int consideredWidth => (Screen.width / Roughness);
     private int consideredHeight => (Screen.height / Roughness);
+
+    public bool HasAttention => attention != null;
 
     public void CheckPlayerState(out Vector3 localScale, out float localRotateZ)
     {
@@ -334,6 +351,8 @@ public class WideCamera
             float actualTargetOrth = Mathf.Lerp(targetOrth, attentionViewRate, attentionRate);
             myCamera.orthographicSize = actualOrth;
             shadowCamera.orthographicSize = actualOrth;
+            SubShadowCam.orthographicSize = actualOrth;
+            SubShadowCam.aspect = shadowCamera.aspect;
             myCamera.transform.localScale = new Vector3(actualOrth / 3f, actualOrth / 3f, 1f);
 
             //コマンドによるモザイクの設定値に変化が生じたら再計算する
@@ -347,6 +366,8 @@ public class WideCamera
             var camUpdateEv = GameOperatorManager.Instance?.Run<CameraUpdateEvent>(new CameraUpdateEvent());
             meshRenderer.sharedMaterial.SetFloat("_Sat", camUpdateEv?.GetSaturation() ?? 1f);
             meshRenderer.sharedMaterial.SetFloat("_Hue", camUpdateEv?.GetHue() ?? 0f);
+            meshRenderer.sharedMaterial.SetFloat("_Val", camUpdateEv?.GetBrightness() ?? 1f);
+            meshRenderer.sharedMaterial.color = camUpdateEv?.Color ?? Color.white;
 
             FixVentArrow();
         }

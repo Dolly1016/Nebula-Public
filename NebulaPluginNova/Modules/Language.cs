@@ -77,8 +77,15 @@ public class Language
     static private Language? CurrentLanguage = null;
     static private Language? GuestLanguage = null;
     static internal Language? DefaultLanguage = null;
+    static public Versioning LanguageVersion = new(); 
+    /// <summary>
+    /// 関数は言語を変更してもリセットしない。
+    /// </summary>
+    static private Dictionary<string, Func<string>> functionalMap = [];
 
-    public Dictionary<string, string> translationMap = new();
+    public Dictionary<string, string> translationMap = [];
+
+    public static void Register(string key, Func<string> function) => functionalMap[key] = function;
 
     public static void SetGuestLanguage(Language? language) => GuestLanguage = language;
 
@@ -161,6 +168,8 @@ public class Language
 
     public static void OnChangeLanguage(uint language)
     {
+        LanguageVersion.Update();
+
         string lang = GetLanguage(language);
         EastAsianFontChanger.SetUpFont(lang);
 
@@ -172,12 +181,12 @@ public class Language
         foreach(var addon in NebulaAddon.AllAddons)
         {
             using var stream = addon.OpenStream("Language/" + lang + ".dat");
-            if (stream != null) CurrentLanguage.Deserialize(stream);
+            if (stream != null) CurrentLanguage.Deserialize(stream, name => addon.OpenStream("Language/" + lang + "_" + name + ".dat"));
         }
     }
 
-    public void Deserialize(Stream? stream) => Deserialize(stream, (key, text) => translationMap[key] = text);
-    static public void Deserialize(Stream? stream, Action<string,string> pairAction, Action<string>? commentAction = null)
+    public void Deserialize(Stream? stream, Func<string, Stream?>? subStreamProvider = null) => Deserialize(stream, (key, text) => translationMap[key] = text, subStreamProvider: subStreamProvider);
+    static public void Deserialize(Stream? stream, Action<string,string> pairAction, Action<string>? commentAction = null, Func<string, Stream?>? subStreamProvider = null)
     {
         if (stream == null) return;
         using (var reader = new StreamReader(stream, Encoding.GetEncoding("utf-8"))) {
@@ -196,6 +205,16 @@ public class Language
                 if (line[0] == '#')
                 {
                     if(commentAction != null) commentAction(line);
+                    continue;
+                }
+
+                if (line[0] == '$')
+                {
+                    if (subStreamProvider != null)
+                    {
+                        using var subStream = subStreamProvider.Invoke(line.Substring(1));
+                        if(subStream != null) Deserialize(subStream, pairAction, commentAction, subStreamProvider);
+                    }
                     continue;
                 }
 
@@ -234,18 +253,32 @@ public class Language
     public static string Translate(string? translationKey)
     {
         if (translationKey == null) return "Invalid Key";
-        return Find(translationKey) ?? "*" + translationKey;
+
+        if (functionalMap.TryGetValue(translationKey, out var func))
+        {
+            return func.Invoke();
+        }
+        else
+        {
+            return Find(translationKey) ?? "*" + translationKey;
+        }
+    }
+
+    public static bool TryTranslate(string? translationKey,[MaybeNullWhen(false)] out string translated)
+    {
+        translated = Find(translationKey);
+        return translated != null;
     }
 
     public static string? Find(string? translationKey)
     {
         if (translationKey == null) return null;
         string? result;
-        if (GuestLanguage?.translationMap.TryGetValue(translationKey, out result) ?? false)
+        if (GuestLanguage?.TryGetText(translationKey, out result) ?? false)
             return result!;
-        if (CurrentLanguage?.translationMap.TryGetValue(translationKey, out result) ?? false)
+        if (CurrentLanguage?.TryGetText(translationKey, out result) ?? false)
             return result!;
-        if (DefaultLanguage?.translationMap.TryGetValue(translationKey, out result) ?? false)
+        if (DefaultLanguage?.TryGetText(translationKey, out result) ?? false)
             return result!;
         return null;
     }

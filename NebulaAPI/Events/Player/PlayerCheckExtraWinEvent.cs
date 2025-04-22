@@ -16,6 +16,7 @@ internal class PlayerCheckExtraWinEvent : AbstractPlayerEvent
     public ExtraWinCheckPhase Phase { get; private init; }
     public bool IsExtraWin { get; set; } = false;
     public void SetWin(bool win) => IsExtraWin = win;
+    public void SetWinIf(bool win) => IsExtraWin |= win;
 
     public BitMask<Virial.Game.Player> LastWinners { get; private init; }
 

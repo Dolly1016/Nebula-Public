@@ -70,9 +70,12 @@ public static class GeneralConfigurations
     static internal IConfiguration MapEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.customization", _ => OpenMapEditor(null)));
     static internal BoolConfiguration MapFlipXOption = NebulaAPI.Configurations.Configuration("options.map.flipX", false);
     static internal BoolConfiguration MapFlipYOption = NebulaAPI.Configurations.Configuration("options.map.flipY", false);
+    static internal BoolConfiguration CanHearOthersFootstepOption = NebulaAPI.Configurations.Configuration("options.map.canHearOthersFootstep", false);
+    static internal FloatConfiguration OthersFootstepRangeOption = NebulaAPI.Configurations.Configuration("options.map.othersFootstepRange", (float[])[1f, 2.5f, 5f, 7.5f, 10f, 15f, 20f], 5f, FloatConfigurationDecorator.Ratio, () => CanHearOthersFootstepOption);
     static internal IConfigurationHolder MapOptions = NebulaAPI.Configurations.Holder("options.map", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
         new GroupConfiguration("options.map.group.spawning", [SpawnMethodOption, SpawnCandidatesOption, SpawnCandidateFilterOption], GroupConfigurationColor.Gray),
         new GroupConfiguration("options.map.group.utilities", [SilentVentOption, CanOpenMapWhileUsingUtilityOption, LadderCoolDownOption, ZiplineCoolDownOption], GroupConfigurationColor.Gray),
+        new GroupConfiguration("options.map.group.footstep", [CanHearOthersFootstepOption, OthersFootstepRangeOption], GroupConfigurationColor.Gray),
         new GroupConfiguration("options.map.group.teleporter", [NumOfTeleportationPortalOption, NonCrewmateCanUseTeleporterImmediatelyOption],GroupConfigurationColor.Gray),
         new GroupConfiguration("options.map.group.wiring", [RandomizedWiringOption, StepsOfWiringGameOption], GroupConfigurationColor.Gray),
         new GroupConfiguration("options.map.group.flip", [MapFlipXOption, MapFlipYOption], GroupConfigurationColor.Gray),
@@ -197,8 +200,10 @@ public static class GeneralConfigurations
     static public FloatConfiguration EarlyExtraEmergencyCoolDownOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarly", (0f, 20f, 2.5f), 0f, FloatConfigurationDecorator.Second);
     static public IntegerConfiguration EarlyExtraEmergencyCoolDownCondOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarlyCondition", (1, 10), 2, () => EarlyExtraEmergencyCoolDownOption > 0f);
     static public BoolConfiguration ShowVoteStateOption = NebulaAPI.Configurations.Configuration("options.meeting.showVoteState", true);
+    static public BoolConfiguration ProhibitMeetingTool = NebulaAPI.Configurations.Configuration("options.meeting.prohibitMeetingTool", false);
+    static public BoolConfiguration ShortenCooldownAtGameStart = NebulaAPI.Configurations.Configuration("options.meeting.shortenCooldownAtGameStart", true);
     static internal IConfigurationHolder MeetingOptions = NebulaAPI.Configurations.Holder("options.meeting", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        DeathPenaltyOption, NoticeExtraVictimsOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart, ShowRoleOfExiled, EarlyExtraEmergencyCoolDownOption, EarlyExtraEmergencyCoolDownCondOption, ShowVoteStateOption
+        DeathPenaltyOption, NoticeExtraVictimsOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart, ShowRoleOfExiled, EarlyExtraEmergencyCoolDownOption, EarlyExtraEmergencyCoolDownCondOption, ShowVoteStateOption, ProhibitMeetingTool, ShortenCooldownAtGameStart
         ]);
 
     static public ExclusiveAssignmentConfiguration[] exclusiveAssignmentOptions = Helpers.Sequential(10).Select(i => new ExclusiveAssignmentConfiguration("options.exclusiveAssignment.category." + i)).ToArray();

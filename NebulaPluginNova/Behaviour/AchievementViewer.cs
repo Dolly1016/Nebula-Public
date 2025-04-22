@@ -50,7 +50,7 @@ internal class AchievementViewer : MonoBehaviour
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.12f)),
                 new NoSGUIText(GUIAlignment.Left, headerAttr, a.GetHeaderComponent()),
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, -0.12f)),
-                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, true,false,a.IsCleared), OnClickText = (() => { if (a.IsCleared) { NebulaAchievementManager.SetOrToggleTitle(a); VanillaAsset.PlaySelectSE(); onClicked?.Invoke(a); } }, true) }};
+                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, true, false,a.IsCleared), OnClickText = (() => { if (a.IsCleared) { NebulaAchievementManager.SetOrToggleTitle(a); VanillaAsset.PlaySelectSE(); onClicked?.Invoke(a); } }, true) }};
                 var progress = a.GetDetailWidget();
                 if (progress != null) widgets.Add(progress);
 

@@ -100,6 +100,8 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
     IRelativeCoolDownConfiguration Configurations.KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate, Func<float>? baseKillCooldown)
      => new KillCoolDownConfiguration(title, id, defaultType, immediateSelection.Selection, immediateDefaultValue, relativeSelection.Selection, relativeDefaultValue, ratioSelection.Selection, ratioDefaultValue, predicate, baseKillCooldown);
 
+    ITaskConfiguration Configurations.TaskConfiguration(string id, bool forceTasks, bool containsCommonTasks, Func<bool>? predicate, string? translationKey) => new TaskConfiguration(id, forceTasks, containsCommonTasks, predicate, translationKey);
+
     bool Configurations.CanJackalize => Jackal.JackalizedImpostorOption;
 }
  

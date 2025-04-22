@@ -214,6 +214,8 @@ public static class Helpers
         return array.OrderBy(i => Guid.NewGuid()).ToArray();
     }
 
+    public static T[] Shuffle<T>(this IReadOnlyList<T> array) => GetRandomArray(array.Count).Select(i => array[i]).ToArray();
+    public static T[] Shuffle<T>(this IEnumerable<T> enumerable) => Shuffle(enumerable.ToArray());
 
     public static string GetClipboardString()
     {
@@ -364,6 +366,7 @@ public static class Helpers
     }
 
     static public bool IsEmpty<T>(this IEnumerable<T> enumerable) => !enumerable.Any(_ => true);
+    static public bool IsEmpty<T>(this IReadOnlyList<T> list) => list.Count == 0;
 
     static public void DoIf<T>(this T? nullableObj, Action<T> action)
     {
@@ -449,4 +452,48 @@ public static class Helpers
         material.SetColor(PlayerMaterial.BodyColor, color.MainColor.ToUnityColor());
         material.SetColor(PlayerMaterial.VisorColor, color.VisorColor.ToUnityColor());
     }
+
+    public static int Round(int number, int round)
+    {
+        int num = number + (round / 2);
+        return num - (num % round);
+    }
+
+    public static void ToLab(this UnityEngine.Color color, out float L, out float a, out float b)
+    {
+        const float xr = 0.4124f;
+        const float xg = 0.3576f;
+        const float xb = 0.1805f;
+        const float yr = 0.2126f;
+        const float yg = 0.7152f;
+        const float yb = 0.0722f;
+        const float zr = 0.0193f;
+        const float zg = 0.1192f;
+        const float zb = 0.9505f;
+
+        const float Xn = xr + xg + xb;
+        const float Yn = yr + yg + yb;
+        const float Zn = zr + zg + zb;
+
+        const float t = 6f / 29f;
+        const float t2 = t * t;
+        const float t3 = t * t * t;
+        var X = xr * color.r + xg * color.g + xb * color.b;
+        var Y = yr * color.r + yg * color.g + yb * color.b;
+        var Z = zr * color.r + zg * color.g + zb * color.b;
+
+        var tx = X / Xn;
+        var ty = Y / Yn;
+        var tz = Z / Zn;
+        
+        float fx = tx > t3 ? Mathf.Pow(tx, 0.333f) : tx / 3f / t2 + 4f / 29f;
+        float fy = ty > t3 ? Mathf.Pow(ty, 0.333f) : ty / 3f / t2 + 4f / 29f;
+        float fz = tz > t3 ? Mathf.Pow(tz, 0.333f) : tz / 3f / t2 + 4f / 29f;
+
+        L = 116 * fy - 16;
+        a = 500 * (fx - fy);
+        b = 200 * (fy - fz);
+    }
+
+    public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> enumerable) => enumerable.Where(val => val != null)!;
 }

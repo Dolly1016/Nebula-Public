@@ -1,0 +1,36 @@
+[
+	{
+		"Tag" : "ProjectileTutorial",
+		"Title" : "ライフルや斧等の構えかた",
+		"SlideType" : "OnlineMovie",
+		"Argument" : "http://168.138.44.249:22020/download/?query=Raider",
+		"Caption" : "カーソルの方向を向きます。<br>キーボード操作で発砲・投擲しましょう！"
+	},
+	{
+		"Tag" : "PaparazzoTutorial",
+		"Title" : "パパラッチのチュートリアル",
+		"SlideType" : "OnlineMovie",
+		"Argument" : "http://168.138.44.249:22020/download/?query=PaparazzoCursor",
+		"Caption" : "望遠で撮影しようとするとファインダーが小さくなります。",
+		"Next" : "PaparazzoTutorial2"
+	},
+	{
+		"Tag" : "PaparazzoTutorial2",
+		"Title" : "左シフトで向きの変更",
+		"SlideType" : "OnlineMovie",
+		"Argument" : "http://168.138.44.249:22020/download/?query=PaparazzoLShift",
+		"Caption" : "左シフトで横向き/縦向きを切り替えられます。",
+		"Prev" : "PaparazzoTutorial",
+		"Next" : "PaparazzoTutorial3",
+		"IsHidden" : true
+	},
+	{
+		"Tag" : "PaparazzoTutorial3",
+		"Title" : "マウス右ボタンで向きの固定",
+		"SlideType" : "OnlineMovie",
+		"Argument" : "http://168.138.44.249:22020/download/?query=PaparazzoRClick",
+		"Caption" : "マウス右ボタンをおさえている間は<br>向きが変わりません。",
+		"Prev" : "PaparazzoTutorial2",
+		"IsHidden" : true
+	}
+]

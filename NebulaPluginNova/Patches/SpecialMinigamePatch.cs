@@ -16,6 +16,11 @@ class SurveillanceMinigameBeginPatch
 
         NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Camera, __instance.transform, new Vector3(3.4f, 2f, -50f));
     }
+
+    public static void Postfix(SurveillanceMinigame __instance)
+    {
+        __instance.gameObject.GetComponentsInChildren<IgnoreShadowCamera>().Do(isc => isc.ShowNameText = false);
+    }
 }
 
 [HarmonyPatch(typeof(SurveillanceMinigame), nameof(SurveillanceMinigame.Update))]
@@ -32,6 +37,17 @@ class SurveillanceMinigameUpdatePatch
             __instance.SabText[j].text = Language.Translate("console.notAvailable");
         }
         return false;
+    }
+}
+
+//Camera (Fungle)
+[HarmonyPatch(typeof(FungleSurveillanceMinigame), nameof(FungleSurveillanceMinigame.Begin))]
+class FungleSurveillanceMinigameBeginPatch
+{
+    public static void Prefix(FungleSurveillanceMinigame __instance)
+    {
+        var isc = __instance.securityCamera.cam.gameObject.AddComponent<IgnoreShadowCamera>();
+        isc.ShowNameText = false;
     }
 }
 

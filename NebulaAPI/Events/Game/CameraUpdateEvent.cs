@@ -23,8 +23,21 @@ public class CameraUpdateEvent : Event
             hue += value;
     }
 
+    private float brightness = 1f;
+    public void UpdateBrightness(float value, bool multiply)
+    {
+        if (multiply)
+            brightness *= value;
+        else
+            brightness += value;
+    }
+
+    private UnityEngine.Color color = UnityEngine.Color.white;
+    internal UnityEngine.Color Color { get =>  color; set => color = value; }
+
     internal float GetSaturation() { return saturation; }
     internal float GetHue() { return hue; }
+    internal float GetBrightness() { return brightness; }
 
     internal CameraUpdateEvent() { }
 }

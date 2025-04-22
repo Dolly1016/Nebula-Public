@@ -38,6 +38,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         }
 
         GamePlayer? obsession = null;
+        public GamePlayer? Obsession => obsession;
 
         [Local]
         void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
@@ -172,7 +173,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
             }
         }
 
-        bool RuntimeModifier.MyCrewmateTaskIsIgnored => obsession?.Role.Role.Category != Virial.Assignable.RoleCategory.CrewmateRole || obsession?.Role.Role == Madmate.MyRole;
+        bool RuntimeModifier.MyCrewmateTaskIsIgnored => !(obsession?.IsTrueCrewmate ?? false);
         bool RuntimeAssignable.CanKill(Virial.Game.Player player) => player != obsession;
     }
 }

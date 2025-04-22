@@ -1,13 +1,18 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Xml.Schema;
+using Nebula.Behaviour;
 using Nebula.Map;
+using System.Data;
 using TMPro;
 using UnityEngine.Rendering;
 using Virial;
 using Virial.Helpers;
+using Virial.Media;
 using Virial.Runtime;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 using static Nebula.Modules.INebulaAchievement;
+using static Nebula.Modules.RingMenu;
+using static Nebula.Roles.Neutral.Spectre;
 
 namespace Nebula;
 
@@ -191,7 +196,10 @@ public class MouseOverPopup : MonoBehaviour
             imagePos.y = 0f;
         }
         else imagePos.y *= -1f;
-        myScreen.SetBackImage(widget.BackImage, 0.6f, 0.4f, imagePos, scale, imageScale);
+        myScreen.SetBackImage(widget.BackImage,
+            widget.GrayoutedBackImage ? 0.03f : 0.6f,
+            widget.GrayoutedBackImage ? 0.46f : 0.4f, 
+            imagePos, scale, imageScale, widget.GrayoutedBackImage);
 
 
         UpdateArea(new(0f, 0f), scale);
@@ -300,13 +308,14 @@ public class MouseOverPopup : MonoBehaviour
     }
 
     public bool ShowAnyOverlay => gameObject.activeSelf;
+    public bool ShowUnrelatedOverlay => ShowAnyOverlay && !RelatedObject;
 }
 
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 [NebulaRPCHolder]
 public class NebulaManager : MonoBehaviour
 {
-    private record PopupProvider(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callBack)> supplier);
+    private record PopupProvider(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callBack)> supplier, Func<float>? guage = null, Image? relatedIcon = null);
     public class MetaCommand
     {
         public Virial.Compat.VirtualKeyInput? KeyAssignmentType = null;
@@ -338,6 +347,9 @@ public class NebulaManager : MonoBehaviour
     //コンソール
     private CommandConsole? console = null;
 
+    //リングメニュー
+    private RingMenu ringMenu = new();
+
     static NebulaManager()
     {
         ClassInjector.RegisterTypeInIl2Cpp<NebulaManager>();
@@ -361,8 +373,15 @@ public class NebulaManager : MonoBehaviour
             () => NebulaGameManager.Instance != null && AmongUsClient.Instance && AmongUsClient.Instance.AmHost && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Joined && GameStartManager.Instance && GameStartManager.Instance.startState == GameStartManager.StartingStates.NotStarting,
             () =>
             {
-                GameStartManager.Instance.startState = GameStartManager.StartingStates.Countdown;
-                GameStartManager.Instance.FinallyBegin();
+                if (GameStartManager.Instance.StartButton.enabled)
+                {
+                    GameStartManager.Instance.startState = GameStartManager.StartingStates.Countdown;
+                    GameStartManager.Instance.FinallyBegin();
+                }
+                else
+                {
+                    DebugScreen.Push(Language.Translate("ui.error.quickStart.cannotStart"), 3f);
+                }
             }
         )
         { DefaultKeyInput = new(KeyCode.F1) });
@@ -400,7 +419,7 @@ public class NebulaManager : MonoBehaviour
 
         commands.Add(new("help.command.toggleSocial",
             () => AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && AmongUsClient.Instance.AmHost && (ModSingleton<ShowUp>.Instance?.ShouldBeShownSocialSettings ?? false),
-            () => ShowUp.RpcShareSocialSettings.Invoke((false, !ModSingleton<ShowUp>.Instance.CanAppealInGame))
+            () => ShowUp.RpcShareSocialSettings.Invoke((false, !ModSingleton<ShowUp>.Instance.CanAppealInGame, ModSingleton<ShowUp>.Instance.CanUseStamps))
         )
         { DefaultKeyInput = new(KeyCode.F4) });
 
@@ -449,24 +468,61 @@ public class NebulaManager : MonoBehaviour
 
         var tex = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
         tex.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
-        tex.Apply();
+        tex.Apply(false, false);
 
         File.WriteAllBytesAsync(GetPicturePath(out string displayPath), tex.EncodeToPNG());
+
+        UnityEngine.Object.Destroy(tex);
+    }
+
+    internal void ShowRingMenu(RingMenuElement[] elements, Func<bool> showWhile, Action? ifEmpty)
+    {
+        if (elements.Length == 0)
+            ifEmpty?.Invoke();
+        else
+            ringMenu.Show(elements, showWhile);
     }
 
     public void Update()
     {
         if (PreloadManager.FinishedPreload)
         {
-
             //スクリーンショット
             if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDownForAction) StartCoroutine(CaptureAndSave().WrapToIl2Cpp());
 
+            if(DebugTools.DebugMode && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.RightShift))
+            {
+                var window = MetaScreen.GenerateWindow(new(8f, 4.7f), HudManager.InstanceExists ? HudManager.Instance.transform : null, new Vector3(0f, 0f, -400f), true, true, false, BackgroundSetting.Modern);
+                window.SetWidget(new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(7.8f, 4.5f), DebugTools.GetEditorWidget()), out _);
+            }
+
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
-                
+                var stampInput = NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Stamp);
+                if (stampInput.KeyDownForAction &&
+                    (
+                    (!GameManager.Instance || !GameManager.Instance.GameHasStarted) ||
+                    (MeetingHud.Instance || ExileController.Instance) ||
+                    NebulaGameManager.Instance!.CanSeeAllInfo
+                    ))
+                {
+                    StampHelpers.ShowStampRingMenu(() => !stampInput.KeyUp);
+                }
+
                 if (Input.GetKeyDown(KeyCode.K))
                 {
+                    CustomConsoleProperty.MinigameAction<Roles.Impostor.SlingshotMinigame>(null!, (minigame, console) =>{}).Invoke(null!);
+                    /*
+                    if (MoreCosmic.AllStamps.Count > 0)
+                    {
+                        StampHelpers.SpawnStamp(0, MoreCosmic.AllStamps.FirstOrDefault().Value, MeetingBack.GetSprite(), new(-0.61f, 0.09f), HudManager.Instance.transform, Vector3.zero);
+                    }
+                    else
+                    {
+                        Debug.Log("no stamp!");
+                    }
+                    */
+
                     //Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;
                     //File.WriteAllBytesAsync("SpawnableMap" + NebulaPreSpawnLocation.MapName[AmongUsUtil.CurrentMapId] +".png", MapData.GetCurrentMapData().OutputMap(center, new Vector2(10f, 7f) * ShipStatus.Instance.MapScale, 40f).EncodeToPNG());
                 }
@@ -535,11 +591,14 @@ public class NebulaManager : MonoBehaviour
             SetHelpWidget(null, parameters.widget);
             mouseOverPopup.SetRelatedPredicate(found.predicate);
             mouseOverPopup.SetRelatedPosition(parameters.screenPosition);
+            mouseOverPopup.Parameters.Icon = found.relatedIcon;
+            mouseOverPopup.Parameters.RelatedValue = found.guage;
             parameters.callBack?.Invoke();
             mouseOverPopup.UpdatePosition(parameters.screenPosition.Invoke(), true);
         }
 
         MoreCosmic.Update();
+        ringMenu.Update();
     }
 
     public void Awake()
@@ -553,6 +612,11 @@ public class NebulaManager : MonoBehaviour
         PopupProviders = new();
     }
 
+    public void LateUpdate()
+    {
+        NebulaGameManager.Instance?.OnLateUpdate();
+    }
+
     
     /// <summary>
     /// 
@@ -560,9 +624,9 @@ public class NebulaManager : MonoBehaviour
     /// <param name="isFinallyDead">この表示が完全に不要になったらtrueを返してください。</param>
     /// <param name="predicate">オーバーレイが表示される間はtrueを返してください。</param>
     /// <param name="supplier">表示されるGUIと表示位置(スクリーン座標)の関数、表示時に実行されるコールバックのタプル</param>
-    public void RegsiterStaticPopup(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callback)> supplier)
+    public void RegsiterStaticPopup(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callback)> supplier, Func<float>? guage = null, Image? relatedIcon = null)
     {
-        PopupProviders.Add(new(isFinallyDead, predicate, supplier));
+        PopupProviders.Add(new(isFinallyDead, predicate, supplier, guage, relatedIcon));
     }
 
     public void StartDelayAction(float delay, Action action)

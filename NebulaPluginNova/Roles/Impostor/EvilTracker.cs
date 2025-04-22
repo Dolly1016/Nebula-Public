@@ -169,14 +169,8 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                     {
                         StringBuilder text = new();
 
-                        string GetRoomName(GamePlayer player)
-                        {
-                            foreach (var entry in ShipStatus.Instance.FastRooms) if (entry.value.roomArea.OverlapPoint(player.TruePosition)) return AmongUsUtil.ToDisplayString(entry.Key);
-                            return Language.Translate("location.outside");
-                        }
-
-                        if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + GetRoomName(trackingTarget)).Color(Color.Lerp(Palette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
-                        if (MyPlayer.IsImpostor) foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostor && !p.IsDead)) text.AppendLine((p.Name + ": " + GetRoomName(p)).Color(Palette.ImpostorRed));
+                        if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + AmongUsUtil.GetRoomName(trackingTarget.TruePosition, true)).Color(Color.Lerp(Palette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
+                        if (MyPlayer.IsImpostor) foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostor && !p.IsDead)) text.AppendLine((p.Name + ": " + AmongUsUtil.GetRoomName(p.TruePosition, true)).Color(Palette.ImpostorRed));
 
                         tmPro.text = text.ToString();
                     });

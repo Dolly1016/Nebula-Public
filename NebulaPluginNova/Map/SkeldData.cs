@@ -47,6 +47,18 @@ public class SkeldData : MapData
         //リアクター右上方
         new(-18.45f, -2.65f)
     };
+
+    static private (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
+        (new(-16.54f, -5.24f, 3.38f, 4.26f), "reactorAccess", false),
+        (new(-10.58f, 0.93f, 4.69f, 1.94f), "medBayAccess", false),
+        (new(-9.73f, -12.97f, 5.34f, 3.71f), "electricalAccess", false),
+        (new(0.01f, -6.87f, 2.61f, 2.86f), "adminAccess", false),
+        (new(3.97f, -12.66f, 3.58f, 2.21f), "commsAccess", false),
+        (new(11.89f, -5.86f, 4.87f, 5.37f), "rightAccess", false),
+        (new(5.86f, 1.18f, 1.74f, 1.49f), "weaponsAccess", false),
+        ];
+    static private (SystemTypes room, AdditionalRoomArea area, string key)[] overrideRooms = [];
+
     static private MapObjectPoint[] mapObjectPoints = [
         new(0.1f, 5.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //カフェ上
         new(-5.7f, 3.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //カフェ左上
@@ -86,6 +98,8 @@ public class SkeldData : MapData
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;
     protected override Vector2[] NonMapArea => NonMapPositions;
+    protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
+    protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };
     internal static IDividedSpriteLoader SealedVentSpriteSkeld = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedVentSkeld.png", 100f, 8, 4);
     protected override IDividedSpriteLoader SealedVentSprite => SealedVentSpriteSkeld;

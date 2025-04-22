@@ -6,8 +6,15 @@ namespace Nebula.Modules.ScriptComponents;
 
 public class Arrow : INebulaScriptComponent, IGameOperator
 {
+    public enum DisappearanceType
+    {
+        FadeOut,
+        Reduction,
+    }
+
     private SpriteRenderer? arrowRenderer;
     private SpriteRenderer? smallRenderer = null;
+    private SpriteRenderer? subRenderer = null;
     public Vector2 TargetPos;
 
     public GameObject ArrowObject => arrowRenderer!.gameObject;
@@ -17,14 +24,21 @@ public class Arrow : INebulaScriptComponent, IGameOperator
     public bool IsActive { get; set; } = true;
     public bool FixedAngle { get; set; } = false;
     public bool IsDisappearing { get; set; } = false;
+    public DisappearanceType DisappearanceEffect { get; set; } = DisappearanceType.FadeOut;
     public bool WithSmallArrow => smallRenderer != null;
     public bool OnJustPoint { get; set; } = false;
-    public bool ShowOnlyOutside { get; set; } = false;
-
+    private bool showOnlyOutside = false;
+    public bool ShowOnlyOutside { get => showOnlyOutside; set
+        {
+            showOnlyOutside = value;
+            if (!showOnlyOutside) arrowRenderer?.gameObject.SetActive(false);
+        }
+    }
+    private float disappearProgress = 0f;
     private static SpriteLoader arrowSprite = SpriteLoader.FromResource("Nebula.Resources.Arrow.png", 185f);
     private static SpriteLoader arrowSmallSprite = SpriteLoader.FromResource("Nebula.Resources.ArrowSmall.png", 360f);
 
-    public Arrow(Sprite? sprite = null, bool usePlayerMaterial = true, bool withSmallArrow = false)
+    public Arrow(Sprite? sprite = null, bool usePlayerMaterial = true, bool withSmallArrow = false, bool withSubRenderer = false)
     {
         arrowRenderer = UnityHelper.CreateObject<SpriteRenderer>("Arrow", HudManager.Instance.transform, new Vector3(0, 0, -10f), LayerExpansion.GetArrowLayer());
         arrowRenderer.sprite = sprite ?? arrowSprite.GetSprite();
@@ -36,9 +50,24 @@ public class Arrow : INebulaScriptComponent, IGameOperator
             smallRenderer.sprite = arrowSmallSprite.GetSprite();
             FixedAngle = true;
         }
+        if (withSubRenderer)
+        {
+            subRenderer = UnityHelper.CreateObject<SpriteRenderer>("Subrenderer", arrowRenderer.transform, new Vector3(0, 0, 0.01f), LayerExpansion.GetArrowLayer());
+            subRenderer.sprite = null;
+        }
+
+        if (ShowOnlyOutside) arrowRenderer.gameObject.SetActive(false);
     }
 
     public void SetSprite(Sprite? sprite) => arrowRenderer!.sprite = sprite;
+    public void SetSubSprite(Sprite? sprite, float z)
+    {
+        if(subRenderer != null)
+        {
+            subRenderer.sprite = sprite;
+            subRenderer.transform.localPosition = new(0f,0f,z);
+        }
+    }
 
     public Arrow HideArrowSprite()
     {
@@ -148,15 +177,26 @@ public class Arrow : INebulaScriptComponent, IGameOperator
 
         if (IsDisappearing)
         {
-            float a = arrowRenderer.color.a;
-            a -= Time.deltaTime * 0.85f;
-            if (a < 0f)
+            float a = 1f - disappearProgress;
+
+            if (DisappearanceEffect == DisappearanceType.FadeOut)
+            {
+                disappearProgress += Time.deltaTime * 0.85f;
+
+                arrowRenderer.color = new Color(arrowRenderer.color.r, arrowRenderer.color.g, arrowRenderer.color.b, a);
+                if (smallRenderer != null) smallRenderer.color = new(1f, 1f, 1f, a);
+            }else if(DisappearanceEffect == DisappearanceType.Reduction)
+            {
+                disappearProgress += Time.deltaTime * 3.2f;
+
+                arrowRenderer.transform.localScale *= a;
+            }
+
+            if (disappearProgress > 1f)
             {
                 this.ReleaseIt();
-                a = 0f;
+                disappearProgress = 1f;
             }
-            arrowRenderer.color = new Color(arrowRenderer.color.r, arrowRenderer.color.g, arrowRenderer.color.b, a);
-            if (smallRenderer != null) smallRenderer.color = new(1f, 1f, 1f, a);
         }
     }
 

@@ -104,14 +104,14 @@ public class StandardRoleAllocator : IRoleAllocator
 
                 selected.Param?.TeamAssignment?.Do(assignment =>
                 {
-                    var param = assignment.Invoke(selected.role, player);
+                    var param = assignment.Assigner.Invoke(selected.role, player);
                     table.SetRole(main[0], param.role, param.argument);
                     main.RemoveAt(0);
                 });
 
                 selected.Param?.OthersAssignment?.Do(assignment =>
                 {
-                    var param = assignment.Invoke(selected.role, player);
+                    var param = assignment.Assigner.Invoke(selected.role, player);
                     table.SetRole(others[0], param.role, param.argument);
                     others.RemoveAt(0);
                 });

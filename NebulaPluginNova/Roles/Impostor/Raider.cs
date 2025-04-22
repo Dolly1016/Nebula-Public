@@ -145,7 +145,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                                             acTokenChallenge ??= new("raider.challenge", killedMask, (val, _) =>
                                             /*人数都合でゲームが終了している*/ NebulaGameManager.Instance!.EndState!.EndReason == GameEndReason.Situation &&
                                             /*勝利している*/ NebulaGameManager.Instance.EndState!.Winners.Test(Owner) &&
-                                            /*最後の死亡者がこの斧によってキルされている*/ (killedMask & (1 << (NebulaGameManager.Instance.GetLastDead?.PlayerId ?? -1))) != 0
+                                            /*最後の死亡者がこの斧によってキルされている*/ (killedMask & (1 << (NebulaGameManager.Instance.LastDead?.PlayerId ?? -1))) != 0
                                             );
                                             acTokenChallenge.Value = killedMask;
                                         }
@@ -164,7 +164,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                     MyRenderer.gameObject.SetActive(false);
                     NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(MyRenderer.gameObject.layer, null, MyRenderer.transform.position, 0.8f).WrapToIl2Cpp());
                 }
-                else if (!Physics2D.OverlapPoint(MyRenderer.transform.position, 1 << LayerExpansion.GetRaiderColliderLayer()) && NebulaPhysicsHelpers.AnyNonTriggersBetween(MyRenderer.transform.position, vec, speed * 4f * Time.deltaTime, Constants.ShipAndAllObjectsMask, out d))
+                else if (!OverlapAxeIgnoreArea(MyRenderer.transform.position) && NebulaPhysicsHelpers.AnyNonTriggersBetween(MyRenderer.transform.position, vec, speed * 4f * Time.deltaTime, Constants.ShipAndAllObjectsMask, out d))
                 {
                     state = 2;
                     MyRenderer.sprite = stuckAxeSprite.GetSprite();
@@ -346,4 +346,8 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
             axe?.Throw(message.pos, message.angle);
         }
         );
+
+    private static int RaiderIgnoreLayerMask = 1 << LayerExpansion.GetRaiderColliderLayer();
+    public static bool OverlapAxeIgnoreArea(Vector2 pos) => Physics2D.OverlapPoint(pos, RaiderIgnoreLayerMask);
+    
 }

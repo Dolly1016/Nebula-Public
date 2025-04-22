@@ -22,6 +22,7 @@ internal class SpectreFollower : DefinedRoleTemplate, DefinedRole
     string DefinedAssignable.InternalName => "spectre.follower";
     private SpectreFollower() : base("spectreFollower", Spectre.MyTeam.Color, RoleCategory.NeutralRole, Spectre.MyTeam, [VentConfiguration, SatietyRateOption, ShowDishesOnMapOption], false, optionHolderPredicate: ()=>IsSpawnableImpl){
         ConfigurationHolder?.ScheduleAddRelated(() => [Spectre.MyRole.ConfigurationHolder!]);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/SpectreFollower.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
@@ -118,6 +119,7 @@ internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole
     string DefinedAssignable.InternalName => "spectre.immoralist";
     private SpectreImmoralist() : base("spectreImmoralist", Spectre.MyTeam.Color, RoleCategory.NeutralRole, Spectre.MyTeam, [VentConfiguration, RespawnCooldownOption, RespawnDurationOption, ShowDishesOnMapOption, CanSuicideOption, ShowKillFlashOption], false, optionHolderPredicate: () => IsSpawnableImpl) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Spectre.MyRole.ConfigurationHolder!]);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Immoralist.png");
     }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
@@ -179,6 +181,9 @@ internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole
                 {
                     if (friesTracker.CurrentTarget == null || !MyPlayer.CanMove || MyPlayer.IsDead) return;
 
+                    var mySpectre = MySpectre;
+                    if (mySpectre != null && !mySpectre.MyPlayer.IsDead && mySpectre.MyPlayer.Position.Distance(MyPlayer.Position) < 1.5f) new StaticAchievementToken("spectreImmoralist.common3");
+
                     FriesDishManager.RpcUpdateFries.Invoke((friesTracker.CurrentTarget.DishId, false, null));
                     StatsRespawnFries.Progress();
                     boostButton.StartCoolDown();
@@ -223,7 +228,7 @@ internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole
                     NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.SpectreWin &&
                     NebulaGameManager.Instance!.EndState!.OriginalEndReason == GameEndReason.Situation &&
                     NebulaGameManager.Instance.EndState.Winners.Test(MyPlayer) && 
-                    (NebulaGameManager.Instance.GetLastDead?.AmOwner ?? false) &&
+                    (NebulaGameManager.Instance.LastDead?.AmOwner ?? false) &&
                     (MyPlayer.PlayerState == PlayerState.Suicide || MyPlayer.PlayerState == PlayerState.Exiled));
 
                 AchievementTokens.FunctionalToken("spectreImmoralist.hard1", () =>

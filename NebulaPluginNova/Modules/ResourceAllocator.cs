@@ -148,6 +148,13 @@ public class StreamResource : INebulaResource {
         if (stream == null) return null;
         return new SpriteLoader(new UnloadTextureLoader(stream.ReadBytes()), defaultPixsPerUnit);
     }
+
+    MultiImage? INebulaResource.AsMultiImage(int x, int y, float defaultPixsPerUnit)
+    {
+        Stream? stream = streamGetter.Invoke();
+        if (stream == null) return null;
+        return new DividedSpriteLoader(new UnloadTextureLoader(stream.ReadBytes()), defaultPixsPerUnit, x, y);
+    }
 }
 
 public class VanillaImageResource : INebulaResource

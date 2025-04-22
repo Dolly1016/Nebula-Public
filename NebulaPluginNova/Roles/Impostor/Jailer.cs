@@ -126,13 +126,11 @@ public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocat
     string DefinedAssignable.InternalName => "jailerModifier";
     string DefinedAssignable.GeneralBlurb => (Jailer.MyRole as DefinedAssignable).GeneralBlurb;
 
-    //割り当てる役職が変更されてしまうので、一番最後に割り当てる
+  
     int HasAssignmentRoutine.AssignPriority => 2;
 
     static public JailerModifier MyRole = new JailerModifier();
 
-
-    // このモディファイアは実際に割り当てられることはない
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier

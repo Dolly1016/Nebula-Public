@@ -108,6 +108,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
     public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyNiceRole;
+        DefinedRole RuntimeRole.ExternalRecognitionRole => savedRole;
         IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [ShownSecret.OptionRole];
 
         public NiceInstance(GamePlayer player, int[] savedArgs) : base(player)
@@ -171,6 +172,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
     public class EvilInstance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyEvilRole;
+        DefinedRole RuntimeRole.ExternalRecognitionRole => savedRole;
         IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [ShownSecret.OptionRole];
         public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
         {

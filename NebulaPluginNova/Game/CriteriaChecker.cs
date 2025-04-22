@@ -170,7 +170,7 @@ public class NebulaEndCriteria
                 jackalMask |= myMask;
 
                 //死亡しておらず、同チーム、かつラバーズでないか相方死亡ラバー
-                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && jackal!.IsSameTeam(p) && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover));
+                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && jackal!.IsSameTeam(p) && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover) && !p.IsMadmate);
 
 
                 //完全殲滅勝利
@@ -218,7 +218,7 @@ public class NebulaEndCriteria
         [OnlyHost]
         void OnExiled(PlayerExiledEvent ev) 
         {
-            if (ev.Player?.Role.Role == Roles.Neutral.Jester.MyRole) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JesterWin, GameEndReason.Special, BitMasks.AsPlayer(1u << ev.Player.PlayerId));
+            if (ev.Player?.Role.Role == Roles.Neutral.Jester.MyRole && (!Jester.RequiresTasksForWin || (ev.Player?.Tasks.IsCompletedCurrentTasks ?? false))) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JesterWin, GameEndReason.Special, BitMasks.AsPlayer(1u << ev.Player.PlayerId));
         }
     };
 }

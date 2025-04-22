@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using BepInEx.Unity.IL2CPP.Utils;
 using Nebula.Behaviour;
 using Virial;
 using Virial.Assignable;
@@ -66,6 +67,35 @@ public class Doctor : DefinedRoleTemplate, DefinedRole
                     vitalsMinigame.Begin(null);
 
                     ConsoleTimer.MarkAsNonConsoleMinigame();
+
+                    IEnumerator CoUpdateState(VitalsPanel panel, GamePlayer player)
+                    {
+                        TMPro.TextMeshPro text = UnityEngine.Object.Instantiate(vitalsMinigame.SabText, panel.transform);
+                        UnityEngine.Object.DestroyImmediate(text.GetComponent<AlphaBlink>());
+                        text.gameObject.SetActive(false);
+                        text.transform.localScale = Vector3.one * 0.5f;
+                        text.transform.localPosition = new Vector3(-0.75f, -0.23f, 0f);
+                        text.color = new Color(0.8f, 0.8f, 0.8f);
+
+                        while (true)
+                        {
+
+                            if (panel.IsDiscon)
+                            {
+                                text.gameObject.SetActive(true);
+                                text.text = player.PlayerState.Text;
+                            }
+                            else
+                            {
+                                text.gameObject.SetActive(false);
+                            }
+                            yield return null;
+                        }
+                    }
+                    vitalsMinigame.vitals.Do(panel =>
+                    {
+                        panel.StartCoroutine(CoUpdateState(panel, NebulaGameManager.Instance!.GetPlayer(panel.PlayerInfo.PlayerId)!));
+                    });
 
                     vitalsMinigame.BatteryText.gameObject.SetActive(true);
                     vitalsMinigame.BatteryText.transform.localPosition = new Vector3(2.2f, -2.45f, 0f);

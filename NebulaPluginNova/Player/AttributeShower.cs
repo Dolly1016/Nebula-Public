@@ -5,7 +5,7 @@ public class AttributeShower
     public class AttributeIcon
     {
         private static Image guageSprite = SpriteLoader.FromResource("Nebula.Resources.AttributeGuage.png", 100f);
-        private static IDividedSpriteLoader imageSprites = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.AttributeIcon.png", 100f, 33, true);
+        private static IDividedSpriteLoader imageSprites = DividedSpriteLoader.FromResource("Nebula.Resources.AttributeIcon.png", 100f, 33, 33, true);
         private static Image[] imageLoaders = Helpers.Sequential(imageSprites.Length).Select(i => imageSprites.AsLoader(i)).ToArray();
         public static Image GetIconSprite(int index) => imageLoaders[index + 2];
         public Virial.Game.IPlayerAttribute Attribute { get; private set; }
@@ -37,7 +37,8 @@ public class AttributeShower
                 collider.isTrigger = true;
 
                 var button = guageRenderer.gameObject.SetUpButton();
-                button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.attribute." + attribute.UIName)));
+                button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button,
+                    Language.Translate("ui.attribute." + attribute.UIName).Bold() + "<br>" + Language.Translate("ui.attribute." + attribute.UIName + ".detail")));
                 button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
             }
 

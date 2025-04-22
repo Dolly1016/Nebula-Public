@@ -24,7 +24,7 @@ public interface INebulaResource
     /// 複数枚からなる画像として取得します。
     /// </summary>
     /// <returns></returns>
-    MultiImage? AsMultiImage() => null;
+    MultiImage? AsMultiImage(int x, int y, float defaultPixsPerUnit = 100f) => null;
 
     /// <summary>
     /// 文字列として取得します。

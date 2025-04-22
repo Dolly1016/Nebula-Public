@@ -82,6 +82,14 @@ public interface IRelativeCoolDownConfiguration : IConfiguration{
     float GetCoolDown(float baseCooldown);
 }
 
+public interface ITaskConfiguration
+{
+    IEnumerable<IConfiguration> Configurations { get; }
+    IConfiguration AsGroup(Virial.Color color);
+    void GetTasks(out int shortTasks, out int longTasks, out int commonTasks);
+    bool RequiresTasks { get; }
+}
+
 public interface Configurations
 {
     /// <summary>
@@ -161,6 +169,7 @@ public interface Configurations
     IVentConfiguration VentConfiguration(string id, bool isOptional, IntegerSelection? usesSelection, int usesDefaultValue, FloatSelection? coolDownSelection, float coolDownDefaultValue, FloatSelection? durationSelection, float durationDefaultValue);
     IVentConfiguration NeutralVentConfiguration(string id, bool isOptional) => VentConfiguration(id, isOptional, null, -1, (0f, 60f, 5f), 15f, (2.5f, 30f, 2.5f), 10f);
 
+    ITaskConfiguration TaskConfiguration(string id, bool forceTasks, bool containsCommonTasks, Func<bool>? predicate = null, string? translationKey = null);
 
     IRelativeCoolDownConfiguration KillConfiguration(string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate = null, Func<float>? baseKillCooldown = null)
         => KillConfiguration(NebulaAPI.GUI.LocalizedTextComponent(id), id, defaultType, immediateSelection, immediateDefaultValue, relativeSelection, relativeDefaultValue, ratioSelection, ratioDefaultValue, predicate, baseKillCooldown);

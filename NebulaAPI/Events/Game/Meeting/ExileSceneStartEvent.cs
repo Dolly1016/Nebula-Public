@@ -11,5 +11,7 @@ namespace Virial.Events.Game.Meeting;
 /// </summary>
 public class ExileSceneStartEvent : Event
 {
-    internal ExileSceneStartEvent() { }
+    IReadOnlyList<Virial.Game.Player> exiled;
+    internal ExileSceneStartEvent(IReadOnlyList<Virial.Game.Player> exiled) { this.exiled = exiled ?? []; }
+    public IReadOnlyList<Virial.Game.Player> Exiled => exiled;
 }

@@ -119,6 +119,10 @@ public class SimpleReleasable : IReleasable, ILifespan
 
     void IReleasable.Release()
     {
+        if (IsDeadObject) return;
         IsDeadObject = true;
+        OnReleased();
     }
+
+    protected virtual void OnReleased() { }
 }

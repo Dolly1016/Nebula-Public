@@ -1,6 +1,7 @@
 ﻿using Nebula.Behaviour;
 using Nebula.Modules.GUIWidget;
 using UnityEngine.UI;
+using Virial.Media;
 
 namespace Nebula.Patches;
 
@@ -17,8 +18,17 @@ public static class MainMenuSetUpPatch
 
     static void Postfix(MainMenuManager __instance)
     {
+
         __instance.PlayOnlineButton.OnClick.AddListener(() => IsLocalGame = false);
         __instance.playLocalButton.OnClick.AddListener(() => IsLocalGame = true);
+
+        {
+            var scaler = __instance.onlineButtonsContainer.GetChild(1);
+            scaler.GetChild(0).localPosition = new(-1f, 0.5f, 0f);//CreateLobby
+            scaler.GetChild(1).localPosition = new(1.5f,0.5f,0f);//JoinGame
+            scaler.GetChild(2).gameObject.SetActive(false);//FindGame
+            scaler.GetChild(3).gameObject.SetActive(false);//Line
+        }
 
         var leftPanel = __instance.mainMenuUI.transform.FindChild("AspectScaler").FindChild("LeftPanel");
         leftPanel.GetComponent<SpriteRenderer>().size += new Vector2(0f,0.5f);
@@ -38,7 +48,6 @@ public static class MainMenuSetUpPatch
         reworkedPanel.size = oldPanel.size;
         oldPanel.enabled = false;
 
-        
         //CreditsとQuit以外のボタンを上に寄せる
         foreach (var button in __instance.mainButtons.GetFastEnumerator())
             if (Math.Abs(button.transform.localPosition.x) < 0.1f) button.transform.localPosition += new Vector3(0f, height, 0f);
@@ -178,7 +187,7 @@ public static class MainMenuSetUpPatch
                 if (addon.IsHidden) continue;
 
                 inner.Append(new CombinedWidgetOld(0.5f,
-                    new MetaWidgetOld.Image(addon.Icon) { Width = 0.3f },
+                    new MetaWidgetOld.Image(addon.Icon) { Width = 0.3f, PostBuilder = renderer => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask },
                     new MetaWidgetOld.HorizonalMargin(0.1f),
                     new MetaWidgetOld.Text(NameAttribute) { RawText = addon.AddonName },
                     new MetaWidgetOld.Text(VersionAttribute) { RawText = addon.Version },

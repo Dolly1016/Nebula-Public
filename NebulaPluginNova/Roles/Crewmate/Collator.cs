@@ -152,7 +152,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
             switch (p.Role.Role.Category)
             {
                 case RoleCategory.CrewmateRole:
-                    if (p.Role.Role == Madmate.MyRole)
+                    if (p.IsMadmate)
                         return MadmateIsClassifiedAsOption.GetValue() switch { 0 => NebulaTeams.ImpostorTeam, 1 => NebulaTeams.CrewmateTeam, _ => NebulaTeams.CrewmateTeam };
                     else
                         return NebulaTeams.CrewmateTeam;
@@ -208,7 +208,8 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                 };
 
                 allSamples = new (SpriteRenderer tube, SpriteRenderer sample)[SelectiveCollatingOption ? NumOfTubesOption : 2];
-                for(int i = 0;i<allSamples.Length;i++)
+                IconsHolder.SetPriority(allSamples.Length > 3 ? 1 : -1);
+                for (int i = 0;i<allSamples.Length;i++)
                 {
                     var tube = UnityHelper.CreateObject<SpriteRenderer>("SampleTube", ajust.transform, Vector3.zero, LayerExpansion.GetUILayer());
                     tube.sprite = tubeSprite.GetSprite(0);

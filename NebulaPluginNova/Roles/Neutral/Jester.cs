@@ -2,9 +2,11 @@
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 
 namespace Nebula.Roles.Neutral;
 
@@ -12,8 +14,11 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static public RoleTeam MyTeam = new Team("teams.jester", new(253,84,167), TeamRevealType.OnlyMe);
 
-    private Jester() : base("jester", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [VentConfiguration, CanDragDeadBodyOption, CanFixLightOption, CanFixCommsOption]) {
+    private Jester() : base("jester", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [VentConfiguration, CanDragDeadBodyOption, CanFixLightOption, CanFixCommsOption,
+        TaskConfiguration.AsGroup(new(GroupConfigurationColor.ToDarkenColor(MyTeam.Color.ToUnityColor()))),
+        ]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Jester.png");
     }
 
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
@@ -24,6 +29,8 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
     static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.jester.canFixLight", false);
     static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.jester.canFixComms", false);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.jester.vent", true);
+    static private ITaskConfiguration TaskConfiguration = NebulaAPI.Configurations.TaskConfiguration("options.role.jester.task", false, true, translationKey: "options.role.jester.task");
+    static public bool RequiresTasksForWin => TaskConfiguration.RequiresTasks;
 
     static public Jester MyRole = new Jester();
 
@@ -44,12 +51,27 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
             if (CanDragDeadBodyOption) draggable = Bind(new Scripts.Draggable());
         }
 
+        void SetJesterTasks()
+        {
+            if (!TaskConfiguration.RequiresTasks) return;
+            if (AmOwner)
+            {
+                using (RPCRouter.CreateSection("JesterTask"))
+                {
+                    TaskConfiguration.GetTasks(out var s, out var l, out var c);
+                    MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(s, l, c);
+                    MyPlayer.Tasks.Unbox().BecomeToOutsider();
+                }
+            }
+        }
 
         void RuntimeAssignable.OnActivated()
         {
             draggable?.OnActivated(this);
-            
         }
+
+        void OnGameStart(GameStartEvent ev) => SetJesterTasks();
+
 
         [Local, OnlyMyPlayer]
         void OnDead(PlayerDieEvent ev) => draggable?.OnDead(this);
@@ -72,6 +94,8 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
                 new StaticAchievementToken("jester.challenge");
 
         }
+
+        RoleTaskType RuntimeRole.TaskType => TaskConfiguration.RequiresTasks ? RoleTaskType.RoleTask : RoleTaskType.NoTask;
     }
 }
 

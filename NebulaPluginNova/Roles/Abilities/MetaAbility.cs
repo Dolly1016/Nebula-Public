@@ -62,6 +62,8 @@ public class MetaAbility : ComponentHolder, IGameOperator, IModule
             OpenCircleWindow();
         };
         circleButton.SetLabel("show");
+
+        if (DebugTools.DebugMode) Bind(new DebugAbility());
     }
 
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MetaActionButton.png", 115f);

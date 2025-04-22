@@ -26,6 +26,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateAssemblyInfo>True</GenerateAssemblyInfo>
 		<Optimize>False</Optimize>
+		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -34,6 +35,7 @@
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
 	  <Optimize>False</Optimize>
+	  <DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -42,6 +44,7 @@
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
 	  <Optimize>False</Optimize>
+	  <DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -50,6 +53,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateAssemblyInfo>True</GenerateAssemblyInfo>
 		<Optimize>True</Optimize>
+		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -58,6 +62,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateAssemblyInfo>True</GenerateAssemblyInfo>
 		<Optimize>True</Optimize>
+		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
@@ -66,6 +71,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateAssemblyInfo>True</GenerateAssemblyInfo>
 		<Optimize>True</Optimize>
+		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -96,11 +102,16 @@
 	</ItemGroup>
 
 	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
-		<Message Text="Second occurrence" />
+		<Message Text="Construct release folders..." />
 		<Copy SourceFiles="bin\x86\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\" />
-		<Exec Command="rm -f $(AmongUsRelease)\Nebula.zip %26 cd $(AmongUsRelease)\Nebula %26 %22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula.zip" />
 		<Copy SourceFiles="bin\x86\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\Nebula\BepInEx\nebula" />
+		<Exec Command="del $(AmongUsRelease)\Nebula.zip %26 cd $(AmongUsRelease)\Nebula %26 %22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula.zip" />
 		<Copy SourceFiles="bin\x86\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsMod)\BepInEx\nebula\" />
+	</Target>
+
+	<Target Name="ZipAddons" BeforeTargets="BeforeBuild">
+		<Message Text="Zip DefaultLanguage addon..." />
+		<Exec Command="del Resources\Addons\DefaultLanguage.zip %26 cd Resources\Addons\DefaultLanguage %26 %22$(ZipArchiver)\7z.exe%22 a ..\DefaultLanguage.zip" />
 	</Target>
 
 </Project>

@@ -5,6 +5,7 @@ using Nebula.Game.Statistics;
 using Nebula.Roles.Complex;
 using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
+using System.ComponentModel;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -235,6 +236,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                 return name;
             }
         }
+        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyTeam.UnityColor);
         string RuntimeRole.DisplayShort => Jackal.AppendTeamIdIfNecessary((MyRole as DefinedRole).DisplayShort, JackalTeamId, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, true);
 
         [OnlyHost, OnlyMyPlayer]
@@ -295,7 +297,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption], false, optionHolderPredicate: ()=> (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.CanCreateSidekickOption ) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Jackal.MyRole.ConfigurationHolder!]);
-        ConfigurationHolder!.Title = ConfigurationHolder.Title.WithComparison("role.jackal.sidekick.name");
+        ConfigurationHolder!.Title = ConfigurationHolder.Title.WithComparison("jackal.sidekick");
     }
     IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Sidekick.MyRole, MyRole];
     string DefinedAssignable.InternalName => "jackal.sidekick";
@@ -306,6 +308,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
     static internal BoolConfiguration IsModifierOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.isModifier", false);
     static internal BoolConfiguration SidekickCanKillOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canKill", false, () => !IsModifierOption);
     static internal BoolConfiguration CanCreateSidekickChainlyOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canCreateSidekickChainly", false);
+    static internal BoolConfiguration CanWinAsOriginalTeamOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canWinAsOriginalTeam", true, () => IsModifierOption);
     static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sidekick.killCoolDown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f, () => SidekickCanKillOption ,() => Jackal.KillCooldown);
 
     static public Sidekick MyRole = new Sidekick();
@@ -329,6 +332,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (AmOwner)
             {
+                AmongUsUtil.PlayCustomFlash(Jackal.MyRole.UnityColor, 0f, 0.25f, 0.45f);
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
                 if (SidekickCanKillOption)
@@ -373,6 +377,10 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
 
         public int JackalTeamId;
 
+        //設定によっては共存する役職の勝利条件をブロックする
+        [OnlyMyPlayer]
+        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= !Sidekick.CanWinAsOriginalTeamOption && ev.GameEnd != NebulaGameEnd.JackalWin;
+
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)));
 
@@ -394,6 +402,7 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
         {
             if (AmOwner)
             {
+                AmongUsUtil.PlayCustomFlash(Jackal.MyRole.UnityColor, 0f, 0.25f, 0.4f);
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
                 if (GeneralConfigurations.JackalRadioOption)

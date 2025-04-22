@@ -80,9 +80,11 @@ public static class NebulaAsset
 
         var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Nebula.Resources.Assets.nebula_asset");
         AssetBundle = AssetBundle.LoadFromMemory(resourceStream!.ReadBytes());
-        
+
+        MultiplyShader = Load<Shader>("Sprites-Multiply");
         MultiplyBackShader = Load<Shader>("Sprites-MultiplyBackground");
         StoreBackShader = Load<Shader>("Sprites-StoreBackground");
+        CustomShadowShader = Load<Shader>("Sprites-CustomShadow");
         GuageShader = Load<Shader>("Sprites-Guage");
         WhiteShader = Load<Shader>("Sprites-White");
         ProgressShader = Load<Shader>("Sprites-Progress");
@@ -90,6 +92,7 @@ public static class NebulaAsset
         HSVNAShader = Load<Shader>("Sprites-HSV-NoAlpha");
         MeshRendererShader = Load<Shader>("Sprites-ForMeshRenderer");
         MeshRendererMaskedShader = Load<Shader>("Sprites-ForMeshRendererMasked");
+        RingMenuShader = Load<Shader>("Sprites-RingMenu");
 
         DivMap[0] = Load<GameObject>("SkeldDivMap");
         DivMap[1] = Load<GameObject>("MIRADivMap");
@@ -125,6 +128,7 @@ public static class NebulaAsset
 
         PaparazzoShot = Load<GameObject>("PhotoObject");
         FriesMinigame = Load<GameObject>("SpectreFriedMinigame");
+        SlingshotInMinigame = Load<GameObject>("Slingshot");
 
         JusticeFont = new FontAssetNoS(JsonStructure.Deserialize<FontAssetNoSInfo>(StreamHelper.OpenFromResource("Nebula.Resources.JusticeFont.json")!)!, new ResourceTextureLoader("Nebula.Resources.JusticeFont.png"));
     }
@@ -191,8 +195,10 @@ public static class NebulaAsset
     }
 
     static public FontAssetNoS JusticeFont { get; private set; } = null!;
+    static public Shader MultiplyShader { get; private set; } = null!;
     static public Shader MultiplyBackShader { get; private set; } = null!;
     static public Shader StoreBackShader { get; private set; } = null!;
+    static public Shader CustomShadowShader { get; private set; } = null!;
     static public Shader GuageShader { get; private set; } = null!;
     static public Shader WhiteShader { get; private set; } = null!;
     static public Shader ProgressShader { get; private set; } = null!;
@@ -200,10 +206,12 @@ public static class NebulaAsset
     static public Shader HSVNAShader { get; private set; } = null!;
     static public Shader MeshRendererShader { get; private set; } = null!;
     static public Shader MeshRendererMaskedShader { get; private set; } = null!;
+    static public Shader RingMenuShader { get; private set; } = null!;
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public GameObject PaparazzoShot { get; private set; } = null!;
     static public GameObject FriesMinigame { get; private set; } = null!;
+    static public GameObject SlingshotInMinigame { get; private set; } = null!;
 
     static public SpriteRenderer CreateSharpBackground(Vector2 size, Color color, Transform transform)
     {

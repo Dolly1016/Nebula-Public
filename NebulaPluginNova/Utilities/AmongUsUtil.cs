@@ -3,7 +3,9 @@ using Il2CppInterop.Runtime.Injection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nebula.Behaviour;
 using Nebula.Game.Statistics;
+using Nebula.Map;
 using UnityEngine;
+using UnityEngine.UI;
 using Virial.Events.Player;
 using Virial.Game;
 using static Il2CppSystem.Xml.XmlWellFormedWriter.AttributeValueCache;
@@ -59,6 +61,35 @@ public class ResetIgnoreShadowCamera : MonoBehaviour
 [NebulaRPCHolder]
 public static class AmongUsUtil
 {
+    public static bool IsPiled(this PassiveUiElement uiElem)
+    {
+        var currentOver = PassiveButtonManager.Instance.currentOver;
+        if (!currentOver || !uiElem) return false;
+        return currentOver.GetInstanceID() == uiElem.GetInstanceID();
+    }
+
+    public static string GetRoomName(UnityEngine.Vector2 position, bool detail = false, bool shortName = false)
+    {
+        var mapData = MapData.GetCurrentMapData();
+        foreach (var entry in ShipStatus.Instance.FastRooms)
+        {
+            if (entry.value.roomArea.OverlapPoint(position))
+            {
+                if (detail)
+                {
+                    var overrideRoom = mapData.GetOverrideMapRooms(entry.Key, position);
+                    if (overrideRoom != null) return ToDisplayLocationString(overrideRoom, null, shortName);
+                }
+                return AmongUsUtil.ToDisplayString(entry.Key, null, shortName);
+            }
+        }
+
+        var additionalRoom = mapData.GetAdditionalMapRooms(position, detail);
+        if(additionalRoom != null) return ToDisplayLocationString(additionalRoom, null, shortName);
+
+        return Language.Translate("location.outside");
+    }
+
     public static void SetHighlight(Renderer renderer, bool on, Color? color = null)
     {
         if (on)
@@ -108,7 +139,17 @@ public static class AmongUsUtil
     public static byte CurrentMapId => GameOptionsManager.Instance.CurrentGameOptions.MapId;
     private static string[] mapName = new string[] { "skeld", "mira", "polus", "undefined", "airship", "fungle" };
     public static string ToMapName(byte mapId) => mapName[mapId];
-    public static string ToDisplayString(SystemTypes room, byte? mapId = null) => Language.Translate("location." + mapName[mapId ?? CurrentMapId] + "." + Enum.GetName(typeof(SystemTypes), room)!.HeadLower());
+    public static string ToDisplayLocationString(string room, byte? mapId = null, bool shortName = false)
+    {
+        string key = "location." + mapName[mapId ?? CurrentMapId] + "." + room;
+        if (shortName)
+        {
+            string? shortResult = Language.Find(key + ".short");
+            if (shortResult != null) return shortResult;
+        }
+        return Language.Translate(key);
+    }
+    public static string ToDisplayString(SystemTypes room, byte? mapId = null, bool shortName = false) => ToDisplayLocationString(Enum.GetName(typeof(SystemTypes), room)!.HeadLower(), mapId, shortName);
     public static float VanillaKillCoolDown => GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
     public static float VanillaKillDistance => GameManager.Instance.LogicOptions.GetKillDistance();
     public static bool InCommSab => PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer);
@@ -169,7 +210,7 @@ public static class AmongUsUtil
     {
         float duration = fadeIn + fadeOut;
 
-        var flash = GenerateFullscreen(color);
+        var flash = GenerateFullscreen(color.AlphaMultiplied(Mathf.Clamp01(maxAlpha)));
 
         IEnumerator CoPlayFlash()
         {
@@ -189,7 +230,7 @@ public static class AmongUsUtil
             t = 0f;
             while (t < fadeOut)
             {
-                flash.color = color.AlphaMultiplied(Mathf.Clamp01(maxAlpha * (1f - t / fadeIn)));
+                flash.color = color.AlphaMultiplied(Mathf.Clamp01(maxAlpha * (1f - t / fadeOut)));
                 t += Time.deltaTime;
                 yield return null;
             }
@@ -256,7 +297,7 @@ public static class AmongUsUtil
     static private SpriteLoader lightMaskSprite = SpriteLoader.FromResource("Nebula.Resources.LightMask.png", 100f);
     public static SpriteRenderer GenerateCustomLight(Vector2 position,Sprite? lightSprite = null)
     {
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light", null, (Vector3)position + new Vector3(0, 0, -50f), LayerExpansion.GetDrawShadowsLayer());
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light", null, (Vector3)position + new Vector3(0, 0, -10f), LayerExpansion.GetDrawShadowsLayer());
         renderer.sprite = lightSprite ?? lightMaskSprite.GetSprite();
         renderer.material.shader = NebulaAsset.MultiplyBackShader;
         new LightInfo(renderer);
@@ -264,28 +305,70 @@ public static class AmongUsUtil
         return renderer;
     }
 
-    private static SpriteLoader footprintSprite = SpriteLoader.FromResource("Nebula.Resources.Footprint.png", 100f);
-    public static void GenerateFootprint(Vector2 pos,Color color, float duration,bool canSeeInShadow = false)
+    internal static CustomShadow GenerateCustomShadow(Vector2 position, Sprite shadowSprite, Color? shadowColor = null)
     {
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Footprint", null, new Vector3(pos.x, pos.y, pos.y / 1000f + 0.001f), canSeeInShadow ? LayerExpansion.GetObjectsLayer() : LayerExpansion.GetDefaultLayer());
+        var shadowCam = NebulaGameManager.Instance!.WideCamera.SubShadowCam;
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Shadow", null, position.AsVector3(-5.001f), LayerExpansion.GetDrawShadowsLayer());
+        renderer.sprite = shadowSprite;
+        renderer.material.shader = NebulaAsset.CustomShadowShader;
+
+        var mulRenderer = UnityHelper.CreateObject<SpriteRenderer>("Subrenderer", renderer.transform, new(0f, 0f, -0.001f), LayerExpansion.GetDefaultLayer());
+        mulRenderer.sprite = shadowSprite;
+        mulRenderer.material.shader = NebulaAsset.MultiplyShader;
+
+        var defRenderer = UnityHelper.CreateObject<SpriteRenderer>("Defaultrenderer", renderer.transform, new(0f, 0f, 0.002f), LayerExpansion.GetObjectsLayer());
+        defRenderer.sprite = shadowSprite;
+
+        var assist = renderer.gameObject.AddComponent<CustomShadow>();
+        assist.Renderer = renderer;
+        assist.MulRenderer = mulRenderer;
+        assist.DefaultRenderer = defRenderer;
+        assist.ShadowCollab = AmongUsUtil.GetShadowCollab();
+        renderer.material.SetColor("_ShadowColor", shadowColor ?? new(0.2745f, 0.2745f, 0.2745f));
+        renderer.material.SetTexture("_ShadowTex", shadowCam.targetTexture);
+        assist.SetBlend(1f);
+        return assist;
+    }
+
+    private static SpriteLoader footprintSprite = SpriteLoader.FromResource("Nebula.Resources.Footprint.png", 100f);
+    public static SpriteRenderer GenerateFootprint(Vector2 pos,Color color, float? duration, Func<bool>? canSeeIn = null)
+    {
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Footprint", null, new Vector3(pos.x, pos.y, pos.y / 1000f + 0.001f), LayerExpansion.GetPlayersLayer());
         renderer.sprite = footprintSprite.GetSprite();
         renderer.color = color;
         renderer.transform.eulerAngles = new Vector3(0f, 0f, (float)System.Random.Shared.NextDouble() * 360f);
         
-        IEnumerator CoShowFootprint()
+        IEnumerator CoDisappearFootprint()
         {
-            yield return new WaitForSeconds(duration);
+            if(canSeeIn == null) 
+                yield return new WaitForSeconds(duration!.Value);
+            else
+            {
+                float t = 0f;
+                while(t < duration)
+                {
+                    renderer.enabled = canSeeIn.Invoke();
+                    t += Time.deltaTime;
+                    yield return null;
+                }
+            }
+
             while (renderer.color.a > 0f)
             {
                 Color col = renderer.color;
                 col.a = Mathf.Clamp01(col.a - Time.deltaTime * 0.8f);
                 renderer.color = col;
+
+                renderer.enabled = canSeeIn?.Invoke() ?? true;
+
                 yield return null;
             }
             GameObject.Destroy(renderer.gameObject);
         }
 
-        NebulaManager.Instance.StartCoroutine(CoShowFootprint().WrapToIl2Cpp());
+        if(duration.HasValue) NebulaManager.Instance.StartCoroutine(CoDisappearFootprint().WrapToIl2Cpp());
+
+        return renderer;
     }
 
     
@@ -555,4 +638,6 @@ public static class AmongUsUtil
     }
 
     public static Vector2 GetCorner(float xCoeff, float yCoeff) => GetCorner(xCoeff, yCoeff, Vector2.zero, Camera.main);
+
+
 }

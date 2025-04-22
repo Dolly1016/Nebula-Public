@@ -72,6 +72,11 @@ public static class PlayerAttributes
     static public IPlayerAttribute CurseOfBloody { get; internal set; }
 
     /// <summary>
+    /// パーク「痕跡」の足跡効果を表します。
+    /// </summary>
+    static public IPlayerAttribute Footprint { get; internal set; }
+
+    /// <summary>
     /// Effacerのインポスターにだけ見える透明化効果を表します。
     /// </summary>
     static public IPlayerAttribute InvisibleElseImpostor { get; internal set; }
@@ -121,6 +126,11 @@ public static class PlayerAttributes
     /// Thuriferの感染状態を表します。
     /// </summary>
     static public IPlayerAttribute Thurifer { get; internal set; }
+
+    /// <summary>
+    /// クールダウンの進行速度上昇効果を表します。
+    /// </summary>
+    static public IPlayerAttribute CooldownSpeed { get; internal set; }
 }
 
 public class Outfit
@@ -246,8 +256,13 @@ public enum KillParameter
     MeetingKill = WithOverlay | WithAssigningGhostRole | WithKillSEWidely
 }
 
-public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer
+public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, IPlayerlike
 {
+    public abstract record ExtraDeadInfo(CommunicableTextTag State)
+    {
+        public abstract string ToStateText();
+    }
+
     // Internal
 
     internal PlayerControl VanillaPlayer { get; }
@@ -324,14 +339,13 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer
     public Compat.Vector2 TruePosition { get; }
 
     /// <summary>
-    /// プレイヤーの座標を返します。足元よりは上寄りです。
-    /// </summary>
-    public Compat.Vector2 Position { get; }
-
-    /// <summary>
     /// プレイヤーの現在の状態を表すタグです。
     /// </summary>
     public CommunicableTextTag PlayerState { get; }
+    /// <summary>
+    /// プレイヤーの死因についての詳細です。死因とPlayerStateが一致しない場合は無視すべきです。
+    /// </summary>
+    public ExtraDeadInfo? PlayerStateExtraInfo { get; set; }
 
     /// <summary>
     /// 陣営の基本的なキルクールダウンです。
@@ -464,7 +478,11 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer
 
     public bool IsImpostor => Role.Role.Category is RoleCategory.ImpostorRole;
     public bool IsCrewmate => Role.Role.Category is RoleCategory.CrewmateRole;
-
+    public bool IsMadmate => Role.Role.IsMadmate || Modifiers.Any(m => m.IsMadmate);
+    /// <summary>
+    /// クルー陣営かつマッドメイトでない正真正銘のクルーメイトであればtrueを返します。
+    /// </summary>
+    public bool IsTrueCrewmate => IsCrewmate && !IsMadmate;
 
 
 
@@ -505,4 +523,7 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer
     /// 自身が操作するプレイヤーを取得します。
     /// </summary>
     public static Player? LocalPlayer => NebulaAPI.instance.CurrentGame?.LocalPlayer;
+    public static IEnumerable<Player> AllPlayers => NebulaAPI.instance.CurrentGame?.GetAllPlayers() ?? [];
+    public static IReadOnlyList<Player> AllOrderedPlayers => NebulaAPI.instance.CurrentGame?.GetAllOrderedPlayers() ?? [];
+    public static Player? GetPlayer(byte playerId) => NebulaAPI.instance.CurrentGame?.GetPlayer(playerId);
 }

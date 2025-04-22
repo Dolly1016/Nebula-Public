@@ -83,8 +83,9 @@ public delegate void GUIClickableAction(GUIClickable clickable);
 /// </summary>
 public abstract class GUIWidget
 {
-    internal abstract GUIAlignment Alignment { get; init; }
+    internal abstract GUIAlignment Alignment { get; }
     internal Image? BackImage { get; set; } = null!;
+    internal bool GrayoutedBackImage { get; set; } = false;
     internal abstract GameObject? Instantiate(Size size, out Size actualSize);
     internal abstract GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize);
 
@@ -101,11 +102,20 @@ public abstract class GUIWidget
 public class GUIClickable
 {
     internal PassiveUiElement uiElement { get; init; }
+    public IGUISelectable? Selectable { get; private init; }
 
-    internal GUIClickable(PassiveUiElement uiElement)
+    internal GUIClickable(PassiveUiElement uiElement, IGUISelectable? selectable = null)
     {
         this.uiElement = uiElement;
+        this.Selectable = selectable;
     }
+}
+
+public interface IGUISelectable
+{
+    void Unselect();
+    void Select();
+    public bool IsSelected { get; }
 }
 
 /// <summary>
@@ -176,7 +186,7 @@ public interface GUI
     /// <param name="color">ボタンの色</param>
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
     /// <returns>生成されたウィジェット定義</returns>
-    GUIWidget LocalizedButton(GUIAlignment alignment, TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null);
+    GUIWidget LocalizedButton(GUIAlignment alignment, TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null);
 
     /// <summary>
     /// 生文字列を表示するボタンです。
@@ -192,7 +202,7 @@ public interface GUI
     /// <param name="color">ボタンの色</param>
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
     /// <returns>生成されたウィジェット定義</returns>
-    GUIWidget RawButton(GUIAlignment alignment, TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null);
+    GUIWidget RawButton(GUIAlignment alignment, TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null);
 
     /// <summary>
     /// テキストを表示するボタンです。
@@ -207,7 +217,7 @@ public interface GUI
     /// <param name="color">ボタンの色</param>
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
     /// <returns>生成されたウィジェット定義</returns>
-    GUIWidget Button(GUIAlignment alignment, TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null);
+    GUIWidget Button(GUIAlignment alignment, TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null);
 
     /// <summary>
     /// 値の増減に使うことができるボタンです。
@@ -430,6 +440,10 @@ public interface GUI
     TextComponent BoldTextComponent(TextComponent component);
 
     TextComponent FunctionalTextComponent(Func<string> supplier);
+    TextComponent FunctionalTextComponent(Func<string> supplier, string textForCompare);
+
+    GUIWidget Masked(Virial.Media.GUIWidget inner);
+    GUIWidget ButtonGrouped(Virial.Media.GUIWidget inner);
 
     internal void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable;
 
@@ -448,4 +462,24 @@ public interface GUI
     /// </summary>
     /// <param name="clickable"></param>
     void HideOverlayIf(GUIClickable? clickable);
+}
+
+public static class GUIWidgetHelpers
+{
+    public static GUIWidget Enmask(this GUIWidget inner) => NebulaAPI.GUI.Masked(inner);
+    public static GUIWidget AsButtonGroup(this GUIWidget inner) => NebulaAPI.GUI.ButtonGrouped(inner);
+    public static GUIWidget Move(this GUIWidget inner, Virial.Compat.Vector2 diff)
+    {
+        if (diff.x > 0f)
+            inner = NebulaAPI.GUI.HorizontalHolder(inner.Alignment, NebulaAPI.GUI.HorizontalMargin(diff.x), inner);
+        if (diff.x < 0f)
+            inner = NebulaAPI.GUI.HorizontalHolder(inner.Alignment, inner, NebulaAPI.GUI.HorizontalMargin(-diff.x));
+
+        if (diff.y > 0f)
+            inner = NebulaAPI.GUI.VerticalHolder(inner.Alignment, NebulaAPI.GUI.VerticalMargin(diff.y), inner);
+        if (diff.y < 0f)
+            inner = NebulaAPI.GUI.VerticalHolder(inner.Alignment, inner, NebulaAPI.GUI.HorizontalMargin(-diff.y));
+
+        return inner;
+    }
 }

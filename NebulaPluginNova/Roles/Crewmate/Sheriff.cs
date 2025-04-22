@@ -8,11 +8,23 @@ using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
+using Virial.Text;
 
 namespace Nebula.Roles.Crewmate;
 
+[NebulaRPCHolder]
 public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
 {
+    private record MisfiredExtraDeadInfo(GamePlayer Target) : GamePlayer.ExtraDeadInfo(PlayerStates.Misfired)
+    {
+        public override string ToStateText() => "for " + Target.PlayerName;
+    }
+    static private RemoteProcess<(GamePlayer sheriff, GamePlayer target)> RpcShareExtraInfo = new("ShareExInfoSheriff",
+        (message, _) => {
+            message.sheriff.PlayerStateExtraInfo = new MisfiredExtraDeadInfo(message.target);
+        }
+    );
+
     private Sheriff():base("sheriff", new(240,191,0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [KillCoolDownOption, NumOfShotsOption, CanKillMadmateOption, CanKillLoversOption, CanKillHidingPlayerOption, SealAbilityUntilReportingDeadBodiesOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
@@ -62,6 +74,7 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
         private bool CanKill(GamePlayer target)
         {
             if (target.Role.Role == Madmate.MyRole) return CanKillMadmateOption;
+            if (target.Role is JekyllAndHyde.Instance jah && !jah.AmJekyll) return CanKillMadmateOption;
             if (target.TryGetModifier<Lover.Instance>(out _) && CanKillLoversOption) return true;
             if (target.Role.Role.Category == RoleCategory.CrewmateRole) return false;
             return true;
@@ -118,6 +131,7 @@ public class Sheriff : DefinedRoleTemplate, HasCitation, DefinedRole
                     {
                         MyPlayer.Suicide(PlayerState.Misfired, null, Virial.Game.KillParameter.NormalKill);
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.VanillaPlayer, killTracker.CurrentTarget!.VanillaPlayer);
+                        RpcShareExtraInfo.Invoke((MyPlayer, killTracker.CurrentTarget!));
 
                         new StaticAchievementToken("sheriff.another1");
                         StatsMisshot.Progress();

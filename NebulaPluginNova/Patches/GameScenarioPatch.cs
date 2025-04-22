@@ -1,9 +1,25 @@
-﻿using InnerNet;
+﻿using AmongUs.GameOptions;
+using InnerNet;
 using Nebula.Behaviour;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Virial;
 
 namespace Nebula.Patches;
+
+public static class AdjustedNumImpostorsModded
+{
+    public static int GetAdjustedNumImpostorsModded(this AmongUs.GameOptions.IGameOptions options, int players)
+    {
+        int numImpostors = GameOptionsManager.Instance.CurrentGameOptions.NumImpostors;
+        int num = 3;
+        int[] intArray = ModdedOptionValues.MaxImpostors;
+        if (intArray != null && players < intArray.Length)
+        {
+            num = intArray[players];
+        }
+        return Mathf.Clamp(numImpostors, 0, num);//0を許容する。
+    }
+}
 
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
 public static class InitializeRolePatch
@@ -13,7 +29,7 @@ public static class InitializeRolePatch
         //ロール割り当て
         var players = PlayerControl.AllPlayerControls.GetFastEnumerator().OrderBy(p => Guid.NewGuid()).ToList();
         
-        int adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(PlayerControl.AllPlayerControls.Count);
+        int adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostorsModded(PlayerControl.AllPlayerControls.Count);
 
         List<byte> impostors = new();
         List<byte> others = new();

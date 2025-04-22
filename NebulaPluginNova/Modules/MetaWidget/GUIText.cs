@@ -13,6 +13,10 @@ public class NoSGUIText : AbstractGUIWidget
     protected TextComponent? Text;
     public GUIWidgetSupplier? OverlayWidget { get; init; } = null;
     public (Action action, bool reopenOverlay)? OnClickText { get; init; } = null;
+    
+    /// <summary>
+    /// NoSGUITextにオーバーレイ表示やクリック操作を委任する場合はtrueにしてください。
+    /// </summary>
     virtual protected bool AllowGenerateCollider => true;
     public Action<TextMeshPro>? PostBuilder = null;
     

@@ -15,6 +15,8 @@ using UnityEngine.Rendering;
 using Sentry.Internal.Extensions;
 using Virial;
 using BepInEx.Unity.IL2CPP.Utils;
+using Hazel.Crypto;
+using Rewired.UI.ControlMapper;
 
 namespace Nebula.Patches;
 
@@ -193,9 +195,19 @@ public class SetUpCertificationPatch
         //ゲーム中であればなにもしない
         if (AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started) return;
         __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
+
+        //Scalerにまとめる
+        var scaler = UnityHelper.CreateObject("Scaler", __instance.transform, __instance.Collider.offset).transform;
+        scaler.gameObject.AddComponent<SortingGroup>();
+        __instance.cosmetics.transform.SetParent(scaler, true);
+        __instance.transform.FindChild("BodyForms").SetParent(scaler, true);
+        __instance.cosmetics.zIndexSpacing = 0f;
+        scaler.transform.localScale = new(1f, 1f, 0f);
+        
     }
 }
 
+/*
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoJoinOnlineGameFromCode))]
 public class JoinGameLoadingPatch
 {
@@ -222,7 +234,9 @@ public class JoinGameLoadingPatch
         
     }
 }
+*/
 
+/*
 [HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.Confirm))]
 public class CreateGameOptionsLoadingPatch
 {
@@ -231,6 +245,7 @@ public class CreateGameOptionsLoadingPatch
         NebulaManager.Instance.StartCoroutine(HintManager.CoShowHint(0.6f + 0.2f).WrapToIl2Cpp());
     }
 }
+*/
 
 [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.Start))]
 public class DelayPlayDropshipAmbiencePatch
@@ -268,7 +283,7 @@ public class DelayPlayDropshipAmbiencePatch
         {
             while (logoHolder)
             {
-                logoHolder.SetActive(ClientOption.AllOptions[ClientOption.ClientOptionType.ShowNoSLogoInLobby].Value == 1);
+                logoHolder.SetActive(ClientOption.GetValue(ClientOption.ClientOptionType.ShowNoSLogoInLobby) == 1);
                 yield return null;
             }
         }
@@ -491,6 +506,9 @@ public class GlobalCosMismatchShowerPatch
         {
             __instance.HostInfoPanel.playerHolder.AddComponent<SortingGroup>();
             __instance.HostInfoPanel.playerHolder.GetComponentInChildren<NebulaCosmeticsLayer>().SetSortingProperty(true, 10000f, 1000);
+            __instance.HostInfoPanel.playerHolder.transform.SetLocalZ(1f);
+            var mask = __instance.HostInfoPanel.playerHolder.GetComponentInChildren<SpriteMask>();
+            mask.gameObject.AddComponent<SortingGroupOrderFixer>().Initialize(mask, 500);
         }).WrapToIl2Cpp());
         
 
@@ -520,5 +538,12 @@ public class GlobalCosMismatchShowerPatch
             }
         }
         __instance.StartCoroutine(CoUpdate().WrapToIl2Cpp());
+
+        //ロビーで見せたいピックアップチュートリアル
+        Tutorial.ShowTutorial(
+                    new TutorialBuilder(() => HudManager.Instance.transform.position + new Vector3(0f, 4f), true)
+                    .BindHistory("stamp")
+                    .ShowWhile(() => !HelpScreen.OpenedAnyHelpScreen)
+                    .AsSimpleTitledTextWidget(Language.Translate("tutorial.variations.stamp.title"), Language.Translate("tutorial.variations.stamp.caption").ReplaceKeyCode("%KEY%", Virial.Compat.VirtualKeyInput.Stamp)));
     }
 }

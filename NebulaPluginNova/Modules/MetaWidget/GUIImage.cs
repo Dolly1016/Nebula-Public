@@ -12,6 +12,7 @@ public class NoSGUIImage : AbstractGUIWidget
     public GUIClickableAction? OnClick;
     public GUIWidgetSupplier? Overlay;
     public bool IsMasked { get; init; }
+    public Action<SpriteRenderer>? PostBuilder = null;
 
     public NoSGUIImage(GUIAlignment alignment, Virial.Media.Image image, FuzzySize size,Color? color = null, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) : base(alignment)
     {
@@ -61,6 +62,8 @@ public class NoSGUIImage : AbstractGUIWidget
                 button.OnMouseOut.AddListener(() => { NebulaManager.Instance.HideHelpWidgetIf(button); });
             }
         }
+
+        PostBuilder?.Invoke(renderer);
 
         return renderer.gameObject;
     }

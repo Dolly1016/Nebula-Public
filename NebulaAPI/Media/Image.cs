@@ -14,4 +14,5 @@ public interface Image
 public interface MultiImage
 {
     internal UnityEngine.Sprite GetSprite(int index);
+    Image AsLoader(int index);
 }

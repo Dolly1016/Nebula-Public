@@ -10,6 +10,7 @@ using Nebula.Utilities;
 using System.Linq;
 using Nebula.Player;
 using Nebula.Configuration;
+using Nebula;
 
 namespace DefaultLang.Documents;
 
@@ -89,7 +90,14 @@ static public class RoleDocumentHelper
                 NebulaAPI.GUI.VerticalMargin(0.12f),
                 new NoSGUIText(GUIAlignment.Left, headerAttr, a.GetHeaderComponent()),
                 NebulaAPI.GUI.VerticalMargin(-0.12f),
-                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, false, false, a.IsCleared) }
+                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { 
+                    OverlayWidget = a.GetOverlayWidget(true, false, true, false, a.IsCleared),
+                    OnClickText = a.IsCleared ? (() =>
+                    {
+                        NebulaAchievementManager.SetOrToggleTitle(a);
+                        VanillaAsset.PlaySelectSE();
+                    }, true) : null
+                }
                 ));
 
         var achievements = Nebula.Modules.NebulaAchievementManager.AllAchievements.Where(a => assignable.AchievementGroups.Any(role => a.RelatedRole.Contains(role)) && !a.IsHidden).ToArray();

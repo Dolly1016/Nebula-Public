@@ -155,28 +155,52 @@ class ExileControllerBeginPatch
         init.isImpostor = first?.GetModInfo()!.IsImpostor ?? false;
 
         Debug.Log("Rewrite Exiled: " + (init.networkedPlayer?.PlayerName ?? "None"));
+
+        StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -500f, () => ExileController.Instance);
     }
 
     public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref ExileController.InitProperties init)
     {
-        if (init.networkedPlayer == null) return;
+        if (init.networkedPlayer != null)
+        {
 
-        if (MeetingHudExtension.IsObvious)
-        {
-            __instance.completeString = Language.Translate("game.meeting.obvious");
-        }
-        else if((MeetingHudExtension.ExiledAll?.Length ?? 0) > 1)
-        {
-            __instance.completeString = Language.Translate("game.meeting.multiple");
-        }
-        else if (GeneralConfigurations.ShowRoleOfExiled && GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor)
-        {
-            var role = NebulaGameManager.Instance.GetPlayer(init.networkedPlayer.PlayerId)?.Role;
-            if (role != null)
+            if (MeetingHudExtension.IsObvious)
             {
-                __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", init.networkedPlayer.PlayerName).Replace("%ROLE%", role.Role.DisplayName);
-                if (role.Role == Roles.Neutral.Jester.MyRole) __instance.ImpostorText.text = Language.Translate("game.meeting.roleJesterText");
+                __instance.completeString = Language.Translate("game.meeting.obvious");
+            }
+            else if ((MeetingHudExtension.ExiledAll?.Length ?? 0) > 1)
+            {
+                __instance.completeString = Language.Translate("game.meeting.multiple");
+            }
+            else if (GeneralConfigurations.ShowRoleOfExiled && GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor)
+            {
+                var role = NebulaGameManager.Instance.GetPlayer(init.networkedPlayer.PlayerId)?.Role;
+                if (role != null)
+                {
+                    __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", init.networkedPlayer.PlayerName).Replace("%ROLE%", role.Role.DisplayName);
+                    if (role.Role == Roles.Neutral.Jester.MyRole) __instance.ImpostorText.text = Language.Translate("game.meeting.roleJesterText");
+                }
             }
         }
+
+        var texts = GameOperatorManager.Instance?.Run(new FixExileTextEvent(MeetingHudExtension.ExiledAllModCache!)).GetTexts();
+        
+        __instance.ImpostorText.rectTransform.pivot = new(0.5f, 1f);
+        __instance.ImpostorText.rectTransform.sizeDelta = new(11.555f, 2f);
+        __instance.ImpostorText.alignment = TMPro.TextAlignmentOptions.Top;
+        if (texts != null && texts.Count > 0)
+        {
+            __instance.ImpostorText.rectTransform.anchoredPosition3D += new Vector3(0f, 0.1f, 0f);
+
+            var text = __instance.ImpostorText.text;
+            text = "<line-height=90%>" + text;
+            texts.Do(str => text += "<br>" + str);
+            __instance.ImpostorText.text = text;
+        }
+        else
+        {
+            __instance.ImpostorText.rectTransform.anchoredPosition3D += new Vector3(0f, 0.19f, 0f);
+        }
+        
     }
 }

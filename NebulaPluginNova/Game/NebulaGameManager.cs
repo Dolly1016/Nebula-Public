@@ -1,4 +1,5 @@
-﻿using Nebula.Game.Statistics;
+﻿using Nebula.Behaviour;
+using Nebula.Game.Statistics;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Crewmate;
 using Nebula.VoiceChat;
@@ -210,6 +211,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     static public NebulaGameManager? Instance { get => instance; }
 
     private Dictionary<byte, GamePlayer> allModPlayers;
+    private GamePlayer[] allOrderedPlayers;
 
     public List<AchievementTokenBase> AllAchievementTokens = new();
     public T? GetAchievementToken<T>(string achievement) where T : AchievementTokenBase {
@@ -247,6 +249,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public bool IgnoreWalls => LocalPlayer?.Role?.EyesightIgnoreWalls ?? false;
     public Dictionary<byte, INebulaAchievement?> TitleMap = new();
+    public bool TryGetTitle(byte playerId, [MaybeNullWhen(false)] out INebulaAchievement title) => TitleMap.TryGetValue(playerId, out title);
 
     static private OutfitDefinition.OutfitId UnknownOutfitId = new(-1, 0);
     public OutfitDefinition UnknownOutfit => OutfitMap[UnknownOutfitId];
@@ -261,7 +264,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     //天界視点フラグ
     public bool CanBeSpectator { get; private set; }
-    public bool CanSeeAllInfo => CanBeSpectator && (ClientOption.AllOptions[ClientOption.ClientOptionType.SpoilerAfterDeath].Value == 1 || !HudManager.InstanceExists);
+    public bool CanSeeAllInfo => CanBeSpectator && (ClientOption.GetValue(ClientOption.ClientOptionType.SpoilerAfterDeath) == 1 || !HudManager.InstanceExists);
     public void ChangeToSpectator(bool tryGhostAssignment = true)
     {
         if (CanBeSpectator) return;
@@ -303,7 +306,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         localPlayerCache = new(() => GetPlayer(PlayerControl.LocalPlayer ? PlayerControl.LocalPlayer.PlayerId : (byte)255)!);
     }
-
 
     public void Abandon()
     {
@@ -436,6 +438,10 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         if(HudManager.InstanceExists) WideCamera.Update();
     }
 
+    public void OnLateUpdate()
+    {
+        GameEntityManager.Run(new GameLateUpdateEvent(this));
+    }
 
     public void OnUpdate() {
         CurrentTime += Time.deltaTime;
@@ -568,7 +574,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         bool wasWon = EndState!.Winners.Test(GamePlayer.LocalPlayer);
         if (wasWon) {
             //生存しているマッドメイト除くクルー陣営
-            var aliveCrewmate = allModPlayers.Values.Where(p => !p.IsDead && p.Role.Role.Category == RoleCategory.CrewmateRole && p.Role.Role != Madmate.MyRole);
+            var aliveCrewmate = allModPlayers.Values.Where(p => !p.IsDead && p.IsTrueCrewmate);
             int aliveCrewmateCount = aliveCrewmate?.Count() ?? 0;
             if (EndState!.EndReason == GameEndReason.Task)
             {
@@ -622,9 +628,10 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         if(GameState != NebulaGameStates.Finished) GameState = NebulaGameStates.WaitGameResult;
 
         while (ExileController.Instance && !Minigame.Instance) yield return null;
+        while ((HudManager.Instance.shhhEmblem.isActiveAndEnabled || IntroCutscene.Instance) && !Minigame.Instance) yield return null;
 
         yield return DestroyableSingleton<HudManager>.Instance.CoFadeFullScreen(Color.clear, Color.black, 0.5f, false);
-        if (AmongUsClient.Instance.AmHost) GameManager.Instance.RpcEndGame(EndState?.EndCondition == NebulaGameEnd.CrewmateWin ? GameOverReason.HumansByTask : GameOverReason.ImpostorByKill, false);
+        if (AmongUsClient.Instance.AmHost) GameManager.Instance.RpcEndGame(EndState?.EndCondition == NebulaGameEnd.CrewmateWin ? GameOverReason.CrewmatesByTask : GameOverReason.ImpostorsByKill, false);
 
         while (GameState != NebulaGameStates.Finished) yield return null;
 
@@ -717,12 +724,17 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         );
 
-    public GamePlayer? GetLastDead => allModPlayers.Values.MaxBy(p => p.Unbox().DeathTimeStamp ?? 0f);
+    public GamePlayer? LastDead => allModPlayers.Values.MaxBy(p => p.Unbox().DeathTimeStamp ?? 0f);
 
     // Virial.Game.Game
     Virial.Game.Player? Virial.Game.Game.GetPlayer(byte playerId)=>GetPlayer(playerId);
 
     IEnumerable<Virial.Game.Player> Virial.Game.Game.GetAllPlayers() => AllPlayerInfo;
+    IReadOnlyList<Virial.Game.Player> Virial.Game.Game.GetAllOrderedPlayers()
+    {
+        if(allOrderedPlayers == null || allOrderedPlayers.Length != AllPlayerInfo.Count()) allOrderedPlayers = allModPlayers.Values.OrderBy(p => p.PlayerId).ToArray();
+        return allOrderedPlayers;
+    }
 
     void Virial.Game.Game.TriggerGameEnd(GameEnd gameEnd, GameEndReason reason, BitMask<GamePlayer>? additionalWinners) => CriteriaManager.Trigger(gameEnd, reason, additionalWinners);
     void Virial.Game.Game.RequestGameEnd(GameEnd gameEnd, BitMask<GamePlayer> winners) => RpcInvokeSpecialWin(gameEnd, AllPlayerInfo.Where(p => winners.Test(p)).Aggregate(0, (v, p) => v | (1 << p.PlayerId)));

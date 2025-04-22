@@ -154,17 +154,18 @@ public static class Tutorial
                 isShownAlready = true;
 
                 NebulaManager.Instance.MouseOverPopup.Parameters.CanPileCursor = true;
-                NebulaManager.Instance.MouseOverPopup.Parameters.RelatedValue = () =>
-                {
-                    if (!NebulaManager.Instance.MouseOverPopup.Piled) left -= Time.deltaTime;
-                    return left / parameters.Duration;
-                };
 
                 if(parameters.CanClickToClose) NebulaManager.Instance.MouseOverPopup.Parameters.OnClick = () => { left = 0f; VanillaAsset.PlaySelectSE(); };
                 NebulaManager.Instance.MouseOverPopup.Parameters.RelatedPredicate = predicate;
-                NebulaManager.Instance.MouseOverPopup.Parameters.Icon = HintIcon;
             }
-        ));
+        ), 
+        () =>
+        {
+            if (!NebulaManager.Instance.MouseOverPopup.Piled) left -= Time.deltaTime;
+            return left / parameters.Duration;
+        },
+        HintIcon
+        );
     }
 
     public static void WaitAndShowTutorial(Func<bool> waitWhile, TutorialBuilder builder)

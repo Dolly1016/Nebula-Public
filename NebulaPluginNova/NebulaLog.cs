@@ -10,7 +10,6 @@ public class NebulaLog
     private static string FileName = "NebulaLog";
     public NebulaLog()
     {
-
         int counter = 0;
         Stream? stream;
 
@@ -95,13 +94,14 @@ public class NebulaLog
     public void PrintWithBepInEx(LogLevel level, LogCategory? category, string message)
     {
         Print(level, category, message);
-        string rawMessage = "[NoS]" + ToRawMessage(level, category, message);
-        if (level == LogLevel.Log)
-            Debug.Log(rawMessage);
-        else if (level == LogLevel.Warning)
-            Debug.LogWarning(rawMessage);
-        else
-            Debug.LogError(rawMessage);
+        string header = "[NoS]";
+        if (level == LogLevel.Warning)
+            header = "[Warning | NoS]";
+        else if (level == LogLevel.Error)
+            header = "[Error | NoS]";
+        
+        string rawMessage = header + ToRawMessage(level, category, message);
+        LogUtils.WriteToConsole(rawMessage);
     }
 
     public void Print(LogLevel level, LogCategory? category, string message)
@@ -114,6 +114,7 @@ public class NebulaLog
         {
             writer.WriteLine("[" + header + "] " + message);
         }
+
     }
 
     string ToRawMessage(LogLevel level, LogCategory? category, string message)

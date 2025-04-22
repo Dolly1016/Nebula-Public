@@ -262,7 +262,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
     }
 
     //壁等の当たり判定を考慮して実際の吹き飛ばし先を決定する
-    private static Vector2 SuggestMoveToPos(Vector2 playerPos, Vector2 maxVector)
+    public static Vector2 SuggestMoveToPos(Vector2 playerPos, Vector2 maxVector)
     {
         var currentData = MapData.GetCurrentMapData();
         bool CanWarpTo(Vector2 pos) => currentData.CheckMapArea(pos, 0.25f);
@@ -271,22 +271,25 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
         Vector2[] pos = new Vector2[length];
         for (int i = 0; i < length; i++) pos[i] = playerPos + maxVector * (i + 1) / length;
 
-        var moveTo = pos.Select(pos => (pos, CanWarpTo(pos))).LastOrDefault(p => p.Item2);
-        if (moveTo.Item2) return moveTo.pos;
+        for(int i = 0; i < length; i++)
+        {
+            var p = pos[pos.Length - 1 - i];
+            if (CanWarpTo(p)) return p;
+        }
         return playerPos; //すべての場所が移動不可なら元の位置から動かない
     }
 
 
-    private static IEnumerator CoPlayJumpAnimation(PlayerControl player, Vector2 from, Vector2 to)
+    public static IEnumerator CoPlayJumpAnimation(PlayerControl player, Vector2 from, Vector2 to, float animOffset = 1.82f, float speedMul = 3f, Action? onLand = null)
     {
         player.moveable = false;
         bool isLeft = to.x < from.x;
         player.MyPhysics.FlipX = isLeft;
         player.MyPhysics.Animations.Animator.Play(player.MyPhysics.Animations.group.SpawnAnim, 0f);
-        player.MyPhysics.Animations.Animator.SetTime(1.82f);
+        player.MyPhysics.Animations.Animator.SetTime(animOffset);
         var skinAnim = player.cosmetics.skin.skin.SpawnLeftAnim && isLeft ? player.cosmetics.skin.skin.SpawnLeftAnim : player.cosmetics.skin.skin.SpawnAnim;
         player.cosmetics.skin.animator.Play(skinAnim, 0f);
-        player.cosmetics.skin.animator.SetTime(1.82f);
+        player.cosmetics.skin.animator.SetTime(animOffset);
 
         //Spawnアニメーションの最終位置はずれがあるので、アニメーションに合わせてずれを補正
         var animTo = to - new Vector2(isLeft ? -0.3f : 0.3f, -0.24f);
@@ -301,7 +304,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
 
         IEnumerator CoAnimMovement()
         {
-            yield return player.MyPhysics.WalkPlayerTo(animTo, 0.01f, 3f, true);
+            yield return player.MyPhysics.WalkPlayerTo(animTo, 0.01f, speedMul, true);
 
             player.MyPhysics.Animations.Animator.SetSpeed(1f);
             player.cosmetics.skin.animator.SetSpeed(1f);
@@ -312,6 +315,8 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
         player.MyPhysics.Animations.Animator.SetSpeed(1f);
         player.cosmetics.skin.animator.SetSpeed(1f);
         player.Collider.enabled = true;
+
+        onLand?.Invoke();
 
         //Spawnアニメーションのずれを補正
         player.transform.position = to;

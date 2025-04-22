@@ -26,6 +26,7 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
     /// </summary>
     /// <returns>ゲーム中の全プレイヤー</returns>
     IEnumerable<Player> GetAllPlayers();
+    IReadOnlyList<Player> GetAllOrderedPlayers();
 
     KillButtonLikeHandler KillButtonLikeHandler { get; }
 

@@ -22,5 +22,22 @@ public class Cache<T> where T : class
     }
 
     public static implicit operator Cache<T>(Func<T> getter) => new Cache<T>(getter);
-    
+}
+
+public class ComponentCache<T> where T : UnityEngine.Component
+{
+    T? value { get; set; } = null;
+    Func<T> getter;
+    public ComponentCache(Func<T> getter)
+    {
+        this.getter = getter;
+    }
+
+    public T Get()
+    {
+        if(!value) value = getter.Invoke();
+        return value;
+    }
+
+    public static implicit operator ComponentCache<T>(Func<T> getter) => new ComponentCache<T>(getter);
 }

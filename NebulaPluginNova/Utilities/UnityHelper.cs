@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes;
+using UnityEngine.Video;
 
 namespace Nebula.Utilities;
 
@@ -34,6 +35,12 @@ public static class UnityHelper
         return renderer;
     }
 
+    public static void SetBothOrder(this Renderer renderer, int order)
+    {
+        renderer.sortingOrder = order;
+        renderer.sortingGroupOrder = order;
+    }
+
     public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer,Color? color = null)
     {
         var meshFilter = UnityHelper.CreateObject<MeshFilter>("mesh", parent, localPosition, layer);
@@ -67,6 +74,20 @@ public static class UnityHelper
         return camera.targetTexture;
     }
 
+    public static VideoPlayer SetMovieToMesh(GameObject holder, MeshRenderer renderer, string url, bool loop)
+    {
+        holder.SetActive(false);
+        var player = holder.AddComponent<VideoPlayer>();
+
+        player.renderMode = VideoRenderMode.MaterialOverride;
+        player.targetMaterialRenderer = renderer;
+        player.source = VideoSource.Url;
+        player.url = url;
+        player.isLooping = loop;
+        holder.SetActive(true);
+        return player;
+    }
+
     public static MeshFilter CreateRectMesh(this MeshFilter filter, Vector2 size, Vector3? center = null)
     {
         center ??= Vector3.zero;
@@ -97,7 +118,19 @@ public static class UnityHelper
         line.SetPositions(new Vector3[] { Vector3.zero, Vector3.zero });
         line.useWorldSpace = false;
         line.SetWidth(width, width);
+        line.alignment = LineAlignment.View;
+        
         return line;
+    }
+
+    static public Transform? TryDig(this Transform transform, params string[] objectName)
+    {
+        foreach(var name in objectName)
+        {
+            if (transform == null || !transform) return null;
+            transform = transform.FindChild(name);
+        }
+        return transform;
     }
 
     public static T? FindAsset<T>(string name) where T : Il2CppObjectBase
@@ -124,6 +157,11 @@ public static class UnityHelper
     public static Vector3 ScreenToWorldPoint(Vector3 screenPos, int cameraLayer)
     {
         return FindCamera(cameraLayer)?.ScreenToWorldPoint(screenPos) ?? Vector3.zero;
+    }
+
+    public static Vector3 ScreenToLocalPoint(Vector3 screenPos, int cameraLayer, Transform transform)
+    {
+        return transform.InverseTransformPoint(ScreenToWorldPoint(screenPos, cameraLayer));
     }
 
     public static Vector3 WorldToScreenPoint(Vector3 worldPos, int cameraLayer)
@@ -253,6 +291,25 @@ public static class UnityHelper
         }
 
         _sub__DoForAllChildren(obj);
+    }
+
+    public static SpriteRenderer SimpleAnimator(Transform? parent, Vector3 localPos, float spf, Func<int, Sprite> sprite, int? layer = null)
+    {
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Animator", parent, localPos, layer);
+        renderer.sprite = sprite.Invoke(0);
+
+        System.Collections.IEnumerator CoUpdate()
+        {
+            int num = 0;
+            do
+            {
+                yield return Effects.Wait(spf);
+                num++;
+                renderer.sprite = sprite.Invoke(num);
+            } while (renderer);
+        }
+        NebulaManager.Instance.StartCoroutine(CoUpdate().WrapToIl2Cpp());
+        return renderer;
     }
 }
 

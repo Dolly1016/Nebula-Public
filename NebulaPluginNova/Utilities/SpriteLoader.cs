@@ -22,13 +22,13 @@ public static class GraphicsHelper
 {
     public static Texture2D LoadTextureFromResources(string path)
     {
-        Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
+        Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, false);
         Assembly assembly = Assembly.GetExecutingAssembly();
         Stream? stream = assembly.GetManifestResourceStream(path);
         if (stream == null) return null!;
         var byteTexture = new byte[stream.Length];
         stream.Read(byteTexture, 0, (int)stream.Length);
-        LoadImage(texture, byteTexture, false);
+        LoadImage(texture, byteTexture, true);
         return texture;
     }
 
@@ -37,7 +37,7 @@ public static class GraphicsHelper
     public static Texture2D LoadTextureFromByteArray(byte[] data)
     {
         Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
-        LoadImage(texture, data, false);
+        LoadImage(texture, data, true);
         return texture;
     }
 
@@ -49,7 +49,7 @@ public static class GraphicsHelper
             {
                 Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
                 byte[] byteTexture = File.ReadAllBytes(path);
-                LoadImage(texture, byteTexture, false);
+                LoadImage(texture, byteTexture, true);
                 return texture;
             }
         }
@@ -73,7 +73,7 @@ public static class GraphicsHelper
                 byte[] byteTexture = new byte[entry.Length];
                 stream.Read(byteTexture, 0, byteTexture.Length);
                 stream.Close();
-                LoadImage(texture, byteTexture, false);
+                LoadImage(texture, byteTexture, true);
                 return texture;
             }
         }
@@ -99,6 +99,11 @@ public static class GraphicsHelper
     public static Sprite ToExpandableSprite(this Texture2D texture, float pixelsPerUnit,int x,int y)
     {
         return Sprite.CreateSprite(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.FullRect, new Vector4(x, y, x, y), false);
+    }
+
+    public static Sprite ToExpandableSprite(this Texture2D texture, Rect rect, float pixelsPerUnit, int x, int y)
+    {
+        return Sprite.CreateSprite(texture, rect, new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.FullRect, new Vector4(x, y, x, y), false);
     }
 
     internal delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
@@ -182,7 +187,7 @@ public class StreamTextureLoader : ITextureLoader
     public StreamTextureLoader(Stream stream)
     {
         texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
-        GraphicsHelper.LoadImage(texture, stream.ReadBytes(), false);
+        GraphicsHelper.LoadImage(texture, stream.ReadBytes(), true);
         texture.hideFlags |= HideFlags.DontUnloadUnusedAsset | HideFlags.HideAndDontSave;
     }
 
@@ -196,7 +201,7 @@ public class UnloadTextureLoader : ITextureLoader
     public UnloadTextureLoader(byte[] byteTexture, bool isFake = false)
     {
         texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
-        GraphicsHelper.LoadImage(texture, byteTexture, false);
+        GraphicsHelper.LoadImage(texture, byteTexture, true);
         if (!isFake) texture.hideFlags |= HideFlags.DontUnloadUnusedAsset | HideFlags.HideAndDontSave;
     }
 
@@ -320,7 +325,7 @@ public class ResourceExpandableSpriteLoader : Image
 }
 
 
-public class DividedSpriteLoader : Image, IDividedSpriteLoader
+public class DividedSpriteLoader : Virial.Media.MultiImage, Image, IDividedSpriteLoader
 {
     float pixelsPerUnit;
     Sprite[] sprites;
@@ -362,6 +367,8 @@ public class DividedSpriteLoader : Image, IDividedSpriteLoader
                 division = new(texture2D.width / size!.Item1, texture2D.height / size!.Item2);
             sprites = new Sprite[division!.Item1 * division!.Item2];
         }
+
+        index %= sprites.Length;
 
         if (!sprites[index])
         {
@@ -453,6 +460,77 @@ public class XOnlyDividedSpriteLoader : Image, IDividedSpriteLoader
     static public XOnlyDividedSpriteLoader FromDisk(string address, float pixelsPerUnit, int x, bool isSize = false)
          => new XOnlyDividedSpriteLoader(new DiskTextureLoader(address), pixelsPerUnit, x, isSize);
 }
+
+public class DividedExpandableSpriteLoader : Virial.Media.MultiImage, Image, IDividedSpriteLoader
+{
+    float pixelsPerUnit;
+    Sprite[] sprites;
+    ITextureLoader texture;
+    Tuple<int, int>? division, size;
+    private int edgeX, edgeY;
+
+    public DividedExpandableSpriteLoader(ITextureLoader textureLoader, float pixelsPerUnit, int edgeX, int edgeY, int x, int y, bool isSize = false)
+    {
+        this.pixelsPerUnit = pixelsPerUnit;
+        this.edgeX = edgeX;
+        this.edgeY = edgeY;
+        if (isSize)
+        {
+            this.size = new(x, y);
+            this.division = null;
+        }
+        else
+        {
+            this.division = new(x, y);
+            this.size = null;
+        }
+        sprites = null!;
+        texture = textureLoader;
+    }
+
+    public Sprite GetSprite(int index)
+    {
+        if (size == null || division == null || sprites == null)
+        {
+            var texture2D = texture.GetTexture();
+            if (size == null)
+                size = new(texture2D.width / division!.Item1, texture2D.height / division!.Item2);
+            else if (division == null)
+                division = new(texture2D.width / size!.Item1, texture2D.height / size!.Item2);
+            sprites = new Sprite[division!.Item1 * division!.Item2];
+        }
+
+        index %= sprites.Length;
+
+        if (!sprites[index])
+        {
+            var texture2D = texture.GetTexture();
+            int _x = index % division!.Item1;
+            int _y = index / division!.Item1;
+            sprites[index] = texture2D.ToExpandableSprite(new Rect(_x * size.Item1, (division.Item2 - _y - 1) * size.Item2, size.Item1, size.Item2), pixelsPerUnit, edgeX, edgeY);
+        }
+        return sprites[index];
+    }
+
+    public Sprite GetSprite() => GetSprite(0);
+
+    public Image AsLoader(int index) => new WrapSpriteLoader(() => GetSprite(index));
+
+    public int Length
+    {
+        get
+        {
+            if (division == null) GetSprite(0);
+            return division!.Item1 * division!.Item2;
+        }
+    }
+
+    static public DividedExpandableSpriteLoader FromResource(string address, float pixelsPerUnit, int edgeX, int edgeY, int x, int y, bool isSize = false)
+         => new DividedExpandableSpriteLoader(new ResourceTextureLoader(address), pixelsPerUnit, edgeX, edgeY, x, y, isSize);
+    static public DividedExpandableSpriteLoader FromDisk(string address, float pixelsPerUnit, int edgeX, int edgeY, int x, int y, bool isSize = false)
+         => new DividedExpandableSpriteLoader(new DiskTextureLoader(address), pixelsPerUnit, edgeX, edgeY, x, y, isSize);
+}
+
 
 public class WrapSpriteLoader : Image
 {

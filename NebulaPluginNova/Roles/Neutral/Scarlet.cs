@@ -358,7 +358,7 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
         [OnlyMyPlayer, OnlyHost]
         void OnDeadHost(PlayerDieOrDisconnectEvent ev) { 
             var myScarlet = MyScarlet as RuntimeRole;
-            if (!(myScarlet?.MyPlayer.IsDead ?? true))
+            if (!(myScarlet?.MyPlayer.IsDead ?? true) && AmFavorite)
             {
                 if (ev is PlayerMurderedEvent or PlayerDisconnectEvent)
                 {

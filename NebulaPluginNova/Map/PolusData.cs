@@ -42,12 +42,31 @@ public class PolusData : MapData
         //デコン(上)
         new(39.8f, -10f),
         //ラボ
-        new(34.7f, -10.2f), new(36.4f, -8f), new(40.5f, -7.6f), new(34.5f, -6.2f), new(31.2f, -7.6f), new(28.4f, -9.6f), new(26.5f, -7f), new(26.5f, -8.3f),
+        new(34.7f, -10.2f), new(36.4f, -8f), new(40.5f, -7.6f), new(34.5f, -6.2f), new(31.2f, -7.6f), new(28.4f, -9.6f), new(26.5f, -7f), new(26.5f, -8.3f),new(33.0f, -9.7f),
         //右リアクター
         new(24.2f, -4.5f),
         //ストレージ・ラボ下・オフィス右
         new(24f, -14.6f), new(26f, -12.2f), new(29.8f, -15.7f)
     ];
+
+    static private (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
+        (new(16.61f, -7.10f, 5.44f, 1.69f), "nearDropship", true),
+        (new(14.88f, -10.97f, 4.15f, 4.90f), "snowdrift", true),
+        (new(5.09f, -16.10f, 1.20f, 3.26f), "lifeSupportToElectrical", true),
+        (new(8.25f, -16.69f, 2.14f, 3.14f), "commLeft", true),
+        (new(6.96f, -24.03f, 3.25f, 2.12f), "lifesupportLower", true),
+        (new(26.64f, -13.68f, 2.98f, 1.80f), "abditory", true),
+        (new(23.98f, -3.57f, 1.81f, 2.56f), "reactorRight", true),
+        (new(4.39f, -4.84f, 1.55f, 2.43f), "reactorLeft", true),
+        (new(20.62f, -18.98f, 4.91f, 1.41f),"officeBuilding", false),
+        (new(18.84f, -21.07f, 1.30f, 1.93f),"officeBuilding", false),
+        (new(0f,0f,1000f,1000f), "outside", false),
+        ];
+    static private (SystemTypes room, AdditionalRoomArea area, string key)[] overrideRooms = [
+        (SystemTypes.Electrical, new(9.10f, -12.46f, 2.60f, 1.60f), "breaker"),
+        (SystemTypes.Decontamination3, new(29.86f, -22.75f, 4.96f, 3.71f), "specimenLeft"),
+        (SystemTypes.Decontamination2, new(38.81f, -16.17f, 1.72f, 4.34f), "specimenRight"),
+        ];
 
     static private MapObjectPoint[] mapObjectPoints = [
         new(18.8f, -1.0f, MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ右上
@@ -103,6 +122,8 @@ public class PolusData : MapData
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;
     protected override Vector2[] NonMapArea => [];
+    protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
+    protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Laboratory, SystemTypes.Comms, SystemTypes.Electrical };
 
     private static IDividedSpriteLoader SealedVentSpritePolus = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedVentPolus.png", 100f, 8, 2);

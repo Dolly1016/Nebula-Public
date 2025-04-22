@@ -22,7 +22,7 @@ public static class HudManagerExtension
         }
 
         bool flag = PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.IsDead;
-        var modPlayer = GamePlayer.LocalPlayer;
+        GamePlayer? modPlayer = GamePlayer.LocalPlayer;
         RuntimeRole? modRole = modPlayer?.Role;
 
         manager.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && GameManager.Instance.CanReportBodies() && ShipStatus.Instance != null);

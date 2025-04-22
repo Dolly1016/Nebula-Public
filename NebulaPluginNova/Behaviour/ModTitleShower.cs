@@ -34,7 +34,7 @@ public class ModTitleShower : MonoBehaviour
         var button = collider.gameObject.SetUpButton(false);
         button.OnMouseOver.AddListener(() =>
             {
-                if (achievement != null) NebulaManager.Instance.SetHelpWidget(button, achievement.GetOverlayWidget(false, true, false, true, achievement.IsCleared));
+                if (achievement != null) NebulaManager.Instance.SetHelpWidget(button, achievement.GetOverlayWidget(false, true, false, true, true));
                 else if (AmOwner) NebulaManager.Instance.SetHelpWidget(button, GUI.Instance.LocalizedText(Virial.Media.GUIAlignment.Left, INebulaAchievement.DetailTitleAttribute, "achievement.ui.unselected.detail"));
                 else return;
                 VanillaAsset.PlayHoverSE();
@@ -46,7 +46,7 @@ public class ModTitleShower : MonoBehaviour
             if (AmOwner)
             {
                 VanillaAsset.PlaySelectSE();
-                HelpScreen.TryOpenHelpScreen(HelpTab.Achievements, true);
+                HelpScreen.TryOpenHelpScreen(HelpTab.Achievements, new() { CanCloseEasily = true });
             }
         });
 

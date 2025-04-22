@@ -203,7 +203,7 @@ public class VanillaAsset
         display.gameObject.SetActive(true);
 
         GameObject.Destroy(display.GetComponent<UncertifiedPlayer>());
-
+        display.GetComponentInChildren<NebulaCosmeticsLayer>().RejectZOrdering = true;
         return display.AddComponent<PlayerDisplay>();
     }
 }

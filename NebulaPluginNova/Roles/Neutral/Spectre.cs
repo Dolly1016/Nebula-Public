@@ -33,6 +33,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
 {
     static public RoleTeam MyTeam = new Team("teams.spectre", new(185, 152, 197), TeamRevealType.OnlyMe);
     static private bool alternateFlag = false;
+
     private Spectre() : base("spectre", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [VentConfiguration, ShowWhereKillersAreOption, ClairvoyanceOption,
         new GroupConfiguration("options.role.spectre.group.immoralist", [ImmoralistOption , SpectreFollowerChanceOption], MyTeam.Color.ToUnityColor().RGBMultiplied(0.65f)),
         new GroupConfiguration("options.role.spectre.group.dish", [NumOfDishesOption, SatietyRateOption, MaxSatietyOption, InitialSatietyOption, RequiredSatietyForWinningOption, ShowDishesOnMapOption, FriesReplenishmentCooldownOption], MyTeam.Color.ToUnityColor().RGBMultiplied(0.65f)),
@@ -42,16 +43,16 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
             switch (ImmoralistOption.GetValue())
             {
                 case 1:
-                    return [(_, playerId) => (SpectreFollower.MyRole, [playerId])];
+                    return [new((_, playerId) => (SpectreFollower.MyRole, [playerId]), RoleCategory.NeutralRole)];
                 case 2:
-                    return [(_, playerId) => (SpectreImmoralist.MyRole, [playerId])];
+                    return [new((_, playerId) => (SpectreImmoralist.MyRole, [playerId]), RoleCategory.NeutralRole)];
                 case 3:
-                    return [(_, playerId) => (Helpers.Prob(SpectreFollowerChanceOption / 100f) ? SpectreFollower.MyRole : SpectreImmoralist.MyRole, [playerId])];
+                    return [new((_, playerId) => (Helpers.Prob(SpectreFollowerChanceOption / 100f) ? SpectreFollower.MyRole : SpectreImmoralist.MyRole, [playerId]), RoleCategory.NeutralRole)];
                 case 4:
-                    return [(_, playerId) => {
+                    return [new((_, playerId) => {
                             alternateFlag = !alternateFlag;
                             return (alternateFlag ? SpectreImmoralist.MyRole : SpectreFollower.MyRole, [playerId]);
-                        }];
+                        }, RoleCategory.NeutralRole)];
                 default:
                     return [];
             }
@@ -60,7 +61,16 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagDifficult);
         ConfigurationHolder?.ScheduleAddRelated(() => [SpectreFollower.MyRole.ConfigurationHolder!, SpectreImmoralist.MyRole.ConfigurationHolder!]);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Spectre.png");
     }
+
+    DefinedRole[] DefinedRole.AdditionalRoles => ImmoralistOption.GetValue() switch
+    {
+        0 => [],
+        1 => [SpectreFollower.MyRole],
+        2 => [SpectreImmoralist.MyRole],
+        <= 3 => [SpectreFollower.MyRole, SpectreImmoralist.MyRole],
+    };
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, player.PlayerId), (float)arguments.Get(1, (int)(InitialSatietyOption * SatietyRateOption)));
 
@@ -634,20 +644,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
 
         public override void Begin(PlayerTask task)
         {
-            //base.begin
-            Minigame.Instance = this;
-            this.MyTask = task;
-            if (task && task.TryGetComponent<NormalPlayerTask>(out var normalTask)) this.MyNormTask = normalTask;
-            this.timeOpened = Time.realtimeSinceStartup;
-            if (PlayerControl.LocalPlayer)
-            {
-                if (MapBehaviour.Instance) MapBehaviour.Instance.Close();
-                PlayerControl.LocalPlayer.MyPhysics.SetNormalizedVelocity(Vector2.zero);
-            }
-            this.StartCoroutine(CoAnimateOpen());
-            this.CloseSound = ShipStatus.Instance.ShortTasks.First().MinigamePrefab.CloseSound;
-            this.TransType = TransitionType.SlideBottom;
-            //base.begin ここまで
+            this.BeginInternal(task);
 
             MetaScreen.InstantiateCloseButton(transform, new(-3f, 1f, -0.5f)).OnClick.AddListener(Close);
 
@@ -709,18 +706,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
 
         public override void Close()
         {
-            if (this.amClosing != Minigame.CloseState.Closing)
-            {
-                if (this.CloseSound && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(this.CloseSound, false, 1f, null);
-                if (PlayerControl.LocalPlayer) PlayerControl.HideCursorTemporarily();
-
-                this.amClosing = Minigame.CloseState.Closing;
-                base.StartCoroutine(this.CoDestroySelf());
-            }
-            else
-            {
-                GameObject.Destroy(base.gameObject);
-            }
+            this.CloseInternal();
         }
     }
 

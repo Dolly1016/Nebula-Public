@@ -57,6 +57,24 @@ public class FungleData : MapData
         new(20.9f,10.8f),new(24.1f,13.2f),new(17.9f,12.7f),
         };
 
+    //先頭の部屋ほど優先される
+    static private (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
+        (new(-5.42f, -9.20f, 3.32f, 3.72f), "jungleLabo", true),
+        (new(16.75f, -6.68f, 3.03f, 1.23f), "jungleReactor", true),
+        (new(17.79f, -10.59f, 1.99f, 3.09f), "jungleReactor", true),
+        (new(9.07f, -11.00f, 5.07f, 3.89f), "jungleGreenhouse", true),
+        (new(8.70f, -10.75f, 17.47f, 6.90f), "jungle", false),
+        (new(-10.25f, -10.93f, 2.84f, 5.19f), "beachToJungle", false),
+        (new(-9.72f, 1.39f, 2.87f, 2.07f), "campfire", false),
+        (new(-16.33f, 5.10f, 6.35f, 4.05f), "beachCafeteria", true),
+        (new(-22.00f, -0.84f, 3.10f, 2.55f), "beachSplashzone", true),
+        (new(-16.33f, 5.10f, 6.35f, 4.05f), "beachCafeteria", true),
+        (new(-10.51f, 1.25f, 14.82f, 9.13f), "beach", false),
+        (new(21.60f, 12.72f, 5.78f, 2.97f), "highlandsComm", true),
+        (new(15.96f, 6.89f, 11.03f, 8.87f), "highlands", false),
+        ];
+    static private (SystemTypes room, AdditionalRoomArea area, string key)[] overrideRooms = [];
+
     static private MapObjectPoint[] mapObjectPoints = [
         new(-11.2f, 12.4f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ上端左
         new(-9.6f, 13.6f, MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ上端
@@ -127,7 +145,21 @@ public class FungleData : MapData
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;
     protected override Vector2[] NonMapArea => [];
+    protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
+    protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms };
+    override public Vector2[][] RaiderIgnoreArea
+    {
+        get => [
+            [new(26.9f, 10.9f),new(26.9f, 4.2f), new(15.9f,4.2f),new(15.9f, 10.9f)],//高台コミュ間
+            [new(19.0f, 0.0f),new(19.0f, -5.9f), new(15.1f,-5.9f),new(15.1f, 0.0f)],//高台下左
+            [new(11.9f, 0.0f),new(11.9f, -2.0f), new(11.1f, -2.0f),new(11.1f, 0.0f)],//高台下右
+            [new(11.9f, -5.0f),new(11.9f, -6.1f), new(10.5f, -6.1f),new(10.5f, -5.0f)],//高台下右ジャングル側
+            [new(4.9f, 2.1f),new(4.9f, 0.3f), new(3.2f,0.3f),new(3.2f, 2.1f)],//セキュ左下層側
+            [new(6.9f, 1.5f),new(6.9f, -1.2f), new(4.5f, -1.2f),new(4.5f, 1.5f)],//セキュ左上層側
+        ];
+    }
+
 
     private static IDividedSpriteLoader SealedVentSpriteFungle = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedVentFungle.png", 100f, 8, 2);
     protected override IDividedSpriteLoader SealedVentSprite => SealedVentSpriteFungle;
@@ -136,4 +168,25 @@ public class FungleData : MapData
     internal static IDividedSpriteLoader SealedDoorSpriteFungleV = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedDoorFungleV.png", 100f, 8, 2);
     protected override IDividedSpriteLoader GetSealedDoorSprite(bool isVert) => isVert ? SealedDoorSpriteFungleV : SealedDoorSpriteFungleH;
     override public Vector3 GetDoorSealingPos(OpenableDoor door, bool isVert) => isVert ? new(-0.07f, -0.4f, -0.01f) : new(-0.02f, -0.4f, -0.01f);
+
+    private Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachFar = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Far")?.GetComponent<AmbientSoundPlayer>()!);
+    private Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachClose = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Close")?.GetComponent<AmbientSoundPlayer>()!);
+    private Virial.Utilities.ComponentCache<AmbientSoundPlayer> highlands = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideHighlands", "SFX", "AMB_Outside")?.GetComponent<AmbientSoundPlayer>()!);
+    public override WindType GetWindType(Vector2 position)
+    {
+        if (
+            (beachFar.Get()?.HitAreas.Any(area => area.OverlapPoint(position)) ?? false) ||
+            (beachClose.Get()?.HitAreas.Any(area => area.OverlapPoint(position)) ?? false)
+            )
+        {
+            return WindType.FungleBeach;
+        }
+        if (
+            (highlands.Get()?.HitAreas.Any(area => area.OverlapPoint(position)) ?? false)
+            )
+        {
+            return WindType.FungleHighlands;
+        }
+        return WindType.NoWind;
+    }
 }

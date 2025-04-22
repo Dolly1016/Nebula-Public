@@ -8,14 +8,19 @@ public abstract class LobbySlide
     public string Tag { get; private set; }
     public string Title { get; private set; }
     public bool AmOwner { get; private set; }
+    public string? Prev { get; private set; } = null;
+    public string? Next { get; private set; } = null;
 
     public bool Shared = false;
     public abstract bool Loaded { get; }
 
-    public LobbySlide(string tag, string title, bool amOwner) {
+    public LobbySlide(string tag, string title, bool amOwner, string? prev = null, string? next = null)
+    {
         Tag = tag;
         Title = title;
         AmOwner = amOwner;
+        Prev = prev;
+        Next = next;
     }
 
     public virtual void Load() { }
@@ -36,89 +41,6 @@ public abstract class LobbySlide
     protected static TextAttributeOld CaptionAttribute = new(TextAttributeOld.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(6f, 0.5f) };
 }
 
-public abstract class LobbyImageSlide : LobbySlide
-{
-    protected Sprite? mySlide { get; set; } = null;
-    public override bool Loaded => mySlide;
-
-    public string Caption { get; private set; }
-
-    public LobbyImageSlide(string tag, string title, string caption, bool amOwner) : base(tag,title,amOwner)
-    {
-        Caption = caption;
-    }
-    public override void Abandon()
-    {
-        if (mySlide && mySlide!.texture) GameObject.Destroy(mySlide!.texture);
-    }
-
-    public override IMetaWidgetOld Show(out float height)
-    {
-        height = 1.4f;
-
-        MetaWidgetOld widget = new();
-
-        widget.Append(new MetaWidgetOld.Text(TitleAttribute) { RawText = Title, Alignment = IMetaWidgetOld.AlignmentOption.Center });
-
-        if (mySlide != null)
-        {
-            //縦に大きすぎる画像はそれに合わせて調整する
-            float width = Mathf.Min(5.4f, mySlide.bounds.size.x / mySlide.bounds.size.y * 2.9f);
-            height += width / mySlide.bounds.size.x * mySlide.bounds.size.y;
-
-            widget.Append(new MetaWidgetOld.Image(mySlide) { Alignment = IMetaWidgetOld.AlignmentOption.Center, Width = width });
-        }
-
-        widget.Append(new MetaWidgetOld.VerticalMargin(0.2f));
-
-        widget.Append(new MetaWidgetOld.Text(CaptionAttribute) { RawText = Caption, Alignment = IMetaWidgetOld.AlignmentOption.Center });
-
-
-        return widget;
-    }
-}
-
-[NebulaRPCHolder]
-public class LobbyOnlineImageSlide : LobbyImageSlide
-{
-    private string url;
-
-    public LobbyOnlineImageSlide(string tag,string title,string caption,bool amOwner,string url) : base(tag,title,caption,amOwner) 
-    {
-        this.url = url;
-    }
-
-    public override void Load() => LobbySlideManager.StartCoroutine(CoLoad());
-    public override void Reshare()
-    {
-        RpcShare.Invoke((Tag, Title, Caption, url));
-    }
-
-    private async Task<byte[]> DownloadAsync()
-    {
-        var response = await NebulaPlugin.HttpClient.GetAsync(url);
-        if (response.StatusCode != HttpStatusCode.OK) return Array.Empty<byte>();
-        return await response.Content.ReadAsByteArrayAsync();
-    }
-
-    private IEnumerator CoLoad()
-    {
-        var task = DownloadAsync();
-        while (!task.IsCompleted) yield return new WaitForSeconds(0.5f);
-
-        if (task.Result.Length > 0)
-        {
-            mySlide = GraphicsHelper.LoadTextureFromByteArray(task.Result).ToSprite(100f);
-            NebulaGameManager.Instance?.LobbySlideManager.OnLoaded(this);
-        }
-    }
-
-    static private RemoteProcess<(string tag, string title, string caption, string url)> RpcShare = new(
-        "ShareOnlineLobbySlide",
-        (message, amOwner) => NebulaGameManager.Instance?.LobbySlideManager.RegisterSlide(new LobbyOnlineImageSlide(message.tag, message.title, message.caption, amOwner, message.url))
-        );
-}
-
 public class LobbySlideTemplate
 {
     [JsonSerializableField]
@@ -129,8 +51,15 @@ public class LobbySlideTemplate
     public string SlideType = "None";
     [JsonSerializableField]
     public string Argument = "None";
-    [JsonSerializableField]
+    [JsonSerializableField(true)]
     public string Caption = "None";
+
+    [JsonSerializableField(true)]
+    public string? Next = null;
+    [JsonSerializableField(true)]
+    public string? Prev = null;
+    [JsonSerializableField(true)]
+    public bool IsHidden = false;
 
     public LobbySlide? Generate()
     {
@@ -138,10 +67,17 @@ public class LobbySlideTemplate
         {
             case "online":
             case "onlineimage":
-                return new LobbyOnlineImageSlide(Tag,Title,Caption,true,Argument);
+                return new LobbySlideVariations.LobbyOnlineImageSlide(Tag,Title,Caption,true,Argument, Prev, Next);
+            case "onlinemovie":
+                return new LobbySlideVariations.LobbyOnlineMovieSlide(Tag, Title, Caption, Argument, true, Prev, Next);
         }
 
         return null;
+    }
+
+    public void TryRegisterAndShow()
+    {
+        NebulaGameManager.Instance?.LobbySlideManager.TryRegisterAndShow(Generate());
     }
 }
 
@@ -150,9 +86,9 @@ public class LobbySlideTemplate
 public class LobbySlideManager
 {
     public Dictionary<string,LobbySlide> allSlides = new();
-    static public List<LobbySlideTemplate> AllTemplates = new();
+    static public Dictionary<string, LobbySlideTemplate> AllTemplates = new();
     private MetaScreen? myScreen = null;
-    private (string tag, bool detatched)? lastShowRequest;
+    private (string tag, bool detatched, bool calledByMe)? lastShowRequest;
     public bool IsValid { get; private set; } = true;
 
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
@@ -167,8 +103,14 @@ public class LobbySlideManager
             var templates = JsonStructure.Deserialize<List<LobbySlideTemplate>>(stream);
             if (templates == null) continue;
 
-            foreach (var entry in templates) entry.Tag = addon.AddonName + "." + entry.Tag;
-            AllTemplates.AddRange(templates);
+            foreach (var entry in templates)
+            {
+                entry.Tag = addon.AddonName + "." + entry.Tag;
+                if (entry.Prev != null) entry.Prev = addon.AddonName + "." + entry.Prev;
+                if (entry.Next != null) entry.Next = addon.AddonName + "." + entry.Next;
+
+                AllTemplates[entry.Tag] = entry;
+            }
 
             yield return null;
         }
@@ -206,7 +148,7 @@ public class LobbySlideManager
     }
 
     static public RemoteProcess<(string tag, bool detatched)> RpcShow = new(
-        "ShowSlide", (message, _) => NebulaGameManager.Instance?.LobbySlideManager.ShowSlide(message.tag, message.detatched)
+        "ShowSlide", (message, calledByMe) => NebulaGameManager.Instance?.LobbySlideManager.ShowSlide(message.tag, message.detatched, calledByMe)
         );
 
     public void RpcShowScreen(string tag,bool detatched)
@@ -220,10 +162,10 @@ public class LobbySlideManager
         }
     }
 
-    private void ShowSlide(string tag, bool detatched)
+    private void ShowSlide(string tag, bool detatched, bool calledByMe)
     {
         if (!allSlides.TryGetValue(tag, out var slide) || !slide.Loaded)
-            lastShowRequest = (tag, detatched);
+            lastShowRequest = (tag, detatched, calledByMe);
         else
         {
             if (myScreen)
@@ -235,6 +177,31 @@ public class LobbySlideManager
             var widget = slide.Show(out float height);
             var screen = MetaScreen.GenerateWindow(new(6.2f, Mathf.Min(height, 4.3f)), HudManager.Instance.transform, new Vector3(0, 0, -100f), true, false);
             screen.SetWidget(widget);
+
+            if (calledByMe)
+            {
+                Debug.Log("Prev: " + slide.Prev + ", Next: " + slide.Next);
+                bool requestedChangeSlide = false;
+                if (slide.Prev != null && AllTemplates.TryGetValue(slide.Prev, out var prev))
+                {
+                    GUI.API.RawButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), "<<", _ =>
+                    {
+                        if (requestedChangeSlide) return;
+                        requestedChangeSlide = true;
+                        prev.TryRegisterAndShow();
+                    }).Instantiate(new Virial.Media.Anchor(new(0.5f, 0.5f), new(-3.3f, 0f, -0.2f)), new(100f, 100f), out _)?.transform.SetParent(screen.transform, false);
+                }
+
+                if (slide.Next != null && AllTemplates.TryGetValue(slide.Next, out var next))
+                {
+                    GUI.API.RawButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), ">>", _ =>
+                    {
+                        if (requestedChangeSlide) return;
+                        requestedChangeSlide = true;
+                        next.TryRegisterAndShow();
+                    }).Instantiate(new Virial.Media.Anchor(new(0.5f,0.5f), new(3.3f,0f,-0.2f)), new(100f,100f), out _)?.transform.SetParent(screen.transform, false);
+                }
+            }
 
             if (!detatched) myScreen = screen;
 
@@ -248,7 +215,7 @@ public class LobbySlideManager
 
         if (slide.Tag == lastShowRequest?.tag)
         {
-            ShowSlide(lastShowRequest.Value.tag, lastShowRequest.Value.detatched);
+            ShowSlide(lastShowRequest.Value.tag, lastShowRequest.Value.detatched, lastShowRequest.Value.calledByMe);
             lastShowRequest = null;
         }
     }

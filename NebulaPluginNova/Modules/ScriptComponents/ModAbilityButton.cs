@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nebula.Commands.Variations;
 using UnityEngine;
 using Virial.Command;
@@ -168,13 +169,21 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
 
     public void UpdateVisibility()
     {
-        //表示・非表示切替
-        VanillaButton.gameObject.SetActive(IsVisible);
-        //使用可能性切替
-        if (IsAvailableUnsafe)
-            VanillaButton.SetEnabled();
-        else
-            VanillaButton.SetDisabled();
+        try
+        {
+            //表示・非表示切替
+            VanillaButton.gameObject.SetActive(IsVisible);
+
+            //使用可能性切替
+            if (IsAvailableUnsafe)
+                VanillaButton.SetEnabled();
+            else
+                VanillaButton.SetDisabled();
+        }
+        catch(Exception exception)
+        {
+            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "[At " + VanillaButton.buttonLabelText.text + "] " + exception.ToString());
+        }
     }
 
     void OnHudActiveChange(Patches.HudActivePatch.HudActiveChangeEvent ev) => UpdateVisibility();
@@ -246,7 +255,13 @@ public class ModAbilityButton : INebulaScriptComponent, Virial.Components.ModAbi
     }
 
     public void OnGameStart(GameStartEvent ev) {
-        if (UseCoolDownSupport && CoolDownTimer != null && CoolDownTimer is Timer timer) timer.Start(Mathf.Min(timer.Max, CoolDownOnGameStart));
+        if (UseCoolDownSupport && CoolDownTimer != null && CoolDownTimer is Timer timer)
+        {
+            if (GeneralConfigurations.ShortenCooldownAtGameStart)
+                timer.Start(Mathf.Min(timer.Max, CoolDownOnGameStart));
+            else
+                StartCoolDown();
+        }
         OnStartTaskPhase?.Invoke(this);
     }
 
@@ -537,6 +552,8 @@ public static class ButtonEffect
         return result;
     }
 
+    public static string ReplaceKeyCode(this string text, string target, Virial.Compat.VirtualKeyInput key) => text.Replace(target, KeyCodeInfo.GetKeyDisplayName(NebulaInput.GetInput(key).TypicalKey));
+
     static public SpriteRenderer AddOverlay(this ActionButton button, Sprite sprite, float order)
     {
         GameObject obj = new GameObject("Overlay");
@@ -557,7 +574,7 @@ public static class ButtonEffect
     static Image mouseActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionIcon.png", 100f);
     static Image mouseDisableActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionDisableIcon.png", 100f);
     static Image infoSprite = SpriteLoader.FromResource("Nebula.Resources.ButtonInfoIcon.png", 100f);
-
+    static public Image InfoImage => infoSprite;
     static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide, bool isAidAction = false, string? action = null)
     {
         if(removeExistingGuide)button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "HotKeyGuide") GameObject.Destroy(obj); }));

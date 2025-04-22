@@ -1,4 +1,7 @@
-﻿namespace Nebula.Utilities;
+﻿using Steamworks;
+using System.Text;
+
+namespace Nebula.Utilities;
 
 static public class StringHelper
 {
@@ -37,5 +40,24 @@ static public class StringHelper
     public static string ToByteString(this string text)
     {
         return text.ComputeConstantHashAsStringLong();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="separator">最初の区切りで1が与えられる。区切りの位置ごとに別の区切り文字を使える。</param>
+    /// <param name="enumerable"></param>
+    /// <returns></returns>
+    public static string Join(Func<int, string> separator, IEnumerable<string> enumerable)
+    {
+        int num = 0;
+        StringBuilder builder = new();
+        foreach(var t in enumerable)
+        {
+            if (num > 0) builder.Append(separator.Invoke(num));
+            builder.Append(t);
+            num++;
+        }
+        return builder.ToString();
     }
 }

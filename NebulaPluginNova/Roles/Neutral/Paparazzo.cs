@@ -111,7 +111,7 @@ public class PaparazzoShot : MonoBehaviour
         RenderTexture.active = cam.targetTexture;
         Texture2D texture2D = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false, false);
         texture2D.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-        texture2D.Apply();
+        texture2D.Apply(false, false);
         var sprite = texture2D.ToSprite(100f);
 
         cam.targetTexture = null;

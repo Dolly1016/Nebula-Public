@@ -82,6 +82,11 @@ static public class LayerExpansion
         return 28;
     }
 
+    static public int GetVanillaShadowLightLayer()
+    {
+        return 27;
+    }
+
     static public int GetLayerMask(params int[] layer)
     {
         int result = 0;

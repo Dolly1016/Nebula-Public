@@ -44,5 +44,12 @@ public static class Il2CppHelpers
     {
         return CastHelper<T>.Cast(ptr);
     }
+
+    public static Il2CppSystem.Collections.Generic.List<T> ToIl2CppList<T>(this System.Collections.Generic.IReadOnlyList<T> list)
+    {
+        Il2CppSystem.Collections.Generic.List<T> result = new(list.Count);
+        foreach (var elem in list) result.Add(elem);
+        return result;
+    }
 }
 

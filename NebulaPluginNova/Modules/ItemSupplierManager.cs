@@ -70,7 +70,7 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
     {
         if (!ev.Player.AmOwner) return;
 
-        bool isCrewmate = ev.Player.IsCrewmate && ev.Player.Role.Role != Roles.Crewmate.Madmate.MyRole;
+        bool isCrewmate = ev.Player.IsTrueCrewmate;
         if (isCrewmate) SetPerk(null, null, true);
         else if (ActiveNoncrewPerk == null)
         {
@@ -277,7 +277,7 @@ public class ItemSupplier : NebulaSyncStandardObject
         }
     }
 
-    bool CanObtainForRole => !NoncrewmateOnly || (!GamePlayer.LocalPlayer!.IsCrewmate || GamePlayer.LocalPlayer.Role.Role == Roles.Crewmate.Madmate.MyRole);
+    bool CanObtainForRole => !NoncrewmateOnly || (!GamePlayer.LocalPlayer!.IsTrueCrewmate);
 
     void OnUpdate(GameUpdateEvent ev)
     {

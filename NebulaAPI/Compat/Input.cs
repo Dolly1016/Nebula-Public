@@ -20,4 +20,5 @@ public enum VirtualKeyInput
     Spectator,
     SpectatorLeft,
     SpectatorRight,
+    Stamp,
 }

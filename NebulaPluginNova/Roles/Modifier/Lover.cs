@@ -19,6 +19,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
     private Lover() : base("lover", new(255, 0, 184), [NumOfPairsOption, RoleChanceOption, ChanceOfAssigningImpostorsOption, AllowExtraWinOption, AvengerModeOption]) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Neutral.Avenger.MyRole.ConfigurationHolder!]);
         ConfigurationHolder?.SetDisplayState(() => NumOfPairsOption == 0 ? ConfigurationHolderState.Inactivated : RoleChanceOption == 100 ? ConfigurationHolderState.Emphasized : ConfigurationHolderState.Activated);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Lover.png");
     }
     string ICodeName.CodeName => "LVR";
     Citation? HasCitation.Citaion => Citations.TheOtherRoles;
@@ -32,13 +33,13 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
     int HasAssignmentRoutine.AssignPriority => 1;
 
     static internal IntegerConfiguration NumOfPairsOption = NebulaAPI.Configurations.Configuration("options.role.lover.numOfPairs", (0, 12), 0);
-    static private IntegerConfiguration RoleChanceOption = NebulaAPI.Configurations.Configuration("options.role.lover.roleChance", (10, 100, 10), 100, decorator: num => num + "%",title: new TranslateTextComponent("options.role.chance"));
+    static internal IntegerConfiguration RoleChanceOption = NebulaAPI.Configurations.Configuration("options.role.lover.roleChance", (10, 100, 10), 100, decorator: num => num + "%",title: new TranslateTextComponent("options.role.chance"));
     static private IntegerConfiguration ChanceOfAssigningImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.lover.chanceOfAssigningImpostors", (0,100,10), 0, decorator: num => num + "%");
     static internal BoolConfiguration AllowExtraWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.allowExtraWin", true);
     static internal BoolConfiguration AvengerModeOption = NebulaAPI.Configurations.Configuration("options.role.lover.avengerMode", false);
 
     static public Lover MyRole = new Lover();
-    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments[0]);
+    RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
 
 
     void HasAssignmentRoutine.TryAssign(Virial.Assignable.IRoleTable roleTable){
@@ -55,6 +56,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         int assigned = 0;
         for (int i = 0; i < maxPairs; i++)
         {
+            //確率による割り当てスキップ
             float chance = RoleChanceOption / 100f;
             if ((float)System.Random.Shared.NextDouble() >= chance) continue;
 
@@ -153,7 +155,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             if (MyPlayer.PlayerState == PlayerState.Suicide) new StaticAchievementToken("lover.another1");
         }
 
-        [OnlyMyPlayer, Local]
+        [OnlyMyPlayer, OnlyHost]
         void OnMurdered(PlayerDieOrDisconnectEvent ev)
         {
             var myLover = MyLover.Get();
@@ -161,7 +163,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
 
             if (ev is PlayerMurderedEvent pme)
             {
-                if (!pme.Murderer.AmOwner && AvengerModeOption)
+                if (pme.Murderer != MyPlayer && AvengerModeOption)
                     myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [pme.Murderer.PlayerId]).InvokeSingle();
                 else 
                     myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);

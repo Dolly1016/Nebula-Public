@@ -223,12 +223,13 @@ public static class UpdatePatch
 
                 /* 名前を編集する */
                 name = "";
+                string prefix = "<line-height=80%>";
                 Helpers.RoleAction(player.TargetPlayerId, (role) => { role.EditDisplayName(player.TargetPlayerId, ref name, false); });
                 Helpers.RoleAction(PlayerControl.LocalPlayer, (role) => { role.EditOthersDisplayName(player.TargetPlayerId, ref name, false); });
                 if (!name.Equals(""))
-                    player.NameText.text = playerData.name + " " + name;
+                    player.NameText.text = prefix + playerData.name + " " + name;
                 else
-                    player.NameText.text = playerData.name;
+                    player.NameText.text = prefix + playerData.name;
 
                 if (player.TargetPlayerId == PlayerControl.LocalPlayer.PlayerId)
                 {

@@ -12,7 +12,7 @@ namespace Virial.Events.Game.Meeting;
 /// </summary>
 public class MeetingEndEvent : Event
 {
-    public IEnumerable<Virial.Game.Player> Exiled { get { foreach(var e in exiled)  yield return e; } }
+    public IReadOnlyList<Virial.Game.Player> Exiled => exiled;
     private Virial.Game.Player[] exiled;
 
     internal MeetingEndEvent(Virial.Game.Player[] exiled) {

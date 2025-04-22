@@ -5,7 +5,6 @@ using Virial.Text;
 
 namespace Nebula.Extensions;
 
-
 [NebulaRPCHolder]
 public static class MeetingHudExtension
 {
@@ -24,6 +23,8 @@ public static class MeetingHudExtension
 
     //直近の投票の結果吊られるプレイヤー
     static public PlayerControl[]? ExiledAll = null;
+    static public GamePlayer[]? ExiledAllModCache = null;
+    
     //直近の投票がタイであったかどうか
     static public bool WasTie = false;
 

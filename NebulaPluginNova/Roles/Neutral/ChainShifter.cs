@@ -109,7 +109,13 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                 yield return player.CoGetRoleArgument((args) => targetArgument = args);
                 yield return player.CoGetLeftGuess((guess) => targetGuess = guess);
 
-                int myGuess = MyPlayer.Unbox().TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1;
+                int myGuess = MyPlayer.TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1;
+
+                bool targetMJailer = player.TryGetModifier<Impostor.JailerModifier.Instance>(out _);
+                bool myMJailer = MyPlayer.TryGetModifier<Impostor.JailerModifier.Instance>(out _);
+
+                bool targetMadmate = player.TryGetModifier<Modifier.Madmate.Instance>(out _);
+                bool myMadmate = MyPlayer.TryGetModifier<Modifier.Madmate.Instance>(out _);
 
                 using (RPCRouter.CreateSection("ChainShift"))
                 {
@@ -152,6 +158,34 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
 
                     if (myGuess != -1) player.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { myGuess }).InvokeSingle();
                     if (targetGuess != -1) MyPlayer.Unbox().RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
+
+                    if(myMJailer != targetMJailer)
+                    {
+                        if (myMJailer)
+                        {
+                            MyPlayer.Unbox().RpcInvokerUnsetModifier(Impostor.JailerModifier.MyRole).InvokeSingle();
+                            player.RpcInvokerSetModifier(Impostor.JailerModifier.MyRole, []).InvokeSingle();
+                        }
+                        else
+                        {
+                            MyPlayer.Unbox().RpcInvokerSetModifier(Impostor.JailerModifier.MyRole, []).InvokeSingle();
+                            player.RpcInvokerUnsetModifier(Impostor.JailerModifier.MyRole).InvokeSingle();
+                        }
+                    }
+
+                    if (myMadmate != targetMadmate)
+                    {
+                        if (myMadmate)
+                        {
+                            MyPlayer.Unbox().RpcInvokerUnsetModifier(Modifier.Madmate.MyRole).InvokeSingle();
+                            player.RpcInvokerSetModifier(Modifier.Madmate.MyRole, []).InvokeSingle();
+                        }
+                        else
+                        {
+                            MyPlayer.Unbox().RpcInvokerSetModifier(Modifier.Madmate.MyRole, []).InvokeSingle();
+                            player.RpcInvokerUnsetModifier(Modifier.Madmate.MyRole).InvokeSingle();
+                        }
+                    }
 
                     new NebulaRPCInvoker(() => MyPlayer.Unbox().UpdateTaskState()).InvokeSingle();
                 }
