@@ -1,5 +1,7 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Game.Statistics;
+using Nebula.Roles.Impostor;
+using System.Linq;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -11,41 +13,21 @@ using Virial.Text;
 
 namespace Nebula.Roles.Complex;
 
-
-[NebulaRPCHolder]
-static file class GuesserSystem
+static public class MeetingRoleSelectWindow
 {
-    private record MisguessedExtraDeadInfo(GamePlayer To, DefinedRole Role) : GamePlayer.ExtraDeadInfo(PlayerStates.Misguessed)
-    {
-        public override string ToStateText() => To.PlayerName + " as " + Role.DisplayColoredName;
-    }
-    static private RemoteProcess<(GamePlayer guesser, GamePlayer to, DefinedRole role)> RpcShareExtraInfo = new("ShareExInfoGuess",
-        (message, _) => {
-            message.guesser.PlayerStateExtraInfo = new MisguessedExtraDeadInfo(message.to, message.role);
-        }
-    );
-
     static TextAttributeOld ButtonAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new(1.3f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(2f, 1f, 2f);
-    public static MetaScreen LastGuesserWindow = null!;
-
-    static public MetaScreen OpenGuessWindow(int leftGuessPerMeeting, int leftGuess,Action<DefinedRole> onSelected)
+    static public MetaScreen OpenRoleSelectWindow(Func<DefinedRole, bool> predicate, string underText, Action<DefinedRole> onSelected)
     {
         var window = MetaScreen.GenerateWindow(new(7.6f, 4.2f), HudManager.Instance.transform, new Vector3(0, 0, -50f), true, false);
 
         MetaWidgetOld widget = new();
 
         MetaWidgetOld inner = new();
-        inner.Append(Roles.AllRoles.Where(r => r.CanBeGuess && r.IsSpawnable), r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+        inner.Append(Roles.AllRoles.Where(predicate), r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
         MetaWidgetOld.ScrollView scroller = new(new(6.9f, 3.8f), inner, true) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
         widget.Append(scroller);
 
-        string leftStr;
-        if (leftGuessPerMeeting < leftGuess)
-            leftStr = $"{leftGuessPerMeeting.ToString()} ({leftGuess.ToString()})";
-        else
-            leftStr = leftGuess.ToString();
-
-        widget.Append(new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { MyText = new CombinedComponent(new TranslateTextComponent("role.guesser.leftGuess"), new RawTextComponent(" : " + leftStr)), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+        widget.Append(new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { MyText = new RawTextComponent(underText), Alignment = IMetaWidgetOld.AlignmentOption.Center });
 
         window.SetWidget(widget);
 
@@ -61,9 +43,37 @@ static file class GuesserSystem
 
         return window;
     }
+}
 
-    static public void OnMeetingStart(int leftGuess,Action guessDecrementer)
+[NebulaRPCHolder]
+static file class GuesserSystem
+{
+    private record MisguessedExtraDeadInfo(GamePlayer To, DefinedRole Role) : GamePlayer.ExtraDeadInfo(PlayerStates.Misguessed)
     {
+        public override string ToStateText() => To.PlayerName + " as " + Role.DisplayColoredName;
+    }
+    static private RemoteProcess<(GamePlayer guesser, GamePlayer to, DefinedRole role)> RpcShareExtraInfo = new("ShareExInfoGuess",
+        (message, _) => {
+            message.guesser.PlayerStateExtraInfo = new MisguessedExtraDeadInfo(message.to, message.role);
+        }
+    );
+
+    public static MetaScreen LastGuesserWindow = null!;
+
+    static public MetaScreen OpenGuessWindow(int leftGuessPerMeeting, int leftGuess,Action<DefinedRole> onSelected)
+    {
+        string leftStr;
+        if (leftGuessPerMeeting < leftGuess)
+            leftStr = $"{leftGuessPerMeeting.ToString()} ({leftGuess.ToString()})";
+        else
+            leftStr = leftGuess.ToString();
+
+        return MeetingRoleSelectWindow.OpenRoleSelectWindow(r => r.CanBeGuess && r.IsSpawnable, Language.Translate("role.guesser.leftGuess") + " : " + leftStr, onSelected);
+    }
+
+    static public void OnMeetingStart(int leftGuess,Action guessDecrementer, Func<bool>? guessIf = null)
+    {
+        bool awareOfUsurpation = false;
         int leftGuessPerMeeting = Guesser.NumOfGuessPerMeetingOption;
 
         NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(0),
@@ -74,18 +84,25 @@ static file class GuesserSystem
                     if (PlayerControl.LocalPlayer.Data.IsDead) return;
                     if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
 
-                    GuesserModifier.StatsAllGuessed.Progress();
-                    if (p?.Role.ExternalRecognitionRole == r)
+                    if (guessIf?.Invoke() ?? true)
                     {
-                        NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill);
+                        GuesserModifier.StatsAllGuessed.Progress();
+                        if (p?.Role.ExternalRecognitionRole == r)
+                        {
+                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill);
+                        }
+                        else
+                        {
+                            GuesserModifier.StatsMisguessed.Progress();
+                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill);
+                            RpcShareExtraInfo.Invoke((NebulaAPI.CurrentGame!.LocalPlayer, p!, r));
+                        }
                     }
                     else
                     {
-                        GuesserModifier.StatsMisguessed.Progress();
-                        NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill);
-                        RpcShareExtraInfo.Invoke((NebulaAPI.CurrentGame!.LocalPlayer, p!, r));
+                        NebulaAsset.PlaySE(NebulaAudioClip.ButtonBreaking, volume: 1f);
+                        awareOfUsurpation = true;
                     }
-
                     //のこり推察数を減らす
                     guessDecrementer.Invoke();
                     leftGuess--;
@@ -95,7 +112,7 @@ static file class GuesserSystem
                     LastGuesserWindow = null!;
                 });
             },
-            p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && leftGuess > 0 && leftGuessPerMeeting > 0 && !PlayerControl.LocalPlayer.Data.IsDead && GameOperatorManager.Instance!.Run(new PlayerCanGuessPlayerLocalEvent(NebulaAPI.CurrentGame!.LocalPlayer, p.MyPlayer, true)).CanGuess
+            p => !awareOfUsurpation && !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && leftGuess > 0 && leftGuessPerMeeting > 0 && !PlayerControl.LocalPlayer.Data.IsDead && GameOperatorManager.Instance!.Run(new PlayerCanGuessPlayerLocalEvent(NebulaAPI.CurrentGame!.LocalPlayer, p.MyPlayer, true)).CanGuess
             ));
         
         /*
@@ -162,12 +179,13 @@ static file class GuesserSystem
     }
 }
 
-public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Guesser : DefinedSingleAbilityRoleTemplate<Guesser.Ability>, HasCitation, DefinedRole
 {
-    public bool IsEvil { get; private set; }
+    public bool IsEvil => Category == RoleCategory.ImpostorRole;
 
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, NumOfGuessOption));
+    bool DefinedRole.IsJackalizable => IsEvil;
 
     static internal IntegerConfiguration NumOfGuessOption = NebulaAPI.Configurations.Configuration("options.role.guesser.numOfGuess", (1, 15), 3);
     static internal IntegerConfiguration NumOfGuessPerMeetingOption = NebulaAPI.Configurations.Configuration("options.role.guesser.numOfGuessPerMeeting", (1, 15), 1);
@@ -186,7 +204,6 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
         isEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam,
         [NumOfGuessOption, NumOfGuessPerMeetingOption, CanCallEmergencyMeetingOption, GuessableFilterEditorOption])
     {
-        IsEvil = isEvil;
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic);
         ConfigurationHolder?.ScheduleAddRelated(() => [isEvil ? MyNiceRole.ConfigurationHolder! : MyEvilRole.ConfigurationHolder!, GuesserModifier.MyRole.ConfigurationHolder!]);
     }
@@ -197,19 +214,20 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
     }
 
     IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [MyNiceRole, MyNiceRole, GuesserModifier.MyRole];
-    public class NiceInstance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyNiceRole;
         private int leftGuess = NumOfGuessOption;
-        public NiceInstance(GamePlayer player, int[] arguments) : base(player)
+        private bool awareOfUsurpation = false;
+        public Ability(GamePlayer player, bool isUsurped, int leftGuess) : base(player, isUsurped)
         {
-            if (arguments.Length >= 1) leftGuess = arguments[0];
+            this.leftGuess = leftGuess;
         }
 
-        void RuntimeAssignable.OnActivated() {}
-
         [Local]
-        void OnMeetingStart(MeetingStartEvent ev) => GuesserSystem.OnMeetingStart(leftGuess, () => leftGuess--);
+        void OnMeetingStart(MeetingStartEvent ev)
+        {
+            if(!awareOfUsurpation) GuesserSystem.OnMeetingStart(leftGuess, () => { leftGuess--; awareOfUsurpation |= IsUsurped; }, () => !IsUsurped);
+        }
 
 
         [Local, OnlyMyPlayer]
@@ -219,32 +237,7 @@ public class Guesser : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnGameEnd(GameEndEvent ev) => GuesserSystem.OnGameEnd(MyPlayer);
 
-        bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
-    }
-
-    public class EvilInstance : RuntimeAssignableTemplate, RuntimeRole
-    {
-        DefinedRole RuntimeRole.Role => MyEvilRole;
-        private int leftGuess = NumOfGuessOption;
-        public EvilInstance(GamePlayer player, int[] arguments) : base(player)
-        {
-            if (arguments.Length >= 1) leftGuess = arguments[0];
-        }
-
-        void RuntimeAssignable.OnActivated() { }
-
-        [Local]
-        void OnMeetingStart(MeetingStartEvent ev) => GuesserSystem.OnMeetingStart(leftGuess, () => leftGuess--);
-
-
-        [Local, OnlyMyPlayer]
-        void OnDead(PlayerDieEvent ev) => GuesserSystem.OnDead();
-
-
-        [Local]
-        void OnGameEnd(GameEndEvent ev) => GuesserSystem.OnGameEnd(MyPlayer);
-
-        bool RuntimeAssignable.CanCallEmergencyMeeting => CanCallEmergencyMeetingOption;
+        bool IPlayerAbility.BlockCallingEmergencyMeeting => !CanCallEmergencyMeetingOption;
     }
 }
 
@@ -254,13 +247,13 @@ public class GuesserModifier : DefinedAllocatableModifierTemplate, DefinedAlloca
     static internal GameStatsEntry StatsAllGuessed = NebulaAPI.CreateStatsEntry("stats.guesser.allGuess", GameStatsCategory.Roles, MyRole);
     static internal GameStatsEntry StatsMisguessed = NebulaAPI.CreateStatsEntry("stats.guesser.misguessed", GameStatsCategory.Roles, MyRole);
 
-    private GuesserModifier() : base("guesser", "GSR", new(255, 255, 0), [Guesser.NumOfGuessOption, Guesser.NumOfGuessPerMeetingOption, Guesser.GuessableFilterEditorOption]) {
+    private GuesserModifier() : base("guesser", "GSR", new(255, 255, 0), [Guesser.NumOfGuessOption, Guesser.NumOfGuessPerMeetingOption, Guesser.CanCallEmergencyMeetingOption, Guesser.GuessableFilterEditorOption]) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Guesser.MyNiceRole.ConfigurationHolder!, Guesser.MyEvilRole.ConfigurationHolder!]);
     }
 
     IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Guesser.MyNiceRole, Guesser.MyNiceRole, MyRole];
 
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
 

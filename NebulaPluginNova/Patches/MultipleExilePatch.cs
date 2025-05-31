@@ -1,4 +1,5 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
+using Nebula.Modules.Cosmetics;
 using System;
 using System.Collections.Generic;
 using System.Linq;

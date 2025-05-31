@@ -12,12 +12,12 @@ namespace Nebula.Roles.Neutral;
 
 public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public RoleTeam MyTeam = new Team("teams.vulture", new(140, 70, 18), TeamRevealType.OnlyMe);
-    
+    static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.vulture", new(140, 70, 18), TeamRevealType.OnlyMe);
+
     private Vulture() : base("vulture", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [EatCoolDownOption, NumOfEatenToWinOption, VentConfiguration]) {
         GameActionTypes.EatCorpseAction = new("vulture.eat", this, isCleanDeadBodyAction: true);
     }
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
@@ -27,26 +27,19 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 
     static public Vulture MyRole = new Vulture();
     static private GameStatsEntry StatsEaten = NebulaAPI.CreateStatsEntry("stats.vulture.eaten", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
-        DefinedRole RuntimeRole.Role => MyRole;
+        public override DefinedRole Role => MyRole;
 
-        private Modules.ScriptComponents.ModAbilityButton? eatButton = null;
+        private Modules.ScriptComponents.ModAbilityButtonImpl? eatButton = null;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EatButton.png", 115f);
 
-
-        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
-        private bool canUseVent = VentConfiguration.CanUseVent;
-        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
-        GameTimer? RuntimeRole.VentDuration => ventDuration;
-        bool RuntimeRole.CanUseVent => canUseVent;
         int leftEaten = NumOfEatenToWinOption;
 
         AchievementToken<bool>? acTokenChallenge;
 
-        public Instance(GamePlayer player, int[] arguments) : base(player)
+        public Instance(GamePlayer player, int[] arguments) : base(player, VentConfiguration)
         {
             if (arguments.Length >= 1) leftEaten = arguments[0];
         }
@@ -57,7 +50,7 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
             if (acTokenChallenge != null) acTokenChallenge.Value = false;
         }
 
-        void RuntimeAssignable.OnActivated()
+        public override void OnActivated()
         {
             if (AmOwner)
             {
@@ -65,23 +58,22 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 //死体を指す矢印を表示する
                 var ability = new DeadbodyArrowAbility().Register(this);
-                GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev => ability.ShowArrow = !MyPlayer.IsDead, this);
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => ability.ShowArrow = !MyPlayer.IsDead, this);
 
                 StaticAchievementToken? acTokenCommon = null;
 
-                var eatTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => true));
+                var eatTracker = ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => true).Register(this);
 
-                eatButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                var usesIcon = eatButton.ShowUsesIcon(2);
-                eatButton.SetSprite(buttonSprite.GetSprite());
-                eatButton.Availability = (button) => eatTracker.CurrentTarget != null && MyPlayer.CanMove;
-                eatButton.Visibility = (button) => !MyPlayer.IsDead;
+                var eatButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    EatCoolDownOption.CoolDown, "eat", buttonSprite,
+                    _ => eatTracker.CurrentTarget != null);
+                eatButton.ShowUsesIcon(2, leftEaten.ToString());
                 eatButton.OnClick = (button) => {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.EatCorpseAction);
 
                     AmongUsUtil.RpcCleanDeadBody(eatTracker.CurrentTarget!.PlayerId, MyPlayer.PlayerId,EventDetail.Eat);
                     leftEaten--;
-                    usesIcon.text=leftEaten.ToString();
+                    button.UpdateUsesIcon(leftEaten.ToString());
                     eatButton.StartCoolDown();
 
                     acTokenCommon ??= new("vulture.common1");
@@ -89,9 +81,6 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 
                     if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId);
                 };
-                eatButton.CoolDownTimer = Bind(new Timer(EatCoolDownOption.CoolDown).SetAsAbilityCoolDown().Start());
-                eatButton.SetLabel("eat");
-                usesIcon.text= leftEaten.ToString();
             }
         }
 

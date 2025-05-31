@@ -1,4 +1,5 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
+using Nebula.Modules.Cosmetics;
 using TMPro;
 using UnityEngine.Rendering;
 using Virial;
@@ -80,19 +81,19 @@ public class PlayersOverlay : IGameOperator
                         player.cosmetics.visor.Image.gameObject.AddComponent<ZOrderedSortingGroup>();
                         player.cosmetics.currentBodySprite.BodySprite.gameObject.AddComponent<ZOrderedSortingGroup>();
 
-                        allIcons.Add(new(p.PlayerId, obj, player, p) { LastColor = Palette.PlayerColors[player.ColorId], LastOutfit = new(p.CurrentOutfit, []) });
+                        allIcons.Add(new(p.PlayerId, obj, player, p) { LastColor = DynamicPalette.PlayerColors[player.ColorId], LastOutfit = new(p.CurrentOutfit, []) });
                     }
                 }
             }
 
             foreach(var i in allIcons)
             {
-                if(!(i.LastOutfit?.Equals(i.relatedControl.CurrentOutfit) ?? true) || !Palette.PlayerColors[i.LastOutfit!.outfit.ColorId].CompareRGB(i.LastColor))
+                if(!(i.LastOutfit?.Equals(i.relatedControl.CurrentOutfit) ?? true) || !DynamicPalette.PlayerColors[i.LastOutfit!.outfit.ColorId].CompareRGB(i.LastColor))
                 {
                     i.display.UpdateFromPlayerOutfit(i.relatedControl.CurrentOutfit, PlayerMaterial.MaskType.ComplexUI, false, false);
                     i.display.TogglePet(false);
                     i.LastOutfit = new(i.relatedControl.CurrentOutfit, [], true);
-                    i.LastColor = Palette.PlayerColors[i.LastOutfit.outfit.ColorId];
+                    i.LastColor = DynamicPalette.PlayerColors[i.LastOutfit.outfit.ColorId];
                 }
             }
         }

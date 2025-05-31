@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Commands;
 using Virial.Command;
 using Virial.Common;

@@ -61,13 +61,13 @@ internal static class AddonScriptManager
 {
     static private MetadataReference[] ReferenceAssemblies = [];
     static public IEnumerable<AddonScript> ScriptAssemblies => scriptAssemblies;
-    static private List<AddonScript> scriptAssemblies = new();
+    static private List<AddonScript> scriptAssemblies = [];
     static public IEnumerator CoLoad(Assembly[] assemblies)
     {
 
         //参照可能なアセンブリを抽出する
         ReferenceAssemblies = assemblies.Where(a => { try { return ((a.Location?.Length ?? 0) > 0); } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).Append(MetadataReference.CreateFromImage(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes())).ToArray();
-        
+
         var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp12);
         var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             .WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic")
@@ -83,13 +83,11 @@ internal static class AddonScriptManager
             var behaviour = addon.Archive.GetEntry(prefix + ".behaviour");
             if (behaviour != null)
             {
-                using (var stream = behaviour.Open())
-                {
-                    addonBehaviour = JsonStructure.Deserialize<AddonBehaviour>(stream);
-                }
+                using var stream = behaviour.Open();
+                addonBehaviour = JsonStructure.Deserialize<AddonBehaviour>(stream);
             }
 
-            List<SyntaxTree> trees = new();
+            List<SyntaxTree> trees = [];
             foreach(var entry in addon.Archive.Entries)
             {
                 if (!entry.FullName.StartsWith(prefix)) continue;

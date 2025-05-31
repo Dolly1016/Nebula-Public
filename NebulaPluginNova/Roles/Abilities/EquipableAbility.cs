@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Roles.Abilities
 {
-    public class EquipableAbility : INebulaScriptComponent, IGameOperator
+    public class EquipableAbility : FlexibleLifespan, IGameOperator
     {
         public GamePlayer Owner { get; private set; }
         protected SpriteRenderer Renderer { get; private set; }

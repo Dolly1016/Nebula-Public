@@ -1,70 +1,119 @@
 ﻿using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Player;
+using Virial.Game;
 using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Doctor : DefinedRoleTemplate, DefinedRole
+public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Doctor.UsurpedAbility>, DefinedRole
 {
 
     private Doctor() : base("doctor", new(128,255,221),RoleCategory.CrewmateRole, Crewmate.MyTeam, [PortableVitalsChargeOption, MaxPortableVitalsChargeOption, ChargesPerTasksOption]) { }
-    
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(Virial.Game.Player player, int[] arguments) => new(player, arguments.GetAsBool(0), (float)arguments.Get(1, (int)(PortableVitalsChargeOption * 10)) / 10f);
+    public override UsurpedAbility CreateUsurpedAbility(Virial.Game.Player player, int[] arguments) => new(player, arguments.GetAsBool(0));
 
-    static private FloatConfiguration PortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.portableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration MaxPortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.maxPortableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration ChargesPerTasksOption = NebulaAPI.Configurations.Configuration("options.role.doctor.chargesPerTasks", (0.5f, 10f, 0.5f), 1f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration PortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.portableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration MaxPortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.maxPortableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration ChargesPerTasksOption = NebulaAPI.Configurations.Configuration("options.role.doctor.chargesPerTasks", (0.5f, 10f, 0.5f), 1f, FloatConfigurationDecorator.Second);
 
-    static public Doctor MyRole = new Doctor();
+    static public readonly Doctor MyRole = new();
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    internal static VitalsMinigame OpenSpecialVitalsMinigame()
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-
-        private ModAbilityButton? vitalButton = null;
-        private float vitalTimer = PortableVitalsChargeOption;
-
-        public Instance(GamePlayer player) : base(player)
+        VitalsMinigame? vitalsMinigame = null;
+        foreach (RoleBehaviour role in RoleManager.Instance.AllRoles)
         {
+            if (role.Role == RoleTypes.Scientist)
+            {
+                vitalsMinigame = UnityEngine.Object.Instantiate(role.gameObject.GetComponent<ScientistRole>().VitalsPrefab, Camera.main.transform, false);
+                break;
+            }
         }
+        if (vitalsMinigame == null) return null!;
+        vitalsMinigame.transform.SetParent(Camera.main.transform, false);
+        vitalsMinigame.transform.localPosition = new Vector3(0.0f, 0.0f, -50f);
+        vitalsMinigame.Begin(null);
 
-        void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
-        {
-            vitalTimer = Mathf.Min(MaxPortableVitalsChargeOption, vitalTimer + ChargesPerTasksOption);
+        ConsoleTimer.MarkAsNonConsoleMinigame();
+
+        return vitalsMinigame;
+    }
+
+    public class UsurpedAbility : AbstractPlayerUsurpableAbility, IGameOperator, IPlayerAbility
+    {
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public UsurpedAbility(GamePlayer player, bool isUsurped) : base(player, isUsurped) {
+            if (AmOwner)
+            {
+                var sprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image;
+                var vitalButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "vital", new WrapSpriteLoader(() => sprite));
+                vitalButton.OnClick = (button) =>
+                {
+                    VitalsMinigame? vitalsMinigame = OpenSpecialVitalsMinigame();
+
+                    ConsoleTimer.MarkAsNonConsoleMinigame();
+
+                    IEnumerator CoUpdateState(VitalsPanel panel, GamePlayer player)
+                    {
+                        TMPro.TextMeshPro text = UnityEngine.Object.Instantiate(vitalsMinigame.SabText, panel.transform);
+                        UnityEngine.Object.DestroyImmediate(text.GetComponent<AlphaBlink>());
+                        text.gameObject.SetActive(false);
+                        text.transform.localScale = Vector3.one * 0.5f;
+                        text.transform.localPosition = new Vector3(-0.75f, -0.23f, 0f);
+                        text.color = new Color(0.8f, 0.8f, 0.8f);
+
+                        while (true)
+                        {
+
+                            if (panel.IsDiscon)
+                            {
+                                text.gameObject.SetActive(true);
+                                text.text = player.PlayerState.Text;
+                            }
+                            else
+                            {
+                                text.gameObject.SetActive(false);
+                            }
+                            yield return null;
+                        }
+                    }
+                    vitalsMinigame.vitals.Do(panel =>
+                    {
+                        panel.StartCoroutine(CoUpdateState(panel, NebulaGameManager.Instance!.GetPlayer(panel.PlayerInfo.PlayerId)!));
+                    });
+                };
+                vitalButton.SetLabelType(ModAbilityButton.LabelType.Utility);
+                vitalButton.SetAsUsurpableButton(this);
+            }
         }
+    }
 
-        void RuntimeAssignable.OnActivated()
+    public class Ability : AbstractPlayerUsurpableAbility, IGameOperator, IUsurpableAbility
+    {
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), (int)(vitalTimer * 10f)];
+        private float vitalTimer;
+
+        public Ability(GamePlayer player, bool isUsurped, float vitalTimer) : base(player, isUsurped)
         {
+            this.vitalTimer = vitalTimer;
+
             StaticAchievementToken? acTokenCommon = null;
             StaticAchievementToken? acTokenChallenge = null;
 
             if (AmOwner)
             {
-                vitalButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                vitalButton.SetSprite(HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image);
-                vitalButton.Availability = (button) => MyPlayer.CanMove && vitalTimer > 0f;
-                vitalButton.Visibility = (button) => !MyPlayer.IsDead;
+                var sprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image;
+                var vitalButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "vital", new WrapSpriteLoader(() => sprite), _ => vitalTimer > 0f, null);
                 vitalButton.OnClick = (button) =>
                 {
-                    VitalsMinigame? vitalsMinigame = null;
-                    foreach (RoleBehaviour role in RoleManager.Instance.AllRoles)
-                    {
-                        if (role.Role == RoleTypes.Scientist)
-                        {
-                            vitalsMinigame = UnityEngine.Object.Instantiate(role.gameObject.GetComponent<ScientistRole>().VitalsPrefab, Camera.main.transform, false);
-                            break;
-                        }
-                    }
-                    if (vitalsMinigame == null) return;
-                    vitalsMinigame.transform.SetParent(Camera.main.transform, false);
-                    vitalsMinigame.transform.localPosition = new Vector3(0.0f, 0.0f, -50f);
-                    vitalsMinigame.Begin(null);
+                    VitalsMinigame? vitalsMinigame = OpenSpecialVitalsMinigame();
 
                     ConsoleTimer.MarkAsNonConsoleMinigame();
 
@@ -122,18 +171,23 @@ public class Doctor : DefinedRoleTemplate, DefinedRole
                         }
 
                         //生存者の数に変化がある
-                        if(lastAliveCount != NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead))
+                        if (lastAliveCount != NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead))
                             acTokenChallenge = new("doctor.challenge");
-                        
+
 
                         if (vitalsMinigame.amClosing != Minigame.CloseState.Closing) vitalsMinigame.Close();
                     }
 
                     vitalsMinigame.StartCoroutine(CoUpdate().WrapToIl2Cpp());
                 };
-                vitalButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Utility);
-                vitalButton.SetLabel("vital");
+                vitalButton.SetLabelType(ModAbilityButton.LabelType.Utility);
+                vitalButton.SetAsUsurpableButton(this);
             }
+        }
+
+        void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
+        {
+            vitalTimer = Mathf.Min(MaxPortableVitalsChargeOption, vitalTimer + ChargesPerTasksOption);
         }
     }
 }

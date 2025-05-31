@@ -3,6 +3,7 @@ using Nebula.Modules.GUIWidget;
 using UnityEngine.Rendering;
 using Virial;
 using Virial.Compat;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Game;
@@ -121,7 +122,7 @@ public class PerkFunctionalDefinition
     }
 }
 
-public abstract class PerkFunctionalInstance : BindableGameOperator
+public abstract class PerkFunctionalInstance : DependentLifespan, IGameOperator
 {
     protected GamePlayer MyPlayer => GamePlayer.LocalPlayer!;
     public PerkDefinition PerkDefinition { get; private set; }
@@ -143,13 +144,12 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
     
     public PerkDefinition(string localizedName, int backId, int iconId, Virial.Color perkColor, Virial.Color? specialColor = null) : this(localizedName, GetPerkBackIcon(backId), GetPerkIcon(iconId), perkColor.ToUnityColor(), specialColor?.ToUnityColor()) { }
     public PerkDefinition(string localizedName) : this(localizedName, null, null, Color.white, null) { }
-    public PerkInstance? Instantiate(Virial.IBinder? binder = null)
+    public PerkInstance? Instantiate(ILifespan? lifespan = null)
     {
         var perk = NebulaAPI.CurrentGame?.GetModule<PerkHolder>()?.RegisterPerk(this);
         if (perk != null)
         {
-            perk.Register(perk);
-            binder?.Bind(perk);
+            perk.Register(lifespan ?? NebulaAPI.CurrentGame!);
         }
         return perk;
     }
@@ -221,14 +221,10 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
     }
 }
 
-public class PerkInstance : IGameOperator, ILifespan, IReleasable
+public class PerkInstance : FlexibleLifespan, IGameOperator
 {
     static public Image IconMaskSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.PerkMask.png", 100f);
     static private Image IconHighlightSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Highlight.png", 100f);
-
-    private bool isDead = false;
-    bool ILifespan.IsDeadObject => isDead;
-    void IReleasable.Release() => OnReleased();
 
     internal GameObject RelatedGameObject => obj;
     private GameObject obj;
@@ -274,27 +270,24 @@ public class PerkInstance : IGameOperator, ILifespan, IReleasable
         SetHighlight(false);
     }
 
-    public Timer? MyTimer { get; private set; } = null!;
+    public GameTimer? MyTimer { get; private set; } = null!;
 
     public int Priority { get; set; } = 0;
     internal int RuntimeId { get; set; } = 0;
 
-    public void OnReleased()
+    void IGameOperator.OnReleased()
     {
-        if (isDead) return;
-
-        isDead = true;
-
         if (obj) GameObject.Destroy(obj);
-        MyTimer?.ReleaseIt();
     }
 
-    public PerkInstance BindTimer(Timer? timer)
+    public PerkInstance BindTimer(GameTimer? timer)
     {
         if (MyTimer == timer) return this;
 
-        MyTimer?.ReleaseIt();
+        MyTimer?.Release();
         MyTimer = timer;
+        timer?.Bind(this);
+        if(timer == null) SetCoolDown(0f);
 
         return this;
     }
@@ -306,7 +299,7 @@ public class PerkInstance : IGameOperator, ILifespan, IReleasable
 
     public void SetCoolDown(float rate)
     {
-        if (isDead) return;
+        if (IsDeadObject) return;
 
         if (rate > 0f)
         {
@@ -336,7 +329,7 @@ public class PerkInstance : IGameOperator, ILifespan, IReleasable
 
     public PerkInstance SetHighlight(bool highlight, Color? color = null)
     {
-        if (isDead) return this;
+        if (IsDeadObject) return this;
 
         this.highlight.gameObject.SetActive(highlight);
         if (highlight && color != null) this.highlight.material.color = color.Value;
@@ -354,7 +347,7 @@ public class PerkInstance : IGameOperator, ILifespan, IReleasable
 
     internal void UpdateLocalPos(UnityEngine.Vector3 pos)
     {
-        if (isDead) return;
+        if (IsDeadObject) return;
 
         this.obj.transform.localPosition = pos;
     }

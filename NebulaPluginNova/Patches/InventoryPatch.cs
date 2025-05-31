@@ -1,4 +1,6 @@
-﻿namespace Nebula.Patches;
+﻿using Nebula.Modules.Cosmetics;
+
+namespace Nebula.Patches;
 
 [HarmonyPatch(typeof(PlayerTab), nameof(PlayerTab.OnEnable))]
 public static class ColorTabEnablePatch

@@ -5,8 +5,7 @@ namespace Nebula.Map;
 
 public class FungleData : MapData
 {
-    static private Vector2[] MapPositions = new Vector2[]
-        { 
+    static private readonly Vector2[] MapPositions = [
         //ドロップシップ
         new(-9.2f,13.4f),
         //カフェテリア
@@ -55,10 +54,10 @@ public class FungleData : MapData
         new(20.1f,7.2f),
         //コミュ
         new(20.9f,10.8f),new(24.1f,13.2f),new(17.9f,12.7f),
-        };
+        ];
 
     //先頭の部屋ほど優先される
-    static private (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
+    static private readonly (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
         (new(-5.42f, -9.20f, 3.32f, 3.72f), "jungleLabo", true),
         (new(16.75f, -6.68f, 3.03f, 1.23f), "jungleReactor", true),
         (new(17.79f, -10.59f, 1.99f, 3.09f), "jungleReactor", true),
@@ -73,9 +72,9 @@ public class FungleData : MapData
         (new(21.60f, 12.72f, 5.78f, 2.97f), "highlandsComm", true),
         (new(15.96f, 6.89f, 11.03f, 8.87f), "highlands", false),
         ];
-    static private (SystemTypes room, AdditionalRoomArea area, string key)[] overrideRooms = [];
+    static private readonly (SystemTypes room, AdditionalRoomArea area, string key)[] overrideRooms = [];
 
-    static private MapObjectPoint[] mapObjectPoints = [
+    static private readonly MapObjectPoint[] mapObjectPoints = [
         new(-11.2f, 12.4f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ上端左
         new(-9.6f, 13.6f, MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ上端
         new(-6.9f, 12.8f, MapObjectType.SmallInCorner), //ドロップシップ上方
@@ -147,7 +146,7 @@ public class FungleData : MapData
     protected override Vector2[] NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
-    protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms };
+    protected override SystemTypes[] SabotageTypes => [SystemTypes.Reactor, SystemTypes.Comms];
     override public Vector2[][] RaiderIgnoreArea
     {
         get => [
@@ -161,17 +160,17 @@ public class FungleData : MapData
     }
 
 
-    private static IDividedSpriteLoader SealedVentSpriteFungle = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedVentFungle.png", 100f, 8, 2);
+    private static readonly IDividedSpriteLoader SealedVentSpriteFungle = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedVentFungle.png", 100f, 8, 2);
     protected override IDividedSpriteLoader SealedVentSprite => SealedVentSpriteFungle;
 
-    internal static IDividedSpriteLoader SealedDoorSpriteFungleH = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedDoorFungleH.png", 100f, 8, 2);
-    internal static IDividedSpriteLoader SealedDoorSpriteFungleV = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedDoorFungleV.png", 100f, 8, 2);
+    internal static readonly IDividedSpriteLoader SealedDoorSpriteFungleH = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedDoorFungleH.png", 100f, 8, 2);
+    internal static readonly IDividedSpriteLoader SealedDoorSpriteFungleV = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedDoorFungleV.png", 100f, 8, 2);
     protected override IDividedSpriteLoader GetSealedDoorSprite(bool isVert) => isVert ? SealedDoorSpriteFungleV : SealedDoorSpriteFungleH;
     override public Vector3 GetDoorSealingPos(OpenableDoor door, bool isVert) => isVert ? new(-0.07f, -0.4f, -0.01f) : new(-0.02f, -0.4f, -0.01f);
 
-    private Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachFar = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Far")?.GetComponent<AmbientSoundPlayer>()!);
-    private Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachClose = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Close")?.GetComponent<AmbientSoundPlayer>()!);
-    private Virial.Utilities.ComponentCache<AmbientSoundPlayer> highlands = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideHighlands", "SFX", "AMB_Outside")?.GetComponent<AmbientSoundPlayer>()!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachFar = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Far")?.GetComponent<AmbientSoundPlayer>()!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachClose = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Close")?.GetComponent<AmbientSoundPlayer>()!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> highlands = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideHighlands", "SFX", "AMB_Outside")?.GetComponent<AmbientSoundPlayer>()!);
     public override WindType GetWindType(Vector2 position)
     {
         if (

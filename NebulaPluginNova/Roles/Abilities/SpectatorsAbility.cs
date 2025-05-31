@@ -1,4 +1,5 @@
-﻿using Virial.Events.Game;
+﻿using Virial;
+using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -98,8 +99,8 @@ public class SpectatorsAbility : IGameOperator
     public SpectatorsAbility()
     {
 
-        var spectatorChangeButton = new ModAbilityButton(true)
-            .KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.SpectatorRight)).SubKeyBind(Virial.Compat.VirtualKeyInput.SpectatorLeft);
+        var spectatorChangeButton = new ModAbilityButtonImpl(true)
+            .KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.SpectatorRight)).SubKeyBind(Virial.Compat.VirtualKeyInput.SpectatorLeft).Register(NebulaAPI.CurrentGame);
         spectatorChangeButton.SetSprite(spectatorChangeSprite.GetSprite());
         spectatorChangeButton.Availability = button => true;
         spectatorChangeButton.Visibility = button => !(GamePlayer.LocalPlayer?.Tasks.IsCrewmateTask ?? false) || (GamePlayer.LocalPlayer?.Tasks.IsCompletedCurrentTasks ?? true);
@@ -115,7 +116,7 @@ public class SpectatorsAbility : IGameOperator
 
 
         
-        var spectatorButton = new ModAbilityButton(true).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Spectator));
+        var spectatorButton = new ModAbilityButtonImpl(true).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Spectator)).Register(NebulaAPI.CurrentGame);
         spectatorButton.SetSprite(spectatorExitSprite.GetSprite());
         spectatorButton.Availability = button => true;
         spectatorButton.Visibility = button => !(currentTarget?.AmOwner ?? true);

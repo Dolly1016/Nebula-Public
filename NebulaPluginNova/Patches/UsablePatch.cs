@@ -1,6 +1,8 @@
 ﻿// 各種使用可能なオブジェクトに関するパッチ
 
 
+using Virial;
+using Virial.DI;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -127,9 +129,13 @@ public static class VentUsePatch
         var info = localPlayer.GetModInfo();
 
         if (isNotEnter)
+        {
             localPlayer.MyPhysics.RpcExitVent(__instance.Id);
-        if (!localPlayer.walkingToVent)
+        }
+        else if (!localPlayer.walkingToVent)
+        {
             localPlayer.MyPhysics.RpcEnterVent(__instance.Id);
+        }
 
         __instance.SetButtons(!isNotEnter && info!.Role.CanMoveInVent);
         return false;
@@ -166,6 +172,8 @@ public static class CommonCanUsePatch
     {
         var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
         if (info == null) return true;
+
+        if (info.AllAbilities.Any(a => a.BlockUsingUtility)) return false;
 
         //ダイブ中は使用不可
         if (info.IsDived) return false;
@@ -272,6 +280,18 @@ public static class ConsoleCanUsePatch
     }
 }
 
+[HarmonyPatch(typeof(Console), nameof(Console.Use))]
+public static class ConsoleUsePatch
+{
+    public static void Postfix(Console __instance)
+    {
+        if (Minigame.Instance && Minigame.Instance.Console && Minigame.Instance.Console.GetInstanceID() == __instance.GetInstanceID())
+        {
+            GameOperatorManager.Instance?.Run(new PlayerBeginMinigameByConsoleLocalEvent(GamePlayer.LocalPlayer!, __instance));
+        }
+    }
+}
+
 [HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.CanUse))]
 public static class SystemConsoleCanUsePatch
 {
@@ -287,7 +307,7 @@ public static class SystemConsoleCanUsePatch
         }
 
         //緊急会議コンソールの使用をブロック
-        if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting))
+        if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting) && info.AllAbilities.Any(a => a.BlockCallingEmergencyMeeting))
         {
             canUse = false;
             couldUse = false;
@@ -405,23 +425,43 @@ public static class PingUpdatePatch
 
 [HarmonyPatch(typeof(Ladder), nameof(Ladder.MaxCoolDown), MethodType.Getter)]
 class LadderCoolDownPatch
+
 {
+    //GeneralConfigurationsの初期化タイミングを調整するため、関数に抽出
+    static float GetModCooldown() => GeneralConfigurations.LadderCoolDownOption;
+
     static bool Prefix(Ladder __instance, out float __result)
     {
-        __result = Math.Max(0.01f, GeneralConfigurations.LadderCoolDownOption);
-        return false;
+        if (NebulaPreprocessorImpl.Finished)
+        {
+            __result = Math.Max(0.01f, GetModCooldown());
+            return false;
+        }
+
+        __result = 0f;
+        return true;
     }
 }
 
 [HarmonyPatch(typeof(Ladder), nameof(Ladder.SetDestinationCooldown))]
 class LadderCoolDownUpdatePatch
 {
+    //GeneralConfigurationsの初期化タイミングを調整するため、関数に抽出
+    static float GetModCooldown() => GeneralConfigurations.LadderCoolDownOption;
+
     static bool Prefix(Ladder __instance)
     {
-        float maxCoolDown = GeneralConfigurations.LadderCoolDownOption;
-        __instance.Destination.CoolDown = maxCoolDown;
-        __instance.CoolDown = maxCoolDown;
-        return false;
+        if (NebulaPreprocessorImpl.Finished)
+        {
+            float maxCoolDown = GeneralConfigurations.LadderCoolDownOption;
+            __instance.Destination.CoolDown = maxCoolDown;
+            __instance.CoolDown = maxCoolDown;
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 }
 
@@ -445,5 +485,39 @@ class ZiplineCoolDownUpdatePatch
         __instance.CoolDown = maxCoolDown;
         return false;
 
+    }
+}
+
+[HarmonyPatch(typeof(ZiplineBehaviour), nameof(ZiplineBehaviour.CoAnimatePlayerJumpingOnToZipline))]
+class ZiplineAnimateBeginPatch
+{
+    static void Postfix(ZiplineBehaviour __instance, [HarmonyArgument(0)]PlayerControl player,[HarmonyArgument(1)]bool fromTop, [HarmonyArgument(2)]HandZiplinePoolable hand)
+    {
+        player.GetModInfo()?.Unbox().AddPlayerColorRenderers(hand.handRenderer);
+
+        try
+        {
+            player.GetModInfo()!.Unbox().GoalPos = fromTop ? __instance.landingPositionBottom.position : __instance.landingPositionTop.position;
+        }
+        catch
+        {
+            Debug.Log($"Skipped presetting goal position on use ZiplineBehaviour. (for {__instance.name})");
+        }
+    }
+}
+
+[HarmonyPatch(typeof(ZiplineBehaviour), nameof(ZiplineBehaviour.CoAlightPlayerFromZipline))]
+class ZiplineAnimateEndPatch
+{
+    static void Postfix(ZiplineBehaviour __instance, ref Il2CppSystem.Collections.IEnumerator __result, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(3)] HandZiplinePoolable hand)
+    {
+        var orig = __result;
+        __result = Effects.Sequence(orig, ManagedEffects.Action(() =>
+        {
+            player.GetModInfo()?.Unbox().RemovePlayerColorRenderer(hand.handRenderer);
+        }).WrapToIl2Cpp());
+
+        //死体生成のための目標地点をリセットする。
+        player.GetModInfo()?.Unbox().ResetDeadBodyGoalPos();
     }
 }

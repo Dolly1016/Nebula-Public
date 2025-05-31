@@ -1,4 +1,5 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
+using Nebula.Modules.Cosmetics;
 using TMPro;
 using Twitch;
 using UnityEngine;
@@ -74,7 +75,7 @@ public class VanillaAsset
 
     static public PlayerCustomizationMenu PlayerOptionsMenuPrefab { get; private set; } = null!;
 
-    static public ShipStatus[] MapAsset = new ShipStatus[6];
+    static public readonly ShipStatus[] MapAsset = new ShipStatus[6];
     static public Vector2 GetMapCenter(byte mapId) => MapAsset[mapId].MapPrefab.transform.GetChild(5).localPosition;
     static public float GetMapScale(byte mapId) => VanillaAsset.MapAsset[mapId].MapScale;
     static public Vector2 ConvertToMinimapPos(Vector2 pos,Vector2 center, float scale)=> (pos / scale) + center;

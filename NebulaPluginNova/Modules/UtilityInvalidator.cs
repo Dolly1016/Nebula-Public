@@ -153,7 +153,7 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
     void OnGameStart(GameStartEvent ev)
     {
         var localPlayer = GamePlayer.LocalPlayer;
-        var desealButton =  new Modules.ScriptComponents.ModAbilityButton(priority: -100);
+        var desealButton =  new Modules.ScriptComponents.ModAbilityButtonImpl(priority: -100).Register(NebulaAPI.CurrentGame!);
         desealButton.SetSprite(desealButtonSprite.GetSprite());
         desealButton.Availability = (button) => localPlayer.CanMove;
         desealButton.Visibility = (button) => (MyContainer.LocalPlayer?.Role?.CanUseVent ?? false) && (CurrentInvalidVent != null || CurrentInvalidDoor != null) && !localPlayer.IsDead;
@@ -182,7 +182,7 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
             if (!button.EffectActive) return;
             if (CurrentInvalidVent == null && CurrentInvalidDoor == null) button.InactivateEffect();
         };
-        desealButton.EffectTimer = new Timer(Roles.Crewmate.Navvy.RemoveDurationPerStepOption);
+        desealButton.EffectTimer = NebulaAPI.Modules.Timer(NebulaAPI.CurrentGame!, Roles.Crewmate.Navvy.RemoveDurationPerStepOption);
         desealButton.SetLabel("vent.seal.remove");
     }
 

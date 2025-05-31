@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nebula.Modules.Cosmetics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,10 +46,10 @@ internal class ArchivedGameImpl : IArchivedGame
         events = game.GameStatistics.Sealed;
         roleHistory = game.RoleHistory;
         mapId = AmongUsUtil.CurrentMapId;
-        palette = new ArchivedColor[Palette.PlayerColors.Length];
+        palette = new ArchivedColor[DynamicPalette.PlayerColors.Length];
         for (int i = 0; i < palette.Length; i++)
         {
-            palette[i] = new(new(Palette.PlayerColors[i]), new(Palette.ShadowColors[i]), new(DynamicPalette.VisorColors[i]));
+            palette[i] = new(new(DynamicPalette.PlayerColors[i]), new(DynamicPalette.ShadowColors[i]), new(DynamicPalette.VisorColors[i]));
         }
 
     }
@@ -62,8 +63,8 @@ internal static class ArchivedColorHelper
 {
     static public void ReflectToArchivedPalette(this ArchivedColor color)
     {
-        Palette.PlayerColors[NebulaPlayerTab.ArchiveColorId] = color.MainColor.ToUnityColor();
-        Palette.ShadowColors[NebulaPlayerTab.ArchiveColorId] = color.ShadowColor.ToUnityColor();
+        DynamicPalette.PlayerColors[NebulaPlayerTab.ArchiveColorId] = color.MainColor.ToUnityColor();
+        DynamicPalette.ShadowColors[NebulaPlayerTab.ArchiveColorId] = color.ShadowColor.ToUnityColor();
         DynamicPalette.VisorColors[NebulaPlayerTab.ArchiveColorId] = color.VisorColor.ToUnityColor();
     }
 }

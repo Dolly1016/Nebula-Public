@@ -5,6 +5,7 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using System.Text.RegularExpressions;
 using System.Net.Http.Headers;
 using System.Net;
+using Virial.Runtime;
 
 namespace Nebula.Patches;
 
@@ -48,6 +49,16 @@ public class ModNews
 }
 
 
+[NebulaPreprocess(PreprocessPhase.PostFixStructure)]
+public static class ModNewsLoader
+{
+    static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
+    {
+        yield return preprocessor.SetLoadingText("Loading News");
+        yield return ModNewsHistory.GetLoaderEnumerator();
+    }
+}
+
 [HarmonyPatch]
 public class ModNewsHistory
 {
@@ -55,6 +66,57 @@ public class ModNewsHistory
 
     private static Regex RoleRegex = new Regex("%ROLE:[A-Z]+\\([^)]+\\)%");
     private static Regex OptionRegex = new Regex("%LANG\\([a-zA-Z\\.0-9]+\\)\\,\\([^)]+\\)%");
+
+    public static IEnumerator GetLoaderEnumerator()
+    {
+        if (!NebulaPlugin.AllowHttpCommunication) yield break;
+
+        AllModNews.Clear();
+
+        var lang = Language.GetCurrentLanguage();
+
+        HttpClient http = new HttpClient();
+        http.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
+        System.Uri uri;
+        try
+        {
+            uri = new(Helpers.ConvertUrl($"https://raw.githubusercontent.com/Dolly1016/Nebula/master/Announcement_{lang}.json"));
+        }
+        catch
+        {
+            yield break;
+        }
+
+        var task = http.GetAsync(uri, HttpCompletionOption.ResponseContentRead);
+        while (!task.IsCompleted) yield return null;
+        var response = task.Result;
+
+
+        if (response.StatusCode != HttpStatusCode.OK || response.Content == null)
+        {
+            yield break;
+        }
+
+        AllModNews = JsonStructure.Deserialize<List<ModNews>>(response.Content.ReadAsStringAsync().Result) ?? new();
+
+        foreach (var news in AllModNews)
+        {
+            foreach (Match match in RoleRegex.Matches(news.detail))
+            {
+                var split = match.Value.Split(':', '(', ')');
+                FormatRoleString(match, ref news.detail, split[1], split[2]);
+            }
+
+            foreach (Match match in OptionRegex.Matches(news.detail))
+            {
+                var split = match.Value.Split('(', ')');
+
+                var translated = Language.Find(split[1]);
+                if (translated == null) translated = split[3];
+                news.detail = news.detail.Replace(match.Value, translated);
+            }
+        }
+    }
 
     private static void FormatRoleString(Match match, ref string str, string key, string defaultString)
     {
@@ -69,63 +131,6 @@ public class ModNewsHistory
     }
 
 
-    [HarmonyPatch(typeof(AnnouncementPopUp), nameof(AnnouncementPopUp.Init)), HarmonyPostfix]
-    public static void Initialize(ref Il2CppSystem.Collections.IEnumerator __result)
-    {
-        IEnumerator GetEnumerator()
-        {
-            if (AnnouncementPopUp.UpdateState > AnnouncementPopUp.AnnounceState.Fetching) yield break;
-            AllModNews.Clear();
-
-            var lang = Language.GetCurrentLanguage();
-
-            HttpClient http = new HttpClient();
-            http.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-            System.Uri uri;
-            try
-            {
-                uri = new(Helpers.ConvertUrl($"https://raw.githubusercontent.com/Dolly1016/Nebula/master/Announcement_{lang}.json"));
-            }
-            catch
-            {
-                yield break;
-            }
-
-            var task = http.GetAsync(uri, HttpCompletionOption.ResponseContentRead);
-            while (!task.IsCompleted) yield return null;
-            var response = task.Result;
-
-
-            if (response.StatusCode != HttpStatusCode.OK || response.Content == null)
-            {
-                yield break;
-            }
-
-            AllModNews = JsonStructure.Deserialize<List<ModNews>>(response.Content.ReadAsStringAsync().Result) ?? new();
-
-            foreach(var news in AllModNews)
-            {
-                foreach (Match match in RoleRegex.Matches(news.detail))
-                {
-                    var split = match.Value.Split(':', '(', ')');
-                    FormatRoleString(match, ref news.detail, split[1], split[2]);
-                }
-
-                foreach (Match match in OptionRegex.Matches(news.detail))
-                {
-                    var split = match.Value.Split('(', ')');
-
-                    var translated = Language.Find(split[1]);
-                    if (translated == null) translated = split[3];
-                    news.detail = news.detail.Replace(match.Value, translated);
-                }
-            }
-            
-            AnnouncementPopUp.UpdateState = AnnouncementPopUp.AnnounceState.NotStarted;
-        }
-
-        __result = Effects.Sequence(GetEnumerator().WrapToIl2Cpp(), __result);
-    }
     
 
     [HarmonyPatch(typeof(PlayerAnnouncementData), nameof(PlayerAnnouncementData.SetAnnouncements)), HarmonyPrefix]

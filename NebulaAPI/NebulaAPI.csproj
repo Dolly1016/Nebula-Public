@@ -2,32 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<AssemblyName>NebulaAPI</AssemblyName>
     <RootNamespace>Virial</RootNamespace>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <NoWin32Manifest>true</NoWin32Manifest>
     <PackageId>NebulaAPI</PackageId>
     <Title>Nebula API</Title>
 	<LangVersion>latest</LangVersion>
-    <Version>2.0.0.0</Version>
+    <Version>3.0.0-alpha1</Version>
     <Authors>Dolly</Authors>
     <Description>Among UsのMod "Nebula on the Ship"におけるスクリプトで使用できるAPIです。</Description>
     <PackageProjectUrl>https://sparkling-dianella-4d1.notion.site/Nebula-on-the-Ship-API-96b2f818267642a182461e1391c2553a</PackageProjectUrl>
     <NeutralLanguage>ja-JP</NeutralLanguage>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>embedded</DebugType>
-    <WarningLevel>7</WarningLevel>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>embedded</DebugType>
-    <WarningLevel>7</WarningLevel>
+	<DebugType>embedded</DebugType>
+	<WarningLevel>7</WarningLevel>
   </PropertyGroup>
 
   <ItemGroup>

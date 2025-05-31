@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Virial.Compat;
 using Virial.Media;
 

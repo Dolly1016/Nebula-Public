@@ -24,7 +24,7 @@ internal class ConfigurationHolder : IConfigurationHolder
     Func<bool>? isShown;
     Func<ConfigurationHolderState>? state;
 
-    static private List<ConfigurationHolder> allHolders = new();
+    static private List<ConfigurationHolder> allHolders = [];
     static public IEnumerable<IConfigurationHolder> AllHolders = allHolders;
 
     static void Preprocess(NebulaPreprocessor preprocessor)
@@ -37,10 +37,10 @@ internal class ConfigurationHolder : IConfigurationHolder
         this.title = title;
         this.detail = detail;
         this.tabs = tabs;
-        this.tags = new();
+        this.tags = [];
         this.gamemodes = gamemodes;
         this.myConfigurations = new(configurations);
-        this.relatedButtons = new();
+        this.relatedButtons = [];
         this.isShown = isShown;
         this.state = state;
 
@@ -58,7 +58,7 @@ internal class ConfigurationHolder : IConfigurationHolder
 
     BitMask<GameModeDefinition> IConfigurationHolder.GameModes => gamemodes;
 
-    IEnumerable<ConfigurationUpperButton> IConfigurationHolder.RelatedInformations => relatedButtons;
+    IEnumerable<ConfigurationUpperButton> IConfigurationHolder.RelatedInformation => relatedButtons;
     IEnumerable<ConfigurationTag> IConfigurationHolder.Tags => tags;
 
     IConfigurationHolder IConfigurationHolder.AppendConfiguration(Virial.Configuration.IConfiguration configuration) { myConfigurations.Add(configuration); return this; }

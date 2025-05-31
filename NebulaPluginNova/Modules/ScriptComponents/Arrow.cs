@@ -1,10 +1,11 @@
-﻿using Virial;
+﻿using Nebula.Modules.Cosmetics;
+using Virial;
 using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
 
-public class Arrow : INebulaScriptComponent, IGameOperator
+public class Arrow : FlexibleLifespan, IGameOperator
 {
     public enum DisappearanceType
     {
@@ -77,7 +78,7 @@ public class Arrow : INebulaScriptComponent, IGameOperator
 
     public Arrow SetColorByOutfit(NetworkedPlayerInfo.PlayerOutfit outfit)
     {
-        return SetColor(Palette.PlayerColors[outfit.ColorId], Palette.ShadowColors[outfit.ColorId]);
+        return SetColor(DynamicPalette.PlayerColors[outfit.ColorId], DynamicPalette.ShadowColors[outfit.ColorId]);
     }
 
     public Arrow SetColor(Color mainColor, Color shadowColor)
@@ -194,7 +195,7 @@ public class Arrow : INebulaScriptComponent, IGameOperator
 
             if (disappearProgress > 1f)
             {
-                this.ReleaseIt();
+                this.Release();
                 disappearProgress = 1f;
             }
         }

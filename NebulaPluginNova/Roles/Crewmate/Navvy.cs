@@ -13,58 +13,59 @@ using Nebula.Map;
 
 namespace Nebula.Roles.Crewmate;
 
-internal class Navvy : DefinedRoleTemplate, DefinedRole
+internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedRole
 {
 
     private Navvy() : base("navvy", new(71, 93, 206), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SealCoolDownOption, CostOption, CostForVentSealingOption, VentRemoveStepsOption, CostForDoorSealingOption, DoorRemoveStepsOption, RemoveDurationPerStepOption, RedundantSealingOption])
     {
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, CostOption));
 
-    static public FloatConfiguration SealCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.navvy.sealCooldown", (0f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static public IntegerConfiguration CostOption = NebulaAPI.Configurations.Configuration("options.role.navvy.maxCost", (1, 30), 4);
-    static public IntegerConfiguration CostForVentSealingOption = NebulaAPI.Configurations.Configuration("options.role.navvy.costForVentSealing", (1, 5), 1);
-    static public IntegerConfiguration CostForDoorSealingOption = NebulaAPI.Configurations.Configuration("options.role.navvy.costForDoorSealing", (1, 5), 2);
-    static public FloatConfiguration RemoveDurationPerStepOption = NebulaAPI.Configurations.Configuration("options.role.navvy.removeDuration", (float[])[0.5f, 1f, 1.5f, 2f, 2.5f, 3f, 3.5f, 4f, 4.5f, 5f, 6f, 7f, 8f, 9f, 10f], 3f, FloatConfigurationDecorator.Second);
-    static public IntegerConfiguration VentRemoveStepsOption = NebulaAPI.Configurations.Configuration("options.role.navvy.numOfVentRemovalSteps", (1, 4), 2);
-    static public IntegerConfiguration DoorRemoveStepsOption = NebulaAPI.Configurations.Configuration("options.role.navvy.numOfDoorRemovalSteps", (1, 4), 2);
-    static public BoolConfiguration RedundantSealingOption = NebulaAPI.Configurations.Configuration("options.role.navvy.redundantSealing", true);
-    static int[][] VisualSteps = [[3, 3, 3, 3, 4, 5, 6, 7], [3, 3, 3, 3, 4, 5, 6, 7], [1, 3, 3, 3, 4, 5, 6, 7], [0, 2, 3, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5, 6, 7]];
-    static int[] VisualStandardSteps = [0, 1, 2, 3, 4, 5, 6, 7];
+    static public readonly FloatConfiguration SealCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.navvy.sealCooldown", (0f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static public readonly IntegerConfiguration CostOption = NebulaAPI.Configurations.Configuration("options.role.navvy.maxCost", (1, 30), 4);
+    static public readonly IntegerConfiguration CostForVentSealingOption = NebulaAPI.Configurations.Configuration("options.role.navvy.costForVentSealing", (1, 5), 1);
+    static public readonly IntegerConfiguration CostForDoorSealingOption = NebulaAPI.Configurations.Configuration("options.role.navvy.costForDoorSealing", (1, 5), 2);
+    static public readonly FloatConfiguration RemoveDurationPerStepOption = NebulaAPI.Configurations.Configuration("options.role.navvy.removeDuration", (float[])[0.5f, 1f, 1.5f, 2f, 2.5f, 3f, 3.5f, 4f, 4.5f, 5f, 6f, 7f, 8f, 9f, 10f], 3f, FloatConfigurationDecorator.Second);
+    static public readonly IntegerConfiguration VentRemoveStepsOption = NebulaAPI.Configurations.Configuration("options.role.navvy.numOfVentRemovalSteps", (1, 4), 2);
+    static public readonly IntegerConfiguration DoorRemoveStepsOption = NebulaAPI.Configurations.Configuration("options.role.navvy.numOfDoorRemovalSteps", (1, 4), 2);
+    static public readonly BoolConfiguration RedundantSealingOption = NebulaAPI.Configurations.Configuration("options.role.navvy.redundantSealing", true);
+    static readonly int[][] VisualSteps = [[3, 3, 3, 3, 4, 5, 6, 7], [3, 3, 3, 3, 4, 5, 6, 7], [1, 3, 3, 3, 4, 5, 6, 7], [0, 2, 3, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5, 6, 7]];
+    static readonly int[] VisualStandardSteps = [0, 1, 2, 3, 4, 5, 6, 7];
 
-    static public Navvy MyRole = new Navvy();
+    static public Navvy MyRole = new();
 
-    static private GameStatsEntry StatsSealVent = NebulaAPI.CreateStatsEntry("stats.navvy.sealVent", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsSealDoor = NebulaAPI.CreateStatsEntry("stats.navvy.sealDoor", GameStatsCategory.Roles, MyRole);
-    static public GameStatsEntry StatsRemoveVent = NebulaAPI.CreateStatsEntry("stats.navvy.removeVent", GameStatsCategory.Roles, MyRole);
-    static public GameStatsEntry StatsRemoveDoor = NebulaAPI.CreateStatsEntry("stats.navvy.removeDoor", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsSealVent = NebulaAPI.CreateStatsEntry("stats.navvy.sealVent", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsSealDoor = NebulaAPI.CreateStatsEntry("stats.navvy.sealDoor", GameStatsCategory.Roles, MyRole);
+    static public readonly GameStatsEntry StatsRemoveVent = NebulaAPI.CreateStatsEntry("stats.navvy.removeVent", GameStatsCategory.Roles, MyRole);
+    static public readonly GameStatsEntry StatsRemoveDoor = NebulaAPI.CreateStatsEntry("stats.navvy.removeDoor", GameStatsCategory.Roles, MyRole);
 
     [NebulaRPCHolder]
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player) { }
 
-        static private Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.CloseVentButton.png", 115f);
-        static private Image sealImage = SpriteLoader.FromResource("Nebula.Resources.Seal.png", 100f);
+        static private readonly Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.CloseVentButton.png", 115f);
+        static private readonly Image sealImage = SpriteLoader.FromResource("Nebula.Resources.Seal.png", 100f);
 
         List<int> nextSealedVents = [];
         List<int> nextSealedDoors = [];
-        void RuntimeAssignable.OnActivated() {
+        int leftTapes = CostOption;
+        public Ability(GamePlayer player, bool isUsurped, int left) : base(player, isUsurped)
+        {
             UtilityInvalidationSystem.Instance.GraphicVentLevels = RedundantSealingOption ? VisualStandardSteps : VisualSteps[VentRemoveStepsOption];
             UtilityInvalidationSystem.Instance.GraphicDoorLevels = RedundantSealingOption ? VisualStandardSteps : VisualSteps[DoorRemoveStepsOption];
 
+            leftTapes = left;
             if (AmOwner)
             {
-                int left = CostOption;
-
-                var tracker = Bind(ObjectTrackers.ForVents(0.8f, MyPlayer, 
+                var tracker = ObjectTrackers.ForVents(0.8f, MyPlayer, 
                     RedundantSealingOption ? 
-                    v => left >= CostForVentSealingOption && !nextSealedVents.Contains(v.Id) && (!v.TryGetComponent<InvalidVent>(out var invalidVent) || (invalidVent.Level + VentRemoveStepsOption < 8)) :
-                    v => left >= CostForVentSealingOption && !nextSealedVents.Contains(v.Id) && !v.TryGetComponent<InvalidVent>(out _), MyRole.UnityColor, true));
+                    v => leftTapes >= CostForVentSealingOption && !nextSealedVents.Contains(v.Id) && (!v.TryGetComponent<InvalidVent>(out var invalidVent) || (invalidVent.Level + VentRemoveStepsOption < 8)) :
+                    v => leftTapes >= CostForVentSealingOption && !nextSealedVents.Contains(v.Id) && !v.TryGetComponent<InvalidVent>(out _), MyRole.UnityColor, true).Register(this);
                 OpenableDoor? currentTargetDoor = null;
-                var sealButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                var sealButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    SealCoolDownOption, "seal", buttonImage,
+                    _ => tracker.CurrentTarget != null || currentTargetDoor != null, _ => leftTapes > 0);
 
                 var mapData = MapData.GetCurrentMapData();
                 //近くの塞げるドアを探す
@@ -73,7 +74,7 @@ internal class Navvy : DefinedRoleTemplate, DefinedRole
                     if (ShipStatus.Instance.AllDoors.Count == 0) return;
                     currentTargetDoor = null;
 
-                    if (left < CostForDoorSealingOption) return;
+                    if (leftTapes < CostForDoorSealingOption) return;
 
                     float min = 10f;
                     var playerPos = MyPlayer.VanillaPlayer.transform.position;
@@ -89,17 +90,13 @@ internal class Navvy : DefinedRoleTemplate, DefinedRole
                     });
                     if (min < 1f) currentTargetDoor = nearbyDoor;
                 };
-                sealButton.SetSprite(buttonImage.GetSprite());
-                sealButton.Availability = (button) => MyPlayer.CanMove && (tracker.CurrentTarget != null || currentTargetDoor != null);
-                sealButton.Visibility = (button) => !MyPlayer.IsDead && left > 0;
-                var icon = sealButton.ShowUsesIcon(3);
-                icon.text = left.ToString();
+                sealButton.ShowUsesIcon(3, leftTapes.ToString());
                 sealButton.OnClick = (button) =>
                 {
                     SpriteRenderer sealRenderer = null!;
                     if (tracker.CurrentTarget != null)
                     {
-                        left -= CostForVentSealingOption;
+                        leftTapes -= CostForVentSealingOption;
                         nextSealedVents.Add(tracker.CurrentTarget!.Id);
 
                         //テープを設置
@@ -117,7 +114,7 @@ internal class Navvy : DefinedRoleTemplate, DefinedRole
                     }
                     else if(currentTargetDoor != null)
                     {
-                        left -= CostForDoorSealingOption;
+                        leftTapes -= CostForDoorSealingOption;
                         nextSealedDoors.Add(currentTargetDoor!.Id);
 
                         //テープを設置
@@ -140,21 +137,19 @@ internal class Navvy : DefinedRoleTemplate, DefinedRole
                     {
                         //テープの共通処理
                         sealRenderer.sprite = sealImage.GetSprite();
-                        Bind(new GameObjectBinding(sealRenderer.gameObject));
-                        GameOperatorManager.Instance?.Register<MeetingStartEvent>(ev =>
+                        this.BindGameObject(sealRenderer.gameObject);
+                        GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev =>
                         {
                             if (sealRenderer) GameObject.Destroy(sealRenderer.gameObject);
                         }, this);
                     }
 
-                    icon.text = left.ToString();
+                    button.UpdateUsesIcon(leftTapes.ToString());
                     new StaticAchievementToken("navvy.common1");
 
                     sealButton.StartCoolDown();
                 };
-                sealButton.OnMeeting = button => button.StartCoolDown();
-                sealButton.CoolDownTimer = Bind(new Timer(SealCoolDownOption).SetAsAbilityCoolDown().Start());
-                sealButton.SetLabel("seal");
+                sealButton.SetAsUsurpableButton(this);
             }
         }
 

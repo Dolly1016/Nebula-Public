@@ -4,6 +4,7 @@ using Unity.Services.Core.Internal;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
@@ -30,9 +31,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
-        private ModAbilityButton? stirButton = null;
-        private ModAbilityButton? sabotageButton = null;
-
+        
         static public Image StirButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.StirButton.png", 115f);
         static public Image SabotageButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FakeSaboButton.png", 115f);
         
@@ -48,12 +47,11 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer)));
+                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer)).Register(this);
 
-                stirButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir");
-                stirButton.SetSprite(StirButtonSprite.GetSprite());
-                stirButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId,out int charge) || charge < SabotageMaxChargeOption);
-                stirButton.Visibility = (button) => !MyPlayer.IsDead;
+                var stirButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir",
+                    StirCoolDownOption, "stir", StirButtonSprite,
+                    _ => sampleTracker.CurrentTarget != null && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId, out int charge) || charge < SabotageMaxChargeOption));
                 stirButton.OnClick = (button) => {
                     int charge = 0;
                     if (sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget!.PlayerId, out var v)) charge = v;
@@ -62,13 +60,12 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
                     stirButton.StartCoolDown();
                     StatsStir.Progress();
                 };
-                stirButton.CoolDownTimer = Bind(new Timer(StirCoolDownOption).SetAsAbilityCoolDown().Start());
-                stirButton.SetLabel("stir");
 
-                sabotageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility,"stirrer.fakeSabo");
-                sabotageButton.SetSprite(SabotageButtonSprite.GetSprite());
-                sabotageButton.Availability = (button) => MyPlayer.CanMove && sabotageChargeMap.Any(entry => entry.Value > 0) && PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null;
-                sabotageButton.Visibility = (button) => !MyPlayer.IsDead;
+                var sabotageButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility,"stirrer.fakeSabo",
+                    Mathf.Max(SabotageIntervalOption, SabotageCoolDownOption), "fakeSabotage", SabotageButtonSprite,
+                    _ => sabotageChargeMap.Any(entry => entry.Value > 0) && PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null
+                    );
+                sabotageButton.CoolDownTimer!.Start(SabotageCoolDownOption);
                 sabotageButton.OnClick = (button) => {
                     int count = 0;
                     foreach (var entry in sabotageChargeMap)
@@ -93,13 +90,14 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
                     StatsSabotage.Progress();
 
                 };
-                sabotageButton.CoolDownTimer = Bind(new Timer(Mathf.Max(SabotageIntervalOption, SabotageCoolDownOption)).SetAsAbilityCoolDown().Start(SabotageCoolDownOption));
                 sabotageButton.SetLabel("fakeSabotage");
-                sabotageButton.UseCoolDownSupport = false;
-                sabotageButton.OnStartTaskPhase = (button) => button.CoolDownTimer?.Start(SabotageCoolDownOption);
+                GameOperatorManager.Instance?.Subscribe<TaskPhaseStartEvent>(ev => {
+                    sabotageButton.CoolDownTimer!.Start(SabotageCoolDownOption);
+                }, this, 99);
+                //ModAbilityButtonのクールダウンリセットより後(優先度100未満)のタイミングで正しくリセットする。
             }
 
-            GameOperatorManager.Instance?.Register<PlayerDieEvent>(ev =>
+            GameOperatorManager.Instance?.Subscribe<PlayerDieEvent>(ev =>
             {
                 ev.Player.Unbox().FakeSabotage.RemoveFakeSabotage(SystemTypes.Electrical, SystemTypes.Comms);
             }, NebulaAPI.CurrentGame!);

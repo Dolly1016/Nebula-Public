@@ -1,5 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Iced.Intel;
+using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using System;
 using System.Collections.Generic;
@@ -22,8 +23,8 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     public class PickedUpArchive
     {
-        List<string> players = new();
-        Dictionary<string, ulong> achievements = new();
+        List<string> players = [];
+        Dictionary<string, ulong> achievements = [];
         PriorityQueue<INebulaAchievement, int> queue = new();
         public void TryAdd(string playerName, IEnumerable<INebulaAchievement> achievements)
         {
@@ -98,15 +99,16 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
     static ShowUp() => DIManager.Instance.RegisterModule(() => new ShowUp());
     public ShowUp() => ModSingleton<ShowUp>.Instance = this;
 
-    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AppealButton.png", 115f);
-    static private Image playButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AchievementHistoryButton.png", 115f);
-    static private Image iconSprite = SpriteLoader.FromResource("Nebula.Resources.AppealIcon.png", 100f);
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AppealButton.png", 115f);
+    static private readonly Image playButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AchievementHistoryButton.png", 115f);
+    static private readonly Image iconSprite = SpriteLoader.FromResource("Nebula.Resources.AppealIcon.png", 100f);
 
     private PickedUpArchive? pickedUpArchive = null;
 
     public bool CanAppealInLobby { get; private set; } = AmongUsClient.Instance.AmHost ? (ClientOption.ShowSocialSettingsOnLobby.Value && ClientOption.CanAppealInLobbyDefault.Value) : false;
     public bool CanAppealInGame { get; private set; } = false;
     public bool CanUseStamps { get; private set; } = true;
+    public bool CanUseEmotes { get; private set; } = false;
     public Virial.Media.GUIWidget GetSettingWidget()
     {
         Virial.Media.GUIWidget GetCheckbox(Func<bool> getter, Action<bool> setter, string label)
@@ -125,9 +127,9 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         return GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,
             new NoSGUIImage(Virial.Media.GUIAlignment.Center, iconSprite, new(0.5f, null), overlay: ()=>GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), "social.appeal.detail")) { IsMasked = false },
             GUI.API.HorizontalMargin(0.05f),
-            GetCheckbox(() => CanAppealInLobby, val => { RpcShareSocialSettings.Invoke((val, CanAppealInGame, CanUseStamps)); ClientOption.CanAppealInLobbyDefault.Value = val; }, "lobby"),
+            GetCheckbox(() => CanAppealInLobby, val => { RpcShareSocialSettings.Invoke((val, CanAppealInGame, CanUseStamps, CanUseEmotes)); ClientOption.CanAppealInLobbyDefault.Value = val; }, "lobby"),
             GUI.API.HorizontalMargin(0.15f),
-            GetCheckbox(() => CanAppealInGame, val => RpcShareSocialSettings.Invoke((CanAppealInLobby, val, CanUseStamps)), "game")
+            GetCheckbox(() => CanAppealInGame, val => RpcShareSocialSettings.Invoke((CanAppealInLobby, val, CanUseStamps, CanUseEmotes)), "game")
             );
     }
 
@@ -137,7 +139,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
     {
         this.Register(container);
 
-        var showUpButton = new ModAbilityButton(true);
+        var showUpButton = new ModAbilityButtonImpl(true).Register(NebulaAPI.CurrentGame!);
         showUpButton.SetSprite(buttonSprite.GetSprite());
         showUpButton.Availability = (button) => true;
         showUpButton.Visibility = (button) => LobbyBehaviour.Instance ? CanAppealInLobby : CanAppealInGame;
@@ -146,11 +148,11 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
             button.StartCoolDown();
             RpcRequestShowUp.Invoke(PlayerControl.LocalPlayer.PlayerId);
         };
-        showUpButton.CoolDownTimer = new Timer(5f).Start();
+        showUpButton.CoolDownTimer = NebulaAPI.Modules.Timer(NebulaAPI.CurrentGame!, 5f).Start();
         showUpButton.SetLabel("appeal");
 
         bool fired = false;
-        var playButton = new ModAbilityButton(true);
+        var playButton = new ModAbilityButtonImpl(true).Register(NebulaAPI.CurrentGame!);
         playButton.SetSprite(playButtonSprite.GetSprite());
         playButton.Availability = (button) => true;
         playButton.Visibility = (button) => LobbyBehaviour.Instance && NebulaAchievementManager.HasAnyAchievementResult && AmongUsClient.Instance.AmHost && !fired;
@@ -197,13 +199,13 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
     }
 
     public PlayerControl? CurrentShowUp { get; private set; } = null;
-    private HashSet<GameObject> AllShowUp = new();
+    private HashSet<GameObject> AllShowUp = [];
     public bool AnyoneShowedUp => CurrentShowUp != null && CurrentShowUp;
     public bool AnySocialShown => AnyoneShowedUp || AllShowUp.Count > 0;
     public bool ShowedUp(GamePlayer player) => AnyoneShowedUp && CurrentShowUp!.PlayerId == player.PlayerId;
 
-    TextAttribute TitleAttribute = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.2f, 0.7f, 1.2f), Size = new(3f,3f) };
-    TextAttribute NameAttribute = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(2f) };
+    static readonly TextAttribute TitleAttribute = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.2f, 0.7f, 1.2f), Size = new(3f,3f) };
+    static readonly TextAttribute NameAttribute = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(2f) };
     public void ShowPlayer(PlayerControl? player, float angle, float duration = 2.5f)
     {
         if (player == null) return;
@@ -221,7 +223,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
             NebulaManager.Instance.StartCoroutine(
                 CoShowSocial("PlayerZoom", new(1.5f, -0.6f),
                 GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
-                    GUI.API.RawText(Virial.Media.GUIAlignment.Center, TitleAttribute, titleText.Color(Color.Lerp(Color.white, Palette.PlayerColors[player.PlayerId], 0.25f))),
+                    GUI.API.RawText(Virial.Media.GUIAlignment.Center, TitleAttribute, titleText.Color(Color.Lerp(Color.white, DynamicPalette.PlayerColors[player.PlayerId], 0.25f))),
                     GUI.API.VerticalMargin(-0.05f),
                     GUI.API.RawText(Virial.Media.GUIAlignment.Center, NameAttribute, text)
                 ),
@@ -244,10 +246,10 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         }));
     }
 
-    public void ShareSocialSettingsAsHost() => RpcShareSocialSettings.Invoke((CanAppealInLobby, CanAppealInGame, ClientOption.ShowStamps.Value));
+    public void ShareSocialSettingsAsHost() => RpcShareSocialSettings.Invoke((CanAppealInLobby, CanAppealInGame, ClientOption.ShowStamps.Value, ClientOption.ShowEmotes.Value));
 
     private PriorityQueue<(INebulaAchievement achievement, string playerName), int> lastClearedAchievementsQueue = new();
-    private HashSet<string> putPlayers = new HashSet<string>();
+    private HashSet<string> putPlayers = [];
 
     internal void PutLastClearedAchievements(string playerName, INebulaAchievement[] achievements)
     {
@@ -262,7 +264,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         pickedUpArchive?.TryAdd(playerName, achievements);
     }
 
-    public static RemoteProcess<(bool inLobby, bool inGame, bool canUseStamps)> RpcShareSocialSettings = new(
+    public static RemoteProcess<(bool inLobby, bool inGame, bool canUseStamps, bool canUseEmotes)> RpcShareSocialSettings = new(
         "ShareSocialSetting",
         (message, _) =>
         {
@@ -270,6 +272,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
             instance.CanAppealInLobby = message.inLobby;
             instance.CanAppealInGame = message.inGame;
             instance.CanUseStamps = message.canUseStamps;
+            instance.CanUseEmotes = message.canUseEmotes;
         });
     private static RemoteProcess<(byte playerId, float angle, float duration)> RpcShowUp = new(
         "PlayShowUp",
@@ -313,7 +316,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         });
 
     public static RemoteProcess<int> RpcRequireAchievementArchive = new(
-        "RequireAchivementArchive", (message, _) =>
+        "RequireAchievementArchive", (message, _) =>
         {
             NebulaAchievementManager.SendPickedUpAchievements();
         });

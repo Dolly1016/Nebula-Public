@@ -1,4 +1,5 @@
 ﻿
+using Virial;
 using Virial.Components;
 using Virial.Events.Game;
 using Virial.Game;
@@ -56,7 +57,7 @@ public static class ObjectTrackers
 
 
 
-public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker<V>, IGameOperator where V : class
+public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, IGameOperator where V : class
 {
     V? ObjectTracker<V>.CurrentTarget => currentTarget?.Item2;
     bool ObjectTracker<V>.IsLocked { get => isLocked; set => isLocked = value; }
@@ -69,7 +70,7 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
     Predicate<V>? predicateHeavier = null;
     Func<T, V> converter;
     Func<T, IEnumerable<UnityEngine.Vector2>> positionConverter;
-    Func<T, SpriteRenderer> rendererConverter;
+    Action<T, bool, Color> highlightSetter;
     UnityEngine.Color color = UnityEngine.Color.yellow;
     bool ignoreColliders;
     bool ignoreShadows;
@@ -78,6 +79,19 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
     public bool MoreHighlight = false;
 
     public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Func<T, SpriteRenderer> rendererConverter, Color? color = null, bool ignoreColliders = false, bool ignoreShadows = true)
+        : this(tracker, maxDistance, allTargets, predicate, predicateHeavier, converter, positionConverter, (target, more, color) =>
+        {
+            var renderer = rendererConverter.Invoke(target);
+            if (renderer)
+            {
+                if (more)
+                    AmongUsUtil.SetHighlight(renderer, true, color);
+                else
+                    HighlightHelpers.SetHighlight(renderer, color);
+            }
+        }, color, ignoreColliders, ignoreShadows) { }
+
+    public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Action<T, bool, Color> highlightSetter, Color? color = null, bool ignoreColliders = false, bool ignoreShadows = true)
     {
         this.tracker = tracker;
         this.allTargets = allTargets;
@@ -85,7 +99,7 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
         this.predicateHeavier = predicateHeavier;
         this.converter = converter;
         this.positionConverter = positionConverter;
-        this.rendererConverter = rendererConverter;
+        this.highlightSetter = highlightSetter;
         this.maxDistance = maxDistance;
         this.ignoreColliders = ignoreColliders;
         this.ignoreShadows = ignoreShadows;
@@ -98,10 +112,7 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
     {
         if (currentTarget == null) return;
 
-        if (MoreHighlight)
-            AmongUsUtil.SetHighlight(rendererConverter.Invoke(currentTarget!.Item1), true, color);
-        else
-            HighlightHelpers.SetHighlight(rendererConverter.Invoke(currentTarget!.Item1), color);
+        highlightSetter?.Invoke(currentTarget!.Item1, MoreHighlight, color);
     }
 
     void HudUpdate(GameHudUpdateEvent ev)
@@ -137,7 +148,7 @@ public class ObjectTrackerUnityImpl<V,T> : INebulaScriptComponent, ObjectTracker
             Vector2 dVec = pos[0] - myPos; //先頭を最たる中心として扱う
             float magnitude = dVec.magnitude;
 
-            if (MoreHighlight && magnitude < 4.5f) HighlightHelpers.SetHighlight(rendererConverter.Invoke(t), color);
+            if (MoreHighlight && magnitude < 4.5f) highlightSetter?.Invoke(currentTarget!.Item1, false, color);
 
             if (distance < magnitude) continue;
 

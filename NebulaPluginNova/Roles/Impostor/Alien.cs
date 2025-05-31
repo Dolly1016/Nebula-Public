@@ -15,38 +15,31 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Alien.png");
     }
     
-    Citation? HasCitation.Citaion => Citations.SuperNewRoles;
+    Citation? HasCitation.Citation => Citations.SuperNewRoles;
 
 
-    static private FloatConfiguration EMICoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration EMIDurationOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiDuration", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("options.role.alien.numOfInvalidations", (1, 10), 1);
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    static private readonly FloatConfiguration EMICoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration EMIDurationOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiDuration", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
+    static private readonly IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("options.role.alien.numOfInvalidations", (1, 10), 1);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
-    static public Alien MyRole = new Alien();
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    static public readonly Alien MyRole = new();
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
-        static private Image invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
+        static private readonly Image invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
 
-        ModAbilityButton? emiButton = null;
-        AchievementToken<(int playerMask,bool clear)>? achCommon4Token = null;
-        AchievementToken<(int killTotal,int killOnlyMe)>? achChallengeToken = null;
-        public Ability(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
-                achChallengeToken = new("alien.challenge", (0, 0), (val, _) => val.killTotal >= 5 && val.killOnlyMe >= 3);
+                AchievementToken<(int killTotal, int killOnlyMe)>  achChallengeToken = new("alien.challenge", (0, 0), (val, _) => val.killTotal >= 5 && val.killOnlyMe >= 3);
 
-                emiButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                emiButton.SetSprite(buttonSprite.GetSprite());
-                emiButton.Availability = (button) => MyPlayer.CanMove;
-                emiButton.Visibility = (button) => !MyPlayer.IsDead;
-                emiButton.OnClick = (button) => {
-                    button.ActivateEffect();
-                };
+                var emiButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    EMICoolDownOption, EMIDurationOption, "emi", buttonSprite);
                 emiButton.OnEffectStart = (button) =>
                 {
                     using (RPCRouter.CreateSection("EMI"))
@@ -57,9 +50,9 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
 
                     IEnumerator CoNoise()
                     {
-                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 4, 0.21f, false, 0, "nebula::alien", false),true));
+                        MyPlayer.GainAttribute(PlayerAttributes.Roughening, 0.21f, 4f, false, 0, "nebula::alien");
                         yield return Effects.Wait(0.45f);
-                        PlayerModInfo.RpcAttrModulator.Invoke((MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 20, 0.5f, false, 0, "nebula::alien", false), true));
+                        MyPlayer.GainAttribute(PlayerAttributes.Roughening, 0.5f, 20f, false, 0, "nebula::alien");
                         yield return Effects.Wait(0.55f);
                     }
                     NebulaManager.Instance.StartCoroutine(CoNoise().WrapToIl2Cpp());
@@ -69,64 +62,52 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
                 {
                     button.StartCoolDown();
                 };
-                emiButton.OnMeeting = button => button.StartCoolDown();
-                emiButton.CoolDownTimer = Bind(new Timer(EMICoolDownOption).SetAsAbilityCoolDown().Start());
-                emiButton.EffectTimer = Bind(new Timer(EMIDurationOption));
-                emiButton.SetLabel("emi");
+                emiButton.SetAsUsurpableButton(this);
 
+                AchievementToken<(int playerMask, bool clear)> achCommon4Token = new("alien.common4", (0, false), (val, _) => val.clear);
                 if (NumOfInvalidationsOption > 0)
                 {
-                    achCommon4Token = new("alien.common4", (0,false),(val,_) => val.clear);
-
                     int left = NumOfInvalidationsOption;
 
-                    var invalidateTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p)));
-                    var invalidateButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
-                    invalidateButton.SetSprite(invalidateButtonSprite.GetSprite());
-                    invalidateButton.Availability = (button) => MyPlayer.CanMove && invalidateTracker.CurrentTarget != null;
-                    invalidateButton.Visibility = (button) => !MyPlayer.IsDead && left > 0;
-                    var icon = invalidateButton.ShowUsesIcon(0);
-                    icon.text = left.ToString();
+                    var invalidateTracker = ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p)).Register(this);
+                    var invalidateButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility,
+                        InvalidateCoolDownOption, "invalidate", invalidateButtonSprite,
+                        _ => invalidateTracker.CurrentTarget != null, _ => left > 0);
+                    invalidateButton.ShowUsesIcon(0, left.ToString());
                     invalidateButton.OnClick = (button) =>
                     {
                         PlayerModInfo.RpcAttrModulator.Invoke((invalidateTracker.CurrentTarget!.PlayerId, new AttributeModulator(PlayerAttributes.Isolation, 100000f, true, 0, canBeAware: invalidateTracker.CurrentTarget.IsImpostor), true));
                         left--;
-                        icon.text = left.ToString();
+                        button.UpdateUsesIcon(left.ToString());
 
                         new StaticAchievementToken("alien.common2");
                         achCommon4Token.Value.playerMask |= 1 << invalidateTracker.CurrentTarget.PlayerId;
 
                         invalidateButton.StartCoolDown();
                     };
-                    invalidateButton.OnMeeting = button => button.StartCoolDown();
-                    invalidateButton.CoolDownTimer = Bind(new Timer(InvalidateCoolDownOption).SetAsAbilityCoolDown().Start());
-                    invalidateButton.SetLabel("invalidate");
-                    
+                    invalidateButton.SetAsUsurpableButton(this);
                 }
-            }
-        }
 
-        [Local, OnlyMyPlayer]
-        void OnKillPlayer(PlayerKillPlayerEvent ev)
-        {
-            if (emiButton?.EffectActive ?? false) new StaticAchievementToken("alien.common1");
-        }
+                GameOperatorManager.Instance?.Subscribe<PlayerKillPlayerEvent>(ev =>
+                {
+                    if (ev.Player.AmOwner && emiButton.IsInEffect) new StaticAchievementToken("alien.common1");
+                }, this);
+                GameOperatorManager.Instance?.Subscribe<PlayerMurderedEvent>(ev =>
+                {
+                    if (emiButton.IsInEffect)
+                    {
+                        achChallengeToken.Value.killTotal++;
+                        if (ev.Murderer.AmOwner) achChallengeToken.Value.killOnlyMe++;
+                    }
 
-        [Local]
-        void OnPlayerMurdered(PlayerMurderedEvent ev)
-        {
-            if (achChallengeToken != null && (emiButton?.EffectActive ?? false))
-            {
-                achChallengeToken.Value.killTotal++;
-                if (ev.Murderer.AmOwner) achChallengeToken.Value.killOnlyMe++;
-            }
-
-            if (!ev.Murderer.AmOwner && ev.Murderer.IsImpostor)
-            {
-                if (emiButton?.EffectActive ?? false)
-                    new StaticAchievementToken("alien.common3");
-                if (((achCommon4Token?.Value.playerMask ?? 0) & (1 << ev.Dead.PlayerId)) != 0)
-                    achCommon4Token!.Value.clear = true;
+                    if (!ev.Murderer.AmOwner && ev.Murderer.IsImpostor)
+                    {
+                        if (emiButton.IsInEffect)
+                            new StaticAchievementToken("alien.common3");
+                        if ((achCommon4Token.Value.playerMask & (1 << ev.Dead.PlayerId)) != 0)
+                            achCommon4Token.Value.clear = true;
+                    }
+                }, this);
             }
         }
     }

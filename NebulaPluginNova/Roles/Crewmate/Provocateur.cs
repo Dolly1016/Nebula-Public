@@ -2,6 +2,7 @@
 using Nebula.Roles.Impostor;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Player;
 using Virial.Game;
@@ -27,60 +28,46 @@ public static class ExtraExileRoleSystem
     }
 }
 
-public class Provocateur : DefinedRoleTemplate, DefinedRole
+public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>, DefinedRole
 {
     private Provocateur() : base("provocateur", new(112, 225, 89), RoleCategory.CrewmateRole, Crewmate.MyTeam, [EmbroilCoolDownOption, EmbroilAdditionalCoolDownOption, EmbroilDurationOption]) { }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, 0));
 
-    static private FloatConfiguration EmbroilCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration EmbroilAdditionalCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilAdditionalCoolDown", (0f, 30f, 2.5f), 5f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration EmbroilDurationOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilDuration", (1f, 20f, 1f), 5f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration EmbroilCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration EmbroilAdditionalCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilAdditionalCoolDown", (0f, 30f, 2.5f), 5f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration EmbroilDurationOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilDuration", (1f, 20f, 1f), 5f, FloatConfigurationDecorator.Second);
 
-    static public Provocateur MyRole = new Provocateur();
-    static private GameStatsEntry StatsTask = NebulaAPI.CreateStatsEntry("stats.provocateur.taskPhase", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsExile = NebulaAPI.CreateStatsEntry("stats.provocateur.exile", GameStatsCategory.Roles, MyRole);
+    static public readonly Provocateur MyRole = new();
+    static private readonly GameStatsEntry StatsTask = NebulaAPI.CreateStatsEntry("stats.provocateur.taskPhase", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsExile = NebulaAPI.CreateStatsEntry("stats.provocateur.exile", GameStatsCategory.Roles, MyRole);
 
     [NebulaRPCHolder]
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerUsurpableAbility, IGameOperator, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player, int embroilNum) : base(player){
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), embroilNum];
+        public Ability(GamePlayer player, bool isUsurped, int embroilNum) : base(player, isUsurped){
             this.embroilNum  = embroilNum;
-        }
-        private int embroilNum = 0;
-        int[] RuntimeAssignable.RoleArguments => [embroilNum];
 
-        private ModAbilityButton embroilButton = null!;
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
-
-        void RuntimeAssignable.OnActivated()
-        {
             if (AmOwner)
             {
-                embroilButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                embroilButton.SetSprite(buttonSprite.GetSprite());
-                embroilButton.Availability = (button) => MyPlayer.CanMove;
-                embroilButton.Visibility = (button) => !MyPlayer.IsDead;
-                embroilButton.OnClick = (button) => {
-                    if (!button.EffectActive)
-                    {
-                        button.ActivateEffect();
-                        RpcShareEmbroilState.Invoke((MyPlayer, true));
-                    }
+                var embroilButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    EmbroilCoolDownOption, EmbroilDurationOption + EmbroilAdditionalCoolDownOption * embroilNum, "embroil", buttonSprite)
+                    .SetAsUsurpableButton(this);
+                embroilButton.OnEffectStart = (button) => {
+                    RpcShareEmbroilState.Invoke((MyPlayer, true));
                 };
-                var coolDownTimer = Bind(new Timer(0f, EmbroilCoolDownOption).SetAsAbilityCoolDown().Start());
                 embroilButton.OnEffectEnd = (button) =>
                 {
                     RpcShareEmbroilState.Invoke((MyPlayer, false));
-                    coolDownTimer.Expand(EmbroilAdditionalCoolDownOption);
+                    (embroilButton.CoolDownTimer as GameTimer)?.Expand(EmbroilAdditionalCoolDownOption);
                     embroilButton.StartCoolDown();
                 };
-                embroilButton.CoolDownTimer = coolDownTimer;
-                embroilButton.EffectTimer = Bind(new Timer(0f, EmbroilDurationOption + EmbroilAdditionalCoolDownOption * embroilNum));
-                embroilButton.SetLabel("embroil");
             }
         }
+        private int embroilNum = 0;
+
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
 
         bool embroilActive = false;
         [OnlyHost, OnlyMyPlayer]
@@ -113,7 +100,7 @@ public class Provocateur : DefinedRoleTemplate, DefinedRole
             "ShareEmbroilState",
             (message, _) =>
             {
-                if(message.player.Role is Instance provocateur)
+                if(message.player.Role is Ability provocateur)
                 {
                     if (message.isActive) provocateur.embroilNum++;
                     provocateur.embroilActive = message.isActive;

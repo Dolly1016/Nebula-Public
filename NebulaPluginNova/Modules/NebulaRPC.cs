@@ -1,4 +1,5 @@
 ﻿using Hazel;
+using Il2CppSystem.Reflection.Internal;
 using InnerNet;
 using Nebula.Scripts;
 using System.Reflection;
@@ -654,6 +655,60 @@ public static class QueryRPC
     }
 }
 
+
+[NebulaRPCHolder]
+public static class RoleRPC
+{
+    public class Definition
+    {
+        private Definition(int id){
+            this.Id = id;
+        }
+
+        static public Definition Get<Ability>(string id, Action<Ability, int, bool> action, Predicate<Ability>? predicate) where Ability : IPlayerAbility => new(RegisterAction(id, action, predicate));        
+        private int Id;
+        public void RpcSync(GamePlayer player, int number) => RoleRPC.RpcSync(Id, player, number);
+    }
+
+    static public Definition Get<Ability>(string id, Action<Ability, int, bool> action, Predicate<Ability>? predicate = null) where Ability : IPlayerAbility => Definition.Get(id, action, predicate);
+
+    public delegate void SyncRoleArgAction(int number, GamePlayer player, bool calledByMe);
+    static private readonly Dictionary<int, SyncRoleArgAction> actions = [];
+    static private void ActionInternal<Ability>(GamePlayer player, int num, Action<Ability, int, bool> action, Predicate<Ability> predicate, bool calledByMe)
+    {
+        foreach(var a in player.AllAbilities)
+        {
+            if(a is Ability ability && (predicate?.Invoke(ability) ?? true))
+            {
+                action.Invoke(ability, num, calledByMe);
+                break;
+            }
+        }
+    }
+
+    static private int RegisterAction<Ability>(string id, Action<Ability, int, bool> action, Predicate<Ability>? predicate) where Ability : IPlayerAbility
+    {
+        var hash = id.ComputeConstantHash();
+        if (actions.ContainsKey(hash)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Duplicated role argument sync message: " + id + " (Hash: " + hash +")");
+        actions[hash] = (num, player, calledByMe) => ActionInternal<Ability>(player, num, action, predicate, calledByMe);
+        NebulaPlugin.Log.Print("Registered role argument sync message: " + id + " (Hash: " + hash + ")");
+        return hash;
+    }
+
+    static private readonly RemoteProcess<(int id, int num, GamePlayer player)> RpcSyncArgument = new("SyncRoleArgument", (message, calledByMe) =>
+    {
+        if(actions.TryGetValue(message.id, out var action))
+        {
+            action.Invoke(message.num, message.player, calledByMe);
+        }
+        else
+        {
+            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Unknown role argument sync message: " + message.id);
+        }
+    });
+
+    static private void RpcSync(int id, GamePlayer player, int number) => RpcSyncArgument.Invoke((id, number, player));
+}
 [NebulaRPCHolder]
 public static class PropertyRPC
 {
@@ -717,6 +772,8 @@ public static class PropertyRPC
     private static RemoteProcess<(byte targetId, int requestId, string propertyId, RequestType type)> RpcPropertyRequest = new(
         "PropertyRequest",
         (message, _)=>{
+            if (!PlayerControl.LocalPlayer) return;
+
             if(message.targetId == PlayerControl.LocalPlayer.PlayerId)
             {
                 var property = PropertyManager.GetProperty(message.propertyId);

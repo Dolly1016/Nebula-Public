@@ -1,5 +1,6 @@
-﻿using NAudio.CoreAudioApi;
-using Nebula.Behaviour;
+﻿using Cpp2IL.Core.Extensions;
+using NAudio.CoreAudioApi;
+using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles.Neutral;
 using Virial;
@@ -14,56 +15,43 @@ namespace Nebula.Roles.Abilities;
 public record EffectCircleInfo(string translationKey, Func<float> outerRadious, Func<float?> innerRadious, Color color);
 
 [NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
-public class MetaAbility : ComponentHolder, IGameOperator, IModule
+public class MetaAbility : DependentLifespan, IGameOperator, IModule
 {
-    static MetaAbility() => DIManager.Instance.RegisterGeneralModule<Virial.Game.IGameModeFreePlay>(() => new MetaAbility());
+    static MetaAbility() => DIManager.Instance.RegisterGeneralModule<Virial.Game.IGameModeFreePlay>(() => new MetaAbility().Register(NebulaAPI.CurrentGame!));
     static private List<EffectCircleInfo> allEffectCircleInfo = new();
     static public void RegisterCircle(EffectCircleInfo info) => allEffectCircleInfo.Add(info);
     public MetaAbility()
     {
-        this.Register(NebulaAPI.CurrentGame!);
         NebulaGameManager.Instance?.ChangeToSpectator(false);
 
-        var roleButton = Bind(new ModAbilityButton(true, false, 100)).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.FreeplayAction));
-        roleButton.SetSprite(buttonSprite.GetSprite());
+        var roleButton = NebulaAPI.Modules.AbilityButton(this, true, false, 100)
+            .BindKey(Virial.Compat.VirtualKeyInput.FreeplayAction)
+            .SetImage(buttonSprite).SetLabel("operate");
         roleButton.Availability = (button) => true;
         roleButton.Visibility = (button) => true;
-        roleButton.OnClick = (button) =>
-        {
-            OpenRoleWindow();
-        };
-        roleButton.SetLabel("operate");
+        roleButton.OnClick = (button) => OpenRoleWindow();
 
-        var reviveButton = Bind(new ModAbilityButton(true, false, 98));
-        reviveButton.SetSprite(reviveSprite.GetSprite());
+        var reviveButton = NebulaAPI.Modules.AbilityButton(this, true, false, 98)
+            .SetImage(reviveSprite).SetLabel("revive");
         reviveButton.Availability = (button) => true;
         reviveButton.Visibility = (button) => PlayerControl.LocalPlayer.Data.IsDead;
-        reviveButton.OnClick = (button) =>
-        {
-            NebulaManager.Instance.ScheduleDelayAction(() => GamePlayer.LocalPlayer.Revive(null, new(PlayerControl.LocalPlayer.transform.position), true, false));
-        };
-        reviveButton.SetLabel("revive");
+        reviveButton.OnClick = (button) => NebulaManager.Instance.ScheduleDelayAction(() => GamePlayer.LocalPlayer!.Revive(null, new(PlayerControl.LocalPlayer.transform.position), true, false));
 
-        var suicideButton = Bind(new ModAbilityButton(true, false, 98));
+
+        var suicideButton = NebulaAPI.Modules.AbilityButton(this, true, false, 98)
+            .SetLabel("suicide");
         suicideButton.Availability = (button) => true;
         suicideButton.Visibility = (button) => !PlayerControl.LocalPlayer.Data.IsDead;
-        suicideButton.OnClick = (button) =>
-        {
-            NebulaManager.Instance.ScheduleDelayAction(()=> GamePlayer.LocalPlayer.Suicide(PlayerState.Suicide, null, KillParameter.WithDeadBody));
-        };
-        suicideButton.SetLabel("suicide");
+        suicideButton.OnClick = (button) => NebulaManager.Instance.ScheduleDelayAction(()=> GamePlayer.LocalPlayer!.Suicide(PlayerState.Suicide, null, KillParameter.WithDeadBody));
+        
 
-        var circleButton = Bind(new ModAbilityButton(true, false, 99));
-        circleButton.SetSprite(circleButtonSprite.GetSprite());
+        var circleButton = NebulaAPI.Modules.AbilityButton(this, true, false, 99)
+            .SetImage(circleButtonSprite).SetLabel("show");
         circleButton.Availability = (button) => true;
         circleButton.Visibility = (button) => true;
-        circleButton.OnClick = (button) =>
-        {
-            OpenCircleWindow();
-        };
-        circleButton.SetLabel("show");
+        circleButton.OnClick = (button) => OpenCircleWindow();
 
-        if (DebugTools.DebugMode) Bind(new DebugAbility());
+        if (DebugTools.DebugMode) new DebugAbility().Register(this);
     }
 
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MetaActionButton.png", 115f);

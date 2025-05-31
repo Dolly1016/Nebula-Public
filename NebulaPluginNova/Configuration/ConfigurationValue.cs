@@ -21,13 +21,13 @@ internal static class ConfigurationValues
     /// <summary>
     /// オプション値の保存先
     /// </summary>
-    static public DataSaver ConfigurationSaver = new DataSaver("Config");
+    static public readonly DataSaver ConfigurationSaver = new("Config");
 
     /// <summary>
     /// 全オプション
     /// </summary>
     static internal List<ISharableEntry> AllEntries = new();
-    static internal List<Action> Reloaders = new();
+    static internal List<Action> Reloaders = [];
     static internal StringDataEntry PresetName = new("preset", ConfigurationSaver, "");
     static internal string CurrentPresetName = "";
 
@@ -45,7 +45,7 @@ internal static class ConfigurationValues
     /// <summary>
     /// 値の共有を遅延させられているエントリーのID
     /// </summary>
-    static HashSet<int> ChangedEntryIdList = new();
+    static HashSet<int> ChangedEntryIdList = [];
     
     /// <summary>
     /// 値の共有を遅延させるブロッカー
@@ -54,7 +54,7 @@ internal static class ConfigurationValues
     {
         public ConfigurationUpdateBlocker()
         {
-            if (CurrentBlocker == null) CurrentBlocker = this;
+            CurrentBlocker ??= this;
         }
 
         public void Dispose()
@@ -141,7 +141,7 @@ internal static class ConfigurationValues
     /// <summary>
     /// ゲーム内のプレイヤーとオプションの値を共有します。
     /// </summary>
-    static private RemoteProcess<(int id, int value)> RpcShare = new(
+    static private readonly RemoteProcess<(int id, int value)> RpcShare = new(
         "ShareOption",
        (message, isCalledByMe) =>
        {
@@ -156,12 +156,12 @@ internal static class ConfigurationValues
     /// <summary>
     /// ゲーム内のプレイヤーと全オプションの値を共有します。
     /// </summary>
-    static private DivisibleRemoteProcess<int, Tuple<int, int>> RpcShareAll = new DivisibleRemoteProcess<int, Tuple<int, int>>(
+    static private readonly DivisibleRemoteProcess<int, Tuple<int, int>> RpcShareAll = new(
         "ShareAllOption",
         (message) =>
         {
             //(Item1)番目から(Item2)-1番目まで
-            IEnumerator<Tuple<int, int>> GetDivider()
+            static IEnumerator<Tuple<int, int>> GetDivider()
             {
                 int done = 0;
                 while (done < AllEntries.Count)

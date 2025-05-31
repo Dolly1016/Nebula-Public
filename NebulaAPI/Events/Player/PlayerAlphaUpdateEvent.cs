@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Player;
 
+/// <summary>
+/// プレイヤーの透明度が更新されるときに発火します。
+/// </summary>
 public class PlayerAlphaUpdateEvent : AbstractPlayerEvent
 {
     public float Alpha { get; private init; }

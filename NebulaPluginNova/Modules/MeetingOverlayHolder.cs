@@ -14,7 +14,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
     static Image NotificationSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingNotificationDot.png", 135f);
     static public Image[] IconsSprite = Helpers.Sequential(IconSprite.Length).Select(num => new WrapSpriteLoader(()=>IconSprite.GetSprite(num))).ToArray();
 
-    List<(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color,Reference<bool> isNew)> icons = new();
+    List<(GUIWidgetSupplier overlay, Image? icon, UnityEngine.Color color,Reference<bool> isNew)> icons = new();
     Transform? shower;
 
     //常駐エンティティ

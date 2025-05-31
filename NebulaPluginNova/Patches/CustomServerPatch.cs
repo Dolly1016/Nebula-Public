@@ -1,7 +1,7 @@
 ﻿using AmongUs.Data;
 using AmongUs.HTTP;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Newtonsoft.Json;
 using UnityEngine.Events;
 using UnityEngine.Networking;
@@ -22,12 +22,12 @@ public static class RegionMenuOpenPatch
 
     public static IRegionInfo[] defaultRegions = null!;
 
-    private static DataSaver customServerData = new DataSaver("CustomServer");
+    private static readonly DataSaver customServerData = new("CustomServer");
     private static StaticHttpRegionInfo /*CustomRegion = null!,*/ NoSServerRegion = null!;
-    private static string NoSIP = "http://168.138.44.249";
-    private static ushort NoSPort = 22023;
+    private const string NoSIP = "https://www.nebula-on-the-ship.com";
+    private const ushort NoSPort = 443;
 
-    public static List<IRegionInfo> AddonRegions = [];
+    public static readonly List<IRegionInfo> AddonRegions = [];
     public static IRegionInfo GenerateRegion(string name, string ip, ushort port) => new StaticHttpRegionInfo(name, StringNames.NoTranslation, ip,
             new ServerInfo[] { new ServerInfo("Http-1", ip, port, false) }).Cast<IRegionInfo>();
 
@@ -38,7 +38,7 @@ public static class RegionMenuOpenPatch
         [JsonSerializableField]
         public string Ip = null!;
         [JsonSerializableField]
-        public ushort Port = 22023;
+        public ushort Port = 443;
 
         public bool IsValid => DisplayName != null && Ip != null;
     }
@@ -72,14 +72,14 @@ public static class RegionMenuOpenPatch
         */
 
         NoSServerRegion = new StaticHttpRegionInfo("Nebula on the Ship JP", StringNames.NoTranslation, NoSIP,
-            new ServerInfo[] { new ServerInfo("Http-1", NoSIP, NoSPort, false) });
+            (ServerInfo[])[new("Http-1", NoSIP, NoSPort, false)]);
 
         var ModNARegion = new StaticHttpRegionInfo("Modded NA (MNA)", StringNames.NoTranslation, "www.aumods.us",
-            new ServerInfo[] { new ServerInfo("Http-1", "https://www.aumods.us", 443, false) });
+            (ServerInfo[])[new("Http-1", "https://www.aumods.us", 443, false)]);
         var ModEURegion = new StaticHttpRegionInfo("Modded EU (MEU)", StringNames.NoTranslation, "au-eu.duikbo.at",
-            new ServerInfo[] { new ServerInfo("Http-1", "https://au-eu.duikbo.at", 443, false) });
+            (ServerInfo[])[new("Http-1", "https://au-eu.duikbo.at", 443, false)]);
         var ModASRegion = new StaticHttpRegionInfo("Modded Asia (MAS)", StringNames.NoTranslation, "au-as.duikbo.at",
-            new ServerInfo[] { new ServerInfo("Http-1", "https://au-as.duikbo.at", 443, false) });
+            (ServerInfo[])[new("Http-1", "https://au-as.duikbo.at", 443, false)]);
 
         regions = regions.Concat(AddonRegions).Concat([ModNARegion.Cast<IRegionInfo>(), ModEURegion.Cast<IRegionInfo>(), ModASRegion.Cast<IRegionInfo>(), NoSServerRegion.Cast<IRegionInfo>()]).ToArray();
         //マージ時、DefaultRegionsに含まれている要素のほうが優先される(重複時に生き残る方)
@@ -99,7 +99,7 @@ public static class RegionMenuOpenPatch
     {
 
         DestroyableSingleton<ServerManager>.Instance.SetRegion(region);
-        __instance.RegionText.text = DestroyableSingleton<TranslationController>.Instance.GetStringWithDefault(region.TranslateName, region.Name, new Il2CppReferenceArray<Il2CppSystem.Object>(new Il2CppSystem.Object[0]));
+        __instance.RegionText.text = DestroyableSingleton<TranslationController>.Instance.GetStringWithDefault(region.TranslateName, region.Name, new Il2CppReferenceArray<Il2CppSystem.Object>([]));
     }
 
     /*
@@ -394,7 +394,7 @@ file static class ModServerSearcher
             try
             {
                 var action = retryableRequest.successCallback;
-                if (action != null) action.Invoke(request.downloadHandler.text);
+                action?.Invoke(request.downloadHandler.text);
 
                 yield break;
             }
@@ -412,7 +412,7 @@ file static class ModServerSearcher
         try
         {
             var action2 = retryableRequest.errorCallback;
-            if (action2 != null) action2.Invoke(retryableRequest);
+            action2?.Invoke(retryableRequest);
 
             yield break;
         }

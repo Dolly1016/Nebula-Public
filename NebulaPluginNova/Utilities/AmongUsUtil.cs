@@ -1,14 +1,12 @@
 ﻿using AmongUs.GameOptions;
 using Il2CppInterop.Runtime.Injection;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Map;
-using UnityEngine;
-using UnityEngine.UI;
-using Virial.Events.Player;
+using Nebula.Modules.Cosmetics;
+using Virial;
 using Virial.Game;
-using static Il2CppSystem.Xml.XmlWellFormedWriter.AttributeValueCache;
+using Virial.Text;
 
 namespace Nebula.Utilities;
 
@@ -172,7 +170,18 @@ public static class AmongUsUtil
         player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, includePet);
         player.ToggleName(false);
         player.SetNameColor(Color.white);
-        
+        var nosCosmeticsLayer = player.cosmetics.GetComponent<NebulaCosmeticsLayer>();
+        nosCosmeticsLayer.SetSortingProperty(true, 1000f, 1000);
+        player.cosmetics.nameText._SortingOrder = 2000;
+        var renderers = player.cosmetics.nameText.GetComponentsInChildren<Renderer>();
+        nosCosmeticsLayer.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += ()=>
+        {
+            renderers.Do(r =>
+            {
+                r.sortingGroupOrder = 2000;
+                r.sortingOrder = 2000;
+            });
+        };
         return player;
     }
 
@@ -625,6 +634,16 @@ public static class AmongUsUtil
         return ServerManager.Instance?.CurrentRegion.TranslateName is StringNames.NoTranslation or null;
     }
 
+    public static bool IsLocalServer()
+    {
+        return AmongUsClient.Instance.NetworkMode == NetworkModes.LocalGame;
+    }
+
+    public static bool IsOnlineServer()
+    {
+        return AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame;
+    }
+
     public static void SetPlayerMaterial(Renderer renderer, Color mainColor, Color shadowColor, Color visorColor)
     {
         renderer.material.SetColor(PlayerMaterial.BackColor, shadowColor);
@@ -640,4 +659,47 @@ public static class AmongUsUtil
     public static Vector2 GetCorner(float xCoeff, float yCoeff) => GetCorner(xCoeff, yCoeff, Vector2.zero, Camera.main);
 
 
+    public static void PlayCinematicKill(GamePlayer killer, GamePlayer player, float delay, float view, CommunicableTextTag playerState, CommunicableTextTag? eventState, Func<(Vector3 position, GameObject showUpObj)> setUp)
+    {
+        player.VanillaPlayer.Visible = false;
+        player.VanillaPlayer.NetTransform.Halt();
+        player.VanillaPlayer.moveable = false;
+        player.Unbox().WillDie = true;
+        NebulaManager.Instance.StartDelayAction(1.3f + delay, () => player.VanillaPlayer.moveable = true);
+        if (player.AmOwner && Minigame.Instance) Minigame.Instance.ForceClose();
+
+        (var position, var showUpObj) = setUp.Invoke();
+
+        if (player.AmOwner)
+        {
+            IEnumerator CoWaitAndKill()
+            {
+                float t = 0.7f;
+                while (t > 0f)
+                {
+                    //会議が始まったらそのタイミングで死亡
+                    if (MeetingHud.Instance)
+                    {
+                        killer.MurderPlayer(player, playerState, eventState, KillParameter.WithAssigningGhostRole | KillParameter.WithOverlay, KillCondition.TargetAlive);
+                        yield break;
+                    }
+
+                    t -= Time.deltaTime;
+                    yield return null;
+                }
+
+
+                killer.MurderPlayer(player, playerState, eventState, KillParameter.WithAssigningGhostRole, KillCondition.TargetAlive);
+
+                showUpObj.transform.SetWorldZ(-100f);
+                NebulaGameManager.Instance!.WideCamera.SetAttention(new SimpleAttention(10f, view, (Vector2)position - new Vector2(0.2f, 0f), FunctionalLifespan.GetTimeLifespan(2.2f)));
+
+                var overlay = HudManager.Instance.KillOverlay;
+                var overlayPrefab = UnityHelper.CreateObject<CustomKillOverlay>("overlayPrefab", null, Vector3.zero);
+                overlay.ShowKillAnimation(overlayPrefab, new CustomKillOverlayData(overlayPrefab.gameObject).VanillaData);
+            }
+            NebulaManager.Instance.StartCoroutine(CoWaitAndKill().WrapToIl2Cpp());
+            NebulaManager.Instance.StartDelayAction(2.45f + delay, () => showUpObj.transform.SetWorldZ(position.z));
+        }
+    }
 }

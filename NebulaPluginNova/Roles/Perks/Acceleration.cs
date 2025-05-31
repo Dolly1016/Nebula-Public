@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game;
 
@@ -26,18 +27,19 @@ internal class Acceleration : PerkFunctionalInstance
 
     public Acceleration(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {
-        cooldownTimer = new Timer(Cooldown).Start(InitialCooldown);
+        cooldownTimer = NebulaAPI.Modules.Timer(this, Cooldown);
+        cooldownTimer.Start(InitialCooldown);
         PerkInstance.BindTimer(cooldownTimer);
     }
 
-    private Timer cooldownTimer;
+    private GameTimer cooldownTimer;
 
     public override bool HasAction => true;
     public override void OnClick()
     {
         if (cooldownTimer.IsProgressing) return;
 
-        MyPlayer.GainAttribute(Rate, Duration, false, 0, "perkAccel");
+        MyPlayer.GainSpeedAttribute(Rate, Duration, false, 0, "perkAccel");
         cooldownTimer.Start();
     }
 

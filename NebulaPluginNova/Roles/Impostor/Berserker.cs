@@ -23,19 +23,19 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
     }    
 
 
-    static private IRelativeCoolDownConfiguration killCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.berserker.killCooldown", CoolDownType.Immediate, (1f, 20f, 1f), 5f, (-30f, 10f, 2.5f), -15f, (0.125f, 2f, 0.125f), 0.25f);
-    static private FloatConfiguration accelRateOption = NebulaAPI.Configurations.Configuration("options.role.berserker.accelRate", (1f, 3f, 0.25f), 1.5f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration berserkSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.berserker.bersekSEStrength", (1.25f, 20f, 1.25f), 7.5f, FloatConfigurationDecorator.Ratio);
-    static private BoolConfiguration canCalmDownOption = NebulaAPI.Configurations.Configuration("options.role.berserker.canCalmDown", true);
-    static private IntegerConfiguration killingForTranceOption = NebulaAPI.Configurations.Configuration("options.role.berserker.killingForTrance", (1, 5), 2);
-    static private FloatConfiguration berserkCooldownOption = NebulaAPI.Configurations.Configuration("options.role.berserker.berserkCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration maxBerserkDurationOption = NebulaAPI.Configurations.Configuration("options.role.berserker.maxBerserkDuration", (10f, 180f, 5f), 30f, FloatConfigurationDecorator.Second, () => canCalmDownOption);
+    static private readonly IRelativeCoolDownConfiguration killCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.berserker.killCooldown", CoolDownType.Immediate, (1f, 20f, 1f), 5f, (-30f, 10f, 2.5f), -15f, (0.125f, 2f, 0.125f), 0.25f);
+    static private readonly FloatConfiguration accelRateOption = NebulaAPI.Configurations.Configuration("options.role.berserker.accelRate", (1f, 3f, 0.25f), 1.5f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration berserkSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.berserker.bersekSEStrength", (1.25f, 20f, 1.25f), 7.5f, FloatConfigurationDecorator.Ratio);
+    static private readonly BoolConfiguration canCalmDownOption = NebulaAPI.Configurations.Configuration("options.role.berserker.canCalmDown", true);
+    static private readonly IntegerConfiguration killingForTranceOption = NebulaAPI.Configurations.Configuration("options.role.berserker.killingForTrance", (1, 5), 2);
+    static private readonly FloatConfiguration berserkCooldownOption = NebulaAPI.Configurations.Configuration("options.role.berserker.berserkCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration maxBerserkDurationOption = NebulaAPI.Configurations.Configuration("options.role.berserker.maxBerserkDuration", (10f, 180f, 5f), 30f, FloatConfigurationDecorator.Second, () => canCalmDownOption);
     
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
-    static public Berserker MyRole = new Berserker();
-    static private GameStatsEntry StatsBerserk = NebulaAPI.CreateStatsEntry("stats.berserker.berserk", GameStatsCategory.Roles, MyRole);
-    public class BerserkMode : SimpleReleasable, IGameOperator, IBindPlayer
+    static public readonly Berserker MyRole = new();
+    static private readonly GameStatsEntry StatsBerserk = NebulaAPI.CreateStatsEntry("stats.berserker.berserk", GameStatsCategory.Roles, MyRole);
+    public class BerserkMode : FlexibleLifespan, IGameOperator, IBindPlayer
     {
         Berserker.Ability myBerserker;
         GamePlayer myPlayer => (myBerserker as IBindPlayer).MyPlayer;
@@ -54,14 +54,14 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.SetCooldown(0f);
             });
 
-            myPlayer.GainAttribute(accelRateOption, float.MaxValue, false, 0, "nebula::berserk");
+            myPlayer.GainSpeedAttribute(accelRateOption, float.MaxValue, false, 0, "nebula::berserk");
         }
 
         void IGameOperator.OnReleased()
         {
             if (myBerserker.AmBerserking) RpcCalmDown.Invoke((myPlayer, true));
 
-            myPlayer.GainAttribute(1f, 0f, false, 0, "nebula::berserk");
+            myPlayer.GainSpeedAttribute(1f, 0f, false, 0, "nebula::berserk");
             NebulaGameManager.Instance?.AllPlayerInfo.Do(p => p.Unbox().RemoveOutfit("nebula::berserk"));
             NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
         }
@@ -76,7 +76,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
             {
                 RpcCalmDown.Invoke((myPlayer, false));
             });
-            NebulaManager.Instance.StartDelayAction(1f, () => this.ReleaseIt());
+            NebulaManager.Instance.StartDelayAction(1f, () => this.Release());
         }
 
         int killing = 0;
@@ -109,7 +109,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
             {
                 NebulaManager.Instance.StartDelayAction(0.3f, () =>
                 {
-                    PlayerModInfo.RpcAttrModulator.Invoke((myPlayer.PlayerId, new FloatModulator(PlayerAttributes.Roughening, 10, 0.3f, false, 0, "nebula::berserk", false), true));
+                    myPlayer.GainAttribute(PlayerAttributes.Roughening, 0.3f, 10f, false, 100, "nebula::berserk");
                 });
                 NebulaManager.Instance.StartDelayAction(0.6f, () =>
                 {
@@ -120,34 +120,28 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
             
         }
 
-        void OnMeetingStart(MeetingStartEvent ev)
-        {
-            this.ReleaseIt();
-        }
+        void OnMeetingStart(MeetingStartEvent ev) => Release();
 
         [OnlyMyPlayer]
-        void OnDead(PlayerDieEvent ev)
-        {
-            this.ReleaseIt();
-        }
+        void OnDead(PlayerDieEvent ev) => Release();
     }
 
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BerserkButton.png", 115f);
-        static private Image buttonCalmSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BerserkCalmButton.png", 115f);
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BerserkButton.png", 115f);
+        static private readonly Image buttonCalmSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BerserkCalmButton.png", 115f);
 
         public bool AmBerserking => MyPlayer.VanillaPlayer.cosmetics.bodyType == PlayerBodyTypes.Seeker;
         public BerserkMode? CurrentBerserkerMode = null;
-
-        public Ability(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
                 var acTokenAnother1 = AchievementTokens.FirstFailedAchievementToken("berserker.another1", MyPlayer, this);
 
                 AchievementToken<(float last1Kill, float last2Kill, bool triggered)> acTokenChallenge = new("berserker.challenge", (-100f, -100f, false), (a, _) => a.triggered && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
-                GameOperatorManager.Instance?.Register<PlayerKillPlayerEvent>(ev =>
+                GameOperatorManager.Instance?.Subscribe<PlayerKillPlayerEvent>(ev =>
                 {
                     if(ev.Player.AmOwner && AmBerserking)
                     {
@@ -158,8 +152,8 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
                     }
                 }, this);
 
-                ModAbilityButton calmButton = null!;
-                var berserkButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                ModAbilityButtonImpl calmButton = null!;
+                var berserkButton = new ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.Ability).Register(this);
                 berserkButton.SetSprite(buttonSprite.GetSprite());
                 berserkButton.Availability = (button) => MyPlayer.CanMove;
                 berserkButton.Visibility = (button) => !MyPlayer.IsDead && !AmBerserking;
@@ -167,8 +161,8 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
                 {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.BerserkerTransformingAction);
 
-                    if (CurrentBerserkerMode != null) CurrentBerserkerMode.ReleaseIt();
-                    CurrentBerserkerMode = Bind(new BerserkMode(this)).Register();
+                    if (CurrentBerserkerMode != null) CurrentBerserkerMode.Release();
+                    CurrentBerserkerMode = new BerserkMode(this).Register(this);
 
                     StatsBerserk.Progress();
                     new StaticAchievementToken("berserker.common1");
@@ -181,11 +175,12 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
                     }
                 };
                 berserkButton.OnMeeting = button => button.StartCoolDown();
-                berserkButton.CoolDownTimer = Bind(new Timer(berserkCooldownOption).SetAsAbilityCoolDown().Start());
+                berserkButton.CoolDownTimer = new TimerImpl(berserkCooldownOption).Register(this).SetAsAbilityCoolDown().Start();
                 berserkButton.SetLabel("berserk");
                 berserkButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
+                berserkButton.RelatedAbility = this;
 
-                calmButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                calmButton = new ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.Ability).Register(this);
                 calmButton.SetSprite(buttonCalmSprite.GetSprite());
                 calmButton.Availability = (button) => MyPlayer.CanMove;
                 calmButton.Visibility = (button) => !MyPlayer.IsDead && AmBerserking && canCalmDownOption;
@@ -206,8 +201,9 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
                 };
                 calmButton.OnMeeting = button => button.StartCoolDown();
                 var spawnAnim = HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim;
-                calmButton.EffectTimer = Bind(new Timer(maxBerserkDurationOption).SetPredicate(()=>MyPlayer.VanillaPlayer.MyPhysics.Animations.Animator.GetCurrentAnimation() != spawnAnim));
+                calmButton.EffectTimer = new TimerImpl(maxBerserkDurationOption).SetPredicate(()=>MyPlayer.VanillaPlayer.MyPhysics.Animations.Animator.GetCurrentAnimation() != spawnAnim).Register(this);
                 calmButton.SetLabel("calmDown");
+                calmButton.RelatedAbility = this;
             }
         }
 
@@ -270,7 +266,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
         {
 
             message.player.VanillaPlayer.NetTransform.Halt();
-            message.player.GainAttribute(0, 1.5f, false, 0);
+            message.player.GainSpeedAttribute(0, 1.5f, false, 0);
 
             RoleEffectAnimation chargeAnim = GameObject.Instantiate<RoleEffectAnimation>(RoleManager.Instance.vanish_ChargeAnim, message.player.VanillaPlayer.transform);
             //roleEffectAnimation2.SetMaskLayerBasedOnWhoShouldSee(base.AmOwner);

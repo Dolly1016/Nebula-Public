@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Map;
 using Virial;
 using Virial.Assignable;
@@ -18,17 +18,17 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
     }
 
 
-    static private FloatConfiguration DiveCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.hadar.diveCooldown", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration GushFromVentsOption = NebulaAPI.Configurations.Configuration("options.role.hadar.gushFromVents", false);
-    static private FloatConfiguration VentDetectionRangeOption = NebulaAPI.Configurations.Configuration("options.role.hadar.ventDetectionRange", (2f, 20f, 1f), 5f, FloatConfigurationDecorator.Ratio, ()=>GushFromVentsOption);
-    static private BoolConfiguration LeftDivingEvidenceOption = NebulaAPI.Configurations.Configuration("options.role.hadar.leftDivingEvidence", false);
-    static private FloatConfiguration AccelRateUndergroundOption = NebulaAPI.Configurations.Configuration("options.role.hadar.accelRateUnderground", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration DiveCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.hadar.diveCooldown", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private readonly BoolConfiguration GushFromVentsOption = NebulaAPI.Configurations.Configuration("options.role.hadar.gushFromVents", false);
+    static private readonly FloatConfiguration VentDetectionRangeOption = NebulaAPI.Configurations.Configuration("options.role.hadar.ventDetectionRange", (2f, 20f, 1f), 5f, FloatConfigurationDecorator.Ratio, ()=>GushFromVentsOption);
+    static private readonly BoolConfiguration LeftDivingEvidenceOption = NebulaAPI.Configurations.Configuration("options.role.hadar.leftDivingEvidence", false);
+    static private readonly FloatConfiguration AccelRateUndergroundOption = NebulaAPI.Configurations.Configuration("options.role.hadar.accelRateUnderground", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
 
-    static public Hadar MyRole = new Hadar();
-    static private GameStatsEntry StatsDive = NebulaAPI.CreateStatsEntry("stats.hadar.dive", GameStatsCategory.Roles, MyRole);
+    static public readonly Hadar MyRole = new();
+    static private readonly GameStatsEntry StatsDive = NebulaAPI.CreateStatsEntry("stats.hadar.dive", GameStatsCategory.Roles, MyRole);
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class HadarEvidence : NebulaSyncStandardObject, IGameOperator
@@ -53,13 +53,13 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
         }
     }
 
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        private ModAbilityButton? diveButton = null;
-        private ModAbilityButton? gushButton = null;
+        private ModAbilityButtonImpl? diveButton = null;
+        private ModAbilityButtonImpl? gushButton = null;
 
-        static private Image diveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarHideButton.png", 115f);
-        static private Image gushButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarAppearButton.png", 115f);
+        static private readonly Image diveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarHideButton.png", 115f);
+        static private readonly Image gushButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarAppearButton.png", 115f);
 
         AchievementToken<(float lastGush, bool cleared)> acToken1 = new("hadar.common1", (-100f, false), (a, _) => a.cleared);
         AchievementToken<(float lastKill, bool cleared)> acToken2 = new("hadar.common2", (-100f, false), (a, _) => a.cleared);
@@ -75,14 +75,18 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                 if (!MyPlayer.IsDead) MyPlayer.VanillaPlayer.gameObject.layer = LayerExpansion.GetPlayersLayer();
             }
         }
-        public Ability(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
                 Vector2 lastDivePoint = Vector2.zeroVector;
 
-                var diveButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                diveButton.SetSprite(diveButtonSprite.GetSprite());
+                var diveButton = NebulaAPI.Modules.AbilityButton(this)
+                    .BindKey(Virial.Compat.VirtualKeyInput.Ability)
+                    .SetImage(diveButtonSprite)
+                    .SetLabel("dive")
+                    .SetAsUsurpableButton(this);
                 diveButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && !IsDiving;
                 diveButton.Visibility = _ => !MyPlayer.IsDead && !IsDiving;
                 diveButton.OnClick = (button) =>
@@ -101,7 +105,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                     NebulaManager.Instance.StartCoroutine(CoLight().WrapToIl2Cpp());
                     NebulaManager.Instance.StartCoroutine(CoPing().WrapToIl2Cpp());
 
-                    if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(AccelRateUndergroundOption, 1000000f, false, 0, "nebula::hadar");
+                    if (AccelRateUndergroundOption > 1f) MyPlayer.GainSpeedAttribute(AccelRateUndergroundOption, 1000000f, false, 0, "nebula::hadar");
 
                     if (LeftDivingEvidenceOption)
                     {
@@ -114,11 +118,12 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                         });
                     }
                 };
-                diveButton.CoolDownTimer = Bind(new Timer(DiveCoolDownOption).SetAsAbilityCoolDown().Start());
-                diveButton.SetLabel("dive");
+                diveButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, DiveCoolDownOption).SetAsAbilityTimer().Start();
 
-                var gushButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                gushButton.SetSprite(gushButtonSprite.GetSprite());
+                var gushButton = NebulaAPI.Modules.AbilityButton(this)
+                    .BindKey(Virial.Compat.VirtualKeyInput.Ability)
+                    .SetImage(gushButtonSprite)
+                    .SetLabel("gush");
 
                 void CheckGushAchievement()
                 {
@@ -141,15 +146,15 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                         diveButton.StartCoolDown();
 
                         CheckGushAchievement();
-                        if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(1f, 0f, false, 0, "nebula::hadar");
+                        if (AccelRateUndergroundOption > 1f) MyPlayer.GainSpeedAttribute(1f, 0f, false, 0, "nebula::hadar");
                     };
                 }
                 else
                 {
-                    Arrow? ventArrow = Bind(new Arrow(null, true));
+                    Arrow? ventArrow = new Arrow(null, true).Register(this);
                     ventArrow.SetColor(Palette.ImpostorRed);
                     ventArrow.IsActive = false;
-                    var tracker = Bind(ObjectTrackers.ForVents(VentDetectionRangeOption, MyPlayer, v => !v.TryGetComponent<InvalidVent>(out _), Palette.ImpostorRed, true));
+                    var tracker = ObjectTrackers.ForVents(VentDetectionRangeOption, MyPlayer, v => !v.TryGetComponent<InvalidVent>(out _), Palette.ImpostorRed, true).Register(this);
                     gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && tracker.CurrentTarget != null;
                     gushButton.OnClick = button =>
                     {
@@ -162,9 +167,9 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                         diveButton.StartCoolDown();
 
                         CheckGushAchievement();
-                        if (AccelRateUndergroundOption > 1f) MyPlayer.GainAttribute(1f, 0f, false, 0, "nebula::hadar");
+                        if (AccelRateUndergroundOption > 1f) MyPlayer.GainSpeedAttribute(1f, 0f, false, 0, "nebula::hadar");
                     };
-                    GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev =>
+                    GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
                     {
                         if (tracker.CurrentTarget == null || !IsDiving)
                             ventArrow.IsActive = false;
@@ -177,8 +182,6 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                     
                 }
                 gushButton.Visibility = (button) => !MyPlayer.IsDead && IsDiving;
-                
-                gushButton.SetLabel("gush");
 
                 //称号
 
@@ -186,10 +189,10 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                 var acTokenChallenge = new AchievementToken<(float diving, int kill)>("hadar.challenge", (0f, 0), 
                     (a, _) => NebulaGameManager.Instance!.EndState!.Winners.Test(MyPlayer) && !MyPlayer.IsDead && a.kill >= 3 && a.diving > 50f);
 
-                GameOperatorManager.Instance!.Register<GameUpdateEvent>(_ => {
+                GameOperatorManager.Instance!.Subscribe<GameUpdateEvent>(_ => {
                     if (!MeetingHud.Instance && !ExileController.Instance && IsDiving) acTokenChallenge.Value.diving += Time.deltaTime;
                 }, this);
-                GameOperatorManager.Instance!.Register<PlayerKillPlayerEvent>(ev => {
+                GameOperatorManager.Instance!.Subscribe<PlayerKillPlayerEvent>(ev => {
                     if (ev.Murderer.AmOwner) acTokenChallenge.Value.kill++;
                 }, this);
                 //チャレンジ称号 ここまで

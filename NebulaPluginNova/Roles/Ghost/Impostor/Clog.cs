@@ -27,12 +27,12 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
 
     string ICodeName.CodeName => "CLG";
 
-    static private FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("options.role.clog.ghostDuration", (10f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration NumOfGhostsOption = NebulaAPI.Configurations.Configuration("options.role.clog.numOfGhost", (1, 20), 3);
-    static private FloatConfiguration GhostSizeOption = NebulaAPI.Configurations.Configuration("options.role.clog.ghostSize", (0.125f, 1.5f, 0.125f), 0.5f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("options.role.clog.ghostDuration", (10f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private readonly IntegerConfiguration NumOfGhostsOption = NebulaAPI.Configurations.Configuration("options.role.clog.numOfGhost", (1, 20), 3);
+    static private readonly FloatConfiguration GhostSizeOption = NebulaAPI.Configurations.Configuration("options.role.clog.ghostSize", (0.125f, 1.5f, 0.125f), 0.5f, FloatConfigurationDecorator.Ratio);
 
-    static public Clog MyRole = new Clog();
-    static internal GameStatsEntry StatsGhosts = NebulaAPI.CreateStatsEntry("stats.clog.ghosts", GameStatsCategory.Roles, MyRole);
+    static public readonly Clog MyRole = new();
+    static internal readonly GameStatsEntry StatsGhosts = NebulaAPI.CreateStatsEntry("stats.clog.ghosts", GameStatsCategory.Roles, MyRole);
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
@@ -41,7 +41,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
 
         public Instance(GamePlayer player) : base(player) { }
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GhostButton.png", 115f);
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GhostButton.png", 115f);
 
         private AchievementToken<bool>? acTokenChallenge = null;
         void RuntimeAssignable.OnActivated()
@@ -49,7 +49,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
             if (AmOwner)
             {
                 acTokenChallenge = new("clog.common2", false, (val, _) => val && NebulaGameManager.Instance?.EndState?.EndReason == Virial.Game.GameEndReason.Sabotage);
-                GameOperatorManager.Instance?.Register<PlayerTaskRemoveLocalEvent>(ev => {
+                GameOperatorManager.Instance?.Subscribe<PlayerTaskRemoveLocalEvent>(ev => {
                     try
                     {
                         if (ev.Task.TryCast<SabotageTask>() != null) acTokenChallenge.Value = false;
@@ -57,10 +57,8 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
                 }, this);
 
                 int left = NumOfGhostsOption.GetValue();
-                var ghostButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                ghostButton.SetSprite(buttonSprite.GetSprite());
-                ghostButton.Availability = (button) => MyPlayer.CanMove;
-                ghostButton.Visibility = (button) => MyPlayer.IsDead;
+                var ghostButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    10f, "ghost", buttonSprite, null, _ => left > 0, true);
                 ghostButton.OnClick = (button) =>
                 {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.ClogInvokingGhostAction);
@@ -72,26 +70,21 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
                     if (AmongUsUtil.InAnySab) acTokenChallenge.Value = true;
 
                     left--;
-                    if(left > 0)
-                        ghostButton.ShowUsesIcon(0).text = left.ToString();
-                    else
-                        ghostButton.ReleaseIt();
+                    if(left > 0) ghostButton.UpdateUsesIcon(left.ToString());
                 };
-                ghostButton.ShowUsesIcon(0).text = left.ToString();
-                ghostButton.CoolDownTimer = Bind(new Timer(0f, 10f).SetAsAbilityCoolDown().Start());
-                ghostButton.SetLabel("ghost");
+                ghostButton.ShowUsesIcon(0, left.ToString());
             }
         }
     }
 
-    static public RemoteProcess<Vector2> RpcSpawnGhost = new(
+    static public readonly RemoteProcess<Vector2> RpcSpawnGhost = new(
         "GhostGhost", (pos, calledBeMe) =>
         {
             var ghost = new Nebula.Roles.Crewmate.Ghost(pos, GhostDurationOption, null, Seer.CanSeeGhostsInShadowOption, GhostSizeOption);
             if (calledBeMe)
             {
                 bool achieved = false;
-                GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev => { 
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => { 
                     if(!achieved && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && !p.AmOwner && p.IsImpostor && pos.Distance(p.Position) < 0.75f))
                     {
                         new StaticAchievementToken("clog.another1");

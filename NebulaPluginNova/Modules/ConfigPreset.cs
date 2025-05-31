@@ -6,7 +6,7 @@ namespace Nebula.Modules;
 
 public interface IConfigPreset
 {
-    static protected Dictionary<string, IConfigPreset> allPresets = new();
+    static protected readonly Dictionary<string, IConfigPreset> allPresets = new();
     static public IEnumerable<IConfigPreset> AllPresets => allPresets.Values;
 
     bool LoadPreset();
@@ -271,7 +271,7 @@ public class ConfigPreset : IConfigPreset
         {
             File.WriteAllText(GetPathFromId(name), OutputCurrentSettings(displayName ?? name), Encoding.UTF8);
             LoadLocal();
-        }catch(Exception e)
+        }catch(Exception)
         {
             return false;
         }

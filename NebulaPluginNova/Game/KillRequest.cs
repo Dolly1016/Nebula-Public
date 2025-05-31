@@ -77,7 +77,7 @@ internal class KillRequestHandler
             return result == KillResult.Kill;
         }
 
-        bool isMeetingKill = MeetingHud.Instance || !killParam.HasFlag(KillParameter.WithDeadBody);
+        bool isMeetingKill = MeetingHud.Instance || ExileController.Instance || !killParam.HasFlag(KillParameter.WithDeadBody);
         if (CheckKill(killer, target, playerState, recordState, isMeetingKill, out var result))
         {
             if (isMeetingKill)
@@ -171,6 +171,7 @@ internal class KillRequestHandler
                }
 
                targetInfo.VanillaPlayer.Data.IsDead = true;
+               PlayerExtension.ResetOnDying(targetInfo.VanillaPlayer);
 
                //1ずつ加算するのでこれで十分
                if (targetInfo.AmOwner)
@@ -213,6 +214,7 @@ internal class KillRequestHandler
            if (!target.AmOwner && message.parameter.HasFlag(KillParameter.WithKillSEWidely) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(target.KillSfx, false, 0.8f, null);
 
            target.Die(DeathReason.Exile, false);
+           PlayerExtension.ResetOnDying(target);
 
            if (target.AmOwner)
            {

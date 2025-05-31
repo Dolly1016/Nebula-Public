@@ -19,13 +19,13 @@ public static class DebugTools
 
     private static BooleanDataEntry debugMode = new("DebugMode", saver, false, shouldWrite: false);
     public static bool DebugMode => debugMode.Value;
-    private static List<IDebugVariable> debugVariables = [];
-    private static DebugValueEntry<bool> showConfigurationId = new BooleanDataEntry("ShowConfigurationId", saver, false, shouldWrite: false);
-    private static DebugValueEntry<bool> releaseAllAchievement = new BooleanDataEntry("ReleaseAllAchievement", saver, false, shouldWrite: false);
-    private static DebugValueEntry<bool> lockAllAchievement = new BooleanDataEntry("LockAllAchievement", saver, false, shouldWrite: false);
-    private static DebugValueEntry<bool> allowVanillaLog = new BooleanDataEntry("AllowVanillaLog", saver, false, shouldWrite: false);
-    private static DebugValueEntry<bool> writeAllAchievementsData = new BooleanDataEntry("WriteAllAchievementsData", saver, false, shouldWrite: false);
-    private static DebugValueEntry<bool> showCostumeMetadata = new BooleanDataEntry("ShowCostumeMetadata", saver, false, shouldWrite: false);
+    private static readonly List<IDebugVariable> debugVariables = [];
+    private static readonly DebugValueEntry<bool> showConfigurationId = new BooleanDataEntry("ShowConfigurationId", saver, false, shouldWrite: false);
+    private static readonly DebugValueEntry<bool> releaseAllAchievement = new BooleanDataEntry("ReleaseAllAchievement", saver, false, shouldWrite: false);
+    private static readonly DebugValueEntry<bool> lockAllAchievement = new BooleanDataEntry("LockAllAchievement", saver, false, shouldWrite: false);
+    private static readonly DebugValueEntry<bool> allowVanillaLog = new BooleanDataEntry("AllowVanillaLog", saver, false, shouldWrite: false);
+    private static readonly DebugValueEntry<bool> writeAllAchievementsData = new BooleanDataEntry("WriteAllAchievementsData", saver, false, shouldWrite: false);
+    private static readonly DebugValueEntry<bool> showCostumeMetadata = new BooleanDataEntry("ShowCostumeMetadata", saver, false, shouldWrite: false);
     public static bool ShowConfigurationId => DebugMode && showConfigurationId.Value;
     public static bool WriteAllAchievementsData => DebugMode && writeAllAchievementsData.Value;
     public static bool ReleaseAllAchievement => DebugMode && releaseAllAchievement.Value;
@@ -107,7 +107,7 @@ internal class DebugVariable<T> : IDebugVariable
     private Func<T, string> serializer;
     public override string? ToString()
     {
-        return value?.ToString();
+        return serializer.Invoke(value);
     }
     public bool Deserialize(string value)
     {

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Game.Minimap;
 
+/// <summary>
+/// サボタージュマップを開いたときに呼び出されます。
+/// </summary>
 public class MapOpenSabotageEvent : AbstractMapOpenEvent
 {
     internal MapOpenSabotageEvent() : base() { }

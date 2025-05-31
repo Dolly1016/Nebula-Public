@@ -37,8 +37,8 @@ public abstract class LobbySlide
     public abstract IMetaWidgetOld Show(out float height);
 
 
-    protected static TextAttributeOld TitleAttribute = new(TextAttributeOld.TitleAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(5f, 0.5f) };
-    protected static TextAttributeOld CaptionAttribute = new(TextAttributeOld.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(6f, 0.5f) };
+    protected static readonly TextAttributeOld TitleAttribute = new(TextAttributeOld.TitleAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(5f, 0.5f) };
+    protected static readonly TextAttributeOld CaptionAttribute = new(TextAttributeOld.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new Vector2(6f, 0.5f) };
 }
 
 public class LobbySlideTemplate
@@ -85,8 +85,8 @@ public class LobbySlideTemplate
 [NebulaPreprocess(PreprocessPhase.PostLoadAddons)]
 public class LobbySlideManager
 {
-    public Dictionary<string,LobbySlide> allSlides = new();
-    static public Dictionary<string, LobbySlideTemplate> AllTemplates = new();
+    public readonly Dictionary<string,LobbySlide> allSlides = [];
+    static public readonly Dictionary<string, LobbySlideTemplate> AllTemplates = [];
     private MetaScreen? myScreen = null;
     private (string tag, bool detatched, bool calledByMe)? lastShowRequest;
     public bool IsValid { get; private set; } = true;
@@ -147,25 +147,25 @@ public class LobbySlideManager
         IsValid = false;
     }
 
-    static public RemoteProcess<(string tag, bool detatched)> RpcShow = new(
+    static public readonly RemoteProcess<(string tag, bool detatched)> RpcShow = new(
         "ShowSlide", (message, calledByMe) => NebulaGameManager.Instance?.LobbySlideManager.ShowSlide(message.tag, message.detatched, calledByMe)
         );
 
-    public void RpcShowScreen(string tag,bool detatched)
+    public void RpcShowScreen(string tag,bool detached)
     {
         if (!IsValid) return;
 
         if (allSlides.TryGetValue(tag, out var slide))
         {
             slide.Reshare();
-            RpcShow.Invoke((tag, detatched));
+            RpcShow.Invoke((tag, detached));
         }
     }
 
-    private void ShowSlide(string tag, bool detatched, bool calledByMe)
+    private void ShowSlide(string tag, bool detached, bool calledByMe)
     {
         if (!allSlides.TryGetValue(tag, out var slide) || !slide.Loaded)
-            lastShowRequest = (tag, detatched, calledByMe);
+            lastShowRequest = (tag, detached, calledByMe);
         else
         {
             if (myScreen)
@@ -203,7 +203,7 @@ public class LobbySlideManager
                 }
             }
 
-            if (!detatched) myScreen = screen;
+            if (!detached) myScreen = screen;
 
             lastShowRequest = null;
         }

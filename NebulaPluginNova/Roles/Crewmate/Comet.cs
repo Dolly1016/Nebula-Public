@@ -1,6 +1,7 @@
 ﻿using Nebula.Patches;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
@@ -10,7 +11,7 @@ using Virial.Helpers;
 namespace Nebula.Roles.Crewmate;
 
 
-public class Comet : DefinedRoleTemplate, DefinedRole
+public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRole
 {
     public Comet() : base("comet", new(121,175,206), RoleCategory.CrewmateRole, Crewmate.MyTeam, [BlazeCoolDownOption, BlazeDurationOption, BlazeSpeedOption, BlazeVisionOption, BlazeScreenOption])
     {
@@ -18,25 +19,23 @@ public class Comet : DefinedRoleTemplate, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Comet.png");
     }
     
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
-    static private FloatConfiguration BlazeCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeCoolDown", (5f,60f,2.5f),20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration BlazeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeSpeed", (0.5f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration BlazeDurationOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration BlazeVisionOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeVisionRate", (1f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration BlazeScreenOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeScreenRate", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration BlazeCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeCoolDown", (5f,60f,2.5f),20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration BlazeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeSpeed", (0.5f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration BlazeDurationOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration BlazeVisionOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeVisionRate", (1f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration BlazeScreenOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeScreenRate", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
 
-    static public Comet MyRole = new Comet();
-    static private GameStatsEntry StatsBlazing = NebulaAPI.CreateStatsEntry("stats.comet.blazing", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static public readonly Comet MyRole = new();
+    static private readonly GameStatsEntry StatsBlazing = NebulaAPI.CreateStatsEntry("stats.comet.blazing", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player) { }
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BoostButton.png", 115f);
-        private ModAbilityButton? boostButton = null;
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BoostButton.png", 115f);
 
-        void RuntimeAssignable.OnActivated()
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
@@ -46,19 +45,22 @@ public class Comet : DefinedRoleTemplate, DefinedRole
                 if(BlazeDurationOption <= 15f && BlazeSpeedOption <= 2.5f)
                     acTokenCommon2 = new("comet.common3", (Vector2.zero, false), (val, _) => val.Item2);
 
-                boostButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                boostButton.SetSprite(buttonSprite.GetSprite());
+                var boostButton = NebulaAPI.Modules.AbilityButton(this)
+                    .BindKey(Virial.Compat.VirtualKeyInput.Ability)
+                    .SetImage(buttonSprite)
+                    .SetLabel("blaze")
+                    .SetAsUsurpableButton(this);
+
                 boostButton.Availability = (button) => MyPlayer.CanMove;
                 boostButton.Visibility = (button) => !MyPlayer.IsDead;
-                boostButton.OnClick = (button) => button.ActivateEffect();
+                boostButton.OnClick = (button) => button.StartEffect();
                 boostButton.OnEffectStart = (button) => {
                     using (RPCRouter.CreateSection("CometBlaze"))
                     {
-                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new SpeedModulator(BlazeSpeedOption, Vector2.one, true, BlazeDurationOption, false, 100, "nebula::comet"), true));
-                        PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new AttributeModulator(PlayerAttributes.Invisible, BlazeDurationOption, false, 100, "nebula::comet"), true));
-                        if (BlazeVisionOption > 1f) PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.Eyesight, BlazeVisionOption, BlazeDurationOption, false, 100, "nebula::comet"), true));
-                        if(BlazeScreenOption > 1f) PlayerModInfo.RpcAttrModulator.Invoke(new(MyPlayer.PlayerId, new FloatModulator(PlayerAttributes.ScreenSize, BlazeScreenOption, BlazeDurationOption, false, 100, "nebula::comet"), true));
-
+                        MyPlayer.GainSpeedAttribute(BlazeSpeedOption, BlazeDurationOption, false, 100, "nebula::comet");
+                        MyPlayer.GainAttribute(PlayerAttributes.Invisible, BlazeDurationOption, false, 100, "nebula::comet");
+                        if (BlazeVisionOption > 1f) MyPlayer.GainAttribute(PlayerAttributes.Eyesight, BlazeDurationOption, BlazeVisionOption, false, 100, "nebula::comet");
+                        if(BlazeScreenOption > 1f) MyPlayer.GainAttribute(PlayerAttributes.ScreenSize, BlazeDurationOption, BlazeScreenOption, false, 100, "nebula::comet");
                     }
                     acTokenCommon.Value = true;
                     if(acTokenCommon2 != null) acTokenCommon2.Value.pos = MyPlayer.VanillaPlayer.GetTruePosition();
@@ -74,13 +76,12 @@ public class Comet : DefinedRoleTemplate, DefinedRole
                     if(!MeetingHud.Instance && acTokenCommon2 != null)
                         acTokenCommon2.Value.cleared |= MyPlayer.VanillaPlayer.GetTruePosition().Distance(acTokenCommon2.Value.pos) > 45f;
                 };
-                boostButton.CoolDownTimer = Bind(new Timer(0f, BlazeCoolDownOption).SetAsAbilityCoolDown().Start());
-                boostButton.EffectTimer = Bind(new Timer(0f, BlazeDurationOption));
-                boostButton.SetLabel("blaze");
+                boostButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, BlazeCoolDownOption).SetAsAbilityTimer().Start();
+                boostButton.EffectTimer = NebulaAPI.Modules.Timer(this, BlazeDurationOption);
             }
         }
 
-        bool RuntimeRole.IgnoreBlackout => true;
+        bool IPlayerAbility.IgnoreBlackout => true;
 
         [Local]
         void OnPlayerMurdered(PlayerMurderedEvent ev)

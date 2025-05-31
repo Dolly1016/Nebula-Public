@@ -9,12 +9,10 @@ using Virial;
 
 namespace Nebula.Roles.Abilities;
 
-internal class DebugAbility : SimpleReleasable, IGameOperator
+internal class DebugAbility : DependentLifespan, IGameOperator
 {
     public DebugAbility()
     {
-        this.Register();
-
         DebugScreen.Push(new FunctionalDebugTextContent(() =>
         {
             if (!NebulaInput.GetKey(KeyCode.RightShift)) return null;

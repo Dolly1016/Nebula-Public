@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Virial;
 using Virial.Assignable;
@@ -130,7 +130,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
 [NebulaRPCHolder]
 public class Dancer : DefinedRoleTemplate, DefinedRole
 {
-    static public RoleTeam MyTeam = new Team("teams.dancer", new(243, 152, 0), TeamRevealType.OnlyMe);
+    static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.dancer", new(243, 152, 0), TeamRevealType.OnlyMe);
 
     static private IntegerConfiguration NumOfSuccessfulForecastToWinOption = NebulaAPI.Configurations.Configuration("options.role.dancer.numOfSuccessfulForecastToWin", (1, 10), 4);
     static private FloatConfiguration DanceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.dancer.danceCoolDown", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
@@ -164,21 +164,14 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         if (!callByMe) (message.Item1.Role as Dancer.Instance)?.UpdateDanceState(message.Item2, message.Item3, message.Item4);
     });
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-
-        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
-        private bool canUseVent = VentConfiguration.CanUseVent;
-        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
-        GameTimer? RuntimeRole.VentDuration => ventDuration;
-        bool RuntimeRole.CanUseVent => canUseVent;
+        public override DefinedRole Role => MyRole;
         bool RuntimeRole.IgnoreNoisemakerNotification => ShowDeahNotificationOption;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DanceButton.png", 100f);
         static private Image buttonKillSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DanceKillButton.png", 100f);
-        public Instance(GamePlayer player) : base(player)
+        public Instance(GamePlayer player) : base(player, VentConfiguration)
         {
         }
 
@@ -190,7 +183,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         //画面左下のホルダ
         PlayersIconHolder iconHolder;
         //ダンスボタン
-        Modules.ScriptComponents.ModAbilityButton danceButton;
+        ModAbilityButton danceButton;
         //死の舞踏の使用可能回数
         int canKillLeft = 0;
 
@@ -223,29 +216,29 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
             if(canKillLeft <= 0 || nextIsFinalDance)
             {
                 canKillLeft = 0;
-                danceButton.SetSprite(buttonSprite.GetSprite());
-                if(danceButton.UsesIcon) GameObject.Destroy(danceButton.UsesIcon);
+                danceButton.SetImage(buttonSprite);
+                danceButton.HideUsesIcon();
             }
             else
             {
-                danceButton.ShowUsesIcon(0).text = canKillLeft.ToString();
-                danceButton.SetSprite(buttonKillSprite.GetSprite());    
+                danceButton.ShowUsesIcon(0, canKillLeft.ToString());
+                danceButton.SetImage(buttonKillSprite);    
             }
         }
 
         //各種ボタン類のセットアップ
-        void RuntimeAssignable.OnActivated()
+        public override void OnActivated()
         {
             if (AmOwner)
             {
-                iconHolder = Bind(new PlayersIconHolder());
+                iconHolder = new PlayersIconHolder().Register(this);
                 iconHolder.XInterval = 0.35f;
 
-                danceCoolDownTimer = Bind(new Timer(DanceCoolDownOption)).Start(10f);
+                danceCoolDownTimer = new TimerImpl(DanceCoolDownOption).Start(10f).Register(this);
                 danceCoolDownTimer.ResetsAtTaskPhase();
 
-                danceButton = Bind(new Modules.ScriptComponents.ModAbilityButton());
-                danceButton.SetSprite(buttonSprite.GetSprite());
+                danceButton = NebulaAPI.Modules.AbilityButton(this);
+                danceButton.SetImage(buttonSprite);
                 danceButton.Availability = (button) => !danceCoolDownTimer.IsProgressing;
                 danceButton.Visibility = (button) => !MyPlayer.IsDead;
                 danceButton.CoolDownTimer = new ScriptVisualTimer(
@@ -253,10 +246,10 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                     () => danceCoolDownTimer.IsProgressing ? danceCoolDownTimer.TimerText : dancerDanceChecker.DancingProgress > 0 ? Mathf.CeilToInt(DanceDuration - dancerDanceChecker.DancingProgress).ToString().Color(Color.cyan) : ""
                     );
                 danceButton.SetLabel("dance");
-                danceButton.SetCanUseByMouseClick(true, ButtonEffect.ActionIconType.NonclickAction, "danceAction", false);
+                (danceButton as ModAbilityButtonImpl)?.SetCanUseByMouseClick(true, ButtonEffect.ActionIconType.NonclickAction, "danceAction", false);
             }
 
-            localDanceChecker = GamePlayer.LocalPlayer.GetModule<DanceModule>()!;
+            localDanceChecker = GamePlayer.LocalPlayer!.GetModule<DanceModule>()!;
             dancerDanceChecker = MyPlayer.GetModule<DanceModule>()!;
         }
 
@@ -492,7 +485,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
 
         void ExtraWinning(PlayerCheckExtraWinEvent ev)
         {
-            if (ev.Phase != ExtraWinCheckPhase.LoversPhase) return;
+            if (ev.Phase != ExtraWinCheckPhase.DancerPhase) return;
 
             //タイムラグで拾い漏れがあるので、少し緩めに取る(有効な預言をうけ且つ死亡している and ダンサーの狂乱で死亡)
             if (ev.GameEnd == NebulaGameEnd.DancerWin && (completedDanceLooked.Contains(ev.Player) || (activeDanceLooked.Contains(ev.Player) && ev.Player.IsDead) || (ev.WinnersMask.Test(ev.Player.MyKiller) && ev.Player.PlayerState == PlayerState.Frenzied))) ev.IsExtraWin = true;

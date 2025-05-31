@@ -282,3 +282,13 @@ public static class EmergencyUpdatePatch
         return false;
     }
 }
+
+//子のゲームにConsoleを登録していない問題を修正
+[HarmonyPatch(typeof(DivertPowerMetagame), nameof(DivertPowerMetagame.Begin))]
+public static class FixDivertPowerMetagamePatch
+{
+    public static void Postfix(DivertPowerMetagame __instance)
+    {
+        Minigame.Instance.Console = __instance.Console;
+    }
+}

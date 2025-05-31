@@ -15,24 +15,6 @@ public interface IGameOperator
     public void OnReleased(){}
 }
 
-public class BindableGameOperator : IGameOperator
-{
-    private List<IReleasable> releasables = new();
-    void IGameOperator.OnReleased()
-    {
-        foreach (var r in releasables) r.Release();
-        OnReleased();
-    }
-
-    protected T Bind<T>(T component) where T : IReleasable
-    {
-        releasables.Add(component);
-        return component;
-    }
-
-    protected virtual void OnReleased() { }
-}
-
 /// <summary>
 /// プレイヤーに紐づけられたEntityを表します。
 /// </summary>
@@ -65,6 +47,7 @@ public static class GameEntityExtension
         return gameEntity;
     }
 
+    /*
     /// <summary>
     /// バインド済みEntityを現在のゲームに追加します。
     /// </summary>
@@ -76,4 +59,5 @@ public static class GameEntityExtension
         NebulaAPI.CurrentGame?.RegisterEntity(gameEntity, gameEntity);
         return gameEntity;
     }
+    */
 }

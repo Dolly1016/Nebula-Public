@@ -10,7 +10,7 @@ namespace Nebula.Roles.Impostor;
 
 public class Impostor : DefinedRoleTemplate, DefinedRole
 {
-    static public RoleTeam MyTeam = new Team("teams.impostor", new(Palette.ImpostorRed), TeamRevealType.Teams);
+    static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.impostor", new(Palette.ImpostorRed), TeamRevealType.Teams);
     
     private Impostor():base("impostor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, MyTeam, [CanKillHidingPlayerOption]) { }
 
@@ -29,16 +29,6 @@ public class Impostor : DefinedRoleTemplate, DefinedRole
 
         void RuntimeAssignable.OnActivated()
         {
-            if (AmOwner)
-            {
-                if (GeneralConfigurations.ImpostorsRadioOption) {
-                    VoiceChatRadio impostorRadio = new((p) => p.Role.Role.Category == RoleCategory.ImpostorRole, Language.Translate("voiceChat.info.impostorRadio"), Palette.ImpostorRed);
-                    Bind(new NebulaGameScript() {
-                        OnActivatedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.AddRadio(impostorRadio) ,
-                        OnReleasedEvent = ()=> NebulaGameManager.Instance?.VoiceChatManager?.RemoveRadio(impostorRadio)
-                    });
-                }
-            }
         }
     }
 }
@@ -55,4 +45,21 @@ public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
     {
         if (ev.Player.IsImpostor && (GamePlayer.LocalPlayer?.IsImpostor ?? false)) ev.Color = new(Palette.ImpostorRed);
     }
+}
+
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
+public class ImpostorRadioOperator : AbstractModule<Virial.Game.Game>, IGameOperator
+{
+    static ImpostorRadioOperator() => DIManager.Instance.RegisterModule(() => new ImpostorRadioOperator());
+
+    public ImpostorRadioOperator() => this.Register(NebulaAPI.CurrentGame!);
+    [OnlyMyPlayer]
+    void OnSetRole(PlayerRoleSetEvent ev)
+    {
+        if (GeneralConfigurations.ImpostorsRadioOption && ev.Role.Role.Category == RoleCategory.ImpostorRole)
+        {
+            VoiceChatManager.RegisterRadio(ev.Role, (p) => p.Role.Role.Category == RoleCategory.ImpostorRole, "voiceChat.info.impostorRadio", Palette.ImpostorRed);
+        }
+    }
+
 }

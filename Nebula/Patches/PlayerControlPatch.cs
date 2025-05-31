@@ -1,12 +1,12 @@
 ﻿namespace Nebula.Patches;
 
 
-[HarmonyPatch(typeof(CustomNetworkTransform), nameof(CustomNetworkTransform.Awake))]
+[HarmonyPatch(typeof(CustomNetworkTransform), nameof(CustomNetworkTransform.OnEnable))]
 public class SyncTransformPatch
 {
     public static void Postfix(CustomNetworkTransform __instance)
     {
-        //__instance.snapThreshold = 0.5f;
+        __instance.incomingPosQueue.Clear();
     }
 }
 

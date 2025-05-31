@@ -1,5 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Virial.DI;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Player;
@@ -270,6 +271,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, IInjectable, PlayerTa
                     case TaskUpdateMessage.CompleteTask:
                         task.CurrentCompleted++;
                         task.TotalCompleted++;
+                        GameOperatorManager.Instance?.Run(new PlayerTaskCompleteEvent(player));
                         break;
                     case TaskUpdateMessage.BecomeToCrewmate:
                         task.IsCrewmateTask = true;

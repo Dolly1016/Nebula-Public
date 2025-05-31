@@ -1,6 +1,7 @@
 ﻿using AmongUs.Data.Player;
 using Il2CppInterop.Runtime.Injection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Nebula.Modules.Cosmetics;
 using Rewired;
 using System.Text;
 using UnityEngine;
@@ -18,33 +19,34 @@ namespace Nebula.Game.Statistics;
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public static class EventDetail
 {
-    static public TranslatableTag Kill = new("statistics.events.kill");
-    static public TranslatableTag Exiled = new("statistics.events.exiled");
-    static public TranslatableTag Misfire = new("statistics.events.misfire");
-    static public TranslatableTag GameStart = new("statistics.events.startGame");
-    static public TranslatableTag GameEnd = new("statistics.events.endGame");
-    static public TranslatableTag MeetingEnd = new("statistics.events.endMeeting");
-    static public TranslatableTag Report = new("statistics.events.report");
-    static public TranslatableTag BaitReport = new("statistics.events.baitReport");
-    static public TranslatableTag EmergencyButton = new("statistics.events.emergency");
-    static public TranslatableTag MayorButton = new("statistics.events.mayorEmergency");
-    static public TranslatableTag Disconnect = new("statistics.events.disconnect");
-    static public TranslatableTag Revive = new("statistics.events.revive");
-    static public TranslatableTag Eat = new("statistics.events.eat");
-    static public TranslatableTag Clean = new("statistics.events.clean");
-    static public TranslatableTag Missed = new("statistics.events.missed");
-    static public TranslatableTag Guess = new("statistics.events.guess");
-    static public TranslatableTag Embroil = new("statistics.events.embroil");
-    static public TranslatableTag Trap = new("statistics.events.trap");
-    static public TranslatableTag Accident = new("statistics.events.accident");
-    static public TranslatableTag FakeSabotage = new("statistics.events.fakeSabotage");
-    static public TranslatableTag Curse = new("statistics.events.curse");
-    static public TranslatableTag Layoff = new("statistics.events.layoff");
-    static public TranslatableTag DestroyKill = new("statistics.events.destroy");
-    static public TranslatableTag Dance = new("statistics.events.dance");
-    static public TranslatableTag Gassed = new("statistics.events.gassed");
-    static public TranslatableTag Bubbled = new("statistics.events.bubbled");
-    static public TranslatableTag Meteor = new("statistics.events.meteor");
+    static public readonly TranslatableTag Kill = new("statistics.events.kill");
+    static public readonly TranslatableTag Exiled = new("statistics.events.exiled");
+    static public readonly TranslatableTag Misfire = new("statistics.events.misfire");
+    static public readonly TranslatableTag GameStart = new("statistics.events.startGame");
+    static public readonly TranslatableTag GameEnd = new("statistics.events.endGame");
+    static public readonly TranslatableTag MeetingEnd = new("statistics.events.endMeeting");
+    static public readonly TranslatableTag Report = new("statistics.events.report");
+    static public readonly TranslatableTag BaitReport = new("statistics.events.baitReport");
+    static public readonly TranslatableTag EmergencyButton = new("statistics.events.emergency");
+    static public readonly TranslatableTag MayorButton = new("statistics.events.mayorEmergency");
+    static public readonly TranslatableTag Disconnect = new("statistics.events.disconnect");
+    static public readonly TranslatableTag Revive = new("statistics.events.revive");
+    static public readonly TranslatableTag Eat = new("statistics.events.eat");
+    static public readonly TranslatableTag Clean = new("statistics.events.clean");
+    static public readonly TranslatableTag Missed = new("statistics.events.missed");
+    static public readonly TranslatableTag Guess = new("statistics.events.guess");
+    static public readonly TranslatableTag Embroil = new("statistics.events.embroil");
+    static public readonly TranslatableTag Trap = new("statistics.events.trap");
+    static public readonly TranslatableTag Accident = new("statistics.events.accident");
+    static public readonly TranslatableTag FakeSabotage = new("statistics.events.fakeSabotage");
+    static public readonly TranslatableTag Curse = new("statistics.events.curse");
+    static public readonly TranslatableTag Layoff = new("statistics.events.layoff");
+    static public readonly TranslatableTag DestroyKill = new("statistics.events.destroy");
+    static public readonly TranslatableTag Dance = new("statistics.events.dance");
+    static public readonly TranslatableTag Gassed = new("statistics.events.gassed");
+    static public readonly TranslatableTag Bubbled = new("statistics.events.bubbled");
+    static public readonly TranslatableTag Meteor = new("statistics.events.meteor");
+    static public readonly TranslatableTag Balloon = new("statistics.events.balloon");
 
     static EventDetail()
     {
@@ -69,6 +71,7 @@ public static class EventDetail
         EventDetails.Gassed = Gassed;
         EventDetails.Bubbled = Bubbled;
         EventDetails.Meteor = Meteor;
+        EventDetails.Balloon = Balloon;
     }
 }
 
@@ -83,18 +86,18 @@ public class GameStatistics
 {
     public class EventVariation : IArchivedEventVariation
     {
-        static Dictionary<int, EventVariation> AllEvents = new();
-        static private DividedSpriteLoader iconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GameStatisticsIcon.png", 100f, 8, 1);
-        static public EventVariation Kill = new(0, iconSprite.AsLoader(0), iconSprite.AsLoader(0), true, true);
-        static public EventVariation Exile = new(1, iconSprite.AsLoader(2), iconSprite.AsLoader(2), false, false);
-        static public EventVariation GameStart = new(2, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
-        static public EventVariation GameEnd = new(3, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
-        static public EventVariation MeetingEnd = new(4, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
-        static public EventVariation Report = new(5, iconSprite.AsLoader(4), iconSprite.AsLoader(4), true, false);
-        static public EventVariation EmergencyButton = new(6, iconSprite.AsLoader(3), iconSprite.AsLoader(3), true, false);
-        static public EventVariation Disconnect = new(7, iconSprite.AsLoader(5), iconSprite.AsLoader(5), false, false);
-        static public EventVariation Revive = new(8, iconSprite.AsLoader(6), iconSprite.AsLoader(6), true, false);
-        static public EventVariation CleanBody = new(9, iconSprite.AsLoader(7), iconSprite.AsLoader(7), true, false);
+        static readonly Dictionary<int, EventVariation> AllEvents = [];
+        static private readonly DividedSpriteLoader iconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GameStatisticsIcon.png", 100f, 8, 1);
+        static public readonly EventVariation Kill = new(0, iconSprite.AsLoader(0), iconSprite.AsLoader(0), true, true);
+        static public readonly EventVariation Exile = new(1, iconSprite.AsLoader(2), iconSprite.AsLoader(2), false, false);
+        static public readonly EventVariation GameStart = new(2, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
+        static public readonly EventVariation GameEnd = new(3, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
+        static public readonly EventVariation MeetingEnd = new(4, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
+        static public readonly EventVariation Report = new(5, iconSprite.AsLoader(4), iconSprite.AsLoader(4), true, false);
+        static public readonly EventVariation EmergencyButton = new(6, iconSprite.AsLoader(3), iconSprite.AsLoader(3), true, false);
+        static public readonly EventVariation Disconnect = new(7, iconSprite.AsLoader(5), iconSprite.AsLoader(5), false, false);
+        static public readonly EventVariation Revive = new(8, iconSprite.AsLoader(6), iconSprite.AsLoader(6), true, false);
+        static public readonly EventVariation CleanBody = new(9, iconSprite.AsLoader(7), iconSprite.AsLoader(7), true, false);
 
         public int Id { get; private init; }
         public Image? EventIcon { get; private init; }
@@ -138,7 +141,7 @@ public class GameStatistics
 
             if (variation.ShowPlayerPosition)
             {
-                List<Tuple<byte, Virial.Compat.Vector2>> list = new();
+                List<Tuple<byte, Virial.Compat.Vector2>> list = [];
                 foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
                 {
                     if (p.Data.IsDead && p.PlayerId != sourceId && (TargetIdMask & 1 << p.PlayerId) == 0) continue;
@@ -168,11 +171,11 @@ public class GameStatistics
         }
     }
 
-    private List<Event> allEvents { get; set; } = new();
+    private List<Event> allEvents { get; set; } = [];
     public IEnumerable<Event> AllEvents => allEvents;
     public Event[] Sealed { get => allEvents.ToArray(); }
 
-    public Dictionary<GameStatisticsGatherTag, Dictionary<byte, Vector2>> Gathering { get; set; } = new();
+    public Dictionary<GameStatisticsGatherTag, Dictionary<byte, Vector2>> Gathering { get; set; } = [];
 
     public void RecordEvent(Event statisticsEvent)
     {
@@ -209,14 +212,14 @@ public class GameStatistics
     public void RpcRecordEvent(EventVariation variation, TranslatableTag relatedTag, float timeLag, PlayerControl? source, int targetMask) => RpcRecord.Invoke((variation.Id, relatedTag.Id, source?.PlayerId ?? byte.MaxValue, targetMask, timeLag));
 
 
-    static private RemoteProcess<(int variation, int relatedTag, byte sourceId, int targetMask, float timeLag)> RpcRecord = new(
+    static private readonly RemoteProcess<(int variation, int relatedTag, byte sourceId, int targetMask, float timeLag)> RpcRecord = new(
         "RecordStatistics",
        (message, isCalledByMe) =>
        {
            NebulaGameManager.Instance?.GameStatistics.RecordEvent(new Event(EventVariation.ValueOf(message.variation), NebulaGameManager.Instance.CurrentTime + message.timeLag, message.sourceId == byte.MaxValue ? null : message.sourceId, message.targetMask, null) { RelatedTag = TranslatableTag.ValueOf(message.relatedTag) });
        });
 
-    static public RemoteProcess<(GameStatisticsGatherTag tag, byte playerId, Vector2 pos)> RpcPoolPosition = new(
+    static public readonly RemoteProcess<(GameStatisticsGatherTag tag, byte playerId, Vector2 pos)> RpcPoolPosition = new(
         "PoolPosition",
         (message, _) =>
         {
@@ -236,8 +239,8 @@ public class CriticalPoint : MonoBehaviour
     {
         ClassInjector.RegisterTypeInIl2Cpp<CriticalPoint>();
     }
-    static private SpriteLoader momentSprite = SpriteLoader.FromResource("Nebula.Resources.GameStatisticsMoment.png", 100f);
-    static private SpriteLoader momentRingSprite = SpriteLoader.FromResource("Nebula.Resources.GameStatisticsMomentRing.png", 100f);
+    static private readonly SpriteLoader momentSprite = SpriteLoader.FromResource("Nebula.Resources.GameStatisticsMoment.png", 100f);
+    static private readonly SpriteLoader momentRingSprite = SpriteLoader.FromResource("Nebula.Resources.GameStatisticsMomentRing.png", 100f);
 
     public int IndexMin { get; private set; }
     public int IndexMax { get; private set; }
@@ -389,7 +392,7 @@ public class GameStatisticsViewer : MonoBehaviour
 
     private void ShowCriticalMoment(float p, ref int index)
     {
-        var sum = allStatistics[allStatistics.Length - 1].Time - allStatistics[0].Time;
+        var sum = allStatistics[^1].Time - allStatistics[0].Time;
         int indexMin = index;
         while (index + 1 < allStatistics.Length && allStatistics[index + 1].Time - allStatistics[indexMin].Time < sum * 0.01f)
         {
@@ -416,7 +419,7 @@ public class GameStatisticsViewer : MonoBehaviour
         float p = 0f;
 
         float minTime = allStatistics[0].Time;
-        float maxTime = allStatistics[allStatistics.Length - 1].Time;
+        float maxTime = allStatistics[^1].Time;
         int index = 0;
 
         ShowCriticalMoment(0, ref index);
@@ -554,7 +557,7 @@ public class GameStatisticsViewer : MonoBehaviour
                 backGround.color = MainColor;
             });
 
-            List<GameObject> objects = new();
+            List<GameObject> objects = [];
 
             Il2CppArgument<PoolablePlayer> GeneratePlayerView(byte id)
             {

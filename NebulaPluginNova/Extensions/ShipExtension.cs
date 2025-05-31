@@ -1,7 +1,7 @@
 ﻿using BepInEx.Unity.IL2CPP;
 using Cpp2IL.Core.Extensions;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using UnityEngine;
 using Virial;
 using Virial.Events.Game;
@@ -9,8 +9,31 @@ using Virial.Events.Game.Minimap;
 
 namespace Nebula.Extensions;
 
+public static class ShipCache
+{
+    static private ShipStatus lastChecked = null!;
+    static private MapConsole[] mapConsoles = [];
+    static private void SearchAll()
+    {
+        if (lastChecked) return;
+        lastChecked = ShipStatus.Instance;
+        if (!lastChecked) return;
+
+        mapConsoles = lastChecked.GetComponentsInChildren<MapConsole>();
+    }
+
+    static public MapConsole[] MapConsoles { get
+        {
+            SearchAll();
+            return mapConsoles;
+        } 
+    }
+}
+
 public static class ShipExtension
 {
+
+
     public static void PatchModification(byte mapId)
     {
         switch (mapId)
@@ -205,6 +228,72 @@ public static class ShipExtension
             collider.SetPoints(((Vector2[])[new(-12.45f, -13.6f), new(6.0f, -13.6f)]).ToIl2CppList());
         }
 
+        List<PlainDoor> additionalDoors = [];
+        
+        
+        if(GeneralConfigurations.AirshipSecurityDeckDoorOption.Value) additionalDoors.Add(GenerateExtraDoorInAirship(false, new(7.09f, -13.8182f, -0.005f), Vector3.one, SystemTypes.Security, 21)); //セキュ展望
+        if (GeneralConfigurations.AirshipSecurityKitchenDoorOption.Value) additionalDoors.Add(GenerateExtraDoorInAirship(true, new(4.4975f, -12.0855f, 1f), Vector3.one, SystemTypes.Security, 22)); //セキュ左
+        if (GeneralConfigurations.AirshipMeetingDoorOption.Value) additionalDoors.Add(GenerateExtraDoorInAirship(true, new(14.595f, 15.302f, 0.2f), Vector3.one, SystemTypes.MeetingRoom, 23)); //ミーティング右
+        if (GeneralConfigurations.AirshipLoungeDoorOption.Value) additionalDoors.Add(GenerateExtraDoorInAirship(true, new(27.79f, 5.572f, 0.2f), new(1.04f, 1f, 1f), SystemTypes.Lounge, 24)); //ラウンジ中
+        if (GeneralConfigurations.AirshipLoungeStorageDoorOption.Value) additionalDoors.Add(GenerateExtraDoorInAirship(false, new(33.8289f, 4.1328f, 0.09f), Vector3.one, SystemTypes.Lounge, 25)); //ラウンジ下
+        if (GeneralConfigurations.AirshipVentilationDoorOption.Value)
+        {
+            additionalDoors.Add(GenerateExtraDoorInAirship(true, new(29.8046f, -1.3482f, 0.2f), Vector3.one, SystemTypes.Ventilation, 26)); //通気口右
+            additionalDoors.Add(GenerateExtraDoorInAirship(true, new(25.0831f, 0.7126f, 0.09f), Vector3.one, SystemTypes.Ventilation, 27)); //通気口左
+        }
+        if (GeneralConfigurations.AirshipShowerDoorOption.Value) additionalDoors.Add(GenerateExtraDoorInAirship(false, new(24.02f, 1.49f, 0.1f), new(0.97f, 1.05f, 1f), SystemTypes.Showers, 28)); //シャワー内
+        if (GeneralConfigurations.AirshipMedicalDoorOption.Value) additionalDoors.Add(GenerateExtraDoorInAirship(true, new(26.57f, -5.5645f, 1f), new(1.03f, 1f, 1f), SystemTypes.Medical, 29)); //メディカル内
+        if (GeneralConfigurations.AirshipMainHallDoorOption.Value)
+        {
+            additionalDoors.Add(GenerateExtraDoorInAirship(false, new(15.34f, 0.955f, 0.1f), Vector3.one, SystemTypes.MainHall, 30)); //メインホール右上
+            additionalDoors.Add(GenerateExtraDoorInAirship(false, new(6.21f, -1.46f, 0.1f), Vector3.one, SystemTypes.MainHall, 31)); //メインホール左下
+            additionalDoors.Add(GenerateExtraDoorInAirship(false, new(6.21f, 0.955f, 0.1f), Vector3.one, SystemTypes.MainHall, 32)); //メインホール左上
+            additionalDoors.Add(GenerateExtraDoorInAirship(false, new(9.25f, 0.955f, 0.1f), Vector3.one, SystemTypes.MainHall, 33)); //メインホール上(左側)
+        }
+        if (GeneralConfigurations.AirshipMainElecDoorOption.Value) additionalDoors.Add(GenerateExtraDoorInAirship(false, new(12.3f, -1.5f, 0.1f), Vector3.one, SystemTypes.MainHall, 34)); //メインホール右下
+
+        GameOperatorManager.Instance?.Subscribe<MapInstantiateEvent>(ev => {
+            List<MapRoom> mapRooms = [];
+            if (GeneralConfigurations.AirshipShowerDoorOption.Value) mapRooms.Add(AddDoorSabotageButtonInAirship("Showers", SystemTypes.Showers, new(1.87f, 0.43f, -1f)));
+            if (GeneralConfigurations.AirshipLoungeStorageDoorOption.Value || GeneralConfigurations.AirshipLoungeDoorOption.Value) mapRooms.Add(AddDoorSabotageButtonInAirship("Lounge", SystemTypes.Lounge, new(2.7f, 0.6f, -1f)));
+            if (GeneralConfigurations.AirshipVentilationDoorOption.Value) mapRooms.Add(AddDoorSabotageButtonInAirship("Ventilation", SystemTypes.Ventilation, new(2.5f, 0f, -1f)));
+            if (GeneralConfigurations.AirshipMeetingDoorOption.Value) mapRooms.Add(AddDoorSabotageButtonInAirship("MeetingRoom", SystemTypes.MeetingRoom, new(1f, 1.8f, -1f)));
+            if (GeneralConfigurations.AirshipSecurityDeckDoorOption.Value || GeneralConfigurations.AirshipSecurityKitchenDoorOption.Value) mapRooms.Add(AddDoorSabotageButtonInAirship("Security", SystemTypes.Security, new(0f, -1.6f, -1f)));
+            if(mapRooms.Count > 0) MapBehaviour.Instance.infectedOverlay.rooms = MapBehaviour.Instance.infectedOverlay.rooms.Concat(mapRooms).ToArray();
+        }, NebulaAPI.CurrentGame!, 200);
+
+        AddDoors(additionalDoors);
+    }
+
+    //Vert->左右通行のドア
+    static private MapRoom AddDoorSabotageButtonInAirship(string name, SystemTypes room, Vector3 pos)
+    {
+        var infectedOverlay = MapBehaviour.Instance.infectedOverlay;
+        var orig = infectedOverlay.transform.GetChild(7);
+        var obj = GameObject.Instantiate(orig, infectedOverlay.transform);
+        obj.name = name;
+        var mapRoom = obj.GetComponent<MapRoom>();
+        mapRoom.room = room;
+        obj.transform.localPosition = pos;
+        return mapRoom;
+    }
+
+    //Vert->左右通行のドア
+    static private PlainDoor GenerateExtraDoorInAirship(bool isVert, Vector3 position, Vector3 scale, SystemTypes room, int id)
+    {
+        var orig = ShipStatus.Instance.FastRooms[SystemTypes.Brig].transform.GetChild(isVert ? 5 : 3);
+        var door = GameObject.Instantiate(orig, ShipStatus.Instance.transform).GetComponent<PlainDoor>();
+        door.transform.localScale = scale;
+        door.transform.position = position;
+        door.Room = room;
+        door.Id = id;
+        return door;
+    }
+
+    static private void AddDoors(params IReadOnlyList<OpenableDoor> doors)
+    {
+        if (doors.Count == 0) return;
+        ShipStatus.Instance.AllDoors = new(ShipStatus.Instance.AllDoors.ToArray().Concat(doors).ToArray());
     }
 
     private static SpriteLoader fungleLight1Sprite = SpriteLoader.FromResource("Nebula.Resources.FungleLightConsole1.png", 100f);
@@ -239,7 +328,7 @@ public static class ShipExtension
         //停電サボタージュ
         if(FungleHasLightSabotage)
         {
-            GameOperatorManager.Instance!.Register<MapInstantiateEvent>(ev =>
+            GameOperatorManager.Instance!.Subscribe<MapInstantiateEvent>(ev =>
             {
                 var infected = MapBehaviour.Instance.infectedOverlay;
                 var lightOut = GameObject.Instantiate(VanillaAsset.MapAsset[0].MapPrefab.infectedOverlay.transform.GetChild(3).GetChild(1).gameObject, infected.transform);
@@ -258,7 +347,7 @@ public static class ShipExtension
                 allButtons.Add(button);
                 infected.allButtons = allButtons.ToArray();
 
-                GameOperatorManager.Instance.Register<GameHudUpdateEvent>(ev =>
+                GameOperatorManager.Instance.Subscribe<GameHudUpdateEvent>(ev =>
                 {
                     if (infected.sabSystem != null)
                     {
@@ -417,6 +506,7 @@ public static class ShipExtension
 
         Console c = Consolize<Console>(obj);
         c.Room = room;
+        c.Image = renderer;
         return c;
     }
 

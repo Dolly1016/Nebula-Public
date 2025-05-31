@@ -69,7 +69,7 @@ public class NebulaCommandLogger : ICommandLogger
     }
 
     public string ExecutedCommand { get; private init; }
-    List<ICommandLogText> allTexts = new();
+    List<ICommandLogText> allTexts = [];
     IEnumerable<ICommandLogText> AllTexts => allTexts;
 
     ICommandLogText ICommandLogger.Push(CommandLogLevel logLevel, string message)
@@ -147,8 +147,7 @@ public class CommandManager
 
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        Patches.LoadPatch.LoadingText = "Loading Commands";
-        yield return null;
+        yield return preprocessor.SetLoadingText("Loading Commands");
 
         foreach (var addon in NebulaAddon.AllAddons)
         {
@@ -173,7 +172,7 @@ public class CommandManager
                     var varAllocator = (allocator as IVariableResourceAllocator);
 
                     if (varAllocator == null) {
-                        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, null, "Invalid namespace was specified. (command: " + splittedPath[splittedPath.Length - 1] + ")" );
+                        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, null, "Invalid namespace was specified. (command: " + splittedPath[^1] + ")" );
                         continue;
                     }
 
@@ -211,8 +210,8 @@ public class CommandManager
                         if(buffer != null) commands.Add(new StatementCommandToken(CommandManager.ParseCommand(CommandManager.ParseRawCommand(buffer))));
                     }
 
-                    varAllocator.Register(splittedPath[splittedPath.Length - 1], new AddonCommand(arguments, commands.ToArray()));
-                    NebulaPlugin.Log.Print("Registered Command: " + splittedPath[splittedPath.Length - 1] + " at " + namespacePath);
+                    varAllocator.Register(splittedPath[^1], new AddonCommand(arguments, commands.ToArray()));
+                    NebulaPlugin.Log.Print("Registered Command: " + splittedPath[^1] + " at " + namespacePath);
 
                 }
             }
@@ -240,7 +239,7 @@ public class CommandManager
             .Replace("{", " { ").Replace("}", " } ").Split(' ').Where(str => str.Length != 0).ToArray();
     }
 
-    static public IReadOnlyArray<ICommandToken> ParseCommand(string[] args, ICommandLogger? logger = null) => ParseCommand(new Stack<string>(args.Reverse()), logger);
+    static public IReadOnlyArray<ICommandToken> ParseCommand(string[] args, ICommandLogger? logger = null) => ParseCommand(new Stack<string>(((IEnumerable<string>)args).Reverse()), logger);
 
     static private IReadOnlyArray<ICommandToken> ParseCommand(Stack<string> args, ICommandLogger? logger)
     {
@@ -254,7 +253,7 @@ public class CommandManager
         IReadOnlyArray<(ICommandToken label, ICommandToken value)> ParseStructElements(Stack<string> args)
         {
             IReadOnlyArray<ICommandToken>? storedLabel = null;
-            List<(ICommandToken label, ICommandToken value)> members = new();
+            List<(ICommandToken label, ICommandToken value)> members = [];
             while (args.Count > 0)
             {
                 var val = ParseCommand(args, logger);
@@ -306,7 +305,7 @@ public class CommandManager
             return ReplaceSpacedCharacter(sb.Join(null," "),'(',')', '[', ']', '{', '}', ':', ',');
         }
 
-        List<ICommandToken> result = new();
+        List<ICommandToken> result = [];
         while (args.Count > 0)
         {
             var arg = args.Pop();
@@ -399,8 +398,8 @@ public class ConsoleShower : MonoBehaviour
         public float Alpha { get; set; } = 1f;
     }
 
-    Queue<Bubble> activeBubbles = new();
-    Stack<Bubble> unusedBubblePool = new();
+    Queue<Bubble> activeBubbles = [];
+    Stack<Bubble> unusedBubblePool = [];
     public GameObject ConsoleInputHolder;
 
     static ConsoleShower() => ClassInjector.RegisterTypeInIl2Cpp<ConsoleShower>();

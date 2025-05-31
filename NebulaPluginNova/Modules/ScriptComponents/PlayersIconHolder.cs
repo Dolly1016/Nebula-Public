@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Rewired.Utils.Classes.Data;
 using System;
 using System.Collections.Generic;
@@ -41,7 +41,7 @@ internal class PlayerIconInfo
     }
 }
 
-internal class PlayersIconHolder : INebulaScriptComponent, IGameOperator
+internal class PlayersIconHolder : FlexibleLifespan, IGameOperator
 {
     HudContent myContent;
     GameObject adjuster;

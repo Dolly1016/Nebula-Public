@@ -114,10 +114,10 @@ public class TeleportationSystem : AbstractModule<Virial.Game.Game>, IGameOperat
     public TeleportationSystem() => ModSingleton<TeleportationSystem>.Instance = this;
 
     private record TeleporterPair(int kind, Vector2 pos1, Vector2 pos2);
-    List<TeleporterPair> Pairs = new();
+    List<TeleporterPair> Pairs = [];
     public const int MaxTeleporterKind = 4;
-    public static float[] TeleportHue = [124, 296, 212, 16];
-    public static float[] TeleportSat = [1f, 1f, 1f, 0.5f];
+    public static readonly float[] TeleportHue = [124, 296, 212, 16];
+    public static readonly float[] TeleportSat = [1f, 1f, 1f, 0.5f];
     protected override void OnInjected(Virial.Game.Game container) => this.Register(container);
 
     public int GetKind(Vector2 pos) => Pairs.MinBy(p => Math.Min(p.pos1.Distance(pos), p.pos2.Distance(pos)))?.kind ?? 0;
@@ -224,8 +224,8 @@ public class TeleportationSystem : AbstractModule<Virial.Game.Game>, IGameOperat
 public class Teleporter : NebulaSyncStandardObject
 {
     public const string MyTag = "Teleporter";
-    static private IDividedSpriteLoader sprite = DividedSpriteLoader.FromResource("Nebula.Resources.Teleporter.png", 100f, TeleportationSystem.MaxTeleporterKind, 1);
-    static private IDividedSpriteLoader shadowSprite = DividedSpriteLoader.FromResource("Nebula.Resources.TeleporterBack.png", 100f, TeleportationSystem.MaxTeleporterKind, 1);
+    static private readonly IDividedSpriteLoader sprite = DividedSpriteLoader.FromResource("Nebula.Resources.Teleporter.png", 100f, TeleportationSystem.MaxTeleporterKind, 1);
+    static private readonly IDividedSpriteLoader shadowSprite = DividedSpriteLoader.FromResource("Nebula.Resources.TeleporterBack.png", 100f, TeleportationSystem.MaxTeleporterKind, 1);
     private SpriteRenderer ConsoleRenderer;
     private SpriteRenderer ShadowRenderer;
     

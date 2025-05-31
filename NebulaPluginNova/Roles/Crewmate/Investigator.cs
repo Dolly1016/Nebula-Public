@@ -1,24 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BepInEx.Unity.IL2CPP.Utils;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.DI;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
-using Virial;
-using Virial.Events.Game;
-using Nebula.Roles.Impostor;
-using static Nebula.Roles.Impostor.Thurifer;
-using Virial.Components;
-using Virial.DI;
-using Rewired.UI.ControlMapper;
-using BepInEx.Unity.IL2CPP.Utils;
-using Epic.OnlineServices.Presence;
-using Virial.Media;
-using Nebula.Modules.GUIWidget;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -78,7 +66,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
             NebulaAPI.CurrentGame?.GetModule<MeetingOverlayHolder>()?.RegisterOverlay(InvestigatorManager.GetWidget(this), MeetingOverlayHolder.IconsSprite[6], MyRole.RoleColor);
 
             bool done = false;
-            GameOperatorManager.Instance?.Register<MeetingEndEvent>(ev =>
+            GameOperatorManager.Instance?.Subscribe<MeetingEndEvent>(ev =>
             {
                 if (ev.Exiled.Contains(Killer)) new StaticAchievementToken("investigator.challenge");
                 done = true;
@@ -176,7 +164,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 void ShowDiscoveredPopup()
                 {
-                    NebulaManager.Instance.RegsiterStaticPopup(
+                    NebulaManager.Instance.RegisterStaticPopup(
                         () => lastFootprint?.Info != selected.Info,
                         () => !NebulaInput.SomeUiIsActive && lastFootprint?.Info == selected.Info,
                         () => (GetWidget(selected.Info), GetScreenPos, null)
@@ -189,7 +177,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
                     {
                         //さらに得られる情報がある場合、情報を得るポップアップを出す。
                         discoverProgress = 0f;
-                        NebulaManager.Instance.RegsiterStaticPopup(
+                        NebulaManager.Instance.RegisterStaticPopup(
                             () => localPlayer.IsDead || lastFootprint?.Info != selected.Info || selected.Info.Discovered,
                             () => localPlayer.CanMove && !NebulaInput.SomeUiIsActive && lastFootprint?.Info == selected.Info && !selected.Info.Discovered,
                             () => (GetWidget(selected.Info), GetScreenPos, null),
@@ -275,19 +263,19 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
     {
     }
 
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private FloatConfiguration InvestigateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateCooldown", (2.5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration InvestigateDurationOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration InvestigateSpeedOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateSpeed", (0.25f, 2f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration InvestigateEyesightOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateEyesight", (0.125f, 2f, 0.125f), 0.5f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration FootprintDuration = NebulaAPI.Configurations.Configuration("options.role.investigator.footprintDuration", (1f,10f,1f), 3f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration InvestigateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateCooldown", (2.5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration InvestigateDurationOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration InvestigateSpeedOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateSpeed", (0.25f, 2f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration InvestigateEyesightOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateEyesight", (0.125f, 2f, 0.125f), 0.5f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration FootprintDuration = NebulaAPI.Configurations.Configuration("options.role.investigator.footprintDuration", (1f,10f,1f), 3f, FloatConfigurationDecorator.Second);
 
-    static public Investigator MyRole = new Investigator();
-    static public GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.investigator.found", GameStatsCategory.Roles, MyRole);
+    static public readonly Investigator MyRole = new();
+    static public readonly GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.investigator.found", GameStatsCategory.Roles, MyRole);
 
-    private class NightVision : SimpleReleasable, IGameOperator {
+    private class NightVision : FlexibleLifespan, IGameOperator {
         //遷移中に使用する
         bool preBlacklightVision = true, postBlacklightVision = false;
         float t = 0f;
@@ -297,7 +285,6 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
 
         public NightVision()
         {
-            this.Register();
             ModSingleton<NightVision>.Instance = this;
         }
 
@@ -310,10 +297,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
             t = 0f;
         }
 
-        override protected void OnReleased()
-        {
-            RemoveEffect();
-        }
+        public void OnReleased() => RemoveEffect();
 
         private void RemoveEffect()
         {
@@ -368,7 +352,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
                 }
                 else if(!IsDeadObject)
                 {
-                    this.ReleaseIt();
+                    this.Release();
                 }
             }
             else
@@ -401,31 +385,17 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
         public Instance(GamePlayer player) : base(player) { }
         
 
-        static private Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.InvestigatorButton.png", 115f);
+        static private readonly Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.InvestigatorButton.png", 115f);
         void RuntimeAssignable.OnActivated() {
             if (AmOwner)
             {
-                var investigatorButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                investigatorButton.SetSprite(buttonImage.GetSprite());
-                investigatorButton.Availability = (button) => MyPlayer.CanMove;
-                investigatorButton.Visibility = (button) => !MyPlayer.IsDead;
-                investigatorButton.OnClick = (button) => {
-                    if (!button.EffectActive) button.ActivateEffect();
-                        
-                    
-                };
+                var investigatorButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, InvestigateCoolDownOption, InvestigateDurationOption, "investigate", buttonImage);
                 investigatorButton.OnEffectEnd = (button) =>
                 {
                     ModSingleton<NightVision>.Instance?.MarkReleased();
                     investigatorButton.StartCoolDown();
                 };
-                investigatorButton.OnEffectStart = (button) =>
-                {
-                    Bind(new NightVision());
-                };
-                investigatorButton.CoolDownTimer = Bind(new Timer(0f, InvestigateCoolDownOption).SetAsAbilityCoolDown().Start());
-                investigatorButton.EffectTimer = Bind(new Timer(0f, InvestigateDurationOption));
-                investigatorButton.SetLabel("investigate");
+                investigatorButton.OnEffectStart = (button) => new NightVision().Register(this);
             }
         }
 

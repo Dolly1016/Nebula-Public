@@ -7,7 +7,7 @@ namespace Nebula.Utilities;
 [NebulaPreprocess(PreprocessPhase.FixStructure)]
 public class TranslatableTag : CommunicableTextTag
 {
-    static public List<TranslatableTag> AllTag = new();
+    static public readonly List<TranslatableTag> AllTag = [];
 
     public string TranslateKey { get; private set; }
     string CommunicableTextTag.TranslationKey => TranslateKey;

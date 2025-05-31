@@ -52,13 +52,33 @@ public interface INebulaResource
 }
 
 /// <summary>
-/// リソースのアロケータ
+/// リソースのアロケータを表します。
 /// </summary>
 public interface IResourceAllocator
 {
-    INebulaResource? GetResource(IReadOnlyArray<string> namespaceArray, string name);
-    INebulaResource? GetResource(string name) => GetResource(IReadOnlyArray<string>.Empty(), name);
-    IResourceAllocator? GetChildAllocator(string name) => null;
+    /// <summary>
+    /// アドレスからリソースを取得します。
+    /// </summary>
+    /// <param name="namespaceArray">名前空間を格納した配列。</param>
+    /// <param name="name">名前。</param>
+    /// <returns></returns>
+    internal INebulaResource? GetResource(IReadOnlyArray<string> namespaceArray, string name);
+    /// <summary>
+    /// アドレスからリソースを取得します。
+    /// </summary>
+    /// <param name="name">名前。</param>
+    /// <returns></returns>
+    INebulaResource? GetResource(string name)
+    {
+        string[] splitted = name.Split("::");
+        return GetResource(new ReadOnlyArray<string>(splitted, 0, splitted.Length - 1), splitted[^1]);
+    }
+    /// <summary>
+    /// 名前から紐づく子のアロケータを取得します。
+    /// </summary>
+    /// <param name="name">子の名前。</param>
+    /// <returns></returns>
+    internal IResourceAllocator? GetChildAllocator(string name) => null;
 }
 
 public interface IVariableNamespaceAllocator : IResourceAllocator

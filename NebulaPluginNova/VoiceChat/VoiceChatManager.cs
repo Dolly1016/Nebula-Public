@@ -2,7 +2,7 @@
 using NAudio.Dsp;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using OpusDotNet;
 using System.Runtime.CompilerServices;
@@ -660,14 +660,12 @@ public class VoiceChatManager : IDisposable
         screen.SetWidget(widget);
     }
 
-    static public NebulaGameScript GenerateBindableRadioScript(Predicate<GamePlayer> predicate, string translationKey, Color color)
+    static public void RegisterRadio(ILifespan lifespan, Predicate<GamePlayer> predicate, string translationKey, Color color)
     {
         VoiceChatRadio radio = new(predicate, Language.Translate(translationKey), color);
-        return new NebulaGameScript()
-        {
-            OnActivatedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.AddRadio(radio),
-            OnReleasedEvent = () => NebulaGameManager.Instance?.VoiceChatManager?.RemoveRadio(radio)
-        };
+
+        NebulaGameManager.Instance?.VoiceChatManager?.AddRadio(radio);
+        GameOperatorManager.Instance?.RegisterReleasedAction(() => NebulaGameManager.Instance?.VoiceChatManager?.RemoveRadio(radio), lifespan);
     }
 }
 

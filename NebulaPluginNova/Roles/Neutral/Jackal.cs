@@ -8,6 +8,7 @@ using Nebula.VoiceChat;
 using System.ComponentModel;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
@@ -17,14 +18,14 @@ namespace Nebula.Roles.Neutral;
 
 public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public RoleTeam MyTeam = new Team("teams.jackal", new(8, 190, 245), TeamRevealType.OnlyMe, () => KillCooldown);
+    static readonly public RoleTeam MyTeam = new Team("teams.jackal", new(8, 190, 245), TeamRevealType.OnlyMe, () => KillCooldown);
 
     private Jackal() : base("jackal", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [KillCoolDownOption, CanCreateSidekickOption, NumOfKillingToCreateSidekickOption, JackalizedImpostorOption])
     {
         ConfigurationHolder?.ScheduleAddRelated(() => [Sidekick.MyRole.ConfigurationHolder!]);
     }
 
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, 0), arguments.Get(2, 0), arguments.Get(3, 0), Roles.GetRole(arguments.Get(4, -1)), arguments.Skip(5).ToArray());
     static public int[] GenerateArgument(int jackalTeamId, DefinedRole? jackalized) => [jackalTeamId, 0, 0, 0, jackalized?.Id ?? -1];
@@ -63,13 +64,46 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
     static public string AppendTeamIdIfNecessary(string orig, int id, bool canSeeAlllInfo, bool withParentheses) => ShouldShowTeamId(id, canSeeAlllInfo) ? withParentheses ? orig + "(" + GetDisplayTeamId(id) + ")" : orig + " " + GetDisplayTeamId(id) : orig;
 
+    IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments)
+    {
+        var role = Roles.GetRole(arguments.Get(0, -1));
+        var ability = role?.GetUsurpedAbility(player, arguments.Skip(1).ToArray());
+        if (ability != null) return new UsurpedJackalizedAbility(player, role!, ability);
+        return null;
+    }
+
+    private class UsurpedJackalizedAbility : FlexibleLifespan, IUsurpableAbility
+    {
+        public DefinedRole Role => jackalizedRole;
+        private DefinedRole jackalizedRole;
+        private IUsurpableAbility jackalizedAbility;
+        public IUsurpableAbility Ability => jackalizedAbility;
+        bool IUsurpableAbility.IsUsurped => jackalizedAbility.IsUsurped;
+        bool IUsurpableAbility.Usurp() => jackalizedAbility.Usurp();
+        public GamePlayer MyPlayer { get; private init; }
+        public bool AmOwner => MyPlayer.AmOwner;
+
+        public UsurpedJackalizedAbility(GamePlayer player, DefinedRole role, IUsurpableAbility ability)
+        {
+            this.MyPlayer = player;
+            this.jackalizedRole = role;
+            this.jackalizedAbility = ability.Register(this);
+        }
+
+        IEnumerable<IPlayerAbility> IPlayerAbility.SubAbilities => [jackalizedAbility];
+        int[] IPlayerAbility.AbilityArguments => [jackalizedRole.Id, ..jackalizedAbility.AbilityArguments];
+    }
+
+    string DefinedRole.GetDisplayName(IPlayerAbility ability)
+    {
+        if (ability is UsurpedJackalizedAbility a) return a.Role.GetDisplayName(a.Ability);
+        return (this as DefinedRole).DisplayName;
+    }
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
 
-        private ModAbilityButton? killButton = null;
-        private ModAbilityButton? sidekickButton = null;
         public int JackalTeamId;
         private int killingTotal = 0;
         private int myKillingTotal = 0;
@@ -81,8 +115,8 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
         string RuntimeRole.DisplayIntroBlurb => (MyJackalized ?? MyRole).DisplayIntroBlurb;
         string RuntimeRole.DisplayIntroRoleName => (MyJackalized ?? MyRole).DisplayName;
-
-        IEnumerable<IPlayerAbility?> RuntimeAssignable.MyAbilities => JackalizedAbility != null ? [JackalizedAbility] : [];
+       
+        IEnumerable<IPlayerAbility?> RuntimeAssignable.MyAbilities => JackalizedAbility != null ? [JackalizedAbility, ..JackalizedAbility.SubAbilities] : [];
 
         private int LeftKillingToCreateSidekick => Math.Max(0, NumOfKillingToCreateSidekickOption - myKillingTotal);
         public Instance(GamePlayer player, int jackalTeamId, int totalKilling, int myTotalKilling, int inherited, DefinedRole? jackalized, int[] jackalizedArgument) : base(player)
@@ -100,7 +134,8 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
         bool RuntimeRole.CanUseVent => true;
         //RoleAssignmentでもこの配置を前提とした部分がある点に注意(ジャッカル化の割り当てのため)
         int[] JackalArguments => [JackalTeamId, killingTotal, myKillingTotal, inherited, MyJackalized?.Id ?? -1];
-        int[]? RuntimeAssignable.RoleArguments => JackalArguments.Concat(JackalizedAbility?.RoleArguments ?? []).ToArray();
+        int[]? RuntimeAssignable.RoleArguments => JackalArguments.Concat(JackalizedAbility?.AbilityArguments ?? []).ToArray();
+        int[]? RuntimeRole.UsurpedAbilityArguments => (JackalizedAbility?.AbilityArguments ?? []).Prepend(MyJackalized?.Id ?? -1).ToArray();
         public int[] RoleArgumentsForSidekick
         {
             get
@@ -135,6 +170,11 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)));
         }
 
+        void RuntimeRole.Usurp()
+        {
+            (JackalizedAbility as IUsurpableAbility)?.Usurp();
+        }
+
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
@@ -143,28 +183,26 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 bool hasSidekick = false;
 
-                var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !IsMySidekick(p), null, Impostor.Impostor.CanKillHidingPlayerOption));
+                var myTracker = ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !IsMySidekick(p), null, Impostor.Impostor.CanKillHidingPlayerOption).Register(this);
 
-                SpriteRenderer? lockSprite = null;
+                GameObject? lockSprite = null;
                 TMPro.TextMeshPro? leftText = null;
+                ModAbilityButton? sidekickButton = null;
 
                 if ((inherited == 0 && CanCreateSidekickOption) || Sidekick.CanCreateSidekickChainlyOption)
                 {
-                    sidekickButton = Bind(new ModAbilityButton(true)).KeyBind(Virial.Compat.VirtualKeyInput.SidekickAction);
+                    sidekickButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, false, true, Virial.Compat.VirtualKeyInput.SidekickAction, null,
+                        15f, "sidekick",sidekickButtonSprite,
+                        _ => myTracker.CurrentTarget != null && LeftKillingToCreateSidekick <= 0,
+                        _ => !hasSidekick);
 
                     if (LeftKillingToCreateSidekick > 0)
                     {
-                        lockSprite = sidekickButton.VanillaButton.AddLockedOverlay();
-                        leftText = sidekickButton.ShowUsesIcon(3);
-                        leftText.text = LeftKillingToCreateSidekick.ToString();
+                        lockSprite = sidekickButton.AddLockedOverlay();
+                        sidekickButton.ShowUsesIcon(3, LeftKillingToCreateSidekick.ToString());
                     }
-                    sidekickButton.SetSprite(sidekickButtonSprite.GetSprite());
-                    sidekickButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.CanMove && LeftKillingToCreateSidekick <= 0;
-                    sidekickButton.Visibility = (button) => !MyPlayer.IsDead && !hasSidekick;
                     sidekickButton.OnClick = (button) =>
                     {
-                        button.StartCoolDown();
-
                         if (Sidekick.IsModifierOption)
                             myTracker.CurrentTarget?.Unbox().RpcInvokerSetModifier(SidekickModifier.MyRole, [JackalTeamId]).InvokeSingle();
                         else
@@ -175,13 +213,13 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                         if (inherited > 0) new StaticAchievementToken("sidekick.common2");
                         StatsSidekick.Progress();
                     };
-                    sidekickButton.CoolDownTimer = Bind(new Timer(15).Start());
-                    sidekickButton.SetLabel("sidekick");
                 }
 
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                killButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.CanMove && !MyPlayer.IsDived && !MyPlayer.IsBlown;
-                killButton.Visibility = (button) => !MyPlayer.IsDead && MyPlayer.AllowToShowKillButtonByAbilities;
+                var killButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, true, false, Virial.Compat.VirtualKeyInput.Kill, null,
+                    KillCooldown,"kill", null!,
+                    _ => myTracker.CurrentTarget != null,
+                    _ => MyPlayer.AllowToShowKillButtonByAbilities
+                    ).SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.OnClick = (button) =>
                 {
                     MyPlayer.MurderPlayer(myTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill, result =>
@@ -205,16 +243,12 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                     });
                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                 };
-                killButton.CoolDownTimer = Bind(new Timer(KillCooldown).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
-                killButton.SetLabel("kill");
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
 
-                if (GeneralConfigurations.JackalRadioOption)
-                    Bind(VoiceChatManager.GenerateBindableRadioScript(IsMySidekick, "voiceChat.info.jackalRadio", MyRole.RoleColor.ToUnityColor()));
+                if (GeneralConfigurations.JackalRadioOption) VoiceChatManager.RegisterRadio(this, IsMySidekick, "voiceChat.info.jackalRadio", MyRole.RoleColor.ToUnityColor());
             }
 
-            JackalizedAbility = Bind(MyJackalized?.GetJackalizedAbility(MyPlayer, StoredJackalizedArgument))?.Register();
+            JackalizedAbility = MyJackalized?.GetJackalizedAbility(MyPlayer, StoredJackalizedArgument)?.Register(this);
         }
 
         //ジャッカルはサイドキックとジャッカルを識別できる
@@ -232,7 +266,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
         }
 
         string RuntimeAssignable.DisplayName { get { 
-                var name = Jackal.AppendTeamIdIfNecessary(((MyJackalized ?? MyRole) as DefinedAssignable).DisplayName, JackalTeamId, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, false);
+                var name = Jackal.AppendTeamIdIfNecessary(MyJackalized?.GetDisplayName(JackalizedAbility!) ?? (MyRole as DefinedRole).DisplayName, JackalTeamId, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, false);
                 return name;
             }
         }
@@ -301,7 +335,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
     }
     IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Sidekick.MyRole, MyRole];
     string DefinedAssignable.InternalName => "jackal.sidekick";
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
 
@@ -316,7 +350,6 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
-        private ModAbilityButton? killButton = null;
         DefinedRole RuntimeRole.Role => MyRole;
         public int JackalTeamId;
         public Instance(GamePlayer player,int jackalTeamId) : base(player)
@@ -337,23 +370,18 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 if (SidekickCanKillOption)
                 {
-                    var myTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer)));
-
-                    killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                    killButton.Availability = (button) => myTracker.CurrentTarget != null && MyPlayer.CanMove;
-                    killButton.Visibility = (button) => !MyPlayer.IsDead;
-                    killButton.OnClick = (button) =>
-                    {
-                        MyPlayer.MurderPlayer(myTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
-                        NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
-                    };
-                    killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.CoolDown).SetAsKillCoolDown().Start());
-                    killButton.SetLabel("kill");
+                    var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
+                        KillCoolDownOption.CoolDown, "kill", ModAbilityButton.LabelType.Impostor, null!,
+                        (player, _) => {
+                            MyPlayer.MurderPlayer(player, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
+                            NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
+                        }
+                        );
                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
                 }
 
                 if (GeneralConfigurations.JackalRadioOption)
-                    Bind(VoiceChatManager.GenerateBindableRadioScript((p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor));
+                    VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);
             }
         }
 
@@ -369,7 +397,7 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
     static public SidekickModifier MyRole = new SidekickModifier();
     private SidekickModifier() : base("sidekick", Jackal.MyTeam.Color, withConfigurationHolder: false) { }
     IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Sidekick.MyRole, MyRole];
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
@@ -406,7 +434,7 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
                 if (GeneralConfigurations.JackalRadioOption)
-                    Bind(VoiceChatManager.GenerateBindableRadioScript((p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor));                
+                    VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);                
 
                 if (MyPlayer.Role.Role.Category == RoleCategory.ImpostorRole && MyPlayer.Unbox().TryGetModifier<Lover.Instance>(out _))
                     new StaticAchievementToken("threeRoles");

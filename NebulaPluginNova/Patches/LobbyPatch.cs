@@ -1,9 +1,8 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using InnerNet;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using UnityEngine;
 using Virial.Game;
-using Nebula.Modules;
 using Il2CppSystem.Collections;
 using UnityEngine.SceneManagement;
 using Virial.Assignable;
@@ -17,6 +16,8 @@ using Virial;
 using BepInEx.Unity.IL2CPP.Utils;
 using Hazel.Crypto;
 using Rewired.UI.ControlMapper;
+using Nebula.Modules.Cosmetics;
+using static Il2CppSystem.Net.Http.Headers.Parser;
 
 namespace Nebula.Patches;
 
@@ -156,7 +157,7 @@ public class GameStartManagerBeginGame
             }
         }
 
-        DynamicPalette.RpcShareMyColor();
+        Certification.RequireHandshake();
         GameStartNotification.Notification();
 
         return true;
@@ -260,6 +261,8 @@ public class DelayPlayDropshipAmbiencePatch
     }
     public static void Postfix(LobbyBehaviour __instance)
     {
+        AmongUsClient.Instance.MinSendInterval = 0.15f; //デフォルトは0.15
+
         if (ClientOption.AllOptions[ClientOption.ClientOptionType.PlayLobbyMusic].Value == 0)
         {
             __instance.StopAllCoroutines();
@@ -288,7 +291,7 @@ public class DelayPlayDropshipAmbiencePatch
             }
         }
         __instance.StartCoroutine(CoUpdateLogo().WrapToIl2Cpp());
-        GameOperatorManager.Instance!.Register<GameStartEvent>(_ => GameObject.Destroy(logoHolder), Virial.NebulaAPI.CurrentGame!);
+        GameOperatorManager.Instance!.Subscribe<GameStartEvent>(_ => GameObject.Destroy(logoHolder), Virial.NebulaAPI.CurrentGame!);
     }
 }
 
@@ -541,9 +544,28 @@ public class GlobalCosMismatchShowerPatch
 
         //ロビーで見せたいピックアップチュートリアル
         Tutorial.ShowTutorial(
-                    new TutorialBuilder(() => HudManager.Instance.transform.position + new Vector3(0f, 4f), true)
+                    new TutorialBuilder()
                     .BindHistory("stamp")
                     .ShowWhile(() => !HelpScreen.OpenedAnyHelpScreen)
                     .AsSimpleTitledTextWidget(Language.Translate("tutorial.variations.stamp.title"), Language.Translate("tutorial.variations.stamp.caption").ReplaceKeyCode("%KEY%", Virial.Compat.VirtualKeyInput.Stamp)));
+    }
+}
+
+[HarmonyPatch(typeof(HostInfoPanel), nameof(HostInfoPanel.Update))]
+public class HostInfoPanelUpdatePatch
+{
+    public static void Postfix(HostInfoPanel __instance)
+    {
+        NetworkedPlayerInfo host = GameData.Instance.GetHost();
+        if (host == null || host.IsIncomplete) return;
+        string text = ColorUtility.ToHtmlStringRGB(DynamicPalette.PlayerColors[__instance.player.ColorId]);
+        if (AmongUsClient.Instance.AmHost)
+        {
+            __instance.playerName.text = string.IsNullOrEmpty(host.PlayerName) ? "..." : string.Concat("<color=#", text, ">", host.PlayerName, "</color>" ) + "  <size=90%><b><font=\"Barlow-BoldItalic SDF\" material=\"Barlow-BoldItalic SDF Outline\">" + DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.HostYouLabel);
+        }
+        else
+        {
+            __instance.playerName.text = string.IsNullOrEmpty(host.PlayerName) ? "..." : string.Concat("<color=#", text, ">", host.PlayerName, "</color>" ) + " (" + __instance.player.ColorBlindName + ")";
+        }
     }
 }

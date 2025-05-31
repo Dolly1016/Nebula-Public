@@ -21,25 +21,23 @@ public class Agent : DefinedRoleTemplate, DefinedRole
     
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private IntegerConfiguration NumOfExemptedTasksOption = NebulaAPI.Configurations.Configuration("options.role.agent.numOfExemptedTasks", (1, 8), 3);
-    static private IntegerConfiguration NumOfExtraTasksOption = NebulaAPI.Configurations.Configuration("options.role.agent.numOfExtraTasks", (0, 8), 3);
-    static private BoolConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = NebulaAPI.Configurations.Configuration("options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent", false);
-    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.agent.vent", false, (0, 16), 3, null, -1f, (2.5f, 30f, 2.5f), 10f);
+    static private readonly IntegerConfiguration NumOfExemptedTasksOption = NebulaAPI.Configurations.Configuration("options.role.agent.numOfExemptedTasks", (1, 8), 3);
+    static private readonly IntegerConfiguration NumOfExtraTasksOption = NebulaAPI.Configurations.Configuration("options.role.agent.numOfExtraTasks", (0, 8), 3);
+    static private readonly BoolConfiguration SuicideIfSomeoneElseCompletesTasksBeforeAgentOption = NebulaAPI.Configurations.Configuration("options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent", false);
+    static private readonly IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.agent.vent", false, (0, 16), 3, null, -1f, (2.5f, 30f, 2.5f), 10f);
 
-    static public Agent MyRole = new Agent();
-    static private GameStatsEntry StatsAgent = NebulaAPI.CreateStatsEntry("stats.agent.agent", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static public readonly Agent MyRole = new();
+    static private readonly GameStatsEntry StatsAgent = NebulaAPI.CreateStatsEntry("stats.agent.agent", GameStatsCategory.Roles, MyRole);
+    public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
-        DefinedRole RuntimeRole.Role => MyRole;
+        public override DefinedRole Role => MyRole;
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
         bool RuntimeRole.CanUseVent => leftVent > 0;
         private int leftVent = VentConfiguration.Uses;
-        private Timer ventDuration = new Timer(VentConfiguration.Duration);
         private TMPro.TextMeshPro UsesText = null!;
 
-        GameTimer? RuntimeRole.VentDuration => ventDuration;
-        public Instance(GamePlayer player, int[] argument) : base(player)
+        public Instance(GamePlayer player, int[] argument) : base(player, VentConfiguration)
         {
             if (argument.Length >= 1) leftVent = argument[0];
         }
@@ -81,8 +79,6 @@ public class Agent : DefinedRoleTemplate, DefinedRole
         [Local, OnlyMyPlayer]
         void OnEnterVent(PlayerVentEnterEvent ev)
         {
-            ventDuration.Start();
-
             leftVent--;
             UsesText.text = leftVent.ToString();
             if (leftVent <= 0) UsesText.transform.parent.gameObject.SetActive(false);
@@ -98,7 +94,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
             for (int i = 0; i < extempts; i++) ev.Tasks.RemoveAt(System.Random.Shared.Next(ev.Tasks.Count));
         }
 
-        void RuntimeAssignable.OnActivated()
+        public override void OnActivated()
         {
             if (AmOwner)
             {
@@ -106,19 +102,16 @@ public class Agent : DefinedRoleTemplate, DefinedRole
 
                 if (NumOfExtraTasksOption > 0)
                 {
-                    var taskButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Ability));
-                    taskButton.SetSprite(buttonSprite.GetSprite());
-                    taskButton.Availability = (button) => MyPlayer.CanMove && MyPlayer.Tasks.IsCompletedCurrentTasks;
-                    taskButton.Visibility = (button) => !MyPlayer.IsDead;
+                    var taskButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "agent", buttonSprite,
+                        _ => MyPlayer.Tasks.IsCompletedCurrentTasks, null);
                     taskButton.OnClick = (button) =>
                     {
                         MyPlayer.Tasks.Unbox().GainExtraTasksAndRecompute(NumOfExtraTasksOption, 0, 0, false);
                         StatsAgent.Progress();
                     };
-                    taskButton.SetLabel("agent");
                 }
 
-                Bind(new GameObjectBinding(HudManager.Instance.ImpostorVentButton.ShowUsesIcon(3, out UsesText)));
+                this.BindGameObject(HudManager.Instance.ImpostorVentButton.ShowUsesIcon(3, out UsesText).gameObject);
                 UsesText.text = leftVent.ToString();
             }
         }

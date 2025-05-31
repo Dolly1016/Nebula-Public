@@ -92,7 +92,7 @@ public class Confused : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
                 NebulaGameManager.Instance!.AllPlayerInfo.Count(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.NeutralRole) >= 2 &&
                 NebulaGameManager.Instance!.AllPlayerInfo.Count(p => p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole) >= 2 &&
                 !MyPlayer.IsDead &&
-                ev.EndState.EndCondition == NebulaGameEnds.CrewmateGameEnd &&
+                ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin &&
                 NebulaGameManager.Instance!.AllPlayerInfo.All(p => p.IsDead || p.Role.Role.Category == Virial.Assignable.RoleCategory.CrewmateRole))
                 new StaticAchievementToken("confused.challenge");
         }

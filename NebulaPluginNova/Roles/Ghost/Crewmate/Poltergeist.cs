@@ -13,10 +13,10 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
 
     string ICodeName.CodeName => "PLT";
 
-    static private FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.poltergeist.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration PoltergeistCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.poltergeist.poltergeistCoolDown", (5f, 30f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 
-    static public Poltergeist MyRole = new Poltergeist();
-    static internal GameStatsEntry StatsPoltergeist = NebulaAPI.CreateStatsEntry("stats.poltergeist.poltergeist", GameStatsCategory.Roles, MyRole);
+    static public readonly Poltergeist MyRole = new();
+    static internal readonly GameStatsEntry StatsPoltergeist = NebulaAPI.CreateStatsEntry("stats.poltergeist.poltergeist", GameStatsCategory.Roles, MyRole);
 
 
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
@@ -29,18 +29,16 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
         {
         }
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PoltergeistButton.png", 115f);
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PoltergeistButton.png", 115f);
 
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
-                var deadBodyTracker = Bind(ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => d.RelatedDeadBody?.GetHolder() == null));
+                var deadBodyTracker = ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => d.RelatedDeadBody?.GetHolder() == null).Register(this);
 
-                var poltergeistButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                poltergeistButton.SetSprite(buttonSprite.GetSprite());
-                poltergeistButton.Availability = (button) => MyPlayer.CanMove && deadBodyTracker.CurrentTarget != null;
-                poltergeistButton.Visibility = (button) => MyPlayer.IsDead;
+                var poltergeistButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    PoltergeistCoolDownOption, "poltergeist", buttonSprite, _ => deadBodyTracker.CurrentTarget != null, null, true);
                 poltergeistButton.OnClick = (button) =>
                 {
                     RpcPoltergeist.Invoke((deadBodyTracker.CurrentTarget!.PlayerId, MyPlayer.VanillaPlayer.GetTruePosition()));
@@ -48,8 +46,6 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
                     StatsPoltergeist.Progress();
                     poltergeistButton.StartCoolDown();
                 };
-                poltergeistButton.CoolDownTimer = Bind(new Timer(0f, PoltergeistCoolDownOption).SetAsAbilityCoolDown().Start());
-                poltergeistButton.SetLabel("poltergeist");
             }
         }
     }

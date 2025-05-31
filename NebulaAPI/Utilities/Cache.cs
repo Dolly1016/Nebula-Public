@@ -22,6 +22,7 @@ public class Cache<T> where T : class
     }
 
     public static implicit operator Cache<T>(Func<T> getter) => new Cache<T>(getter);
+    public static implicit operator T(Cache<T> cache) => cache.Get();
 }
 
 public class ComponentCache<T> where T : UnityEngine.Component

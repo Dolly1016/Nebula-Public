@@ -1,5 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -1184,8 +1184,10 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         return button;
     }
 
-    static private Image backFrameSprite = new ResourceExpandableSpriteLoader("Nebula.Resources.GUI.Background_Frame.png", 150f, 60, 60);
-    static private Image backInnerSprite = new ResourceExpandableSpriteLoader("Nebula.Resources.GUI.Background_Inner.png", 150f, 60, 60);
+    static readonly private Image backFrameSprite = new ResourceExpandableSpriteLoader("Nebula.Resources.GUI.Background_Frame.png", 150f, 60, 60);
+    static readonly private Image backInnerSprite = new ResourceExpandableSpriteLoader("Nebula.Resources.GUI.Background_Inner.png", 150f, 60, 60);
+    static public Image BackFrameImage => backFrameSprite;
+    static public Image BackInnerImage => backInnerSprite;
     static private MultiImage closeButtonSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GUI.CloseButton.png", 100f, 2, 1);
     static public MetaScreen GenerateScreen(Vector2 size, Transform? parent, Vector3 localPos, bool withBackground, bool withBlackScreen, bool withClickGuard)
         => GenerateScreen(size, parent, localPos, withBackground ? BackgroundSetting.Old : BackgroundSetting.Off, withBlackScreen, withClickGuard);
@@ -1375,7 +1377,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
 
 public static class MetaUI
 {
-    static public void ShowConfirmDialog(Transform? transform, Virial.Text.TextComponent text)
+    static public MetaScreen ShowConfirmDialog(Transform? transform, Virial.Text.TextComponent text)
     {
         MetaScreen screen = MetaScreen.GenerateWindow(new(3.5f, 1.35f), transform, Vector3.zero, true, true);
 
@@ -1384,6 +1386,8 @@ public static class MetaUI
         widget.Append(new MetaWidgetOld.Text(new(TextAttributeOld.ContentAttr) { Size = new(3.3f, 0.8f) }) { MyText = text, Alignment = AlignmentOption.Center });
         widget.Append(new MetaWidgetOld.Button(screen.CloseScreen, TextAttributeOld.BoldAttr) { TranslationKey = "ui.dialog.ok", Alignment = AlignmentOption.Center });
         screen.SetWidget(widget);
+
+        return screen;
     }
 
     static public void ShowYesOrNoDialog(Transform? transform, Action yesAction, Action noAction,string text, bool canCancelClickOutside = false)

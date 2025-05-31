@@ -7,7 +7,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
 	<PublishSingleFile>true</PublishSingleFile>
-	<SelfContained>true</SelfContained>
 	<ApplicationIcon>Resources\NebulaImage.ico</ApplicationIcon>
   </PropertyGroup>
 

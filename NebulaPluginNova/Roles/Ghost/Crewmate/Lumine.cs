@@ -13,10 +13,10 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
 
     string ICodeName.CodeName => "LMN";
 
-    static private FloatConfiguration LightSizeOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightSize", (1f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration LightDurationOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration LightSizeOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightSize", (1f, 10f, 0.25f), 2f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration LightDurationOption = NebulaAPI.Configurations.Configuration("options.role.lumine.lightDuration", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
 
-    static public Lumine MyRole = new Lumine();
+    static public readonly Lumine MyRole = new();
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
@@ -31,10 +31,9 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
         {
             if (AmOwner)
             {
-                var lumineButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                lumineButton.SetSprite(buttonSprite.GetSprite());
-                lumineButton.Availability = (button) => MyPlayer.CanMove;
-                lumineButton.Visibility = (button) => MyPlayer.IsDead;
+                bool isUsed = false;
+                var lumineButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    10f, "lumine", buttonSprite, null, _ => !isUsed, true);
                 lumineButton.OnClick = (button) =>
                 {
                     RpcLumineLight.Invoke(MyPlayer.VanillaPlayer.transform.position);
@@ -45,11 +44,9 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
                     if (near.Any(db => db.ParentId == MyPlayer.PlayerId))
                         new StaticAchievementToken("lumine.another1");
 
-                    lumineButton.ReleaseIt();
+                    isUsed = true;
                 };
-                lumineButton.ShowUsesIcon(3).text = "1";
-                lumineButton.CoolDownTimer = Bind(new Timer(0f, 10f).SetAsAbilityCoolDown().Start());
-                lumineButton.SetLabel("lumine");
+                lumineButton.ShowUsesIcon(3, "1");
             }
         }
     }

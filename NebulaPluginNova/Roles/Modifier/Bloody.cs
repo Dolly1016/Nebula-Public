@@ -42,7 +42,7 @@ public class Bloody : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
             {
                 if (AmOwner)
                 {
-                    PlayerModInfo.RpcAttrModulator.Invoke((ev.Murderer.PlayerId, new AttributeModulator(PlayerAttributes.CurseOfBloody, CurseDurationOption, false, 1), true));
+                    ev.Murderer.GainAttribute(PlayerAttributes.CurseOfBloody, CurseDurationOption, false, 1);
                     new StaticAchievementToken("bloody.common1");
                     StatsBloody.Progress();
                     acTokenChallenge = new("bloody.challenge", (false, true), (val, _) => val.cleared);

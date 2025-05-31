@@ -2,7 +2,7 @@
 using System.Text;
 using UnityEngine.Rendering;
 using Nebula.Roles;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using Virial.Media;
 using Virial.Configuration;
@@ -325,7 +325,7 @@ public class NebulaSettingMenu : MonoBehaviour
         //SecondScroller.SetYBoundsMax(SecondScreen.SetWidget(new Vector2(7.8f, 4.1f), CurrentHolder.GetWidget()) - 4.1f);
 
         //ホルダから上方ボタンを生成
-        List<IMetaParallelPlacableOld> topContents = new(CurrentHolder.RelatedInformations.Where(info => info.predicate.Invoke()).Select(info => new MetaWidgetOld.Button(info.onClicked, RelatedButtonAttr) { Text = info.text }));
+        List<IMetaParallelPlacableOld> topContents = new(CurrentHolder.RelatedInformation.Where(info => info.predicate.Invoke()).Select(info => new MetaWidgetOld.Button(info.onClicked, RelatedButtonAttr) { Text = info.text }));
 
      
         //関連する役職プリセット

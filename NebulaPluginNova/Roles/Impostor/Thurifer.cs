@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Roles.Neutral;
 using Virial;
 using Virial.Assignable;
@@ -179,13 +179,12 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
             bool used = false; //使用は一度きり
             var localPlayer = GamePlayer.LocalPlayer;
 
-            Modules.ScriptComponents.ModAbilityButton imputeButton = null!;
+            ModAbilityButton imputeButton = null!;
             var thuribulumTracker = new ObjectTrackerUnityImpl<Thuribulum, Thuribulum>(localPlayer.VanillaPlayer, 1f, () => ModSingleton<ThuribulumManager>.Instance.AllThuribulums, t => (imputeButton!.IsVisible && t.CanInteract), null, t => t, t => [t.Position, new(t.Position.x, t.Position.y - 0.3f)], t => t.MyRenderer) { MoreHighlight = true } as ObjectTracker<Thuribulum>;
 
-            imputeButton = new Modules.ScriptComponents.ModAbilityButton(true);
-            imputeButton.SetSprite(buttonSprite.GetSprite());
-            imputeButton.Availability = (button) => thuribulumTracker.CurrentTarget != null;
-            imputeButton.Visibility = (button) => !localPlayer.IsDead && LocalInhalationPercentage > 0.5f && localPlayer.Role.Role != Thurifer.MyRole && !used;
+            imputeButton = NebulaAPI.Modules.AbilityButton(NebulaAPI.CurrentGame!, localPlayer, Virial.Compat.VirtualKeyInput.None,
+                0f, "thurifer.impute", buttonSprite,
+                _ => thuribulumTracker.CurrentTarget != null, _ => LocalInhalationPercentage > 0.5f && localPlayer.Role.Role != Thurifer.MyRole && !used);
             imputeButton.OnClick = (button) => {
                 NebulaGameManager.Instance?.RpcDoGameAction(localPlayer, thuribulumTracker.CurrentTarget!.Position, GameActionTypes.ThuriferImputeAction);
 
@@ -194,7 +193,6 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
                 new StaticAchievementToken("thurifer.common2");
                 StatsImpute.Progress();
             };
-            imputeButton.SetLabel("thurifer.impute");
         }
 
         float meetingCooldown = 0f;
@@ -291,27 +289,27 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
     static private FloatConfiguration ActivationDelayOption = NebulaAPI.Configurations.Configuration("options.role.thurifer.activationDelay", (0f,60f,2.5f),5f, FloatConfigurationDecorator.Second);
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ThuriferButton.png", 115f);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
 
     static public Thurifer MyRole = new Thurifer();
 
     static private GameStatsEntry StatsActivate = NebulaAPI.CreateStatsEntry("stats.thurifer.activate", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsImpute = NebulaAPI.CreateStatsEntry("stats.thurifer.impute", GameStatsCategory.Roles, MyRole);
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         //画面左下のホルダ
         PlayersIconHolder iconHolder;
 
         AchievementToken<(EditableBitMask<GamePlayer> more50Players, int killed, bool inMeetingKill, bool maxDelayKill)>? acTokenChallenge = null;
-
-        public Ability(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
                 acTokenChallenge = new("thurifer.challenge", (BitMasks.AsPlayer(), 0, false, false), (a, _) => a.more50Players.ForEach(NebulaGameManager.Instance!.AllPlayerInfo).Count() >= 8 && a.maxDelayKill && a.inMeetingKill && a.killed >= 4);
 
-                iconHolder = Bind(new PlayersIconHolder());
+                iconHolder = new PlayersIconHolder().Register(this);
                 iconHolder.XInterval = 0.35f;
                 NebulaGameManager.Instance?.AllPlayerInfo.Do(p => {
                     if (!p.AmOwner)
@@ -322,20 +320,17 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
                     }
                 });
 
-                var thuribulumTracker = Bind(new ObjectTrackerUnityImpl<Thuribulum, Thuribulum>(MyPlayer.VanillaPlayer, 1f, () => ModSingleton<ThuribulumManager>.Instance.AllThuribulums, t => t.CanInteract, null, t => t, t => [t.Position, new(t.Position.x, t.Position.y - 0.3f)], t => t.MyRenderer) { MoreHighlight = true }) as ObjectTracker<Thuribulum>;
+                ObjectTracker<Thuribulum> thuribulumTracker = new ObjectTrackerUnityImpl<Thuribulum, Thuribulum>(MyPlayer.VanillaPlayer, 1f, () => ModSingleton<ThuribulumManager>.Instance.AllThuribulums, t => t.CanInteract, null, t => t, t => [t.Position, new(t.Position.x, t.Position.y - 0.3f)], t => t.MyRenderer) { MoreHighlight = true }.Register(this);
                 
-                var activateButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "thurifer.curse");
-                activateButton.SetSprite(buttonSprite.GetSprite());
-                activateButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && thuribulumTracker.CurrentTarget != null;
-                activateButton.Visibility = (button) => !MyPlayer.IsDead;
+                var activateButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "thurifer.curse",
+                    10f, "thurifer.curse", buttonSprite,
+                    _ => thuribulumTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 activateButton.OnClick = (button) => {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, thuribulumTracker.CurrentTarget!.Position, GameActionTypes.ThuriferActivateAction);
                     thuribulumTracker.CurrentTarget?.ScheduleActivate(ActivationDelayOption, ActivateDurationOption);
                     new StaticAchievementToken("thurifer.common1");
                     StatsActivate.Progress();
                 };
-                activateButton.CoolDownTimer = Bind(new Timer(10f).SetAsAbilityCoolDown().Start());
-                activateButton.SetLabel("thurifer.curse");
             }
         }
 

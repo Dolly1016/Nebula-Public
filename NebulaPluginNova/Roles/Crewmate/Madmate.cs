@@ -26,23 +26,23 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Madmate.png");
         ConfigurationHolder?.ScheduleAddRelated(() => [Modifier.Madmate.MyRole.ConfigurationHolder!]);
     }
-    Citation? HasCitation.Citaion => Citations.TheOtherRolesGM;
+    Citation? HasCitation.Citation => Citations.TheOtherRolesGM;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static private BoolConfiguration EmbroilVotersOnExileOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilPlayersOnExile", false);
-    static private BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("options.role.madmate.limitEmbroiledPlayersToVoters", true, ()=>EmbroilVotersOnExileOption);
-    static private FloatConfiguration EmbroilDelayOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilDelay", (0f, 5f, 1f), 0f,FloatConfigurationDecorator.TaskPhase, () => EmbroilVotersOnExileOption);
+    static private readonly BoolConfiguration EmbroilVotersOnExileOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilPlayersOnExile", false);
+    static private readonly BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("options.role.madmate.limitEmbroiledPlayersToVoters", true, ()=>EmbroilVotersOnExileOption);
+    static private readonly FloatConfiguration EmbroilDelayOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilDelay", (0f, 5f, 1f), 0f,FloatConfigurationDecorator.TaskPhase, () => EmbroilVotersOnExileOption);
 
-    static private BoolConfiguration CanSuicideOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canSuicide", false);
-    static private IRelativeCoolDownConfiguration SuicideCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.madmate.suicideCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => CanSuicideOption);
-    static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixLight", false);
-    static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixComms", false);
-    static private BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.madmate.hasImpostorVision", false);
-    static private BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canUseVents", false);
-    static private BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canMoveInVents", false);
-    static private IntegerConfiguration CanIdentifyImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canIdentifyImpostors", (0, 3), 0);
-    static private IOrderedSharableVariable<int>[] NumOfTasksToIdentifyImpostorsOptions = [
+    static private readonly BoolConfiguration CanSuicideOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canSuicide", false);
+    static private readonly IRelativeCoolDownConfiguration SuicideCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.madmate.suicideCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => CanSuicideOption);
+    static private readonly BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixLight", false);
+    static private readonly BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixComms", false);
+    static private readonly BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.madmate.hasImpostorVision", false);
+    static private readonly BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canUseVents", false);
+    static private readonly BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canMoveInVents", false);
+    static private readonly IntegerConfiguration CanIdentifyImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canIdentifyImpostors", (0, 3), 0);
+    static private readonly IOrderedSharableVariable<int>[] NumOfTasksToIdentifyImpostorsOptions = [
         NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors0",(0,10),2),
         NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors1",(0,10),4),
         NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors2",(0,10),6)
@@ -79,9 +79,9 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         );
 
     bool DefinedRole.IsMadmate => true;
-    static public Madmate MyRole = new Madmate();
-    static private GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
+    static public readonly Madmate MyRole = new();
+    static private readonly GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -122,16 +122,12 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 
             if (AmOwner && CanSuicideOption)
             {
-                var suicideButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility);
-                suicideButton.SetSprite(suicideButtonSprite.GetSprite());
-                suicideButton.Availability = (button) => MyPlayer.CanMove;
-                suicideButton.Visibility = (button) => !MyPlayer.IsDead;
+                var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, SuicideCoolDownOption.CoolDown,
+                    "madmate.suicide", suicideButtonSprite);
                 suicideButton.OnClick = (button) =>
                 {
                     MyPlayer.Suicide(PlayerState.Suicide, null, KillParameter.RemoteKill);
                 };
-                suicideButton.CoolDownTimer = Bind(new Timer(SuicideCoolDownOption.CoolDown)).Start();
-                suicideButton.SetLabel("madmate.suicide");
                 suicideButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
             }
         }
@@ -196,7 +192,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
             else
             {
                 int left = (int)(float)EmbroilDelayOption;
-                GameOperatorManager.Instance?.Register<MeetingPreSyncEvent>(ev => {
+                GameOperatorManager.Instance?.Subscribe<MeetingPreSyncEvent>(ev => {
                     left--;
                     if (left == 0) Embroil();
                 }, new FunctionalLifespan(() => left > 0));

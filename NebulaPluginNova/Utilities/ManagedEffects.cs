@@ -44,6 +44,13 @@ public static class ManagedEffects
         yield break;
     }
 
+    static public IEnumerator Wait(float second)
+    {
+        var t = Time.time;
+        while (Time.time - t < second) yield return null;
+        yield break;
+    }
+
     static public IEnumerator Wait(Func<bool> waitWhile, Action then)
     {
         while (waitWhile()) yield return null;
@@ -61,6 +68,26 @@ public static class ManagedEffects
     {
         while (!task.IsCompleted) yield return null;
         yield break;
+    }
+
+    static public IEnumerator BeamSequence(int width, params IEnumerator[] coroutines)
+    {
+        IEnumerator[] current = new IEnumerator[width];
+        int next = 0;
+        while (true)
+        {
+            bool hasCoroutine = next < coroutines.Length;
+            for (int i = 0; i < width; i++)
+            {
+                if (current[i] != null) {
+                    if( !current[i].MoveNext()) current[i] = null!;
+                    else hasCoroutine = true;
+                }
+                if (current[i] == null && next < coroutines.Length) current[i] = current[i] = coroutines[next++];
+            }
+            if (!hasCoroutine) break;
+            yield return null;
+        }
     }
 
     static public IEnumerator Smooth(this Transform transform, Vector3 goalLocalPosition, float duration)
@@ -121,7 +148,7 @@ public static class ManagedEffects
         obj.transform.localPosition = pos;
         obj.transform.localScale = new Vector3(scale, scale, 1f);
 
-        List<IEnumerator> coroutines = new();
+        List<IEnumerator> coroutines = [];
         
         //円を描くように7つの煙を配置
         for (int i = 0; i < 7; i++)

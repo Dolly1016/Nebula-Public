@@ -41,12 +41,19 @@ public static class UnityHelper
         renderer.sortingGroupOrder = order;
     }
 
-    public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer,Color? color = null)
+    public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer,Color? color = null,Material? material = null)
     {
         var meshFilter = UnityHelper.CreateObject<MeshFilter>("mesh", parent, localPosition, layer);
         var meshRenderer = meshFilter.gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = new Material(Shader.Find(color.HasValue ? "Unlit/Color" : "Unlit/Texture"));
-        if(color.HasValue) meshRenderer.sharedMaterial.color = color.Value;
+        if (!material)
+        {
+            meshRenderer.material = new Material(Shader.Find(color.HasValue ? "Unlit/Color" : "Unlit/Texture"));
+            if (color.HasValue) meshRenderer.sharedMaterial.color = color.Value;
+        }
+        else
+        {
+            meshRenderer.material = material;
+        }
         meshFilter.mesh = new Mesh();
 
         return (meshRenderer, meshFilter);
@@ -305,7 +312,7 @@ public static class UnityHelper
             {
                 yield return Effects.Wait(spf);
                 num++;
-                renderer.sprite = sprite.Invoke(num);
+                if(renderer) renderer.sprite = sprite.Invoke(num);
             } while (renderer);
         }
         NebulaManager.Instance.StartCoroutine(CoUpdate().WrapToIl2Cpp());

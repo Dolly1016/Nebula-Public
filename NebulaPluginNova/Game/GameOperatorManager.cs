@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq.Expressions;
 using System.Reflection;
 using Virial;
 using Virial.Attributes;
@@ -16,7 +17,6 @@ internal class GameOperatorBuilder
     {
         this.allActions = actions;
     }
-
 
     /// <summary>
     /// ゲーム作用素を登録します。
@@ -183,12 +183,18 @@ public class GameOperatorManager
         //新たな作用素を追加
         RegisterAll();
 
+        WrapUpDeadLifespans();
+    }
+
+    public void WrapUpDeadLifespans()
+    {
         //OnReleasedの呼び出し
         allOperators.RemoveAll(tuple =>
         {
             if (tuple.lifespan.IsDeadObject)
             {
                 tuple.operation.OnReleased();
+                operatorsDic.Remove(tuple.operation);
                 return true;
             }
             return false;
@@ -262,12 +268,50 @@ public class GameOperatorManager
         newFuncOperations.Clear();
     }
 
-    public void Register(IGameOperator entity, ILifespan lifespan)
+    private class ReleaseAction : IGameOperator
     {
+        public ReleaseAction(Action action) => releaseAction = action;
+        private Action releaseAction;
+        void IGameOperator.OnReleased() => releaseAction?.Invoke();
+    }
+    public void RegisterOnReleased(Action onReleased, ILifespan lifespan) => Subscribe(new ReleaseAction(onReleased), lifespan);
+
+    public void Subscribe(IGameOperator entity, ILifespan lifespan)
+    {
+        if (entity is INestedLifespan nl && nl != lifespan)
+        {
+            //入れ子にするタイプの寿命オブジェクトなら指定した寿命オブジェクトの入れ子にする。
+            if(nl.Bind(lifespan)) lifespan = nl;
+        }
         newOperations.Add((entity, lifespan));
+        operatorsDic[entity] = lifespan;
     }
 
-    public void Register<Event>(Action<Event> operation, ILifespan lifespan, int priority = 100)
+    Dictionary<IGameOperator, ILifespan> operatorsDic = [];
+    public bool CheckAndRegister(IGameOperator entity, ILifespan lifespan)
+    {
+        if (operatorsDic.ContainsKey(entity)) return false;
+        Subscribe(entity, lifespan);
+        return true;
+    }
+
+    /// <summary>
+    /// 親の作用素と同じ寿命で作用素を登録します。
+    /// 作用素は多重で登録されません。
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <param name="parent"></param>
+    /// <returns></returns>
+    public bool SearchAndSubscribe(IGameOperator entity, IGameOperator parent)
+    {
+        if (operatorsDic.TryGetValue(parent, out var lifespan))
+        {
+            return CheckAndRegister(entity, lifespan);
+        }
+        return false;
+    }
+
+    public void Subscribe<Event>(Action<Event> operation, ILifespan lifespan, int priority = 100)
     {
         newFuncOperations.Add((typeof(Event), obj => operation.Invoke((Event)obj), lifespan, priority));
     }
@@ -283,4 +327,13 @@ public class GameOperatorManager
 
     
     public IEnumerable<IGameOperator> AllOperators  { get { foreach (var op in allOperators) yield return op.operation; } }
+}
+
+public static class GameOperatorHelpers
+{
+    static public GameObject BindGameObject(this ILifespan lifespan, GameObject obj)
+    {
+        GameOperatorManager.Instance?.RegisterOnReleased(() => { if (obj) GameObject.Destroy(obj); }, lifespan);
+        return obj;
+    }
 }

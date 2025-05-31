@@ -1,6 +1,12 @@
-﻿using System.Reflection;
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Reflection;
+global using System.Linq;
+global using System.IO;
 using System.Runtime.CompilerServices;
 using Virial.Assignable;
+using Virial.Compat;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events;
 using Virial.Game;
@@ -14,7 +20,7 @@ namespace Virial;
 
 internal interface INebula
 {
-    string APIVersion { get; }
+    Version APIVersion { get; }
 
     /// <summary>
     /// モジュールを取得します。
@@ -22,13 +28,6 @@ internal interface INebula
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     T? Get<T>() where T : class;
-
-    /// <summary>
-    /// モジュールを生成します。
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    T? Instantiate<T>() where T : class;
 
     // ResourceAPI
 
@@ -64,6 +63,8 @@ internal interface INebula
     void RegisterTip(IDocumentTip tip);
 
     E RunEvent<E>(E ev) where E : class, Event;
+
+    IModuleFactory Modules { get; }
 }
 
 public static class NebulaAPI
@@ -71,7 +72,7 @@ public static class NebulaAPI
     static internal INebula instance = null!;
     static internal NebulaPreprocessor? preprocessor = null;
 
-    public static string APIVersion => instance.APIVersion;
+    public static Version APIVersion => instance.APIVersion;
 
     static public IResourceAllocator NebulaAsset => instance.NebulaAsset;
     static public IResourceAllocator InnerslothAsset => instance.InnerslothAsset;
@@ -79,7 +80,6 @@ public static class NebulaAPI
     static public IResourceAllocator? GetAddon(string addonId) => instance.GetAddonResource(addonId);
 
     static public T? Get<T>() where T : class => instance.Get<T>();
-    static public T? Instantiate<T>() where T : class => instance.Instantiate<T>();
 
 
     /// <summary>
@@ -146,5 +146,16 @@ public static class NebulaAPI
     static public void Progress(this GameStatsEntry entry, int num = 1) => instance.IncrementStatsEntry(entry.Id, num);
     static public void IncrementStatsEntry(string  entryId, int num = 1) => instance.IncrementStatsEntry(entryId, num);
 
+    /// <summary>
+    /// ドキュメント内で表示される要素を追加します。
+    /// 現在、<see cref="WinConditionTip"/>のみ使用可能です。
+    /// <see cref="WinConditionTip"/>の場合、勝利条件一覧に表示されます。
+    /// </summary>
+    /// <param name="tip"></param>
     static public void RegisterTip(IDocumentTip tip) => instance.RegisterTip(tip);
+
+    /// <summary>
+    /// モジュールを生成するファクトリメソッド群です。
+    /// </summary>
+    static public IModuleFactory Modules => instance.Modules;
 }

@@ -1,5 +1,5 @@
 ﻿using Hazel;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Map;
 using Nebula.Modules.CustomMap;
 

@@ -11,6 +11,7 @@ using static Nebula.Modules.HelpScreen;
 
 namespace Nebula.Modules;
 
+/*
 internal static class RestAPIHelpers
 {
     async public static Task<T?> GetRequestAsync<T>(string url, IEnumerable<KeyValuePair<string, string>> parameters)
@@ -47,7 +48,7 @@ internal static class Helpbot
 
         TextAttribute answerAttr = new(GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentStandard)) { Size = new(6.8f, 2f), FontSize = new(1.2f, false), IsFlexible = true, Wrapping = true };
         window.SetWidget(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
-            GUI.API.RawText(Virial.Media.GUIAlignment.TopLeft, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentStandard), "ヘルプボット ※開発中につき回答の精度が低いです。ご了承ください。"/*"ヘルプボットにお困りごとを教えてください！"*/),
+            GUI.API.RawText(Virial.Media.GUIAlignment.TopLeft, GUI.API.GetAttribute(Virial.Text.AttributeAsset.DocumentStandard), "ヘルプボット ※開発中につき回答の精度が低いです。ご了承ください。"),
             textField, GUI.API.RawButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed), "尋ねる", _ =>
             {
                 //window.CloseScreen();
@@ -97,3 +98,5 @@ internal static class Helpbot
         fieldArtifact.FirstOrDefault()?.GainFocus();
     }
 }
+
+*/

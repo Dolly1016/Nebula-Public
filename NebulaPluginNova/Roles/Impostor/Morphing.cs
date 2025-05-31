@@ -1,5 +1,6 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -11,22 +12,22 @@ namespace Nebula.Roles.Impostor;
 public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasCitation, DefinedRole
 {
     private Morphing() : base("morphing", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption, MorphDurationOption, LoseSampleOnMeetingOption]) { }
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.morphing.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.morphing.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("options.role.morphing.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.morphing.loseSampleOnMeeting", false);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
     static public Morphing MyRole = new Morphing();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.morphing.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.morphing.morph", GameStatsCategory.Roles, MyRole);
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        private ModAbilityButton? sampleButton = null;
-        private ModAbilityButton? morphButton = null;
+        private ModAbilityButtonImpl? sampleButton = null;
+        private ModAbilityButtonImpl? morphButton = null;
 
         static public Image SampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
         static public Image MorphButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
@@ -39,37 +40,32 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
 
         OutfitDefinition? sample = null;
 
-        public Ability(GamePlayer player): base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped): base(player, isUsurped)
         {
             if (AmOwner)
             {
                 acTokenChallenge = new("morphing.challenge", (false, false), (val, _) => val.kill && val.exile);
 
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
+                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate).Register(this);
 
-                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample");
-                sampleButton.SetSprite(SampleButtonSprite.GetSprite());
-                sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
-                sampleButton.Visibility = (button) => !MyPlayer.IsDead;
+                ModAbilityButton morphButton = null!;
+                var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
+                    SampleCoolDownOption, "sample", SampleButtonSprite,
+                    _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 sampleButton.OnClick = (button) => {
                     sample = sampleTracker!.CurrentTarget!.GetOutfit(75);
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
-                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample.outfit, morphButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample.outfit, (morphButton as ModAbilityButtonImpl)!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                     StatsSample.Progress();
                 };
-                sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
-                sampleButton.SetLabel("sample");
 
-                morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph");
-                morphButton.SetSprite(MorphButtonSprite.GetSprite());
-                morphButton.Availability = (button) => MyPlayer.CanMove && sample != null;
-                morphButton.Visibility = (button) => !MyPlayer.IsDead;
-                morphButton.OnClick = (button) => {
-                    button.ToggleEffect();
-                };
+                morphButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph",
+                    MorphCoolDownOption, MorphDurationOption, "morph", MorphButtonSprite,
+                    _ => sample != null, isToggleEffect: true).SetAsUsurpableButton(this);
                 morphButton.OnEffectStart = (button) =>
                 {
                     PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", 50, true)));
@@ -84,7 +80,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                 morphButton.OnUpdate = (button) =>
                 {
                     //すれ違いチェック
-                    if (button.EffectActive && acTokenAnother2 == null)
+                    if (button.IsInEffect && acTokenAnother2 == null)
                     {
                         int colorId = MyPlayer.GetOutfit(75).outfit.ColorId;
                         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
@@ -99,19 +95,16 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                         }
                     }
                 };
-                morphButton.OnMeeting = (button) =>
+                GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev =>
                 {
-                    morphButton.InactivateEffect();
+                    morphButton.InterruptEffect();
 
                     if (LoseSampleOnMeetingOption)
                     {
                         if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                         sampleIcon = null;
                     }
-                };
-                morphButton.CoolDownTimer = Bind(new Timer(MorphCoolDownOption).SetAsAbilityCoolDown().Start());
-                morphButton.EffectTimer = Bind(new Timer(MorphDurationOption));
-                morphButton.SetLabel("morph");
+                }, this);
             }
         }
 

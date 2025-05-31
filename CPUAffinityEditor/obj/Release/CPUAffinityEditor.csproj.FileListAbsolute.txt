@@ -14,3 +14,10 @@ D:\AmongUsModding\Nebula\CPUAffinityEditor\obj\Release\CPUAffinityEditor.csproj.
 D:\AmongUsModding\Nebula\CPUAffinityEditor\obj\Release\CPUAffinityEditor.csproj.CoreCompileInputs.cache
 D:\AmongUsModding\Nebula\CPUAffinityEditor\obj\Release\CPUAffinityEditor.exe
 D:\AmongUsModding\Nebula\CPUAffinityEditor\obj\Release\CPUAffinityEditor.pdb
+C:\AmongUsModding\Nebula\CPUAffinityEditor\bin\Release\CPUAffinityEditor.exe.config
+C:\AmongUsModding\Nebula\CPUAffinityEditor\bin\Release\CPUAffinityEditor.exe
+C:\AmongUsModding\Nebula\CPUAffinityEditor\bin\Release\CPUAffinityEditor.pdb
+C:\AmongUsModding\Nebula\CPUAffinityEditor\obj\Release\CPUAffinityEditor.csproj.AssemblyReference.cache
+C:\AmongUsModding\Nebula\CPUAffinityEditor\obj\Release\CPUAffinityEditor.csproj.CoreCompileInputs.cache
+C:\AmongUsModding\Nebula\CPUAffinityEditor\obj\Release\CPUAffinityEditor.exe
+C:\AmongUsModding\Nebula\CPUAffinityEditor\obj\Release\CPUAffinityEditor.pdb

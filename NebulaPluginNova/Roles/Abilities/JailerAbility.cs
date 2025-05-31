@@ -1,14 +1,42 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
+using Virial;
 using Virial.Events.Game.Minimap;
 using Virial.Game;
 
 namespace Nebula.Roles.Abilities;
 
-public class JailerAbility : IGameOperator
+public class JailerAbility : IGameOperator, ILifespan
 {
     bool canIdentifyImpostors, canIdentifyDeadBodies;
     bool canMoveWithMapWatching, canUseAdminOnMeeting;
-    public JailerAbility(bool canIdentifyImpostors,bool canIdentifyDeadBodies, bool canMoveWithMapWatching,bool canUseAdminOnMeeting)
+
+    public List<Func<bool>> parents = [];
+    public bool IsDeadObject => parents.Count > 0 && parents.All(p => !p.Invoke());
+    public void AddParent(Func<bool> lifespan) => parents.Add(lifespan);
+
+    private static JailerAbility AddAndRegisterAbility(Func<bool> lifespan)
+    {
+        var ability = new JailerAbility(Impostor.Jailer.CanIdentifyImpostorsOption, Impostor.Jailer.CanIdentifyDeadBodiesOption, Impostor.Jailer.CanMoveWithMapWatchingOption, Impostor.Jailer.CanUseAdminOnMeetingOption);
+        ability.Register(ability);
+        ability.AddParent(lifespan);
+        return ability;
+    }
+
+    public static JailerAbility TryAddAndBind(Func<bool> lifespan)
+    {
+        if(GameOperatorManager.Instance?.AllOperators.Find(op => op is JailerAbility, out var ability) ?? false)
+        {
+            var jAbility = (ability as JailerAbility)!;
+            jAbility.AddParent(lifespan);
+            return jAbility;
+        }
+        else
+        {
+            return AddAndRegisterAbility(lifespan);
+        }
+    }
+
+    private JailerAbility(bool canIdentifyImpostors,bool canIdentifyDeadBodies, bool canMoveWithMapWatching,bool canUseAdminOnMeeting)
     {
         this.canIdentifyImpostors = canIdentifyImpostors;
         this.canIdentifyDeadBodies = canIdentifyDeadBodies;
@@ -20,14 +48,21 @@ public class JailerAbility : IGameOperator
 
     void OnOpenNormalMap(MapOpenNormalEvent ev)
     {
-        if (canUseAdminOnMeeting)
+        if (MeetingHud.Instance)
         {
-            MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
-            MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false);
-            MapBehaviour.Instance.countOverlay.SetOptions(true, true);
-            ConsoleTimer.MarkAsNonConsoleMinigame();
+            if (canUseAdminOnMeeting)
+            {
+                MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
+                MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false);
+                MapBehaviour.Instance.countOverlay.SetOptions(true, true);
+                ConsoleTimer.MarkAsNonConsoleMinigame();
 
-            MapBehaviour.Instance.taskOverlay.Hide();
+                MapBehaviour.Instance.taskOverlay.Hide();
+            }
+        }
+        else
+        {
+            OnOpenSabotageMap(null!);
         }
     }
 
@@ -162,7 +197,10 @@ public class JailerAbility : IGameOperator
         countOverlay.transform.GetChild(3).localPosition += new Vector3(0.05f, -0.2f, 0f);
         countOverlay.transform.GetChild(5).localPosition += new Vector3(0.06f, -0.25f, 0f);
         countOverlay.transform.GetChild(6).localPosition += new Vector3(0f, -0.28f, 0f);
+        if (GeneralConfigurations.AirshipLoungeDoorOption.Value || GeneralConfigurations.AirshipLoungeStorageDoorOption.Value) countOverlay.transform.GetChild(7).localPosition += new Vector3(0f, 0.55f, 0f);
+        if (GeneralConfigurations.AirshipSecurityDeckDoorOption.Value || GeneralConfigurations.AirshipSecurityKitchenDoorOption.Value) countOverlay.transform.GetChild(15).localPosition += new Vector3(0f, -0.47f, 0f);
         countOverlay.transform.GetChild(16).localPosition += new Vector3(0.15f, -0.3f, 0f);
         countOverlay.transform.GetChild(17).localPosition += new Vector3(-0.1f, -0.5f, 0f);
+        if (GeneralConfigurations.AirshipVentilationDoorOption.Value) countOverlay.transform.GetChild(18).localPosition += new Vector3(0f, -0.18f, 0f);
     }
 }

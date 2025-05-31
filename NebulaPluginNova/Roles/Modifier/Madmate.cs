@@ -33,10 +33,14 @@ internal class Madmate : DefinedAllocatableModifierTemplate, DefinedAllocatableM
         }
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.IsWin |= ev.GameEnd == NebulaGameEnd.ImpostorWin;
+        void CheckWins(PlayerCheckExtraWinEvent ev)
+        {
+            if (ev.Phase != ExtraWinCheckPhase.MadmatePhase) return;
+            ev.IsExtraWin |= ev.GameEnd == NebulaGameEnd.ImpostorWin;
+        }
 
         [OnlyMyPlayer]
-        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= ev.GameEnd == NebulaGameEnd.CrewmateWin;
+        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= ev.GameEnd != NebulaGameEnd.ImpostorWin;
 
         void RuntimeAssignable.OnActivated() { }
 

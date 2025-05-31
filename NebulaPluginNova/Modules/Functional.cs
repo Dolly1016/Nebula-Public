@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Roles;
 using System.Text;
 using Virial.Assignable;
@@ -169,7 +169,7 @@ public class FunctionalEnvironment
 
     public FunctionalEnvironment(Dictionary<string, string>? arguments = null, FunctionalEnvironment? baseTable = null)
     {
-        Arguments = new();
+        Arguments = [];
         if (arguments == null) return;
         foreach (var entry in arguments)
         {
@@ -234,7 +234,7 @@ static public class ArgumentTableHelper
 
             string argStr = tokenString.Substring(lastIndex + 1);
             progress = lastIndex + 1 + diff;
-            List<IFunctionalVariable> args = new();
+            List<IFunctionalVariable> args = [];
             while (true)
             {
 
@@ -287,7 +287,7 @@ static public class ArgumentTableHelper
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class FunctionalSpace
 {
-    private Dictionary<string, TextFunction> allFunctions = new();
+    private Dictionary<string, TextFunction> allFunctions = [];
     private FunctionalSpace? parentSpace = null;
 
     public static FunctionalSpace DefaultSpace = null!;
@@ -348,7 +348,7 @@ public class FunctionalSpace
         {
             Citation? citation = null;
             if (args[0] is FunctionalObjectWrapping<DefinedAssignable> w)
-                citation = (w.AsObject<DefinedAssignable>() as HasCitation)?.Citaion;
+                citation = (w.AsObject<DefinedAssignable>() as HasCitation)?.Citation;
             if (Citation.TryGetCitation(args[0].AsString(), out var temp))
                 citation = temp;
             

@@ -19,12 +19,12 @@ public class Noisemaker : DefinedRoleTemplate, HasCitation, DefinedRole
         ConfigurationHolder?.ScheduleAddRelated(() => [Nebula.Roles.Ghost.Complex.Noiseghost.MyRole.ConfigurationHolder!]);
     }
 
-    Citation? HasCitation.Citaion => Citations.AmongUs;
+    Citation? HasCitation.Citation => Citations.AmongUs;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
-    static public FloatConfiguration NoiseDurationOption = NebulaAPI.Configurations.Configuration("options.role.noisemaker.noiseDuration", (1f, 10f, 1f), 3f, FloatConfigurationDecorator.Second);
+    static public readonly FloatConfiguration NoiseDurationOption = NebulaAPI.Configurations.Configuration("options.role.noisemaker.noiseDuration", (1f, 10f, 1f), 3f, FloatConfigurationDecorator.Second);
 
-    static public Noisemaker MyRole = new Noisemaker();
+    static public readonly Noisemaker MyRole = new();
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

@@ -1,9 +1,21 @@
 ﻿namespace Virial.Assignable;
 
+/// <summary>
+/// 陣営の開示バリエーションを表します。
+/// </summary>
 public enum TeamRevealType
 {
+    /// <summary>
+    /// 自分自身のみ表示されます。主に第三陣営で使用します。
+    /// </summary>
     OnlyMe,
+    /// <summary>
+    /// ゲーム中の全プレイヤーが表示されます。クルーメイト陣営で使用します。
+    /// </summary>
     Everyone,
+    /// <summary>
+    /// チームのメンバー全員が表示されます。
+    /// </summary>
     Teams,
 }
 

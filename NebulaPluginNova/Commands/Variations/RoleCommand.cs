@@ -27,7 +27,7 @@ public class RoleCommand : ICommand
             {
                 var role = players.FirstOrDefault()?.Role.Role;
                 if (role == null) return new CoImmediateErrorTask<ICommandToken>();
-                return (CoTask<ICommandToken>) new CoImmediateTask<ICommandToken>(new ObjectCommandToken<Virial.Assignable.DefinedRole>(role));
+                return (CoTask<ICommandToken>) new CoImmediateTask<ICommandToken>(new RoleCommandToken(role));
             });
         }
         else

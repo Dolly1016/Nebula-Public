@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using NAudio.CoreAudioApi;
-using Nebula.Behaviour;
+using Nebula.Behavior;
+using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Patches;
 using Steamworks;
@@ -72,20 +73,20 @@ public class JusticeMeetingHud : MonoBehaviour
 {
     static JusticeMeetingHud() => ClassInjector.RegisterTypeInIl2Cpp<JusticeMeetingHud>();
 
-    static private SpriteLoader meetingBackMaskSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingUIMask.png", 100f);
-    static private SpriteLoader meetingBackSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingBack.png", 100f);
-    static private SpriteLoader meetingBackAlphaSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingBackAlpha.png", 100f);
-    static private SpriteLoader meetingReticleSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeMeetingReticle.png", 100f);
-    static private SpriteLoader meetingViewSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeMeetingView.png", 100f);
-    static private SpriteLoader votingHolderLeftSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderLeft.png", 120f);
-    static private SpriteLoader votingHolderRightSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderRight.png", 120f);
-    static private SpriteLoader votingHolderMaskSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderMask.png", 120f);
-    static private SpriteLoader votingHolderFlashSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderFlash.png", 120f);
-    static private SpriteLoader votingHolderBlurSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderFlashBlur.png", 120f);
+    static private readonly SpriteLoader meetingBackMaskSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingUIMask.png", 100f);
+    static private readonly SpriteLoader meetingBackSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingBack.png", 100f);
+    static private readonly SpriteLoader meetingBackAlphaSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingBackAlpha.png", 100f);
+    static private readonly SpriteLoader meetingReticleSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeMeetingReticle.png", 100f);
+    static private readonly SpriteLoader meetingViewSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeMeetingView.png", 100f);
+    static private readonly SpriteLoader votingHolderLeftSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderLeft.png", 120f);
+    static private readonly SpriteLoader votingHolderRightSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderRight.png", 120f);
+    static private readonly SpriteLoader votingHolderMaskSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderMask.png", 120f);
+    static private readonly SpriteLoader votingHolderFlashSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderFlash.png", 120f);
+    static private readonly SpriteLoader votingHolderBlurSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeHolderFlashBlur.png", 120f);
 
-    static private SpriteLoader circleGraphSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeCircleGraph.png", 120f);
-    static private SpriteLoader circleGraphBackSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeCircleBackGraph.png", 120f);
-    static private SpriteLoader bandGraphSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeBandGraph.png", 120f);
+    static private readonly SpriteLoader circleGraphSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeCircleGraph.png", 120f);
+    static private readonly SpriteLoader circleGraphBackSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeCircleBackGraph.png", 120f);
+    static private readonly SpriteLoader bandGraphSprite = SpriteLoader.FromResource("Nebula.Resources.JusticeBandGraph.png", 120f);
 
     SpriteRenderer Background1, Background2, BackView;
     
@@ -484,10 +485,10 @@ public class JusticeMeetingHud : MonoBehaviour
                 var maskRenderer = UnityHelper.CreateObject<SpriteMask>("Mask", mask.transform, Vector3.zero);
                 maskRenderer.sprite = votingHolderMaskSprite.GetSprite();
 
-                var playerColor = Palette.PlayerColors[player.PlayerId];
+                var playerColor = DynamicPalette.PlayerColors[player.PlayerId];
                 var textColor = Color.Lerp(playerColor, DynamicPalette.IsLightColor(playerColor) ? new(0.18f, 0.18f, 0.18f, 1f) : new(1f, 1f, 1f, 1f), 0.4f);
 
-                var graphColor = Color.Lerp(Color.Lerp(Palette.PlayerColors[player.PlayerId], Palette.ShadowColors[player.PlayerId], 0.25f), Color.white, 0.28f);
+                var graphColor = Color.Lerp(Color.Lerp(DynamicPalette.PlayerColors[player.PlayerId], DynamicPalette.ShadowColors[player.PlayerId], 0.25f), Color.white, 0.28f);
                 for (int x = 0; x < 3; x++) InstantiateCircleGraph(back.transform, new(-0.6f + (0.28f * x), -0.5f, -0.2f), graphColor);
                 InstantiateBandGraph(24, back.transform, new(0.65f, -0.13f, -0.2f), graphColor);
 
@@ -556,7 +557,7 @@ public class JusticeMeetingHud : MonoBehaviour
 }
 
 [NebulaRPCHolder]
-public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCitation, DefinedRole
 {
     private Justice():base("justice", new(255, 128, 0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PutJusticeOnTheBalanceOption, JusticeMeetingTimeOption])
     {
@@ -564,19 +565,19 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Justice.png");
     }
 
-    Citation? HasCitation.Citaion => Citations.SuperNewRoles;
+    Citation? HasCitation.Citation => Citations.SuperNewRoles;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.GetAsBool(1));
 
-    static private BoolConfiguration PutJusticeOnTheBalanceOption = new BoolConfigurationImpl("options.role.justice.putJusticeOnTheBalance", false);
-    static public FloatConfiguration JusticeMeetingTimeOption = NebulaAPI.Configurations.Configuration("options.role.justice.justiceMeetingTime", (30f,300f,15f), 60f, FloatConfigurationDecorator.Second);
+    static private readonly BoolConfiguration PutJusticeOnTheBalanceOption = new BoolConfigurationImpl("options.role.justice.putJusticeOnTheBalance", false);
+    static public readonly FloatConfiguration JusticeMeetingTimeOption = NebulaAPI.Configurations.Configuration("options.role.justice.justiceMeetingTime", (30f,300f,15f), 60f, FloatConfigurationDecorator.Second);
 
-    static public Justice MyRole = new Justice();
+    static public readonly Justice MyRole = new();
 
-    static private GameStatsEntry StatsExiled = NebulaAPI.CreateStatsEntry("stats.justice.exiled", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsNonCrewmates = NebulaAPI.CreateStatsEntry("stats.justice.nonCrewmates", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsExiled = NebulaAPI.CreateStatsEntry("stats.justice.exiled", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsNonCrewmates = NebulaAPI.CreateStatsEntry("stats.justice.nonCrewmates", GameStatsCategory.Roles, MyRole);
 
-    static RemoteProcess<(GamePlayer p1, GamePlayer p2)> RpcJusticeMeeting = new("JusticeMeeting",
+    static readonly RemoteProcess<(GamePlayer p1, GamePlayer p2)> RpcJusticeMeeting = new("JusticeMeeting",
         (message, _) => {
             MeetingModRpc.RpcChangeVotingStyle.LocalInvoke((0xFFFFFF, false, JusticeMeetingTimeOption, true, false));
             MeetingHudExtension.CanShowPhotos = false;
@@ -588,14 +589,16 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
                 MeetingModRpc.RpcChangeVotingStyle.LocalInvoke(((1 << message.p1.PlayerId) | (1 << message.p2.PlayerId), false, Justice.JusticeMeetingTimeOption, true, false));
             });
         });
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+
+    [NebulaRPCHolder]
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player) { }
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), usedBalance.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped, bool usedBalance) : base(player, isUsurped) {
+            this.usedBalance = usedBalance;
+        }
 
-        
-
-        void RuntimeAssignable.OnActivated() { }
+        static private readonly RoleRPC.Definition UpdateState = RoleRPC.Get<Ability>("justice.heldMeeting", (ability, num, calledByMe) => ability.usedBalance = num == 1);
 
         bool usedBalance = false;
         bool isMyJusticeMeeting = false;
@@ -610,7 +613,7 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 new StaticAchievementToken("justice.common1");
                 if(p1.IsImpostor || p2.IsImpostor) new StaticAchievementToken("justice.common2");
-                isMyJusticeMeeting = true;
+                UpdateState.RpcSync(MyPlayer, 1);
             }
 
             if (!usedBalance)
@@ -625,8 +628,11 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
                        {
                            if (MeetingHudExtension.CanInvokeSomeAction)
                            {
-                               StartJusticeMeeting(p.MyPlayer, MyPlayer);
+                               if (IsUsurped) NebulaAsset.PlaySE(NebulaAudioClip.ButtonBreaking, volume: 1f);
+                               else StartJusticeMeeting(p.MyPlayer, MyPlayer);
+                               
                                usedBalance = true;
+                               
                            }
                        }
                        else
@@ -643,7 +649,9 @@ public class Justice : DefinedRoleTemplate, HasCitation, DefinedRole
                                    {
                                        selected.SetSelect(false);
 
-                                       StartJusticeMeeting(p.MyPlayer, selected.MyPlayer);
+                                       if (IsUsurped) NebulaAsset.PlaySE(NebulaAudioClip.ButtonBreaking, volume: 1f);
+                                       else StartJusticeMeeting(p.MyPlayer, selected.MyPlayer);
+
                                        usedBalance = true;
                                    }
                                    else

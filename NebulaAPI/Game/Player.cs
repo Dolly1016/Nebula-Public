@@ -1,8 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Virial.Assignable;
+using Virial.Attributes;
 using Virial.Command;
 using Virial.DI;
 using Virial.Helpers;
+using Virial.Media;
 using Virial.Text;
 
 namespace Virial.Game;
@@ -400,17 +404,45 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     // MurderAPI
 
     /// <summary>
-    /// プレイヤーをキルします。会議中の場合は<paramref name="leftDeadBody"/>の値は無視され、強制的に死体を残さないキルを起こします。
+    /// プレイヤーをキルします。会議中の場合は<paramref name="killParams"/>の死体を残す設定は無視され、強制的に死体を残さないキルを起こします。
     /// </summary>
-    /// <param name="player"></param>
-    /// <param name="playerState"></param>
-    /// <param name="eventDetail"></param>
+    /// <param name="player">キル対象のプレイヤー。</param>
+    /// <param name="playerState">キル後のプレイヤー状態。</param>
+    /// <param name="eventDetail">キルイベントの詳細。</param>
+    /// <param name="killParams">キルのパラメータ。</param>
+    /// <param name="killCondition">キルが通る条件。</param>
+    /// <param name="callBack">キル時に呼び出されるコールバック。</param>
     /// <returns></returns>
     public void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack = null);
+    /// <summary>
+    /// プレイヤーをキルします。会議中の場合は<paramref name="killParams"/>の死体を残す設定は無視され、強制的に死体を残さないキルを起こします。
+    /// </summary>
+    /// <param name="player">キル対象のプレイヤー。</param>
+    /// <param name="playerState">キル後のプレイヤー状態。</param>
+    /// <param name="eventDetail">キルイベントの詳細。</param>
+    /// <param name="killParams">キルのパラメータ。</param>
+    /// <param name="callBack">キル時に呼び出されるコールバック。</param>
     public void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null)
         => MurderPlayer(player, playerState, eventDetail, killParams, KillCondition.BothAlive, callBack);
+    /// <summary>
+    /// 自殺します。
+    /// </summary>
+    /// <param name="playerState">自殺後のプレイヤー状態。</param>
+    /// <param name="eventDetail">自殺イベントの詳細。</param>
+    /// <param name="killParams">キルのパラメータ。</param>
+    /// <param name="callBack">自殺時に呼び出されるコールバック。</param>
     public void Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null);
+    /// <summary>
+    /// 復活します。
+    /// </summary>
+    /// <param name="healer">復活者。</param>
+    /// <param name="position">復活位置。</param>
+    /// <param name="eraseDeadBody">死体を消去したうえで復活する場合、true。</param>
+    /// <param name="recordEvent">復活イベントをゲーム履歴に残す場合、true。</param>
     public void Revive(Player? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent = true);
+    /// <summary>
+    /// 自身をキルした相手を返します。
+    /// </summary>
     public Player? MyKiller { get; }
 
 
@@ -423,25 +455,53 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// </summary>
     /// <param name="attribute">付与するアトリビュート</param>
     /// <param name="duration">効果時間</param>
-    /// <param name="canPassMeeting">会議を超えて効果が持続するかどうか</param>
+    /// <param name="canPassMeeting">会議を超えて効果が持続する場合、<c>true</c></param>
     /// <param name="priority">優先度</param>
     /// <param name="duplicateTag">重複チェック用タグ</param>
     public void GainAttribute(IPlayerAttribute attribute, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
-    
+    /// <summary>
+    /// 係数付きアトリビュートを付与します。
+    /// </summary>
+    /// <remarks>
+    /// v2.0.1.0で追加。<br />
+    /// </remarks>
+    /// <param name="attribute">付与するアトリビュート。</param>
+    /// <param name="duration">効果時間。</param>
+    /// <param name="ratio">係数。</param>
+    /// <param name="canPassMeeting">会議を超えて効果が持続する場合、<c>true</c>。</param>
+    /// <param name="priority">優先度。</param>
+    /// <param name="duplicateTag">重複チェック用タグ。</param>
+    public void GainAttribute(IPlayerAttribute attribute, float duration, float ratio, bool canPassMeeting, int priority, string? duplicateTag = null);
+    /// <summary>
+    /// サイズアトリビュートを付与します。
+    /// </summary>
+    /// <remarks>
+    /// v2.0.1.0で追加。<br />
+    /// </remarks>
+    /// <param name="size">プレイヤーの大きさ。</param>
+    /// <param name="duration">効果時間。</param>
+    /// <param name="canPassMeeting">会議を超えて効果が持続する場合、<c>true</c>。</param>
+    /// <param name="priority">優先度。</param>
+    /// <param name="duplicateTag">重複チェック用タグ。</param>
+    public void GainSizeAttribute(Compat.Vector2 size, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
+
     /// <summary>
     /// 加減速アトリビュートを付与します。
     /// </summary>
-    /// <param name="speedRate">加減速の倍率</param>
-    /// <param name="duration">効果時間</param>
-    /// <param name="canPassMeeting">会議を超えて効果が持続するかどうか</param>
-    /// <param name="priority">優先度</param>
-    /// <param name="duplicateTag">重複チェック用タグ</param>
-    public void GainAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
+    /// <remarks>
+    /// v2.0.1.0でGainAttributeから名前変更。<br />
+    /// </remarks>
+    /// <param name="speedRate">加減速の倍率。</param>
+    /// <param name="duration">効果時間。</param>
+    /// <param name="canPassMeeting">会議を超えて効果が持続するかどうか。</param>
+    /// <param name="priority">優先度。</param>
+    /// <param name="duplicateTag">重複チェック用タグ。</param>
+    public void GainSpeedAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
     
     /// <summary>
     /// アトリビュートを獲得しているかどうか調べます。
     /// </summary>
-    /// <param name="attribute">調べる対象のアトリビュート</param>
+    /// <param name="attribute">調べる対象のアトリビュート。</param>
     /// <returns></returns>
     public bool HasAttribute(IPlayerAttribute attribute);
 
@@ -454,15 +514,45 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
 
 
 
-    // AssignableAPI
-
+    
+    /// <summary>
+    /// 現在割り当てられている役職です。
+    /// </summary>
     public RuntimeRole Role { get; }
+    /// <summary>
+    /// 現在割り当てられている幽霊役職です。
+    /// </summary>
     public RuntimeGhostRole? GhostRole { get; }
+    /// <summary>
+    /// 現在割り当てられているモディファイアです。
+    /// </summary>
     public IEnumerable<RuntimeModifier> Modifiers { get; }
+    /// <summary>
+    /// 現在割り当てられている役職実体を全て返します。
+    /// </summary>
+    /// <returns></returns>
     public IEnumerable<RuntimeAssignable> AllAssigned();
+    /// <summary>
+    /// 指定したモディファイアを取得します。
+    /// </summary>
+    /// <typeparam name="Modifier">モディファイアの型</typeparam>
+    /// <param name="modifier">モディファイアが割り当てられている場合、割り当てられているモディファイア。</param>
+    /// <returns>モディファイアが割り当てられている場合、true</returns>
     public bool TryGetModifier<Modifier>([MaybeNullWhen(false)] out Modifier modifier) where Modifier : class, RuntimeModifier;
+    /// <summary>
+    /// 幽霊役職を割り当て済みの場合、trueを返します。
+    /// </summary>
     public bool AttemptedGhostAssignment { get; internal set; }
-    public IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth();
+    /// <summary>
+    /// 全ての能力を返します。
+    /// </summary>
+    public IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth()!;
+    /// <summary>
+    /// 能力を取得します。
+    /// </summary>
+    /// <typeparam name="Ability"></typeparam>
+    /// <param name="ability"></param>
+    /// <returns></returns>
     public bool TryGetAbility<Ability>([MaybeNullWhen(false)]out Ability ability) where Ability : class, IPlayerAbility
     {
         bool result = AllAbilities.Find(ability => ability is Ability, out var pAbility);
@@ -474,24 +564,29 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     }
 
 
-    // PlayerRoleCategoryAPI
-
+    /// <summary>
+    /// インポスター陣営の場合、trueを返します。
+    /// </summary>
     public bool IsImpostor => Role.Role.Category is RoleCategory.ImpostorRole;
+    /// <summary>
+    /// クルーメイト陣営の場合、trueを返します。マッドメイトであってもtrueを返します。
+    /// </summary>
     public bool IsCrewmate => Role.Role.Category is RoleCategory.CrewmateRole;
+    /// <summary>
+    /// マッドメイトの場合、trueを返します。
+    /// </summary>
     public bool IsMadmate => Role.Role.IsMadmate || Modifiers.Any(m => m.IsMadmate);
     /// <summary>
-    /// クルー陣営かつマッドメイトでない正真正銘のクルーメイトであればtrueを返します。
+    /// クルー陣営かつマッドメイトでないクルーメイトであればtrueを返します。
+    /// <c>IsCrewmate &amp;&amp; !IsMadmate</c>と等価です。
     /// </summary>
     public bool IsTrueCrewmate => IsCrewmate && !IsMadmate;
 
 
-
-    // OutfitAPI
-
     /// <summary>
     /// プレイヤーの見た目を取得します。
     /// </summary>
-    /// <param name="maxPriority">優先度の最大値</param>
+    /// <param name="maxPriority">見た目の優先度の最大値</param>
     /// <returns></returns>
     public OutfitDefinition GetOutfit(int maxPriority);
 
@@ -504,26 +599,47 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// プレイヤーの本来の見た目を取得します。
     /// </summary>
     public OutfitDefinition DefaultOutfit { get; }
+
     Virial.Game.OutfitDefinition IArchivedPlayer.DefaultOutfit => DefaultOutfit;
 
-
-
-    // TasksAPI
 
     /// <summary>
     /// プレイヤーのタスク進捗を取得します。
     /// </summary>
     public PlayerTasks Tasks => GetModule<PlayerTasks>()!;
 
+    /// <summary>
+    /// キルボタンを表示すべきか否かを取得します。
+    /// </summary>
     public bool ShowKillButton => (Role?.HasVanillaKillButton ?? false) && AllowToShowKillButtonByAbilities;
+
+    /// <summary>
+    /// 能力がキルボタンの表示を許可しているかを返します。
+    /// </summary>
     public bool AllowToShowKillButtonByAbilities => AllAssigned().All(assigned => assigned.MyAbilities.All(ability => !(ability?.HideKillButton ?? false)));
 
+    /// <summary>
+    /// 視界が壁を無視する場合、trueを返します。
+    /// </summary>
+    [Obsolete(AttributeConstants.ObsoleteText)]
+    public bool EyesightIgnoreWalls => (Role?.EyesightIgnoreWalls ?? false) || AllAbilities.Any(a => a.EyesightIgnoreWalls);
 
     /// <summary>
     /// 自身が操作するプレイヤーを取得します。
     /// </summary>
     public static Player? LocalPlayer => NebulaAPI.instance.CurrentGame?.LocalPlayer;
+    /// <summary>
+    /// 全プレイヤーを取得します。
+    /// </summary>
     public static IEnumerable<Player> AllPlayers => NebulaAPI.instance.CurrentGame?.GetAllPlayers() ?? [];
+    /// <summary>
+    /// 全プレイヤーをPlayerIdの順で取得します。
+    /// </summary>
     public static IReadOnlyList<Player> AllOrderedPlayers => NebulaAPI.instance.CurrentGame?.GetAllOrderedPlayers() ?? [];
+    /// <summary>
+    /// プレイヤーを取得します。
+    /// </summary>
+    /// <param name="playerId">プレイヤーID</param>
+    /// <returns></returns>
     public static Player? GetPlayer(byte playerId) => NebulaAPI.instance.CurrentGame?.GetPlayer(playerId);
 }

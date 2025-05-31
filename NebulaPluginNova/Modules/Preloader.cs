@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Roles;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Crewmate;
@@ -7,13 +7,16 @@ using System.Reflection;
 using Virial;
 using Virial.Assignable;
 using Virial.DI;
+using Virial.Game;
 using Virial.Runtime;
+using Virial.Text;
 using static Virial.Attributes.NebulaPreprocess;
 
 namespace Nebula.Modules;
 
 internal class NebulaPreprocessorImpl : NebulaPreprocessor
 {
+    static public bool Finished => Instance.FinishPreprocess;
     static internal NebulaPreprocessor Instance { get; private set; } = new NebulaPreprocessorImpl();
 
     DIManager NebulaPreprocessor.DIManager => DIManager.Instance;
@@ -24,7 +27,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
         NebulaAPI.preprocessor = this;
         preprocessList = new List<IEnumerator>[(int)PreprocessPhase.NumOfPhases];
 
-        for (int i = 0; i < preprocessList.Length; i++) preprocessList[i] = new();
+        for (int i = 0; i < preprocessList.Length; i++) preprocessList[i] = [];
     }
 
     void NebulaPreprocessor.PickUpPreprocess(Assembly assembly)
@@ -83,6 +86,11 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
         yield break;
     }
 
+    GameEnd NebulaPreprocessor.CreateEnd(string localizedName, Virial.Color color, int priority) => new(localizedName, color, priority);
+    GameEnd NebulaPreprocessor.CreateEnd(string immutableId, TextComponent displayText, Virial.Color color, int priority) => new(immutableId, displayText, color, priority);
+    ExtraWin NebulaPreprocessor.CreateExtraWin(string localizedName, Virial.Color color) => new(localizedName, color);
+    ExtraWin NebulaPreprocessor.CreateExtraWin(string immutableId, TextComponent displayText, Virial.Color color) => new(immutableId, displayText, color);
+
     private List<IEnumerator>[] preprocessList;
 }
 
@@ -97,18 +105,19 @@ public static class ToolsInstaller
             Patches.LoadPatch.LoadingText = "Installing Tools";
             yield return null;
 
-            InstallTool("CPUAffinityEditor.exe");
-            InstallTool("opus.dll");
+            InstallTool("CPUAffinityEditor.exe", null);
+
+            InstallTool(Environment.Is64BitProcess ? "opus_x64.dll" : "opus_x86.dll", "opus.dll");
         }
     }
 
-    private static void InstallTool(string name)
+    private static void InstallTool(string name, string? outputName)
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
         Stream? stream = assembly.GetManifestResourceStream("Nebula.Resources.Tools." + name);
         if (stream == null) return;
 
-        var file = File.Create(name);
+        var file = File.Create(outputName ?? name);
         byte[] data = new byte[stream.Length];
         stream.Read(data);
         file.Write(data);
@@ -150,14 +159,18 @@ public static class PreloadManager
         //NoSのプリプロセッサを取得
         NebulaPreprocessorImpl.Instance.PickUpPreprocess(typeof(PreloadManager).Assembly);
 
-        void OnRaisedExcep(Exception exception)
+        static void OnRaisedExcep(Exception exception)
         {
             LastException ??= exception;
         }
 
         yield return NebulaPreprocessorImpl.Instance.SetLoadingText("Checking Component Dependencies");
 
-        for(int i=0;i<(int)PreprocessPhase.NumOfPhases;i++) yield return NebulaPreprocessorImpl.Instance. RunPreprocess((PreprocessPhase)i).HandleException(OnRaisedExcep);
+        for(int i=0;i<(int)PreprocessPhase.NumOfPhases;i++) yield return NebulaPreprocessorImpl.Instance.RunPreprocess((PreprocessPhase)i).HandleException(OnRaisedExcep);
+
+        yield return NebulaPreprocessorImpl.Instance.SetLoadingText("Finalizing...");
+
+        GC.Collect(2);
 
         FinishedPreload = true;
     }

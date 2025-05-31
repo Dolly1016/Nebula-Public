@@ -1,5 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using System.Linq;
 using Virial;

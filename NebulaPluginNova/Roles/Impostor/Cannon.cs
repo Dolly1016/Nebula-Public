@@ -1,5 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Map;
 using Virial;
 using Virial.Assignable;
@@ -13,7 +13,7 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Cannon : DefinedRoleTemplate, DefinedRole
+public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedRole
 {
     public Cannon() : base("cannon", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MarkCoolDownOption, CannonCoolDownOption, NumOfMarksOption, CannonPowerOption, CannonPowerAttenuationOption])
     {
@@ -22,22 +22,23 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
         GameActionTypes.CannonMarkPlacementAction = new("cannon.placement", this, isPlacementAction: true);
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsJackalizable => true;
 
-    static private FloatConfiguration MarkCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cannon.markCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration CannonCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration CannonPowerOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonPower", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration CannonPowerAttenuationOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonPowerAttenuation", (0.25f, 2f, 0.125f), 0.75f, FloatConfigurationDecorator.Ratio);
-    static private IntegerConfiguration NumOfMarksOption = NebulaAPI.Configurations.Configuration("options.role.cannon.numOfMarks", (1, 10), 3);
+    static private readonly FloatConfiguration MarkCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cannon.markCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration CannonCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration CannonPowerOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonPower", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration CannonPowerAttenuationOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonPowerAttenuation", (0.25f, 2f, 0.125f), 0.75f, FloatConfigurationDecorator.Ratio);
+    static private readonly IntegerConfiguration NumOfMarksOption = NebulaAPI.Configurations.Configuration("options.role.cannon.numOfMarks", (1, 10), 3);
 
-    static public Cannon MyRole = new Cannon();
-    static private GameStatsEntry StatsFire = NebulaAPI.CreateStatsEntry("stats.cannon.fire", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsBlow = NebulaAPI.CreateStatsEntry("stats.cannon.players", GameStatsCategory.Roles, MyRole);
+    static public readonly Cannon MyRole = new();
+    static private readonly GameStatsEntry StatsFire = NebulaAPI.CreateStatsEntry("stats.cannon.fire", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsBlow = NebulaAPI.CreateStatsEntry("stats.cannon.players", GameStatsCategory.Roles, MyRole);
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class CannonMark : NebulaSyncStandardObject, IGameOperator
     {
-        public static string MyTag = "CannonMark";
+        public const string MyTag = "CannonMark";
         private static SpriteLoader markSprite = SpriteLoader.FromResource("Nebula.Resources.CannonMark.png", 100f);
         public CannonMark(Vector2 pos) : base(pos, ZOption.Back, true, markSprite.GetSprite())
         {
@@ -49,11 +50,11 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
         }
     }
 
-    private static SpriteLoader mapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.CannonButton.png", 100f);
-    private static SpriteLoader mapButtonInnerSprite = SpriteLoader.FromResource("Nebula.Resources.CannonButtonInner.png", 100f);
+    private static readonly SpriteLoader mapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.CannonButton.png", 100f);
+    private static readonly SpriteLoader mapButtonInnerSprite = SpriteLoader.FromResource("Nebula.Resources.CannonButtonInner.png", 100f);
     public class CannonMapLayer : MonoBehaviour
     {
-        public Cannon.Instance MyCannon = null;
+        public Cannon.Ability MyCannon = null!;
         static CannonMapLayer() => ClassInjector.RegisterTypeInIl2Cpp<CannonMapLayer>();
         public void AddMark(NebulaSyncStandardObject obj, Action onFired)
         {
@@ -89,49 +90,33 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
     {
         public CannonFireLocalEvent(){ }
     }
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player) { }
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MarkButton.png", 115f);
-        static private Image cannonButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CannonButton.png", 115f);
-
-        private List<NebulaSyncStandardObject> Marks = new();
-        private CannonMapLayer mapLayer = null!;
-
-        AchievementToken<(float lastFire, bool isCleared)>? acTokenCommon1 = null;
-
-        void RuntimeAssignable.OnActivated()
-        {
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped) {
             if (AmOwner)
             {
-                var markButtom = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "cannon.mark");
-                markButtom.SetSprite(buttonSprite.GetSprite());
-                markButtom.Availability = (button) => MyPlayer.CanMove && Marks.Count < NumOfMarksOption;
-                markButtom.Visibility = (button) => !MyPlayer.IsDead;
-                markButtom.OnClick = (button) =>
+                var markButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "cannon.mark",
+                    MarkCoolDownOption, "mark", buttonSprite,
+                    _ => Marks.Count < NumOfMarksOption);
+                markButton.OnClick = (button) =>
                 {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.CannonMarkPlacementAction);
 
-                    var mark = Bind(NebulaSyncObject.LocalInstantiate(CannonMark.MyTag, [
+                    var mark = NebulaSyncObject.LocalInstantiate(CannonMark.MyTag, [
                                 PlayerControl.LocalPlayer.transform.localPosition.x,
                                 PlayerControl.LocalPlayer.transform.localPosition.y - 0.25f
-                            ]).SyncObject) as NebulaSyncStandardObject;
+                            ]).SyncObject! as NebulaSyncStandardObject;
                     Marks.Add(mark!);
                     if (mapLayer) mapLayer.AddMark(mark!, () => Marks.Remove(mark!));
-                    markButtom.StartCoolDown();
-
+                    markButton.StartCoolDown();
                 };
-                markButtom.CoolDownTimer = Bind(new Timer(0f, MarkCoolDownOption).SetAsAbilityCoolDown().Start());
-                markButtom.SetLabel("mark");
-                var icon = markButtom.ShowUsesIcon(0);
-                GameOperatorManager.Instance?.Register<GameUpdateEvent>(_ => icon.text = (NumOfMarksOption - Marks.Count).ToString(), markButtom);
+                markButton.ShowUsesIcon(0, " ");
+                markButton.SetAsUsurpableButton(this);
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(_ => markButton.UpdateUsesIcon((NumOfMarksOption - Marks.Count).ToString()), markButton);
 
-                var mapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "cannon.cannon");
-                mapButton.SetSprite(cannonButtonSprite.GetSprite());
-                mapButton.Availability = (button) => Marks.Count > 0;
-                mapButton.Visibility = (button) => !MyPlayer.IsDead;
+                var mapButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "cannon.cannon",
+                    CannonCoolDownOption, "cannon", cannonButtonSprite,
+                    _ => Marks.Count > 0);
                 mapButton.OnClick = (button) =>
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
@@ -141,9 +126,8 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
                         MapBehaviour.Instance.taskOverlay.gameObject.SetActive(false);
                     });
                 };
-                mapButton.SetLabel("cannon");
-                mapButton.CoolDownTimer = Bind(new Timer(0f, CannonCoolDownOption).SetAsAbilityCoolDown().Start());
-                GameOperatorManager.Instance?.Register<CannonFireLocalEvent>(_ => mapButton.StartCoolDown(), mapButton);
+                mapButton.SetAsUsurpableButton(this);
+                GameOperatorManager.Instance?.Subscribe<CannonFireLocalEvent>(_ => mapButton.StartCoolDown(), mapButton);
 
                 acTokenCommon1 = new("cannon.common1", (-100f, false), (a, _) => a.isCleared);
 
@@ -152,17 +136,25 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
             }
         }
 
+        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MarkButton.png", 115f);
+        static private Image cannonButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CannonButton.png", 115f);
+
+        private List<NebulaSyncStandardObject> Marks = [];
+        private CannonMapLayer mapLayer = null!;
+
+        AchievementToken<(float lastFire, bool isCleared)>? acTokenCommon1 = null;
+
         [Local]
         void OnOpenMap(AbstractMapOpenEvent ev)
         {
-            if (!MeetingHud.Instance && ev is MapOpenNormalEvent)
+            if (!MeetingHud.Instance && ev is MapOpenNormalEvent && !IsUsurped)
             {
                 if (!mapLayer)
                 {
                     mapLayer = UnityHelper.CreateObject<CannonMapLayer>("CannonLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                     mapLayer.MyCannon = this;
                     Marks.Do(m => mapLayer.AddMark(m, () => Marks.Remove(m)));
-                    this.Bind(mapLayer.gameObject);
+                    this.BindGameObject(mapLayer.gameObject);
                 }
                 mapLayer.gameObject.SetActive(true);
             }
@@ -241,7 +233,7 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
             public bool IsCurrentPhase = true;
         }
 
-        private List<CannonAchievementData> cannonAchievementData = new();
+        private List<CannonAchievementData> cannonAchievementData = [];
     }
     private static void FireCannon(Vector2 pos, GamePlayer myPlayer, int num)
     {
@@ -250,7 +242,6 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
 
     private static IDividedSpriteLoader cannonArrowSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CannonArrow.png", 200f, 3, 3);
     private static IDividedSpriteLoader smokeSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CannonSmoke.png", 150f, 4, 1);
-    private static IDividedSpriteLoader smokeTraceSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CannonSmokeTrace.png", 100f, 7, 1);
 
     //吹っ飛ばしベクトルを計算する。
     //reductionFactorが1以下だと滑らかで自然に飛ばされる距離が減少する。1より大きいと位置関係の逆転が起こる
@@ -330,22 +321,23 @@ public class Cannon : DefinedRoleTemplate, DefinedRole
         yield break;
     }
 
-    static RemoteProcess<(GamePlayer player, Vector2 to, byte cannonId, int num)> RpcCannon = new("Cannon", (message, _) =>
+    static readonly RemoteProcess<(GamePlayer player, Vector2 to, byte cannonId, int num)> RpcCannon = new("Cannon", (message, _) =>
     {
         NebulaManager.Instance.StartCoroutine(CoPlayJumpAnimation(message.player.VanillaPlayer, message.player.Position, message.to).WrapToIl2Cpp());
 
         //Cannon自身は称号に関する情報を更新する。
-        if(GamePlayer.LocalPlayer.PlayerId == message.cannonId && GamePlayer.LocalPlayer.Role is Instance cannon)
+        if(GamePlayer.LocalPlayer.PlayerId == message.cannonId && GamePlayer.LocalPlayer.Role is Ability cannon)
         {
             cannon.UpdateAchievementData(message.num, message.player);
         }
     });
 
-    static RemoteProcess<(Vector2 pos, byte cannonId, int num)> RpcCheckCannon = new("CheckCannon", (message, _) =>
+    static readonly RemoteProcess<(Vector2 pos, byte cannonId, int num)> RpcCheckCannon = new("CheckCannon", (message, _) =>
     {
         IEnumerator CoShowIcon()
         {
             var icon = new Arrow(cannonArrowSprite.GetSprite(0), false) { TargetPos = message.pos, FixedAngle = true, IsSmallenNearPlayer = false, ShowOnlyOutside = true };
+            icon.Register(icon);
             for (int i = 0; i < 9; i++)
             {
                 icon.SetSprite(cannonArrowSprite.GetSprite(i));

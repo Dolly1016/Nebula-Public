@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -141,6 +141,8 @@ internal class GUIModernButton : NoSGUIText
 {
     static private MultiImage modernButtonSprite = DividedExpandableSpriteLoader.FromResource("Nebula.Resources.GUI.Button.png", 150f, 12, 12, 3, 2);
     static private MultiImage modernCheckSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GUI.Checkmark.png", 150f, 2, 1);
+    static internal Sprite ModernCheckBackSprite => modernCheckSprite.GetSprite(0);
+    static internal Sprite ModernCheckSprite => modernCheckSprite.GetSprite(1);
     public GUIClickableAction? OnClick { get; init; }
     public GUIClickableAction? OnRightClick { get; init; }
     public GUIClickableAction? OnMouseOver { get; init; }

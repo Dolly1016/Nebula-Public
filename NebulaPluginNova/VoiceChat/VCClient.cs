@@ -219,7 +219,7 @@ public class VCClient : IDisposable
         //普通に話している生存者
         if(InputtedVoiceType == VoiceType.Normal && !(relatedControl.Data?.IsDead ?? false))
         {
-            if (GeneralConfigurations.CanTalkInWandaringPhaseOption)
+            if (GeneralConfigurations.CanTalkInWanderingPhaseOption)
             {
                 foreach (var mic in NebulaGameManager.Instance!.VoiceChatManager!.AllMics())
                 {

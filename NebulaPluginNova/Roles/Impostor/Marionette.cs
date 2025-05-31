@@ -1,6 +1,7 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
@@ -25,7 +26,7 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
     static private FloatConfiguration DecoyDurationOption = NebulaAPI.Configurations.Configuration("options.role.marionette.decoyDuration", (5f, 180f, 5f), 40f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration CanSeeDecoyInShadowOption = NebulaAPI.Configurations.Configuration("options.role.marionette.canSeeDecoyInShadow", false);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
 
     static public Marionette MyRole = new Marionette();
@@ -51,13 +52,8 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
         }
     }
 
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        private ModAbilityButton? placeButton = null;
-        private ModAbilityButton? destroyButton = null;
-        private ModAbilityButton? swapButton = null;
-        private ModAbilityButton? monitorButton = null;
-
         static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyButton.png", 115f);
         static private Image destroyButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyDestroyButton.png", 115f);
         static private Image swapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoySwapButton.png", 115f);
@@ -79,22 +75,23 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
             MyDecoy = null;
         }
 
-        public Ability(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
-                decoyArrow = Bind(new Arrow(decoyArrowSprite.GetSprite(), false, true) { IsAffectedByComms = false, FixedAngle = true });
+                decoyArrow = new Arrow(decoyArrowSprite.GetSprite(), false, true) { IsAffectedByComms = false, FixedAngle = true }.Register(this);
                 decoyArrow.IsActive = false;
 
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("marionette.another1");
                 acTokenCommon2 = new("marionette.common2", (false,-100f),(val,_) => val.cleared);
                 acTokenChallenge = new("marionette.challenge", (false,-100f),(val,_)=>val.cleared);
 
-                placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "marionette.place");
-                placeButton.SetSprite(placeButtonSprite.GetSprite());
-                placeButton.Availability = (button) => MyPlayer.CanMove;
-                placeButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy == null;
-                placeButton.CoolDownTimer = Bind(new Timer(PlaceCoolDownOption).SetAsAbilityCoolDown().Start());
+                ModAbilityButton destroyButton = null!, swapButton = null!, monitorButton = null!;
+
+                var placeButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "marionette.place",
+                    PlaceCoolDownOption, "place", placeButtonSprite,
+                    null, _ => MyDecoy == null).SetAsUsurpableButton(this);
                 placeButton.OnClick = (button) =>
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
@@ -107,25 +104,18 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
                         PlayerControl.LocalPlayer.cosmetics.FlipX ? -1f : 1f 
                         ]).SyncObject as Decoy);
 
-                        destroyButton!.ActivateEffect();
-                        destroyButton.EffectTimer?.Start();
+                        destroyButton.InterruptEffect();
+                        destroyButton.StartEffect();
                     });
                     placeButton.StartCoolDown();
                     swapButton?.StartCoolDown();
                     acTokenCommon ??= new("marionette.common1");
                     StatsDecoy.Progress();
                 };
-                placeButton.SetLabel("place");
 
-                destroyButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "marionette.destroy");
-                destroyButton.SetSprite(destroyButtonSprite.GetSprite());
-                destroyButton.Availability = (button) => MyPlayer.CanMove;
-                destroyButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
-                destroyButton.EffectTimer = Bind(new Timer(DecoyDurationOption));
-                destroyButton.OnClick = (button) =>
-                {
-                    destroyButton.InactivateEffect();
-                };
+                destroyButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "marionette.destroy",
+                    0f, DecoyDurationOption, "destroy", destroyButtonSprite, null, _ => MyDecoy != null).SetAsUsurpableButton(this);
+                destroyButton.OnClick = (button) => destroyButton.InterruptEffect();
                 destroyButton.OnEffectEnd = (button) =>
                 {
                     if (MyDecoy != null) NebulaSyncObject.RpcDestroy(MyDecoy!.ObjectId);
@@ -133,13 +123,11 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
 
                     placeButton.StartCoolDown();
                 };
-                destroyButton.SetLabel("destroy");
 
-                swapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.swap").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
-                swapButton.SetSprite(swapButtonSprite.GetSprite());
+                swapButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.swap",
+                    SwapCoolDownOption, "swap", swapButtonSprite,
+                    null, _ => MyDecoy != null).BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch").SetAsUsurpableButton(this);
                 swapButton.Availability = (button) => (MyPlayer.CanMove || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour) && (!MyPlayer.VanillaPlayer.inVent && !MyPlayer.VanillaPlayer.onLadder && !MyPlayer.VanillaPlayer.inMovingPlat);
-                swapButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
-                swapButton.CoolDownTimer = Bind(new Timer(SwapCoolDownOption));
                 swapButton.OnClick = (button) =>
                 {
                     DecoySwap.Invoke((MyPlayer.PlayerId, MyDecoy!.ObjectId));
@@ -159,31 +147,36 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
-                        swapButton.ResetKeyBind();
-                        monitorButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.monitor");
-                        monitorButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
+                        swapButton.ResetKeyBinding();
+                        monitorButton.BindKey(Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.monitor");
+                        monitorButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
                     });
                 };
                 swapButton.SetLabel("swap");
+                
 
-                monitorButton = Bind(new ModAbilityButton());
-                monitorButton.SetSprite(monitorButtonSprite.GetSprite());
+                monitorButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
+                    0f, "monitor", monitorButtonSprite, null, _ => MyDecoy != null).SetAsUsurpableButton(this);
                 monitorButton.Availability = (button) => true;
                 monitorButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
-                monitorButton.OnClick = (button) =>
-                {
-                    AmongUsUtil.ToggleCamTarget(MyDecoy!.MyBehaviour, null);
-                };
+                monitorButton.OnClick = (button) => AmongUsUtil.ToggleCamTarget(MyDecoy!.MyBehaviour, null);
+                monitorButton.OnBroken = (button) => AmongUsUtil.SetCamTarget(null);
                 monitorButton.OnSubAction = (button) =>
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
-                        monitorButton.ResetKeyBind();
-                        swapButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.swap");
-                        swapButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
+                        monitorButton.ResetKeyBinding();
+                        swapButton!.BindKey(Virial.Compat.VirtualKeyInput.SecondaryAbility, "marionette.swap");
+                        swapButton!.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
                     });
                 };
-                monitorButton.SetLabel("monitor");
+
+                GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev => {
+                    if (MyDecoy != null) NebulaSyncObject.RpcDestroy(MyDecoy!.ObjectId);
+                    MyDecoy = null;
+
+                    monitorButton.DoSubClick();
+                }, this);
             }
         }
 
@@ -199,15 +192,6 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
                     decoyArrow.TargetPos = MyDecoy.Position;
                 }
             }
-        }
-
-        [Local]
-        void OnMeetingStart(MeetingStartEvent ev)
-        {
-                if (MyDecoy != null) NebulaSyncObject.RpcDestroy(MyDecoy!.ObjectId);
-                MyDecoy = null;
-
-                monitorButton?.DoSubClick();
         }
 
         [OnlyMyPlayer]

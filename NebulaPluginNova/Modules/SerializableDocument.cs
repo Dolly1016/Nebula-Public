@@ -1,5 +1,5 @@
 ﻿using Il2CppSystem.Xml.Schema;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using Nebula.Scripts;
 using System.Reflection;

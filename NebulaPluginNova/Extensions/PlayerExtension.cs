@@ -1,7 +1,8 @@
 ﻿using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils;
+using Epic.OnlineServices.Mods;
 using Hazel;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Player;
 using TMPro;
@@ -170,5 +171,23 @@ public static class PlayerExtension
         {
             return player.gameObject.AddComponent<ModTitleShower>();
         }
+    }
+
+    static public void ResetOnDying(PlayerControl player)
+    {
+        var modInfo = player.GetModInfo()!;
+        modInfo.Unbox().CurrentDiving = null;
+
+        if (player.AmOwner)
+        {
+            if(Vent.currentVent != null)
+            {
+                Vent.currentVent.SetButtons(false);
+                Vent.currentVent = null;
+            }
+        }
+
+        player.inVent = false;
+        player.moveable = true;
     }
 }

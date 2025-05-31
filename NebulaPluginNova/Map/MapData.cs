@@ -32,7 +32,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
     static MapObjectSpawner() => DIManager.Instance.RegisterModule(() => new MapObjectSpawner());
 
     List<MapObjectPoint>? unusedPoints;
-    Dictionary<string, List<Virial.Compat.Vector2>> usedPoints = new();
+    Dictionary<string, List<Virial.Compat.Vector2>> usedPoints = [];
 
     bool TryGetPoint(string tag, string? objectTag, float distance, MapObjectType type, out Virial.Compat.Vector2 point, out NebulaSyncObjectReference? reference, MapObjectCondition[] conditions)
     {
@@ -46,7 +46,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
 
         if (!usedPoints.TryGetValue(tag, out var used))
         {
-            used = new();
+            used = [];
             usedPoints[tag] = used;
         }
 
@@ -129,7 +129,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
 
             if (!usedPoints.TryGetValue(reason, out var used))
             {
-                used = new();
+                used = [];
                 usedPoints[reason] = used;
             }
 
@@ -137,7 +137,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
         }
     }
 
-    static RemoteProcess<(int id, string reason)> RpcSpawn = new("SpawnMapObject", (message, calledByMe) =>
+    static private readonly RemoteProcess<(int id, string reason)> RpcSpawn = new("SpawnMapObject", (message, calledByMe) =>
     {
         if(!calledByMe) NebulaAPI.CurrentGame?.GetModule<IMapObjectSpawner>()?.Spawn(message.id, message.reason);
     });
@@ -184,11 +184,11 @@ public abstract class MapData
     virtual public Vector3 GetDoorSealingPos(OpenableDoor door, bool isVert) => isVert ? new(-0.024f,0.52f,-0.01f) : new(0f, -0.1f, -0.01f);
     virtual public bool IsSealableDoor(OpenableDoor door) => true;
     public SystemTypes[] GetSabotageSystemTypes() => SabotageTypes;
-    public bool CheckMapArea(Vector2 position, float radious = 0.1f)
+    public bool CheckMapArea(Vector2 position, float radius = 0.1f)
     {
-        if (radious > 0f)
+        if (radius > 0f)
         {
-            int num = Physics2D.OverlapCircleNonAlloc(position, radious, PhysicsHelpers.colliderHits, Constants.ShipAndAllObjectsMask);
+            int num = Physics2D.OverlapCircleNonAlloc(position, radius, PhysicsHelpers.colliderHits, Constants.ShipAndAllObjectsMask);
             if (num > 0) for (int i = 0; i < num; i++) if (!PhysicsHelpers.colliderHits[i].isTrigger) return false;
         }
 
@@ -248,7 +248,7 @@ public abstract class MapData
         return count;
     }
 
-    private static Texture2D CreateReadabeTexture(Texture texture, int margin = 0)
+    private static Texture2D CreateReadableTexture(Texture texture, int margin = 0)
     {
         RenderTexture renderTexture = RenderTexture.GetTemporary(
                     texture.width,
@@ -260,13 +260,13 @@ public abstract class MapData
         Graphics.Blit(texture, renderTexture);
         RenderTexture previous = RenderTexture.active;
         RenderTexture.active = renderTexture;
-        Texture2D readableTextur2D = new Texture2D(texture.width + margin * 2, texture.height + margin * 2);
-        readableTextur2D.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), margin, margin);
-        readableTextur2D.Apply();
+        Texture2D readableTexture2D = new Texture2D(texture.width + margin * 2, texture.height + margin * 2);
+        readableTexture2D.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), margin, margin);
+        readableTexture2D.Apply();
         RenderTexture.active = previous;
         RenderTexture.ReleaseTemporary(renderTexture);
 
-        return readableTextur2D;
+        return readableTexture2D;
     } 
     public Texture2D OutputMap(Vector2 center, Vector2 size, float resolution = 10f)
     {
@@ -306,10 +306,10 @@ public abstract class MapData
 
         texture.Apply(false, false);
 
-        return CreateReadabeTexture(texture);
+        return CreateReadableTexture(texture);
     }
 
-    static private MapData[] AllMapData = new MapData[] { new SkeldData(), new MiraData(), new PolusData(), null!, new AirshipData(), new FungleData() };
+    static private readonly MapData[] AllMapData = [new SkeldData(), new MiraData(), new PolusData(), null!, new AirshipData(), new FungleData()];
     static public MapData GetCurrentMapData() => AllMapData[AmongUsUtil.CurrentMapId];
 
     public string? GetOverrideMapRooms(SystemTypes room, UnityEngine.Vector2 pos)

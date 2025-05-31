@@ -14,7 +14,7 @@ namespace Nebula.Roles.Neutral;
 
 public class Avenger : DefinedRoleTemplate, DefinedRole
 {
-    static public RoleTeam MyTeam = new Team("teams.avenger", new(141,111,131), TeamRevealType.OnlyMe);
+    static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.avenger", new(141,111,131), TeamRevealType.OnlyMe);
     private Avenger() : base("avenger", MyTeam.Color, RoleCategory.NeutralRole, MyTeam,
         [KillCoolDownOption, VentOption, CanKnowExistanceOfAvengerOption, TargetCanKnowAvengerOption, AvengerFlashForMurdererOption, NotificationForMurdererIntervalOption, NotificationForAvengerIntervalOption],
         false, optionHolderPredicate: () => (Modifier.Lover.NumOfPairsOption > 0 && Modifier.Lover.AvengerModeOption))
@@ -42,55 +42,41 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
     static private GameStatsEntry StatsDefendAsKiller = NebulaAPI.CreateStatsEntry("stats.avenger.defend", GameStatsCategory.Roles, MyRole);
     bool IGuessed.CanBeGuessDefault => false;
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-
-        private GameTimer ventCoolDown = (new Timer(VentOption.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(VentOption.Duration);
-        private bool canUseVent = VentOption.CanUseVent;
-        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
-        GameTimer? RuntimeRole.VentDuration => ventDuration;
-        bool RuntimeRole.CanUseVent => canUseVent;
-
+        public override DefinedRole Role => MyRole;
 
         private GamePlayer? target;
         public GamePlayer? AvengerTarget => target;
-        public Instance(GamePlayer player,byte targetId) : base(player)
+        public Instance(GamePlayer player,byte targetId) : base(player, VentOption)
         {
             target = NebulaGameManager.Instance?.GetPlayer(targetId);
         }
 
         int[]? RuntimeAssignable.RoleArguments => [target?.PlayerId ?? 255];
-        void RuntimeAssignable.OnActivated()
+        public override void OnActivated()
         {
             if (AmOwner)
             {
                 NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText("You became AVENGER.", MyRole.RoleColor.ToUnityColor(), 5.5f, true);
                 AmongUsUtil.PlayCustomFlash(MyRole.RoleColor.ToUnityColor(), 0f, 0.8f, 0.7f);
 
-                var killable = ObjectTrackers.KillablePredicate(MyPlayer);
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, p => killable(p) || target == p));
-
-                var killButton = Bind(new Modules.ScriptComponents.ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;
-                killButton.Visibility = (button) => !MyPlayer.IsDead;
-                killButton.OnClick = (button) => {
-                    MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
-                    killButton.StartCoolDown();
-                };
-                killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
-                killButton.SetLabel("kill");
-
-                if (target != null) Bind(new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor(), false)).Register();
+                var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
+                        KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "kill", ModAbilityButton.LabelType.Impostor, null,
+                        (player, button) => {
+                            MyPlayer.MurderPlayer(player, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
+                            button.StartCoolDown();
+                        }
+                    );
+                
+                if (target != null) new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor(), false).Register(this);
 
                 if((target?.TryGetModifier<Damned.Instance>(out var damned) ?? false) && MyPlayer.TryGetModifier<Lover.Instance>(out var lover))
                 {
                     var myLover = lover.MyLover.Get();
                     var targetRole = target.Role.Role;
                     if (myLover != null) {
-                        GameOperatorManager.Instance?.Register<GameEndEvent>(ev =>
+                        GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev =>
                         {
                             var winners = ev.EndState.Winners;
                             if (
@@ -107,7 +93,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
 
             if (target?.AmOwner ?? false)
             {
-                if (TargetCanKnowAvengerOption) Bind(new TrackingArrowAbility(MyPlayer, NotificationForMurdererIntervalOption, MyRole.RoleColor.ToUnityColor(), false)).Register();
+                if (TargetCanKnowAvengerOption) new TrackingArrowAbility(MyPlayer, NotificationForMurdererIntervalOption, MyRole.RoleColor.ToUnityColor(), false).Register(this);
                 if (AvengerFlashForMurdererOption) AmongUsUtil.PlayFlash(MyRole.RoleColor.ToUnityColor());
             }
         }

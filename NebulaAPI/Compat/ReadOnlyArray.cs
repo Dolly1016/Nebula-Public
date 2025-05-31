@@ -2,6 +2,10 @@
 
 namespace Virial.Compat;
 
+/// <summary>
+/// 配列のスライスを表します。
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public interface IReadOnlyArray<T> : IEnumerable<T>, IReadOnlyList<T>
 {
     IReadOnlyArray<T> Skip(int skipped);
@@ -10,6 +14,10 @@ public interface IReadOnlyArray<T> : IEnumerable<T>, IReadOnlyList<T>
     public static IReadOnlyArray<T> Empty() => new ReadOnlyArray<T>(Array.Empty<T>());
 } 
 
+/// <summary>
+/// 配列のスライスです。
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class ReadOnlyArray<T> : IReadOnlyArray<T>
 {
     private T[] list;

@@ -516,9 +516,9 @@ public static class DynamicColors
     }
 
     //他人の色名を覚えておく
-    static public Dictionary<int, Tuple<byte, byte>> ColorNameDic = new();
+    static public Dictionary<int, Tuple<byte, byte>> ColorNameDic = [];
     //他人の色座標を覚えておく
-    static public Dictionary<int, Tuple<byte, byte>> ColorPosDic = new();
+    static public Dictionary<int, Tuple<byte, byte>> ColorPosDic = [];
 
     static public void SetOthersColor(byte hue, byte dis, byte posHue,byte posDis,Color color, Color shadowColor, byte playerId)
     {
@@ -549,39 +549,51 @@ public static class DynamicColors
         }
     }
 
+    private static string GetColorName(int color)
+    {
+        string colorName;
+        if (ColorNameDic.ContainsKey(color))
+        {
+            var tuple = ColorNameDic[color];
+            colorName = GetColorName(tuple.Item1, tuple.Item2);
+        }
+        else
+        {
+            colorName = GetColorName();
+        }
+
+        char[] array = colorName.ToCharArray();
+        if (array.Length != 0)
+        {
+            array[0] = char.ToUpper(array[0]);
+            bool afterSpace = false;
+            for (int i = 1; i < array.Length; i++)
+            {
+                array[i] = afterSpace ? char.ToUpper(array[i]) : char.ToLower(array[i]);
+                afterSpace = array[i] == ' ';
+            }
+        }
+
+        return new string(array);
+    }
 
     [HarmonyPatch(typeof(CosmeticsLayer), nameof(CosmeticsLayer.GetColorBlindText))]
     private class CosmeticsLayerColorStringPatch
     {
-        public static bool Prefix(CosmeticsLayer __instance,ref string __result)
+        public static bool Prefix(CosmeticsLayer __instance, ref string __result)
         {
-            int color = __instance.bodyMatProperties.ColorId;
+            __result = GetColorName(__instance.bodyMatProperties.ColorId);
 
-            string colorName;
-            if (ColorNameDic.ContainsKey(color))
-            {
-                var tuple = ColorNameDic[color];
-                colorName = GetColorName(tuple.Item1, tuple.Item2);
-            }
-            else
-            {
-                colorName = GetColorName();
-            }
+            return false;
+        }
+    }
 
-            char[] array = colorName.ToCharArray();
-            if (array.Length != 0)
-            {
-                array[0] = char.ToUpper(array[0]);
-                bool afterSpace = false;
-                for (int i = 1; i < array.Length; i++)
-                {
-                    array[i] = afterSpace ? char.ToUpper(array[i]) : char.ToLower(array[i]);
-                    afterSpace = array[i] == ' ';
-                }
-            }
-            
-            __result = new string(array);
-
+    [HarmonyPatch(typeof(PoolablePlayer), nameof(PoolablePlayer.ColorBlindName), MethodType.Getter)]
+    private class PoolablePlayerColorStringPatch
+    {
+        public static bool Prefix(PoolablePlayer __instance, ref string __result)
+        {
+            __result = GetColorName(__instance.ColorId);
             return false;
         }
     }

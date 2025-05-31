@@ -344,8 +344,12 @@ public static class JsonStructure
             return "null";
         }
 
-        if (obj is int or byte or float or double or bool or long)
+        if (obj is int or byte or bool or long)
             return obj.ToString() ?? "null";
+        if (obj is float fNum)
+            return fNum.ToString(CultureInfo.InvariantCulture);
+        if (obj is double dNum)
+            return dNum.ToString(CultureInfo.InvariantCulture);
         if (obj is string)
             return "\"" + obj + "\"";
         if (obj is IDictionary dic && dic.GetType().GenericTypeArguments[0] == typeof(string))

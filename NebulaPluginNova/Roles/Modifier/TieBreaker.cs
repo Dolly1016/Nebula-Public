@@ -10,7 +10,7 @@ namespace Nebula.Roles.Modifier;
 public class TieBreaker : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, HasCitation
 {
     private TieBreaker(): base("tieBreaker", "TBR", new(239, 175, 135)) { }
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     static public TieBreaker MyRole = new TieBreaker();
     static internal GameStatsEntry StatsTieBreaking = NebulaAPI.CreateStatsEntry("stats.tieBreaker.tieBreaking", GameStatsCategory.Roles, MyRole);
@@ -52,7 +52,7 @@ public class TieBreaker : DefinedAllocatableModifierTemplate, DefinedAllocatable
             }
         });
 
-        void OnTieVotes(MeetingTieVoteEvent ev)
+        void OnTieVotes(MeetingTieVoteHostEvent ev)
         {
             if (ev.TryCheckVotedFor(MyPlayer, out var votedFor)) ev.AddExtraVote(votedFor);
         }

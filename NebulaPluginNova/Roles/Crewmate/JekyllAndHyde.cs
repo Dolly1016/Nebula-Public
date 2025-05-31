@@ -36,18 +36,18 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole
     string DefinedAssignable.DisplayColoredName => JAndHCombinationName.Replace("%J%", JekyllDisplayName.Color(Palette.CrewmateBlue)).Replace("%H%", HydeDisplayName.Color(Palette.ImpostorRed));
     string DefinedCategorizedAssignable.DisplayShort => JAndHCombinationShort.Replace("%J%", JekyllDisplayShort).Replace("%H%", HydeDisplayShort);
     string DefinedCategorizedAssignable.DisplayColoredShort => JAndHCombinationShort.Replace("%J%", JekyllDisplayShort.Color(Palette.CrewmateBlue)).Replace("%H%", HydeDisplayShort.Color(Palette.ImpostorRed));
-    static private IntegerConfiguration NumOfKillOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.numOfKill", (0, 5), 1);
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.jekyllAndHyde.killCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => NumOfKillOption > 0);
-    static private BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.hasImpostorVision", false);
-    static private BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.canUseVents", false);
-    static private BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.canMoveInVents", false);
-    static private ITaskConfiguration TaskConfiguration = NebulaAPI.Configurations.TaskConfiguration("options.role.jekyllAndHyde.task", true, true);
+    static private readonly IntegerConfiguration NumOfKillOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.numOfKill", (0, 5), 1);
+    static private readonly IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.jekyllAndHyde.killCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => NumOfKillOption > 0);
+    static private readonly BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.hasImpostorVision", false);
+    static private readonly BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.canUseVents", false);
+    static private readonly BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.canMoveInVents", false);
+    static private readonly ITaskConfiguration TaskConfiguration = NebulaAPI.Configurations.TaskConfiguration("options.role.jekyllAndHyde.task", true, true);
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     bool DefinedRole.IsMadmate => true;
-    static public JekyllAndHyde MyRole = new JekyllAndHyde();
-    static private GameStatsEntry StatsMedicine = NebulaAPI.CreateStatsEntry("stats.jekyllAndHyde.medicine", GameStatsCategory.Roles, MyRole);
+    static public readonly JekyllAndHyde MyRole = new();
+    static private readonly GameStatsEntry StatsMedicine = NebulaAPI.CreateStatsEntry("stats.jekyllAndHyde.medicine", GameStatsCategory.Roles, MyRole);
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -64,58 +64,52 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole
 
         int LeftKill = 0;
         bool UsedDrug = false;
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.JekyllDrugButton.png", 115f);
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.JekyllDrugButton.png", 115f);
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
             {
-                var predicate = ObjectTrackers.KillablePredicate(MyPlayer);
-                var killTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, p => !AmJekyll && predicate(p), null, false));
+                //var predicate = ObjectTrackers.KillablePredicate(MyPlayer);
+                //var killTracker = NebulaAPI.Modules.KillTracker(this, MyPlayer, _ => !AmJekyll);
 
-                var killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill);
-                var icon = killButton.ShowUsesIcon(0);
-                icon.text = LeftKill.ToString();
-                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove && !MyPlayer.IsDived && !MyPlayer.IsBlown && LeftKill > 0;
-                killButton.Visibility = (button) => !MyPlayer.IsDead && !AmJekyll;
-                killButton.OnClick = (button) =>
-                {
-                    using (RPCRouter.CreateSection("HydeKill"))
+                var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true,
+                    Virial.Compat.VirtualKeyInput.Kill, KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "kill", Virial.Components.ModAbilityButton.LabelType.Impostor,
+                    null, (player, button) =>
                     {
-                        RpcDetermineState.Invoke((MyPlayer, false));
-
-                        var target = killTracker.CurrentTarget!;
-                        MyPlayer.MurderPlayer(target, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill, result =>
+                        using (RPCRouter.CreateSection("HydeKill"))
                         {
-                            if (target.IsCrewmate) GameOperatorManager.Instance?.Register<GameEndEvent>(ev => {
-                                if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && AmJekyll && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("jekyllAndHyde.challenge");
-                            }, this);
-                        });
-                        NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
+                            RpcDetermineState.Invoke((MyPlayer, false));
+
+                            var target = player;
+                            MyPlayer.MurderPlayer(target, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill, result =>
+                            {
+                                if (target.IsCrewmate) GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev =>
+                                {
+                                    if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && AmJekyll && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("jekyllAndHyde.challenge");
+                                }, this);
+                            });
+                            NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
+                        }
                         RpcUpdateLeftKill.Invoke(MyPlayer);
-                    }
-                    icon.text = LeftKill.ToString();
-                };
-                killButton.CoolDownTimer = Bind(new Timer(KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
-                killButton.SetLabel("kill");
+                        button.UpdateUsesIcon(LeftKill.ToString());
+                        button.StartCoolDown();
+                    }, _ => !AmJekyll, _ => LeftKill > 0, _ => !AmJekyll
+                    );
+                killButton.ShowUsesIcon(0, LeftKill.ToString());
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
 
-
-                var medicineButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                medicineButton.SetSprite(buttonSprite.GetSprite());
-                medicineButton.Availability = (button) => MyPlayer.CanMove && MyPlayer.Tasks.IsCompletedCurrentTasks;
-                medicineButton.Visibility = (button) => !MyPlayer.IsDead && AmJekyll && !UsedDrug;
+                var medicineButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    5f, "medicine", buttonSprite,
+                    _ => MyPlayer.Tasks.IsCompletedCurrentTasks, _ => AmJekyll && !UsedDrug);
                 medicineButton.OnClick = (button) =>
                 {
                     StatsMedicine.Progress();
                     RpcDetermineState.Invoke((MyPlayer, true));
                 };
-                medicineButton.CoolDownTimer = Bind(new Timer(5f).SetAsAbilityCoolDown().Start());
-                medicineButton.SetLabel("medicine");
-                var lockSprite = medicineButton.VanillaButton.AddLockedOverlay();
-                GameOperatorManager.Instance?.Register<PlayerTaskCompleteLocalEvent>(ev =>
+                var lockSprite = medicineButton.AddLockedOverlay();
+                GameOperatorManager.Instance?.Subscribe<PlayerTaskCompleteLocalEvent>(ev =>
                 {
-                    if (MyPlayer.Tasks.IsCompletedCurrentTasks && lockSprite) GameObject.Destroy(lockSprite.gameObject);
+                    if (MyPlayer.Tasks.IsCompletedCurrentTasks && lockSprite) GameObject.Destroy(lockSprite);
                 }, this);
             }
 

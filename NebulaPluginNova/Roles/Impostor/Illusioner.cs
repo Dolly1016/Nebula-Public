@@ -1,6 +1,8 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 using Virial.Helpers;
 
@@ -14,32 +16,28 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
     }
 
 
-    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration PaintCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.paintCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.loseSampleOnMeeting", false);
-    static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.transformAfterMeeting", false);
-    static private BoolConfiguration SampleOriginalLookOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleOriginalLook", false);
+    static private readonly FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration MorphCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.morphCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration MorphDurationOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.morphDuration", (5f, 120f, 2.5f), 25f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration PaintCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.paintCoolDown", (0f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
+    static private readonly BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.loseSampleOnMeeting", false);
+    static private readonly BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.transformAfterMeeting", false);
+    static private readonly BoolConfiguration SampleOriginalLookOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleOriginalLook", false);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
 
     static public Illusioner MyRole = new Illusioner();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.illusioner.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.illusioner.morph", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsPaint = NebulaAPI.CreateStatsEntry("stats.illusioner.paint", GameStatsCategory.Roles, MyRole);
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
-        private ModAbilityButton? sampleButton = null;
-        private ModAbilityButton? morphButton = null;
-        private ModAbilityButton? paintButton = null;
-
         StaticAchievementToken? acTokenMorphingCommon = null, acTokenPainterCommon = null, acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
 
-        public Ability(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
@@ -52,38 +50,32 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
 
                 OutfitDefinition? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
+                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate).Register(this);
 
-                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample");
-                sampleButton.SetSprite(Morphing.Ability.SampleButtonSprite.GetSprite());
-                sampleButton.Availability = (button) => MyPlayer.CanMove;
-                sampleButton.Visibility = (button) => !MyPlayer.IsDead;
+                var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
+                    SampleCoolDownOption, "sample", Morphing.Ability.SampleButtonSprite).SetAsUsurpableButton(this);
                 sampleButton.OnClick = (button) => {
                     sample = sampleTracker.CurrentTarget?.GetOutfit(SampleOriginalLookOption ? 35 : 75) ?? null;
                     if (sample != null) acTokenChallenge.Value |= 1 << sample.outfit.ColorId;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
-                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample.outfit, sampleButton.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample.outfit, (sampleButton as ModAbilityButtonImpl)!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                     StatsSample.Progress();
                 };
-                sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
-                sampleButton.SetLabel("sample");
 
-                morphButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph").SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction,"illusioner.switch");
-                morphButton.SetSprite(Morphing.Ability.MorphButtonSprite.GetSprite());
-                morphButton.Availability = (button) => MyPlayer.CanMove && sample != null;
-                morphButton.Visibility = (button) => !MyPlayer.IsDead;
-                morphButton.OnClick = (button) => {
-                    button.ToggleEffect();
-                };
+                ModAbilityButton morphButton = null!, paintButton = null!;
+
+                morphButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph",
+                    MorphCoolDownOption, MorphDurationOption, "morph", Morphing.Ability.MorphButtonSprite, _ => sample != null, isToggleEffect: true)
+                    .BindSubKey(Virial.Compat.VirtualKeyInput.AidAction,"illusioner.switch").SetAsUsurpableButton(this);
                 morphButton.OnSubAction = (button) =>
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
-                        morphButton.ResetKeyBind();
-                        paintButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility,"illusioner.paint");
-                        paintButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "illusioner.switch");
+                        morphButton.ResetKeyBinding();
+                        paintButton.BindKey(Virial.Compat.VirtualKeyInput.SecondaryAbility,"illusioner.paint");
+                        paintButton.BindKey(Virial.Compat.VirtualKeyInput.AidAction, "illusioner.switch");
                     });
                 };
                 morphButton.OnEffectStart = (button) =>
@@ -99,25 +91,9 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                     PlayerModInfo.RpcRemoveOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, "Morphing"));
                     morphButton.CoolDownTimer?.Start();
                 };
-                morphButton.OnMeeting = (button) =>
-                {
-                    morphButton.InactivateEffect();
 
-                    if (LoseSampleOnMeetingOption)
-                    {
-                        if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
-                        sampleIcon = null;
-                        sample = null;
-                    }
-                };
-                morphButton.CoolDownTimer = Bind(new Timer(MorphCoolDownOption).SetAsAbilityCoolDown().Start());
-                morphButton.EffectTimer = Bind(new Timer(MorphDurationOption));
-                morphButton.SetLabel("morph");
-
-                paintButton = Bind(new ModAbilityButton());
-                paintButton.SetSprite(Painter.Ability.PaintButtonSprite.GetSprite());
-                paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
-                paintButton.Visibility = (button) => !MyPlayer.IsDead;
+                paintButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
+                    PaintCoolDownOption, "paint", Painter.Ability.PaintButtonSprite, _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 paintButton.OnClick = (button) => {
                     var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new(sample ?? MyPlayer.GetOutfit(75), "Paint", 40, false)));
                     if (TransformAfterMeetingOption)
@@ -134,22 +110,22 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
-                        paintButton.ResetKeyBind();
-                        morphButton!.KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph");
-                        morphButton!.SubKeyBind(Virial.Compat.VirtualKeyInput.AidAction, "illusioner.switch");
+                        paintButton.ResetKeyBinding();
+                        morphButton.BindKey(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph");
+                        morphButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "illusioner.switch");
                     });
                 };
-                paintButton.OnMeeting = (button) =>
-                {
+
+                GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev => {
+                    morphButton.InterruptEffect();
+
                     if (LoseSampleOnMeetingOption)
                     {
                         if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                         sampleIcon = null;
                         sample = null;
                     }
-                };
-                paintButton.CoolDownTimer = Bind(new Timer(PaintCoolDownOption).SetAsAbilityCoolDown().Start());
-                paintButton.SetLabel("paint");
+                }, this);
             }
         }
     }

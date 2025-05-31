@@ -167,6 +167,8 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
         [OnlyMyPlayer]
         void CheckExtraWin(PlayerCheckExtraWinEvent ev)
         {
+            if (ev.Phase != ExtraWinCheckPhase.TrilemmaPhase) return;
+
             if (WinConditionOption.GetValue() == 1 && AmLastTrilemma)
             {
                 ev.SetWin(true);
@@ -231,7 +233,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
             if (!MyPlayer.IsDead && MyTrilemmas.All(p => p.AmOwner || p.IsDead))
             {
                 new StaticAchievementToken("trilemma.common1");
-                GameOperatorManager.Instance.Register<GameEndEvent>(ev =>
+                GameOperatorManager.Instance.Subscribe<GameEndEvent>(ev =>
                 {
                     if (ev.EndState.EndReason == GameEndReason.Situation && ev.EndState.Winners.Test(MyPlayer) && !MyPlayer.IsDead && NebulaGameManager.Instance?.LastDead?.MyKiller == MyPlayer)
                     {

@@ -33,6 +33,7 @@ namespace DefaultLang.Documents;
 [AddonDocument("role.thurifer", RoleType.Role, (string[])["Buttons.ThuriferButton.png;role.thurifer.ability.curse", "Buttons.ThuriferButton.png;role.thurifer.ability.impute"], false, false)]
 [AddonDocument("role.ubiquitous", RoleType.Role, (string[])["Buttons.DroneButton.png;role.ubiquitous.ability.drone", "Buttons.DroneCallBackButton.png;role.ubiquitous.ability.callBack", "Buttons.DroneHackButton.png;role.ubiquitous.ability.doorHack"], false, true)]
 [AddonDocument("role.scarlet", RoleType.Role, (string[])["Buttons.FlirtatiousMainButton.png;role.scarlet.ability.favorite", "Buttons.FlirtatiousSubButton.png;role.scarlet.ability.kept", "Buttons.HourglassButton.png;role.scarlet.ability.hourglass", "Buttons.FlirtatiousMeetingButton.png;role.scarlet.ability.meeting"], true, false)]
+[AddonDocument("role.gambler", RoleType.Role, (string[])["Buttons.DeceiveButton.png;role.gambler.ability.deceive"], true, false)]
 [AddonDocument("role.spectre.follower", RoleType.Role, (string[])["SpectreDish.png;role.spectre.follower.rule.fries"], true, false)]
 [AddonDocument("role.spectre.immoralist", RoleType.Role, (string[])["Buttons.ImmoralistAliveButton.png;role.spectre.immoralist.ability.alive", "Buttons.ImmoralistDeadButton.png;role.spectre.immoralist.ability.dead", "Buttons.ImmoralistSuicideButton.png;role.spectre.immoralist.ability.suicide"], true, false)]
 [AddonDocument("role.jekyllAndHyde", RoleType.Role, (string[])["Buttons.JekyllDrugButton.png;role.jekyllAndHyde.ability.drug"], true, true)]
@@ -40,6 +41,7 @@ namespace DefaultLang.Documents;
 [AddonDocument("role.confused", RoleType.Modifier, (string[])[], false, false)]
 [AddonDocument("role.trilemma", RoleType.Modifier, (string[])[], true, false)]
 [AddonDocument("role.investigator", RoleType.Role, (string[])["Buttons.InvestigatorButton.png;role.investigator.ability.investigate"], false, false)]
+[AddonDocument("role.snatcher", RoleType.Role, (string[])["Buttons.SnatchButton.png;role.snatcher.ability.snatch", "Buttons.SnatcherClockButton.png;role.snatcher.ability.clock"], false, false)]
 public class StandardDocument : IDocumentWithId
 {
     string documentId;

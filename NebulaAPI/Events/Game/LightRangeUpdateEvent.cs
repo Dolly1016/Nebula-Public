@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Game;
 
+/// <summary>
+/// 視界の広さを更新する際に発火します。
+/// </summary>
 public class LightRangeUpdateEvent : Event
 {
     public float LightRange { get => lightRange; set => lightRange = MathF.Max(0f, value); }

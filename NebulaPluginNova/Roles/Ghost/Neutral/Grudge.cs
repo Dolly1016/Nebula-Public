@@ -22,20 +22,18 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
 
     string ICodeName.CodeName => "GRD";
 
-    static private FloatConfiguration TotalStandingTimeToWin = NebulaAPI.Configurations.Configuration("options.role.grudge.totalStandingTimeToWin", (15f, 120f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration TotalStandingTimeToWin = NebulaAPI.Configurations.Configuration("options.role.grudge.totalStandingTimeToWin", (15f, 120f, 2.5f), 30f, FloatConfigurationDecorator.Second);
 
-    static public Grudge MyRole = new Grudge();
+    static public readonly Grudge MyRole = new();
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
-    public class GrudgeIllusion : IGameOperator, ILifespan
+    public class GrudgeIllusion : FlexibleLifespan, IGameOperator
     {
         PoolablePlayer player;
         SpriteRenderer[] allRenderers;
         public bool IsActive { get; set; } = true;
         private float Alpha { get; set; } = 0f;
-        private bool isDestroyed = false;
-        bool ILifespan.IsDeadObject => isDestroyed;
 
         public GrudgeIllusion(GamePlayer player, Vector3 position, bool flipX) {
             this.player = AmongUsUtil.GetPlayerIcon(player.DefaultOutfit.outfit, null, position, new(0.35f, 0.35f, 1f), flipX, false);
@@ -52,7 +50,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
 
         void Update(GameUpdateEvent ev)
         {
-            if (isDestroyed) return;
+            if (IsDeadObject) return;
 
             if (IsActive)
             {
@@ -65,7 +63,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
                 if (Alpha < 0f)
                 {
                     Alpha = 0f;
-                    isDestroyed = true;
+                    Release();
                 }
             }
 
@@ -185,6 +183,8 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
         [OnlyMyPlayer]
         void CheckExtraWin(PlayerCheckExtraWinEvent ev)
         {
+            if (ev.Phase != ExtraWinCheckPhase.GrudgePhase) return;
+
             if (canWin)
             {
                 ev.SetWin(true);
@@ -192,7 +192,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
             }
         }
         
-        RemoteProcess<(GamePlayer player, Vector3 pos, bool flipX)> RpcShowIllusion = new("ShowGrudgeIllusion",
+        static private readonly RemoteProcess<(GamePlayer player, Vector3 pos, bool flipX)> RpcShowIllusion = new("ShowGrudgeIllusion",
             (message, _) =>
             {
                 var grudge = message.player.Unbox().GhostRole as Grudge.Instance;
@@ -200,11 +200,11 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
                 {
                     if(grudge.currentIllusion != null) grudge.currentIllusion.IsActive = false;
                     grudge.currentIllusion = new GrudgeIllusion(message.player, message.pos, message.flipX);
-                    grudge.currentIllusion.Register();
+                    grudge.currentIllusion.Register(grudge);
                 }
             });
 
-        RemoteProcess<GamePlayer> RpcDisappearIllusion = new("DisappearIllusion",
+        static private readonly RemoteProcess<GamePlayer> RpcDisappearIllusion = new("DisappearIllusion",
             (message, _) =>
             {
                 var grudge = message.Unbox().GhostRole as Grudge.Instance;

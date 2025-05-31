@@ -17,3 +17,13 @@ public static class SoundPatch
         return true;
     }
 }
+
+
+[HarmonyPatch(typeof(SoundManager), nameof(SoundManager.UpdateChannelVolumes))]
+public static class OverwriteChannelVolumePatch
+{
+    public static void Postfix(SoundManager __instance)
+    {
+        ClientOption.TryChangeAmbientVolumeImmediately();
+    }
+}

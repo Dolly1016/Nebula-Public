@@ -33,7 +33,7 @@ public class NebulaResourceManager
 
         if(allocator is IVariableResourceAllocator vra)
         {
-            vra.Register(splitted[splitted.Length - 1], resource);
+            vra.Register(splitted[^1], resource);
             return true;
         }
 
@@ -48,7 +48,7 @@ public class NebulaResourceManager
     static public INebulaResource? GetResource(string fullAddress, IResourceAllocator? defaultAllocator = null)
     {
         string[] splitted = fullAddress.Split("::");
-        return GetResource(new ReadOnlyArray<string>(splitted, 0, splitted.Length - 1), splitted[splitted.Length - 1], defaultAllocator);
+        return GetResource(new ReadOnlyArray<string>(splitted, 0, splitted.Length - 1), splitted[^1], defaultAllocator);
     }
 
     static public INebulaResource? GetResource(string fullAddress, string defaultAllocator) => GetResource(fullAddress, GetAllocator(defaultAllocator, false));
@@ -86,7 +86,7 @@ public class NebulaDefaultNamespace : VariableResourceAllocator, IResourceAlloca
 {
     Dictionary<string, string> allResources;
     public NebulaDefaultNamespace() {
-        allResources = new();
+        allResources = [];
         foreach(var name in Assembly.GetExecutingAssembly().GetManifestResourceNames())
         {
             allResources[name.ToLower()] = name;

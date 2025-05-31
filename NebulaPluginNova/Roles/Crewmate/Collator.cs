@@ -1,8 +1,10 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
+using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -11,41 +13,36 @@ using Virial.Text;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasCitation, DefinedRole
 {
     private Collator():base("collator",new(37, 159, 148), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SampleCoolDownOption, SelectiveCollatingOption, MaxTrialsOption, MaxTrialsPerMeetingOption, NumOfTubesOption, CarringOverSamplesOption, CanTakeDuplicateSampleOption, StrictClassificationOfNeutralRolesOption, MadmateIsClassifiedAsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Collator.png");
     }
-    Citation? HasCitation.Citaion => Citations.SuperNewRoles;
+    Citation? HasCitation.Citation => Citations.SuperNewRoles;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
-    static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.collator.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration SelectiveCollatingOption = NebulaAPI.Configurations.Configuration("options.role.collator.selectiveCollating", false);
-    static private IntegerConfiguration MaxTrialsOption = NebulaAPI.Configurations.Configuration("options.role.collator.maxTrials", (1, 15), 8);
-    static private IntegerConfiguration MaxTrialsPerMeetingOption = NebulaAPI.Configurations.Configuration("options.role.collator.maxTrialsPerMeeting", (1, 5), 1, () => SelectiveCollatingOption);
-    static private IntegerConfiguration NumOfTubesOption = NebulaAPI.Configurations.Configuration("options.role.collator.numOfTubes", (3, 14), 5, () => SelectiveCollatingOption);
-    static private BoolConfiguration CarringOverSamplesOption = NebulaAPI.Configurations.Configuration("options.role.collator.carringOverSamples", false, () => SelectiveCollatingOption);
-    static private BoolConfiguration CanTakeDuplicateSampleOption = NebulaAPI.Configurations.Configuration("options.role.collator.canTakeDuplicateSample", false, () => SelectiveCollatingOption);
-    static private BoolConfiguration StrictClassificationOfNeutralRolesOption = NebulaAPI.Configurations.Configuration("options.role.collator.strictClassificationForNeutralRoles", false);
-    static private ValueConfiguration<int> MadmateIsClassifiedAsOption = NebulaAPI.Configurations.Configuration("options.role.collator.madmateIsClassifiedAs", ["options.role.collator.madmateIsClassifiedAs.impostor", "options.role.collator.madmateIsClassifiedAs.crewmate"], 0);
+    static private readonly FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.collator.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private readonly BoolConfiguration SelectiveCollatingOption = NebulaAPI.Configurations.Configuration("options.role.collator.selectiveCollating", false);
+    static private readonly IntegerConfiguration MaxTrialsOption = NebulaAPI.Configurations.Configuration("options.role.collator.maxTrials", (1, 15), 8);
+    static private readonly IntegerConfiguration MaxTrialsPerMeetingOption = NebulaAPI.Configurations.Configuration("options.role.collator.maxTrialsPerMeeting", (1, 5), 1, () => SelectiveCollatingOption);
+    static private readonly IntegerConfiguration NumOfTubesOption = NebulaAPI.Configurations.Configuration("options.role.collator.numOfTubes", (3, 14), 5, () => SelectiveCollatingOption);
+    static private readonly BoolConfiguration CarringOverSamplesOption = NebulaAPI.Configurations.Configuration("options.role.collator.carringOverSamples", false, () => SelectiveCollatingOption);
+    static private readonly BoolConfiguration CanTakeDuplicateSampleOption = NebulaAPI.Configurations.Configuration("options.role.collator.canTakeDuplicateSample", false, () => SelectiveCollatingOption);
+    static private readonly BoolConfiguration StrictClassificationOfNeutralRolesOption = NebulaAPI.Configurations.Configuration("options.role.collator.strictClassificationForNeutralRoles", false);
+    static private readonly ValueConfiguration<int> MadmateIsClassifiedAsOption = NebulaAPI.Configurations.Configuration("options.role.collator.madmateIsClassifiedAs", ["options.role.collator.madmateIsClassifiedAs.impostor", "options.role.collator.madmateIsClassifiedAs.crewmate"], 0);
     
-    static public Collator MyRole = new Collator();
+    static public readonly Collator MyRole = new();
 
-    static private GameStatsEntry StatsCollating = NebulaAPI.CreateStatsEntry("stats.collator.collating", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsMatched = NebulaAPI.CreateStatsEntry("stats.collator.matched", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsUnmatched = NebulaAPI.CreateStatsEntry("stats.collator.unmatched", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static private readonly GameStatsEntry StatsCollating = NebulaAPI.CreateStatsEntry("stats.collator.collating", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsMatched = NebulaAPI.CreateStatsEntry("stats.collator.matched", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsUnmatched = NebulaAPI.CreateStatsEntry("stats.collator.unmatched", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CollatorSampleButton.png", 100f);
+        static private readonly IDividedSpriteLoader tubeSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CollatorTube.png", 125f, 2, 1);
 
-        static private SpriteLoader meetingSprite = SpriteLoader.FromResource("Nebula.Resources.CollatorIcon.png", 115f);
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CollatorSampleButton.png", 100f);
-        static private IDividedSpriteLoader tubeSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CollatorTube.png", 125f, 2, 1);
-
-        public Instance(GamePlayer player, int[] arguments) : base(player){}
 
         private List<(GamePlayer player, RoleTeam team)> sampledPlayers = new();
         private (SpriteRenderer tube, SpriteRenderer sample)[] allSamples = null!;
@@ -59,7 +56,7 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                 if (player != null)
                 {
                     allSamples[i].sample.gameObject.SetActive(true);
-                    allSamples[i].sample.color = Palette.PlayerColors[player.PlayerId];
+                    allSamples[i].sample.color = DynamicPalette.PlayerColors[player.PlayerId];
                 }
                 else allSamples[i].sample.gameObject.SetActive(false);
             }
@@ -93,6 +90,8 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnMeetingStart(MeetingStartEvent ev)
         {
+            if (IsUsurped) return;
+
             if (ActualSampledPlayers >= 2)
             {
                 if (SelectiveCollatingOption)
@@ -182,16 +181,17 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
         AchievementToken<EditableBitMask<GamePlayer>>? acTokenChallenge = null;
         AchievementToken<(GamePlayer? player, float time, bool clear)>? acTokenAnother1 = null;
 
-        void RuntimeAssignable.OnActivated()
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
-                acTokenChallenge = new("collator.challenge", BitMasks.AsPlayer(), (value, _) => NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnds.CrewmateGameEnd && (NebulaGameManager.Instance?.AllPlayerInfo.Where(p => (p as GamePlayer).IsImpostor).All(p => p.PlayerState == PlayerStates.Exiled && value.Test(p)) ?? false));
+                acTokenChallenge = new("collator.challenge", BitMasks.AsPlayer(), (value, _) => NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnd.CrewmateWin && (NebulaGameManager.Instance?.AllPlayerInfo.Where(p => (p as GamePlayer).IsImpostor).All(p => p.PlayerState == PlayerStates.Exiled && value.Test(p)) ?? false));
                 acTokenAnother1 = new("collator.another1", (null, 0f, false), (value, _) => value.clear);
 
                 //サンプル一覧の表示
                 var IconsHolder = HudContent.InstantiateContent("CollatorIcons", true, true, false, true);
-                this.Bind(IconsHolder.gameObject);
+                this.BindGameObject(IconsHolder.gameObject);
                 var ajust = UnityHelper.CreateObject<ScriptBehaviour>("Ajust", IconsHolder.transform, Vector3.zero);
                 ajust.UpdateHandler += () =>
                 {
@@ -225,13 +225,13 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 UpdateSamples();
 
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && ((CanTakeDuplicateSampleOption && (sampledPlayers.Count + 1 < allSamples.Length || ActualSampledPlayers >= 2)) || !sampledPlayers.Any(s => s.player.PlayerId == p.PlayerId))));
-                var sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
+                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && ((CanTakeDuplicateSampleOption && (sampledPlayers.Count + 1 < allSamples.Length || ActualSampledPlayers >= 2)) || !sampledPlayers.Any(s => s.player.PlayerId == p.PlayerId))).Register(this);
+                var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, SampleCoolDownOption, "collatorSample", buttonSprite)
+                    .SetAsUsurpableButton(this);
 
                 AchievementToken<int> achCommon1Token = new("collator.common1", 0, (val, _) => val >= 5);
                 AchievementToken<int> achCommon2Token = new("collator.common2", 0, (val, _) => val);
 
-                sampleButton.SetSprite(buttonSprite.GetSprite());
                 sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove && sampledPlayers.Count < allSamples.Length;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead && trials > 0;
                 sampleButton.OnClick = (button) => {
@@ -247,9 +247,11 @@ public class Collator : DefinedRoleTemplate, HasCitation, DefinedRole
                     acTokenAnother1.Value.player = p;
                     acTokenAnother1.Value.time = NebulaGameManager.Instance!.CurrentTime;
                 };
-                sampleButton.OnStartTaskPhase = (button) => { if (!SelectiveCollatingOption || !CarringOverSamplesOption) sampledPlayers.Clear(); UpdateSamples(); };
-                sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
-                sampleButton.SetLabel("collatorSample");
+                
+                GameOperatorManager.Instance?.Subscribe<TaskPhaseStartEvent>(Event =>
+                {
+                    if (!SelectiveCollatingOption || !CarringOverSamplesOption) sampledPlayers.Clear(); UpdateSamples();
+                }, sampleButton);
             }
         }
 

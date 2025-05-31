@@ -9,8 +9,10 @@ namespace Virial.Events.Game.Meeting;
 
 /// <summary>
 /// 投票時に呼び出されます。
-/// 自身が操作するプレイヤーに対してのみ呼び出されます。
 /// </summary>
+/// <remarks>
+/// ローカルでのみ呼び出されます。
+/// </remarks>
 public class PlayerVoteCastLocalEvent : AbstractPlayerEvent
 {
     public int Vote { get; set; }
@@ -24,7 +26,9 @@ public class PlayerVoteCastLocalEvent : AbstractPlayerEvent
     }
 }
 
-
+/// <summary>
+/// 投票時に呼び出されます。
+/// </summary>
 public class PlayerVoteCastEvent : AbstractPlayerEvent
 {
     public int Vote { get; private init; }

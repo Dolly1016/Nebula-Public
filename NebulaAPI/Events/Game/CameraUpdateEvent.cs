@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Game;
 
+/// <summary>
+/// カメラが更新される際に呼び出されます。
+/// カメラの色調を変更できます。
+/// </summary>
 public class CameraUpdateEvent : Event
 {
     private float saturation = 1f;

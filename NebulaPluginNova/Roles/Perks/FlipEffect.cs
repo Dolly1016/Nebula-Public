@@ -8,7 +8,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Perks;
 
-internal class FlipEffect : PerkFunctionalInstance
+internal class FlipEffect : PerkFunctionalInstance, IGameOperator
 {
     static private int DuplicateCounter = 0;
     private int MyDuplicateCounter { get; init; }
@@ -39,7 +39,7 @@ internal class FlipEffect : PerkFunctionalInstance
     }
 
     private string EffectTag => "flipXEffect" + MyPlayer.PlayerId + "-" + MyDuplicateCounter;
-    protected override void OnReleased()
+    void IGameOperator.OnReleased()
     {
         using (RPCRouter.CreateSection("FlipEffect"))
         {

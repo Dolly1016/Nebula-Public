@@ -36,11 +36,11 @@ internal class PositionAdjuster : AbstractModule<Virial.Game.Game>, IGameOperato
     {
         //ボタンを追加する
 
-        Modules.ScriptComponents.ModAbilityButton fixButton = null!;
+        Modules.ScriptComponents.ModAbilityButtonImpl fixButton = null!;
         var player = MyContainer.LocalPlayer;
 
 
-        fixButton = new Modules.ScriptComponents.ModAbilityButton(true, priority: -10);
+        fixButton = new Modules.ScriptComponents.ModAbilityButtonImpl(true, priority: -10).Register(NebulaAPI.CurrentGame!);
         fixButton.SetSprite(buttonSprite.GetSprite());
         fixButton.Availability = (button) => true;
         fixButton.Visibility = (button) => !player.IsDead && player.CanMove && CanFixPosition;

@@ -4,7 +4,7 @@ namespace Nebula.Roles.Impostor;
 
 public class DamnedImpostor : DefinedRoleTemplate, DefinedRole
 {
-    static public DamnedImpostor MyRole = new DamnedImpostor();
+    static public readonly DamnedImpostor MyRole = new();
 
     private DamnedImpostor():base("damnedImpostor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, null, false, false) { }
     

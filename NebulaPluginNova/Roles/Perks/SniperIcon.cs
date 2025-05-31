@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Game;
 
@@ -15,11 +16,12 @@ internal class SniperIcon : PerkFunctionalInstance
     static PerkFunctionalDefinition Def = new("sniperIcon", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("sniperIcon", 3, 1, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", ()=>CoolDown), (def, instance) => new SniperIcon(def, instance));
 
     public SniperIcon(PerkDefinition def, PerkInstance instance) : base(def, instance) {
-        cooldownTimer = new Timer(CoolDown).Start();
+        cooldownTimer = NebulaAPI.Modules.Timer(this, CoolDown);
+        cooldownTimer.Start();
         PerkInstance.BindTimer(cooldownTimer);
     }
 
-    private Timer cooldownTimer;
+    private GameTimer cooldownTimer;
     
     public override bool HasAction => true;
     public override void OnClick()
@@ -47,7 +49,7 @@ internal class SniperIcon : PerkFunctionalInstance
     static public void RegisterAchievementToken(GamePlayer player)
     {
         new StaticAchievementToken("perk.blank");
-        if (player.Role.Role == Neutral.Jester.MyRole) GameOperatorManager.Instance?.Register<GameEndEvent>(ev => {
+        if (player.Role.Role == Neutral.Jester.MyRole) GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
             if (ev.EndState.EndCondition == NebulaGameEnd.JesterWin && ev.EndState.Winners.Test(player)) new StaticAchievementToken("jester.common2");
         }, player.Role);
     }

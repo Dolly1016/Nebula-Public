@@ -9,6 +9,7 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 using Virial.Utilities;
 
 namespace Nebula.Roles.Modifier;
@@ -22,7 +23,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Lover.png");
     }
     string ICodeName.CodeName => "LVR";
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     bool AssignableFilter<DefinedRole>.Test(DefinedRole role) => role.ModifierFilter?.Test(this) ?? false;
     void AssignableFilter<DefinedRole>.ToggleAndShare(DefinedRole role) => role.ModifierFilter?.ToggleAndShare(this);
@@ -152,7 +153,11 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         [OnlyMyPlayer, Local]
         void OnDead(PlayerDieEvent ev)
         {
-            if (MyPlayer.PlayerState == PlayerState.Suicide) new StaticAchievementToken("lover.another1");
+            if (MyPlayer.PlayerState == PlayerState.Suicide)
+            {
+                new StaticAchievementToken("lover.another1");
+                if (MyLover.Get().Role.Role == Neutral.Gambler.MyRole && MyLover.Get().PlayerState == PlayerStates.Lost) NebulaAchievementManager.RpcClearAchievement.Invoke(("combination.2.gambler.lover.another", MyLover.Get()));
+            }
         }
 
         [OnlyMyPlayer, OnlyHost]
@@ -204,8 +209,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         {
             if (AmOwner)
             {
-                if (GeneralConfigurations.LoversRadioOption)
-                    Bind(VoiceChatManager.GenerateBindableRadioScript(p=>p == MyLover, "voiceChat.info.loversRadio", MyRole.UnityColor));
+                if (GeneralConfigurations.LoversRadioOption) VoiceChatManager.RegisterRadio(this, p=>p == MyLover, "voiceChat.info.loversRadio", MyRole.UnityColor);
             }
         }
 

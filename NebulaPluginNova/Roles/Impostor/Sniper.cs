@@ -1,10 +1,11 @@
 ﻿using Epic.OnlineServices.Mods;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Neutral;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
@@ -27,7 +28,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
         GameActionTypes.SniperEquippingAction = new("sniper.equipping", this, isEquippingAction: true);
     }
-    Citation? HasCitation.Citaion => Citations.TownOfImpostors;
+    Citation? HasCitation.Citation => Citations.TownOfImpostors;
 
     static private IRelativeCoolDownConfiguration SnipeCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sniper.snipeCoolDown", CoolDownType.Immediate, (0f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
     static private FloatConfiguration ShotSizeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
@@ -41,7 +42,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
     static private FloatConfiguration DelayInAimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.delayInAimAssistActivation", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second, () => AimAssistOption);
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillImpostor", false);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, player.IsImpostor ? AmongUsUtil.VanillaKillCoolDown : Jackal.KillCooldown);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, player.IsImpostor ? AmongUsUtil.VanillaKillCoolDown : Jackal.KillCooldown, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
 
     static public Sniper MyRole = new Sniper();
@@ -92,16 +93,15 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
     }
 
     [NebulaRPCHolder]
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
 
-        private ModAbilityButton? killButton = null;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnipeButton.png", 115f);
         static private Image aimAssistSprite = SpriteLoader.FromResource("Nebula.Resources.SniperGuide.png", 100f);
         
         public SniperRifle? MyRifle = null;
-        bool IPlayerAbility.HideKillButton => true;
+        bool IPlayerAbility.HideKillButton => !(equipButton?.IsBroken ?? false);
 
         AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
         StaticAchievementToken? acTokenCommon = null;
@@ -117,17 +117,17 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
             }
         }
 
-        public Ability(GamePlayer player, float defaultCooldown) :base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        ModAbilityButton equipButton = null!;
+        public Ability(GamePlayer player, float defaultCooldown, bool isUsurped) :base(player, isUsurped)
         {
             if (AmOwner)
             {
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("sniper.another1");
                 AchievementToken<int> acTokenChallenge = new("sniper.challenge", 0, (val, _) => val >= 2);
 
-                var equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "sniper.equip");
-                equipButton.SetSprite(buttonSprite.GetSprite());
-                equipButton.Availability = (button) => MyPlayer.CanMove;
-                equipButton.Visibility = (button) => !MyPlayer.IsDead;
+                equipButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "sniper.equip",
+                    0f, "equip", buttonSprite).SetAsUsurpableButton(this);
                 equipButton.OnClick = (button) =>
                 {
                     if (MyRifle == null)
@@ -149,15 +149,25 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                         {
                             if (MyRifle == null) circle.Disappear();
                         };
-                        Bind(new GameObjectBinding(circle.gameObject));
+                        this.BindGameObject(circle.gameObject);
                     }
                 };
-                equipButton.OnMeeting = (button) => button.SetLabel("equip");
-                equipButton.SetLabel("equip");
+                equipButton.OnBroken = (button) =>
+                {
+                    if (MyRifle != null)
+                    {
+                        equipButton.SetLabel("equip");
+                        RpcEquip.Invoke((MyPlayer.PlayerId, false));
+                    }
+                    Snatcher.RewindKillCooldown();
+                };
+                GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev => equipButton.SetLabel("equip"), this);
 
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "sniper.kill");
-                killButton.Availability = (button) => MyRifle != null && MyPlayer.CanMove;
-                killButton.Visibility = (button) => !MyPlayer.IsDead;
+                var killButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, true, false, Virial.Compat.VirtualKeyInput.Kill, "sniper.kill",
+                    SnipeCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "snipe", null,
+                    _ => MyRifle != null, _ => !equipButton.IsBroken)
+                    .SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor)
+                    .SetAsMouseClickButton().SetAsUsurpableButton(this);
                 killButton.OnClick = (button) =>
                 {
                     StatsShot.Progress();
@@ -191,10 +201,6 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                     acTokenAnother.Value.triggered = true;
 
                 };
-                killButton.CoolDownTimer = Bind(new Timer(SnipeCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
-                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
-                killButton.SetLabel("snipe");
-                killButton.SetCanUseByMouseClick();
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
             }
         }
@@ -303,14 +309,14 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
         void EquipRifle()
         {
-            MyRifle = Bind(new SniperRifle(MyPlayer));
+            MyRifle = new SniperRifle(MyPlayer).Register(this);
 
             if (AmOwner && AimAssistOption) NebulaManager.Instance.StartCoroutine(CoShowAimAssist().WrapToIl2Cpp());
         }
 
         void UnequipRifle()
         {
-            if (MyRifle != null) MyRifle.ReleaseIt();
+            if (MyRifle != null) MyRifle.Release();
             MyRifle = null;
         }
 
@@ -339,6 +345,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
             if ((message - (Vector2)PlayerControl.LocalPlayer.transform.position).magnitude < ShotNoticeRangeOption)
             {
                 var arrow = new Arrow(snipeNoticeSprite.GetSprite(), false) { IsSmallenNearPlayer = false, IsAffectedByComms = false, FixedAngle = true, OnJustPoint = true };
+                arrow.Register(arrow);
                 arrow.TargetPos = message;
                 NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
             }

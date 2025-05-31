@@ -9,7 +9,7 @@ namespace Nebula.Roles.Impostor;
 
 internal class HydeImpostor : DefinedRoleTemplate, DefinedRole
 {
-    static public HydeImpostor MyRole = new HydeImpostor();
+    static public readonly HydeImpostor MyRole = new();
 
     private HydeImpostor() : base("hydeImpostor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, null, false, false) { }
 

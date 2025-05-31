@@ -4,8 +4,10 @@ using Nebula.Modules.GUIWidget;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Game;
 using Virial.Runtime;
 using Virial.Text;
 using static Nebula.Configuration.ConfigurationValues;
@@ -92,12 +94,12 @@ public class Roles
 
     static public IReadOnlyList<Team> AllTeams { get; private set; } = null!;
 
-    static private List<DefinedRole>? allRoles = new();
-    static private List<DefinedGhostRole>? allGhostRoles = new();
-    static private List<DefinedModifier>? allModifiers = new();
-    static private List<Team>? allTeams = new();
+    static private List<DefinedRole>? allRoles = [];
+    static private List<DefinedGhostRole>? allGhostRoles = [];
+    static private List<DefinedModifier>? allModifiers = [];
+    static private List<Team>? allTeams = [];
 
-    static private Dictionary<string, PerkFunctionalDefinition> allPerks = new();
+    static private Dictionary<string, PerkFunctionalDefinition> allPerks = [];
     static internal IEnumerable<PerkFunctionalDefinition> AllPerks => allPerks.Values;
     static internal void Register(PerkFunctionalDefinition definition) => allPerks[definition.Id] = definition;
     static internal PerkFunctionalDefinition GetPerk(string id) => allPerks[id];
@@ -217,8 +219,8 @@ public class Roles
 
 internal static class RoleOptionHelper
 {
-    private static TextAttribute RelatedOutsideButtonAttr = new TextAttribute(GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed)) { Size = new(1.2f, 0.29f) };
-    private static TextAttribute RelatedInsideButtonAttr = new TextAttribute(GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed)) { Size = new(1.14f, 0.26f), Font = GUI.API.GetFont(FontAsset.GothicMasked) };
+    private static readonly TextAttribute RelatedOutsideButtonAttr = new(GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed)) { Size = new(1.2f, 0.29f) };
+    private static readonly TextAttribute RelatedInsideButtonAttr = new(GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed)) { Size = new(1.14f, 0.26f), Font = GUI.API.GetFont(FontAsset.GothicMasked) };
 
     static internal void OpenFilterScreen<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, AssignableFilter<R>> filter, MetaScreen? screen = null) where R : DefinedAssignable
         => OpenFilterScreen(scrollerTag, allRoles, r => filter.Invoke(r).Test(r), (r, val) => filter.Invoke(r).SetAndShare(r, val), r => filter.Invoke(r).ToggleAndShare(r), screen);
@@ -230,7 +232,7 @@ internal static class RoleOptionHelper
 
         IEnumerable<R> allRolesFiltered = showOnlySpawnable ? allRoles.Where(r => (r as ISpawnable)?.IsSpawnable ?? true) : allRoles;
 
-        List<GUIWidget> shortcutButtons = new();
+        List<GUIWidget> shortcutButtons = [];
         if(setAndShare != null)
         {
             void Append(string translationKey, Func<bool> isInvalid, Action<bool> onClicked)
@@ -279,7 +281,7 @@ internal static class RoleOptionHelper
             new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, shortcutButtons),
             new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, new NoSGUICheckbox(Virial.Media.GUIAlignment.Center, showOnlySpawnable) { OnValueChanged = val =>
             {
-                ClientOption.AllOptions[ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter].Increament();
+                ClientOption.AllOptions[ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter].Increment();
                 OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen);
             } }, GUI.API.HorizontalMargin(0.2f), GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), "roleFilter.showOnlySpawnable")),
             new GUIScrollView(Virial.Media.GUIAlignment.Center, new(6.5f, 3.1f), GUI.API.Arrange(Virial.Media.GUIAlignment.Center,

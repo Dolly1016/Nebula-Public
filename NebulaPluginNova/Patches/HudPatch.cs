@@ -1,5 +1,6 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Game.Statistics;
+using Nebula.Modules.Cosmetics;
 using Virial.DI;
 using Virial.Events.Player;
 using static Nebula.Modules.HelpScreen;
@@ -39,10 +40,7 @@ public static class HudManagerUpdatePatch
 
         if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDownForAction && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
         {
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-                Helpbot.TryOpenHelpbotScreen();
-            else
-                HelpScreen.TryOpenHelpScreen(HelpTab.MyInfo);
+            HelpScreen.TryOpenHelpScreen(HelpTab.MyInfo);
         }
     }
 }
@@ -65,7 +63,7 @@ public static class HudManagerCoStartGamePatch
             DestroyableSingleton<HudManager>.Instance.FullScreen.transform.localPosition = new Vector3(0f, 0f, -250f);
 
             //スタンプの位置を変更
-            StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -500f, () => !GameManager.Instance.GameHasStarted);
+            StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -505f, () => !GameManager.Instance.GameHasStarted);
 
             yield return DestroyableSingleton<HudManager>.Instance.ShowEmblem(true);
             IntroCutscene introCutscene = GameObject.Instantiate<IntroCutscene>(__instance.IntroPrefab, __instance.transform);

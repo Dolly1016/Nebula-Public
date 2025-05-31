@@ -11,7 +11,7 @@ using Virial.Helpers;
 namespace Nebula.Roles.Crewmate;
 
 [NebulaPreprocess(PreprocessPhase.PostRoles)]
-public class Ghost : INebulaScriptComponent, IGameOperator
+public class Ghost : FlexibleLifespan, IGameOperator
 {
     SpriteRenderer renderer;
     static XOnlyDividedSpriteLoader ghostSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Ghost.png", 160f, 9);
@@ -56,7 +56,7 @@ public class Ghost : INebulaScriptComponent, IGameOperator
             indexTime = 0.2f;
 
             if (index < 9) renderer.sprite = (isWhiteGhost ? ghostWSprite : ghostBSprite).GetSprite(index);
-            else this.ReleaseIt();
+            else this.Release();
         }
     }
 
@@ -86,36 +86,32 @@ public class GhostAndFlashAbility : IGameOperator
     }
 }
 
-public class Seer : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Seer : DefinedSingleAbilityRoleTemplate<Seer.Ability>, HasCitation, DefinedRole
 {
     private Seer():base("seer", new(73,166,104), RoleCategory.CrewmateRole, Crewmate.MyTeam, [GhostDurationOption, CanSeeGhostsInShadowOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
-    static private FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("options.role.seer.ghostDuration", (15f,300f,15f),90f,FloatConfigurationDecorator.Second);
-    static public BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("options.role.seer.canSeeGhostsInShadow", false);
+    static private readonly FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("options.role.seer.ghostDuration", (15f,300f,15f),90f,FloatConfigurationDecorator.Second);
+    static public readonly BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("options.role.seer.canSeeGhostsInShadow", false);
 
-    static public Seer MyRole = new Seer();
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static public readonly Seer MyRole = new();
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
 
         private AchievementToken<(bool noMissFlag, int meetings)>? acTokenChallenge;
-
-        void RuntimeAssignable.OnActivated()
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
                 AchievementToken<bool> acTokenCommon = new("seer.common1", false, (val, _) => val);
-                acTokenChallenge = Bind(new AchievementToken<(bool noMissFlag, int meetings)>("seer.challenge2", (true, 0), (val, _) => val.noMissFlag && val.meetings >= 3));
+                acTokenChallenge = new AchievementToken<(bool noMissFlag, int meetings)>("seer.challenge2", (true, 0), (val, _) => val.noMissFlag && val.meetings >= 3);
 
-                new GhostAndFlashAbility() { CanSeeGhostInShadow = CanSeeGhostsInShadowOption, FlashColor = MyRole.UnityColor, GhostDuration = GhostDurationOption, CommonToken = acTokenCommon }.Register(this);
+                new GhostAndFlashAbility() { CanSeeGhostInShadow = CanSeeGhostsInShadowOption, FlashColor = MyRole.UnityColor, GhostDuration = GhostDurationOption, CommonToken = acTokenCommon }.Register(new FunctionalLifespan(() => !this.IsDeadObject && !this.IsUsurped));
             }
         }
 

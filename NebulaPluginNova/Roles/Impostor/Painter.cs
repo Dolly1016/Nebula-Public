@@ -1,6 +1,8 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
+using Virial.Events.Game.Meeting;
 using Virial.Game;
 using Virial.Helpers;
 
@@ -16,16 +18,16 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
     static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.painter.loseSampleOnMeeting", false);
     static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("options.role.painter.transformAfterMeeting", false);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
 
     static public Painter MyRole = new Painter();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.painter.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsPaint = NebulaAPI.CreateStatsEntry("stats.painter.paint", GameStatsCategory.Roles, MyRole);
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        private ModAbilityButton? sampleButton = null;
-        private ModAbilityButton? paintButton = null;
+        private ModAbilityButtonImpl? sampleButton = null;
+        private ModAbilityButtonImpl? paintButton = null;
 
         static public Image sampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
         static public Image PaintButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PaintButton.png", 115f);
@@ -34,35 +36,32 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<int[]> acTokenChallenge = null;
 
-        public Ability(GamePlayer player): base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped): base(player, isUsurped)
         {
             if (AmOwner)
             {
                 acTokenChallenge = new("painter.challenge", new int[24], (val, _) => val.Count(v => v >= 2) >= 3);
 
+                ModAbilityButton paintButton = null!;
                 OutfitDefinition? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate));
+                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate).Register(this);
 
-                sampleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample");
-                sampleButton.SetSprite(sampleButtonSprite.GetSprite());
-                sampleButton.Availability = (button) => MyPlayer.CanMove;
-                sampleButton.Visibility = (button) => !MyPlayer.IsDead;
+                var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
+                    SampleCoolDownOption, "sample", sampleButtonSprite).SetAsUsurpableButton(this);
                 sampleButton.OnClick = (button) => {
                     sample = sampleTracker.CurrentTarget?.GetOutfit(75) ?? null;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
-                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample!.outfit, paintButton!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
+                    sampleIcon = AmongUsUtil.GetPlayerIcon(sample!.outfit, (paintButton as ModAbilityButtonImpl)!.VanillaButton.transform, new Vector3(-0.4f, 0.35f, -0.5f), new(0.3f, 0.3f)).SetAlpha(0.5f);
                     StatsSample.Progress();
                 };
-                sampleButton.CoolDownTimer = Bind(new Timer(SampleCoolDownOption).SetAsAbilityCoolDown().Start());
-                sampleButton.SetLabel("sample");
-                
-                paintButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.paint");
-                paintButton.SetSprite(PaintButtonSprite.GetSprite());
-                paintButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove;
-                paintButton.Visibility = (button) => !MyPlayer.IsDead;
+
+                paintButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.paint",
+                    PaintCoolDownOption, "paint", PaintButtonSprite,
+                    _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 paintButton.OnClick = (button) => {
                     var outfit = sample ?? MyPlayer.GetOutfit(75);
 
@@ -78,7 +77,8 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
                     button.StartCoolDown();
                     StatsPaint.Progress();
                 };
-                paintButton.OnMeeting = (button) =>
+
+                GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev =>
                 {
                     if (LoseSampleOnMeetingOption)
                     {
@@ -86,9 +86,7 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
                         sampleIcon = null;
                         sample = null;
                     }
-                };
-                paintButton.CoolDownTimer = Bind(new Timer(PaintCoolDownOption).SetAsAbilityCoolDown().Start());
-                paintButton.SetLabel("paint");
+                }, this);
             }
         }
     }

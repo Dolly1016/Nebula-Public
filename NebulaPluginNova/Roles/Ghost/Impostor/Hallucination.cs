@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Virial.Events.Game;
 using AmongUs.Data;
 using Virial.Game;
@@ -21,17 +21,15 @@ namespace Nebula.Roles.Ghost.Impostor;
 
 public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
 {
-    public class HallucinationPlayer : IGameOperator, ILifespan
+    public class HallucinationPlayer : FlexibleLifespan, IGameOperator
     {
         private PlayerDisplay display;
         GamePlayer originalPlayer;
         GamePlayer targetGhost;
         bool isValid = true;
-        public bool isDeadObject = false;
         float speed = 2.5f;
         float alpha = 0f;
         SpriteRenderer[] allRenderers;
-        public bool IsDeadObject => isDeadObject;
 
         void IGameOperator.OnReleased()
         {
@@ -98,10 +96,7 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
             if(!isValid && alpha > 0f)
             {
                 alpha -= Time.deltaTime * 0.6f;
-                if(!(alpha > 0f))
-                {
-                    isDeadObject = true;
-                }
+                if(!(alpha > 0f)) Release();
             }
 
             Color color = new(1f, 1f, 1f, alpha);
@@ -176,12 +171,12 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
 
     string ICodeName.CodeName => "HLC";
 
-    static private FloatConfiguration HallucinationCooldownOption = NebulaAPI.Configurations.Configuration("options.role.hallucination.hallucinationCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration HallucinationDurationOption = NebulaAPI.Configurations.Configuration("options.role.hallucination.hallucinationDuration", (10f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration HallucinationCooldownOption = NebulaAPI.Configurations.Configuration("options.role.hallucination.hallucinationCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration HallucinationDurationOption = NebulaAPI.Configurations.Configuration("options.role.hallucination.hallucinationDuration", (10f, 60f, 2.5f), 30f, FloatConfigurationDecorator.Second);
     
 
-    static public Hallucination MyRole = new Hallucination();
-    static internal GameStatsEntry StatsHallucinations = NebulaAPI.CreateStatsEntry("stats.hallucination.hallucinations", GameStatsCategory.Roles, MyRole);
+    static public readonly Hallucination MyRole = new();
+    static internal readonly GameStatsEntry StatsHallucinations = NebulaAPI.CreateStatsEntry("stats.hallucination.hallucinations", GameStatsCategory.Roles, MyRole);
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     [NebulaRPCHolder]
@@ -191,7 +186,7 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
 
         public Instance(GamePlayer player) : base(player) { }
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HallucinationButton.png", 115f);
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HallucinationButton.png", 115f);
 
         private HallucinationPlayer? currentHallucination = null;
         private AchievementToken<(uint mask, bool cleared)>? acTokenAnother1 = null;
@@ -201,14 +196,9 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
             {
                 acTokenAnother1 = new("hallucination.another1", (0u, false), (val, _) => val.cleared);
 
-                var hallucinationButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                hallucinationButton.SetSprite(buttonSprite.GetSprite());
-                hallucinationButton.Availability = (button) => MyPlayer.CanMove;
-                hallucinationButton.Visibility = (button) => MyPlayer.IsDead;
-                hallucinationButton.OnClick = (button) =>
-                {
-                    button.ToggleEffect();
-                };
+                var hallucinationButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 
+                    HallucinationCooldownOption, HallucinationDurationOption, "hallucination", buttonSprite,
+                    asGhostButton: true);
                 hallucinationButton.OnEffectStart = (button) =>
                 {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.HallucinationAction);
@@ -231,9 +221,6 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
                     RpcDisappearHallucination.Invoke(MyPlayer);
                     button.StartCoolDown();
                 };
-                hallucinationButton.CoolDownTimer = Bind(new Timer(0f, HallucinationCooldownOption).SetAsAbilityCoolDown().Start());
-                hallucinationButton.EffectTimer = Bind(new Timer(HallucinationDurationOption));
-                hallucinationButton.SetLabel("hallucination");
             }
         }
 
@@ -250,18 +237,18 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
         }
 
 
-        RemoteProcess<(GamePlayer hallucination, GamePlayer target, Vector2 pos)> RpcShowHallucination = new("ShowHallucination",
+        private static readonly RemoteProcess<(GamePlayer hallucination, GamePlayer target, Vector2 pos)> RpcShowHallucination = new("ShowHallucination",
             (message, _) =>
             {
                 var hallucination = message.hallucination.Unbox().GhostRole as Hallucination.Instance;
                 if (hallucination != null)
                 {
                     if (hallucination.currentHallucination != null) hallucination.currentHallucination.Disappear();
-                    hallucination.currentHallucination = new HallucinationPlayer(message.pos, message.target, message.hallucination).Register();
+                    hallucination.currentHallucination = new HallucinationPlayer(message.pos, message.target, message.hallucination).Register(hallucination);
                 }
             });
 
-        RemoteProcess<GamePlayer> RpcDisappearHallucination = new("DisappearHallucination",
+        private static readonly RemoteProcess<GamePlayer> RpcDisappearHallucination = new("DisappearHallucination",
             (message, _) =>
             {
                 var hallucination = message.Unbox().GhostRole as Hallucination.Instance;

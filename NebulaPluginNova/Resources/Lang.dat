@@ -11,6 +11,7 @@
 "title.buttons.developersStudio" : "Dev. Studio"
 "title.buttons.marketplace" : "Marketplace"
 "title.buttons.stats" : "Stats"
+"title.buttons.form" : "Bug Report"
 
 # Certification
 
@@ -62,7 +63,9 @@
 "ui.costume.missedCostume" : "Unowned global costume"
 "ui.costume.unownedCostume" : "Unowned global costume"
 "ui.error.stamp.notLoaded" : "Loading stamps.<br>Try again later!"
-"ui.error.stamp.notAllowed" : "Stamps are not allowed in this lobby!"
+"ui.error.stamp.notAllowed" : "Stamps are not allowed in this room!"
+"ui.error.emote.notAllowed" : "Emotes are not allowed in this room!"
+"ui.error.emote.cooldown" : "You can send the emote again a little later."
 "ui.stamp.onTable" : "Stamps on menu"
 "ui.stamp.all" : "All stamps"
 "ui.stamp.full" : "There is no space left for the stamp. <br>Please select a stamp to replace it."
@@ -142,6 +145,19 @@
 "ui.action.bubblegun.kill" : "Shoot bubbles. <br>After shooting, the bubblegun will automatically retract."
 "ui.action.nightmare.place" : "Place a nightmare seed.<br>When nightmare is activated, a shadow will fall around the seed."
 "ui.action.nightmare.nightmare" : "Casts a shadow around the seed you place."
+"ui.action.snatcher.snatch" : "Steals player's ability."
+"ui.action.snatcher.clock" : "Change cooldown speed."
+
+"ui.contact.title" : "Report Form"
+"ui.contact.guide" : "Please let us know about any bugs you notice or requests you have.<br>* Note that the form will be sent anonymously, so you will not receive a direct response from the development team.<br><br>If you need a response, please contact us on the official Discord server."
+"ui.contact.emptyError" : "Please fill out here!"
+"ui.contact.image" : "Please select an image to attach if you have one."
+"ui.contact.noImage" : "If you have taken a screenshot, you can attach it to this form."
+"ui.contact.sendLog" : "Send Game Log"
+"ui.contact.send" : "Send"
+"ui.contact.wait" : "Please wait..."
+"ui.contact.finished" : "The form was submitted successfully. <br>Thank you!"
+"ui.contact.failed" : "Failed to submit your form.<br><br>%DETAIL%"
 
 # Tutorial
 
@@ -154,6 +170,8 @@
 "tutorial.variations.meetingTool.caption" : "You can place icons and draw lines on the map during the meeting.<br>It can be used for reasoning."
 "tutorial.variations.stamp.title" : "Stamps"
 "tutorial.variations.stamp.caption" : "You can send stamps by pressing the %KEY% key."
+"tutorial.variations.ambienceOnMeeting.title" : "Mute Ambience Option"
+"tutorial.variations.ambienceOnMeeting.caption" : "Instead you can use the "Mute Ambience On Meeting" option."
 
 # Versions
 
@@ -273,6 +291,16 @@
 "options.map.customization.airship.harderDownload" : "Harder Download Task"
 "options.map.customization.airship.betterImpostorVision" : "Impostor Can See Separate Floor"
 "options.map.customization.airship.shadedLowerFloor" : "Shaded Lower Floor"
+"options.map.customization.airship.mainHallDoor" : "Extra Doors (Main Hall)"
+"options.map.customization.airship.mainElecDoor" : "Extra Door (Main to Elec.)"
+"options.map.customization.airship.showerDoor" : "Extra Door (Showers)"
+"options.map.customization.airship.ventilationDoor" : "Extra Doors (Ventilation)"
+"options.map.customization.airship.loungeDoor" : "Extra Door (Lounge)"
+"options.map.customization.airship.loungeStorageDoor" : "Extra Door (Lounge to Cargo Bay)"
+"options.map.customization.airship.medicalDoor" : "Extra Door (Medical)"
+"options.map.customization.airship.securityKitchenDoor" : "Extra Door (Security to Kitchen)"
+"options.map.customization.airship.securityDeckDoor" : "Extra Door (Security Deck)"
+"options.map.customization.airship.meetingDoor" : "Extra Door (Meeting Room)"
 "options.map.customization.fungle.simpleLaboratory" : "Simple Laboratory"
 "options.map.customization.fungle.thinFog" : "Thin Fog"
 "options.map.customization.fungle.glowingCampfire" : "Glowing Campfire"
@@ -334,7 +362,7 @@
 "options.voiceChat" : "Voice Chat Options"
 "options.voiceChat.detail" : "Let's play while talking with nearby players!"
 "options.voiceChat.useVoiceChat" : "Use Voice Chat"
-"options.voiceChat.canTalkInWandaringPhase" : "Can Talk In Wandaring Phase"
+"options.voiceChat.canTalkInWanderingPhase" : "Can Talk In Wandering Phase"
 "options.voiceChat.wallsBlockAudio" : "Walls Block Audio"
 "options.voiceChat.killersHearDead" : "Killers Hear Dead"
 "options.voiceChat.killersHearDead.onlyMyKiller" : "Only My Killer"
@@ -979,6 +1007,12 @@
 "stats.painter.sample" : "Num of Taking Samples"
 "stats.painter.paint" : "Num of Painting"
 
+"role.quack.name" : "Quack"
+"role.quack.short" : "Q"
+"role.quack.blurb" : "Here ... and There"
+"options.role.quack.detail" : "Quack has vitals that allow quack to report dead bodies."
+"stats.quack.report" : "Num of Reporting with Vitals"
+
 "role.raider.name" : "Raider"
 "role.raider.short" : "Ra"
 "role.raider.blurb" : "Let's Rampage"
@@ -997,8 +1031,26 @@
 "options.role.reaper.useVentWhileHoldingDeadbody" : "Use Vent While Holding Deadbody"
 "stats.reaper.ventWithDeadBody" : "Num of Using Vents With Corpses"
 
+"role.snatcher.name" : "Snatcher"
+"role.snatcher.short" : "Sna"
+"role.snatcher.blurb" : "What Is Yours Is Mine"
+"role.snatcher.prefix" : "Snatched"
+"options.role.snatcher.detail" : "Snatchers can steal abilities from players and use them."
+"options.role.snatcher.snatchMethod" : "Snatch Method"
+"options.role.snatcher.snatchMethod.guess" : "Guess"
+"options.role.snatcher.snatchMethod.interaction" : "Interaction"
+"options.role.snatcher.snatchCoolDown" : "Snatch Cooldown"
+"options.role.snatcher.obviousGuessFailure" : "Obvious Guess Failure"
+"options.role.snatcher.clockCoolDown" : "Clock Cooldown"
+"options.role.snatcher.clockDuration" : "Clock Duration"
+"options.role.snatcher.clockRatio" : "Clock Ratio"
+"options.role.snatcher.killCooldownRewindAfterUsurp" : "Kill Cooldown Rewind After Snatching"
+"options.role.snatcher.group.snatch" : "Snatching Settings"
+"options.role.snatcher.group.clock" : "Cooldown Accel. Settings"
+"stats.snatcher.snatch" : "Num of Snatching"
+
 "role.sniper.name" : "Sniper"
-"role.sniper.short" : "Sn"
+"role.sniper.short" : "Sni"
 "role.sniper.blurb" : "Shoot Up!"
 "options.role.sniper.detail" : "Sniper has a rifle to snipe players.<br>When sniper shoots, players nearby they see a notification."
 "options.role.sniper.snipeCoolDown" : "Snipe Cooldown"
@@ -1043,6 +1095,26 @@
 "options.role.thurifer.activationDelay" : "Activation Delay"
 "stats.thurifer.activate" : "Num of Activated Thuribulums"
 "stats.thurifer.impute" : "Num of Imputing"
+
+"role.whammy.name" : "Whammy"
+"role.whammy.short" : "W"
+"role.whammy.blurb" : "Raise the Pitch"
+"options.role.whammy.detail" : "Whammy places balloons in the task,<br>which will cause the player to float away if the balloons are not popped."
+"options.role.whammy.balloonsInStarting" : "# Balloons In Starting"
+"options.role.whammy.balloonsByKilling" : "# Balloons By Killing"
+"options.role.whammy.balloonsTimeLimit" : "Time Limit Of Balloon Sabo."
+"options.role.whammy.numOfMaxMinigameConsoles" : "Max Slingshot Consoles"
+"options.role.whammy.numOfMaxMinigameToBreakBalloon" : "Max Minigame To Break Balloon"
+"options.role.whammy.playSeOnPlacingBalloon" : "Play SE On Placing Balloon"
+"options.role.whammy.seStrength" : "SE Strength"
+"options.role.whammy.placeDuration" : "Place Duration"
+"options.role.whammy.additionalKillCooldownByPlacement" : "Additional Kill Cooldown By Placement"
+"options.role.whammy.stoneAssignment" : "Stone Assignment"
+"options.role.whammy.group.place" : "Placement Option"
+"options.role.whammy.group.gaining" : "Supplies Option"
+"options.role.whammy.group.balloon" : "Balloon Option"
+"stats.whammy.balloon" : "Num of Balloons Set"
+"roles.whammy.taskText" : "Pop The Balloon (%TIME%s)"
 
 # Neutral Roles
 
@@ -1098,6 +1170,31 @@
 "role.ember.short" : "E"
 "role.ember.blurb" : "The Demise"
 "options.role.ember.detail" : "Ember was defeated in a decisive battle with the Avengers<br>and burned by the curse of the Damned."
+
+"role.gambler.name" : "Gambler"
+"role.gambler.short" : "G"
+"role.gambler.blurb" : "Thrilling Game!"
+"options.role.gambler.detail" : "Bet on the results of votes in the meeting to get chips. <br>Deceive to understand your opponent's movements and get an advantage."
+"options.role.gambler.deceiveCooldown" : "Deceive Cooldown"
+"options.role.gambler.deceiveDuration" : "Deceive Duration"
+"options.role.gambler.initialChips" : "# Initial Chips"
+"options.role.gambler.goalChips" : "# Chips Required To Win"
+"options.role.gambler.canVote" : "Can Vote"
+"options.role.gambler.maxBettingPatterns" : "Max Betting Patterns"
+"options.role.gambler.chipsLimitForNoVoteBetting" : "Chips Limit For Zero Vote Betting"
+"gambler.betting.control" : "L Click: Add a chip<br>Shift + L Click: Decrease a chip<br>R Click: Cancel betting"
+"gambler.ui.selectingHint" : "Select the player to bet and press the + button again.<br><b>Zero Vote Betting</b>: Select %NV% players who will not be voted<br><b>Max Vote Betting</b>: Select %MV% players who will be got most votes."
+"gambler.ui.multiSelecting" : "Players cannot be overlapped across multiple bets."
+"gambler.ui.lackOfChips" :  "You have no chips to bet!"
+"gambler.ui.zeroBetting" : "Zero Vote Betting"
+"gambler.ui.maxBetting" : "Max Vote Betting"
+"gambler.currentChips" : "Chips:"
+"gambler.ui.help.add" : "Select a player and press to <b>add your bet</b>."
+"gambler.ui.help.check" : "Your current bet will be <b>confirmed</b>."
+"stats.gambler.bet" : "Num of Betting"
+"stats.gambler.bet.success" : "Num of Bets Won"
+"stats.gambler.bet.failed" : "Num of Bets Lost"
+"stats.gambler.deceive" : "Num of Deceive"
 
 "role.jackal.name" : "Jackal"
 "role.jackal.short" : "J"
@@ -1670,7 +1767,11 @@
 "button.label.oracle" : "oracle"
 "button.label.investigate" : "investigate"
 "button.label.nightmare" : "nightmare"
-"button.label.gust" : "blast"
+"button.label.gust" : "hookshot"
+"button.label.balloon" : "balloon"
+"button.label.deceive" : "deceive"
+"button.label.snatch" : "snatch"
+"button.label.clock" : "clock"
 
 # Game
 
@@ -1757,6 +1858,8 @@
 "state.bubbled" : "Bubbled"
 "state.meteor" : "Meteor"
 "state.starved" : "Starved"
+"state.balloon" : "Balloon"
+"state.lost" : "Lost"
 
 # Endings
 
@@ -1898,7 +2001,8 @@
 "config.client.social" : "Social Settings"
 "config.client.social.showAppealSettings" : "Show Appeal Settings"
 "config.client.social.appealDuration" : "Appeal Duration"
-"config.client.social.showStamps" : "Show Stamps"
+"config.client.social.showStamps" : "Show Stamps/Emotes"
+"config.client.social.showEmotes" : "Emotes In Game"
 "config.client.social.note" : "Changes will be reflected in the next room built."
 "config.client.avoidingColorDuplication" : "Avoiding Color Dup."
 "config.client.avoidingColorDuplication.off" : "Off"
@@ -1908,6 +2012,7 @@
 "config.client.stampMenu.normal" : "Normal"
 "config.client.stampMenu.center" : "Centering"
 "config.client.stampMenu.cursor" : "Reset Cursor"
+"config.client.muteAmbienceOnMeeting" : "Mute Ambience On Meeting"
 
 # Preset
 
@@ -2289,3 +2394,5 @@
 "document.tip.winCond.spectre" : "If Spectre is still alive, it will overwrite the winning."
 "document.tip.winCond.trilemma.title" : "Overwrite Winning"
 "document.tip.winCond.trilemma" : "If two player in the trilemma die and then survive and meet the victory conditions,<br>it will overwrite the winning."
+"document.tip.winCond.gambler.title" : "Special Trigger"
+"document.tip.winCond.gambler" : "The gambler win if they survive, and get %NUM% chips."

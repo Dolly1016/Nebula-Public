@@ -1,13 +1,14 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Il2CppInterop.Runtime.Injection;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Map;
 using Nebula.Modules.GUIWidget;
 using TMPro;
 using UnityEngine.UIElements;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Game.Minimap;
@@ -18,7 +19,7 @@ using static Nebula.Roles.Impostor.Cannon;
 
 namespace Nebula.Roles.Impostor;
 
-public class Disturber : DefinedRoleTemplate, DefinedRole
+public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, DefinedRole
 {
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     [NebulaRPCHolder]
@@ -75,21 +76,21 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         static public RemoteProcess<int> RpcActivate = new("ActivatePole", (id, _) => NebulaSyncObject.GetObject<DisturbPole>(id)?.Activate());
     }
 
-    private Disturber() : base("disturber", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [PlaceCoolDownOption, DisturbCoolDownOption, DisturbDurationOption, MaxNumOfPolesOption, MaxDistanceBetweenPolesOption]) {
+    private Disturber() : base("disturber", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [DisturbCoolDownOption, DisturbDurationOption, MaxNumOfPolesOption, MaxDistanceBetweenPolesOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagDifficult, ConfigurationTags.TagFunny);
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsJackalizable => true;
 
-    static private FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.disturber.placeCoolDown", (0f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration DisturbCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration DisturbDurationOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration MaxNumOfPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxNumOfPoles", (2, 15), 7);
-    static private FloatConfiguration MaxDistanceBetweenPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxDistanceBetweenPoles", (2f, 6f, 1f), 5f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration DisturbCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration DisturbDurationOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private readonly IntegerConfiguration MaxNumOfPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxNumOfPoles", (2, 15), 7);
+    static private readonly FloatConfiguration MaxDistanceBetweenPolesOption = NebulaAPI.Configurations.Configuration("options.role.disturber.maxDistanceBetweenPoles", (2f, 6f, 1f), 5f, FloatConfigurationDecorator.Ratio);
 
-    static public Disturber MyRole = new Disturber();
-    static private GameStatsEntry StatsPole = NebulaAPI.CreateStatsEntry("stats.disturber.pole", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsDisturb = NebulaAPI.CreateStatsEntry("stats.disturber.disturb", GameStatsCategory.Roles, MyRole);
+    static public readonly Disturber MyRole = new();
+    static private readonly GameStatsEntry StatsPole = NebulaAPI.CreateStatsEntry("stats.disturber.pole", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsDisturb = NebulaAPI.CreateStatsEntry("stats.disturber.disturb", GameStatsCategory.Roles, MyRole);
 
 
     public class DisturberMapLayer : MonoBehaviour
@@ -106,12 +107,12 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         private SpriteRenderer poleRenderer;
         public List<(Vector3 minimapPos, Vector3 worldPos, DisturbPole pole)> Positions;
         private PassiveButton clickButton;
-        private Disturber.Instance disturber;
+        private Disturber.Ability disturber;
 
-        static private Image whiteCircleSprite = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
+        static private readonly Image whiteCircleSprite = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
 
         private int CurrentPolesIncludingUnactivated => MaxNumOfPolesOption - disturber.CurrentPoles - (Positions?.Count ?? 0);
-        public void SetDisturber(Disturber.Instance disturber)
+        public void SetDisturber(Disturber.Ability disturber)
         {
             this.disturber = disturber;
             disturber.UpdatePoleText(CurrentPolesIncludingUnactivated);
@@ -299,9 +300,8 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
 
 
     [NebulaRPCHolder]
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
 
         static float PoleDistanceMin = 0.8f;
         static float PoleDistanceMax => MaxDistanceBetweenPolesOption;
@@ -314,71 +314,98 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
         static private Image elecAnimVSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnimSub.png", 100f);
 
         private DisturberMapLayer mapLayer = null!;
-
-        public Instance(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
-        }
-
-        [OnlyMyPlayer, Local]
-        void OnAddSystemTask(PlayerSabotageTaskAddLocalEvent ev)
-        {
-            if (acTokenChallenge != null)
+            if (AmOwner)
             {
-                acTokenChallenge.Value.cmTask = ev.SystemTask.TryCast<IHudOverrideTask>();
-                acTokenChallenge.Value.elTask = ev.SystemTask.TryCast<ElectricTask>();
-                acTokenChallenge.Value.time = NebulaGameManager.Instance?.CurrentTime ?? 0f;
-                acTokenChallenge.Value.dead = 0;
-                acTokenChallenge.Value.ability = disturbButton?.EffectActive ?? false;
+                AchievementToken<(IHudOverrideTask? cmTask, ElectricTask? elTask, float time, int dead, bool ability, bool isCleared)> acTokenChallenge = new("disturber.challenge", (null, null, 0f, 0, false, false), (val, _) => val.isCleared);
+
+                ModAbilityButton disturbButton = null!;
+
+                var openMapButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "disturber.place",
+                    0f, "place", placeButtonSprite, _ => !disturbButton.IsInEffect, _ => !MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
+                openMapButton.OnClick = button => {
+                    NebulaManager.Instance.ScheduleDelayAction(() =>
+                    {
+                        HudManager.Instance.InitMap();
+                        MapBehaviour.Instance.ShowNormalMap();
+                        MapBehaviour.Instance.taskOverlay.gameObject.SetActive(false);
+                    });
+                };
+
+                var placeButton = NebulaAPI.Modules.AbilityButton(this, alwaysShow: true)
+                    .BindKey(Virial.Compat.VirtualKeyInput.Ability, "disturber.place")
+                    .SetImage(placeButtonSprite).ShowUsesIcon(0, "").SetLabel("place").SetAsUsurpableButton(this);
+                placeButton.Availability = (button) => mapLayer && mapLayer.Positions.Count >= 2;
+                placeButton.Visibility = (button) => !MyPlayer.IsDead && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && mapLayer && mapLayer.gameObject.active;
+                placeButton.OnClick = button => PlacePoles();
+                updatePoleTextFunc = (num) => placeButton.UpdateUsesIcon(num.ToString());
+
+                disturbButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "disturber.disturb",
+                    DisturbCoolDownOption, DisturbDurationOption, "disturb", disturbButtonSprite).SetAsUsurpableButton(this);
+                disturbButton.Availability = (button) => poles.Count > 0 && (!MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
+                disturbButton.OnEffectStart = (button) =>
+                {
+                    new StaticAchievementToken("disturber.common1");
+
+                    using (RPCRouter.CreateSection("Disturb"))
+                    {
+                        foreach (var p in poles) RpcDisturb.Invoke(p.Select(pole => pole.Position).ToArray());
+                    }
+
+                    if (acTokenChallenge != null) acTokenChallenge.Value.ability = true;
+                    CheckChallengeAchievement();
+                    StatsDisturb.Progress();
+                };
+                disturbButton.OnEffectEnd = (button) => button.StartCoolDown();
+
+                GameOperatorManager.Instance?.Subscribe<PlayerSabotageTaskAddLocalEvent>(ev =>
+                {
+                    if (ev.Player.AmOwner)
+                    {
+                        acTokenChallenge.Value.cmTask = ev.SystemTask.TryCast<IHudOverrideTask>();
+                        acTokenChallenge.Value.elTask = ev.SystemTask.TryCast<ElectricTask>();
+                        acTokenChallenge.Value.time = NebulaGameManager.Instance?.CurrentTime ?? 0f;
+                        acTokenChallenge.Value.dead = 0;
+                        acTokenChallenge.Value.ability = disturbButton.IsInEffect;
+                    }
+                }, this);
+                GameOperatorManager.Instance?.Subscribe<PlayerTaskRemoveLocalEvent>(ev =>
+                {
+                    if (ev.Player.AmOwner)
+                    {
+                        CheckChallengeAchievement();
+                        if (acTokenChallenge.Value.cmTask == ev.Task.TryCast<IHudOverrideTask>()) acTokenChallenge.Value.cmTask = null;
+                        if (acTokenChallenge.Value.elTask == ev.Task.TryCast<ElectricTask>()) acTokenChallenge.Value.elTask = null;
+                    }
+                }, this);
+                GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev =>
+                {
+                    CheckChallengeAchievement();
+                    acTokenChallenge.Value.cmTask = null;
+                    acTokenChallenge.Value.elTask = null;
+                    acTokenChallenge.Value.dead = 0;
+                    acTokenChallenge.Value.ability = false;
+                }, this);
+                GameOperatorManager.Instance?.Subscribe<PlayerMurderedEvent>(ev =>
+                {
+                    acTokenChallenge.Value.dead++;
+                    CheckChallengeAchievement();
+                }, this);
+
+                void CheckChallengeAchievement()
+                {
+                    if (AmOwner && acTokenChallenge != null && acTokenChallenge.Value.dead >= 3 && acTokenChallenge.Value.time + 40f < (NebulaGameManager.Instance?.CurrentTime ?? 0f) && (acTokenChallenge.Value.elTask != null || acTokenChallenge.Value.cmTask != null) && acTokenChallenge.Value.ability) acTokenChallenge.Value.isCleared = true;
+                }
             }
         }
-
-        [OnlyMyPlayer, Local]
-        void OnRemoveTask(PlayerTaskRemoveLocalEvent ev)
-        {
-            if(acTokenChallenge != null)
-            {
-                CheckChallengeAchievement();
-                if (acTokenChallenge.Value.cmTask == ev.Task.TryCast<IHudOverrideTask>()) acTokenChallenge.Value.cmTask = null;
-                if (acTokenChallenge.Value.elTask == ev.Task.TryCast<ElectricTask>()) acTokenChallenge.Value.elTask = null;
-            }
-        }
-
-        [Local]
-        void OnMeetingStart(MeetingStartEvent ev)
-        {
-            if (acTokenChallenge != null)
-            {
-                CheckChallengeAchievement();
-                acTokenChallenge.Value.cmTask = null;
-                acTokenChallenge.Value.elTask = null;
-                acTokenChallenge.Value.dead = 0;
-                acTokenChallenge.Value.ability = false;
-            }
-        }
-
-        [Local]
-        void OnPlayerMurdered(PlayerMurderedEvent ev)
-        {
-            if(acTokenChallenge != null)
-            {
-                acTokenChallenge.Value.dead++;
-                CheckChallengeAchievement();
-            }
-        }
-
-        void CheckChallengeAchievement()
-        {
-            if (AmOwner && acTokenChallenge != null && acTokenChallenge.Value.dead >= 3 && acTokenChallenge.Value.time + 40f < (NebulaGameManager.Instance?.CurrentTime ?? 0f) && (acTokenChallenge.Value.elTask != null || acTokenChallenge.Value.cmTask != null) && acTokenChallenge.Value.ability) acTokenChallenge.Value.isCleared = true;
-        }
-
-
-        private AchievementToken<(IHudOverrideTask? cmTask, ElectricTask? elTask, float time, int dead, bool ability, bool isCleared)>? acTokenChallenge = null;
-        private ModAbilityButton? disturbButton = null;
 
         List<DisturbPole[]> poles = new();
         public int CurrentPoles => poles.Sum(p => p.Length);
-        private TextMeshPro poleText;
-        public void UpdatePoleText(int num) => poleText.text = num.ToString();
+
+        Action<int>? updatePoleTextFunc = null;
+        public void UpdatePoleText(int num) => updatePoleTextFunc?.Invoke(num);
 
         public void PlacePoles()
         {
@@ -395,78 +422,16 @@ public class Disturber : DefinedRoleTemplate, DefinedRole
             mapLayer.Clear(false);
         }
 
-        void RuntimeAssignable.OnActivated()
-        {
-            if (AmOwner)
-            {
-                acTokenChallenge = new("disturber.challenge", (null, null, 0f, 0, false, false), (val, _) => val.isCleared);
-
-                var openMapButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
-                openMapButton.SetSprite(placeButtonSprite.GetSprite());
-                openMapButton.Availability = (button) => (MyPlayer.CanMove || MeetingHud.Instance) && !disturbButton!.EffectActive;
-                openMapButton.Visibility = (button) => !MyPlayer.IsDead && (!MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
-                openMapButton.OnClick = button => {
-                    NebulaManager.Instance.ScheduleDelayAction(() =>
-                    {
-                        HudManager.Instance.InitMap();
-                        MapBehaviour.Instance.ShowNormalMap();
-                        MapBehaviour.Instance.taskOverlay.gameObject.SetActive(false);
-                    });
-                };
-                openMapButton.SetLabel("place");
-
-                var placeButton = Bind(new ModAbilityButton(alwaysShow: true)).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "disturber.place");
-                placeButton.SetSprite(placeButtonSprite.GetSprite());
-                placeButton.Availability = (button) => mapLayer && mapLayer.Positions.Count >= 2;
-                placeButton.Visibility = (button) => !MyPlayer.IsDead && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && mapLayer && mapLayer.gameObject.active;
-                placeButton.OnClick = button =>
-                {
-                    PlacePoles();
-                };
-                poleText = placeButton.ShowUsesIcon(0);
-                placeButton.SetLabel("place");
-                
-
-                disturbButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "disturber.disturb");
-                disturbButton.SetSprite(disturbButtonSprite.GetSprite());
-                disturbButton.Availability = (button) => poles.Count > 0 && (!MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
-                disturbButton.Visibility = (button) => !MyPlayer.IsDead;
-                disturbButton.OnClick = (button) => {
-                    button.ActivateEffect();
-                };
-                disturbButton.OnEffectStart = (button) =>
-                {
-                    new StaticAchievementToken("disturber.common1");
-
-                    using (RPCRouter.CreateSection("Disturb"))
-                    {
-                        foreach(var p in poles) RpcDisturb.Invoke(p.Select(pole => pole.Position).ToArray());
-                    }
-
-                    if (acTokenChallenge != null) acTokenChallenge.Value.ability = true;
-                    CheckChallengeAchievement();
-                    StatsDisturb.Progress();
-                };
-                disturbButton.OnEffectEnd = (button) =>
-                {
-                    button.StartCoolDown();
-                };
-                
-                disturbButton.CoolDownTimer = Bind(new Timer(DisturbCoolDownOption).SetAsAbilityCoolDown().Start());
-                disturbButton.EffectTimer = Bind(new Timer(DisturbDurationOption));
-                disturbButton.SetLabel("disturb");
-            }
-        }
 
         [Local]
         void OnOpenMap(AbstractMapOpenEvent ev)
         {
-            if (ev is MapOpenNormalEvent)
+            if (ev is MapOpenNormalEvent && !IsUsurped)
             {
                 if (!mapLayer)
                 {
                     mapLayer = UnityHelper.CreateObject<DisturberMapLayer>("DisturberLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
-                    this.Bind(mapLayer.gameObject);
+                    this.BindGameObject(mapLayer.gameObject);
                     mapLayer.SetDisturber(this);
                     poles.Do(p => mapLayer.RegisterPoles(p, poles));
                 }

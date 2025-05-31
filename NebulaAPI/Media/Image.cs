@@ -3,7 +3,7 @@
 /// <summary>
 /// 画像メディアを表します。
 /// </summary>
-public interface Image
+public interface Image : IManageableAsset
 {
     internal UnityEngine.Sprite GetSprite();
 }
@@ -11,8 +11,15 @@ public interface Image
 /// <summary>
 /// 複数の画像メディアを表します。
 /// </summary>
-public interface MultiImage
+public interface MultiImage : IManageableAsset
 {
     internal UnityEngine.Sprite GetSprite(int index);
     Image AsLoader(int index);
+}
+
+public interface IManageableAsset
+{
+    void UnloadAsset();
+    System.Collections.IEnumerator LoadAsset();
+    void MarkAsUnloadAsset();
 }

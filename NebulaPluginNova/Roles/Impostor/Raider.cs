@@ -1,9 +1,11 @@
-﻿using Nebula.Game.Statistics;
+﻿using Cpp2IL.Core.Extensions;
+using Nebula.Game.Statistics;
 using Nebula.Map;
 using Nebula.Roles.Abilities;
 using UnityEngine;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
@@ -33,16 +35,16 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
     static private FloatConfiguration AxeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSpeed", (0.5f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.raider.canKillImpostor", false);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
-    static public Raider MyRole = new Raider();
+    static public readonly Raider MyRole = new();
     static private GameStatsEntry StatsThrown = NebulaAPI.CreateStatsEntry("stats.raider.thrown", GameStatsCategory.Roles, MyRole);
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class RaiderAxe : NebulaSyncStandardObject, IGameOperator
     {
-        public static string MyTag = "RaiderAxe";
-        public static string MyLocalFakeTag = "RaiderAxeLocalFake";
-        public static string MyGlobalFakeTag = "RaiderAxeGlobalFake";
+        public static readonly string MyTag = "RaiderAxe";
+        public static readonly string MyLocalFakeTag = "RaiderAxeLocalFake";
+        public static readonly string MyGlobalFakeTag = "RaiderAxeGlobalFake";
 
         private static SpriteLoader staticAxeSprite = SpriteLoader.FromResource("Nebula.Resources.RaiderAxe.png", 150f);
         private static SpriteLoader thrownAxeSprite = SpriteLoader.FromResource("Nebula.Resources.RaiderAxeThrown.png", 150f);
@@ -229,20 +231,21 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
         
     }
 
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButton? equipButton = null;
-        private ModAbilityButton? killButton = null;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AxeButton.png", 115f);
         
         public RaiderAxe? MyAxe = null;
-        bool IPlayerAbility.HideKillButton => true;
+        bool IPlayerAbility.HideKillButton => !(equipButton?.IsBroken ?? false);
 
         AchievementToken<(bool isCleared, bool triggered)>? acTokenAnother = null;
         StaticAchievementToken? acTokenCommon = null;
 
-        public Ability(GamePlayer player):base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
@@ -250,10 +253,8 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
 
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("raider.another1");
 
-                equipButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "raider.equip");
-                equipButton.SetSprite(buttonSprite.GetSprite());
-                equipButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove;
-                equipButton.Visibility = (button) => !MyPlayer.IsDead;
+                equipButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "raider.equip",
+                    0f, "equip", buttonSprite).SetAsUsurpableButton(this);
                 equipButton.OnClick = (button) =>
                 {
                     if (MyAxe == null)
@@ -262,15 +263,28 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                         equipButton.SetLabel("unequip");
                     }
                     else
+                    {
                         equipButton.SetLabel("equip");
-
+                    }
                     if (MyAxe == null) EquipAxe(); else UnequipAxe();
+                };
+                equipButton.OnBroken = (button) =>
+                {
+                    if (MyAxe != null)
+                    {
+                        equipButton.SetLabel("equip");
+                        UnequipAxe();
+                    }
+                    Snatcher.RewindKillCooldown();
                 };
                 equipButton.SetLabel("equip");
 
-                killButton = Bind(new ModAbilityButton(isArrangedAsKillButton: true)).KeyBind(Virial.Compat.VirtualKeyInput.Kill, "raider.kill");
+                var killButton = NebulaAPI.Modules.AbilityButton(this, isArrangedAsKillButton: true)
+                    .BindKey(Virial.Compat.VirtualKeyInput.Kill, "raider.kill")
+                    .SetLabel("throw").SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor)
+                    .SetAsMouseClickButton().SetAsUsurpableButton(this);
                 killButton.Availability = (button) => MyAxe != null && MyPlayer.CanMove && MyAxe.CanThrow;
-                killButton.Visibility = (button) => !MyPlayer.IsDead;
+                killButton.Visibility = (button) => !MyPlayer.IsDead && !equipButton.IsBroken;
                 killButton.OnClick = (button) =>
                 {
                     if (MyAxe != null)
@@ -287,10 +301,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
 
                     acTokenAnother.Value.triggered = true;
                 };
-                killButton.CoolDownTimer = Bind(new Timer(ThrowCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolDown().Start());
-                killButton.SetLabel("throw");
-                killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
-                killButton.SetCanUseByMouseClick();
+                killButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, ThrowCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer().Start();
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
             }
         }
@@ -324,7 +335,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
 
         void EquipAxe()
         {
-            MyAxe = (NebulaSyncObject.RpcInstantiate(RaiderAxe.MyTag, new float[] { (float)PlayerControl.LocalPlayer.PlayerId }).SyncObject as RaiderAxe);
+            MyAxe = (NebulaSyncObject.RpcInstantiate(RaiderAxe.MyTag, [(float)PlayerControl.LocalPlayer.PlayerId]).SyncObject as RaiderAxe);
         }
 
         void UnequipAxe()

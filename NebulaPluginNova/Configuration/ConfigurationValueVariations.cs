@@ -10,9 +10,11 @@ internal abstract class ConfigurationValueBase<T, LocalEntry> : ISharableVariabl
 {
     protected LocalEntry localEntry { get; init; }
     protected T currentValue { get; set; }
-
+    protected string name;
+    protected string Name => name;
     public ConfigurationValueBase(string name, LocalEntry entry)
     {
+        this.name = name;
         this.localEntry = entry;
         this.currentValue = entry.Value;
 
@@ -86,10 +88,18 @@ internal abstract class ComparableConfigurationValueBase<T, LocalEntry> : Config
 
     private void AdjustValue()
     {
-        T localVal =  localEntry.Value;
-        T nearVal = myMapper.MinBy(v => CalcAbsDiff(v, localVal));
-        (this as ISharableVariable<T>).SetValueWithoutSaveUnsafe(nearVal);
-        myIndex = Array.IndexOf(myMapper, nearVal);
+        if (myMapper.Length > 0)
+        {
+            T localVal = localEntry.Value;
+            T nearVal = myMapper.MinBy(v => CalcAbsDiff(v, localVal));
+            (this as ISharableVariable<T>).SetValueWithoutSaveUnsafe(nearVal);
+            myIndex = Array.IndexOf(myMapper, nearVal);
+        }
+        else
+        {
+            LogUtils.WriteToConsole("Mapper's length is 0! (id:"+ name + ")");
+            myIndex = Array.IndexOf(myMapper, 0);
+        }
     }
 
     public ComparableConfigurationValueBase(string name, T[] mapper, LocalEntry entry) : base(name, entry)

@@ -1,7 +1,8 @@
 ﻿using AmongUs.Data.Player;
 using Hazel;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
+using Nebula.Modules.Cosmetics;
 using PowerTools;
 using UnityEngine;
 using Virial.Events.Player;
@@ -30,12 +31,38 @@ public static class PlayerStartPatch
                     __instance.lightSource.lightChild.layer = LayerExpansion.GetVanillaShadowLightLayer();
                 }
 
+                if (AmongUsClient.Instance.AmHost) ConfigurationValues.ShareAll();
             }))
             );
 
         //人数が多いと近くのコンソールも追跡できなくなるので、上限を緩和
         __instance.hitBuffer = new Collider2D[120];
+        
+        /*
+        IEnumerator CoShowPosition()
+        {
+
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("PlayerPos", null, Vector3.zero, LayerExpansion.GetDefaultLayer());
+            renderer.sprite = image.GetSprite();
+            while (renderer && __instance)
+            {
+                if (__instance.NetTransform.incomingPosQueue.Count > 0) {
+                    renderer.enabled = true;
+                    renderer.transform.position = __instance.NetTransform.incomingPosQueue.ToArray().Last();
+                    renderer.transform.SetWorldZ(-10f);
+                }
+                else
+                {
+                    renderer.enabled = false;
+                }
+                yield return null;
+            }
+            if(renderer) GameObject.Destroy(renderer);
+        }
+        NebulaManager.Instance.StartCoroutine(CoShowPosition().WrapToIl2Cpp());
+        */
     }
+    static private Image image = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
 }
 
 [HarmonyPatch(typeof(PlayerCustomizationData), nameof(PlayerCustomizationData.Color), MethodType.Setter)]
@@ -85,7 +112,11 @@ public static class PlayerUpdatePatch
     {
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) yield return p.cosmetics.currentBodySprite.BodySprite;
         foreach (var d in Helpers.AllDeadBodies()) foreach (var r in d.bodyRenderers) yield return r;
-        if (ShipStatus.Instance) foreach (var v in ShipStatus.Instance.AllVents) yield return v.myRend;
+        if (ShipStatus.Instance)
+        {
+            foreach (var v in ShipStatus.Instance.AllVents) yield return v.myRend;
+            foreach (var c in ShipStatus.Instance.AllConsoles) if(c.Image) yield return c.Image;
+        }
         foreach (var cc in ModSingleton<CustomConsoleManager>.Instance.AllCustomConsoles) yield return cc.Renderer;
     }
 
@@ -337,16 +368,6 @@ class PlayerDisconnectPatch
 
         GameOperatorManager.Instance?.Run(new PlayerDisconnectEvent(unboxed), true);
         NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Disconnect, player.PlayerId, 0){ RelatedTag = EventDetail.Disconnect }) ;
-    }
-}
-
-
-[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.CoSpawnPlayer))]
-public class PlayerJoinedPatch
-{
-    public static void Postfix()
-    {
-        if (AmongUsClient.Instance.AmHost) ConfigurationValues.ShareAll();
     }
 }
 
@@ -651,6 +672,9 @@ public static class UsePlatformPatch
             target.NetTransform.SetPaused(false);
             target.SetKinematic(false);
             target.NetTransform.Halt();
+
+            target.GetModInfo()?.Unbox().ResetDeadBodyGoalPos();
+
             yield return Effects.Wait(0.1f);
             __instance.Target = null;
             yield break;
@@ -676,19 +700,14 @@ public static class UseLadderPatch
     }
 }
 
-[HarmonyPatch(typeof(ZiplineBehaviour), nameof(ZiplineBehaviour.Use),typeof(PlayerControl),typeof(bool))]
-public static class UseZiplinePatch
+[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.CoClimbLadder))]
+public static class CoUseLadderPatch
 {
-    public static void Postfix(ZiplineBehaviour __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] bool fromTop)
+    public static void Postfix(PlayerPhysics __instance, ref Il2CppSystem.Collections.IEnumerator __result)
     {
-        try
-        {
-            player.GetModInfo()!.Unbox().GoalPos = fromTop ? __instance.landingPositionBottom.position : __instance.landingPositionTop.position;
-        }
-        catch
-        {
-            Debug.Log($"Skipped presetting goal position on use ZiplineBehaviour. (for {__instance.name})");
-        }
+        __result = Effects.Sequence(__result, ManagedEffects.Action(() => {
+            __instance.myPlayer.GetModInfo()?.Unbox().ResetDeadBodyGoalPos();
+        }).WrapToIl2Cpp());
     }
 }
 
@@ -708,46 +727,29 @@ internal class RPCSealingPatch
     }
 }
 
-
 [NebulaRPCHolder]
 [HarmonyPatch(typeof(CustomNetworkTransform), nameof(CustomNetworkTransform.FixedUpdate))]
 class CustomNetworkTransformPatch
 {
-
-    public static void Postfix(CustomNetworkTransform __instance)
+    
+    public static void Prefix(CustomNetworkTransform __instance)
     {
-        if (PlayerControl.LocalPlayer)
+        if (__instance.isPaused && __instance.incomingPosQueue.Count > 0) __instance.incomingPosQueue.Clear();
+
+        //rubberbandModifierをいじる関数にフックできないのでここで変更(バニラの変更を考慮して大きめな値にしておく)
+        if (GeneralConfigurations.LowLatencyPlayerSyncOption && (AmongUsUtil.IsCustomServer() || AmongUsUtil.IsLocalServer()))
         {
-            if (GeneralConfigurations.LowLatencyPlayerSyncOption && AmongUsUtil.IsCustomServer())
+            float num = __instance.incomingPosQueue.Count switch
             {
-                if (__instance.myPlayer.AmOwner && __instance.sendQueue.Count == 1)
-                {
-                    __instance.lastSequenceId++;
-                    var pos = __instance.sendQueue.Dequeue();
-                    RpcSendMovementImmediately.Invoke((__instance.myPlayer.PlayerId, pos, __instance.lastSequenceId));
-                    __instance.lastPosSent = pos;
-                    __instance.ClearDirtyBits();
-                }
-            }
+                < 2 => 1.3f, //0.5にしようとしてくるやつを抑制するので大きめに
+                3 => 1.8f, //0.5にしようとしてくるやつを抑制するので大きめに
+                4 or 5 => 2.5f, //0.5にしようとしてくるやつを抑制するので大きめに
+                _ => 1.8f
+            };
+            __instance.rubberbandModifier = Mathf.Lerp(__instance.rubberbandModifier, num, Time.fixedDeltaTime * 3f);
         }
     }
-
-    private static RemoteProcess<(byte playerId, Vector2 pos, int sequenceId)> RpcSendMovementImmediately = new(
-        "SendNetTransformMovement",
-        (message, sendByMe) =>
-        {
-            if (sendByMe) return;
-
-            var player = Helpers.GetPlayer(message.playerId);
-            if (player)
-            {
-                if (NetHelpers.SidGreaterThan((ushort)message.sequenceId, player!.NetTransform.lastSequenceId))
-                {
-                    player.NetTransform.lastSequenceId = (ushort)message.sequenceId;
-                    player.NetTransform.incomingPosQueue.Enqueue(message.pos);
-                }
-            }
-        }, false);
+    
 }
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.PlayStepSound))]

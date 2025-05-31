@@ -1,4 +1,5 @@
-﻿using Virial.Events.Game;
+﻿using TMPro;
+using Virial.Events.Game;
 
 namespace Nebula.Extensions;
 
@@ -69,6 +70,7 @@ public static class KillAnimationExtension
         target.GetModInfo()!.Unbox().relatedDeadBodyCache = deadBody;
 
         target.Die(DeathReason.Kill, false);
+        PlayerExtension.ResetOnDying(target);
 
         if (blink)
         {

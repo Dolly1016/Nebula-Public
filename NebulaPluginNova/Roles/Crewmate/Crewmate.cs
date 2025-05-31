@@ -8,11 +8,11 @@ namespace Nebula.Roles.Crewmate;
 
 public class Crewmate : DefinedRoleTemplate, DefinedRole
 {
-    static public RoleTeam MyTeam = new Team("teams.crewmate", new(Palette.CrewmateBlue), TeamRevealType.Everyone);
+    static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.crewmate", new(Palette.CrewmateBlue), TeamRevealType.Everyone);
 
     private Crewmate() : base("crewmate", new(Palette.CrewmateBlue), RoleCategory.CrewmateRole, MyTeam) { }
 
-    static public Crewmate MyRole = new Crewmate();
+    static public readonly Crewmate MyRole = new();
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     bool ISpawnable.IsSpawnable => true;

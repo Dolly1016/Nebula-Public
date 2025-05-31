@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Events.Game;
 using Virial.Game;
 
@@ -17,11 +19,10 @@ internal class Invisible : PerkFunctionalInstance
     bool used = false;
     public Invisible(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {
-        var durationTimer = new Timer(Duration).SetTime(0f);
+        var durationTimer = NebulaAPI.Modules.Timer(this,Duration).SetTime(0f);
         PerkInstance.BindTimer(durationTimer);
     }
 
-    private Timer cooldownTimer;
 
     public override bool HasAction => true;
     public override void OnClick()
@@ -36,6 +37,6 @@ internal class Invisible : PerkFunctionalInstance
 
     void OnUpdate(GameHudUpdateEvent ev)
     {
-        PerkInstance.SetDisplayColor((!cooldownTimer.IsProgressing || used) ? Color.gray : Color.white);
+        PerkInstance.SetDisplayColor((used) ? Color.gray : Color.white);
     }
 }

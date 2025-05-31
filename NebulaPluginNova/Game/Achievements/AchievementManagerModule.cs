@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Nebula.Modules.Cosmetics;
 using Nebula.Roles.Modifier;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
 
         //実績
         var challengeDeath2Token = new AchievementToken<int>("challenge.death2", 0, (exileAnyone, _) => (NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p.IsDead && p.MyKiller == GamePlayer.LocalPlayer && p != GamePlayer.LocalPlayer).Select(p => p.PlayerState).Distinct().Count() + exileAnyone) >= 4);
-        GameOperatorManager.Instance?.Register<PlayerVoteDisclosedLocalEvent>(ev => { if (ev.VoteToWillBeExiled) challengeDeath2Token.Value = 1; }, NebulaAPI.CurrentGame!);
+        GameOperatorManager.Instance?.Subscribe<PlayerVoteDisclosedLocalEvent>(ev => { if (ev.VoteToWillBeExiled) challengeDeath2Token.Value = 1; }, NebulaAPI.CurrentGame!);
         
         if (Helpers.CurrentMonth == 3) new AchievementToken<int>("graduation2", 0, (exileAnyone, _) => exileAnyone >= 3);
 
@@ -47,13 +48,11 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
                 var myLover = lover.MyLover.Get();
                 float time = 0f;
                 bool isCleared = false;
-                new NebulaGameScript()
-                {
-                    OnUpdateEvent = () =>
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
                     {
                         if (isCleared) return;
 
-                        if (!lover.IsDeadObject && !GamePlayer.LocalPlayer.IsDead && !myLover!.IsDead)
+                        if (!lover.IsDeadObject && !GamePlayer.LocalPlayer!.IsDead && !myLover!.IsDead)
                         {
                             if (
                                 GamePlayer.LocalPlayer.HasAttribute(PlayerAttributes.Accel) &&
@@ -74,8 +73,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
                                 time = 0f;
                             }
                         }
-                    }
-                };
+                    }, NebulaAPI.CurrentGame!);
             }
         }
 
@@ -87,33 +85,32 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
                 IPlayerAttribute attr = isSkeld ? PlayerAttributes.Accel : PlayerAttributes.Decel;
                 float time = 0f;
                 bool isCleared = false;
-                new NebulaGameScript()
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
                 {
-                    OnUpdateEvent = () =>
-                    {
-                        if (isCleared) return;
 
-                        if (!GamePlayer.LocalPlayer!.IsDead)
+                    if (isCleared) return;
+
+                    if (!GamePlayer.LocalPlayer!.IsDead)
+                    {
+                        if (
+                            GamePlayer.LocalPlayer.HasAttribute(attr) &&
+                            GamePlayer.LocalPlayer.VanillaPlayer.MyPhysics.Velocity.magnitude > 0f
+                        )
                         {
-                            if (
-                                GamePlayer.LocalPlayer.HasAttribute(attr) &&
-                                GamePlayer.LocalPlayer.VanillaPlayer.MyPhysics.Velocity.magnitude > 0f
-                            )
+                            time += Time.deltaTime;
+                            if (time > 6f)
                             {
-                                time += Time.deltaTime;
-                                if (time > 6f)
-                                {
-                                    new StaticAchievementToken(isSkeld ? "rainyStepAnother" : "rainyStep");
-                                    isCleared = true;
-                                }
-                            }
-                            else
-                            {
-                                time = 0f;
+                                new StaticAchievementToken(isSkeld ? "rainyStepAnother" : "rainyStep");
+                                isCleared = true;
                             }
                         }
+                        else
+                        {
+                            time = 0f;
+                        }
                     }
-                };
+
+                }, NebulaAPI.CurrentGame!);
             }
         }
 
@@ -121,9 +118,9 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
         {
             if (AmongUsUtil.CurrentMapId is 5)
             {
-                GameOperatorManager.Instance?.Register<PlayerKillPlayerEvent>(ev =>
+                GameOperatorManager.Instance?.Subscribe<PlayerKillPlayerEvent>(ev =>
                 {
-                    if (ev.Murderer.AmOwner && ev.Dead.TryGetModifier<Bloody.Instance>(out _) && ev.Dead.Position.x < -8f && ev.Murderer.Position.x < -8f && ColorHelper.IsGreenOrBlack(Palette.PlayerColors[ev.Dead.PlayerId]))
+                    if (ev.Murderer.AmOwner && ev.Dead.TryGetModifier<Bloody.Instance>(out _) && ev.Dead.Position.x < -8f && ev.Murderer.Position.x < -8f && ColorHelper.IsGreenOrBlack(DynamicPalette.PlayerColors[ev.Dead.PlayerId]))
                         new StaticAchievementToken("watermelon");
                 }, NebulaAPI.CurrentGame!);
             }
@@ -135,7 +132,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
             byte lastDeadBody = byte.MaxValue;
             Vector2 lastPos = Vector2.zeroVector;
             var myPlayer = GamePlayer.LocalPlayer!;
-            GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev =>
+            GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
             {
                 byte currentBody = myPlayer.HoldingDeadBody?.PlayerId ?? byte.MaxValue;
                 if (currentBody != byte.MaxValue && currentBody == lastDeadBody && !myPlayer.VanillaPlayer.inVent)
@@ -155,7 +152,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
         {
             //会議が始まったらフラグを下げる
             var token = new AchievementToken<bool>("noMeeting", true, (val, _) => val && NebulaGameManager.Instance!.EndState!.Winners.Test(GamePlayer.LocalPlayer));
-            GameOperatorManager.Instance?.Register<MeetingStartEvent>(ev => token.Value = false, NebulaAPI.CurrentGame);
+            GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev => token.Value = false, NebulaAPI.CurrentGame);
         }
 
         //コスチューム (ゲーム開始時に判定できるもの)
@@ -168,9 +165,9 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
                 new StaticAchievementToken("costume.animals");
             if (HasAnyTag(GamePlayer.LocalPlayer, "music.instrument", "music.conductor") && NebulaGameManager.Instance.AllPlayerInfo.Count(p => HasTag(p, "music.instrument")) >= 3 && NebulaGameManager.Instance.AllPlayerInfo.Count(p => HasTag(p, "music.conductor")) == 1)
                 new StaticAchievementToken("costume.music");
-            if (HasVisorTag(GamePlayer.LocalPlayer, "party") && ColorHelper.IsVividColor(Palette.PlayerColors[GamePlayer.LocalPlayer.PlayerId]))
+            if (HasVisorTag(GamePlayer.LocalPlayer, "party") && ColorHelper.IsVividColor(DynamicPalette.PlayerColors[GamePlayer.LocalPlayer.PlayerId]))
             {
-                var partyMembers = NebulaGameManager.Instance.AllPlayerInfo.Where(p => HasVisorTag(p, "party") && ColorHelper.IsVividColor(Palette.PlayerColors[p.PlayerId])).DistinctBy(p => p.DefaultOutfit.outfit.VisorId).ToArray();
+                var partyMembers = NebulaGameManager.Instance.AllPlayerInfo.Where(p => HasVisorTag(p, "party") && ColorHelper.IsVividColor(DynamicPalette.PlayerColors[p.PlayerId])).DistinctBy(p => p.DefaultOutfit.outfit.VisorId).ToArray();
                 if(partyMembers.Length >= 3) new StaticAchievementToken("costume.party");
             }
         }

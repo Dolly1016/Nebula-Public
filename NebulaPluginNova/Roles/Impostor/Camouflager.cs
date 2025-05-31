@@ -17,36 +17,30 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
     }
 
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
-    static private FloatConfiguration CamoCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.camoCoolDown", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration CamoDurationOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.camoDuration", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanInvokeCamoAfterDeathOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.canInvokeCamoAfterDeath", false);
+    static private readonly FloatConfiguration CamoCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.camoCoolDown", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration CamoDurationOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.camoDuration", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);
+    static private readonly BoolConfiguration CanInvokeCamoAfterDeathOption = NebulaAPI.Configurations.Configuration("options.role.camouflager.canInvokeCamoAfterDeath", false);
 
-    static public Camouflager MyRole = new Camouflager();
-    static private GameStatsEntry StatsCamo = NebulaAPI.CreateStatsEntry("stats.camouflager.camo", GameStatsCategory.Roles, MyRole);
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    static public readonly Camouflager MyRole = new();
+    static private readonly GameStatsEntry StatsCamo = NebulaAPI.CreateStatsEntry("stats.camouflager.camo", GameStatsCategory.Roles, MyRole);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
 
-
-    public class Ability : AbstractPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CamoButton.png", 115f);
 
-        private AchievementToken<(bool cleared, int killed)>? acTokenChallenge;
-        public Ability(GamePlayer player) : base(player) {
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped) {
             if (AmOwner)
             {
-                acTokenChallenge = new("camouflager.challenge", (false, 0), (val, _) => val.cleared);
+                AchievementToken<(bool cleared, int killed)>? acTokenChallenge = new("camouflager.challenge", (false, 0), (val, _) => val.cleared);
 
-                var camouflageButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                camouflageButton.SetSprite(buttonSprite.GetSprite());
-                camouflageButton.Availability = (button) => MyPlayer.CanMove;
-                camouflageButton.Visibility = (button) => !MyPlayer.IsDead || CanInvokeCamoAfterDeathOption;
-                camouflageButton.OnClick = (button) =>
-                {
-                    button.ActivateEffect();
-                };
+                var camouflageButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    CamoCoolDownOption, CamoDurationOption, "camo", buttonSprite).SetAsUsurpableButton(this);
+                if(CanInvokeCamoAfterDeathOption) camouflageButton.Visibility = (button) => !MyPlayer.IsDead || CanInvokeCamoAfterDeathOption;
                 camouflageButton.OnEffectStart = (button) =>
                 {
                     RpcCamouflage.Invoke(new(MyPlayer.PlayerId, true));
@@ -54,33 +48,20 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
                     new StaticAchievementToken("camouflager.common1");
                     acTokenChallenge!.Value.killed = 0;
                     StatsCamo.Progress();
-
                 };
                 camouflageButton.OnEffectEnd = (button) =>
                 {
                     RpcCamouflage.Invoke(new(MyPlayer.PlayerId, false));
                     button.StartCoolDown();
 
-                    if (acTokenChallenge!.Value.killed >= 4)
-                    {
-                        acTokenChallenge!.Value.cleared = true;
-                    }
+                    if (acTokenChallenge.Value.killed >= 4) acTokenChallenge!.Value.cleared = true;
                 };
-                camouflageButton.OnMeeting = button => button.StartCoolDown();
-                camouflageButton.CoolDownTimer = Bind(new Timer(CamoCoolDownOption).SetAsAbilityCoolDown().Start());
-                camouflageButton.EffectTimer = Bind(new Timer(CamoDurationOption));
-                camouflageButton.SetLabel("camo");
-                camouflageButton.OnReleased = button =>
+                GameOperatorManager.Instance?.RegisterOnReleased(() =>
                 {
-                    if (button.EffectActive) RpcCamouflage.Invoke(new(MyPlayer.PlayerId, false));
-                };
+                    if (camouflageButton.IsInEffect) RpcCamouflage.Invoke(new(MyPlayer.PlayerId, false));
+                }, camouflageButton);
+                GameOperatorManager.Instance?.Subscribe<PlayerMurderedEvent>(ev => acTokenChallenge.Value.killed++, this);
             }
-        }
-
-        [Local]
-        void OnPlayerMurdered(PlayerMurderedEvent ev)
-        {
-            if (AmOwner && acTokenChallenge != null) acTokenChallenge.Value.killed++;
         }
     }
 

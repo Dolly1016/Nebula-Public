@@ -7,7 +7,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Perks;
 
-internal class Footprint : PerkFunctionalInstance
+internal class Footprint : PerkFunctionalInstance, IGameOperator
 {
     static PerkFunctionalDefinition Def = new("footprint", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("footprint", 3, 29, new(36, 224, 174)), (def, instance) => new Footprint(def, instance));
 
@@ -17,7 +17,7 @@ internal class Footprint : PerkFunctionalInstance
     }
 
     private const string EffectTag = "footprint";
-    protected override void OnReleased()
+    void IGameOperator.OnReleased()
     {
         PlayerModInfo.RpcRemoveAttrByTag.Invoke((GamePlayer.LocalPlayer!.PlayerId, EffectTag));
     }

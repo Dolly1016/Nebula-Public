@@ -12,10 +12,11 @@ using Virial.Events.Game;
 using Nebula.Modules.GUIWidget;
 using Virial.Game;
 using Virial.Events.Player;
+using Nebula.Modules.Cosmetics;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Psychic : DefinedRoleTemplate, DefinedRole
+public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, DefinedRole
 {
     private Psychic() : base("psychic", new(96, 206, 137), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SearchCooldownOption, SearchDurationOption])
     {
@@ -23,53 +24,34 @@ public class Psychic : DefinedRoleTemplate, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Psychic.png");
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
-    static private FloatConfiguration SearchCooldownOption = NebulaAPI.Configurations.Configuration("options.role.psychic.searchCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration SearchDurationOption = NebulaAPI.Configurations.Configuration("options.role.psychic.searchDuration", (float[])([1f,2f,3f,4f,5f,7.5f,10f,15f,20f]), 5f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration SearchCooldownOption = NebulaAPI.Configurations.Configuration("options.role.psychic.searchCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration SearchDurationOption = NebulaAPI.Configurations.Configuration("options.role.psychic.searchDuration", (float[])([1f,2f,3f,4f,5f,7.5f,10f,15f,20f]), 5f, FloatConfigurationDecorator.Second);
 
 
-    static public Psychic MyRole = new Psychic();
-    static private GameStatsEntry StatsSearching = NebulaAPI.CreateStatsEntry("stats.psychic.searching", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsMessages = NebulaAPI.CreateStatsEntry("stats.psychic.messages", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static public readonly Psychic MyRole = new();
+    static private readonly GameStatsEntry StatsSearching = NebulaAPI.CreateStatsEntry("stats.psychic.searching", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsMessages = NebulaAPI.CreateStatsEntry("stats.psychic.messages", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerUsurpableAbility, IGameOperator, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SearchButton.png", 115f);
-
-        void RuntimeAssignable.OnActivated()
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
-                var searchButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                searchButton.SetSprite(buttonSprite.GetSprite());
-                searchButton.Availability = (button) => MyPlayer.CanMove;
-                searchButton.Visibility = (button) => !MyPlayer.IsDead;
-                searchButton.OnClick = (button) =>
-                {
-                    if(!searchButton.EffectActive) button.ToggleEffect();
-                };
-                searchButton.OnEffectEnd = (button) =>
-                {
-                    button.StartCoolDown();
-                };
-                searchButton.OnEffectStart = (button) =>
-                {
-                    StatsSearching.Progress();
-                };
-                searchButton.CoolDownTimer = Bind(new Timer(0f, SearchCooldownOption).SetAsAbilityCoolDown().Start());
-                searchButton.EffectTimer = Bind(new Timer(SearchDurationOption));
-                searchButton.SetLabel("search");
+                var searchButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    SearchCooldownOption, SearchDurationOption, "search", buttonSprite);
+                searchButton.OnEffectEnd = (button) => button.StartCoolDown();
+                searchButton.OnEffectStart = (button) => StatsSearching.Progress();
 
                 //死体を指す矢印を表示する
                 var ability = new DeadbodyArrowAbility().Register(this);
-                GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev => ability.ShowArrow = searchButton.EffectActive && !MyPlayer.IsDead, this);
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => ability.ShowArrow = searchButton.IsInEffect && !MyPlayer.IsDead, this);
             }
         }
+
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SearchButton.png", 115f);
 
         GamePlayer? lastReported = null;
 

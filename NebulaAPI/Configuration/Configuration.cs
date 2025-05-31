@@ -118,7 +118,7 @@ public interface IConfigurationHolder
     ConfigurationHolderState DisplayOption { get; }
     Image? Illustration { get; set; }
 
-    internal IEnumerable<ConfigurationUpperButton> RelatedInformations { get; }
+    internal IEnumerable<ConfigurationUpperButton> RelatedInformation { get; }
 
     void SetDisplayState(Func<ConfigurationHolderState> state);
 }

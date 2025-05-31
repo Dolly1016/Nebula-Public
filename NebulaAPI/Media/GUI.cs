@@ -482,4 +482,18 @@ public static class GUIWidgetHelpers
 
         return inner;
     }
+    public static GUIWidget WithRoom(this GUIWidget inner, Virial.Compat.Vector2 margin)
+    {
+        if (margin.x > 0f)
+        {
+            var xMargin = NebulaAPI.GUI.HorizontalMargin(margin.x * 0.5f);
+            inner = NebulaAPI.GUI.HorizontalHolder(inner.Alignment, xMargin, inner, xMargin);
+        }
+        if (margin.y > 0f)
+        {
+            var yMargin = NebulaAPI.GUI.VerticalMargin(margin.y * 0.5f);
+            inner = NebulaAPI.GUI.VerticalHolder(inner.Alignment, yMargin, inner, yMargin);
+        }
+        return inner;
+    }
 }

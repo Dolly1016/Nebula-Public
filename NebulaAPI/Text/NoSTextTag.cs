@@ -60,6 +60,8 @@ public static class PlayerStates
     public static CommunicableTextTag Gassed { get; internal set; } = null!;
     public static CommunicableTextTag Bubbled { get; internal set; } = null!;
     public static CommunicableTextTag Meteor { get; internal set; } = null!;
+    public static CommunicableTextTag Balloon { get; internal set; } = null!;
+    public static CommunicableTextTag Lost { get; internal set; } = null;
 }
 
 /// <summary>
@@ -145,4 +147,5 @@ public static class EventDetails
     public static CommunicableTextTag Gassed { get; internal set; } = null!;
     public static CommunicableTextTag Bubbled { get; internal set; } = null!;
     public static CommunicableTextTag Meteor { get; internal set; } = null!;
+    public static CommunicableTextTag Balloon { get; internal set; } = null!;
 }

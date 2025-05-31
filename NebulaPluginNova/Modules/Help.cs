@@ -1,7 +1,7 @@
 ﻿using Hazel.Crypto;
 using NAudio.CoreAudioApi;
-using Nebula.Behaviour;
-
+using Nebula.Behavior;
+using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
@@ -24,15 +24,15 @@ using AssignmentFlag = Nebula.Roles.Assignment.AssignmentPreview.AssignmentFlag;
 namespace Nebula.Modules;
 
 public class CombiImageInfo {
-    public static Dictionary<string, CombiImageInfo> FastImages = [];
-    public static OrderedList<CombiImageInfo, int> OrderedImages = OrderedList<CombiImageInfo, int>.DescendingList(image => image.Priority);
+    public static readonly Dictionary<string, CombiImageInfo> FastImages = [];
+    public static readonly OrderedList<CombiImageInfo, int> OrderedImages = OrderedList<CombiImageInfo, int>.DescendingList(image => image.Priority);
 
-    public static CombiImageInfo SniperRaider = new("SniperRaider", 10, () => CheckSpawnable(Roles.Impostor.Sniper.MyRole, Roles.Impostor.Raider.MyRole));
-    public static CombiImageInfo JesNecRep = new("NecroJesterReaper", 50, () => CheckSpawnable(Roles.Neutral.Jester.MyRole, Roles.Impostor.Reaper.MyRole, Roles.Crewmate.Necromancer.MyRole));
-    public static CombiImageInfo JesNec = new("NecroJester", 40, () => CheckSpawnable(Roles.Neutral.Jester.MyRole, Roles.Crewmate.Necromancer.MyRole));
-    public static CombiImageInfo JesRep = new("JesterReaper", 40, () => CheckSpawnable(Roles.Neutral.Jester.MyRole, Roles.Impostor.Reaper.MyRole));
-    public static CombiImageInfo SpectreImmoralist = new("SpectreAndImmoralist", 44, () => CheckSpawnable(Roles.Neutral.SpectreImmoralist.MyRole, Roles.Neutral.Spectre.MyRole));
-    public static CombiImageInfo SpectreAndFollower = new("SpectreAndFollower", 45, () => CheckSpawnable(Roles.Neutral.SpectreFollower.MyRole, Roles.Neutral.Spectre.MyRole));
+    public static readonly CombiImageInfo SniperRaider = new("SniperRaider", 10, () => CheckSpawnable(Roles.Impostor.Sniper.MyRole, Roles.Impostor.Raider.MyRole));
+    public static readonly CombiImageInfo JesNecRep = new("NecroJesterReaper", 50, () => CheckSpawnable(Roles.Neutral.Jester.MyRole, Roles.Impostor.Reaper.MyRole, Roles.Crewmate.Necromancer.MyRole));
+    public static readonly CombiImageInfo JesNec = new("NecroJester", 40, () => CheckSpawnable(Roles.Neutral.Jester.MyRole, Roles.Crewmate.Necromancer.MyRole));
+    public static readonly CombiImageInfo JesRep = new("JesterReaper", 40, () => CheckSpawnable(Roles.Neutral.Jester.MyRole, Roles.Impostor.Reaper.MyRole));
+    public static readonly CombiImageInfo SpectreImmoralist = new("SpectreAndImmoralist", 44, () => CheckSpawnable(Roles.Neutral.SpectreImmoralist.MyRole, Roles.Neutral.Spectre.MyRole));
+    public static readonly CombiImageInfo SpectreAndFollower = new("SpectreAndFollower", 45, () => CheckSpawnable(Roles.Neutral.SpectreFollower.MyRole, Roles.Neutral.Spectre.MyRole));
 
 
     public string Name { get; private init; }
@@ -97,7 +97,7 @@ public static class HelpScreen
         
     }
 
-    public static HelpTabInfo[] AllHelpTabInfo = {
+    public static readonly HelpTabInfo[] AllHelpTabInfo = [
         new(HelpTab.MyInfo, "help.tabs.myInfo"),
         new(HelpTab.Roles, "help.tabs.roles"),
         new(HelpTab.Overview, "help.tabs.overview"),
@@ -105,7 +105,7 @@ public static class HelpScreen
         new(HelpTab.Slides, "help.tabs.slides"),
         new(HelpTab.Achievements, "help.tabs.achievements"),
         new(HelpTab.Stamps, "help.tabs.stamps"),
-    };
+    ];
 
     private static float HelpHeight = 4.1f;
 
@@ -147,7 +147,7 @@ public static class HelpScreen
     private static TextAttributeOld TabButtonAttr = new(TextAttributeOld.BoldAttr) { Size = new(1f, 0.26f) };
     private static IMetaWidgetOld GetTabsWidget(MetaScreen screen, HelpTab tab, HelpTab validTabs)
     {
-        List<IMetaParallelPlacableOld> tabs = new();
+        List<IMetaParallelPlacableOld> tabs = [];
 
         foreach (var info in AllHelpTabInfo) if ((validTabs & info.Tab) != 0) tabs.Add(info.GetButton(screen, tab, validTabs));
 
@@ -173,7 +173,7 @@ public static class HelpScreen
                 widget.Append(ShowAssignableScreen());
                 break;
             case HelpTab.Overview:
-                widget.Append(ShowPreviewSrceen(screen, validTabs, out backImage));
+                widget.Append(ShowPreviewScreen(screen, validTabs, out backImage));
                 break;
             case HelpTab.Options:
                 widget.Append(ShowOptionsScreen());
@@ -193,7 +193,7 @@ public static class HelpScreen
         screen.SetBackImage(backImage, 0.2f);
     }
 
-    static private void ShowDocumentScreen(IDocument doc, Image? illustlation)
+    static private void ShowDocumentScreen(IDocument doc, Image? illustration)
     {
         var screen = MetaScreen.GenerateWindow(new(7f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, true, background: BackgroundSetting.Modern);
 
@@ -202,21 +202,21 @@ public static class HelpScreen
         inner = scrollView.Artifact;
         Reference<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
 
-        screen.SetWidget(scrollView, illustlation, out _);
+        screen.SetWidget(scrollView, illustration, out _);
     }
 
-    private static TextAttributeOld RoleTitleAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
-    private static TextAttributeOld RoleTitleAttrUnmasked = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f) };
+    private static readonly TextAttributeOld RoleTitleAttr = new(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
+    private static readonly TextAttributeOld RoleTitleAttrUnmasked = new(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f) };
     
     private static Virial.Media.GUIWidget GetAssignableOverlay(DefinedAssignable assignable)
     {
-        List<Virial.Media.GUIWidget> widgets = new();
+        List<Virial.Media.GUIWidget> widgets = [];
 
         widgets.Add(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), new RawTextComponent(assignable.DisplayColoredName)));
         widgets.Add(new NoSGUIText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), assignable?.ConfigurationHolder?.Detail));
-        if (assignable is HasCitation hc && hc.Citaion != null)
+        if (assignable is HasCitation hc && hc.Citation != null)
         {
-            var citation = hc.Citaion;
+            var citation = hc.Citation;
 
             widgets.Add(new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.35f)));
             widgets.Add(new HorizontalWidgetsHolder(GUIAlignment.Left,
@@ -320,12 +320,12 @@ public static class HelpScreen
         return new MetaWidgetOld.ScrollView(new(7.4f, HelpHeight), inner) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
     }
 
-    private static TextAttributeOld OptionsAttr = new(TextAttributeOld.BoldAttr) { FontSize = 1.6f, FontMaxSize = 1.6f, FontMinSize = 1.6f, Size = new(4f, 10f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial, Alignment = TMPro.TextAlignmentOptions.TopLeft };
+    private static readonly TextAttributeOld OptionsAttr = new(TextAttributeOld.BoldAttr) { FontSize = 1.6f, FontMaxSize = 1.6f, FontMinSize = 1.6f, Size = new(4f, 10f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial, Alignment = TMPro.TextAlignmentOptions.TopLeft };
     private static Reference<ScrollView.InnerScreen>? optionsInner = new();
     private static IMetaWidgetOld ShowOptionsScreen()
     {
         var view = new MetaWidgetOld.ScrollView(new(7.4f, HelpHeight - 0.5f), GetOptionsWidget()) { Alignment = IMetaWidgetOld.AlignmentOption.Center, ScrollerTag = "HelpOptions", InnerRef = optionsInner };
-        List<Virial.Media.GUIWidget> buttons = new();
+        List<Virial.Media.GUIWidget> buttons = [];
         var textAttr = new TextAttribute(GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium)) { Font = GUI.API.GetFont(FontAsset.Gothic), Size = new(1.7f, 0.22f) };
         buttons.Add(GUI.API.LocalizedButton(GUIAlignment.Center, textAttr, "options.map.customization", (_) => GeneralConfigurations.OpenMapEditor(null, null, false)));
         if (GeneralConfigurations.SpawnMethodOption.GetValue() != 0) buttons.Add(GUI.API.LocalizedButton(GUIAlignment.Center, textAttr, "options.map.spawnCandidatesFilter", (_) => GeneralConfigurations.OpenCandidatesFilter(null, null, false)));
@@ -454,8 +454,7 @@ public static class HelpScreen
         { AssignmentFlag.ModImpostor | AssignmentFlag.ModNeutral | AssignmentFlag.VanillaCrewmate | AssignmentFlag.ModCrewmate, 16},
     };
 
-    private static NebulaSpriteLoader previewSpriteRaiderAndSniper = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Combinations/SniperRaider.png");
-    private static IMetaWidgetOld ShowPreviewSrceen(MetaScreen screen, HelpTab validTabs, out Image? backImage)
+    private static IMetaWidgetOld ShowPreviewScreen(MetaScreen screen, HelpTab validTabs, out Image? backImage)
     {
         backImage = null;
 
@@ -546,8 +545,8 @@ public static class HelpScreen
             if (ghosts.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.ghostRoles") + "-").Bold()), .. ghosts, GUI.API.Margin(new(2f, 0.3f))]));
             if (withJackalizedView)
             {
-                List<Virial.Media.GUIWidget> listJ100 = new();
-                List<Virial.Media.GUIWidget> listJRandom = new();
+                List<Virial.Media.GUIWidget> listJ100 = [];
+                List<Virial.Media.GUIWidget> listJRandom = [];
                 CheckRoles(listJ100, listJRandom, true);
 
                 if (listJ100.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.jackalized.100") + "-").Bold()), .. listJ100, GUI.API.Margin(new(2f, 0.3f))]));
@@ -594,7 +593,7 @@ public static class HelpScreen
             if (end != tip.End)
             {
                 winConds.Add(GUI.API.VerticalMargin(0.1f));
-                winConds.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GUI.API.HorizontalMargin(0.2f), GUI.API.RawText(GUIAlignment.Left, maskedSubtitleAttr, tip.End.DisplayText.Replace("%EXTRA%", "").Color(tip.End.Color))));
+                winConds.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GUI.API.HorizontalMargin(0.2f), GUI.API.RawText(GUIAlignment.Left, maskedSubtitleAttr, tip.End.DisplayText.GetString().Replace("%EXTRA%", "").Color(tip.End.Color))));
                 end = tip.End;
             }
             winConds.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GUI.API.HorizontalMargin(0.3f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, ("・" + tip.Title).Bold())));
@@ -642,7 +641,7 @@ public static class HelpScreen
         CombiImageInfo.TryGetSuitableImage(out var info);
         backImage = info?.Image;
 
-        int GetNextSimulatePlayerArgument(bool increament)
+        int GetNextSimulatePlayerArgument(bool increment)
         {
             if(lastArgument.PreviewSimulation == -1)
             {
@@ -657,7 +656,7 @@ public static class HelpScreen
             }
             else
             {
-                return Math.Clamp(lastArgument.PreviewSimulation + (increament ? 1 : -1), 1, 24);
+                return Math.Clamp(lastArgument.PreviewSimulation + (increment ? 1 : -1), 1, 24);
             }
         }
 
@@ -853,7 +852,7 @@ public static class HelpScreen
 
 public class HintManager
 { 
-    internal static List<Virial.Media.Hint> AllHints = new();
+    internal static List<Virial.Media.Hint> AllHints = [];
 
     static private Hint WithImage(string id) => new HintWithImage(SpriteLoader.FromResource("Nebula.Resources.Hints." + id.HeadUpper() + ".png", 100f), new TranslateTextComponent("hint." + id.HeadLower() + ".title"), new TranslateTextComponent("hint." + id.HeadLower() + ".detail"));
     static HintManager() {

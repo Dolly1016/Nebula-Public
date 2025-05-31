@@ -1,5 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Roles;
 using System;
@@ -89,7 +89,7 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
     {
         void SetPerkInner(ref PerkInstanceEntry? instance, int priority)
         {
-            instance?.instance?.ReleaseIt();
+            instance?.instance?.Release();
             var newInstance = perkDefinition?.Instantiate();
             if (newInstance != null)
             {
@@ -196,7 +196,7 @@ public class ItemSupplier : NebulaSyncStandardObject
         myConsole.enabled = false;
         ModSingleton<ItemSupplierManager>.Instance?.OnSupplierInstantiated(this);
 
-        NebulaManager.Instance.RegsiterStaticPopup(() => false, () =>
+        NebulaManager.Instance.RegisterStaticPopup(() => false, () =>
         {
             if (holdingPerk == null) return false;
             if (NebulaInput.SomeUiIsActive) return false;

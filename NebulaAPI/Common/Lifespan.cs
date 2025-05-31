@@ -3,19 +3,27 @@
 namespace Virial;
 
 /// <summary>
-/// 寿命を持つオブジェクトです
+/// 寿命オブジェクトを表します。
 /// </summary>
 public interface ILifespan
 {
     /// <summary>
-    /// 寿命の尽きたオブジェクトはtrueを返します
+    /// 寿命の尽きたオブジェクトは<c>true</c>を返します。
     /// </summary>
     bool IsDeadObject { get; }
 
     /// <summary>
-    /// 寿命の尽きたオブジェクトはfalseを返します
+    /// 存命中のオブジェクトは<c>true</c>を返します。
     /// </summary>
     bool IsAliveObject { get => !IsDeadObject; }
+}
+
+/// <summary>
+/// 入れ子状になった寿命オブジェクトを表します。
+/// </summary>
+public interface INestedLifespan : ILifespan
+{
+    bool Bind(ILifespan lifespan);
 }
 
 internal class GameObjectLifespan : ILifespan
@@ -45,14 +53,19 @@ public class FunctionalLifespan : ILifespan
     }
 
     /// <summary>
-    /// 生存している間はtrueを返す関数から作られる寿命付きオブジェクト
+    /// 生存している間はtrueを返す関数から作られる寿命付きオブジェクトを生成します。
     /// </summary>
-    /// <param name="predicate">生存している間はtrueを返す関数</param>
+    /// <param name="predicate">生存している間はtrueを返す関数。</param>
     public FunctionalLifespan(Func<bool> predicate)
     {
         this.predicate = predicate;
     }
 
+    /// <summary>
+    /// 指定の時間だけ生存する寿命オブジェクトを生成します。
+    /// </summary>
+    /// <param name="duration"></param>
+    /// <returns></returns>
     public static ILifespan GetTimeLifespan(float duration)
     {
         float end = UnityEngine.Time.time + duration;
@@ -62,67 +75,61 @@ public class FunctionalLifespan : ILifespan
 }
 
 /// <summary>
-/// 解放可能なオブジェクトを表します。
+/// 任意のタイミングで解放できるオブジェクトを表します。
+/// 能動的に寿命が切れる寿命オブジェクトが実装すべきインターフェースです。
 /// </summary>
 public interface IReleasable
 {
-    internal void Release();
+    void Release();
 }
 
-public static class IReleasableExtension
-{
-    public static void ReleaseIt(this IReleasable releasable) => releasable.Release();
-}
 /// <summary>
-/// 解放可能なオブジェクトを束縛できるオブジェクトです。
+/// ごく単純な寿命オブジェクトを表します。
+/// Release操作によってのみキルできます。
 /// </summary>
-public interface IBinder
+public class SimpleLifespan : ILifespan, IReleasable
 {
-    [return: NotNullIfNotNull("obj")]
-    T? Bind<T>(T? obj) where T : class, IReleasable;
-}
-
-internal interface IBinderLifespan : ILifespan, IBinder { }
-
-public class ComponentHolder : IBinder, IReleasable, ILifespan
-{
-    public bool IsDeadObject { get; private set; } = false;
-    private List<IReleasable> myComponent { get; init; } = new();
-
-
-    [return: NotNullIfNotNull("component")]
-    public T? Bind<T>(T? component) where T : class, IReleasable
+    private bool isDeadObject = false;
+    public bool IsDeadObject => isDeadObject;
+    public void Release()
     {
-        if (component == null) return null;
-
-        BindComponent(component);
-        return component;
-    }
-    public void BindComponent(IReleasable component) => myComponent.Add(component);
-
-    protected void ReleaseComponents()
-    {
-        foreach (var component in myComponent) component.Release();
-        myComponent.Clear();
-    }
-
-    void IReleasable.Release()
-    {
-        ReleaseComponents();
-        IsDeadObject = true;
-    }
-}
-
-public class SimpleReleasable : IReleasable, ILifespan
-{
-    public bool IsDeadObject { get; private set; } = false;
-
-    void IReleasable.Release()
-    {
-        if (IsDeadObject) return;
-        IsDeadObject = true;
+        if (isDeadObject) return;
+        isDeadObject = true;
         OnReleased();
     }
 
-    protected virtual void OnReleased() { }
+    /// <summary>
+    /// 解放されたときに呼び出されます。
+    /// 一度だけ呼び出されます。
+    /// </summary>
+    virtual protected void OnReleased() { }
+}
+
+/// <summary>
+/// 他の寿命オブジェクトにキルのタイミングを委ねる寿命オブジェクトです。
+/// 委ねる寿命オブジェクトを注入されるまでは少なくとも生存します。
+/// </summary>
+public class DependentLifespan : INestedLifespan
+{
+    private ILifespan? parentLifespan = null;
+    public bool IsDeadObject => parentLifespan?.IsDeadObject ?? false;
+    public bool Bind(ILifespan lifespan)
+    {
+        if (IsDeadObject) return false;
+        this.parentLifespan = lifespan;
+        return true;
+    }
+}
+
+/// <summary>
+/// 注入された寿命オブジェクトの寿命が尽きるか、Release操作によってキルできます。
+/// </summary>
+public class FlexibleLifespan : DependentLifespan, INestedLifespan, IReleasable
+{
+    private bool isDead = false;
+    public bool IsDeadObject => isDead || base.IsDeadObject;
+    public void Release()
+    {
+        isDead = true;
+    }
 }

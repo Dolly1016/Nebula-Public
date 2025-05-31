@@ -20,7 +20,7 @@ using Nebula.Roles.Abilities;
 namespace Nebula.Roles.Crewmate;
 
 [NebulaRPCHolder]
-internal class Climber : DefinedRoleTemplate, DefinedRole
+internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, DefinedRole
 {
     private const float HookSpeed = 19f;
     private const float HookBackSuccessSpeed = 12f;
@@ -29,37 +29,32 @@ internal class Climber : DefinedRoleTemplate, DefinedRole
     private Climber() : base("climber", new(86, 171, 246), RoleCategory.CrewmateRole, Crewmate.MyTeam, [GustCooldownOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
+        GameActionTypes.HookshotAction = new("hookshot", this, isPhysicalAction: true);
     }
 
     static private FloatConfiguration GustCooldownOption = NebulaAPI.Configurations.Configuration("options.role.climber.gustCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
-    static public Climber MyRole = new Climber();
-    static private GameStatsEntry StatsGust = NebulaAPI.CreateStatsEntry("stats.climber.gust", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsDistance = NebulaAPI.CreateStatsEntry("stats.climber.distance", GameStatsCategory.Roles, MyRole);
+    static public readonly Climber MyRole = new();
+    static private readonly GameStatsEntry StatsGust = NebulaAPI.CreateStatsEntry("stats.climber.gust", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsDistance = NebulaAPI.CreateStatsEntry("stats.climber.distance", GameStatsCategory.Roles, MyRole);
 
-    static private Image hookSprite = SpriteLoader.FromResource("Nebula.Resources.GustHook.png", 100f);
-    static private Image ropeSprite = SpriteLoader.FromResource("Nebula.Resources.GustRope.png", 100f);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static private readonly Image hookSprite = SpriteLoader.FromResource("Nebula.Resources.GustHook.png", 100f);
+    static private readonly Image ropeSprite = SpriteLoader.FromResource("Nebula.Resources.GustRope.png", 100f);
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GustHookButton.png", 115f);
 
-        public Instance(GamePlayer player, int[] argument) : base(player)
-        {
-        }
-
-
-        void RuntimeAssignable.OnActivated()
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
-                var gustButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                gustButton.SetSprite(buttonSprite.GetSprite());
-                gustButton.Availability = (button) => MyPlayer.CanMove;
-                gustButton.Visibility = (button) => !MyPlayer.IsDead;
+                var gustButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, GustCooldownOption, "gust", buttonSprite)
+                    .SetAsUsurpableButton(this)
+                    .SetAsMouseClickButton();
                 gustButton.OnClick = (button) =>
                 {
                     if (SearchPointAndSendJump())
@@ -68,19 +63,24 @@ internal class Climber : DefinedRoleTemplate, DefinedRole
                     }
                     button.StartCoolDown();
                 };
-                gustButton.CoolDownTimer = Bind(new Timer(0f, GustCooldownOption).SetAsAbilityCoolDown().Start());
-                gustButton.SetLabel("gust");
-                gustButton.SetCanUseByMouseClick();
-                new GuideLineAbility(MyPlayer, () => !gustButton.CoolDownTimer.IsProgressing && gustButton.IsAvailable).Register(this);
+                new GuideLineAbility(MyPlayer, () => !gustButton.IsInCooldown && MyPlayer.CanMove && !MyPlayer.IsDead).Register(new FunctionalLifespan(() => !this.IsDeadObject && !gustButton.IsBroken));
             }
         }
+
+        internal Hookshot? MyHookshot = null;
+        internal void SetHookshot(Hookshot? hookshot) => MyHookshot = hookshot;
+        bool IPlayerAbility.BlockUsingUtility => MyHookshot != null && !MyHookshot.IsDeadObject && !MyHookshot.IsDisappearing;
+
+
     }
- 
+
     static public bool SearchPointAndSendJump()
     {
-        ContactFilter2D filter = new();
-        filter.useLayerMask = true;
-        filter.layerMask = Constants.ShipAndAllObjectsMask;
+        ContactFilter2D filter = new()
+        {
+            useLayerMask = true,
+            layerMask = Constants.ShipAndAllObjectsMask
+        };
 
         var localPlayer = GamePlayer.LocalPlayer!;
 
@@ -134,13 +134,22 @@ internal class Climber : DefinedRoleTemplate, DefinedRole
         {
             RpcHook.Invoke((localPlayer, localPlayer.Position.ToUnityVector() + dir * 30f, Vector2.zero, 30f / HookSpeed, false));
         }
+        NebulaGameManager.Instance?.RpcDoGameAction(localPlayer, localPlayer.Position, GameActionTypes.HookshotAction);
+
         return false;
     }
+    
 
     static private RemoteProcess<(GamePlayer player, Vector2 hookTo, Vector2 playerTo, float delay, bool jump)> RpcHook = new("gustJumpAction", (message, _) =>
     {
         var hookshot = new Hookshot(message.player, message.hookTo);
         hookshot.Register(hookshot);
+
+        if (message.player.AmOwner)
+        {
+            NebulaAsset.PlaySE(NebulaAudioClip.Climber1, volume: 1f);
+            if(message.player.TryGetAbility<Ability>(out var ability)) ability.SetHookshot(hookshot);
+        }
 
         NebulaManager.Instance.StartDelayAction(message.delay, () =>
         {
@@ -152,7 +161,7 @@ internal class Climber : DefinedRoleTemplate, DefinedRole
                     int d = (int)(message.player.Position.Distance(message.playerTo) + 0.5f);
                     StatsDistance.Progress(d);
                     if (d >= 5) new StaticAchievementToken("climber.common1");
-                    GameOperatorManager.Instance?.Register<PlayerDieEvent>(ev => {
+                    GameOperatorManager.Instance?.Subscribe<PlayerDieEvent>(ev => {
                         if (ev.Player.AmOwner) new StaticAchievementToken("climber.another1");
                     }, FunctionalLifespan.GetTimeLifespan(8f));
 
@@ -161,6 +170,7 @@ internal class Climber : DefinedRoleTemplate, DefinedRole
                     if (killers >= 2) new AchievementToken<bool>("climber.challenge", true, (_, _) => !GamePlayer.LocalPlayer!.IsDead);
                 }
 
+                if (message.player.AmOwner) NebulaAsset.PlaySE(NebulaAudioClip.Climber2, volume: 1f);
                 NebulaManager.Instance.StartCoroutine(Impostor.Cannon.CoPlayJumpAnimation(message.player.VanillaPlayer, message.player.Position, message.playerTo, 1.9f, 4.9f, () => hookshot.MarkDespawn(HookBackSuccessSpeed)).WrapToIl2Cpp());
             }
             else
@@ -170,7 +180,7 @@ internal class Climber : DefinedRoleTemplate, DefinedRole
         });
     });
 
-    private class Hookshot : SimpleReleasable, IGameOperator, IBindPlayer
+    internal class Hookshot : SimpleLifespan, IGameOperator, IBindPlayer
     {
         GamePlayer IBindPlayer.MyPlayer => player;
         private SpriteRenderer ropeRenderer, hookRenderer;
@@ -224,7 +234,7 @@ internal class Climber : DefinedRoleTemplate, DefinedRole
                 length -= Speed * Time.deltaTime;
                 if (length < 0)
                 {
-                    this.ReleaseIt();
+                    this.Release();
                     return;
                 }
             }

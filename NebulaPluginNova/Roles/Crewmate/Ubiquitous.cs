@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Nebula.Modules.Cosmetics;
 using Nebula.Roles.Abilities;
 using Nebula.VoiceChat;
 using Virial;
@@ -262,7 +263,7 @@ public class UbiquitousMapLayer : MonoBehaviour
 }
 
 [NebulaRPCHolder]
-public class Ubiquitous : DefinedRoleTemplate, DefinedRole
+public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, DefinedRole
 {
     private Ubiquitous(): base("ubiquitous", new(56,155,223), RoleCategory.CrewmateRole, Crewmate.MyTeam, [droneCoolDownOption, droneDurationOption, droneMicrophoneRadiousOption, droneDetectionRadiousOption, doorHackCoolDownOption, doorHackRadiousOption])
     {
@@ -274,32 +275,28 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
         GameActionTypes.UbiquitousInvokeDroneAction = new("ubiquitous.invoke", this, isPlacementAction: true);
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
 
-    static private FloatConfiguration droneCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.droneCoolDown", (5f, 120f, 2.5f), 15f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration droneDurationOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.droneDuration", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static internal FloatConfiguration droneMicrophoneRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.microphoneRadious", (0f,5f,0.25f),2f, FloatConfigurationDecorator.Ratio);
-    static internal FloatConfiguration droneDetectionRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.detectionRadious", (0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
-    static private FloatConfiguration doorHackCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.doorHackCoolDown", (10f, 120f, 2.5f), 30f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration doorHackRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.doorHackRadious", (0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration droneCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.droneCoolDown", (5f, 120f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration droneDurationOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.droneDuration", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static internal readonly FloatConfiguration droneMicrophoneRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.microphoneRadious", (0f,5f,0.25f),2f, FloatConfigurationDecorator.Ratio);
+    static internal readonly FloatConfiguration droneDetectionRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.detectionRadious", (0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
+    static private readonly FloatConfiguration doorHackCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.doorHackCoolDown", (10f, 120f, 2.5f), 30f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration doorHackRadiousOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.doorHackRadious", (0f, 10f, 0.25f), 3f, FloatConfigurationDecorator.Ratio);
 
-    static public Ubiquitous MyRole = new Ubiquitous();
-    static private GameStatsEntry StatsDrones = NebulaAPI.CreateStatsEntry("stats.ubiquitous.drones", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static public readonly Ubiquitous MyRole = new();
+    static private readonly GameStatsEntry StatsDrones = NebulaAPI.CreateStatsEntry("stats.ubiquitous.drones", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player)
-        {
-        }
 
         UbiquitousDrone? myDrone = null;
         UbiquitousMapLayer? mapLayer = null;
         List<Vector2> dronePos = new();
 
-        static private Image droneButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneButton.png", 115f);
-        static private Image callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
-        static private Image hackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneHackButton.png", 115f);
+        static private readonly Image droneButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneButton.png", 115f);
+        static private readonly Image callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
+        static private readonly Image hackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneHackButton.png", 115f);
 
         [Local]
         void OnOpenNormalMap(MapOpenNormalEvent ev)
@@ -308,7 +305,7 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
             {
                 mapLayer = UnityHelper.CreateObject<UbiquitousMapLayer>("UbiquitousLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                 mapLayer.ReferenceDronePos(dronePos);
-                this.Bind(mapLayer.gameObject);
+                this.BindGameObject(mapLayer.gameObject);
             }
 
             mapLayer.gameObject.SetActive(!MeetingHud.Instance);
@@ -329,14 +326,14 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                 myDrone.DestroyDroneObject();
             }
         }
-
-        void RuntimeAssignable.OnActivated()
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
                 int currentSize = 1;
                 var cameraObj = HudContent.InstantiateContent("UbiquitousCamera", true, true, false, true);
-                this.Bind(cameraObj.gameObject);
+                this.BindGameObject(cameraObj.gameObject);
 
                 var mesh = UnityHelper.CreateMeshRenderer("MeshRenderer", cameraObj.transform, new(0, -0.08f, -1), LayerExpansion.GetUILayer());
                 mesh.filter.CreateRectMesh(new(1.34f, 0.78f), new(0.35f, 0f, 0f));
@@ -344,32 +341,28 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
 
                 var backMesh = UnityHelper.CreateMeshRenderer("MeshBackRenderer", mesh.renderer.transform, new(0, 0, 0.1f), LayerExpansion.GetUILayer(), MyRole.UnityColor);
                 backMesh.filter.CreateRectMesh(new(1.34f + 0.05f, 0.78f + 0.05f), new(0.35f, 0f, 0f));
-
-                ModAbilityButton callBackButton = null!;
-                ModAbilityButton droneButton;
-
-                droneButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "ubiquitous.drone");
-                droneButton.SetSprite(droneButtonSprite.GetSprite());
-                droneButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
-                droneButton.Visibility = (button) =>
-                {
-                    cameraObj.gameObject.SetActive(myDrone && AmongUsUtil.CurrentCamTarget != myDrone && !MeetingHud.Instance);
-                    if (cameraObj.gameObject.active)
-                    {
-                        int level = Mathf.Max(2, myDrone!.CameraRoughness);
-                        if(currentSize != level)
+                
+                var droneButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "ubiquitous.drone",
+                    droneCoolDownOption, droneDurationOption, "drone", droneButtonSprite,
+                    null, _ => {
+                        cameraObj.gameObject.SetActive(myDrone && AmongUsUtil.CurrentCamTarget != myDrone && !MeetingHud.Instance);
+                        if (cameraObj.gameObject.active)
                         {
-                            currentSize = level;
-                            mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134 / currentSize * 2, 78 / currentSize * 2);
+                            int level = Mathf.Max(2, myDrone!.CameraRoughness);
+                            if (currentSize != level)
+                            {
+                                currentSize = level;
+                                mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134 / currentSize * 2, 78 / currentSize * 2);
+                            }
                         }
+                        return !MyPlayer.IsDead;
                     }
-                    return !MyPlayer.IsDead;
-                };
-                droneButton.OnClick = (button) =>
+                    );
+                droneButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
+                droneButton.OnClick = _ =>
                 {
-                    droneButton.ActivateEffect();
-
-                    if (droneButton.EffectActive)
+                    droneButton.StartEffect();
+                    if (droneButton.IsInEffect)
                     {
                         if (!myDrone)
                         {
@@ -392,30 +385,30 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                     AmongUsUtil.SetCamTarget(null);
                     droneButton.StartCoolDown();
                 };
-                droneButton.CoolDownTimer = Bind(new Timer(droneCoolDownOption).SetAsAbilityCoolDown().Start());
-                droneButton.EffectTimer = Bind(new Timer(droneDurationOption).Start());
-                droneButton.SetLabel("drone");
+                droneButton.OnBroken = (button) =>
+                {
+                    AmongUsUtil.SetCamTarget(null);
+                };
+                droneButton.SetAsUsurpableButton(this);
 
-                callBackButton = Bind(new ModAbilityButton());
-                callBackButton.SetSprite(callBackButtonSprite.GetSprite());
+                var callBackButton = NebulaAPI.Modules.AbilityButton(this).SetLabel("callBack").SetImage(callBackButtonSprite).SetAsUsurpableButton(this);
                 callBackButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
                 callBackButton.Visibility = (button) => !MyPlayer.IsDead && myDrone;
                 callBackButton.OnClick = (button) =>
                 {
-                    callBackButton.DoSubClick();
                     AmongUsUtil.SetCamTarget();
                     myDrone!.CallBack();
                     myDrone = null;
 
-                    if (droneButton.EffectActive) droneButton.InactivateEffect();
+                    if (droneButton.IsInEffect) droneButton.InterruptEffect();
                 };
-                callBackButton.CoolDownTimer = Bind(new Timer(0f).SetAsAbilityCoolDown().Start());
-                callBackButton.SetLabel("callBack");
 
                 AchievementToken<int> totalAchievement = new("ubiquitous.common1", 0, (val, _) => val >= 5);
 
-                var hackButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "ubiquitous.doorHack");
-                hackButton.SetSprite(hackButtonSprite.GetSprite());
+                var hackButton = NebulaAPI.Modules.AbilityButton(this)
+                    .BindKey(Virial.Compat.VirtualKeyInput.SecondaryAbility, "ubiquitous.doorHack")
+                    .SetImage(hackButtonSprite)
+                    .SetLabel("doorHack");
                 hackButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
                 hackButton.Visibility = (button) => !MyPlayer.IsDead && myDrone;
                 hackButton.OnClick = (button) =>
@@ -434,18 +427,16 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
                     
                     hackButton.StartCoolDown();
                 };
-                
-                var coolDownTimer = Bind(new Timer(doorHackCoolDownOption).SetAsAbilityCoolDown().Start());
+                hackButton.SetAsUsurpableButton(this);
+                var coolDownTimer = new TimerImpl(doorHackCoolDownOption).SetAsAbilityCoolDown().Start().Register(this);
                 var pred = coolDownTimer.Predicate;
                 coolDownTimer.SetPredicate(()=>pred!.Invoke() || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone));
                 hackButton.CoolDownTimer = coolDownTimer;
-
-                hackButton.SetLabel("doorHack");
             }
         }
 
 
-        void RuntimeAssignable.OnInactivated()
+        void IGameOperator.OnReleased()
         {
             if (AmOwner)
             {
@@ -464,7 +455,7 @@ public class Ubiquitous : DefinedRoleTemplate, DefinedRole
 
         bool IsOperatingDrone => myDrone && AmongUsUtil.CurrentCamTarget == myDrone;
         //ドローン視点では壁を無視
-        bool RuntimeRole.EyesightIgnoreWalls => IsOperatingDrone;
+        bool IPlayerAbility.EyesightIgnoreWalls => IsOperatingDrone;
 
         [Local]
         public void EditLightRange(LightRangeUpdateEvent ev)

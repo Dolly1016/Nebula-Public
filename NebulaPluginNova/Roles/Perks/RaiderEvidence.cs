@@ -4,22 +4,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
+using Virial.Components;
 using Virial.Events.Game;
+using Virial.Game;
 
 namespace Nebula.Roles.Perks;
 
-internal class RaiderEvidence : PerkFunctionalInstance
+internal class RaiderEvidence : PerkFunctionalInstance, IGameOperator
 {
     const float CoolDown = 10f;
     static PerkFunctionalDefinition Def = new("raiderEvidence", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("raiderEvidence", 3, 38, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", () => CoolDown), (def, instance) => new RaiderEvidence(def, instance));
 
     public RaiderEvidence(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {
-        cooldownTimer = new Timer(CoolDown).Start();
+        cooldownTimer = NebulaAPI.Modules.Timer(this, CoolDown);
+        cooldownTimer.Start();
         PerkInstance.BindTimer(cooldownTimer);
     }
 
-    private Timer cooldownTimer;
+    private GameTimer cooldownTimer;
     private Raider.RaiderAxe? axe;
 
     public override bool HasAction => true;
@@ -57,7 +61,7 @@ internal class RaiderEvidence : PerkFunctionalInstance
         cooldownTimer.Start();
     }
 
-    protected override void OnReleased()
+    void IGameOperator.OnReleased()
     {
         if(axe != null) NebulaSyncObject.LocalDestroy(axe.ObjectId);
     }

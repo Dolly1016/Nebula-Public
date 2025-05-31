@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Roles.Impostor;
 using Nebula.Roles.Modifier;
 using Nebula.Roles.Neutral;
@@ -30,9 +30,9 @@ public class NebulaEndCriteria
 
     public bool IsValidCriteria => (gameModeMask & GeneralConfigurations.CurrentGameMode) != 0;
 
-    public Func<CustomEndCondition?>? OnUpdate = null;
-    public Func<PlayerControl?, Tuple<CustomEndCondition, int>?>? OnExiled = null;
-    public Func<CustomEndCondition?>? OnTaskUpdated = null;
+    public Func<GameEnd?>? OnUpdate = null;
+    public Func<PlayerControl?, Tuple<GameEnd, int>?>? OnExiled = null;
+    public Func<GameEnd?>? OnTaskUpdated = null;
 
     public NebulaEndCriteria(int gameModeMask = 0xFFFF)
     {
@@ -139,7 +139,7 @@ public class NebulaEndCriteria
         {
             int totalAlive = 0;
             bool leftImpostors = false;
-            bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
+            static bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
 
             //全生存者数を数えつつ、インポスターが生存していたらチェックをやめる
             allAliveJackals.Clear();
@@ -225,12 +225,19 @@ public class NebulaEndCriteria
 
 public class CriteriaManager
 {
-    private record TriggeredGameEnd(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, BitMask<Virial.Game.Player>? additionalWinners);
-    private List<TriggeredGameEnd> triggeredGameEnds = new();
+    private record TriggeredGameEnd(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, EditableBitMask<Virial.Game.Player>? additionalWinners);
+    private List<TriggeredGameEnd> triggeredGameEnds = [];
     
-    public void Trigger(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, BitMask<Virial.Game.Player>? additionalWinners)
+    public void Trigger(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, EditableBitMask<Virial.Game.Player>? additionalWinners)
     {
-        triggeredGameEnds.Add(new(gameEnd, reason, additionalWinners));
+        if (additionalWinners != null && reason == GameEndReason.Special && triggeredGameEnds.Find(end => end.gameEnd == gameEnd && end.reason == reason && end.additionalWinners != null, out var end))
+        {
+            GamePlayer.AllPlayers.Where(additionalWinners.Test).Do(p => end.additionalWinners!.Add(p));
+        }
+        else
+        {
+            triggeredGameEnds.Add(new(gameEnd, reason, additionalWinners));
+        }
     }
 
     public void CheckAndTriggerGameEnd()
@@ -240,7 +247,11 @@ public class CriteriaManager
         //終了条件が確定済みなら何もしない
         if (NebulaGameManager.Instance?.EndState != null) return;
 
-        if ((ExileController.Instance) && !Minigame.Instance) triggeredGameEnds.RemoveAll(t => t.reason is GameEndReason.Situation or GameEndReason.SpecialSituation);
+        if ((ExileController.Instance) && !Minigame.Instance)
+        {
+            triggeredGameEnds.RemoveAll(t => t.reason is GameEndReason.Situation or GameEndReason.SpecialSituation);
+            return; //追放中はゲーム終了条件の判定をスキップする。
+        }
 
         if(triggeredGameEnds.Count == 0) return;
 

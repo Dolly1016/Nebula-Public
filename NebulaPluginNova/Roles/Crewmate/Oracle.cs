@@ -14,6 +14,7 @@ using Virial.DI;
 using Virial.Events.Game;
 using Nebula.Roles.Modifier;
 using Virial.Text;
+using Virial.Components;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -142,41 +143,38 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
     }
     
 }
-internal class Oracle : DefinedRoleTemplate, DefinedRole
+internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, DefinedRole
 {
     private Oracle() : base("oracle", new(214, 156, 45), RoleCategory.CrewmateRole, Crewmate.MyTeam, [OracleCooldownOption, OracleAdditionalCooldownOption, OracleDurationOption, NumOfCandidatesOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic);
     }
 
-    static private FloatConfiguration OracleCooldownOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration OracleAdditionalCooldownOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleAdditionalCooldown", (float[])[0f,0.5f,1f,2f,2.5f,3f,4f,5f,7.5f,10f,12.5f,15f,20f,30f], 1f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration OracleDurationOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleDuration", (float[])[0f,0.5f,1f,1.5f,2f,2.5f,3f,3.5f,4f,5f,6f,7f,8f,9f,10f], 2f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration NumOfCandidatesOption = NebulaAPI.Configurations.Configuration("options.role.oracle.numOfCandidates", (1, 3), 3);
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
+    static private readonly FloatConfiguration OracleCooldownOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration OracleAdditionalCooldownOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleAdditionalCooldown", (float[])[0f,0.5f,1f,2f,2.5f,3f,4f,5f,7.5f,10f,12.5f,15f,20f,30f], 1f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration OracleDurationOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleDuration", (float[])[0f,0.5f,1f,1.5f,2f,2.5f,3f,3.5f,4f,5f,6f,7f,8f,9f,10f], 2f, FloatConfigurationDecorator.Second);
+    static private readonly IntegerConfiguration NumOfCandidatesOption = NebulaAPI.Configurations.Configuration("options.role.oracle.numOfCandidates", (1, 3), 3);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
-    static public Oracle MyRole = new Oracle();
-    static private GameStatsEntry StatsOracle = NebulaAPI.CreateStatsEntry("stats.oracle.oracle", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    static public readonly Oracle MyRole = new();
+    static private readonly GameStatsEntry StatsOracle = NebulaAPI.CreateStatsEntry("stats.oracle.oracle", GameStatsCategory.Roles, MyRole);
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.OracleButton.png", 115f);
-
-        public Instance(GamePlayer player, int[] argument) : base(player)
-        {
-        }
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.OracleButton.png", 115f);
 
         Dictionary<byte, (string longName, string shortName)> divideResults = [];
 
-        void RuntimeAssignable.OnActivated()
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
-                var playerTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !divideResults.ContainsKey(p.PlayerId)));
+                var playerTracker = ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !divideResults.ContainsKey(p.PlayerId)).Register(this);
 
-                var oracleButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                var cooldownTimer = Bind(new Timer(0f, OracleCooldownOption).SetAsAbilityCoolDown().Start());
+                var oracleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    OracleCooldownOption, "oracle", buttonSprite, 
+                    _ => playerTracker.CurrentTarget != null, null);
+                
 
                 void PredicateRole()
                 {
@@ -187,17 +185,13 @@ internal class Oracle : DefinedRoleTemplate, DefinedRole
                         string.Join(", ", shuffled.Select(r => shuffled.Length >= 2 ? r.DisplayColoredShort : r.DisplayColoredName))
                         );
 
-                    cooldownTimer.Expand(OracleAdditionalCooldownOption);
+                    (oracleButton.CoolDownTimer as GameTimer)?.Expand(OracleAdditionalCooldownOption);
                     StatsOracle.Progress();
                 }
-
-                oracleButton.SetSprite(buttonSprite.GetSprite());
-                oracleButton.Availability = (button) => MyPlayer.CanMove && playerTracker.CurrentTarget != null;
-                oracleButton.Visibility = (button) => !MyPlayer.IsDead;
                 oracleButton.OnClick = (button) => {
                     if (OracleDurationOption > 0f)
                     {
-                        button.ActivateEffect();
+                        button.StartEffect();
                     }
                     else
                     {
@@ -213,12 +207,12 @@ internal class Oracle : DefinedRoleTemplate, DefinedRole
                     oracleButton.StartCoolDown();
                 };
                 oracleButton.OnUpdate = (button) => {
-                    if (!button.EffectActive) return;
-                    if (playerTracker.CurrentTarget == null) button.InactivateEffect();
+                    if (!button.IsInEffect) return;
+                    if (playerTracker.CurrentTarget == null) button.InterruptEffect();
                 };
-                oracleButton.CoolDownTimer = cooldownTimer;
-                oracleButton.EffectTimer = Bind(new Timer(0f, OracleDurationOption).Start());
+                oracleButton.EffectTimer = NebulaAPI.Modules.Timer(this, OracleDurationOption);
                 oracleButton.SetLabel("oracle");
+                oracleButton.SetAsUsurpableButton(this);
             }
         }
 
@@ -245,7 +239,7 @@ internal class Oracle : DefinedRoleTemplate, DefinedRole
         {
             if(ev.Dead.PlayerState == PlayerStates.Guessed && divideResults.ContainsKey((byte)ev.Dead.PlayerId))
             {
-                if (ev.Dead.IsImpostor && ev.Murderer.IsTrueCrewmate) GameOperatorManager.Instance?.Register<GameEndEvent>(ev => { 
+                if (ev.Dead.IsImpostor && ev.Murderer.IsTrueCrewmate) GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => { 
                     if(ev.EndState.Winners.Test(MyPlayer) && !GamePlayer.AllPlayers.Any(p => p.PlayerState == PlayerStates.Exiled && (p.MyKiller?.IsTrueCrewmate ?? false)))
                     {
                         new StaticAchievementToken("oracle.challenge");

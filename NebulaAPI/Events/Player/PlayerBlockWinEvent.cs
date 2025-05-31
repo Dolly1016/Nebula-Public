@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Player;
 
+
 public class PlayerBlockWinEvent : AbstractPlayerEvent
 {
     public Virial.Game.GameEnd GameEnd { get; private init; }

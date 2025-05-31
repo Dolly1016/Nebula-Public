@@ -18,11 +18,11 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
 
     string ICodeName.CodeName => "NGH";
 
-    static private IntegerConfiguration NumOfNoiseOption = NebulaAPI.Configurations.Configuration("options.role.noiseghost.numOfNoise", (1, 10), 1);
-    static private FloatConfiguration NoiseCooldownOption = NebulaAPI.Configurations.Configuration("options.role.noiseghost.noiseCooldown", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => NumOfNoiseOption >= 2);
+    static private readonly IntegerConfiguration NumOfNoiseOption = NebulaAPI.Configurations.Configuration("options.role.noiseghost.numOfNoise", (1, 10), 1);
+    static private readonly FloatConfiguration NoiseCooldownOption = NebulaAPI.Configurations.Configuration("options.role.noiseghost.noiseCooldown", (5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => NumOfNoiseOption >= 2);
 
-    static public Noiseghost MyRole = new Noiseghost();
-    static internal GameStatsEntry StatsAlert = NebulaAPI.CreateStatsEntry("stats.noiseghost.alert", GameStatsCategory.Roles, MyRole);
+    static public readonly Noiseghost MyRole = new();
+    static internal readonly GameStatsEntry StatsAlert = NebulaAPI.CreateStatsEntry("stats.noiseghost.alert", GameStatsCategory.Roles, MyRole);
     RuntimeGhostRole RuntimeAssignableGenerator<RuntimeGhostRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
@@ -31,7 +31,7 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
 
         public Instance(GamePlayer player) : base(player) { }
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GhostNoiseButton.png", 115f);
+        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GhostNoiseButton.png", 115f);
 
         string RuntimeAssignable.DisplayColoredName => (MyRole as DefinedAssignable).DisplayName.Color(MyPlayer.IsImpostor ? NebulaTeams.ImpostorTeam.UnityColor : MyRole.UnityColor);
         void RuntimeAssignable.OnActivated()
@@ -39,12 +39,10 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
             if (AmOwner)
             {
                 int left = NumOfNoiseOption;
-                var noiseButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                noiseButton.SetSprite(buttonSprite.GetSprite());
-                noiseButton.Availability = (button) => MyPlayer.CanMove;
-                noiseButton.Visibility = (button) => MyPlayer.IsDead;
-                var usesIcon = noiseButton.ShowUsesIcon(3);
-                usesIcon.text = left.ToString();
+                var noiseButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, NoiseCooldownOption,
+                    "noise", buttonSprite, null, _ => left >= 0, true);
+                
+                noiseButton.ShowUsesIcon(3, left.ToString());
                 noiseButton.OnClick = (button) =>
                 {
                     new StaticAchievementToken("noiseghost.common1");
@@ -53,18 +51,11 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
                     RpcGhostNoise.Invoke((MyPlayer, MyPlayer.VanillaPlayer.transform.position));
                     left--;
 
-                    if (left == 0)
-                    {
-                        noiseButton.ReleaseIt();
-                    }
-                    else
-                    {
-                        usesIcon.text = left.ToString();
-                        noiseButton.StartCoolDown();
-                    }
+                    if (left > 0) noiseButton.UpdateUsesIcon(left.ToString());
+
+                    noiseButton.StartCoolDown();
+                    
                 };
-                noiseButton.CoolDownTimer = Bind(new Timer(0f, NoiseCooldownOption).SetAsAbilityCoolDown().Start(0f));
-                noiseButton.SetLabel("noise");
             }
         }
     }

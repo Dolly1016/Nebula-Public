@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
@@ -12,9 +12,9 @@ namespace Nebula.Roles.Neutral;
 
 public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static public RoleTeam MyTeam = new Team("teams.arsonist", new(229, 93, 0), TeamRevealType.OnlyMe);
+    static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.arsonist", new(229, 93, 0), TeamRevealType.OnlyMe);
     private Arsonist():base("arsonist", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [DouseCoolDownOption, DouseDurationOption, VentConfiguration]) { }
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);
 
@@ -24,18 +24,12 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 
     static public Arsonist MyRole = new Arsonist();
     static private GameStatsEntry StatsDouse = NebulaAPI.CreateStatsEntry("stats.arsonist.doused", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
-        DefinedRole RuntimeRole.Role => MyRole;
+        public override DefinedRole Role => MyRole;
 
-        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
-        private bool canUseVent = VentConfiguration.CanUseVent;
-        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
-        GameTimer? RuntimeRole.VentDuration => ventDuration;
-        bool RuntimeRole.CanUseVent => canUseVent;
         private int initialDousedMask = 0;
-        public Instance(GamePlayer player, int[] arguments) : base(player)
+        public Instance(GamePlayer player, int[] arguments) : base(player, VentConfiguration)
         {
             if (arguments.Length == 1) initialDousedMask = arguments[0];
         }
@@ -53,9 +47,6 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
             }
         }
 
-
-        private Modules.ScriptComponents.ModAbilityButton? douseButton = null;
-        private Modules.ScriptComponents.ModAbilityButton? igniteButton = null;
         static private Image douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DouseButton.png", 115f);
         static private Image IgniteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.IgniteButton.png", 115f);
         private List<(byte playerId,PoolablePlayer icon)> playerIcons = new();
@@ -76,12 +67,13 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
             }
         }
 
-        void RuntimeAssignable.OnActivated()
+        public override void OnActivated()
         {
             if (AmOwner)
             {
                 var IconsHolder = HudContent.InstantiateContent("ArsonistIcons", true, true, false, true);
-                this.Bind(IconsHolder.gameObject);
+                this.BindGameObject(IconsHolder.gameObject);
+                
 
                 var ajust = UnityHelper.CreateObject<ScriptBehaviour>("Ajust", IconsHolder.transform, Vector3.zero);
                 ajust.UpdateHandler += () =>
@@ -115,15 +107,11 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     CheckIgnitable();
                 }
 
-                var douseTracker = Bind(ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)));
+                var douseTracker = ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)).Register(this);
 
-                douseButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                douseButton.SetSprite(douseButtonSprite.GetSprite());
-                douseButton.Availability = (button) => MyPlayer.CanMove && douseTracker.CurrentTarget != null;
-                douseButton.Visibility = (button) => !MyPlayer.IsDead && !canIgnite;
-                douseButton.OnClick = (button) => {
-                    button.ActivateEffect();
-                };
+                var douseButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    DouseCoolDownOption, DouseDurationOption, "douse", douseButtonSprite,
+                    _ => douseTracker.CurrentTarget != null, _ => !canIgnite);
                 douseButton.OnEffectEnd = (button) =>
                 {
                     if (douseTracker.CurrentTarget == null) return;
@@ -136,23 +124,18 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     douseButton.StartCoolDown();
                 };
                 douseButton.OnUpdate = (button) => {
-                    if (!button.EffectActive) return;
-                    if (douseTracker.CurrentTarget == null) button.InactivateEffect();
+                    if (!button.IsInEffect) return;
+                    if (douseTracker.CurrentTarget == null) button.InterruptEffect();
                 };
-                douseButton.CoolDownTimer = Bind(new Timer(0f, DouseCoolDownOption).SetAsAbilityCoolDown().Start());
-                douseButton.EffectTimer = Bind(new Timer(0f, DouseDurationOption));
-                douseButton.SetLabel("douse");
 
                 bool won = false;
-                igniteButton = Bind(new Modules.ScriptComponents.ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-                igniteButton.SetSprite(IgniteButtonSprite.GetSprite());
-                igniteButton.Availability = (button) => MyPlayer.CanMove;
-                igniteButton.Visibility = (button) => !MyPlayer.IsDead && canIgnite && !won;
+                var igniteButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                    0f, "ignite", IgniteButtonSprite,
+                    null, _ => canIgnite && !won);
                 igniteButton.OnClick = (button) => {
                     NebulaGameManager.Instance.RpcInvokeSpecialWin(NebulaGameEnd.ArsonistWin, 1 << MyPlayer.PlayerId);
                     won = true;
                 };
-                igniteButton.SetLabel("ignite");
             }
 
         }

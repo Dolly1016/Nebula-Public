@@ -1,6 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using InnerNet;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Virial;
 

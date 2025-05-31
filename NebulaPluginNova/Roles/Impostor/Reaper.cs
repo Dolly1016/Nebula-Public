@@ -17,6 +17,10 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Reaper.png");
     }
 
+    bool DefinedRole.IsJackalizable => true;
+    IPlayerAbility DefinedRole.GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => new Ability(jackal, arguments.GetAsBool(0));
+    IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.reaper.vent", false, null, -1, (0f, 60f, 2.5f), 15f, (2.5f, 30f, 2.5f), 10f);
@@ -24,23 +28,25 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
 
     static public Reaper MyRole = new Reaper();
     static private GameStatsEntry StatsVent = NebulaAPI.CreateStatsEntry("stats.reaper.ventWithDeadBody", GameStatsCategory.Roles, MyRole);
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped) {
+            new Scripts.Draggable(MyPlayer).Register(new FunctionalLifespan(()=> !IsDeadObject && !IsUsurped));
+        }
+    }
 
-        private Scripts.Draggable? draggable = null;
-        private GameTimer ventCoolDown = (new Timer(VentConfiguration.CoolDown).SetAsAbilityCoolDown().Start() as GameTimer).ResetsAtTaskPhase();
-        private GameTimer ventDuration = new Timer(VentConfiguration.Duration);
-        GameTimer? RuntimeRole.VentCoolDown => ventCoolDown;
-        GameTimer? RuntimeRole.VentDuration => ventDuration;
+    public class Instance : RuntimeVentRoleTemplate, RuntimeRole
+    {
+        public override DefinedRole Role => MyRole;
         bool RuntimeRole.PreventUsingVent => MyPlayer.HoldingAnyDeadBody && !CanUseVentWhileHoldingDeadbodyOption;
 
         StaticAchievementToken? acTokenCommon = null;
         AchievementToken<int>? acTokenChallenge = null;
-
-        public Instance(GamePlayer player) : base(player)
+        int[] RuntimeAssignable.RoleArguments => [isUsurped.AsInt()];
+        public Instance(GamePlayer player) : base(player, VentConfiguration)
         {
-            draggable = Bind(new Scripts.Draggable());
         }
 
         private Vent? GetVent(string name)
@@ -163,9 +169,12 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
             }
         }
 
-        void RuntimeAssignable.OnActivated()
+
+        private bool isUsurped = false;
+        void Usurp() => isUsurped = true;
+        public override void OnActivated()
         {
-            draggable?.OnActivated(this);
+            new Scripts.Draggable(MyPlayer).Register(new FunctionalLifespan(() => !IsDeadObject && !isUsurped));
             if (AmOwner)
             {
                 EditVentInfo(true);
@@ -177,14 +186,8 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
         [Local]
         void EditVentInfoOnGameStart(GameStartEvent ev) => EditVentInfo(true);
 
-
-        [OnlyMyPlayer]
-        void OnDead(PlayerDieEvent ev) => draggable?.OnDead(this);
-
-
         void RuntimeAssignable.OnInactivated()
         {
-            draggable?.OnInactivated(this);
             if (AmOwner) EditVentInfo(false);
         }
 

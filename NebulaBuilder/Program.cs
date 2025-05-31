@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 Console.WriteLine(GetDisplayVersion() + " ("+ GetTagVersion() +")");
 
-List<Process> AllProcess = new();
+List<Process> AllProcess = [];
 
 var githubClient = new GitHubClient(new ProductHeaderValue("lr")) { Credentials = new(GetGitHubToken()) };
 
@@ -22,7 +22,7 @@ while (!exit)
         Console.WriteLine("\n\n");
         return key.Key;
     }
-
+    
     switch (ReadKey())
     {
         case ConsoleKey.D:
@@ -65,8 +65,10 @@ while (!exit)
                     var path = Environment.GetEnvironmentVariable("AmongUsRelease");
                     Console.WriteLine("dllファイルをアップロードしています...");
                     UploadAsset(release, "Nebula.dll", File.OpenRead(path + "\\Nebula.dll"));
-                    Console.WriteLine("zipファイルをアップロードしています...");
-                    UploadAsset(release, "Nebula.zip", File.OpenRead(path + "\\Nebula.zip"));
+                    Console.WriteLine("Steam版 zipファイルをアップロードしています...");
+                    UploadAsset(release, "Nebula_Steam.zip", File.OpenRead(path + "\\Nebula_Steam.zip"));
+                    Console.WriteLine("Epic版 zipファイルをアップロードしています...");
+                    UploadAsset(release, "Nebula_Epic.zip", File.OpenRead(path + "\\Nebula_Epic.zip"));
                     Console.WriteLine("公開が完了しました。");
                 }
             }
@@ -155,7 +157,7 @@ string GenerateShortcut(string envPath)
 
 Process? OpenWebpage(string url)
 {
-    ProcessStartInfo pi = new ProcessStartInfo()
+    ProcessStartInfo pi = new()
     {
         FileName = url,
         UseShellExecute = true,
@@ -195,7 +197,7 @@ void CopyText(params string[] text)
 
 bool IsStableVersion()
 {
-    return NebulaPlugin.VisualVersion.StartsWith("v") && NebulaPlugin.VisualVersion.Length >= 2 && char.IsNumber(NebulaPlugin.VisualVersion[1]);
+    return NebulaPlugin.VisualVersion.StartsWith('v') && NebulaPlugin.VisualVersion.Length >= 2 && char.IsNumber(NebulaPlugin.VisualVersion[1]);
 }
 
 string FormatDisplayVersion()

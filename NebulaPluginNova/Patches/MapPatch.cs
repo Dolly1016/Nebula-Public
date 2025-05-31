@@ -1,5 +1,5 @@
 ﻿using NAudio.MediaFoundation;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using System.Reflection.Metadata;
 using Virial.Events.Game.Minimap;
 using Virial.Game;

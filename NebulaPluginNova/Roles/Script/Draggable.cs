@@ -1,50 +1,49 @@
 ﻿using Virial;
 using Virial.Assignable;
+using Virial.Events.Player;
+using Virial.Game;
 
 namespace Nebula.Roles.Scripts;
 
-public class Draggable : ComponentHolder
+public class Draggable : FlexibleLifespan, IGameOperator, IBindPlayer
 {
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DragAndDropButton.png", 115f);
 
     public Action<DeadBody>? OnHoldingDeadBody { get; set; } = null;
+    private GamePlayer myPlayer;
+    GamePlayer IBindPlayer.MyPlayer => myPlayer;
 
-    public void OnActivated(RuntimeRole role)
+    public Draggable(GamePlayer player)
     {
-        if (role.MyPlayer.AmOwner)
+        this.myPlayer = player;
+
+        if (player.AmOwner)
         {
             //不可視の死体はつかめる対象から外す
-            var deadBodyTracker = Bind(ObjectTrackers.ForDeadBody(null, role.MyPlayer, d => d.RelatedDeadBody?.GetHolder() == null));
+            var deadBodyTracker = ObjectTrackers.ForDeadBody(null, player, d => d.RelatedDeadBody?.GetHolder() == null).Register(this);
 
-            var dragButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability);
-            dragButton.SetSprite(buttonSprite.GetSprite());
-            dragButton.Availability = (button) =>
-            {
-                return (deadBodyTracker.CurrentTarget != null || role.MyPlayer.HoldingAnyDeadBody) && role.MyPlayer.CanMove;
-            };
-            dragButton.Visibility = (button) => !role.MyPlayer.IsDead;
+            var dragButton = NebulaAPI.Modules.AbilityButton(this, myPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                0f, "drag", buttonSprite,
+                _ => deadBodyTracker.CurrentTarget != null || player.HoldingAnyDeadBody, null);
             dragButton.OnClick = (button) =>
             {
-                if (!role.MyPlayer.HoldingAnyDeadBody)
+                if (!player.HoldingAnyDeadBody)
                 {
-                    role.MyPlayer.HoldDeadBody(deadBodyTracker.CurrentTarget!);
+                    player.HoldDeadBody(deadBodyTracker.CurrentTarget!);
                     OnHoldingDeadBody?.Invoke(deadBodyTracker.CurrentTarget!.RelatedDeadBody!);
                 }
                 else
-                    role.MyPlayer.ReleaseDeadBody();
+                    player.ReleaseDeadBody();
             };
-            dragButton.OnUpdate = (button) => dragButton.SetLabel(role.MyPlayer.HoldingAnyDeadBody ? "release" : "drag");
-            dragButton.SetLabel("drag");
+            dragButton.OnUpdate = (button) => dragButton.SetLabel(player.HoldingAnyDeadBody ? "release" : "drag");
         }
     }
 
-    public void OnDead(RuntimeRole role)
+    [OnlyMyPlayer, Local]
+    void OnDead(PlayerDieEvent ev)
     {
-        role.MyPlayer.ReleaseDeadBody();
+        myPlayer.ReleaseDeadBody();
     }
 
-    public void OnInactivated(RuntimeRole role)
-    {
-        role.MyPlayer.ReleaseDeadBody();
-    }
+    void IGameOperator.OnReleased() => myPlayer.ReleaseDeadBody();
 }

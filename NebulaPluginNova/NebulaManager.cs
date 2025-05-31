@@ -1,7 +1,10 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Xml.Schema;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Map;
+using Nebula.Modules.Cosmetics;
+using Nebula.VisualProgramming;
+using Nebula.VisualProgramming.UI;
 using System.Data;
 using TMPro;
 using UnityEngine.Rendering;
@@ -9,10 +12,15 @@ using Virial;
 using Virial.Helpers;
 using Virial.Media;
 using Virial.Runtime;
+using Virial.VisualProgramming;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 using static Nebula.Modules.INebulaAchievement;
-using static Nebula.Modules.RingMenu;
+using static Nebula.Modules.Cosmetics.RingMenu;
 using static Nebula.Roles.Neutral.Spectre;
+using Virial.Events.Game;
+using static Il2CppSystem.Uri;
+using Nebula.Patches;
+using Nebula.Roles.Crewmate;
 
 namespace Nebula;
 
@@ -223,11 +231,14 @@ public class MouseOverPopup : MonoBehaviour
             smoothY = Math.Max(0f, 1f - Math.Abs(yCenter));
         }
 
-        float[] xRange = new float[2], yRange = new float[2];
-        xRange[0] = -lastSize.Width * 0.5f - 0.15f;
-        xRange[1] = lastSize.Width * 0.5f + 0.15f;
-        yRange[0] = -lastSize.Height * 0.5f - 0.15f;
-        yRange[1] = lastSize.Height * 0.5f + 0.15f;
+        float[] xRange = [
+            -lastSize.Width * 0.5f - 0.15f,
+            lastSize.Width * 0.5f + 0.15f
+            ];
+        float[] yRange = [
+            -lastSize.Height * 0.5f - 0.15f,
+            lastSize.Height * 0.5f + 0.15f
+            ];
 
         Vector2 anchorPoint = new(Mathf.Lerp(xRange[isLeft ? 0 : 1], 0f, smoothX), Mathf.Lerp(yRange[isLower ? 0 : 1], 0f, smoothY));
 
@@ -315,7 +326,7 @@ public class MouseOverPopup : MonoBehaviour
 [NebulaRPCHolder]
 public class NebulaManager : MonoBehaviour
 {
-    private record PopupProvider(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callBack)> supplier, Func<float>? guage = null, Image? relatedIcon = null);
+    private record PopupProvider(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callBack)> supplier, Func<float>? gauge = null, Image? relatedIcon = null);
     public class MetaCommand
     {
         public Virial.Compat.VirtualKeyInput? KeyAssignmentType = null;
@@ -333,8 +344,8 @@ public class NebulaManager : MonoBehaviour
         }
     }
     List<PopupProvider> PopupProviders = null!;
-    private List<Tuple<GameObject, PassiveButton?>> allModUi = new();
-    static private List<MetaCommand> commands = new();
+    private List<Tuple<GameObject, PassiveButton?>> allModUi = [];
+    static private List<MetaCommand> commands = [];
     static public NebulaManager Instance { get; private set; } = null!;
 
     public DebugScreen DebugScreen => debugScreen;
@@ -419,7 +430,7 @@ public class NebulaManager : MonoBehaviour
 
         commands.Add(new("help.command.toggleSocial",
             () => AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && AmongUsClient.Instance.AmHost && (ModSingleton<ShowUp>.Instance?.ShouldBeShownSocialSettings ?? false),
-            () => ShowUp.RpcShareSocialSettings.Invoke((false, !ModSingleton<ShowUp>.Instance.CanAppealInGame, ModSingleton<ShowUp>.Instance.CanUseStamps))
+            () => ShowUp.RpcShareSocialSettings.Invoke((false, !ModSingleton<ShowUp>.Instance.CanAppealInGame, ModSingleton<ShowUp>.Instance.CanUseStamps, ModSingleton<ShowUp>.Instance.CanUseEmotes))
         )
         { DefaultKeyInput = new(KeyCode.F4) });
 
@@ -470,9 +481,9 @@ public class NebulaManager : MonoBehaviour
         tex.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
         tex.Apply(false, false);
 
-        File.WriteAllBytesAsync(GetPicturePath(out string displayPath), tex.EncodeToPNG());
+        File.WriteAllBytesAsync(GetPicturePath(out _), tex.EncodeToPNG());
 
-        UnityEngine.Object.Destroy(tex);
+        DevTeamContact.PushScreenshot(tex);
     }
 
     internal void ShowRingMenu(RingMenuElement[] elements, Func<bool> showWhile, Action? ifEmpty)
@@ -499,19 +510,126 @@ public class NebulaManager : MonoBehaviour
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
                 var stampInput = NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Stamp);
-                if (stampInput.KeyDownForAction &&
-                    (
-                    (!GameManager.Instance || !GameManager.Instance.GameHasStarted) ||
-                    (MeetingHud.Instance || ExileController.Instance) ||
-                    NebulaGameManager.Instance!.CanSeeAllInfo
-                    ))
+                if (stampInput.KeyDownForAction)
                 {
-                    StampHelpers.ShowStampRingMenu(() => !stampInput.KeyUp);
+                    StampHelpers.TryShowStampRingMenu(() => !stampInput.KeyUp);
                 }
 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    CustomConsoleProperty.MinigameAction<Roles.Impostor.SlingshotMinigame>(null!, (minigame, console) =>{}).Invoke(null!);
+                    /*
+                    var player1 = GamePlayer.GetPlayer(0)!;
+                    var player2 = GamePlayer.GetPlayer(1)!;
+
+                    int length = 0, begin = 0;
+                    int max = 30;
+                    Vector2[] pos1 = new Vector2[max];
+                    Vector2[] pos2 = new Vector2[max];
+
+                    (var renderer, var filter) = UnityHelper.CreateMeshRenderer("MeshRenderer", null, new(0f, 0f, -10f), LayerExpansion.GetDefaultLayer(), null, UnityHelper.GetMeshRendererMaterial());
+                    renderer.material.mainTexture = SpriteLoader.FromResource("Nebula.Resources.Gradation.png", 100f).GetSprite().texture;
+                    var mesh = filter.mesh;
+
+                    Vector3[] pos = new Vector3[max * 2];
+                    mesh.SetVertices(pos);
+
+                    var color = new Color32(255, 255, 255, 255);
+                    Color32[] colors = new Color32[max * 2];
+                    for (int i = 0; i < max * 2; i++) colors[i] = color;
+                    mesh.SetColors(colors);
+
+                    Vector2[] uvs = new Vector2[max * 2];
+                    for(int i = 0; i < max; i++)
+                    {
+                        uvs[i] = new((float)i / (max - 1) * 0.95f, 0);
+                        uvs[i + max] = new((float)i / (max - 1) * 0.95f, 1);
+                    }
+                    mesh.SetUVs(0, uvs);
+
+                    
+
+                    GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
+                    {
+                        Vector3 center = HudManager.Instance.transform.position;
+                        center.z = -100f;
+                        renderer.transform.position = center;
+                        center.z = 0f;
+
+                        if (length < max) length++; else begin = (begin + 1) % max;
+                        int lastIndex = (begin + length - 1) % max;
+                        pos1[lastIndex] = player1.Position.ToUnityVector();
+                        pos2[lastIndex] = player2.Position.ToUnityVector();
+
+                        int offset = max - length;
+                        for(int i = 0; i < length; i++)
+                        {
+                            pos[offset + i] = (Vector3)pos1[(begin + i) % max] - center;
+                            pos[offset + i + max] = (Vector3)pos2[(begin + i) % max] - center;
+                        }
+
+                        mesh.SetVertices(pos);
+                        List<int> triangleList = [];
+
+                        Vector2 temp1, temp2, temp3, dir;
+                        float cross;
+                        for (int i =0;i<length - 1; i++)
+                        {
+                            temp1 = pos2[(begin + i) % max];
+                            temp2 = pos2[(begin + i + 1) % max];
+                            temp3 = pos1[(begin + i) % max];
+                            dir = temp2 - temp1;
+                            cross = dir.x * temp3.y - dir.y * temp3.x;
+                            if(cross > 0f) triangleList.AddRange([offset + i + max, offset + i, offset + i + 1 + max]);
+                            else triangleList.AddRange([offset + i + max, offset + i + 1 + max, offset + i]);
+
+                            temp1 = pos1[(begin + i) % max];
+                            temp2 = pos1[(begin + i + 1) % max];
+                            temp3 = pos2[(begin + i + 1) % max];
+                            dir = temp2 - temp1;
+                            cross = dir.x * temp3.y - dir.y * temp3.x;
+                            if (cross > 0f) triangleList.AddRange([offset + i, offset + i + 1, offset + i + 1 + max]);
+                            else triangleList.AddRange([offset + i, offset + i + 1 + max, offset + i + 1]);
+                        }
+
+                        
+                        mesh.SetTriangles(triangleList.ToArray(), 0);
+                    }, NebulaAPI.CurrentGame);
+                    */
+
+
+
+
+                    //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
+
+                    /*
+                    var generator = new EdgeGenerator(new(-1f, 0f), [new(2f, 2f), new(2f, 1f), new(2f, 0f), new(2f, -1f), new(2f, -2f)]);
+                    StartCoroutine(ManagedEffects.Wait(() =>
+                    {
+                        generator.Update();
+                        return generator.IsActive;
+                    }, () => { }).WrapToIl2Cpp());
+                    */
+
+                    /*
+                    SerializedCircuit circuit = new();
+                    circuit.Inputs = [0, 1];
+                    circuit.Outputs = [2];
+                    circuit.Nodes = [
+                        new(){ Inputs = [new(){ Id = 0}, new() { Id = 1}], Outputs = [3], Operation ="__add"},
+                        new(){ Inputs = [new(){ Id = 3}, new() { Id = 4}], Outputs = [2], Operation ="__mul"},
+                        new(){ Inputs = [new(){ Value = "値を入力してください。"}], Outputs = [4], Operation ="read"}
+                        ];
+                    var generated = circuit.GenerateCircuit(NodesCollection.Default);
+                    var output = generated.GetOutput(0);
+
+                    var env1 = generated.GenerateInstance([new VPFloat(4f), new VPFloat(5f)]);
+                    var coroutine = output.PrepareIfNeeded(env1).AsStackfullCoroutine();
+                    StartCoroutine(ManagedEffects.Sequence(coroutine.AsEnumerator(), ManagedEffects.Action(() =>
+                    {
+                        LogUtils.WriteToConsole(output.Get(env1).GetString());
+                    })).WrapToIl2Cpp());
+                    */
+
                     /*
                     if (MoreCosmic.AllStamps.Count > 0)
                     {
@@ -581,7 +699,7 @@ public class NebulaManager : MonoBehaviour
         }
 
         if (allModUi.Count > 0 && Input.GetKeyDown(KeyCode.Escape))
-            allModUi[allModUi.Count - 1].Item2?.OnClick.Invoke();
+            allModUi[^1].Item2?.OnClick.Invoke();
 
         //静的に表示されるオーバーレイ
         PopupProviders.RemoveAll(p => p.isFinallyDead());
@@ -592,7 +710,7 @@ public class NebulaManager : MonoBehaviour
             mouseOverPopup.SetRelatedPredicate(found.predicate);
             mouseOverPopup.SetRelatedPosition(parameters.screenPosition);
             mouseOverPopup.Parameters.Icon = found.relatedIcon;
-            mouseOverPopup.Parameters.RelatedValue = found.guage;
+            mouseOverPopup.Parameters.RelatedValue = found.gauge;
             parameters.callBack?.Invoke();
             mouseOverPopup.UpdatePosition(parameters.screenPosition.Invoke(), true);
         }
@@ -609,7 +727,7 @@ public class NebulaManager : MonoBehaviour
         mouseOverPopup = UnityHelper.CreateObject<MouseOverPopup>("MouseOverPopup",transform,Vector3.zero);
         debugScreen = new DebugScreen(transform);
 
-        PopupProviders = new();
+        PopupProviders = [];
     }
 
     public void LateUpdate()
@@ -624,9 +742,9 @@ public class NebulaManager : MonoBehaviour
     /// <param name="isFinallyDead">この表示が完全に不要になったらtrueを返してください。</param>
     /// <param name="predicate">オーバーレイが表示される間はtrueを返してください。</param>
     /// <param name="supplier">表示されるGUIと表示位置(スクリーン座標)の関数、表示時に実行されるコールバックのタプル</param>
-    public void RegsiterStaticPopup(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callback)> supplier, Func<float>? guage = null, Image? relatedIcon = null)
+    public void RegisterStaticPopup(Func<bool> isFinallyDead, Func<bool> predicate, Func<(GUIWidget widget, Func<Vector2> screenPosition, Action? callback)> supplier, Func<float>? gauge = null, Image? relatedIcon = null)
     {
-        PopupProviders.Add(new(isFinallyDead, predicate, supplier, guage, relatedIcon));
+        PopupProviders.Add(new(isFinallyDead, predicate, supplier, gauge, relatedIcon));
     }
 
     public void StartDelayAction(float delay, Action action)

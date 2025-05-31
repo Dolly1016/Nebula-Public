@@ -24,14 +24,13 @@ public interface IUpperRightContent
 public class FunctionalUpperRightContent : IUpperRightContent
 {
     PassiveButton button;
-    Vector3 scale;
+    
     public FunctionalUpperRightContent(PassiveButton button, int priority)
     {
         this.button = button;
         if (button.TryGetComponent<AspectPosition>(out var ap)) ap.enabled = false;
 
         (button.transform.FindChild("background") ?? button.transform.FindChild("Background")).gameObject.SetActive(false);
-        scale = this.button.transform.localScale;
         Priority = priority;
     }
 
@@ -53,7 +52,7 @@ public class CustomUpperRightContent : IUpperRightContent
     bool IUpperRightContent.IsShown => button.gameObject.active;
 
     public int Priority { get; init; }
-    static private IDividedSpriteLoader buttonImages = DividedSpriteLoader.FromResource("Nebula.Resources.UpperRightButton.png", 100f, 100, 94, true);
+    static private readonly IDividedSpriteLoader buttonImages = DividedSpriteLoader.FromResource("Nebula.Resources.UpperRightButton.png", 100f, 100, 94, true);
 
     void IUpperRightContent.Update(Vector3 localPos)
     {
@@ -167,7 +166,7 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
         Register(new FunctionalUpperRightContent(hud.SettingsButton.GetComponent<PassiveButton>(), 5));
         Register(new FunctionalUpperRightContent(hud.MapButton, 1));
 
-        var lastGame = new CustomUpperRightContent(101, 1, () => LastGameHistory.ShowLastGameStatistics(), () => LastGameHistory.ArchivedGame != null && LobbyBehaviour.Instance, () => LastGameHistory.ScreenIsVisible);
+        var lastGame = new CustomUpperRightContent(101, 1, () => LastGameHistory.ShowLastGameStatistics(), () => LastGameHistory.ArchivedGame != null && LobbyBehaviour.Instance && !PlayerCustomizationMenu.Instance, () => LastGameHistory.ScreenIsVisible);
         Register(lastGame);
         lastGame.Button.OnMouseOver.AddListener(() =>
         {
@@ -175,16 +174,17 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
         });
         lastGame.Button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(lastGame.Button));
 
-        OnUpdate(null!);
-
         var helpButton = new CustomUpperRightContent(100, 0, () => HelpScreen.TryOpenHelpScreen(HelpScreen.HelpTab.MyInfo), () => true, () => HelpScreen.LastHelpScreen);
         Register(helpButton);
-        GameOperatorManager.Instance?.Register<GameStartEvent>(_ =>
+        GameOperatorManager.Instance?.Subscribe<GameStartEvent>(_ =>
         {
             ButtonEffect.SetKeyGuideOnSmallButton(helpButton.Button.gameObject, NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).TypicalKey);
         }, MyContainer);
 
+        var formButton = new CustomUpperRightContent(102, 2, () => DevTeamContact.OpenContactWindow(HudManager.Instance.transform), () => LobbyBehaviour.Instance && !PlayerCustomizationMenu.Instance, () => DevTeamContact.IsShown);
+        Register(formButton);
 
+        OnUpdate(null!);
     }
 
     void OnUpdate(UpdateEvent ev)

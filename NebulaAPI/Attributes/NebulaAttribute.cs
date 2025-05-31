@@ -1,4 +1,8 @@
-﻿namespace Virial.Attributes;
+﻿
+
+using System;
+
+namespace Virial.Attributes;
 
 /// <summary>
 /// メソッド呼び出しをRPC呼び出しに置き換える属性です。

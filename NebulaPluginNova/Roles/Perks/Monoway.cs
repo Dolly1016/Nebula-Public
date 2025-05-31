@@ -1,9 +1,12 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
+using Nebula.Modules.Cosmetics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
+using Virial.Components;
 using Virial.Events.Game;
 
 namespace Nebula.Roles.Perks;
@@ -25,14 +28,16 @@ internal class Monoway : PerkFunctionalInstance
     private IconType iconType;
     private Monoway(PerkDefinition def, PerkInstance instance, Func<Vector4> speedVector, IconType iconType, float cooldown, float duration) : base(def, instance)
     {
-        cooldownTimer = new Timer(cooldown).Start(InitialCooldown).SetPredicate(() => !MeetingHud.Instance && !ExileController.Instance);
+        cooldownTimer = NebulaAPI.Modules.Timer(this, cooldown);
+        cooldownTimer.Start(InitialCooldown);
+        cooldownTimer.SetCondition(() => !MeetingHud.Instance && !ExileController.Instance);
         PerkInstance.BindTimer(cooldownTimer);
         this.speedVec = speedVector;
         this.iconType = iconType;
         this.duration = duration;
     }
 
-    private Timer cooldownTimer;
+    private GameTimer cooldownTimer;
 
     public override bool HasAction => true;
     public override void OnClick()

@@ -19,7 +19,7 @@ public class NebulaSyncObjectReference
 }
 
 [NebulaRPCHolder]
-public abstract class NebulaSyncObject : INebulaScriptComponent, IGameOperator
+public abstract class NebulaSyncObject : FlexibleLifespan, IGameOperator
 {
     static private Dictionary<int, Func<float[], NebulaSyncObject>> instantiaters = new();
     static private Dictionary<int, NebulaSyncObject> allObjects = new();
@@ -77,13 +77,14 @@ public abstract class NebulaSyncObject : INebulaScriptComponent, IGameOperator
             obj.TagHash = message.tagHash;
             if (allObjects.ContainsKey(obj.ObjectId)) throw new Exception("[NebulaSyncObject] Duplicated Key Error");
             obj.OnInstantiated();
+            obj.Register(obj);
             allObjects.Add(obj.ObjectId, obj);
         });
 
     static private RemoteProcess<int> RpcDestroyDef = new("DestroyObj",
        (message, _) =>
        {
-           if (allObjects.TryGetValue(message, out var obj)) obj.ReleaseIt();
+           if (allObjects.TryGetValue(message, out var obj)) obj.Release();
        });
 
     static public NebulaSyncObjectReference RpcInstantiate(string tag, float[]? arguments)
@@ -139,7 +140,7 @@ public abstract class NebulaSyncObject : INebulaScriptComponent, IGameOperator
     }
 }
 
-public class NebulaSyncStandardObject : NebulaSyncObject, IReleasable
+public class NebulaSyncStandardObject : NebulaSyncObject
 {
     public enum ZOption
     {
@@ -257,7 +258,7 @@ public class NebulaSyncStandardObject : NebulaSyncObject, IReleasable
     }
 }
 
-public class NebulaSyncShadowObject : NebulaSyncStandardObject, IReleasable
+public class NebulaSyncShadowObject : NebulaSyncStandardObject
 {
     public SpriteRenderer ShadowRenderer { get; private set; }
 

@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using UnityEngine.UI;
 using Virial.Media;
@@ -8,8 +8,8 @@ namespace Nebula.Patches;
 [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Awake))]
 public static class MainMenuSetUpPatch
 {
-    static private Image nebulaIconSprite = SpriteLoader.FromResource("Nebula.Resources.NebulaNewsIcon.png", 100f);
-    static private Image discordIconSprite = SpriteLoader.FromResource("Nebula.Resources.DiscordIcon.png", 100f);
+    static private readonly Image nebulaIconSprite = SpriteLoader.FromResource("Nebula.Resources.NebulaNewsIcon.png", 100f);
+    static private readonly Image discordIconSprite = SpriteLoader.FromResource("Nebula.Resources.DiscordIcon.png", 100f);
     static public GameObject? NebulaScreen = null;
     static public GameObject? AddonsScreen = null;
     static public GameObject? VersionsScreen = null;
@@ -102,19 +102,28 @@ public static class MainMenuSetUpPatch
             index++;
         }
 
-        SetUpButton("title.buttons.update", () => {
-            __instance.ResetScreen();
-            if (!VersionsScreen) CreateVersionsScreen();
-            VersionsScreen?.SetActive(true);
-            __instance.screenTint.enabled = true;
-        });
+        if (NebulaPlugin.AllowHttpCommunication)
+        {
+            SetUpButton("title.buttons.update", () =>
+            {
+                __instance.ResetScreen();
+                if (!VersionsScreen) CreateVersionsScreen();
+                VersionsScreen?.SetActive(true);
+                __instance.screenTint.enabled = true;
+            });
+        }
+
         SetUpButton("title.buttons.achievements", () => {
             AchievementViewer.Open(__instance);
         });
 
-        SetUpButton("title.buttons.marketplace", () => {
-            Marketplace.Open(__instance);
-        });
+        if (NebulaPlugin.AllowHttpCommunication)
+        {
+            SetUpButton("title.buttons.marketplace", () =>
+            {
+                Marketplace.Open(__instance);
+            });
+        }
         
         SetUpButton("title.buttons.addons", () => {
             __instance.ResetScreen();
@@ -129,6 +138,14 @@ public static class MainMenuSetUpPatch
         SetUpButton("title.buttons.stats", () => {
             StatsViewer.Open(__instance);
         });
+
+        if (NebulaPlugin.AllowHttpCommunication)
+        {
+            SetUpButton("title.buttons.form", () =>
+            {
+                DevTeamContact.OpenContactWindow(null);
+            });
+        }
 
         if (DebugTools.DebugMode)
         {
@@ -254,32 +271,36 @@ public static class MainMenuSetUpPatch
 
                 void AutoUpdateContent(string translationKey, Func<bool> predicate, Action onSelected)
                 {
-                    List<IMetaParallelPlacableOld> placable = new();
+                    List<IMetaParallelPlacableOld> placeable = [];
 
-                    placable.Add(new MetaWidgetOld.Text(CategoryAttribute) { RawText = Language.Translate("version.category.auto") });
-                    placable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
-                    placable.Add(new MetaWidgetOld.Text(NameAttribute) { TranslationKey = translationKey });
-                    placable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
+                    placeable.Add(new MetaWidgetOld.Text(CategoryAttribute) { RawText = Language.Translate("version.category.auto") });
+                    placeable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
+                    placeable.Add(new MetaWidgetOld.Text(NameAttribute) { TranslationKey = translationKey });
+                    placeable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
                     if(!predicate.Invoke())
-                        placable.Add(new MetaWidgetOld.Button(() => { onSelected.Invoke(); UpdateContents(category);  MetaUI.ShowConfirmDialog(null, new TranslateTextComponent("ui.update.autoUpdate")); }, ButtonAttribute) { TranslationKey = "version.fetching.setAutoUpdate", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
+                        placeable.Add(new MetaWidgetOld.Button(() => { onSelected.Invoke(); UpdateContents(category);  MetaUI.ShowConfirmDialog(null, new TranslateTextComponent("ui.update.autoUpdate")); }, ButtonAttribute) { TranslationKey = "version.fetching.setAutoUpdate", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
                     else
                     {
-                        placable.Add(new MetaWidgetOld.HorizonalMargin(0.13f));
-                        placable.Add(new MetaWidgetOld.Text(ButtonAttribute) { TranslationKey = "version.fetching.applied" });
+                        placeable.Add(new MetaWidgetOld.HorizonalMargin(0.13f));
+                        placeable.Add(new MetaWidgetOld.Text(ButtonAttribute) { TranslationKey = "version.fetching.applied" });
                     }
                     
-                    inner.Append(new CombinedWidgetOld(0.5f, placable.ToArray()) { Alignment = IMetaWidgetOld.AlignmentOption.Left });
+                    inner.Append(new CombinedWidgetOld(0.5f, placeable.ToArray()) { Alignment = IMetaWidgetOld.AlignmentOption.Left });
                 }
 
                 if ((category ?? ModUpdater.ReleasedInfo.ReleaseCategory.Major) == ModUpdater.ReleasedInfo.ReleaseCategory.Major)
-                    AutoUpdateContent("version.fetching.autoUpdate.major", () => NebulaLoader.NebulaLoader.AutoUpdate.Value && !NebulaLoader.NebulaLoader.UseSnapshot.Value, () => {
-                        NebulaLoader.NebulaLoader.AutoUpdate.Value = true;
-                        NebulaLoader.NebulaLoader.UseSnapshot.Value = false;
+                    AutoUpdateContent("version.fetching.autoUpdate.major", () =>
+                        (NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.AutoUpdate))?.Value ?? false) &&
+                        (NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.UseSnapshot))?.Value ?? false), () => {
+                        NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.AutoUpdate))?.Value = true;
+                        NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.UseSnapshot))?.Value = false;
                     });
                 if ((category ?? ModUpdater.ReleasedInfo.ReleaseCategory.Snapshot) == ModUpdater.ReleasedInfo.ReleaseCategory.Snapshot)
-                    AutoUpdateContent("version.fetching.autoUpdate.snapshot", ()=> NebulaLoader.NebulaLoader.AutoUpdate.Value && NebulaLoader.NebulaLoader.UseSnapshot.Value, () => {
-                        NebulaLoader.NebulaLoader.AutoUpdate.Value = true;
-                        NebulaLoader.NebulaLoader.UseSnapshot.Value = true;
+                    AutoUpdateContent("version.fetching.autoUpdate.snapshot", () => 
+                        (NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.AutoUpdate))?.Value ?? false) &&
+                        (NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.UseSnapshot))?.Value ?? false), () => {
+                        NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.AutoUpdate))?.Value = true;
+                        NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.UseSnapshot))?.Value = true;
                     });
 
                 foreach (var version in versions)
@@ -288,10 +309,10 @@ public static class MainMenuSetUpPatch
 
                     try
                     {
-                        List<IMetaParallelPlacableOld> placable = new();
-                        placable.Add(new MetaWidgetOld.Text(CategoryAttribute) { MyText = NebulaGUIWidgetEngine.Instance.TextComponent(ModUpdater.ReleasedInfo.CategoryColors[(int)version.Category], ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)version.Category]) });
-                        placable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
-                        placable.Add(new MetaWidgetOld.Text(NameAttribute)
+                        List<IMetaParallelPlacableOld> placeable = [];
+                        placeable.Add(new MetaWidgetOld.Text(CategoryAttribute) { MyText = NebulaGUIWidgetEngine.Instance.TextComponent(ModUpdater.ReleasedInfo.CategoryColors[(int)version.Category], ModUpdater.ReleasedInfo.CategoryTranslationKeys[(int)version.Category]) });
+                        placeable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
+                        placeable.Add(new MetaWidgetOld.Text(NameAttribute)
                         {
                             RawText = version.Version!.Replace('_', ' '),
                             PostBuilder = text =>
@@ -311,20 +332,20 @@ public static class MainMenuSetUpPatch
                                 });
                             }
                         });
-                        placable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
+                        placeable.Add(new MetaWidgetOld.HorizonalMargin(0.15f));
 
                         if (version.Epoch == NebulaPlugin.PluginEpoch && version.BuildNum != NebulaPlugin.PluginBuildNum)
                         {
-                            placable.Add(new MetaWidgetOld.Button(() => NebulaManager.Instance.StartCoroutine(version.CoUpdateAndShowDialog().WrapToIl2Cpp()), ButtonAttribute) { TranslationKey = "version.fetching.gainPackage", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
+                            placeable.Add(new MetaWidgetOld.Button(() => NebulaManager.Instance.StartCoroutine(version.CoUpdateAndShowDialog().WrapToIl2Cpp()), ButtonAttribute) { TranslationKey = "version.fetching.gainPackage", PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask });
                         }
                         else
                         {
-                            placable.Add(new MetaWidgetOld.HorizonalMargin(0.13f));
-                            placable.Add(new MetaWidgetOld.Text(ButtonAttribute) { TranslationKey = version.Epoch == NebulaPlugin.PluginEpoch ? "version.fetching.current" : "version.fetching.mismatched", });
+                            placeable.Add(new MetaWidgetOld.HorizonalMargin(0.13f));
+                            placeable.Add(new MetaWidgetOld.Text(ButtonAttribute) { TranslationKey = version.Epoch == NebulaPlugin.PluginEpoch ? "version.fetching.current" : "version.fetching.mismatched", });
                         }
 
 
-                        inner.Append(new CombinedWidgetOld(0.5f, placable.ToArray()) { Alignment = IMetaWidgetOld.AlignmentOption.Left });
+                        inner.Append(new CombinedWidgetOld(0.5f, placeable.ToArray()) { Alignment = IMetaWidgetOld.AlignmentOption.Left });
                     }
                     catch
                     {

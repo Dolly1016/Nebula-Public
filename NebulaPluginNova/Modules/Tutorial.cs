@@ -85,6 +85,22 @@ public class TutorialBuilder : TutorialParameter
         return this;
     }
 
+    public TutorialBuilder AsSimpleTitledTextWidget(string id)
+    {
+        widget = GUI.API.VerticalHolder(GUIAlignment.Left,
+            GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), "tutorial.variations." + id + ".title"),
+            GetSimpleTextWidget(Language.Translate("tutorial.variations." + id + ".caption"))
+            );
+        return this;
+    }
+
+    public TutorialBuilder AsSimpleTitledOnceTextWidget(string id)
+    {
+        BindHistory(id);
+        AsSimpleTitledTextWidget(id);
+        return this;
+    }
+
     public TutorialBuilder ShowWhile(Func<bool> showWhile)
     {
         this.showWhile = showWhile;
@@ -109,12 +125,20 @@ public class TutorialBuilder : TutorialParameter
         return this;
     }
 
+    public TutorialBuilder UnbindHistory()
+    {
+        this.relatedEntry = null;
+        return this;
+    }
+
     public TutorialBuilder(Func<UnityEngine.Vector3> worldPosition, bool forUiTutorial)
     {
         this.position = forUiTutorial ?
             () => UnityHelper.WorldToScreenPoint(worldPosition.Invoke(), LayerExpansion.GetUILayer()) :
             () => UnityHelper.WorldToScreenPoint(NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(worldPosition.Invoke()), LayerExpansion.GetObjectsLayer());
     }
+
+    public TutorialBuilder() : this(() => HudManager.Instance.transform.position + new UnityEngine.Vector3(0f, 4f), true) { }
 }
 
 public static class Tutorial
@@ -145,7 +169,7 @@ public static class Tutorial
 
         bool isShownAlready = false;
 
-        NebulaManager.Instance.RegsiterStaticPopup(()=>!(left > 0f) || (!isShownAlready && (parameters.RelatedEntry?.Value ?? false)), predicate, () => (
+        NebulaManager.Instance.RegisterStaticPopup(()=>!(left > 0f) || (!isShownAlready && (parameters.RelatedEntry?.Value ?? false)), predicate, () => (
             parameters.Widget,
             parameters.Position,
             () =>

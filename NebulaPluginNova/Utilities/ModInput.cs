@@ -1,4 +1,4 @@
-﻿using Nebula.Behaviour;
+﻿using Nebula.Behavior;
 using Rewired.ControllerExtensions;
 using Steamworks;
 using Virial.Runtime;
@@ -7,7 +7,7 @@ namespace Nebula.Utilities;
 
 public interface IKeyAssignment
 {
-    static protected List<IKeyAssignment> allKeyAssignments = new();
+    static protected readonly List<IKeyAssignment> allKeyAssignments = [];
     static public IEnumerable<IKeyAssignment> AllKeyAssignments => allKeyAssignments;
     public string DisplayName { get; }
     public KeyCode KeyInput { get; set; }
@@ -52,7 +52,7 @@ public class VirtualInput
 
     public VirtualInput(KeyCode keyCode)
     {
-        assignments = new Func<KeyCode>[] { () => keyCode };
+        assignments = [() => keyCode];
     }
 
     public IEnumerable<KeyCode> AllKeyCode()
@@ -136,7 +136,7 @@ public class NebulaInput
         return Input.GetKey(keyCode);
     }
 
-    private static Dictionary<Virial.Compat.VirtualKeyInput, VirtualInput> modInput = new();
+    private static Dictionary<Virial.Compat.VirtualKeyInput, VirtualInput> modInput = [];
 
     static public VirtualInput GetInput(Virial.Compat.VirtualKeyInput type) => modInput[type];
 

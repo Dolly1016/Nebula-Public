@@ -7,6 +7,12 @@ using Virial.Events.Player;
 
 namespace Virial.Events.Game.Meeting;
 
+/// <summary>
+/// 投票が開示されたときに呼び出されます。
+/// </summary>
+/// <remarks>
+/// 自身の投票結果についてのみ呼び出されます。
+/// </remarks>
 public class PlayerVoteDisclosedLocalEvent : AbstractPlayerEvent
 {
     public bool VoteToWillBeExiled { get; private init; }

@@ -36,7 +36,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
     static private IntegerConfiguration numOfNightSeedOption = NebulaAPI.Configurations.Configuration("options.role.nightmare.numOfNightSeed", (1, 30), 5, () => !disposableNightSeedOption);
     static private FloatConfiguration inShadowLightSizeOption = NebulaAPI.Configurations.Configuration("options.role.nightmare.inShadowLightSize", (0f, 2f, 0.25f), 0.5f, FloatConfigurationDecorator.Ratio);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
     static public Nightmare MyRole = new Nightmare();
     static private GameStatsEntry StatsPlaceNightSeed = NebulaAPI.CreateStatsEntry("stats.nightmare.place", GameStatsCategory.Roles, MyRole);
@@ -75,7 +75,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
                 }
             }
 
-            if (WillDespawn && (nightmareRole == null || !nightmareRole.EffectIsActive)) this.ReleaseIt();
+            if (WillDespawn && (nightmareRole == null || !nightmareRole.EffectIsActive)) this.Release();
         }
 
         static NightmareSeed()
@@ -121,49 +121,37 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
         }
     }
 
-    public class Ability : AbstractPlayerAbility, IPlayerAbility
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        private ModAbilityButton? cleanButton = null;
+        private ModAbilityButtonImpl? cleanButton = null;
 
         static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.NightmarePlaceButton.png", 115f);
         static private Image nightmareButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.NightmareButton.png", 115f);
 
-        public Ability(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
             {
                 List<NightmareSeedInfo> placed = [];
 
-                var placeButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.Ability, "nightmare.place");
-
-                TMPro.TextMeshPro? iconText = null;
-                if (!disposableNightSeedOption)
-                {
-                    iconText = placeButton.ShowUsesIcon(0);
-                    iconText.text = numOfNightSeedOption.GetValue().ToString();
-                }
-                
-                placeButton.SetSprite(placeButtonSprite.GetSprite());
-                placeButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove;
-                placeButton.Visibility = (button) => !MyPlayer.IsDead && (disposableNightSeedOption || placed.Count < numOfNightSeedOption);
+                var placeButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "nightmare.place",
+                    placeCooldownOption, "place", placeButtonSprite, visibility: _ => disposableNightSeedOption || placed.Count < numOfNightSeedOption)
+                    .SetAsUsurpableButton(this);
+                if (!disposableNightSeedOption) placeButton.ShowUsesIcon(0, numOfNightSeedOption.GetValue().ToString());
                 placeButton.OnClick = (button) => {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.NightmarePlacementAction);
                     placed.Add(new NightmareSeedInfo(MyPlayer.Position + new Virial.Compat.Vector2(0f, -0.1f)));
                     StatsPlaceNightSeed.Progress();
 
-                    if (iconText != null) iconText.text = (numOfNightSeedOption - placed.Count).ToString();
-
+                    placeButton.UpdateUsesIcon((numOfNightSeedOption - placed.Count).ToString());
                     placeButton.StartCoolDown();
                 };
-                placeButton.CoolDownTimer = Bind(new Timer(placeCooldownOption).SetAsAbilityCoolDown().Start());
-                placeButton.SetLabel("place");
-
+                
                 var acTokenAnother = AchievementTokens.FirstFailedAchievementToken("nightmare.another2", MyPlayer, this);
-                var nightmareButton = Bind(new ModAbilityButton()).KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility, "nightmare.nightmare");
-                nightmareButton.SetSprite(nightmareButtonSprite.GetSprite());
-                nightmareButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && placed.Count > 0;
-                nightmareButton.Visibility = (button) => !MyPlayer.IsDead;
-                nightmareButton.OnClick = (button) => button.ActivateEffect();
+                var nightmareButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "nightmare.nightmare",
+                    nightmareCooldownOption, nightmareDurationOption, "nightmare", nightmareButtonSprite,
+                    _ => placed.Count > 0).SetAsUsurpableButton(this);
                 nightmareButton.OnEffectStart = (button) =>
                 {
                     RpcNight.Invoke((MyPlayer,placed.Select(p => p.Position).ToArray()));
@@ -172,13 +160,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
                     acTokenAnother.Value.triggered = true;
                     if (disposableNightSeedOption) placed.Clear();
                 };
-                nightmareButton.OnEffectEnd = (button) =>
-                {
-                    button.StartCoolDown();
-                };
-                nightmareButton.CoolDownTimer = Bind(new Timer(nightmareCooldownOption).SetAsAbilityCoolDown().Start());
-                nightmareButton.EffectTimer = Bind(new Timer(nightmareDurationOption));
-                nightmareButton.SetLabel("nightmare");
+                nightmareButton.OnEffectEnd = (button) => button.StartCoolDown();
             }
         }
 
@@ -314,7 +296,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
         int totalDead = 0;
 
         var lifespan = FunctionalLifespan.GetTimeLifespan(nightmareDurationOption);
-        GameOperatorManager.Instance?.Register<PlayerMurderedEvent>(ev =>
+        GameOperatorManager.Instance?.Subscribe<PlayerMurderedEvent>(ev =>
         {
             bool murdererIsInNight = IsInNight(ev.Murderer.Position);
             if (ev.Murderer.AmOwner && murdererIsInNight) new StaticAchievementToken("nightmare.common2");
@@ -334,7 +316,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
         
         if (inShadowLightSizeOption > 0f)
         {
-            var inShdowLight = new InShadowLight(pos).Register();
+            var inShdowLight = new InShadowLight(pos).Register(NebulaAPI.CurrentGame!);
             NebulaManager.Instance.StartDelayAction(nightmareDurationOption, () => inShdowLight.IsDisappearing = true);
         }
 

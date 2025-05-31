@@ -13,6 +13,7 @@ public static class MeetingHudExtension
     static public float VotingTimer = 0f;
     static public float ResultTimer = 0f;
     static public int VotingMask = 0;
+    static public bool CanVoteFor(byte playerId) => !(GamePlayer.GetPlayer(playerId)?.IsDead ?? true) && (MeetingHudExtension.VotingMask & (1 << playerId)) != 0;
     static public bool CanSkip = true;
     static public bool ExileEvenIfTie = false;
     static public bool IsObvious = false;
@@ -21,6 +22,10 @@ public static class MeetingHudExtension
     static public bool CanInvokeSomeAction => !(ActionCoolDown > 0f);
     static public int LastSharedCount = 110;
 
+    //ローカルで変わる変数
+    static public bool CanVote = true;
+
+    static public GamePlayer? LastReporter = null;
     //直近の投票の結果吊られるプレイヤー
     static public PlayerControl[]? ExiledAll = null;
     static public GamePlayer[]? ExiledAllModCache = null;
@@ -64,7 +69,7 @@ public static class MeetingHudExtension
                 p.SetDisabled();
         }
 
-        if (CanSkip && MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted)
+        if (CanSkip && MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted && CanVote)
             MeetingHud.Instance.SkipVoteButton.SetEnabled();
         else
             MeetingHud.Instance.SkipVoteButton.SetDisabled();
@@ -89,18 +94,16 @@ public static class MeetingHudExtension
     {
         Reset();
 
-        meetingHud.UpdatePlayerState();
+        meetingHud.ClearVote();
 
+        meetingHud.UpdatePlayerState();
         foreach (PlayerVoteArea voter in meetingHud.playerStates)
         {
-            if (!voter.DidVote) continue;
-
-            var p = NebulaGameManager.Instance?.GetPlayer(voter.TargetPlayerId);
-            if (p?.AmOwner ?? false) meetingHud.ClearVote();
-
             voter.ThumbsDown.enabled = false;
             voter.UnsetVote();
         }
+
+        GameOperatorManager.Instance?.Run(new MeetingResetEvent());
 
         if (AmongUsClient.Instance.AmHost) meetingHud.CheckForEndVoting();
     }
@@ -137,6 +140,8 @@ public static class MeetingHudExtension
 
             player.VanillaPlayer.Exiled();
             player.VanillaPlayer.Data.IsDead = true;
+            PlayerExtension.ResetOnDying(player.VanillaPlayer);
+
             player.Unbox().MyState = victims.playerState;
 
             //Entityイベント発火
@@ -166,8 +171,9 @@ public static class MeetingHudExtension
         (message, _) =>
         {
             WeightMap[message.source] = message.weight;
+            if (PlayerControl.LocalPlayer.PlayerId == message.source) MeetingHud.Instance.state = MeetingHud.VoteStates.Voted;
 
-            GameOperatorManager.Instance?.Run(new PlayerVoteCastEvent(GamePlayer.LocalPlayer!, NebulaGameManager.Instance!.GetPlayer(message.target), message.weight));
+            GameOperatorManager.Instance?.Run(new PlayerVoteCastEvent(GamePlayer.GetPlayer(message.source)!, GamePlayer.GetPlayer(message.target), message.weight));
 
             if (AmongUsClient.Instance.AmHost)
             {

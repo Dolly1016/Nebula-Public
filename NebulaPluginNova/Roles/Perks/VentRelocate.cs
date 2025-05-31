@@ -129,14 +129,14 @@ internal class VentRelocate : PerkFunctionalInstance
     static private FloatConfiguration DurationOption = NebulaAPI.Configurations.Configuration("perk.ventRelocate.duration", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
 
     static PerkFunctionalDefinition def = new("ventRelocate", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("ventRelocate", 7, 56, new(230, 30, 30)).DurationText("%D%", ()=>Duration), (def, instance) => new VentRelocate(def, instance), [DurationOption]);
-    private Timer? durationTimer = null;
+    private GameTimer? durationTimer = null;
     private bool canUse => durationTimer == null;
     private Vent? holdingVent = null;
     private ObjectTracker<Vent> ventTracker;
 
     private VentRelocate(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {
-        ventTracker = Bind(ObjectTrackers.ForVents(1f, MyPlayer, vent => canUse && !ModSingleton<VentHolderManager>.Instance.AnyoneHolds(vent), MyPlayer.Role.Role.UnityColor));
+        ventTracker = ObjectTrackers.ForVents(1f, MyPlayer, vent => canUse && !ModSingleton<VentHolderManager>.Instance.AnyoneHolds(vent), MyPlayer.Role.Role.UnityColor).Register(this);
     }
 
     private float holdTime = 0f;
@@ -149,7 +149,8 @@ internal class VentRelocate : PerkFunctionalInstance
         {
             if (ventTracker.CurrentTarget != null)
             {
-                durationTimer = new Timer(Duration).Start();
+                durationTimer = NebulaAPI.Modules.Timer(this, Duration);
+                durationTimer.Start();
                 PerkInstance.BindTimer(durationTimer);
                 holdTime = NebulaGameManager.Instance!.CurrentTime;
                 holdingVent = ventTracker.CurrentTarget;
@@ -158,7 +159,7 @@ internal class VentRelocate : PerkFunctionalInstance
         }else if (durationTimer!.IsProgressing && holdingVent != null && NebulaGameManager.Instance!.CurrentTime - holdTime > 0.5f)
         {
             ModSingleton<VentHolderManager>.Instance.RequestReleaseVent(holdingVent);
-            durationTimer.StopForcely();
+            PerkInstance.BindTimer(null);
             holdingVent = null;
         }
     }

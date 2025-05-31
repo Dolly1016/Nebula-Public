@@ -4,7 +4,7 @@ using Virial.Events.Game;
 
 namespace Nebula.Roles.Abilities;
 
-public class TrackingArrowAbility : ComponentHolder, IGameOperator
+public class TrackingArrowAbility : FlexibleLifespan, IGameOperator
 {
     public GamePlayer MyPlayer => target;
 
@@ -40,13 +40,13 @@ public class TrackingArrowAbility : ComponentHolder, IGameOperator
                 {
                     if (showPlayerIcon)
                     {
-                        arrow = Bind(new Arrow(null, false, true) { IsAffectedByComms = false }.HideArrowSprite());
+                        arrow = new Arrow(null, false, true) { IsAffectedByComms = false }.HideArrowSprite().Register(this);
                         arrow.SetSmallColor(color);
                         AmongUsUtil.GetPlayerIcon(target.DefaultOutfit.outfit, arrow.ArrowObject.transform, new(0f, 0f, -1f), new(0.24f, 0.24f, 1f));
                     }
                     else
                     {
-                        arrow = Bind(new Arrow(null, true) { IsAffectedByComms = false }).SetColor(color);
+                        arrow = new Arrow(null, true) { IsAffectedByComms = false }.SetColor(color).Register(this);
                     }
                 }
 

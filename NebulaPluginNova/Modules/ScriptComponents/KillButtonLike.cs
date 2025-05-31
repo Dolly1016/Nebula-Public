@@ -26,9 +26,9 @@ internal class VanillaKillButtonHandler : IKillButtonLike
         PlayerControl.LocalPlayer.killTimer = cooldown;
     }
 
-    void IKillButtonLike.StartCooldown()
+    void IKillButtonLike.StartCooldown(float ratio = 1f)
     {
-        PlayerControl.LocalPlayer.SetKillTimer(AmongUsUtil.VanillaKillCoolDown);
+        PlayerControl.LocalPlayer.SetKillTimer(AmongUsUtil.VanillaKillCoolDown * ratio);
     }
 }
 
@@ -40,17 +40,20 @@ internal class ModKillButtonHandler : IKillButtonLike
         this.button = button;
     }
 
-    float IKillButtonLike.Cooldown => (button.GetCoolDownTimer() as GameTimer)?.CurrentTime ?? 0f;
+    float IKillButtonLike.Cooldown => (button.CoolDownTimer as GameTimer)?.CurrentTime ?? 0f;
 
     bool ILifespan.IsDeadObject => button.IsDeadObject;
 
     void IKillButtonLike.SetCooldown(float cooldown)
     {
-        button.GetCoolDownTimer()?.Start(cooldown);
+        button.CoolDownTimer?.Start(cooldown);
     }
 
-    void IKillButtonLike.StartCooldown()
+    void IKillButtonLike.StartCooldown(float ratio)
     {
-        button.StartCoolDown();
+        if (ratio < 0f && button.CoolDownTimer is GameTimer gTimer)
+            gTimer.Start(gTimer.Max * ratio);
+        else
+            button.StartCoolDown();
     }
 }

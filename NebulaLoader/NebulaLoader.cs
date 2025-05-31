@@ -121,6 +121,7 @@ public class NebulaLoader : BasePlugin
     static public ConfigEntry<bool> IgnoringVersionConsistencyOnUpdate { get; private set; } = null!;
     static public ConfigEntry<bool> UseSnapshot { get; private set; } = null!;
     static public ConfigEntry<bool> AutoUpdate { get; private set; } = null!;
+    static public ConfigEntry<bool> AllowHttpCommunication { get; private set; } = null!;
     static public ConfigEntry<bool> AutoUpdateIfVersionMismatch { get; private set; } = null!;
     static public ConfigEntry<string> UrlConverter { get; private set; } = null!;
     static public bool UpdateIsDone = false;
@@ -141,6 +142,7 @@ public class NebulaLoader : BasePlugin
         AutoUpdate = Config.Bind("Options", "AutoUpdate", false, "When enabled, the automatic update feature is enabled.");
         AutoUpdateIfVersionMismatch = Config.Bind("Options", "AutoUpdateIfVersionMismatching", true, "Automatically updates when a version mismatch of Among Us is detected. This setting is ignored when AutoUpdate is enabled.");
         UrlConverter = Config.Bind("Options", "UrlConverter", "<url>", "You can convert the URL used by NoS to access the Internet into a specified format.");
+        AllowHttpCommunication = Config.Bind("Options", "AllowHttpCommunication", true, "In environments with limited internet access, setting this option to false may allow the game to run.");
 
         bool autoUpdate = AutoUpdate.Value;
         bool autoUpdateIfVersionMismatch = AutoUpdateIfVersionMismatch.Value;

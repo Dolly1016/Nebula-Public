@@ -5,6 +5,7 @@ using Nebula.Scripts;
 using System.Reflection;
 using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
 using Virial.Game;
 using Virial.Text;
@@ -19,22 +20,15 @@ public class NebulaImpl : INebula
 
     private static List<object> allModules = new();
     private static Dictionary<Type, object> moduleFastMap = new();
-
-    private static List<(Type type, Func<object> generator)> allDefinitions = new();
-    private static Dictionary<Type, Func<object>> definitionFastMap = new();
-
+    private static NebulaModuleFactory factory = new();
     public NebulaImpl()
     {
         Instance = this;
 
         allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API, NebulaHasher.API]);
-        allDefinitions.AddRange([
-            (typeof(ModAbilityButton), () => new ModAbilityButton()),
-            (typeof(Timer), () => new Timer())
-            ]);
     }
 
-    public string APIVersion => typeof(NebulaAPI).Assembly.GetName().Version?.ToString() ?? "Undefined";
+    public Version APIVersion => typeof(NebulaAPI).Assembly.GetName().Version!;
 
     public Virial.Media.IResourceAllocator NebulaAsset => NebulaResourceManager.NebulaNamespace;
 
@@ -51,16 +45,6 @@ public class NebulaImpl : INebula
         var result = allModules.FirstOrDefault(m => m.GetType().IsAssignableTo(type));
         if (result != null) moduleFastMap[type] = result;
         return result as T;
-    }
-
-    T? INebula.Instantiate<T>() where T : class
-    {
-        var type = typeof(T);
-        if (definitionFastMap.TryGetValue(type, out var module))
-            return module as T;
-        var result = allDefinitions.FirstOrDefault(m => m.type.IsAssignableTo(type)).generator;
-        if (result != null) definitionFastMap[type] = result;
-        return result?.Invoke() as T;
     }
 
     Virial.Game.Game? INebula.CurrentGame => NebulaGameManager.Instance;
@@ -86,22 +70,14 @@ public class NebulaImpl : INebula
     Virial.Media.GUI GUILibrary => GUI.API;
     Virial.Media.Translator Language => Nebula.Modules.Language.API;
     Virial.Utilities.IHasher Hasher => NebulaHasher.API;
+
+    IModuleFactory INebula.Modules => factory;
 }
 
 internal static class UnboxExtension
 {
     internal static PlayerModInfo Unbox(this Virial.Game.Player player) => (PlayerModInfo)player;
-    internal static CustomEndCondition Unbox(this Virial.Game.GameEnd end) => (CustomEndCondition)end;
     internal static PlayerTaskState Unbox(this Virial.Game.PlayerTasks taskInfo) => (PlayerTaskState)taskInfo;
-}
-
-public static class ComponentHolderHelper
-{
-    static public GameObject Bind(this ComponentHolder holder, GameObject gameObject)
-    {
-        holder.BindComponent(new GameObjectBinding(gameObject));
-        return gameObject;
-    }
 }
 
 public class NebulaHasher : Virial.Utilities.IHasher
@@ -110,4 +86,22 @@ public class NebulaHasher : Virial.Utilities.IHasher
     int IHasher.GetIntegerHash(string text) => text.ComputeConstantHash();
 
     long IHasher.GetLongHash(string text) => text.ComputeConstantLongHash();
+}
+
+internal class NebulaModuleFactory : IModuleFactory
+{
+    Virial.Components.ModAbilityButton IModuleFactory.AbilityButton(ILifespan lifespan) => new ModAbilityButtonImpl().Register(lifespan);
+    Virial.Components.ModAbilityButton IModuleFactory.AbilityButton(ILifespan lifespan, bool isLeftSideButton, bool isArrangedAsKillButton, int priority, bool alwaysShow) => new ModAbilityButtonImpl(isLeftSideButton, isArrangedAsKillButton, priority, alwaysShow).Register(lifespan);
+    Virial.Components.GameTimer IModuleFactory.Timer(ILifespan lifespan, float max) => new TimerImpl(max).Register(lifespan);
+    Virial.Components.ObjectTracker<GamePlayer> IModuleFactory.KillTracker(ILifespan lifespan, GamePlayer player, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier)
+    {
+        var predicate = ObjectTrackers.KillablePredicate(player);
+        Predicate<GamePlayer>? predicateHeavier = filterHeavier == null ? null : filterHeavier.Invoke;
+        if (filter == null)
+            return ObjectTrackers.ForPlayer(null, player, predicate, predicateHeavier, null).Register(lifespan);
+        else
+        {
+            return ObjectTrackers.ForPlayer(null, player, (p) => predicate.Invoke(p) && filter(p), predicateHeavier, null).Register(lifespan);
+        }
+    }
 }

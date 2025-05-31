@@ -8,31 +8,28 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Bait : DefinedSingleAbilityRoleTemplate<Bait.Ability>, HasCitation, DefinedRole
 {
 
     private Bait(): base("bait", new(0, 247, 255), RoleCategory.CrewmateRole, Crewmate.MyTeam, [ShowKillFlashOption, ReportDelayOption, ReportDelayDispersionOption, CanSeeVentFlashOption]) {
     }
 
-    Citation? HasCitation.Citaion => Citations.TheOtherRoles;
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    Citation? HasCitation.Citation => Citations.TheOtherRoles;
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0, false));
 
-    static private BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("options.role.bait.showKillFlash", false);
-    static private FloatConfiguration ReportDelayOption = NebulaAPI.Configurations.Configuration("options.role.bait.reportDelay", (0f, 5f, 0.5f), 0f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration ReportDelayDispersionOption = NebulaAPI.Configurations.Configuration("options.role.bait.reportDelayDispersion", (0f, 10f, 0.25f), 0.5f, FloatConfigurationDecorator.Second);
-    static private BoolConfiguration CanSeeVentFlashOption = NebulaAPI.Configurations.Configuration("options.role.bait.canSeeVentFlash", false);
+    static private readonly BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("options.role.bait.showKillFlash", false);
+    static private readonly FloatConfiguration ReportDelayOption = NebulaAPI.Configurations.Configuration("options.role.bait.reportDelay", (0f, 5f, 0.5f), 0f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration ReportDelayDispersionOption = NebulaAPI.Configurations.Configuration("options.role.bait.reportDelayDispersion", (0f, 10f, 0.25f), 0.5f, FloatConfigurationDecorator.Second);
+    static private readonly BoolConfiguration CanSeeVentFlashOption = NebulaAPI.Configurations.Configuration("options.role.bait.canSeeVentFlash", false);
 
-    static public Bait MyRole = new Bait();
-    static private GameStatsEntry StatsBait = NebulaAPI.CreateStatsEntry("stats.bait.bait", GameStatsCategory.Roles, MyRole);
-    static private GameStatsEntry StatsKiller = NebulaAPI.CreateStatsEntry("stats.bait.killer", GameStatsCategory.Roles, MyRole);
+    static public readonly Bait MyRole = new();
+    static private readonly GameStatsEntry StatsBait = NebulaAPI.CreateStatsEntry("stats.bait.bait", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsKiller = NebulaAPI.CreateStatsEntry("stats.bait.killer", GameStatsCategory.Roles, MyRole);
     [NebulaRPCHolder]
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player){}
-
-        void RuntimeAssignable.OnActivated() { }
-
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped){}
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
 
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
         private IEnumerator CoReport(PlayerControl murderer)
@@ -67,13 +64,13 @@ public class Bait : DefinedRoleTemplate, HasCitation, DefinedRole
         [OnlyMyPlayer]
         void BaitReportOnMurdered(PlayerMurderedEvent ev)
         { 
-            if (ev.Murderer.AmOwner && !MyPlayer.AmOwner) NebulaManager.Instance.StartCoroutine(CoReport(ev.Murderer.VanillaPlayer).WrapToIl2Cpp());
+            if (ev.Murderer.AmOwner && !MyPlayer.AmOwner && !IsUsurped) NebulaManager.Instance.StartCoroutine(CoReport(ev.Murderer.VanillaPlayer).WrapToIl2Cpp());
         }
 
         [Local]
         void OnEnterVent(PlayerVentEnterEvent ev)
         {
-            if (CanSeeVentFlashOption) AmongUsUtil.PlayQuickFlash(MyRole.UnityColor.AlphaMultiplied(0.3f));
+            if (CanSeeVentFlashOption && !IsUsurped) AmongUsUtil.PlayQuickFlash(MyRole.UnityColor.AlphaMultiplied(0.3f));
         }
 
         void OnMeetingEnd(MeetingEndEvent ev)

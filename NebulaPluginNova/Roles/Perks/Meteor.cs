@@ -1,5 +1,5 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ internal class Meteor : PerkFunctionalInstance
 
     public Meteor(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {
-        PerkInstance.BindTimer(new Timer(10f).Start());
+        PerkInstance.BindTimer(NebulaAPI.Modules.Timer(this, 10f)).MyTimer?.Start();
     }
     void OnMeetingEnd(TaskPhaseStartEvent ev)
     {
@@ -46,7 +46,7 @@ internal class Meteor : PerkFunctionalInstance
 
         new StaticAchievementToken("perk.manyPerks1.meteor");
         int killed = 0;
-        GameOperatorManager.Instance?.Register<PlayerKillPlayerEvent>(ev =>
+        GameOperatorManager.Instance?.Subscribe<PlayerKillPlayerEvent>(ev =>
         {
             if (ev.Murderer.AmOwner && !ev.Dead.AmOwner && ev.Dead.PlayerState == PlayerState.Meteor)
             {
@@ -74,12 +74,12 @@ internal class Meteor : PerkFunctionalInstance
 
             var duration = FireDelay - FireSilentDelay;
 
-            GameOperatorManager.Instance?.Register<PlayerTaskTextLocalEvent>(ev => {
+            GameOperatorManager.Instance?.Subscribe<PlayerTaskTextLocalEvent>(ev => {
                 even = !even;
                 slowEven = (slowEven + 1) % 6;
                 ev.AppendText(Language.Translate("perk.meteor.sabotageText").Color(even ? Color.red : Color.yellow));
             }, FunctionalLifespan.GetTimeLifespan(duration + AfterFireDuration));
-            GameOperatorManager.Instance?.Register<CheckCanPushEmergencyButtonEvent>(ev => ev.DenyButton("perk.meteor.meetingButtonText"), FunctionalLifespan.GetTimeLifespan(duration + AfterFireDuration));
+            GameOperatorManager.Instance?.Subscribe<CheckCanPushEmergencyButtonEvent>(ev => ev.DenyButton("perk.meteor.meetingButtonText"), FunctionalLifespan.GetTimeLifespan(duration + AfterFireDuration));
 
             var player = GamePlayer.LocalPlayer;
             float alertTime = 0f;

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Game;
 
+/// <summary>
+/// ゲームに関するイベントを表します。
+/// </summary>
 public class AbstractGameEvent : Event
 {
     public Virial.Game.Game Game { get; private set; }

@@ -1,6 +1,7 @@
 ﻿using Epic.OnlineServices.Presence;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
+using Nebula.Modules.Cosmetics;
 using Virial;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
@@ -45,6 +46,7 @@ public static class NebulaExileWrapUp
                     {
                         exiled.Exiled();
                         exiled.Data.IsDead = true;
+                        PlayerExtension.ResetOnDying(exiled);
                     }
 
                     NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Exile, null, 1 << exiled.PlayerId, GameStatisticsGatherTag.Spawn) { RelatedTag = EventDetail.Exiled });
@@ -143,6 +145,32 @@ public static class AirshipExileWrapUpPatch
     }
 }
 
+[HarmonyPatch(typeof(AirshipExileController), nameof(AirshipExileController.Animate))]
+public static class AirshipExileWrapUpAnimatePatch
+{
+    static void Postfix(AirshipExileController __instance, ref Il2CppSystem.Collections.IEnumerator __result)
+    {
+        var orig = __result;
+        IEnumerator CoWrap()
+        {
+            while (orig.MoveNext())
+            {
+                var current = orig.Current;
+                if (current != null && current?.TryCast<AirshipExileController._WrapUpAndSpawn_d__11>() != null)
+                {
+                    yield return NebulaExileWrapUp.WrapUpAndSpawn(__instance).WrapToIl2Cpp();
+                }
+                else
+                {
+                    yield return current;
+                }
+            }
+        }
+
+        __result = CoWrap().WrapToIl2Cpp();
+    }
+}
+
 [HarmonyPatch(typeof(ExileController), nameof(ExileController.Begin))]
 class ExileControllerBeginPatch
 {
@@ -154,13 +182,13 @@ class ExileControllerBeginPatch
         init.outfit = first?.GetModInfo()!.DefaultOutfit.outfit;
         init.isImpostor = first?.GetModInfo()!.IsImpostor ?? false;
 
-        Debug.Log("Rewrite Exiled: " + (init.networkedPlayer?.PlayerName ?? "None"));
-
-        StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -500f, () => ExileController.Instance);
+        StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -505f, () => ExileController.Instance);
     }
 
     public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref ExileController.InitProperties init)
     {
+        GameOperatorManager.Instance?.Run(new ExileSceneStartEvent(MeetingHudExtension.ExiledAllModCache!));
+
         if (init.networkedPlayer != null)
         {
 

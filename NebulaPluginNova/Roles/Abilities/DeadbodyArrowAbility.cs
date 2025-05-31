@@ -9,16 +9,14 @@ using Virial.Game;
 
 namespace Nebula.Roles.Abilities;
 
-public class DeadbodyArrowAbility : ComponentHolder, IGameOperator
+public class DeadbodyArrowAbility : FlexibleLifespan, IGameOperator
 {
     private List<(DeadBody deadBody, Arrow arrow)> AllArrows = new();
     public bool ShowArrow { get; set; } = true;
 
-    void IGameOperator.OnReleased() => this.ReleaseIt();
-
     void OnDeadBodyGenerated(DeadBodyInstantiateEvent ev)
     {
-        AllArrows.Add((ev.DeadBody, Bind(new Arrow(null) { TargetPos = ev.DeadBody.TruePosition }.SetColor(Color.blue))));
+        AllArrows.Add((ev.DeadBody, new Arrow(null) { TargetPos = ev.DeadBody.TruePosition }.SetColor(Color.blue).Register(this)));
         LocalUpdate(null!);
     }
 
@@ -35,7 +33,7 @@ public class DeadbodyArrowAbility : ComponentHolder, IGameOperator
             }
             else
             {
-                tuple.arrow.ReleaseIt();
+                tuple.arrow.Release();
                 return true;
             }
         });

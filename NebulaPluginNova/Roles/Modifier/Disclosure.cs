@@ -12,6 +12,7 @@ using Virial;
 using Nebula.Modules.ScriptComponents;
 using Virial.Events.Game;
 using Nebula.Roles.Impostor;
+using Nebula.Modules.Cosmetics;
 
 namespace Nebula.Roles.Modifier;
 
@@ -45,15 +46,15 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                 GamePlayer? voted = null;
                 float votedTime = 0f;
                 AchievementToken<int> challengeToken = new("disclosure.challenge", 0, (num, _) => num >= 3);
-                //票を投じたらタイマーと重複人数をリセットする。(条件を満たしていれば銀称号をクリア)
-                GameOperatorManager.Instance?.Register<PlayerVoteCastLocalEvent>(ev => {
+                //票を投じたらタイマーと重複人数をリセットする。
+                GameOperatorManager.Instance?.Subscribe<PlayerVoteCastLocalEvent>(ev => {
 
                     voted = ev.VoteFor;
                     num = 0;
                     votedTime = NebulaGameManager.Instance!.CurrentTime;
-                    if (PointerShown) new StaticAchievementToken("disclosure.common1");
+                    new StaticAchievementToken("disclosure.common1");
                 }, this);
-                GameOperatorManager.Instance?.Register<PlayerVoteCastEvent>(ev =>
+                GameOperatorManager.Instance?.Subscribe<PlayerVoteCastEvent>(ev =>
                 {
                     if (MeetingHud.Instance.playerStates.Find(p => p.TargetPlayerId == MyPlayer.PlayerId, out var pva))
                     {
@@ -61,7 +62,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                         if (voted == ev.VoteFor && NebulaGameManager.Instance!.CurrentTime - votedTime > 5f) num++;
                     }
                 }, this);
-                GameOperatorManager.Instance?.Register<MeetingEndEvent>(ev => {
+                GameOperatorManager.Instance?.Subscribe<MeetingEndEvent>(ev => {
                     if (voted != null && num >= 3 && MyPlayer.Role.Role.Team != voted.Role.Role.Team && ev.Exiled.Contains(voted)) challengeToken.Value++;
 
                     num = 0;
@@ -69,9 +70,6 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                 }, this);
             }
         }
-
-        ComponentBinding<SpriteRenderer>? Pointer = null;
-        bool PointerShown => Pointer != null && Pointer.MyObject && Pointer.MyObject!.enabled;
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
@@ -81,8 +79,6 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
         Vector2 MouseToHudPos(Vector2 mousePos) => (mousePos - (new Vector2(Screen.width, Screen.height) * 0.5f)) / Screen.height * 2f * HudManager.Instance.UICamera.orthographicSize;
         void OnMeetingStart(MeetingStartEvent ev)
         {
-            Pointer?.ReleaseIt();
-
             if(MyPlayer.AmOwner) ShareMousePoint.Invoke((MyPlayer.PlayerId, MouseToHudPos(Input.mousePosition), 0f, ++sentSequentialId));
 
             if (MyPlayer.IsDead) return;
@@ -91,26 +87,52 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
             renderer.sprite = IconSprite.GetSprite();
             renderer.color = Palette.PlayerColors[(AnonymousCursorOption && !MyPlayer.AmOwner) ? NebulaPlayerTab.CamouflageColorId : MyPlayer.PlayerId];
             renderer.enabled = false;
-            Pointer = Bind(new ComponentBinding<SpriteRenderer>(renderer));
+
+            var pointerLifespan = new FunctionalLifespan(() => !this.IsDeadObject && MeetingHud.Instance);
+            pointerLifespan.BindGameObject(renderer.gameObject);
+
+            GameOperatorManager.Instance?.Subscribe<GameHudUpdateEvent>(ev => {
+                if (renderer)
+                {
+                    renderer.enabled = !MyPlayer.IsDead && lastPoint != null && (ShowCursorAtLateVotingOption || MeetingHudExtension.VotingTimer > 15f);
+
+                    if (AmOwner)
+                    {
+                        renderer.transform.localPosition = MouseToHudPos(Input.mousePosition).AsVector3(-50f);
+                    }
+                    else
+                    {
+                        if (lastPoint != null)
+                        {
+                            if (lastPoint!.Value.speed > 0f)
+                            {
+                                Vector2 currentPos = renderer.transform.localPosition;
+                                var diff = currentPos - lastPoint.Value.pos;
+                                if (diff.magnitude < 0.04f)
+                                {
+                                    currentPos = lastPoint.Value.pos;
+                                }
+                                else
+                                {
+                                    currentPos -= diff.normalized * Mathf.Min(diff.magnitude, lastPoint.Value.speed * Time.deltaTime);
+                                }
+
+                                renderer.transform.localPosition = currentPos.AsVector3(-50f);
+                            }
+                            else
+                            {
+                                renderer.transform.localPosition = lastPoint.Value.pos.AsVector3(-50f);
+                            }
+                        }
+                    }
+                }
+            }, pointerLifespan);
         }
 
         float lastSent = 0f;
         int sentSequentialId = 0;
         void Update(GameHudUpdateEvent ev)
         {
-            if (Pointer != null)
-            {
-                if (!MeetingHud.Instance)
-                {
-                    Pointer.ReleaseIt();
-                    Pointer = null;
-                }
-                else if (Pointer.MyObject)
-                {
-                    Pointer.MyObject!.enabled = !MyPlayer.IsDead && lastPoint != null && (ShowCursorAtLateVotingOption || MeetingHudExtension.VotingTimer > 15f);
-                }
-            }
-
             if (AmOwner)
             {
                 if (MeetingHud.Instance && lastPoint != null)
@@ -124,36 +146,6 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                     }
                 }
                 if (!MeetingHud.Instance) lastPoint = null;
-
-                if (Pointer != null && Pointer.MyObject) Pointer.MyObject!.transform.localPosition = MouseToHudPos(Input.mousePosition).AsVector3(-50f);
-            }
-            else
-            {
-                if (Pointer != null && Pointer.MyObject)
-                {
-                    if (lastPoint != null)
-                    {
-                        if (lastPoint!.Value.speed > 0f)
-                        {
-                            Vector2 currentPos = Pointer.MyObject.transform.localPosition;
-                            var diff = currentPos - lastPoint.Value.pos;
-                            if (diff.magnitude < 0.04f)
-                            {
-                                currentPos = lastPoint.Value.pos;
-                            }
-                            else
-                            {
-                                currentPos -= diff.normalized * Mathf.Min(diff.magnitude, lastPoint.Value.speed * Time.deltaTime);
-                            }
-
-                            Pointer.MyObject.transform.localPosition = currentPos.AsVector3(-50f);
-                        }
-                        else
-                        {
-                            Pointer.MyObject.transform.localPosition = lastPoint.Value.pos.AsVector3(-50f);
-                        }
-                    }
-                }
             }
         }
 

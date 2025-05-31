@@ -12,7 +12,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Jailer : DefinedRoleTemplate, DefinedRole
+public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedRole
 {
     private Jailer() : base("jailer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CanMoveWithMapWatchingOption, CanUseAdminOnMeetingOption, CanIdentifyDeadBodiesOption, CanIdentifyImpostorsOption, InheritAbilityOnDyingOption])
     {
@@ -21,7 +21,8 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Jailer.png");
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsJackalizable => true;
 
     static public BoolConfiguration CanMoveWithMapWatchingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canMoveWithMapWatching", false);
     static public BoolConfiguration CanUseAdminOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canUseAdminOnMeeting", true);
@@ -33,11 +34,16 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
 
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable != JailerModifier.MyRole;
 
-    public class Instance : RuntimeAssignableTemplate, RuntimeRole
+    public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        DefinedRole RuntimeRole.Role => MyRole;
-        public Instance(GamePlayer player) : base(player)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
+            if (AmOwner)
+            {
+                JailerAbility.TryAddAndBind(() => !this.IsDeadObject && !this.IsUsurped);
+                acTokenCommon2 ??= new("jailer.common2", 0f, (val, _) => val > 10f);
+            }
         }
 
         AchievementToken<bool>? acTokenCommon = null;
@@ -73,20 +79,6 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
             }
         }
 
-        void RuntimeAssignable.OnActivated()
-        {
-            if (AmOwner)
-            {
-                //JailerAbilityを獲得していなければ登録
-                if ((GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
-                {
-                    new JailerAbility(CanIdentifyImpostorsOption, CanIdentifyDeadBodiesOption, CanMoveWithMapWatchingOption, CanUseAdminOnMeetingOption).Register(this);
-                }
-
-                acTokenCommon2 ??= new("jailer.common2", 0f, (val, _) => val > 10f);
-            }
-        }
-
         [Local, OnlyMyPlayer]
         void Update(GameUpdateEvent ev)
         {
@@ -107,9 +99,9 @@ public class Jailer : DefinedRoleTemplate, DefinedRole
             if (localPlayer == null) return;
 
             //継承ジェイラーの対象で、JailerAbilityを獲得していなければ登録
-            if (InheritAbilityOnDyingOption && !localPlayer.IsDead && localPlayer.IsImpostor && (GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
+            if (InheritAbilityOnDyingOption && !localPlayer.IsDead && localPlayer.IsImpostor)
             {
-                new JailerAbility(CanIdentifyImpostorsOption, CanIdentifyDeadBodiesOption, CanMoveWithMapWatchingOption, CanUseAdminOnMeetingOption).Register(this);
+                JailerAbility.TryAddAndBind(() => !this.IsDeadObject && !this.IsUsurped);
             }
 
         }
@@ -149,10 +141,7 @@ public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocat
 
         void RuntimeAssignable.OnActivated()
         {
-            if(AmOwner && (GameOperatorManager.Instance?.AllOperators.All(e => e is not JailerAbility) ?? false))
-            {
-                new JailerAbility(Jailer.CanIdentifyImpostorsOption, Jailer.CanIdentifyDeadBodiesOption, Jailer.CanMoveWithMapWatchingOption, Jailer.CanUseAdminOnMeetingOption).Register(this);
-            }
+            if(AmOwner) JailerAbility.TryAddAndBind(() => !this.IsDeadObject);
         }
     }
 }

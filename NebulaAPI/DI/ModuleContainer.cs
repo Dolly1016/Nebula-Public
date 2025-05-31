@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
-using static Il2CppSystem.Diagnostics.Tracing.TraceLoggingMetadataCollector;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Virial.DI;
 

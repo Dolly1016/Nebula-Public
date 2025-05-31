@@ -1,5 +1,6 @@
 ﻿using Hazel;
 using InnerNet;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nebula.Modules.GUIWidget;
 using Steamworks;
 using System.Runtime.InteropServices;
@@ -39,6 +40,7 @@ public class Reference<T>
 
 public static class Helpers
 {
+    static public float FlipIf(this float value, bool flip) => flip ? -value : value;
     private static Func<string, string>? urlConverter = null;
     static public string ConvertUrl(string url)
     {
@@ -297,6 +299,9 @@ public static class Helpers
         return defaultValue;
     }
 
+    static public bool GetAsBool(this int[] array, int index, bool defaultValue) => Get(array, index, defaultValue ? 1 : 0) == 1;
+    static public bool GetAsBool(this int[] array, int index) => Get(array, index, 0) == 1;
+    static public int AsInt(this bool value) => value ? 1 : 0;
     /// <summary>
     /// リストの範囲内ならリストの値を返します。
     /// 範囲外ならデフォルト値を返します。例外は発しません。
@@ -384,6 +389,7 @@ public static class Helpers
         return null!;
     }
 
+    /*
     static public void SyncSingleNetObject(InnerNetObject obj)
     {
         MessageWriter messageWriter = MessageWriter.Get(obj.sendMode);
@@ -407,6 +413,7 @@ public static class Helpers
             messageWriter.CancelMessage();
         }
     }
+    */
 
     static public void PlayKillStingerSE()
     {
@@ -420,21 +427,21 @@ public static class Helpers
         GC.Collect();
     }
 
-    static public TMPro.TextMeshPro TextHudContent(string name, ComponentHolder binder, Action<TMPro.TextMeshPro> updater)
+    static public TMPro.TextMeshPro TextHudContent(string name, ILifespan lifespan, Action<TMPro.TextMeshPro> updater)
     {
         var TextHolder = HudContent.InstantiateContent(name, true, true, false, false);
-        binder.Bind(TextHolder.gameObject);
+        lifespan.BindGameObject(TextHolder.gameObject);
 
         TextMeshPro tmPro = null!;
         var text = new NoSGUIText(Virial.Media.GUIAlignment.Left, new(GUI.API.GetAttribute(Virial.Text.AttributeParams.StandardBaredBoldLeftNonFlexible)) { Alignment = Virial.Text.TextAlignment.BottomLeft, FontSize = new(1.6f), Size = new(3f, 1f) }, new RawTextComponent("")) { PostBuilder = t => { tmPro = t; tmPro.sortingOrder = 0; } };
         text.Instantiate(new Virial.Media.Anchor(new(0f, 0f), new(-0.5f, -0.5f, 0f)), new(20f, 20f), out _)!.transform.SetParent(TextHolder.transform, false);
 
-        GameOperatorManager.Instance?.Register<GameUpdateEvent>(ev => {
+        GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => {
             if (tmPro)
             {
                 updater.Invoke(tmPro);
             }
-        }, binder);
+        }, lifespan);
 
         return tmPro;
     }

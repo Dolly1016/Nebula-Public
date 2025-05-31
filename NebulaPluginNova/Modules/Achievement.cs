@@ -1,7 +1,7 @@
 ﻿using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils;
 using Il2CppInterop.Runtime.Injection;
-using Nebula.Behaviour;
+using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using Steamworks;
@@ -22,7 +22,7 @@ using static Nebula.Modules.AbstractAchievement;
 
 namespace Nebula.Modules;
 
-abstract public class AchievementTokenBase : IReleasable, ILifespan
+abstract public class AchievementTokenBase
 {
     public ProgressRecord Achievement { get; private init; }
     abstract public AbstractAchievement.ClearDisplayState UniteTo(bool update = true);
@@ -32,13 +32,6 @@ abstract public class AchievementTokenBase : IReleasable, ILifespan
         this.Achievement = achievement;
 
         NebulaGameManager.Instance?.AllAchievementTokens.Add(this);
-    }
-    public bool IsDeadObject { get; private set; } = false;
-
-    public void Release()
-    {
-        IsDeadObject = true;
-        NebulaGameManager.Instance?.AllAchievementTokens.Remove(this);
     }
 }
 
@@ -54,8 +47,6 @@ public class StaticAchievementToken : AchievementTokenBase
 
     public override AbstractAchievement.ClearDisplayState UniteTo(bool update)
     {
-        if (IsDeadObject) return AbstractAchievement.ClearDisplayState.None;
-
         return Achievement?.Unite(1, update) ?? ClearDisplayState.None;
     }
 }
@@ -80,9 +71,26 @@ public class AchievementToken<T> : AchievementTokenBase
 
     public override AbstractAchievement.ClearDisplayState UniteTo(bool update)
     {
-        if (IsDeadObject) return AbstractAchievement.ClearDisplayState.None;
-
         return Achievement.Unite(Supplier.Invoke(Value, (Achievement as ProgressRecord)!),update);
+    }
+}
+
+public class SimpleAchievementToken : AchievementTokenBase
+{
+    public Func<bool> Supplier { get; set; }
+
+
+
+    public SimpleAchievementToken(ProgressRecord achievement, Func<bool> supplier) : base(achievement)
+    {
+        Supplier = supplier;
+    }
+    public SimpleAchievementToken(string achievement, Func<bool> supplier) : this(NebulaAchievementManager.GetRecord(achievement, out var a) ? a : null!, supplier) { }
+
+    public override AbstractAchievement.ClearDisplayState UniteTo(bool update)
+    {
+        if (Supplier.Invoke()) return Achievement.Unite(1, update);
+        return ClearDisplayState.None;
     }
 }
 
@@ -99,8 +107,8 @@ public static class AchievementTokens
     public static AchievementToken<(bool triggered, bool blocked, bool isCleared)> FirstFailedAchievementToken(string id, GamePlayer player, ILifespan lifespan)
     {
         AchievementToken<(bool triggered, bool blocked, bool isCleared)> token = new(id, (false, false, false), (a, _) => a.isCleared);
-        GameOperatorManager.Instance?.Register<MeetingEndEvent>(ev => token.Value.blocked = token.Value.triggered, lifespan);
-        GameOperatorManager.Instance?.Register<PlayerDieEvent>(ev =>
+        GameOperatorManager.Instance?.Subscribe<MeetingEndEvent>(ev => token.Value.blocked = token.Value.triggered, lifespan);
+        GameOperatorManager.Instance?.Subscribe<PlayerDieEvent>(ev =>
         {
             //自身の死亡かつ死因が追放か推察
             if (ev.Player == player && (ev.Player.PlayerState == PlayerState.Exiled || ev.Player.PlayerState == PlayerState.Guessed))
@@ -118,16 +126,16 @@ public static class AchievementTokens
 
 public class AchievementType
 {
-    static public AchievementType Challenge = new("challenge");
-    static public AchievementType Secret = new("secret");
-    static public AchievementType Seasonal = new("seasonal");
-    static public AchievementType Costume = new("costume");
-    static public AchievementType Innersloth = new("innersloth");
-    static public AchievementType Perk = new("perk");
+    static public readonly AchievementType Challenge = new("challenge");
+    static public readonly AchievementType Secret = new("secret");
+    static public readonly AchievementType Seasonal = new("seasonal");
+    static public readonly AchievementType Costume = new("costume");
+    static public readonly AchievementType Innersloth = new("innersloth");
+    static public readonly AchievementType Perk = new("perk");
 
-    static public AchievementType Uljun = new("uljun");
-    static public AchievementType Mememura = new("meme");
-    static private Dictionary<string, AchievementType> CollabTypes;
+    static public readonly AchievementType Uljun = new("uljun");
+    static public readonly AchievementType Mememura = new("meme");
+    static private readonly Dictionary<string, AchievementType> CollabTypes;
     static public bool TryGetCollabType(string id, [MaybeNullWhen(false)] out AchievementType type) => CollabTypes.TryGetValue(id, out type);
     static AchievementType()
     {
@@ -223,14 +231,14 @@ public interface INebulaAchievement
         ClearedMultiple
     }
 
-    static public TextComponent HiddenComponent = new RawTextComponent("???");
-    static public TextComponent HiddenDescriptiveComponent = new ColorTextComponent(new Color(0.4f, 0.4f, 0.4f), new TranslateTextComponent("achievement.title.hidden"));
-    static public TextComponent HiddenDetailComponent = new ColorTextComponent(new Color(0.8f, 0.8f, 0.8f), new TranslateTextComponent("achievement.title.hiddenDetail"));
-    static public TextAttribute DetailTitleAttribute { get; private set; } = GUI.API.GetAttribute(AttributeAsset.OverlayTitle);
-    static public TextAttribute SocialCaptionAttribute { get; private set; } = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.3f) };
-    static public TextAttribute SocialCategoryAttribute { get; private set; } = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.2f) };
-    static public TextAttribute SocialTitleAttribute { get; private set; } = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(2f, 1f, 2f), Size = new(3f, 1f) };
-    static private TextAttribute DetailContentAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayContent);
+    static public readonly TextComponent HiddenComponent = new RawTextComponent("???");
+    static public readonly TextComponent HiddenDescriptiveComponent = new ColorTextComponent(new Color(0.4f, 0.4f, 0.4f), new TranslateTextComponent("achievement.title.hidden"));
+    static public readonly TextComponent HiddenDetailComponent = new ColorTextComponent(new Color(0.8f, 0.8f, 0.8f), new TranslateTextComponent("achievement.title.hiddenDetail"));
+    static public readonly TextAttribute DetailTitleAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayTitle);
+    static public readonly TextAttribute SocialCaptionAttribute = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.3f) };
+    static public readonly TextAttribute SocialCategoryAttribute= new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.2f) };
+    static public readonly TextAttribute SocialTitleAttribute = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(2f, 1f, 2f), Size = new(3f, 1f) };
+    static private readonly TextAttribute DetailContentAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayContent);
 
     string Id { get; }
     string TranslationKey => "achievement." + Id + ".title";
@@ -259,16 +267,16 @@ public interface INebulaAchievement
         }
         foreach (var type in AchievementType()) yield return Language.Translate(type.TranslationKey);
     }
-    Virial.Media.GUIWidget GetOverlayWidget(bool hiddenNotClearedAchievement = true, bool showCleared = false, bool showTitleInfo = false, bool showTorophy = false, bool showFlavor = false)
+    Virial.Media.GUIWidget GetOverlayWidget(bool hiddenNotClearedAchievement = true, bool showCleared = false, bool showTitleInfo = false, bool showTrophy = false, bool showFlavor = false)
     {
         var gui = NebulaAPI.GUI;
 
-        List<Virial.Media.GUIWidget> list = new();
+        List<Virial.Media.GUIWidget> list = [];
 
         list.Add(new NoSGUIText(GUIAlignment.Left, DetailContentAttribute, GetHeaderComponent()));
 
-        List<Virial.Media.GUIWidget> titleList = new();
-        if (showTorophy)
+        List<Virial.Media.GUIWidget> titleList = [];
+        if (showTrophy)
         {
             titleList.Add(new NoSGUIMargin(GUIAlignment.Left, new(-0.04f, 0.2f)));
             titleList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => TrophySprite.GetSprite(Trophy)), new(0.3f, 0.3f)));
@@ -340,7 +348,7 @@ public interface INebulaAchievement
     Virial.Media.GUIWidget? GetDetailWidget() => null;
     TextComponent GetDetailComponent()
     {
-        List<TextComponent> list = new();
+        List<TextComponent> list = [];
         if (!NoHint || IsCleared)
             list.Add(new TranslateTextComponent(GoalTranslationKey));
         else
@@ -385,7 +393,7 @@ public interface INebulaAchievement
 
     IEnumerator CoShowSocialBillboard(Vector2 pos, SocialMessageType type, string playerName, int others = 0)
     {
-        return ModSingleton<ShowUp>.Instance.CoShowSocial("SocialAchivement", pos, GetSocialWidget(type, playerName, others), (widget, size) =>
+        return ModSingleton<ShowUp>.Instance.CoShowSocial("SocialAchievement", pos, GetSocialWidget(type, playerName, others), (widget, size) =>
         {
             var button = widget.SetUpButton(true);
             button.gameObject.layer = LayerExpansion.GetUILayer();
@@ -414,7 +422,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
 {
     public static AchievementToken<(bool isCleared, bool triggered)> GenerateSimpleTriggerToken(string achievement) => new(achievement,(false,false),(val,_)=>val.isCleared);
 
-    static public IDividedSpriteLoader TrophySprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Trophy.png", 100f, 4);
+    static public readonly IDividedSpriteLoader TrophySprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Trophy.png", 100f, 4);
 
     bool isSecret;
     bool noHint;
@@ -474,15 +482,23 @@ public class InnerslothAchievement : INebulaAchievement
     bool INebulaAchievement.IsHidden => false;
     Image? INebulaAchievement.SpecifiedBackImage => null;
 
-    bool IsClearedSteam => SteamUserStats.GetAchievement(Id.Split('.', 2)[1], out var cleared) ? cleared : false;
+    bool IsClearedSteam => SteamUserStats.GetAchievement(Id.Split('.', 2)[1], out var cleared) && cleared;
     bool INebulaAchievement.IsCleared
     {
         get
         {
-            if (Constants.GetCurrentPlatformName() == "Steam")
-                return IsClearedSteam;
-            else
+            try
+            {
+                if (Constants.GetCurrentPlatformName() == "Steam")
+                    return IsClearedSteam;
+                else
+                    return false;
+            }
+            catch 
+            {
+                //Steamプラットフォームでも初期化失敗で取得できないことがあるらしい。
                 return false;
+            }
         }
     }
 
@@ -517,7 +533,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
         NebulaAchievementManager.RegisterNonrecord(this, key);
     }
 
-    SpriteLoader guageSprite = SpriteLoader.FromResource("Nebula.Resources.ProgressGuage.png", 100f);
+    static readonly SpriteLoader gaugeSprite = SpriteLoader.FromResource("Nebula.Resources.ProgressGauge.png", 100f);
 
     static private TextAttribute OblongAttribute = new(GUI.Instance.GetAttribute(AttributeParams.Oblong)) { FontSize = new(1.6f), Size = new(0.6f, 0.2f), Color = new(163, 204, 220) };
 
@@ -530,7 +546,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
     private int goal { get; init; }
     private string reference { get; init; }
     private ProgressRecord? referenceRecord = null;
-    private IEnumerable<AchievementType> achievementType =[];
+    private readonly IEnumerable<AchievementType> achievementType =[];
     public Image? SpecifiedBackImage { get; set; }
     public ProgressRecord? ReferenceRecord { get
         {
@@ -565,12 +581,12 @@ public class SumUpReferenceAchievement : INebulaAchievement
             var backGround = UnityHelper.CreateObject<SpriteRenderer>("Background", obj.transform, new Vector3(0f, 0f, 0f));
             var colored = UnityHelper.CreateObject<SpriteRenderer>("Colored", obj.transform, new Vector3(0f, 0f, -0.1f));
 
-            backGround.sprite = guageSprite.GetSprite();
+            backGround.sprite = gaugeSprite.GetSprite();
             backGround.color = new(0.21f, 0.21f, 0.21f);
             backGround.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             backGround.sortingOrder = 1;
 
-            colored.sprite = guageSprite.GetSprite();
+            colored.sprite = gaugeSprite.GetSprite();
             colored.material.shader = NebulaAsset.ProgressShader;
             colored.sharedMaterial.SetFloat("_Guage", Mathf.Min(1f, (float)(referenceRecord?.Progress ?? 0) / (float)goal));
             colored.sharedMaterial.color = new(56f / 255f, 110f / 255f, 191f / 255f);
@@ -596,7 +612,7 @@ public class SumUpAchievement : AbstractAchievement, INebulaAchievement
     {
     }
 
-    SpriteLoader guageSprite = SpriteLoader.FromResource("Nebula.Resources.ProgressGuage.png", 100f);
+    static readonly SpriteLoader gaugeSprite = SpriteLoader.FromResource("Nebula.Resources.ProgressGauge.png", 100f);
 
     static private TextAttribute OblongAttribute = new(GUI.Instance.GetAttribute(AttributeParams.Oblong)) { FontSize = new(1.6f), Size = new(0.6f, 0.2f), Color = new(163,204,220) };
     protected virtual void OnWidgetGenerated(GameObject obj) { }
@@ -611,12 +627,12 @@ public class SumUpAchievement : AbstractAchievement, INebulaAchievement
             var backGround = UnityHelper.CreateObject<SpriteRenderer>("Background", obj.transform, new Vector3(0f, 0f, 0f));
             var colored = UnityHelper.CreateObject<SpriteRenderer>("Colored", obj.transform, new Vector3(0f, 0f, -0.1f));
 
-            backGround.sprite = guageSprite.GetSprite();
+            backGround.sprite = gaugeSprite.GetSprite();
             backGround.color = new(0.21f, 0.21f, 0.21f);
             backGround.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             backGround.sortingOrder = 1;
 
-            colored.sprite = guageSprite.GetSprite();
+            colored.sprite = gaugeSprite.GetSprite();
             colored.material.shader = NebulaAsset.ProgressShader;
             colored.sharedMaterial.SetFloat("_Guage", Mathf.Min(1f, (float)Progress / (float)Goal));
             colored.sharedMaterial.color = new(56f / 255f, 110f / 255f, 191f / 255f);
@@ -669,18 +685,18 @@ public class CompleteAchievement : SumUpAchievement, INebulaAchievement
 [NebulaRPCHolder]
 static public class NebulaAchievementManager
 {
-    static public DataSaver AchievementDataSaver = new("Achievements");
-    static private Dictionary<string, ProgressRecord> allRecords = [];
-    static private Dictionary<string, INebulaAchievement> allNonrecords = [];
-    static private Dictionary<long, INebulaAchievement> fastAchievements = [];
-    static private StringDataEntry myTitleEntry = new("MyTitle", AchievementDataSaver, "-");
-    static private List<INebulaAchievement> allAchievements = [];
-    static private List<GameStatsEntry> allStats = [];
+    static public readonly DataSaver AchievementDataSaver = new("Achievements");
+    static private readonly Dictionary<string, ProgressRecord> allRecords = [];
+    static private readonly Dictionary<string, INebulaAchievement> allNonrecords = [];
+    static private readonly Dictionary<long, INebulaAchievement> fastAchievements = [];
+    static private readonly StringDataEntry myTitleEntry = new("MyTitle", AchievementDataSaver, "-");
+    static private readonly List<INebulaAchievement> allAchievements = [];
+    static private readonly List<GameStatsEntry> allStats = [];
 
     static private INebulaAchievement[] LastFirstClearedArchive = [];
     static private List<INebulaAchievement> ClearedAllOrderedArchive = [];
     static public IEnumerable<INebulaAchievement> RecentlyCleared => ClearedAllOrderedArchive;
-    static private HashSet<INebulaAchievement> ClearedArchive = new();
+    static private HashSet<INebulaAchievement> ClearedArchive = [];
 
     static public IEnumerable<ProgressRecord> AllRecords => allRecords.Values;
     static public IEnumerable<INebulaAchievement> AllAchievements => allAchievements;
@@ -730,7 +746,7 @@ static public class NebulaAchievementManager
     }
 
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor) {
-        yield return preprocessor.SetLoadingText("Loading Achievements");
+        yield return preprocessor.SetLoadingText("Loading Titles");
 
         {
             int num = 0;
@@ -741,10 +757,10 @@ static public class NebulaAchievementManager
                 num++;
             });
         }
-        CustomEndCondition.AllEndConditions.Do(end =>
+        GameEnd.AllEndConditions.Do(end =>
         {
-            RegisterStats("stats.end.win." + end.LocalizedName, GameStatsCategory.Game, null, new LazyTextComponent(() => Language.Translate("stats.common.win").Replace("%END%", Language.Translate("end." + end.LocalizedName).Replace("%EXTRA%", "").Color(end.Color))), 80);
-            RegisterStats("stats.end.lose." + end.LocalizedName, GameStatsCategory.Game, null, new LazyTextComponent(() => Language.Translate("stats.common.defeat").Replace("%END%", Language.Translate("end." + end.LocalizedName).Replace("%EXTRA%", "").Color(end.Color))), 70);
+            RegisterStats("stats.end.win." + end.ImmutableId, GameStatsCategory.Game, null, new LazyTextComponent(() => Language.Translate("stats.common.win").Replace("%END%", end.DisplayText.GetString().Replace("%EXTRA%", "").Color(end.Color))), 80);
+            RegisterStats("stats.end.lose." + end.ImmutableId, GameStatsCategory.Game, null, new LazyTextComponent(() => Language.Translate("stats.common.defeat").Replace("%END%", end.DisplayText.GetString().Replace("%EXTRA%", "").Color(end.Color))), 70);
         });
         RegisterStats("stats.gamePlay", GameStatsCategory.Game, null, null, 81);
         RegisterStats("stats.plants.gain.normal", GameStatsCategory.Perks, null, null, 101);
@@ -782,6 +798,7 @@ static public class NebulaAchievementManager
             PlayerState.Frenzied,
             PlayerState.Bubbled,
             PlayerState.Meteor,
+            PlayerState.Balloon,
         }.Select(tag => new DisplayProgressRecord("kill." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
         ProgressRecord[] deathRecord = new TranslatableTag[] { 
             PlayerState.Dead,
@@ -803,6 +820,8 @@ static public class NebulaAchievementManager
             PlayerState.Bubbled,
             PlayerState.Meteor,
             PlayerState.Starved,
+            PlayerState.Balloon,
+            PlayerState.Lost,
         }.Select(tag => new DisplayProgressRecord("death." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
 
 
@@ -896,7 +915,7 @@ static public class NebulaAchievementManager
                         defaultSource = a.Substring(8);
                         break;
                     case string a when a.StartsWith("a-"):
-                        if (int.TryParse(a.Substring(2), out var val)) attention = val;
+                        if (int.TryParse(a.AsSpan(2), out var val)) attention = val;
                         break;
                     case string a when a.StartsWith("image-role-"):
                         var roleName = a.Substring(11);
@@ -949,7 +968,7 @@ static public class NebulaAchievementManager
                 new InnerslothAchievement(noHint, args[0]);
             else if (isRecord)
                 new DisplayProgressRecord(args[0], goal, "record." + args[0], defaultSource);
-            else if (records.Count() > 0)
+            else if (!records.IsEmpty())
                 new CompleteAchievement(records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage);
             else if (reference != null)
                 new SumUpReferenceAchievement(secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage);
@@ -964,12 +983,12 @@ static public class NebulaAchievementManager
         foreach (var achievement in AllAchievements) achievement.CheckClear();
     }
 
-    static private void RegisterAchivement(INebulaAchievement ach)
+    static private void RegisterAchievement(INebulaAchievement ach)
     {
         allAchievements.Add(ach);
 
         long hash = ach.Id.ComputeConstantLongHash();
-        if (!fastAchievements.TryAdd(hash, ach)) NebulaPlugin.Log.Print($"Duplicated Achievement! (Hash: {hash.ToString()}, Achivement: {ach.Id} & {fastAchievements[hash].Id})");
+        if (!fastAchievements.TryAdd(hash, ach)) NebulaPlugin.Log.Print($"Duplicated Achievement! (Hash: {hash}, Achievement: {ach.Id} & {fastAchievements[hash].Id})");
     }
     static internal GameStatsEntry RegisterStats(string id, GameStatsCategory category, DefinedAssignable? relatedAssignable, TextComponent? displayName = null, int innerPriority = 0)
     {
@@ -980,7 +999,7 @@ static public class NebulaAchievementManager
     }
     static internal void SortStats()
     {
-        string AssignableToStr(DefinedAssignable? assignable)
+        static string AssignableToStr(DefinedAssignable? assignable)
         {
             if (assignable == null) return "4";
             if (assignable is DefinedRole role) return "1." + (int)role.Category + "." + role.InternalName;
@@ -1003,13 +1022,13 @@ static public class NebulaAchievementManager
     static internal void RegisterRecord(ProgressRecord progressRecord,string id)
     {
         allRecords[id] = progressRecord;
-        if (progressRecord is INebulaAchievement ach) RegisterAchivement(ach);
+        if (progressRecord is INebulaAchievement ach) RegisterAchievement(ach);
     }
 
     static internal void RegisterNonrecord(INebulaAchievement achievement, string id)
     {
         allNonrecords[id] = achievement;
-        RegisterAchivement(achievement);
+        RegisterAchievement(achievement);
     }
 
     static public bool GetRecord(string id, [MaybeNullWhen(false)] out ProgressRecord record)
@@ -1030,7 +1049,7 @@ static public class NebulaAchievementManager
     }
     static public (INebulaAchievement achievement, AbstractAchievement.ClearDisplayState clearState)[] UniteAll()
     {
-        List<(INebulaAchievement achievement, AbstractAchievement.ClearDisplayState clearState)> result  =new();
+        List<(INebulaAchievement achievement, AbstractAchievement.ClearDisplayState clearState)> result  =[];
 
         //トークンによるクリア
         foreach (var token in NebulaGameManager.Instance!.AllAchievementTokens)
@@ -1050,7 +1069,7 @@ static public class NebulaAchievementManager
             result.Add(new(achievement, state));
         }
 
-        result.OrderBy(val => val.clearState);
+        result.Sort((val1, val2) => val1.clearState - val2.clearState);//昇順
 
         //履歴への追加
         var lastFirstCleared = result.Where(r => r.clearState == ClearDisplayState.FirstClear && r.achievement.Attention >= 50).Select(r => r.achievement).ToArray();
@@ -1204,7 +1223,7 @@ static public class NebulaAchievementManager
         yield break;
     }
 
-    static public RemoteProcess<(string achievement, GamePlayer player)> RpcClearAchievement = new("ClearAchievement", (message, _) =>
+    static public readonly RemoteProcess<(string achievement, GamePlayer player)> RpcClearAchievement = new("ClearAchievement", (message, _) =>
     {
         if (message.player.AmOwner) new StaticAchievementToken(message.achievement);
     });
@@ -1220,12 +1239,12 @@ static public class NebulaAchievementManager
         if (ClearedArchive.Count > 0) RpcSharePickedUpAchievement.Invoke((PlayerControl.LocalPlayer.name, ClearedArchive.ToArray()));
     }
 
-    static public RemoteProcess<(string playerName, INebulaAchievement[] achievements)> RpcShareClearedAchievement = new("ShareClearedAchievement", (message, _) =>
+    static public readonly RemoteProcess<(string playerName, INebulaAchievement[] achievements)> RpcShareClearedAchievement = new("ShareClearedAchievement", (message, _) =>
     {
         ModSingleton<ShowUp>.Instance?.PutLastClearedAchievements(message.playerName, message.achievements);
     });
 
-    public static RemoteProcess<(string playerName, INebulaAchievement[] achievements)> RpcSharePickedUpAchievement = new("SharePickedUpAchievement", (message, _) =>
+    public static readonly RemoteProcess<(string playerName, INebulaAchievement[] achievements)> RpcSharePickedUpAchievement = new("SharePickedUpAchievement", (message, _) =>
     {
         ModSingleton<ShowUp>.Instance?.PutPickedUpAchievements(message.playerName, message.achievements);
     });
