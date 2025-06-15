@@ -25,47 +25,55 @@ public class NoSGUIImage : AbstractGUIWidget
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
-        if(Image?.GetSprite() == null)
+        try
+        {
+            if (Image?.GetSprite() == null)
+            {
+                actualSize = new(0f, 0f);
+                return null;
+            }
+
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("Image", null, UnityEngine.Vector3.zero, LayerExpansion.GetUILayer());
+            renderer.sprite = Image.GetSprite();
+            renderer.sortingOrder = 10;
+            if (IsMasked) renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+
+            var spriteSize = renderer.sprite.bounds.size;
+            float scale = Math.Min(
+                Size.Width.HasValue ? (Size.Width.Value / spriteSize.x) : float.MaxValue,
+                Size.Height.HasValue ? (Size.Height.Value / spriteSize.y) : float.MaxValue
+                );
+            renderer.transform.localScale = UnityEngine.Vector3.one * scale;
+
+            if (Color != null) renderer.color = Color.Value;
+
+            actualSize = new(spriteSize.x * scale, spriteSize.y * scale);
+
+            if (OnClick != null || Overlay != null)
+            {
+                var button = renderer.gameObject.SetUpButton(false, renderer, renderer.color, renderer.color * new UnityEngine.Color(0.7f, 1f, 0.7f));
+                var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
+                collider.size = renderer.sprite.bounds.size;
+                collider.isTrigger = true;
+
+                GUIClickable clickable = new(button);
+                if (OnClick != null) button.OnClick.AddListener(() => { VanillaAsset.PlaySelectSE(); OnClick.Invoke(clickable); });
+                if (Overlay != null)
+                {
+                    button.OnMouseOver.AddListener(() => { VanillaAsset.PlayHoverSE(); NebulaManager.Instance.SetHelpWidget(button, Overlay()); });
+                    button.OnMouseOut.AddListener(() => { NebulaManager.Instance.HideHelpWidgetIf(button); });
+                }
+            }
+
+            PostBuilder?.Invoke(renderer);
+
+            return renderer.gameObject;
+        }
+        catch
         {
             actualSize = new(0f, 0f);
             return null;
         }
-
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Image", null, UnityEngine.Vector3.zero,LayerExpansion.GetUILayer());
-        renderer.sprite = Image.GetSprite();
-        renderer.sortingOrder = 10;
-        if (IsMasked) renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-
-        var spriteSize = renderer.sprite.bounds.size;
-        float scale = Math.Min(
-            Size.Width.HasValue ? (Size.Width.Value / spriteSize.x) : float.MaxValue,
-            Size.Height.HasValue ? (Size.Height.Value / spriteSize.y) : float.MaxValue
-            );
-        renderer.transform.localScale = UnityEngine.Vector3.one * scale;
-
-        if (Color != null) renderer.color = Color.Value;
-
-        actualSize = new(spriteSize.x * scale, spriteSize.y * scale);
-
-        if(OnClick != null || Overlay != null)
-        {
-            var button = renderer.gameObject.SetUpButton(false, renderer, renderer.color, renderer.color * new UnityEngine.Color(0.7f,1f,0.7f));
-            var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
-            collider.size = renderer.sprite.bounds.size;
-            collider.isTrigger = true;
-
-            GUIClickable clickable = new(button);
-            if (OnClick != null) button.OnClick.AddListener(() => { VanillaAsset.PlaySelectSE(); OnClick.Invoke(clickable); });
-            if (Overlay != null)
-            {
-                button.OnMouseOver.AddListener(() => { VanillaAsset.PlayHoverSE(); NebulaManager.Instance.SetHelpWidget(button, Overlay()); });
-                button.OnMouseOut.AddListener(() => { NebulaManager.Instance.HideHelpWidgetIf(button); });
-            }
-        }
-
-        PostBuilder?.Invoke(renderer);
-
-        return renderer.gameObject;
     }
 }
 

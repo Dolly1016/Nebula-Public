@@ -148,17 +148,17 @@ internal class KillRequestHandler
            // MurderPlayer ここまで
 
 
-           var targetInfo = target.GetModInfo();
-
-           var killerInfo = killer?.GetModInfo();
+           var targetInfo = target.GetModInfo()?.Unbox();
+           var killerInfo = killer?.GetModInfo()?.Unbox();
 
            if (targetInfo != null)
            {
-               targetInfo.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-               targetInfo.Unbox().MyKiller = killerInfo;
-               targetInfo.Unbox().MyState = TranslatableTag.ValueOf(message.stateId);
+               targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+               targetInfo.MyKiller = killerInfo;
 
-               var deadState = targetInfo!.PlayerState.TranslationKey;
+               var deadState = TranslatableTag.ValueOf(message.stateId);
+               targetInfo.MyState = deadState;
+
                if (targetInfo.AmOwner)
                {
                    if(NebulaAchievementManager.GetRecord("death." + deadState, out var rec)) new StaticAchievementToken(rec);
@@ -170,8 +170,8 @@ internal class KillRequestHandler
                    new StaticAchievementToken("stats.kill." + deadState);
                }
 
-               targetInfo.VanillaPlayer.Data.IsDead = true;
-               PlayerExtension.ResetOnDying(targetInfo.VanillaPlayer);
+               targetInfo.MyControl.Data.IsDead = true;
+               PlayerExtension.ResetOnDying(targetInfo.MyControl);
 
                //1ずつ加算するのでこれで十分
                if (targetInfo.AmOwner)

@@ -85,7 +85,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
 
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("DisclosurePointer", HudManager.Instance.transform, Vector3.zero);
             renderer.sprite = IconSprite.GetSprite();
-            renderer.color = Palette.PlayerColors[(AnonymousCursorOption && !MyPlayer.AmOwner) ? NebulaPlayerTab.CamouflageColorId : MyPlayer.PlayerId];
+            renderer.color = DynamicPalette.PlayerColors[(AnonymousCursorOption && !MyPlayer.AmOwner) ? NebulaPlayerTab.CamouflageColorId : MyPlayer.PlayerId];
             renderer.enabled = false;
 
             var pointerLifespan = new FunctionalLifespan(() => !this.IsDeadObject && MeetingHud.Instance);

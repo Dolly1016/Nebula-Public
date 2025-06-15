@@ -132,7 +132,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                             if (!Helpers.AnyNonTriggersBetween(p.TruePosition,pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
-                                if (p.Unbox().IsInvisible) continue;
+                                if (p.IsInvisible) continue;
 
                                 Owner.MurderPlayer(p, PlayerState.Beaten, EventDetail.Kill, KillParameter.RemoteKill, KillCondition.TargetAlive, result =>
                                 {

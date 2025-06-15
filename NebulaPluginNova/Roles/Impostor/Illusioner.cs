@@ -50,8 +50,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
 
                 OutfitDefinition? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate).Register(this);
-
+                var sampleTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
                 var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
                     SampleCoolDownOption, "sample", Morphing.Ability.SampleButtonSprite).SetAsUsurpableButton(this);
                 sampleButton.OnClick = (button) => {

@@ -48,7 +48,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                 acTokenChallenge = new("morphing.challenge", (false, false), (val, _) => val.kill && val.exile);
 
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate).Register(this);
+                var sampleTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
 
                 ModAbilityButton morphButton = null!;
                 var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
@@ -86,7 +86,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                         {
                             if (p.AmOwner) continue;
-                            if (p.Unbox().CurrentOutfit.Outfit.outfit.ColorId != colorId) continue;
+                            if (p.CurrentOutfit.outfit.ColorId != colorId) continue;
                             if (p.VanillaPlayer.GetTruePosition().Distance(MyPlayer.VanillaPlayer.GetTruePosition()) < 0.8f)
                             {
                                 acTokenAnother2 ??= new("morphing.another2");
@@ -117,16 +117,16 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
         [Local]
         void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (acTokenChallenge != null && ev.Player.Unbox()!.DefaultOutfit.Outfit.outfit.ColorId == (sample?.outfit.ColorId ?? -1))
+            if (acTokenChallenge != null && ev.Player.DefaultOutfit.outfit.ColorId == (sample?.outfit.ColorId ?? -1))
                 acTokenChallenge.Value.exile = true;
         }
 
         [OnlyMyPlayer, Local]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            var targetId = ev.Dead.Unbox()?.GetOutfit(75).Outfit.outfit.ColorId;
+            var targetId = ev.Dead.GetOutfit(75).outfit.ColorId;
             var sampleId = sample?.outfit.ColorId;
-            if (targetId.HasValue && sampleId.HasValue && targetId.Value == sampleId.Value)
+            if (sampleId.HasValue && targetId == sampleId.Value)
                 acTokenAnother1 ??= new("morphing.another1");
 
             if (morphButton != null && acTokenChallenge != null && morphButton.EffectActive)

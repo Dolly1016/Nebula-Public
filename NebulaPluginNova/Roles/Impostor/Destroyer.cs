@@ -1,6 +1,7 @@
 ﻿using Hazel.Dtls;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
+using Nebula.Modules.Cosmetics;
 using UnityEngine.SceneManagement;
 using Virial;
 using Virial.Assignable;
@@ -122,11 +123,24 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             }
 
             //自身が動いている間は相手側もうまいこと動かそうとさせる。
-            var myAnim = myPlayer.MyPhysics.WalkPlayerTo(GetDestroyKillPosition(targetPos, moveToLeft), 0.001f, 1f, false);
+            bool myDone = false;
+            var myAnim = Effects.Sequence(myPlayer.MyPhysics.WalkPlayerTo(GetDestroyKillPosition(targetPos, moveToLeft), 0.001f, 1f, false), ManagedEffects.Action(()=>myDone = true).WrapToIl2Cpp());
             var targetAnim = target.MyPhysics.WalkPlayerTo(targetPos, 0.001f, 1f, false);
 
             var targetCoroutine = NebulaManager.Instance.StartCoroutine(targetAnim);
-            yield return myAnim;
+            var myCoroutine = NebulaManager.Instance.StartCoroutine(myAnim);
+
+            float leftCount = 1.5f;
+            while(leftCount > 0f && !myDone)
+            {
+                leftCount -= Time.deltaTime;
+                yield return null;
+            }
+
+            if (!myDone)
+            {
+                NebulaManager.Instance.StopCoroutine(myCoroutine);
+            }
             try
             {
                 NebulaManager.Instance.StopCoroutine(targetCoroutine);
@@ -293,7 +307,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             {
                 var bloodRenderer = UnityHelper.CreateObject<SpriteRenderer>("DestroyerBlood", null, (targetPos + new Vector3(0f, 0.1f, 0f)).AsWorldPos(true));
                 bloodRenderer.sprite = spriteBloodPuddle.GetSprite();
-                bloodRenderer.color = Palette.PlayerColors[target.CurrentOutfit.ColorId];
+                bloodRenderer.color = DynamicPalette.PlayerColors[target.CurrentOutfit.ColorId];
                 bloodRenderer.transform.localScale = new(0.45f, 0.45f, 1f);
             }
 

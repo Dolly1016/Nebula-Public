@@ -104,6 +104,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
     {
         DefinedModifier RuntimeModifier.Modifier => MyRole;
 
+        public int LoversId => loversId;
         private int loversId; 
         public Instance(GamePlayer player,int loversId) : base(player)
         {
@@ -169,7 +170,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             if (ev is PlayerMurderedEvent pme)
             {
                 if (pme.Murderer != MyPlayer && AvengerModeOption)
-                    myLover.Unbox().RpcInvokerSetRole(Avenger.MyRole, [pme.Murderer.PlayerId]).InvokeSingle();
+                    myLover.SetRole(Avenger.MyRole, [pme.Murderer.PlayerId]);
                 else 
                     myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
             }
@@ -236,6 +237,10 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         bool RuntimeModifier.InvalidateCrewmateTask => true;
         bool RuntimeModifier.MyCrewmateTaskIsIgnored => true;
 
-        bool RuntimeAssignable.CanKill(Virial.Game.Player player) => MyLover.Get() != player;
+        [OnlyMyPlayer]
+        void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
+        {
+            if (MyLover.Get() == ev.Target) ev.SetAsCannotKillBasically();
+        }
     }
 }

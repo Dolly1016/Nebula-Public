@@ -88,7 +88,7 @@ public class DIManager
     private record ContainerDefinition(Func<object> Supplier, List<Func<object>> ModuleSuppliers);
 
     private Dictionary<Type, Func<object>> allContainers = new();
-    private Dictionary<Type, List<Func<object>>> allInterfaces = new();
+    private Dictionary<Type, List<Func<object?>>> allInterfaces = new();
 
     public ContainerImpl? Instantiate<ContainerImpl>(Action<ContainerImpl>? preprocess = null) where ContainerImpl : class
         => Instantiate(typeof(ContainerImpl), container => preprocess?.Invoke((container as ContainerImpl)!)) as ContainerImpl;
@@ -120,7 +120,11 @@ public class DIManager
 
                 if (allInterfaces.TryGetValue(t, out var modules))
                 {
-                    foreach (var m in modules) implAsContainer.AddModule(m.Invoke());
+                    foreach (var m in modules)
+                    {
+                        var instantiatedModule = m.Invoke();
+                        if(instantiatedModule != null) implAsContainer.AddModule(instantiatedModule);
+                    }
                 }
             }
         }
@@ -129,9 +133,9 @@ public class DIManager
         return impl;
     }
 
-    public bool RegisterModule<Container>(Func<IGenericModule<Container>> supplier) => RegisterGeneralModule<Container>(supplier);
+    public bool RegisterModule<Container>(Func<IGenericModule<Container>?> supplier) => RegisterGeneralModule<Container>(supplier);
 
-    public bool RegisterGeneralModule<Container>(Func<IModule> supplier)
+    public bool RegisterGeneralModule<Container>(Func<IModule?> supplier)
     {
         var type = typeof(Container);
 

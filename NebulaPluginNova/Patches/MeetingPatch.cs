@@ -99,6 +99,8 @@ public static class MeetingModRpc
         var reporter = NebulaGameManager.Instance?.GetPlayer(message.reporter);
         var reported = NebulaGameManager.Instance?.GetPlayer(message.reported);
 
+        Resources.UnloadUnusedAssets();
+
         if (reported != null)
             GameOperatorManager.Instance?.Run(new ReportDeadBodyEvent(reporter!, reported), true);
         else

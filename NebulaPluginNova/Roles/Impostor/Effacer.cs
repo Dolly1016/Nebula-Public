@@ -41,7 +41,7 @@ public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCit
                 );
                 
 
-                var effaceTracker = ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p) && (p.Unbox()?.VisibilityLevel ?? 2) == 0).Register(this);
+                var effaceTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, p => ObjectTrackers.StandardPredicate(p) && (p.Unbox()?.VisibilityLevel ?? 2) == 0);
 
                 var effaceButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     EffaceCoolDownOption, "efface", buttonSprite, _ => effaceTracker.CurrentTarget != null).SetAsUsurpableButton(this);

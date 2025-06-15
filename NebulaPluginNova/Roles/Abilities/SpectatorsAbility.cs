@@ -16,7 +16,7 @@ public class SpectatorsAbility : IGameOperator
     
     void OnChangeTarget()
     {
-        var target = currentTarget?.Unbox().MyControl;
+        var target = currentTarget?.VanillaPlayer;
 
         AmongUsUtil.SetCamTarget(target);
     }

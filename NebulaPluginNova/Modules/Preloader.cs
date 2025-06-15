@@ -10,6 +10,7 @@ using Virial.DI;
 using Virial.Game;
 using Virial.Runtime;
 using Virial.Text;
+using Virial.Utilities;
 using static Virial.Attributes.NebulaPreprocess;
 
 namespace Nebula.Modules;
@@ -173,6 +174,8 @@ public static class PreloadManager
         GC.Collect(2);
 
         FinishedPreload = true;
+
+        
     }
 
     public static bool FinishedPreload { get; private set; } = false;

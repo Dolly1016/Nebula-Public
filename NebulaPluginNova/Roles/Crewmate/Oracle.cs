@@ -169,7 +169,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
         {
             if (AmOwner)
             {
-                var playerTracker = ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !divideResults.ContainsKey(p.PlayerId)).Register(this);
+                var playerTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !divideResults.ContainsKey(p.PlayerId));
 
                 var oracleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     OracleCooldownOption, "oracle", buttonSprite, 

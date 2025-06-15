@@ -65,7 +65,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                 acTokenCommon2 = new("sheriff.common2", (byte.MaxValue, false), (val, _) => val.Item2);
                 acTokenAnother2 = new("sheriff.another2", true, (val, _) => val && NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnd.CrewmateWin && !MyPlayer.IsDead);
 
-                var killTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer), null, CanKillHidingPlayerOption).Register(this);
+                var killTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer), null, CanKillHidingPlayerOption);
                 killButton = new ModAbilityButtonImpl(isArrangedAsKillButton: MyPlayer.IsCrewmate).KeyBind(MyPlayer.IsCrewmate ? Virial.Compat.VirtualKeyInput.Kill : Virial.Compat.VirtualKeyInput.Ability).Register(this);
 
                 var leftText = killButton.ShowUsesIcon(3);
@@ -80,7 +80,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                     lockSprite = killButton.VanillaButton.AddLockedOverlay();
                 }
 
-                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove && lockSprite == null;
+                killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove && !MyPlayer.WillDie && lockSprite == null;
                 killButton.Visibility = (button) => !MyPlayer.IsDead && leftShots > 0;
                 killButton.OnClick = (button) => {
                     acTokenAnother2.Value = false;

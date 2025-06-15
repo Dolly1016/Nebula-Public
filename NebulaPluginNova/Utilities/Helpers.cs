@@ -503,4 +503,7 @@ public static class Helpers
     }
 
     public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> enumerable) => enumerable.Where(val => val != null)!;
+
+    public static float ConsiderPlayerFlip(this float num, CosmeticsLayer layer) => layer.FlipX ? -num : num;
+    public static int ConsiderPlayerFlip(this int num, CosmeticsLayer layer) => layer.FlipX ? -num : num;
 }

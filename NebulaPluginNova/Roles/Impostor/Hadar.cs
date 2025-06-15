@@ -154,7 +154,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                     Arrow? ventArrow = new Arrow(null, true).Register(this);
                     ventArrow.SetColor(Palette.ImpostorRed);
                     ventArrow.IsActive = false;
-                    var tracker = ObjectTrackers.ForVents(VentDetectionRangeOption, MyPlayer, v => !v.TryGetComponent<InvalidVent>(out _), Palette.ImpostorRed, true).Register(this);
+                    var tracker = ObjectTrackers.ForVents(this, VentDetectionRangeOption, MyPlayer, v => !v.TryGetComponent<InvalidVent>(out _), Palette.ImpostorRed, true);
                     gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && tracker.CurrentTarget != null;
                     gushButton.OnClick = button =>
                     {
@@ -254,7 +254,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                 {
                     if (!IsDiving) yield break;
                     if (p.AmOwner || p.IsDead) continue;
-                    if (p.IsDived || p.Unbox().IsInvisible) continue;
+                    if (p.IsDived || p.IsInvisible) continue;
                     if (p.VanillaPlayer.transform.position.Distance(MyPlayer.VanillaPlayer.transform.position) < 6f)
                     {
                         AmongUsUtil.Ping([p.VanillaPlayer.transform.position], false, playSE);

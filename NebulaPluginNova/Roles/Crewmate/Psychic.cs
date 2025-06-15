@@ -86,7 +86,7 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
                 //キラーの特徴
                 if(ev.Reported.MyKiller != null && ev.Reported.MyKiller != ev.Reported)
                 {
-                    cand.Add(("killersColor", Language.Translate("options.role.psychic.message.killersColor").Replace("%COLOR%", Language.Translate(DynamicPalette.IsLightColor(Palette.PlayerColors[ev.Reported.MyKiller.PlayerId]) ? "options.role.psychic.message.inner.lightColor" : "options.role.psychic.message.inner.darkColor"))));
+                    cand.Add(("killersColor", Language.Translate("options.role.psychic.message.killersColor").Replace("%COLOR%", Language.Translate(DynamicPalette.IsLightColor(DynamicPalette.PlayerColors[ev.Reported.MyKiller.PlayerId]) ? "options.role.psychic.message.inner.lightColor" : "options.role.psychic.message.inner.darkColor"))));
                     cand.Add(("killersRole", Language.Translate("options.role.psychic.message.killersRole").Replace("%ROLE%", ev.Reported.MyKiller.Role.DisplayColoredName)));
                     if (ev.Reported.MyKiller.IsDead) cand.Add(("killerIsDead", Language.Translate("options.role.psychic.message.killerIsDead")));
                 }

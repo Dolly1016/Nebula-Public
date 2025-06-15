@@ -136,7 +136,7 @@ internal class VentRelocate : PerkFunctionalInstance
 
     private VentRelocate(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {
-        ventTracker = ObjectTrackers.ForVents(1f, MyPlayer, vent => canUse && !ModSingleton<VentHolderManager>.Instance.AnyoneHolds(vent), MyPlayer.Role.Role.UnityColor).Register(this);
+        ventTracker = ObjectTrackers.ForVents(this, 1f, MyPlayer, vent => canUse && !ModSingleton<VentHolderManager>.Instance.AnyoneHolds(vent), MyPlayer.Role.Role.UnityColor);
     }
 
     private float holdTime = 0f;

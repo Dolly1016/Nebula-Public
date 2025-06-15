@@ -4,6 +4,7 @@ namespace Nebula.Map;
 
 public class PolusData : MapData
 {
+    override public int Id => 2;
     static private Vector2[] MapPositions = [
         //ドロップシップ
         new(16.7f, -2.6f),

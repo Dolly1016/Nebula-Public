@@ -1,23 +1,24 @@
-﻿using System;
+﻿using Nebula.Behavior;
+using Nebula.Modules.Cosmetics;
+using Nebula.Modules.GUIWidget;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
+using UnityEngine.Rendering;
+using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
-using Virial.Events.Game.Meeting;
 using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
-using Virial;
-using Virial.Media;
-using Nebula.Modules.GUIWidget;
-using Virial.Text;
-using UnityEngine.Rendering;
-using TMPro;
-using Nebula.Behavior;
 using Virial.Game;
 using Virial.Helpers;
+using Virial.Media;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -56,7 +57,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
         static private readonly Dictionary<int, List<SpriteRenderer>> renderers = [];
         static public void Push(GamePlayer gambler, int to, int num)
         {
-            Color color = Palette.PlayerColors[gambler.PlayerId];
+            Color color = DynamicPalette.PlayerColors[gambler.PlayerId];
             color.ToHSV(out var h, out var s, out _);
             h = 360f - h;
 
@@ -157,7 +158,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
 
                 acTokenChallenge = new("gambler.challenge", (false, false), (val, _) => !val.failed && !val.useDeceive && NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnd.GamblerWin && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
 
-                var playerTracker = ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !interactedPlayers.Test(p)).Register(this);
+                var playerTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !interactedPlayers.Test(p));
 
                 var deceiveButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     DeceiveCoolDownOption, DeceiveDurationOption, "deceive", buttonSprite,

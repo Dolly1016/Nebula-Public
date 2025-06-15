@@ -4,6 +4,7 @@ namespace Nebula.Map;
 
 public class MiraData : MapData
 {
+    override public int Id => 1;
     static private Vector2[] MapPositions = new Vector2[]
     {
         //ラウンチパッド

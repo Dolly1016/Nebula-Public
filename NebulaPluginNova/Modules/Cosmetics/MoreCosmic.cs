@@ -1600,7 +1600,7 @@ public static class HatVisibilityFixPatch
 
         try
         {
-            __instance.myPlayer.cosmetics.SetHatAndVisorIdle(__instance.myPlayer.GetModInfo()!.Unbox().CurrentOutfit.Outfit.outfit.ColorId);
+            __instance.myPlayer.cosmetics.SetHatAndVisorIdle(__instance.myPlayer.GetModInfo()!.CurrentOutfit.outfit.ColorId);
         }
         catch { }
 
@@ -1724,6 +1724,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     public PlayerAnimations? MyAnimations = null!;
     public PlayerPhysics? MyPhysics = null;
     public GamePlayer? myModPlayerCache = null;
+    internal FakePlayer? fakePlayerCache = null;
 
     public HatData? CurrentHat;
     public VisorData? CurrentVisor;
@@ -1880,8 +1881,9 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         catch { }
     }
 
-    public bool IsDead => MyPhysics && MyPhysics!.myPlayer.Data && MyPhysics!.myPlayer.Data.IsDead;
-    public bool IsGamePlayer => MyPhysics && MyPhysics!.myPlayer;
+    public bool IsDead => (MyPhysics && MyPhysics!.myPlayer.Data && MyPhysics!.myPlayer.Data.IsDead) || (fakePlayerCache?.IsDead ?? false);
+    public bool IsGamePlayer => (MyPhysics && MyPhysics!.myPlayer) || IsFakePlayer;
+    public bool IsFakePlayer => fakePlayerCache != null;
     private bool requiredUpdate = false;
 
     private bool requiredAction = false;
@@ -1929,6 +1931,11 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CostumeButton.png", 115f);
     public GamePlayer? GetModPlayer()
     {
+        if (fakePlayerCache != null)
+        {
+            return (fakePlayerCache as IPlayerlike).VisualPlayer;
+        }
+
         if (myModPlayerCache == null && IsGamePlayer && NebulaGameManager.Instance != null && MyPhysics != null)
         {
             myModPlayerCache = NebulaGameManager.Instance.GetPlayer(MyPhysics!.myPlayer.PlayerId);
@@ -1967,7 +1974,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             MoreCosmic.AllHats.TryGetValue(MyLayer.hat.Hat.ProductId, out CurrentModHat);
             HatFrontIndex = HatBackIndex = 0;
 
-            if (IsGamePlayer && CurrentModHat?.RelatedMarketplaceItem != null) MoreCosmic.RpcShareMarketplaceItem.Invoke((CurrentModHat!.RelatedMarketplaceItem!.EntryId, CurrentModHat!.RelatedMarketplaceItem!.Title));
+            if (IsGamePlayer && !IsFakePlayer && CurrentModHat?.RelatedMarketplaceItem != null) MoreCosmic.RpcShareMarketplaceItem.Invoke((CurrentModHat!.RelatedMarketplaceItem!.EntryId, CurrentModHat!.RelatedMarketplaceItem!.Title));
         }
 
         if (MyLayer.visor != null && CurrentVisor != MyLayer.visor.visorData)
@@ -1976,7 +1983,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             MoreCosmic.AllVisors.TryGetValue(MyLayer.visor.visorData.ProductId, out CurrentModVisor);
             VisorIndex = VisorBackIndex = 0;
 
-            if (IsGamePlayer && CurrentModVisor?.RelatedMarketplaceItem != null) MoreCosmic.RpcShareMarketplaceItem.Invoke((CurrentModVisor!.RelatedMarketplaceItem!.EntryId, CurrentModVisor!.RelatedMarketplaceItem!.Title));
+            if (IsGamePlayer && !IsFakePlayer && CurrentModVisor?.RelatedMarketplaceItem != null) MoreCosmic.RpcShareMarketplaceItem.Invoke((CurrentModVisor!.RelatedMarketplaceItem!.EntryId, CurrentModVisor!.RelatedMarketplaceItem!.Title));
         }
 
         //現在のアニメーションを取得する。
@@ -2139,13 +2146,12 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 hatFrontExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * (frontImage?.ExIsFront ?? false ? -0.125f : 0.125f));
                 hatBackExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * (backImage?.ExIsFront ?? false ? -0.125f : 0.125f));
             }
-            else
-            {
-                Order.HatFront = visualHat?.IsSkinny ?? false ? CosmeticsOrder.HatFrontSkinny : CosmeticsOrder.HatFrontDefault;
-                Order.HatFrontExDiff = frontImage?.ExIsFront ?? false ? 1 : -1;
-                Order.HatBack = CosmeticsOrder.HatBackDefault;
-                Order.HatBackExDiff = backImage?.ExIsFront ?? false ? 1 : -1;
-            }
+
+
+            Order.HatFront = visualHat?.IsSkinny ?? false ? CosmeticsOrder.HatFrontSkinny : CosmeticsOrder.HatFrontDefault;
+            Order.HatFrontExDiff = frontImage?.ExIsFront ?? false ? 1 : -1;
+            Order.HatBack = CosmeticsOrder.HatBackDefault;
+            Order.HatBackExDiff = backImage?.ExIsFront ?? false ? 1 : -1;
         }
         else if (MyLayer.hat != null)
         {
@@ -2260,13 +2266,11 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 visorFrontExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * (image?.ExIsFront ?? false ? -0.125f : 0.125f));
                 visorBackExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * (backImage?.ExIsFront ?? false ? -0.125f : 0.125f));
             }
-            else
-            {
-                Order.VisorFront = visualVisor!.BehindHat ? CosmeticsOrder.VisorFrontBehindHat : CosmeticsOrder.VisorFrontDefault;
-                Order.VisorFrontExDiff = image?.ExIsFront ?? false ? 1 : -1;
-                Order.VisorBack = visualVisor!.BackmostBack ? CosmeticsOrder.VisorBackBackmost : CosmeticsOrder.VisorBackDefault;
-                Order.VisorBackExDiff = backImage?.ExIsFront ?? false ? 1 : -1;
-            }
+
+            Order.VisorFront = visualVisor!.BehindHat ? CosmeticsOrder.VisorFrontBehindHat : CosmeticsOrder.VisorFrontDefault;
+            Order.VisorFrontExDiff = image?.ExIsFront ?? false ? 1 : -1;
+            Order.VisorBack = visualVisor!.BackmostBack ? CosmeticsOrder.VisorBackBackmost : CosmeticsOrder.VisorBackDefault;
+            Order.VisorBackExDiff = backImage?.ExIsFront ?? false ? 1 : -1;
         }
         else if (MyLayer.visor != null)
         {
@@ -2319,6 +2323,24 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
     void UpdateZ()
     {
+        try
+        {
+            if(MyLayer != null)
+            {
+                if (MyLayer.currentBodySprite != null && MyLayer.currentBodySprite.BodySprite) MyLayer.currentBodySprite.BodySprite.SetBothOrder(Order.Body);
+                MyLayer.skin.layer.SetBothOrder(Order.Skin);
+                MyLayer.hat.FrontLayer.SetBothOrder(Order.HatFront);
+                MyLayer.hat.BackLayer.SetBothOrder(Order.HatBack);
+                MyLayer.visor.Image.SetBothOrder(Order.VisorFront);
+            }
+            hatFrontExRenderer?.SetBothOrder(Order.HatFrontEx);
+            hatBackExRenderer?.SetBothOrder(Order.HatBackEx);
+            visorFrontExRenderer?.SetBothOrder(Order.VisorFrontEx);
+            visorBackRenderer?.SetBothOrder(Order.VisorBack);
+            visorBackExRenderer?.SetBothOrder(Order.VisorBackEx);
+        }
+        catch { }
+        /*
         if (!ZOrdering)
         {
             MyLayer.currentBodySprite.BodySprite.SetBothOrder(Order.Body);
@@ -2360,6 +2382,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 renderer.sortingGroupOrder = order;
             }
         }
+        */
     }
 
     public void SetSortingProperty(bool shouldSort, float sortingScale, int sortingBaseOrder)
@@ -2632,6 +2655,8 @@ public static class TabEnablePatch
     {
         public static bool Prefix(HatsTab __instance)
         {
+            Resources.UnloadUnusedAssets();
+
             (HatData, CosmicHat?)[] unlockedHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats().Select(hat => MoreCosmic.AllHats.TryGetValue(hat.ProductId, out var modHat) ? (hat, modHat) : (hat, null)).ToArray();
             __instance.currentHat = DestroyableSingleton<HatManager>.Instance.GetHatById(DataManager.Player.Customization.Hat);
 
@@ -2649,6 +2674,8 @@ public static class TabEnablePatch
     {
         public static bool Prefix(VisorsTab __instance)
         {
+            Resources.UnloadUnusedAssets();
+
             (VisorData, CosmicVisor?)[] unlockedVisors = DestroyableSingleton<HatManager>.Instance.GetUnlockedVisors().Select(visor => MoreCosmic.AllVisors.TryGetValue(visor.ProductId, out var modVisor) ? (visor, modVisor) : (visor, null)).ToArray();
 
             SetUpTab(__instance, HatManager.Instance.allVisors.First(v => v.IsEmpty), unlockedVisors,
@@ -2665,6 +2692,8 @@ public static class TabEnablePatch
     {
         public static bool Prefix(NameplatesTab __instance)
         {
+            Resources.UnloadUnusedAssets();
+
             (NamePlateData, CosmicNameplate?)[] unlockedNamePlates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(nameplate => MoreCosmic.AllNameplates.TryGetValue(nameplate.ProductId, out var modNameplate) ? (nameplate, modNameplate) : (nameplate, null)).ToArray();
 
             __instance.previewArea.TargetPlayerId = NebulaPlayerTab.PreviewColorId;

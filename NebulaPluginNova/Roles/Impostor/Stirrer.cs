@@ -47,7 +47,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer)).Register(this);
+                var sampleTracker = NebulaAPI.Modules.KillTracker(this, MyPlayer);
 
                 var stirButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir",
                     StirCoolDownOption, "stir", StirButtonSprite,

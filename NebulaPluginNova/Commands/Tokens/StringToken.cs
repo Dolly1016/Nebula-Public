@@ -81,6 +81,7 @@ public class StringCommandToken : ICommandToken
         else if (type == typeof(Virial.Game.Player))
         {
             var temp = NebulaAPI.CurrentGame?.GetAllPlayers().FirstOrDefault(p => p.Name == myStr);
+            if (temp == null && int.TryParse(myStr, out var num)) temp = NebulaAPI.CurrentGame?.GetPlayer((byte)num);
             if (temp != null) return new CoImmediateTask<T>(Unsafe.As<Virial.Game.Player, T>(ref temp));
         }
         else if (type == typeof(OutfitDefinition))

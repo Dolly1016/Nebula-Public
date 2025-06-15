@@ -51,7 +51,7 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 PoolablePlayer? shiftIcon = null;
 
-                var playerTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate).Register(this);
+                var playerTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
 
                 var chainShiftButton =NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     ShiftCoolDown, "shift", buttonSprite,

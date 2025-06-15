@@ -101,8 +101,8 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                     {
                         if (ev.Murderer.IsDead)
                         {
-                            MyPlayer.Unbox().RpcInvokerUnsetModifier(MyRole).InvokeSingle();
-                            MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, myNextArgs).InvokeSingle();
+                            MyPlayer.RemoveModifier(MyRole);
+                            MyPlayer.SetRole(myNextRole, myNextArgs);
 
                         }
                         else
@@ -126,8 +126,8 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
             {
                 using (RPCRouter.CreateSection("DamedAction"))
                 {
-                    MyPlayer.Unbox().RpcInvokerUnsetModifier(MyRole).InvokeSingle();
-                    MyPlayer.Unbox().RpcInvokerSetRole(nextRole ?? Impostor.DamnedImpostor.MyRole, nextArgs).InvokeSingle();
+                    MyPlayer.RemoveModifier(MyRole);
+                    MyPlayer.SetRole(nextRole ?? Impostor.DamnedImpostor.MyRole, nextArgs);
                 }
             }
         }
@@ -143,10 +143,10 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
                 using (RPCRouter.CreateSection("DamedAction"))
                 {
-                    ev.Murderer.Unbox().RpcInvokerUnsetModifier(Lover.MyRole).InvokeSingle();
-                    loverPair?.Unbox().RpcInvokerUnsetModifier(Lover.MyRole).InvokeSingle();
-                    ev.Murderer.Unbox().RpcInvokerSetRole(nextRole, nextArgs).InvokeSingle();
-                    ev.Dead.Unbox().RpcInvokerSetRole(Ember.MyRole, null).InvokeSingle();
+                    ev.Murderer.RemoveModifier(Lover.MyRole);
+                    loverPair?.RemoveModifier(Lover.MyRole);
+                    ev.Murderer.SetRole(nextRole, nextArgs);
+                    ev.Dead.SetRole(Ember.MyRole);
                 }
             }
         }
@@ -164,8 +164,8 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
                     using (RPCRouter.CreateSection("DamnedAction"))
                     {
-                        MyPlayer.Unbox().RpcInvokerUnsetModifier(MyRole).InvokeSingle();
-                        MyPlayer.Unbox().RpcInvokerSetRole(myNextRole, myNextArgs).InvokeSingle();
+                        MyPlayer.RemoveModifier(MyRole);
+                        MyPlayer.SetRole(myNextRole, myNextArgs);
                     }
                 });
             }
@@ -199,7 +199,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                     NebulaGameManager.Instance!.EndState!.Winners.Test(NebulaGameManager.Instance.GetPlayer(param.playerId)) && NebulaGameManager.Instance!.EndState.EndCondition == NebulaGameEnd.CrewmateWin
                 );
                 if (param.type == 3) new AchievementToken<int>("damned.another1", 0, (_, _) =>
-                    GamePlayer.LocalPlayer.MyKiller?.IsImpostor ?? false || GamePlayer.LocalPlayer.PlayerState == PlayerStates.Guessed || GamePlayer.LocalPlayer.PlayerState == PlayerStates.Exiled
+                    GamePlayer.LocalPlayer?.MyKiller?.IsImpostor ?? false || GamePlayer.LocalPlayer?.PlayerState == PlayerStates.Guessed || GamePlayer.LocalPlayer?.PlayerState == PlayerStates.Exiled
                 );
             }
         });

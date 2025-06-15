@@ -69,9 +69,9 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         static private Image meetingButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousMeetingButton.png", 115f);
         static private Image hourglassButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HourglassButton.png", 115f);
 
-        bool IsMyLover(GamePlayer player) => player.Unbox().GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId);
-        bool IsMyFavorite(GamePlayer player) => player.Unbox().GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId && f.AmFavorite);
-        bool IsMyFlirt(GamePlayer player) => player.Unbox().GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId && !f.AmFavorite);
+        bool IsMyLover(GamePlayer player) => player.GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId);
+        bool IsMyFavorite(GamePlayer player) => player.GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId && f.AmFavorite);
+        bool IsMyFlirt(GamePlayer player) => player.GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId && !f.AmFavorite);
         GamePlayer? GetMyFavorite() => NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault(IsMyFavorite);
 
         public override void OnActivated()
@@ -111,7 +111,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                     if (numOfFavorite > 0 && numOfFlirt > 0) new StaticAchievementToken("scarlet.common1");
                 }
 
-                var playerTracker = ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p) && !IsMyLover(p)).Register(this);
+                var playerTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, p => ObjectTrackers.StandardPredicate(p) && !IsMyLover(p));
 
                 Modules.ScriptComponents.ModAbilityButtonImpl flirtButton = null!, favoriteButton = null!;
                 flirtButton = new Modules.ScriptComponents.ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.Ability).Register(this);
@@ -122,7 +122,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                 flirtIcon.text = LeftFlirts.ToString();
                 flirtButton.OnClick = (button) =>
                 {
-                    playerTracker.CurrentTarget?.Unbox().RpcInvokerSetModifier(ScarletLover.MyRole, [FlirtatiousId, 0]).InvokeSingle();
+                    playerTracker.CurrentTarget?.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 0]);
                     LeftFlirts--;
                     flirtIcon.text = LeftFlirts.ToString();
                     flirtButton.StartCoolDown();
@@ -141,7 +141,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                 favoriteIcon.text = LeftFavorite.ToString();
                 favoriteButton.OnClick = (button) =>
                 {
-                    playerTracker.CurrentTarget?.Unbox().RpcInvokerSetModifier(ScarletLover.MyRole, [FlirtatiousId, 1]).InvokeSingle();
+                    playerTracker.CurrentTarget?.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 1]);
                     LeftFavorite--;
                     favoriteIcon.text = LeftFavorite.ToString();
                     flirtButton.StartCoolDown();

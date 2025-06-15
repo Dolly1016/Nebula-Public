@@ -5,6 +5,7 @@ namespace Nebula.Map;
 
 public class FungleData : MapData
 {
+    override public int Id => 5;
     static private readonly Vector2[] MapPositions = [
         //ドロップシップ
         new(-9.2f,13.4f),

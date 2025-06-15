@@ -248,7 +248,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                 foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                 {
                     if (p.AmOwner) continue;
-                    if (p.IsDead || p.Unbox().IsInvisible) continue;
+                    if (p.IsDead || p.IsInvisible) continue;
                     if (p.VanillaPlayer.transform.position.Distance(commTrap.Position) < CommTrapSizeOption * 0.35f)
                     {
                         //直前にトラップを踏んでいるプレイヤーは無視する
@@ -256,7 +256,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                         if ((lastCommPlayersMask & (1u << p.PlayerId)) != 0) continue;
 
                         //Camo貫通(Morphingまで効果を受ける)
-                        var arrow = new Arrow().SetColorByOutfit(p.Unbox().GetOutfit(75).Outfit.outfit);
+                        var arrow = new Arrow().SetColorByOutfit(p.GetOutfit(75).outfit).Register(NebulaAPI.CurrentGame!);
                         arrow.TargetPos = commTrap.Position;
                         NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
 

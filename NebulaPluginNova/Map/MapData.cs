@@ -1,4 +1,5 @@
 ﻿using MS.Internal.Xml.XPath;
+using Nebula.Dev;
 using Nebula.Roles.Impostor;
 using Virial;
 using Virial.DI;
@@ -158,6 +159,7 @@ public abstract class MapData
     {
         public bool Overlaps(UnityEngine.Vector2 position) => Mathf.Abs(position.x - CenterX) < SizeX && Mathf.Abs(position.y - CenterY) < SizeY;
     }
+    abstract public int Id { get; }
 
     abstract protected Vector2[] MapArea { get; }
     abstract protected Vector2[] NonMapArea { get; }
@@ -166,6 +168,15 @@ public abstract class MapData
     virtual public Vector2[][] RaiderIgnoreArea { get => []; }
     abstract protected SystemTypes[] SabotageTypes { get; }
     abstract public MapObjectPoint[] MapObjectPoints { get; }
+    public NavVerticesStructure MapNavData { get {
+            if (field == null)
+            {
+                using var stream = StreamHelper.OpenFromResource("Nebula.Resources.Pathfinding." + AmongUsUtil.ToMapName((byte)Id) + ".json");
+                if (stream != null) field = JsonStructure.Deserialize<NavVerticesStructure>(stream);
+            }
+            return field!;
+        }
+    }
     /// <summary>
     /// 封鎖されたベントの画像を取得します。
     /// </summary>

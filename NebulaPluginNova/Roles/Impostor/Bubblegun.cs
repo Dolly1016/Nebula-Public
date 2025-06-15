@@ -25,6 +25,7 @@ using Virial.Components;
 
 namespace Nebula.Roles.Impostor;
 
+[NebulaRPCHolder]
 public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, DefinedRole
 {
     private Bubblegun() : base("bubblegun", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [BubbleCoolDownOption, bubbleSizeOption, bubbleSpeedOption, bubbleDurationOption, maxBubblesOption, eraseBubblesOnMeeting, canKillImpostorOption, bubblePopWhenHitWallOption])

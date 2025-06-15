@@ -132,7 +132,7 @@ public class PaparazzoShot : MonoBehaviour
         int playerNum = 0;
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
         {
-            if (p.Data.IsDead || !p.Visible || (p.GetModInfo()?.Unbox().IsInvisible ?? false)) continue;
+            if (p.Data.IsDead || !p.Visible || (p.GetModInfo()?.IsInvisible ?? false)) continue;
             if (p.AmOwner) continue;
 
             if (collider.OverlapPoint(p.transform.position))
@@ -231,7 +231,7 @@ public class PaparazzoShot : MonoBehaviour
                 foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) {
                     if (((1 << p.PlayerId) & playerMask) == 0) continue;
 
-                    var icon = AmongUsUtil.GetPlayerIcon(p.GetModInfo()!.Unbox().CurrentOutfit, players.transform, new Vector3((float)(-(playerNum - 1) + num * 2) * 0.075f, -0.3f, -0.2f), Vector3.one * 0.1f);
+                    var icon = AmongUsUtil.GetPlayerIcon(p.GetModInfo()!.CurrentOutfit, players.transform, new Vector3((float)(-(playerNum - 1) + num * 2) * 0.075f, -0.3f, -0.2f), Vector3.one * 0.1f);
                     icon.transform.localEulerAngles = Vector3.zero;
                     var script = icon.gameObject.AddComponent<ScriptBehaviour>();
                     

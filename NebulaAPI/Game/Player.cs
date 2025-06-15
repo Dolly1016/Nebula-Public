@@ -86,6 +86,13 @@ public static class PlayerAttributes
     static public IPlayerAttribute InvisibleElseImpostor { get; internal set; }
 
     /// <summary>
+    /// 即座に変化する透明化効果を表します。
+    /// ドリルの演出で使用しています。
+    /// </summary>
+    static public IPlayerAttribute InternalInvisible { get; internal set; }
+
+
+    /// <summary>
     /// Alienの情報端末からの無縁化効果を表します。
     /// </summary>
     static public IPlayerAttribute Isolation { get; internal set; }
@@ -260,7 +267,7 @@ public enum KillParameter
     MeetingKill = WithOverlay | WithAssigningGhostRole | WithKillSEWidely
 }
 
-public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, IPlayerlike
+public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
 {
     public abstract record ExtraDeadInfo(CommunicableTextTag State)
     {
@@ -276,46 +283,31 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     // PlayerAPI
 
     /// <summary>
-    /// プレイヤーの名前です。
-    /// </summary>
-    public string Name { get; }
-
-    /// <summary>
-    /// ゲーム内でプレイヤーを識別するIDです。１ゲームの中で変わることはありません。
-    /// </summary>
-    public byte PlayerId { get; }
-
-    /// <summary>
-    /// 死亡しているとき、Trueを返します。
-    /// </summary>
-    public bool IsDead { get; }
-
-    /// <summary>
     /// 死が確定しているとき、Trueを返します。
     /// 死亡していても、Trueを返さないときがあります。IsDeadと併用して使用する必要があります。
     /// </summary>
-    public bool WillDie { get; }
+    bool WillDie { get; }
 
-    public PlayerDiving? CurrentDiving { get; }
+    PlayerDiving? CurrentDiving { get; }
     /// <summary>
     /// ダイブしているとき、Trueを返します。
     /// </summary>
-    public bool IsDived => CurrentDiving != null;
+    bool IsDived => CurrentDiving != null;
 
     /// <summary>
     /// テレポート中、Trueを返します。
     /// </summary>
-    public bool IsTeleporting { get; }
+    bool IsTeleporting { get; }
 
     /// <summary>
     /// 吹き飛ばされているとき、Trueを返します。
     /// </summary>
-    public bool IsBlown { get; }
+    bool IsBlown { get; }
 
     /// <summary>
     /// 死亡時刻をゲーム開始からの経過時間で返します。
     /// </summary>
-    public float? DeathTime { get; }
+    float? DeathTime { get; }
 
     /// <summary>
     /// 切断されているとき、Trueを返します。切断されている場合は死亡しているものとして扱われます。
@@ -323,88 +315,91 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     bool IsDisconnected { get; }
 
     /// <summary>
-    /// 自身がこのプレイヤーの本来の操作主である場合、Trueを返します。
+    /// プレイヤーが不可視なとき、Trueを返します。
+    /// ローカルのプレイヤーから見た可視性を表します。
     /// </summary>
-    public bool AmOwner { get; }
+    /// <remarks>
+    /// v3.1.0で追加。<br />
+    /// </remarks>
+    bool IsInvisible { get; }
 
     /// <summary>
     /// 自身がこのゲームのホストである場合、Trueを返します。
     /// </summary>
-    public bool AmHost { get; }
+    bool AmHost { get; }
 
     /// <summary>
     /// 梯子を使うなどの理由で操作不能な状態になっていない場合、Trueを返します。
     /// </summary>
-    public bool CanMove { get; }
-
-    /// <summary>
-    /// プレイヤーの足元の座標を返します。
-    /// </summary>
-    public Compat.Vector2 TruePosition { get; }
+    bool CanMove { get; }
 
     /// <summary>
     /// プレイヤーの現在の状態を表すタグです。
     /// </summary>
-    public CommunicableTextTag PlayerState { get; }
+    CommunicableTextTag PlayerState { get; }
     /// <summary>
     /// プレイヤーの死因についての詳細です。死因とPlayerStateが一致しない場合は無視すべきです。
     /// </summary>
-    public ExtraDeadInfo? PlayerStateExtraInfo { get; set; }
+    ExtraDeadInfo? PlayerStateExtraInfo { get; set; }
 
     /// <summary>
     /// 陣営の基本的なキルクールダウンです。
     /// </summary>
-    public float TeamKillCooldown => Role.Role.Team.KillCooldown;
+    float TeamKillCooldown => Role.Role.Team.KillCooldown;
 
     // HoldingAPI
 
     /// <summary>
     /// いま掴んでいるプレイヤーを返します。
     /// </summary>
-    public Player? HoldingPlayer { get; }
-    public bool HoldingAnyPlayer { get; }
+    Player? HoldingPlayer { get; }
+    bool HoldingAnyPlayer { get; }
 
     /// <summary>
     /// いま掴んでいる死体を返します。
     /// </summary>
-    public Player? HoldingDeadBody { get; }
-    public bool HoldingAnyDeadBody { get; }
+    Player? HoldingDeadBody { get; }
+    bool HoldingAnyDeadBody { get; }
 
     /// <summary>
     /// 死体を掴みます。
     /// </summary>
     /// <param name="deadBody"></param>
-    public void HoldDeadBody(Player? deadBody);
+    void HoldDeadBody(Player? deadBody);
     internal void HoldDeadBodyFast(DeadBody? deadBody);
 
     /// <summary>
     /// 掴んでいる死体を放します。
+    /// このAPIはRPCを送信します。
     /// </summary>
-    public void ReleaseDeadBody();
+    void ReleaseDeadBody();
 
     /// <summary>
     /// プレイヤーを掴みます。
+    /// このAPIはRPCを送信します。
     /// </summary>
     /// <param name="player"></param>
-    public void HoldPlayer(Player? player);
+    void HoldPlayer(Player? player);
 
     /// <summary>
     /// 掴んでいるプレイヤーを放します。
+    /// このAPIはRPCを送信します。
     /// </summary>
-    public void ReleaseHoldingPlayer();
+    void ReleaseHoldingPlayer();
 
     /// <summary>
     /// 役職の関係性でキルできるかどうかをチェックします。
     /// </summary>
     /// <param name="player"></param>
     /// <returns></returns>
-    public bool CanKill(Player player) => AllAssigned().All(a => a.CanKill(player));
+    bool CanKill(Player player);
 
 
     // MurderAPI
 
     /// <summary>
     /// プレイヤーをキルします。会議中の場合は<paramref name="killParams"/>の死体を残す設定は無視され、強制的に死体を残さないキルを起こします。
+    /// このAPIはRPCを送信します。
     /// </summary>
     /// <param name="player">キル対象のプレイヤー。</param>
     /// <param name="playerState">キル後のプレイヤー状態。</param>
@@ -413,37 +408,40 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// <param name="killCondition">キルが通る条件。</param>
     /// <param name="callBack">キル時に呼び出されるコールバック。</param>
     /// <returns></returns>
-    public void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack = null);
+    void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack = null);
     /// <summary>
     /// プレイヤーをキルします。会議中の場合は<paramref name="killParams"/>の死体を残す設定は無視され、強制的に死体を残さないキルを起こします。
+    /// このAPIはRPCを送信します。
     /// </summary>
     /// <param name="player">キル対象のプレイヤー。</param>
     /// <param name="playerState">キル後のプレイヤー状態。</param>
     /// <param name="eventDetail">キルイベントの詳細。</param>
     /// <param name="killParams">キルのパラメータ。</param>
     /// <param name="callBack">キル時に呼び出されるコールバック。</param>
-    public void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null)
+    void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null)
         => MurderPlayer(player, playerState, eventDetail, killParams, KillCondition.BothAlive, callBack);
     /// <summary>
     /// 自殺します。
+    /// このAPIはRPCを送信します。
     /// </summary>
     /// <param name="playerState">自殺後のプレイヤー状態。</param>
     /// <param name="eventDetail">自殺イベントの詳細。</param>
     /// <param name="killParams">キルのパラメータ。</param>
     /// <param name="callBack">自殺時に呼び出されるコールバック。</param>
-    public void Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null);
+    void Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null);
     /// <summary>
     /// 復活します。
+    /// このAPIはRPCを送信します。
     /// </summary>
     /// <param name="healer">復活者。</param>
     /// <param name="position">復活位置。</param>
     /// <param name="eraseDeadBody">死体を消去したうえで復活する場合、true。</param>
     /// <param name="recordEvent">復活イベントをゲーム履歴に残す場合、true。</param>
-    public void Revive(Player? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent = true);
+    void Revive(Player? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent = true);
     /// <summary>
     /// 自身をキルした相手を返します。
     /// </summary>
-    public Player? MyKiller { get; }
+    Player? MyKiller { get; }
 
 
 
@@ -452,13 +450,14 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
 
     /// <summary>
     /// アトリビュートを付与します。
+    /// このAPIはRPCを送信します。
     /// </summary>
     /// <param name="attribute">付与するアトリビュート</param>
     /// <param name="duration">効果時間</param>
     /// <param name="canPassMeeting">会議を超えて効果が持続する場合、<c>true</c></param>
     /// <param name="priority">優先度</param>
     /// <param name="duplicateTag">重複チェック用タグ</param>
-    public void GainAttribute(IPlayerAttribute attribute, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
+    void GainAttribute(IPlayerAttribute attribute, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
     /// <summary>
     /// 係数付きアトリビュートを付与します。
     /// </summary>
@@ -471,9 +470,10 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// <param name="canPassMeeting">会議を超えて効果が持続する場合、<c>true</c>。</param>
     /// <param name="priority">優先度。</param>
     /// <param name="duplicateTag">重複チェック用タグ。</param>
-    public void GainAttribute(IPlayerAttribute attribute, float duration, float ratio, bool canPassMeeting, int priority, string? duplicateTag = null);
+    void GainAttribute(IPlayerAttribute attribute, float duration, float ratio, bool canPassMeeting, int priority, string? duplicateTag = null);
     /// <summary>
     /// サイズアトリビュートを付与します。
+    /// このAPIはRPCを送信します。
     /// </summary>
     /// <remarks>
     /// v2.0.1.0で追加。<br />
@@ -483,10 +483,11 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// <param name="canPassMeeting">会議を超えて効果が持続する場合、<c>true</c>。</param>
     /// <param name="priority">優先度。</param>
     /// <param name="duplicateTag">重複チェック用タグ。</param>
-    public void GainSizeAttribute(Compat.Vector2 size, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
+    void GainSizeAttribute(Compat.Vector2 size, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
 
     /// <summary>
     /// 加減速アトリビュートを付与します。
+    /// このAPIはRPCを送信します。
     /// </summary>
     /// <remarks>
     /// v2.0.1.0でGainAttributeから名前変更。<br />
@@ -496,20 +497,20 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// <param name="canPassMeeting">会議を超えて効果が持続するかどうか。</param>
     /// <param name="priority">優先度。</param>
     /// <param name="duplicateTag">重複チェック用タグ。</param>
-    public void GainSpeedAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
+    void GainSpeedAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag = null);
     
     /// <summary>
     /// アトリビュートを獲得しているかどうか調べます。
     /// </summary>
     /// <param name="attribute">調べる対象のアトリビュート。</param>
     /// <returns></returns>
-    public bool HasAttribute(IPlayerAttribute attribute);
+    bool HasAttribute(IPlayerAttribute attribute);
 
     /// <summary>
     /// 現在有効化されているアトリビュートを列挙します。
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<(IPlayerAttribute attribute, float percentage)> GetAttributes();
+    IEnumerable<(IPlayerAttribute attribute, float percentage)> GetAttributes();
 
 
 
@@ -518,42 +519,99 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// <summary>
     /// 現在割り当てられている役職です。
     /// </summary>
-    public RuntimeRole Role { get; }
+    RuntimeRole Role { get; }
     /// <summary>
     /// 現在割り当てられている幽霊役職です。
     /// </summary>
-    public RuntimeGhostRole? GhostRole { get; }
+    RuntimeGhostRole? GhostRole { get; }
     /// <summary>
     /// 現在割り当てられているモディファイアです。
     /// </summary>
-    public IEnumerable<RuntimeModifier> Modifiers { get; }
+    IEnumerable<RuntimeModifier> Modifiers { get; }
     /// <summary>
     /// 現在割り当てられている役職実体を全て返します。
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<RuntimeAssignable> AllAssigned();
+    IEnumerable<RuntimeAssignable> AllAssigned();
     /// <summary>
     /// 指定したモディファイアを取得します。
     /// </summary>
-    /// <typeparam name="Modifier">モディファイアの型</typeparam>
+    /// <typeparam name="Modifier">モディファイアの型。</typeparam>
     /// <param name="modifier">モディファイアが割り当てられている場合、割り当てられているモディファイア。</param>
-    /// <returns>モディファイアが割り当てられている場合、true</returns>
-    public bool TryGetModifier<Modifier>([MaybeNullWhen(false)] out Modifier modifier) where Modifier : class, RuntimeModifier;
+    /// <returns>モディファイアが割り当てられている場合、true。</returns>
+    bool TryGetModifier<Modifier>([MaybeNullWhen(false)] out Modifier modifier) where Modifier : class, RuntimeModifier;
+    /// <summary>
+    /// 指定したモディファイアをすべて取得します。
+    /// </summary>
+    /// <typeparam name="Modifier">モディファイアの型。</typeparam>
+    /// <returns>モディファイア</returns>
+    IEnumerable<Modifier> GetModifiers<Modifier>() where Modifier : class, RuntimeModifier;
+
+    /// <summary>
+    /// 役職を変更します。
+    /// このAPIはRPCを送信します。
+    /// </summary>
+    /// <remarks>
+    /// v3.1.0で追加。<br />
+    /// </remarks>
+    /// <param name="role">変更する役職。</param>
+    /// <param name="arguments">役職のパラメータ。</param>
+    void SetRole(DefinedRole role, int[]? arguments = null);
+    /// <summary>
+    /// 幽霊役職を変更します。
+    /// このAPIはRPCを送信します。
+    /// </summary>
+    /// <remarks>
+    /// v3.1.0で追加。<br />
+    /// </remarks>
+    /// <param name="role">変更する幽霊役職。</param>
+    /// <param name="arguments">幽霊役職のパラメータ。</param>
+    void SetGhostRole(DefinedGhostRole role, int[]? arguments = null);
+    /// <summary>
+    /// モディファイアを追加します。
+    /// </summary>
+    /// <remarks>
+    /// v3.1.0で追加。<br />
+    /// </remarks>
+    /// <param name="modifier">追加するモディファイア。</param>
+    /// <param name="arguments">モディファイアのパラメータ。</param>
+    void AddModifier(DefinedModifier modifier, int[]? arguments = null);
+    /// <summary>
+    /// モディファイアを削除します。
+    /// 該当するモディファイアをすべて削除します。
+    /// </summary>
+    /// <remarks>
+    /// v3.1.0で追加。<br />
+    /// </remarks>
+    /// <param name="modifier">削除するモディファイア。</param>
+    void RemoveModifier(DefinedModifier modifier);
+
+    /// <summary>
+    /// 自身の視点でのみモディファイアを削除します。
+    /// 同一のモディファイアを複数所持しうる場合に使用してください。
+    /// 全クライアントでこのAPIを同様に呼び出す必要があります。
+    /// </summary>
+    /// <remarks>
+    /// v3.1.0で追加。<br />
+    /// </remarks>
+    /// <param name="modifier">削除するモディファイア。</param>
+    void RemoveModifierLocal(RuntimeModifier modifier);
+
     /// <summary>
     /// 幽霊役職を割り当て済みの場合、trueを返します。
     /// </summary>
-    public bool AttemptedGhostAssignment { get; internal set; }
+    bool AttemptedGhostAssignment { get; internal set; }
     /// <summary>
     /// 全ての能力を返します。
     /// </summary>
-    public IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth()!;
+    IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth()!;
     /// <summary>
     /// 能力を取得します。
     /// </summary>
     /// <typeparam name="Ability"></typeparam>
     /// <param name="ability"></param>
     /// <returns></returns>
-    public bool TryGetAbility<Ability>([MaybeNullWhen(false)]out Ability ability) where Ability : class, IPlayerAbility
+    bool TryGetAbility<Ability>([MaybeNullWhen(false)]out Ability ability) where Ability : class, IPlayerAbility
     {
         bool result = AllAbilities.Find(ability => ability is Ability, out var pAbility);
         if (pAbility == null)
@@ -567,20 +625,20 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// <summary>
     /// インポスター陣営の場合、trueを返します。
     /// </summary>
-    public bool IsImpostor => Role.Role.Category is RoleCategory.ImpostorRole;
+    bool IsImpostor => Role.Role.Category is RoleCategory.ImpostorRole;
     /// <summary>
     /// クルーメイト陣営の場合、trueを返します。マッドメイトであってもtrueを返します。
     /// </summary>
-    public bool IsCrewmate => Role.Role.Category is RoleCategory.CrewmateRole;
+    bool IsCrewmate => Role.Role.Category is RoleCategory.CrewmateRole;
     /// <summary>
     /// マッドメイトの場合、trueを返します。
     /// </summary>
-    public bool IsMadmate => Role.Role.IsMadmate || Modifiers.Any(m => m.IsMadmate);
+    bool IsMadmate => Role.Role.IsMadmate || Modifiers.Any(m => m.IsMadmate);
     /// <summary>
     /// クルー陣営かつマッドメイトでないクルーメイトであればtrueを返します。
     /// <c>IsCrewmate &amp;&amp; !IsMadmate</c>と等価です。
     /// </summary>
-    public bool IsTrueCrewmate => IsCrewmate && !IsMadmate;
+    bool IsTrueCrewmate => IsCrewmate && !IsMadmate;
 
 
     /// <summary>
@@ -588,17 +646,17 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// </summary>
     /// <param name="maxPriority">見た目の優先度の最大値</param>
     /// <returns></returns>
-    public OutfitDefinition GetOutfit(int maxPriority);
+    OutfitDefinition GetOutfit(int maxPriority);
 
     /// <summary>
     /// プレイヤーの現在の見た目を取得します。
     /// </summary>
-    public OutfitDefinition CurrentOutfit { get; }
+    OutfitDefinition CurrentOutfit { get; }
 
     /// <summary>
     /// プレイヤーの本来の見た目を取得します。
     /// </summary>
-    public OutfitDefinition DefaultOutfit { get; }
+    OutfitDefinition DefaultOutfit { get; }
 
     Virial.Game.OutfitDefinition IArchivedPlayer.DefaultOutfit => DefaultOutfit;
 
@@ -606,23 +664,25 @@ public interface Player : IModuleContainer, ICommandExecutor, IArchivedPlayer, I
     /// <summary>
     /// プレイヤーのタスク進捗を取得します。
     /// </summary>
-    public PlayerTasks Tasks => GetModule<PlayerTasks>()!;
+    PlayerTasks Tasks => GetModule<PlayerTasks>()!;
+
+
 
     /// <summary>
     /// キルボタンを表示すべきか否かを取得します。
     /// </summary>
-    public bool ShowKillButton => (Role?.HasVanillaKillButton ?? false) && AllowToShowKillButtonByAbilities;
+    bool ShowKillButton => (Role?.HasVanillaKillButton ?? false) && AllowToShowKillButtonByAbilities;
 
     /// <summary>
     /// 能力がキルボタンの表示を許可しているかを返します。
     /// </summary>
-    public bool AllowToShowKillButtonByAbilities => AllAssigned().All(assigned => assigned.MyAbilities.All(ability => !(ability?.HideKillButton ?? false)));
+    bool AllowToShowKillButtonByAbilities => AllAssigned().All(assigned => assigned.MyAbilities.All(ability => !(ability?.HideKillButton ?? false)));
 
     /// <summary>
     /// 視界が壁を無視する場合、trueを返します。
     /// </summary>
     [Obsolete(AttributeConstants.ObsoleteText)]
-    public bool EyesightIgnoreWalls => (Role?.EyesightIgnoreWalls ?? false) || AllAbilities.Any(a => a.EyesightIgnoreWalls);
+    bool EyesightIgnoreWalls => (Role?.EyesightIgnoreWalls ?? false) || AllAbilities.Any(a => a.EyesightIgnoreWalls);
 
     /// <summary>
     /// 自身が操作するプレイヤーを取得します。

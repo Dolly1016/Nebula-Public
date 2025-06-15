@@ -112,6 +112,8 @@ internal static class AddonScriptManager
                 //全Internal, Privateメンバにアクセスできるようにする
                 var topLevelBinderFlagsProperty = typeof(CSharpCompilationOptions).GetProperty("TopLevelBinderFlags", BindingFlags.Instance | BindingFlags.NonPublic)!;
                 topLevelBinderFlagsProperty.SetValue(myCompilationOptions, (uint)1 << 22);
+
+                trees.Add(CSharpSyntaxTree.ParseText("[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksTo(\"Nebula\")]\n[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksTo(\"NebulaAPI\")]", parseOptions, "", Encoding.UTF8));
             }
 
             var compilation = CSharpCompilation.Create("Script." + addon.Id.HeadUpper(), trees, ReferenceAssemblies, myCompilationOptions)
@@ -132,6 +134,7 @@ internal static class AddonScriptManager
                         log += $"\n[{diagnostic.Severity}, {location}] {diagnostic.Id}, {diagnostic.GetMessage()}";
                     }
                     NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.Scripting, log);
+                    
                 }
 
                 if (emitResult.Success)

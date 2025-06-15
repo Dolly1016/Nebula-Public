@@ -273,6 +273,7 @@ public class ZipTextureLoader : ITextureLoader
         {
             texture = GraphicsHelper.LoadTextureFromZip(archive, address);
             if(texture!=null && IsUnloadAsset) texture.hideFlags |= HideFlags.DontUnloadUnusedAsset | HideFlags.HideAndDontSave;
+            if (texture == null) NebulaPlugin.Log.Print(NebulaLog.LogCategory.Scripting, $"Image is not found. (path:{address})");
         }
         return texture!;
     }
@@ -353,6 +354,7 @@ public class UnloadTextureLoader : ITextureLoader
     public UnloadTextureLoader(byte[] byteTexture)
     {
         texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
+        texture.MarkDontUnload(); 
         GraphicsHelper.LoadImage(texture, byteTexture, true);
     }
 

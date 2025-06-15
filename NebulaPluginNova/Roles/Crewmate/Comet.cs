@@ -57,10 +57,10 @@ public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRol
                 boostButton.OnEffectStart = (button) => {
                     using (RPCRouter.CreateSection("CometBlaze"))
                     {
-                        MyPlayer.GainSpeedAttribute(BlazeSpeedOption, BlazeDurationOption, false, 100, "nebula::comet");
-                        MyPlayer.GainAttribute(PlayerAttributes.Invisible, BlazeDurationOption, false, 100, "nebula::comet");
-                        if (BlazeVisionOption > 1f) MyPlayer.GainAttribute(PlayerAttributes.Eyesight, BlazeDurationOption, BlazeVisionOption, false, 100, "nebula::comet");
-                        if(BlazeScreenOption > 1f) MyPlayer.GainAttribute(PlayerAttributes.ScreenSize, BlazeDurationOption, BlazeScreenOption, false, 100, "nebula::comet");
+                        MyPlayer.GainSpeedAttribute(BlazeSpeedOption, BlazeDurationOption, false, 100);
+                        MyPlayer.GainAttribute(PlayerAttributes.Invisible, BlazeDurationOption, false, 100);
+                        if (BlazeVisionOption > 1f) MyPlayer.GainAttribute(PlayerAttributes.Eyesight, BlazeDurationOption, BlazeVisionOption, false, 100);
+                        if(BlazeScreenOption > 1f) MyPlayer.GainAttribute(PlayerAttributes.ScreenSize, BlazeDurationOption, BlazeScreenOption, false, 100);
                     }
                     acTokenCommon.Value = true;
                     if(acTokenCommon2 != null) acTokenCommon2.Value.pos = MyPlayer.VanillaPlayer.GetTruePosition();

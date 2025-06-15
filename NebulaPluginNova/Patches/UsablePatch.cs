@@ -5,6 +5,7 @@ using Virial;
 using Virial.DI;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
 
 namespace Nebula.Patches;
 
@@ -465,6 +466,7 @@ class LadderCoolDownUpdatePatch
     }
 }
 
+/*
 [HarmonyPatch(typeof(ZiplineConsole), nameof(ZiplineConsole.MaxCoolDown), MethodType.Getter)]
 class ZiplineCoolDownPatch
 {
@@ -474,6 +476,17 @@ class ZiplineCoolDownPatch
         return false;
     }
 }
+*/
+
+[HarmonyPatch(typeof(ZiplineBehaviour._CoUseZipline_d__39), nameof(ZiplineBehaviour._CoUseZipline_d__39.MoveNext))]
+class ZiplineSetCoolDownPatch
+{
+    static void Postfix(ZiplineBehaviour._CoUseZipline_d__39 __instance, bool __result)
+    {
+        if (!__result && __instance.__4__this.lastUsedConsole && __instance.player.AmOwner) __instance.__4__this.lastUsedConsole.SetDestinationCooldown();
+    }
+}
+
 
 [HarmonyPatch(typeof(ZiplineConsole), nameof(ZiplineConsole.SetDestinationCooldown))]
 class ZiplineCoolDownUpdatePatch

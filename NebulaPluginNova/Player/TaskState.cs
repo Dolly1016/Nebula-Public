@@ -6,7 +6,7 @@ using Virial.Game;
 namespace Nebula.Player;
 
 [NebulaRPCHolder]
-public class PlayerTaskState : AbstractModule<GamePlayer>, IInjectable, PlayerTasks
+public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
 {
     //Virial.TasksAPIの実装を兼ねています。
     public int CurrentTasks { get; private set; } = 0;

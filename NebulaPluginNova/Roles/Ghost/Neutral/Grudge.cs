@@ -195,7 +195,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
         static private readonly RemoteProcess<(GamePlayer player, Vector3 pos, bool flipX)> RpcShowIllusion = new("ShowGrudgeIllusion",
             (message, _) =>
             {
-                var grudge = message.player.Unbox().GhostRole as Grudge.Instance;
+                var grudge = message.player.GhostRole as Grudge.Instance;
                 if (grudge != null)
                 {
                     if(grudge.currentIllusion != null) grudge.currentIllusion.IsActive = false;
@@ -207,7 +207,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
         static private readonly RemoteProcess<GamePlayer> RpcDisappearIllusion = new("DisappearIllusion",
             (message, _) =>
             {
-                var grudge = message.Unbox().GhostRole as Grudge.Instance;
+                var grudge = message.GhostRole as Grudge.Instance;
                 if (grudge != null && grudge.currentIllusion != null)
                 {
                     grudge.currentIllusion.IsActive = false;
@@ -218,7 +218,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
         RemoteProcess<GamePlayer> RpcShareCanWin = new("ShareGrudgeCanWin",
             (message, _) =>
             {
-                var grudge = message.Unbox().GhostRole as Grudge.Instance;
+                var grudge = message.GhostRole as Grudge.Instance;
                 if (grudge != null) grudge.canWin = true;
             });
     }

@@ -152,6 +152,9 @@
 "ui.action.nightmare.nightmare" : "設置したランタンのまわりに影を落とします。"
 "ui.action.snatcher.snatch" : "相手の能力を奪います。"
 "ui.action.snatcher.clock" : "しばらくの間、クールダウンのあがる速度を早めます。"
+"ui.action.cupid.lover" : "ラバーズにするプレイヤーを選択します。"
+"ui.action.cupid.string" : "ラバーズの間に赤い糸を顕現させます。<br>初回の発動ではラバーズを成立させて赤い糸を顕現させます。<br>その後もう一度だけ赤い糸を発動できます。"
+"ui.action.cupid.lover.string" : "赤い糸を顕現させます。<br>ゲーム中に一度だけ使用できます。"
 
 "ui.contact.title" : "ご報告フォーム"
 "ui.contact.guide" : "お気づきのバグやご要望、ご感想をお知らせください。<br>フォームは匿名で送信されるため、開発チームからの直接の返答は得られません。<br>返答が必要な場合は公式Discordサーバーにてお問い合わせください。<br><br>送信する内容の例: 各種機能のフィードバック(使いやすさ)、役職のご要望、バグのご報告、使用感などのご感想、等"
@@ -762,6 +765,7 @@
 "options.role.sheriff.killCoolDown" : "キルクールダウン"
 "options.role.sheriff.numOfShots" : "キル可能回数"
 "options.role.sheriff.canKillHidingPlayer" : "隠れているプレイヤーをキル可能"
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "第一犠牲者の発覚までキル能力を封印"
 "stats.sheriff.shot" : "発砲回数"
 "stats.sheriff.misshot" : "誤射回数"
 
@@ -863,6 +867,21 @@
 "options.role.cleaner.syncKillAndCleanCoolDown" : "キルと能力クールダウンの同期"
 "stats.cleaner.clean" : "消去した死体の数"
 
+"role.cupid.name" : "キューピッド"
+"role.cupid.short" : "キ"
+"role.cupid.blurb" : "堕天"
+"options.role.cupid.detail" : "キューピッドはラバーズをつくれるインポスターです。<br>キューピッドがつくったラバーズはプレイヤーをキルできる赤い糸で結ばれています。"
+"options.role.cupid.selectCooldown" : "ラバーズの選択クールダウン"
+"options.role.cupid.laserDelayByCupid" : "キューピッドによる赤い糸顕現の遅延"
+"options.role.cupid.laserDelayByLover" : "ラバーズによる赤い糸顕現の遅延"
+"options.role.cupid.laserCooldown" : "赤い糸クールダウン"
+"options.role.cupid.laserDuration" : "赤い糸の効果時間"
+"options.role.cupid.laserRadius" : "赤い糸の当たり判定"
+"options.role.cupid.laserSeStrength" : "赤い糸SEの可聴範囲"
+"stats.cupid.lovers" : "ラバーズを結んだ回数"
+"stats.cupid.laserCupid" : "キューピッドで赤い糸を顕現させた回数"
+"stats.cupid.laserLover" : "ラバーズで赤い糸を顕現させた回数"
+
 "role.destroyer.name" : "デストロイヤー"
 "role.destroyer.short" : "デス"
 "role.destroyer.blurb" : "圧し潰せ"
@@ -914,6 +933,7 @@
 "options.role.evilTracker.canChangeTargetOnMeeting" : "会議中の追跡対象の変更"
 "options.role.evilTracker.trackImpostors" : "インポスターの追跡"
 "options.role.evilTracker.showTrackingTargetOnMap" : "マップ上での追跡対象の表示"
+"options.role.evilTracker.canCheckTrackingTasksInTaskPhase" : "タスクフェイズ中のタスク追跡確認"
 "options.role.evilTracker.showWhereTrackingIs" : "追跡対象の位置を部屋名で表示"
 
 "role.evilTrapper.name" : "イビルトラッパー"
@@ -923,6 +943,19 @@
 "options.role.evilTrapper.killTrapSoundDistance" : "キルトラップ設置音の可聴範囲"
 "options.role.evilTrapper.costOfKillTrap" : "キルトラップの設置コスト"
 "options.role.evilTrapper.killTrapSize" : "キルトラップの当たり判定"
+
+"role.gimlet.name" : "ギムレット"
+"role.gimlet.short" : "ギ"
+"role.gimlet.blurb" : "希望を穿て"
+"options.role.gimlet.detail" : "ギムレットは自身の姿をドリルに変えて、大量キルを決めるインポスターです。"
+"options.role.gimlet.drillCooldown" : "ドリルクールダウン"
+"options.role.gimlet.drillSize" : "ドリルの当たり判定"
+"options.role.gimlet.drillSpeed" : "ドリルの移動速度"
+"options.role.gimlet.canKillImpostor" : "ドリルのフレンドリーファイア"
+"options.role.gimlet.drillSeStrength" : "ドリルSEの可聴範囲"
+"options.role.gimlet.frictionResistance" : "ドリルの摩擦耐性"
+"stats.gimlet.drill" : "ドリルの使用回数"
+"ui.action.gimlet.drill" : "ドリルに変身して発進します。"
 
 "role.hadar.name" : "ハダル"
 "role.hadar.short" : "ハ"
@@ -1022,7 +1055,7 @@
 "options.role.raider.throwCoolDown" : "投擲クールダウン"
 "options.role.raider.axeSize" : "斧の当たり判定"
 "options.role.raider.axeSpeed" : "斧の投擲速度"
-"options.role.raider.canKillImpostor" : "インポスターのフレンドリーファイア"
+"options.role.raider.canKillImpostor" : "フレンドリーファイア"
 "role.raider.axeSize" : "レイダー<color=white>: 斧の当たり判定</color>"
 "stats.raider.thrown" : "斧の投擲回数"
 
@@ -1065,7 +1098,7 @@
 "options.role.sniper.canKillHidingPlayer" : "隠れているプレイヤーをキル可能"
 "options.role.sniper.aimAssist" : "エイムアシスト"
 "options.role.sniper.delayInAimAssistActivation" : "エイムアシスト有効化までの遅延"
-"options.role.sniper.canKillImpostor" : "インポスターのフレンドリーファイア"
+"options.role.sniper.canKillImpostor" : "フレンドリーファイア"
 "role.sniper.shotRange" : "スナイパー<color=white>: ライフルの有効射程</color>"
 "role.sniper.soundRange" : "スナイパー<color=white>: 銃声の可聴範囲</color>"
 "role.sniper.shotSize" : "スナイパー<color=white>: 銃弾の当たり判定</color>"
@@ -1801,6 +1834,9 @@
 "button.label.deceive" : "イカサマ"
 "button.label.snatch" : "スナッチ"
 "button.label.clock" : "変速"
+"button.label.cupid.lover" : "選択"
+"button.label.cupid.string" : "赤い糸"
+"button.label.drill" : "ドリル"
 
 # Game
 
@@ -1889,6 +1925,8 @@
 "state.starved" : "餓死"
 "state.balloon" : "宙吊り"
 "state.lost" : "惨敗"
+"state.laser" : "赤い糸"
+"state.drill" : "掘削"
 
 # Endings
 
@@ -2526,6 +2564,8 @@
 "options.role.gambler.canVote.detail" : "オンにするとギャンブラーは賭け方に応じてスキップか賭け先に票を投じます。<br>-<b>最多票賭けをしている場合</b>: 最多票賭け先に投票します。<br>-<b>最多票賭けをしていない場合</b>: スキップに投票します。"
 "options.role.gambler.chipsLimitForNoVoteBetting.detail" : "ゼロ票賭けに賭けられるチップ数の上限を設定します。"
 "options.role.snatcher.killCooldownRewindAfterUsurp.detail" : "スナイパーなどの特殊キルが盗まれると、代わりに通常キル能力が解禁されます。<br>通常キル能力を獲得した際にキルクールダウンをどの程度巻き戻すか設定します。"
+"options.role.gimlet.drillSpeed.detail" : "ドリルの速度を設定します。<br>プレイヤーの移動速度の2倍が基準値です。"
+"options.role.gimlet.frictionResistance.detail" : "ドリルが壁に擦れる際の耐性を変更します。<br>大きな値にするほど、壁により直角に突き刺さっても突進し続けます。"
 
 "role.guesser.doc.main" : "会議中に役職を<b>推察</b>できます。推察された相手はキルされます。<br>ただし、推察に失敗すると<b>自身が死んでしまいます。</b>"
 "role.guesser.doc.guess" : "プレイヤーの上に表示されるアイコンをクリックすると推察画面が開きます。<br>表示された役職を選択することで<b>推察</b>を行います。"
@@ -2702,6 +2742,11 @@
 "role.cleaner.ability.title" : "固有能力 "死体消去""
 "role.cleaner.ability.main" : "死体を消し去ります。死体が消えてしまうと、プレイヤーはその死体を通報できなくなります。#COOLDOWN"
 "role.cleaner.ability.main.cooldown" : "<br>キルと死体消去のクールダウンは<var>同期</var>しています。<br>片方の能力を発動するともう片方の能力のクールダウンも同時にリセットされます。"
+"role.cupid.ability.title" : "固有能力 "恋という名の呪縛""
+"role.cupid.ability.main" : "ラバーズを作り出せます。また、作り出したラバーズの間に「赤い糸」を顕現させられます。<br>赤い糸に触れたプレイヤーは死亡します。"
+"role.cupid.ability.lover" : "ラバーズで結び付けるプレイヤーを選択します。<br>2人選択すると、後述の赤い糸ボタンに変化します。"
+"role.cupid.ability.laser" : "ラバーズの間に赤い糸を顕現させます。<br>ラバーズは、はじめて赤い糸を顕現させるときに結びつけます。"
+"role.cupid.tips" : "・2人目選択時、あるいは初回の赤い糸顕現時に選択したプレイヤーが死亡していた場合、<br>　死亡しているプレイヤーは選択から除外され、もう一度プレイヤーを選択できます。"
 "role.destroyer.ability.title" : "固有能力 "クラッシュキル""
 "role.destroyer.ability.main" : "デストロイヤーは通常のキルの代わりに、プレイヤーを押しつぶす<b>クラッシュキル</b>ができます。<br>クラッシュキルはキルまでに時間がかかるものの、その場に死体を残しません。#LEFTEVIDENCE"
 "role.destroyer.ability.main.leftEvidence" : "<br>代わりに、キルの現場には<var>シミ</var>が残ります。<br>シミは通報できませんが、重要な推理材料のひとつになります。"
@@ -2714,6 +2759,10 @@
 "role.effacer.ability.main" : "味方のインポスターやプレイヤーを<b>透明化</b>させられます。<br>透明になったプレイヤーは他人からは視認されなくなりますが、透明になった本人は<br>自身が透明になったことに気づけません。<br><br>ただし、インポスターは透明化したプレイヤーを視認でき、自身が透明になったことを自覚できます。"
 "role.effacer.ability.efface" : "近くのプレイヤーをしばらくの間透明化させます。"
 "role.effacer.tips" : "・この役職は、<color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>コラボ役職 (元役職: ジャマー)です。"
+"role.gimlet.ability.title" : "固有能力 "ドリル猛突進""
+"role.gimlet.ability.main" : "自身の姿をドリルに変えて突進します。ドリルに触れたプレイヤーは死亡します。"
+"role.gimlet.ability.drill" : "ドリルに変身して突進します。マウスカーソルの向きに突進します。"
+"role.gimlet.tips" : "・壁に激突すると突進を終了し、元の姿に戻ります。<br>・浅い角度で壁に触れた場合は、壁にこすりながら突進を継続します。"
 "role.hadar.ability.title" : "固有能力 "地底の変光星""
 "role.hadar.ability.main" : "ハダルは地底に潜って、自在に移動できます。<br>地底にいる間、視界はごく狭く薄らになります。周囲のプレイヤーの場所が定期的に通知されます。<br>設定によって、脱出場所をベントに限定させることもできます。"
 "role.hadar.ability.dive" : "地底に潜ります。"

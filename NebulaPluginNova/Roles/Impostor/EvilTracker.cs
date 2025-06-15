@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behavior;
+using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles.Abilities;
 using Newtonsoft.Json.Utilities;
@@ -170,7 +171,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                     {
                         StringBuilder text = new();
 
-                        if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + AmongUsUtil.GetRoomName(trackingTarget.TruePosition, true)).Color(Color.Lerp(Palette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
+                        if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + AmongUsUtil.GetRoomName(trackingTarget.TruePosition, true)).Color(Color.Lerp(DynamicPalette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
                         if (MyPlayer.IsImpostor) foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostor && !p.IsDead)) text.AppendLine((p.Name + ": " + AmongUsUtil.GetRoomName(p.TruePosition, true)).Color(Palette.ImpostorRed));
 
                         tmPro.text = text.ToString();
@@ -179,7 +180,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                 //インポスターに矢印を付ける
                 if (TrackImpostorsOption && MyPlayer.IsImpostor) NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.AmOwner && p.Role.Role.Category == RoleCategory.ImpostorRole).Do(p => TryRegisterArrow(p));
 
-                var trackTracker = ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p)).Register(this);
+                var trackTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, p => ObjectTrackers.StandardPredicate(p));
 
                 trackButton = new ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.Ability).Register(this);
                 trackButton.SetSprite(buttonSprite.GetSprite());

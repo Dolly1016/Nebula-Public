@@ -57,7 +57,7 @@ public class OutfitCommand : ICommand
                     if (arguments.Count == 3) task = task.Chain(_ => arguments[2].AsValue<int>(env).Action(val => priority = val));
 
                     return task.ChainFast(_ => (targets.Count() == 0 ? EmptyCommandToken.Token
-                    : new ObjectCommandToken<OutfitDefinition>(targets.First().Unbox().GetOutfit(priority).Outfit)));
+                    : new ObjectCommandToken<OutfitDefinition>(targets.First().GetOutfit(priority))));
                 }
             });
     }

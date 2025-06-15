@@ -35,5 +35,6 @@ static public class Commands
         CommandManager.RegisterCommand(new GuiTextCommand(), "gui::text");
         CommandManager.RegisterCommand(new GuiButtonCommand(), "gui::button");
         CommandManager.RegisterCommand(new GuiArrayerCommand(), "gui::arrayer");
+        CommandManager.RegisterCommand(new WalkCommand(), "nebula::walk");
     }
 }

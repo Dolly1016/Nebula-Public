@@ -3,24 +3,26 @@ using Il2CppSystem.Xml.Schema;
 using Nebula.Behavior;
 using Nebula.Map;
 using Nebula.Modules.Cosmetics;
+using Nebula.Patches;
+using Nebula.Roles.Crewmate;
 using Nebula.VisualProgramming;
 using Nebula.VisualProgramming.UI;
+using Sentry.Unity.NativeUtils;
 using System.Data;
 using TMPro;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 using Virial;
+using Virial.Events.Game;
 using Virial.Helpers;
 using Virial.Media;
 using Virial.Runtime;
 using Virial.VisualProgramming;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
-using static Nebula.Modules.INebulaAchievement;
-using static Nebula.Modules.Cosmetics.RingMenu;
-using static Nebula.Roles.Neutral.Spectre;
-using Virial.Events.Game;
 using static Il2CppSystem.Uri;
-using Nebula.Patches;
-using Nebula.Roles.Crewmate;
+using static Nebula.Modules.Cosmetics.RingMenu;
+using static Nebula.Modules.INebulaAchievement;
+using static Nebula.Roles.Neutral.Spectre;
 
 namespace Nebula;
 
@@ -517,88 +519,6 @@ public class NebulaManager : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    /*
-                    var player1 = GamePlayer.GetPlayer(0)!;
-                    var player2 = GamePlayer.GetPlayer(1)!;
-
-                    int length = 0, begin = 0;
-                    int max = 30;
-                    Vector2[] pos1 = new Vector2[max];
-                    Vector2[] pos2 = new Vector2[max];
-
-                    (var renderer, var filter) = UnityHelper.CreateMeshRenderer("MeshRenderer", null, new(0f, 0f, -10f), LayerExpansion.GetDefaultLayer(), null, UnityHelper.GetMeshRendererMaterial());
-                    renderer.material.mainTexture = SpriteLoader.FromResource("Nebula.Resources.Gradation.png", 100f).GetSprite().texture;
-                    var mesh = filter.mesh;
-
-                    Vector3[] pos = new Vector3[max * 2];
-                    mesh.SetVertices(pos);
-
-                    var color = new Color32(255, 255, 255, 255);
-                    Color32[] colors = new Color32[max * 2];
-                    for (int i = 0; i < max * 2; i++) colors[i] = color;
-                    mesh.SetColors(colors);
-
-                    Vector2[] uvs = new Vector2[max * 2];
-                    for(int i = 0; i < max; i++)
-                    {
-                        uvs[i] = new((float)i / (max - 1) * 0.95f, 0);
-                        uvs[i + max] = new((float)i / (max - 1) * 0.95f, 1);
-                    }
-                    mesh.SetUVs(0, uvs);
-
-                    
-
-                    GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
-                    {
-                        Vector3 center = HudManager.Instance.transform.position;
-                        center.z = -100f;
-                        renderer.transform.position = center;
-                        center.z = 0f;
-
-                        if (length < max) length++; else begin = (begin + 1) % max;
-                        int lastIndex = (begin + length - 1) % max;
-                        pos1[lastIndex] = player1.Position.ToUnityVector();
-                        pos2[lastIndex] = player2.Position.ToUnityVector();
-
-                        int offset = max - length;
-                        for(int i = 0; i < length; i++)
-                        {
-                            pos[offset + i] = (Vector3)pos1[(begin + i) % max] - center;
-                            pos[offset + i + max] = (Vector3)pos2[(begin + i) % max] - center;
-                        }
-
-                        mesh.SetVertices(pos);
-                        List<int> triangleList = [];
-
-                        Vector2 temp1, temp2, temp3, dir;
-                        float cross;
-                        for (int i =0;i<length - 1; i++)
-                        {
-                            temp1 = pos2[(begin + i) % max];
-                            temp2 = pos2[(begin + i + 1) % max];
-                            temp3 = pos1[(begin + i) % max];
-                            dir = temp2 - temp1;
-                            cross = dir.x * temp3.y - dir.y * temp3.x;
-                            if(cross > 0f) triangleList.AddRange([offset + i + max, offset + i, offset + i + 1 + max]);
-                            else triangleList.AddRange([offset + i + max, offset + i + 1 + max, offset + i]);
-
-                            temp1 = pos1[(begin + i) % max];
-                            temp2 = pos1[(begin + i + 1) % max];
-                            temp3 = pos2[(begin + i + 1) % max];
-                            dir = temp2 - temp1;
-                            cross = dir.x * temp3.y - dir.y * temp3.x;
-                            if (cross > 0f) triangleList.AddRange([offset + i, offset + i + 1, offset + i + 1 + max]);
-                            else triangleList.AddRange([offset + i, offset + i + 1 + max, offset + i + 1]);
-                        }
-
-                        
-                        mesh.SetTriangles(triangleList.ToArray(), 0);
-                    }, NebulaAPI.CurrentGame);
-                    */
-
-
-
-
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
 
                     /*

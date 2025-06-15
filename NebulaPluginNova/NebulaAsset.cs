@@ -46,6 +46,10 @@ public enum NebulaAudioClip {
     ButtonBreaking,
     SnatcherSuccess,
     SnatcherFailed,
+    Laser,
+    Drill,
+    DrillEnd,
+    DrillFric,
 }
 
 public static class SoundManagerHelper
@@ -147,6 +151,10 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.ButtonBreaking] = Load<AudioClip>("ButtonBreaking.mp3");
         audioMap[NebulaAudioClip.SnatcherSuccess] = Load<AudioClip>("SnatcherSuccess.mp3");
         audioMap[NebulaAudioClip.SnatcherFailed] = Load<AudioClip>("SnatcherFailed.mp3");
+        audioMap[NebulaAudioClip.Laser] = Load<AudioClip>("Laser.wav");
+        audioMap[NebulaAudioClip.Drill] = Load<AudioClip>("Drill.wav");
+        audioMap[NebulaAudioClip.DrillEnd] = Load<AudioClip>("DrillEnd.wav");
+        audioMap[NebulaAudioClip.DrillFric] = Load<AudioClip>("DrillFrac.wav");
         BrokenShaderMat = Load<Material>("BrokenShaderMat");
 
         PaparazzoShot = Load<GameObject>("PhotoObject");
@@ -273,9 +281,9 @@ public static class NebulaAsset
             SoundManager.Instance.PlaySound(audioMap[clip],false,volume).pitch = pitch;
     }
 
-    public static void PlaySE(NebulaAudioClip clip, Vector2 pos, float minDistance, float maxDistance, float volume = 1f) => PlaySE(audioMap[clip], pos, minDistance, maxDistance);
+    public static AudioSource PlaySE(NebulaAudioClip clip, Vector2 pos, float minDistance, float maxDistance, float volume = 1f, bool loop = false) => PlaySE(audioMap[clip], pos, minDistance, maxDistance, volume, loop);
 
-    public static void PlaySE(AudioClip clip,Vector2 pos,float minDistance,float maxDistance, float volume = 1f)
+    public static AudioSource PlaySE(AudioClip clip,Vector2 pos,float minDistance,float maxDistance, float volume = 1f, bool loop = false)
     {
         var audioSource = UnityHelper.CreateObject<AudioSource>("SEPlayer", null, pos);
 
@@ -285,18 +293,18 @@ public static class NebulaAsset
         audioSource.priority = 0;
         audioSource.spatialBlend = 1f;
         audioSource.clip = clip;
-        audioSource.loop = false;
+        audioSource.loop = loop;
         audioSource.playOnAwake = false;
         audioSource.maxDistance = maxDistance;
         audioSource.minDistance = minDistance;
         audioSource.rolloffMode = UnityEngine.AudioRolloffMode.Linear;
         audioSource.outputAudioMixerGroup = SoundManager.Instance.SfxChannel;
-        audioSource.PlayOneShot(audioSource.clip);
+        audioSource.Play();
 
         IEnumerator CoPlay()
         {
             Camera.main.gameObject.TryGetComponent<AudioListener>(out var listener);
-            while (audioSource.isPlaying)
+            while (audioSource && audioSource.isPlaying)
             {
                 if (listener)
                 {
@@ -306,11 +314,12 @@ public static class NebulaAsset
                 }
                 yield return null;
             }
-            GameObject.Destroy(audioSource.gameObject);
+            if(audioSource) GameObject.Destroy(audioSource.gameObject);
             yield break;
         }
 
         NebulaManager.Instance.StartCoroutine(CoPlay().WrapToIl2Cpp());
+        return audioSource;
     }
 
     public static readonly RemoteProcess<(NebulaAudioClip clip, Vector2 pos, float minDistance, float maxDistance)> RpcPlaySE = new(

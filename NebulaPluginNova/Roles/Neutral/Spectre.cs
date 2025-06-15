@@ -437,7 +437,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
                     _ => (VanishCostOption + 1f) < guage.LeftSatiety);
                 vanishButton.OnEffectStart = (button) => {
                     AddSatiety(-VanishCostOption);
-                    MyPlayer.GainAttribute(PlayerAttributes.Invisible, VanishCooldownOption, false, 100, "nebula::spectreVanish");
+                    MyPlayer.GainAttribute(PlayerAttributes.Invisible, VanishDurationOption, false, 100, "nebula::spectreVanish");
                     StatsVanish.Progress();
                 };
                 vanishButton.OnEffectEnd = (button) => vanishButton.StartCoolDown();

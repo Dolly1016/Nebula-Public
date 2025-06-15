@@ -745,12 +745,6 @@ public interface RuntimeRole : RuntimeAssignable
     /// 現在の状態を簒奪可能能力の引数に変換します。
     /// </summary>
     int[]? UsurpedAbilityArguments { get => null; }
-
-    /// <summary>
-    /// チームの関係でキルできるか否かを調べます。ここで生死や距離を考慮する必要はありません。
-    /// </summary>
-    /// <returns></returns>
-    bool RuntimeAssignable.CanKill(Virial.Game.Player player) => Role.Category is RoleCategory.ImpostorRole ? player.Role.Role.Category != RoleCategory.ImpostorRole : true;
 }
 
 /// <summary>

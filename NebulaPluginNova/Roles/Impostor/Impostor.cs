@@ -48,11 +48,11 @@ public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 }
 
 [NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
-public class ImpostorRadioOperator : AbstractModule<Virial.Game.Game>, IGameOperator
+public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGameOperator
 {
-    static ImpostorRadioOperator() => DIManager.Instance.RegisterModule(() => new ImpostorRadioOperator());
+    static ImpostorBasicRuleOperator() => DIManager.Instance.RegisterModule(() => new ImpostorBasicRuleOperator());
 
-    public ImpostorRadioOperator() => this.Register(NebulaAPI.CurrentGame!);
+    public ImpostorBasicRuleOperator() => this.Register(NebulaAPI.CurrentGame!);
     [OnlyMyPlayer]
     void OnSetRole(PlayerRoleSetEvent ev)
     {
@@ -62,4 +62,8 @@ public class ImpostorRadioOperator : AbstractModule<Virial.Game.Game>, IGameOper
         }
     }
 
+    void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
+    {
+        if (ev.Player.IsImpostor && ev.Target.IsImpostor) ev.SetAsCannotKillBasically(); 
+    }
 }

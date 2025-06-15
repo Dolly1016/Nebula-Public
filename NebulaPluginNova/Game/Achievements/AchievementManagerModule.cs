@@ -43,7 +43,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
 
         if (Helpers.CurrentMonth == 5 && (AmongUsUtil.CurrentMapId is 1 or 4))
         {
-            if (GamePlayer.LocalPlayer!.Unbox().TryGetModifier<Lover.Instance>(out var lover))
+            if (GamePlayer.LocalPlayer!.TryGetModifier<Lover.Instance>(out var lover))
             {
                 var myLover = lover.MyLover.Get();
                 float time = 0f;

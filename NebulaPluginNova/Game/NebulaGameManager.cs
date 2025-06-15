@@ -212,13 +212,13 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     static public NebulaGameManager? Instance { get => instance; }
 
     private Dictionary<byte, GamePlayer> allModPlayers;
+    private Dictionary<int, IPlayerlike> allPlayerlikes;
     private GamePlayer[] allOrderedPlayers;
 
     public List<AchievementTokenBase> AllAchievementTokens = new();
     public T? GetAchievementToken<T>(string achievement) where T : AchievementTokenBase {
         return AllAchievementTokens.FirstOrDefault(a => a.Achievement.Id == achievement) as T;
     }
-
 
     //ゲーム開始時からの経過時間
     public float CurrentTime { get; private set; } = 0f;
@@ -291,7 +291,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     static private SpriteLoader vcConnectSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.VCReconnectButton.png", 100f);
     public NebulaGameManager()
     {
-        allModPlayers = new();
+        allModPlayers = [];
+        allPlayerlikes = [];
         instance = this;
         HudGrid = HudManager.Instance.gameObject.AddComponent<HudGrid>();
         RuntimeAsset = new();
@@ -338,6 +339,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         Debug.Log("Registered: " + player.name);
         var info = DIManager.Instance.Instantiate<GamePlayer>(p => p.Unbox().SetPlayer(player))!;
         allModPlayers.Add(player.PlayerId, info);
+        allPlayerlikes.Add(player.PlayerId, info);
 
         if (player.AmHost() && (GeneralConfigurations.AssignOpToHostOption) || GeneralConfigurations.CurrentGameMode == GameModes.FreePlay) info.Unbox().PermissionHolder.AddPermission(PlayerModInfo.OpPermission);
 
@@ -527,7 +529,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             }
             else if(info != null)
             {
-                KillButtonTracker ??= ObjectTrackers.ForPlayer(null, info, (p) => (info.AllAbilities.Any(a => a.KillIgnoreTeam) ? ObjectTrackers.StandardPredicate(p) : ObjectTrackers.LocalKillablePredicate(p)) && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption).Register(NebulaAPI.CurrentGame!);
+                KillButtonTracker ??= ObjectTrackers.ForPlayer(NebulaAPI.CurrentGame!, null, info, (p) => (info.AllAbilities.Any(a => a.KillIgnoreTeam) ? ObjectTrackers.StandardPredicate(p) : ObjectTrackers.LocalKillablePredicate(p)) && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
                 HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
             }
             else
@@ -613,6 +615,11 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         return allModPlayers.TryGetValue(playerId, out var v) ? v : null;
     }
 
+    public IPlayerlike? GetPlayerlike(int playerlikeId)
+    {
+        return allPlayerlikes.TryGetValue(playerlikeId, out var v) ? v : null;
+    }
+
     public void CheckGameState()
     {
         switch (GameState)
@@ -668,6 +675,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
 
     public IEnumerable<GamePlayer> AllPlayerInfo => allModPlayers.Values;
+    public IEnumerable<IPlayerlike> AllPlayerlike => allPlayerlikes.Values;
     public int AllPlayersNum => allModPlayers.Count;
 
     public void AllAssignableAction(Action<RuntimeAssignable> action)
@@ -784,6 +792,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public void RpcDoGameAction(GamePlayer player, UnityEngine.Vector2 position, GameActionType actionType) => RpcGameAction.Invoke((player, position, actionType.Id));
 
     public bool HavePassed(float since, float duration) => since + duration < CurrentTime;
+
+    internal void RemovePlayerlike(IPlayerlike player) => allPlayerlikes.Remove(player.PlayerlikeId);
 }
 
 internal static class NebulaGameManagerExpansion

@@ -1572,6 +1572,7 @@ public class DevAddon : IResourceAllocator
 
     static public IEnumerable<DevAddon> SearchDevAddons()
     {
+        if (!Directory.Exists("Addons")) yield break;
         foreach (var dir in Directory.GetDirectories("Addons", "*"))
         {
             string metaFile = $"{dir}/addon.meta";
@@ -1587,14 +1588,17 @@ public class DevAddon : IResourceAllocator
     static public async Task<DevAddon[]> SearchDevAddonsAsync()
     {
         List<DevAddon> result = new();
-        foreach (var dir in Directory.GetDirectories("Addons", "*"))
+        if (Directory.Exists("Addons"))
         {
-            string metaFile = $"{dir}/addon.meta";
-            if (File.Exists(metaFile))
+            foreach (var dir in Directory.GetDirectories("Addons", "*"))
             {
-                AddonMeta? meta = (AddonMeta?)JsonStructure.Deserialize(await File.ReadAllTextAsync(metaFile), typeof(AddonMeta));
-                if (meta == null) continue;
-                result.Add(new DevAddon(meta.Name, dir) { addonMeta = meta });
+                string metaFile = $"{dir}/addon.meta";
+                if (File.Exists(metaFile))
+                {
+                    AddonMeta? meta = (AddonMeta?)JsonStructure.Deserialize(await File.ReadAllTextAsync(metaFile), typeof(AddonMeta));
+                    if (meta == null) continue;
+                    result.Add(new DevAddon(meta.Name, dir) { addonMeta = meta });
+                }
             }
         }
         return result.ToArray();
@@ -1650,6 +1654,7 @@ public class DevAddon : IResourceAllocator
         while (true) {
             if (File.Exists(folderPath + "/" + leftPath)) return new StreamResource(() => File.OpenRead(folderPath + "/" + leftPath));
 
+            if (!Directory.Exists(folderPath)) return null;
             var dirs = Directory.GetDirectories(folderPath);
             if (dirs.Length == 0) return null;
             foreach (var dir in dirs)

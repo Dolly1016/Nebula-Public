@@ -11,10 +11,10 @@
     <PackageId>NebulaAPI</PackageId>
     <Title>Nebula API</Title>
 	<LangVersion>latest</LangVersion>
-    <Version>3.0.0-alpha1</Version>
+    <Version>3.2.0</Version>
     <Authors>Dolly</Authors>
     <Description>Among UsのMod "Nebula on the Ship"におけるスクリプトで使用できるAPIです。</Description>
-    <PackageProjectUrl>https://sparkling-dianella-4d1.notion.site/Nebula-on-the-Ship-API-96b2f818267642a182461e1391c2553a</PackageProjectUrl>
+    <PackageProjectUrl>https://dolly1016.github.io/Virial.Doc/</PackageProjectUrl>
     <NeutralLanguage>ja-JP</NeutralLanguage>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>

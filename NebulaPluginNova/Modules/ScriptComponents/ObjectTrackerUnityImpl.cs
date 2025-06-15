@@ -26,13 +26,13 @@ public static class HighlightHelpers
 
 public static class ObjectTrackers
 {
-    static public Predicate<GamePlayer> StandardPredicateIgnoreOwner = p => !p.IsDead && !p.WillDie && !p.Unbox().IsInvisible && !p.IsDived && !p.IsBlown;
+    static public Predicate<GamePlayer> StandardPredicateIgnoreOwner = p => !p.IsDead && !p.WillDie && !p.IsInvisible && !p.IsDived && !p.IsBlown;
     static public Predicate<GamePlayer> StandardPredicate = p => !p.AmOwner && StandardPredicateIgnoreOwner.Invoke(p);
     static public Predicate<GamePlayer> KillablePredicate(GamePlayer myPlayer) => p => StandardPredicate(p) && myPlayer.CanKill(p);
     static public Predicate<GamePlayer> LocalKillablePredicate = p => StandardPredicate(p) && (GamePlayer.LocalPlayer?.CanKill(p) ?? true);
 
-    public static ObjectTracker<GamePlayer> ForPlayer(float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, UnityEngine.Color? color = null, bool canTrackInVent = false, bool ignoreCollider = false) => ForPlayer(distance, tracker, predicate, null, color ?? UnityEngine.Color.yellow, canTrackInVent, ignoreCollider);
-    public static ObjectTracker<GamePlayer> ForPlayer(float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier, UnityEngine.Color? color, bool canTrackInVent = false, bool ignoreCollider = false)
+    public static ObjectTracker<GamePlayer> ForPlayer(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, UnityEngine.Color? color = null, bool canTrackInVent = false, bool ignoreCollider = false) => ForPlayer(lifespan, distance, tracker, predicate, null, color ?? UnityEngine.Color.yellow, canTrackInVent, ignoreCollider);
+    public static ObjectTracker<GamePlayer> ForPlayer(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier, UnityEngine.Color? color, bool canTrackInVent = false, bool ignoreCollider = false)
     {
         if (!canTrackInVent)
         {
@@ -41,17 +41,17 @@ public static class ObjectTrackers
         }
         IEnumerable<PlayerControl> FastPlayers() => PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => p);
 
-        return new ObjectTrackerUnityImpl<GamePlayer, PlayerControl>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, FastPlayers, predicate, predicateHeavier, p => p.GetModInfo(), p => [p.GetTruePosition()], p => p.cosmetics.currentBodySprite.BodySprite, color, ignoreCollider);
+        return new ObjectTrackerUnityImpl<GamePlayer, PlayerControl>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, FastPlayers, predicate, predicateHeavier, p => p.GetModInfo(), p => [p.GetTruePosition()], p => p.cosmetics.currentBodySprite.BodySprite, color, ignoreCollider).Register(lifespan);
     }
 
-    public static ObjectTracker<GamePlayer> ForDeadBody(float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier = null, UnityEngine.Color? color = null, bool ignoreCollider = false)
+    public static ObjectTracker<GamePlayer> ForDeadBody(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier = null, UnityEngine.Color? color = null, bool ignoreCollider = false)
     {
-        return new ObjectTrackerUnityImpl<GamePlayer, DeadBody>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => Helpers.AllDeadBodies().Where(d => d.bodyRenderers.Any(r => r.enabled)), predicate, predicateHeavier, d => NebulaGameManager.Instance.GetPlayer(d.ParentId), d => [d.TruePosition], d => d.bodyRenderers[0], color, ignoreCollider);
+        return new ObjectTrackerUnityImpl<GamePlayer, DeadBody>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => Helpers.AllDeadBodies().Where(d => d.bodyRenderers.Any(r => r.enabled)), predicate, predicateHeavier, d => NebulaGameManager.Instance.GetPlayer(d.ParentId), d => [d.TruePosition], d => d.bodyRenderers[0], color, ignoreCollider).Register(lifespan);
     }
 
-    public static ObjectTracker<Vent> ForVents(float? distance, GamePlayer tracker, Predicate<Vent> predicate, UnityEngine.Color color, bool ignoreColliders = false)
+    public static ObjectTracker<Vent> ForVents(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<Vent> predicate, UnityEngine.Color color, bool ignoreColliders = false)
     {
-        return new ObjectTrackerUnityImpl<Vent, Vent>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => ShipStatus.Instance.AllVents, predicate, _ => true, v => v, v => [v.transform.position], v => v.myRend, color, ignoreColliders);
+        return new ObjectTrackerUnityImpl<Vent, Vent>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => ShipStatus.Instance.AllVents, predicate, _ => true, v => v, v => [v.transform.position], v => v.myRend, color, ignoreColliders).Register(lifespan);
     }
 }
 

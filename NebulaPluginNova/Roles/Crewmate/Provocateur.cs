@@ -100,7 +100,7 @@ public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>
             "ShareEmbroilState",
             (message, _) =>
             {
-                if(message.player.Role is Ability provocateur)
+                if(message.player.TryGetAbility<Ability>(out var provocateur))
                 {
                     if (message.isActive) provocateur.embroilNum++;
                     provocateur.embroilActive = message.isActive;

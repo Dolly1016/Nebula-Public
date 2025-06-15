@@ -150,7 +150,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             if (player == null) return false;
             if (player.Role is Sidekick.Instance sidekick && sidekick.JackalTeamId == JackalTeamId) return true;
-            if (player.Unbox().AllModifiers.Any(m => m is SidekickModifier.Instance sidekick && sidekick.JackalTeamId == JackalTeamId)) return true;
+            if (player.Modifiers.Any(m => m is SidekickModifier.Instance sidekick && sidekick.JackalTeamId == JackalTeamId)) return true;
             return false;
         }
 
@@ -183,7 +183,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 bool hasSidekick = false;
 
-                var myTracker = ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !IsMySidekick(p), null, Impostor.Impostor.CanKillHidingPlayerOption).Register(this);
+                var myTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !IsMySidekick(p), null, Impostor.Impostor.CanKillHidingPlayerOption);
 
                 GameObject? lockSprite = null;
                 TMPro.TextMeshPro? leftText = null;
@@ -204,9 +204,9 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                     sidekickButton.OnClick = (button) =>
                     {
                         if (Sidekick.IsModifierOption)
-                            myTracker.CurrentTarget?.Unbox().RpcInvokerSetModifier(SidekickModifier.MyRole, [JackalTeamId]).InvokeSingle();
+                            myTracker.CurrentTarget?.AddModifier(SidekickModifier.MyRole, [JackalTeamId]);
                         else
-                            myTracker.CurrentTarget?.Unbox().RpcInvokerSetRole(Sidekick.MyRole, [JackalTeamId]).InvokeSingle();
+                            myTracker.CurrentTarget?.SetRole(Sidekick.MyRole, [JackalTeamId]);
                         hasSidekick = true;
 
                         new StaticAchievementToken("jackal.common1");
@@ -282,8 +282,8 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                 if (IsMySidekick(player))
                 {
                     using(RPCRouter.CreateSection("Sidekick")){
-                        player.Unbox().RpcInvokerSetRole(Jackal.MyRole, RoleArgumentsForSidekick).InvokeSingle();
-                        player.Unbox().RpcInvokerUnsetModifier(SidekickModifier.MyRole).InvokeSingle();
+                        player.SetRole(Jackal.MyRole, RoleArgumentsForSidekick);
+                        player.RemoveModifier(SidekickModifier.MyRole);
                     }
                 }
 
@@ -309,7 +309,11 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                 new StaticAchievementToken("jackal.challenge");
         }
 
-        bool RuntimeAssignable.CanKill(Virial.Game.Player player) =>!IsSameTeam(player);
+        [OnlyMyPlayer]
+        void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
+        {
+            if (!IsSameTeam(ev.Target)) ev.SetAsCannotKillBasically();
+        }
     }
 }
 
@@ -388,7 +392,10 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
         string RuntimeAssignable.DisplayName => Jackal.AppendTeamIdIfNecessary((MyRole as DefinedAssignable).DisplayName, JackalTeamId, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, false);
         string RuntimeRole.DisplayShort => Jackal.AppendTeamIdIfNecessary((MyRole as DefinedRole).DisplayShort, JackalTeamId, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, true);
 
-        bool RuntimeAssignable.CanKill(Virial.Game.Player player) => !(player.Role is Jackal.Instance ji && ji.IsSameTeam(MyPlayer));
+        [OnlyMyPlayer]
+        void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev) {
+            if (ev.Target.Role is Jackal.Instance ji && ji.IsSameTeam(MyPlayer)) ev.SetAsCannotKillBasically();
+        }
     }
 }
 
@@ -436,12 +443,17 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
                 if (GeneralConfigurations.JackalRadioOption)
                     VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);                
 
-                if (MyPlayer.Role.Role.Category == RoleCategory.ImpostorRole && MyPlayer.Unbox().TryGetModifier<Lover.Instance>(out _))
+                if (MyPlayer.Role.Role.Category == RoleCategory.ImpostorRole && MyPlayer.TryGetModifier<Lover.Instance>(out _))
                     new StaticAchievementToken("threeRoles");
             }
         }
 
-        bool RuntimeAssignable.CanKill(Virial.Game.Player player) => !(player.Role is Jackal.Instance ji && ji.IsSameTeam(MyPlayer));
+        [OnlyMyPlayer]
+        void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
+        {
+            if (ev.Target.Role is Jackal.Instance ji && ji.IsSameTeam(MyPlayer)) ev.SetAsCannotKillBasically();
+        }
+
         bool RuntimeModifier.MyCrewmateTaskIsIgnored => true;
     }
 }

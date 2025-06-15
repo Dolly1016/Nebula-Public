@@ -62,7 +62,7 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 StaticAchievementToken? acTokenCommon = null;
 
-                var eatTracker = ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => true).Register(this);
+                var eatTracker = ObjectTrackers.ForDeadBody(this, null, MyPlayer, (d) => true);
 
                 var eatButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     EatCoolDownOption.CoolDown, "eat", buttonSprite,

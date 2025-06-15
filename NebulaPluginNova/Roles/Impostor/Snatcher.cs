@@ -73,7 +73,7 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
             }
             if (AmOwner && SnatchMethodOption.GetValue() == 1)
             {
-                var playerTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate).Register(this);
+                var playerTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
 
                 var snatchButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "snatcher.snatch",
                     SnatchCoolDownOption, "snatch", buttonSprite,

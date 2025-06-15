@@ -1,4 +1,5 @@
-﻿using Virial.Compat;
+﻿using MS.Internal.Xml.XPath;
+using Virial.Compat;
 using Virial.Components;
 using Virial.Game;
 using Virial.Media;
@@ -38,6 +39,22 @@ public interface IModuleFactory
         => AbilityButton(lifespan, player, input, null, cooldown, label, image, availability, visibility, asGhostButton);
     ModAbilityButton AbilityButton(ILifespan lifespan, Player player, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false)
         => AbilityButton(lifespan, player, false, false, input, inputHelp, cooldown, label, image, availability, visibility, asGhostButton);
+
+    ModAbilityButton InteractButton(ILifespan lifespan, Player player, ObjectTracker<Player> tracker, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image image, Action<Player, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false)
+    {
+        var button = AbilityButton(lifespan, player, input, inputHelp, cooldown, label, image, availability, visibility, asGhostButton);
+        button.OnClick = b => onClick.Invoke(tracker.CurrentTarget!, b);
+        if (availability == null)
+            availability = _ => tracker.CurrentTarget != null;
+        else
+        {
+            var givenAvailability = availability;
+            availability = b => tracker.CurrentTarget != null && givenAvailability.Invoke(b);
+        }
+
+        SetUpAbilityOrKillButton(button, lifespan, player, input, inputHelp, cooldown, true, label, image, availability, visibility, false);
+        return button;
+    }
 
     ModAbilityButton EffectButton(ILifespan lifespan, Player player, VirtualKeyInput input, string? inputHelp, float cooldown, float duration, string label, Image image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false, bool isToggleEffect = false)
     {
@@ -83,6 +100,8 @@ public interface IModuleFactory
     /// <returns></returns>
     ObjectTracker<Player> KillTracker(ILifespan lifespan, Player player, Func<Player, bool>? filter = null, Func<Player, bool>? filterHeavier = null);
 
+    ObjectTracker<Player> PlayerTracker(ILifespan lifespan, Player player, Func<Player, bool>? filter = null, Func<Player, bool>? filterHeavier = null);
+
     /// <summary>
     /// タイマーを生成します。
     /// </summary>
@@ -103,7 +122,7 @@ public interface IModuleFactory
         button.CoolDownTimer = timer.Start();
 
         if (availability == null) button.Availability = b => player.CanMove;
-        else button.Availability = b => player.CanMove && availability.Invoke(b);
+        else button.Availability = b => player.CanMove && !player.WillDie && availability.Invoke(b);
 
         if (visibility == null) button.Visibility = asGhostButton ? b => player.IsDead : b => !player.IsDead;
         else button.Visibility = asGhostButton ? (b => player.IsDead && visibility.Invoke(b)) : (b => !player.IsDead && visibility.Invoke(b));

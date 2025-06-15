@@ -65,6 +65,9 @@ public class NebulaImpl : INebula
     }
 
     void INebula.RegisterTip(IDocumentTip tip) => DocumentTipManager.Register(tip);
+
+    IDisposable INebula.CreateRPCSection(string? label) => RPCRouter.CreateSection(label);
+
     //ショートカット
     Virial.Configuration.Configurations Configurations => ConfigurationsAPI.API;
     Virial.Media.GUI GUILibrary => GUI.API;
@@ -93,15 +96,20 @@ internal class NebulaModuleFactory : IModuleFactory
     Virial.Components.ModAbilityButton IModuleFactory.AbilityButton(ILifespan lifespan) => new ModAbilityButtonImpl().Register(lifespan);
     Virial.Components.ModAbilityButton IModuleFactory.AbilityButton(ILifespan lifespan, bool isLeftSideButton, bool isArrangedAsKillButton, int priority, bool alwaysShow) => new ModAbilityButtonImpl(isLeftSideButton, isArrangedAsKillButton, priority, alwaysShow).Register(lifespan);
     Virial.Components.GameTimer IModuleFactory.Timer(ILifespan lifespan, float max) => new TimerImpl(max).Register(lifespan);
-    Virial.Components.ObjectTracker<GamePlayer> IModuleFactory.KillTracker(ILifespan lifespan, GamePlayer player, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier)
+    
+    private Virial.Components.ObjectTracker<GamePlayer> GetTracker(ILifespan lifespan, GamePlayer player, Predicate<GamePlayer> predicate, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier)
     {
-        var predicate = ObjectTrackers.KillablePredicate(player);
         Predicate<GamePlayer>? predicateHeavier = filterHeavier == null ? null : filterHeavier.Invoke;
         if (filter == null)
-            return ObjectTrackers.ForPlayer(null, player, predicate, predicateHeavier, null).Register(lifespan);
+            return ObjectTrackers.ForPlayer(lifespan, null, player, predicate, predicateHeavier, null);
         else
         {
-            return ObjectTrackers.ForPlayer(null, player, (p) => predicate.Invoke(p) && filter(p), predicateHeavier, null).Register(lifespan);
+            return ObjectTrackers.ForPlayer(lifespan, null, player, (p) => predicate.Invoke(p) && filter(p), predicateHeavier, null);
         }
     }
+    Virial.Components.ObjectTracker<GamePlayer> IModuleFactory.KillTracker(ILifespan lifespan, GamePlayer player, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier) 
+        => GetTracker(lifespan, player, ObjectTrackers.KillablePredicate(player), filter, filterHeavier);
+    
+    Virial.Components.ObjectTracker<GamePlayer> IModuleFactory.PlayerTracker(ILifespan lifespan, GamePlayer player, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier)
+        => GetTracker(lifespan, player, ObjectTrackers.StandardPredicate, filter, filterHeavier);
 }

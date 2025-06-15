@@ -197,14 +197,7 @@ public class SetUpCertificationPatch
         if (AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started) return;
         __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
 
-        //Scalerにまとめる
-        var scaler = UnityHelper.CreateObject("Scaler", __instance.transform, __instance.Collider.offset).transform;
-        scaler.gameObject.AddComponent<SortingGroup>();
-        __instance.cosmetics.transform.SetParent(scaler, true);
-        __instance.transform.FindChild("BodyForms").SetParent(scaler, true);
-        __instance.cosmetics.zIndexSpacing = 0f;
-        scaler.transform.localScale = new(1f, 1f, 0f);
-        
+        PlayerExtension.SetUpScaler(__instance.gameObject);
     }
 }
 

@@ -73,7 +73,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                 //吹っ飛ばされているプレイヤーは無視しない
 
                 //不可視なプレイヤーは無視
-                if (p.Unbox().IsInvisible || p.WillDie) continue;
+                if (p.IsInvisible || p.WillDie) continue;
 
                 var pos = p.VanillaPlayer.GetTruePosition();
                 Vector2 diff = pos - (Vector2)Renderer.transform.position;

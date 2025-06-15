@@ -1,4 +1,5 @@
-﻿using Nebula.Patches;
+﻿using Nebula.Modules.Cosmetics;
+using Nebula.Patches;
 using UnityEngine;
 using Virial;
 using Virial.Assignable;
@@ -270,7 +271,14 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
 
             RoleEffectAnimation chargeAnim = GameObject.Instantiate<RoleEffectAnimation>(RoleManager.Instance.vanish_ChargeAnim, message.player.VanillaPlayer.transform);
             //roleEffectAnimation2.SetMaskLayerBasedOnWhoShouldSee(base.AmOwner);
-            chargeAnim.SetMaterialColor(message.player.PlayerId);
+
+            //SetMaterialColor
+            var playerId = message.player.PlayerId;
+            chargeAnim.Renderer.material.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId]);
+            chargeAnim.Renderer.material.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId]);
+            chargeAnim.Renderer.material.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId]);
+
+
             AmongUsUtil.GetRolePrefab<PhantomRole>()?.PlayPhantomAppearSound();
             chargeAnim.Play(message.player.VanillaPlayer, (Il2CppSystem.Action)(() =>
             {
@@ -279,7 +287,12 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
                 if (!message.player.IsDead && !message.player.VanillaPlayer.inVent)
                 {
                     RoleEffectAnimation poofAnim = GameObject.Instantiate<RoleEffectAnimation>(DestroyableSingleton<RoleManager>.Instance.vanish_PoofAnim, message.player.VanillaPlayer.transform);
-                    poofAnim.SetMaterialColor(message.player.PlayerId);
+                    
+                    //SetMaterialColor
+                    poofAnim.Renderer.material.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId]);
+                    poofAnim.Renderer.material.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId]);
+                    poofAnim.Renderer.material.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId]);
+
                     poofAnim.Play(message.player.VanillaPlayer, (Il2CppSystem.Action)(() => { }), message.player.VanillaPlayer.cosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 0f, true, 0f);
                 }
 

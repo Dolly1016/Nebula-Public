@@ -4,6 +4,7 @@ using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.MetaWidget;
 using Nebula.Utilities;
+using NebulaLoader;
 using Sentry.Unity.NativeUtils;
 using System.Text;
 using TMPro;
@@ -619,13 +620,16 @@ internal static class OnlineMarketplace
 
     static private IEnumerator CoGetResponse<T>(string method, Func<T, IEnumerator> callback, params (string label, string value)[] contents)
     {
-        var json = contents.Prepend(("request", method)).Select(tuple => (tuple.Item1, Uri.EscapeDataString(tuple.Item2))).Join(tuple => $"\"{tuple.Item1}\" : \"{tuple.Item2}\"", ",");
-        var content = new StringContent("{" + json + "}", Encoding.UTF8, @"application/json");
-        var task = NebulaPlugin.HttpClient.PostAsync(Helpers.ConvertUrl(APIURL), content);
-        yield return task.WaitAsCoroutine();
-        var strTask = task.Result.Content.ReadAsStringAsync();
-        yield return strTask.WaitAsCoroutine();
-        yield return callback.Invoke(JsonStructure.Deserialize<OnlineResponse<T>>(strTask.Result)!.data);
+        if (NebulaPlugin.AllowHttpCommunication)
+        {
+            var json = contents.Prepend(("request", method)).Select(tuple => (tuple.Item1, Uri.EscapeDataString(tuple.Item2))).Join(tuple => $"\"{tuple.Item1}\" : \"{tuple.Item2}\"", ",");
+            var content = new StringContent("{" + json + "}", Encoding.UTF8, @"application/json");
+            var task = NebulaPlugin.HttpClient.PostAsync(Helpers.ConvertUrl(APIURL), content);
+            yield return task.WaitAsCoroutine();
+            var strTask = task.Result.Content.ReadAsStringAsync();
+            yield return strTask.WaitAsCoroutine();
+            yield return callback.Invoke(JsonStructure.Deserialize<OnlineResponse<T>>(strTask.Result)!.data);
+        }
     }
 
     public class SearchContentResult

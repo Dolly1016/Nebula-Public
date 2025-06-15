@@ -37,32 +37,8 @@ public static class PlayerStartPatch
 
         //人数が多いと近くのコンソールも追跡できなくなるので、上限を緩和
         __instance.hitBuffer = new Collider2D[120];
-        
-        /*
-        IEnumerator CoShowPosition()
-        {
-
-            var renderer = UnityHelper.CreateObject<SpriteRenderer>("PlayerPos", null, Vector3.zero, LayerExpansion.GetDefaultLayer());
-            renderer.sprite = image.GetSprite();
-            while (renderer && __instance)
-            {
-                if (__instance.NetTransform.incomingPosQueue.Count > 0) {
-                    renderer.enabled = true;
-                    renderer.transform.position = __instance.NetTransform.incomingPosQueue.ToArray().Last();
-                    renderer.transform.SetWorldZ(-10f);
-                }
-                else
-                {
-                    renderer.enabled = false;
-                }
-                yield return null;
-            }
-            if(renderer) GameObject.Destroy(renderer);
-        }
-        NebulaManager.Instance.StartCoroutine(CoShowPosition().WrapToIl2Cpp());
-        */
     }
-    static private Image image = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
+    
 }
 
 [HarmonyPatch(typeof(PlayerCustomizationData), nameof(PlayerCustomizationData.Color), MethodType.Setter)]
@@ -110,7 +86,7 @@ public static class PlayerUpdatePatch
 {
     static IEnumerable<SpriteRenderer> AllHighlightable()
     {
-        foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) yield return p.cosmetics.currentBodySprite.BodySprite;
+        foreach (var p in NebulaGameManager.Instance?.AllPlayerlike ?? []) yield return p.VanillaCosmetics.currentBodySprite.BodySprite;
         foreach (var d in Helpers.AllDeadBodies()) foreach (var r in d.bodyRenderers) yield return r;
         if (ShipStatus.Instance)
         {
@@ -272,7 +248,7 @@ class CurrentOutfitPatch
 {
     public static bool Prefix(PlayerControl __instance, ref NetworkedPlayerInfo.PlayerOutfit __result)
     {
-        __result = __instance.GetModInfo()?.Unbox().CurrentOutfit.Outfit.outfit!;
+        __result = __instance.GetModInfo()?.CurrentOutfit.outfit!;
         return __result == null;
     }
 }
@@ -727,6 +703,19 @@ internal class RPCSealingPatch
     }
 }
 
+[HarmonyPatch(typeof(CustomNetworkTransform), nameof(CustomNetworkTransform.OnEnable))]
+public class SyncTransformPatch
+{
+    public static void Postfix(CustomNetworkTransform __instance)
+    {
+        __instance.sendQueue.Clear();
+        __instance.incomingPosQueue.Clear();
+        __instance.lastPosition = __instance.transform.position;
+        __instance.lastPosSent = __instance.transform.position;
+    }
+}
+
+
 [NebulaRPCHolder]
 [HarmonyPatch(typeof(CustomNetworkTransform), nameof(CustomNetworkTransform.FixedUpdate))]
 class CustomNetworkTransformPatch
@@ -734,7 +723,11 @@ class CustomNetworkTransformPatch
     
     public static void Prefix(CustomNetworkTransform __instance)
     {
+        if (__instance.isPaused && __instance.AmOwner && __instance.sendQueue.Count > 0) __instance.sendQueue.Clear();
+        if(__instance.AmOwner && __instance.sendQueue.Count == 0) __instance.lastPosSent = __instance.transform.position;
+
         if (__instance.isPaused && __instance.incomingPosQueue.Count > 0) __instance.incomingPosQueue.Clear();
+        if (__instance.incomingPosQueue.Count == 0) __instance.lastPosition = __instance.transform.position;
 
         //rubberbandModifierをいじる関数にフックできないのでここで変更(バニラの変更を考慮して大きめな値にしておく)
         if (GeneralConfigurations.LowLatencyPlayerSyncOption && (AmongUsUtil.IsCustomServer() || AmongUsUtil.IsLocalServer()))
@@ -787,17 +780,21 @@ public static class PlayerFootstepPatch
             canHear |= (modInfo?.VisibilityLevel ?? 2) <= 1 && !(modPlayer?.IsDived ?? false);
             
         }
+
         if (canHear)
         {
-            for (int j = 0; j < ShipStatus.Instance.AllStepWatchers.Length; j++)
+            if (GameOperatorManager.Instance?.Run(new PlayerCheckPlayFootSoundEvent(__instance.GetModInfo()!)).PlayFootSound ?? true)
             {
-                SoundGroup soundGroup2 = ShipStatus.Instance.AllStepWatchers[j].MakeFootstep(__instance);
-                if (soundGroup2)
+                for (int j = 0; j < ShipStatus.Instance.AllStepWatchers.Length; j++)
                 {
-                    AudioClip clip2 = soundGroup2.Random();
-                    __instance.FootSteps.clip = clip2;
-                    __instance.FootSteps.Play();
-                    return false;
+                    SoundGroup soundGroup2 = ShipStatus.Instance.AllStepWatchers[j].MakeFootstep(__instance);
+                    if (soundGroup2)
+                    {
+                        AudioClip clip2 = soundGroup2.Random();
+                        __instance.FootSteps.clip = clip2;
+                        __instance.FootSteps.Play();
+                        return false;
+                    }
                 }
             }
         }

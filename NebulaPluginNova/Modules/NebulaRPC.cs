@@ -372,6 +372,10 @@ public static class RemoteProcessAsset
         defaultProcessDic[typeof(DefinedModifier)] = ((writer, obj) => writer.Write(((DefinedModifier)obj)?.Id ?? -1), (reader) => Roles.Roles.GetModifier(reader.ReadInt32())!);
     }
 
+    static public void RegisterType<Type>(Action<MessageWriter, Type> writer, Func<MessageReader, Type> reader) where Type : class
+    {
+        defaultProcessDic[typeof(Type)] = ((mw, obj) => writer.Invoke(mw, (Type)obj), reader);
+    }
     static public (Action<MessageWriter, object>, Func<MessageReader, object>) GetProcess(Type type)
     {
         //配列の場合

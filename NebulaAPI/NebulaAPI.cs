@@ -65,6 +65,8 @@ internal interface INebula
     E RunEvent<E>(E ev) where E : class, Event;
 
     IModuleFactory Modules { get; }
+
+    IDisposable CreateRPCSection(string? label);
 }
 
 public static class NebulaAPI
@@ -158,4 +160,17 @@ public static class NebulaAPI
     /// モジュールを生成するファクトリメソッド群です。
     /// </summary>
     static public IModuleFactory Modules => instance.Modules;
+
+    /// <summary>
+    /// 一括で送信するRPCをまとめるセクションを取得します。
+    /// セクション内のRPCは、全クライアントでの同時かつ同順序の実行が保証されます。
+    /// </summary>
+    /// <remarks>
+    /// v3.1.0で追加。<br />
+    /// </remarks>
+    /// <param name="label"></param>
+    /// <returns>RPCセクション。戻り値をusingステートメントで使用すると一括でまとめられるRPCを視覚的に把握しやすくなります。</returns>
+    static public IDisposable CreateRPCSection(string? label = null) => instance.CreateRPCSection(label);
+
+
 }

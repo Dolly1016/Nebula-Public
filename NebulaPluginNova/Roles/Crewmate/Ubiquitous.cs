@@ -244,14 +244,14 @@ public class UbiquitousMapLayer : MonoBehaviour
             alive++;
 
             //不可視のプレイヤーは何もしない
-            if(p.Unbox().IsInvisible || p.VanillaPlayer.inVent) continue;
+            if(p.IsInvisible || p.VanillaPlayer.inVent) continue;
 
             foreach (var pos in dronePos)
             {
                 float d = pos.Distance(p.VanillaPlayer.transform.position);
                 if(d < Ubiquitous.droneDetectionRadiousOption)
                 {
-                    var icon = (DynamicPalette.IsLightColor(Palette.PlayerColors[p.PlayerId]) ? lightIconPool : darkIconPool).Instantiate();
+                    var icon = (DynamicPalette.IsLightColor(DynamicPalette.PlayerColors[p.PlayerId]) ? lightIconPool : darkIconPool).Instantiate();
                     icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.VanillaPlayer.transform.position, center, scale);
                     shown++;
                     if (alive >= 10 && alive == shown) challengeToken.Value = true;

@@ -58,10 +58,10 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
             leftTapes = left;
             if (AmOwner)
             {
-                var tracker = ObjectTrackers.ForVents(0.8f, MyPlayer, 
+                var tracker = ObjectTrackers.ForVents(this, 0.8f, MyPlayer, 
                     RedundantSealingOption ? 
                     v => leftTapes >= CostForVentSealingOption && !nextSealedVents.Contains(v.Id) && (!v.TryGetComponent<InvalidVent>(out var invalidVent) || (invalidVent.Level + VentRemoveStepsOption < 8)) :
-                    v => leftTapes >= CostForVentSealingOption && !nextSealedVents.Contains(v.Id) && !v.TryGetComponent<InvalidVent>(out _), MyRole.UnityColor, true).Register(this);
+                    v => leftTapes >= CostForVentSealingOption && !nextSealedVents.Contains(v.Id) && !v.TryGetComponent<InvalidVent>(out _), MyRole.UnityColor, true);
                 OpenableDoor? currentTargetDoor = null;
                 var sealButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     SealCoolDownOption, "seal", buttonImage,

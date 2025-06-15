@@ -147,7 +147,7 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole
         {
             if (ev.Dead.IsImpostor && !AmJekyll)
             {
-                MyPlayer.Unbox().RpcInvokerSetRole(Impostor.HydeImpostor.MyRole, null).InvokeSingle();
+                MyPlayer.SetRole(Impostor.HydeImpostor.MyRole);
                 NebulaAchievementManager.RpcClearAchievement.Invoke(("jekyllAndHyde.common2", MyPlayer));
             }
             if(ev.Dead.IsCrewmate && AmJekyll)

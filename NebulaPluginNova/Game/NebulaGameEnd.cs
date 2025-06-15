@@ -355,7 +355,7 @@ public class EndGameManagerSetUpPatch
             {
                 poolablePlayer.SetFlipX(i % 2 == 0);
             }
-            poolablePlayer.UpdateFromPlayerOutfit(player.Unbox().DefaultOutfit.Outfit.outfit, PlayerMaterial.MaskType.None, player.IsDead, true);
+            poolablePlayer.UpdateFromPlayerOutfit(player.DefaultOutfit.outfit, PlayerMaterial.MaskType.None, player.IsDead, true);
 
             poolablePlayer.SetName(player.Name, new Vector3(1f / vector.x, 1f / vector.y, 1f / vector.z), Color.white, -15f); ;
             poolablePlayer.SetNamePosition(new Vector3(0f, -1.31f, -0.5f));
@@ -372,7 +372,7 @@ public class EndGameManagerSetUpPatch
 
         string extraText = "";
         var wins = NebulaGameManager.Instance.EndState!.ExtraWins;
-        ExtraWin.AllExtraWins.Where(e => wins.Test(e)).Do(e => extraText += e.DisplayText);
+        ExtraWin.AllExtraWins.Where(e => wins.Test(e)).Do(e => extraText += e.DisplayText.GetString());
         textRenderer.text = endCondition?.DisplayText.GetString().Replace("%EXTRA%", extraText) ?? "Error";
         textRenderer.color = endCondition?.Color ?? Color.white;
 

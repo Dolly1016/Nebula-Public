@@ -7,7 +7,7 @@ namespace Virial.Components;
 /// オブジェクトに対してインタラクトするボタンなどで使用します。
 /// </summary>
 /// <typeparam name="T">追跡対象のオブジェクトの型</typeparam>
-public interface ObjectTracker<T> : IGameOperator
+public interface ObjectTracker<T>
 {
     /// <summary>
     /// 現在のターゲットを返します。

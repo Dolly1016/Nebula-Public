@@ -240,7 +240,7 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
         private static readonly RemoteProcess<(GamePlayer hallucination, GamePlayer target, Vector2 pos)> RpcShowHallucination = new("ShowHallucination",
             (message, _) =>
             {
-                var hallucination = message.hallucination.Unbox().GhostRole as Hallucination.Instance;
+                var hallucination = message.hallucination.GhostRole as Hallucination.Instance;
                 if (hallucination != null)
                 {
                     if (hallucination.currentHallucination != null) hallucination.currentHallucination.Disappear();
@@ -251,7 +251,7 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
         private static readonly RemoteProcess<GamePlayer> RpcDisappearHallucination = new("DisappearHallucination",
             (message, _) =>
             {
-                var hallucination = message.Unbox().GhostRole as Hallucination.Instance;
+                var hallucination = message.GhostRole as Hallucination.Instance;
                 if (hallucination?.currentHallucination != null)
                 {
                     hallucination.currentHallucination.Disappear();

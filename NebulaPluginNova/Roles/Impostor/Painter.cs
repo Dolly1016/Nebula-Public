@@ -46,7 +46,7 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
                 ModAbilityButton paintButton = null!;
                 OutfitDefinition? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.StandardPredicate).Register(this);
+                var sampleTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
 
                 var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
                     SampleCoolDownOption, "sample", sampleButtonSprite).SetAsUsurpableButton(this);
@@ -66,7 +66,7 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
                     var outfit = sample ?? MyPlayer.GetOutfit(75);
 
                     acTokenCommon ??= new("painter.common1");
-                    if (sampleTracker.CurrentTarget!.Unbox()!.GetOutfit(75).Outfit.outfit.ColorId != outfit.outfit.ColorId)
+                    if (sampleTracker.CurrentTarget!.GetOutfit(75).outfit.ColorId != outfit.outfit.ColorId)
                         acTokenChallenge.Value[sampleTracker.CurrentTarget!.PlayerId]++;
 
                     var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new(outfit, "Paint", 40, false)));

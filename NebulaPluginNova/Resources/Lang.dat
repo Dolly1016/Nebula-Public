@@ -147,6 +147,8 @@
 "ui.action.nightmare.nightmare" : "Casts a shadow around the seed you place."
 "ui.action.snatcher.snatch" : "Steals player's ability."
 "ui.action.snatcher.clock" : "Change cooldown speed."
+"ui.action.cupid.lover" : "Select the players you want to make lovers."
+"ui.action.cupid.laser" : "Makes Fate lasers appear between lovers.<br>There is a delay before the laser appears."
 
 "ui.contact.title" : "Report Form"
 "ui.contact.guide" : "Please let us know about any bugs you notice or requests you have.<br>* Note that the form will be sent anonymously, so you will not receive a direct response from the development team.<br><br>If you need a response, please contact us on the official Discord server."
@@ -861,6 +863,21 @@
 "options.role.cleaner.syncKillAndCleanCoolDown" : "Sync Kill And Clean Cooldown"
 "stats.cleaner.clean" : "Num of Cleaned Corpses"
 
+"role.cupid.name" : "Cupid"
+"role.cupid.short" : "Cu"
+"role.cupid.blurb" : "The Fallen"
+"options.role.cupid.detail" : "Cupid is an imposter who can create lovers. <br> The lovers cupid has a red thread that can kill the player."
+"options.role.cupid.selectCooldown" : "Select Cooldown"
+"options.role.cupid.laserDelayByCupid" : "Fate Delay By Cupid"
+"options.role.cupid.laserDelayByLover" : "Fate Delay By Lovers"
+"options.role.cupid.laserCooldown" : "Fate Cooldown"
+"options.role.cupid.laserDuration" : "Fate Duration"
+"options.role.cupid.laserRadius" : "Fate Laser Radius"
+"options.role.cupid.laserSeStrength" : "Fate Laser SE Strength"
+"stats.cupid.lovers" : "Num of Making Lovers"
+"stats.cupid.laserCupid" : "Num of Fate as Cupid"
+"stats.cupid.laserLover" : "Num of Fate as Lover"
+
 "role.destroyer.name" : "Destroyer"
 "role.destroyer.short" : "De"
 "role.destroyer.blurb" : "Ruthless"
@@ -923,6 +940,19 @@
 "options.role.evilTrapper.killTrapSoundDistance" : "Kill Trap Sound Distance"
 "options.role.evilTrapper.costOfKillTrap" : "Cost Of Kill Trap"
 "options.role.evilTrapper.killTrapSize" : "Kill Trap Size"
+
+"role.gimlet.name" : "Gimlet"
+"role.gimlet.short" : "G"
+"role.gimlet.blurb" : "Unstoppable Revolution"
+"options.role.gimlet.detail" : "Gimlet is an imposter who can transform into a drill."
+"options.role.gimlet.drillCooldown" : "Drill Cooldown"
+"options.role.gimlet.drillSize" : "Drill Size"
+"options.role.gimlet.drillSpeed" : "Drill Speed"
+"options.role.gimlet.canKillImpostor" : "Can Kill Impostor"
+"options.role.gimlet.drillSeStrength" : "Drill SE Strength"
+"options.role.gimlet.frictionResistance" : "Friction Resistance"
+"stats.gimlet.drill" : "Uses of Drill"
+"ui.action.gimlet.drill" : "Transform into a drill and take off."
 
 "role.hadar.name" : "Hadar"
 "role.hadar.short" : "H"
@@ -1772,6 +1802,9 @@
 "button.label.deceive" : "deceive"
 "button.label.snatch" : "snatch"
 "button.label.clock" : "clock"
+"button.label.cupid.lover" : "select"
+"button.label.cupid.string" : "fate"
+"button.label.drill" : "drill"
 
 # Game
 
@@ -1860,6 +1893,8 @@
 "state.starved" : "Starved"
 "state.balloon" : "Balloon"
 "state.lost" : "Lost"
+"state.laser" : "Laser"
+"state.drill" : "Drill"
 
 # Endings
 

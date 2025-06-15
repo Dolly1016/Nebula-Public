@@ -50,7 +50,7 @@ public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Abilit
                 bountyTimer = new TimerImpl(ChangeBountyIntervalOption).Start().Register(this);
                 arrowTimer = new TimerImpl(ArrowUpdateIntervalOption).Start().Register(this);
 
-                var killTracker = ObjectTrackers.ForPlayer(null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer), null, Impostor.CanKillHidingPlayerOption).Register(this);
+                var killTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer), null, Impostor.CanKillHidingPlayerOption);
 
                 killButton = new ModAbilityButtonImpl(false, true).KeyBind(Virial.Compat.VirtualKeyInput.Kill).Register(this);
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove;

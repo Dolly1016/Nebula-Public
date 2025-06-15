@@ -121,10 +121,10 @@ public class NebulaEndCriteria
                 totalAlive++;
 
                 //相方生存Loversではないインポスターのみカウントに入れる
-                if (p.Role.Role.Team == Impostor.MyTeam && (!p.Unbox().TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover)) impostors++;
+                if (p.Role.Role.Team == Impostor.MyTeam && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover)) impostors++;
 
                 //ジャッカル陣営が生存している間は勝利できない
-                if (p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return;
+                if (p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return;
             }
 
             if(impostors * 2 >= totalAlive) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.ImpostorWin, GameEndReason.Situation);
@@ -139,7 +139,7 @@ public class NebulaEndCriteria
         {
             int totalAlive = 0;
             bool leftImpostors = false;
-            static bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Unbox().AllModifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
+            static bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
 
             //全生存者数を数えつつ、インポスターが生存していたらチェックをやめる
             allAliveJackals.Clear();
@@ -201,7 +201,7 @@ public class NebulaEndCriteria
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDead) continue;
-                if (p.Unbox().TryGetModifier<Lover.Instance>(out var lover)){
+                if (p.TryGetModifier<Lover.Instance>(out var lover)){
                     if (lover.MyLover.Get()?.IsDead ?? true) continue;
 
                     NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.LoversWin, GameEndReason.Situation);

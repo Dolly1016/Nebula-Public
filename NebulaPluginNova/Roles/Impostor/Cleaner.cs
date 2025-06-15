@@ -37,7 +37,7 @@ public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCit
             {
                 AchievementToken<(bool cleared, int removed)>? acTokenChallenge = new("cleaner.challenge", (false, 0), (val, _) => val.cleared);
                 
-                var cleanTracker = ObjectTrackers.ForDeadBody(null, MyPlayer, (d) => true).Register(this);
+                var cleanTracker = ObjectTrackers.ForDeadBody(this, null, MyPlayer, (d) => true);
 
                 var cleanButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "cleaner.clean",
                     CleanCoolDownOption, "clean", buttonSprite,

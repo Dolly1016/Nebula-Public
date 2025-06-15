@@ -11,6 +11,7 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
 using Virial.Helpers;
+using Virial.Media;
 using Virial.Runtime;
 using Virial.Text;
 
@@ -130,6 +131,8 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     {
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
+            if (NebulaInput.SomeUiIsActive || (MapBehaviour.Instance && MapBehaviour.Instance.IsOpen)) return false;
+
             var dis = (UnityEngine.Vector2)Input.mousePosition - new UnityEngine.Vector2(Screen.width, Screen.height) * 0.5f;
             return dis.magnitude < 280f;
         }

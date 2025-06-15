@@ -14,12 +14,12 @@ file static class IgnoreShadowHelpers
 {
     static public void SetIgnoreShadow(bool ignore = true, bool showNameText = true)
     {
-        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) p.Unbox().UpdateVisibility(false, ignore, showNameText);
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) p.UpdateVisibility(false, ignore, showNameText);
     }
 
     static public void ResetIgnoreShadow()
     {
-        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) p.Unbox().UpdateVisibility(false, !NebulaGameManager.Instance.WideCamera.DrawShadow);
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) p.UpdateVisibility(false, !NebulaGameManager.Instance.WideCamera.DrawShadow);
     }
 }
 file class IgnoreShadowScope : IDisposable

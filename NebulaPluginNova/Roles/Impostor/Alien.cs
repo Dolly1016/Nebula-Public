@@ -69,7 +69,7 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
                 {
                     int left = NumOfInvalidationsOption;
 
-                    var invalidateTracker = ObjectTrackers.ForPlayer(null, MyPlayer, p => ObjectTrackers.StandardPredicate(p)).Register(this);
+                    var invalidateTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, p => ObjectTrackers.StandardPredicate(p));
                     var invalidateButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility,
                         InvalidateCoolDownOption, "invalidate", invalidateButtonSprite,
                         _ => invalidateTracker.CurrentTarget != null, _ => left > 0);

@@ -6,6 +6,7 @@ using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Player;
 using TMPro;
+using UnityEngine.Rendering;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
@@ -189,5 +190,17 @@ public static class PlayerExtension
 
         player.inVent = false;
         player.moveable = true;
+    }
+
+    public static void SetUpScaler(GameObject playerControlObject)
+    {
+        //Scalerにまとめる
+        var scaler = UnityHelper.CreateObject("Scaler", playerControlObject.transform, playerControlObject.GetComponent<Collider2D>().offset).transform;
+        scaler.gameObject.AddComponent<SortingGroup>();
+        var cosmetics = playerControlObject.GetComponentInChildren<CosmeticsLayer>();
+        cosmetics.transform.SetParent(scaler, true);
+        playerControlObject.transform.FindChild("BodyForms").SetParent(scaler, true);
+        cosmetics.zIndexSpacing = 0f;
+        scaler.transform.localScale = new(1f, 1f, 0f);
     }
 }

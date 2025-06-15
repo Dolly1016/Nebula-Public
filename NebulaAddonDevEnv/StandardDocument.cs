@@ -42,6 +42,8 @@ namespace DefaultLang.Documents;
 [AddonDocument("role.trilemma", RoleType.Modifier, (string[])[], true, false)]
 [AddonDocument("role.investigator", RoleType.Role, (string[])["Buttons.InvestigatorButton.png;role.investigator.ability.investigate"], false, false)]
 [AddonDocument("role.snatcher", RoleType.Role, (string[])["Buttons.SnatchButton.png;role.snatcher.ability.snatch", "Buttons.SnatcherClockButton.png;role.snatcher.ability.clock"], false, false)]
+[AddonDocument("role.cupid", RoleType.Role, (string[])["Buttons.CupidLoverButton.png;role.cupid.ability.lover", "Buttons.CupidStringButton.png;role.cupid.ability.laser"], false, true)]
+[AddonDocument("role.gimlet", RoleType.Role, (string[])["Buttons.DrillButton.png;role.gimlet.ability.drill"], false, true)]
 public class StandardDocument : IDocumentWithId
 {
     string documentId;

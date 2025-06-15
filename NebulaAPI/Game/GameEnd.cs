@@ -26,6 +26,7 @@ public sealed class GameEnd
     {
         Priority = priority;
         Id = id;
+        this.ImmutableId = immutableId;
         AllowWin = allowWin;
         DisplayText = dislayText;
         Color = color;

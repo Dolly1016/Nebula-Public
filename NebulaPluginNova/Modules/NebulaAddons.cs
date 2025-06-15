@@ -1,4 +1,5 @@
 ﻿using Nebula.Behavior;
+using NebulaLoader;
 using System.IO.Compression;
 using System.Net;
 using System.Reflection;
@@ -90,6 +91,8 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
     private static async Task FetchAndDownloadAddon(string url, long? lastId, int entryId, Action? onDownload = null)
     {
+        if (!NebulaPlugin.AllowHttpCommunication) return;
+
         var response = await NebulaPlugin.HttpClient.GetAsync(url);
         if (response.StatusCode != HttpStatusCode.OK) return;
         string json = await response.Content.ReadAsStringAsync();
@@ -148,6 +151,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         {
             string id = Path.GetFileName(dir);
             string filePath = dir + "/" + id + ".zip";
+            
             if (File.Exists(filePath)) File.Move(filePath, "Addons/" + id + ".zip", true);
         }
 
@@ -334,10 +338,13 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
     public Stream? OpenRead(string innerAddress)
     {
         innerAddress = (InZipPath + innerAddress).Replace('/', '.').ToLower();
-        
+
         foreach (var entry in Archive.Entries)
         {
-            if (entry.FullName.Replace('/', '.').ToLower() == innerAddress) return entry.Open();
+            if (entry.FullName.Replace('/', '.').ToLower() == innerAddress)
+            {
+                return entry.Open();
+            }
         }
         return null;
     }

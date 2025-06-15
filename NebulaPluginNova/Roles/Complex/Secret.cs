@@ -75,8 +75,8 @@ public class Secret : DefinedRoleTemplate, DefinedRole
         {
             using (RPCRouter.CreateSection("ArousalSecretRole"))
             {
-                player.Unbox().RpcInvokerSetRole(Roles.AllRoles.First(r => r.Id == savedArgs[0]), savedArgs.Skip(2).ToArray()).InvokeSingle();
-                if ((savedArgs[1] & 0b1) != 0) player.Unbox().RpcInvokerSetModifier(GuesserModifier.MyRole, null).InvokeSingle();
+                player.SetRole(Roles.AllRoles.First(r => r.Id == savedArgs[0]), savedArgs.Skip(2).ToArray());
+                if ((savedArgs[1] & 0b1) != 0) player.AddModifier(GuesserModifier.MyRole);
 
                 if (tasks != null)
                 {

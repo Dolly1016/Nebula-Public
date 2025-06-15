@@ -35,6 +35,7 @@ public static class GameActionTypes
     static public GameActionType NightmarePlacementAction { get; internal set; }
     static public GameActionType WhammyPlacementAction { get; internal set; }
     static public GameActionType HookshotAction { get; internal set; }
+    static public GameActionType DrillAction { get; internal set; }
 }
 
 public class GameActionType

@@ -107,7 +107,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     CheckIgnitable();
                 }
 
-                var douseTracker = ObjectTrackers.ForPlayer(null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f)).Register(this);
+                var douseTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f));
 
                 var douseButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     DouseCoolDownOption, DouseDurationOption, "douse", douseButtonSprite,

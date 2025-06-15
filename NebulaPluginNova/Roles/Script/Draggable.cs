@@ -20,7 +20,7 @@ public class Draggable : FlexibleLifespan, IGameOperator, IBindPlayer
         if (player.AmOwner)
         {
             //不可視の死体はつかめる対象から外す
-            var deadBodyTracker = ObjectTrackers.ForDeadBody(null, player, d => d.RelatedDeadBody?.GetHolder() == null).Register(this);
+            var deadBodyTracker = ObjectTrackers.ForDeadBody(this, null, player, d => d.RelatedDeadBody?.GetHolder() == null);
 
             var dragButton = NebulaAPI.Modules.AbilityButton(this, myPlayer, Virial.Compat.VirtualKeyInput.Ability,
                 0f, "drag", buttonSprite,

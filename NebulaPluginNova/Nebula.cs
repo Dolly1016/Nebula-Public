@@ -36,6 +36,7 @@ using UnityEngine.ResourceManagement.Util;
 using UnityEngine.Networking;
 using Hazel.Udp;
 using BepInEx.Configuration;
+using Virial.Utilities;
 
 [assembly: System.Reflection.AssemblyFileVersionAttribute(Nebula.NebulaPlugin.PluginEpochStr + "."  + Nebula.NebulaPlugin.PluginBuildNumStr)]
 
@@ -46,14 +47,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.21.0.10";
+    public const string PluginVersion = "2.22";
 
-    public const string VisualVersion = "v2.21.0.10";
-    //public const string VisualVersion = "Snapshot 25.05.18b";
+    public const string VisualVersion = "v2.22";
+    //public const string VisualVersion = "Snapshot 25.06.11a";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "107";
-    public const string PluginBuildNumStr = "1388";
+    public const string PluginBuildNumStr = "1405";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -121,8 +122,6 @@ public class NebulaPlugin
             new GameObject("NebulaManager").AddComponent<NebulaManager>();
         });
         SetUpNebulaImpl();
-
-        
     }
 
     static private void SetUpNebulaImpl()

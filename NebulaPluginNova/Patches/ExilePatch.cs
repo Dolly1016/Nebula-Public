@@ -122,6 +122,8 @@ public static class NebulaExileWrapUp
         AmongUsUtil.SetEmergencyCoolDown(0f, true);
 
         GameObject.Destroy(__instance.gameObject);
+
+        Resources.UnloadUnusedAssets();
     }
 }
 
