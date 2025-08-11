@@ -28,6 +28,7 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public Marionette MyRole = new Marionette();
     static private GameStatsEntry StatsDecoy = NebulaAPI.CreateStatsEntry("stats.marionette.decoy", GameStatsCategory.Roles, MyRole);

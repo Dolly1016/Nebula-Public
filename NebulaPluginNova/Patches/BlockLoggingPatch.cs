@@ -1,6 +1,5 @@
 ﻿using AmongUs.Data;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text;
 
 namespace Nebula.Patches;

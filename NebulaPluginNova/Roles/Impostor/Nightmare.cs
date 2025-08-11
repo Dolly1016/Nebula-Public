@@ -38,6 +38,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
     static public Nightmare MyRole = new Nightmare();
     static private GameStatsEntry StatsPlaceNightSeed = NebulaAPI.CreateStatsEntry("stats.nightmare.place", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsNightmare = NebulaAPI.CreateStatsEntry("stats.nightmare.nightmare", GameStatsCategory.Roles, MyRole);

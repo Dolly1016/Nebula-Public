@@ -103,9 +103,6 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                 bool targetMJailer = player.TryGetModifier<Impostor.JailerModifier.Instance>(out _);
                 bool myMJailer = MyPlayer.TryGetModifier<Impostor.JailerModifier.Instance>(out _);
 
-                bool targetMadmate = player.TryGetModifier<Modifier.Madmate.Instance>(out _);
-                bool myMadmate = MyPlayer.TryGetModifier<Modifier.Madmate.Instance>(out _);
-
                 using (RPCRouter.CreateSection("ChainShift"))
                 {
                     Debug.Log("Test1");
@@ -139,8 +136,8 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                     }
 
                     //タスクを整えたうえで役職を変更する
-                    player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
                     MyPlayer.Unbox().RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
+                    player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
 
                     if (targetGuess != -1) player.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
                     if (myGuess != -1) MyPlayer.Unbox().RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
@@ -159,20 +156,6 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                         {
                             MyPlayer.Unbox().RpcInvokerSetModifier(Impostor.JailerModifier.MyRole, []).InvokeSingle();
                             player.RpcInvokerUnsetModifier(Impostor.JailerModifier.MyRole).InvokeSingle();
-                        }
-                    }
-
-                    if (myMadmate != targetMadmate)
-                    {
-                        if (myMadmate)
-                        {
-                            MyPlayer.Unbox().RpcInvokerUnsetModifier(Modifier.Madmate.MyRole).InvokeSingle();
-                            player.RpcInvokerSetModifier(Modifier.Madmate.MyRole, []).InvokeSingle();
-                        }
-                        else
-                        {
-                            MyPlayer.Unbox().RpcInvokerSetModifier(Modifier.Madmate.MyRole, []).InvokeSingle();
-                            player.RpcInvokerUnsetModifier(Modifier.Madmate.MyRole).InvokeSingle();
                         }
                     }
 

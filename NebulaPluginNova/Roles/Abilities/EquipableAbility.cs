@@ -20,7 +20,7 @@ namespace Nebula.Roles.Abilities
             Owner = owner;
             Renderer = UnityHelper.CreateObject<SpriteRenderer>(name, owner.VanillaPlayer.transform, Vector3.zero, LayerExpansion.GetObjectsLayer());
             Renderer.transform.localScale = new Vector3(Size, Size, 1f);
-            Renderer.gameObject.layer = canSeeInShadow ? LayerExpansion.GetObjectsLayer() : LayerExpansion.GetDefaultLayer();
+            Renderer.gameObject.layer = canSeeInShadow ? LayerExpansion.GetPlayerWithShadowLayer() : LayerExpansion.GetPlayersLayer();
         }
 
         protected virtual float FixAngle(float angle) => angle;
@@ -43,7 +43,7 @@ namespace Nebula.Roles.Abilities
             Renderer.flipY = Mathf.Cos(rad) < 0f;
         }
 
-        virtual public void OnReleased()
+        void IGameOperator.OnReleased()
         {
             if (Renderer) GameObject.Destroy(Renderer.gameObject);
             Renderer = null!;

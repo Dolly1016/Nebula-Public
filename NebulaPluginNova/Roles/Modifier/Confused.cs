@@ -66,8 +66,8 @@ public class Confused : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
                 player1.Unbox().RemoveOutfit("Confused");
                 player2.Unbox().RemoveOutfit("Confused");
 
-                player1.Unbox().AddOutfit(new(outfit2, "Confused", 20, false));
-                player2.Unbox().AddOutfit(new(outfit1, "Confused", 20, false));
+                player1.Unbox().AddOutfit(new(outfit2, "Confused", OutfitPriority.Confused, false));
+                player2.Unbox().AddOutfit(new(outfit1, "Confused", OutfitPriority.Confused, false));
             }
 
             if (shuffled && !skipMeeting)

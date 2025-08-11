@@ -26,4 +26,12 @@ public interface IKillButtonLike : ILifespan
     /// </summary>
     /// <param name="ratio">クールダウンに乗じる値。1の場合通常通りのクールダウンが開始する。</param>
     void StartCooldown(float ratio = 1f);
+
+    /// <summary>
+    /// このボタンが有効か調べます。
+    /// </summary>
+    /// <remarks>
+    /// v4.1.0で追加。<br />
+    /// </remarks>
+    bool IsShown { get; }
 }

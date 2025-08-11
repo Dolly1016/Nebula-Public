@@ -20,6 +20,9 @@ public static class PlayerStartPatch
 {
     static void Postfix(PlayerControl __instance, ref Il2CppSystem.Collections.IEnumerator __result)
     {
+        //フックショットや斧用の壁と当たらないようにする
+        if (__instance.rigidbody2D) __instance.rigidbody2D.excludeLayers |= 1 << LayerExpansion.GetHookshotWallLayer();
+
         __result = Effects.Sequence(
             __result,
             Effects.Action((Il2CppSystem.Action)(()=>
@@ -86,8 +89,8 @@ public static class PlayerUpdatePatch
 {
     static IEnumerable<SpriteRenderer> AllHighlightable()
     {
-        foreach (var p in NebulaGameManager.Instance?.AllPlayerlike ?? []) yield return p.VanillaCosmetics.currentBodySprite.BodySprite;
-        foreach (var d in Helpers.AllDeadBodies()) foreach (var r in d.bodyRenderers) yield return r;
+        foreach (var p in NebulaGameManager.Instance?.AllPlayerlike ?? []) if(p.IsActive) yield return p.VanillaCosmetics.currentBodySprite.BodySprite;
+        foreach (var d in Helpers.AllDeadBodies()) if(d) foreach (var r in d.bodyRenderers) if(r) yield return r;
         if (ShipStatus.Instance)
         {
             foreach (var v in ShipStatus.Instance.AllVents) yield return v.myRend;
@@ -103,7 +106,7 @@ public static class PlayerUpdatePatch
 
         if (__instance.AmOwner)
         {
-            foreach(var r in AllHighlightable()) r.material.SetFloat("_Outline", 0f);
+            foreach(var r in AllHighlightable()) if(r) r.material.SetFloat("_Outline", 0f);
         }
     }
 
@@ -350,13 +353,27 @@ class PlayerDisconnectPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CanMove), MethodType.Getter)]
 class PlayerCanMovePatch
 {
+    //特別に移動を許可するプレイヤーカメラ
+    private static int? canMoveCameraId = null;
+    public static void SetMovableCamera(MonoBehaviour behaviour)
+    {
+        canMoveCameraId = behaviour.GetInstanceID();
+    }
+    private static bool CameraAllowMoving()
+    {
+        var currentTarget = HudManager.Instance.PlayerCam.Target;
+        if (currentTarget == PlayerControl.LocalPlayer) return true;
+        if (currentTarget && currentTarget.GetInstanceID() == canMoveCameraId) return true;
+        return false;
+    }
+
     public static void Postfix(PlayerControl __instance, ref bool __result)
     {
         if (__instance != PlayerControl.LocalPlayer) return;
 
         var modPlayer = __instance.GetModInfo();
 
-        __result &= !TextField.AnyoneValid && HudManager.Instance.PlayerCam.Target == PlayerControl.LocalPlayer  && !ModSingleton<Marketplace>.Instance && !(modPlayer?.IsTeleporting ?? false);
+        __result &= !TextField.AnyoneValid && CameraAllowMoving() && !ModSingleton<Marketplace>.Instance && !(modPlayer?.IsTeleporting ?? false);
     }
 }
 
@@ -812,5 +829,30 @@ public static class SkeldFootstepPatch
         if (__instance.roomArea.OverlapPoint(player.GetTruePosition())) __result = __instance.FootStepSounds;
         
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(PetBehaviour), nameof(PetBehaviour.Start))]
+public class PetBehaviourStartPatch
+{
+    public static void Postfix(PetBehaviour __instance)
+    {
+        __instance.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetPlayersLayer());
+    }
+}
+
+[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.LateUpdate))]
+public static class PlayerPhysicsPatch
+{
+    static bool Prefix(PlayerPhysics __instance)
+    {
+        if (AmongUsClient.Instance.GameState >= InnerNet.InnerNetClient.GameStates.Started)
+        {
+            Vector3 position = __instance.transform.position;
+            var y = GameOperatorManager.Instance?.Run(new PlayerFixZPositionEvent(__instance.myPlayer.GetModInfo()!, position.y)).Y ?? position.y;
+            __instance.transform.SetWorldZ(y / 1000f);
+            return false;
+        }
+        return true;
     }
 }

@@ -1,14 +1,6 @@
 ﻿using AmongUs.Data.Player;
 using Il2CppInterop.Runtime.Injection;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nebula.Modules.Cosmetics;
-using Rewired;
-using System.Text;
-using UnityEngine;
-using Virial.DI;
-using Virial.Events.Game;
-using Virial.Events.Game.Meeting;
-using Virial.Events.Player;
 using Virial.Game;
 using Virial.Runtime;
 using Virial.Text;
@@ -538,6 +530,8 @@ public class GameStatisticsViewer : MonoBehaviour
         {
             var target = allStatistics[eventIndex];
 
+            Resources.UnloadUnusedAssets();
+
             GameObject detail = UnityHelper.CreateObject("EventDetail", detailHolder.transform, new Vector3(0, -0.76f * num, -10f));
 
             var backGround = NebulaAsset.CreateSharpBackground(new Vector2(3.4f, 0.7f), MainColor, detail.transform);
@@ -566,9 +560,19 @@ public class GameStatisticsViewer : MonoBehaviour
                 if (aPlayer != null)
                 {
                     archivedGame!.GetColor(aPlayer.PlayerId).ReflectToArchivedPalette();
+                    player.SetBodyColor(NebulaPlayerTab.ArchiveColorId);
+
                     var outfit = aPlayer.DefaultOutfit.outfit;
                     outfit.ColorId = NebulaPlayerTab.ArchiveColorId;
-                    player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, true, null);
+                    player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, true, (Il2CppSystem.Action)(() =>
+                    {
+                        if (player.cosmetics.skin.skin && player.cosmetics.skin.skin.MatchPlayerColor)
+                        {
+                            //スキンの色を参照するタイミングがずれているので同じ色IDをとっかえひっかえで使うとおかしな色が参照される。ここで設定しなおす。
+                            archivedGame!.GetColor(aPlayer.PlayerId).ReflectToArchivedPalette();
+                            PlayerMaterial.SetColors(NebulaPlayerTab.ArchiveColorId, player.cosmetics.skin.layer);
+                        }
+                    }));
                     
                     player.ToggleName(true);
                     player.SetName(aPlayer!.PlayerName, new Vector3(3.1f, 3.1f, 1f), Color.white, -15f);

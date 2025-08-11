@@ -220,6 +220,9 @@ class ExileControllerBeginPatch
         __instance.ImpostorText.alignment = TMPro.TextAlignmentOptions.Top;
         if (texts != null && texts.Count > 0)
         {
+            if (!init.confirmImpostor) __instance.ImpostorText.text = "";
+            init.confirmImpostor = true;
+
             __instance.ImpostorText.rectTransform.anchoredPosition3D += new Vector3(0f, 0.1f, 0f);
 
             var text = __instance.ImpostorText.text;

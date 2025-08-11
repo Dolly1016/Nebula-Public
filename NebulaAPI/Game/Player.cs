@@ -13,9 +13,21 @@ namespace Virial.Game;
 
 public enum KillResult
 {
+    /// <summary>
+    /// キルの成功を表します。
+    /// </summary>
     Kill,
+    /// <summary>
+    /// キルが防がれたことを表します。
+    /// </summary>
     Guard,
+    /// <summary>
+    /// エフェクト付きでキルが防がれたことを表します。
+    /// </summary>
     ObviousGuard,
+    /// <summary>
+    /// 条件に適わず、キル要求が却下されたことを表します。
+    /// </summary>
     Rejected,
 }
 
@@ -185,8 +197,28 @@ public class Outfit
         }
         return false;
     }
+
+    internal bool IsSame(NetworkedPlayerInfo.PlayerOutfit outfit)
+    {
+        return
+                outfit.HatId == this.outfit.HatId &&
+                outfit.SkinId == this.outfit.SkinId &&
+                outfit.VisorId == this.outfit.VisorId &&
+                outfit.ColorId == this.outfit.ColorId;
+    }
 }
 
+public static class OutfitPriority
+{
+    public const int Default = 0;
+    public const int Confused = 20;
+    public const int OriginalThrethold = 35;
+    public const int Paint = 40;
+    public const int Morph = 50;
+    public const int FakeSpecialOutfit = 70;
+    public const int TransformedThrethold = 75;
+    public const int Camouflage = 100;
+}
 public record OutfitTag {
     public Virial.Media.Image TagImage { get;private init; }
     private string TranslationKey { get; init; }
@@ -277,32 +309,11 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     // Internal
 
     internal PlayerControl VanillaPlayer { get; }
-    internal DeadBody? RelatedDeadBody { get; }
 
 
     // PlayerAPI
-
-    /// <summary>
-    /// 死が確定しているとき、Trueを返します。
-    /// 死亡していても、Trueを返さないときがあります。IsDeadと併用して使用する必要があります。
-    /// </summary>
-    bool WillDie { get; }
-
     PlayerDiving? CurrentDiving { get; }
-    /// <summary>
-    /// ダイブしているとき、Trueを返します。
-    /// </summary>
-    bool IsDived => CurrentDiving != null;
-
-    /// <summary>
-    /// テレポート中、Trueを返します。
-    /// </summary>
-    bool IsTeleporting { get; }
-
-    /// <summary>
-    /// 吹き飛ばされているとき、Trueを返します。
-    /// </summary>
-    bool IsBlown { get; }
+    bool IPlayerlike.IsDived => CurrentDiving != null;
 
     /// <summary>
     /// 死亡時刻をゲーム開始からの経過時間で返します。
@@ -313,15 +324,6 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// 切断されているとき、Trueを返します。切断されている場合は死亡しているものとして扱われます。
     /// </summary>
     bool IsDisconnected { get; }
-
-    /// <summary>
-    /// プレイヤーが不可視なとき、Trueを返します。
-    /// ローカルのプレイヤーから見た可視性を表します。
-    /// </summary>
-    /// <remarks>
-    /// v3.1.0で追加。<br />
-    /// </remarks>
-    bool IsInvisible { get; }
 
     /// <summary>
     /// 自身がこのゲームのホストである場合、Trueを返します。
@@ -358,15 +360,14 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <summary>
     /// いま掴んでいる死体を返します。
     /// </summary>
-    Player? HoldingDeadBody { get; }
+    Virial.Game.DeadBody? HoldingDeadBody { get; }
     bool HoldingAnyDeadBody { get; }
 
     /// <summary>
     /// 死体を掴みます。
     /// </summary>
     /// <param name="deadBody"></param>
-    void HoldDeadBody(Player? deadBody);
-    internal void HoldDeadBodyFast(DeadBody? deadBody);
+    void HoldDeadBody(Virial.Game.DeadBody? deadBody);
 
     /// <summary>
     /// 掴んでいる死体を放します。
@@ -408,7 +409,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <param name="killCondition">キルが通る条件。</param>
     /// <param name="callBack">キル時に呼び出されるコールバック。</param>
     /// <returns></returns>
-    void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack = null);
+    void MurderPlayer(IPlayerlike player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack = null);
     /// <summary>
     /// プレイヤーをキルします。会議中の場合は<paramref name="killParams"/>の死体を残す設定は無視され、強制的に死体を残さないキルを起こします。
     /// このAPIはRPCを送信します。
@@ -418,7 +419,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <param name="eventDetail">キルイベントの詳細。</param>
     /// <param name="killParams">キルのパラメータ。</param>
     /// <param name="callBack">キル時に呼び出されるコールバック。</param>
-    void MurderPlayer(Player player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null)
+    void MurderPlayer(IPlayerlike player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null)
         => MurderPlayer(player, playerState, eventDetail, killParams, KillCondition.BothAlive, callBack);
     /// <summary>
     /// 自殺します。
@@ -633,7 +634,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <summary>
     /// マッドメイトの場合、trueを返します。
     /// </summary>
-    bool IsMadmate => Role.Role.IsMadmate || Modifiers.Any(m => m.IsMadmate);
+    bool IsMadmate => Role.Role.IsMadmate;
     /// <summary>
     /// クルー陣営かつマッドメイトでないクルーメイトであればtrueを返します。
     /// <c>IsCrewmate &amp;&amp; !IsMadmate</c>と等価です。
@@ -649,9 +650,12 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     OutfitDefinition GetOutfit(int maxPriority);
 
     /// <summary>
-    /// プレイヤーの現在の見た目を取得します。
+    /// プレイヤーの見た目を取得します。
     /// </summary>
-    OutfitDefinition CurrentOutfit { get; }
+    /// <param name="maxPriority">見た目の優先度の最大値</param>
+    /// <param name="minPriority">見た目の優先度の最小値</param>
+    /// <returns></returns>
+    OutfitDefinition? GetOutfit(int? maxPriority, int minPriority);
 
     /// <summary>
     /// プレイヤーの本来の見た目を取得します。
@@ -702,4 +706,15 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <param name="playerId">プレイヤーID</param>
     /// <returns></returns>
     public static Player? GetPlayer(byte playerId) => NebulaAPI.instance.CurrentGame?.GetPlayer(playerId);
+
+    public bool IsSameSideOf(Player player)
+    {
+        //TODO: いずれイベントでまとめる
+        if(this.IsTrueCrewmate && player.IsTrueCrewmate) return true;
+        if((this.IsImpostor || this.IsMadmate) && (player.IsImpostor || player.IsMadmate)) return true;
+        if (this.Role.Role.Team == NebulaTeams.JackalTeam) return !this.CanKill(player);
+        if (player.Role.Role.Team == NebulaTeams.JackalTeam) return !player.CanKill(this);
+        if(this.Role.Role.Team == player.Role.Role.Team) return true;
+        return false;
+    }
 }

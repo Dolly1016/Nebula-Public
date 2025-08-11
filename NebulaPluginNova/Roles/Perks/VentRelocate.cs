@@ -101,7 +101,7 @@ internal class VentRelocate : PerkFunctionalInstance
 
                     Vector3 nextPos;
                     if (currentPos.Distance(targetPos) < 0.7f)
-                        nextPos = currentPos + (Vector3)((Vector2)(targetPos - (Vector2)currentPos).Delta(4f, 0.02f));
+                        nextPos = currentPos + (Vector3)((Vector2)(targetPos - (Vector2)currentPos).Delta(5.5f, 0.02f));
                     else
                         nextPos = targetPos;
 

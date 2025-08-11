@@ -192,4 +192,5 @@ public interface Configurations
     /// 現在、ジャッカライズ可能であればtrueを返します。
     /// </summary>
     bool CanJackalize { get; }
+    bool CanMadden { get; }
 }

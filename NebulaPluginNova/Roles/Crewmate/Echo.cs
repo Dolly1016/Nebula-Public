@@ -26,6 +26,7 @@ public class Echo : DefinedSingleAbilityRoleTemplate<Echo.Ability>, DefinedRole
     static private readonly FloatConfiguration EchoRangeOption = NebulaAPI.Configurations.Configuration("options.role.echo.echoRange", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Ratio);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public readonly Echo MyRole = new();
     static private readonly GameStatsEntry StatsPlayers = NebulaAPI.CreateStatsEntry("stats.echo.players", GameStatsCategory.Roles, MyRole);

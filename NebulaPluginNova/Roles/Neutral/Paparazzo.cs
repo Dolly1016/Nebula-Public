@@ -64,7 +64,16 @@ public class PaparazzoShot : MonoBehaviour
 
             transform.localPosition -= (transform.localPosition - targetPos) * Time.deltaTime * 8.6f;
             var scale = transform.localScale.x;
-            var targetScale = Mathf.Clamp((4.1f - dis) * 0.25f + 0.5f, 0.65f, 1f);
+            //var targetScale = Mathf.Clamp((4.1f - dis) * 0.25f + 0.5f, 0.65f, 1f);
+
+            float targetP = dis switch
+            {
+                < 2.1f => 0f,
+                > 3.5f => 1f,
+                _ => (dis - 2.1f) / (3.5f - 2.1f)
+            };
+            float targetScale = Mathf.Lerp(Paparazzo.WideAngleFinderSizeOption, Paparazzo.TelephotoFinderSizeOption, targetP);
+
             scale -= (scale - targetScale) * Time.deltaTime * 5.4f;
             transform.localScale = Vector3.one * scale;
 
@@ -95,7 +104,7 @@ public class PaparazzoShot : MonoBehaviour
         cam.orthographic = true;
         cam.orthographicSize = transform.localScale.y * frameRenderer.size.y * 0.5f;
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.cullingMask = 0b1101100000001;
+        cam.cullingMask = 0b10000000000001101100000001;
         cam.nearClipPlane = -100;
         cam.farClipPlane = 100;
         cam.enabled = true;
@@ -112,6 +121,23 @@ public class PaparazzoShot : MonoBehaviour
         Texture2D texture2D = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false, false);
         texture2D.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         texture2D.Apply(false, false);
+
+        //画像を保存する
+        if(ClientOption.GetValue(ClientOption.ClientOptionType.OutputPaparazzoPhoto) == 1){
+            File.WriteAllBytesAsync(NebulaManager.GetPicturePath("_Original", out _), texture2D.EncodeToPNG());
+            Vector2 vec1 = new Vector2(rt.width, rt.height).Rotate(transform.localEulerAngles.z), vec2 = new Vector2(rt.width, -rt.height).Rotate(transform.localEulerAngles.z);
+            var rotatedWidth = (int)(Math.Max(Math.Abs(vec1.x), Math.Abs(vec2.x)) + 0.8f);
+            var rotatedHeight = (int)(Math.Max(Math.Abs(vec1.y), Math.Abs(vec2.y)) + 0.8f);
+            var renderer = UnityHelper.CreateSpriteRenderer("TempImage", null, Vector3.zero, 30);
+            renderer.sprite = texture2D.ToSprite(100f);
+            renderer.transform.localEulerAngles = transform.localEulerAngles;
+            var rotatedTexture = UnityHelper.TakeCustomPicture(null, new(0f,0f,-1f), rotatedWidth, rotatedHeight, rotatedHeight * 0.5f * 0.01f, 1 << 30, Color.clear, false, false);
+            File.WriteAllBytesAsync(NebulaManager.GetPicturePath("_Rotated", out _), rotatedTexture.EncodeToPNG());
+            GameObject.Destroy(renderer.gameObject);
+            GameObject.Destroy(rotatedTexture);
+        }
+
+
         var sprite = texture2D.ToSprite(100f);
 
         cam.targetTexture = null;
@@ -269,7 +295,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.paparazzo", new(202,118,140), TeamRevealType.OnlyMe);
 
-    private Paparazzo() : base("paparazzo", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [ShotCoolDownOption, RequiredSubjectsOption, RequiredDisclosedOption, VentConfiguration])
+    private Paparazzo() : base("paparazzo", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [ShotCoolDownOption, RequiredSubjectsOption, RequiredDisclosedOption, RequiredPicturesOption, WideAngleFinderSizeOption, TelephotoFinderSizeOption, VentConfiguration])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Paparazzo.png");
@@ -280,6 +306,9 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration ShotCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.shotCoolDown", (2.5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private IntegerConfiguration RequiredSubjectsOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.requiredSubjects", (1, 15), 5);
     static private IntegerConfiguration RequiredDisclosedOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.requiredDisclosed", (1, 15), 3);
+    static private IntegerConfiguration RequiredPicturesOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.requiredPhotos", (1, 15), 1);
+    static internal FloatConfiguration TelephotoFinderSizeOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.telephotoFinderSize", (0.25f, 1f, 0.125f), 0.625f, FloatConfigurationDecorator.Ratio);
+    static internal FloatConfiguration WideAngleFinderSizeOption = NebulaAPI.Configurations.Configuration("options.role.paparazzo.wideAngleFinderSize", (0.5f, 2.5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.paparazzo.vent", true);
 
     static public readonly Paparazzo MyRole = new();
@@ -305,6 +334,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
 
         public int DisclosedMask = 0;
         public int CapturedMask = 0;
+        public int DisclosedPhotos = 0;
 
         private int GetActivatedBits(int mask)
         {
@@ -383,7 +413,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
 
         internal bool CheckPaparazzoWin()
         {
-            return !MyPlayer.IsDead && (GetActivatedBits(CapturedMask) >= RequiredSubjectsOption && GetActivatedBits(DisclosedMask) >= RequiredDisclosedOption);
+            return !MyPlayer.IsDead && (GetActivatedBits(CapturedMask) >= RequiredSubjectsOption && GetActivatedBits(DisclosedMask) >= RequiredDisclosedOption) && DisclosedPhotos >= RequiredPicturesOption;
         }
 
         [Local]
@@ -405,7 +435,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                 if((mask | CapturedMask) != CapturedMask)
                 {
                     CapturedMask |= mask;
-                    RpcShareState.Invoke((MyPlayer.PlayerId, CapturedMask, DisclosedMask));
+                    RpcShareState.Invoke((MyPlayer.PlayerId, CapturedMask, DisclosedMask, DisclosedPhotos));
                 }
 
                 foreach (var shot in shots)
@@ -482,7 +512,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                         int aliveMask = 0;
                         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) if (!p.IsDead) aliveMask |= 1 << p.PlayerId;
                         DisclosedMask |= (shot.playerMask & aliveMask);
-                        RpcShareState.Invoke((MyPlayer.PlayerId, CapturedMask, DisclosedMask));
+                        RpcShareState.Invoke((MyPlayer.PlayerId, CapturedMask, DisclosedMask, DisclosedPhotos + 1));
 
                         SharePicture((shot.playerMask & aliveMask), shot.shot.centerRenderer.transform.localScale.x, shot.shot.transform.localEulerAngles.z, shot.shot.centerRenderer.sprite.texture);
                         shareFlag = true;
@@ -518,6 +548,13 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
                 detail = Language.Translate("role.paparazzo.taskTextSubject")
                     .Replace("%GS%", RequiredSubjectsOption.GetValue().ToString())
                     .Replace("%CS%", GetActivatedBits(CapturedMask).ToString())
+                    + ", " + detail;
+            }
+            if (RequiredPicturesOption > 1)
+            {
+                detail = Language.Translate("role.paparazzo.taskTextPhoto")
+                    .Replace("%GP%", RequiredPicturesOption.GetValue().ToString())
+                    .Replace("%CP%", DisclosedPhotos.ToString())
                     + ", " + detail;
             }
 
@@ -615,13 +652,14 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         }
         );
 
-    public static RemoteProcess<(byte playerId, int subjectMask, int disclosedMask)> RpcShareState = new ("SharePaparazzo", (message,_) =>
+    public static RemoteProcess<(byte playerId, int subjectMask, int disclosedMask, int photosSum)> RpcShareState = new ("SharePaparazzo", (message,_) =>
     {
         var role = NebulaGameManager.Instance?.GetPlayer(message.playerId)?.Role;
         if (role is Paparazzo.Instance paparazzo)
         {
             paparazzo.CapturedMask = message.subjectMask;
             paparazzo.DisclosedMask = message.disclosedMask;
+            paparazzo.DisclosedPhotos = message.photosSum;
         }
     });
 

@@ -93,6 +93,13 @@ public class IntegerDataEntry : DataEntry<int>
     public IntegerDataEntry(string name, DataSaver saver, int defaultValue, string? defaultSource = null, bool shouldWrite = true) : base(name, saver, defaultValue, defaultSource, shouldWrite) { }
 }
 
+public class LongDataEntry : DataEntry<long>
+{
+    public override long Parse(string str) { return long.TryParse(str, out var result) ? result : 0; }
+    protected override bool Equals(long val1, long val2) => val1 == val2;
+    public LongDataEntry(string name, DataSaver saver, long defaultValue, string? defaultSource = null, bool shouldWrite = true) : base(name, saver, defaultValue, defaultSource, shouldWrite) { }
+}
+
 public class BooleanDataEntry : DataEntry<bool>
 {
     public override bool Parse(string str) { return bool.TryParse(str, out var result) ? result : false; }
@@ -226,6 +233,8 @@ public class DataSaver
     internal List<IDataEntry> allEntries = new();
     string filename;
 
+    private bool AllowAsyncUpdate { get; init; }
+
     public IEnumerable<(string,string)> AllRawContents()
     {
         foreach (var entry in contents) yield return (entry.Key, entry.Value);
@@ -253,9 +262,10 @@ public class DataSaver
         contents.Remove(name);
     }
 
-    public DataSaver(string filename)
+    public DataSaver(string filename, bool useAsyncOutput = false)
     {
         this.filename = filename;
+        this.AllowAsyncUpdate = useAsyncOutput;
         Load();
     }
 
@@ -278,19 +288,65 @@ public class DataSaver
         }
     }
 
-    public void WriteToFile()
+    private string CalcRawText()
     {
         string strContents = "";
         foreach (var entry in contents)
         {
             strContents += entry.Key + ":" + entry.Value + "\n";
         }
-        try
+        return strContents;
+    }
+
+    private bool IsRunningAsyncOutput = false;
+    private bool WillWrite = false;
+    private IEnumerator CoWrite()
+    {
+        async Task WriteAsyncSingle(string contents)
         {
-            FileIO.WriteAllText(ToDataSaverPath(filename), strContents);
-        }catch (Exception e)
+            IsRunningAsyncOutput = true;
+            try
+            {
+                await File.WriteAllTextAsync(ToDataSaverPath(filename),contents);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        IsRunningAsyncOutput = true;
+        while (WillWrite)
         {
-            Debug.LogError($"DataOutputError ({filename})");
+            string strContents = CalcRawText();
+            WillWrite = false;
+
+            yield return WriteAsyncSingle(strContents).WaitAsCoroutine();
+        }
+        IsRunningAsyncOutput = false;
+    }
+
+    public void WriteToFile()
+    {
+        if (AllowAsyncUpdate)
+        {
+            WillWrite = true;
+            if (!IsRunningAsyncOutput)
+            {
+                IsRunningAsyncOutput = true;
+                ModSingleton<ResidentBehaviour>.Instance.StartCoroutine(CoWrite().WrapToIl2Cpp());
+            }
+        }
+        else
+        {
+            string strContents = CalcRawText();
+            try
+            {
+                FileIO.WriteAllText(ToDataSaverPath(filename), strContents);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"DataOutputError ({filename})");
+            }
         }
     }
 

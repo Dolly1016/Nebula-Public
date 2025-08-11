@@ -2,20 +2,14 @@
 <p align="center">
 This mod is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC. Portions of the materials contained herein are property of Innersloth LLC. © Innersloth LLC.</p>
 
-# クレジットとリソース
+### ライセンス
 
-いずれも、敬称略
+NebulaAPIを除くプロジェクトのソースコードは全てGPLv3でライセンスされています。
+NebulaAPIプロジェクトのみ、LGPLv3でライセンスされています。さらに、**NoSのアドオンスクリプトでの使用に限り**、NebulaPluginNovaプロジェクトもLGPLv3ライセンスに則ってご使用いただけます。
+NoSアドオンの開発者は、スクリプトをオープンソースにせずともNoSのソフトウェアを使用できます。
 
-[BepInEx](https://github.com/BepInEx) ゲームの関数をフックするために使用しています。\
-[The Other Roles](https://github.com/Eisbison/TheOtherRoles) このMODの着想の根源はすべてここからのものです。クレジット表記の為、画像データを一部借用しています。\
-[TheOtherRoles: GM Edition](https://github.com/yukinogatari/TheOtherRoles-GM) MadmateのアイデアはこのMODからのものです。\
-[Town Of Impostors](https://github.com/Town-of-Impostors/TownOfImpostors) Sniper,Necromancer,MayorのアイデアはこのMODからのものです。\
+このリポジトリに含まれるメディア(画像、音声、映像アセット、ソースコード除くテキスト、ライブラリ)は再利用いただけません。
 
-**イラストのご提供**\
-かつどん\
-えのき
+### その他ご案内
 
-**その他ロールアイデアのご提供等**\
-龍 : Reaper, Provocateur, Booster(現:Commet)\
-Alps : Guesser(Secondary)\
-p5p5next : Damned
+クレジットはNebula on the Shipの最新版パッケージを公開しているリポジトリ[Nebula](https://github.com/Dolly1016/Nebula)からご覧ください。

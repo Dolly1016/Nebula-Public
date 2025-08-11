@@ -292,3 +292,38 @@ public static class FixDivertPowerMetagamePatch
         Minigame.Instance.Console = __instance.Console;
     }
 }
+
+//レイダー用の壁にぶつかる問題を修正
+[HarmonyPatch(typeof(EmptyGarbageMinigame), nameof(EmptyGarbageMinigame.Begin))]
+public static class EmptyGarbageMinigamePatch
+{
+    public static void Postfix(EmptyGarbageMinigame __instance)
+    {
+        __instance.Objects.Do(obj => obj.GetComponent<Rigidbody2D>().excludeLayers = 1 << LayerExpansion.GetHookshotWallLayer());
+    }
+}
+
+//レイダー用の壁にぶつかる問題を修正
+[HarmonyPatch(typeof(AirshipGarbageGame), nameof(AirshipGarbageGame.Begin))]
+public static class AirshipGarbageGameMinigamePatch
+{
+    public static void Postfix(AirshipGarbageGame __instance)
+    {
+        __instance.can.Body.excludeLayers = 1 << LayerExpansion.GetHookshotWallLayer();
+    }
+}
+
+//レイダー用の壁にぶつかる問題を修正
+[HarmonyPatch(typeof(TowelMinigame), nameof(TowelMinigame.Begin))]
+public static class TowelMinigamePatch
+{
+    public static void Postfix(TowelMinigame __instance)
+    {
+        __instance.Towels.Do(obj => obj.GetComponent<Rigidbody2D>().excludeLayers = 1 << LayerExpansion.GetHookshotWallLayer());
+        
+        var clickGuard = UnityHelper.CreateObject<BoxCollider2D>("ClickGuard", __instance.transform, new(0f, 0f, 0.1f), LayerExpansion.GetUILayer());
+        clickGuard.gameObject.SetUpButton();
+        clickGuard.isTrigger = true;
+        clickGuard.size = new(100f, 100f);
+    }
+}

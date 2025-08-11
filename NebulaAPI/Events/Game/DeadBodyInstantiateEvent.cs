@@ -15,9 +15,9 @@ public class DeadBodyInstantiateEvent : Event
     /// 死亡したプレイヤーです。
     /// </summary>
     public Virial.Game.Player? Player { get; private init; }
-    internal DeadBody DeadBody { get; private init; }
+    public Virial.Game.DeadBody DeadBody { get; private init; }
 
-    internal DeadBodyInstantiateEvent(Virial.Game.Player? player, DeadBody deadBody)
+    internal DeadBodyInstantiateEvent(Virial.Game.Player? player, Virial.Game.DeadBody deadBody)
     {
         Player = player;
         DeadBody = deadBody;

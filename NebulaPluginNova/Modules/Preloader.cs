@@ -41,7 +41,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
             var method = t.GetMethod("Preprocess", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, [typeof(NebulaPreprocessor)]);
             if (method == null)
             {
-                preprocessList[(int)attr.MyPhase].Add(((Action)(() => System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle))).ToCoroutine());
+                preprocessList[(int)attr.MyPhase].Add(((Action)(() => Helpers.RunStaticConstructor(t))).ToCoroutine());
                 NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, t.Name + " doesn't have preprocessor. its static constructor is called instead.");
             }
             else if(method.ReturnType == typeof(void))

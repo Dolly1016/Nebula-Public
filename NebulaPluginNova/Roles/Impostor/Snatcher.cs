@@ -58,7 +58,7 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
             if (isMatched)
             {
                 NebulaAchievementManager.RpcClearAchievement.Invoke(("snatcher.another1", target!));
-                new AchievementToken<bool>("snatcher.common2", false, (_, _) => target.IsDead && !MyPlayer.IsDead && !NebulaGameManager.Instance!.EndState!.Winners.Test(target) && NebulaGameManager.Instance!.EndState!.Winners.Test(target));
+                new AchievementToken<bool>("snatcher.common2", false, (_, _) => target.IsDead && !MyPlayer.IsDead && !NebulaGameManager.Instance!.EndState!.Winners.Test(target) && NebulaGameManager.Instance!.EndState!.Winners.Test(MyPlayer));
                 if (target.IsImpostor && MyPlayer.IsImpostor) new AchievementToken<bool>("snatcher.challenge", false, (_, _) => target.IsDead && !MyPlayer.IsDead && NebulaGameManager.Instance!.EndState!.Winners.Test(MyPlayer));
             }
         }
@@ -73,31 +73,28 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
             }
             if (AmOwner && SnatchMethodOption.GetValue() == 1)
             {
-                var playerTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
+                var playerTracker = NebulaAPI.Modules.PlayerlikeTracker(this, MyPlayer);
 
-                var snatchButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "snatcher.snatch",
+                var snatchButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, playerTracker, new PlayerInteractParameter(RealPlayerOnly: true), Virial.Compat.VirtualKeyInput.Ability, "snatcher.snatch",
                     SnatchCoolDownOption, "snatch", buttonSprite,
-                    _ => playerTracker.CurrentTarget != null, _ => !HasTried).SetAsUsurpableButton(this);
-                snatchButton.OnClick = (button) =>
-                {
-                    var target = playerTracker.CurrentTarget;
-                    if (target == null) return;
-
-                    snatchButton.StartCoolDown();
-                    OnSnatching(playerTracker.CurrentTarget!);
-                    NebulaManager.Instance.ScheduleDelayAction(() =>
+                    (p, button) =>
                     {
-                        var args = target.Role.UsurpedAbilityArguments;
-                        RpcUsurp.Invoke((MyPlayer, target, target.Role.Role.Id, args ?? [], false));
-                        StatsSnatch.Progress();
-                        NebulaAsset.PlaySE(NebulaAudioClip.SnatcherSuccess);
+                        button.StartCoolDown();
+                        OnSnatching(p.RealPlayer);
+                        NebulaManager.Instance.ScheduleDelayAction(() =>
+                        {
+                            var args = p.RealPlayer.Role.UsurpedAbilityArguments;
+                            RpcUsurp.Invoke((MyPlayer, p.RealPlayer, p.RealPlayer.Role.Role.Id, args ?? [], false));
+                            StatsSnatch.Progress();
+                            NebulaAsset.PlaySE(NebulaAudioClip.SnatcherSuccess);
 
-                        //エフェクトの再生
-                        var text = PlayerControl.LocalPlayer.cosmetics.nameText;
-                        text.StartCoroutine(AnimationEffects.CoPlayRoleNameEffect(text.transform.parent, new(0f, 0.185f, -0.1f), GamePlayer.LocalPlayer!.Role.Role.UnityColor, text.gameObject.layer, 1f / 0.7f).WrapToIl2Cpp());
-                    });
-                    UpdateHasTried.RpcSync(MyPlayer, 1);
-                };
+                            //エフェクトの再生
+                            var text = PlayerControl.LocalPlayer.cosmetics.nameText;
+                            text.StartCoroutine(AnimationEffects.CoPlayRoleNameEffect(text.transform.parent, new(0f, 0.185f, -0.1f), GamePlayer.LocalPlayer!.Role.Role.UnityColor, text.gameObject.layer, 1f / 0.7f).WrapToIl2Cpp());
+                        });
+                        UpdateHasTried.RpcSync(MyPlayer, 1);
+                    },
+                    _ => playerTracker.CurrentTarget != null, _ => !HasTried).SetAsUsurpableButton(this);
             }
         }
 
@@ -114,8 +111,6 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
                 lastWindow = Complex.MeetingRoleSelectWindow.OpenRoleSelectWindow(r => r.IsSpawnable, " ", r =>
                 {
                     if (PlayerControl.LocalPlayer.Data.IsDead) return;
-                    if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
-
 
                     var isMatched = p?.Role.ExternalRecognitionRole == r;
                     UpdateHasTried.RpcSync(MyPlayer, 1);
@@ -126,7 +121,7 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
                         OnSnatching(p!, isMatched);
                         NebulaAsset.PlaySE(NebulaAudioClip.SnatcherSuccess);
                         //エフェクトの再生
-                        if (MeetingHud.Instance.playerStates.Find(pva => pva.TargetPlayerId == MyPlayer.PlayerId, out var pva))
+                        if (MeetingHud.Instance.TryGetPlayer(MyPlayer.PlayerId, out var pva))
                         {
                             pva.NameText.StartCoroutine(AnimationEffects.CoPlayRoleNameEffect(pva.NameText.transform.parent, new(0.3384f, -0.13f, -0.1f), GamePlayer.LocalPlayer!.Role.Role.UnityColor, LayerExpansion.GetUILayer(), 1.2f).WrapToIl2Cpp());
                         }

@@ -1,5 +1,4 @@
 ﻿using Il2CppSystem.IO;
-using Microsoft.CodeAnalysis;
 using Nebula.Behavior;
 using Nebula.Patches;
 using System;
@@ -108,7 +107,10 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
         if (isDetail)
             DetailNodes.Add(node);
         else
+        {
+            DebugScreen.Push("Node ID: " + MainNodes.Count, 2f);
             MainNodes.Add(node);
+        }
 
             button.OnClick.AddListener(() =>
             {
@@ -229,7 +231,7 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
                 var structure = OutputStructure();
 
                 int[] path = null!;
-                NavVerticesHelpers.GetPathfindingNode(structure, from, to, 8f, 3.2f, out var positions, out var nextNodes);
+                NavVerticesHelpers.GetPathfindingNode(structure, from, to, 0.15f, 8f, 3.2f, out var positions, out var nextNodes, out var conds);
 
                 if (pathParent) GameObject.Destroy(pathParent.gameObject);
 

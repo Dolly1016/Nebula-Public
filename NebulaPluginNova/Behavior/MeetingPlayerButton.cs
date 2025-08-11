@@ -8,13 +8,18 @@ using static Nebula.Behavior.MeetingPlayerButtonManager;
 
 namespace Nebula.Behavior;
 
-public record MeetingPlayerAction(Image icon, Action<MeetingPlayerButtonState> buttonAction, Predicate<MeetingPlayerButtonState> predicate);
+public record MeetingPlayerAction(Image icon, Action<MeetingPlayerButtonState> ButtonAction, Predicate<MeetingPlayerButtonState> Predicate, bool CanUseOnce = false)
+{
+    private bool canUse = true;
+    public bool CanUseTo(MeetingPlayerButtonState p) => canUse && MeetingHudExtension.CanUseAbilityFor(p.MyPlayer, false) && Predicate.Invoke(p);
+    public bool OnUsed() => canUse &= !CanUseOnce;
+}
 
 public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     internal static DividedSpriteLoader Icons = DividedSpriteLoader.FromResource("Nebula.Resources.MeetingButtons.png", 115f, 100, 110, true);
 
-    public record MeetingPlayerButton(GameObject gameObject, SpriteRenderer renderer, GamePlayer player, Reference<MeetingPlayerButtonState> state);
+    public record MeetingPlayerButton(GameObject gameObject, SpriteRenderer renderer, GamePlayer player, Variable<MeetingPlayerButtonState> state);
 
     public class MeetingPlayerButtonState
     {
@@ -94,14 +99,14 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
             GameObject targetBox = UnityEngine.Object.Instantiate(template, playerVoteArea.transform);
 
             targetBox.name = "MeetingModButton";
-            targetBox.transform.localPosition = new Vector3(-0.95f, 0f, -2.5f);
+            targetBox.transform.localPosition = MeetingHudExtension.VoteAreaPlayerIconPos;
 
             SpriteRenderer renderer = targetBox.GetComponent<SpriteRenderer>();
             renderer.sprite = null;
             PassiveButton button = targetBox.GetComponent<PassiveButton>();
             button.OnClick.RemoveAllListeners();
 
-            Reference<MeetingPlayerButtonState> stateRef = new();
+            Variable<MeetingPlayerButtonState> stateRef = new();
             MeetingPlayerButton myRecord = new(targetBox, renderer, player, stateRef);
             stateRef.Value = new() { MyButton = myRecord };
 
@@ -139,14 +144,19 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
 
     private void DoClick(MeetingPlayerButtonState player)
     {
-        if (currentAction != null) currentAction.buttonAction.Invoke(player);
+        if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
+        if (currentAction != null)
+        {
+            currentAction.ButtonAction.Invoke(player);
+            currentAction.OnUsed();
+        }
     }
 
     void UpdatePlayerState()
     {
         foreach (var button in allButtons)
         {
-            button.gameObject.SetActive(currentAction?.predicate(button.state.Value!) ?? false);
+            button.gameObject.SetActive(currentAction?.CanUseTo(button.state.Value!) ?? false);
         }
     }
 
@@ -161,7 +171,7 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
         //今のアクションが無効なものであれば消去して他のアクションへ変更
         var lastAction = currentAction;
         var nextAction = currentAction;
-        while (nextAction != null && AllStates.All(p => !(nextAction!.predicate.Invoke(p))))
+        while (nextAction != null && AllStates.All(p => !(nextAction!.CanUseTo(p))))
         {
             int index = allActions.IndexOf(nextAction);
             allActions.RemoveAt(index);

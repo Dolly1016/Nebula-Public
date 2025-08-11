@@ -24,6 +24,7 @@ public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCit
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
     static public readonly Cleaner MyRole = new();
     static private readonly GameStatsEntry StatsClean = NebulaAPI.CreateStatsEntry("stats.cleaner.clean", GameStatsCategory.Roles, MyRole);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
@@ -45,8 +46,8 @@ public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCit
                 cleanButton.OnClick = (button) => {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.CleanCorpseAction);
 
-                    if (cleanTracker.CurrentTarget?.MyKiller == MyPlayer) new StaticAchievementToken("cleaner.common2");
-                    AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!.PlayerId,MyPlayer.PlayerId,EventDetail.Clean);
+                    if (cleanTracker.CurrentTarget?.Player.MyKiller == MyPlayer) new StaticAchievementToken("cleaner.common2");
+                    AmongUsUtil.RpcCleanDeadBody(cleanTracker.CurrentTarget!, MyPlayer.PlayerId,EventDetail.Clean);
                     if (SyncKillAndCleanCoolDownOption) NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                     cleanButton.StartCoolDown();
 

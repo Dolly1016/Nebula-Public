@@ -8,8 +8,8 @@ namespace Virial.Events.Player;
 
 public class PlayerTryVanillaKillLocalEventAbstractPlayerEvent : AbstractPlayerEvent, ICancelableEvent
 {
-    public Virial.Game.Player Target { get; private init; }
-    internal PlayerTryVanillaKillLocalEventAbstractPlayerEvent(Virial.Game.Player killer, Virial.Game.Player target) : base(killer)
+    public Virial.Game.IPlayerlike Target { get; private init; }
+    internal PlayerTryVanillaKillLocalEventAbstractPlayerEvent(Virial.Game.Player killer, Virial.Game.IPlayerlike target) : base(killer)
     {
         this.Target = target;
     }

@@ -1,6 +1,9 @@
 ﻿
+using Virial.Game;
+
 namespace Nebula.Utilities;
 
+[NebulaRPCHolder]
 public static class ManagedEffects
 {
     //actionはt=0,1の両方の場合で必ず実行されます。
@@ -189,4 +192,9 @@ public static class ManagedEffects
 
         GameObject.Destroy(obj);
     }
+
+    static public void StartOnScene(this IEnumerator coroutine) => NebulaManager.Instance.StartCoroutine(coroutine.WrapToIl2Cpp());
+    static public void StartOnProcess(this IEnumerator coroutine) => ModSingleton<ResidentBehaviour>.Instance.StartCoroutine(coroutine.WrapToIl2Cpp());
+
+    static public RemoteProcess<(Vector3 pos, int layer)> RpcDisappearEffect = new("DisappearEffect", (message, _) => NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(message.layer, null, message.pos, 1f).WrapToIl2Cpp()));
 }

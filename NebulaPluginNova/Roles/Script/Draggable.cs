@@ -9,7 +9,7 @@ public class Draggable : FlexibleLifespan, IGameOperator, IBindPlayer
 {
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DragAndDropButton.png", 115f);
 
-    public Action<DeadBody>? OnHoldingDeadBody { get; set; } = null;
+    public Action<Virial.Game.DeadBody>? OnHoldingDeadBody { get; set; } = null;
     private GamePlayer myPlayer;
     GamePlayer IBindPlayer.MyPlayer => myPlayer;
 
@@ -20,7 +20,7 @@ public class Draggable : FlexibleLifespan, IGameOperator, IBindPlayer
         if (player.AmOwner)
         {
             //不可視の死体はつかめる対象から外す
-            var deadBodyTracker = ObjectTrackers.ForDeadBody(this, null, player, d => d.RelatedDeadBody?.GetHolder() == null);
+            var deadBodyTracker = ObjectTrackers.ForDeadBody(this, null, player);
 
             var dragButton = NebulaAPI.Modules.AbilityButton(this, myPlayer, Virial.Compat.VirtualKeyInput.Ability,
                 0f, "drag", buttonSprite,
@@ -30,7 +30,7 @@ public class Draggable : FlexibleLifespan, IGameOperator, IBindPlayer
                 if (!player.HoldingAnyDeadBody)
                 {
                     player.HoldDeadBody(deadBodyTracker.CurrentTarget!);
-                    OnHoldingDeadBody?.Invoke(deadBodyTracker.CurrentTarget!.RelatedDeadBody!);
+                    OnHoldingDeadBody?.Invoke(deadBodyTracker.CurrentTarget!);
                 }
                 else
                     player.ReleaseDeadBody();

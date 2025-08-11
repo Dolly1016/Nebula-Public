@@ -1,9 +1,6 @@
 ﻿using Cpp2IL.Core.Extensions;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.IO.Compression;
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Text;
 using Virial;
 using Virial.Runtime;
@@ -19,7 +16,7 @@ internal class AddonBehaviour
     public bool UseHiddenMembers = false;
 }
 
-internal record AddonScript(Assembly Assembly, NebulaAddon Addon, MetadataReference Reference, AddonBehaviour Behaviour);
+internal record AddonScript(Assembly Assembly, NebulaAddon Addon, object Reference, AddonBehaviour Behaviour);
 
 internal static class LibraryLoader
 {
@@ -47,27 +44,73 @@ internal static class AddonScriptManagerLoader
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("System.Collections.Immutable.dll")!));
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("System.Reflection.Metadata.dll")!));
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.dll")!));
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.CSharp.dll")!));
+        var loader = NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("AddonScriptLoader.dll")!));
+        var type = loader.GetType("AddonScriptLoader.ScriptCompiler");
+        CompileMethod = type?.GetMethod("CompileScripts", BindingFlags.Static | BindingFlags.Public)!;
+        SearchAssembliesMethod = type?.GetMethod("SearchReferences", BindingFlags.Static | BindingFlags.Public)!;
+
+        /*
         Assembly.Load(LibraryLoader.OpenLibrary("System.Collections.Immutable.dll")!);
         Assembly.Load(LibraryLoader.OpenLibrary("System.Reflection.Metadata.dll")!);
         Assembly.Load(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.dll")!);
         Assembly.Load(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.CSharp.dll")!);
-        
+        */
+
         yield return AddonScriptManager.CoLoad(assemblies);
     }
+
+    static internal MethodInfo CompileMethod { get; private set; } = null!;
+    static internal MethodInfo SearchAssembliesMethod { get; private set; } = null!;
 }
 
 
 internal static class AddonScriptManager
 {
-    static private MetadataReference[] ReferenceAssemblies = [];
+    static private object[] ReferenceAssemblies = [];
     static public IEnumerable<AddonScript> ScriptAssemblies => scriptAssemblies;
     static private List<AddonScript> scriptAssemblies = [];
+    static private NebulaLog.LogLevel[] logLevels = [NebulaLog.LogLevel.Log, NebulaLog.LogLevel.Log, NebulaLog.LogLevel.Warning, NebulaLog.LogLevel.Error];
+    static private void PrintToLog(int severity, string path, int line, int character, string id, string message) {
+        NebulaPlugin.Log.Print(logLevels[severity], NebulaLog.LogCategory.Scripting, $"{id}: {message} at {path} (Line: {line + 1}, Character: {character + 1})");
+    }
     static public IEnumerator CoLoad(Assembly[] assemblies)
     {
 
         //参照可能なアセンブリを抽出する
-        ReferenceAssemblies = assemblies.Where(a => { try { return ((a.Location?.Length ?? 0) > 0); } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).Append(MetadataReference.CreateFromImage(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes())).ToArray();
+        ReferenceAssemblies = (object[])AddonScriptManagerLoader.SearchAssembliesMethod.Invoke(null, [assemblies, StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes()])!;
 
+        foreach (var addon in NebulaAddon.AllAddons)
+        {
+            string prefix = addon.InZipPath + "Scripts/";
+
+            var sources = addon.Archive.Entries.Where(e => e.FullName.StartsWith(prefix) && e.FullName.EndsWith(".cs")).Select(e => (e.Open().ReadToEnd(), e.FullName.Substring(prefix.Length))).ToArray();
+            if (sources.Length == 0) continue;
+            
+            AddonBehaviour? addonBehaviour = null;
+            var behaviour = addon.Archive.GetEntry(prefix + ".behaviour");
+            if (behaviour != null)
+            {
+                using var stream = behaviour.Open();
+                addonBehaviour = JsonStructure.Deserialize<AddonBehaviour>(stream);
+            }
+
+            var assembly = (Tuple<Assembly, object>?)AddonScriptManagerLoader.CompileMethod.Invoke(null, ["Script." + addon.Id.HeadUpper(), NebulaPlugin.NoSAssemblyContext, ReferenceAssemblies, (Action<int, string, int, int, string, string>)PrintToLog, sources, addonBehaviour?.UseHiddenMembers ?? false]);
+
+            if(assembly == null) { 
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Scripting, "Compile Error! Scripts is ignored (Addon: " + addon.Id + ")");
+            }
+            else
+            {
+                scriptAssemblies.Add(new(assembly.Item1, addon, assembly.Item2, addonBehaviour ?? new()));
+                NebulaAPI.Preprocessor?.PickUpPreprocess(assembly.Item1);
+            }
+        }
+
+        /*
         var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp12);
         var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             .WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic")
@@ -140,7 +183,7 @@ internal static class AddonScriptManager
                 if (emitResult.Success)
                 {
                     stream.Seek(0, SeekOrigin.Begin);
-                    assembly = AssemblyLoadContext.Default.LoadFromStream(stream);
+                    assembly = NebulaPlugin.NoSAssemblyContext.LoadFromStream(stream); //もとはデフォルトのコンテキストでロードしていた。
                 }
                 else
                 {
@@ -154,9 +197,11 @@ internal static class AddonScriptManager
                 NebulaAPI.Preprocessor?.PickUpPreprocess(assembly);
             }
         }
+        */
 
         yield break;
     }
+
 }
 
 /*

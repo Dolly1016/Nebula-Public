@@ -29,7 +29,7 @@ public class GameStartManagerUpdatePatch
     public static float ShareOnLobbyTimer = 10f;
     public static bool Prefix(GameStartManager __instance)
     {
-        if (!GameData.Instance) return false;
+        if (GameData.Instance == null || !GameData.Instance) return false;
         if (!GameManager.Instance) return false;
 
         //公開ルームではスライド使用不可 (不特定多数への画像配信を禁止)
@@ -122,6 +122,7 @@ public class GameStartManagerUpdatePatch
         if (__instance.LobbyInfoPane.gameObject.activeSelf && HudManager.Instance.Chat.IsOpenOrOpening) __instance.LobbyInfoPane.DeactivatePane();
         __instance.LobbyInfoPane.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !HudManager.Instance.Chat.IsOpenOrOpening);
         __instance.HostInfoPanel.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp);
+        __instance.HostInfoPanel.playerHolder.transform.GetChild(1).gameObject.SetActive(!NebulaInput.SomeUiIsActive);
         return false;
     }
 }

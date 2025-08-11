@@ -57,29 +57,29 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             {
                 AchievementToken<int> achChallengeToken = new("destroyer.challenge", 0, (val, _) => val >= 3 && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
 
-                destroyButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill, "destroyer.kill",
+                destroyButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, new Virial.Events.Player.PlayerInteractParameter(RealPlayerOnly: true, IsKillInteraction: true), true, Virial.Compat.VirtualKeyInput.Kill, "destroyer.kill",
                    KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "destroyerKill", Virial.Components.ModAbilityButton.LabelType.Impostor,
                    null, (player, _) =>
                    {
                        //左右どちらでキルすればよいか考える
-                       var targetTruePos = player.VanillaPlayer.GetTruePosition();
-                       var targetPos = player.VanillaPlayer.transform.position;
+                       var targetTruePos = player.RealPlayer.TruePosition.ToUnityVector();
+                       var targetPos = player.Position.ToUnityVector();
                        var canMoveToLeft = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, true), out var leftDis);
                        var canMoveToRight = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, false), out var rightDis);
                        bool moveToLeft = false;
                        if (canMoveToLeft && canMoveToRight && leftDis < rightDis) moveToLeft = true;
                        else if (!canMoveToRight) moveToLeft = true;
 
-                       lastKilling = player;
+                       lastKilling = player.RealPlayer;
 
-                       RpcCoDestroyKill.Invoke((MyPlayer, player!, targetTruePos, moveToLeft));
+                       RpcCoDestroyKill.Invoke((MyPlayer, player!.RealPlayer, targetTruePos, moveToLeft));
 
                        new StaticAchievementToken("destroyer.common1");
                        new StaticAchievementToken("destroyer.common2");
                        achChallengeToken.Value++;
 
                        NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
-                   }, filterHeavier: p => CheckDestroyKill(MyPlayer.VanillaPlayer, p.VanillaPlayer.transform.position))
+                   }, filterHeavier: p => CheckDestroyKill(MyPlayer.VanillaPlayer, p.RealPlayer.VanillaPlayer.transform.position))
                     .SetAsUsurpableButton(this);
                 destroyButton.OnBroken = _ => Snatcher.RewindKillCooldown();
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(destroyButton.GetKillButtonLike());

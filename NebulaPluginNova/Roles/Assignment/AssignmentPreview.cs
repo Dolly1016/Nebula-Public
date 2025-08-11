@@ -290,7 +290,8 @@ internal class AssignmentPreview
             var currentPool = followersAndMe[0];
             var followers = followersAndMe.Skip(1).ToArray();
 
-            var max = Math.Min(players - consumed, allPhases[phase].GetMax.Invoke(propagation));
+            int willConsume = extraAssignmentInfo.Sum;
+            var max = Math.Min(players - consumed - willConsume, allPhases[phase].GetMax.Invoke(propagation));
             var wholeMax = players - consumed;
             foreach (var pattern in currentPool.TryResolve(max, wholeMax, followers, 0, extraAssignmentInfo, false))
             {

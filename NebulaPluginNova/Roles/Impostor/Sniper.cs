@@ -58,24 +58,24 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
             Renderer.sprite = rifleSprite.GetSprite();
         }
 
-        public GamePlayer? GetTarget(float width,float maxLength)
+        public IPlayerlike? GetTarget(float width,float maxLength)
         {
             float minLength = maxLength;
-            GamePlayer? result = null;
+            IPlayerlike? result = null;
 
-            foreach(var p in NebulaGameManager.Instance!.AllPlayerInfo)
+            foreach(var p in GamePlayer.AllPlayerlikes)
             {
-                if (p.IsDead || p.AmOwner || ((!CanKillHidingPlayerOption) && p.VanillaPlayer.inVent || p.IsDived)) continue;
+                if (p.IsDead || p.AmOwner || ((!CanKillHidingPlayerOption) && p.Logic.InVent || p.IsDived)) continue;
 
                 //仲間は無視
-                if (!CanKillImpostorOption && !Owner.CanKill(p)) continue;
+                if (!CanKillImpostorOption && !Owner.CanKill(p.RealPlayer)) continue;
 
                 //吹っ飛ばされているプレイヤーは無視しない
 
                 //不可視なプレイヤーは無視
                 if (p.IsInvisible || p.WillDie) continue;
 
-                var pos = p.VanillaPlayer.GetTruePosition();
+                var pos = p.TruePosition.ToUnityVector();
                 Vector2 diff = pos - (Vector2)Renderer.transform.position;
 
                 //移動と回転を施したベクトル
@@ -173,17 +173,17 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                     StatsShot.Progress();
                     NebulaAsset.PlaySE(NebulaAudioClip.SniperShot, true);
                     var target = MyRifle?.GetTarget(ShotSizeOption, ShotEffectiveRangeOption);
-                    if (target != null)
+                    if (target != null && !(GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, target, new(IsKillInteraction: true))).IsCanceled ?? false))
                     {
                         bool isBlown = target.IsBlown;
                         MyPlayer.MurderPlayer(target, PlayerState.Sniped, EventDetail.Kill, KillParameter.RemoteKill, result =>
                         {
                             if (result == KillResult.Kill)
                             {
-                                if (target.VanillaPlayer.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
+                                if (target.Logic.InMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
                                 acTokenCommon ??= new("sniper.common1");
                                 if (isBlown) new StaticAchievementToken("sniper.common2");
-                                if (MyPlayer.VanillaPlayer.GetTruePosition().Distance(target!.VanillaPlayer.GetTruePosition()) > 20f) acTokenChallenge.Value++;
+                                if (MyPlayer.VanillaPlayer.GetTruePosition().Distance(target!.TruePosition) > 20f) acTokenChallenge.Value++;
                             }
                         });
                     }

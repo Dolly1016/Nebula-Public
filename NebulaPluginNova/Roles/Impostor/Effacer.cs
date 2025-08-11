@@ -22,6 +22,7 @@ public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCit
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => false;
+    bool DefinedRole.IsLoadableToMadmate => true;
     static public readonly Effacer MyRole = new();
     static private readonly GameStatsEntry StatsEfface = NebulaAPI.CreateStatsEntry("stats.effacer.efface", GameStatsCategory.Roles, MyRole);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility 
@@ -41,20 +42,18 @@ public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCit
                 );
                 
 
-                var effaceTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, p => ObjectTrackers.StandardPredicate(p) && (p.Unbox()?.VisibilityLevel ?? 2) == 0);
+                var effaceTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeStandardPredicate(p));
+                var effaceButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, effaceTracker, new PlayerInteractParameter(RealPlayerOnly: true), Virial.Compat.VirtualKeyInput.Ability, null,
+                    EffaceCoolDownOption, "efface", buttonSprite, (p, button) => {
+                        p.RealPlayer.GainAttribute(PlayerAttributes.InvisibleElseImpostor, EffaceDurationOption, false, 0);
+                        button.StartCoolDown();
 
-                var effaceButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
-                    EffaceCoolDownOption, "efface", buttonSprite, _ => effaceTracker.CurrentTarget != null).SetAsUsurpableButton(this);
-                effaceButton.OnClick = (button) => {
-                    effaceTracker.CurrentTarget!.GainAttribute(PlayerAttributes.InvisibleElseImpostor, EffaceDurationOption, false, 0);
-                    effaceButton.StartCoolDown();
+                        new StaticAchievementToken("effacer.common1");
+                        StatsEfface.Progress();
+                        if (p.RealPlayer.IsImpostor) new StaticAchievementToken("effacer.common2");
 
-                    new StaticAchievementToken("effacer.common1");
-                    StatsEfface.Progress();
-                    if (effaceTracker.CurrentTarget!.IsImpostor) new StaticAchievementToken("effacer.common2");
-
-                    achChallengeToken.Value.Add(effaceTracker.CurrentTarget);
-                };
+                        achChallengeToken.Value.Add(p.RealPlayer);
+                    }).SetAsUsurpableButton(this);
             }
         }
 

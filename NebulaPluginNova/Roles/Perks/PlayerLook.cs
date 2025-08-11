@@ -38,8 +38,6 @@ internal class PlayerLook : PerkFunctionalInstance
             buttonManager?.RegisterMeetingAction(new(playerButtonImage,
                p =>
                {
-                   if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
-
                    used = true;
 
                    NebulaAPI.CurrentGame?.GetModule<MeetingOverlayHolder>()?.RegisterOverlay(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,

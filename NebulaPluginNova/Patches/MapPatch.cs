@@ -226,7 +226,8 @@ class MapBehaviourShowNormalMapPatch
         if (!PlayerControl.LocalPlayer.CanMove && !MeetingHud.Instance) {
             //会議中でなく動けないとき
 
-            if (GeneralConfigurations.CanOpenMapWhileUsingUtilityOption) {
+            int val = GeneralConfigurations.CanOpenMapWhileUsingUtilityOption.GetValue();
+            if (val == 2 || (val == 1 && !(GamePlayer.LocalPlayer?.IsTrueCrewmate ?? true))) {
                 //何れかのユーティリティを使用してなければ開けない
                 if(!PlayerControl.LocalPlayer.inVent && !PlayerControl.LocalPlayer.inMovingPlat && !PlayerControl.LocalPlayer.walkingToVent && !PlayerControl.LocalPlayer.onLadder) return false; 
             }

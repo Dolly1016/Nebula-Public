@@ -149,7 +149,7 @@ public interface ModAbilityButton : ILifespan
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    ModAbilityButton BindKey(VirtualKeyInput input, string? action = null);
+    ModAbilityButton BindKey(VirtualKeyInput input, string? action = null, bool holdingDown = false);
     /// <summary>
     /// サブ入力キーを設定します。
     /// </summary>
@@ -172,6 +172,7 @@ public interface ModAbilityButton : ILifespan
     ModAbilityButton ShowUsesIcon(int variation, string text);
     ModAbilityButton UpdateUsesIcon(string text);
     ModAbilityButton HideUsesIcon();
+    ModAbilityButton Break();
 
     internal UnityEngine.GameObject AddLockedOverlay();
 

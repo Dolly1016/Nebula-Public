@@ -18,6 +18,7 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
 
     public override Ability CreateAbility(Virial.Game.Player player, int[] arguments) => new(player, arguments.GetAsBool(0), (float)arguments.Get(1, (int)(PortableVitalsChargeOption * 10)) / 10f);
     public override UsurpedAbility CreateUsurpedAbility(Virial.Game.Player player, int[] arguments) => new(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private readonly FloatConfiguration PortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.portableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration MaxPortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.maxPortableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
@@ -110,7 +111,7 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
             if (AmOwner)
             {
                 var sprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image;
-                var vitalButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "vital", new WrapSpriteLoader(() => sprite), _ => vitalTimer > 0f, null);
+                var vitalButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "vital", new WrapSpriteLoader(() => sprite), _ => this.vitalTimer > 0f, null);
                 vitalButton.OnClick = (button) =>
                 {
                     VitalsMinigame? vitalsMinigame = OpenSpecialVitalsMinigame();
@@ -158,14 +159,14 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
 
                         while (vitalsMinigame.amClosing != Minigame.CloseState.Closing)
                         {
-                            vitalTimer -= Time.deltaTime;
-                            if (vitalTimer < 0f)
+                            this.vitalTimer -= Time.deltaTime;
+                            if (this.vitalTimer < 0f)
                             {
                                 vitalsMinigame.BatteryText.gameObject.SetActive(false);
                                 break;
                             }
 
-                            vitalsMinigame.BatteryText.text = Language.Translate("role.doctor.gadgetLeft").Replace("%SECOND%", string.Format("{0:f1}", vitalTimer));
+                            vitalsMinigame.BatteryText.text = Language.Translate("role.doctor.gadgetLeft").Replace("%SECOND%", string.Format("{0:f1}", this.vitalTimer));
 
                             yield return null;
                         }

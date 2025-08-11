@@ -85,6 +85,8 @@ internal class Monoway : PerkFunctionalInstance
                         modifier.SetDirection(message.vec);
                     }
                     NebulaManager.Instance.StartCoroutine(CoUpdateAngle().WrapToIl2Cpp());
+
+                    new StaticAchievementToken("perk.manyPerks1.rotation");
                 }
                 else
                 {

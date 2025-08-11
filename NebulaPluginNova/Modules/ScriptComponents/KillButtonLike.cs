@@ -30,6 +30,7 @@ internal class VanillaKillButtonHandler : IKillButtonLike
     {
         PlayerControl.LocalPlayer.SetKillTimer(AmongUsUtil.VanillaKillCoolDown * ratio);
     }
+    bool IKillButtonLike.IsShown => GamePlayer.LocalPlayer?.ShowKillButton ?? false;
 }
 
 internal class ModKillButtonHandler : IKillButtonLike
@@ -56,4 +57,6 @@ internal class ModKillButtonHandler : IKillButtonLike
         else
             button.StartCoolDown();
     }
+
+    bool IKillButtonLike.IsShown => button.IsVisible;
 }

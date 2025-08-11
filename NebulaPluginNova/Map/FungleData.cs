@@ -157,6 +157,7 @@ public class FungleData : MapData
             [new(11.9f, -5.0f),new(11.9f, -6.1f), new(10.5f, -6.1f),new(10.5f, -5.0f)],//高台下右ジャングル側
             [new(4.9f, 2.1f),new(4.9f, 0.3f), new(3.2f,0.3f),new(3.2f, 2.1f)],//セキュ左下層側
             [new(6.9f, 1.5f),new(6.9f, -1.2f), new(4.5f, -1.2f),new(4.5f, 1.5f)],//セキュ左上層側
+            [new(-19.5f, -7.35f),new(-24.5f, -7.1f),new(-24.5f, 1.48f),new(-20.5f, -4.0f)],//桟橋上側
         ];
     }
 

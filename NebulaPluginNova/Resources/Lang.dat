@@ -191,6 +191,8 @@
 "version.fetching.current" : "Current"
 "version.fetching.mismatched" : "Mismatched"
 "version.fetching.applied" : "Applied"
+"version.fetching.mismatched.detail" : "The version of Among Us is too far apart to change. <br>Please reinstall. Sorry!"
+"version.fetching.loadMore" : "More"
 
 # Game Mode
 
@@ -210,8 +212,14 @@
 
 # Options
 
+"ui.options.nav.1.left" : "Open option"
+"ui.options.nav.1.middle" : "Toggle display style"
+"ui.options.nav.1.right" : "Copy role name and details"
+"ui.options.nav.2.middle" : "Back to options list"
+
 "options.switch.off" : "Off"
 "options.switch.on" : "On"
+"options.switch.nonCrewmateOnly" : "Non-Crew Only"
 "options.percentage" : "%"
 "options.cross" : "x"
 "options.sec" : "s"
@@ -222,6 +230,12 @@
 "options.values.short" : "Short"
 "options.values.middle" : "Middle"
 "options.values.long" : "Long"
+
+"options.vanilla.header" : "Among Us"
+"options.vanilla.header.impostor" : "Impostor Settings"
+"options.vanilla.header.crewmate" : "Crewmate Settings"
+"options.vanilla.header.meeting" : "Meeting Settings"
+"options.vanilla.header.task" : "Task Settings"
 
 "options.gamemode" : "Game Mode"
 
@@ -243,6 +257,11 @@
 "options.assignment.ghostAssignmentMethod" : "Ghost Assignment Method"
 "options.assignment.ghostAssignmentMethod.normal" : "Normal"
 "options.assignment.ghostAssignmentMethod.thrilling" : "Thrilling"
+"options.assignment.preview" : "Assignment Preview"
+"options.assignment.preview.withoutCrewmate" : "Impostors: %IMP% (%RIMP% of them have a mod role), Neutral: %NEU%"
+"options.assignment.preview.withCrewmate" : "Impostors: %IMP% (%RIMP% of them have a mod role), Neutral: %NEU%, Crewmates with mod role: %CREW%"
+"options.assignment.preview.hint" : "※ Players outlined in yellow will be assigned roles.<br>※ You can change <b>the total number</b> of imposters in <b>Among Us settings</b>."
+"options.assignment.group.assignment" : "Role Assignment"
 
 "options.soloFreePlay" : "Solo Free Play Options"
 "options.soloFreePlay.detail" : "About dummies"
@@ -260,8 +279,6 @@
 "options.map.canOpenMapWhileUsingUtility" : "Can Open Map While Using Utility"
 "options.map.numOfTeleporter" : "# Of Teleporter Pairs"
 "options.map.nonCrewmateCanUseTeleporterImmediately" : "Non-crewmate Can Use Teleporter Immediately"
-"options.map.randomizedWiring" : "Randomized Wiring"
-"options.map.stepsOfWiringGame" : "Steps Of Wiring Game"
 "options.map.ladderCoolDown" : "Ladder Cooldown"
 "options.map.ziplineCoolDown" : "Zipline Cooldown"
 "options.map.flipX" : "Flip X"
@@ -316,8 +333,23 @@
 "options.map.group.utilities" : "Utilities Settings"
 "options.map.group.footstep" : "Footstep SE Settings"
 "options.map.group.teleporter" : "Teleporter Settings"
-"options.map.group.wiring" : "Wiring Task Settings"
 "options.map.group.flip" : "Flipped Map Settings"
+
+"options.task" : "Task Options"
+"options.task.detail" : "About crewmate tasks"
+"options.task.noGuide.wiring" : "Fix Wiring Task"
+"options.task.noGuide.upload" : "Upload Data Task"
+"options.task.noGuide.divertPower" : "Divert Power Task"
+"options.task.noGuide.garbage" : "Empty Garbage Task"
+"options.task.noGuide.sortRecords" : "Sort Records Task"
+"options.task.noGuide.marshmallow" : "Roast Marshmallow Task"
+"options.task.noGuide.helpCritter" : "Help Critter Task"
+"options.task.noGuide.replaceParts" : "Replace Parts Task"
+"options.task.noGuide.collectSamples" : "Collect Samples Task"
+"options.map.randomizedWiring" : "Randomized Wiring"
+"options.map.stepsOfWiringGame" : "Steps Of Wiring Game"
+"options.task.group.wiring" : "Wiring Task Settings"
+"options.task.group.noGuide" : "No Guide Task Settings"
 
 "options.meeting" : "Meeting Options"
 "options.meeting.detail" : "About meeting"
@@ -327,6 +359,7 @@
 "options.meeting.emergencyCooldownAtGameStart" : "Emergency Cooldown At Game Start"
 "options.meeting.showRoleOfExiled" : "Confirm Role Of Exiled"
 "options.meeting.extraEmergencyCooldownInTheEarly" : "Extra Emergency Cooldown In The Early"
+"options.meeting.earlyDiscussionReduction" : "Discussion Reduction In The Early"
 "options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "# Deaths Required To End The Early"
 "options.meeting.waitingForHost" : "Please Wait..."
 "options.meeting.showVoteState" : "Show Vote State"
@@ -380,6 +413,8 @@
 "options.role.secondaryChance" : "2nd Onward"
 "options.role.count.jackalized" : "Jacalized Assignment"
 "options.role.chance.jackalized" : "Jackalized Assignment Chance"
+"options.role.count.madden" : "Madden Assignment"
+"options.role.chance.madden" : "Madden Assignment Chance"
 "options.role.count.short" : "Assignment"
 "options.modifier.chance" : "Assignment Chance"
 "options.role.crewmateCount" : "Crewmate Assignment"
@@ -555,6 +590,16 @@
 "options.role.doctor.chargesPerTasks" : "Charges Per Tasks" 
 "role.doctor.gadgetLeft" : "%SECOND%s"
 
+"role.doppelganger.name" : "Doppelganger"
+"role.doppelganger.short" : "D"
+"role.doppelganger.blurb" : "Face Me"
+"options.role.doppelganger.detail" : "Doppelgangers can create a illusion of themselves.<br>This can be used for long distance travel."
+"options.role.doppelganger.swapCooldown" : "Swap Cooldown"
+"options.role.doppelganger.swapDuration" : "Swap Duration"
+"options.role.doppelganger.detectionRadius" : "Player Detection Radius"
+"ui.action.doppelganger.swap" : "Swap positions with the illusion."
+"ui.action.doppelganger.despawn" : "It Despawns the illusion."
+
 "role.echo.name" : "Echo"
 "role.echo.short" : "E"
 "role.echo.blurb" : "Listen Carefully"
@@ -563,6 +608,17 @@
 "options.role.echo.echoRange" : "Echo Range"
 "stats.echo.players" : "Num of Players Detected"
 "stats.echo.actions" : "Num of Actions Detected"
+
+"role.fixer.name" : "Fixer"
+"role.fixer.short" : "F"
+"role.fixer.blurb" : "Unsung Hero"
+"options.role.fixer.detail" : "Fixer is Crewmates who manage the game by restricting<br>ability activation and voting during meetings."
+"options.role.fixer.numOfJamming" : "# Of Jamming"
+"options.role.fixer.canJamPlayerContinuously" : "Can Jam Same Player Constinously"
+"options.role.fixer.jammingSealsVoteRight" : "Jamming Seals Vote Rights"
+"options.role.fixer.maxLeftVotingTimeForJamming" : "Max Left Voting Time For Jamming"
+"roles.fixer.jamming" : "Left Jamming"
+"stats.fixer.jamming" : "Num of Jamming"
 
 "role.investigator.name" : "Investigator"
 "role.investigator.short" : "I"
@@ -630,6 +686,7 @@
 "options.role.madmate.hasImpostorVision" : "Has Impostor Vision"
 "options.role.madmate.canUseVents" : "Can Use Vents"
 "options.role.madmate.canMoveInVents" : "Can Move In Vents"
+"options.role.madmate.maddenRole" : "Maddened Role"
 "stats.madmate.foundImpostors" : "Num of Impostors Found"
 "stats.madmate.embroil" : "Num of Embroil"
 
@@ -1061,6 +1118,28 @@
 "options.role.reaper.useVentWhileHoldingDeadbody" : "Use Vent While Holding Deadbody"
 "stats.reaper.ventWithDeadBody" : "Num of Using Vents With Corpses"
 
+"role.rokurokubi.name" : "Rokurokubi"
+"role.rokurokubi.short" : "Ro"
+"role.rokurokubi.blurb" : "Eagerly Waiting The Opportunity"
+"options.role.rokurokubi.detail" : "Rokurokubi can stretch its neck to straddle walls<br>and kill players above it."
+"options.role.rokurokubi.craneSpeed" : "Crane Speed"
+"options.role.rokurokubi.maxNeckLength" : "Max Neck Length"
+"ui.action.rokurokubi.pause" : "While holding down,<br>stop extending your neck."
+
+"role.sculptor.name" : "Sculptor"
+"role.sculptor.short" : "Sc"
+"role.sculptor.blurb" : "Chaos Creation"
+"options.role.sculptor.detail" : "Sculptor will spawn idols of players that walk around the map.<br>Crewmates will not know if they are the real deal when they pass by!"
+"options.role.sculptor.sampleCoolDown" : "Sample Cooldown"
+"options.role.sculptor.createCoolDown" : "Create Cooldown"
+"options.role.sculptor.maxSamples" : "Max Samples"
+"options.role.sculptor.stayDurationAfterMoving" : "Stay Duration After Moving"
+"options.role.sculptor.detectionRadius" : "Player Detection Radius"
+"stats.sculptor.sample" : "Num of Samples"
+"stats.sculptor.create" : "Num of Creation"
+"ui.action.sculptor.sample" : "Get sample of the player."
+"ui.action.sculptor.create" : "Specify the destination of the idol and<br>generate the idol."
+
 "role.snatcher.name" : "Snatcher"
 "role.snatcher.short" : "Sna"
 "role.snatcher.blurb" : "What Is Yours Is Mine"
@@ -1212,6 +1291,7 @@
 "options.role.gambler.canVote" : "Can Vote"
 "options.role.gambler.maxBettingPatterns" : "Max Betting Patterns"
 "options.role.gambler.chipsLimitForNoVoteBetting" : "Chips Limit For Zero Vote Betting"
+"options.role.gambler.noticeFirstSuccess" : "Notify Of First Successful Betting"
 "gambler.betting.control" : "L Click: Add a chip<br>Shift + L Click: Decrease a chip<br>R Click: Cancel betting"
 "gambler.ui.selectingHint" : "Select the player to bet and press the + button again.<br><b>Zero Vote Betting</b>: Select %NV% players who will not be voted<br><b>Max Vote Betting</b>: Select %MV% players who will be got most votes."
 "gambler.ui.multiSelecting" : "Players cannot be overlapped across multiple bets."
@@ -1221,6 +1301,7 @@
 "gambler.currentChips" : "Chips:"
 "gambler.ui.help.add" : "Select a player and press to <b>add your bet</b>."
 "gambler.ui.help.check" : "Your current bet will be <b>confirmed</b>."
+"gambler.ui.firstSuccess" : "Someone is excited."
 "stats.gambler.bet" : "Num of Betting"
 "stats.gambler.bet.success" : "Num of Bets Won"
 "stats.gambler.bet.failed" : "Num of Bets Lost"
@@ -1244,6 +1325,11 @@
 "options.role.sidekick.killCoolDown" : "Kill Cooldown"
 "options.role.sidekick.isModifier" : "Is Modifier"
 "options.role.sidekick.canCreateSidekickChainly" : "Can Create Sidekick Chainly"
+"options.role.sidekick.inheritanceRule" : "Inheritance Rule"
+"options.role.sidekick.inheritanceRule.inherit" : "Inherit"
+"options.role.sidekick.inheritanceRule.suicide" : "Suicide"
+"options.role.sidekick.inheritanceRule.none" : "None"
+"options.role.sidekick.assignedSidekick" : "Initial Assignment"
 
 "role.jester.name" : "Jester"
 "role.jester.short" : "J"
@@ -1257,13 +1343,17 @@
 "role.paparazzo.name" : "Paparazzo"
 "role.paparazzo.short" : "P"
 "role.paparazzo.blurb" : "Take a Best Shot!"
-"role.paparazzo.taskText" : "Take a Photo and Disclose (%DETAIL%)"
+"role.paparazzo.taskText" : "Take a Photo and Disclose<br>(%DETAIL%)"
 "role.paparazzo.taskTextSubject" : "Subjects: %CS%/%GS%"
 "role.paparazzo.taskTextDisclosed" : "Disclosed: %CD%/%GD%"
+"role.paparazzo.taskTextPhoto" : "Photos: %CP%/%GP%"
 "options.role.paparazzo.detail" : "Paparazzo takes a photo and disclose it at a meeting."
 "options.role.paparazzo.shotCoolDown" : "Shot Cooldown"
 "options.role.paparazzo.requiredSubjects" : "Required Subjects"
 "options.role.paparazzo.requiredDisclosed" : "Required Disclosed"
+"options.role.paparazzo.requiredPhotos" : "Required Photos"
+"options.role.paparazzo.telephotoFinderSize" : "Telephoto Finder Size"
+"options.role.paparazzo.wideAngleFinderSize" : "Wide-angle Finder Size"
 "stats.paparazzo.photo" : "Num of Taking Photos"
 "stats.paparazzo.players" : "Num of Players Taken Photos"
 
@@ -1274,6 +1364,7 @@
 "options.role.scarlet.graceUntilDecidingFavorite" : "Grace Until Deciding Favorite"
 "options.role.scarlet.numOfKept" : "# Of Kept"
 "options.role.scarlet.numOfCommand" : "# Of Commands"
+"options.role.scarlet.canOverrideTaskWin" : "Can Override Task Win"
 "stats.scarlet.kept" : "Num of Kept"
 
 "role.spectre.name" : "Spectre"
@@ -1446,6 +1537,7 @@
 "options.role.lover.numOfPairs" : "# Pairs"
 "options.role.lover.chanceOfAssigningImpostors" : "% Assigning Impostors"
 "options.role.lover.allowExtraWin" : "Allow Extra Win" 
+"options.role.lover.blockRoleWin" : "Block Role Win"
 "options.role.lover.avengerMode" : "Avenger Mode"
 
 "role.obsessional.name" : "Obsessional"
@@ -1579,8 +1671,13 @@
 "perk.footprint.name" : "Presence"
 "perk.footprint.detail" : "You leave footprints visible to everyone."
 
+"perk.sacrifice.name" : "Sacrifice"
+"perk.sacrifice.detail" : "Summons a decoy at the location.<br>If the decoy is killed, the perk user will not die.<br>The decoy will disappear after %D% seconds."
+"perk.sacrifice.duration" : "Decoy Duration"
+
 # Location
 
+"map.skeld" : "The Skeld"
 "location.skeld.admin" : "Admin"
 "location.skeld.cafeteria" : "Cafeteria"
 "location.skeld.comms" : "Comms."
@@ -1604,6 +1701,8 @@
 "location.skeld.commsAccess" : "Near Comms."
 "location.skeld.rightAccess" : "Near Nav."
 "location.skeld.weaponsAccess" : "Near Weapons"
+
+"map.mira" : "MIRA HQ"
 "location.mira.admin" : "Admin"
 "location.mira.balcony" : "Balcony"
 "location.mira.cafeteria" : "Cafeteria"
@@ -1618,6 +1717,8 @@
 "location.mira.rendezvous" : "Rendezvous"
 "location.mira.storage" : "Storage"
 "location.mira.launchpad" : "Lanuchpad"
+
+"map.polus" : "Polus"
 "location.polus.abditory" : "Abditory"
 "location.polus.admin" : "Admin"
 "location.polus.comms" : "Comms."
@@ -1649,6 +1750,8 @@
 "location.polus.reactorRight" : "Seismic Stabilizer (R)"
 "location.polus.officeBuilding" : "Office Building"
 "location.polus.outside" : "Outside"
+
+"map.airship" : "The Airship"
 "location.airship.brig" : "Brig"
 "location.airship.engine" : "Engine Room"
 "location.airship.hallway" : "Main Hall"
@@ -1681,6 +1784,8 @@
 "location.airship.cargoSafe" : "Safe in Cargo Bay"
 "location.airship.meetingRight" : "Meeting Room (Right)"
 "location.airship.ventilation" : "Ventilation"
+
+"map.fungle" : "The Fungle"
 "location.fungle.beach" : "Beach"
 "location.fungle.cafeteria" : "Cafeteria"
 "location.fungle.campfire" : "Campfire"
@@ -1805,6 +1910,11 @@
 "button.label.cupid.lover" : "select"
 "button.label.cupid.string" : "fate"
 "button.label.drill" : "drill"
+"button.label.despawn" : "despawn"
+"button.label.doppelganger.command" : "command"
+"button.label.sculptor.command" : "command"
+"button.label.rokuro" : "crane"
+"button.label.rokuro.reset" : "reset"
 
 # Game
 
@@ -1965,6 +2075,11 @@
 
 "console.notAvailable" : "Not Available"
 
+# Tasks
+
+"task.unknownPlace" : "???"
+"task.divertPower" : "Divert Power"
+
 # Inventory
 
 "inventory.palette.catalogue" : "Catalogue"
@@ -2032,6 +2147,7 @@
 "config.client.showNebulaLogoInLobby" : "Show NoS Logo"
 "config.client.externalModColor" : "External Mod Color Support"
 "config.client.simpleNameplate" : "Simple Nameplate"
+"config.client.outputPaparazzoPhoto" : "Output Papaazzo Photo"
 "config.client.webhook" : "Discord Webhook"
 "config.client.social" : "Social Settings"
 "config.client.social.showAppealSettings" : "Show Appeal Settings"
@@ -2043,10 +2159,6 @@
 "config.client.avoidingColorDuplication.off" : "Off"
 "config.client.avoidingColorDuplication.soft" : "Soft"
 "config.client.avoidingColorDuplication.strict" : "Strict"
-"config.client.stampMenu" : "Stamp Menu"
-"config.client.stampMenu.normal" : "Normal"
-"config.client.stampMenu.center" : "Centering"
-"config.client.stampMenu.cursor" : "Reset Cursor"
 "config.client.muteAmbienceOnMeeting" : "Mute Ambience On Meeting"
 
 # Preset
@@ -2189,8 +2301,10 @@
 "achievement.ui.unsetTitle" : "CLICK To Unset This Title."
 "achievement.ui.unselected" : "(Unselected)"
 "achievement.ui.unselected.detail" : "CLICK To Select Your Title."
+"achievement.ui.globalProgress" : "%RATE%% of players achieved"
 "achievement.title.hidden" : "Unachieved"
 "achievement.title.hiddenDetail" : "Details have not been disclosed..."
+"achievement.title.unachieved" : "?????"
 "achievement.type.challenge" : "Challenge"
 "achievement.type.secret" : "Secret"
 "achievement.type.seasonal" : "Seasonal"
@@ -2214,6 +2328,11 @@
 "achievement.filter.nonAchieved" : "Not Cleared"
 "achievement.filter.search" : "Search"
 "achievement.filter.myRole" : "My Role"
+
+"achievement.sort" : "Sorted by"
+"achievement.sort.categorized" : "Category"
+"achievement.sort.progress" : "Global"
+""
 
 "achievement.social.firstClear" : "%PLAYER% got"
 "achievement.social.clear" : "%PLAYER% got"
@@ -2280,6 +2399,8 @@
 "help.rolePreview.inner.ghostRoles" : "Ghost Roles"
 "help.rolePreview.inner.jackalized.100" : "Jackalized 100%"
 "help.rolePreview.inner.jackalized.random" : "Jackalized Random"
+"help.rolePreview.inner.madden.100" : "Madden 100%"
+"help.rolePreview.inner.madden.random" : "Madden Random"
 
 # Tag
 

@@ -231,7 +231,7 @@ public interface INebulaAchievement
         ClearedMultiple
     }
 
-    static public readonly TextComponent HiddenComponent = new RawTextComponent("???");
+    static public readonly TextComponent HiddenComponent = new TranslateTextComponent("achievement.title.unachieved");
     static public readonly TextComponent HiddenDescriptiveComponent = new ColorTextComponent(new Color(0.4f, 0.4f, 0.4f), new TranslateTextComponent("achievement.title.hidden"));
     static public readonly TextComponent HiddenDetailComponent = new ColorTextComponent(new Color(0.8f, 0.8f, 0.8f), new TranslateTextComponent("achievement.title.hiddenDetail"));
     static public readonly TextAttribute DetailTitleAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayTitle);
@@ -239,7 +239,7 @@ public interface INebulaAchievement
     static public readonly TextAttribute SocialCategoryAttribute= new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.2f) };
     static public readonly TextAttribute SocialTitleAttribute = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(2f, 1f, 2f), Size = new(3f, 1f) };
     static private readonly TextAttribute DetailContentAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayContent);
-
+    static private readonly Virial.Color GlobalProgressColor = new(180,180,180);
     string Id { get; }
     string TranslationKey => "achievement." + Id + ".title";
     string GoalTranslationKey => "achievement." + Id + ".goal";
@@ -251,6 +251,7 @@ public interface INebulaAchievement
     bool IsCleared { get; }
     bool NoHint { get; }
     int Attention { get; }
+    float GlobalProgress { get; internal set; }
     IEnumerable<DefinedAssignable> RelatedRole { get; }
     IEnumerable<AchievementType> AchievementType();
     Image? BackImage { get => SpecifiedBackImage ?? RelatedRole.FirstOrDefault()?.ConfigurationHolder?.Illustration; }
@@ -267,7 +268,7 @@ public interface INebulaAchievement
         }
         foreach (var type in AchievementType()) yield return Language.Translate(type.TranslationKey);
     }
-    Virial.Media.GUIWidget GetOverlayWidget(bool hiddenNotClearedAchievement = true, bool showCleared = false, bool showTitleInfo = false, bool showTrophy = false, bool showFlavor = false)
+    Virial.Media.GUIWidget GetOverlayWidget(bool hiddenNotClearedAchievement = true, bool showCleared = false, bool showTitleInfo = false, bool showTrophy = false, bool showFlavor = false, bool showGlobalProgress = true)
     {
         var gui = NebulaAPI.GUI;
 
@@ -302,6 +303,9 @@ public interface INebulaAchievement
                 list.Add(new NoSGUIText(GUIAlignment.Left, DetailContentAttribute, flavor) { PostBuilder = text => text.outlineColor = Color.clear });
             }
         }
+
+        if (showGlobalProgress && NebulaAchievementManager.GotOnlineProgress) list.Add(new NoSGUIText(GUIAlignment.Left, DetailContentAttribute, GetGlobalProgressComponent().Size(0.75f)));
+        
 
         if (showTitleInfo && IsCleared)
         {
@@ -338,6 +342,12 @@ public interface INebulaAchievement
         if (hiddenComponent != null && !IsCleared)
             return hiddenComponent;
         return new TranslateTextComponent(TranslationKey);
+    }
+    TextComponent GetGlobalProgressComponent()
+    {
+        float rate100 = GlobalProgress * 100f;
+        //(GlobalProgress * 100f).ToString("F1")
+        return GUI.API.FunctionalTextComponent(() => Language.Translate("achievement.ui.globalProgress").Replace("%RATE%", rate100.ToString("F1"))).Color(GlobalProgressColor);
     }
     TextComponent? GetFlavorComponent()
     {
@@ -435,6 +445,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
     public IEnumerable<AchievementType> AchievementType() => type;
     public Image? SpecifiedBackImage { get; set; } = null;
     public int Attention { get; private init; }
+    public float GlobalProgress { get; set; }
     public bool IsHidden { get {
             return isSecret && !IsCleared;
         } }
@@ -481,6 +492,7 @@ public class InnerslothAchievement : INebulaAchievement
 
     bool INebulaAchievement.IsHidden => false;
     Image? INebulaAchievement.SpecifiedBackImage => null;
+    public float GlobalProgress { get; set; }
 
     bool IsClearedSteam => SteamUserStats.GetAchievement(Id.Split('.', 2)[1], out var cleared) && cleared;
     bool INebulaAchievement.IsCleared
@@ -545,6 +557,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
     public bool IsHidden => IsSecret && !IsCleared;
     private int goal { get; init; }
     private string reference { get; init; }
+    public float GlobalProgress { get; set; }
     private ProgressRecord? referenceRecord = null;
     private readonly IEnumerable<AchievementType> achievementType =[];
     public Image? SpecifiedBackImage { get; set; }
@@ -690,6 +703,7 @@ static public class NebulaAchievementManager
     static private readonly Dictionary<string, INebulaAchievement> allNonrecords = [];
     static private readonly Dictionary<long, INebulaAchievement> fastAchievements = [];
     static private readonly StringDataEntry myTitleEntry = new("MyTitle", AchievementDataSaver, "-");
+    static private readonly LongDataEntry onlineEntry = new("Hash", AchievementDataSaver, 0);
     static private readonly List<INebulaAchievement> allAchievements = [];
     static private readonly List<GameStatsEntry> allStats = [];
 
@@ -705,7 +719,7 @@ static public class NebulaAchievementManager
     static public bool TryGetAchievement(long hash, [MaybeNullWhen(false)] out INebulaAchievement? achievement) => fastAchievements.TryGetValue(hash, out achievement);
     static public INebulaAchievement? MyTitle { get {
             if (GetAchievement(myTitleEntry.Value, out var achievement) && achievement.IsCleared)
-                return achievement;
+                return achievement;string a;
             return null;
         }
         set {
@@ -981,6 +995,10 @@ static public class NebulaAchievementManager
         }
 
         foreach (var achievement in AllAchievements) achievement.CheckClear();
+
+        //進捗を記録する。 
+        SendOnlineProgress(true);
+        GetOnlineGlobalProgress();
     }
 
     static private void RegisterAchievement(INebulaAchievement ach)
@@ -1051,11 +1069,14 @@ static public class NebulaAchievementManager
     {
         List<(INebulaAchievement achievement, AbstractAchievement.ClearDisplayState clearState)> result  =[];
 
+        bool mayChangeClearState = false;
+
         //トークンによるクリア
         foreach (var token in NebulaGameManager.Instance!.AllAchievementTokens)
         {
             var state = token.UniteTo();
             if (state == AbstractAchievement.ClearDisplayState.None) continue;
+            mayChangeClearState |= state == AbstractAchievement.ClearDisplayState.FirstClear;
 
             //実績のみ結果に表示(他実績用のレコードは対象外)
             if(token.Achievement is AbstractAchievement ach && result.All(a => a.achievement != ach)) result.Add(new(ach, state));
@@ -1066,6 +1087,8 @@ static public class NebulaAchievementManager
         {
             var state = achievement.CheckClear();
             if (state == AbstractAchievement.ClearDisplayState.None) continue;
+            mayChangeClearState |= state == AbstractAchievement.ClearDisplayState.FirstClear;
+
             result.Add(new(achievement, state));
         }
 
@@ -1080,6 +1103,8 @@ static public class NebulaAchievementManager
         ClearedAllOrderedArchive.RemoveAll(a => result.Any(r => r.achievement == a));
         ClearedAllOrderedArchive.InsertRange(0, result.Select(r => r.achievement));
         if (ClearedAllOrderedArchive.Count > 10) ClearedAllOrderedArchive.RemoveRange(10, ClearedAllOrderedArchive.Count - 10);
+
+        if (mayChangeClearState) SendOnlineProgress(false);
 
         //重複を許さない
         return result.DistinctBy(a=>a.achievement).ToArray();
@@ -1248,6 +1273,46 @@ static public class NebulaAchievementManager
     {
         ModSingleton<ShowUp>.Instance?.PutPickedUpAchievements(message.playerName, message.achievements);
     });
+
+
+    /// <summary>
+    /// 称号の獲得状況を送信します。
+    /// </summary>
+    /// <param name="initialize"></param>
+    static private void SendOnlineProgress(bool initialize)
+    {
+        if (DebugTools.DebugMode) return;
+
+        MonoBehaviour parent = initialize ? ModSingleton<ResidentBehaviour>.Instance : NebulaManager.Instance;
+        parent.StartCoroutine(ManagedEffects.Wait(() => !EOSManager.Instance || EOSManager.Instance.friendCode == null || EOSManager.Instance.friendCode.Length == 0, () => {
+            var text = "[" + string.Join(",", NebulaAchievementManager.AllAchievements.Where(a => a.IsCleared).Select(a => "\"" + a.Id + "\"")) + "]";
+            var currentHash = text.ComputeConstantLongHash();
+            if (currentHash != onlineEntry.Value)
+            {
+                _ = RestAPIHelpers.PostRequestAsync("http://168.138.44.249:22020/titles/push/", [new("titles", text), new("friendCode", "\"" + EOSManager.Instance.FriendCode + "\"")], code =>
+                {
+                    if (code == System.Net.HttpStatusCode.OK) NebulaManager.Instance.ScheduleDelayAction(() => onlineEntry.Value = currentHash);
+                });
+            }
+        }));
+    }
+
+    static public bool GotOnlineProgress { get; private set; } = false;
+    static private void GetOnlineGlobalProgress()
+    {
+        var task = RestAPIHelpers.GetRequestAsync<Dictionary<string, float>>("http://168.138.44.249:22020/titles/get/", []);
+        ModSingleton<ResidentBehaviour>.Instance.StartCoroutine(ManagedEffects.Sequence(task.WaitAsCoroutine(), ManagedEffects.Action(() =>
+        {
+            if ((task.Result?.Count ?? 0) > 0)
+            {
+                foreach (var entry in task.Result!)
+                {
+                    if (NebulaAchievementManager.GetAchievement(entry.Key, out var achievement)) achievement.GlobalProgress = entry.Value;
+                }
+                GotOnlineProgress = true;
+            }
+        })));
+    }
 }
 
 file class GameStatsEntryImpl : GameStatsEntry
@@ -1272,3 +1337,4 @@ file class GameStatsEntryImpl : GameStatsEntry
     DefinedAssignable? GameStatsEntry.RelatedAssignable => relatedAssignable;
     int GameStatsEntry.InnerPriority => innerPriority;
 }
+

@@ -1,5 +1,6 @@
 ﻿using Il2CppSystem.Security.Cryptography;
 using Nebula.Roles.Abilities;
+using Nebula.Roles.Perks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +55,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
                 var acTokenAnother2 = AchievementTokens.FirstFailedAchievementToken("gimlet.another2", MyPlayer, this);
 
                 var drillButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "gimlet.drill",
-                    DrillCooldownOption.CoolDown, "drill", buttonSprite).SetAsUsurpableButton(this);
+                    DrillCooldownOption.CoolDown, "drill", buttonSprite, _ => !Helpers.LocalPlayerUsingHookshot).SetAsUsurpableButton(this);
                 drillButton.OnClick = (button) => {
                     acTokenAnother2.Value.triggered = true;
                     killstreak = 0;
@@ -217,13 +218,21 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
         {
             count++;
             var currentPos = player.VanillaPlayer.transform.position;
-            if (MeetingHud.Instance) break;
+            if (MeetingHud.Instance || player.IsDead) break;
             if (count > 5)
             {
-                if (currentPos.Distance(lastPos) < 0.005f) break;
+                if (currentPos.Distance(lastPos) < 0.005f)
+                {
+                    LogUtils.WriteToConsole("Break 1");
+                    break;
+                }
                 float dotProd = Vector2.Dot((currentPos - lastPos).normalized, dir);
                 //1未満で擦れる音、0.6未満で終了
-                if (dotProd < (1f - frictionResistance)) break;
+                if (dotProd < (0.9f - frictionResistance))
+                {
+                    LogUtils.WriteToConsole("Break 2");
+                    break;
+                }
 
                 fricVolume -= (fricVolume - (dotProd < 0.995f ? 1f : 0f)).Delta(dotProd < 0.995f ? 2f : 3f, 0.001f);
                 drillFricSE.volume = fricVolume;
@@ -233,7 +242,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
             lastPos = currentPos;
 
 
-            if(!killInvoked && !player.AmOwner && !localPlayer.IsDead && (CanKillImpostorOption || player.CanKill(localPlayer)) && player.Position.Distance(localPlayer.Position) < (DrillSizeOption * 0.4f + 0.25f))
+            if(!killInvoked && !player.AmOwner && !localPlayer.IsDead && !localPlayer.IsDived && (CanKillImpostorOption || player.CanKill(localPlayer)) && player.Position.Distance(localPlayer.Position) < (DrillSizeOption * 0.55f + 0.25f))
             {
                 player.MurderPlayer(localPlayer, PlayerState.Drill, null, KillParameter.RemoteKill);
                 killInvoked = true;
@@ -247,12 +256,17 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
         if (drillFricSE) GameObject.Destroy(drillFricSE.gameObject);
         NebulaAsset.PlaySE(NebulaAudioClip.DrillEnd, player.Position, 0.95f, DrillSEStrengthOption, 1f);
 
-        anim.Animator.Play(anim.group.ExitVentAnim, 1f);
+        if (!player.IsDead) anim.Animator.Play(anim.group.ExitVentAnim, 1f);
         yield return Effects.Wait(0.1f);
         if (drillRenderer) GameObject.Destroy(drillRenderer.gameObject);
         PlayerModInfo.RpcRemoveAttrByTag.LocalInvoke((player.PlayerId, GimletAttrTag));
-        while (anim.Animator.IsPlaying()) yield return null;
-        anim.PlayIdleAnimation();
+        while (anim.Animator.IsPlaying(anim.group.ExitVentAnim)) yield return null;
+        if (!player.IsDead)
+        {
+            anim.PlayIdleAnimation();
+            cosmeticsLayer.AnimateSkinIdle();
+        }
+        
         player.VanillaPlayer.NetTransform.SetPaused(false);
         player.VanillaPlayer.moveable = true;
 

@@ -16,7 +16,7 @@ public class DeadbodyArrowAbility : FlexibleLifespan, IGameOperator
 
     void OnDeadBodyGenerated(DeadBodyInstantiateEvent ev)
     {
-        AllArrows.Add((ev.DeadBody, new Arrow(null) { TargetPos = ev.DeadBody.TruePosition }.SetColor(Color.blue).Register(this)));
+        AllArrows.Add((ev.DeadBody.VanillaDeadBody, new Arrow(null) { TargetPos = ev.DeadBody.VanillaDeadBody.TruePosition }.SetColor(Color.blue).Register(this)));
         LocalUpdate(null!);
     }
 

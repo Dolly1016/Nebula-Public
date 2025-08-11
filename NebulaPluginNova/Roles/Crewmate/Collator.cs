@@ -7,6 +7,7 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
+using Virial.Events.Role;
 using Virial.Game;
 using Virial.Helpers;
 using Virial.Text;
@@ -22,6 +23,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
     Citation? HasCitation.Citation => Citations.SuperNewRoles;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private readonly FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.collator.sampleCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
     static private readonly BoolConfiguration SelectiveCollatingOption = NebulaAPI.Configurations.Configuration("options.role.collator.selectiveCollating", false);
@@ -104,8 +106,6 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                     buttonManager?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(3),
                     p =>
                     {
-                        if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
-
                         if (p.IsSelected)
                             p.SetSelect(false);
                         else
@@ -148,20 +148,28 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
 
         private RoleTeam CheckTeam(GamePlayer p)
         {
+            RoleTeam team = NebulaTeams.CrewmateTeam;
+
             switch (p.Role.Role.Category)
             {
                 case RoleCategory.CrewmateRole:
                     if (p.IsMadmate)
-                        return MadmateIsClassifiedAsOption.GetValue() switch { 0 => NebulaTeams.ImpostorTeam, 1 => NebulaTeams.CrewmateTeam, _ => NebulaTeams.CrewmateTeam };
+                        team = MadmateIsClassifiedAsOption.GetValue() switch { 0 => NebulaTeams.ImpostorTeam, 1 => NebulaTeams.CrewmateTeam, _ => NebulaTeams.CrewmateTeam };
                     else
-                        return NebulaTeams.CrewmateTeam;
+                        team = NebulaTeams.CrewmateTeam;
+                    break;
                 case RoleCategory.ImpostorRole:
-                    return NebulaTeams.ImpostorTeam;
+                    team = NebulaTeams.ImpostorTeam;
+                    break;
                 case RoleCategory.NeutralRole:
-                    return StrictClassificationOfNeutralRolesOption ? p.Role.Role.Team : NebulaTeams.JackalTeam;
+                    team = p.Role.Role.Team;
+                    break;
             }
 
-            return NebulaTeams.CrewmateTeam;
+            team = GameOperatorManager.Instance?.Run(new CollatorCheckTeamEvent(MyPlayer, p, team)).Team ?? team;
+            if(team != NebulaTeams.CrewmateTeam && team != NebulaTeams.ImpostorTeam && !StrictClassificationOfNeutralRolesOption) team = NebulaTeams.JackalTeam;
+
+            return team;
         }
 
         private IEnumerator CoShakeTube(int index)
@@ -225,7 +233,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
 
                 UpdateSamples();
 
-                var sampleTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && ((CanTakeDuplicateSampleOption && (sampledPlayers.Count + 1 < allSamples.Length || ActualSampledPlayers >= 2)) || !sampledPlayers.Any(s => s.player.PlayerId == p.PlayerId)));
+                var sampleTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p.RealPlayer) && ((CanTakeDuplicateSampleOption && (sampledPlayers.Count + 1 < allSamples.Length || ActualSampledPlayers >= 2)) || !sampledPlayers.Any(s => s.player.PlayerId == p.RealPlayer.PlayerId)));
                 var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, SampleCoolDownOption, "collatorSample", buttonSprite)
                     .SetAsUsurpableButton(this);
 
@@ -235,7 +243,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                 sampleButton.Availability = (button) => sampleTracker.CurrentTarget != null && MyPlayer.CanMove && sampledPlayers.Count < allSamples.Length;
                 sampleButton.Visibility = (button) => !MyPlayer.IsDead && trials > 0;
                 sampleButton.OnClick = (button) => {
-                    var p = sampleTracker.CurrentTarget;
+                    var p = sampleTracker.CurrentTarget!.RealPlayer;
                     sampledPlayers.Add((p,CheckTeam(p)));
                     NebulaManager.Instance.StartCoroutine(CoShakeTube(sampledPlayers.Count - 1).WrapToIl2Cpp());
                     UpdateSamples();

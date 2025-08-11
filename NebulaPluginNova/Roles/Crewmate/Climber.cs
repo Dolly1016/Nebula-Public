@@ -31,6 +31,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         GameActionTypes.HookshotAction = new("hookshot", this, isPhysicalAction: true);
     }
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private FloatConfiguration GustCooldownOption = NebulaAPI.Configurations.Configuration("options.role.climber.gustCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 
@@ -76,10 +77,12 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
 
     static public bool SearchPointAndSendJump()
     {
+        int hookshotWallLayer = LayerExpansion.GetHookshotWallLayer();
+
         ContactFilter2D filter = new()
         {
             useLayerMask = true,
-            layerMask = Constants.ShipAndAllObjectsMask
+            layerMask = Constants.ShipAndAllObjectsMask | (1 << hookshotWallLayer)
         };
 
         var localPlayer = GamePlayer.LocalPlayer!;
@@ -101,6 +104,14 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
             {
                 var h = hits[i];
                 if (h.collider.isTrigger) continue;
+
+                if (h.collider.gameObject.layer == hookshotWallLayer)
+                {
+                    //越えられない壁は越えない。
+                    lastHitPos ??= h.point - localPlayer.VanillaPlayer.Collider.offset;
+                    searched = 99999f;
+                    break;
+                }
 
                 bool overlapAxeIgnoreArea = Impostor.Raider.OverlapAxeIgnoreArea(h.point);
                 bool inMap = mapData.CheckMapArea(h.point - dir * 0.05f, 0f);
@@ -199,14 +210,16 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
             IsDisappearing = true;
         }
 
+        public static Hookshot? LocalHookshot = null;
         public Hookshot(GamePlayer player, Vector2 target)
         {
+            if (player.AmOwner) LocalHookshot = this;
             this.player = player;
             this.target = target;
             this.begin = player.Position;
             this.pMax = this.target.Distance(this.begin);
 
-            ropeRenderer = UnityHelper.CreateObject<SpriteRenderer>("GustRope", player.VanillaPlayer.cosmetics.transform, Vector3.zero, LayerExpansion.GetObjectsLayer());
+            ropeRenderer = UnityHelper.CreateObject<SpriteRenderer>("GustRope", player.VanillaPlayer.cosmetics.transform, Vector3.zero, LayerExpansion.GetPlayerWithShadowLayer());
             ropeRenderer.sprite = ropeSprite.GetSprite();
             ropeRenderer.tileMode = SpriteTileMode.Continuous;
             ropeRenderer.drawMode = SpriteDrawMode.Tiled;

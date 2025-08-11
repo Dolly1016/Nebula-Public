@@ -21,6 +21,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private readonly FloatConfiguration ReviveCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveCoolDown", (5f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration ReviveDurationOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveDuration", (0.5f, 10f, 0.5f), 3f, FloatConfigurationDecorator.Second);
@@ -84,7 +85,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
 
                 draggable!.OnHoldingDeadBody = (deadBody) =>
                 {
-                    if (!resurrectionRoom.ContainsKey(deadBody.ParentId))
+                    if (!resurrectionRoom.ContainsKey(deadBody.Player.PlayerId))
                     {
                         //復活部屋を計算
                         List<Tuple<float, PlainShipRoom>> cand = new();
@@ -104,10 +105,10 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                         if (lastIndex == -1) lastIndex = cand.Count;
                         if (lastIndex == 0) lastIndex = 1;
 
-                        resurrectionRoom[deadBody.ParentId] = cand[System.Random.Shared.Next(lastIndex)].Item2.RoomId;
+                        resurrectionRoom[deadBody.Player.PlayerId] = cand[System.Random.Shared.Next(lastIndex)].Item2.RoomId;
                     }
 
-                    currentTargetRoom = resurrectionRoom[deadBody.ParentId];
+                    currentTargetRoom = resurrectionRoom[deadBody.Player.PlayerId];
                     //myArrow.TargetPos = ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.bounds.center;
                     message.text = Language.Translate("role.necromancer.phantomMessage").Replace("%ROOM%", AmongUsUtil.ToDisplayString(currentTargetRoom.Value));
                 };
@@ -126,12 +127,21 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                         var currentHolding = MyPlayer.HoldingDeadBody!;
 
                         new StaticAchievementToken("necromancer.common1");
-                        if (!currentHolding.IsCrewmate) new StaticAchievementToken("necromancer.another1");
-                        acTokenChalenge.Value.cleared |= (acTokenChalenge.Value.bitFlag & (1 << currentHolding.PlayerId)) != 0;
-                        acTokenChalenge.Value.bitFlag |= 1 << currentHolding.PlayerId;
+                        if (!currentHolding.Player.IsCrewmate) new StaticAchievementToken("necromancer.another1");
+                        acTokenChalenge.Value.cleared |= (acTokenChalenge.Value.bitFlag & (1 << currentHolding.Player.PlayerId)) != 0;
+                        acTokenChalenge.Value.bitFlag |= 1 << currentHolding.Player.PlayerId;
 
-                        currentHolding.Revive(MyPlayer, new(MyPlayer.VanillaPlayer.transform.position), true);
-                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.NecromancerRevivingAction);
+                        if (currentHolding.Player.IsDead)
+                        {
+                            currentHolding.Player.Revive(MyPlayer, new(MyPlayer.VanillaPlayer.transform.position), true);
+                            NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.NecromancerRevivingAction);
+                        }
+                        else
+                        {
+                            ManagedEffects.RpcDisappearEffect.Invoke((currentHolding.Position.AsVector3(-1f), LayerExpansion.GetPlayersLayer()));
+                            AmongUsUtil.RpcCleanDeadBody(currentHolding, MyPlayer.PlayerId, null);
+                            
+                        }
                         button.CoolDownTimer!.Start();
 
                         StatsRevive.Progress();
@@ -161,7 +171,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                 var myPos = MyPlayer.VanillaPlayer.GetTruePosition();
                 float maxDis = DetectedRangeOption;
 
-                byte currentHolding = MyPlayer.HoldingDeadBody?.PlayerId ?? byte.MaxValue;
+                byte currentHolding = MyPlayer.HoldingDeadBody?.Player.PlayerId ?? byte.MaxValue;
                 foreach (var deadbody in Helpers.AllDeadBodies())
                 {
                     if (currentHolding == deadbody.ParentId) continue;

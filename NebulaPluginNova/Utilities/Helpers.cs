@@ -1,8 +1,4 @@
-﻿using Hazel;
-using InnerNet;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Nebula.Modules.GUIWidget;
-using Steamworks;
+﻿using Nebula.Modules.GUIWidget;
 using System.Runtime.InteropServices;
 using System.Text;
 using TMPro;
@@ -14,29 +10,6 @@ using Virial.Text;
 
 
 namespace Nebula.Utilities;
-
-public class Reference<T>
-{
-    public T? Value { get; set; } = default(T);
-
-    public Reference<T> Set(T value)
-    {
-        Value = value;
-        return this;
-    }
-
-    public Reference<T> Update(Func<T?,T?> update)
-    {
-        Value = update.Invoke(Value);
-        return this;
-    }
-
-    public IEnumerator Wait()
-    {
-        while (Value == null) yield return null;
-        yield break;
-    }
-}
 
 public static class Helpers
 {
@@ -359,6 +332,24 @@ public static class Helpers
         return result;
     }
 
+    public static bool AnyCustomNonTriggersBetweenThick(Vector2 pos1, Vector2 pos2, float radius, Predicate<Collider2D>? predicate, int? layerMask = null)
+    {
+        layerMask ??= Constants.ShipAndAllObjectsMask;
+        var vector = pos2 - pos1;
+
+        int num = Physics2D.CircleCastNonAlloc(pos1, radius, vector.normalized, PhysicsHelpers.castHits, vector.magnitude, layerMask!.Value);
+        bool flag = false;
+        for (int i = 0; i < num; i++)
+        {
+            if (!PhysicsHelpers.castHits[i].collider.isTrigger && (predicate?.Invoke(PhysicsHelpers.castHits[i].collider) ?? true))
+            {
+                flag = true;
+                break;
+            }
+        }
+        return flag;
+    }
+
     static public IEnumerator DoTransitionFadeOut(this TransitionFade transitionFade)
     {
         yield return Effects.ColorFade(transitionFade.overlay, Color.clear, Color.black, 0.2f);
@@ -370,13 +361,6 @@ public static class Helpers
         yield break;
     }
 
-    static public bool IsEmpty<T>(this IEnumerable<T> enumerable) => !enumerable.Any(_ => true);
-    static public bool IsEmpty<T>(this IReadOnlyList<T> list) => list.Count == 0;
-
-    static public void DoIf<T>(this T? nullableObj, Action<T> action)
-    {
-        if(nullableObj != null) action.Invoke(nullableObj!);
-    }
 
     static public Transform FindChild(this Transform transform, Predicate<Transform> predicate)
     {
@@ -427,9 +411,9 @@ public static class Helpers
         GC.Collect();
     }
 
-    static public TMPro.TextMeshPro TextHudContent(string name, ILifespan lifespan, Action<TMPro.TextMeshPro> updater)
+    static public TMPro.TextMeshPro TextHudContent(string name, ILifespan lifespan, Action<TMPro.TextMeshPro> updater, bool isStaticContent = false)
     {
-        var TextHolder = HudContent.InstantiateContent(name, true, true, false, false);
+        var TextHolder = HudContent.InstantiateContent(name, true, true, false, isStaticContent);
         lifespan.BindGameObject(TextHolder.gameObject);
 
         TextMeshPro tmPro = null!;
@@ -506,4 +490,37 @@ public static class Helpers
 
     public static float ConsiderPlayerFlip(this float num, CosmeticsLayer layer) => layer.FlipX ? -num : num;
     public static int ConsiderPlayerFlip(this int num, CosmeticsLayer layer) => layer.FlipX ? -num : num;
+
+    public static void RunStaticConstructor(Type type)
+    {
+        System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+    }
+
+    public static bool LocalPlayerUsingHookshot => !(Roles.Crewmate.Climber.Hookshot.LocalHookshot?.IsDeadObject ?? true);
+
+    static public Texture2D CreateReadableTexture(Texture texture, int margin = 0)
+    {
+        RenderTexture renderTexture = RenderTexture.GetTemporary(
+                    texture.width,
+                    texture.height,
+                    0,
+                    RenderTextureFormat.Default,
+                    RenderTextureReadWrite.Linear);
+
+        Graphics.Blit(texture, renderTexture);
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = renderTexture;
+        Texture2D readableTextur2D = new Texture2D(texture.width + margin * 2, texture.height + margin * 2);
+        readableTextur2D.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), margin, margin);
+        readableTextur2D.Apply();
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(renderTexture);
+
+        return readableTextur2D;
+    }
+
+    static public float Diff(Color color1, Color color2)
+    {
+        return Math.Max(Math.Max(Math.Abs(color1.r - color2.r), Math.Abs(color1.g - color2.g)), Math.Abs(color1.b - color2.b));
+    }
 }

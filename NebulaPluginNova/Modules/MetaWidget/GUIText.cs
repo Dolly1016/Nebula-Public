@@ -13,7 +13,7 @@ public class NoSGUIText : AbstractGUIWidget
     protected TextComponent? Text;
     public GUIWidgetSupplier? OverlayWidget { get; init; } = null;
     public (Action action, bool reopenOverlay)? OnClickText { get; init; } = null;
-    
+
     /// <summary>
     /// NoSGUITextにオーバーレイ表示やクリック操作を委任する場合はtrueにしてください。
     /// </summary>
@@ -51,7 +51,7 @@ public class NoSGUIText : AbstractGUIWidget
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
-        if(Text == null)
+        if (Text == null)
         {
             actualSize = new(0f, 0f);
             return null;
@@ -63,6 +63,8 @@ public class NoSGUIText : AbstractGUIWidget
         ReflectMyAttribute(text, size.Width);
         text.text = Text.GetString();
         text.sortingOrder = 10;
+
+
         text.ForceMeshUpdate();
 
         if (Attr.IsFlexible)
@@ -82,6 +84,7 @@ public class NoSGUIText : AbstractGUIWidget
 
             text.ForceMeshUpdate();
         }
+
 
         if (AllowGenerateCollider && (OverlayWidget != null || OnClickText != null))
         {

@@ -24,6 +24,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private readonly FloatConfiguration MarkCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cannon.markCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration CannonCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);

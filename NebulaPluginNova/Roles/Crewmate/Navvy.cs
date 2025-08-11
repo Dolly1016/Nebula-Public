@@ -21,6 +21,7 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, CostOption));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public readonly FloatConfiguration SealCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.navvy.sealCooldown", (0f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static public readonly IntegerConfiguration CostOption = NebulaAPI.Configurations.Configuration("options.role.navvy.maxCost", (1, 30), 4);

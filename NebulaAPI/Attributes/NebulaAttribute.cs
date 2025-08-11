@@ -109,7 +109,8 @@ public class RequiringHandshake : Attribute
 
 /// <summary>
 /// GameOperatorに付与できる属性です。
-/// そのクラスに紐づけられたプレイヤーに関するイベントでのみ呼び出されるよう制限されます。
+/// <see cref="Virial.Game.IBindPlayer"/>を実装するクラスで定義したリスナでイベントが<see cref="Virial.Events.Player.AbstractPlayerEvent"/>を継承している場合にのみ使用できます。
+/// <see cref="Virial.Game.IBindPlayer.MyPlayer"/>とイベントの<see cref="Virial.Events.Player.AbstractPlayerEvent.Player"/>が一致する場合のみ実行されます。
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class OnlyMyPlayer : Attribute
@@ -117,7 +118,18 @@ public class OnlyMyPlayer : Attribute
 }
 
 /// <summary>
+/// GameOperatorに付与できる属性です。
+/// イベントが<see cref="Virial.Events.Player.AbstractPlayerEvent"/>を継承している場合にのみ使用できます。
+/// イベントの<see cref="Virial.Events.Player.AbstractPlayerEvent.Player"/>の<see cref="Virial.Game.IPlayerlike.AmOwner"/>がtrueの場合のみ実行されます。
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class OnlyLocalPlayer : Attribute
+{
+}
+
+/// <summary>
 /// ローカルでのみ呼び出される手続きを表します。
+/// <see cref="Virial.Game.IBindPlayer"/>を実装するクラスで定義したリスナで<see cref="Virial.Game.IBindPlayer.AmOwner"/>がtrueの場合のみ実行されます。
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class Local : Attribute
@@ -126,7 +138,7 @@ public class Local : Attribute
 }
 
 /// <summary>
-/// ホストのみ呼び出される手続きを表します。
+/// ホストでのみ呼び出される手続きを表します。
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class OnlyHost : Attribute

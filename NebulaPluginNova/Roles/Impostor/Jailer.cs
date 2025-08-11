@@ -23,6 +23,7 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public BoolConfiguration CanMoveWithMapWatchingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canMoveWithMapWatching", false);
     static public BoolConfiguration CanUseAdminOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canUseAdminOnMeeting", true);

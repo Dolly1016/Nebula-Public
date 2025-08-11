@@ -6,6 +6,7 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
+using Virial.Events.Role;
 using Virial.Game;
 using Virial.Helpers;
 using Virial.Text;
@@ -34,6 +35,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1,NumOfShotsOption));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private readonly IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sheriff.killCoolDown", CoolDownType.Relative, (10f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static private readonly IntegerConfiguration NumOfShotsOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.numOfShots", (1, 15), 3);
@@ -65,7 +67,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                 acTokenCommon2 = new("sheriff.common2", (byte.MaxValue, false), (val, _) => val.Item2);
                 acTokenAnother2 = new("sheriff.another2", true, (val, _) => val && NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnd.CrewmateWin && !MyPlayer.IsDead);
 
-                var killTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, ObjectTrackers.KillablePredicate(MyPlayer), null, CanKillHidingPlayerOption);
+                var killTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, ObjectTrackers.PlayerlikeKillablePredicate(MyPlayer), null, CanKillHidingPlayerOption);
                 killButton = new ModAbilityButtonImpl(isArrangedAsKillButton: MyPlayer.IsCrewmate).KeyBind(MyPlayer.IsCrewmate ? Virial.Compat.VirtualKeyInput.Kill : Virial.Compat.VirtualKeyInput.Ability).Register(this);
 
                 var leftText = killButton.ShowUsesIcon(3);
@@ -85,11 +87,11 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                 killButton.OnClick = (button) => {
                     acTokenAnother2.Value = false;
                     StatsShot.Progress();
-                    if (CanKill(killTracker.CurrentTarget!))
+                    if (!MyPlayer.IsMadmate && CanKill(killTracker.CurrentTarget!.RealPlayer!))
                     {
                         new StaticAchievementToken("sheriff.common1");
-                        acTokenCommon2.Value.Item2 |= acTokenCommon2.Value.Item1 == killTracker.CurrentTarget!.PlayerId;
-                        if (acTokenChallenge != null && killTracker.CurrentTarget!.IsImpostor) acTokenChallenge!.Value--;
+                        acTokenCommon2.Value.Item2 |= acTokenCommon2.Value.Item1 == killTracker.CurrentTarget!.RealPlayer.PlayerId;
+                        if (acTokenChallenge != null && killTracker.CurrentTarget!.RealPlayer.IsImpostor) acTokenChallenge!.Value--;
 
                         MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
 
@@ -98,8 +100,8 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                     else
                     {
                         MyPlayer.Suicide(PlayerState.Misfired, null, Virial.Game.KillParameter.NormalKill);
-                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.VanillaPlayer, killTracker.CurrentTarget!.VanillaPlayer);
-                        RpcShareExtraInfo.Invoke((MyPlayer, killTracker.CurrentTarget!));
+                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.VanillaPlayer, killTracker.CurrentTarget!.RealPlayer.VanillaPlayer);
+                        RpcShareExtraInfo.Invoke((MyPlayer, killTracker.CurrentTarget!.RealPlayer));
 
                         new StaticAchievementToken("sheriff.another1");
                         StatsMisshot.Progress();
@@ -137,11 +139,14 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
 
         private bool CanKill(GamePlayer target)
         {
-            if (target.Role.Role == Madmate.MyRole) return CanKillMadmateOption;
-            if (target.Role is JekyllAndHyde.Instance jah && !jah.AmJekyll) return CanKillMadmateOption;
-            if (target.TryGetModifier<Lover.Instance>(out _) && CanKillLoversOption) return true;
-            if (target.Role.Role.Category == RoleCategory.CrewmateRole) return false;
-            return true;
+            bool canKill = true;
+            if (target.Role.Role == Madmate.MyRole) canKill = CanKillMadmateOption;
+            else if (target.Role is JekyllAndHyde.Instance jah && !jah.AmJekyll) canKill = CanKillMadmateOption;
+            else if (target.TryGetModifier<Lover.Instance>(out _) && CanKillLoversOption) canKill = true;
+            else if (target.Role.Role.Category == RoleCategory.CrewmateRole) canKill = false;
+            else canKill = true;
+
+            return GameOperatorManager.Instance?.Run(new SheriffCheckKillEvent(MyPlayer, target, canKill)).CanKill ?? canKill;
         }
 
         void OnMeetingEnd(MeetingVoteDisclosedEvent ev)

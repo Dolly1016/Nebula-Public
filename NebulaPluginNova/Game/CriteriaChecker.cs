@@ -79,12 +79,23 @@ public class NebulaEndCriteria
         [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
+            bool sidekickShouldBeCountKillers = Sidekick.SidekickShouldBeCountAsKillers;
+
             if (NebulaGameManager.Instance?.AllPlayerInfo.Any(p =>
             {
                 if (p.IsDead) return false;
                 if (p.Role.Role.Team == Impostor.MyTeam) return true;
-                if (p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return true;
-                return false;
+
+                //ジャッカル陣営が生存している間は勝利できない
+                if (sidekickShouldBeCountKillers)
+                {
+                    if (p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return true;
+                }
+                else
+                {
+                    if (p.Role.Role == Jackal.MyRole) return true;
+                }
+                    return false;
             }) ?? true) return;
 
             NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Situation);
@@ -115,6 +126,8 @@ public class NebulaEndCriteria
             int impostors = 0;
             int totalAlive = 0;
             
+            bool sidekickShouldBeCountKillers = Sidekick.SidekickShouldBeCountAsKillers;
+
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDead) continue;
@@ -124,7 +137,14 @@ public class NebulaEndCriteria
                 if (p.Role.Role.Team == Impostor.MyTeam && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover)) impostors++;
 
                 //ジャッカル陣営が生存している間は勝利できない
-                if (p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return;
+                if (sidekickShouldBeCountKillers)
+                {
+                    if (p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole)) return;
+                }
+                else
+                {
+                    if (p.Role.Role == Jackal.MyRole) return;
+                }
             }
 
             if(impostors * 2 >= totalAlive) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.ImpostorWin, GameEndReason.Situation);
@@ -137,9 +157,11 @@ public class NebulaEndCriteria
         [OnlyHost]
         void OnUpdate(GameUpdateEvent ev)
         {
+            bool sidekickShouldBeCountKillers = Sidekick.SidekickShouldBeCountAsKillers;
+
             int totalAlive = 0;
             bool leftImpostors = false;
-            static bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
+            //static bool isJackalTeam(GamePlayer p) => p.Role.Role.Team == Jackal.MyTeam || p.Modifiers.Any(m => m.Modifier == SidekickModifier.MyRole);
 
             //全生存者数を数えつつ、インポスターが生存していたらチェックをやめる
             allAliveJackals.Clear();
@@ -169,8 +191,8 @@ public class NebulaEndCriteria
                 else continue; //既に考慮したチームはスキップしてよい
                 jackalMask |= myMask;
 
-                //死亡しておらず、同チーム、かつラバーズでないか相方死亡ラバー
-                int aliveJackals = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && jackal!.IsSameTeam(p) && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover) && !p.IsMadmate);
+                //死亡しておらず、同チーム、かつラバーズでないか相方死亡ラバー。ただし、サイドキックがキル人外でないならジャッカル本人のみ
+                int aliveJackals = sidekickShouldBeCountKillers ? 1 : NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && jackal!.IsSameTeam(p) && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover) && !p.IsMadmate);
 
 
                 //完全殲滅勝利

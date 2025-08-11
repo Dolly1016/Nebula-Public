@@ -1,14 +1,16 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using System.Text;
-using UnityEngine.Rendering;
-using Nebula.Roles;
 using Nebula.Behavior;
+using Nebula.Dev;
 using Nebula.Modules.GUIWidget;
-using Virial.Media;
-using Virial.Configuration;
-
-using UnityEngine;
+using Nebula.Roles;
+using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
+using UnityEngine;
+using UnityEngine.Rendering;
+using Virial.Configuration;
+using Virial.Media;
+using Virial.Text;
 
 namespace Nebula.Configuration;
 
@@ -19,7 +21,9 @@ public class NebulaSettingMenu : MonoBehaviour
         ClassInjector.RegisterTypeInIl2Cpp<NebulaSettingMenu>();
     }
 
-    MetaScreen LeftHolder = null!, MainHolder = null!, RightHolder = null!, SecondScreen = null!, SecondTopScreen = null!;
+    private record OptionNav(int imgIndex, string translationKey);
+
+    MetaScreen LeftHolder = null!, MainHolder = null!, RightHolder = null!, SecondScreen = null!, SecondTopScreen = null!, UnderScreen = null!;
     GameObject FirstPage = null!, SecondPage = null!;
     //Scroller FirstScroller = null!, SecondScroller = null!;
     Virial.Compat.Artifact<GUIScreen> FirstInnerScreen = null!, SecondInnerScreen = null!;
@@ -28,6 +32,7 @@ public class NebulaSettingMenu : MonoBehaviour
     SpriteRenderer RightImage = null!;
     static public NebulaSettingMenu Instance { get; private set; } = null!;
 
+    static private readonly MultiImage MouseButton = DividedSpriteLoader.FromResource("Nebula.Resources.MouseButton.png", 100f, 3, 1);
     public void Start()
     {
         Instance = this;
@@ -86,9 +91,21 @@ public class NebulaSettingMenu : MonoBehaviour
         new MetaWidgetOld.Button(() => OpenFirstPage(), new(TextAttributeOld.BoldAttr) { Size = new Vector2(0.4f, 0.28f) }) { RawText = "<<" }.Generate(SecondPage, new Vector2(-4.8f, 1.9f),out _);
         SecondTopScreen = UnityHelper.CreateObject<MetaScreen>("SecondTopScreen", SecondPage.transform, new Vector3(0f, 1.9f, -5f));
 
+        UnderScreen = UnityHelper.CreateObject<MetaScreen>("UnderNav", transform, new(4.8f - 5f, -2.52f - 1f, 0f));
+        UnderScreen.SetBorder(new(10f,2f));
+
         OpenFirstPage();
     }
 
+    private void UpdateNav(OptionNav[] navs)
+    {
+        static IEnumerable<GUIWidget> GetNavContent(OptionNav nav)
+        {
+            yield return new NoSGUIImage(GUIAlignment.Left, MouseButton.AsLoader(nav.imgIndex), new(0.25f, 0.25f)) { IsMasked = false };
+            yield return GUI.API.LocalizedText(GUIAlignment.Left, AttributeAsset.OverlayContent, nav.translationKey);
+        }
+        UnderScreen.SetWidget(GUI.API.HorizontalHolder(GUIAlignment.Left, navs.Select(GetNavContent).JoinMany(GUI.API.HorizontalMargin(0.05f))), new Vector2(1f, 1f), out _);
+    }
     private IEnumerator CoShowRightImage()
     {
         Color col = new(0.2f, 0.2f, 0.2f, 0f);
@@ -206,6 +223,8 @@ public class NebulaSettingMenu : MonoBehaviour
             if (lastRight == h) return;
 
             var str = "<size=150%>" + h.Title.GetString().Bold() + "</size>\n" + h.Configurations.Where(c => c.IsShown).Select(a => a?.GetDisplayText()).Where(str => str != null).Join(null, "\n");
+            int index = str.FindNIndex('\n', 25);
+            if (index > 0) str = str.Substring(0, index) + "\n...";
             RightHolder.SetWidget(new(2.2f, 3.8f), new MetaWidgetOld.Text(RightTextAttr) { RawText = str });
 
             UpdateRightImage(h.Illustration);
@@ -288,8 +307,8 @@ public class NebulaSettingMenu : MonoBehaviour
                                 ClipboardHelper.PutClipboardString(Regex.Replace(text, "<[^<>]*>", ""));
                                 NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.copied"));
                             };
-                            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.click")));
-                            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                            //button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.click")));
+                            //button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
                         }
                     },
                     Alignment = IMetaWidgetOld.AlignmentOption.Center,
@@ -317,7 +336,7 @@ public class NebulaSettingMenu : MonoBehaviour
             LastHolder = CurrentHolder;
         }
 
-        if(CurrentHolder == null) return;
+        if (CurrentHolder == null) return;
 
         UpdateRightImage(CurrentHolder.Illustration);
 
@@ -327,7 +346,6 @@ public class NebulaSettingMenu : MonoBehaviour
         //ホルダから上方ボタンを生成
         List<IMetaParallelPlacableOld> topContents = new(CurrentHolder.RelatedInformation.Where(info => info.predicate.Invoke()).Select(info => new MetaWidgetOld.Button(info.onClicked, RelatedButtonAttr) { Text = info.text }));
 
-     
         //関連する役職プリセット
         /*
         if (IConfigPreset.AllPresets.Any(preset => preset.RelatedHolder == CurrentHolder.Id))
@@ -366,6 +384,12 @@ public class NebulaSettingMenu : MonoBehaviour
 
         CurrentHolder = holder;
         UpdateSecondaryPage();
+
+        UpdateNav([
+            //new(0, "ui.options.nav.2.left"),
+            //new(1, "ui.options.nav.2.right"),
+            new(2, "ui.options.nav.2.middle")
+            ]);
     }
 
     public void OpenFirstPage()
@@ -373,14 +397,29 @@ public class NebulaSettingMenu : MonoBehaviour
         CloseAllPage();
         FirstPage.SetActive(true);
         UpdateMainTab();
+
+        UpdateNav([
+            new(0, "ui.options.nav.1.left"),
+            new(1, "ui.options.nav.1.right"),
+            new(2, "ui.options.nav.1.middle")
+            ]);
     }
 
     public void Update()
     {
-        if (FirstPage.active && Input.GetMouseButtonDown(2))
+        if (Input.GetMouseButtonDown(2))
         {
-            ClientOption.UseSimpleConfigurationViewerEntry.Value = !ClientOption.UseSimpleConfigurationViewerEntry.Value;
-            OpenFirstPage();
+            if (FirstPage.active)
+            {
+                ClientOption.UseSimpleConfigurationViewerEntry.Value = !ClientOption.UseSimpleConfigurationViewerEntry.Value;
+                OpenFirstPage();
+                VanillaAsset.PlaySelectSE();
+            }
+            else if(SecondPage.active)
+            {
+                OpenFirstPage();
+                VanillaAsset.PlaySelectSE();
+            }
         }
     }
 

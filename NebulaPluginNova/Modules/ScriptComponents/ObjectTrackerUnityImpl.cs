@@ -21,15 +21,19 @@ public static class HighlightHelpers
     }
 
     public static void SetHighlight(GamePlayer player, Virial.Color color) => SetHighlight(player, color.ToUnityColor());
-    public static void SetDeadBodyHighlight(GamePlayer player, Virial.Color color) => SetHighlight(player.RelatedDeadBody, color.ToUnityColor());
 }
 
 public static class ObjectTrackers
 {
-    static public Predicate<GamePlayer> StandardPredicateIgnoreOwner = p => !p.IsDead && !p.WillDie && !p.IsInvisible && !p.IsDived && !p.IsBlown;
+    static public Predicate<GamePlayer> StandardPredicateIgnoreOwner = p => p.CanBeTarget && !p.IsDead && !p.WillDie && !p.IsInvisible && !p.IsDived && !p.IsBlown;
     static public Predicate<GamePlayer> StandardPredicate = p => !p.AmOwner && StandardPredicateIgnoreOwner.Invoke(p);
     static public Predicate<GamePlayer> KillablePredicate(GamePlayer myPlayer) => p => StandardPredicate(p) && myPlayer.CanKill(p);
     static public Predicate<GamePlayer> LocalKillablePredicate = p => StandardPredicate(p) && (GamePlayer.LocalPlayer?.CanKill(p) ?? true);
+
+    static public Predicate<IPlayerlike> PlayerlikeStandardPredicateIgnoreOwner = p => p.CanBeTarget && !p.IsDead && (p is not GamePlayer gp || (!gp.WillDie && !gp.IsInvisible && !gp.IsDived && !gp.IsBlown));
+    static public Predicate<IPlayerlike> PlayerlikeStandardPredicate = p => !p.RealPlayer.AmOwner && PlayerlikeStandardPredicateIgnoreOwner.Invoke(p);
+    static public Predicate<IPlayerlike> PlayerlikeKillablePredicate(GamePlayer myPlayer) => p => PlayerlikeStandardPredicate(p) && myPlayer.CanKill(p.RealPlayer);
+    static public Predicate<IPlayerlike> PlayerlikeLocalKillablePredicate = p => PlayerlikeStandardPredicate(p) && (GamePlayer.LocalPlayer?.CanKill(p.RealPlayer) ?? true);
 
     public static ObjectTracker<GamePlayer> ForPlayer(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, UnityEngine.Color? color = null, bool canTrackInVent = false, bool ignoreCollider = false) => ForPlayer(lifespan, distance, tracker, predicate, null, color ?? UnityEngine.Color.yellow, canTrackInVent, ignoreCollider);
     public static ObjectTracker<GamePlayer> ForPlayer(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier, UnityEngine.Color? color, bool canTrackInVent = false, bool ignoreCollider = false)
@@ -44,9 +48,22 @@ public static class ObjectTrackers
         return new ObjectTrackerUnityImpl<GamePlayer, PlayerControl>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, FastPlayers, predicate, predicateHeavier, p => p.GetModInfo(), p => [p.GetTruePosition()], p => p.cosmetics.currentBodySprite.BodySprite, color, ignoreCollider).Register(lifespan);
     }
 
-    public static ObjectTracker<GamePlayer> ForDeadBody(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<GamePlayer> predicate, Predicate<GamePlayer>? predicateHeavier = null, UnityEngine.Color? color = null, bool ignoreCollider = false)
+    public static ObjectTracker<IPlayerlike> ForPlayerlike(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<IPlayerlike> predicate, UnityEngine.Color? color = null, bool canTrackInVent = false, bool ignoreCollider = false) => ForPlayerlike(lifespan, distance, tracker, predicate, null, color ?? UnityEngine.Color.yellow, canTrackInVent, ignoreCollider);
+    public static ObjectTracker<IPlayerlike> ForPlayerlike(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<IPlayerlike> predicate, Predicate<IPlayerlike>? predicateHeavier, UnityEngine.Color? color, bool canTrackInVent = false, bool ignoreCollider = false) => ForPlayerlike(lifespan, distance, () => tracker.TruePosition.ToUnityVector(), predicate, predicateHeavier, color, canTrackInVent, ignoreCollider);
+    public static ObjectTracker<IPlayerlike> ForPlayerlike(ILifespan? lifespan, float? distance, Func<Vector2?> tracker, Predicate<IPlayerlike> predicate, Predicate<IPlayerlike>? predicateHeavier, UnityEngine.Color? color, bool canTrackInVent = false, bool ignoreCollider = false)
     {
-        return new ObjectTrackerUnityImpl<GamePlayer, DeadBody>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => Helpers.AllDeadBodies().Where(d => d.bodyRenderers.Any(r => r.enabled)), predicate, predicateHeavier, d => NebulaGameManager.Instance.GetPlayer(d.ParentId), d => [d.TruePosition], d => d.bodyRenderers[0], color, ignoreCollider).Register(lifespan);
+        if (!canTrackInVent)
+        {
+            var lastPredicate = predicate;
+            predicate = p => !p.Logic.InVent && lastPredicate(p);
+        }
+
+        return new ObjectTrackerUnityImpl<IPlayerlike, IPlayerlike>(tracker, distance ?? AmongUsUtil.VanillaKillDistance, () => NebulaGameManager.Instance!.AllPlayerlike, predicate, predicateHeavier, p => p, p => [p.TruePosition], p => p.VanillaCosmetics.currentBodySprite.BodySprite, color, ignoreCollider).Register(lifespan);
+    }
+
+    public static ObjectTracker<Virial.Game.DeadBody> ForDeadBody(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<Virial.Game.DeadBody>? predicate = null, Predicate<Virial.Game.DeadBody>? predicateHeavier = null, UnityEngine.Color? color = null, bool ignoreCollider = false)
+    {
+        return new ObjectTrackerUnityImpl<Virial.Game.DeadBody, Virial.Game.DeadBody>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => ModSingleton<DeadBodyManager>.Instance.AllDeadBodies.Where(d => d.IsActive), predicate ?? (_ => true), predicateHeavier, d => d, d => [d.TruePosition], d => d.VanillaDeadBody.bodyRenderers[0], color, ignoreCollider).Register(lifespan);
     }
 
     public static ObjectTracker<Vent> ForVents(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<Vent> predicate, UnityEngine.Color color, bool ignoreColliders = false)
@@ -64,7 +81,7 @@ public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, I
 
     private Tuple<T,V>? currentTarget = null;
 
-    PlayerControl tracker;
+    Func<Vector2?> tracker;
     Func<IEnumerable<T>> allTargets;
     Predicate<V> predicate;
     Predicate<V>? predicateHeavier = null;
@@ -79,6 +96,9 @@ public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, I
     public bool MoreHighlight = false;
 
     public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Func<T, SpriteRenderer> rendererConverter, Color? color = null, bool ignoreColliders = false, bool ignoreShadows = true)
+    : this(() => tracker ? tracker.GetTruePosition() : null, maxDistance, allTargets, predicate, predicateHeavier, converter, positionConverter, rendererConverter, color, ignoreColliders, ignoreShadows) { }
+
+    internal ObjectTrackerUnityImpl(Func<Vector2?> tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Func<T, SpriteRenderer> rendererConverter, Color? color = null, bool ignoreColliders = false, bool ignoreShadows = true)
         : this(tracker, maxDistance, allTargets, predicate, predicateHeavier, converter, positionConverter, (target, more, color) =>
         {
             var renderer = rendererConverter.Invoke(target);
@@ -91,7 +111,7 @@ public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, I
             }
         }, color, ignoreColliders, ignoreShadows) { }
 
-    public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Action<T, bool, Color> highlightSetter, Color? color = null, bool ignoreColliders = false, bool ignoreShadows = true)
+    private ObjectTrackerUnityImpl(Func<Vector2?> tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Action<T, bool, Color> highlightSetter, Color? color = null, bool ignoreColliders = false, bool ignoreShadows = true)
     {
         this.tracker = tracker;
         this.allTargets = allTargets;
@@ -123,13 +143,14 @@ public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, I
             return;
         }
 
-        if (!tracker)
+        Vector2? calced = tracker.Invoke();
+        if (!calced.HasValue)
         {
             currentTarget = null;
             return;
-        }
 
-        Vector2 myPos = tracker.GetTruePosition();
+        }
+        Vector2 myPos = calced.Value;
 
         float distance = maxDistance;
         Tuple<T,V>? candidate = null;
@@ -148,7 +169,7 @@ public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, I
             Vector2 dVec = pos[0] - myPos; //先頭を最たる中心として扱う
             float magnitude = dVec.magnitude;
 
-            if (MoreHighlight && magnitude < 4.5f) highlightSetter?.Invoke(currentTarget!.Item1, false, color);
+            if (MoreHighlight && magnitude < 4.5f) highlightSetter?.Invoke(t, false, color);
 
             if (distance < magnitude) continue;
 

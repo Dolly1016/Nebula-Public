@@ -22,17 +22,22 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
     static private readonly FloatConfiguration EMIDurationOption = NebulaAPI.Configurations.Configuration("options.role.alien.emiDuration", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration InvalidateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.alien.invalidateCoolDown", (5f,60f,2.5f),10f, FloatConfigurationDecorator.Second);
     static private readonly IntegerConfiguration NumOfInvalidationsOption = NebulaAPI.Configurations.Configuration("options.role.alien.numOfInvalidations", (1, 10), 1);
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0), arguments.Get(1, NumOfInvalidationsOption));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
     static public readonly Alien MyRole = new();
+    [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
 
         static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
         static private readonly Image invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
 
-        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
-        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), LeftInvalidation];
+        int LeftInvalidation = NumOfInvalidationsOption;
+
+        static private readonly RoleRPC.Definition UpdateInvalidate = RoleRPC.Get<Ability>("alien.invalidate", (ability, num, _) => ability.LeftInvalidation = num);
+        public Ability(GamePlayer player, bool isUsurped, int leftInvalidation) : base(player, isUsurped)
         {
             if (AmOwner)
             {
@@ -65,23 +70,24 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
                 emiButton.SetAsUsurpableButton(this);
 
                 AchievementToken<(int playerMask, bool clear)> achCommon4Token = new("alien.common4", (0, false), (val, _) => val.clear);
-                if (NumOfInvalidationsOption > 0)
-                {
-                    int left = NumOfInvalidationsOption;
 
-                    var invalidateTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, p => ObjectTrackers.StandardPredicate(p));
+                LeftInvalidation = leftInvalidation;
+                if (leftInvalidation > 0)
+                {
+                    var invalidateTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeStandardPredicate(p));
                     var invalidateButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility,
                         InvalidateCoolDownOption, "invalidate", invalidateButtonSprite,
-                        _ => invalidateTracker.CurrentTarget != null, _ => left > 0);
-                    invalidateButton.ShowUsesIcon(0, left.ToString());
+                        _ => invalidateTracker.CurrentTarget != null, _ => LeftInvalidation > 0);
+                    invalidateButton.ShowUsesIcon(0, LeftInvalidation.ToString());
                     invalidateButton.OnClick = (button) =>
                     {
-                        PlayerModInfo.RpcAttrModulator.Invoke((invalidateTracker.CurrentTarget!.PlayerId, new AttributeModulator(PlayerAttributes.Isolation, 100000f, true, 0, canBeAware: invalidateTracker.CurrentTarget.IsImpostor), true));
-                        left--;
-                        button.UpdateUsesIcon(left.ToString());
+                        PlayerModInfo.RpcAttrModulator.Invoke((invalidateTracker.CurrentTarget!.RealPlayer.PlayerId, new AttributeModulator(PlayerAttributes.Isolation, 100000f, true, 0, canBeAware: invalidateTracker.CurrentTarget!.RealPlayer.IsImpostor), true));
+                        LeftInvalidation--;
+                        UpdateInvalidate.RpcSync(MyPlayer, LeftInvalidation);
+                        button.UpdateUsesIcon(LeftInvalidation.ToString());
 
                         new StaticAchievementToken("alien.common2");
-                        achCommon4Token.Value.playerMask |= 1 << invalidateTracker.CurrentTarget.PlayerId;
+                        achCommon4Token.Value.playerMask |= 1 << invalidateTracker.CurrentTarget!.RealPlayer.PlayerId;
 
                         invalidateButton.StartCoolDown();
                     };

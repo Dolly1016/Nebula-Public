@@ -16,6 +16,7 @@ public class Bait : DefinedSingleAbilityRoleTemplate<Bait.Ability>, HasCitation,
 
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0, false));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private readonly BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("options.role.bait.showKillFlash", false);
     static private readonly FloatConfiguration ReportDelayOption = NebulaAPI.Configurations.Configuration("options.role.bait.reportDelay", (0f, 5f, 0.5f), 0f, FloatConfigurationDecorator.Second);

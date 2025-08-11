@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Neutral;
+﻿using Nebula.Roles.Crewmate;
+using Nebula.Roles.Neutral;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -103,5 +104,6 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
     ITaskConfiguration Configurations.TaskConfiguration(string id, bool forceTasks, bool containsCommonTasks, Func<bool>? predicate, string? translationKey) => new TaskConfiguration(id, forceTasks, containsCommonTasks, predicate, translationKey);
 
     bool Configurations.CanJackalize => Jackal.JackalizedImpostorOption;
+    bool Configurations.CanMadden =>  Madmate.MaddenRoleOption;
 }
  

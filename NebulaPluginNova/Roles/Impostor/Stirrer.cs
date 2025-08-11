@@ -48,18 +48,18 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
             if (AmOwner)
             {
                 var sampleTracker = NebulaAPI.Modules.KillTracker(this, MyPlayer);
-
-                var stirButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir",
+                var stirButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, sampleTracker, new PlayerInteractParameter(RealPlayerOnly: true), Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir",
                     StirCoolDownOption, "stir", StirButtonSprite,
-                    _ => sampleTracker.CurrentTarget != null && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId, out int charge) || charge < SabotageMaxChargeOption));
-                stirButton.OnClick = (button) => {
-                    int charge = 0;
-                    if (sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget!.PlayerId, out var v)) charge = v;
-                    sabotageChargeMap[sampleTracker.CurrentTarget!.PlayerId] = Mathf.Min(SabotageMaxChargeOption, charge + SabotageChargeOption);
+                    (p, button) =>
+                    {
+                        int charge = 0;
+                        if (sabotageChargeMap.TryGetValue(p!.RealPlayer.PlayerId, out var v)) charge = v;
+                        sabotageChargeMap[sampleTracker.CurrentTarget!.RealPlayer.PlayerId] = Mathf.Min(SabotageMaxChargeOption, charge + SabotageChargeOption);
 
-                    stirButton.StartCoolDown();
-                    StatsStir.Progress();
-                };
+                        button.StartCoolDown();
+                        StatsStir.Progress();
+                    },
+                    _ => sampleTracker.CurrentTarget != null && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId, out int charge) || charge < SabotageMaxChargeOption));
 
                 var sabotageButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility,"stirrer.fakeSabo",
                     Mathf.Max(SabotageIntervalOption, SabotageCoolDownOption), "fakeSabotage", SabotageButtonSprite,

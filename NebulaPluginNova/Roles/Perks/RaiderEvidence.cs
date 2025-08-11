@@ -41,6 +41,8 @@ internal class RaiderEvidence : PerkFunctionalInstance, IGameOperator
         cooldownTimer.Start();
 
         SniperIcon.RegisterAchievementToken(MyPlayer);
+
+        new StaticAchievementToken("perk.manyPerks1.fakeAxe");
     }
 
     void OnUpdate(GameHudUpdateEvent ev)

@@ -4,23 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial;
-using Nebula.Utilities;
-using Nebula.Behavior;
 using PowerTools;
 using Virial.Events.Game;
 using Nebula.Roles.Abilities;
-using UnityEngine;
-using TMPro;
 using Virial.DI;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using MS.Internal.Xml.XPath;
 using Virial.Components;
 
 namespace Nebula.Roles.Impostor;
@@ -106,13 +99,23 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
 
             if (!MeetingHud.Instance && moving)
             {
+                float bubbleOption = (1.7f / 2f * bubbleSizeOption);
+
                 var localPlayer = GamePlayer.LocalPlayer;
                 if (!used && !myPlayer.AmOwner && ObjectTrackers.StandardPredicateIgnoreOwner.Invoke(localPlayer) && (canKillImpostorOption || myPlayer.CanKill(localPlayer)))
                 {
-                    if (localPlayer.Position.ToUnityVector().Distance(renderer.transform.position) < (1.7f / 2f * bubbleSizeOption))
+                    if (localPlayer.Position.Distance(renderer.transform.position) < bubbleOption)
                     {
                         RpcBubbleKill.Invoke((myPlayer, localPlayer, localPlayer.Position, index));
                         used = true;
+                    }
+                }
+
+                foreach( var p in GamePlayer.AllOwningFakePlayers)
+                {
+                    if(p.IsActive && p.Position.Distance(renderer.transform.position) < bubbleOption)
+                    {
+                        myPlayer.MurderPlayer(p, PlayerState.Bubbled, null, KillParameter.RemoteKill);
                     }
                 }
             }
@@ -140,7 +143,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
         }
 
         int killed = 0;
-        public void OnKill(GamePlayer dead)
+        public void OnKill(IPlayerlike dead)
         {
             killed++;
 
@@ -212,7 +215,6 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                     equipButton.SetLabel("equip");
                     NebulaAsset.PlaySE(Helpers.Prob(50) ? NebulaAudioClip.Bubble1 : NebulaAudioClip.Bubble2, oneshot: true, volume: 1f);
 
-                    LeftUses--;
                     equipButton.UpdateUsesIcon(LeftUses.ToString());
 
                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
@@ -273,6 +275,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             {
                 var role = NebulaGameManager.Instance?.GetPlayer(message.playerId)?.Role;
                 var ability = role?.GetAbility<Bubblegun.Ability>();
+                if (ability != null) ability.LeftUses--;
                 ability?.Bubbles.Add(ability.FireBubblegun(message.pos, message.angle, message.index));
             }
             );
@@ -305,7 +308,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             if (MyGun != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
         }
 
-        public void OnBubbleKill(int index, GamePlayer dead)
+        public void OnBubbleKill(int index, IPlayerlike dead)
         {
             Bubbles[index].OnKill(dead);
         }
@@ -360,7 +363,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             deadBody.transform.localPosition = new Vector3(0.2f, 0.12f, 1f);
             deadBody.transform.localScale = new(0.36f, 0.36f, 0.5f);
             deadBody.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetDefaultLayer());
-            deadBody.UpdateFromPlayerOutfit(player.DefaultOutfit.outfit, PlayerMaterial.MaskType.None, false, false, (System.Action)(() =>
+            deadBody.UpdateFromPlayerOutfit(player.CurrentOutfit.outfit, PlayerMaterial.MaskType.None, false, false, (System.Action)(() =>
             {
                 var skinView = deadBody.GetSkinView();
                 var skinAnim = deadBody.GetSkinSpriteAnim();

@@ -143,6 +143,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
             t.Index = t.Index;
             t.Owner = PlayerControl.LocalPlayer;
             t.Initialize();
+            GameOperatorManager.Instance?.Run(new PlayerGetTaskLocalEvent(MyContainer, t));
             return t;
         })) MyContainer.VanillaPlayer.myTasks.Add(t);
     }
@@ -183,6 +184,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
             normalPlayerTask.Id = taskInfo.Id;
             normalPlayerTask.Owner = MyContainer.VanillaPlayer;
             normalPlayerTask.Initialize();
+            GameOperatorManager.Instance?.Run(new PlayerGetTaskLocalEvent(MyContainer, normalPlayerTask));
             MyContainer.VanillaPlayer.myTasks.Add(normalPlayerTask);
         }
     }

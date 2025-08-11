@@ -1,6 +1,8 @@
 ﻿// 各種使用可能なオブジェクトに関するパッチ
 
 
+using NAudio.Codecs;
+using UnityEngine.XR;
 using Virial;
 using Virial.DI;
 using Virial.Events.Player;
@@ -308,7 +310,7 @@ public static class SystemConsoleCanUsePatch
         }
 
         //緊急会議コンソールの使用をブロック
-        if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting) && info.AllAbilities.Any(a => a.BlockCallingEmergencyMeeting))
+        if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && (info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting) || info.AllAbilities.Any(a => a.BlockCallingEmergencyMeeting)))
         {
             canUse = false;
             couldUse = false;
@@ -483,7 +485,44 @@ class ZiplineSetCoolDownPatch
 {
     static void Postfix(ZiplineBehaviour._CoUseZipline_d__39 __instance, bool __result)
     {
-        if (!__result && __instance.__4__this.lastUsedConsole && __instance.player.AmOwner) __instance.__4__this.lastUsedConsole.SetDestinationCooldown();
+        if (__result)
+        {
+            //コルーチン実行中
+            var current = __instance.__2__current;
+            if (current != null)
+            {
+                if (current?.TryCast<ZiplineBehaviour._CoAnimatePlayerJumpingOnToZipline_d__40>(out var apjz) ?? false)
+                {
+                    var modPlayer = __instance.player.GetModInfo();
+                    modPlayer?.Unbox().AddPlayerColorRenderers(apjz.hand.handRenderer);
+                    try
+                    {
+                        modPlayer?.Unbox().GoalPos = __instance.fromTop ? __instance.__4__this.landingPositionBottom.position : __instance.__4__this.landingPositionTop.position;
+                    }
+                    catch
+                    {
+                        Debug.Log($"Skipped presetting goal position on use ZiplineBehaviour. (for {__instance.__4__this.name})");
+                    }
+                }
+                else if (current?.TryCast<ZiplineBehaviour._CoAlightPlayerFromZipline_d__46>(out var apfz) ?? false)
+                {
+                    __instance.player.GetModInfo()?.Unbox().ResetDeadBodyGoalPos();
+
+                    __instance.__2__current = Effects.Sequence(current?.CastFast<Il2CppSystem.Collections.IEnumerator>(),
+                        ManagedEffects.Action(() =>
+                        {
+                            __instance.player.GetModInfo()?.Unbox().RemovePlayerColorRenderer(apfz.hand.handRenderer);
+                        }).WrapToIl2Cpp()
+                        ).CastFast<Il2CppSystem.Object>();
+                    
+                }
+            }
+        }
+        else
+        {
+            //コルーチン終了時
+            if (__instance.__4__this.lastUsedConsole && __instance.player.AmOwner) __instance.__4__this.lastUsedConsole.SetDestinationCooldown();
+        }
     }
 }
 
@@ -498,39 +537,5 @@ class ZiplineCoolDownUpdatePatch
         __instance.CoolDown = maxCoolDown;
         return false;
 
-    }
-}
-
-[HarmonyPatch(typeof(ZiplineBehaviour), nameof(ZiplineBehaviour.CoAnimatePlayerJumpingOnToZipline))]
-class ZiplineAnimateBeginPatch
-{
-    static void Postfix(ZiplineBehaviour __instance, [HarmonyArgument(0)]PlayerControl player,[HarmonyArgument(1)]bool fromTop, [HarmonyArgument(2)]HandZiplinePoolable hand)
-    {
-        player.GetModInfo()?.Unbox().AddPlayerColorRenderers(hand.handRenderer);
-
-        try
-        {
-            player.GetModInfo()!.Unbox().GoalPos = fromTop ? __instance.landingPositionBottom.position : __instance.landingPositionTop.position;
-        }
-        catch
-        {
-            Debug.Log($"Skipped presetting goal position on use ZiplineBehaviour. (for {__instance.name})");
-        }
-    }
-}
-
-[HarmonyPatch(typeof(ZiplineBehaviour), nameof(ZiplineBehaviour.CoAlightPlayerFromZipline))]
-class ZiplineAnimateEndPatch
-{
-    static void Postfix(ZiplineBehaviour __instance, ref Il2CppSystem.Collections.IEnumerator __result, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(3)] HandZiplinePoolable hand)
-    {
-        var orig = __result;
-        __result = Effects.Sequence(orig, ManagedEffects.Action(() =>
-        {
-            player.GetModInfo()?.Unbox().RemovePlayerColorRenderer(hand.handRenderer);
-        }).WrapToIl2Cpp());
-
-        //死体生成のための目標地点をリセットする。
-        player.GetModInfo()?.Unbox().ResetDeadBodyGoalPos();
     }
 }

@@ -67,7 +67,7 @@ public static class MeetingModRpc
     public static readonly RemoteProcess<(int voteMask, bool canSkip, float votingTime, bool exileEvenIfTie, bool sort)> RpcChangeVotingStyle = new("ChangeVotingStyle",
         (message,_) =>
         {
-            MeetingHudExtension.VotingMask = message.voteMask;
+            MeetingHudExtension.UpdateVotingMask(message.voteMask);
             MeetingHudExtension.CanSkip = message.canSkip;
             MeetingHudExtension.ExileEvenIfTie = message.exileEvenIfTie;
 
@@ -312,7 +312,11 @@ class MeetingStartPatch
 
         NebulaManager.Instance.CloseAllUI();
 
-        __instance.transform.localPosition = new Vector3(0f, 0f, -25f);
+        //InnernetObjectの位置はStartより後で何か調整が入る (ownerとそれ以外で位置に違いが生まれる)
+        __instance.StartCoroutine(Effects.Sequence(Effects.Wait(0.1f), ManagedEffects.Action(() => {
+            __instance.transform.localPosition = new Vector3(0f, 0f, -25f);
+        }).WrapToIl2Cpp()));
+        
 
         {
             var role = GamePlayer.LocalPlayer!.Role.Role;
@@ -336,7 +340,7 @@ class MeetingStartPatch
             {
                 var unbox = p.Unbox();
                 var shower = unbox.SpecialStampShower;
-                var area = __instance.playerStates.FirstOrDefault(area => area.TargetPlayerId == p.PlayerId);
+                var area = __instance.GetPlayer(p.PlayerId);
                 unbox.SpecialStampShower = new ConditionalStampShower(
                     PopupStampShower.GetMeetingShower(area),
                     shower,
@@ -725,13 +729,13 @@ static class CheckForEndVotingPatch
     {
         //投票結果が自明な場合、早回しで終わらせる。
         {
-            int canVoteTo = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && (MeetingHudExtension.VotingMask & (1 << p.PlayerId)) != 0);
+            int canVoteTo = NebulaGameManager.Instance!.AllPlayerInfo.Count(MeetingHudExtension.CanVoteFor);
             if (MeetingHudExtension.CanSkip) canVoteTo++;
             
             //選択肢が1つ以下の場合、結果は自明
             if (canVoteTo <= 1) 
             {
-                var exiled = NebulaGameManager.Instance!.AllPlayerInfo.FirstOrDefault(p => !p.IsDead && (MeetingHudExtension.VotingMask & (1 << p.PlayerId)) != 0);
+                var exiled = NebulaGameManager.Instance!.AllPlayerInfo.FirstOrDefault(MeetingHudExtension.CanVoteFor);
 
                 if (exiled == null)
                     MeetingModRpc.RpcModCompleteVoting.Invoke(([], byte.MaxValue, [], false, true));
@@ -745,7 +749,7 @@ static class CheckForEndVotingPatch
         }
 
         //投票が済んでない場合、なにもしない
-        if (!__instance.playerStates.All((PlayerVoteArea ps) => ps.AmDead || ps.DidVote)) return false;
+        if (!__instance.playerStates.All((PlayerVoteArea ps) => ps.AmDead || ps.DidVote || !MeetingHudExtension.HasVote(ps.TargetPlayerId))) return false;
 
         {
             Dictionary<byte, int> dictionary = ModCalculateVotes(__instance);
@@ -774,8 +778,8 @@ static class CheckForEndVotingPatch
             }
 
 
-            NetworkedPlayerInfo exiled = null!;
-            NetworkedPlayerInfo[] exiledAll = new NetworkedPlayerInfo[0];
+            GamePlayer exiled = null!;
+            GamePlayer[] exiledAll = [];
 
             if (MeetingHudExtension.ExileEvenIfTie) tie = false;
             try
@@ -783,7 +787,7 @@ static class CheckForEndVotingPatch
                 if (!tie)
                 {
                     //投票対象で最高票を獲得しているプレイヤー全員
-                    var exiledPlayers = GameData.Instance.AllPlayers.ToArray().Where(v => !v.IsDead && dictionary.GetValueOrDefault(v.PlayerId) == max.Value && ((MeetingHudExtension.VotingMask & (1 << v.PlayerId)) != 0)).ToArray();
+                    var exiledPlayers = GamePlayer.AllPlayers.Where(v => dictionary.GetValueOrDefault(v.PlayerId) == max.Value && MeetingHudExtension.CanVoteFor(v)).ToArray();
                     exiled = exiledPlayers.First();
                     if (exiledPlayers.Length > 0) exiledAll = exiledPlayers.ToArray();
                 }
@@ -892,7 +896,7 @@ class PopulateResultPatch
                 if (state.SkippedVote)
                     voteFor = __instance.SkippedVoting.transform;
                 else
-                    voteFor = __instance.playerStates.FirstOrDefault((area) => area.TargetPlayerId == lastVoteFor)?.transform ?? null;
+                    voteFor = __instance.GetPlayer(lastVoteFor)?.transform ?? null;
             }
 
             if (voteFor != null)

@@ -173,14 +173,14 @@ public class DevStudio : MonoBehaviour
             var screen = MetaScreen.GenerateWindow(new(5.9f, 3.1f), transform, Vector3.zero, true, false);
             MetaWidgetOld widget = new();
 
-            CombinedWidgetOld GenerateWidget(Reference<TextField> reference, string rawText,bool isMultiline,Predicate<char> predicate)=> 
+            CombinedWidgetOld GenerateWidget(Variable<TextField> reference, string rawText,bool isMultiline,Predicate<char> predicate)=> 
             new CombinedWidgetOld(
                new MetaWidgetOld.Text(new Utilities.TextAttributeOld(Utilities.TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left, Size = new(1.5f, 0.3f) }) { RawText = rawText },
                new MetaWidgetOld.Text(new Utilities.TextAttributeOld(Utilities.TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(0.2f, 0.3f) }) { RawText = ":" },
                new MetaWidgetOld.TextInput(isMultiline ? 2 : 1, 2f, new(3.7f, isMultiline ? 0.58f : 0.3f)) { TextFieldRef = reference, TextPredicate = predicate }
                    );
 
-            Reference<TextField> refId = new(), refName = new(), refAuthor = new(), refDesc = new();
+            Variable<TextField> refId = new(), refName = new(), refAuthor = new(), refDesc = new();
             widget.Append(GenerateWidget(refId, "Add-on ID", false, TextField.IdPredicate));
             widget.Append(GenerateWidget(refName, "Name", false, TextField.JsonStringPredicate));
             widget.Append(GenerateWidget(refAuthor, "Author", false, TextField.JsonStringPredicate));
@@ -197,7 +197,7 @@ public class DevStudio : MonoBehaviour
 
         }, new Utilities.TextAttributeOld(Utilities.TextAttributeOld.BoldAttr) { Size = new(0.34f, 0.18f) }.EditFontSize(2.4f)) { RawText = "+" });
 
-        Reference<MetaWidgetOld.ScrollView.InnerScreen> addonsRef = new();
+        Variable<MetaWidgetOld.ScrollView.InnerScreen> addonsRef = new();
         widget.Append(new MetaWidgetOld.ScrollView(new Vector2(9f, 4f), addonsRef));
 
         IEnumerator CoLoadAddons()
@@ -258,7 +258,7 @@ public class DevStudio : MonoBehaviour
         void ShowNameEditWindow() {
             var screen = MetaScreen.GenerateWindow(new(3.9f, 1.14f), transform, Vector3.zero, true, false);
             MetaWidgetOld widget = new();
-            Reference<TextField> refName = new();
+            Variable<TextField> refName = new();
 
             widget.Append(new MetaWidgetOld.TextInput(1, 2f, new(3.7f, 0.3f)) { TextFieldRef = refName, DefaultText = addon.Name, TextPredicate = TextField.JsonStringPredicate });
             widget.Append(new MetaWidgetOld.Button(() =>
@@ -275,9 +275,9 @@ public class DevStudio : MonoBehaviour
             screen.SetWidget(widget);
         }
 
-        Reference<TextField> authorRef = new();
-        Reference<TextField> versionRef = new();
-        Reference<TextField> descRef = new();
+        Variable<TextField> authorRef = new();
+        Variable<TextField> versionRef = new();
+        Variable<TextField> descRef = new();
 
         //Addon Name
         widget.Append(
@@ -600,7 +600,7 @@ public class DevStudio : MonoBehaviour
                     AppendTextField(false, 3f, doc.TranslationKey, (input) => doc.TranslationKey = input, TextField.JsonStringPredicate);
 
 
-                AppendParallel(MetaWidgetOld.StateButton.TopLabelCheckBox("devStudio.ui.document.editor.isBold", null, true, new Reference<bool>().Set(doc.IsBold ?? false), (val) => { doc.IsBold = val; ReopenScreen(true); }));
+                AppendParallel(MetaWidgetOld.StateButton.TopLabelCheckBox("devStudio.ui.document.editor.isBold", null, true, new Variable<bool>().Set(doc.IsBold ?? false), (val) => { doc.IsBold = val; ReopenScreen(true); }));
                 AppendParallelMargin(0.2f);
 
                 AppendTopTag("devStudio.ui.document.editor.fontSize");
@@ -665,7 +665,7 @@ public class DevStudio : MonoBehaviour
                 OutputParallelToWidget();
             }else if(doc.Document != null)
             {
-                Reference<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
+                Variable<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
                 void UpdateInner()
                 {
                     if (innerRef.Value == null) return;
@@ -851,7 +851,7 @@ public class DevStudio : MonoBehaviour
 
             if (original != null) widget.Append(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(1.5f, 0.3f) }) { RawText = Language.Translate("devStudio,ui.common.original") + " : " + original });
 
-            Reference<TextField> refId = new();
+            Variable<TextField> refId = new();
             TMPro.TextMeshPro usingInfoText = null!;
 
 
@@ -899,7 +899,7 @@ public class DevStudio : MonoBehaviour
         { RawText = "+" });
 
         //Scroller
-        Reference<MetaWidgetOld.ScrollView.InnerScreen> inner = new();
+        Variable<MetaWidgetOld.ScrollView.InnerScreen> inner = new();
         widget.Append(new MetaWidgetOld.ScrollView(new(ScreenWidth, 4f), inner) { Alignment = IMetaWidgetOld.AlignmentOption.Center });
 
         //Shower
@@ -952,10 +952,10 @@ public class DevStudio : MonoBehaviour
     }
 
 
-    (IMetaWidgetOld widget, Reference<PlayerDisplay> player) GetPlayerDisplayWidget()
+    (IMetaWidgetOld widget, Variable<PlayerDisplay> player) GetPlayerDisplayWidget()
     {
         MetaWidgetOld widget = new();
-        Reference<PlayerDisplay> display = new();
+        Variable<PlayerDisplay> display = new();
 
         widget.Append(new MetaWidgetOld.CustomWidget(new Vector2(1.5f,3.5f),IMetaWidgetOld.AlignmentOption.Center,
             (parent,center) => {
@@ -997,7 +997,7 @@ public class DevStudio : MonoBehaviour
         new string[]{ "devStudio.ui.cosmetics.contents.backFlipped", "devStudio.ui.cosmetics.contents.climbDownBack" },
     };
 
-    private static MetaWidgetOld.Button GetCostumeContentButton<Costume>(Costume costume, string translationKey, string fieldName,DevAddon addon, Reference<TextField> costumeNameRef,Action? updateAction) where Costume : CustomCosmicItem {
+    private static MetaWidgetOld.Button GetCostumeContentButton<Costume>(Costume costume, string translationKey, string fieldName,DevAddon addon, Variable<TextField> costumeNameRef,Action? updateAction) where Costume : CustomCosmicItem {
         Color disabledColor = Color.gray.RGBMultiplied(0.48f);
 
         MetaWidgetOld.Button? myButton = null;
@@ -1060,7 +1060,7 @@ public class DevStudio : MonoBehaviour
         return myButton;
     }
 
-    static private CombinedWidgetOld GetTextInputWidget(string translationKey, string hint, Reference<TextField> textRef, string defaultText, Action<string> onEntered)
+    static private CombinedWidgetOld GetTextInputWidget(string translationKey, string hint, Variable<TextField> textRef, string defaultText, Action<string> onEntered)
     {
         return new CombinedWidgetOld(
         new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Right, Size = new(1f, 0.4f) }) { TranslationKey = translationKey },
@@ -1077,7 +1077,7 @@ public class DevStudio : MonoBehaviour
         { Alignment = IMetaWidgetOld.AlignmentOption.Left };
     }
 
-    private void SetUpCommonCosmicProperty(MetaWidgetOld widget,DevAddon addon, CustomCosmicItem costume, Reference<TextField> titleRef, Reference<TextField> authorRef)
+    private void SetUpCommonCosmicProperty(MetaWidgetOld widget,DevAddon addon, CustomCosmicItem costume, Variable<TextField> titleRef, Variable<TextField> authorRef)
     {
         TextMeshPro myText = null!;
         widget.Append(GetTextInputWidget("devStudio.ui.cosmetics.attributes.name", "Title", titleRef, costume.UnescapedName, (text) => costume.Name = CustomCosmicItem.GetEscapedString(text)));
@@ -1112,14 +1112,14 @@ public class DevStudio : MonoBehaviour
 
     
 
-    private void SetUpCosmicContentProperty<Costume>(MetaWidgetOld widget,Costume costume, DevAddon addon, Reference<TextField> costumeNameRef, Action? updateAction, (string translationKey, string fieldName, string? flipName, string? backName, string? backFlipName, int variation)[] contents) where Costume : CustomCosmicItem
+    private void SetUpCosmicContentProperty<Costume>(MetaWidgetOld widget,Costume costume, DevAddon addon, Variable<TextField> costumeNameRef, Action? updateAction, (string translationKey, string fieldName, string? flipName, string? backName, string? backFlipName, int variation)[] contents) where Costume : CustomCosmicItem
     {
         widget.Append(contents.Where(c => c.variation == -1), c => {
             return new CombinedWidgetOld(
                 new MetaWidgetOld.HorizonalMargin(0.16f),
                 new MetaWidgetOld.StateButton()
                 {
-                    StateRef = new Reference<bool>().Set((bool)(typeof(Costume).GetField(c.fieldName)?.GetValue(costume) ?? false)),
+                    StateRef = new Variable<bool>().Set((bool)(typeof(Costume).GetField(c.fieldName)?.GetValue(costume) ?? false)),
                     OnChanged = flag => {
                         typeof(Costume).GetField(c.fieldName)?.SetValue(costume, flag);
                         updateAction?.Invoke();
@@ -1172,7 +1172,7 @@ public class DevStudio : MonoBehaviour
             myAdaptive.transform.localPosition = new(0f, 0f, nameplate.AdaptiveInFront ? -1f : 1f);
         }
 
-        Reference<TextField> titleRef = new(), authorRef = new();
+        Variable<TextField> titleRef = new(), authorRef = new();
         SetUpCommonCosmicProperty(widgets[2], addon, nameplate, titleRef, authorRef);
         SetUpCosmicContentProperty(widgets[2], nameplate, addon, titleRef, UpdateNameplate, contents);
 
@@ -1208,7 +1208,7 @@ public class DevStudio : MonoBehaviour
 
         widgets[0].Append(displayWidget);
 
-        Reference<TextField> titleRef = new(), authorRef = new();
+        Variable<TextField> titleRef = new(), authorRef = new();
         SetUpCommonCosmicProperty(widgets[2], addon, costume, titleRef, authorRef);
         SetUpCosmicContentProperty(widgets[2], costume, addon,titleRef, UpdateCostume, contents);
 
@@ -1241,7 +1241,7 @@ public class DevStudio : MonoBehaviour
     {
         MetaWidgetOld widget = new();
 
-        Reference<TextField> titleRef = new(), keyRef = new();
+        Variable<TextField> titleRef = new(), keyRef = new();
 
         CombinedWidgetOld Centeralize(CombinedWidgetOld widget)
         {
@@ -1289,7 +1289,7 @@ public class DevStudio : MonoBehaviour
         widget.Append(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.TitleAttr) { Font = VanillaAsset.BrookFont, Styles = TMPro.FontStyles.Normal, Size = new(3f, 0.45f) }.EditFontSize(5.2f)) { TranslationKey = "devStudio.ui.addon.cosmetics" });
         widget.Append(new MetaWidgetOld.VerticalMargin(0.2f));
 
-        Reference<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
+        Variable<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
 
         void GenerateSprite(Sprite? mainSprite, Sprite? backSprite, Transform parent, bool adaptive,float scale = 0.3f,float position = -1.15f)
         {

@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Modules.Cosmetics;
 using Nebula.Roles.Abilities;
+using Nebula.Roles.MapLayer;
 using Nebula.VoiceChat;
 using Virial;
 using Virial.Assignable;
@@ -244,7 +245,7 @@ public class UbiquitousMapLayer : MonoBehaviour
             alive++;
 
             //不可視のプレイヤーは何もしない
-            if(p.IsInvisible || p.VanillaPlayer.inVent) continue;
+            if(p.IsInvisible || p.VanillaPlayer.inVent || p.IsDived) continue;
 
             foreach (var pos in dronePos)
             {
@@ -276,6 +277,7 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
 
     static private readonly FloatConfiguration droneCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.droneCoolDown", (5f, 120f, 2.5f), 15f, FloatConfigurationDecorator.Second);
@@ -291,8 +293,9 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
     {
 
         UbiquitousDrone? myDrone = null;
-        UbiquitousMapLayer? mapLayer = null;
+        ShowPlayersMapLayer? mapLayer = null;
         List<Vector2> dronePos = new();
+        AchievementToken<bool> challengeToken = null!;
 
         static private readonly Image droneButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneButton.png", 115f);
         static private readonly Image callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
@@ -303,8 +306,8 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
         {
             if (mapLayer is null)
             {
-                mapLayer = UnityHelper.CreateObject<UbiquitousMapLayer>("UbiquitousLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
-                mapLayer.ReferenceDronePos(dronePos);
+                mapLayer = UnityHelper.CreateObject<ShowPlayersMapLayer>("UbiquitousLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
+                mapLayer.SetUp(p => !p.AmOwner && dronePos.Any(d => p.Position.Distance(d) < droneDetectionRadiousOption), shown => challengeToken.Value |= shown >= 10 && GamePlayer.AllPlayerlikes.Count(p => !p.IsDead) == shown + 1);
                 this.BindGameObject(mapLayer.gameObject);
             }
 
@@ -406,7 +409,7 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
                 AchievementToken<int> totalAchievement = new("ubiquitous.common1", 0, (val, _) => val >= 5);
 
                 var hackButton = NebulaAPI.Modules.AbilityButton(this)
-                    .BindKey(Virial.Compat.VirtualKeyInput.SecondaryAbility, "ubiquitous.doorHack")
+                    .BindKey(Virial.Compat.VirtualKeyInput.SecondaryAbility, "ubiquitous.doorHack", false)
                     .SetImage(hackButtonSprite)
                     .SetLabel("doorHack");
                 hackButton.Availability = (button) => MyPlayer.CanMove || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone);
@@ -432,6 +435,8 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
                 var pred = coolDownTimer.Predicate;
                 coolDownTimer.SetPredicate(()=>pred!.Invoke() || (myDrone && AmongUsUtil.CurrentCamTarget == myDrone));
                 hackButton.CoolDownTimer = coolDownTimer;
+
+                challengeToken = new("ubiquitous.challenge", false, (val, _) => val && Ubiquitous.droneDetectionRadiousOption < 3f);
             }
         }
 

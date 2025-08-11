@@ -71,7 +71,7 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
                 eatButton.OnClick = (button) => {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.EatCorpseAction);
 
-                    AmongUsUtil.RpcCleanDeadBody(eatTracker.CurrentTarget!.PlayerId, MyPlayer.PlayerId,EventDetail.Eat);
+                    AmongUsUtil.RpcCleanDeadBody(eatTracker.CurrentTarget!, MyPlayer.PlayerId,EventDetail.Eat);
                     leftEaten--;
                     button.UpdateUsesIcon(leftEaten.ToString());
                     eatButton.StartCoolDown();

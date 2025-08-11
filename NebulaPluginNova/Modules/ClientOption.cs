@@ -33,9 +33,9 @@ public class ClientOption
         ShowOnlySpawnableAssignableOnFilter,
         ShowVanillaColor,
         AvoidingColorDuplication,
-        StampMenu,
         SimpleNameplate,
         MuteAmbienceOnMeeting,
+        OutputPaparazzoPhoto,
     }
 
     /*
@@ -236,11 +236,6 @@ public class ClientOption
             "config.client.avoidingColorDuplication.soft",
             "config.client.avoidingColorDuplication.strict",
             ], 1);
-        new ClientOption(ClientOptionType.StampMenu, "stampMenu", [
-            "config.client.stampMenu.normal",
-            "config.client.stampMenu.center",
-            "config.client.stampMenu.cursor",
-            ], 1);
         new ClientOption(ClientOptionType.SimpleNameplate, "simpleNameplate", simpleSwitch, 0)
         {
             OnValueChanged = () =>
@@ -261,6 +256,8 @@ public class ClientOption
                 if (MeetingHud.Instance) ChangeAmbientVolumeIfNecessary(mute, true);
             }
         };
+        new ClientOption(ClientOptionType.OutputPaparazzoPhoto, "outputPaparazzoPhoto", simpleSwitch, 0);
+
         ReflectProcessorAffinity();
     }
 

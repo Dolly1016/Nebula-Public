@@ -10,6 +10,7 @@ using Virial.Utilities;
 
 namespace Nebula.Commands.Variations;
 
+/*
 internal class WalkCommand : ICommand
 {
     IEnumerable<CommandComplement> ICommand.Complement(string label, IReadOnlyArray<ICommandToken> arguments, string? last, ICommandExecutor executor)
@@ -61,3 +62,4 @@ internal class WalkCommand : ICommand
             });
     }
 }
+*/

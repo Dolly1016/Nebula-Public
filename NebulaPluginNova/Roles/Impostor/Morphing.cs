@@ -21,6 +21,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
     static public Morphing MyRole = new Morphing();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.morphing.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.morphing.morph", GameStatsCategory.Roles, MyRole);
@@ -48,14 +49,14 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                 acTokenChallenge = new("morphing.challenge", (false, false), (val, _) => val.kill && val.exile);
 
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
+                var sampleTracker = NebulaAPI.Modules.PlayerlikeTracker(this, MyPlayer);
 
                 ModAbilityButton morphButton = null!;
                 var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
                     SampleCoolDownOption, "sample", SampleButtonSprite,
                     _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker!.CurrentTarget!.GetOutfit(75);
+                    sample = sampleTracker!.CurrentTarget!.RealPlayer.GetOutfit(OutfitPriority.TransformedThrethold);
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
@@ -68,7 +69,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                     _ => sample != null, isToggleEffect: true).SetAsUsurpableButton(this);
                 morphButton.OnEffectStart = (button) =>
                 {
-                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", 50, true)));
+                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", OutfitPriority.Morph, true)));
                     acTokenCommon ??= new("morphing.common1");
                     StatsMorph.Progress();
                 };
@@ -82,7 +83,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                     //すれ違いチェック
                     if (button.IsInEffect && acTokenAnother2 == null)
                     {
-                        int colorId = MyPlayer.GetOutfit(75).outfit.ColorId;
+                        int colorId = MyPlayer.GetOutfit(OutfitPriority.TransformedThrethold).outfit.ColorId;
                         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                         {
                             if (p.AmOwner) continue;
@@ -124,7 +125,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
         [OnlyMyPlayer, Local]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            var targetId = ev.Dead.GetOutfit(75).outfit.ColorId;
+            var targetId = ev.Dead.GetOutfit(OutfitPriority.TransformedThrethold).outfit.ColorId;
             var sampleId = sample?.outfit.ColorId;
             if (sampleId.HasValue && targetId == sampleId.Value)
                 acTokenAnother1 ??= new("morphing.another1");

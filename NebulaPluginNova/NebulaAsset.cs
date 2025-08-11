@@ -50,6 +50,7 @@ public enum NebulaAudioClip {
     Drill,
     DrillEnd,
     DrillFric,
+    Fixer
 }
 
 public static class SoundManagerHelper
@@ -106,8 +107,10 @@ public static class NebulaAsset
         HSVShader = Load<Shader>("Sprites-HSV");
         HSVNAShader = Load<Shader>("Sprites-HSV-NoAlpha");
         MeshRendererShader = Load<Shader>("Sprites-ForMeshRenderer");
+        MeshRendererSTShader = Load<Shader>("Sprites-ForMeshRendererST");
         MeshRendererMaskedShader = Load<Shader>("Sprites-ForMeshRendererMasked");
         RingMenuShader = Load<Shader>("Sprites-RingMenu");
+        MeshDistShader = Load<Shader>("Mesh-HortDist");
 
         DivMap[0] = Load<GameObject>("SkeldDivMap");
         DivMap[1] = Load<GameObject>("MIRADivMap");
@@ -155,6 +158,7 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.Drill] = Load<AudioClip>("Drill.wav");
         audioMap[NebulaAudioClip.DrillEnd] = Load<AudioClip>("DrillEnd.wav");
         audioMap[NebulaAudioClip.DrillFric] = Load<AudioClip>("DrillFrac.wav");
+        audioMap[NebulaAudioClip.Fixer] = Load<AudioClip>("Fixer.mp3");
         BrokenShaderMat = Load<Material>("BrokenShaderMat");
 
         PaparazzoShot = Load<GameObject>("PhotoObject");
@@ -236,8 +240,10 @@ public static class NebulaAsset
     static public Shader HSVShader { get; private set; } = null!;
     static public Shader HSVNAShader { get; private set; } = null!;
     static public Shader MeshRendererShader { get; private set; } = null!;
+    static public Shader MeshRendererSTShader { get; private set; } = null!;
     static public Shader MeshRendererMaskedShader { get; private set; } = null!;
     static public Shader RingMenuShader { get; private set; } = null!;
+    static public Shader MeshDistShader { get; private set; } = null!;
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public Material BrokenShaderMat { get; private set; } = null!;

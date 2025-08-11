@@ -21,7 +21,7 @@ internal static class ConfigurationValues
     /// <summary>
     /// オプション値の保存先
     /// </summary>
-    static public readonly DataSaver ConfigurationSaver = new("Config");
+    static public readonly DataSaver ConfigurationSaver = new("Config", true);
 
     /// <summary>
     /// 全オプション

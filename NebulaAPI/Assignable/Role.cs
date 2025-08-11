@@ -249,6 +249,10 @@ public interface DefinedSingleAssignable : DefinedCategorizedAssignable, ISpawna
     /// ジャッカル化割り当てのパラメータを返します。ゲーム内オプションで設定した割り当てを表します。
     /// </summary>
     AllocationParameters? JackalAllocationParameters { get => null; }
+    /// <summary>
+    /// マッド化割り当てのパラメータを返します。ゲーム内オプションで設定した割り当てを表します。
+    /// </summary>
+    AllocationParameters? MadmateAllocationParameters { get => null; }
 }
 
 /// <summary>
@@ -414,6 +418,22 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// <param name="arguments">割り当てのパラメータ。</param>
     /// <returns></returns>
     IPlayerAbility GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => null!;
+
+    /// <summary>
+    /// マッド化可能な場合はtrueを返します。
+    /// マッドメイト用作用素を生成できる必要があります。
+    /// </summary>
+    bool IsLoadableToMadmate => false;
+
+    /// <summary>
+    /// マッド化可能な場合はマッドメイト化能力を生成します。
+    /// マッドメイト化可能でない場合の動作は未定義で構いません。
+    /// </summary>
+    /// <param name="madmate">割り当て対象のプレイヤー。</param>
+    /// <param name="arguments">割り当てのパラメータ。</param>
+    /// <returns></returns>
+    IPlayerAbility GetMaddenAbility(Virial.Game.Player madmate, int[] arguments) => null!;
+
     /// <summary>
     /// 簒奪された能力を生成します。
     /// </summary>
@@ -428,7 +448,7 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     bool IsMadmate => false;
 
     /// <summary>
-    /// 追加割り当てされる役職を一覧で返します。割り当て数と一致する必要はありません。
+    /// 追加割り当てされる役職を一覧で全て返します。割り当て数と一致する必要はありません。
     /// </summary>
     DefinedRole[] AdditionalRoles => [];
 
@@ -438,6 +458,7 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// <param name="ability"></param>
     /// <returns></returns>
     string GetDisplayName(IPlayerAbility ability) => DisplayName;
+    string GetDisplayShort(IPlayerAbility ability) => DisplayShort;
 }
 
 /// <summary>
@@ -456,6 +477,7 @@ public interface DefinedSingleAbilityRole<Ability> : DefinedRole, RuntimeAssigna
     private IUsurpableAbility? CreateUsurpedAbility(Virial.Game.Player player, int[] arguments) => typeof(Ability).IsAssignableTo(typeof(IUsurpableAbility)) ? CreateAbility(player, arguments) as IUsurpableAbility : null;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new RuntimeSingleAbilityAssignable<Ability>(player, this, arguments);
     IPlayerAbility DefinedRole.GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => IsJackalizable ? CreateAbility(jackal, arguments) : null!;
+    IPlayerAbility DefinedRole.GetMaddenAbility(Virial.Game.Player madmate, int[] arguments) => IsLoadableToMadmate ? CreateAbility(madmate, arguments) : null!;
     IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments) => CreateUsurpedAbility(player, arguments);
     /// <summary>
     /// 能力から役職の表示名を取得します。
@@ -470,6 +492,16 @@ public interface DefinedSingleAbilityRole<Ability> : DefinedRole, RuntimeAssigna
             return GetDisplayAbilityName(a) ?? DisplayName;
         }
         return DisplayName;
+    }
+
+    string? GetDisplayAbilityShort(Ability ability) => null;
+    string DefinedRole.GetDisplayShort(IPlayerAbility ability)
+    {
+        if (ability is Ability a)
+        {
+            return GetDisplayAbilityShort(a) ?? DisplayShort;
+        }
+        return DisplayShort;
     }
 }
 
@@ -789,6 +821,4 @@ public interface RuntimeModifier : RuntimeAssignable
     /// クルーメイトタスクを持っていたとしても、クルーメイトタスクの総数に計上されない場合はtrue
     /// </summary>
     public virtual bool MyCrewmateTaskIsIgnored => false;
-
-    public virtual bool IsMadmate => false;
 }

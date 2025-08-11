@@ -86,16 +86,19 @@ public class PlayersOverlay : IGameOperator
                 }
             }
 
+            bool changed = false;
             foreach(var i in allIcons)
             {
-                if(!(i.LastOutfit?.Equals(i.relatedControl.CurrentOutfit) ?? true) || !DynamicPalette.PlayerColors[i.LastOutfit!.outfit.ColorId].CompareRGB(i.LastColor))
+                if(!(i.LastOutfit?.IsSame(i.relatedControl.CurrentOutfit) ?? true) || Helpers.Diff(DynamicPalette.PlayerColors[i.LastOutfit!.outfit.ColorId],i.LastColor) > 0.01f)
                 {
                     i.display.UpdateFromPlayerOutfit(i.relatedControl.CurrentOutfit, PlayerMaterial.MaskType.ComplexUI, false, false);
                     i.display.TogglePet(false);
                     i.LastOutfit = new(i.relatedControl.CurrentOutfit, [], true);
                     i.LastColor = DynamicPalette.PlayerColors[i.LastOutfit.outfit.ColorId];
+                    changed = true;
                 }
             }
+            if(changed) Resources.UnloadUnusedAssets();
         }
 
         if(mask != null)
@@ -118,5 +121,6 @@ public class PlayersOverlay : IGameOperator
     void OnOutfitChanged(PlayerOutfitChangeEvent ev)
     {
         allIcons.FirstOrDefault(i => i.playerId == ev.Player.PlayerId)?.display.UpdateFromPlayerOutfit(ev.Outfit.Outfit.outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
+        Resources.UnloadUnusedAssets();
     } 
 }

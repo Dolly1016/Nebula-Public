@@ -25,6 +25,8 @@ public static class CreateGameOptionsPatch
         __instance.levelButtons[0].transform.parent.gameObject.SetActive(false);
         __instance.serverButton.transform.parent.SetLocalY(-1.84f);
         __instance.serverDropdown.transform.SetLocalY(-2.63f);
+
+        __instance.capacityOption.ValidRange.max = AmongUsUtil.IsCustomServer() ? 24 : 15;
     }
 }
 

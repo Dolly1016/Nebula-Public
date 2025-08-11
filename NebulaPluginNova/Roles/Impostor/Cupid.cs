@@ -36,7 +36,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
     static private readonly FloatConfiguration LaserSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.cupid.laserSeStrength", (1f, 5f, 0.5f), 2f, FloatConfigurationDecorator.Ratio);
     //static private readonly BoolConfiguration SyncKillAndCleanCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cleaner.syncKillAndCleanCoolDown", true);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), GamePlayer.GetPlayer((byte)arguments.Get(1, 255)), GamePlayer.GetPlayer((byte)arguments.Get(2, 255)), arguments.GetAsBool(3), arguments.Get(4, 0));
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), GamePlayer.GetPlayer((byte)arguments.Get(1, 255)), GamePlayer.GetPlayer((byte)arguments.Get(2, 255)), arguments.Get(3, 0));
     bool DefinedRole.IsJackalizable => true;
     static public readonly Cupid MyRole = new();
     static private readonly GameStatsEntry StatsLovers = NebulaAPI.CreateStatsEntry("stats.cupid.lovers", GameStatsCategory.Roles, MyRole);
@@ -49,12 +49,19 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
     {
         static private Image loverButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CupidLoverButton.png", 115f);
 
-        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), selected1?.PlayerId ?? byte.MaxValue, selected2?.PlayerId ?? byte.MaxValue, hasCreatedLover.AsInt(), used];
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), selected1?.PlayerId ?? byte.MaxValue, selected2?.PlayerId ?? byte.MaxValue, used];
 
         private GamePlayer? selected1, selected2;
         private bool hasCreatedLover = false;
         private bool loversIsBrokenObviously = false;
         private int used = 0;
+
+        internal void FixLovers(GamePlayer selected1, GamePlayer selected2)
+        {
+            this.selected1 = selected1;
+            this.selected2 = selected2;
+            this.hasCreatedLover = true;
+        }
 
         private void CheckSelectedStatus()
         {
@@ -95,12 +102,11 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
                 )
                 new StaticAchievementToken("cupid.challenge");
         }
-        public Ability(GamePlayer player, bool isUsurped, GamePlayer? selected1, GamePlayer? selected2, bool createdAlready, int used) : base(player, isUsurped)
+        public Ability(GamePlayer player, bool isUsurped, GamePlayer? selected1, GamePlayer? selected2, int used) : base(player, isUsurped)
         {
-            if (createdAlready)
+            if (selected1 != null && selected2 != null)
             {
-                this.selected1 = selected1;
-                this.selected2 = selected2;
+                FixLovers(selected1, selected2);
                 loversIsBrokenObviously = (selected1?.IsDead ?? true) || (selected2?.IsDead ?? true);
                 this.used = used;
             }
@@ -139,7 +145,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
                         }
                         else if(this.selected1!.IsDead || this.selected2!.IsDead)
                         {
-
+                            button.Break();
                             loversIsBrokenObviously = true;
                             return;
                         }
@@ -229,6 +235,8 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
         private AudioSource soundSource;
         private GamePlayer invoker;
 
+        private bool sentKillRequest = false;
+
         private ILifespan? parentLifespan = null;
         public bool IsDeadObject => !isActive && meshTerminal >= meshLength;
         public void Bind(ILifespan parent) => parentLifespan = parent;
@@ -308,11 +316,12 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
 
         int counter = 0;
 
-        private const float LaserRadiusBase = 0.45f;
+        private const float LaserRadiusBase = 0.65f;
         private static float LaserRadius => LaserRadiusBase * LaserRadiusOption;
         bool CheckLocalKill()
         {
             if (player1.AmOwner || player2.AmOwner) return false;
+            if (MeetingHud.Instance) return false;
 
             var myPos = GamePlayer.LocalPlayer!.Position;
             UnityEngine.Vector2 vec = player2.Position - player1.Position;
@@ -336,11 +345,17 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
         {
             var player = GamePlayer.LocalPlayer;
             if (player.IsDead) return;
+            if (player.IsDived) return;
+            if (sentKillRequest) return;
             if (CheckLocalKill())
             {
                 invoker.MurderPlayer(player, PlayerState.Laser, null, KillParameter.RemoteKill);
+                sentKillRequest = true;
             }
         }
+
+        void OnRevive(PlayerReviveEvent ev) => sentKillRequest = false;
+        
 
         void OnHudUpdate(GameHudUpdateEvent ev) {
             if (!initialized) OnFirstUpdate();
@@ -532,6 +547,12 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
 
     static private readonly RemoteProcess<(GamePlayer player1, GamePlayer player2, GamePlayer invoker)> RpcLaser = new("CupidLaser", (message, _) =>
     {
+        if(message.player1 != message.invoker && message.player2 != message.invoker)
+        {
+            //Cupidによるレーザーなら、Cupidの恋人を確定させる
+            if (message.invoker.TryGetAbility<Ability>(out var ability)) ability.FixLovers(message.player1, message.player2);
+        }
+
         float preDuration = (message.invoker == message.player1 || message.invoker == message.player2) ? LaserDelayByLoverOption : LaserDelayByCupidOption;
         if (message.player1.AmOwner || message.player2.AmOwner || message.invoker.AmOwner)
         {

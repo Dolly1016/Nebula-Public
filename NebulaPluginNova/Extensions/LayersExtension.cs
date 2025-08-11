@@ -87,6 +87,17 @@ static public class LayerExpansion
         return 27;
     }
 
+    static public int GetHookshotWallLayer()
+    {
+        return 26;
+    }
+
+    //プレイヤーを描画しないカメラに映らず、影には映るレイヤーです。
+    static public int GetPlayerWithShadowLayer()
+    {
+        return 25;
+    }
+
     static public int GetLayerMask(params int[] layer)
     {
         int result = 0;

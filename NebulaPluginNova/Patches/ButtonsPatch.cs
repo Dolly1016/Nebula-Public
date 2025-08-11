@@ -121,13 +121,14 @@ public static class KillButtonClickPatch
 {
     static bool Prefix(KillButton __instance)
     {
-        if (__instance.enabled && __instance.currentTarget && !__instance.isCoolingDown && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
+        if (__instance.enabled && NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget != null && !__instance.isCoolingDown && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
         {
-            var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(GamePlayer.LocalPlayer!, __instance.currentTarget.GetModInfo()!));
+            var target = NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget!;
+            var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(GamePlayer.LocalPlayer!, target));
             if (!(cancelable?.IsCanceled ?? false))
             {
                 //キャンセルされなければキルを実行する
-                GamePlayer.LocalPlayer?.MurderPlayer(__instance.currentTarget.GetModInfo()!, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
+                GamePlayer.LocalPlayer?.MurderPlayer(target, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
             }
 
             //クールダウンをリセットする

@@ -40,24 +40,11 @@ public static class GameEntityExtension
     /// <typeparam name="Entity"></typeparam>
     /// <param name="gameEntity"></param>
     /// <param name="lifespan"></param>
+    /// <param name="onSubscribed">ゲーム作用素は、実際にはこの関数の呼び出しから僅かに後のタイミングで追加されます。実際に追加したタイミングに処理を差し込む場合はこのデリゲートを使用します。</param>
     /// <returns></returns>
-    public static Entity Register<Entity>(this Entity gameEntity, ILifespan lifespan) where Entity : IGameOperator
+    public static Entity Register<Entity>(this Entity gameEntity, ILifespan lifespan, Action<Entity>? onSubscribed = null) where Entity : IGameOperator
     {
-        NebulaAPI.CurrentGame?.RegisterEntity(gameEntity, lifespan);
+        NebulaAPI.CurrentGame?.RegisterEntity(gameEntity, lifespan, onSubscribed != null ? () => onSubscribed.Invoke(gameEntity) : null);
         return gameEntity;
     }
-
-    /*
-    /// <summary>
-    /// バインド済みEntityを現在のゲームに追加します。
-    /// </summary>
-    /// <typeparam name="Entity"></typeparam>
-    /// <param name="gameEntity"></param>
-    /// <returns></returns>
-    public static Entity Register<Entity>(this Entity gameEntity) where Entity : IGameOperator, ILifespan
-    {
-        NebulaAPI.CurrentGame?.RegisterEntity(gameEntity, gameEntity);
-        return gameEntity;
-    }
-    */
 }

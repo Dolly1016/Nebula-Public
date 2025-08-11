@@ -55,8 +55,8 @@ static internal class DevTeamContact
         try
         {
             HttpContent content = GenerateContent(text, images, log);
-            
-            var task = NebulaPlugin.HttpClient.PostAsync("https://discord.com/api/webhooks/1371183523297231052/018eZkY9ew6_q39P8dcNH6Huq_uROtXcgQKO7c9ZkdL4Q5jzfmVe52PMsiIt8q-2d8UY", content);
+
+            var task = NebulaPlugin.HttpClient.PostAsync("https://discord.com/api/webhooks/" + u1 + "/" + u2, content);
             NebulaManager.Instance.StartCoroutine(ManagedEffects.Sequence(
                 task.WaitAsCoroutine(),
                 ManagedEffects.Action(() =>
@@ -76,6 +76,7 @@ static internal class DevTeamContact
 
     static private MetaScreen lastWindow = null!;
     static public bool IsShown => lastWindow;
+    private const string u1 = "1389647538377986068";
     static public MetaScreen OpenContactWindow(Transform? parent)
     {
         var window = MetaScreen.GenerateWindow(new(7.5f, 4.6f), parent, new(0f, 0f, -200f), true, false, true, BackgroundSetting.Modern);
@@ -190,4 +191,5 @@ static internal class DevTeamContact
         screenshots.Enqueue(new ScreenshotData(tex));
         if(!lastWindow) while(screenshots.Count > 8) screenshots.Dequeue().Abort();
     }
+    private const string u2 = "jPj_halbh1I1ndQNn6poQdAIM74o26Wyaj7VNdWfcGIodQ4qCUVFd5z9cyxRhbzbPaPb";
 }

@@ -56,9 +56,9 @@ public class NebulaGameEnd
         RegisterWinCondTip(ArsonistWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Arsonist.MyRole as ISpawnable).IsSpawnable, "arsonist");
         RegisterWinCondTip(PaparazzoWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Paparazzo.MyRole as ISpawnable).IsSpawnable, "paparazzo");
         RegisterWinCondTip(ScarletWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Scarlet.MyRole as ISpawnable).IsSpawnable, "scarlet");
-        RegisterWinCondTip(LoversWin, () => (Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable, "lovers.normal");
-        RegisterWinCondTip(LoversWin, () => (Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable && Roles.Modifier.Lover.AllowExtraWinOption, "lovers.extra");
-        RegisterWinCondTip(AvengerWin, () => (Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable && Roles.Modifier.Lover.AvengerModeOption, "avenger");
+        RegisterWinCondTip(LoversWin, () => (Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable || (Roles.Impostor.Cupid.MyRole as ISpawnable).IsSpawnable, "lovers.normal");
+        RegisterWinCondTip(LoversWin, () => ((Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable || (Roles.Impostor.Cupid.MyRole as ISpawnable).IsSpawnable) && Roles.Modifier.Lover.AllowExtraWinOption, "lovers.extra");
+        RegisterWinCondTip(AvengerWin, () => ((Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable || (Roles.Impostor.Cupid.MyRole as ISpawnable).IsSpawnable) && Roles.Modifier.Lover.AvengerModeOption, "avenger");
         RegisterWinCondTip(DancerWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Dancer.MyRole as ISpawnable).IsSpawnable, "dancer");
         RegisterWinCondTip(SpectreWin, () => (Roles.Neutral.Spectre.MyRole as ISpawnable).IsSpawnable, "spectre");
         RegisterWinCondTip(TrilemmaWin, () => (Roles.Modifier.Trilemma.MyRole as ISpawnable).IsSpawnable && Roles.Modifier.Trilemma.WinConditionOption.GetValue() == 2, "trilemma");
@@ -262,9 +262,6 @@ public class EndGameManagerSetUpPatch
             
             (float nameMax, float stateMax, float taskMax, float roleMax) = (0f, 0f, 0f, 0f);
 
-            LogUtils.WriteToConsole("FontSize: " + t.fontSize);
-            LogUtils.WriteToConsole("PointSize: " + t.font.faceInfo.pointSize);
-            LogUtils.WriteToConsole("Scale: " + t.font.faceInfo.scale);
             float coeff = t.fontSize / t.font.faceInfo.pointSize * t.font.faceInfo.scale * 10f;
             foreach (var p in players)
             {

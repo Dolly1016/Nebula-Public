@@ -1,4 +1,5 @@
 ﻿using Hazel;
+using Nebula.Roles.Crewmate;
 using Nebula.Roles.Neutral;
 using Virial.Assignable;
 
@@ -178,12 +179,14 @@ public class StandardRoleAllocator : IRoleAllocator
         //ロールプールを作る
         List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r) { cost = 1,otherCost = 0 }));
         List<RoleChance> GetJackalizedRolePool() => new(Roles.AllRoles.Where(r => r.IsJackalizable && (r.JackalAllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.JackalAllocationParameters) { cost = 1, otherCost = 0 }));
+        List<RoleChance> GetMaddenRolePool() => new(Roles.AllRoles.Where(r => r.IsLoadableToMadmate && (r.MadmateAllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.MadmateAllocationParameters) { cost = 1, otherCost = 0 }));
 
         List<RoleChance> crewmateRoles = GetRolePool(RoleCategory.CrewmateRole);
         List<RoleChance> impostorRoles = GetRolePool(RoleCategory.ImpostorRole);
         List<RoleChance> neutralRoles = GetRolePool(RoleCategory.NeutralRole);
         List<RoleChance> jackalizedRoles = GetJackalizedRolePool();
-        List<RoleChance>[] allRoles = [crewmateRoles, impostorRoles, neutralRoles, jackalizedRoles];
+        List<RoleChance> maddenRoles = GetMaddenRolePool();
+        List<RoleChance>[] allRoles = [crewmateRoles, impostorRoles, neutralRoles, jackalizedRoles, maddenRoles];
 
         CategoryAssign(table, GeneralConfigurations.AssignmentImpostorOption, impostors, others, impostorRoles, allRoles);
         CategoryAssign(table, GeneralConfigurations.AssignmentNeutralOption, others, others, neutralRoles, allRoles);
@@ -205,7 +208,17 @@ public class StandardRoleAllocator : IRoleAllocator
         foreach (var p in impostors) table.SetRole(p, Impostor.Impostor.MyRole);
         foreach (var p in others) table.SetRole(p, Crewmate.Crewmate.MyRole);
 
-        
+        var madmates = table.roles.Where(r => r.role == Madmate.MyRole).Select(r => r.playerId).ToList();
+        //マッド化役職の割り当て
+        if (Madmate.MaddenRoleOption)
+        {
+            CategoryAssign(table, madmates.Count, madmates, madmates, maddenRoles, allRoles, (role, player) =>
+            {
+                table.EditRole(player, last => (last.role, Madmate.GenerateArgument(role)));
+            });
+        }
+
+
 
         foreach (var m in Roles.AllAllocatableModifiers().OrderBy(im => im.AssignPriority)) m.TryAssign(table);
 

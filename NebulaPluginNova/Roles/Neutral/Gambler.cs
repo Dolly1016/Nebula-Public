@@ -27,7 +27,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.gambler", new(216, 194, 79), TeamRevealType.OnlyMe);
 
-    private Gambler() : base("gambler", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [DeceiveCoolDownOption, DeceiveDurationOption, InitialChipsOption, GoalChipsOption, MaxBettingPatternsOption, CanVoteOption, ChipsLimitForNoVoteBettingOption, VentConfiguration])
+    private Gambler() : base("gambler", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [DeceiveCoolDownOption, DeceiveDurationOption, InitialChipsOption, GoalChipsOption, MaxBettingPatternsOption, CanVoteOption, ChipsLimitForNoVoteBettingOption, VentConfiguration, NoticeOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
     }
@@ -42,6 +42,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.gambler.vent", true);
     static private BoolConfiguration CanVoteOption = NebulaAPI.Configurations.Configuration("options.role.gambler.canVote", false);
     static private IntegerConfiguration ChipsLimitForNoVoteBettingOption = NebulaAPI.Configurations.Configuration("options.role.gambler.chipsLimitForNoVoteBetting", (1, 10, 1), 10);
+    static private BoolConfiguration NoticeOption = NebulaAPI.Configurations.Configuration("options.role.gambler.noticeFirstSuccess", false);
 
     static public Gambler MyRole = new Gambler();
     static internal GameStatsEntry StatsDeceive = NebulaAPI.CreateStatsEntry("stats.gambler.deceive", GameStatsCategory.Roles, MyRole);
@@ -61,7 +62,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
             color.ToHSV(out var h, out var s, out _);
             h = 360f - h;
 
-            if (MeetingHud.Instance.playerStates.Find(pva => pva.TargetPlayerId == to, out var pva) && MeetingHud.Instance.playerStates.Find(pva => pva.TargetPlayerId == gambler.PlayerId, out var from))
+            if (MeetingHud.Instance.TryGetPlayer(to, out var pva) && MeetingHud.Instance.TryGetPlayer(gambler.PlayerId, out var from))
             {
                 Vector3 fromPos = pva.transform.InverseTransformPoint(from.PlayerIcon.cosmetics.hat.transform.position);
                 fromPos.z = -2f;
@@ -139,7 +140,6 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
                 void AddPlayer(GamePlayer player)
                 {
                     var icon = AmongUsUtil.GetPlayerIcon(player.Unbox().DefaultOutfit, playersHolder.transform, Vector3.zero, Vector3.one * 0.31f);
-                    icon.ToggleName(false);
                     icon.transform.localPosition = new((float)deceivedNum * 0.29f + 0.2f, -0.1f, -(float)deceivedNum * 0.01f);
                     interactedPlayers.Add(player);
                     deceivedNum++;
@@ -158,7 +158,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
 
                 acTokenChallenge = new("gambler.challenge", (false, false), (val, _) => !val.failed && !val.useDeceive && NebulaGameManager.Instance?.EndState?.EndCondition == NebulaGameEnd.GamblerWin && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
 
-                var playerTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !interactedPlayers.Test(p));
+                var playerTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeStandardPredicate(p) && !interactedPlayers.Test(p.RealPlayer));
 
                 var deceiveButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     DeceiveCoolDownOption, DeceiveDurationOption, "deceive", buttonSprite,
@@ -167,7 +167,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
                 {
                     if (playerTracker.CurrentTarget == null) return;
                     acTokenChallenge.Value.useDeceive = true;
-                    AddPlayer(playerTracker.CurrentTarget);
+                    AddPlayer(playerTracker.CurrentTarget.RealPlayer);
                     deceiveButton.StartCoolDown();
                     StatsDeceive.Progress();
                 };
@@ -222,7 +222,8 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
 
         void OnMeetingStartGlobal(MeetingStartEvent ev) => GamblerSpreader.ResetWithoutChecking();
         void OnResetVoteGlobal(MeetingResetEvent ev) => GamblerSpreader.ClearRenderers();
-        
+
+        bool notSuccessed = true;
 
         //会議画面の改変
         [Local]
@@ -520,6 +521,12 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
                 if (bettings.Count >= 3 && failedNum == 0) new StaticAchievementToken("gambler.common4");
                 if (failedNum > 0 && acTokenChallenge != null) acTokenChallenge.Value.failed = true; 
 
+                if(notSuccessed && successNum > 0)
+                {
+                    if (NoticeOption) RpcNotice.Invoke();
+                    notSuccessed = false;
+                }
+
                 ClearVoteForIcons();
             }, lifespan);
 
@@ -546,7 +553,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
             {
                 if (ev.VoteFor == null) return;
                 if (!interactedPlayers.Test(ev.Voter)) return;
-                if(MeetingHud.Instance.playerStates.Find(pva => pva.TargetPlayerId == ev.VoteFor.PlayerId, out var pva))
+                if(MeetingHud.Instance.TryGetPlayer(ev.VoteFor.PlayerId, out var pva))
                 {
                     MeetingHud.Instance.BloopAVoteIcon(ev.Voter.VanillaPlayer.Data, 0, pva.transform);
                 }
@@ -699,6 +706,14 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
                     GamblerSpreader.Push(message.gambler, betting.to, betting.num);
                 }
             }
+        });
+
+        static private readonly RemoteProcess RpcNotice = new("FirstSuccess", (calledByMe) =>
+        {
+            if (!calledByMe) GameOperatorManager.Instance?.SubscribeSingleListener<FixExileTextEvent>(ev =>
+            {
+                ev.AddText(Language.Translate("gambler.ui.firstSuccess"));
+            },NebulaAPI.CurrentGame);
         });
     }
 }

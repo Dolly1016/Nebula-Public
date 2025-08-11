@@ -68,8 +68,21 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
     private StringArrayDataEntry dataEntry;
     abstract protected IEnumerable<T> AllAssignables { get; }
     private ISharableVariable<int>[] sharableVariables;
-    private HashSet<T> myLocalCache;
-    private int ToSharableValueFromLocal(int index) => myLocalCache.Aggregate(0, (val, a) => { if (a.Id >= index * UnitSize && a.Id < (index + 1) * UnitSize) return val | (1 << (a.Id % UnitSize)); else return val; });
+    
+    private int ToSharableValueFromLocal(int index)
+    {
+        int value = 0;
+        int idMin = index * UnitSize;
+        int idMax = (index + 1) * UnitSize;
+        foreach (var a in AllAssignables)
+        {
+            if(a.Id >= idMin && a.Id < idMax && dataEntry.Value.Contains(a.CodeName))
+            {
+                value |= 1 << a.Id % UnitSize;
+            }
+        }
+        return value;
+    }
     
     public string Id { get; private set; }
     public AssignableFilterConfigurationValue(string id)
@@ -77,15 +90,8 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
         Id = id;
         dataEntry = new StringArrayDataEntry(id, Configuration.ConfigurationValues.ConfigurationSaver, []);
 
-        void RefreshCache()
-        {
-            myLocalCache = new(dataEntry.Value.Select(code => AllAssignables.FirstOrDefault(a => a.CodeName == code)).Where(a => a != null)!);
-        }
-
         void GenerateSharable()
         {
-            RefreshCache();
-
             int length = (AllAssignables.Max(a => a.Id) + 1) / UnitSize + 1;
 
             sharableVariables = new ISharableVariable<int>[length];
@@ -106,8 +112,6 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
     public void RemoveWithLocal(T assignable, bool saveLocal = true)
     {
         sharableVariables[assignable.Id / UnitSize].CurrentValue |= (1 << assignable.Id % UnitSize);
-        myLocalCache.Add(assignable);
-
         if (saveLocal) Save();
     }
 
@@ -118,14 +122,13 @@ public abstract class AssignableFilterConfigurationValue<T> where T : class, Vir
     public void AddWithLocal(T assignable, bool saveLocal = true)
     {
         sharableVariables[assignable.Id / UnitSize].CurrentValue &= ~(1 << assignable.Id % UnitSize);
-        myLocalCache.Remove(assignable);
-
         if (saveLocal) Save();
     }
 
     public void Save()
     {
-        dataEntry.Value = myLocalCache.Select(a => a.CodeName).ToArray();
+        //除外リストを保存している点に注意
+        dataEntry.Value = AllAssignables.Where(a => !Test(a)).Select(a => a.CodeName).ToArray();
     }
 
     public void ToggleAndShare(T assignable) => SetAndShare(assignable, !Test(assignable));

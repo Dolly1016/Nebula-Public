@@ -115,6 +115,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
 
     public bool IsEvil => Category == RoleCategory.ImpostorRole;
     bool DefinedRole.IsJackalizable => IsEvil;
+    bool DefinedRole.IsLoadableToMadmate => !IsEvil;
     public override IUsurpableAbility CreateAbility(GamePlayer player, int[] arguments) => IsEvil ? new EvilAbility(player, arguments.GetAsBool(0), arguments.Get(1, NumOfChargesOption)) : new NiceAbility(player, arguments.GetAsBool(0), arguments.Get(1, NumOfChargesOption));
 
     static internal readonly IntegerConfiguration NumOfChargesOption = NebulaAPI.Configurations.Configuration("options.role.trapper.numOfCharges", (1, 15), 3);
@@ -256,7 +257,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                         if ((lastCommPlayersMask & (1u << p.PlayerId)) != 0) continue;
 
                         //Camo貫通(Morphingまで効果を受ける)
-                        var arrow = new Arrow().SetColorByOutfit(p.GetOutfit(75).outfit).Register(NebulaAPI.CurrentGame!);
+                        var arrow = new Arrow().SetColorByOutfit(p.GetOutfit(OutfitPriority.TransformedThrethold).outfit).Register(NebulaAPI.CurrentGame!);
                         arrow.TargetPos = commTrap.Position;
                         NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
 

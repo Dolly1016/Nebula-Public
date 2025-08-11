@@ -3,6 +3,7 @@
 using Nebula.Modules.GUIWidget;
 using Nebula.Scripts;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Virial;
 using Virial.Assignable;
@@ -50,7 +51,7 @@ internal class NoSRoleSetUp
         foreach (var assembly in AddonScriptManager.ScriptAssemblies.Where(script => script.Behaviour.LoadRoles).Select(s => s.Assembly).Prepend(Assembly.GetAssembly(typeof(Roles))))
         {
             var types = assembly?.GetTypes().Where((type) => type.IsAssignableTo(typeof(DefinedAssignable)) || type.IsAssignableTo(typeof(PerkFunctionalInstance)));
-            foreach(var type in types ?? []) System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+            foreach(var type in types ?? []) Helpers.RunStaticConstructor(type);
         }
     }
 }
@@ -61,6 +62,40 @@ public class Roles
     static public IReadOnlyList<DefinedRole> AllRoles { get; private set; } = [];
     static public IReadOnlyList<DefinedModifier> AllModifiers { get; private set; } = [];
     static public IReadOnlyList<DefinedGhostRole> AllGhostRoles { get; private set; } = [];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static private IEnumerable<T> GetAssignables<T>(IReadOnlyList<T> list, int idMin, int idMax)
+    {
+        if (idMin < 0) idMin = 0;
+        if (idMax >= list.Count) idMax = list.Count - 1;
+        for (int i = idMin; i < idMax; i++) yield return list[i];
+
+    }
+    /// <summary>
+    /// 指定の範囲に収まるIDの役職を全て返します。
+    /// </summary>
+    /// <param name="idMin">自身を含むIdの最小値</param>
+    /// <param name="idMax">自身を含まないIdの最大値</param>
+    /// <returns></returns>
+    static public IEnumerable<DefinedRole> GetRoles(int idMin, int idMax) => GetAssignables(AllRoles, idMin, idMax);
+
+    /// <summary>
+    /// 指定の範囲に収まるIDのモディファイアを全て返します。
+    /// </summary>
+    /// <param name="idMin">自身を含むIdの最小値</param>
+    /// <param name="idMax">自身を含まないIdの最大値</param>
+    /// <returns></returns>
+    static public IEnumerable<DefinedModifier> GetModifiers(int idMin, int idMax) => GetAssignables(AllModifiers, idMin, idMax);
+
+    /// <summary>
+    /// 指定の範囲に収まるIDの幽霊役職を全て返します。
+    /// </summary>
+    /// <param name="idMin">自身を含むIdの最小値</param>
+    /// <param name="idMax">自身を含まないIdの最大値</param>
+    /// <returns></returns>
+    static public IEnumerable<DefinedGhostRole> GetGhostRoles(int idMin, int idMax) => GetAssignables(AllGhostRoles, idMin, idMax);
+
+
 
     static public DefinedRole? GetRole(int id)
     {

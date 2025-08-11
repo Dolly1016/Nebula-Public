@@ -60,4 +60,24 @@ static public class StringHelper
         }
         return builder.ToString();
     }
+
+    /// <summary>
+    /// n回目に出現したvalueの位置を返します。最初の出現を0回目と数えます。
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="value"></param>
+    /// <param name="startIndex"></param>
+    /// <param name="n"></param>
+    /// <returns></returns>
+    public static int FindNIndex(this string text, char value, int n, int startIndex = 0)
+    {
+        int length = text.Length;
+        int count = 0;
+        for(int i = startIndex; i < length; i++)
+        {
+            if (value != text[i]) continue;
+            if (n == count++) return i;
+        }
+        return -1;
+    }
 }

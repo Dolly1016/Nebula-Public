@@ -155,6 +155,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
     static private readonly FloatConfiguration OracleDurationOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleDuration", (float[])[0f,0.5f,1f,1.5f,2f,2.5f,3f,3.5f,4f,5f,6f,7f,8f,9f,10f], 2f, FloatConfigurationDecorator.Second);
     static private readonly IntegerConfiguration NumOfCandidatesOption = NebulaAPI.Configurations.Configuration("options.role.oracle.numOfCandidates", (1, 3), 3);
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public readonly Oracle MyRole = new();
     static private readonly GameStatsEntry StatsOracle = NebulaAPI.CreateStatsEntry("stats.oracle.oracle", GameStatsCategory.Roles, MyRole);
@@ -169,7 +170,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
         {
             if (AmOwner)
             {
-                var playerTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && !divideResults.ContainsKey(p.PlayerId));
+                var playerTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeStandardPredicate(p) && !divideResults.ContainsKey(p.RealPlayer.PlayerId));
 
                 var oracleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     OracleCooldownOption, "oracle", buttonSprite, 
@@ -178,9 +179,9 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
 
                 void PredicateRole()
                 {
-                    var result = ModSingleton<OracleSystem>.Instance.GetRoleCandidate(MyPlayer, playerTracker.CurrentTarget!, 3);
+                    var result = ModSingleton<OracleSystem>.Instance.GetRoleCandidate(MyPlayer, playerTracker.CurrentTarget!.RealPlayer, 3);
                     var shuffled = Helpers.GetRandomArray(result.Length).Select(i => result[i]).ToArray();
-                    divideResults[playerTracker.CurrentTarget!.PlayerId] = (
+                    divideResults[playerTracker.CurrentTarget!.RealPlayer.PlayerId] = (
                         string.Join(", ", shuffled.Select(r => r.DisplayColoredName)),
                         string.Join(", ", shuffled.Select(r => shuffled.Length >= 2 ? r.DisplayColoredShort : r.DisplayColoredName))
                         );
@@ -202,6 +203,8 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 oracleButton.OnEffectEnd = (button) =>
                 {
                     if (playerTracker.CurrentTarget == null) return;
+
+                    if (GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, playerTracker.CurrentTarget, new(RealPlayerOnly: true))).IsCanceled ?? true) return;
 
                     if (!button.EffectTimer!.IsProgressing) PredicateRole();
                     oracleButton.StartCoolDown();

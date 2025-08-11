@@ -180,8 +180,8 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
             var localPlayer = GamePlayer.LocalPlayer;
 
             ModAbilityButton imputeButton = null!;
-            var thuribulumTracker = new ObjectTrackerUnityImpl<Thuribulum, Thuribulum>(localPlayer.VanillaPlayer, 1f, () => ModSingleton<ThuribulumManager>.Instance.AllThuribulums, t => (imputeButton!.IsVisible && t.CanInteract), null, t => t, t => [t.Position, new(t.Position.x, t.Position.y - 0.3f)], t => t.MyRenderer) { MoreHighlight = true } as ObjectTracker<Thuribulum>;
-
+            var thuribulumTracker = new ObjectTrackerUnityImpl<Thuribulum, Thuribulum>(localPlayer.VanillaPlayer, 1f, () => ModSingleton<ThuribulumManager>.Instance.AllThuribulums, t => (imputeButton!.IsVisible && t.CanInteract), null, t => t, t => [t.Position, new(t.Position.x, t.Position.y - 0.3f)], t => t.MyRenderer) { MoreHighlight = true }.Register(NebulaAPI.CurrentGame!) as ObjectTracker<Thuribulum>;
+            
             imputeButton = NebulaAPI.Modules.AbilityButton(NebulaAPI.CurrentGame!, localPlayer, Virial.Compat.VirtualKeyInput.None,
                 0f, "thurifer.impute", buttonSprite,
                 _ => thuribulumTracker.CurrentTarget != null, _ => LocalInhalationPercentage > 0.5f && localPlayer.Role.Role != Thurifer.MyRole && !used);
@@ -373,51 +373,54 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         [Local]
         void OnKillAnyone(PlayerTryVanillaKillLocalEventAbstractPlayerEvent ev)
         {
-            var inhalation = ModSingleton<ThuribulumManager>.Instance.GetInhalationAsPercentage(ev.Target.PlayerId);
-            if(inhalation > 0f)
+            if (ev.Target is GamePlayer gp)
             {
-                var delay = inhalation * MaxKillDelayOption;
-
-                IEnumerator CoDelayKill()
+                var inhalation = ModSingleton<ThuribulumManager>.Instance.GetInhalationAsPercentage(gp.PlayerId);
+                if (inhalation > 0f)
                 {
-                    float t = 0f;
-                    while(t  < delay)
+                    var delay = inhalation * MaxKillDelayOption;
+
+                    IEnumerator CoDelayKill()
                     {
-                        //アニメーション中、追放中は何もしない
-                        if (MeetingHud.Instance && MeetingHud.Instance.state < MeetingHud.VoteStates.Discussion)
+                        float t = 0f;
+                        while (t < delay)
                         {
-                            yield return null;
+                            //アニメーション中、追放中は何もしない
+                            if (MeetingHud.Instance && MeetingHud.Instance.state < MeetingHud.VoteStates.Discussion)
+                            {
+                                yield return null;
+                            }
+                            else if (ExileController.Instance)
+                            {
+                                yield return null;
+                            }
+                            else
+                            {
+                                t += Time.deltaTime;
+                                yield return null;
+                            }
                         }
-                        else if (ExileController.Instance)
+
+                        if (!ev.Target.IsDead)
                         {
-                            yield return null;
-                        }
-                        else
-                        {
-                            t += Time.deltaTime;
-                            yield return null;
+                            if (MeetingHud.Instance) acTokenChallenge.DoIf(a => a.Value.inMeetingKill = true);
+                            if (!(inhalation < 1f)) acTokenChallenge.DoIf(a => a.Value.maxDelayKill = true);
+                            acTokenChallenge.DoIf(a => a.Value.killed++);
+
+                            MyPlayer.MurderPlayer(ev.Target, PlayerStates.Gassed, EventDetails.Gassed, KillParameter.RemoteKill);
                         }
                     }
 
-                    if (!ev.Target.IsDead)
+                    if (ShowBlinkOption || delay < 3f)
                     {
-                        if (MeetingHud.Instance) acTokenChallenge.DoIf(a => a.Value.inMeetingKill = true);
-                        if (!(inhalation < 1f)) acTokenChallenge.DoIf(a => a.Value.maxDelayKill = true);
-                        acTokenChallenge.DoIf(a => a.Value.killed++);
-
-                        MyPlayer.MurderPlayer(ev.Target, PlayerStates.Gassed, EventDetails.Gassed, KillParameter.RemoteKill);
+                        //ブリンクを見せる
+                        MyPlayer.VanillaPlayer.NetTransform.RpcSnapTo(gp.VanillaPlayer.transform.position);
                     }
+
+                    NebulaManager.Instance.StartCoroutine(CoDelayKill().WrapToIl2Cpp());
+
+                    ev.Cancel(true);
                 }
-
-                if (ShowBlinkOption || delay < 3f)
-                {
-                    //ブリンクを見せる
-                    MyPlayer.VanillaPlayer.NetTransform.RpcSnapTo(ev.Target.VanillaPlayer.transform.position);
-                }
-
-                NebulaManager.Instance.StartCoroutine(CoDelayKill().WrapToIl2Cpp());
-
-                ev.Cancel(true);
             }
         }
     }

@@ -1,35 +1,93 @@
-﻿using Nebula.Game.Statistics;
+﻿using MS.Internal.Xml.XPath;
+using Nebula.Game.Statistics;
+using Nebula.Modules;
 using Nebula.Patches;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Game;
+
+internal record KillRequestParameter(int Id, GamePlayer Killer, IPlayerlike Target, CommunicableTextTag PlayerState, CommunicableTextTag? RecordState, KillParameter KillParam, KillCondition KillCondition)
+{
+    static KillRequestParameter()
+    {
+        new RemoteProcessArgument<KillRequestParameter>((writer, param) =>
+        {
+            writer.Write(param!.Id);
+            RemoteProcessArgument<GamePlayer>.Write(writer, param.Killer);
+            RemoteProcessArgument<IPlayerlike>.Write(writer, param.Target);
+            RemoteProcessArgument<CommunicableTextTag>.Write(writer, param.PlayerState);
+            RemoteProcessArgument<CommunicableTextTag>.Write(writer, param.RecordState);
+            writer.Write((int)param.KillParam);
+            writer.Write((int)param.KillCondition);
+        }, (reader) => new(
+            reader.ReadInt32(),
+            RemoteProcessArgument<GamePlayer>.Read(reader),
+            RemoteProcessArgument<IPlayerlike>.Read(reader),
+            RemoteProcessArgument<CommunicableTextTag>.Read(reader),
+            RemoteProcessArgument<CommunicableTextTag>.Read(reader),
+            (KillParameter)reader.ReadInt32(),
+            (KillCondition)reader.ReadInt32()
+        ));
+    }
+}
+
+internal record KillExecutionParameter(byte RequestSender, int RequestId, GamePlayer Killer, IPlayerlike Target, Vector2 TargetPos, GamePlayer RealTarget, KillCharacteristics KillCharacteristics, CommunicableTextTag PlayerState, CommunicableTextTag? RecordState, KillParameter KillParam, bool TargetIsUsingUtility, Vector2 DeadGoalPos)
+{
+    static KillExecutionParameter()
+    {
+        new RemoteProcessArgument<KillExecutionParameter>((writer, param) =>
+        {
+            writer.Write((byte)param!.RequestSender);
+            writer.Write((int)param.RequestId);
+            RemoteProcessArgument<GamePlayer>.Write(writer, param.Killer);
+            RemoteProcessArgument<IPlayerlike>.Write(writer, param.Target);
+            RemoteProcessArgument<Vector2>.Write(writer, param.TargetPos);
+            RemoteProcessArgument<GamePlayer>.Write(writer, param.RealTarget);
+            writer.Write((int)param.KillCharacteristics);
+            RemoteProcessArgument<CommunicableTextTag>.Write(writer, param.PlayerState);
+            RemoteProcessArgument<CommunicableTextTag>.Write(writer, param.RecordState);
+            writer.Write((int)param.KillParam);
+            writer.Write(param.TargetIsUsingUtility);
+            RemoteProcessArgument<Vector2>.Write(writer, param.DeadGoalPos);
+        }, (reader) => new(
+            reader.ReadByte(),
+            reader.ReadInt32(),
+            RemoteProcessArgument<GamePlayer>.Read(reader),
+            RemoteProcessArgument<IPlayerlike>.Read(reader),
+            RemoteProcessArgument<Vector2>.Read(reader),
+            RemoteProcessArgument<GamePlayer>.Read(reader),
+            (KillCharacteristics)reader.ReadInt32(),
+            RemoteProcessArgument<CommunicableTextTag>.Read(reader),
+            RemoteProcessArgument<CommunicableTextTag>.Read(reader),
+            (KillParameter)reader.ReadInt32(),
+            reader.ReadBoolean(),
+            RemoteProcessArgument<Vector2>.Read(reader)
+        ));
+    }
+}
 
 [NebulaRPCHolder]
 internal class KillRequestHandler
 {
-    record KillRequest(int Id, GamePlayer Killer, GamePlayer Target, CommunicableTextTag PlayerState, CommunicableTextTag? RecordState, KillParameter KillParam, KillCondition KillCondition, Action<KillResult>? CallBack);
+    record KillRequest(int Id, GamePlayer Killer, IPlayerlike Target, CommunicableTextTag PlayerState, CommunicableTextTag? RecordState, KillParameter KillParam, KillCondition KillCondition, Action<KillResult>? CallBack);
 
     private int availableId = 0;
     private List<KillRequest> myRequests = new();
 
-    private static uint PackFlags(KillParameter killParam, KillCondition killCondition) => (uint)killParam | ((uint)killCondition << 16);
-    private static void UnpackFlags(uint flag, out KillParameter killParam, out KillCondition killCondition)
-    {
-        killParam = (KillParameter)(flag & 0xFFFF);
-        killCondition = (KillCondition)((flag >> 16) & 0xFFFF);
-    } 
-    public void RequestKill(GamePlayer killer, GamePlayer target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack = null)
+    public void RequestKill(GamePlayer killer, IPlayerlike target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack = null)
     {
         int id = availableId++;
         myRequests.Add(new(id, killer, target, playerState, recordState, killParams, killCondition, callBack));
-        RpcRequestKill.Invoke((GamePlayer.LocalPlayer!.PlayerId, id, killer, target, playerState, recordState, PackFlags(killParams, killCondition)));
+        RpcRequestKill.Invoke((GamePlayer.LocalPlayer!.PlayerId, new(id, killer, target, playerState, recordState, killParams, killCondition)));
     }
 
     private static RemoteProcess<(byte sender, int id, KillResult result)> RpcSendResult = new(
@@ -43,47 +101,55 @@ internal class KillRequestHandler
         }
         );
 
-    private static RemoteProcess<(byte sender, int id, GamePlayer killer, GamePlayer target, CommunicableTextTag playerState, CommunicableTextTag? recordState, uint killFlags)> RpcRequestKill = new(
+    private static RemoteProcess<(byte sender, KillRequestParameter parameter)> RpcRequestKill = new(
         "RequestKill",
         (message, _) =>
         {
             if (AmongUsClient.Instance.AmHost)
             {
-                UnpackFlags(message.killFlags, out var killParam, out var killCond);
-                var result = ModFlexibleKill(message.killer.VanillaPlayer, message.target.VanillaPlayer, message.playerState, message.recordState, killParam, killCond);
-                RpcSendResult.Invoke((message.sender, message.id, result));
+                var result = ModFlexibleKill(message.sender, message.parameter.Id, message.parameter.Killer, message.parameter.Target, message.parameter.PlayerState, message.parameter.RecordState, message.parameter.KillParam, message.parameter.KillCondition);
+                RpcSendResult.Invoke((message.sender, message.parameter.Id, result));
             }
         }
         );
 
-    private static KillResult ModFlexibleKill(PlayerControl killer, PlayerControl target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParam, KillCondition killCond)
+    private static KillResult ModFlexibleKill(byte sender, int id, GamePlayer killer, IPlayerlike target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParam, KillCondition killCond)
     {
-        bool CheckKill(PlayerControl? killer, PlayerControl target, CommunicableTextTag playerState, CommunicableTextTag? recordState, bool isMeetingKill, out KillResult result)
+        bool CheckKill(bool isMeetingKill, out KillResult result)
         {
-            var targetInfo = target.GetModInfo()!;
-            var killerInfo = killer?.GetModInfo() ?? targetInfo;
+            result = KillResult.Kill;
 
-            if(
-                (targetInfo.IsDead && killCond.HasFlag(KillCondition.TargetAlive)) ||
-                (killerInfo.IsDead && killCond.HasFlag(KillCondition.KillerAlive)))
+            if(target == null)
             {
                 result = KillResult.Rejected;
                 return false;
             }
 
-            result = GameOperatorManager.Instance?.Run(new PlayerCheckKilledEvent(targetInfo, killerInfo, isMeetingKill, playerState, recordState)).Result ?? KillResult.Kill;
+            if((target.IsDead && killCond.HasFlag(KillCondition.TargetAlive)) || (killer.IsDead && killCond.HasFlag(KillCondition.KillerAlive)))
+            {
+                result = KillResult.Rejected;
+                return false;
+            }
 
-            if (result != KillResult.Kill) RpcOnGuard.Invoke((killerInfo.PlayerId, targetInfo.PlayerId, result == KillResult.ObviousGuard));
+            bool willDieRealTarget = target is GamePlayer || target.KillCharacteristics.HasFlag(KillCharacteristics.FlagKillRealPlayer);
+            if (willDieRealTarget)
+            {
+                var targetRealPlayer = target.RealPlayer!;
+                result = GameOperatorManager.Instance?.Run(new PlayerCheckKilledEvent(targetRealPlayer, killer, isMeetingKill, playerState, recordState)).Result ?? KillResult.Kill;
+                if (result != KillResult.Kill) RpcOnGuard.Invoke((killer.PlayerId, targetRealPlayer.PlayerId, result == KillResult.ObviousGuard));
+            }
             return result == KillResult.Kill;
         }
 
         bool isMeetingKill = MeetingHud.Instance || ExileController.Instance || !killParam.HasFlag(KillParameter.WithDeadBody);
-        if (CheckKill(killer, target, playerState, recordState, isMeetingKill, out var result))
+        if (CheckKill(isMeetingKill, out var result))
         {
+            bool usingUtility = target.Logic.InMovingPlat || target.Logic.OnLadder;
+            var deadGoalPos = (target as GamePlayer)?.Unbox().GoalPos ?? target.Position;
             if (isMeetingKill)
-                RpcMeetingKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, killParam));
+                RpcMeetingKill.Invoke(new(sender, id, killer, target, target.Position, target.RealPlayer, target.KillCharacteristics,  playerState, recordState, killParam, usingUtility, deadGoalPos));
             else
-                RpcKill.Invoke((killer.PlayerId, target.PlayerId, playerState.Id, recordState?.Id ?? int.MaxValue, killParam));
+                RpcKill.Invoke(new(sender, id, killer, target, target.Position, target.RealPlayer, target.KillCharacteristics, playerState, recordState, killParam, usingUtility, deadGoalPos));
         }
         return result;
     }
@@ -103,170 +169,179 @@ internal class KillRequestHandler
     }
     );
 
-    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, KillParameter parameter)> RpcKill = new(
+    static RemoteProcess<KillExecutionParameter> RpcKill = new(
         "Kill",
-       (message, _) =>
+       (KillExecutionParameter param, bool _) =>
        {
-           var withBlink = message.parameter.HasFlag(KillParameter.WithBlink);
+           var vanillaKiller = param.Killer?.VanillaPlayer;
+           var vanillaRealTarget = param.RealTarget.VanillaPlayer;
 
-           var recordTag = TranslatableTag.ValueOf(message.recordId);
-           if (recordTag != null)
-               NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, message.killerId == byte.MaxValue ? null : message.killerId, 1 << message.targetId) { RelatedTag = recordTag });
+           var withBlink = param.KillParam.HasFlag(KillParameter.WithBlink);
 
-           var killer = Helpers.GetPlayer(message.killerId == byte.MaxValue ? message.targetId : message.killerId);
-           var target = Helpers.GetPlayer(message.targetId);
+           bool realTargetWillDie = param.Target is GamePlayer || param.Target.KillCharacteristics.HasFlag(KillCharacteristics.FlagKillRealPlayer);
 
-           if (target == null) return;
+           if (realTargetWillDie)
+           {
+               var recordTag = param.RecordState;
+               if (recordTag != null)
+                   NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, param.Killer == null ? null : param.Killer.PlayerId, 1 << param.RealTarget.PlayerId) { RelatedTag = recordTag });
+           }
+           
 
            // MurderPlayer ここから
 
-           if (((!target.AmOwner && message.parameter.HasFlag(KillParameter.WithKillSEWidely)) || (killer?.AmOwner ?? false)) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(target.KillSfx, false, 0.8f, null);
+           //死亡する本人でなくかつ全員にSEを再生する場合、あるいはキルの本人であればキルSEを再生する。
+           if (((!realTargetWillDie && param.KillParam.HasFlag(KillParameter.WithKillSEWidely)) || (param.Killer?.AmOwner ?? false)) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(vanillaRealTarget.KillSfx, false, 0.8f, null);
 
 
-           target.gameObject.layer = LayerMask.NameToLayer("Ghost");
-
-           if (target.AmOwner)
+           if (realTargetWillDie)
            {
-               //StatsManager.Instance.IncrementStat(StringNames.StatsTimesMurdered);
-               if (Minigame.Instance)
+               param.RealTarget.VanillaPlayer.gameObject.layer = LayerMask.NameToLayer("Ghost");
+               if (param.RealTarget.AmOwner)
                {
-                   try
+                   //StatsManager.Instance.IncrementStat(StringNames.StatsTimesMurdered);
+                   if (Minigame.Instance)
                    {
-                       Minigame.Instance.Close();
-                       Minigame.Instance.Close();
+                       try
+                       {
+                           Minigame.Instance.Close();
+                           Minigame.Instance.Close();
+                       }
+                       catch
+                       {
+                       }
                    }
-                   catch
-                   {
-                   }
+                   if (param.KillParam.HasFlag(KillParameter.WithOverlay)) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(vanillaKiller?.Data, param.RealTarget.VanillaPlayer.Data);
+                   param.RealTarget.VanillaPlayer.cosmetics.SetNameMask(false);
+                   param.RealTarget.VanillaPlayer.RpcSetScanner(false);
                }
-               if (message.parameter.HasFlag(KillParameter.WithOverlay)) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
-               target.cosmetics.SetNameMask(false);
-               target.RpcSetScanner(false);
            }
-           if (killer) killer!.MyPhysics.StartCoroutine(killer.KillAnimations[System.Random.Shared.Next(killer.KillAnimations.Count)].CoPerformModKill(killer, target, withBlink).WrapToIl2Cpp());
+
+           vanillaKiller?.MyPhysics.StartCoroutine(vanillaKiller.KillAnimations[System.Random.Shared.Next(vanillaKiller.KillAnimations.Count)].CoPerformModKill(param.RequestSender, param.RequestId, vanillaKiller, new(param.Target, param.TargetPos), param.RealTarget, param.KillCharacteristics, withBlink, param.TargetIsUsingUtility, param.DeadGoalPos).WrapToIl2Cpp());
 
            // MurderPlayer ここまで
 
 
-           var targetInfo = target.GetModInfo()?.Unbox();
-           var killerInfo = killer?.GetModInfo()?.Unbox();
-
-           if (targetInfo != null)
+           if (realTargetWillDie)
            {
-               targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-               targetInfo.MyKiller = killerInfo;
+               var targetInfo = param.RealTarget?.Unbox();
+               var killerInfo = param.Killer?.Unbox();
 
-               var deadState = TranslatableTag.ValueOf(message.stateId);
-               targetInfo.MyState = deadState;
-
-               if (targetInfo.AmOwner)
+               if (targetInfo != null)
                {
-                   if(NebulaAchievementManager.GetRecord("death." + deadState, out var rec)) new StaticAchievementToken(rec);
-                   new StaticAchievementToken("stats.death." + deadState);
+                   targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+                   targetInfo.MyKiller = killerInfo;
+
+                   var deadState = param.PlayerState;
+                   targetInfo.MyState = deadState;
+
+                   if (targetInfo.AmOwner)
+                   {
+                       if (NebulaAchievementManager.GetRecord("death." + deadState?.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+                       new StaticAchievementToken("stats.death." + deadState?.TranslationKey);
+                   }
+                   if (killerInfo?.AmOwner ?? false)
+                   {
+                       if (NebulaAchievementManager.GetRecord("kill." + deadState?.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
+                       new StaticAchievementToken("stats.kill." + deadState?.TranslationKey);
+                   }
+
+                   targetInfo.MyControl.Data.IsDead = true;
+                   PlayerExtension.ResetOnDying(targetInfo.MyControl);
+
+                   //1ずつ加算するのでこれで十分
+                   if (targetInfo.AmOwner)
+                   {
+                       if ((NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.IsDead) ?? 0) == 1) new StaticAchievementToken("firstKillRecord");
+                       new StaticAchievementToken("deathRecord");
+
+                   }
+
+                   //幽霊役職割り当ての前にイベントを発火させる。
+                   if (killerInfo != null)
+                   {
+                       GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
+                       GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, withBlink), true);
+                   }
+                   else
+                   {
+                       GameOperatorManager.Instance?.Run(new PlayerDieEvent(targetInfo));
+                   }
+
+                   if (param.KillParam.HasFlag(KillParameter.WithAssigningGhostRole) && targetInfo.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(targetInfo);
                }
-               if (killerInfo?.AmOwner ?? false)
-               {
-                   if(NebulaAchievementManager.GetRecord("kill." + deadState, out var recKill)) new StaticAchievementToken(recKill);
-                   new StaticAchievementToken("stats.kill." + deadState);
-               }
-
-               targetInfo.MyControl.Data.IsDead = true;
-               PlayerExtension.ResetOnDying(targetInfo.MyControl);
-
-               //1ずつ加算するのでこれで十分
-               if (targetInfo.AmOwner)
-               {
-                   if ((NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.IsDead) ?? 0) == 1) new StaticAchievementToken("firstKillRecord");
-                   new StaticAchievementToken("deathRecord");
-
-               }
-
-               //幽霊役職割り当ての前にイベントを発火させる。
-               if (killerInfo != null)
-               {
-                   GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
-                   GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, withBlink), true);
-               }
-               else
-               {
-                   GameOperatorManager.Instance?.Run(new PlayerDieEvent(targetInfo));
-               }
-
-               if (message.parameter.HasFlag(KillParameter.WithAssigningGhostRole) && targetInfo.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(targetInfo);
-
            }
        }
        );
 
-    static RemoteProcess<(byte killerId, byte targetId, int stateId, int recordId, KillParameter parameter)> RpcMeetingKill = new(
+    static RemoteProcess<KillExecutionParameter> RpcMeetingKill = new(
         "NonPhysicalKill",
-       (message, calledByMe) =>
-       {
-           var recordTag = TranslatableTag.ValueOf(message.recordId);
-           if (recordTag != null)
-               NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, message.killerId, 1 << message.targetId) { RelatedTag = recordTag });
+      (KillExecutionParameter param, bool _) =>
+      {
 
-           var killer = Helpers.GetPlayer(message.killerId);
-           var target = Helpers.GetPlayer(message.targetId);
+          var killer = param.Killer;
+          var target = param.RealTarget;
 
-           if (target == null) return;
+          bool realTargetWillDie = param.Target is GamePlayer || param.Target.KillCharacteristics.HasFlag(KillCharacteristics.FlagKillRealPlayer);
 
-           if (!target.AmOwner && message.parameter.HasFlag(KillParameter.WithKillSEWidely) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(target.KillSfx, false, 0.8f, null);
+          if (realTargetWillDie)
+          {
+              var recordTag = param.RecordState;
+              if (recordTag != null)
+                  NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Kill, param.Killer == null ? null : param.Killer.PlayerId, 1 << param.RealTarget.PlayerId) { RelatedTag = recordTag });
+          }
 
-           target.Die(DeathReason.Exile, false);
-           PlayerExtension.ResetOnDying(target);
+          //死亡する本人でなくかつ全員にSEを再生する場合、あるいはキルの本人であればキルSEを再生する。
+          bool amKiller = param.Killer?.AmOwner ?? false;
+          bool amTarget = param.Target.AmOwner;
+          bool everyoneShouldHearSE = realTargetWillDie && param.KillParam.HasFlag(KillParameter.WithKillSEWidely);
+          if ((amKiller || (everyoneShouldHearSE && !amTarget)) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(param.RealTarget.VanillaPlayer.KillSfx, false, 0.8f, null);
 
-           if (target.AmOwner)
-           {
-               if (message.parameter.HasFlag(KillParameter.WithOverlay)) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer ? killer!.Data : null, target.Data);
+          if (param.Target is IFakePlayer fp)
+          {
+              GameOperatorManager.Instance?.Run(new PlayerKillFakePlayerEvent(fp, param.Killer!));
+              fp.Release();
+          }
 
-               NebulaGameManager.Instance!.ChangeToSpectator();
-           }
+          if (realTargetWillDie)
+          {
+              target.VanillaPlayer.Die(DeathReason.Exile, false);
+              PlayerExtension.ResetOnDying(target.VanillaPlayer);
 
-
-           if (MeetingHud.Instance != null) MeetingHud.Instance.ResetPlayerState();
-
-
-
-           var targetInfo = target.GetModInfo();
-           var killerInfo = killer.GetModInfo();
-
-           if (targetInfo != null)
-           {
-               targetInfo.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
-               targetInfo.Unbox().MyKiller = killerInfo;
-               targetInfo.Unbox().MyState = TranslatableTag.ValueOf(message.stateId);
-               if (targetInfo.AmOwner && NebulaAchievementManager.GetRecord("death." + targetInfo!.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
-               if(targetInfo.AmOwner) new StaticAchievementToken("stats.death." + targetInfo!.PlayerState.TranslationKey);
-
-               if ((killerInfo?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + targetInfo!.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
+              if (target.AmOwner)
+              {
+                  if (param.KillParam.HasFlag(KillParameter.WithOverlay)) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer?.VanillaPlayer.Data, target.VanillaPlayer.Data);
+                  NebulaGameManager.Instance!.ChangeToSpectator();
+              }
 
 
-               //Entityイベント発火
-               if (killerInfo != null)
-               {
-                   GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
-                   GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, false), true);
-               }
-               else
-                   GameOperatorManager.Instance?.Run(new PlayerDieEvent(targetInfo));
+              if (MeetingHud.Instance != null) MeetingHud.Instance.ResetPlayerState();
 
-               if (message.parameter.HasFlag(KillParameter.WithAssigningGhostRole) && targetInfo.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(targetInfo);
-           }
 
-           if (MeetingHud.Instance)
-           {
-               IEnumerator CoGainDiscussionTime()
-               {
-                   for (int i = 0; i < 10; i++)
-                   {
-                       MeetingHudExtension.VotingTimer += 1f;
-                       MeetingHud.Instance!.lastSecond = 11;
-                       yield return new WaitForSeconds(0.1f);
-                   }
-               }
-               NebulaManager.Instance!.StartCoroutine(CoGainDiscussionTime().WrapToIl2Cpp());
-           }
-       }
+
+              target.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+              target.Unbox().MyKiller = killer;
+              target.Unbox().MyState = param.PlayerState;
+              if (target.AmOwner && NebulaAchievementManager.GetRecord("death." + target!.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
+              if (target.AmOwner) new StaticAchievementToken("stats.death." + target!.PlayerState.TranslationKey);
+
+              if ((killer?.AmOwner ?? false) && NebulaAchievementManager.GetRecord("kill." + target!.PlayerState.TranslationKey, out var recKill)) new StaticAchievementToken(recKill);
+
+
+              //Entityイベント発火
+              if (killer != null)
+              {
+                  GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killer, target), true);
+                  GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(target, killer, false), true);
+              }
+              else
+                  GameOperatorManager.Instance?.Run(new PlayerDieEvent(target));
+
+              if (param.KillParam.HasFlag(KillParameter.WithAssigningGhostRole) && target.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(target);
+
+
+              if (MeetingHud.Instance) MeetingHudExtension.ExpandDiscussionTime();
+          }
+      }
        );
 }

@@ -40,7 +40,7 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
             {
                 int left = NumOfNoiseOption;
                 var noiseButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, NoiseCooldownOption,
-                    "noise", buttonSprite, null, _ => left >= 0, true);
+                    "noise", buttonSprite, null, _ => left > 0, true);
                 
                 noiseButton.ShowUsesIcon(3, left.ToString());
                 noiseButton.OnClick = (button) =>

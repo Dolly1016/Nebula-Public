@@ -110,11 +110,11 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
             {
                 NebulaManager.Instance.StartDelayAction(0.3f, () =>
                 {
-                    myPlayer.GainAttribute(PlayerAttributes.Roughening, 0.3f, 10f, false, 100, "nebula::berserk");
+                    myPlayer.GainAttribute(PlayerAttributes.Roughening, 0.3f, 10f, false, 100);
                 });
                 NebulaManager.Instance.StartDelayAction(0.6f, () =>
                 {
-                    NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.AmOwner).Do(p => p.Unbox().AddOutfit(new(NebulaGameManager.Instance.UnknownOutfit, "nebula::berserk", 100, true)));
+                    NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.AmOwner).Do(p => p.Unbox().AddOutfit(new(NebulaGameManager.Instance.UnknownOutfit, "nebula::berserk", OutfitPriority.Camouflage, true)));
                     IsTrancing = true;
                 });
             }
@@ -231,9 +231,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
     static private RemoteProcess<GamePlayer> RpcBerserk = new("berserk", (player, _) =>
     {
         player.VanillaPlayer.NetTransform.Halt();
-        var lastFlipX = player.VanillaPlayer.MyPhysics.FlipX;
-        player.VanillaPlayer.MyPhysics.SetBodyType(PlayerBodyTypes.Seeker);
-        player.VanillaPlayer.MyPhysics.FlipX = lastFlipX;
+        player.ChangeBodyType(PlayerBodyTypes.Seeker);
         player.VanillaPlayer.AnimateCustom(HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim);
 
         player.VanillaPlayer.MyPhysics.Animations.Animator.SetTime(7.4f);//Coroutineは最初のyieldまで実行したのちに脱出することに留意
@@ -243,18 +241,13 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
 
     static private void ResetBody(GamePlayer player)
     {
-        var lastFlipX = player.VanillaPlayer.MyPhysics.FlipX;
-
         if(player.VanillaPlayer.MyPhysics.Animations.Animator.m_currAnim == HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim)
         {
             player.VanillaPlayer.moveable = true;
             player.VanillaPlayer.MyPhysics.DoingCustomAnimation = false;
         }
-        player.VanillaPlayer.MyPhysics.SetBodyType(PlayerBodyTypes.Normal);
-        player.VanillaPlayer.MyPhysics.FlipX = lastFlipX;
-        player.VanillaPlayer.cosmetics.SetBodyCosmeticsVisible(true);
-        player.VanillaPlayer.cosmetics.UpdateVisibility();
-        
+
+        player.ChangeBodyTypeAndWrapUp(PlayerBodyTypes.Normal);
     }
 
     static private RemoteProcess<(GamePlayer player, bool immediately)> RpcCalmDown = new("calmDown", (message, _) =>

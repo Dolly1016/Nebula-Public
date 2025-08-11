@@ -1,18 +1,6 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
-using JetBrains.Annotations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NAudio.Dmo;
-using NAudio.Wave.SampleProviders;
-using Nebula.Behavior;
+﻿using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
-using Nebula.Modules.ScriptComponents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine.Rendering;
-using Virial;
 using Virial.Media;
 using Virial.Text;
 

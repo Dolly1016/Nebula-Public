@@ -1,50 +1,54 @@
-﻿using AmongUs.GameOptions;
-using Hazel;
-using InnerNet.GizmoHelpers;
-using NAudio.Codecs;
+﻿using BepInEx.Unity.IL2CPP.Utils;
+using Innersloth.Assets;
 using Nebula.Behavior;
 using Nebula.Modules.Cosmetics;
-using Rewired.UI.ControlMapper;
-using Rewired.Utils.Classes.Data;
-using Sentry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.XR;
 using Virial;
 using Virial.DI;
 using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Runtime;
-using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
-using static Rewired.Demos.CustomPlatform.MyPlatformControllerExtension;
 
 namespace Nebula.Player;
 
 [NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
-internal class FakePlayerIdGenerator : AbstractModule<Virial.Game.Game>
+[NebulaRPCHolder]
+internal class FakePlayerManager : AbstractModule<Virial.Game.Game>, IGameOperator
 {
-    static public void Preprocess(NebulaPreprocessor preprocess) => DIManager.Instance.RegisterModule(() => new FakePlayerIdGenerator());
+    static public void Preprocess(NebulaPreprocessor preprocess) => DIManager.Instance.RegisterModule(() => new FakePlayerManager());
     
     private int AvailableId = 1;
 
-    private FakePlayerIdGenerator()
+    private FakePlayerManager()
     {
-        ModSingleton<FakePlayerIdGenerator>.Instance = this;
+        ModSingleton<FakePlayerManager>.Instance = this;
     }
 
+    protected override void OnInjected(Virial.Game.Game container) => GameOperatorManager.Instance?.Subscribe(this, container);
+    
     public int GenerateAvailableId() => (AvailableId++) << 8 + GamePlayer.LocalPlayer!.PlayerId;
+
+    [EventPriority(0)]
+    void OnInteract(PlayerInteractPlayerLocalEvent ev)
+    {
+        if (ev.IsCanceled && ev.Target is IFakePlayer p) RpcNoticeFailedInteract.Invoke((ev.User, ev.Target));
+    }
+
+    static readonly private RemoteProcess<(GamePlayer user, IPlayerlike target)> RpcNoticeFailedInteract = new("NoticeFailedInteraction", (message, _) =>
+    {
+        if (message.target is IFakePlayer fp && fp.AmOwner) GameOperatorManager.Instance?.Run(new PlayerInteractionFailedForMyFakePlayerEvent(message.user, fp));
+    });
+
 }
 
+[NebulaRPCHolder]
 internal class FakePlayerNetTransform : IGameOperator
 {
     Rigidbody2D body;
     bool amOwner;
-    bool isActive;
+    internal bool enabled = true;
 
+    
     public FakePlayerNetTransform(Rigidbody2D body, FakePlayer player, bool amOwner)
     {
         this.body = body;
@@ -53,6 +57,9 @@ internal class FakePlayerNetTransform : IGameOperator
 
         this.lastPosSent = body.transform.position;
         this.incomingPosQueue.Enqueue(body.transform.position);
+
+        enabled = true;
+        isPaused = false;
     }
 
     public void SetPaused(bool isPaused)
@@ -66,20 +73,10 @@ internal class FakePlayerNetTransform : IGameOperator
         SnapTo(body.transform.position, num);
     }
 
-    public void RpcSnapTo(Vector2 position)
-    {
-        if (AmongUsClient.Instance.AmClient)
-        {
-            this.SnapTo(position, (ushort)(lastSequenceId + 1));
-        }
-        ushort num = (ushort)(lastSequenceId + 2);
-        /*
-        MessageWriter messageWriter = AmongUsClient.Instance.StartRpcImmediately(this.NetId, 21, 1, -1);
-        NetHelpers.WriteVector2(position, messageWriter);
-        messageWriter.Write(num);
-        AmongUsClient.Instance.FinishRpcImmediately(messageWriter);
-        */
-    }
+    public void RpcSnapTo(Vector2 position) => RpcCallSnapTo.Invoke(((this.player as IPlayerlike).PlayerlikeId, position, lastSequenceId));
+    
+
+    static readonly RemoteProcess<(int playerId, Vector2 position, ushort id)> RpcCallSnapTo = new("FakeSnapTo", (message, calledByMe) => (NebulaGameManager.Instance?.GetPlayerlike(message.playerId) as FakePlayer)?.NetTransform.SnapTo(message.position, (ushort)(message.id + (calledByMe ? 1 : 2))));
 
     public void SnapTo(Vector2 position)
     {
@@ -123,17 +120,24 @@ internal class FakePlayerNetTransform : IGameOperator
         body.velocity = Vector2.zero;
     }
 
-    private void FixedUpdate()
+    int interval = 2;
+    void FixedUpdate(GameUpdateEvent ev)
     {
-        if (this.isPaused) return;
+        if (isPaused || !enabled) return;
 
         if (amOwner)
         {
+            interval--;
             if (this.HasMoved())
             {
                 this.sendQueue.Enqueue(this.body.position);
-                return;
             }
+            if (interval <= 0 && sendQueue.Count > 0)
+            {
+                Sync();
+                interval = 2;
+            }
+            return;
         }
         else
         {
@@ -158,74 +162,54 @@ internal class FakePlayerNetTransform : IGameOperator
         return num > 0.0001f;
     }
 
-    //TODO RpcSnapToに相当するメソッド
+    private static readonly RemoteProcess<(int playerId, ushort lastSequenceId, Vector2[] positions)> RpcSync = new("FakeNetTransformSync",
+        (message, calledByMe) => {
+            if (calledByMe) return;
 
-    public bool Serialize(MessageWriter writer, bool initialState)
+            var fakePlayer = (NebulaGameManager.Instance?.GetPlayerlike(message.playerId) as FakePlayer);
+            if (fakePlayer == null) return;
+
+            var netTransform = fakePlayer.NetTransform;
+            
+            Vector2 vector;
+            if (netTransform.incomingPosQueue.Count > 0)
+            {
+                vector = netTransform.incomingPosQueue.Last();
+            }
+            else
+            {
+                vector = netTransform.body.position;
+            }
+            var length = message.positions.Length;
+            for (int i = 0; i < length; i++)
+            {
+                ushort num3 = (ushort)((int)message.lastSequenceId + i);
+                Vector2 vector2 = message.positions[i];
+                if (NetHelpers.SidGreaterThan(num3, netTransform.lastSequenceId))
+                {
+                    netTransform.lastSequenceId = num3;
+                    netTransform.incomingPosQueue.Enqueue(vector2);
+                    vector = vector2;
+                }
+            }
+            if (netTransform.IsInMiddleOfAnimationThatMakesPlayerInvisible()) netTransform.tempSnapPosition = vector;
+            else netTransform.tempSnapPosition = null;
+
+        });
+
+    public void Sync()
     {
-        if (this.isPaused)
-        {
-            return false;
-        }
-        if (initialState)
-        {
-            writer.Write(this.lastSequenceId);
-            NetHelpers.WriteVector2(this.body.position, writer);
-            return true;
-        }
+        if (this.isPaused) return;
+        if (!this.enabled) return;
         
-        if (sendQueue.Count == 0) sendQueue.Enqueue(lastPosSent);
+        if (sendQueue.Count == 0) return;
 
         lastSequenceId += 1;
-        writer.Write(lastSequenceId);
-        ushort num = (ushort)sendQueue.Count;
-        writer.WritePacked((int)num);
-        foreach (Vector2 vector in sendQueue)
-        {
-            NetHelpers.WriteVector2(vector, writer);
-            lastPosSent = vector;
-        }
+        var count = sendQueue.Count();
+        RpcSync.Invoke(((this.player as IPlayerlike).PlayerlikeId, lastSequenceId, sendQueue.ToArray()));
+        lastPosSent = sendQueue.Last();
         sendQueue.Clear();
-        lastSequenceId += (ushort)(num - 1);
-        return true;
-    }
-    public void Deserialize(MessageReader reader, bool initialState)
-    {
-        if (isPaused) return;
-        
-        if (initialState)
-        {
-            lastSequenceId = reader.ReadUInt16();
-            body.transform.position = NetHelpers.ReadVector2(reader);
-            incomingPosQueue.Clear();
-            incomingPosQueue.Enqueue(body.transform.position);
-            return;
-        }
-        if (amOwner) return;
-        
-        ushort num = reader.ReadUInt16();
-        int num2 = reader.ReadPackedInt32();
-        Vector2 vector;
-        if (this.incomingPosQueue.Count > 0)
-        {
-            vector = incomingPosQueue.Last<Vector2>();
-        }
-        else
-        {
-            vector = body.position;
-        }
-        for (int i = 0; i < num2; i++)
-        {
-            ushort num3 = (ushort)((int)num + i);
-            Vector2 vector2 = NetHelpers.ReadVector2(reader);
-            if (NetHelpers.SidGreaterThan(num3, lastSequenceId))
-            {
-                lastSequenceId = num3;
-                incomingPosQueue.Enqueue(vector2);
-                vector = vector2;
-            }
-        }
-        if (IsInMiddleOfAnimationThatMakesPlayerInvisible()) tempSnapPosition = new Vector2?(vector);
-        else tempSnapPosition = null;
+        lastSequenceId += (ushort)(count - 1);
     }
 
     private void MoveTowardNextPoint()
@@ -301,8 +285,22 @@ internal class FakePlayerNetTransform : IGameOperator
 
     private void SetMovementSmoothingModifier()
     {
-        float num = ((incomingPosQueue.Count <= QUEUE_THRESHOLD_FOR_SMOOTHING) ? SMOOTHING_BAND_MODIFIER : NEUTRAL_BAND_MODIFIER);
-        this.rubberbandModifier = Mathf.Lerp(this.rubberbandModifier, num, Time.fixedDeltaTime * SMOOTHING_LERP_RATE);
+        if (GeneralConfigurations.LowLatencyPlayerSyncOption && (AmongUsUtil.IsCustomServer() || AmongUsUtil.IsLocalServer()))
+        {
+            float num = incomingPosQueue.Count switch
+            {
+                < 2 => 0.7f, 
+                3 => 0.85f, 
+                4 or 5 => 0.9f, 
+                _ => 1.2f
+            };
+            rubberbandModifier = Mathf.Lerp(rubberbandModifier, num, Time.fixedDeltaTime * 3f);
+        }
+        else
+        {
+            float num = ((incomingPosQueue.Count <= QUEUE_THRESHOLD_FOR_SMOOTHING) ? SMOOTHING_BAND_MODIFIER : NEUTRAL_BAND_MODIFIER);
+            rubberbandModifier = Mathf.Lerp(rubberbandModifier, num, Time.fixedDeltaTime * SMOOTHING_LERP_RATE);
+        }
     }
 
     private const float SEND_MOVEMENT_THRESHOLD = 0.0001f;
@@ -321,64 +319,190 @@ internal class FakePlayerNetTransform : IGameOperator
     private float rubberbandModifier = 1f;
     private float idealSpeed;
     private bool isPaused;
-    private ushort lastSequenceId;
+    private ushort lastSequenceId = 0;
     private Vector2 lastPosition;
     private Vector2 lastPosSent;
     private Vector2? tempSnapPosition;
 }
 
-[NebulaRPCHolder]
-internal record FakePlayerParameters(bool AllowKill, bool CanBeTarget)
+internal class FakePet : IGameOperator
+{
+    CosmeticsLayer cosmeticsLayer;
+    FakePlayer player;
+    PetBehaviour vanillaPet => cosmeticsLayer.CurrentPet;
+
+    public FakePet(CosmeticsLayer layer, FakePlayer player)
+    {
+        this.player = player;
+        this.cosmeticsLayer = layer;
+    }
+
+    void IGameOperator.OnReleased()
+    {
+        if(vanillaPet) GameObject.Destroy(vanillaPet.gameObject);
+    }
+    public void UpdatePet(PetData petData, Vector2? position = null)
+    {
+        if (vanillaPet) GameObject.Destroy(vanillaPet.gameObject);
+        
+        cosmeticsLayer.UnloadAddressableAsset(cosmeticsLayer.petAsset);
+        NebulaManager.Instance.StartCoroutine(cosmeticsLayer.CoLoadAssetAsync<PetBehaviour>(petData.Cast<IAddressableAssetProvider<PetBehaviour>>(),(Il2CppSystem.Action<PetBehaviour>)(Action<PetBehaviour>)((PetBehaviour pet)=>
+        {
+            cosmeticsLayer.currentPet = GameObject.Instantiate<PetBehaviour>(pet, null);
+            cosmeticsLayer.currentPet.enabled = false;
+
+            cosmeticsLayer.currentPet.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetPlayersLayer());
+
+            vanillaPet.SetCrewmateColor(cosmeticsLayer.ColorId);
+            vanillaPet.transform.localPosition = Vector3.zero;
+            vanillaPet.SetDefaultMaterial();
+            cosmeticsLayer.SetPetFlipX(cosmeticsLayer.FlipX);
+            vanillaPet.SetIdle();
+
+            if (position != null) vanillaPet.transform.position = position.Value.AsVector3(position.Value.y * 1000f);
+            
+            if (Application.targetFrameRate > 30) vanillaPet.rigidbody.interpolation = RigidbodyInterpolation2D.Interpolate;
+
+            if (player.InMovingPlat) cosmeticsLayer.SetPetVisible(false);
+        })));       
+    }
+
+    public PetData Data => vanillaPet.data;
+
+    public FakePlayer TargetPlayer => player;
+    public int RendererCount => vanillaPet.renderers.Length;
+
+    public bool Visible => vanillaPet.visible;
+
+    public bool FlipX => vanillaPet.flipX;
+
+    void OnUpdate(GameUpdateEvent ev)
+    {
+        if (!vanillaPet) return;
+
+        Vector2 truePosition = player.TruePosition.ToUnityVector();
+        Vector2 truePosition2 = vanillaPet.GetTruePosition();
+        Vector2 vector = vanillaPet.rigidbody.velocity;
+        Vector2 vector2 = truePosition - truePosition2;
+        float num = 0.2f; //canmoveでなければ0にするらしい
+        if (vector2.sqrMagnitude > num)
+        {
+            if (vector2.sqrMagnitude > 2f)
+            {
+                vanillaPet.transform.position = truePosition;
+                return;
+            }
+            vector2 *= 5f * GameOptionsManager.Instance.currentNormalGameOptions.PlayerSpeedMod;
+            vector = vector * 0.8f + vector2 * 0.2f;
+        }
+        else
+        {
+            vector *= 0.7f;
+        }
+        AnimationClip currentAnimation = vanillaPet.animator.GetCurrentAnimation();
+        if (vector.sqrMagnitude > 0.01f)
+        {
+            if (currentAnimation != vanillaPet.walkClip)
+            {
+                vanillaPet.StartWalkAnim();
+            }
+            if (vector.x < -0.01f) vanillaPet.FlipX = true;
+            else if (vector.x > 0.01f) vanillaPet.FlipX = false;
+        }
+        else if (currentAnimation == vanillaPet.walkClip)
+        {
+            vanillaPet.animator.Play(vanillaPet.idleClip, 1f);
+        }
+        vanillaPet.rigidbody.velocity = vector;
+    }
+
+    void LateUpdate(GameLateUpdateEvent ev)
+    {
+        if (!vanillaPet) return;
+
+        Vector3 localPosition = vanillaPet.transform.localPosition;
+        localPosition.z = (localPosition.y + vanillaPet.yOffset) / 1000f + 0.0002f;
+        vanillaPet.transform.localPosition = localPosition;
+    }
+}
+
+
+[NebulaPreprocess(PreprocessPhase.BuildNoSModuleContainer), NebulaRPCHolder]
+internal record FakePlayerParameters(Vector2 position, KillCharacteristics KillCharacteristics, bool CanBeTarget, bool InitialFlipX, Vector2? petInitialPos, OutfitCandidate? specialOutfit = null)
 {
     static FakePlayerParameters()
     {
-        RemoteProcessAsset.RegisterType<FakePlayerParameters>((writer, parameters) =>
+        new RemoteProcessArgument<FakePlayerParameters>((writer, parameters) =>
         {
-            writer.Write(parameters.AllowKill);
+            writer.Write(parameters!.position.x);
+            writer.Write(parameters.position.y);
+            writer.Write((int)parameters.KillCharacteristics);
             writer.Write(parameters.CanBeTarget);
+            writer.Write(parameters.InitialFlipX);
+            writer.Write(parameters.petInitialPos?.x ?? parameters.position.x);
+            writer.Write(parameters.petInitialPos?.y ?? (parameters.position.y + 0.2f));
+            writer.WriteIfNotNullCustom(parameters.specialOutfit);
         }, (reader) =>
         {
-            return new(reader.ReadBoolean(), reader.ReadBoolean());
+            return new(new(reader.ReadSingle(), reader.ReadSingle()), (KillCharacteristics)reader.ReadInt32(), reader.ReadBoolean(), reader.ReadBoolean(),new(reader.ReadSingle(), reader.ReadSingle()), reader.ReadIfNotNullCustom<OutfitCandidate>());
         });
     }
 }
 
-[NebulaRPCHolder]
+
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule), NebulaRPCHolder]
 internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGameOperator
 {
+    private enum MovingPlatformState
+    {
+        None,
+        NotAllowed,
+        Allowed,
+        Failed,
+        Done,
+    }
+
     protected readonly PlayerDisplay displayPlayer;
     protected readonly Collider2D collider;
     protected readonly Rigidbody2D body;
+    private readonly FakePet pet;
     private readonly int id;
     private readonly GamePlayer visualPlayer;
     private bool isDead;
-    private bool allowKill;
+    private KillCharacteristics killCharacteristics;
     private bool canBeTarget;
     private bool amOwner;
     internal readonly FakePlayerNetTransform NetTransform;
+    internal readonly FakePlayerLogics Logics;
+    private OutfitCandidate? specialOutfit = null;
+    IPlayerLogics IPlayerlike.Logic => this.Logics;
 
     protected bool isDeadObject { get; private set; } = false;
-    private void Release() => isDeadObject = true;
+    public void Release() => isDeadObject = true;
 
-    static FakePlayer()
-    {
-        RemoteProcessAsset.RegisterType<IPlayerlike>((writer, player) => writer.Write(player?.PlayerlikeId ?? -1), (reader) => NebulaGameManager.Instance?.GetPlayerlike(reader.ReadInt32())!);
-    }
 
-    protected FakePlayer(Vector2 position, bool amOwner, int id, GamePlayer visualPlayer, FakePlayerParameters parameters, IFakePlayerSpawnStrategy spawnStrategy)
+    protected FakePlayer(bool amOwner, int id, GamePlayer visualPlayer, FakePlayerParameters parameters, IFakePlayerSpawnStrategy spawnStrategy)
     {
         this.id = id;
         this.displayPlayer = VanillaAsset.GetPlayerDisplay(true, true);
-        this.displayPlayer.transform.position = position.AsVector3(position.y / 1000f);
+        this.displayPlayer.transform.position = parameters.position.AsVector3(parameters.position.y / 1000f);
         this.displayPlayer.Cosmetics.GetComponent<NebulaCosmeticsLayer>().fakePlayerCache = this;
+        this.displayPlayer.Cosmetics.SetFlipX(parameters.InitialFlipX);
         this.collider = displayPlayer.GetComponent<Collider2D>();
         this.body = displayPlayer.GetComponent<Rigidbody2D>();
         this.visualPlayer = visualPlayer;
         this.amOwner = amOwner;
         this.NetTransform = new FakePlayerNetTransform(body, this, amOwner).Register(this);
+        this.pet = new FakePet(displayPlayer.Cosmetics, this).Register(this);
 
-        this.allowKill = parameters.AllowKill;
+        this.killCharacteristics = parameters.KillCharacteristics;
         this.canBeTarget = parameters.CanBeTarget;
+
+        this.specialOutfit = parameters.specialOutfit;
+
+        NebulaGameManager.Instance.RegisterFakePlayer(this);
+
+        Logics = new(this);
 
         //スポーン & デスポーン
         GameOperatorManager.Instance?.RegisterOnReleased(() =>
@@ -391,21 +515,32 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
 
         this.Register(this);
 
-        UpdateOutfit(visualPlayer.CurrentOutfit.outfit);
+        CheckAndUpdateOutfit(parameters.petInitialPos);
     }
 
-    static public FakePlayer SpawnLocalFakePlayer(Vector2 position, GamePlayer visualPlayer, FakePlayerParameters parameters) => new FakePlayer(position, true, ModSingleton<FakePlayerIdGenerator>.Instance.GenerateAvailableId(), visualPlayer, parameters, new LocalOnlyFakePlayerSpawnStrategy());
+    private void CheckAndUpdateOutfit(Vector2? petPos) { 
+        if(specialOutfit != null)
+        {
+            UpdateOutfit((visualPlayer.GetOutfit(null, specialOutfit.Priority + 1) ?? specialOutfit.Outfit), petPos);
+        }
+        else
+        {
+            UpdateOutfit(visualPlayer.CurrentOutfit, petPos);
+        }
+    }
+
+    static public FakePlayer SpawnLocalFakePlayer(GamePlayer visualPlayer, FakePlayerParameters parameters) => new FakePlayer(true, ModSingleton<FakePlayerManager>.Instance.GenerateAvailableId(), visualPlayer, parameters, new LocalOnlyFakePlayerSpawnStrategy());
 
     int IPlayerlike.PlayerlikeId => id;
 
-    GamePlayer? IPlayerlike.VisualPlayer => visualPlayer;
+    GamePlayer? IPlayerlike.RealPlayer => visualPlayer;
 
     string IPlayerlike.Name => visualPlayer.Name;
     public bool AmOwner => amOwner;
     public bool IsDead => isDead;
+    public bool IsActive => !IsDeadObject;
 
-    public bool AllowKill => allowKill;
-
+    public KillCharacteristics KillCharacteristics => killCharacteristics;
     public bool CanBeTarget => canBeTarget;
 
     public Virial.Compat.Vector2 TruePosition => new((Vector2)displayPlayer.transform.position + collider.offset);
@@ -417,28 +552,61 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
     //Vanillaの挙動を模倣するためのメンバ
     protected bool vanilla_inMovingPlat = false;
     protected bool vanilla_onLadder = false;
+    internal bool InMovingPlat => vanilla_inMovingPlat;
+    internal bool OnLadder => vanilla_onLadder;
+    private MovingPlatformState MovingPlatState = MovingPlatformState.None; 
+
+    public bool UsingSomeUtility => vanilla_inMovingPlat || vanilla_onLadder;
 
     private List<SpriteRenderer> additionalRenderers = [];
     CosmeticsLayer IPlayerlike.VanillaCosmetics => displayPlayer.Cosmetics;
 
-    internal static readonly RemoteProcess<(int id, GamePlayer? visualPlayer, FakePlayerParameters parameters, Vector2 position)> RpcSpawnFakePlayer = new("SendSpawnFakePlayer",
+    internal static readonly RemoteProcess<(int id, GamePlayer? visualPlayer, FakePlayerParameters parameters)> RpcSpawnFakePlayer = new("SendSpawnFakePlayer",
     (message, calledByMe) =>
     {
         if (!calledByMe)
         {
-            new FakePlayer(message.position, false, message.id, message.visualPlayer, message.parameters, new OnlineNonOwnerFakePlayerSpawnStrategy());
+            new FakePlayer(false, message.id, message.visualPlayer, message.parameters, new OnlineNonOwnerFakePlayerSpawnStrategy());
         }
     });
 
     internal static readonly RemoteProcess<int> RpcDespawnFakePlayer = new("DespawnFakePlayer", (id, _) => (NebulaGameManager.Instance?.GetPlayerlike(id) as FakePlayer)?.Release());
 
-    void UpdateOutfit(NetworkedPlayerInfo.PlayerOutfit outfit)
+    internal static readonly RemoteProcess<(int player, bool allowed)> ReplyMovingPlatform = new("ReplyMovingPlatform", (message, _) => {
+        if (NebulaGameManager.Instance?.GetPlayerlike(message.player) is FakePlayer fp) fp.MovingPlatState = message.allowed ? MovingPlatformState.Allowed : MovingPlatformState.NotAllowed;
+    });
+    internal static readonly RemoteProcess<int> RequestMovingPlatform = new("RequestMovingPlatform", (id, _) => {
+        var player = NebulaGameManager.Instance?.GetPlayerlike(id);
+        if (player == null) return;
+        if (player is FakePlayer fp)
+            fp.MovingPlatState = MovingPlatformState.None;
+        if (AmongUsClient.Instance.AmHost)
+        {
+            AirshipStatus airship = ShipStatus.Instance.TryCast<AirshipStatus>();
+            if (airship)
+            {
+                Vector2 vector = (Vector2)airship!.GapPlatform!.transform.position - player.Position.ToUnityVector();
+                bool canUse = !airship.GapPlatform.Target && vector.magnitude < 3f;
+                if (canUse) airship.GapPlatform.Target = player.RealPlayer.VanillaPlayer;
+                ReplyMovingPlatform.Invoke((id, canUse));
+            }
+        }
+    });
+
+    OutfitDefinition? currentOutfit;
+    OutfitDefinition IPlayerlike.CurrentOutfit => currentOutfit ??= visualPlayer.CurrentOutfit;
+
+    void UpdateOutfit(OutfitDefinition outfitDef, Vector2? petPosition = null)
     {
+        currentOutfit = outfitDef;
+        NetworkedPlayerInfo.PlayerOutfit outfit = outfitDef.outfit;
+
         var animations = displayPlayer.Animations;
         var cosmetics = displayPlayer.Cosmetics;
 
         //PlayerControl.SetOutfit
-        cosmetics.SetName(outfit.PlayerName);
+        //cosmetics.SetName(outfit.PlayerName);
+        cosmetics.nameText.text = outfit.PlayerName; //SetNameメソッドは空白の場合に別のテキストが入ってしまうため使えない
         cosmetics.SetNameMask(true);
         cosmetics.SetColor(outfit.ColorId);
         cosmetics.SetHat(outfit.HatId, outfit.ColorId);
@@ -462,17 +630,12 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
 
         foreach (var r in additionalRenderers) if (r) r.material = cosmetics.currentBodySprite.BodySprite.sharedMaterial;
 
-        /*
-        cosmetics.SetPetIdle(outfit.outfit.PetId, outfit.outfit.ColorId, delegate
-        {
-            //cosmetics.SetPetSource(this);
-            if (vanilla_inMovingPlat) cosmetics.SetPetVisible(false);
-            
-        });
-        */
+        pet.UpdatePet(HatManager.Instance.GetPetById(outfit.PetId), petPosition);
+        
         cosmetics.Visible = !IsDead || GamePlayer.LocalPlayer!.IsDead;
     }
 
+    [NebulaRPCHolder]
     internal class FakePlayerLogics : IPlayerLogics
     {
         FakePlayer player;
@@ -489,13 +652,12 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
 
         public Rigidbody2D Body => player.body;
 
-        public void Halt()
-        {
-            //TODO
-        }
+        public void Halt() => player.NetTransform.Halt();
 
+        bool IPlayerLogics.IsActive => player.body;
         public IPlayerlike Player => player;
-
+        bool IPlayerLogics.InMovingPlat => player.vanilla_inMovingPlat;
+        bool IPlayerLogics.OnLadder => player.vanilla_onLadder;
         float IPlayerLogics.TrueSpeed { get
             {
                 var speed = PlayerModInfo.OriginalSpeed;
@@ -534,13 +696,24 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             //walkingToVent = false
             player.vanilla_onLadder = false;
             UpdateNetworkTransformState(true);
-            //NetTranform.SetPaused(false);
+            player.NetTransform.SetPaused(false);
             Body.isKinematic = false;
             player.collider.enabled = true;
             ResetAnimState();
         }
         public IEnumerator UseLadder(Ladder ladder)
         {
+            RpcSendUseLadder.Invoke((ladder.Id, this.player.id));
+            yield return UseLadderImpl(ladder);
+        }
+
+        static readonly private RemoteProcess<(int ladderId, int playerId)> RpcSendUseLadder = new("FakeSendUseLadder", (message, calledByMe) =>
+        {
+            if(!calledByMe) NebulaManager.Instance.StartCoroutine((NebulaGameManager.Instance?.GetPlayerlike(message.playerId) as FakePlayer)?.Logics.UseLadderImpl(ShipStatus.Instance.Ladders.FirstOrDefault(l => l.Id == message.ladderId)!));
+        });
+
+        private IEnumerator UseLadderImpl(Ladder ladder)
+        { 
             //this.myPlayer.moveable = false;
             //this.myPlayer.ForceKillTimerContinue = true;
             player.vanilla_onLadder = true;
@@ -559,7 +732,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             if (player.displayPlayer.Cosmetics.bodyType.GetVisorOptions().HideDuringClimb) player.displayPlayer.Cosmetics.ToggleVisor(false);
 
             yield return WalkPlayerTo(ladder.Destination.transform.position, 0.001f, (float)(ladder.IsTop ? 2 : 1), false);
-            //this.myPlayer.SetPetPosition(this.myPlayer.transform.position);
+            player.visualPlayer.VanillaCosmetics.SetPetPosition(this.player.Position.ToUnityVector());
             this.ResetAnimState();
             yield return Effects.Wait(0.1f);
 
@@ -570,6 +743,28 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         }
 
         public IEnumerator UseZipline(ZiplineConsole zipline)
+        {
+            RpcSendUseZipline.Invoke((this.player.id, zipline.atTop));
+            yield return UseZiplineImpl(zipline);
+        }
+
+        static readonly private RemoteProcess<(int playerId, bool atTop)> RpcSendUseZipline = new("FakeSendUseZipline", (message, calledByMe) =>
+        {
+            if (!calledByMe)
+            {
+                var fungleShipStatus = ShipStatus.Instance.TryCast<FungleShipStatus>();
+                if (fungleShipStatus)
+                {
+                    if(fungleShipStatus!.Zipline.gameObject.GetComponentsInChildren<ZiplineConsole>().Find(c => c.atTop == message.atTop, out var zipline))
+                    {
+                        NebulaManager.Instance.StartCoroutine((NebulaGameManager.Instance?.GetPlayerlike(message.playerId) as FakePlayer)?.Logics.UseZiplineImpl(zipline!));
+                    }
+                    
+                }
+            }
+        });
+
+        private IEnumerator UseZiplineImpl(ZiplineConsole zipline)
         {
             Transform start;
             Transform end;
@@ -630,10 +825,10 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             player.vanilla_inMovingPlat = true;
             //PreparePlayerForZipline ここまで
 
-            //REMOVED: Petがいるなら隠す
             yield return WalkPlayerTo(start.position, 0.001f, 1f, true);
+            player.displayPlayer.Cosmetics.TogglePetVisible(false);
             HandZiplinePoolable currentHand = zipline.zipline.GetHand();
-            currentHand.SetPlayerColor((player as IPlayerlike).VisualPlayer!.CurrentOutfit.outfit, PlayerMaterial.MaskType.None, 1f);
+            currentHand.SetPlayerColor((player as IPlayerlike).RealPlayer!.CurrentOutfit.outfit, PlayerMaterial.MaskType.None, 1f);
             ZiplinePlaySound(zipline.zipline.attachSound, start.position);
 
             //CoAnimatePlayerJumpingOnToZipline ここから
@@ -705,6 +900,8 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             else currentHand.StartUpOutroAnimation();
             
             yield return WalkPlayerTo(zipline.zipline.transform.TransformPoint(landing.position), 0.01f, 1f, false);
+            player.displayPlayer.Cosmetics.SetPetPosition(player.Position.ToUnityVector());
+            player.displayPlayer.Cosmetics.TogglePetVisible(true);
             //REMOVE: Petの再表示
             yield return Effects.Wait(0.1f);
             //CoAlightPlayerFromZipline ここまで
@@ -718,6 +915,81 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             //ResetTarget ここまで
 
             VibrationManager.ClearAllVibration();
+
+            yield break;
+        }
+
+        public IEnumerator UseMovingPlatform(MovingPlatformBehaviour movingPlat, Variable<bool> done)
+        {
+            done.Value = false;
+            RequestMovingPlatform.Invoke(player.id);
+            while (player.MovingPlatState == MovingPlatformState.None) yield return null;
+            if (player.MovingPlatState == MovingPlatformState.NotAllowed)
+            {
+                player.MovingPlatState = MovingPlatformState.Failed;
+                yield break;
+            }
+
+            RpcSendUseMovingPlat.Invoke(this.player.id);
+            yield return UseMovePlatformImpl(movingPlat);
+            done.Value = player.MovingPlatState == MovingPlatformState.Done;
+        }
+
+        static readonly private RemoteProcess<int> RpcSendUseMovingPlat = new("FakeSendUseMovingPlat", (message, calledByMe) =>
+        {
+            if (!calledByMe)
+            {
+                var airship = ShipStatus.Instance.TryCast<AirshipStatus>();
+                if (airship)
+                {
+                    NebulaManager.Instance.StartCoroutine((NebulaGameManager.Instance?.GetPlayerlike(message) as FakePlayer)?.Logics.UseMovePlatformImpl(airship.GapPlatform));   
+                }
+            }
+        });
+
+        private IEnumerator UseMovePlatformImpl(MovingPlatformBehaviour movingPlatform)
+        {
+            movingPlatform.Target = (player as IFakePlayer).RealPlayer.VanillaPlayer;
+            ResetMoveState();
+            UpdateNetworkTransformState(false);
+            ClearPositionQueues();
+            Body.isKinematic = true;
+            player.vanilla_inMovingPlat = true;
+            
+            Vector3 vector = (movingPlatform.IsLeft ? movingPlatform.LeftUsePosition : movingPlatform.RightUsePosition);
+            Vector3 vector2 = ((!movingPlatform.IsLeft) ? movingPlatform.LeftUsePosition : movingPlatform.RightUsePosition);
+            Vector3 sourcePos = (movingPlatform.IsLeft ? movingPlatform.LeftPosition : movingPlatform.RightPosition);
+            Vector3 targetPos = ((!movingPlatform.IsLeft) ? movingPlatform.LeftPosition : movingPlatform.RightPosition);
+            Vector3 vector3 = movingPlatform.transform.parent.TransformPoint(vector);
+            Vector3 worldUseTargetPos = movingPlatform.transform.parent.TransformPoint(vector2);
+            Vector3 worldSourcePos = movingPlatform.transform.parent.TransformPoint(sourcePos);
+            Vector3 worldTargetPos = movingPlatform.transform.parent.TransformPoint(targetPos);
+            yield return WalkPlayerTo(vector3, 0.01f, 1f, false);
+            yield return WalkPlayerTo(worldSourcePos, 0.01f, 1f, false);
+            yield return Effects.Wait(0.1f);
+            worldSourcePos -= (Vector3)player.collider.offset;
+            worldTargetPos -= (Vector3)player.collider.offset;
+            if (Constants.ShouldPlaySfx())
+            {
+                SoundManager.Instance.PlayDynamicSound("PlatformMoving", movingPlatform.MovingSound, true, (DynamicSound.GetDynamicsFunction)movingPlatform.SoundDynamics, SoundManager.Instance.SfxChannel);
+            }
+            movingPlatform.IsLeft = !movingPlatform.IsLeft;
+            yield return Effects.All(
+                Effects.Slide2D(movingPlatform.transform, sourcePos, targetPos, PlayerModInfo.OriginalSpeed),
+                Effects.Slide2DWorld(player.displayPlayer.transform, worldSourcePos, worldTargetPos, PlayerModInfo.OriginalSpeed)
+            );
+            if (Constants.ShouldPlaySfx()) SoundManager.Instance.StopNamedSound("PlatformMoving");
+            
+            yield return WalkPlayerTo(worldUseTargetPos, 0.01f, 1f, false);
+            player.displayPlayer.Cosmetics.SetPetPosition(player.Position.ToUnityVector());
+            player.vanilla_inMovingPlat = false;
+            UpdateNetworkTransformState(true);
+            Body.isKinematic = false;
+            Halt();
+            yield return Effects.Wait(0.1f);
+            movingPlatform.Target = null;
+
+            player.MovingPlatState = MovingPlatformState.Done;
 
             yield break;
         }
@@ -746,6 +1018,13 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             yield break;
         }
 
+        public void SetMovement(bool canMove)
+        {
+            ResetMoveState();
+            UpdateNetworkTransformState(canMove);
+            Halt();
+        }
+
         public void SnapTo(Vector2 position)
         {
             player.displayPlayer.transform.position = position.AsVector3(position.y / 1000f);
@@ -753,17 +1032,24 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
 
         public void ClearPositionQueues()
         {
-            //TODO
+            player.NetTransform.ClearPositionQueues();
         }
 
         public void UpdateNetworkTransformState(bool enabled)
         {
-            //TODO
+            player.NetTransform.enabled = enabled;
         }
+
+        public bool InVent => false;
     }
 
-    public bool FlipX { get => displayPlayer.Cosmetics.FlipX; private set => displayPlayer.Cosmetics.SetFlipXWithoutPet(value); } 
-        
+    public bool FlipX { get => displayPlayer.Cosmetics.FlipX; private set => displayPlayer.Cosmetics.SetFlipXWithoutPet(value); }
+
+    void OnUpdateRealOutfit(PlayerOutfitChangeEvent ev)
+    {
+        if (ev.Player == visualPlayer) CheckAndUpdateOutfit(displayPlayer.Cosmetics.GetPetPosition());
+    }
+
     void UpdateAnimation(GameUpdateEvent ev){
         var animations = displayPlayer.Animations;
         var cosmetics = displayPlayer.Cosmetics;
@@ -771,7 +1057,9 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         //if (this.DoingCustomAnimation) return;
         
         if (!GameData.Instance) return;
-        
+
+        body.transform.SetWorldZ(body.transform.position.y / 1000f);
+
         Vector2 velocity = this.body.velocity;
         if (animations.IsPlayingClimbAnimation()) return;
         
@@ -887,29 +1175,30 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         }
         catch (Exception e) { }
     }
+
 }
 
-[NebulaRPCHolder]
 internal class FakePlayerController : FakePlayer, ILifespan
 {
     //自身が管理者なら関係する寿命を紐づけられる。
     private ILifespan? relatedLifespan = null;
 
-    private FakePlayerController(Vector2 position, GamePlayer visualPlayer, FakePlayerParameters parameters, IFakePlayerSpawnStrategy spawnStrategy) 
-        : base(position, true, ModSingleton<FakePlayerIdGenerator>.Instance.GenerateAvailableId(), visualPlayer, parameters, spawnStrategy)
+    private FakePlayerController(GamePlayer visualPlayer, FakePlayerParameters parameters, IFakePlayerSpawnStrategy spawnStrategy) 
+        : base(true, ModSingleton<FakePlayerManager>.Instance.GenerateAvailableId(), visualPlayer, parameters, spawnStrategy)
     {
     }
 
-    static public FakePlayerController SpawnSyncFakePlayer(Vector2 position, GamePlayer visualPlayer, FakePlayerParameters parameters) => new FakePlayerController(position, visualPlayer, parameters, new OnlineOwnerFakePlayerSpawnStrategy());
+    static public FakePlayerController SpawnSyncFakePlayer(GamePlayer visualPlayer, FakePlayerParameters parameters) => new FakePlayerController(visualPlayer, parameters, new OnlineOwnerFakePlayerSpawnStrategy());
 
     /// <summary>
     /// 自身が管理者であれば、寿命を関連付けられます。
     /// 明示的に開放するか、紐づけた寿命が尽きれば寿命が尽きます。
     /// </summary>
     /// <param name="lifespan"></param>
-    void BindLifespan(ILifespan lifespan)
+    public FakePlayerController BindLifespan(ILifespan lifespan)
     { 
         if(!IsDeadObject) relatedLifespan = lifespan;
+        return this;
     }
 
     public override bool IsDeadObject => isDeadObject || (relatedLifespan?.IsDeadObject ?? false);
@@ -944,7 +1233,7 @@ internal class OnlineOwnerFakePlayerSpawnStrategy : IFakePlayerSpawnStrategy
     void IFakePlayerSpawnStrategy.OnSpawn(FakePlayer player, FakePlayerParameters parameters)
     {
         IFakePlayer fp = player;
-        FakePlayer.RpcSpawnFakePlayer.Invoke((fp.PlayerlikeId, fp.VisualPlayer, parameters, player.Position));
+        FakePlayer.RpcSpawnFakePlayer.Invoke((fp.PlayerlikeId, fp.RealPlayer, parameters));
     }
 }
 

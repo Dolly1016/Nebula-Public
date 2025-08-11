@@ -18,17 +18,16 @@ namespace Nebula.Roles.Crewmate;
 public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, 
-        [CanFixLightOption, CanFixCommsOption, CanSuicideOption, SuicideCoolDownOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, 
+        [CanFixLightOption, CanFixCommsOption, CanSuicideOption, SuicideCoolDownOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, MaddenRoleOption, 
         new GroupConfiguration("options.role.madmate.group.embroil", [EmbroilVotersOnExileOption, LimitEmbroiledPlayersToVotersOption, EmbroilDelayOption], GroupConfigurationColor.ImpostorRed), 
         new GroupConfiguration("options.role.madmate.group.identification", [CanIdentifyImpostorsOptionEditor], GroupConfigurationColor.ImpostorRed)
         ]) 
     {
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Madmate.png");
-        ConfigurationHolder?.ScheduleAddRelated(() => [Modifier.Madmate.MyRole.ConfigurationHolder!]);
     }
     Citation? HasCitation.Citation => Citations.TheOtherRolesGM;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, Roles.GetRole(arguments.Get(0, -1)), arguments.Skip(1).ToArray());
 
     static private readonly BoolConfiguration EmbroilVotersOnExileOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilPlayersOnExile", false);
     static private readonly BoolConfiguration LimitEmbroiledPlayersToVotersOption = NebulaAPI.Configurations.Configuration("options.role.madmate.limitEmbroiledPlayersToVoters", true, ()=>EmbroilVotersOnExileOption);
@@ -77,9 +76,11 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
             return new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, widgets);
         }
         );
+    static public BoolConfiguration MaddenRoleOption = NebulaAPI.Configurations.Configuration("options.role.madmate.maddenRole", false);
 
     bool DefinedRole.IsMadmate => true;
     static public readonly Madmate MyRole = new();
+    static public int[] GenerateArgument(DefinedRole? madden) => [madden?.Id ?? -1];
     static private readonly GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -87,8 +88,29 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         DefinedRole RuntimeRole.Role => MyRole;
 
         List<byte> impostors = new();
+        int[] evacuatedArguments = [];
 
-        public Instance(GamePlayer player) : base(player) {}
+        public Instance(GamePlayer player, DefinedRole? maddenRole, int[] maddenRoleArguments) : base(player) {
+            this.evacuatedArguments = maddenRoleArguments;
+            this.MyMadden = maddenRole;
+        }
+        IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => MyMadden != null ? [MyRole, MyMadden] : [MyRole];
+        public DefinedRole? MyMadden { get; private set; }
+        public IPlayerAbility? MaddenAbility { get; private set; } = null;
+        int[]? RuntimeAssignable.RoleArguments => ((int[])[MyMadden?.Id ?? -1]).Concat(MaddenAbility?.AbilityArguments ?? []).ToArray();
+        IEnumerable<IPlayerAbility?> RuntimeAssignable.MyAbilities => MaddenAbility != null ? [MaddenAbility, .. MaddenAbility.SubAbilities] : [];
+
+        string RuntimeAssignable.DisplayName
+        {
+            get
+            {
+                return MaddenAbility != null ? Language.Translate("role.madmate.prefix") + MyMadden!.GetDisplayName(MaddenAbility) : (MyRole as DefinedAssignable).DisplayName;
+            }
+        }
+        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyRole.UnityColor);
+        string RuntimeRole.DisplayShort => MaddenAbility != null ? Language.Translate("role.madmate.prefix") + MyMadden!.GetDisplayShort(MaddenAbility) : (MyRole as DefinedRole).DisplayShort;
+        string RuntimeRole.DisplayIntroBlurb =>  MyMadden?.DisplayIntroBlurb ?? (MyRole as DefinedRole).DisplayIntroBlurb;
+        string RuntimeRole.DisplayIntroRoleName => (this as RuntimeAssignable).DisplayName;
 
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.IsWin |= ev.GameEnd == NebulaGameEnd.ImpostorWin;
@@ -122,7 +144,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 
             if (AmOwner && CanSuicideOption)
             {
-                var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, SuicideCoolDownOption.CoolDown,
+                var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, MyMadden == Sheriff.MyRole ? Virial.Compat.VirtualKeyInput.SecondaryAbility : Virial.Compat.VirtualKeyInput.Kill, SuicideCoolDownOption.CoolDown,
                     "madmate.suicide", suicideButtonSprite);
                 suicideButton.OnClick = (button) =>
                 {
@@ -130,6 +152,8 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
                 };
                 suicideButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
             }
+
+            if (MyMadden != null) MaddenAbility = MyMadden.GetMaddenAbility(MyPlayer, evacuatedArguments)?.Register(this);
         }
 
         public void OnGameStart(GameStartEvent ev)

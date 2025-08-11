@@ -1,8 +1,7 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Virial;
-using Virial.Attributes;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -72,8 +71,8 @@ internal class GameOperatorBuilder
                 var lastAction = procedure;
                 procedure = (instance, e) =>
                 {
-                    byte? p = (e as AbstractPlayerEvent)?.Player.PlayerId;
-                    if (p.HasValue && p.Value == ((instance as IBindPlayer)?.MyPlayer.PlayerId ?? byte.MaxValue)) lastAction.Invoke(instance, e);
+                    byte p = Unsafe.As<AbstractPlayerEvent>(e).Player.PlayerId;
+                    if (p == ((instance as IBindPlayer)?.MyPlayer.PlayerId ?? byte.MaxValue)) lastAction.Invoke(instance, e);
                 };
             }
 
@@ -83,6 +82,15 @@ internal class GameOperatorBuilder
                 procedure = (instance, e) =>
                 {
                     if ((instance as IBindPlayer)?.AmOwner ?? false) lastAction.Invoke(instance, e);
+                };
+            }
+
+            if (method.GetCustomAttribute<OnlyLocalPlayer>() != null)
+            {
+                var lastAction = procedure;
+                procedure = (instance, e) =>
+                {
+                    if (Unsafe.As<AbstractPlayerEvent>(e).Player.AmOwner) lastAction.Invoke(instance, e);
                 };
             }
 
@@ -222,7 +230,7 @@ public class GameOperatorManager
     }
 
     // 反復中に作用素が追加されないよう、一時的に退避する
-    private List<(IGameOperator entity, ILifespan lifespan)> newOperations = new();
+    private List<(IGameOperator entity, ILifespan lifespan, Action? onSubscribed)> newOperations = new();
     private List<(Type eventType, Action<object> operation, ILifespan lifespan, int priority)> newFuncOperations = new();
 
     private void RegisterEntity(IGameOperator operation, ILifespan lifespan)
@@ -262,8 +270,13 @@ public class GameOperatorManager
     //退避されていた作用素をゲームに追加する
     private void RegisterAll()
     {
-        foreach (var entry in newOperations) RegisterEntity(entry.entity, entry.lifespan);
+        foreach (var entry in newOperations)
+        {
+            RegisterEntity(entry.entity, entry.lifespan);
+            entry.onSubscribed?.Invoke();
+        }
         foreach (var op in newFuncOperations) RegisterImpl(op.eventType, new(op.lifespan, op.operation, op.priority));
+        
         newOperations.Clear();
         newFuncOperations.Clear();
     }
@@ -274,24 +287,24 @@ public class GameOperatorManager
         private Action releaseAction;
         void IGameOperator.OnReleased() => releaseAction?.Invoke();
     }
-    public void RegisterOnReleased(Action onReleased, ILifespan lifespan) => Subscribe(new ReleaseAction(onReleased), lifespan);
+    public void RegisterOnReleased(Action onReleased, ILifespan lifespan, Action? onSubscribed = null) => Subscribe(new ReleaseAction(onReleased), lifespan, onSubscribed);
 
-    public void Subscribe(IGameOperator entity, ILifespan lifespan)
+    public void Subscribe(IGameOperator entity, ILifespan lifespan, Action? onSubscribed = null)
     {
         if (entity is INestedLifespan nl && nl != lifespan)
         {
             //入れ子にするタイプの寿命オブジェクトなら指定した寿命オブジェクトの入れ子にする。
             if(nl.Bind(lifespan)) lifespan = nl;
         }
-        newOperations.Add((entity, lifespan));
+        newOperations.Add((entity, lifespan, onSubscribed));
         operatorsDic[entity] = lifespan;
     }
 
     Dictionary<IGameOperator, ILifespan> operatorsDic = [];
-    public bool CheckAndRegister(IGameOperator entity, ILifespan lifespan)
+    public bool CheckAndRegister(IGameOperator entity, ILifespan lifespan, Action? onSubscribed = null)
     {
         if (operatorsDic.ContainsKey(entity)) return false;
-        Subscribe(entity, lifespan);
+        Subscribe(entity, lifespan, onSubscribed);
         return true;
     }
 
@@ -316,9 +329,19 @@ public class GameOperatorManager
         newFuncOperations.Add((typeof(Event), obj => operation.Invoke((Event)obj), lifespan, priority));
     }
 
+    public void SubscribeSingleListener<Event>(Action<Event> operation, ILifespan? lifespan = null, int priority = 100)
+    {
+        bool called = false;
+        newFuncOperations.Add((typeof(Event), obj =>
+        {
+            operation.Invoke((Event)obj);
+            called = true;
+        }, new FunctionalLifespan(()=> (lifespan?.IsAliveObject ?? true) && !called), priority));
+    }
+
     public void RegisterReleasedAction(Action onReleased, ILifespan lifespan)
     {
-        newOperations.Add((new LambdaOnReleaseOperator(onReleased), lifespan));
+        newOperations.Add((new LambdaOnReleaseOperator(onReleased), lifespan, null));
     }
     public GameOperatorManager()
     {
@@ -333,7 +356,7 @@ public static class GameOperatorHelpers
 {
     static public GameObject BindGameObject(this ILifespan lifespan, GameObject obj)
     {
-        GameOperatorManager.Instance?.RegisterOnReleased(() => { if (obj) GameObject.Destroy(obj); }, lifespan);
+        GameOperatorManager.Instance?.RegisterOnReleased(() => { if (obj) GameObject.Destroy(obj); }, lifespan, null);
         return obj;
     }
 }

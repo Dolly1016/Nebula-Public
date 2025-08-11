@@ -1,5 +1,8 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes;
+using UnityEngine;
+using UnityEngine.UIElements;
 using UnityEngine.Video;
+using Virial.Events.Player;
 
 namespace Nebula.Utilities;
 
@@ -18,6 +21,7 @@ public static class UnityHelper
         obj.transform.localPosition = localPosition;
         obj.transform.localScale = new Vector3(1f, 1f, 1f);
         if (layer.HasValue) obj.layer = layer.Value;
+        
         else if (parent != null) obj.layer = parent.gameObject.layer;
         return obj;
     }
@@ -43,7 +47,7 @@ public static class UnityHelper
 
     public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer,Color? color = null,Material? material = null)
     {
-        var meshFilter = UnityHelper.CreateObject<MeshFilter>("mesh", parent, localPosition, layer);
+        var meshFilter = UnityHelper.CreateObject<MeshFilter>(objName, parent, localPosition, layer);
         var meshRenderer = meshFilter.gameObject.AddComponent<MeshRenderer>();
         if (!material)
         {
@@ -103,6 +107,7 @@ public static class UnityHelper
 
         float x = size.x * 0.5f;
         float y = size.y * 0.5f;
+        mesh.Clear();
         mesh.SetVertices((Vector3[])[
             new Vector3(-x , -y) + center.Value,
             new Vector3(x, -y) + center.Value,
@@ -317,6 +322,71 @@ public static class UnityHelper
         }
         NebulaManager.Instance.StartCoroutine(CoUpdate().WrapToIl2Cpp());
         return renderer;
+    }
+
+    private static Texture2D TakeCustomPictureInner(Camera camera, int width, int height, bool? ignoreShadow, bool showNameText)
+    {
+        RenderTexture rt = new(width, height, 16);
+        rt.Create();
+        camera.targetTexture = rt;
+
+        using (ignoreShadow.HasValue ? AmongUsUtil.IgnoreShadow(ignoreShadow.Value, showNameText) : null) camera.Render();
+
+        RenderTexture.active = camera.targetTexture;
+        Texture2D texture2D = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false, false);
+        texture2D.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        texture2D.Apply(false, false);
+
+        camera.targetTexture = null;
+        RenderTexture.active = null;
+        GameObject.Destroy(rt);
+
+        return texture2D;
+    }
+
+    public static Texture2D TakeCustomPictureAndDestroyCamObj(GameObject camObj, int width, int height, float orthographicSize, int cullingMask, UnityEngine.Color backgroundColor, bool? ignoreShadow, bool showNameText)
+    {
+        Camera cam = camObj.AddComponent<Camera>();
+        cam.orthographic = true;
+        cam.orthographicSize = orthographicSize;
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.backgroundColor = backgroundColor;
+        cam.cullingMask = cullingMask;
+        cam.nearClipPlane = -100;
+        cam.farClipPlane = 100;
+        cam.enabled = true;
+
+        var texture = TakeCustomPictureInner(cam, width, height, ignoreShadow, showNameText);
+
+        GameObject.Destroy(camObj);
+
+        return texture;
+    }
+
+    public static Texture2D TakeCustomPicture(Transform? parent, Vector3 localPos, int width, int height, float orthographicSize, int cullingMask, UnityEngine.Color backgroundColor, bool? ignoreShadow, bool showNameText)
+    {
+        var camObj = UnityHelper.CreateObject("TempCam", parent, localPos);
+        return TakeCustomPictureAndDestroyCamObj(camObj, width, height, orthographicSize, cullingMask, backgroundColor, ignoreShadow, showNameText);
+    }
+
+    public static void ReflectSpriteST(Material material, Sprite sprite)
+    {
+        var texture = sprite.texture;
+        material.mainTexture = texture;
+
+        float textureWidth = texture.width;
+        float textureHeight = texture.height;
+
+        Rect spriteRect = sprite.rect;
+
+        float tilingX = spriteRect.width / textureWidth;
+        float tilingY = spriteRect.height / textureHeight;
+
+        float offsetX = spriteRect.x / textureWidth;
+        float offsetY = spriteRect.y / textureHeight;
+
+        material.SetTextureScale("_MainTex", new Vector2(tilingX, tilingY));
+        material.SetTextureOffset("_MainTex", new Vector2(offsetX, offsetY));
     }
 }
 

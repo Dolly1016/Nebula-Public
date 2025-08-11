@@ -7,6 +7,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
 using Virial.Utilities;
@@ -96,8 +97,12 @@ internal class NebulaModuleFactory : IModuleFactory
     Virial.Components.ModAbilityButton IModuleFactory.AbilityButton(ILifespan lifespan) => new ModAbilityButtonImpl().Register(lifespan);
     Virial.Components.ModAbilityButton IModuleFactory.AbilityButton(ILifespan lifespan, bool isLeftSideButton, bool isArrangedAsKillButton, int priority, bool alwaysShow) => new ModAbilityButtonImpl(isLeftSideButton, isArrangedAsKillButton, priority, alwaysShow).Register(lifespan);
     Virial.Components.GameTimer IModuleFactory.Timer(ILifespan lifespan, float max) => new TimerImpl(max).Register(lifespan);
-    
-    private Virial.Components.ObjectTracker<GamePlayer> GetTracker(ILifespan lifespan, GamePlayer player, Predicate<GamePlayer> predicate, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier)
+    Virial.Components.IVisualTimer IModuleFactory.CombinedTimer(IVisualTimer primaryTimer, IVisualTimer secondaryTimer, bool allowPrimaryTimerToStart, bool allowSecondaryTimerToStart) => new CombinedTimer(primaryTimer, secondaryTimer, allowPrimaryTimerToStart, allowSecondaryTimerToStart);
+
+    Virial.Components.IVisualTimer IModuleFactory.VanillaKillTimer() => new VanillaKillTimer();
+    Virial.Components.IVisualTimer IModuleFactory.CurrentKillTimer() => new CurrentKillTimer();
+
+    private Virial.Components.ObjectTracker<GamePlayer> GetPlayerTracker(ILifespan lifespan, GamePlayer player, Predicate<GamePlayer> predicate, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier)
     {
         Predicate<GamePlayer>? predicateHeavier = filterHeavier == null ? null : filterHeavier.Invoke;
         if (filter == null)
@@ -107,9 +112,30 @@ internal class NebulaModuleFactory : IModuleFactory
             return ObjectTrackers.ForPlayer(lifespan, null, player, (p) => predicate.Invoke(p) && filter(p), predicateHeavier, null);
         }
     }
-    Virial.Components.ObjectTracker<GamePlayer> IModuleFactory.KillTracker(ILifespan lifespan, GamePlayer player, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier) 
-        => GetTracker(lifespan, player, ObjectTrackers.KillablePredicate(player), filter, filterHeavier);
-    
+    Virial.Components.ObjectTracker<GamePlayer> IModuleFactory.KillTracker(ILifespan lifespan, GamePlayer player, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier)
+        => GetPlayerTracker(lifespan, player, ObjectTrackers.KillablePredicate(player), filter, filterHeavier);
+
     Virial.Components.ObjectTracker<GamePlayer> IModuleFactory.PlayerTracker(ILifespan lifespan, GamePlayer player, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier)
-        => GetTracker(lifespan, player, ObjectTrackers.StandardPredicate, filter, filterHeavier);
+        => GetPlayerTracker(lifespan, player, ObjectTrackers.StandardPredicate, filter, filterHeavier);
+
+    private Virial.Components.ObjectTracker<IPlayerlike> GetPlayerlikeTracker(ILifespan lifespan, GamePlayer player, Predicate<IPlayerlike> predicate, Func<IPlayerlike, bool>? filter, Func<IPlayerlike, bool>? filterHeavier)
+    {
+        Predicate<IPlayerlike>? predicateHeavier = filterHeavier == null ? null : filterHeavier.Invoke;
+        if (filter == null)
+            return ObjectTrackers.ForPlayerlike(lifespan, null, player, predicate, predicateHeavier, null);
+        else
+        {
+            return ObjectTrackers.ForPlayerlike(lifespan, null, player, (p) => predicate.Invoke(p) && filter(p), predicateHeavier, null);
+        }
+    }
+    ObjectTracker<IPlayerlike> IModuleFactory.PlayerlikeKillTracker(ILifespan lifespan, GamePlayer player, Func<IPlayerlike, bool>? filter, Func<IPlayerlike, bool>? filterHeavier)
+        => GetPlayerlikeTracker(lifespan, player, ObjectTrackers.PlayerlikeKillablePredicate(player), filter, filterHeavier);
+
+    ObjectTracker<IPlayerlike> IModuleFactory.PlayerlikeTracker(ILifespan lifespan, GamePlayer player, Func<IPlayerlike, bool>? filter, Func<IPlayerlike, bool>? filterHeavier)
+        => GetPlayerlikeTracker(lifespan, player, ObjectTrackers.PlayerlikeStandardPredicate, filter, filterHeavier);
+
+    bool IModuleFactory.CheckInteraction(GamePlayer player, IPlayerlike target, PlayerInteractParameter parameters)
+    {
+        return !(GameOperatorManager.Instance?.Run<PlayerInteractPlayerLocalEvent>(new PlayerInteractPlayerLocalEvent(player, target, parameters)).IsCanceled ?? false);
+    }
 }

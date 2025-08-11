@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Nebula.Utilities;
@@ -43,6 +44,12 @@ public static class Il2CppHelpers
     public static T CastFast<T>(this IntPtr ptr) where T : Il2CppObjectBase
     {
         return CastHelper<T>.Cast(ptr);
+    }
+
+    public static bool TryCast<T>(this Il2CppObjectBase obj,[MaybeNullWhen(false)] out T value) where T : Il2CppObjectBase
+    {
+        value = obj.TryCast<T>();
+        return value != null;
     }
 
     public static Il2CppSystem.Collections.Generic.List<T> ToIl2CppList<T>(this System.Collections.Generic.IReadOnlyList<T> list)

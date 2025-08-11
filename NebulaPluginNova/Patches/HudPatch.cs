@@ -106,3 +106,12 @@ class TaskTextPatch
         catch { }
     }
 }
+
+[HarmonyPatch(typeof(ProgressTracker), nameof(ProgressTracker.Start))]
+class ProgressTrackerPatch
+{
+    public static void Postfix(ProgressTracker __instance)
+    {
+        __instance.transform.localPosition -= new Vector3(0f, 0f, 25f);//MeetingHudを前に出している分、同じく前に出す。
+    }
+}

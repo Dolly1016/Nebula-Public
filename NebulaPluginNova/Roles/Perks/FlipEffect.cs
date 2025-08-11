@@ -34,7 +34,7 @@ internal class FlipEffect : PerkFunctionalInstance, IGameOperator
             NebulaGameManager.Instance?.AllPlayerInfo.Do(p => PlayerModInfo.RpcAttrModulator.Invoke((p.PlayerId, new SpeedModulator(1f, normVec, true, 100000f, true, 0, EffectTag), true)));
         }
 
-        new StaticAchievementToken("perk.manyPerks1" + def.localizedName);
+        new StaticAchievementToken("perk.manyPerks1." + def.localizedName);
         if(MyPlayer.IsCrewmate) new StaticAchievementToken("perk.screen");
     }
 

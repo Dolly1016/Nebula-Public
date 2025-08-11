@@ -12,6 +12,7 @@ using Virial;
 
 namespace Nebula.Roles.Modifier;
 
+/*
 internal class Madmate : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
     private Madmate() : base("madmate", "MDM", new(Palette.ImpostorRed), [], allocateToImpostor: false)
@@ -54,5 +55,4 @@ internal class Madmate : DefinedAllocatableModifierTemplate, DefinedAllocatableM
         bool RuntimeModifier.IsMadmate => false;
     }
 }
-
-
+*/

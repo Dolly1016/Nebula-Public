@@ -59,6 +59,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Spectre.png");
     }
 
+    //ヘルプ画面上での表示, 確率的な出現をする場合は全パターンを載せる。
     DefinedRole[] DefinedRole.AdditionalRoles => ImmoralistOption.GetValue() switch
     {
         0 => [],

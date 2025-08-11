@@ -26,6 +26,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public Illusioner MyRole = new Illusioner();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.illusioner.sample", GameStatsCategory.Roles, MyRole);
@@ -37,6 +38,8 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
         AchievementToken<int>? acTokenChallenge = null;
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+
+        static int OutfitThrethold => SampleOriginalLookOption ? OutfitPriority.OriginalThrethold : OutfitPriority.TransformedThrethold;
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
@@ -50,11 +53,11 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
 
                 OutfitDefinition? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
+                var sampleTracker = NebulaAPI.Modules.PlayerlikeTracker(this, MyPlayer);
                 var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
                     SampleCoolDownOption, "sample", Morphing.Ability.SampleButtonSprite).SetAsUsurpableButton(this);
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker.CurrentTarget?.GetOutfit(SampleOriginalLookOption ? 35 : 75) ?? null;
+                    sample = sampleTracker.CurrentTarget?.RealPlayer.GetOutfit(OutfitThrethold) ?? null;
                     if (sample != null) acTokenChallenge.Value |= 1 << sample.outfit.ColorId;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
@@ -66,7 +69,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                 ModAbilityButton morphButton = null!, paintButton = null!;
 
                 morphButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "illusioner.morph",
-                    MorphCoolDownOption, MorphDurationOption, "morph", Morphing.Ability.MorphButtonSprite, _ => sample != null, isToggleEffect: true)
+                    MorphCoolDownOption, MorphDurationOption, "morph", Morphing.Ability.MorphButtonSprite, button => sample != null || button.IsInEffect, isToggleEffect: true)
                     .BindSubKey(Virial.Compat.VirtualKeyInput.AidAction,"illusioner.switch").SetAsUsurpableButton(this);
                 morphButton.OnSubAction = (button) =>
                 {
@@ -79,7 +82,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                 };
                 morphButton.OnEffectStart = (button) =>
                 {
-                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", 50, true)));
+                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", OutfitPriority.Morph, true)));
 
                     acTokenMorphingCommon ??= new("morphing.common1");
                     if (acTokenPainterCommon != null) acTokenCommon ??= new("illusioner.common1");
@@ -94,7 +97,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                 paintButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
                     PaintCoolDownOption, "paint", Painter.Ability.PaintButtonSprite, _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 paintButton.OnClick = (button) => {
-                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new(sample ?? MyPlayer.GetOutfit(75), "Paint", 40, false)));
+                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.RealPlayer.PlayerId, new(sample ?? MyPlayer.GetOutfit(OutfitThrethold), "Paint", OutfitPriority.Paint, false)));
                     if (TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else

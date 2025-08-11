@@ -4,28 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Game;
+using static Rewired.Demos.CustomPlatform.MyPlatformControllerExtension;
 
 namespace Nebula.Player;
-
-internal interface IPlayerLogics
-{
-    UnityEngine.Vector2 Position { get; set; }
-    UnityEngine.Vector2 TruePosition { get; }
-    Collider2D GroundCollider { get; }
-    PlayerAnimations Animations { get; }
-    Rigidbody2D Body { get; }
-    IPlayerlike Player { get; }
-    float TrueSpeed { get; }
-    void Halt();
-    void SnapTo(Vector2 position);
-    void ClearPositionQueues();
-    void UpdateNetworkTransformState(bool enabled);
-    void SetKinematic(bool kinematic) => Body.isKinematic = kinematic;
-    void SetNormalizedVelocity(Vector2 direction) => Body.velocity = direction * this.TrueSpeed;
-    void ResetMoveState();
-    IEnumerator UseZipline(ZiplineConsole zipline);
-    IEnumerator UseLadder(Ladder ladder);
-}
 
 internal class VanillaPlayerLogics : IPlayerLogics { 
     PlayerControl player;
@@ -50,7 +31,9 @@ internal class VanillaPlayerLogics : IPlayerLogics {
     public float TrueSpeed => player.MyPhysics.TrueSpeed;
 
     public void ClearPositionQueues() => player.NetTransform.ClearPositionQueues();
-
+    public bool InVent => player.inVent;
+    public bool InMovingPlat => player.inMovingPlat;
+    public bool OnLadder => player.onLadder;
 
     public void Halt()
     {
@@ -92,5 +75,31 @@ internal class VanillaPlayerLogics : IPlayerLogics {
             zipline.atTop ? zipline.zipline.handleBottom : zipline.zipline.handleTop,
             zipline.atTop ? zipline.zipline.landingPositionBottom : zipline.zipline.landingPositionTop,
             zipline.atTop);
+    }
+
+    public IEnumerator UseMovingPlatform(MovingPlatformBehaviour movingPlatform, Variable<bool> done)
+    {
+        movingPlatform.Use();
+        yield return Effects.Wait(0.5f);
+        if (movingPlatform.Target && movingPlatform.Target.PlayerId == player.PlayerId)
+        {
+            done.Value = true;
+            while (movingPlatform.Target && movingPlatform.Target.PlayerId == player.PlayerId) yield return null;
+            yield break;
+        }
+        else
+        {
+            done.Value = false;
+            yield break;
+        }
+    }
+
+    public void SetMovement(bool canMove)
+    {
+        player.moveable = canMove;
+        player.MyPhysics.ResetMoveState(false);
+        player.NetTransform.enabled = canMove;
+        player.MyPhysics.enabled = canMove;
+        player.NetTransform.Halt();
     }
 }

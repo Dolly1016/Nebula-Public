@@ -471,7 +471,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public AlignmentOption Alignment { get; set; }
         public Action<bool>? OnChanged { get; set; }
-        public Reference<bool>? StateRef { get; set; }
+        public Variable<bool>? StateRef { get; set; }
         public bool WithMaskMaterial { get; set; } = false;
         public bool FirstState = false;
         public StateButton() { }
@@ -533,7 +533,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return 0.25f;
         }
 
-        public static CombinedWidgetOld CheckBox(string translateKey,float width,bool isBold,Reference<bool> state,Action<bool> onChanged, bool maskMaterial = false)
+        public static CombinedWidgetOld CheckBox(string translateKey,float width,bool isBold,Variable<bool> state,Action<bool> onChanged, bool maskMaterial = false)
         {
             return new CombinedWidgetOld(
                 new StateButton() { StateRef = state, OnChanged = onChanged, WithMaskMaterial = maskMaterial },
@@ -541,7 +541,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
                 );
         }
 
-        public static CombinedWidgetOld TopLabelCheckBox(string translateKey, float? width, bool isBold, Reference<bool> state, Action<bool> onChanged,bool maskMaterial = false)
+        public static CombinedWidgetOld TopLabelCheckBox(string translateKey, float? width, bool isBold, Variable<bool> state, Action<bool> onChanged,bool maskMaterial = false)
         {
             IMetaParallelPlacableOld label;
             if (width == null)
@@ -727,7 +727,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         public IMetaWidgetOld? Inner = null;
         public Vector2 Size;
         public bool WithMask;
-        public Reference<InnerScreen>? InnerRef = null;
+        public Variable<InnerScreen>? InnerRef = null;
         public string? ScrollerTag = null;
         public Action? PostBuilder = null;
 
@@ -738,7 +738,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             this.WithMask = withMask;
         }
 
-        public ScrollView(Vector2 size, Reference<InnerScreen> reference, bool withMask = true)
+        public ScrollView(Vector2 size, Variable<InnerScreen> reference, bool withMask = true)
         {
             this.Size = size;
             this.InnerRef = reference;
@@ -830,7 +830,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         private int maxLines;
         private float fontSize;
         private bool useSharpFieldFlag;
-        public Reference<TextField>? TextFieldRef;
+        public Variable<TextField>? TextFieldRef;
         public Predicate<char>? TextPredicate;
         public Action<TextField>? PostBuilder;
         public string DefaultText = "";
@@ -1394,7 +1394,7 @@ public static class MetaUI
     {
         MetaScreen screen = MetaScreen.GenerateWindow(new(3.9f, 1.14f), transform, Vector3.zero, true, canCancelClickOutside);
         MetaWidgetOld widget = new();
-        Reference<TextField> refName = new();
+        Variable<TextField> refName = new();
 
         widget.Append(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(3f, 0.6f) }) { RawText = text, Alignment = IMetaWidgetOld.AlignmentOption.Center });
 

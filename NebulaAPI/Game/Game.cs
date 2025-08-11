@@ -16,6 +16,13 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
     Player? GetPlayer(byte playerId);
 
     /// <summary>
+    /// プレイヤーのような対象を取得します。
+    /// </summary>
+    /// <param name="playerlikeId">プレイヤーのような対象のID</param>
+    /// <returns>IDが一致するプレイヤー 存在しない場合はnull</returns>
+    IPlayerlike? GetPlayerlike(int playerlikeId);
+
+    /// <summary>
     /// 自身が操作するプレイヤー。
     /// 即ちこのプレイヤーの<see cref="Player.AmOwner"/>がtrueであることを意味します。
     /// </summary>
@@ -28,9 +35,11 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
     IEnumerable<Player> GetAllPlayers();
     IReadOnlyList<Player> GetAllOrderedPlayers();
 
+    IEnumerable<IPlayerlike> GetAllPlayerlikes();
+
     KillButtonLikeHandler KillButtonLikeHandler { get; }
 
-    internal void RegisterEntity(IGameOperator entity, ILifespan lifespan);
+    internal void RegisterEntity(IGameOperator entity, ILifespan lifespan, Action? onSubscribed = null);
 
     /// <summary>
     /// ゲーム終了をトリガーします。

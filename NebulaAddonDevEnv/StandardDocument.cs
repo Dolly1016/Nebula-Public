@@ -44,6 +44,10 @@ namespace DefaultLang.Documents;
 [AddonDocument("role.snatcher", RoleType.Role, (string[])["Buttons.SnatchButton.png;role.snatcher.ability.snatch", "Buttons.SnatcherClockButton.png;role.snatcher.ability.clock"], false, false)]
 [AddonDocument("role.cupid", RoleType.Role, (string[])["Buttons.CupidLoverButton.png;role.cupid.ability.lover", "Buttons.CupidStringButton.png;role.cupid.ability.laser"], false, true)]
 [AddonDocument("role.gimlet", RoleType.Role, (string[])["Buttons.DrillButton.png;role.gimlet.ability.drill"], false, true)]
+[AddonDocument("role.doppelganger", RoleType.Role, (string[])["Buttons.DecoyMapCrewmateButton.png;role.doppelganger.ability.map", "Buttons.DoppelgangerSwapButton.png;role.doppelganger.ability.swap", "Buttons.DoppelgangerDespawnButton.png;role.doppelganger.ability.despawn"], false, true)]
+[AddonDocument("role.sculptor", RoleType.Role, (string[])["Buttons.SampleButton.png;role.sculptor.ability.sample", "Buttons.DecoyMapImpostorButton.png;role.sculptor.ability.map"], false, true)]
+[AddonDocument("role.fixer", RoleType.Role, (string[])["FixerIcon.png;role.fixer.ability.meeting"], false, false)]
+[AddonDocument("role.rokurokubi", RoleType.Role, (string[])["Buttons.RokurokubiButton.png;role.rokurokubi.ability.rokurokubi", "Buttons.RokurokubiResetButton.png;role.rokurokubi.ability.reset"], false, false)]
 public class StandardDocument : IDocumentWithId
 {
     string documentId;

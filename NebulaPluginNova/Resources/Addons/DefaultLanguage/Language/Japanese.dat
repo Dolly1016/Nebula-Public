@@ -1,3 +1,5 @@
+$Color
+
 # Title
 
 "title.buttons.nebula" : "ネブラ"
@@ -197,6 +199,8 @@
 "version.fetching.current" : "使用中"
 "version.fetching.mismatched" : "変更不可"
 "version.fetching.applied" : "適用中"
+"version.fetching.mismatched.detail" : "対応するAmong Us本体のバージョンがかけ離れているため、変更できません。<br>お手数をおかけしますが、再導入をお願いします。"
+"version.fetching.loadMore" : "さらに読み込む"
 
 # Game Mode
 
@@ -216,8 +220,14 @@
 
 # Options
 
+"ui.options.nav.1.left" : "オプションを開く"
+"ui.options.nav.1.middle" : "簡易/詳細表示を切替"
+"ui.options.nav.1.right" : "役職名と詳細をコピー (役職オプションのみ)"
+"ui.options.nav.2.middle" : "オプション一覧に戻る"
+
 "options.switch.off" : "Off"
 "options.switch.on" : "On"
+"options.switch.nonCrewmateOnly" : "非クルーのみ"
 "options.percentage" : "%"
 "options.cross" : "x"
 "options.sec" : "s"
@@ -228,6 +238,12 @@
 "options.values.short" : "短め"
 "options.values.middle" : "普通"
 "options.values.long" : "長め"
+
+"options.vanilla.header" : "Among Us"
+"options.vanilla.header.impostor" : "インポスターオプション"
+"options.vanilla.header.crewmate" : "クルーメイトオプション"
+"options.vanilla.header.meeting" : "緊急会議オプション"
+"options.vanilla.header.task" : "タスクオプション"
 
 "options.gamemode" : "ゲームモード"
 
@@ -248,6 +264,11 @@
 "options.assignment.ghostAssignmentMethod" : "幽霊役職の割り当てタイプ"
 "options.assignment.ghostAssignmentMethod.normal" : "標準"
 "options.assignment.ghostAssignmentMethod.thrilling" : "スリリング"
+"options.assignment.preview" : "配役プレビュー"
+"options.assignment.preview.withoutCrewmate" : "インポスターx%IMP% (うち役職持ち: %RIMP%), 第三陣営x%NEU%, クルーメイトは全員役職持ち"
+"options.assignment.preview.withCrewmate" : "インポスターx%IMP% (うち役職持ち: %RIMP%), 第三陣営x%NEU%, 役職持ちクルーメイトx%CREW%"
+"options.assignment.preview.hint" : "※ 黄色く縁どられているプレイヤーに役職が割り当てられます。<br>※ インポスターの総数はAmong Usの設定から変更してください。"
+"options.assignment.group.assignment" : "役職割り当て"
 
 "options.soloFreePlay" : "ソロフリープレイオプション"
 "options.soloFreePlay.detail" : "フリープレイのダミーに関する設定です。"
@@ -262,11 +283,9 @@
 "options.map.spawnCandidates" : "スポーン候補数"
 "options.map.spawnCandidatesFilter" : "スポーン候補地フィルター"
 "options.map.silentVents" : "視界外のベント開閉不可視"
-"options.map.canOpenMapWhileUsingUtility" : "ユーティリティ使用中のマップ開閉"
+"options.map.canOpenMapWhileUsingUtility" : "移動ツール使用中のマップ開閉"
 "options.map.numOfTeleporter" : "テレポーターのペア数"
 "options.map.nonCrewmateCanUseTeleporterImmediately" : "(非クルーのみ)即時テレポート"
-"options.map.randomizedWiring" : "配線タスクの順番ランダム化"
-"options.map.stepsOfWiringGame" : "配線タスクのステップ数"
 "options.map.ladderCoolDown" : "はしごの使用クールダウン"
 "options.map.ziplineCoolDown" : "ジップラインの使用クールダウン"
 "options.map.flipX" : "マップの左右反転"
@@ -318,12 +337,26 @@
 "options.map.customization.fungle.blackOutJungle" : "配電盤 (ジャングル)"
 "options.map.customization.fungle.blackOutMiningPit" : "配電盤 (採掘場)"
 "options.map.group.spawning" : "スポーン設定"
-"options.map.group.utilities" : "ユーティリティ設定"
+"options.map.group.utilities" : "移動ツール設定"
 "options.map.group.footstep" : "他人の足音設定"
 "options.map.group.teleporter" : "テレポーター設定"
-"options.map.group.wiring" : "配線タスクの設定"
 "options.map.group.flip" : "反転マップ設定"
 
+"options.task" : "タスクオプション"
+"options.task.detail" : "タスクに関する設定です。"
+"options.task.noGuide.wiring" : "配線タスク"
+"options.task.noGuide.upload" : "アップロードタスク"
+"options.task.noGuide.divertPower" : "配電タスク"
+"options.task.noGuide.garbage" : "ゴミ捨てタスク"
+"options.task.noGuide.sortRecords" : "資料整理タスク"
+"options.task.noGuide.marshmallow" : "マシュマロタスク"
+"options.task.noGuide.helpCritter" : "生物飼育タスク"
+"options.task.noGuide.replaceParts" : "部品交換タスク"
+"options.task.noGuide.collectSamples" : "サンプル収集タスク"
+"options.map.randomizedWiring" : "配線タスクの順番ランダム化"
+"options.map.stepsOfWiringGame" : "配線タスクのステップ数"
+"options.task.group.wiring" : "配線タスクの設定"
+"options.task.group.noGuide" : "場所不明タスクの設定"
 
 "options.meeting" : "緊急会議オプション"
 "options.meeting.detail" : "緊急会議に関する設定です。"
@@ -333,6 +366,7 @@
 "options.meeting.emergencyCooldownAtGameStart" : "ゲーム開始時の緊急クールダウン"
 "options.meeting.showRoleOfExiled" : "追放者の役職開示"
 "options.meeting.extraEmergencyCooldownInTheEarly" : "ゲーム序盤の追加緊急クールダウン"
+"options.meeting.earlyDiscussionReduction" : "ゲーム序盤の議論時間短縮"
 "options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "ゲーム序盤終了までに必要な死者数"
 "options.meeting.waitingForHost" : "集計中"
 "options.meeting.showVoteState" : "投票状況の表示"
@@ -346,6 +380,7 @@
 "options.consoleRestriction.vitalsRestriction" : "バイタル"
 "options.consoleRestriction.cameraRestriction" : "カメラ & ログ"
 "options.consoleRestriction.resetRestrictions" : "会議ごとの制限リセット"
+"options.consoleRestriction.showDeadBodiesOnAdmin" : "アドミンに死体を計上"
 
 "options.quality" : "クオリティオプション"
 "options.quality.detail" : "ゲームのクオリティに関する設定です。<br>パフォーマンスに影響を及ぼす恐れがあります。参加者の様子を見て調整してください。"
@@ -387,6 +422,8 @@
 "options.role.secondaryChance" : "2回目～"
 "options.role.count.jackalized" : "ジャッカル割当人数"
 "options.role.chance.jackalized" : "ジャッカル割当確率"
+"options.role.count.madden" : "マッドメイト割当人数"
+"options.role.chance.madden" : "マッドメイト割当確率"
 "options.role.count.short" : "割り当て"
 "options.modifier.chance" : "割り当て確率"
 "options.role.crewmateCount" : "クルーメイト割り当て"
@@ -469,6 +506,7 @@
 # Common Roles
 
 "options.role.modifierFilter" : "モディファイアフィルター"
+"options.role.ghostRoleFilter" : "幽霊役職フィルター"
 
 # Crewmate Roles
 
@@ -559,6 +597,16 @@
 "options.role.doctor.chargesPerTasks" : "タスクによる使用可能時間チャージ" 
 "role.doctor.gadgetLeft" : "%SECOND%s"
 
+"role.doppelganger.name" : "ドッペルゲンガー"
+"role.doppelganger.short" : "ド"
+"role.doppelganger.blurb" : "ワタシ と オトモダチ"
+"options.role.doppelganger.detail" : "ドッペルゲンガーは自身の幻影を生み出せます。<br>大移動や、敵の目を欺くために使えます。"
+"options.role.doppelganger.swapCooldown" : "スワップクールダウン" 
+"options.role.doppelganger.swapDuration" : "スワップに要する時間"
+"options.role.doppelganger.detectionRadius" : "幻像のプレイヤー探知範囲"
+"ui.action.doppelganger.swap" : "幻影と位置を交換します。"
+"ui.action.doppelganger.despawn" : "幻影を消滅させます。"
+
 "role.echo.name" : "エコー"
 "role.echo.short" : "エ"
 "role.echo.blurb" : "慟哭が谺する"
@@ -567,6 +615,17 @@
 "options.role.echo.echoRange" : "エコーの効果範囲"
 "stats.echo.players" : "探知したプレイヤー人数"
 "stats.echo.actions" : "アクションの感知回数"
+
+"role.fixer.name" : "フィクサー"
+"role.fixer.short" : "フ"
+"role.fixer.blurb" : "陰の闘士"
+"options.role.fixer.detail" : "フィクサーは会議中の能力発動や投票を制限し、ゲームを管理するクルーメイトです。"
+"options.role.fixer.numOfJamming" : "妨害工作の使用回数"
+"options.role.fixer.canJamPlayerContinuously" : "連続した同一プレイヤーへの妨害工作"
+"options.role.fixer.jammingSealsVoteRight" : "妨害工作による投票権の剥奪"
+"options.role.fixer.maxLeftVotingTimeForJamming" : "妨害工作可能な最大残会議時間"
+"roles.fixer.jamming" : "残り妨害工作回数"
+"stats.fixer.jamming" : "妨害工作の発動回数"
 
 "role.investigator.name" : "インヴェスティゲーター"
 "role.investigator.short" : "イ"
@@ -634,6 +693,7 @@
 "options.role.madmate.hasImpostorVision" : "インポスター視界"
 "options.role.madmate.canUseVents" : "ベントの使用"
 "options.role.madmate.canMoveInVents" : "ベント間の移動"
+"options.role.madmate.maddenRole" : "役職のマッド化"
 "stats.madmate.foundImpostors" : "インポスターの発見回数"
 "stats.madmate.embroil" : "生存者を道連れした回数"
 
@@ -1066,6 +1126,28 @@
 "options.role.reaper.useVentWhileHoldingDeadbody" : "死体を抱えながらのベント使用"
 "stats.reaper.ventWithDeadBody" : "死体と共にベントに潜入した回数"
 
+"role.rokurokubi.name" : "ろくろ首"
+"role.rokurokubi.short" : "ろ"
+"role.rokurokubi.blurb" : "長アくしても、あぐれつしゔ"
+"options.role.rokurokubi.detail" : "ろくろ首は首を伸ばして、遠くのプレイヤーをキルできます。<br>首は壁を跨いで伸ばせます。"
+"options.role.rokurokubi.craneSpeed" : "首の伸長速度"
+"options.role.rokurokubi.maxNeckLength" : "首の最大長"
+"ui.action.rokurokubi.pause" : "押下している間、首の伸長を停止します。"
+
+"role.sculptor.name" : "スカルプター"
+"role.sculptor.short" : "スカ"
+"role.sculptor.blurb" : "混乱の創造主"
+"options.role.sculptor.detail" : "スカルプターはマップ中を歩くプレイヤーの偶像を生成します。<br>クルーメイトはすれ違った相手が本物なのか分からなくなってしまいます！"
+"options.role.sculptor.sampleCoolDown" : "採取クールダウン"
+"options.role.sculptor.createCoolDown" : "生成クールダウン"
+"options.role.sculptor.maxSamples" : "サンプルの最大保持数"
+"options.role.sculptor.stayDurationAfterMoving" : "移動後の偶像の滞在時間"
+"options.role.sculptor.detectionRadius" : "偶像のプレイヤー探知範囲"
+"stats.sculptor.sample" : "サンプルの採取回数"
+"stats.sculptor.create" : "偶像の生成回数"
+"ui.action.sculptor.sample" : "サンプルを取得します。"
+"ui.action.sculptor.create" : "偶像の移動先を指定するマップを開きます。<br>移動先と見た目を選択すると偶像が出現します。"
+
 "role.snatcher.name" : "スナッチャー"
 "role.snatcher.short" : "スナッ"
 "role.snatcher.blurb" : "すべて、僕のもの"
@@ -1093,7 +1175,7 @@
 "options.role.sniper.shotEffectiveRange" : "狙撃の有効射程"
 "options.role.sniper.shotNoticeRange" : "銃声通知の有効範囲"
 "options.role.sniper.storeRifleOnFire" : "狙撃後にライフルを格納"
-"options.role.sniper.storeRifleOnUsingUtility" : "ユーティリティ使用時にライフルを格納"
+"options.role.sniper.storeRifleOnUsingUtility" : "移動ツール使用時にライフルを格納"
 "options.role.sniper.canSeeRifleInShadow" : "視界外でライフルを視認可能"
 "options.role.sniper.canKillHidingPlayer" : "隠れているプレイヤーをキル可能"
 "options.role.sniper.aimAssist" : "エイムアシスト"
@@ -1218,6 +1300,7 @@
 "options.role.gambler.maxBettingPatterns" : "会議ごとの最大賭け式数"
 "options.role.gambler.canVote" : "スキップか最多票賭け先に投票"
 "options.role.gambler.chipsLimitForNoVoteBetting" : "ゼロ票賭けのチップ数制限"
+"options.role.gambler.noticeFirstSuccess" : "初回の賭け成功を通知"
 "gambler.betting.control" : "左クリック: チップを追加<br>シフト左クリック: チップを減少<br>右クリック: 賭けを取り消す"
 "gambler.ui.selectingHint" : "賭ける対象のプレイヤーを選択して、再度+ボタンを押してください。<br><b>ゼロ票賭け</b>: 票を一切集めないだろうプレイヤーを%NV%人選択<br><b>最多票賭け</b>: 最も票を集めるだろうプレイヤーを%MV%人選択"
 "gambler.ui.multiSelecting" : "賭け対象のプレイヤーは重複させられません。"
@@ -1227,6 +1310,7 @@
 "gambler.currentChips" : "所持チップ:"
 "gambler.ui.help.add" : "プレイヤーを選択したうえで押すと<b>賭けを追加</b>します。"
 "gambler.ui.help.check" : "現在指定している賭けで<b>確定</b>します。<br>確定すると周囲からは<b>票を投じたように</b>見えます。"
+"gambler.ui.firstSuccess" : "胸の高鳴りが聞こえる。"
 "stats.gambler.bet" : "賭けをした回数"
 "stats.gambler.bet.success" : "賭けに勝った回数"
 "stats.gambler.bet.failed" : "賭けに負けた回数"
@@ -1252,6 +1336,11 @@
 "options.role.sidekick.killCoolDown" : "キルクールダウン"
 "options.role.sidekick.isModifier" : "元役職との共存"
 "options.role.sidekick.canCreateSidekickChainly" : "サイドキックによるサイドキックの生成"
+"options.role.sidekick.inheritanceRule" : "継承ルール"
+"options.role.sidekick.inheritanceRule.inherit" : "昇格"
+"options.role.sidekick.inheritanceRule.suicide" : "自殺"
+"options.role.sidekick.inheritanceRule.none" : "なし"
+"options.role.sidekick.assignedSidekick" : "ゲーム開始時に割り当て"
 
 "role.jester.name" : "ジェスター"
 "role.jester.short" : "ジ"
@@ -1265,13 +1354,17 @@
 "role.paparazzo.name" : "パパラッチ"
 "role.paparazzo.short" : "パ"
 "role.paparazzo.blurb" : "究極の一枚を目指して"
-"role.paparazzo.taskText" : "写真を撮り、開示する (%DETAIL%)"
+"role.paparazzo.taskText" : "写真を撮り、開示する<br>(%DETAIL%)"
 "role.paparazzo.taskTextSubject" : "撮影対象: %CS%/%GS%"
 "role.paparazzo.taskTextDisclosed" : "開示済み: %CD%/%GD%"
+"role.paparazzo.taskTextPhoto" : "開示枚数: %CP%/%GP%"
 "options.role.paparazzo.detail" : "パパラッチは写真を撮影し、会議中に写真を開示できます。<br>写真に収めた多くのプレイヤーの姿を見せることで勝利します。"
 "options.role.paparazzo.shotCoolDown" : "撮影クールダウン"
 "options.role.paparazzo.requiredSubjects" : "勝利に必要な撮影対象の数"
 "options.role.paparazzo.requiredDisclosed" : "勝利に必要な開示済みプレイヤー数"
+"options.role.paparazzo.requiredPhotos" : "勝利に必要な開示済み写真枚数"
+"options.role.paparazzo.telephotoFinderSize" : "望遠ファインダーサイズ"
+"options.role.paparazzo.wideAngleFinderSize" : "広角ファインダーサイズ"
 "stats.paparazzo.photo" : "撮影した写真の枚数"
 "stats.paparazzo.players" : "撮影したプレイヤー数"
 
@@ -1282,6 +1375,7 @@
 "options.role.scarlet.graceUntilDecidingFavorite" : "本命決定までの猶予時間"
 "options.role.scarlet.numOfKept" : "キープの最大人数"
 "options.role.scarlet.numOfCommand" : "号令の最大使用回数"
+"options.role.scarlet.canOverrideTaskWin" : "タスク勝利の乗っ取り"
 "stats.scarlet.kept" : "キープを誑かした回数"
 
 "role.spectre.name" : "妖狐"
@@ -1466,6 +1560,7 @@
 "options.role.lover.numOfPairs" : "ラバーズのペア数"
 "options.role.lover.chanceOfAssigningImpostors" : "インポスターの割り当て確率"
 "options.role.lover.allowExtraWin" : "ラバーズの追加勝利"
+"options.role.lover.blockRoleWin" : "役職による勝利をブロック"
 "options.role.lover.avengerMode" : "アヴェンジャーモード" 
 
 "role.obsessional.name" : "オブセッショナル"
@@ -1602,8 +1697,13 @@
 "perk.footprint.name" : "放つ存在感"
 "perk.footprint.detail" : "全員から見える足跡を残すようになる。"
 
+"perk.sacrifice.name" : "身代わり"
+"perk.sacrifice.detail" : "その場に身代わりを召喚する。<br>身代わりがキルされてもパークの使用者は死亡しない。<br>身代わりは%D%秒後に消滅する。"
+"perk.sacrifice.duration" : "身代わりの効果時間"
+
 # Location
 
+"map.skeld" : "スケルド"
 "location.skeld.admin" : "管理室"
 "location.skeld.cafeteria" : "カフェテリア"
 "location.skeld.comms" : "通信室"
@@ -1627,6 +1727,8 @@
 "location.skeld.commsAccess" : "通信室上通路"
 "location.skeld.rightAccess" : "右通路"
 "location.skeld.weaponsAccess" : "ウェポン左通路"
+
+"map.mira" : "ミラ"
 "location.mira.admin" : "管理室"
 "location.mira.balcony" : "バルコニー"
 "location.mira.cafeteria" : "カフェテリア"
@@ -1641,6 +1743,8 @@
 "location.mira.rendezvous" : "三叉路"
 "location.mira.storage" : "保管庫"
 "location.mira.launchpad" : "発射台"
+
+"map.polus" : "ポーラス"
 "location.polus.abditory" : "大岩"
 "location.polus.admin" : "管理室"
 "location.polus.comms" : "通信室"
@@ -1675,6 +1779,8 @@
 "location.polus.reactorRight.short" : "右リアクター"
 "location.polus.officeBuilding" : "オフィス建屋内"
 "location.polus.outside" : "屋外"
+
+"map.airship" : "エアシップ"
 "location.airship.brig" : "宿舎前通路"
 "location.airship.engine" : "エンジンルーム"
 "location.airship.hallway" : "メインホール"
@@ -1711,6 +1817,8 @@
 "location.airship.meetingRight" : "ミーティングルーム奥"
 "location.airship.meetingRight.short" : "ミーティング奥"
 "location.airship.ventilation" : "換気室"
+
+"map.fungle" : "ファングル"
 "location.fungle.beach" : "ビーチ"
 "location.fungle.cafeteria" : "カフェテリア"
 "location.fungle.campfire" : "キャンプファイア"
@@ -1837,6 +1945,11 @@
 "button.label.cupid.lover" : "選択"
 "button.label.cupid.string" : "赤い糸"
 "button.label.drill" : "ドリル"
+"button.label.despawn" : "デスポーン"
+"button.label.doppelganger.command" : "配置"
+"button.label.sculptor.command" : "生成"
+"button.label.rokuro" : "ろくろ首"
+"button.label.rokuro.reset" : "収縮"
 
 # Game
 
@@ -1995,6 +2108,12 @@
 
 "console.notAvailable" : "使用不可"
 
+# Tasks
+
+"task.unknownPlace" : "？？？"
+"task.divertPower" : "電力を変換する"
+
+
 # Inventory
 
 "inventory.palette.catalogue" : "カタログ"
@@ -2072,6 +2191,8 @@
 "config.client.externalModColor.detail" : "オンにすると外部Modで表示される<br>内部的な色を表示します。"
 "config.client.simpleNameplate" : "簡素なネームプレート"
 "config.client.simpleNameplate.detail" : "オンにするとネームプレートの表示を簡素にします。"
+"config.client.outputPaparazzoPhoto" : "パパラッチの写真を保存"
+"config.client.outputPaparazzoPhoto.detail" : "オンにすると撮影したパパラッチの写真がディスクに保存されます。"
 "config.client.webhook" : "Discord ウェブフック"
 "config.client.webhook.detail" : "ゲーム終了時にゲーム結果をDiscordチャンネルに送信できます。"
 "config.client.social" : "社交設定"
@@ -2086,11 +2207,6 @@
 "config.client.avoidingColorDuplication.off" : "オフ"
 "config.client.avoidingColorDuplication.soft" : "広域"
 "config.client.avoidingColorDuplication.strict" : "厳密"
-"config.client.stampMenu" : "スタンプメニュー"
-"config.client.stampMenu.detail" : "スタンプメニューの動作を変更できます。<br><br>通常: メニューはカーソルの位置に出現します。<br>中央に表示: メニューは常に画面中央に出現します。<br>カーソルを戻す: スタンプ選択後にカーソルの位置をもとに戻します。"
-"config.client.stampMenu.normal" : "通常"
-"config.client.stampMenu.center" : "中央に表示"
-"config.client.stampMenu.cursor" : "カーソルを戻す"
 "config.client.muteAmbienceOnMeeting" : "会議中の環境音ミュート"
 "config.client.muteAmbienceOnMeeting.detail" : "会議中に限り環境音をミュートできます。"
 
@@ -2232,8 +2348,10 @@
 "achievement.ui.unsetTitle" : "クリックで称号を外せます。"
 "achievement.ui.unselected" : "(称号未選択)"
 "achievement.ui.unselected.detail" : "クリックで称号を選択できます。"
+"achievement.ui.globalProgress" : "全プレイヤーの%RATE%%が達成"
 "achievement.title.hidden" : "未獲得の称号"
 "achievement.title.hiddenDetail" : "称号を獲得すると詳細が明かされます。"
+"achievement.title.unachieved" : "？？？？？"
 "achievement.type.challenge" : "チャレンジ"
 "achievement.type.secret" : "シークレット"
 "achievement.type.seasonal" : "期間限定"
@@ -2257,6 +2375,10 @@
 "achievement.filter.nonAchieved" : "未達成"
 "achievement.filter.search" : "検索"
 "achievement.filter.myRole" : "自役職"
+
+"achievement.sort" : "並び替え"
+"achievement.sort.categorized" : "カテゴリ"
+"achievement.sort.progress" : "獲得率"
 
 "achievement.social.firstClear" : "%PLAYER%が初獲得"
 "achievement.social.clear" : "%PLAYER%が獲得"
@@ -2323,6 +2445,8 @@
 "help.rolePreview.inner.ghostRoles" : "幽霊役職"
 "help.rolePreview.inner.jackalized.100" : "ジャッカル化 確定出現"
 "help.rolePreview.inner.jackalized.random" : "ジャッカル化 ランダム出現"
+"help.rolePreview.inner.madden.100" : "マッド化 確定出現"
+"help.rolePreview.inner.madden.random" : "マッド化 ランダム出現"
 
 # Tag
 
@@ -2479,7 +2603,7 @@
 "options.assignment.ghostAssignmentMethod.detail" : "幽霊役職の割り当て方法を変更できます。<br> -<b>標準</b>: 死亡者には割り当てられる役職の何れかが必ず割り当てられます。<br> -<b>スリリング</b>: 割当確率が役職を割り当てられるか否かにまで影響を及ぼします。"
 "options.map.spawnMethod.detail" : "プレイヤーがスポーンする際のスポーン方法を設定できます。<br> -<b>標準</b>: マップそれぞれの従来のスポーン方法です。<br> -<b>選択式</b>: Airshipのように複数のスポーン場所からスポーン先を選びます。<br> -<b>ランダム</b>: 各プレイヤーはそれぞれに選ばれたランダムな場所でスポーンします。"
 "options.map.silentVents.detail" : "オンに設定することで視界外のベントの開閉が見えなくなります。"
-"options.map.canOpenMapWhileUsingUtility.detail" : "オンにすると、はしごや昇降機の使用中でも<br>マップが開けるようになります。" 
+"options.map.canOpenMapWhileUsingUtility.detail" : "オンにすると、はしごや昇降機の使用中やベント潜伏中でも<br>マップが開けるようになります。" 
 "options.map.numOfTeleporter.detail" : "マップ上に、プレイヤーを転移させる宝石のペアが出現します。<br>プレイヤーは宝石を磨くことで対応する宝石の元へテレポートします。"
 "options.map.nonCrewmateCanUseTeleporterImmediately.detail" : "オンにするとインポスターおよび第三陣営は宝石を磨くミニゲーム無しに<br>テレポートができるようになります。"
 "options.map.customization.airship.oneWayMeetingRoom.detail" : "会議室左側のはしごを上り専用にし、<br>新たに会議室右側に下降専用のはしごを追加します。"
@@ -2494,6 +2618,16 @@
 "options.meeting.extraEmergencyCooldownInTheEarlyCondition.detail" : "設定した人数だけプレイヤーが死亡するとゲーム序盤の追加緊急クールダウンによる<br>緊急クールダウンの引き延ばしが終了します。"
 "options.quality.lowLatencyPlayerSync.detail" : "<b>カスタムサーバー限定</b><br>プレイヤーの位置を同期するタイミングをより短くします。"
 "options.perk.growSpeed.detail" : "プラントが成長する速度を調整できます。<br>大きな値にするほど早く成長します。"
+
+"options.task.noGuide.wiring.detail" : "オンにすると配線タスクの派生先(=2箇所目以降)の<br>場所が分からなくなります。"
+"options.task.noGuide.upload.detail" : "オンにするとダウンロードタスクの<br>場所が分からなくなります。"
+"options.task.noGuide.divertPower.detail" : "オンにすると配電先のタスクの<br>場所が分からなくなります。"
+"options.task.noGuide.garbage.detail" : "オンにするとゴミの回収タスク(=1箇所目)の<br>場所が分からなくなります。"
+"options.task.noGuide.sortRecords.detail" : "オンにすると資料の収納先が分からなくなります。"
+"options.task.noGuide.marshmallow.detail" : "オンにすると棒を集めるタスクの<br>場所が分からなくなります。"
+"options.task.noGuide.helpCritter.detail" : "オンにすると卵を改修するタスクの<br>場所が分からなくなります。"
+"options.task.noGuide.replaceParts.detail" : "オンにするとパーツの回収タスクの<br>場所が分からなくなります。"
+"options.task.noGuide.collectSamples.detail" : "オンにするとサンプルの回収タスクの<br>場所が分からなくなります。"
 
 "options.role.agent.numOfExemptedTasks.detail" : "指定した数だけ、Agentの総タスク数が少なくなります。<br>総タスクが少なくなれば、追加タスクを手に入れるのにかかる時間は短縮します。"
 "options.role.agent.numOfExtraTasks.detail" : "一度のタスク代行で手に入れられるタスクの数を設定します。<br>死亡後はタスク代行による<b>さらなる</b>タスクの入手はできません。"
@@ -2695,6 +2829,12 @@
 "role.collator.ability.sample" : "近くのプレイヤーのサンプルを採取します。<br>試験管は同時に最大<var>#NUM</var>本まで使用できます。"
 "role.collator.ability.meeting" : "会議中、プレイヤーのアイコンに被さるように被検体を選択できるボタンが現れます。<br>二つのサンプルを選択し、検査を始めましょう。"
 "role.collator.tips" : "・この役職は、<color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>コラボ役職 (元役職: 臨床検査技師)です。"
+"role.doppelganger.ability.title" : "固有能力 "遊離する自意識""
+"role.doppelganger.ability.main" : "マップ上に自身と同じ姿をした幻影を召喚できます。"
+"role.doppelganger.ability.map" : "幻影を召喚させるためのマップを開きます。通常のマップからも召喚できます。"
+"role.doppelganger.ability.swap" : "幻影と自分自身の位置を入れ替えます。"
+"role.doppelganger.ability.despawn" : "幻影を消滅させます。"
+"role.doppelganger.tips" : "・幻影がキルされるとドッペルゲンガー自身も<b>死亡します</b>。<br>・ミニマップ上で幻影周囲にいるプレイヤーの位置と色の明暗を確認できます。"
 "role.investigator.ability.title" : "固有能力 "真実の追究者""
 "role.investigator.ability.main" : "インヴェスティゲーターは「調査」能力を持ちます。<br>「調査」中は犯行現場に残された足跡を視認できます。<br>足跡をよく調べると更なる情報が手に入ります。"
 "role.investigator.ability.investigate" : "調査を始めます。<br>調査中は視界が変わり、足跡が見えるようになります。"
@@ -2712,12 +2852,15 @@
 "role.ubiquitous.ability.callBack" : "アタッチ中のドローンを呼び戻します。"
 "role.ubiquitous.ability.doorHack" : "アタッチ中のドローンの周辺にあるドアをハッキングしてこじ開けます。"
 "role.ubiquitous.tips" : "・アタッチ中のドローンを操作していない間であっても、画面左下の小窓からドローン周囲の様子を確認できます。"
+"role.fixer.ability.title" : "固有能力 "緊急会議の調停者""
+"role.fixer.ability.main" : "会議中にプレイヤーに妨害工作を施し、タブレット通信を遮断できます。<br>タブレット通信を遮断されたプレイヤーは投票権を奪われ、その会議で能力を使用できなくなります。<br>また、他のプレイヤーは遮断されたプレイヤーへの投票や能力行使が不可能になります。<br>戦略的にタブレット通信を遮断して、クルーメイトを勝利に導きましょう。"
+"role.fixer.ability.meeting" : "選択したプレイヤーのタブレット通信を遮断します。<br>能力の発動回数には制限があります。"
 
 "role.jekyllAndHyde.winCond" : "ジキルの場合: タスクをこなしているとクルーメイト勝利で勝利します。<br>ハイドの場合: インポスター勝利で勝利します。"
 "role.jekyllAndHyde.ability.title" : "固有能力 "多重人格""
 "role.jekyllAndHyde.ability.main" : "緊急会議を終えるたびに人格が入れ替わります。<br>ジキルはクルーメイトの味方で、ハイドはインポスターの味方です。<br>ハイドは回数制限のあるキルボタンを持ちます。ハイドがインポスターをキルすると<br>ハイドはインポスターの一員になり、人格はハイドで固定されます。"
 "role.jekyllAndHyde.ability.drug" : "ジキルはタスクをこなすと<b>変身薬</b>を手に入れます。<br>変身薬を飲むと即座にハイドに変身します。"
-"role.jekyllAndHyde.tips" : "・人格は追放と同時に入れ替わります。追放によってゲームが終了する場合、勝敗は<br>　入れ替わり後の人格で判定されます。<br>・ゲーム開始時の人格はランダムに決定します。<br>・死亡後は人格は入れ替わりません。"
+"role.jekyllAndHyde.tips" : "・人格は追放と同時に入れ替わります。追放によってゲームが終了する場合、<br>　勝敗は入れ替わり後の人格で判定されます。<br>・ゲーム開始時の人格はランダムに決定します。<br>・死亡後は人格は入れ替わりません。"
 
 "role.alien.ability.title" : "固有能力 "スペースインベイダー""
 "role.alien.ability.main" : "異星の奇怪な技術がアドミン・バイタル端末に悪影響をもたらします。<br>情報端末の更新を止めたり、プレイヤーを情報端末上から消し去れます。"
@@ -2803,6 +2946,15 @@
 "role.raider.ability.main" : "レイダーは通常のキルができない代わりに、斧の投擲によるキルができます。<br>斧は投擲後、壁に刺さるまでに触れたプレイヤー全員をキルします。<br>斧の向きはマウス操作によって調整できます。<br>キルのキーボードショートカットのほか、画面中央付近で左クリックをすることで投擲できます。"
 "role.raider.ability.axe" : "斧を構える、あるいは格納します。<br>構えている斧は他人からも視認されます。"
 "role.raider.tips" : "・生存者の当たり判定はキャラクターの中心付近にあります。"
+"role.rokurokubi.ability.title" : "固有能力 "妖怪ろくろ首""
+"role.rokurokubi.ability.main" : "首をながぁ～く伸ばします。首を伸ばした先のプレイヤーをキルできます。"
+"role.rokurokubi.ability.rokurokubi" : "首を伸ばします。切り替えアクションキーを押下すると首の伸長を一時停止できます。"
+"role.rokurokubi.ability.reset" : "収縮ボタンを押すか、キルすると首の長さが元に戻ります。"
+"role.sculptor.ability.title" : "固有能力 "ケイオスクリーチャー""
+"role.sculptor.ability.main" : "マップ上に歩く偶像を召喚できます。"
+"role.sculptor.ability.sample" : "偶像に適用できる見た目を採取します。"
+"role.sculptor.ability.map" : "偶像を召喚させるためのマップを開きます。<br>マップ上で偶像の目的地と見た目を選ぶとその場に偶像が出現し、歩き出します。"
+"role.sculptor.tips" : "・偶像がキルされるとその場で消え、実際には誰も死亡しません。"
 "role.snatcher.ability.title" : "固有能力 "力の簒奪者""
 "role.snatcher.ability.main" : "プレイヤーから能力を奪って使えるインポスターです。<br>奪われた能力は発動時に壊れ、プレイヤーに能力が奪われた事実を知らせます。"
 "role.snatcher.ability.snatch" : "プレイヤーから能力を奪います。<br>「会議時推察」モードの場合は会議中にプレイヤーと役職を選んで能力を奪います。"

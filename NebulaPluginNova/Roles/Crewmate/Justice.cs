@@ -69,6 +69,75 @@ public class RandomMultibandMeter : IMultibandMater{
     }
 }
 
+public static class MeetingHudModAnimations
+{
+    static public IEnumerator CoAnimBackLine(GameObject parent, float appearSpeed, float duration, float disappearSpeed)
+    {
+        var lineRenderer = UnityHelper.CreateObject<SpriteRenderer>("Line", parent.transform, new(0.01f, 0f, -18f));
+        lineRenderer.sprite = VanillaAsset.FullScreenSprite;
+        lineRenderer.color = Color.black.AlphaMultiplied(0.85f);
+        lineRenderer.transform.localScale = new(20f, 0f, 1f);
+
+        float t = 0f;
+        float p = 0f;
+        while (t < 2f && parent)
+        {
+            p += (1 - p).Delta(appearSpeed, 0.01f);
+            lineRenderer.transform.localScale = new(8.79f, p * 0.76f, 1f);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        yield return Effects.Wait(1.25f);
+        t = 0f;
+        while (t < 1f && parent)
+        {
+            p -= p.Delta(disappearSpeed, 0.01f);
+            lineRenderer.transform.localScale = new(8.79f, p * 0.76f, 1f);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+    }
+
+    static public IEnumerator CoAnimIntroText(GameObject parent, string text, float spawnInterval, float duration)
+    {
+        var introText = UnityHelper.CreateObject<TextMeshNoS>("IntroText", parent.transform, new(0f, 0f, -18.5f));
+        introText.Font = NebulaAsset.JusticeFont;
+        introText.FontSize = 0.48f;
+        introText.TextAlignment = Virial.Text.TextAlignment.Center;
+        introText.Pivot = new(0.5f, 0.5f);
+        introText.Text = "";
+        introText.Material = UnityHelper.GetMeshRendererMaterial();
+        introText.Color = Color.white;
+        yield return null;
+        string completedText = text;
+
+        if (spawnInterval > 0f)
+        {
+            for (int i = 0; i < completedText.Length; i++)
+            {
+                introText.Text = completedText.Substring(0, i + 1);
+                yield return Effects.Wait(spawnInterval);
+            }
+        }
+        else
+        {
+            introText.Text = completedText;
+        }
+
+        if(duration > 0f) yield return Effects.Wait(duration);
+
+        for (int i = 0; i < 3; i++)
+        {
+            introText.gameObject.SetActive(false);
+            yield return Effects.Wait(0.04f);
+            introText.gameObject.SetActive(true);
+            yield return Effects.Wait(0.04f);
+        }
+    }
+}
+
 public class JusticeMeetingHud : MonoBehaviour
 {
     static JusticeMeetingHud() => ClassInjector.RegisterTypeInIl2Cpp<JusticeMeetingHud>();
@@ -212,62 +281,8 @@ public class JusticeMeetingHud : MonoBehaviour
         }
     }
 
-    IEnumerator CoAnimBackLine(GameObject parent)
-    {
-        var lineRenderer = UnityHelper.CreateObject<SpriteRenderer>("Line", parent.transform, new(0.01f, 0f, -18f));
-        lineRenderer.sprite = VanillaAsset.FullScreenSprite;
-        lineRenderer.color = Color.black.AlphaMultiplied(0.85f);
-        lineRenderer.transform.localScale = new(20f, 0f, 1f);
-
-        float t = 0f;
-        float p = 0f;
-        while(t < 2f && parent)
-        {
-            p += (1 - p).Delta(3.5f, 0.01f);
-            lineRenderer.transform.localScale = new(8.79f, p * 0.76f, 1f);
-            t += Time.deltaTime;
-            yield return null;
-        }
-
-        yield return Effects.Wait(1.25f);
-        t = 0f;
-        while (t < 1f && parent)
-        {
-            p -= p.Delta(6.9f, 0.01f);
-            lineRenderer.transform.localScale = new(8.79f, p * 0.76f, 1f);
-            t += Time.deltaTime;
-            yield return null;
-        }
-
-    }
-
-    IEnumerator CoAnimIntroText(GameObject parent)
-    {
-        var introText = UnityHelper.CreateObject<TextMeshNoS>("IntroText", parent.transform, new(0f, 0f, -18.5f));
-        introText.Font = NebulaAsset.JusticeFont;
-        introText.FontSize = 0.48f;
-        introText.TextAlignment = Virial.Text.TextAlignment.Center;
-        introText.Pivot = new(0.5f, 0.5f);
-        introText.Text = "";
-        introText.Material = UnityHelper.GetMeshRendererMaterial();
-        introText.Color = Color.white;
-        yield return null;
-        string completedText = System.Random.Shared.NextSingle() < 0.1f ? "The balance is at will!" : "Justice meeting begins...";
-
-        for(int i = 0;i<completedText.Length;i++)
-        {
-            introText.Text = completedText.Substring(0,i + 1);
-            yield return Effects.Wait(0.078f);
-        }
-        for(int i = 0; i < 3; i++)
-        {
-            introText.gameObject.SetActive(false);
-            yield return Effects.Wait(0.04f);
-            introText.gameObject.SetActive(true);
-            yield return Effects.Wait(0.04f);
-        }
-    }
-
+    static IEnumerator CoAnimBackLine(GameObject parent) => MeetingHudModAnimations.CoAnimBackLine(parent, 3.5f, 1.25f, 6.9f);
+    static IEnumerator CoAnimIntroText(GameObject parent) => MeetingHudModAnimations.CoAnimIntroText(parent, System.Random.Shared.NextSingle() < 0.1f ? "The balance is at will!" : "Justice meeting begins...", 0.078f, 0f);
     IEnumerator CoPlayAlertFlash()
     {
         yield return Effects.Wait(0.15f);
@@ -536,7 +551,7 @@ public class JusticeMeetingHud : MonoBehaviour
                 photo.material = HatManager.Instance.PlayerMaterial;
                 PlayerMaterial.SetColors(player.PlayerId, photo.material);
 
-                var playerState = meetingHud.playerStates.FirstOrDefault(p => p.TargetPlayerId == player.PlayerId);
+                var playerState = meetingHud.GetPlayer(player.PlayerId);
                 if (playerState != null)
                 {
                     playerState.gameObject.SetActive(true);
@@ -568,6 +583,7 @@ public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCit
     Citation? HasCitation.Citation => Citations.SuperNewRoles;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.GetAsBool(1));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private readonly BoolConfiguration PutJusticeOnTheBalanceOption = new BoolConfigurationImpl("options.role.justice.putJusticeOnTheBalance", false);
     static public readonly FloatConfiguration JusticeMeetingTimeOption = NebulaAPI.Configurations.Configuration("options.role.justice.justiceMeetingTime", (30f,300f,15f), 60f, FloatConfigurationDecorator.Second);
@@ -622,8 +638,6 @@ public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCit
                 buttonManager?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(2),
                    p =>
                    {
-                       if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
-
                        if (PutJusticeOnTheBalanceOption)
                        {
                            if (MeetingHudExtension.CanInvokeSomeAction)
@@ -674,7 +688,7 @@ public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCit
             if (isMyJusticeMeeting)
             {
                 if (ev.Exiled.Any(e => e.AmOwner)) new StaticAchievementToken("justice.another1");
-                if(ev.Exiled.Count() == 2)
+                if(ev.Exiled.Count == 2)
                 {
                     new StaticAchievementToken("justice.common3");
                     if(ev.Exiled.All(e => e.IsImpostor)) new StaticAchievementToken("justice.challenge");

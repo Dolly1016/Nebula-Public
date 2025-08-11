@@ -8,6 +8,6 @@ using Virial.DI;
 
 namespace Virial.Game;
 
-public interface IFakePlayer : IPlayerlike
+public interface IFakePlayer : IPlayerlike, IReleasable
 {
 }

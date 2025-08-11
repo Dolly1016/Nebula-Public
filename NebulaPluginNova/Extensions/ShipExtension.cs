@@ -6,6 +6,7 @@ using UnityEngine;
 using Virial;
 using Virial.Events.Game;
 using Virial.Events.Game.Minimap;
+using Virial.Events.Player;
 
 namespace Nebula.Extensions;
 
@@ -76,6 +77,12 @@ public static class ShipExtension
                 ModifyEarlierFungle();
                 break;
         }
+    }
+
+    private static void CreateAxeWall(string name, Vector2[] points)
+    {
+        var collider = UnityHelper.CreateObject<EdgeCollider2D>(name, null, Vector3.zero, LayerExpansion.GetHookshotWallLayer());
+        collider.SetPoints(points.ToIl2CppList());
     }
 
     private static void ModifyEarlierSkeld() { }
@@ -184,6 +191,21 @@ public static class ShipExtension
             collider.size = size;
         }
 
+        //複数回のタオル拾いタスク
+        GameOperatorManager.Instance?.Subscribe<PlayerGetTaskLocalEvent>(ev =>
+        {
+            if(ev.Task.TaskType == TaskTypes.PickUpTowels)
+            {
+                foreach(var c in ShipStatus.Instance.AllConsoles)
+                {
+                    if (!c.TaskTypes.Contains(TaskTypes.PickUpTowels)) continue;
+                    var ttc = c.CastFast<TowelTaskConsole>();
+                    if (!ttc) continue;
+                    ttc.Image.color = Color.white;
+                }
+            }
+        }, NebulaAPI.CurrentGame);
+
         if (GeneralConfigurations.AirshipMeetingVentOption.CurrentValue) CreateVent(SystemTypes.MeetingRoom, "MeetingVent", new Vector2(-3.1f, -1.6f)).transform.localPosition += new Vector3(0, 0, 2);
         if (GeneralConfigurations.AirshipElectricalVentOption.CurrentValue) CreateVent(SystemTypes.Electrical, "ElectricalVent", new Vector2(-0.275f, -1.7f)).transform.localPosition += new Vector3(0, 0, 1);
 
@@ -214,7 +236,7 @@ public static class ShipExtension
 
             var ledgeShadow = obj.transform.FindChild("Shadow").FindChild("LedgeShadow").GetComponent<OneWayShadows>();
             //インポスターについてのみ影を無効化
-            if(GeneralConfigurations.AirshipBetterImpostorVisonOption.CurrentValue)  ledgeShadow.IgnoreImpostor = true;
+            if (GeneralConfigurations.AirshipBetterImpostorVisonOption.CurrentValue) ledgeShadow.IgnoreImpostor = true;
             //上下両方から見えないように
             if (GeneralConfigurations.AirshipShadedLowerFloorOption.CurrentValue) ledgeShadow.RoomCollider.enabled = false;
         }
@@ -222,11 +244,13 @@ public static class ShipExtension
         //エンジンの影を無視したオブジェクトを修正
         ShipStatus.Instance.FastRooms[SystemTypes.Engine].transform.FindChild("engine_pipewheel").SetLocalZ(-2f);
 
-        //Raiderの斧対策で展望間に壁設置
-        {
-            var collider = UnityHelper.CreateObject<EdgeCollider2D>("DeckWall", null, Vector3.zero, LayerExpansion.GetShipLayer());
-            collider.SetPoints(((Vector2[])[new(-12.45f, -13.6f), new(6.0f, -13.6f)]).ToIl2CppList());
-        }
+        //壁のすり抜け対策
+        CreateAxeWall("DeckWall", [new(-12.45f, -13.6f), new(6.0f, -13.6f)]);
+        CreateAxeWall("Shower-Storage Lower", [new(25.16f, -0.52f), new(25.16f, -3.9f), new(29.66f, -3.9f), new(29.66f, -2.65f)]);
+        CreateAxeWall("Shower-Storage Upper", [new(25.16f, 1.5f), new(25.16f, 2.6f), new(29.66f, 2.6f), new(29.66f, -0.42f)]);
+        CreateAxeWall("GapUpper", [new(16.41f, 10.23f), new(16.41f, 12.48f), new(5.16f, 12.48f), new(5.16f, 13.7f), new(3.91f, 13.7f), new(3.91f, 12.48f), new(2.85f, 12.48f), new(2.85f, 9.86f)]);
+        CreateAxeWall("GapLower", [new(16.41f, 8.36f), new(16.41f, 5.48f), new(2.85f, 5.48f), new(2.85f, 6.11f)]);
+        CreateAxeWall("SecurityRight", [new(8.11f, -13.77f), new(-13.77f, -13.31f), new(14.91f, -15.36f)]);
 
         List<PlainDoor> additionalDoors = [];
         
@@ -432,6 +456,10 @@ public static class ShipExtension
 
             //BepInEx.ConsoleManager.StandardOutStream.WriteLine("Colliders: " + collider.pointCount);
         }
+
+        //壁のすり抜け対策
+        CreateAxeWall("MiningPit Right", [new(14.14f, 5.98f), new(16.25f, 7.58f), new(16.25f, 13.5f)]);
+        CreateAxeWall("Jungle Right", [new(13.44f, -6.17f), new(13.09f, 0f)]);
     }
 
 

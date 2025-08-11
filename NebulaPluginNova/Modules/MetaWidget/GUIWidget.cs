@@ -408,6 +408,27 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     public void HideOverlay() => NebulaManager.Instance.HideHelpWidget();
 
     public void HideOverlayIf(GUIClickable? clickable) => NebulaManager.Instance.HideHelpWidgetIf(clickable?.uiElement);
+
+    
+    public void MoveGUIContent(GUIAlignment alignment, GameObject content, Size contentSize, Size screenSize, float? z = null)
+    {
+        float x = 0f;
+        float y = 0f;
+        if (screenSize.Width > contentSize.Width)
+        {
+            var diff = (screenSize.Width - contentSize.Width) * 0.5f;
+            if (alignment.HasFlag(GUIAlignment.Left)) x -= diff;
+            if (alignment.HasFlag(GUIAlignment.Right)) x += diff;
+        }
+        if (screenSize.Height > contentSize.Height)
+        {
+            var diff = (screenSize.Height - contentSize.Height) * 0.5f;
+            if (alignment.HasFlag(GUIAlignment.Bottom)) y -= diff;
+            if (alignment.HasFlag(GUIAlignment.Top)) y += diff;
+        }
+        z ??= content.transform.localPosition.z;
+        content.transform.localPosition = new(x, y, z.Value);
+    }
 }
 
 public class GUIScreenImpl : GUIScreen

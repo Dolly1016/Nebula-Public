@@ -1,8 +1,5 @@
 ﻿using AmongUs.GameOptions;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nebula.Commands.Variations;
-using System.Security.Cryptography.X509Certificates;
-using UnityEngine;
 using Virial;
 using Virial.Command;
 using Virial.Compat;
@@ -10,9 +7,7 @@ using Virial.Components;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
-using Virial.Helpers;
 using Virial.Media;
-using Virial.Runtime;
 using Virial.Text;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -342,6 +337,16 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         return this;
     }
 
+    ModAbilityButton ModAbilityButton.Break()
+    {
+        if (!IsBroken)
+        {
+            IsBroken = true;
+            OnBroken?.Invoke(this);
+        }
+        return this;
+    }
+
     public ModAbilityButtonImpl SetSprite(Sprite? sprite)
     {
         VanillaButton.graphic.sprite = sprite;
@@ -415,13 +420,13 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         return this;
     }
 
-    public ModAbilityButtonImpl KeyBind(Virial.Compat.VirtualKeyInput keyCode, string? action = null) => KeyBind(NebulaInput.GetInput(keyCode), action);
-    public ModAbilityButtonImpl KeyBind(VirtualInput keyCode, string? action = null)
+    public ModAbilityButtonImpl KeyBind(Virial.Compat.VirtualKeyInput keyCode, bool holdingDown = false, string? action = null) => KeyBind(NebulaInput.GetInput(keyCode), action, holdingDown);
+    public ModAbilityButtonImpl KeyBind(VirtualInput keyCode, string? action = null, bool holdingDown = false)
     {
         VanillaButton.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((c) => { if (c.name.Equals("HotKeyGuide")) GameObject.Destroy(c); }));
 
         this.keyCode= keyCode;
-        ButtonEffect.SetKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, action: action);
+        ButtonEffect.SetKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, action: action, backVariation: holdingDown ? 1 : 0);
         
         return this;
     }
@@ -488,7 +493,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     Action<ModAbilityButton> ModAbilityButton.OnBroken { set => OnBroken = value; }
     Func<ModAbilityButton, bool> ModAbilityButton.PlayFlashWhile { set => PlayFlashWhile = value; }
 
-    ModAbilityButton ModAbilityButton.BindKey(VirtualKeyInput input, string? action = null) => KeyBind(input, action);
+    ModAbilityButton ModAbilityButton.BindKey(VirtualKeyInput input, string? action = null, bool holdingDown = false) => KeyBind(input, holdingDown, action);
     ModAbilityButton ModAbilityButton.BindSubKey(VirtualKeyInput input, string? action = null, bool withTutrorial = false) => SubKeyBind(input, action, withTutrorial);
     ModAbilityButton ModAbilityButton.ResetKeyBinding() => ResetKeyBind();
     ModAbilityButton ModAbilityButton.SetAsMouseClickButton() => SetCanUseByMouseClick();
@@ -605,12 +610,12 @@ public static class ButtonEffect
     static public SpriteRenderer AddLockedOverlay(this ActionButton button) => AddOverlay(button, lockedButtonSprite.GetSprite(), 0f);
 
 
-    static readonly Image keyBindBackgroundSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindBackground.png", 100f);
+    static readonly MultiImage keyBindBackgroundSprite = DividedSpriteLoader.FromResource("Nebula.Resources.KeyBindBackground.png", 100f, 2, 1);
     static readonly Image mouseActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionIcon.png", 100f);
     static readonly Image mouseDisableActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionDisableIcon.png", 100f);
     static readonly Image infoSprite = SpriteLoader.FromResource("Nebula.Resources.ButtonInfoIcon.png", 100f);
     static public Image InfoImage => infoSprite;
-    static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide, bool isAidAction = false, string? action = null)
+    static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide, bool isAidAction = false, string? action = null, int backVariation = 0)
     {
         if(removeExistingGuide)button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "HotKeyGuide") GameObject.Destroy(obj); }));
 
@@ -624,7 +629,7 @@ public static class ButtonEffect
         obj.layer = button.layer;
         SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
         renderer.transform.localPosition = (UnityEngine.Vector3)pos + new UnityEngine.Vector3(0f, 0f, -10f);
-        renderer.sprite = keyBindBackgroundSprite.GetSprite();
+        renderer.sprite = keyBindBackgroundSprite.GetSprite(backVariation);
 
         GameObject numObj = new();
         numObj.name = "HotKeyText";
@@ -638,9 +643,9 @@ public static class ButtonEffect
 
         return obj;
     }
-    static public GameObject? SetKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide = true, string? action = null)
+    static public GameObject? SetKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide = true, string? action = null, int backVariation = 0)
     {
-        return AddKeyGuide(button, key, new(0.48f, 0.48f), removeExistingGuide, action: action);
+        return AddKeyGuide(button, key, new(0.48f, 0.48f), removeExistingGuide, action: action, backVariation: backVariation);
     }
 
     static public GameObject? SetSubKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide, string? action = null)

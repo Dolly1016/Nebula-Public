@@ -85,7 +85,7 @@ public class VanillaAsset
 
     static public void LoadAssetAtInitialize()
     {   
-        PlayerOptionsMenuPrefab = UnityHelper.FindAsset<PlayerCustomizationMenu>("LobbyPlayerCustomizationMenu")!;
+        //PlayerOptionsMenuPrefab = UnityHelper.FindAsset<PlayerCustomizationMenu>("LobbyPlayerCustomizationMenu")!;
     }
 
     public static void PlaySelectSE() => SoundManager.Instance.PlaySound(SelectClip.Clip, false, 0.8f);
@@ -93,6 +93,8 @@ public class VanillaAsset
 
     static public IEnumerator CoLoadAssetOnTitle()
     {
+        PlayerOptionsMenuPrefab = UnityHelper.FindAsset<PlayerCustomizationMenu>("LobbyPlayerCustomizationMenu")!;
+
         var twitchPopUp = TwitchManager.Instance.transform.GetChild(0);
         PopUpBackSprite = twitchPopUp.GetChild(3).GetComponent<SpriteRenderer>().sprite;
         TextButtonSprite = twitchPopUp.GetChild(2).GetComponent<SpriteRenderer>().sprite;

@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Xml.Schema;
+using InnerNet;
 using Nebula.Behavior;
 using Nebula.Map;
 using Nebula.Modules.Cosmetics;
@@ -9,7 +10,9 @@ using Nebula.VisualProgramming;
 using Nebula.VisualProgramming.UI;
 using Sentry.Unity.NativeUtils;
 using System.Data;
+using System.Runtime.Loader;
 using TMPro;
+using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using Virial;
@@ -18,6 +21,7 @@ using Virial.Helpers;
 using Virial.Media;
 using Virial.Runtime;
 using Virial.VisualProgramming;
+using static FilterPopUp.FilterInfoUI;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 using static Il2CppSystem.Uri;
 using static Nebula.Modules.Cosmetics.RingMenu;
@@ -465,14 +469,15 @@ public class NebulaManager : MonoBehaviour
         return DateTime.Now.ToString("yyyyMMddHHmmss");
     }
 
-    static public string GetPicturePath(out string displayPath)
+    static public string GetPicturePath(out string displayPath) => GetPicturePath("", out displayPath);
+    static public string GetPicturePath(string postfix, out string displayPath)
     {
         string dir = "Screenshots";
         displayPath = "ScreenShots";
         string currentTime = GetCurrentTimeString();
-        displayPath += "\\" + currentTime + ".png";
+        displayPath += "\\" + currentTime + postfix + ".png";
         if (!System.IO.Directory.Exists(dir)) System.IO.Directory.CreateDirectory(dir);
-        return dir + "\\" + currentTime + ".png";
+        return dir + "\\" + currentTime + postfix + ".png";
     }
 
     static public IEnumerator CaptureAndSave()
@@ -488,12 +493,12 @@ public class NebulaManager : MonoBehaviour
         DevTeamContact.PushScreenshot(tex);
     }
 
-    internal void ShowRingMenu(RingMenuElement[] elements, Func<bool> showWhile, Action? ifEmpty)
+    internal void ShowRingMenu(RingMenuElement[] elements, Func<bool> showWhile, Action? ifEmpty, Vector2? menuPosition = null)
     {
         if (elements.Length == 0)
             ifEmpty?.Invoke();
         else
-            ringMenu.Show(elements, showWhile);
+            ringMenu.Show(elements, showWhile, menuPosition);
     }
 
     public void Update()
@@ -516,7 +521,7 @@ public class NebulaManager : MonoBehaviour
                 {
                     StampHelpers.TryShowStampRingMenu(() => !stampInput.KeyUp);
                 }
-
+                
                 if (Input.GetKeyDown(KeyCode.K))
                 {
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));

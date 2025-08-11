@@ -12,6 +12,7 @@ global using System.Collections;
 global using HarmonyLib;
 global using Virial.Attributes;
 global using Virial.Helpers;
+global using Virial.Utilities;
 global using Timer = Nebula.Modules.ScriptComponents.TimerImpl;
 global using Color = UnityEngine.Color;
 global using GUIWidget = Virial.Media.GUIWidget;
@@ -37,6 +38,7 @@ using UnityEngine.Networking;
 using Hazel.Udp;
 using BepInEx.Configuration;
 using Virial.Utilities;
+using System.Runtime.Loader;
 
 [assembly: System.Reflection.AssemblyFileVersionAttribute(Nebula.NebulaPlugin.PluginEpochStr + "."  + Nebula.NebulaPlugin.PluginBuildNumStr)]
 
@@ -47,17 +49,18 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.22";
+    public const string PluginVersion = "2.25.0.0";
 
-    public const string VisualVersion = "v2.22";
-    //public const string VisualVersion = "Snapshot 25.06.11a";
+    public const string VisualVersion = "v2.25";
+    //public const string VisualVersion = "Snapshot 25.08.09a";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "107";
-    public const string PluginBuildNumStr = "1405";
+    public const string PluginBuildNumStr = "1435";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
+    public static AssemblyLoadContext NoSAssemblyContext = new AssemblyLoadContext("NoSAssemblyContext");
 
     private static Dictionary<string, ConfigEntryBase> loaderConfigurations = [];
     internal static ConfigEntry<T>? GetLoaderConfig<T>(string name)
@@ -101,11 +104,19 @@ public class NebulaPlugin
 
     static public void Load()
     {
+        
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Core.dll")!.ReadBytes()));
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Wasapi.dll")!.ReadBytes()));
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.WinMM.dll")!.ReadBytes()));
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.OpusDotNet.dll")!.ReadBytes()));
+        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes()));
+        /*
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Core.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Wasapi.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.WinMM.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.OpusDotNet.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes());
+        */
 
         Harmony.PatchAll();
 
@@ -117,9 +128,17 @@ public class NebulaPlugin
         }
         */
 
+        bool isFirst = true;
         SceneManager.sceneLoaded += (UnityEngine.Events.UnityAction<Scene, LoadSceneMode>)((scene, loadMode) =>
         {
             new GameObject("NebulaManager").AddComponent<NebulaManager>();
+            if (isFirst)
+            {
+                isFirst = false;
+                var residentObj = new GameObject("ResidentObject");
+                residentObj.AddComponent<ResidentBehaviour>().MarkDontUnload();
+                residentObj.MarkDontUnload();
+            }
         });
         SetUpNebulaImpl();
     }

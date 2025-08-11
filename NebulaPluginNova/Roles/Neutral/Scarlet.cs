@@ -22,7 +22,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.scarlet", new(138, 26, 49), TeamRevealType.OnlyMe);
 
-    private Scarlet() : base("scarlet", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [GraceUntilDecidingFavoriteOption, NumOfKept, MaxUsesOfCommand, VentConfiguration])
+    private Scarlet() : base("scarlet", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [GraceUntilDecidingFavoriteOption, NumOfKept, MaxUsesOfCommand, CanOverrideTaskWin, VentConfiguration])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Scarlet.png");
@@ -33,6 +33,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration GraceUntilDecidingFavoriteOption = NebulaAPI.Configurations.Configuration("options.role.scarlet.graceUntilDecidingFavorite", (30f, 600f, 10f), 120f, FloatConfigurationDecorator.Second);
     static private IntegerConfiguration NumOfKept = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfKept", (1,10), 3);
     static private IntegerConfiguration MaxUsesOfCommand = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfCommand", (1, 10), 2);
+    static internal BoolConfiguration CanOverrideTaskWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.canOverrideTaskWin", false);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.scarlet.vent", true);
 
     static public Scarlet MyRole = new Scarlet();
@@ -111,7 +112,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                     if (numOfFavorite > 0 && numOfFlirt > 0) new StaticAchievementToken("scarlet.common1");
                 }
 
-                var playerTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, p => ObjectTrackers.StandardPredicate(p) && !IsMyLover(p));
+                var playerTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeStandardPredicate(p) && !IsMyLover(p.RealPlayer));
 
                 Modules.ScriptComponents.ModAbilityButtonImpl flirtButton = null!, favoriteButton = null!;
                 flirtButton = new Modules.ScriptComponents.ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.Ability).Register(this);
@@ -122,7 +123,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                 flirtIcon.text = LeftFlirts.ToString();
                 flirtButton.OnClick = (button) =>
                 {
-                    playerTracker.CurrentTarget?.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 0]);
+                    playerTracker.CurrentTarget?.RealPlayer.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 0]);
                     LeftFlirts--;
                     flirtIcon.text = LeftFlirts.ToString();
                     flirtButton.StartCoolDown();
@@ -141,7 +142,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                 favoriteIcon.text = LeftFavorite.ToString();
                 favoriteButton.OnClick = (button) =>
                 {
-                    playerTracker.CurrentTarget?.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 1]);
+                    playerTracker.CurrentTarget?.RealPlayer.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 1]);
                     LeftFavorite--;
                     favoriteIcon.text = LeftFavorite.ToString();
                     flirtButton.StartCoolDown();
@@ -216,6 +217,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         {
             var favorite = GetMyFavorite();
             if (favorite == null) return;
+            if (!CanOverrideTaskWin && ev.EndReason == GameEndReason.Task) return;//タスク勝利の乗っ取り
             if (!MyPlayer.IsDead && !favorite.IsDead && ev.Winners.Test(favorite)) ev.TryOverwriteEnd(NebulaGameEnd.ScarletWin, GameEndReason.Special);
         }
 
@@ -245,7 +247,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
             if (MyPlayer.IsDead) return;
             if (MyPlayer.PlayerId == MyRole.MeetingFixedScarlet)
             {
-                var scarletArea = MeetingHud.Instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == MyPlayer.PlayerId);
+                var scarletArea = MeetingHud.Instance.GetPlayer(MyPlayer.PlayerId);
 
                 if (MyPlayer.PlayerId == ev.Player.PlayerId)
                 {
@@ -392,5 +394,7 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
                 ev.IsExtraWin = true;
             }            
         }
+
+        bool RuntimeModifier.MyCrewmateTaskIsIgnored => !Scarlet.CanOverrideTaskWin && AmFavorite;
     }
 }

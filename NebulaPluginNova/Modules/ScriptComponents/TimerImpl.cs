@@ -1,4 +1,5 @@
-﻿using Rewired.Utils.Platforms.Windows;
+﻿using AmongUs.GameOptions;
+using Rewired.Utils.Platforms.Windows;
 using Virial;
 using Virial.Components;
 using Virial.DI;
@@ -233,3 +234,104 @@ internal class ScriptVisualTimer : SimpleLifespan, IVisualTimer
 
     IVisualTimer IVisualTimer.Start(float? time) => this;
 }
+
+internal class VanillaKillTimer : IVisualTimer
+{
+    public VanillaKillTimer()
+    {
+    }
+
+
+    string? IVisualTimer.TimerText => Mathf.CeilToInt(PlayerControl.LocalPlayer.killTimer).ToString();
+
+    float IVisualTimer.Percentage
+    {
+        get
+        {
+            var timer = PlayerControl.LocalPlayer.killTimer;
+            var maxTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
+            if (maxTimer > 0f) return timer / maxTimer;
+            return 0f;
+        }
+    }
+
+    bool IVisualTimer.IsProgressing => PlayerControl.LocalPlayer.killTimer > 0f;
+    float IVisualTimer.CurrentTime => PlayerControl.LocalPlayer.killTimer;
+    bool ILifespan.IsDeadObject => false;
+    void IReleasable.Release() {}
+    IVisualTimer IVisualTimer.Start(float? time) => this;
+}
+
+internal class CurrentKillTimer : IVisualTimer
+{
+    public CurrentKillTimer()
+    {
+    }
+
+    private IKillButtonLike? killButton = null;
+    private IKillButtonLike? GetKillButton()
+    {
+        if (killButton != null && killButton.IsShown && killButton.IsAliveObject) return killButton;
+        killButton = NebulaAPI.CurrentGame?.KillButtonLikeHandler.KillButtonLike.FirstOrDefault(k => k.IsShown && k.IsAliveObject);
+        return killButton;
+    }
+
+    private float GetCurrentCooldown() => GetKillButton()?.Cooldown ?? 0f;
+
+    string? IVisualTimer.TimerText
+    {
+        get
+        {
+            float cooldown = GetKillButton()?.Cooldown ?? 0f;
+            return cooldown > 0f ? Mathf.CeilToInt(cooldown).ToString() : null;
+        }
+    }
+
+    float IVisualTimer.Percentage
+    {
+        get
+        {
+            float cooldown = GetKillButton()?.Cooldown ?? 0f;
+            var maxTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown); //TODO: 実際の最大クールダウンを取得する。
+            if (maxTimer > 0f) return cooldown / maxTimer;
+            return 0f;
+        }
+    }
+
+    bool IVisualTimer.IsProgressing => GetCurrentCooldown() > 0f;
+    float IVisualTimer.CurrentTime => GetCurrentCooldown();
+    bool ILifespan.IsDeadObject => false;
+    void IReleasable.Release() { }
+    IVisualTimer IVisualTimer.Start(float? time) => this;
+}
+internal class CombinedTimer : SimpleLifespan, IVisualTimer
+{
+    public CombinedTimer(IVisualTimer primaryTimer, IVisualTimer secondaryTimer, bool allowPrimaryToStart = true, bool allowSecondaryToStart= false)
+    {
+        PrimaryTimer = primaryTimer;
+        SecondaryTimer = secondaryTimer;
+        AllowPrimaryToStart = allowPrimaryToStart;
+        AllowSecondaryToStart = allowSecondaryToStart;
+    }
+
+    public IVisualTimer PrimaryTimer { get; }
+    public IVisualTimer SecondaryTimer { get; }
+    public bool AllowPrimaryToStart { get; }
+    public bool AllowSecondaryToStart { get; }
+
+    string? IVisualTimer.TimerText => PrimaryTimer.IsProgressing ? PrimaryTimer.TimerText : SecondaryTimer.TimerText;
+
+    float IVisualTimer.Percentage => PrimaryTimer.IsProgressing ? PrimaryTimer.Percentage : SecondaryTimer.Percentage;
+
+    bool IVisualTimer.IsProgressing => PrimaryTimer.IsProgressing || SecondaryTimer.IsProgressing;
+
+    float IVisualTimer.CurrentTime => PrimaryTimer.IsProgressing ? PrimaryTimer.CurrentTime : SecondaryTimer.CurrentTime;
+
+    IVisualTimer IVisualTimer.Start(float? time)
+    {
+        if (AllowPrimaryToStart) PrimaryTimer.Start(time);
+        if (AllowSecondaryToStart) SecondaryTimer.Start(time);
+        return this;
+    }
+}
+

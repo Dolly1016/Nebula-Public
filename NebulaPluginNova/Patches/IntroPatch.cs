@@ -82,14 +82,15 @@ public static class ShowIntroPatch
         }
         yield return ShipStatus.Instance.CosmeticsCache.PopulateFromPlayers();
 
-        Color c = myInfo.Role!.Role.Team.UnityColor;
+        Color fromC = myInfo.Role!.Role.Team.UnityColor;
+        Color toC = myInfo.IsMadmate ? Palette.ImpostorRed : fromC;
 
         Vector3 position = __instance.BackgroundBar.transform.position;
         position.y -= 0.25f;
         __instance.BackgroundBar.transform.position = position;
-        __instance.BackgroundBar.material.SetColor("_Color", c);
+        __instance.BackgroundBar.material.SetColor("_Color", fromC);
         __instance.TeamTitle.text = Language.Translate(myInfo.Role.Role.Team.TranslationKey);
-        __instance.TeamTitle.color = c;
+        __instance.TeamTitle.color = fromC;
         int maxDepth = Mathf.CeilToInt(7.5f);
         for (int i = 0; i < shownPlayers.Length; i++)
         {
@@ -108,13 +109,15 @@ public static class ShowIntroPatch
             }
         }
 
-        __instance.overlayHandle.color = c;
+        __instance.overlayHandle.color = fromC;
 
         
         Color fade = Color.black;
         Color impColor = Color.white;
         Vector3 titlePos = __instance.TeamTitle.transform.localPosition;
         float timer = 0f;
+
+        float madFadeBegin = 1.8f, madFadeEnd = 2.4f;
         while (timer < duration)
         {
             timer += Time.deltaTime;
@@ -122,6 +125,12 @@ public static class ShowIntroPatch
             __instance.Foreground.material.SetFloat("_Rad", __instance.ForegroundRadius.ExpOutLerp(num * 2f));
             fade.a = Mathf.Lerp(1f, 0f, num * 3f);
             __instance.FrontMost.color = fade;
+
+
+            float p = timer < madFadeBegin ? 0f : timer > madFadeEnd ? 1f : (timer - madFadeBegin) / (madFadeEnd - madFadeBegin);
+            __instance.BackgroundBar.material.SetColor("_Color", Color.Lerp(fromC, toC, p));
+
+            Color c = fromC;
             c.a = Mathf.Clamp(FloatRange.ExpOutLerp(num, 0f, 1f), 0f, 1f);
             __instance.TeamTitle.color = c;
             __instance.RoleText.color = c;
@@ -139,7 +148,7 @@ public static class ShowIntroPatch
             float num2 = timer / 1f;
             fade.a = Mathf.Lerp(0f, 1f, num2 * 3f);
             __instance.FrontMost.color = fade;
-            __instance.overlayHandle.color = c.AlphaMultiplied(1f - fade.a);
+            __instance.overlayHandle.color = fromC.AlphaMultiplied(1f - fade.a);
             yield return null;
         }
         yield break;

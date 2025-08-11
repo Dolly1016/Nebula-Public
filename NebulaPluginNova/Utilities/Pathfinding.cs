@@ -1,4 +1,5 @@
-﻿using Nebula.Map;
+﻿using MS.Internal.Xml.XPath;
+using Nebula.Map;
 using System;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -43,6 +44,14 @@ public class NavSpecialEdge
     public int To;
 }
 
+[Flags]
+public enum NavPathStopCondition
+{
+    None                    = 0x0000,
+    ChangeMovingPlatState   = 0x0001,
+}
+
+public record NavPath(Vector2[] Path, NavPathStopCondition StopCond);
 
 public static class NavVerticesHelpers
 {
@@ -58,8 +67,10 @@ public static class NavVerticesHelpers
     /// <param name="detailRange"></param>
     /// <param name="positions"></param>
     /// <param name="nextNodes"></param>
-    public static void GetPathfindingNode(this NavVerticesStructure structure, Vector2 from, Vector2 to, float detailRange, float defaultNearbyRange, out Virial.Compat.Vector2[] positions, out int[][] nextNodes)
+    public static void GetPathfindingNode(this NavVerticesStructure structure, Vector2 from, Vector2 to, float radius, float detailRange, float defaultNearbyRange, out Virial.Compat.Vector2[] positions, out int[][] nextNodes, out (int from, int to, NavPathStopCondition stopCond)[] conds)
     {
+        List<(int from, int to, NavPathStopCondition stopCond)> condsList = [];
+
         List<Virial.Compat.Vector2> positionsList = new(structure.MainNodes.Count + 50);
         List<List<int>> mainNextNodes = new(structure.MainNodes.Count);
         List<int[]> subNextNodes = new(50);
@@ -67,7 +78,7 @@ public static class NavVerticesHelpers
         List<int> fromNearby = [], toNearby = [];
 
         //現在のゲーム空間で移動の可能性を調べます。
-        bool CanMove(Vector2 from, float toX, float toY) => !Helpers.AnyNonTriggersBetween(from, new(toX, toY), out _);
+        bool CanMove(Vector2 from, float toX, float toY) => !Helpers.AnyCustomNonTriggersBetweenThick(from, new(toX, toY), radius, null);
 
         foreach (var node in structure.MainNodes)
         {
@@ -149,6 +160,30 @@ public static class NavVerticesHelpers
                     case "AirshipMeetingRight":
                         if (GeneralConfigurations.AirshipOneWayMeetingRoomOption.Value) AddSingleEdge();
                         break;
+                    case "AirshipGapFromRight":
+                        var fromNodeR = structure.MainNodes[edge.From];
+                        if (from.Distance(new Vector2(fromNodeR.X, fromNodeR.Y)) < 5f)
+                        {
+                            var airshipR = ShipStatus.Instance.TryCast<AirshipStatus>();
+                            if (airshipR && !airshipR!.GapPlatform.Target && !airshipR.GapPlatform.IsLeft)
+                            {
+                                AddSingleEdge();
+                                condsList.Add((edge.From, edge.To, NavPathStopCondition.ChangeMovingPlatState));
+                            }
+                        }
+                        break;
+                    case "AirshipGapFromLeft":
+                        var fromNodeL = structure.MainNodes[edge.From];
+                        if (from.Distance(new Vector2(fromNodeL.X, fromNodeL.Y)) < 5f)
+                        {
+                            var airshipL = ShipStatus.Instance.TryCast<AirshipStatus>();
+                            if (airshipL && !airshipL!.GapPlatform.Target && airshipL.GapPlatform.IsLeft)
+                            {
+                                AddSingleEdge();
+                                condsList.Add((edge.From, edge.To, NavPathStopCondition.ChangeMovingPlatState));
+                            }
+                        }
+                        break;
                 }
             }
         }
@@ -168,6 +203,8 @@ public static class NavVerticesHelpers
             //末尾の添え字を正しい値に直す。
             for (int n = 0; n < nextNodes[i].Length; n++) if (nextNodes[i][n] < 0) nextNodes[i][n] += positions.Length;
         }
+
+        conds = condsList.ToArray();
     }
 
     private const float VHMovementInitCoeff = 0.8f;
@@ -208,7 +245,11 @@ public static class NavVerticesHelpers
         }
         if (door.TryCast<AutoCloseDoor>())
         {
-            if (!door.IsOpen) door.SetDoorway(true);
+            if (!door.IsOpen)
+            {
+                ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
+                door.SetDoorway(true);
+            }
             yield return Effects.Wait(0.4f);
             yield break;
         }
@@ -232,26 +273,43 @@ public static class NavVerticesHelpers
                 }
             }
             yield return Effects.Wait(3.8f);
-            if (!door.IsOpen) door.SetDoorway(true);
+            if (!door.IsOpen)
+            {
+                ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
+                door.SetDoorway(true);
+            }
             yield break;
         }
         if (door.TryCast<MushroomWallDoor>())
         {
             yield return Effects.Wait(5.2f);
-            if (!door.IsOpen) door.SetDoorway(true);
+            if (!door.IsOpen)
+            {
+                ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
+                door.SetDoorway(true);
+            }
             yield return Effects.Wait(0.4f);
             yield break;
         }
     }
 
-    internal static IEnumerator WalkPath(Vector2[] path, IPlayerLogics player)
+    internal static IEnumerator WalkPath(Vector2[] path, NavPathStopCondition stopCond, IPlayerLogics player, Func<bool>? interrupter = null)
     {
+        bool RecalcPath()
+        {
+            var newPath = CalcPath(player.TruePosition, path.Last());
+            if (newPath == null) return false;
+            path = newPath.Path;
+            stopCond = newPath.StopCond;
+            return true;
+        }
+
         player.SnapTo(path[0] - player.GroundCollider.offset);
         player.ClearPositionQueues();
-        player.UpdateNetworkTransformState(false);
 
         ZiplineConsole[] ziplineConsoles = [];
         ManualDoor[] manualDoors = [];
+        MovingPlatformBehaviour movingPlatform = null!;
 
         {
             //MIRA HQ
@@ -267,16 +325,29 @@ public static class NavVerticesHelpers
             {
                 ziplineConsoles = fungleShipStatus!.Zipline.GetComponentsInChildren<ZiplineConsole>();
             }
+
+            //the Airship
+            var airshipStatus = ShipStatus.Instance.TryCast<AirshipStatus>();
+            if (airshipStatus)
+            {
+                movingPlatform = airshipStatus!.GapPlatform;
+            }
         }
 
         int currentTarget = 1;
         float VHMovementCoeff = VHMovementInitCoeff;
         Vector2 lastPos = player.Position;
         int noMoveCount = 0;
+        bool shouldNotSnapToTargetPos = false;
 
-        while (currentTarget < path.Length)
+        while (currentTarget < path.Length && player.IsActive)
         {
             if (player.Player.IsDead) break;
+            if (interrupter?.Invoke() ?? false)
+            {
+                shouldNotSnapToTargetPos = true;
+                break;
+            }
 
             var d = player.TrueSpeed * Time.fixedDeltaTime + 0.01f;
 
@@ -334,7 +405,14 @@ public static class NavVerticesHelpers
                 noMoveCount++;
             else
                 noMoveCount = 0;
-            if (noMoveCount > 60) break;
+            if (noMoveCount > 80)
+            {
+                Vector3 snapTo = (currentGoal - player.GroundCollider.offset);
+                snapTo.z = snapTo.y / 1000f;
+                player.Body.transform.position = snapTo;
+                currentTarget++;
+                continue;
+            }
 
             foreach (var door in manualDoors)
             {
@@ -403,29 +481,53 @@ public static class NavVerticesHelpers
                 break;
             }
 
+            if (movingPlatform && stopCond.HasFlag(NavPathStopCondition.ChangeMovingPlatState))
+            {
+                if (movingPlatform.Target) RecalcPath(); //状態が変わったため経路を再計算する。
+                else
+                {
+                    var mpDir = movingPlatform.IsLeft ? Vector2.right : Vector2.left;
+                    if (Vector2.Dot(mpDir, velocity.normalized) > 0.9f && movingPlatform.transform.position.Distance(currentPos) < 1f)
+                    {
+                        Variable<bool> done = new();
+                        yield return player.UseMovingPlatform(movingPlatform, done);
+                        stopCond &= ~NavPathStopCondition.ChangeMovingPlatState;
+                    }
+                }
+            }
 
             yield return null;
-
         }
 
-        player.Body.velocity = Vector2.zero;
-        player.UpdateNetworkTransformState(true);
-        if (!player.Player.IsDead) player.SnapTo(path[^1] - player.GroundCollider.offset);
+        if (player.IsActive)
+        {
+            player.Body.velocity = Vector2.zero;
+            if (!player.Player.IsDead && !shouldNotSnapToTargetPos) player.SnapTo(path[^1] - player.GroundCollider.offset);
+        }
     }
 
-    static public Vector2[]? CalcPath(Vector2 from, Vector2 to)
+    static public NavPath? CalcPath(Vector2 from, Vector2 to)
     {
-        if (Helpers.AnyNonTriggersBetween(from, to, out _))
+        if (Helpers.AnyCustomNonTriggersBetweenThick(from, to, 0.15f, null))
         {
-            MapData.GetCurrentMapData().MapNavData.GetPathfindingNode(from, to, 8f, 3.2f, out var positions, out var nextNodes);
+            MapData.GetCurrentMapData().MapNavData.GetPathfindingNode(from, to, 0.15f, 8f, 3.2f, out var positions, out var nextNodes, out var conds);
             var indexPath = Pathfinding.FindPath(positions, nextNodes, positions.Length - 2, positions.Length - 1);
             if (indexPath.Length == 0) return null;
-            
-            return indexPath.Select(i => positions[i].ToUnityVector()).ToArray();
+
+            NavPathStopCondition condFlag = NavPathStopCondition.None;
+            int lastPos = -1;
+            var pathArray = indexPath.Select(i =>
+            {
+                int nextPos = i;
+                foreach (var c in conds) if (c.from == lastPos && c.to == nextPos) condFlag |= c.stopCond;
+                lastPos = nextPos;
+                return positions[i].ToUnityVector();
+            }).ToArray();
+            return new(pathArray, condFlag);
         }
         else
         {
-            return [from, to];
+            return new([from, to], NavPathStopCondition.None);
         }
     }
 }

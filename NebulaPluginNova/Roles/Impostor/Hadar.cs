@@ -26,6 +26,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public readonly Hadar MyRole = new();
     static private readonly GameStatsEntry StatsDive = NebulaAPI.CreateStatsEntry("stats.hadar.dive", GameStatsCategory.Roles, MyRole);

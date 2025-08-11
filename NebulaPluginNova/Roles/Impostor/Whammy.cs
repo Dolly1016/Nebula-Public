@@ -1247,6 +1247,7 @@ public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedR
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0), arguments.Get(1, NumOfBalloonsInStartingOption));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
     static public readonly Whammy MyRole = new();
     static private readonly GameStatsEntry StatsBalloon = NebulaAPI.CreateStatsEntry("stats.whammy.balloon", GameStatsCategory.Roles, MyRole);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility

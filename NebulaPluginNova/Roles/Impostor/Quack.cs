@@ -26,6 +26,7 @@ internal class Quack : DefinedSingleAbilityRoleTemplate<Quack.Ability>, DefinedR
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
     static public readonly Quack MyRole = new();
     static private readonly GameStatsEntry StatsReport = NebulaAPI.CreateStatsEntry("stats.quack.report", GameStatsCategory.Roles, MyRole);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility

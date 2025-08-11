@@ -6,6 +6,7 @@ using Nebula.Modules.GUIWidget;
 using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
 using Nebula.Roles.Assignment;
+using Nebula.Roles.Crewmate;
 using Nebula.Roles.Neutral;
 using Nebula.Utilities;
 using Sentry.Unity.NativeUtils;
@@ -114,6 +115,26 @@ public static class HelpScreen
     //Current help status
     private static HelpArgument lastArgument = HelpArgument.Default;
     private static HelpTab lastTab = HelpTab.Roles;
+    internal static void ChangePreviewSimulation(int num) => lastArgument.PreviewSimulation = num;
+    internal static int PreviewSimulation => lastArgument.PreviewSimulation;
+    internal static int GetNextSimulatePlayerArgument(bool increment)
+    {
+        if (lastArgument.PreviewSimulation == -1)
+        {
+            return AmongUsUtil.NumOfImpostors switch
+            {
+                5 => 22,
+                4 => 18,
+                3 => 14,
+                2 => 11,
+                _ => 7,
+            };
+        }
+        else
+        {
+            return Math.Clamp(lastArgument.PreviewSimulation + (increment ? 1 : -1), 1, 24);
+        }
+    }
 
     public static bool OpenedAnyHelpScreen => lastHelpScreen;
     public static MetaScreen? LastHelpScreen => lastHelpScreen;
@@ -200,7 +221,7 @@ public static class HelpScreen
         Virial.Compat.Artifact<GUIScreen>? inner = null;
         var scrollView = new GUIScrollView(Virial.Media.GUIAlignment.Left, new(7f, 4.5f), () => doc.Build(inner) ?? GUIEmptyWidget.Default);
         inner = scrollView.Artifact;
-        Reference<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
+        Variable<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
 
         screen.SetWidget(scrollView, illustration, out _);
     }
@@ -321,7 +342,7 @@ public static class HelpScreen
     }
 
     private static readonly TextAttributeOld OptionsAttr = new(TextAttributeOld.BoldAttr) { FontSize = 1.6f, FontMaxSize = 1.6f, FontMinSize = 1.6f, Size = new(4f, 10f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial, Alignment = TMPro.TextAlignmentOptions.TopLeft };
-    private static Reference<ScrollView.InnerScreen>? optionsInner = new();
+    private static Variable<ScrollView.InnerScreen>? optionsInner = new();
     private static IMetaWidgetOld ShowOptionsScreen()
     {
         var view = new MetaWidgetOld.ScrollView(new(7.4f, HelpHeight - 0.5f), GetOptionsWidget()) { Alignment = IMetaWidgetOld.AlignmentOption.Center, ScrollerTag = "HelpOptions", InnerRef = optionsInner };
@@ -336,11 +357,52 @@ public static class HelpScreen
     static private IMetaWidgetOld GetOptionsWidget()
     {
         StringBuilder builder = new();
+
+        //バニラオプション
+        var vanillaOptions = GameOptionsManager.Instance.currentNormalGameOptions;
+        var translator = TranslationController.Instance;
+
+        void AddHeader(string header)
+        {
+            builder.Append("\n  ");
+            builder.Append(Language.Translate(header));
+        }
+        void AddOption(StringNames option, string value)
+        {
+            builder.Append("\n    ");
+            builder.Append(translator.GetString(option));
+            builder.Append(": ");
+            builder.Append(value);
+        }
+        builder.Append(Language.Translate("options.vanilla.header"));
+        AddOption(StringNames.GameMapName, AmongUsUtil.ToLocalizedMapName(vanillaOptions.MapId));
+        AddHeader("options.vanilla.header.impostor");
+        AddOption(StringNames.GameNumImpostors, vanillaOptions.NumImpostors.ToString());
+        AddOption(StringNames.GameKillCooldown, vanillaOptions.KillCooldown.ToString() + Language.Translate("options.sec"));
+        AddOption(StringNames.GameImpostorLight, vanillaOptions.ImpostorLightMod.ToString() + Language.Translate("options.cross"));
+        AddOption(StringNames.GameKillDistance, translator.GetString(vanillaOptions.KillDistance switch { 0 => StringNames.SettingShort, 1 => StringNames.SettingMedium , _ => StringNames.SettingLong }));
+        AddHeader("options.vanilla.header.crewmate");
+        AddOption(StringNames.GamePlayerSpeed, vanillaOptions.PlayerSpeedMod.ToString() + Language.Translate("options.cross"));
+        AddOption(StringNames.GameCrewLight, vanillaOptions.CrewLightMod.ToString() + Language.Translate("options.cross"));
+        AddHeader("options.vanilla.header.meeting");
+        AddOption(StringNames.GameNumMeetings, vanillaOptions.NumEmergencyMeetings.ToString());
+        AddOption(StringNames.GameEmergencyCooldown, vanillaOptions.EmergencyCooldown.ToString() + Language.Translate("options.sec"));
+        AddOption(StringNames.GameDiscussTime, vanillaOptions.DiscussionTime.ToString() + Language.Translate("options.sec"));
+        AddOption(StringNames.GameVotingTime, vanillaOptions.VotingTime.ToString() + Language.Translate("options.sec"));
+        AddOption(StringNames.GameAnonymousVotes, BoolConfigurationImpl.GetDisplayValue(vanillaOptions.AnonymousVotes));
+        AddOption(StringNames.GameConfirmImpostor, BoolConfigurationImpl.GetDisplayValue(vanillaOptions.ConfirmImpostor));
+        AddHeader("options.vanilla.header.task");
+        AddOption(StringNames.GameTaskBarMode, translator.GetString(vanillaOptions.TaskBarMode switch { AmongUs.GameOptions.TaskBarMode.Normal => StringNames.SettingNormalTaskMode , AmongUs.GameOptions.TaskBarMode.MeetingOnly => StringNames.SettingMeetingTaskMode, _ => StringNames.SettingInvisibleTaskMode }));
+        AddOption(StringNames.GameCommonTasks, vanillaOptions.NumCommonTasks.ToString());
+        AddOption(StringNames.GameLongTasks, vanillaOptions.NumLongTasks.ToString());
+        AddOption(StringNames.GameShortTasks, vanillaOptions.NumShortTasks.ToString());
+        AddOption(StringNames.GameVisualTasks, BoolConfigurationImpl.GetDisplayValue(vanillaOptions.VisualTasks));
+
         foreach (var holder in ConfigurationHolder.AllHolders.Where(h => h.DisplayOption != Virial.Configuration.ConfigurationHolderState.Inactivated))
         {
             if (!holder.IsShown || !holder.GameModes.Test(GeneralConfigurations.CurrentGameMode)) continue;
 
-            if (builder.Length != 0) builder.Append("\n\n");
+            builder.Append("\n\n");
             builder.Append(holder.Title.GetString() + "\n   ");
             builder.Append(holder.Configurations.Where(c => c.IsShown).Select(c => c.GetDisplayText()?.Replace("\n", "\n   ")).Where(str => str != null).Join(null, "\n   "));
         }
@@ -393,16 +455,70 @@ public static class HelpScreen
         return widget;
     }
 
+    internal static Virial.Media.GUIWidget GetPreviewIconsWidget(out AssignmentPreview.AssignmentFlag flagSum, Func<int, float>? scaler = null)
+    {
+        scaler ??= l => l >= 18 ? 0.33f : 0.48f;
+        int players = lastArgument.PreviewSimulation == -1 ? PlayerControl.AllPlayerControls.Count : lastArgument.PreviewSimulation;
+        var flags = AssignmentPreview.CalcPreview(players);
+
+        //出現しうるカテゴリを全て集計する。
+        AssignmentPreview.AssignmentFlag allFlags = 0;
+        flags.Do(f => allFlags |= f);
+        flagSum = allFlags;
+
+        return GUI.API.HorizontalHolder(GUIAlignment.Center, flags.Select(f => new NoSGUIImage(
+            GUIAlignment.Center, RolePreviewIconMap.TryGetValue(f & AssignmentFlag.ImageFlag, out var i) ? RolePreviewIconSprite.AsLoader(i) : null!, new(null, scaler.Invoke(flags.Length)), overlay: () =>
+            {
+                string text = Language.Translate("help.rolePreview.header").Bold() + "<br>";
+                if ((f & AssignmentFlag.ModImpostor100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modImpostor.100").Color(Palette.ImpostorRed);
+                if ((f & AssignmentFlag.ModImpostorPrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modImpostor.random").Color(Palette.ImpostorRed);
+                if ((f & AssignmentFlag.ModImpostorAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modImpostor.additional").Color(Palette.ImpostorRed);
+                if ((f & AssignmentFlag.VanillaImpostor) != 0) text += "<br>" + Language.Translate("help.rolePreview.vanillaImpostor").Color(Palette.ImpostorRed);
+                if ((f & AssignmentFlag.ModNeutral100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.100").Color(Color.yellow);
+                if ((f & AssignmentFlag.ModNeutralPrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.random").Color(Color.yellow);
+                if ((f & AssignmentFlag.ModNeutralAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.additional").Color(Color.yellow);
+                if ((f & AssignmentFlag.ModCrewmate100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.100").Color(Palette.CrewmateBlue);
+                if ((f & AssignmentFlag.ModCrewmatePrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.random").Color(Palette.CrewmateBlue);
+                if ((f & AssignmentFlag.ModCrewmateAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.additional").Color(Palette.CrewmateBlue);
+                if ((f & AssignmentFlag.VanillaCrewmate) != 0) text += "<br>" + Language.Translate("help.rolePreview.vanillaCrewmate").Color(Palette.CrewmateBlue);
+
+                return GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), text);
+            })
+            ), 0.48f);
+    }
     private static IMetaWidgetOld ShowAchievementsScreen()
     {
-        Virial.Media.GUIWidget GenerateWidget(string? scrollerTag = null, Predicate<INebulaAchievement>? predicate = null, string? shownText = null) => AchievementViewer.GenerateWidget(3.15f, 6.2f, scrollerTag, true, predicate, shownText, onClicked: lastArgument.CanCloseEasily ? _ => TryCloseHelpScreen() : null);
         Virial.Compat.Artifact<GUIScreen> artifact = null!;
-        
-        List<Virial.Media.GUIWidget> buttons = new([
+
+        Predicate<INebulaAchievement>? achPredicate = null;
+        string? shownPredicate = null;
+        string scrollerTagPrefix = "ingameAchievementViewer";
+        AchievementViewer.SortRule sortRule = AchievementViewer.SortRule.Categorized;
+        string scrollerTagPostfix = "_categorized";
+
+        Virial.Media.GUIWidget GenerateWidget() => AchievementViewer.GenerateWidget(3.15f, 6.2f, scrollerTagPrefix + scrollerTagPostfix, true, achPredicate, shownPredicate, onClicked: lastArgument.CanCloseEasily ? _ => TryCloseHelpScreen() : null, sortRule: sortRule);
+        void ShowInnerWidget() => artifact.Do(screen => screen.SetWidget(GenerateWidget(), out var _));
+
+        List<Virial.Media.GUIWidget> categorizeButtons = [
             GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.StandardMediumMasked, "achievement.filter"),
-            new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.all")){ OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget(), out var _)), SelectedDefault = true, WithCheckMark = true },
-            new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.achieved")){ OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget("AchievementAchieved", a => a.IsCleared, Language.Translate("achievement.filter.achieved")), out var _)), WithCheckMark = true},
-            new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.nonAchieved")){ OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget("AchievementDontAchieved", a => !a.IsCleared, Language.Translate("achievement.filter.nonAchieved")), out var _)), WithCheckMark = true},
+            new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.all")){ OnClick = _ => {
+                achPredicate = null;
+                scrollerTagPrefix = "ingameAchievementViewer";
+                shownPredicate = null;
+                ShowInnerWidget();
+            }, SelectedDefault = true, WithCheckMark = true },
+            new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.achieved")){ OnClick = _ => {
+                achPredicate = a => a.IsCleared;
+                scrollerTagPrefix = "ingameAchievementViewerCleared";
+                shownPredicate = Language.Translate("achievement.filter.achieved");
+                ShowInnerWidget();
+            }, WithCheckMark = true},
+            new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.nonAchieved")){ OnClick = _ => {
+                achPredicate = a => !a.IsCleared;
+                scrollerTagPrefix = "ingameAchievementViewerNotCleared";
+                shownPredicate = Language.Translate("achievement.filter.nonAchieved");
+                ShowInnerWidget();
+            }, WithCheckMark = true},
             new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.search")){ OnClick = clickable => {
                 var searchWindow = MetaScreen.GenerateWindow(new(6f,0.8f), HudManager.Instance.transform, Vector3.zero, true, true, true);
 
@@ -411,7 +527,9 @@ public static class HelpScreen
                     searchWindow.CloseScreen();
                     clickable.Selectable?.Select();
 
-                    artifact.Do(screen => screen.SetWidget(GenerateWidget(predicate: ac => keyword.All(k => ac.GetKeywords().Any(acK => acK.Contains(k))), shownText: Language.Translate("achievement.ui.shown.search").Replace("%KEYWORD%", rawKeyword)), out var _));
+                    achPredicate = a => keyword.All(k => a.GetKeywords().Any(acK => acK.Contains(k)));
+                    shownPredicate = Language.Translate("achievement.ui.shown.search").Replace("%KEYWORD%", rawKeyword);
+                    ShowInnerWidget();
                 }
 
                 var textField = new GUITextField(GUIAlignment.Left, new(4.3f,0.4f)){ HintText = Language.Translate("ui.dialog.keyword").Color(Color.gray), IsSharpField = false, WithMaskMaterial = true, EnterAction = (rawKeyword) => {ShowResult(rawKeyword); return true; } };
@@ -419,14 +537,41 @@ public static class HelpScreen
                 searchWindow.SetWidget(GUI.API.HorizontalHolder(GUIAlignment.Center, textField, button), new Vector2(0.5f,0.5f), out var size);
                 textField.Artifact.Do(field => field.GainFocus());
             }, WithCheckMark = true, BlockSelectingOnClicked = true},
-            ]);
-
+            ];
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized)
         {
-            buttons.Add(new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.myRole")) { OnClick = _ => artifact.Do(screen => screen.SetWidget(GenerateWidget("AchievementMyRole", a => GamePlayer.LocalPlayer.AllAssigned().Any(r => r.Assignable == a.RelatedRole), Language.Translate("achievement.filter.myRole")), out var _)), WithCheckMark = true });
+            categorizeButtons.Add(new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.filter.myRole"))
+            {
+                OnClick = _ =>
+                {
+                    achPredicate = a => GamePlayer.LocalPlayer?.AllAssigned().Any(r => a.RelatedRole.Contains(r.Assignable)) ?? false;
+                    scrollerTagPrefix = "ingameAchievementViewerMyRole";
+                    shownPredicate = Language.Translate("achievement.filter.myRole");
+                    ShowInnerWidget();
+                },
+                WithCheckMark = true
+            });
         }
 
-        var sidebar = new GUIButtonGroup(new VerticalWidgetsHolder(GUIAlignment.Top, buttons));
+        Virial.Media.GUIWidget[] sortButtons = [
+            GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.StandardMediumMasked, "achievement.sort"),
+            new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.sort.categorized")){ OnClick = _ => {
+                sortRule = AchievementViewer.SortRule.Categorized;
+                scrollerTagPostfix = "_categorized";
+                ShowInnerWidget();
+            },SelectedDefault = true, WithCheckMark = true},
+            new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.sort.progress")){ OnClick = _ => {
+                sortRule = AchievementViewer.SortRule.GlobalProgress;
+                scrollerTagPrefix = "_progress";
+                ShowInnerWidget();
+            }, WithCheckMark = true},
+            ];
+
+        var sidebar = new VerticalWidgetsHolder(GUIAlignment.Top,
+            new GUIButtonGroup(new VerticalWidgetsHolder(GUIAlignment.Top, categorizeButtons)),
+            GUI.API.VerticalMargin(0.05f),
+            new GUIButtonGroup(new VerticalWidgetsHolder(GUIAlignment.Top, sortButtons))
+            );
         var screen = new GUIFixedView(GUIAlignment.Top, new(5.7f, 3.8f), GenerateWidget()) { WithMask = false };
         artifact = screen.Artifact;
         return new MetaWidgetOld.WrappedWidget(new HorizontalWidgetsHolder(GUIAlignment.Center, screen, sidebar));
@@ -454,6 +599,12 @@ public static class HelpScreen
         { AssignmentFlag.ModImpostor | AssignmentFlag.ModNeutral | AssignmentFlag.VanillaCrewmate | AssignmentFlag.ModCrewmate, 16},
     };
 
+    private enum AssignmentType
+    {
+        Jackalized,
+        Madden,
+        Normal
+    }
     private static IMetaWidgetOld ShowPreviewScreen(MetaScreen screen, HelpTab validTabs, out Image? backImage)
     {
         backImage = null;
@@ -483,23 +634,25 @@ public static class HelpScreen
             list?.Add(holder);
         }
 
-        Virial.Media.GUIWidget GetRoleOverview(RoleCategory category, string categoryName, List<Virial.Media.GUIWidget> additionalList, bool with100View, bool withRandomView, bool withJackalizedView = false)
+        Virial.Media.GUIWidget GetRoleOverview(RoleCategory category, string categoryName, List<Virial.Media.GUIWidget> additionalList, bool with100View, bool withRandomView, bool withJackalizedView = false, bool withMaddenView = false)
         {
             List<Virial.Media.GUIWidget> list100 = [], listRandom = [], ghosts = [], modifiers = [];
 
-            void CheckRoles(List<Virial.Media.GUIWidget> list100, List<Virial.Media.GUIWidget> listRandom, bool jackalAssignment = false)
+            void CheckRoles(List<Virial.Media.GUIWidget> list100, List<Virial.Media.GUIWidget> listRandom, bool with100View, bool withRandomView, AssignmentType type = AssignmentType.Normal)
             {
-                foreach (var role in Roles.Roles.AllRoles.Where(r => jackalAssignment || r.Category == category))
+                foreach (var role in Roles.Roles.AllRoles.Where(r => type != AssignmentType.Normal || r.Category == category))
                 {
-                    var param = jackalAssignment ? role.JackalAllocationParameters : role.AllocationParameters;
+                    var param = type switch { AssignmentType.Jackalized => role.JackalAllocationParameters, AssignmentType.Madden => role.MadmateAllocationParameters, _ => role.AllocationParameters };
+
+                    string? roleName = type switch { AssignmentType.Jackalized => role.DisplayName.Color(Jackal.MyRole.UnityColor), AssignmentType.Madden => (Language.Translate("role.madmate.prefix") + role.DisplayName).Color(Palette.ImpostorRed), _ => null };
                     if ((param?.RoleCount100 ?? 0) > 0)
                     {
                         if (with100View)
                         {
                             string numText = "x" + param!.RoleCount100;
                             if (param.RoleCountRandom > 0) numText += $" (+{param.RoleCountRandom}, {param.GetRoleChance(param!.RoleCount100 + 1)}%)";
-                            list100.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GetAssignableText(role, jackalAssignment ? role.DisplayName.Color(Jackal.MyRole.UnityColor) : null), GUI.API.HorizontalMargin(0.1f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, numText)));
-                            if (!jackalAssignment) role.AdditionalRoles.Do(a => AddAdditionalRole(a, role));
+                            list100.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GetAssignableText(role, roleName), GUI.API.HorizontalMargin(0.1f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, numText)));
+                            if (type == AssignmentType.Normal) role.AdditionalRoles.Do(a => AddAdditionalRole(a, role));
                         }
                     }
                     else if ((param?.RoleCountRandom ?? 0) > 0)
@@ -507,13 +660,13 @@ public static class HelpScreen
                         if (withRandomView)
                         {
                             string numText = $"x{param!.RoleCountRandom} ({param.GetRoleChance(1)}%)";
-                            listRandom.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GetAssignableText(role, jackalAssignment ? role.DisplayName.Color(Jackal.MyRole.UnityColor) : null), GUI.API.HorizontalMargin(0.1f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, numText)));
-                            if (!jackalAssignment) role.AdditionalRoles.Do(a => AddAdditionalRole(a, role));
+                            listRandom.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GetAssignableText(role, roleName), GUI.API.HorizontalMargin(0.1f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, numText)));
+                            if (type == AssignmentType.Normal) role.AdditionalRoles.Do(a => AddAdditionalRole(a, role));
                         }
                     }
                 }
             }
-            CheckRoles(list100, listRandom);
+            CheckRoles(list100, listRandom, with100View, withRandomView);
 
             foreach (var m in Roles.Roles.AllAllocatableModifiers())
             {
@@ -547,10 +700,19 @@ public static class HelpScreen
             {
                 List<Virial.Media.GUIWidget> listJ100 = [];
                 List<Virial.Media.GUIWidget> listJRandom = [];
-                CheckRoles(listJ100, listJRandom, true);
+                CheckRoles(listJ100, listJRandom, true, true, AssignmentType.Jackalized);
 
                 if (listJ100.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.jackalized.100") + "-").Bold()), .. listJ100, GUI.API.Margin(new(2f, 0.3f))]));
                 if (listJRandom.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.jackalized.random") + "-").Bold()), .. listJRandom, GUI.API.Margin(new(2f, 0.3f))]));
+            }
+            if (withMaddenView)
+            {
+                List<Virial.Media.GUIWidget> listM100 = [];
+                List<Virial.Media.GUIWidget> listMRandom = [];
+                CheckRoles(listM100, listMRandom, true, true, AssignmentType.Madden);
+
+                if (listM100.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.madden.100") + "-").Bold()), .. listM100, GUI.API.Margin(new(2f, 0.3f))]));
+                if (listMRandom.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.madden.random") + "-").Bold()), .. listMRandom, GUI.API.Margin(new(2f, 0.3f))]));
             }
 
             return GUI.API.VerticalHolder(GUIAlignment.Top, result);
@@ -560,29 +722,7 @@ public static class HelpScreen
         int players = lastArgument.PreviewSimulation == -1 ? PlayerControl.AllPlayerControls.Count : lastArgument.PreviewSimulation;
         var flags = AssignmentPreview.CalcPreview(players);
         
-        //出現しうるカテゴリを全て集計する。
-        AssignmentPreview.AssignmentFlag allFlag = 0;
-        flags.Do(f => allFlag |= f);
-
-        var iconHolder = GUI.API.HorizontalHolder(GUIAlignment.Center, flags.Select(f => new NoSGUIImage(
-            GUIAlignment.Center, RolePreviewIconMap.TryGetValue(f & AssignmentFlag.ImageFlag, out var i) ? RolePreviewIconSprite.AsLoader(i) : null!, new(null,flags.Length >= 18 ? 0.33f : 0.48f), overlay: () =>
-            {
-                string text = Language.Translate("help.rolePreview.header").Bold() + "<br>";
-                if ((f & AssignmentFlag.ModImpostor100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modImpostor.100").Color(Palette.ImpostorRed);
-                if ((f & AssignmentFlag.ModImpostorPrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modImpostor.random").Color(Palette.ImpostorRed);
-                if ((f & AssignmentFlag.ModImpostorAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modImpostor.additional").Color(Palette.ImpostorRed);
-                if ((f & AssignmentFlag.VanillaImpostor) != 0) text += "<br>" + Language.Translate("help.rolePreview.vanillaImpostor").Color(Palette.ImpostorRed);
-                if ((f & AssignmentFlag.ModNeutral100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.100").Color(Color.yellow);
-                if ((f & AssignmentFlag.ModNeutralPrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.random").Color(Color.yellow);
-                if ((f & AssignmentFlag.ModNeutralAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.additional").Color(Color.yellow);
-                if ((f & AssignmentFlag.ModCrewmate100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.100").Color(Palette.CrewmateBlue);
-                if ((f & AssignmentFlag.ModCrewmatePrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.random").Color(Palette.CrewmateBlue);
-                if ((f & AssignmentFlag.ModCrewmateAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.additional").Color(Palette.CrewmateBlue);
-                if ((f & AssignmentFlag.VanillaCrewmate) != 0) text += "<br>" + Language.Translate("help.rolePreview.vanillaCrewmate").Color(Palette.CrewmateBlue);
-
-                return GUI.API.RawText(GUIAlignment.Center, textAttr, text);
-            })
-            ), 0.48f);
+        var iconHolder = GetPreviewIconsWidget(out var allFlag);
 
         List<Virial.Media.GUIWidget> winConds = [
             GUI.API.RawText(GUIAlignment.Left, maskedTitleAttr,"勝利条件"),
@@ -626,8 +766,8 @@ public static class HelpScreen
             GUI.API.VerticalHolder(GUIAlignment.Center,
                 GUI.API.HorizontalHolder(GUIAlignment.Center, 
                 GetRoleOverview(RoleCategory.ImpostorRole,"impostor", listAdditionalImp, allFlag.HasFlag(AssignmentFlag.ModImpostor100), allFlag.HasFlag(AssignmentFlag.ModImpostorPrb)), 
-                GeneralConfigurations.NeutralSpawnable ? GetRoleOverview(RoleCategory.NeutralRole, "neutral", listAdditionalNeu, allFlag.HasFlag(AssignmentFlag.ModNeutral100), allFlag.HasFlag(AssignmentFlag.ModNeutralPrb), (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.JackalizedImpostorOption) : GUI.API.EmptyWidget, 
-                GetRoleOverview(RoleCategory.CrewmateRole, "crewmate", listAdditionalCrew, allFlag.HasFlag(AssignmentFlag.ModCrewmate100), allFlag.HasFlag(AssignmentFlag.ModCrewmatePrb))),
+                GeneralConfigurations.NeutralSpawnable ? GetRoleOverview(RoleCategory.NeutralRole, "neutral", listAdditionalNeu, allFlag.HasFlag(AssignmentFlag.ModNeutral100), allFlag.HasFlag(AssignmentFlag.ModNeutralPrb), withJackalizedView: (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.JackalizedImpostorOption) : GUI.API.EmptyWidget, 
+                GetRoleOverview(RoleCategory.CrewmateRole, "crewmate", listAdditionalCrew, allFlag.HasFlag(AssignmentFlag.ModCrewmate100), allFlag.HasFlag(AssignmentFlag.ModCrewmatePrb), withMaddenView: (Madmate.MyRole as DefinedRole).IsSpawnable && Madmate.MaddenRoleOption)),
                 specialAssignmentsWidget,
                 GUI.API.VerticalHolder(GUIAlignment.Left, winConds)
             )));
@@ -640,25 +780,6 @@ public static class HelpScreen
 
         CombiImageInfo.TryGetSuitableImage(out var info);
         backImage = info?.Image;
-
-        int GetNextSimulatePlayerArgument(bool increment)
-        {
-            if(lastArgument.PreviewSimulation == -1)
-            {
-                return AmongUsUtil.NumOfImpostors switch
-                {
-                    5 => 22,
-                    4 => 18,
-                    3 => 14,
-                    2 => 11,
-                    _ => 7,
-                };
-            }
-            else
-            {
-                return Math.Clamp(lastArgument.PreviewSimulation + (increment ? 1 : -1), 1, 24);
-            }
-        }
 
         TMPro.TextMeshPro simulateText = null!;
         return new MetaWidgetOld.WrappedWidget(new VerticalWidgetsHolder(GUIAlignment.Center, 

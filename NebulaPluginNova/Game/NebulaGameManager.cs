@@ -260,7 +260,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public WideCamera WideCamera { get; init; } = new();
 
     //自身のキルボタン用トラッカー
-    private ObjectTracker<GamePlayer> KillButtonTracker = null!;
+    internal ObjectTracker<IPlayerlike> KillButtonTracker = null!;
     public int EmergencyCalls = 0;
 
     //天界視点フラグ
@@ -329,7 +329,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         }
     }
 
-    void Virial.Game.Game.RegisterEntity(IGameOperator entity, ILifespan lifespan) => GameEntityManager.Subscribe(entity, lifespan);
+    void Virial.Game.Game.RegisterEntity(IGameOperator entity, ILifespan lifespan, Action? onSubscribed = null) => GameEntityManager.Subscribe(entity, lifespan, onSubscribed);
     
 
     public GamePlayer RegisterPlayer(PlayerControl player)
@@ -344,6 +344,11 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         if (player.AmHost() && (GeneralConfigurations.AssignOpToHostOption) || GeneralConfigurations.CurrentGameMode == GameModes.FreePlay) info.Unbox().PermissionHolder.AddPermission(PlayerModInfo.OpPermission);
 
         return info;
+    }
+
+    public void RegisterFakePlayer(IFakePlayer player)
+    {
+        allPlayerlikes[player.PlayerlikeId] = player;
     }
 
     public void RpcPreSpawn(byte playerId,Vector2 spawnPos)
@@ -529,8 +534,12 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             }
             else if(info != null)
             {
-                KillButtonTracker ??= ObjectTrackers.ForPlayer(NebulaAPI.CurrentGame!, null, info, (p) => (info.AllAbilities.Any(a => a.KillIgnoreTeam) ? ObjectTrackers.StandardPredicate(p) : ObjectTrackers.LocalKillablePredicate(p)) && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
-                HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
+                KillButtonTracker ??= ObjectTrackers.ForPlayerlike(NebulaAPI.CurrentGame!, null, info, (p) => (info.AllAbilities.Any(a => a.KillIgnoreTeam) ? ObjectTrackers.PlayerlikeStandardPredicate(p) : ObjectTrackers.PlayerlikeLocalKillablePredicate(p)) && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
+                if(KillButtonTracker.CurrentTarget != null)
+                    HudManager.Instance.KillButton.SetEnabled();
+                else
+                    HudManager.Instance.KillButton.SetDisabled();
+                //HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
             }
             else
             {
@@ -752,6 +761,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         if(allOrderedPlayers == null || allOrderedPlayers.Length != AllPlayerInfo.Count()) allOrderedPlayers = allModPlayers.Values.OrderBy(p => p.PlayerId).ToArray();
         return allOrderedPlayers;
     }
+    IEnumerable<IPlayerlike> Virial.Game.Game.GetAllPlayerlikes() => allPlayerlikes.Values;
 
     void Virial.Game.Game.TriggerGameEnd(GameEnd gameEnd, GameEndReason reason, EditableBitMask<GamePlayer>? additionalWinners) => CriteriaManager.Trigger(gameEnd, reason, additionalWinners);
     void Virial.Game.Game.RequestGameEnd(GameEnd gameEnd, BitMask<GamePlayer> winners) => RpcInvokeSpecialWin(gameEnd, AllPlayerInfo.Where(p => winners.Test(p)).Aggregate(0, (v, p) => v | (1 << p.PlayerId)));

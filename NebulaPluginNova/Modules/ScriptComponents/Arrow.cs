@@ -57,7 +57,8 @@ public class Arrow : FlexibleLifespan, IGameOperator
             subRenderer.sprite = null;
         }
 
-        if (ShowOnlyOutside) arrowRenderer.gameObject.SetActive(false);
+        //if (ShowOnlyOutside) 
+        arrowRenderer.gameObject.SetActive(false);
     }
 
     public void SetSprite(Sprite? sprite) => arrowRenderer!.sprite = sprite;

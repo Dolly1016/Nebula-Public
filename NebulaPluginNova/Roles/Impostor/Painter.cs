@@ -20,6 +20,7 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public Painter MyRole = new Painter();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.painter.sample", GameStatsCategory.Roles, MyRole);
@@ -46,12 +47,12 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
                 ModAbilityButton paintButton = null!;
                 OutfitDefinition? sample = null;
                 PoolablePlayer? sampleIcon = null;
-                var sampleTracker = NebulaAPI.Modules.PlayerTracker(this, MyPlayer);
+                var sampleTracker = NebulaAPI.Modules.PlayerlikeTracker(this, MyPlayer);
 
                 var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
                     SampleCoolDownOption, "sample", sampleButtonSprite).SetAsUsurpableButton(this);
                 sampleButton.OnClick = (button) => {
-                    sample = sampleTracker.CurrentTarget?.GetOutfit(75) ?? null;
+                    sample = sampleTracker.CurrentTarget?.RealPlayer.GetOutfit(OutfitPriority.TransformedThrethold) ?? null;
 
                     if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
                     if (sample == null) return;
@@ -63,13 +64,13 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
                     PaintCoolDownOption, "paint", PaintButtonSprite,
                     _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 paintButton.OnClick = (button) => {
-                    var outfit = sample ?? MyPlayer.GetOutfit(75);
+                    var outfit = sample ?? MyPlayer.GetOutfit(OutfitPriority.TransformedThrethold);
 
                     acTokenCommon ??= new("painter.common1");
-                    if (sampleTracker.CurrentTarget!.GetOutfit(75).outfit.ColorId != outfit.outfit.ColorId)
-                        acTokenChallenge.Value[sampleTracker.CurrentTarget!.PlayerId]++;
+                    if (sampleTracker.CurrentTarget!.RealPlayer.GetOutfit(OutfitPriority.TransformedThrethold).outfit.ColorId != outfit.outfit.ColorId)
+                        acTokenChallenge.Value[sampleTracker.CurrentTarget!.RealPlayer.PlayerId]++;
 
-                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.PlayerId, new(outfit, "Paint", 40, false)));
+                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.RealPlayer.PlayerId, new(outfit, "Paint", OutfitPriority.Paint, false)));
                     if (TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else

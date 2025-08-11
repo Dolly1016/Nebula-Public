@@ -107,7 +107,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     CheckIgnitable();
                 }
 
-                var douseTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, (p) => ObjectTrackers.StandardPredicate(p) && playerIcons.Any(tuple => tuple.playerId == p.PlayerId && tuple.icon.GetAlpha() < 0.8f));
+                var douseTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeStandardPredicate(p) && playerIcons.Any(tuple => tuple.playerId == p.RealPlayer.PlayerId && tuple.icon.GetAlpha() < 0.8f));
 
                 var douseButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     DouseCoolDownOption, DouseDurationOption, "douse", douseButtonSprite,
@@ -117,10 +117,14 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     if (douseTracker.CurrentTarget == null) return;
 
                     if (!button.EffectTimer!.IsProgressing)
-                        foreach (var icon in playerIcons) if (icon.playerId == douseTracker.CurrentTarget.PlayerId) icon.icon.SetAlpha(1f);
-
-                    StatsDouse.Progress();
-                    CheckIgnitable();
+                    {
+                        if (!(GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, douseTracker.CurrentTarget, new(RealPlayerOnly: true))).IsCanceled ?? false))
+                        {
+                            foreach (var icon in playerIcons) if (icon.playerId == douseTracker.CurrentTarget.RealPlayer.PlayerId) icon.icon.SetAlpha(1f);
+                            StatsDouse.Progress();
+                            CheckIgnitable();
+                        }
+                    }
                     douseButton.StartCoolDown();
                 };
                 douseButton.OnUpdate = (button) => {

@@ -150,6 +150,7 @@ public class WideCamera
     {
         myCamera.cullingMask = drawShadow ? 97047 : 31511;
         myCamera.cullingMask |= 1 << LayerExpansion.GetArrowLayer();
+        myCamera.cullingMask |= 1 << LayerExpansion.GetPlayerWithShadowLayer();
 
         this.drawShadow = drawShadow;
     }
@@ -172,6 +173,7 @@ public class WideCamera
         var newCam = UnityHelper.CreateRenderingCamera("SubShadowCam", shadowCam.transform, Vector3.zero, shadowCam.orthographicSize, shadowCam.cullingMask);
         newCam.depth = shadowCam.depth;
         shadowCam.cullingMask |= 1 << LayerExpansion.GetVanillaShadowLightLayer();
+        shadowCam.cullingMask |= 1 << LayerExpansion.GetPlayerWithShadowLayer();
         var origTexture = shadowCam.targetTexture;
         var newTexture = new RenderTexture(origTexture.width, origTexture.height, origTexture.depth, origTexture.format, origTexture.mipmapCount);
         newCam.targetTexture = newTexture;

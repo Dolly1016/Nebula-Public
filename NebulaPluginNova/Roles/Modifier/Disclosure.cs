@@ -56,7 +56,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                 }, this);
                 GameOperatorManager.Instance?.Subscribe<PlayerVoteCastEvent>(ev =>
                 {
-                    if (MeetingHud.Instance.playerStates.Find(p => p.TargetPlayerId == MyPlayer.PlayerId, out var pva))
+                    if (MeetingHud.Instance.TryGetPlayer(MyPlayer.PlayerId, out var pva))
                     {
                         if (!pva.DidVote) return;
                         if (voted == ev.VoteFor && NebulaGameManager.Instance!.CurrentTime - votedTime > 5f) num++;

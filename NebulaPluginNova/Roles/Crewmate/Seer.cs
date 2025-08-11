@@ -94,6 +94,7 @@ public class Seer : DefinedSingleAbilityRoleTemplate<Seer.Ability>, HasCitation,
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static private readonly FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("options.role.seer.ghostDuration", (15f,300f,15f),90f,FloatConfigurationDecorator.Second);
     static public readonly BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("options.role.seer.canSeeGhostsInShadow", false);

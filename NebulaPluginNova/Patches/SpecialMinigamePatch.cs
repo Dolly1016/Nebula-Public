@@ -10,6 +10,7 @@ class SurveillanceMinigameBeginPatch
     {
         if(!__instance.CameraPrefab.gameObject.TryGetComponent<IgnoreShadowCamera>(out _))
         {
+            __instance.CameraPrefab.cullingMask &= 0xFFFF; 
             var isc = __instance.CameraPrefab.gameObject.AddComponent<IgnoreShadowCamera>();
             isc.ShowNameText = false;
         }

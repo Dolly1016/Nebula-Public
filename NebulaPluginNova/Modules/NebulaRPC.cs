@@ -1,9 +1,11 @@
 ﻿using Hazel;
+using Il2CppInterop.Generator.Extensions;
 using Il2CppSystem.Reflection.Internal;
 using InnerNet;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using UnityEngine.IO;
 using Virial.Assignable;
 using Virial.Game;
 using Virial.Runtime;
@@ -225,7 +227,7 @@ public class RemoteProcessBase
 
         foreach (var type in types)
         {
-            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+            Helpers.RunStaticConstructor(type);
             foreach(var method in type.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC)))) WrapRpcMethod(NebulaPlugin.Harmony, method);
         }
 
@@ -234,7 +236,7 @@ public class RemoteProcessBase
         {
             foreach (var t in script.Assembly.GetTypes())
             {
-                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle);
+                Helpers.RunStaticConstructor(t);
                 foreach (var method in t.GetMethods().Where(m => m.IsDefined(typeof(NebulaRPC))))
                 {
                     //RPCを持つならハンドシェイクが必要
@@ -248,134 +250,179 @@ public class RemoteProcessBase
     public virtual void Receive(MessageReader reader) { }
 }
 
+public abstract class RemoteProcessArgumentBase
+{
+    internal abstract object ReadDynamic(MessageReader reader);
+    internal abstract void WriteDynamic(MessageWriter writer, object obj);
 
+    private static Dictionary<Type, RemoteProcessArgumentBase> dynamicProcessDic = [];
+    internal static RemoteProcessArgumentBase? Get(Type type) {
+        if (!dynamicProcessDic.ContainsKey(type)) Helpers.RunStaticConstructor(type);
+        return dynamicProcessDic.TryGetValue(type, out var val) ? val : null;
+    }
+    protected void Register(Type type, RemoteProcessArgumentBase process) => dynamicProcessDic[type] = process;
+
+    static RemoteProcessArgumentBase()
+    {
+        new RemoteProcessArgument<byte>((writer, val) => writer.Write(val), reader => reader.ReadByte());
+
+        new RemoteProcessArgument<short>((writer, val) => writer.Write(val), reader => reader.ReadInt16());
+        new RemoteProcessArgument<ushort>((writer, val) => writer.Write(val), reader => reader.ReadUInt16());
+        new RemoteProcessArgument<int>((writer, val) => writer.Write(val), reader => reader.ReadInt32());
+        new RemoteProcessArgument<uint>((writer, val) => writer.Write(val), reader => reader.ReadUInt32());
+        new RemoteProcessArgument<ulong>((writer, val) => writer.Write(val), reader => reader.ReadUInt64());
+
+        new RemoteProcessArgument<float>((writer, val) => writer.Write(val), reader => reader.ReadSingle());
+        new RemoteProcessArgument<bool>((writer, val) => writer.Write(val), reader => reader.ReadBoolean());
+        new RemoteProcessArgument<string>((writer, val) => writer.Write(val), reader => reader.ReadString());
+
+        new RemoteProcessArgument<Vector2>((writer, vec) =>
+        {
+            writer.Write(vec.x);
+            writer.Write(vec.y);
+        }, reader => new(reader.ReadSingle(), reader.ReadSingle()));
+        new RemoteProcessArgument<Vector3>((writer, vec) =>
+        {
+            writer.Write(vec.x);
+            writer.Write(vec.y);
+            writer.Write(vec.z);
+        }, reader => new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
+        new RemoteProcessArgument<Vector4>((writer, vec) =>
+        {
+            writer.Write(vec.x);
+            writer.Write(vec.y);
+            writer.Write(vec.z);
+            writer.Write(vec.w);
+        }, reader => new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
+
+        new RemoteProcessArgument<OutfitCandidate>((writer, outfit) =>
+        {
+            writer.Write(outfit.Outfit.Id.ownerId);
+            writer.Write(outfit.Outfit.Id.outfitId);
+            writer.Write(outfit.Tag);
+            writer.Write(outfit.Priority);
+            writer.Write(outfit.SelfAware);
+        }, reader => {
+            OutfitDefinition? outfit = null;
+            NebulaGameManager.Instance?.TryGetOutfit(new(reader.ReadInt32(), reader.ReadInt32()), out outfit);
+            return new OutfitCandidate(outfit!, reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean());
+        });
+
+        new RemoteProcessArgument<TimeLimitedModulator>((writer, mod) =>
+        {
+            writer.Write(mod.Timer);
+            writer.Write(mod.CanPassMeeting);
+            writer.Write(mod.Priority);
+            writer.Write(mod.DuplicateTag);
+
+            if (mod is SpeedModulator sm)
+            {
+                writer.Write(1);
+                writer.Write(sm.Num);
+                writer.Write(sm.DirectionalNum.x);
+                writer.Write(sm.DirectionalNum.y);
+                writer.Write(sm.DirectionalNum.z);
+                writer.Write(sm.DirectionalNum.w);
+                writer.Write(sm.IsMultiplier);
+                writer.Write(sm.CanBeAware);
+            }
+            else if (mod is SizeModulator sim)
+            {
+                writer.Write(2);
+                writer.Write(sim.Size.x);
+                writer.Write(sim.Size.y);
+                writer.Write(sim.CanBeAware);
+                writer.Write(sim.Smooth);
+            }
+            else if (mod is FloatModulator fm)
+            {
+                writer.Write(4);
+                writer.Write(fm.Attribute.Id);
+                writer.Write(fm.Num);
+                writer.Write(fm.CanBeAware);
+            }
+            else if (mod is AttributeModulator am)
+            {
+                writer.Write(3);
+                writer.Write(am.Attribute.Id);
+                writer.Write(am.CanBeAware);
+            }
+        }, reader => {
+            float timer = reader.ReadSingle();
+            bool canPassMeeting = reader.ReadBoolean();
+            int priority = reader.ReadInt32();
+            string dupTag = reader.ReadString();
+            int type = reader.ReadInt32();
+
+            if (type == 1)
+                return new SpeedModulator(reader.ReadSingle(), new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
+            else if (type == 2)
+                return new SizeModulator(new(reader.ReadSingle(), reader.ReadSingle()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean(), reader.ReadBoolean());
+            else if (type == 3)
+                return new AttributeModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
+            else if (type == 4)
+                return new FloatModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), reader.ReadSingle(), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
+
+            return null!;
+        });
+
+        new RemoteProcessArgument<TranslatableTag>((writer, tag) => writer.Write(tag?.Id ?? int.MaxValue), reader => TranslatableTag.ValueOf(reader.ReadInt32())!);
+        new RemoteProcessArgument<CommunicableTextTag>((writer, tag) => writer.Write(tag?.Id ?? int.MaxValue), reader => TranslatableTag.ValueOf(reader.ReadInt32())!);
+
+        new RemoteProcessArgument<PlayerModInfo>((writer, player) => writer.Write(player?.PlayerId ?? byte.MaxValue), reader => (PlayerModInfo)NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())!);
+        new RemoteProcessArgument<GamePlayer>((writer, player) => writer.Write(player?.PlayerId ?? byte.MaxValue), reader => NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())!);
+        new RemoteProcessArgument<IPlayerlike>((writer, player) => writer.Write(player?.PlayerlikeId ?? int.MaxValue), reader => NebulaGameManager.Instance?.GetPlayerlike(reader.ReadInt32())!);
+        new RemoteProcessArgument<Virial.Game.DeadBody>((writer, deadBody) => writer.Write(deadBody?.Id ?? -1), reader => ModSingleton<DeadBodyManager>.Instance.TryGetDeadBody(reader.ReadInt32(), out var d) ? d : null!);
+
+        new RemoteProcessArgument<INebulaAchievement>((writer, achievement) => writer.Write((ulong)achievement!.Id.ComputeConstantLongHash()), (reader) => (NebulaAchievementManager.TryGetAchievement((long)reader.ReadUInt64(), out var ach) ? ach : null)!);
+
+        new RemoteProcessArgument<DefinedRole>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetRole(reader.ReadInt32())!);
+        new RemoteProcessArgument<DefinedGhostRole>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetGhostRole(reader.ReadInt32())!);
+        new RemoteProcessArgument<DefinedModifier>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetModifier(reader.ReadInt32())!);
+    }
+}
+public class RemoteProcessArgument<T> : RemoteProcessArgumentBase
+{
+    internal Action<MessageWriter, T?> Writer { get; private init; }
+    internal Func<MessageReader, T> Reader { get; private init; }
+    internal RemoteProcessArgument(Action<MessageWriter, T?> writer, Func<MessageReader, T> reader)
+    {
+        this.Writer = writer;
+        this.Reader = reader;
+        Protocol = this;
+        Register(typeof(T), this);
+    }
+    
+    override internal object ReadDynamic(MessageReader reader) => Reader.Invoke(reader)!;
+    override internal void WriteDynamic(MessageWriter writer, object obj) => Writer.Invoke(writer, (T)obj);
+
+    static private RemoteProcessArgument<T>? Protocol { get; set; }
+    static public T Read(MessageReader reader) => Protocol!.Reader.Invoke(reader);
+    static public void Write(MessageWriter writer, T? obj) => Protocol!.Writer.Invoke(writer, obj);
+
+}
+
+public static class RemoteProcessArgumentsHelpers
+{
+    //Note: 拡張メソッドよりインスタンスメソッドの方が優先して呼ばれる。
+
+    public static void Write<T>(this MessageWriter writer, T obj) => RemoteProcessArgument<T>.Write(writer, obj);
+    public static T ReadCustom<T>(this MessageReader reader) => RemoteProcessArgument<T>.Read(reader);
+
+    public static void WriteIfNotNullCustom<T>(this MessageWriter writer, T? obj) where T : class
+    {
+        writer.Write(obj != null);
+        if(obj != null) RemoteProcessArgument<T>.Write(writer, obj);
+    }
+
+    public static T? ReadIfNotNullCustom<T>(this MessageReader reader) where T : class
+    {
+        return reader.ReadBoolean() ? reader.ReadCustom<T>() : null;
+    }
+}
 
 public static class RemoteProcessAsset
 {
-    private static Dictionary<Type, (Action<MessageWriter, object>, Func<MessageReader, object>)> defaultProcessDic = new();
-
-    static RemoteProcessAsset()
-    {
-        defaultProcessDic[typeof(byte)] = ((writer, obj) => writer.Write((byte)obj), (reader) => reader.ReadByte());
-        defaultProcessDic[typeof(short)] = ((writer, obj) => writer.Write((short)obj), (reader) => reader.ReadInt16());
-        defaultProcessDic[typeof(int)] = ((writer, obj) => writer.Write((int)obj), (reader) => reader.ReadInt32());
-        defaultProcessDic[typeof(uint)] = ((writer, obj) => writer.Write((uint)obj), (reader) => reader.ReadUInt32());
-        defaultProcessDic[typeof(ulong)] = ((writer, obj) => writer.Write((ulong)obj), (reader) => reader.ReadUInt64());
-        defaultProcessDic[typeof(float)] = ((writer, obj) => writer.Write((float)obj), (reader) => reader.ReadSingle());
-        defaultProcessDic[typeof(bool)] = ((writer, obj) => writer.Write((bool)obj), (reader) => reader.ReadBoolean());
-        defaultProcessDic[typeof(string)] = ((writer, obj) => writer.Write((string)obj), (reader) => reader.ReadString());
-        defaultProcessDic[typeof(Vector2)] = ((writer, obj) => { var vec = (Vector2)obj; writer.Write(vec.x); writer.Write(vec.y); }, (reader) => new Vector2(reader.ReadSingle(), reader.ReadSingle()));
-        defaultProcessDic[typeof(Vector3)] = ((writer, obj) => { var vec = (Vector3)obj; writer.Write(vec.x); writer.Write(vec.y); writer.Write(vec.z); }, (reader) => new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
-        defaultProcessDic[typeof(Vector4)] = ((writer, obj) => { var vec = (Vector4)obj; writer.Write(vec.x); writer.Write(vec.y); writer.Write(vec.z); writer.Write(vec.w); }, (reader) => new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
-        defaultProcessDic[typeof(Vector2[])] = ((writer, obj) => { 
-            var ary = (Vector2[])obj;
-            writer.Write(ary.Length);
-            foreach (var vec in ary)
-            {
-                writer.Write(vec.x); writer.Write(vec.y);
-            }
-        }, (reader) =>
-        {
-            Vector2[] ary = new Vector2[reader.ReadInt32()];
-            for (int i = 0; i < ary.Length; i++) ary[i] = new Vector2(reader.ReadSingle(), reader.ReadSingle());
-            return ary;
-        }
-        );
-
-        defaultProcessDic[typeof(OutfitCandidate)] = (
-            (writer, obj) => {
-                var cand = (OutfitCandidate)obj;
-                writer.Write(cand.Outfit.Id.ownerId);
-                writer.Write(cand.Outfit.Id.outfitId);
-
-                writer.Write(cand.Tag);
-                writer.Write(cand.Priority);
-                writer.Write(cand.SelfAware);
-            },
-            (reader) => {
-                OutfitDefinition? outfit = null;
-                NebulaGameManager.Instance?.TryGetOutfit(new(reader.ReadInt32(), reader.ReadInt32()), out outfit);
-                return new OutfitCandidate(outfit!, reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean());
-            }
-        );
-        defaultProcessDic[typeof(TimeLimitedModulator)] = (
-            (writer, obj) =>
-            {
-                var mod = (TimeLimitedModulator)obj;
-                writer.Write(mod.Timer);
-                writer.Write(mod.CanPassMeeting);
-                writer.Write(mod.Priority);
-                writer.Write(mod.DuplicateTag);
-
-                if (mod is SpeedModulator sm)
-                {
-                    writer.Write(1);
-                    writer.Write(sm.Num);
-                    writer.Write(sm.DirectionalNum.x);
-                    writer.Write(sm.DirectionalNum.y);
-                    writer.Write(sm.DirectionalNum.z);
-                    writer.Write(sm.DirectionalNum.w);
-                    writer.Write(sm.IsMultiplier);
-                    writer.Write(sm.CanBeAware);
-                }
-                else if (mod is SizeModulator sim)
-                {
-                    writer.Write(2);
-                    writer.Write(sim.Size.x);
-                    writer.Write(sim.Size.y);
-                    writer.Write(sim.CanBeAware);
-                    writer.Write(sim.Smooth);
-                }
-                else if (mod is FloatModulator fm)
-                {
-                    writer.Write(4);
-                    writer.Write(fm.Attribute.Id);
-                    writer.Write(fm.Num);
-                    writer.Write(fm.CanBeAware);
-                }
-                else if (mod is AttributeModulator am)
-                {
-                    writer.Write(3);
-                    writer.Write(am.Attribute.Id);
-                    writer.Write(am.CanBeAware);
-                }
-                
-
-            },
-            (reader) =>
-            {
-                float timer = reader.ReadSingle();
-                bool canPassMeeting = reader.ReadBoolean();
-                int priority = reader.ReadInt32();
-                string dupTag = reader.ReadString();
-                int type = reader.ReadInt32();
-
-                if (type == 1)
-                    return new SpeedModulator(reader.ReadSingle(), new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
-                else if (type == 2)
-                    return new SizeModulator(new(reader.ReadSingle(), reader.ReadSingle()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean(), reader.ReadBoolean());
-                else if (type == 3)
-                    return new AttributeModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
-                else if (type == 4)
-                    return new FloatModulator(PlayerAttributeImpl.GetAttributeById(reader.ReadInt32()), reader.ReadSingle(), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
-
-                return null!;
-            }
-        );
-        defaultProcessDic[typeof(TranslatableTag)] = ((writer, obj) => writer.Write(((TranslatableTag)obj)?.Id ?? int.MaxValue), (reader) => TranslatableTag.ValueOf(reader.ReadInt32())!);
-        defaultProcessDic[typeof(CommunicableTextTag)] = defaultProcessDic[typeof(TranslatableTag)];
-        defaultProcessDic[typeof(PlayerModInfo)] = ((writer, obj) => writer.Write(((PlayerModInfo)obj)?.PlayerId ?? 255), (reader) => NebulaGameManager.Instance?.GetPlayer(reader.ReadByte())!);
-        defaultProcessDic[typeof(GamePlayer)] = defaultProcessDic[typeof(PlayerModInfo)];
-        defaultProcessDic[typeof(INebulaAchievement)] = ((writer, obj) => writer.Write((ulong)((INebulaAchievement)obj).Id.ComputeConstantLongHash()), (reader) => (NebulaAchievementManager.TryGetAchievement((long)reader.ReadUInt64(), out var ach) ? ach : null)!);
-        defaultProcessDic[typeof(DefinedRole)] = ((writer, obj) => writer.Write(((DefinedRole)obj)?.Id ?? -1), (reader) => Roles.Roles.GetRole(reader.ReadInt32())!);
-        defaultProcessDic[typeof(DefinedGhostRole)] = ((writer, obj) => writer.Write(((DefinedGhostRole)obj)?.Id ?? -1), (reader) => Roles.Roles.GetGhostRole(reader.ReadInt32())!);
-        defaultProcessDic[typeof(DefinedModifier)] = ((writer, obj) => writer.Write(((DefinedModifier)obj)?.Id ?? -1), (reader) => Roles.Roles.GetModifier(reader.ReadInt32())!);
-    }
-
-    static public void RegisterType<Type>(Action<MessageWriter, Type> writer, Func<MessageReader, Type> reader) where Type : class
-    {
-        defaultProcessDic[typeof(Type)] = ((mw, obj) => writer.Invoke(mw, (Type)obj), reader);
-    }
     static public (Action<MessageWriter, object>, Func<MessageReader, object>) GetProcess(Type type)
     {
         //配列の場合
@@ -431,10 +478,16 @@ public static class RemoteProcessAsset
 
         //列挙型であった場合
         if (type.IsAssignableTo(typeof(Enum)))
-            return defaultProcessDic[Enum.GetUnderlyingType(type)];
+        {
+            var protocol = RemoteProcessArgumentBase.Get(Enum.GetUnderlyingType(type));
+            return (protocol!.WriteDynamic, protocol.ReadDynamic);
+        }
 
         //その他の型である場合
-        return defaultProcessDic[type];
+        {
+            var protocol = RemoteProcessArgumentBase.Get(type);
+            return (protocol!.WriteDynamic, protocol.ReadDynamic);
+        }
     }
 
     public static void GetMessageTreater<Parameter>(out Action<MessageWriter, Parameter> sender, out Func<MessageReader, Parameter> receiver)
@@ -452,8 +505,8 @@ public static class RemoteProcessAsset
             return (Parameter)process.Item2.Invoke(reader);
         };
     }
-
 }
+
 public class RemoteProcess<Parameter> : RemoteProcessBase
 {
     public delegate void Process(Parameter parameter, bool isCalledByMe);

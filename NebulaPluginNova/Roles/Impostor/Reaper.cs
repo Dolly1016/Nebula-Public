@@ -18,7 +18,9 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
     }
 
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
     IPlayerAbility DefinedRole.GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => new Ability(jackal, arguments.GetAsBool(0));
+    IPlayerAbility DefinedRole.GetMaddenAbility(Virial.Game.Player madmate, int[] arguments) => new Ability(madmate, arguments.GetAsBool(0));
     IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);

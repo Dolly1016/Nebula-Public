@@ -141,7 +141,7 @@ public class PresetSettingMenu : MonoBehaviour
                 {
                     var popup = MetaScreen.GenerateWindow(new(4f, 1.7f), HudManager.Instance.transform, Vector3.zero, true, false);
                     MetaWidgetOld widget = new();
-                    Reference<TextField> fieldRef = new();
+                    Variable<TextField> fieldRef = new();
                     widget.Append(new MetaWidgetOld.Text(TextAttributeOld.NormalAttrLeft) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = "preset.enterPresetName" });
                     widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
                     widget.Append(new MetaWidgetOld.TextInput(1, 1.2f, new(3f, 0.28f)) { Hint = "Current Output".Color(Color.gray), TextFieldRef = fieldRef, Alignment = IMetaWidgetOld.AlignmentOption.Center });

@@ -29,6 +29,11 @@ file class IgnoreShadowScope : IDisposable
         IgnoreShadowHelpers.SetIgnoreShadow(showNameText: showNameText);
     }
 
+    public IgnoreShadowScope(bool ignoreShadow, bool showNameText)
+    {
+        IgnoreShadowHelpers.SetIgnoreShadow(ignoreShadow, showNameText);
+    }
+
     void IDisposable.Dispose()
     {
         IgnoreShadowHelpers.ResetIgnoreShadow();
@@ -105,13 +110,15 @@ public static class AmongUsUtil
     }
 
     public static IDisposable IgnoreShadow(bool showNameText = true) => new IgnoreShadowScope(showNameText);
+    public static IDisposable IgnoreShadow(bool ignoreShadow, bool showNameText) => new IgnoreShadowScope(ignoreShadow, showNameText);
 
     public static MonoBehaviour CurrentCamTarget => HudManager.Instance.PlayerCam.Target;
-    public static void SetCamTarget(MonoBehaviour? target = null)
+    public static void SetCamTarget(MonoBehaviour? target = null, bool allowMoving = false)
     {
         if(CurrentCamTarget == PlayerControl.LocalPlayer) PlayerControl.LocalPlayer.NetTransform.Halt();
 
         HudManager.Instance.PlayerCam.Target = target ?? PlayerControl.LocalPlayer;
+        if (allowMoving && target) Patches.PlayerCanMovePatch.SetMovableCamera(target!);
     }
     public static void ToggleCamTarget(MonoBehaviour? target1 = null, MonoBehaviour? target2 = null)
     {
@@ -137,6 +144,7 @@ public static class AmongUsUtil
     public static byte CurrentMapId => GameOptionsManager.Instance.CurrentGameOptions.MapId;
     private static string[] mapName = new string[] { "skeld", "mira", "polus", "undefined", "airship", "fungle" };
     public static string ToMapName(byte mapId) => mapName[mapId];
+    public static string ToLocalizedMapName(byte mapId) => Language.Translate("map." + mapName[mapId].HeadLower());
     public static string ToDisplayLocationString(string room, byte? mapId = null, bool shortName = false)
     {
         string key = "location." + mapName[mapId ?? CurrentMapId] + "." + room;
@@ -265,7 +273,7 @@ public static class AmongUsUtil
     {
         public TranslatableTag? RelatedTag = null;
         public byte SourceId =  byte.MaxValue;
-        public byte TargetId;
+        public int TargetId;
     }
 
     static RemoteProcess<CleanBodyMessage> RpcCleanDeadBodyDef = new RemoteProcess<CleanBodyMessage>(
@@ -276,32 +284,30 @@ public static class AmongUsUtil
             writer.Write(message.RelatedTag?.Id ?? -1);
         },
         (reader)=> {
-            return new() { SourceId = reader.ReadByte(), TargetId = reader.ReadByte(), RelatedTag = TranslatableTag.ValueOf(reader.ReadInt32()) };
+            return new() { SourceId = reader.ReadByte(), TargetId = reader.ReadInt32(), RelatedTag = TranslatableTag.ValueOf(reader.ReadInt32()) };
         },
         (message, _) =>
         {
-            foreach (var d in Helpers.AllDeadBodies()) if (d.ParentId == message.TargetId) GameObject.Destroy(d.gameObject);
+            if (ModSingleton<DeadBodyManager>.Instance.TryGetDeadBody(message.TargetId, out var body) && body.IsActive)
+            {
+                GameObject.Destroy(body.VanillaDeadBody.gameObject);
+            }
 
             if (message.SourceId != byte.MaxValue)
                 NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.CleanBody, message.SourceId, 1 << message.TargetId) { RelatedTag = message.RelatedTag });
         }
         );
 
-    static public void RpcCleanDeadBody(byte bodyId,byte sourceId=byte.MaxValue,TranslatableTag? relatedTag = null)
+    static public void RpcCleanDeadBody(Virial.Game.DeadBody deadbody,byte sourceId=byte.MaxValue,TranslatableTag? relatedTag = null)
     {
         if (Helpers.CurrentMonth == 11)
         {
-            var deadBodyPlayer = NebulaGameManager.Instance!.GetPlayer(bodyId);
+            var deadBodyPlayer = deadbody.Player;
             if (!(deadBodyPlayer?.MyKiller?.AmOwner ?? true) && NebulaGameManager.Instance!.CurrentTime - (deadBodyPlayer.DeathTime ?? 0f) < 5f) new StaticAchievementToken("freshWine");
         }
-        RpcCleanDeadBodyDef.Invoke(new() { TargetId = bodyId, SourceId = sourceId, RelatedTag = relatedTag });
-    }
 
-    internal static GamePlayer? GetHolder(this DeadBody body)
-    {
-        return NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault((p) => p.HoldingAnyDeadBody && p.HoldingDeadBody?.PlayerId == body.ParentId);
+        RpcCleanDeadBodyDef.Invoke(new() { TargetId = deadbody.Id, SourceId = sourceId, RelatedTag = relatedTag });
     }
-
 
     static private SpriteLoader lightMaskSprite = SpriteLoader.FromResource("Nebula.Resources.LightMask.png", 100f);
     public static SpriteRenderer GenerateCustomLight(Vector2 position,Sprite? lightSprite = null)
@@ -533,7 +539,7 @@ public static class AmongUsUtil
     {
         if (addVanillaCoolDown) coolDown += (float)GameManager.Instance.LogicOptions.GetEmergencyCooldown();
 
-        if (addExtraCoolDown && (NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.IsDead) ?? 0) < GeneralConfigurations.EarlyExtraEmergencyCoolDownCondOption)
+        if (addExtraCoolDown && GeneralConfigurations.IsInEarlyPhase)
             coolDown += GeneralConfigurations.EarlyExtraEmergencyCoolDownOption;
 
         ShipStatus.Instance.EmergencyCooldown = coolDown;
@@ -702,4 +708,6 @@ public static class AmongUsUtil
             NebulaManager.Instance.StartDelayAction(2.45f + delay, () => showUpObj.transform.SetWorldZ(position.z));
         }
     }
+
+    public static Vector2? GetPetPosition(this CosmeticsLayer cLayer) => cLayer.currentPet ? cLayer.currentPet.transform.position : null;
 }

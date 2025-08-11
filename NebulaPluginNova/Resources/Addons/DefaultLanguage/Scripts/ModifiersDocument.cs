@@ -31,7 +31,7 @@ public class LoverDocument : IDocument
     {
         var gui = NebulaAPI.GUI;
         var winCondAdd = RoleDocumentHelper.ConfigBool("options.role.lover.allowExtraWin", "role.lover.winCond.additional");
-        var tips = RoleDocumentHelper.ConfigBool("options.role.lover.avengerMode", "role.lover.tips.standard", "role.lover.tips.avenger");
+        var tips = RoleDocumentHelper.ConfigBool("options.role.lover.avengerMode", "role.lover.tips.avenger", "role.lover.tips.standard");
         var impostorChance = RoleDocumentHelper.Config<int>("options.role.lover.chanceOfAssigningImpostors");
         var assignment = NebulaAPI.Language.Translate(impostorChance == "0" ? "role.lover.tips.assignment.noImpostor" : "role.lover.tips.assignment.impostor").Replace("#NUM", impostorChance);
         return RoleDocumentHelper.GetModifierWidget("lover",

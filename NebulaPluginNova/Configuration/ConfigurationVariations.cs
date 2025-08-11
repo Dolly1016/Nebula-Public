@@ -11,6 +11,7 @@ using Nebula.Modules.GUIWidget;
 using Epic.OnlineServices.Platform;
 using static Il2CppMono.Security.X509.X520;
 using Virial.Game;
+using Nebula.Dev;
 
 namespace Nebula.Configuration;
 
@@ -84,12 +85,13 @@ internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
             ConfigurationAssets.GetOptionTitle(Title, id),
             ConfigurationAssets.Semicolon,
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new LazyTextComponent(() => ValueAsDisplayString)) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }, Color = Color.Lerp(Color.white, GetValue() ? Color.cyan : Color.red ,0.65f) }
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new LazyTextComponent(() => ValueAsDisplayString)) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen();}, Color = Color.Lerp(Color.white, GetValue() ? Color.cyan : Color.red ,0.65f) }
             );
     }
 
-    private string ValueAsDisplayString => NebulaAPI.instance.Language.Translate(val.CurrentValue ? "options.switch.on" : "options.switch.off");
-    internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString.Color(Color.Lerp(Color.white, GetValue() ? Color.cyan : Color.red, 0.65f));
+    internal static string GetDisplayValue(bool val) => Language.Translate(val ? "options.switch.on" : "options.switch.off").Color(Color.Lerp(Color.white, val ? Color.cyan : Color.red, 0.65f));
+    private string ValueAsDisplayString => GetDisplayValue(val.CurrentValue);
+    internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
 
     internal Func<bool>? Predicate = null;
     internal override bool IsShown => Predicate?.Invoke() ?? true;
@@ -216,7 +218,7 @@ internal class StringConfigurationImpl : Virial.Configuration.ValueConfiguration
         this.mySelection = selection;
         this.Title = title ?? new TranslateTextComponent(id);
         this.val = new SelectionConfigurationValue(id, defaultIndex, selection.Length);
-        this.editor = () => new HorizontalWidgetsHolder(GUIAlignment.Left,
+        this.editor = new HorizontalWidgetsHolder(GUIAlignment.Left,
             ConfigurationAssets.GetOptionTitle(Title, id),
             new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsFlexible), new RawTextComponent(":")),
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f,0f)),

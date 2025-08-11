@@ -14,8 +14,6 @@ namespace Nebula.Modules.Cosmetics;
 internal class RingMenu
 {
     [DllImport("user32.dll")]
-    static extern bool SetCursorPos(int X, int Y);
-    [DllImport("user32.dll")]
     static extern bool GetCursorPos(out System.Drawing.Point lpPoint);
 
     public record RingMenuElement(GUIWidgetSupplier Widget, Action OnClick);
@@ -35,28 +33,15 @@ internal class RingMenu
 
     static private Image backgroundSprite = SpriteLoader.FromResource("Nebula.Resources.RingMenu.png", 100f);
 
-    private void OnDestroy()
-    {
-        if (ClientOption.AllOptions[ClientOption.ClientOptionType.StampMenu].Value == 2)
-        {
-            SetCursorPos((int)startPos.x, (int)startPos.y);
-        }
-    }
 
-    public void Show(RingMenuElement[] elements, Func<bool> showWhile)
+    public void Show(RingMenuElement[] elements, Func<bool> showWhile, Vector2? menuPosition)
     {
         if (obj) UnityEngine.Object.Destroy(obj);
 
         GetCursorPos(out var point);
         startPos = new(point.X, point.Y);
 
-        Vector2 objPos = Vector2.zeroVector;
-        if (ClientOption.AllOptions[ClientOption.ClientOptionType.StampMenu].Value != 1)
-        {
-            objPos = UnityHelper.ScreenToLocalPoint(Input.mousePosition, LayerExpansion.GetUILayer(), HudManager.Instance.transform);
-        }
-
-        obj = UnityHelper.CreateObject("RingMenu", HudManager.Instance.transform, objPos);
+        obj = UnityHelper.CreateObject("RingMenu", HudManager.Instance.transform, menuPosition ?? Vector2.zero);
         obj.transform.SetLocalZ(-780f);
 
         generated = new (GameObject obj, Vector2 origScale)[elements.Length];
@@ -95,7 +80,6 @@ internal class RingMenu
                 UnityEngine.Object.Destroy(obj);
                 obj = null!;
                 showWhile = null!;
-                OnDestroy();
             }
         });
         this.showWhile = showWhile;
@@ -117,7 +101,6 @@ internal class RingMenu
                 }
 
                 UnityEngine.Object.Destroy(obj);
-                OnDestroy();
                 obj = null!;
                 showWhile = null!;
             }

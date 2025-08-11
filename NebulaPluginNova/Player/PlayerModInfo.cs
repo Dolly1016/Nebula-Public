@@ -151,6 +151,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public bool AmController => AmOwner;
     public bool IsDisconnected { get; set; } = false;
     public bool IsDead => IsDisconnected || (MyControl ? MyControl.Data.IsDead : ((this as GamePlayer).PlayerState != PlayerStates.Alive && (this as GamePlayer).PlayerState != PlayerStates.Revived));
+    public bool IsActive => MyControl;
     public PlayerDiving? CurrentDiving { get; set; }
     public bool IsBlown => MyControl.MyPhysics.Animations.IsPlayingSpawnAnimation();
     public bool IsTeleporting { get; internal set; } = false;
@@ -163,10 +164,10 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     private bool requiredUpdateMouseAngle { get; set; }
     public void RequireUpdateMouseAngle() => requiredUpdateMouseAngle = true;
 
-    public byte? HoldingDeadBodyId { get; private set; } = null;
-    public bool HoldingAnyDeadBody => HoldingDeadBodyId != null;
+    public Virial.Game.DeadBody? HoldingDeadBody { get; private set; } = null;
+    public bool HoldingAnyDeadBody => HoldingDeadBody != null;
+
     public bool AmHost => MyControl.AmHost();
-    private DeadBody? holdingDeadBodyCache { get; set; } = null;
 
     public RuntimeRole Role => myRole;
     private RuntimeRole myRole = null!;
@@ -231,6 +232,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public IStampShower StampShower => (SpecialStampShower?.IsValid ?? false) ? SpecialStampShower : DefaultStampShower;
 
     private readonly List<SpriteRenderer> playerAdditionalRenderers = [];
+    private readonly List<(MeshRenderer renderer, MeshFilter? filter)> playerAdditionalMeshRenderers = [];
     public void AddPlayerColorRenderers(params SpriteRenderer[] renderers)
     {
         playerAdditionalRenderers.RemoveAll(r => !r);
@@ -241,7 +243,20 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         int instanceId = renderer.GetInstanceID();
         playerAdditionalRenderers.RemoveAll(r => r.GetInstanceID() == instanceId);
     }
+    public void RemovePlayerColorRenderers(params SpriteRenderer[] renderers) => renderers.Do(r => RemovePlayerColorRenderer(r));
 
+    public void AddPlayerColorRenderers(params (MeshRenderer renderer, MeshFilter? filter)[] renderers)
+    {
+        playerAdditionalMeshRenderers.RemoveAll(r => !r.renderer);
+        playerAdditionalMeshRenderers.AddRange(renderers);
+    }
+    public void RemovePlayerColorRenderer(MeshRenderer renderer)
+    {
+        int instanceId = renderer.GetInstanceID();
+        playerAdditionalMeshRenderers.RemoveAll(r => r.renderer.GetInstanceID() == instanceId);
+    }
+    public void RemovePlayerColorRenderers(params MeshRenderer[] renderers) => renderers.Do(r => RemovePlayerColorRenderer(r));
+    
     //各種収集データ
     public GamePlayer? MyKiller = null;
     public GamePlayer.ExtraDeadInfo? PlayerStateExtraInfo { get; set; }
@@ -307,6 +322,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         DefaultStampShower = new ArrowStampShower(this);
 
+        playerLogic = new(myPlayer, this);
+
         //PlayerScaler.gameObject.AddComponent<SortingGroup>();
         //PlayerScaler.gameObject.GetComponentsInChildren<SpriteRenderer>(true).Do(r => r.sortingOrder = 10);
 
@@ -340,7 +357,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public OutfitCandidate CurrentOutfit => outfits.Count > 0 ? outfits[0] : DefaultOutfit;
     public OutfitTag[] DefaultOutfitTags => DefaultOutfit.Outfit.OutfitTags;
 
-    private void UpdateOutfit()
+    internal void UpdateOutfit()
     {
         int lastColor = MyControl.cosmetics.ColorId;
 
@@ -362,7 +379,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             MyControl.RawSetPet(newOutfit.PetId, newOutfit.ColorId);
             MyControl.RawSetColor(newOutfit.ColorId);
 
-            foreach(var r in playerAdditionalRenderers) if(r) r.material = MyControl.cosmetics.currentBodySprite.BodySprite.sharedMaterial;
+            foreach (var r in playerAdditionalRenderers) if (r) r.material = MyControl.cosmetics.currentBodySprite.BodySprite.sharedMaterial;
+            foreach (var r in playerAdditionalMeshRenderers) if (r.renderer) r.renderer.material = MyControl.cosmetics.currentBodySprite.BodySprite.sharedMaterial;
             /*
             if (MyControl.MyPhysics.Animations.IsPlayingRunAnimation())
             {
@@ -658,44 +676,38 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         if (!HoldingAnyDeadBody) return;
 
         //同じ死体を持つプレイヤーがいる
-        if (NebulaGameManager.Instance?.AllPlayerInfo.Any(p => p.PlayerId < PlayerId && p.HoldingAnyDeadBody && p.HoldingDeadBody?.PlayerId == HoldingDeadBodyId) ?? false)
+        if (GamePlayer.AllPlayers.Any(p => p.PlayerId < PlayerId && p.HoldingDeadBody == HoldingDeadBody))
         {
-            holdingDeadBodyCache = null;
             if (AmOwner) ReleaseDeadBody();
             return;
         }
 
-
-        if (!holdingDeadBodyCache || holdingDeadBodyCache!.ParentId != HoldingDeadBodyId)
+        if (!HoldingDeadBody!.IsActive)
         {
-            holdingDeadBodyCache = Helpers.AllDeadBodies().FirstOrDefault((d) => d.ParentId == HoldingDeadBodyId);
-            if (!holdingDeadBodyCache)
-            {
-                holdingDeadBodyCache = null;
-                if (AmOwner) ReleaseDeadBody();
-                return;
-            }
+            if(AmOwner) ReleaseDeadBody();
+            return;
         }
 
         //ベント中の死体
-        holdingDeadBodyCache!.Reported = MyControl.inVent;
-        foreach (var r in holdingDeadBodyCache!.bodyRenderers) r.enabled = !MyControl.inVent;
+        var deadBody = HoldingDeadBody.VanillaDeadBody;
+        deadBody.Reported = MyControl.inVent;
+        foreach (var r in deadBody.bodyRenderers) r.enabled = !MyControl.inVent;
 
         var targetPosition = MyControl.transform.position + new Vector3(-0.1f, -0.1f);
-        var lastPosition = holdingDeadBodyCache!.transform.position;
+        var lastPosition = deadBody.transform.position;
 
-        if (MyControl.transform.position.Distance(holdingDeadBodyCache!.transform.position) < 1.8f)
-            holdingDeadBodyCache!.transform.position += (targetPosition - holdingDeadBodyCache!.transform.position) * 0.15f;
+        if (MyControl.transform.position.Distance(deadBody.transform.position) < 1.8f)
+            deadBody.transform.position += (targetPosition - deadBody.transform.position) * 0.15f;
         else
-            holdingDeadBodyCache!.transform.position = targetPosition;
+            deadBody.transform.position = targetPosition;
 
         {
-            var diffSingle = holdingDeadBodyCache!.transform.position.Distance(lastPosition);
+            var diffSingle = deadBody.transform.position.Distance(lastPosition);
             if (AmOwner && MyControl.CanMove) ModSingleton<AchievementManagerModule>.Instance.CorpseToken.Value += diffSingle;
         }
 
         Vector3 playerPos = MyControl.GetTruePosition();
-        Vector3 deadBodyPos = holdingDeadBodyCache!.TruePosition;
+        Vector3 deadBodyPos = deadBody.TruePosition;
         Vector3 diff = (deadBodyPos - playerPos);
         float d = diff.magnitude;
         if (PhysicsHelpers.AnythingBetween(playerPos, deadBodyPos, Constants.ShipAndAllObjectsMask, false))
@@ -709,42 +721,36 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             d -= 0.15f;
             if (d < 0f) d = 0f;
 
-            holdingDeadBodyCache!.transform.localPosition = playerPos + diff.normalized * d;
-        }
-        else
-        {
-            holdingDeadBodyCache!.transform.localPosition = holdingDeadBodyCache!.transform.position;
+            deadBody.transform.localPosition = playerPos + diff.normalized * d;
         }
 
     }
 
     public void ReleaseDeadBody() {
-        RpcHoldDeadBody.Invoke(new(PlayerId, byte.MaxValue, (holdingDeadBodyCache ? holdingDeadBodyCache?.transform.localPosition : null) ?? new Vector2(10000, 10000)));
+        RpcHoldDeadBody.Invoke(new(PlayerId, -1, (HoldingDeadBody?.VanillaDeadBody ?? false) ? HoldingDeadBody.Position : new Vector2(10000, 10000)));
     }
 
-    public void HoldDeadBody(DeadBody? deadBody) {
+    public void HoldDeadBody(Virial.Game.DeadBody? deadBody) {
         if (deadBody == null) ReleaseDeadBody();
-        else RpcHoldDeadBody.Invoke(new(PlayerId, deadBody.ParentId, deadBody.transform.position));
+        else RpcHoldDeadBody.Invoke(new(PlayerId, deadBody.Id, deadBody.Position));
     }
 
-    readonly static RemoteProcess<(byte holderId, byte bodyId, Vector2 pos)> RpcHoldDeadBody = new(
+    readonly static RemoteProcess<(byte holderId, int bodyId, Vector2 pos)> RpcHoldDeadBody = new(
       "HoldDeadBody",
       (message, _) =>
       {
           var info = NebulaGameManager.Instance?.GetPlayer(message.holderId)?.Unbox();
           if (info == null) return;
 
-          if (message.bodyId == byte.MaxValue)
+          if (message.bodyId == -1)
           {
-              if (info.holdingDeadBodyCache && message.pos.magnitude < 10000) info.holdingDeadBodyCache!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
-              info.HoldingDeadBodyId = null;
+              if(info.HoldingDeadBody?.IsActive ?? false) info.HoldingDeadBody.VanillaDeadBody.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
+              info.HoldingDeadBody = null;
           }
           else
           {
-              info.HoldingDeadBodyId = message.bodyId;
-              var deadBody = Helpers.AllDeadBodies().FirstOrDefault(d => d.ParentId == message.bodyId);
-              info.holdingDeadBodyCache = deadBody;
-              if (deadBody && message.pos.magnitude < 10000) deadBody!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
+              info.HoldingDeadBody = ModSingleton<DeadBodyManager>.Instance.TryGetDeadBody(message.bodyId, out var body) ? body : null;              
+              if ((info.HoldingDeadBody?.IsActive ?? false) && message.pos.magnitude < 10000) info.HoldingDeadBody.VanillaDeadBody!.transform.localPosition = new Vector3(message.Item3.x, message.Item3.y, message.Item3.y / 1000f);
           }
       }
       );
@@ -1130,7 +1136,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 mixedVisualInvisibleLevel = Math.Min(1, mixedVisualInvisibleLevel);
             }
 
-            MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText);
+            MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText && MyControl.cosmetics.bodyType != PlayerBodyTypes.Long);
 
             if (IsDead)
             {
@@ -1145,6 +1151,16 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 Color c = new(1f, 1f, 1f, 0.5f);
                 MyControl.cosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = c);
                 foreach (var r in playerAdditionalRenderers) if (r) r.color = c;
+                foreach (var r in playerAdditionalMeshRenderers)
+                {
+                    if (r.filter != null && r.filter)
+                    {
+                        var mesh = r.filter.mesh;
+                        Color[] colors = new UnityEngine.Color[mesh.vertices.Count];
+                        for (int i = 0; i < colors.Length; i++) colors[i] = c;
+                        mesh.SetColors(colors);
+                    }
+                }
                 alpha = alphaIgnoresWall = 0.5f;
                 return;
             }
@@ -1155,10 +1171,14 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             {
                 UpdateVisibilityAlpha(visualInvisibleLevel);
 
-                bool isInShadow = false;
-                if (!GamePlayer.LocalPlayer!.IsDead && !AmOwner)
+                bool CheckIsInWall()
                 {
-                    //自身も生存している場合、影の中にいるプレイヤーは見えないようにする
+                    //死亡していればすべて見える。
+                    if (GamePlayer.LocalPlayer!.IsDead) return false;
+                    //自分自身であれば常に見える。
+                    if (AmOwner) return false;
+                    //ろくろ首はどこからでも見える
+                    if (MyControl.cosmetics.bodyType == PlayerBodyTypes.Long) return false;
 
                     int shadowMask = Constants.ShadowMask;
                     int objectMask = Constants.ShipAndAllObjectsMask;
@@ -1171,14 +1191,19 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
                     var mag = isAcrossWalls ? 0.22f : 0.4f;
 
-                    //いずれかの追加ライトの範囲内にいない場合
+                    //いずれかの追加ライトの範囲内にいない場合、壁の中にいる。
                     if (!LightInfo.AllLightInfo.Any(info => VisibilityCheckVectors.Any(vec => info.CheckPoint(vec))))
                     {
-                        isInShadow = VisibilityCheckVectors.All(v => Helpers.AnyCustomNonTriggersBetween(pos, myPos + v * mag,
+                        return VisibilityCheckVectors.All(v => Helpers.AnyCustomNonTriggersBetween(pos, myPos + v * mag,
                             collider => LightSource.OneWayShadows.TryGetValue(collider.gameObject, out var oneWayShadows) ? !oneWayShadows.IsIgnored(light) : true,
                             shadowMask));
                     }
+
+                    //特に何もなければ、壁の中にいない。
+                    return false;
                 }
+
+                bool isInShadow = CheckIsInWall();
 
                 IsInShadowCache = isInShadow;
             }
@@ -1212,6 +1237,16 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
             MyControl.cosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = color);
             foreach (var r in playerAdditionalRenderers) if (r) r.color = color;
+            foreach (var r in playerAdditionalMeshRenderers)
+            {
+                if (r.filter != null && r.filter)
+                {
+                    var mesh = r.filter.mesh;
+                    Color[] colors = new UnityEngine.Color[mesh.vertices.Count];
+                    for (int i = 0; i < colors.Length; i++) colors[i] = color;
+                    mesh.SetColors(colors);
+                }
+            }
         }
         catch (Exception e){ }
     }
@@ -1227,7 +1262,13 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     {
         if (AmOwner) return;
         if (MyControl.MyPhysics.Velocity.sqrMagnitude > 0) return;
-        if(MyControl.MyPhysics.FlipX != CachedFlipX)MyControl.MyPhysics.FlipX = CachedFlipX;
+        if (MyControl.MyPhysics.FlipX != CachedFlipX)
+        {
+            MyControl.MyPhysics.FlipX = CachedFlipX;
+            var anim = MyControl.MyPhysics.Animations;
+            if (anim.IsPlayingRunAnimation()) anim.PlayRunAnimation();
+            else if (anim.Animator.GetCurrentAnimation() == anim.group.IdleAnim) anim.PlayIdleAnimation();
+        }
     }
     public void Update()
     {
@@ -1294,19 +1335,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     // Virial::MurderAPI
 
-    void GamePlayer.MurderPlayer(GamePlayer player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack) => NebulaGameManager.Instance?.KillRequestHandler.RequestKill(this, player, playerState, eventDetail, killParams, killCondition, callBack);
+    void GamePlayer.MurderPlayer(IPlayerlike player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, KillCondition killCondition, Action<KillResult>? callBack) => NebulaGameManager.Instance?.KillRequestHandler.RequestKill(this, player, playerState, eventDetail, killParams, killCondition, callBack);
     void GamePlayer.Suicide(CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack) => NebulaGameManager.Instance?.KillRequestHandler.RequestKill(this, this, playerState, eventDetail, killParams, KillCondition.BothAlive, callBack);
     void GamePlayer.Revive(GamePlayer? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent) => MyControl.ModRevive(healer?.VanillaPlayer, new(position.x, position.y), eraseDeadBody, recordEvent);
     GamePlayer? GamePlayer.MyKiller => MyKiller;
 
     // Virial::HoldingAPI
-
-    GamePlayer? GamePlayer.HoldingDeadBody => NebulaGameManager.Instance?.GetPlayer(HoldingDeadBodyId ?? 255);
-    bool GamePlayer.HoldingAnyDeadBody => HoldingAnyDeadBody;
-    void GamePlayer.HoldDeadBody(Virial.Game.Player? deadBody) => HoldDeadBody(deadBody?.RelatedDeadBody);
-    void GamePlayer.HoldDeadBodyFast(DeadBody? deadBody) => HoldDeadBody(deadBody);
-    void GamePlayer.ReleaseDeadBody() => ReleaseDeadBody();
-
     GamePlayer? GamePlayer.HoldingPlayer => null;
     bool GamePlayer.HoldingAnyPlayer => false;
     void GamePlayer.HoldPlayer(Virial.Game.Player? player) { }
@@ -1345,6 +1379,16 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     // Virial::OutfitAPI
 
     Virial.Game.OutfitDefinition GamePlayer.GetOutfit(int maxPriority) => GetOutfit(maxPriority).Outfit;
+    Virial.Game.OutfitDefinition? GamePlayer.GetOutfit(int? maxPriority, int minPriority)
+    {
+        OutfitCandidate maxOutfit;
+        if (maxPriority != null)
+            maxOutfit = GetOutfit(maxPriority.Value);
+        else
+            maxOutfit = CurrentOutfit;
+        if (maxOutfit.Priority >= minPriority) return maxOutfit.Outfit;
+        return null;
+    }
 
     IEnumerable<Modifier> GamePlayer.GetModifiers<Modifier>()
     {
@@ -1360,24 +1404,25 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     bool GamePlayer.CanKill(GamePlayer target) => GameOperatorManager.Instance!.Run(new PlayerCheckCanKillLocalEvent(this, target)).CanKill;
 
-    Virial.Game.OutfitDefinition GamePlayer.CurrentOutfit => CurrentOutfit.Outfit;
+    Virial.Game.OutfitDefinition IPlayerlike.CurrentOutfit => CurrentOutfit.Outfit;
     Virial.Game.OutfitDefinition GamePlayer.DefaultOutfit => DefaultOutfit.Outfit;
 
     // Virial::Internal
 
     PlayerControl GamePlayer.VanillaPlayer => MyControl;
-    DeadBody? GamePlayer.RelatedDeadBody { get { if (!relatedDeadBodyCache) relatedDeadBodyCache = null; return relatedDeadBodyCache; } }
-    internal DeadBody? relatedDeadBodyCache;
 
     // Virial::PlayerlikeAPI
 
-    GamePlayer IPlayerlike.VisualPlayer => this;
+    GamePlayer IPlayerlike.RealPlayer => this;
 
     int IPlayerlike.PlayerlikeId => PlayerId;
 
-    bool IPlayerlike.AllowKill => true;
+    KillCharacteristics IPlayerlike.KillCharacteristics => KillCharacteristics.KillOne;
 
     bool IPlayerlike.CanBeTarget => true;
 
     CosmeticsLayer IPlayerlike.VanillaCosmetics => MyControl.cosmetics;
+
+    private VanillaPlayerLogics playerLogic;
+    IPlayerLogics IPlayerlike.Logic => playerLogic;
 }

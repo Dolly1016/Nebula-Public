@@ -17,7 +17,7 @@ namespace Nebula.Roles.Modifier;
 
 public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCitation, RoleFilter
 {
-    private Lover() : base("lover", new(255, 0, 184), [NumOfPairsOption, RoleChanceOption, ChanceOfAssigningImpostorsOption, AllowExtraWinOption, AvengerModeOption]) {
+    private Lover() : base("lover", new(255, 0, 184), [NumOfPairsOption, RoleChanceOption, ChanceOfAssigningImpostorsOption, AllowExtraWinOption, BlockRoleWinOption, AvengerModeOption]) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Neutral.Avenger.MyRole.ConfigurationHolder!]);
         ConfigurationHolder?.SetDisplayState(() => NumOfPairsOption == 0 ? ConfigurationHolderState.Inactivated : RoleChanceOption == 100 ? ConfigurationHolderState.Emphasized : ConfigurationHolderState.Activated);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Lover.png");
@@ -37,6 +37,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
     static internal IntegerConfiguration RoleChanceOption = NebulaAPI.Configurations.Configuration("options.role.lover.roleChance", (10, 100, 10), 100, decorator: num => num + "%",title: new TranslateTextComponent("options.role.chance"));
     static private IntegerConfiguration ChanceOfAssigningImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.lover.chanceOfAssigningImpostors", (0,100,10), 0, decorator: num => num + "%");
     static internal BoolConfiguration AllowExtraWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.allowExtraWin", true);
+    static internal BoolConfiguration BlockRoleWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.blockRoleWin", false);
     static internal BoolConfiguration AvengerModeOption = NebulaAPI.Configurations.Configuration("options.role.lover.avengerMode", false);
 
     static public Lover MyRole = new Lover();
@@ -118,6 +119,9 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.LoversWin && !MyPlayer.IsDead);
 
+        [OnlyMyPlayer]
+        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= BlockRoleWinOption && ev.GameEnd != NebulaGameEnd.LoversWin;
+
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
             Color loverColor = colors[canSeeAllInfo ? loversId : 0];
@@ -171,15 +175,21 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             {
                 if (pme.Murderer != MyPlayer && AvengerModeOption)
                     myLover.SetRole(Avenger.MyRole, [pme.Murderer.PlayerId]);
-                else 
+                else
                     myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
             }
-            else if(ev is PlayerDisconnectEvent)
+            else if (ev is PlayerDisconnectEvent)
             {
                 myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
             }
-            else /* PlayerExtraExiledEvent, PlayerExiledEvent */
-            {   
+            else if (ev is PlayerExiledEvent)
+            {
+                myLover.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
+
+                if (Helpers.CurrentMonth == 12) NebulaAchievementManager.RpcClearAchievement.Invoke(("christmas", MyPlayer));
+            }
+            else /* PlayerExtraExiledEvent */
+            { 
                 myLover.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.WithAssigningGhostRole);
             }
         }
@@ -194,17 +204,6 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             }
         }
         */
-
-        [OnlyMyPlayer, Local]
-        void OnExiled(PlayerExiledEvent ev)
-        {
-            if (!(MyLover.Get()?.IsDead ?? false))
-            {
-                MyLover.Get()?.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
-
-                if(Helpers.CurrentMonth == 12) new StaticAchievementToken("christmas");
-            }
-        }
 
         void RuntimeAssignable.OnActivated()
         {

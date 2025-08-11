@@ -54,12 +54,11 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
         private int state = 0;
         private float speed = AxeSpeedOption;
         private int killedMask = 0;
-        private int tryKillMask = 0;
         private int killedNum = 0;
         private float thrownTime = 0f;
         private float thrownDistance = 0f;
         AchievementToken<int>? acTokenChallenge = null;
-
+        HashSet<IPlayerlike> tryKillSet = [];
         private bool fakeLocal = false;
         
 
@@ -117,30 +116,31 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                     var size = AxeSizeOption;
                     if (!MeetingHud.Instance)
                     {
-                        foreach (var p in NebulaGameManager.Instance.AllPlayerInfo)
+                        foreach (var p in GamePlayer.AllPlayerlikes)
                         {
-                            if (p.IsDead || p.AmOwner) continue;
+                            if (p.IsDead || p.AmOwner || !p.IsActive) continue;
 
-                            if (!CanKillImpostorOption && !Owner.CanKill(p)) continue;
-
+                            if (!CanKillImpostorOption && !Owner.CanKill(p.RealPlayer)) continue;
 
                             //ベント内、吹っ飛ばされ中、および地底のプレイヤーを無視
-                            if (p.IsDived || p.VanillaPlayer.inVent || p.IsBlown || p.WillDie) continue;
+                            if (p.IsDived || p.Logic.InVent || p.IsBlown || p.WillDie) continue;
 
-                            if ((tryKillMask & (1 << p.PlayerId)) != 0) continue;//一度キルを試行しているならなにもしない。
+                            if (tryKillSet.Contains(p)) continue;//一度キルを試行しているならなにもしない。
 
                             if (!Helpers.AnyNonTriggersBetween(p.TruePosition,pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.magnitude < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
                                 if (p.IsInvisible) continue;
 
+                                if(GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(Owner, p, new(IsKillInteraction: true))).IsCanceled ?? false) continue;
+
                                 Owner.MurderPlayer(p, PlayerState.Beaten, EventDetail.Kill, KillParameter.RemoteKill, KillCondition.TargetAlive, result =>
                                 {
                                     if(result == KillResult.Kill)
                                     {
-                                        if (p.VanillaPlayer.inMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
+                                        if (p.Logic.InMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
 
-                                        killedMask |= 1 << p.PlayerId;
+                                        killedMask |= 1 << p.RealPlayer.PlayerId;
                                         killedNum++;
                                         if (killedNum >= 3)
                                         {
@@ -153,7 +153,8 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                                         }
                                     }
                                 });
-                                tryKillMask |= 1 << p.PlayerId;
+
+                                tryKillSet.Add(p);
                             }
                         }
                     }
@@ -166,7 +167,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                     MyRenderer.gameObject.SetActive(false);
                     NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(MyRenderer.gameObject.layer, null, MyRenderer.transform.position, 0.8f).WrapToIl2Cpp());
                 }
-                else if (!OverlapAxeIgnoreArea(MyRenderer.transform.position) && NebulaPhysicsHelpers.AnyNonTriggersBetween(MyRenderer.transform.position, vec, speed * 4f * Time.deltaTime, Constants.ShipAndAllObjectsMask, out d))
+                else if (!OverlapAxeIgnoreArea(MyRenderer.transform.position) && NebulaPhysicsHelpers.AnyNonTriggersBetween(MyRenderer.transform.position, vec, speed * 4f * Time.deltaTime, Constants.ShipAndAllObjectsMask | (1 << LayerExpansion.GetHookshotWallLayer()), out d))
                 {
                     state = 2;
                     MyRenderer.sprite = stuckAxeSprite.GetSprite();
@@ -190,7 +191,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                     var dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
                     MyRenderer.flipY = dir.x < 0f;
                     MyRenderer.transform.localEulerAngles = new Vector3(0, 0, angle * 180f / Mathf.PI);
-                    var hits = Physics2D.RaycastAll(Owner.Position, dir, 0.8f, Constants.ShipAndAllObjectsMask).Where(h => !h.collider.isTrigger).ToArray();
+                    var hits = Physics2D.RaycastAll(Owner.Position, dir, 0.8f, Constants.ShipAndAllObjectsMask | (1 << LayerExpansion.GetHookshotWallLayer())).Where(h => !h.collider.isTrigger).ToArray();
 
                     if(hits.Length > 0)
                     {

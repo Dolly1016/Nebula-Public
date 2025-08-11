@@ -104,6 +104,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     static public readonly EvilTracker MyRole = new();
 
@@ -180,7 +181,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                 //インポスターに矢印を付ける
                 if (TrackImpostorsOption && MyPlayer.IsImpostor) NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.AmOwner && p.Role.Role.Category == RoleCategory.ImpostorRole).Do(p => TryRegisterArrow(p));
 
-                var trackTracker = ObjectTrackers.ForPlayer(this, null, MyPlayer, p => ObjectTrackers.StandardPredicate(p));
+                var trackTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeStandardPredicate(p));
 
                 trackButton = new ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.Ability).Register(this);
                 trackButton.SetSprite(buttonSprite.GetSprite());
@@ -189,7 +190,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                 trackButton.OnClick = (button) =>
                 {
                     trackButton.StartCoolDown();
-                    ChangeTrackingTarget(trackTracker.CurrentTarget!);
+                    ChangeTrackingTarget(trackTracker.CurrentTarget!.RealPlayer);
                 };
                 trackButton.CoolDownTimer = new TimerImpl(TrackCoolDownOption).SetAsAbilityCoolDown().Start().Register(this);
                 trackButton.SetLabel("track");

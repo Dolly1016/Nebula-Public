@@ -27,6 +27,7 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
     static private readonly GameStatsEntry StatsCamo = NebulaAPI.CreateStatsEntry("stats.camouflager.camo", GameStatsCategory.Roles, MyRole);
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
+    bool DefinedRole.IsLoadableToMadmate => true;
 
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
@@ -73,7 +74,7 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (message.on)
-                    p.Unbox().AddOutfit(new OutfitCandidate(NebulaGameManager.Instance.UnknownOutfit, tag, 100, true));
+                    p.Unbox().AddOutfit(new OutfitCandidate(NebulaGameManager.Instance.UnknownOutfit, tag, OutfitPriority.Camouflage, true));
                 else
                     p.Unbox().RemoveOutfit(tag);
             }

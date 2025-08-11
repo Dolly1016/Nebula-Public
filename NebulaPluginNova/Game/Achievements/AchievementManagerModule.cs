@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Nebula.Modules.Cosmetics;
+﻿using Nebula.Modules.Cosmetics;
 using Nebula.Roles.Modifier;
 using System;
 using System.Collections.Generic;
@@ -134,7 +133,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
             var myPlayer = GamePlayer.LocalPlayer!;
             GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
             {
-                byte currentBody = myPlayer.HoldingDeadBody?.PlayerId ?? byte.MaxValue;
+                byte currentBody = myPlayer.HoldingDeadBody?.Player.PlayerId ?? byte.MaxValue;
                 if (currentBody != byte.MaxValue && currentBody == lastDeadBody && !myPlayer.VanillaPlayer.inVent)
                 {
                     float val = lastPos.Distance(myPlayer.Position);

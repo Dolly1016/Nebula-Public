@@ -123,24 +123,33 @@ public class ModUpdater
         }
     }
 
-    static string GetTagsUrl(int page) => Helpers.ConvertUrl("https://api.github.com/repos/Dolly1016/Nebula/releases?per_page=100&page=" + (page));
+    static string GetTagsUrl(int page) => Helpers.ConvertUrl("https://api.github.com/repos/Dolly1016/Nebula/releases?per_page=30&page=" + (page));
+
+    private static int nextPage = 1;
     private static async Task FetchAsync()
     {
-        List<ReleasedInfo> releases = new();
+        List<ReleasedInfo> releases = new List<ReleasedInfo>(cache ?? []);
 
-        int page = 1;
-        while (true)
+        var response = await NebulaPlugin.HttpClient.GetAsync(GetTagsUrl(nextPage));
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            var response = await NebulaPlugin.HttpClient.GetAsync(GetTagsUrl(page));
-            if (response.StatusCode != HttpStatusCode.OK) break;
             string json = await response.Content.ReadAsStringAsync();
+
+            int lastReleases = releases.Count;
 
             var tags = JsonStructure.Deserialize<List<ReleaseContent>>(json);
             if (tags != null) foreach (var tag in tags) if (tag.tag_name != null) releases.Add(new(tag.tag_name, tag.body?.Replace("\\n", "\n").Replace("\\r", "")));
             NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, releases.Count.ToString() + " releases have got from GitHub.");
-            if (tags == null || tags.Count < 100 || tags.Count == 0) break;
-            page++;
+
+            if (releases.Count == lastReleases) MaybeNoMorePages = true;
+
+            nextPage++; //次のフェッチでは次のページを取得する。
         }
+        else
+        {
+            MaybeNoMorePages = true;
+        }
+
 
         releases.Sort((v1, v2) => v1.Epoch != v2.Epoch ? v2.Epoch - v1.Epoch : v2.BuildNum - v1.BuildNum);
 
@@ -148,6 +157,8 @@ public class ModUpdater
     }
 
     static private List<ReleasedInfo>? cache = null;
+    static internal List<ReleasedInfo>? Cache => cache;
+    static internal bool MaybeNoMorePages { get; private set; } = false;
     public static IEnumerator CoFetchVersionTags(Action<List<ReleasedInfo>> postAction)
     {
         yield return FetchAsync().WaitAsCoroutine();

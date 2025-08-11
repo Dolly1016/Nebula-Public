@@ -93,6 +93,8 @@ public abstract class CustomCosmicItem : CustomItemGrouped
     public CostumeAction? CommSabAlternative = null;
     [JsonSerializableField(true)]
     public CostumeAction? GhostAlternative = null;
+    [JsonSerializableField(true)]
+    public CostumeAction? LongNeckAlternative = null;
 
     [JsonSerializableField(true)]
     public bool IsUnlockable = false;
@@ -1010,6 +1012,8 @@ public static class MoreCosmic
     public static readonly Dictionary<string, CosmicStamp> AllStamps = [];
     public static readonly Dictionary<string, CosmicPackage> AllPackages = [];
     public static Dictionary<string, HashSet<string>> VanillaTags = [];
+    internal static readonly CustomHooksManager<SimpleActionList> NodeSyncHooks = new(() => new());
+    internal static readonly CustomHooksManager<SimpleActionList> LongNeckHooks = new(() => new());
 
     public record LocalizedSpriteLoader(string Address, IResourceAllocator Allocator)
     {
@@ -1708,16 +1712,6 @@ public class NebulaNameplate : MonoBehaviour
     }
 }
 
-public class NebulaCosmeticsLayerVisorLink : MonoBehaviour
-{
-    static NebulaCosmeticsLayerVisorLink()
-    {
-        ClassInjector.RegisterTypeInIl2Cpp<NebulaCosmeticsLayerVisorLink>();
-    }
-
-    public Reference<NebulaCosmeticsLayer> NebulaLayer;
-}
-
 public class NebulaCosmeticsLayer : MonoBehaviour
 {
     public CosmeticsLayer MyLayer = null!;
@@ -1806,7 +1800,14 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         renderersCache = null!;
 
         MyLayer = gameObject.GetComponent<CosmeticsLayer>();
-        if (MyLayer.visor != null) MyLayer.visor.gameObject.AddComponent<NebulaCosmeticsLayerVisorLink>().NebulaLayer = new() { Value = this };
+        if (MyLayer.visor != null)
+        {
+            MoreCosmic.NodeSyncHooks.Get(MyLayer.visor.gameObject).AddAction(() =>
+            {
+                FixVisor();
+                return true;
+            });
+        }
 
         var bodyParent = MyLayer.normalBodySprite.BodySprite.transform.parent;
         if (bodyParent.gameObject.TryGetComponent<MeetingCalledAnimation>(out _))
@@ -1933,7 +1934,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     {
         if (fakePlayerCache != null)
         {
-            return (fakePlayerCache as IPlayerlike).VisualPlayer;
+            return (fakePlayerCache as IPlayerlike).RealPlayer;
         }
 
         if (myModPlayerCache == null && IsGamePlayer && NebulaGameManager.Instance != null && MyPhysics != null)
@@ -2045,6 +2046,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             string? visualHatId = null;
             if (ShipStatus.Instance && AmongUsUtil.InAnySab) visualHatId = (AmongUsUtil.InCommSab ? functionalHat.CommSabAlternative ?? functionalHat.SabotageAlternative : functionalHat.SabotageAlternative)?.Costume;
             if (MyLayer.bodyType == PlayerBodyTypes.Seeker && functionalHat.SeekerAlternative != null) visualHatId = functionalHat.SeekerAlternative?.Costume;
+            if (MyLayer.bodyType == PlayerBodyTypes.Long && functionalHat.LongNeckAlternative != null) visualHatId = functionalHat.LongNeckAlternative?.Costume;
             if (isDead && functionalHat.GhostAlternative != null) visualHatId = functionalHat.GhostAlternative?.Costume;
             visualHat = CheckAndUpdateCache(visualHat, ref CurrentVisualModHatCache, visualHatId, CosmicHat.IdToProductId, pi => MoreCosmic.AllHats.TryGetValue(pi, out var h) ? h : null!);
 
@@ -2180,6 +2182,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             var visualVisor = functionalVisor;
             string? visualVisorId = null;
             if (ShipStatus.Instance && AmongUsUtil.InAnySab) visualVisorId = (AmongUsUtil.InCommSab ? functionalVisor.CommSabAlternative ?? functionalVisor.SabotageAlternative : functionalVisor.SabotageAlternative)?.Costume;
+            if (MyLayer.bodyType == PlayerBodyTypes.Long && functionalVisor.LongNeckAlternative != null) visualVisorId = functionalVisor.LongNeckAlternative?.Costume;
             if (isDead && functionalVisor.GhostAlternative != null) visualVisorId = functionalVisor.GhostAlternative?.Costume;
             visualVisor = CheckAndUpdateCache(visualVisor, ref CurrentVisualModVisorCache, visualVisorId, CosmicVisor.IdToProductId, pi => MoreCosmic.AllVisors.TryGetValue(pi, out var v) ? v : null!);
             currentVisualVisor = visualVisor;
@@ -2409,10 +2412,7 @@ public class SpriteAnimNodeSyncUpdatePatch
 {
     public static void Postfix(SpriteAnimNodeSync __instance)
     {
-        if (__instance.gameObject.TryGetComponent<NebulaCosmeticsLayerVisorLink>(out var layer))
-        {
-            layer.NebulaLayer.Value?.FixVisor();
-        }
+        if (MoreCosmic.NodeSyncHooks.TryGet(__instance.gameObject, out var found)) found.Update();
     }
 }
 
@@ -2655,8 +2655,6 @@ public static class TabEnablePatch
     {
         public static bool Prefix(HatsTab __instance)
         {
-            Resources.UnloadUnusedAssets();
-
             (HatData, CosmicHat?)[] unlockedHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats().Select(hat => MoreCosmic.AllHats.TryGetValue(hat.ProductId, out var modHat) ? (hat, modHat) : (hat, null)).ToArray();
             __instance.currentHat = DestroyableSingleton<HatManager>.Instance.GetHatById(DataManager.Player.Customization.Hat);
 
@@ -2674,8 +2672,6 @@ public static class TabEnablePatch
     {
         public static bool Prefix(VisorsTab __instance)
         {
-            Resources.UnloadUnusedAssets();
-
             (VisorData, CosmicVisor?)[] unlockedVisors = DestroyableSingleton<HatManager>.Instance.GetUnlockedVisors().Select(visor => MoreCosmic.AllVisors.TryGetValue(visor.ProductId, out var modVisor) ? (visor, modVisor) : (visor, null)).ToArray();
 
             SetUpTab(__instance, HatManager.Instance.allVisors.First(v => v.IsEmpty), unlockedVisors,
@@ -2692,8 +2688,6 @@ public static class TabEnablePatch
     {
         public static bool Prefix(NameplatesTab __instance)
         {
-            Resources.UnloadUnusedAssets();
-
             (NamePlateData, CosmicNameplate?)[] unlockedNamePlates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(nameplate => MoreCosmic.AllNameplates.TryGetValue(nameplate.ProductId, out var modNameplate) ? (nameplate, modNameplate) : (nameplate, null)).ToArray();
 
             __instance.previewArea.TargetPlayerId = NebulaPlayerTab.PreviewColorId;
@@ -2813,6 +2807,37 @@ public static class TabEnablePatch
                 nebulaPlate.AdaptiveRenderer.sprite = null;
             }
 
+        }
+    }
+
+    [HarmonyPatch(typeof(LongBoiPlayerBody), nameof(LongBoiPlayerBody.Start))]
+    public class LongBoiStartPatch
+    {
+        public static bool Prefix(LongBoiPlayerBody __instance)
+        {
+            __instance.headSprite.gameObject.SetActive(true);
+            __instance.neckSprite.gameObject.SetActive(true);
+            __instance.foregroundNeckSprite.gameObject.SetActive(true);
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(LongBoiPlayerBody), nameof(LongBoiPlayerBody.LateUpdate))]
+    public class LongBoiLateUpdatePatch
+    {
+        public static bool Prefix(LongBoiPlayerBody __instance)
+        {
+            if (__instance.isPoolablePlayer) return true;
+
+            //var order = __instance.GetComponent<SpriteRenderer>().sortingGroupOrder;
+            int order = 1000;
+            __instance.headSprite.SetBothOrder(order + 8);
+            __instance.neckSprite.SetBothOrder(order + 8);
+            __instance.foregroundNeckSprite.SetBothOrder(order + 8);
+
+            if (MoreCosmic.LongNeckHooks.TryGet(__instance.gameObject, out var found)) found.Update();
+
+            return false;
         }
     }
 }
