@@ -147,7 +147,7 @@ public class Arrow : FlexibleLifespan, IGameOperator
             //UIのカメラに合わせて位置を調節する
             float orthographicSize = main.orthographicSize;
             float num3 = main.orthographicSize * main.aspect;
-            Vector3 vector4 = new Vector3(Mathf.LerpUnclamped(0f, num3 * (WithSmallArrow ? 0.82f : 0.88f), vector3.x), Mathf.LerpUnclamped(0f, orthographicSize * (WithSmallArrow ? 0.72f : 0.79f), vector3.y), 2f);
+            Vector3 vector4 = new Vector3(Mathn.Lerp(0f, num3 * (WithSmallArrow ? 0.82f : 0.88f), vector3.x), Mathn.Lerp(0f, orthographicSize * (WithSmallArrow ? 0.72f : 0.79f), vector3.y), 2f);
             arrowRenderer.transform.localPosition = vector4;
             arrowRenderer.transform.localScale = Vector3.one;
         }
