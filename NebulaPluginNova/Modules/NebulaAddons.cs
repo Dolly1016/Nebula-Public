@@ -205,12 +205,13 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
             {
                 var stream = assembly.GetManifestResourceStream(file);
                 if (stream == null) continue;
-                zip = new ZipArchive(stream);
+                zip = new ZipArchive(stream, ZipArchiveMode.Read);
 
                 var addon = new NebulaAddon(zip, file.Substring(prefix.Length)) { IsBuiltIn = true };
                 allAddons.Add(addon.Id, addon);
 
-                addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(assembly.GetManifestResourceStream(file)!)).ComputeConstantHash();
+                using var md5Stream = assembly.GetManifestResourceStream(file)!;
+                addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(md5Stream)).ComputeConstantHash();
             }
             catch
             {
@@ -318,7 +319,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
             var texture = GraphicsHelper.LoadTextureFromStream(iconEntry);
             texture.MarkDontUnload();
 
-            Icon = texture.ToSprite(Mathf.Max(texture.width, texture.height));
+            Icon = texture.ToSprite(Mathn.Max(texture.width, texture.height));
             Icon.MarkDontUnload();
         }
 

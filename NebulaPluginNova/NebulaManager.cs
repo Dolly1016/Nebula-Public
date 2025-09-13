@@ -2,6 +2,7 @@
 using Il2CppSystem.Xml.Schema;
 using InnerNet;
 using Nebula.Behavior;
+using Nebula.Dev;
 using Nebula.Map;
 using Nebula.Modules.Cosmetics;
 using Nebula.Patches;
@@ -246,7 +247,7 @@ public class MouseOverPopup : MonoBehaviour
             lastSize.Height * 0.5f + 0.15f
             ];
 
-        Vector2 anchorPoint = new(Mathf.Lerp(xRange[isLeft ? 0 : 1], 0f, smoothX), Mathf.Lerp(yRange[isLower ? 0 : 1], 0f, smoothY));
+        Vector2 anchorPoint = new(Mathn.Lerp(xRange[isLeft ? 0 : 1], 0f, smoothX), Mathn.Lerp(yRange[isLower ? 0 : 1], 0f, smoothY));
 
         var pos = UnityHelper.ScreenToWorldPoint(screenPos, LayerExpansion.GetUILayer());
         pos.z = -800f;
@@ -524,6 +525,10 @@ public class NebulaManager : MonoBehaviour
                 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
+                    NebulaPlugin.Log.Print("ViperBlurb: " + TranslationController.Instance.GetString(StringNames.ViperBlurb));
+                    NebulaPlugin.Log.Print("ViperBlurbLong: " + TranslationController.Instance.GetString(StringNames.ViperBlurbLong));
+                    //DiscordVC.Start();
+
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
 
                     /*

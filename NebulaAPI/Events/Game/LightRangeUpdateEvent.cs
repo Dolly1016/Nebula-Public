@@ -11,10 +11,20 @@ namespace Virial.Events.Game;
 /// </summary>
 public class LightRangeUpdateEvent : Event
 {
+    /// <summary>
+    /// 徐々に反映される視界の倍率を指定します。停電サボタージュと同じ速さで適用されます。
+    /// </summary>
     public float LightRange { get => lightRange; set => lightRange = MathF.Max(0f, value); }
     private float lightRange;
+
+    /// <summary>
+    /// 即座に反映される視界の倍率を指定します。
+    /// </summary>
+    public float LightQuickRange { get => lightQuickRange; set => lightQuickRange = MathF.Max(0f, value); }
+    private float lightQuickRange;
     internal LightRangeUpdateEvent(float lightRange)
     {
         LightRange = lightRange;
+        LightQuickRange = 1f;
     }
 }

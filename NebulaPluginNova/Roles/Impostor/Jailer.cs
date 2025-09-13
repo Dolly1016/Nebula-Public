@@ -80,7 +80,7 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
             }
         }
 
-        [Local, OnlyMyPlayer]
+        [Local]
         void Update(GameUpdateEvent ev)
         {
             if(acTokenCommon2 != null && !MeetingHud.Instance && !ExileController.Instance)

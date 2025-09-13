@@ -159,7 +159,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                     gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && tracker.CurrentTarget != null;
                     gushButton.OnClick = button =>
                     {
-                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, tracker.CurrentTarget!.transform.position, GameActionTypes.DecoyPlacementAction);
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, tracker.CurrentTarget!.transform.position, GameActionTypes.HadarAppearingAction);
 
                         MyPlayer.VanillaPlayer.ModDive(false, false);
                         MyPlayer.VanillaPlayer.gameObject.layer = LayerExpansion.GetPlayersLayer();

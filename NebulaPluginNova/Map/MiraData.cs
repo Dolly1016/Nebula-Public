@@ -94,4 +94,20 @@ public class MiraData : MapData
         return base.GetSealedVentSprite(vent, altSealedVents.Contains(vent.name) ? (8 + level) : level, remove);
     }
     override public bool IsSealableDoor(OpenableDoor door) => false;
+
+    public override (SystemTypes room, Vector2 pos)[] AdminRooms { get; } = [
+        (SystemTypes.Launchpad, new(-4.4f, 2.1f)),
+        (SystemTypes.MedBay, new(15.8f,-0.4f)),
+        (SystemTypes.Comms, new(15.8f, 4.0f)),
+        (SystemTypes.LockerRoom, new(7.0f, 1.3f)),
+        (SystemTypes.Decontamination, new(6.1f, 6.2f)),
+        (SystemTypes.Laboratory, new(9.9f,12.0f)),
+        (SystemTypes.Reactor, new(2.4f,13.2f)),
+        (SystemTypes.Admin, new(21.5f, 19.0f)),
+        (SystemTypes.Office, new(14f, 20.1f)),
+        (SystemTypes.Greenhouse, new(17.8f, 23.5f)),
+        (SystemTypes.Storage, new(19.9f, 4.0f)),
+        (SystemTypes.Cafeteria, new(25.5f, 3.2f)),
+        (SystemTypes.Balcony, new(24.7f, -1.9f)),
+        ];
 }

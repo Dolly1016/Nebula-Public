@@ -1202,7 +1202,8 @@ public static class MoreCosmic
 
         isLoaded = true;
 
-        VanillaTags = JsonStructure.Deserialize<Dictionary<string, HashSet<string>>>(StreamHelper.OpenFromResource("Nebula.Resources.VanillaTags.json")!) ?? [];
+        using var stream = StreamHelper.OpenFromResource("Nebula.Resources.VanillaTags.json");
+        VanillaTags = JsonStructure.Deserialize<Dictionary<string, HashSet<string>>>(stream!) ?? [];
 
         foreach (var addon in NebulaAddon.AllAddons) LoadLocalizationLocal(addon);
     }

@@ -119,6 +119,12 @@ internal class KillRequestHandler
         {
             result = KillResult.Kill;
 
+            if(killCond.HasFlag(KillCondition.InTaskPhase) && (MeetingHud.Instance || ExileController.Instance))
+            {
+                result = KillResult.Rejected;
+                return false;
+            }
+
             if(target == null)
             {
                 result = KillResult.Rejected;
@@ -145,11 +151,26 @@ internal class KillRequestHandler
         if (CheckKill(isMeetingKill, out var result))
         {
             bool usingUtility = target.Logic.InMovingPlat || target.Logic.OnLadder;
-            var deadGoalPos = (target as GamePlayer)?.Unbox().GoalPos ?? target.Position;
+            UnityEngine.Vector2 deathPos = target.Position;
+            if(target is GamePlayer gamePlayer && gamePlayer.DeathPosition != null)
+            {
+                if (killParam.HasFlag(KillParameter.WithBlink))
+                {
+                    deathPos = gamePlayer.DeathPosition.GetNearestPos(killer.Position);
+                }
+                else 
+                {
+                    if (gamePlayer.Position.Distance(gamePlayer.DeathPosition.StartPos) < 0.8f)
+                        deathPos = gamePlayer.DeathPosition.StartPos;
+                    else
+                        deathPos = gamePlayer.DeathPosition.GoalPos;
+                }
+            }
+            
             if (isMeetingKill)
-                RpcMeetingKill.Invoke(new(sender, id, killer, target, target.Position, target.RealPlayer, target.KillCharacteristics,  playerState, recordState, killParam, usingUtility, deadGoalPos));
+                RpcMeetingKill.Invoke(new(sender, id, killer, target, target.Position, target.RealPlayer, target.KillCharacteristics,  playerState, recordState, killParam, usingUtility, deathPos));
             else
-                RpcKill.Invoke(new(sender, id, killer, target, target.Position, target.RealPlayer, target.KillCharacteristics, playerState, recordState, killParam, usingUtility, deadGoalPos));
+                RpcKill.Invoke(new(sender, id, killer, target, target.Position, target.RealPlayer, target.KillCharacteristics, playerState, recordState, killParam, usingUtility, deathPos));
         }
         return result;
     }
@@ -177,6 +198,7 @@ internal class KillRequestHandler
            var vanillaRealTarget = param.RealTarget.VanillaPlayer;
 
            var withBlink = param.KillParam.HasFlag(KillParameter.WithBlink);
+           var useViperDeadBody = param.KillParam.HasFlag(KillParameter.WithViperDeadBody);
 
            bool realTargetWillDie = param.Target is GamePlayer || param.Target.KillCharacteristics.HasFlag(KillCharacteristics.FlagKillRealPlayer);
 
@@ -211,14 +233,17 @@ internal class KillRequestHandler
                        {
                        }
                    }
-                   if (param.KillParam.HasFlag(KillParameter.WithOverlay)) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(vanillaKiller?.Data, param.RealTarget.VanillaPlayer.Data);
+                   if (param.KillParam.HasFlag(KillParameter.WithOverlay))
+                   {
+                       if (param.Killer != null) param.Killer.VanillaPlayer.Data.Role.CustomKillAnimations = useViperDeadBody ? AmongUsUtil.GetRolePrefab<ViperRole>()!.CustomKillAnimations : new(0);
+                       DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(vanillaKiller?.Data, param.RealTarget.VanillaPlayer.Data);
+                   }
                    param.RealTarget.VanillaPlayer.cosmetics.SetNameMask(false);
                    param.RealTarget.VanillaPlayer.RpcSetScanner(false);
                }
            }
 
-           vanillaKiller?.MyPhysics.StartCoroutine(vanillaKiller.KillAnimations[System.Random.Shared.Next(vanillaKiller.KillAnimations.Count)].CoPerformModKill(param.RequestSender, param.RequestId, vanillaKiller, new(param.Target, param.TargetPos), param.RealTarget, param.KillCharacteristics, withBlink, param.TargetIsUsingUtility, param.DeadGoalPos).WrapToIl2Cpp());
-
+           vanillaKiller?.MyPhysics.StartCoroutine(vanillaKiller.KillAnimations[System.Random.Shared.Next(vanillaKiller.KillAnimations.Count)].CoPerformModKill(param.RequestSender, param.RequestId, vanillaKiller, new(param.Target, param.TargetPos), param.RealTarget, param.KillCharacteristics, withBlink, param.TargetIsUsingUtility, param.DeadGoalPos, useViperDeadBody, vanillaKiller, param.PlayerState).WrapToIl2Cpp());
            // MurderPlayer ここまで
 
 

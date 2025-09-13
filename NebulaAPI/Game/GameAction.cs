@@ -36,6 +36,8 @@ public static class GameActionTypes
     static public GameActionType WhammyPlacementAction { get; internal set; }
     static public GameActionType HookshotAction { get; internal set; }
     static public GameActionType DrillAction { get; internal set; }
+    static public GameActionType DoppelgangerAction { get; internal set; }
+    static public GameActionType SculptorAction { get; internal set; }
 }
 
 public class GameActionType

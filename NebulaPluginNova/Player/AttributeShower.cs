@@ -13,7 +13,7 @@ public class AttributeShower
 
         private SpriteRenderer guageRenderer;
         public void Update(float ratio) {
-            guageRenderer.material.SetFloat("_Guage", Mathf.Clamp01(ratio));
+            guageRenderer.material.SetFloat("_Guage", Mathn.Clamp01(ratio));
         }
 
         public AttributeIcon(Transform parent,Virial.Game.IPlayerAttribute attribute)

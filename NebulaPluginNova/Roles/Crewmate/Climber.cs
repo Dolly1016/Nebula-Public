@@ -282,7 +282,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
             ropeRenderer.enabled = true;
             ropeRenderer.transform.position = center;
             ropeRenderer.transform.SetLocalZ(0f);
-            ropeRenderer.transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x).RadToDeg());
+            ropeRenderer.transform.localEulerAngles = new(0f, 0f, Mathn.Atan2(diff.y, diff.x).RadToDeg());
             length = diff.magnitude;
             ropeRenderer.size = new(length, 0.17f);
 

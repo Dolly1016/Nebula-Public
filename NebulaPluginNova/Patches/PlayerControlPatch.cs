@@ -491,7 +491,7 @@ public static class OverlayKillAnimationInitializePatch
         if (KillOverlayPatch.NextIsSelfKill)
         {
             __instance.transform.GetChild(0).gameObject.SetActive(false);
-            __instance.transform.GetChild(2).gameObject.SetActive(false);
+            if(__instance.transform.childCount >= 3) __instance.transform.GetChild(2).gameObject.SetActive(false);
 
             float x = 0.6f;
             var victim = __instance.transform.GetChild(1);
@@ -595,17 +595,6 @@ public static class LoadKillerSkinPatch
 [HarmonyPatch(typeof(MovingPlatformBehaviour), nameof(MovingPlatformBehaviour.UsePlatform))]
 public static class UsePlatformPatch
 {
-    private static void SetGoalPos(PlayerControl target, Vector2 pos)
-    {
-        try
-        {
-            target.GetModInfo()!.Unbox().GoalPos = pos;
-        }
-        catch
-        {
-            Debug.Log($"Skipped presetting goal position on use MovingPlatform. (for {target.name})");
-        }
-    }
     public static bool Prefix(MovingPlatformBehaviour __instance, ref Il2CppSystem.Collections.IEnumerator __result, [HarmonyArgument(0)]PlayerControl target)
     {
         __result = CoUsePlatform().WrapToIl2Cpp();
@@ -623,26 +612,28 @@ public static class UsePlatformPatch
             target.SetKinematic(true);
             target.inMovingPlat = true;
             target.ForceKillTimerContinue = true;
-            Vector3 vector = __instance.IsLeft ? __instance.LeftUsePosition : __instance.RightUsePosition;
-            Vector3 vector2 = (!__instance.IsLeft) ? __instance.LeftUsePosition : __instance.RightUsePosition;
-            Vector3 sourcePos = __instance.IsLeft ? __instance.LeftPosition : __instance.RightPosition;
-            Vector3 targetPos = (!__instance.IsLeft) ? __instance.LeftPosition : __instance.RightPosition;
-            Vector3 worldUseSourcePos = __instance.transform.parent.TransformPoint(vector);
-            Vector3 worldUseTargetPos = __instance.transform.parent.TransformPoint(vector2);
-            Vector3 worldSourcePos = __instance.transform.parent.TransformPoint(sourcePos);
-            Vector3 worldTargetPos = __instance.transform.parent.TransformPoint(targetPos);
+            bool isLeft = __instance.IsLeft;
+            var parent = __instance.transform.parent;
+            Vector3 vector = isLeft ? __instance.LeftUsePosition : __instance.RightUsePosition;
+            Vector3 vector2 = (!isLeft) ? __instance.LeftUsePosition : __instance.RightUsePosition;
+            Vector3 sourcePos = isLeft ? __instance.LeftPosition : __instance.RightPosition;
+            Vector3 targetPos = (!isLeft) ? __instance.LeftPosition : __instance.RightPosition;
+            Vector3 worldUseSourcePos = parent.TransformPoint(vector);
+            Vector3 worldUseTargetPos = parent.TransformPoint(vector2);
+            Vector3 worldSourcePos = parent.TransformPoint(sourcePos);
+            Vector3 worldTargetPos = parent.TransformPoint(targetPos);
 
-            SetGoalPos(target, worldUseSourcePos);
-
+            target.GetModInfo()?.DeathPosition = new(worldUseSourcePos, worldUseSourcePos);
+            
             yield return target.MyPhysics.WalkPlayerTo(worldUseSourcePos, 0.01f, 1f, false);
             yield return target.MyPhysics.WalkPlayerTo(worldSourcePos, 0.01f, 1f, false);
-
-            SetGoalPos(target, worldUseTargetPos);
 
             yield return Effects.Wait(0.1f);
             worldSourcePos -= (Vector3)target.Collider.offset;
             worldTargetPos -= (Vector3)target.Collider.offset;
             if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlayDynamicSound("PlatformMoving", __instance.MovingSound, true, (GetDynamicsFunction)__instance.SoundDynamics, SoundManager.Instance.SfxChannel);
+
+            target.GetModInfo()?.DeathPosition = new(worldUseSourcePos, worldUseTargetPos);
 
             __instance.IsLeft = !__instance.IsLeft;
             yield return Effects.All(
@@ -666,7 +657,7 @@ public static class UsePlatformPatch
             target.SetKinematic(false);
             target.NetTransform.Halt();
 
-            target.GetModInfo()?.Unbox().ResetDeadBodyGoalPos();
+            target.GetModInfo()?.DeathPosition = null;
 
             yield return Effects.Wait(0.1f);
             __instance.Target = null;
@@ -682,9 +673,9 @@ public static class UseLadderPatch
     {
         try
         {
-            Vector2 pos = source.Destination.transform.position;
-            if (source.Destination.IsTop) pos += new Vector2(0f, 1.2f);
-            __instance.myPlayer.GetModInfo()!.Unbox().GoalPos = pos;
+            Vector2 GetPosition(Ladder ladder) => ladder.IsTop ? (Vector2)ladder.transform.position + new Vector2(0f, 1.2f) : ladder.transform.position;
+            
+            __instance.myPlayer.GetModInfo()!.DeathPosition = new(GetPosition(source), GetPosition(source.Destination));
         }
         catch
         {
@@ -699,7 +690,7 @@ public static class CoUseLadderPatch
     public static void Postfix(PlayerPhysics __instance, ref Il2CppSystem.Collections.IEnumerator __result)
     {
         __result = Effects.Sequence(__result, ManagedEffects.Action(() => {
-            __instance.myPlayer.GetModInfo()?.Unbox().ResetDeadBodyGoalPos();
+            __instance.myPlayer.GetModInfo()?.DeathPosition = null;
         }).WrapToIl2Cpp());
     }
 }
@@ -756,7 +747,7 @@ class CustomNetworkTransformPatch
                 4 or 5 => 2.5f, //0.5にしようとしてくるやつを抑制するので大きめに
                 _ => 1.8f
             };
-            __instance.rubberbandModifier = Mathf.Lerp(__instance.rubberbandModifier, num, Time.fixedDeltaTime * 3f);
+            __instance.rubberbandModifier = Mathn.Lerp(__instance.rubberbandModifier, num, Time.fixedDeltaTime * 3f);
         }
     }
     
@@ -849,8 +840,55 @@ public static class PlayerPhysicsPatch
         if (AmongUsClient.Instance.GameState >= InnerNet.InnerNetClient.GameStates.Started)
         {
             Vector3 position = __instance.transform.position;
-            var y = GameOperatorManager.Instance?.Run(new PlayerFixZPositionEvent(__instance.myPlayer.GetModInfo()!, position.y)).Y ?? position.y;
-            __instance.transform.SetWorldZ(y / 1000f);
+            var ev = GameOperatorManager.Instance?.Run(new PlayerFixZPositionEvent(__instance.myPlayer.GetModInfo()!, position.y));
+            if (ev != null)
+            {
+                __instance.transform.SetWorldZ(ev.Z.HasValue ? ev.Z.Value : ev.Y / 1000f);
+            }
+            return false;
+        }
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.HandleRpc))]
+class ResetMoveStatePatch
+{
+    public static void Prefix(PlayerPhysics __instance, [HarmonyArgument(0)] byte callId)
+    {
+        if (callId == 19)
+        {
+            //EnterVent, はしご移動によるNetTransformの更新停止を切る。
+            __instance.myPlayer.ChangeMoveMode(true);
+            if (__instance.Animations.IsPlayingAnyLadderAnimation()) __instance.Animations.PlayIdleAnimation();
+        }
+    }
+}
+
+[HarmonyPatch(typeof(ViperDeadBody), nameof(ViperDeadBody.FixedUpdate))]
+public class BlockViperDeadBodyUpdatePatch
+{
+    public static bool Prefix(ViperDeadBody __instance) => false;
+}
+
+[HarmonyPatch(typeof(DeadBody), nameof(DeadBody.OnClick))]
+public class DissolvedDeadBodyClickPatch
+{
+    readonly public static byte DissolvedDeadBodyMask = 0x80;
+    public static bool Prefix(DeadBody __instance)
+    {
+        if((__instance.ParentId & DissolvedDeadBodyMask) != 0)
+        {
+            if (__instance.Reported || !GameManager.Instance.CanReportBodies()) return false;
+
+            var localPlayer = PlayerControl.LocalPlayer;
+            Vector2 truePosition = localPlayer.GetTruePosition();
+            Vector2 truePosition2 = __instance.TruePosition;
+            if (Vector2.Distance(truePosition2, truePosition) <= localPlayer.MaxReportDistance && localPlayer.CanMove && !PhysicsHelpers.AnythingBetween(truePosition, truePosition2, Constants.ShipAndObjectsMask, false))
+            {
+                __instance.Reported = true;
+                MeetingHudExtension.RpcCmdReportDissolvedDeadBody.Invoke((GamePlayer.LocalPlayer, GamePlayer.GetPlayer((byte)(__instance.ParentId & ~DissolvedDeadBodyMask))));
+            }
             return false;
         }
         return true;

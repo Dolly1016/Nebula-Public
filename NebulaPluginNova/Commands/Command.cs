@@ -472,7 +472,7 @@ public class ConsoleShower : MonoBehaviour
         foreach (var bubble in activeBubbles)
         {
             if (bubble.Timer > 0f) { bubble.Timer -= Time.deltaTime; }
-            else if (bubble.Alpha > 0f) bubble.Alpha = Mathf.Clamp01(bubble.Alpha - Time.deltaTime * 0.7f);
+            else if (bubble.Alpha > 0f) bubble.Alpha = Mathn.Clamp01(bubble.Alpha - Time.deltaTime * 0.7f);
 
             UnityEngine.Color alphaColor = new(1f, 1f, 1f, ConsoleInputHolder.active ? 1f : bubble.Alpha);
 

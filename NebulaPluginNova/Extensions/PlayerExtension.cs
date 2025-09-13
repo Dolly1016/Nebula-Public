@@ -136,7 +136,7 @@ public static class PlayerExtension
             modinfo.WillDie = false;
             modinfo.CurrentDiving = null;
 
-            if (message.cleanDeadBody) foreach (var d in Helpers.AllDeadBodies()) if (d.ParentId == player.PlayerId) GameObject.Destroy(d.gameObject);
+            if (message.cleanDeadBody) foreach (var d in Helpers.AllDeadBodies()) if ((d.ParentId & 0x7F) == player.PlayerId) GameObject.Destroy(d.gameObject);
 
             if(message.recordEvent)NebulaGameManager.Instance?.GameStatistics.RecordEvent(new(GameStatistics.EventVariation.Revive, message.sourceId != byte.MaxValue ? message.sourceId : null, 1 << message.targetId) { RelatedTag = EventDetail.Revive });
 

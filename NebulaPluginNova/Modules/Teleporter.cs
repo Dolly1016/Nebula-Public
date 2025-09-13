@@ -180,7 +180,7 @@ public class TeleportationSystem : AbstractModule<Virial.Game.Game>, IGameOperat
         while(p < 1f)
         {
             float t2 = p * 2;
-            sizeModulator.Size = new(1f - p, Mathf.Lerp(1f - p, t2 * t2, p * p));
+            sizeModulator.Size = new(1f - p, Mathn.Lerp(1f - p, t2 * t2, p * p));
 
             p += Time.deltaTime * 3.4f;
 
@@ -193,7 +193,7 @@ public class TeleportationSystem : AbstractModule<Virial.Game.Game>, IGameOperat
         while (p > 0f)
         {
             float t2 = p * 2;
-            sizeModulator.Size = new(1f - p, Mathf.Lerp(1f - p, t2 * t2, p * p));
+            sizeModulator.Size = new(1f - p, Mathn.Lerp(1f - p, t2 * t2, p * p));
             
             p -= Time.deltaTime * 2.7f;
 
@@ -239,7 +239,7 @@ public class Teleporter : NebulaSyncStandardObject
 
     void OnUpdate(GameUpdateEvent ev)
     {
-        float num = Mathf.Sin(Time.time);
+        float num = Mathn.Sin(Time.time);
         ConsoleRenderer.transform.localPosition = new Vector3(0f, 0.28f + num * 0.05f, 0.0002f);
         ShadowRenderer.color = new(1f, 1f, 1f, 0.6f - num * 0.4f);
 

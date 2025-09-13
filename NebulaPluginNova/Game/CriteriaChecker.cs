@@ -192,7 +192,7 @@ public class NebulaEndCriteria
                 jackalMask |= myMask;
 
                 //死亡しておらず、同チーム、かつラバーズでないか相方死亡ラバー。ただし、サイドキックがキル人外でないならジャッカル本人のみ
-                int aliveJackals = sidekickShouldBeCountKillers ? 1 : NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && jackal!.IsSameTeam(p) && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover) && !p.IsMadmate);
+                int aliveJackals = sidekickShouldBeCountKillers ? NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && jackal!.IsSameTeam(p) && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover) && !p.IsMadmate) : 1;
 
 
                 //完全殲滅勝利
@@ -223,9 +223,8 @@ public class NebulaEndCriteria
             foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
             {
                 if (p.IsDead) continue;
-                if (p.TryGetModifier<Lover.Instance>(out var lover)){
+                foreach (var lover in p.GetModifiers<Lover.Instance>()){
                     if (lover.MyLover.Get()?.IsDead ?? true) continue;
-
                     NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.LoversWin, GameEndReason.Situation);
                 }
 

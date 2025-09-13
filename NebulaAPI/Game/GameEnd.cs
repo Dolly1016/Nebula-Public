@@ -92,6 +92,11 @@ public enum GameEndReason
     Sabotage
 }
 
+public static class GameEndReasonHelper
+{
+    static public bool IsSpecial(this GameEndReason reason) => reason is GameEndReason.Special or GameEndReason.SpecialSituation;
+}
+
 public enum ExtraWinCheckPhase
 {
     Phase0,

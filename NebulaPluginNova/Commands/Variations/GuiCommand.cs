@@ -125,7 +125,7 @@ public class GuiArrayerCommand : ICommand
 
         public static CommandStructureConverter<GuiArrayerStructure> Converter = new CommandStructureConverter<GuiArrayerStructure>()
             .AddCollection<GUIWidget>("inner", (structure, val) => structure.inner = val)
-            .Add<int>("perRow", (structure, val) => structure.perRow = Mathf.Max(val,0))
+            .Add<int>("perRow", (structure, val) => structure.perRow = Mathn.Max(val,0))
             .Inherit(GUICommonStructure.Converter);
 
     }

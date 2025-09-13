@@ -155,7 +155,7 @@ public static class HelpScreen
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) validTabs |= HelpTab.MyInfo;
         
-        if (AmongUsClient.Instance.AmHost && (NebulaGameManager.Instance?.LobbySlideManager.IsValid ?? false)) validTabs |= HelpTab.Slides;
+        if (AmongUsClient.Instance.AmHost && (NebulaGameManager.Instance?.LobbySlideManager.IsValid ?? false) && LobbySlideManager.AllTemplates.Count > 0) validTabs |= HelpTab.Slides;
 
         //開こうとしているタブが存在しない場合は、ロール一覧を開く
         if ((tab & validTabs) == (HelpTab)0) tab = PlayerControl.AllPlayerControls.Count > 5 ? HelpTab.Overview : HelpTab.Roles;
@@ -359,7 +359,7 @@ public static class HelpScreen
         StringBuilder builder = new();
 
         //バニラオプション
-        var vanillaOptions = GameOptionsManager.Instance.currentNormalGameOptions;
+        var vanillaOptions = AmongUsUtil.GetCurrentNormalOption();
         var translator = TranslationController.Instance;
 
         void AddHeader(string header)
@@ -496,7 +496,7 @@ public static class HelpScreen
         AchievementViewer.SortRule sortRule = AchievementViewer.SortRule.Categorized;
         string scrollerTagPostfix = "_categorized";
 
-        Virial.Media.GUIWidget GenerateWidget() => AchievementViewer.GenerateWidget(3.15f, 6.2f, scrollerTagPrefix + scrollerTagPostfix, true, achPredicate, shownPredicate, onClicked: lastArgument.CanCloseEasily ? _ => TryCloseHelpScreen() : null, sortRule: sortRule);
+        Virial.Media.GUIWidget GenerateWidget() => AchievementViewer.GenerateWidget(3.15f, 6.2f, scrollerTagPrefix + scrollerTagPostfix, true, achPredicate, shownPredicate, onClicked: lastArgument.CanCloseEasily ? () => TryCloseHelpScreen() : null, onUpdated: ShowInnerWidget, sortRule: sortRule);
         void ShowInnerWidget() => artifact.Do(screen => screen.SetWidget(GenerateWidget(), out var _));
 
         List<Virial.Media.GUIWidget> categorizeButtons = [

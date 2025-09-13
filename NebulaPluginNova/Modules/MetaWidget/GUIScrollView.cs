@@ -133,7 +133,7 @@ public class GUIScrollView : AbstractGUIWidget
 
         if (ScrollerTag != null && distDic.TryGetValue(ScrollerTag, out var val))
             scroller.Inner.transform.localPosition = scroller.Inner.transform.localPosition +
-                new UnityEngine.Vector3(0f, Mathf.Clamp(val + scroller.ContentYBounds.min, scroller.ContentYBounds.min, scroller.ContentYBounds.max), 0f);
+                new UnityEngine.Vector3(0f, Mathn.Clamp(val + scroller.ContentYBounds.min, scroller.ContentYBounds.min, scroller.ContentYBounds.max), 0f);
 
         if (ScrollerTag != null)
             scroller.Inner.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += () => { distDic[ScrollerTag] = scroller.Inner.transform.localPosition.y - scroller.ContentYBounds.min; };

@@ -42,7 +42,8 @@ public class TrackingArrowAbility : FlexibleLifespan, IGameOperator
                     {
                         arrow = new Arrow(null, false, true) { IsAffectedByComms = false }.HideArrowSprite().Register(this);
                         arrow.SetSmallColor(color);
-                        AmongUsUtil.GetPlayerIcon(target.DefaultOutfit.outfit, arrow.ArrowObject.transform, new(0f, 0f, -1f), new(0.24f, 0.24f, 1f));
+                        var playerObj = AmongUsUtil.GetPlayerIcon(target.DefaultOutfit.outfit, arrow.ArrowObject.transform, new(0f, 0f, -1f), new(0.24f, 0.24f, 1f));
+                        playerObj.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetArrowLayer());
                     }
                     else
                     {

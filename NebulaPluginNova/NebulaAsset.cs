@@ -94,7 +94,7 @@ public static class NebulaAsset
     {
         yield return preprocessor.SetLoadingText("Loading Assets");
 
-        var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Nebula.Resources.Assets.nebula_asset");
+        using var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Nebula.Resources.Assets.nebula_asset");
         AssetBundle = AssetBundle.LoadFromMemory(resourceStream!.ReadBytes());
 
         MultiplyShader = Load<Shader>("Sprites-Multiply");
@@ -109,6 +109,7 @@ public static class NebulaAsset
         MeshRendererShader = Load<Shader>("Sprites-ForMeshRenderer");
         MeshRendererSTShader = Load<Shader>("Sprites-ForMeshRendererST");
         MeshRendererMaskedShader = Load<Shader>("Sprites-ForMeshRendererMasked");
+        MeshRendererUVMaskedShader = Load<Shader>("Sprites-ForMeshRendererUVMask");
         RingMenuShader = Load<Shader>("Sprites-RingMenu");
         MeshDistShader = Load<Shader>("Mesh-HortDist");
 
@@ -165,7 +166,8 @@ public static class NebulaAsset
         FriesMinigame = Load<GameObject>("SpectreFriedMinigame");
         SlingshotInMinigame = Load<GameObject>("Slingshot");
 
-        JusticeFont = new FontAssetNoS(JsonStructure.Deserialize<FontAssetNoSInfo>(StreamHelper.OpenFromResource("Nebula.Resources.JusticeFont.json")!)!, new ResourceTextureLoader("Nebula.Resources.JusticeFont.png"));
+        using var fontStream = StreamHelper.OpenFromResource("Nebula.Resources.JusticeFont.json");
+        JusticeFont = new FontAssetNoS(JsonStructure.Deserialize<FontAssetNoSInfo>(fontStream!)!, new ResourceTextureLoader("Nebula.Resources.JusticeFont.png"));
     }
 
     private static T LoadAsset<T>(this AssetBundle assetBundle, string name) where T : UnityEngine.Object
@@ -200,7 +202,7 @@ public static class NebulaAsset
             {
                 var c = obj.transform.GetChild(i);
                 bool enable = (mask & 1) == 1;
-                c.GetComponent<Renderer>().material.SetFloat("_Coeff", enable ? 1f : 0.35f);
+                c.GetComponent<Renderer>().material.SetFloat("_Coeff", enable ? 1f : 0.4f);
                 c.transform.localPosition += new Vector3(0, 0, 1);
                 mask >>= 1;
             }
@@ -242,6 +244,7 @@ public static class NebulaAsset
     static public Shader MeshRendererShader { get; private set; } = null!;
     static public Shader MeshRendererSTShader { get; private set; } = null!;
     static public Shader MeshRendererMaskedShader { get; private set; } = null!;
+    static public Shader MeshRendererUVMaskedShader { get; private set; } = null!;
     static public Shader RingMenuShader { get; private set; } = null!;
     static public Shader MeshDistShader { get; private set; } = null!;
 

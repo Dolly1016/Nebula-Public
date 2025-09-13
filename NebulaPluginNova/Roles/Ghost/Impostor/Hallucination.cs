@@ -16,6 +16,7 @@ using static Rewired.ComponentControls.Effects.RotateAroundAxis;
 using Virial.Events.Game.Meeting;
 using Nebula.Roles.Ghost.Neutral;
 using static Nebula.Roles.Ghost.Neutral.Grudge;
+using Virial.Components;
 
 namespace Nebula.Roles.Ghost.Impostor;
 
@@ -221,6 +222,11 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
                     RpcDisappearHallucination.Invoke(MyPlayer);
                     button.StartCoolDown();
                 };
+                hallucinationButton.OnUpdate = (button) =>
+                {
+                    if (button.IsInEffect && !MyPlayer.IsDead) button.InterruptEffect();
+                };
+                ((TimerImpl?)hallucinationButton.CoolDownTimer)?.SetPredicate(() => MyPlayer.IsDead);
             }
         }
 

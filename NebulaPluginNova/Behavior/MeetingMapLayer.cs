@@ -83,7 +83,7 @@ public class LineDrawer
                 var currentPos = positions[i];
                 var diffVec = currentPos - trackingPos;
                 diff += Vector2.Dot(orth, diffVec);
-                if (Mathf.Abs(diff) > 0.08f) //ある程度まっすぐでなければ修正しない。
+                if (Mathn.Abs(diff) > 0.08f) //ある程度まっすぐでなければ修正しない。
                 {
                     breakFlag = true;
                     break;
@@ -330,7 +330,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
             {
                 NebulaManager.Instance.SetHelpWidget(Button, GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
                     IsPlayerImage ? GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
-                    NebulaGameManager.Instance!.TryGetTitle(PlayerId, out var title) ? GUI.API.RawText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), Language.Translate(title.TranslationKey).Sized(80).Color(DynamicPalette.PlayerColors[PlayerId])) : null,
+                    (NebulaGameManager.Instance!.TryGetTitle(PlayerId, out var title) && title != null) ? GUI.API.RawText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), Language.Translate(title.GetLocalizedText()).Sized(80).Color(DynamicPalette.PlayerColors[PlayerId])) : null,
                     GUI.API.RawText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), player.PlayerName)
                     ) : null,
                     GUI.API.LocalizedText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), "meeting.memo.control.icon")
@@ -368,6 +368,12 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                     {
                         SetPlayer(p.PlayerId);
                         NebulaManager.Instance.HideHelpWidget();
+
+                        //チュートリアル
+                        Tutorial.ShowTutorial(
+                                    new TutorialBuilder().AsSimpleTitledOnceTextWidget("meetingTool.advance")
+                                    .ShowWhile(() => MeetingHud.Instance && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen)
+                                    );
                     })
                     {
                         PostBuilder = renderer =>

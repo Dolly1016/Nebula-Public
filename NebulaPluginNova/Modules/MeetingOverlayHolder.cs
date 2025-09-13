@@ -60,7 +60,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
 
                 //曲線(0<=x<=1): x\ +\ \left(\cos0.5x\pi\ \right)^{1.5}\cdot x^{0.3}\cdot2.5
                 if (p > 0f)
-                    renderer.transform.localScale = Vector3.one * (p + Mathf.Pow(Mathf.Cos(0.5f * p * Mathf.PI), 1.5f) * Mathf.Pow(p, 0.3f) * 2.5f);
+                    renderer.transform.localScale = Vector3.one * (p + Mathn.Pow(Mathn.Cos(0.5f * p * Mathn.PI), 1.5f) * Mathn.Pow(p, 0.3f) * 2.5f);
                 else
                     renderer.transform.localScale = Vector3.zero;
                 yield return null;

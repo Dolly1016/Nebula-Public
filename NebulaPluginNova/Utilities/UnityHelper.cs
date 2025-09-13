@@ -39,6 +39,12 @@ public static class UnityHelper
         return renderer;
     }
 
+    public static void SetAsExpandableRenderer(this SpriteRenderer renderer)
+    {
+        renderer.drawMode = SpriteDrawMode.Sliced;
+        renderer.tileMode = SpriteTileMode.Continuous;
+    }
+
     public static void SetBothOrder(this Renderer renderer, int order)
     {
         renderer.sortingOrder = order;
@@ -117,6 +123,47 @@ public static class UnityHelper
         mesh.SetUVs(0, (Vector2[])[new(0, 0), new(1, 0), new(0, 1), new(1, 1)]);
         var color = new Color32(255, 255, 255, 255);
         mesh.SetColors((Color32[])[color, color, color, color]);
+
+        return filter;
+    }
+
+    public static MeshFilter CreateCircleMesh(this MeshFilter filter, Vector2 size, int vertices, Vector3? center = null)
+    {
+        center ??= Vector3.zero;
+
+        var mesh = filter.mesh;
+
+        float x = size.x * 0.5f;
+        float y = size.y * 0.5f;
+        mesh.Clear();
+
+        var sequential = Helpers.Sequential(vertices + 1);
+        mesh.SetVertices(sequential.Select(i =>
+        {
+            if (i == 0) return center.Value;
+            float n = (i - 1) / (float)vertices * Mathn.PI2;
+            return new Vector3(Mathn.Cos(n) * x, Mathn.Sin(n) * y) + center.Value;
+        }).ToArray()!);
+        mesh.SetTriangles(Helpers.Sequential(vertices * 3).Select(i =>
+        {
+            var s = i % 3;
+            if (s == 1) return 0;
+            var n = i / 3;
+            return s == 0 ? n + 1 : (n + 1) % vertices + 1;
+        }).ToArray(), 0);
+        mesh.SetUVs(0, sequential.Select(i =>
+        {
+            if (i == 0) return new Vector2(0.5f, 0.5f);
+            float n = (i - 1) / (float)vertices * Mathn.PI2;
+            return new Vector2(Mathn.Cos(n) * 0.5f + 0.5f, Mathn.Sin(n) * 0.5f + 0.5f);
+        }).ToArray()!);
+        mesh.SetUVs(1, sequential.Select(i =>
+        {
+            if (i == 0) return new Vector2(0f, 1f);
+            return new Vector2(1f, 0f);
+        }).ToArray()!);
+        var color = new Color32(255, 255, 255, 255);
+        mesh.SetColors(sequential.Select(_ => color).ToArray());
 
         return filter;
     }

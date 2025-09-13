@@ -1,7 +1,9 @@
-﻿using TMPro;
+﻿using Nebula.Roles.Impostor;
+using TMPro;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 
 namespace Nebula.Extensions;
 
@@ -12,7 +14,7 @@ public static class KillAnimationExtension
         public bool AmOwner => (Player?.AmOwner ?? false) && Player is GamePlayer;
         public Vector2 Position => (Player?.IsActive ?? false) ? Player.Position : AlterPosition;
     }
-    static public IEnumerator CoPerformModKill(this KillAnimation killAnim, byte requestSender, int requestId, PlayerControl source, IPlayerlikePosition target, GamePlayer realTarget, KillCharacteristics killCharacteristics, bool blink, bool targetIsUsingUtility, Vector2 deadGoalPos)
+    static public IEnumerator CoPerformModKill(this KillAnimation killAnim, byte requestSender, int requestId, PlayerControl source, IPlayerlikePosition target, GamePlayer realTarget, KillCharacteristics killCharacteristics, bool blink, bool targetIsUsingUtility, Vector2 deadGoalPos, bool useViperDeadBody, PlayerControl killer, CommunicableTextTag deadState)
     {
         FollowerCamera cam = Camera.main.GetComponent<FollowerCamera>();
         bool isParticipant = source.AmOwner || target.AmOwner;
@@ -27,7 +29,12 @@ public static class KillAnimationExtension
 
         DeadBody GenerateDisableDeadBody(int variation, Vector2 position)
         {
-            DeadBody deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.DeadBodyPrefab);
+            DeadBody deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.deadBodyPrefab[useViperDeadBody ? 1 : 0]);
+            if (useViperDeadBody)
+            {
+                var modViperDeadBody = deadBody.gameObject.AddComponent<ModViperDeadBody>();
+                if (killer.AmOwner) modViperDeadBody.PlayKillerSE();
+            }
             deadBody.enabled = false;
             deadBody.ParentId = realTarget.PlayerId;
             foreach (var r in deadBody.bodyRenderers) realTarget.VanillaPlayer.SetPlayerMaterialColors(r);
@@ -67,7 +74,7 @@ public static class KillAnimationExtension
             deadBody.transform.position = vector;
 
             var wrapped = ModSingleton<DeadBodyManager>.Instance.RegisterDeadBody(deadBody, DeadBodyManager.GenerateId(requestSender, requestId, variation), realTarget);
-            GameOperatorManager.Instance?.Run(new DeadBodyInstantiateEvent(realTarget, wrapped));
+            GameOperatorManager.Instance?.Run(new DeadBodyInstantiateEvent(realTarget, wrapped, killer?.GetModInfo(), deadState));
 
             return deadBody;
         }

@@ -36,7 +36,7 @@ public abstract class LobbyImageSlide : LobbySlide
         if (mySlide != null)
         {
             //縦に大きすぎる画像はそれに合わせて調整する
-            float width = Mathf.Min(5.4f, mySlide.bounds.size.x / mySlide.bounds.size.y * 2.9f);
+            float width = Mathn.Min(5.4f, mySlide.bounds.size.x / mySlide.bounds.size.y * 2.9f);
             height += width / mySlide.bounds.size.x * mySlide.bounds.size.y;
 
             widget.Append(new MetaWidgetOld.Image(mySlide) { Alignment = IMetaWidgetOld.AlignmentOption.Center, Width = width });

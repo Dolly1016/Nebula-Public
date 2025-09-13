@@ -508,7 +508,7 @@ public class DynamicPalette
 
     public static bool IsLightColor(Color color)
     {
-        var max = Mathf.Max(color.r, color.g, color.b);
+        var max = Mathn.Max(color.r, color.g, color.b);
         var sum = color.r + color.g + color.b;
         return max > 0.8f || sum > 2.1f;
     }
@@ -728,7 +728,7 @@ public class NebulaPlayerTab : MonoBehaviour
     public PlayerTab playerTab = null!;
 
     static private float BrightnessHeight = 2.6f;
-    static private float ToBrightness(float y) => Mathf.Clamp01((y + BrightnessHeight * 0.5f) / BrightnessHeight);
+    static private float ToBrightness(float y) => Mathn.Clamp01((y + BrightnessHeight * 0.5f) / BrightnessHeight);
 
     static private SpriteLoader saveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.ColorSave.png", 100f);
 
@@ -826,7 +826,7 @@ public class NebulaPlayerTab : MonoBehaviour
             DynamicPalette.MyColor.EditColor(editingShadowColor, null, null, b, null);
 
             var targetLocPos = BrightnessTargetRenderer.transform.localPosition;
-            targetLocPos.y = Mathf.Clamp(pos.y, -BrightnessHeight * 0.5f, BrightnessHeight * 0.5f);
+            targetLocPos.y = Mathn.Clamp(pos.y, -BrightnessHeight * 0.5f, BrightnessHeight * 0.5f);
             BrightnessTargetRenderer.transform.localPosition = targetLocPos;
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.IsInGame && PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
@@ -916,15 +916,15 @@ public class NebulaPlayerTab : MonoBehaviour
     public static Vector3 ToPalettePosition(byte hue, byte distance)
     {
         float magnitude = distance / 24f * 2.1f;
-        float angle = (float)hue / 64 * (2f * Mathf.PI) + Mathf.PI * 0.5f;
-        return new Vector3(Mathf.Cos(angle) * magnitude, Mathf.Sin(angle) * magnitude, -1f);
+        float angle = (float)hue / 64 * Mathn.PI2 + Mathn.PI * 0.5f;
+        return new Vector3(Mathn.Cos(angle) * magnitude, Mathn.Sin(angle) * magnitude, -1f);
     }
 
     private void ToColorParam(Vector2 pos, out byte hue, out byte distance)
     {
         distance = (byte)(pos.magnitude / 2.1f * 24);
         if (distance > 23) distance = 23;
-        hue = (byte)(Mathf.Atan2(-pos.x, pos.y) / (2f * Mathf.PI) * 64);
+        hue = (byte)(Mathn.Atan2(-pos.x, pos.y) / (2f * Mathn.PI) * 64);
         while (hue < 0) hue += 64;
         while (hue >= 64) hue -= 64;
     }
@@ -942,14 +942,14 @@ public class NebulaPlayerTab : MonoBehaviour
         {
             var currentPos = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer()) - BrPaletteBackButton.transform.position;
             var b = ToBrightness(currentPos.y);
-            if (Mathf.Abs(lastPreviewB - b) > 0.001f)
+            if (Mathn.Abs(lastPreviewB - b) > 0.001f)
             {
                 PreviewColor(null, null, b);
                 lastPreviewB = b;
             }
 
             var targetLocPos = BrightnessTargetPreviewRenderer.transform.localPosition;
-            targetLocPos.y = Mathf.Clamp(currentPos.y, -BrightnessHeight * 0.5f, BrightnessHeight * 0.5f);
+            targetLocPos.y = Mathn.Clamp(currentPos.y, -BrightnessHeight * 0.5f, BrightnessHeight * 0.5f);
             BrightnessTargetPreviewRenderer.transform.localPosition = targetLocPos;
 
             BrightnessTargetPreviewRenderer.gameObject.SetActive(true);
@@ -967,7 +967,7 @@ public class NebulaPlayerTab : MonoBehaviour
         {
             ToColorParam(pos, out var h, out var d);
 
-            if (h == lastH && d == lastD || Mathf.Abs(Time.time - lastTime) < 0.05f) return;
+            if (h == lastH && d == lastD || Mathn.Abs(Time.time - lastTime) < 0.05f) return;
             lastTime = Time.time;
             lastH = h;
             lastD = d;

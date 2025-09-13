@@ -35,7 +35,7 @@ namespace Nebula.Behavior
             }
             , false);
 
-        public static RemoteProcess<(byte playerId, string achievement)> RpcShareAchievement = new(
+        public static RemoteProcess<(byte playerId, string[] achievement)> RpcShareAchievement = new(
             "ShareAchievement",
             (message, _) =>
             {
@@ -50,7 +50,7 @@ namespace Nebula.Behavior
         {
             byte id = PlayerControl.LocalPlayer.PlayerId;
             RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash, Application.version));
-            RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaAchievementManager.MyTitle?.Id ?? "-"));
+            RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaAchievementManager.MyTitleData));
             DynamicPalette.RpcShareMyColor();
             NebulaAchievementManager.SendLastClearedAchievements();
             if (AmongUsClient.Instance.AmHost) ModSingleton<ShowUp>.Instance?.ShareSocialSettingsAsHost();

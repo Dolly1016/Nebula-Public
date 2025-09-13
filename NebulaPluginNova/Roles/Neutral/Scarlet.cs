@@ -1,19 +1,20 @@
-﻿using System;
+﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Abilities;
+using Nebula.Roles.Modifier;
+using Nebula.VoiceChat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
-using Virial;
-using Nebula.Game.Statistics;
-using Nebula.VoiceChat;
-using Virial.Events.Game;
 using Virial.Game;
-using Nebula.Roles.Modifier;
 using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Neutral;
@@ -22,18 +23,25 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.scarlet", new(138, 26, 49), TeamRevealType.OnlyMe);
 
-    private Scarlet() : base("scarlet", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [GraceUntilDecidingFavoriteOption, NumOfKept, MaxUsesOfCommand, CanOverrideTaskWin, VentConfiguration])
+    private Scarlet() : base("scarlet", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [GraceUntilDecidingFavoriteOption, NumOfKept, MaxUsesOfCommand, CanOverrideTaskWin, CanLocateLovers, VentConfiguration,
+    new GroupConfiguration("options.role.scarlet.group.gauge",[WithFavoriteGauge, RequiredGaugeToWin, SurplusGauge, GaugeReductionSpeed], GroupConfigurationColor.ToDarkenColor(MyTeam.UnityColor))
+    ])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Scarlet.png");
     }
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, NumOfKept), arguments.Get(2, 1), arguments.Get(3, MaxUsesOfCommand), arguments.Get(4, (int)(float)GraceUntilDecidingFavoriteOption));
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, NumOfKept), arguments.Get(2, 1), arguments.Get(3, MaxUsesOfCommand), arguments.Get(4, (int)(float)GraceUntilDecidingFavoriteOption), (float)arguments.Get(5, 0) / 100f);
 
     static private FloatConfiguration GraceUntilDecidingFavoriteOption = NebulaAPI.Configurations.Configuration("options.role.scarlet.graceUntilDecidingFavorite", (30f, 600f, 10f), 120f, FloatConfigurationDecorator.Second);
     static private IntegerConfiguration NumOfKept = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfKept", (1,10), 3);
     static private IntegerConfiguration MaxUsesOfCommand = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfCommand", (1, 10), 2);
     static internal BoolConfiguration CanOverrideTaskWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.canOverrideTaskWin", false);
+    static private BoolConfiguration WithFavoriteGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.favoriteGauge", true);
+    static private FloatConfiguration RequiredGaugeToWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.requiredGaugeToWin", (10f, 150f, 5f), 40f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
+    static private FloatConfiguration SurplusGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.surplusGauge", (10f, 80f, 5f), 25f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
+    static private FloatConfiguration GaugeReductionSpeed = NebulaAPI.Configurations.Configuration("options.role.scarlet.gaugeReductionRatio", (0f, 2f, 0.125f), 0.25f, FloatConfigurationDecorator.Ratio, () => WithFavoriteGauge);
+    static private BoolConfiguration CanLocateLovers = NebulaAPI.Configurations.Configuration("options.role.scarlet.canLocateLovers", false);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.scarlet.vent", true);
 
     static public Scarlet MyRole = new Scarlet();
@@ -52,9 +60,12 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         private int LeftFavorite = 1;
         private int LeftMeeting = 3;
         private int GraceOnAssignment;
+        private float FavoriteGauge = 0f;
+        static private float FavoriteGaugeMax => RequiredGaugeToWin + SurplusGauge;
+        static private float FavoriteGaugeThreshold => RequiredGaugeToWin;
         TimerImpl? SuicideTimer = null;
 
-        public Instance(GamePlayer player, int flirtatiousId, int leftFlirts, int leftFavorite, int leftMeeting, int grace) : base(player, VentConfiguration)
+        public Instance(GamePlayer player, int flirtatiousId, int leftFlirts, int leftFavorite, int leftMeeting, int grace, float gauge) : base(player, VentConfiguration)
         {
             this.FlirtatiousId = flirtatiousId;
             this.LeftFlirts = leftFlirts;
@@ -63,7 +74,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
             this.GraceOnAssignment = grace;
         }
 
-        int[]? RuntimeAssignable.RoleArguments => [FlirtatiousId, LeftFlirts, LeftFavorite, LeftMeeting, (int)(SuicideTimer?.CurrentTime ?? GraceUntilDecidingFavoriteOption) + 1];
+        int[]? RuntimeAssignable.RoleArguments => [FlirtatiousId, LeftFlirts, LeftFavorite, LeftMeeting, (int)(SuicideTimer?.CurrentTime ?? GraceUntilDecidingFavoriteOption) + 1, (int)(FavoriteGauge * 100f)];
 
         static private Image flirtButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousSubButton.png", 115f);
         static private Image favoriteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousMainButton.png", 115f);
@@ -74,11 +85,24 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         bool IsMyFavorite(GamePlayer player) => player.GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId && f.AmFavorite);
         bool IsMyFlirt(GamePlayer player) => player.GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId && !f.AmFavorite);
         GamePlayer? GetMyFavorite() => NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault(IsMyFavorite);
+        Cache<GamePlayer> MyFavorite = null!;
+        private AbilityGauge Gauge = null!;
+
+        void ShowArrow(GamePlayer player, bool isFavorite)
+        {
+            UnityEngine.Color arrowColor = isFavorite ? MyRole.UnityColor : Color.white;
+            var arrow = new TrackingArrowAbility(player, 0f, arrowColor).Register(this);
+        }
 
         public override void OnActivated()
         {
+            MyFavorite = new(GetMyFavorite!);
+
             if (AmOwner)
             {
+                //矢印を表示
+                if (CanLocateLovers) foreach (var p in GamePlayer.AllPlayers) if (IsMyLover(p)) ShowArrow(p, IsMyFavorite(p));
+
                 var hourglass = new Modules.ScriptComponents.ModAbilityButtonImpl().Register(this);
                 hourglass.SetSprite(hourglassButtonSprite.GetSprite());
                 hourglass.Availability = (button) => true;
@@ -130,6 +154,8 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                     favoriteButton.StartCoolDown();
                     StatsKept.Progress();
                     CheckAndClearAch1(false);
+
+                    if (CanLocateLovers) ShowArrow(playerTracker.CurrentTarget?.RealPlayer!, false);
                 };
                 flirtButton.CoolDownTimer = new TimerImpl(2f).SetAsAbilityCoolDown().Start().Register(this);
                 flirtButton.SetLabel("seduce");
@@ -149,6 +175,8 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                     favoriteButton.StartCoolDown();
 
                     CheckAndClearAch1(true);
+
+                    if (CanLocateLovers) ShowArrow(playerTracker.CurrentTarget?.RealPlayer!, true);
                 };
                 favoriteButton.CoolDownTimer = new TimerImpl(2f).SetAsAbilityCoolDown().Start().Register(this);
                 favoriteButton.SetLabel("favorite");
@@ -170,8 +198,14 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                     usedInTheMeeting = false;
                 };
                 meetingButton.SetLabel("scarlet.command");
+
+                Gauge = new AbilityGauge(FavoriteGaugeMax, FavoriteGaugeThreshold, 340f, GaugeIcons.AsLoader(0), GaugeIcons.AsLoader(1), () => FavoriteGauge, () => GaugeIsInProgress).Register(this);
+                Gauge.SetActive(false);
             }
         }
+
+        static private IDividedSpriteLoader GaugeIcons = DividedSpriteLoader.FromResource("Nebula.Resources.ScarletGuageIcon.png", 160f, 2, 1).SetPivot(new(0.5f, 0f));
+        static private IDividedSpriteLoader NameplateDecoImages = DividedSpriteLoader.FromResource("Nebula.Resources.ScarletNameplate.png", 119f, 1, 2);
 
         [OnlyMyPlayer]
         void OnPreExiled(PlayerVoteDisclosedLocalEvent ev)
@@ -217,6 +251,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         {
             var favorite = GetMyFavorite();
             if (favorite == null) return;
+            if (WithFavoriteGauge && FavoriteGauge < FavoriteGaugeThreshold) return; //ゲージがたまりきっていなければ乗っ取らない。
             if (!CanOverrideTaskWin && ev.EndReason == GameEndReason.Task) return;//タスク勝利の乗っ取り
             if (!MyPlayer.IsDead && !favorite.IsDead && ev.Winners.Test(favorite)) ev.TryOverwriteEnd(NebulaGameEnd.ScarletWin, GameEndReason.Special);
         }
@@ -285,16 +320,102 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
             if (IsMyLover(GamePlayer.LocalPlayer)) name += " ♡".Color(loverColor);
         }
 
-        static private RemoteProcess<GamePlayer> RpcCommand = new("ScarletCommand", (p, _) =>
+        static private RemoteProcess<GamePlayer> RpcCommand = new("ScarletCommand", (p, calledByMe) =>
         {
             MyRole.MeetingFixedScarlet = p.PlayerId;
+            if ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || calledByMe)
+            {
+                var voteFor = MeetingHud.Instance.GetPlayer(p.PlayerId)?.VotedFor ?? byte.MaxValue;
+                if (GamePlayer.GetPlayer(voteFor) != null) UpdateVisualCommand(voteFor);
+            }
         });
+
+        static GameObject lastVisualCommand = null!;
+        static void UpdateVisualCommand(byte targetId)
+        {
+            if(lastVisualCommand != null && lastVisualCommand) GameObject.Destroy(lastVisualCommand);
+
+            var pva = MeetingHud.Instance.GetPlayer(targetId);
+            if (!pva) return;
+            lastVisualCommand = UnityHelper.SimpleAnimator(pva.transform, new(0f, 0.005f, -0.5f), 0.25f, i => NameplateDecoImages.GetSprite(i % 2)).gameObject;
+            lastVisualCommand.transform.localScale = new(1.02f, 1.06f, 1f);
+        }
+
+        [OnlyMyPlayer]
+        void OnVote(PlayerVoteCastEvent ev)
+        {
+            if(ev.VoteFor != null && MyPlayer.PlayerId == MyRole.MeetingFixedScarlet && ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || MyPlayer.AmOwner))
+            {
+                UpdateVisualCommand(ev.VoteFor.PlayerId);
+            }
+        }
 
         static private RemoteProcess<GamePlayer> RpcUseCommand = new("ConsumeScarletCommand", (p, _) =>
         {
             MyRole.MeetingFixedScarlet = p.PlayerId;
             (p.Role as Instance).DoIf(scarlet => scarlet.LeftMeeting--);
         });
+
+        float shareInterval = 0.5f;
+        float progressGrace = 0f;
+        private bool GaugeIsInProgress { get; set; } = false;
+        [Local]
+        void OnUpdate(GameUpdateEvent ev) {
+            if (!WithFavoriteGauge) return;
+
+            //本命がいるかチェックする
+            var favorite = MyFavorite.Get();
+            if (favorite == null || MyPlayer.IsDead || favorite.IsDead)
+            {
+                Gauge.SetActive(false);
+                return;
+            }
+            Gauge.SetActive(true);
+
+            GaugeIsInProgress = false;
+                 
+            //会議中はゲージを進行しない
+            if (MeetingHud.Instance || ExileController.Instance)
+            {
+                if (!(progressGrace > 0f))
+                {
+                    RpcShareGauge.Invoke((MyPlayer, FavoriteGauge));
+                    progressGrace = 5f;
+                    shareInterval = 0.5f;
+                }
+                return;
+            }
+
+            //ゲージ進行までの猶予時間
+            if (progressGrace > 0f)
+            {
+                progressGrace -= Time.deltaTime;
+                return;
+            }
+
+            shareInterval -= Time.deltaTime;
+            if(shareInterval < 0f)
+            {
+                RpcShareGauge.Invoke((MyPlayer, FavoriteGauge));
+                shareInterval = 0.5f;
+            }
+
+            //ゲージを進行する
+            if (favorite.Position.Distance(MyPlayer.Position) < 2f && !favorite.IsInvisible)
+            {
+                FavoriteGauge = Math.Clamp(FavoriteGauge + Time.deltaTime, 0f, FavoriteGaugeMax);
+                GaugeIsInProgress = true;
+            }
+            else
+            {
+                FavoriteGauge = Math.Clamp(FavoriteGauge - Time.deltaTime * GaugeReductionSpeed, 0f, FavoriteGaugeMax);
+            }
+        }
+
+        static private RemoteProcess<(GamePlayer scarlet, float gauge)> RpcShareGauge = new("ShareScarletGauge", (message, _) =>
+        {
+            if (message.scarlet.Role is Instance scarlet) scarlet.FavoriteGauge = message.gauge;
+        }, false);
     }
 }
 
@@ -375,7 +496,7 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
         void ShowMyRoleForScarlet(PlayerCheckRoleInfoVisibilityLocalEvent ev) => ev.CanSeeRole |= !AmFavorite && ((MyScarlet as RuntimeAssignable)?.AmOwner ?? false);
 
         [OnlyMyPlayer]
-        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= AmFavorite && (MyScarlet as RuntimeAssignable)!.MyPlayer.IsDead;
+        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= AmFavorite && (MyScarlet as RuntimeAssignable)!.MyPlayer.IsDead && ev.GameEnd != NebulaGameEnds.JesterGameEnd.Get();
 
         [OnlyMyPlayer]
         void CheckExtraWins(PlayerCheckExtraWinEvent ev)

@@ -175,7 +175,7 @@ public class LobbySlideManager
             }
 
             var widget = slide.Show(out float height);
-            var screen = MetaScreen.GenerateWindow(new(6.2f, Mathf.Min(height, 4.3f)), HudManager.Instance.transform, new Vector3(0, 0, -100f), true, false);
+            var screen = MetaScreen.GenerateWindow(new(6.2f, Mathn.Min(height, 4.3f)), HudManager.Instance.transform, new Vector3(0, 0, -100f), true, false);
             screen.SetWidget(widget);
 
             if (calledByMe)

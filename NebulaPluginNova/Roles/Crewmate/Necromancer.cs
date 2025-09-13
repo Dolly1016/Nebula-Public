@@ -5,7 +5,6 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
-using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -161,9 +160,9 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
         void LocalUpdate(GameUpdateEvent ev)
         {
             bool flag = MyPlayer.HoldingAnyDeadBody;
-
+            
             message.gameObject.SetActive(flag);
-            if (flag) message.color = MyRole.UnityColor.AlphaMultiplied(MathF.Sin(Time.time * 2.4f) * 0.2f + 0.8f);
+            if (flag) message.color = MyRole.UnityColor.AlphaMultiplied(Mathn.Sin(Time.time * 2.4f) * 0.2f + 0.8f);
 
             if (fullScreen)
             {

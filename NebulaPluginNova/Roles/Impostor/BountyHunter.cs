@@ -28,7 +28,7 @@ public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Abilit
 
     static private readonly GameStatsEntry StatsBountyKill = NebulaAPI.CreateStatsEntry("stats.bountyHunter.bountyKill", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsOthersKill = NebulaAPI.CreateStatsEntry("stats.bountyHunter.othersKill", GameStatsCategory.Roles, MyRole);
-    float MaxKillCoolDown => Mathf.Max(BountyKillCoolDownOption.CoolDown, OthersKillCoolDownOption.CoolDown, AmongUsUtil.VanillaKillCoolDown);
+    float MaxKillCoolDown => Mathn.Max(BountyKillCoolDownOption.CoolDown, OthersKillCoolDownOption.CoolDown, AmongUsUtil.VanillaKillCoolDown);
 
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
@@ -152,7 +152,7 @@ public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Abilit
             {
                 ChangeBounty();
             }
-            bountyIcon.SetName(Mathf.CeilToInt(bountyTimer.CurrentTime).ToString());
+            bountyIcon.SetName(Mathn.CeilToInt(bountyTimer.CurrentTime).ToString());
 
             if (ShowBountyArrowOption && !arrowTimer.IsProgressing)
             {

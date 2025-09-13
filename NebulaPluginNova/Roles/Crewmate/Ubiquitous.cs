@@ -59,7 +59,7 @@ public class UbiquitousDrone : MonoBehaviour
             while (t < 2f)
             {
                 t += Time.deltaTime;
-                float p = Mathf.Pow(t / 2f, 0.7f);
+                float p = Mathn.Pow(t / 2f, 0.7f);
                 transform.localPosition = new(0f, p * DroneHeight);
                 shadeRenderer.color = new(1f, 1f, 1f, 1f - p * 0.5f);
                 yield return null;
@@ -74,7 +74,7 @@ public class UbiquitousDrone : MonoBehaviour
     
     public Vector3 ColliderPosition => myRigidBody.transform.position;
 
-    public int CameraRoughness => 1 << Mathf.Min(5, (int)(PlayerControl.LocalPlayer.transform.position.Distance(transform.position) / 5.2f));
+    public int CameraRoughness => 1 << Mathn.Min(5, (int)(PlayerControl.LocalPlayer.transform.position.Distance(transform.position) / 5.2f));
 
     void UpdateSprite()
     {
@@ -120,7 +120,7 @@ public class UbiquitousDrone : MonoBehaviour
             updateTimer = 0.15f;
         }
 
-        droneRenderer.transform.localPosition = new Vector3(0f, Mathf.Sin(Time.time * 1.4f) * 0.08f, -3f);
+        droneRenderer.transform.localPosition = new Vector3(0f, Mathn.Sin(Time.time * 1.4f) * 0.08f, -3f);
     }
 
     public void CallBack()
@@ -131,7 +131,7 @@ public class UbiquitousDrone : MonoBehaviour
             while (t < 0.8f)
             {
                 t += Time.deltaTime;
-                float p = Mathf.Pow(t / 0.8f, 4.5f);
+                float p = Mathn.Pow(t / 0.8f, 4.5f);
                 transform.localPosition = new(0f, DroneHeight + p * 1.25f);
                 droneRenderer.color = new(1f, 1f, 1f, 1f - p);
                 shadeRenderer.color = new(1f, 1f, 1f, 0.5f - p * 0.5f);
@@ -194,7 +194,7 @@ public class UbiquitousDetachedDrone : MonoBehaviour, IVoiceComponent
             updateTimer = 0.15f;
         }
 
-        droneRenderer.transform.localPosition = new Vector3(0f,  Mathf.Sin(Time.time * 1.4f) * 0.08f + DroneHeight, -3f);
+        droneRenderer.transform.localPosition = new Vector3(0f,  Mathn.Sin(Time.time * 1.4f) * 0.08f + DroneHeight, -3f);
     }
 
     bool IVoiceComponent.CanPlaySoundFrom(IVoiceComponent mic)
@@ -351,11 +351,12 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
                         cameraObj.gameObject.SetActive(myDrone && AmongUsUtil.CurrentCamTarget != myDrone && !MeetingHud.Instance);
                         if (cameraObj.gameObject.active)
                         {
-                            int level = Mathf.Max(2, myDrone!.CameraRoughness);
+                            int level = Mathn.Max(2, myDrone!.CameraRoughness);
                             if (currentSize != level)
                             {
                                 currentSize = level;
                                 mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134 / currentSize * 2, 78 / currentSize * 2);
+                                mesh.renderer.sharedMaterial.mainTexture.filterMode = FilterMode.Point;
                             }
                         }
                         return !MyPlayer.IsDead;

@@ -27,9 +27,11 @@ class VitalsMinigameBeginPatch
         int displayType = More15Helpers.GetDisplayType(__instance.vitals.Count);
         foreach (var panel in __instance.vitals)
         {
-            panel.PlayerIcon.cosmetics.SetSkin(panel.PlayerInfo.DefaultOutfit.SkinId, panel.PlayerInfo.DefaultOutfit.ColorId);
-            panel.PlayerIcon.cosmetics.SetHatColor(Palette.White);
-            panel.PlayerIcon.cosmetics.SetVisorAlpha(Palette.White.a);
+            var cosmetics = panel.PlayerIcon.cosmetics;
+            var outfit = panel.PlayerInfo.DefaultOutfit;
+            cosmetics.SetSkin(outfit.SkinId, outfit.ColorId);
+            cosmetics.SetHatColor(Palette.White);
+            cosmetics.SetVisorAlpha(Palette.White.a);
 
             panel.transform.localPosition = ToVoteAreaPos(__instance, n, displayType);
             panel.transform.localScale *= PanelAreaScale[displayType];

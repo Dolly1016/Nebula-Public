@@ -32,6 +32,12 @@ internal static class LibraryLoader
 
         return archive.GetEntry("Libs/" + libraryName)?.Open().ReadBytes();
     }
+
+    static public void CloseZip()
+    {
+        archive?.Dispose();
+        archive = null;
+    }
 }
 
 [NebulaPreprocess(PreprocessPhase.CompileAddons)]
@@ -49,6 +55,7 @@ internal static class AddonScriptManagerLoader
         NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.dll")!));
         NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.CSharp.dll")!));
         var loader = NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("AddonScriptLoader.dll")!));
+        LibraryLoader.CloseZip();
         var type = loader.GetType("AddonScriptLoader.ScriptCompiler");
         CompileMethod = type?.GetMethod("CompileScripts", BindingFlags.Static | BindingFlags.Public)!;
         SearchAssembliesMethod = type?.GetMethod("SearchReferences", BindingFlags.Static | BindingFlags.Public)!;
@@ -79,9 +86,10 @@ internal static class AddonScriptManager
     }
     static public IEnumerator CoLoad(Assembly[] assemblies)
     {
-
+        using var apiStream = StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!;
+        
         //参照可能なアセンブリを抽出する
-        ReferenceAssemblies = (object[])AddonScriptManagerLoader.SearchAssembliesMethod.Invoke(null, [assemblies, StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes()])!;
+        ReferenceAssemblies = (object[])AddonScriptManagerLoader.SearchAssembliesMethod.Invoke(null, [assemblies, apiStream.ReadBytes()])!;
 
         foreach (var addon in NebulaAddon.AllAddons)
         {

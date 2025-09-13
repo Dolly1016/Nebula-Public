@@ -18,14 +18,14 @@ internal class DanceEmote : AbstractEmote, IEmote
         PlayerModInfo.RpcAttrModulator.LocalInvoke((player.PlayerId, sizeModulator, true));
 
         yield return ManagedEffects.Lerp(0.15f, p => sizeModulator.Size = new(1f, 1f + p * 0.1f));
-        float halfPi = Mathf.PI * 0.5f;
+        float halfPi = Mathn.PI * 0.5f;
         float p = 0f;
         for(int i = 0; i < 3; i++)
         {
             p = 0f;
             while (p < halfPi)
             {
-                float sin = Mathf.Sin(p);
+                float sin = Mathn.Sin(p);
                 sizeModulator.Size = new(1f + sin * 0.35f, 1.1f - sin * 0.3f);
                 yield return null;
                 p += Time.deltaTime * 5.5f;

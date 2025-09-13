@@ -29,8 +29,8 @@ public class ShowCommand : ICommand
                         .Chain(_ => arguments[2].AsValue<float>(env)).Action(val => height = val);
                     if(arguments.Count == 6)
                         task = task
-                        .Chain(_ => arguments[3].AsValue<float>(env)).Action(val => pivotX = Mathf.Clamp01(val))
-                        .Chain(_ => arguments[4].AsValue<float>(env)).Action(val => pivotY = Mathf.Clamp01(val));
+                        .Chain(_ => arguments[3].AsValue<float>(env)).Action(val => pivotX = Mathn.Clamp01(val))
+                        .Chain(_ => arguments[4].AsValue<float>(env)).Action(val => pivotY = Mathn.Clamp01(val));
 
                     return task.Chain(_ => arguments[arguments.Count - 1].AsValue<GUIWidget>(env))
                     .Action(widget =>
@@ -50,9 +50,9 @@ public class ShowCommand : ICommand
                     if(arguments.Count >= 6){
                         int r = 255,g = 255,b = 255;
                         task = task
-                        .Chain(_ => arguments[2].AsValue<int>(env)).Action(val => r = Mathf.Clamp(val,0,255))
-                        .Chain(_ => arguments[3].AsValue<int>(env)).Action(val => g = Mathf.Clamp(val,0,255))
-                        .Chain(_ => arguments[4].AsValue<int>(env)).Action(val => b = Mathf.Clamp(val,0,255))
+                        .Chain(_ => arguments[2].AsValue<int>(env)).Action(val => r = Mathn.Clamp(val,0,255))
+                        .Chain(_ => arguments[3].AsValue<int>(env)).Action(val => g = Mathn.Clamp(val,0,255))
+                        .Chain(_ => arguments[4].AsValue<int>(env)).Action(val => b = Mathn.Clamp(val,0,255))
                         .Action(_ => color = new Color(r/255f,g/255f,b/255f,1f));
                     }
                     string subString = "";

@@ -289,7 +289,7 @@ public class WideCamera
                             pos.z = -10f;
                             var transform = vent.Buttons[i].transform;
                             transform.position = pos;
-                            transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x) / Mathf.PI * 180f);
+                            transform.localEulerAngles = new(0f, 0f, Mathn.Atan2(diff.y, diff.x) / Mathn.PI * 180f);
                         }
                     }
                 }
@@ -340,7 +340,7 @@ public class WideCamera
             float currentOrth = orthographicCache;
             float targetOrth = targetRate * targetRateByEffect * 3f;
             float diff = currentOrth - targetOrth;
-            bool reached = Mathf.Abs(diff) < 0.001f;
+            bool reached = Mathn.Abs(diff) < 0.001f;
 
             if (reached)
                 currentOrth = targetOrth;
@@ -349,8 +349,8 @@ public class WideCamera
 
             orthographicCache = currentOrth;
             float attentionViewRate = 3f * (attentionCache?.view ?? 1f);
-            float actualOrth = Mathf.Lerp(currentOrth, attentionViewRate, attentionRate);
-            float actualTargetOrth = Mathf.Lerp(targetOrth, attentionViewRate, attentionRate);
+            float actualOrth = Mathn.Lerp(currentOrth, attentionViewRate, attentionRate);
+            float actualTargetOrth = Mathn.Lerp(targetOrth, attentionViewRate, attentionRate);
             myCamera.orthographicSize = actualOrth;
             shadowCamera.orthographicSize = actualOrth;
             SubShadowCam.orthographicSize = actualOrth;
@@ -358,7 +358,7 @@ public class WideCamera
             myCamera.transform.localScale = new Vector3(actualOrth / 3f, actualOrth / 3f, 1f);
 
             //コマンドによるモザイクの設定値に変化が生じたら再計算する
-            int currentCommandRoughness =  Mathf.Max(1, (int?)GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.Roughening, true) ?? 1);
+            int currentCommandRoughness = Mathn.Max(1, (int?)GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.Roughening, true) ?? 1);
             if(lastCommandRoughness != currentCommandRoughness)
             {
                 lastCommandRoughness = currentCommandRoughness;

@@ -90,12 +90,12 @@ static file class GuesserSystem
                         GuesserModifier.StatsAllGuessed.Progress();
                         if (p?.Role.ExternalRecognitionRole == r)
                         {
-                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill);
+                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill, KillCondition.BothAlive);
                         }
                         else
                         {
                             GuesserModifier.StatsMisguessed.Progress();
-                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill);
+                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill, KillCondition.BothAlive);
                             RpcShareExtraInfo.Invoke((NebulaAPI.CurrentGame!.LocalPlayer, p!, r));
                         }
                     }

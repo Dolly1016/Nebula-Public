@@ -74,7 +74,7 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
         Vector2 diff = pos2 - pos1;
         var edgeRenderer = UnityHelper.CreateObject<SpriteRenderer>("Edge", GetMapTransform(), ((Vector2)((pos1 + pos2) * 0.5f)).AsVector3(-4f));
         edgeRenderer.transform.localScale = new(diff.magnitude, 0.05f);
-        edgeRenderer.transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x).RadToDeg());
+        edgeRenderer.transform.localEulerAngles = new(0f, 0f, Mathn.Atan2(diff.y, diff.x).RadToDeg());
         edgeRenderer.sprite = squareImage.GetSprite();
 
         var edge = new Edge(edgeRenderer.gameObject, node1, node2);
@@ -259,7 +259,7 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
                             UnityEngine.Vector2 diff = pos2 - pos1;
                             var edgeRenderer = UnityHelper.CreateObject<SpriteRenderer>("Edge", pathParent, ((Vector2)((pos1 + pos2) * 0.5f)).AsVector3(-6f));
                             edgeRenderer.transform.localScale = new(diff.magnitude, 0.05f);
-                            edgeRenderer.transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x).RadToDeg());
+                            edgeRenderer.transform.localEulerAngles = new(0f, 0f, Mathn.Atan2(diff.y, diff.x).RadToDeg());
                             edgeRenderer.sprite = squareImage.GetSprite();
                             edgeRenderer.color = Color.red;
                         }

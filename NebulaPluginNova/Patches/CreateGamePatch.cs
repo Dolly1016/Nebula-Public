@@ -35,11 +35,12 @@ public static class CreateGameOptionsUpdateRegionPatch
 {
     static void Postfix(CreateGameOptions __instance)
     {
-        __instance.capacityOption.ValidRange.max = AmongUsUtil.IsCustomServer() ? 24 : 15;
+        var capacityOption = __instance.capacityOption;
+        capacityOption.ValidRange.max = AmongUsUtil.IsCustomServer() ? 24 : 15;
 
-        __instance.capacityOption.Value = __instance.capacityOption.ValidRange.Clamp(__instance.capacityOption.Value);
-        __instance.capacityOption.UpdateValue();
-        __instance.capacityOption.AdjustButtonsActiveState();
+        capacityOption.Value = capacityOption.ValidRange.Clamp(capacityOption.Value);
+        capacityOption.UpdateValue();
+        capacityOption.AdjustButtonsActiveState();
     }
 }
 
@@ -50,14 +51,15 @@ public static class CreateGameOptionsConfirmPatch
     static bool Prefix(CreateGameOptions __instance)
     {
         if (!DestroyableSingleton<MatchMaker>.Instance.Connecting<CreateGameOptions>(__instance)) return false;
-        
-        GameOptionsManager.Instance.GameHostOptions.TryGetInt(Int32OptionNames.MaxPlayers, out var num);
+
+        var hostOptions = GameOptionsManager.Instance.GameHostOptions;
+        hostOptions.TryGetInt(Int32OptionNames.MaxPlayers, out var num);
         int[] array = ModdedOptionValues.MaxImpostors;
-        GameOptionsManager.Instance.GameHostOptions.TryGetInt(Int32OptionNames.NumImpostors, out var num2);
+        hostOptions.TryGetInt(Int32OptionNames.NumImpostors, out var num2);
         if (num2 > array[num])
-            GameOptionsManager.Instance.GameHostOptions.SetInt(Int32OptionNames.NumImpostors, array[num]);
+            hostOptions.SetInt(Int32OptionNames.NumImpostors, array[num]);
         if (num2 == 0)
-            GameOptionsManager.Instance.GameHostOptions.SetInt(Int32OptionNames.NumImpostors, 1);
+            hostOptions.SetInt(Int32OptionNames.NumImpostors, 1);
         __instance.CoStartGame();
 
         return false;

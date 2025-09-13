@@ -2,6 +2,7 @@
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
+using Nebula.Roles.Neutral;
 using Virial;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
@@ -87,7 +88,7 @@ public static class NebulaExileWrapUp
                 num++;
                 additionalText.text = str.Substring(0, num);
                 SoundManager.Instance.PlaySoundImmediate(__instance.TextSound, false, 0.8f, 0.92f);
-                yield return new WaitForSeconds(Mathf.Min(2.8f / str.Length, 0.28f));
+                yield return new WaitForSeconds(Mathn.Min(2.8f / str.Length, 0.28f));
             }
             yield return new WaitForSeconds(1.9f);
 
@@ -202,7 +203,7 @@ class ExileControllerBeginPatch
             {
                 __instance.completeString = Language.Translate("game.meeting.multiple");
             }
-            else if (GeneralConfigurations.ShowRoleOfExiled && GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor)
+            else if (GeneralConfigurations.ShowRoleOfExiled && AmongUsUtil.GetCurrentNormalOption().ConfirmImpostor)
             {
                 var role = NebulaGameManager.Instance.GetPlayer(init.networkedPlayer.PlayerId)?.Role;
                 if (role != null)
@@ -214,25 +215,62 @@ class ExileControllerBeginPatch
         }
 
         var texts = GameOperatorManager.Instance?.Run(new FixExileTextEvent(MeetingHudExtension.ExiledAllModCache!)).GetTexts();
-        
-        __instance.ImpostorText.rectTransform.pivot = new(0.5f, 1f);
-        __instance.ImpostorText.rectTransform.sizeDelta = new(11.555f, 2f);
-        __instance.ImpostorText.alignment = TMPro.TextAlignmentOptions.Top;
+
+        var impostorText = __instance.ImpostorText;
+        impostorText.rectTransform.pivot = new(0.5f, 1f);
+        impostorText.rectTransform.sizeDelta = new(11.555f, 2f);
+        impostorText.alignment = TMPro.TextAlignmentOptions.Top;
+
+        //追放を確認の詳細設定
+        if (init.confirmImpostor)
+        {
+            var confirmText = impostorText.text;
+            int num = 0;
+            int exiledBitFlag = 0;
+            foreach (var exiled in MeetingHudExtension.ExiledAll) exiledBitFlag |= 1 << exiled.PlayerId;
+            bool IsDead(GamePlayer p) => p.IsDead || (exiledBitFlag & (1 << p.PlayerId)) != 0;
+            switch (GeneralConfigurations.ConfirmEjectTargetOption.GetValue())
+            {
+                case 0: //インポスター陣営
+                    num = GamePlayer.AllPlayers.Count(p => !IsDead(p) && p.IsImpostor);
+                    confirmText = Language.Translate(num > 1 ? "exile.confirmEject.impostor.p" : "exile.confirmEject.impostor.s").Replace("%NUM%", num.ToString());
+                    break;
+                case 1: //キラー陣営
+                    num = GamePlayer.AllPlayers.Count(p => !IsDead(p) && p.Role.Role.IsKiller);
+                    confirmText = Language.Translate(num > 1 ? "exile.confirmEject.killer.p" : "exile.confirmEject.killer.s").Replace("%NUM%", num.ToString());
+                    break;
+                case 2: //全人外
+                    num = GamePlayer.AllPlayers.Count(p => !IsDead(p) && !p.IsCrewmate);
+                    confirmText = Language.Translate(num > 1 ? "exile.confirmEject.nonCrewmate.p" : "exile.confirmEject.nonCrewmate.s").Replace("%NUM%", num.ToString());
+                    break;
+            }
+
+            var localPlayer = GamePlayer.LocalPlayer;
+            bool canSeeText = GeneralConfigurations.ConfirmEjectConditionOption.GetValue() switch {
+                0 => true,
+                1 => localPlayer.IsImpostor,
+                2 => localPlayer.Role.Role.IsKiller,
+                3 => !localPlayer.IsCrewmate
+            };
+            if (!canSeeText) confirmText = "";
+            impostorText.text = confirmText;
+        }
+
         if (texts != null && texts.Count > 0)
         {
-            if (!init.confirmImpostor) __instance.ImpostorText.text = "";
+            if (!init.confirmImpostor) impostorText.text = "";
             init.confirmImpostor = true;
 
-            __instance.ImpostorText.rectTransform.anchoredPosition3D += new Vector3(0f, 0.1f, 0f);
+            impostorText.rectTransform.anchoredPosition3D += new Vector3(0f, 0.1f, 0f);
 
-            var text = __instance.ImpostorText.text;
+            var text = impostorText.text;
             text = "<line-height=90%>" + text;
             texts.Do(str => text += "<br>" + str);
-            __instance.ImpostorText.text = text;
+            impostorText.text = text;
         }
         else
         {
-            __instance.ImpostorText.rectTransform.anchoredPosition3D += new Vector3(0f, 0.19f, 0f);
+            impostorText.rectTransform.anchoredPosition3D += new Vector3(0f, 0.19f, 0f);
         }
         
     }

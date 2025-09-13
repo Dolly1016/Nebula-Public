@@ -188,7 +188,7 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
 
         void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
-            vitalTimer = Mathf.Min(MaxPortableVitalsChargeOption, vitalTimer + ChargesPerTasksOption);
+            vitalTimer = Mathn.Min(MaxPortableVitalsChargeOption, vitalTimer + ChargesPerTasksOption);
         }
     }
 }

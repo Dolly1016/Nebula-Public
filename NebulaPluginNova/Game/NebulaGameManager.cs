@@ -197,7 +197,7 @@ public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator
         {
             alpha -= Time.deltaTime * 0.5f;
         }
-        alpha = Mathf.Clamp01(alpha);
+        alpha = Mathn.Clamp01(alpha);
 
         mainText.color = textColor.AlphaMultiplied(alpha);
         shadowText.color = Color.black.AlphaMultiplied(0.6f * alpha);
@@ -249,8 +249,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     internal KillRequestHandler KillRequestHandler { get; private init; } = new();
 
     public bool IgnoreWalls => LocalPlayer?.EyesightIgnoreWalls ?? false;
-    public Dictionary<byte, INebulaAchievement?> TitleMap = new();
-    public bool TryGetTitle(byte playerId, [MaybeNullWhen(false)] out INebulaAchievement title) => TitleMap.TryGetValue(playerId, out title);
+    public Dictionary<byte, PlayerTitle?> TitleMap = new();
+    public bool TryGetTitle(byte playerId, [MaybeNullWhen(false)] out PlayerTitle title) => TitleMap.TryGetValue(playerId, out title);
 
     static private OutfitDefinition.OutfitId UnknownOutfitId = new(-1, 0);
     public OutfitDefinition UnknownOutfit => OutfitMap[UnknownOutfitId];
@@ -477,7 +477,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             float ventPercentage = 0f;
             if (ventTimer != null && ventTimer.IsProgressing)
             {
-                ventText = Mathf.CeilToInt(ventTimer.CurrentTime).ToString();
+                ventText = Mathn.CeilToInt(ventTimer.CurrentTime).ToString();
                 ventPercentage = ventTimer.Percentage;
             }
             if (ventTimer != null && !ventTimer.IsProgressing && PlayerControl.LocalPlayer.inVent)
@@ -598,11 +598,14 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
                 if(allModPlayers.Values.All(p => !p.IsDead)) new StaticAchievementToken("challenge.crewmate");
                 if (aliveCrewmateCount == 0 && LocalPlayer?.Role.Role.Category == RoleCategory.CrewmateRole) new StaticAchievementToken("noCrewmate");
             }
-            if(EndState!.EndCondition == NebulaGameEnd.CrewmateWin && aliveCrewmateCount == 1 && aliveCrewmate!.First().AmOwner) new StaticAchievementToken("lastCrewmate");
+            if(EndState!.EndCondition == NebulaGameEnd.CrewmateWin && aliveCrewmateCount == 1 && aliveCrewmate!.First().AmOwner) new StaticAchievementToken("challenge.lastCrewmate");
             
             if(Helpers.CurrentMonth == 2 && !LocalPlayer!.IsDead && EndState!.EndCondition == NebulaGameEnd.CrewmateWin && EndState!.EndReason == GameEndReason.Situation && GamePlayer.LocalPlayer.Tasks.IsCompletedCurrentTasks) new StaticAchievementToken("setsubun");
 
+            static bool MetChallengeCond((int impostors, bool allImpostorsAlive) val) => val.impostors >= 2 && val.allImpostorsAlive;
+            static (int impostors, bool allImpostorsAlive) AggregateFunc((int impostors, bool allImpostorsAlive) val, GamePlayer player) => (val.impostors + (player.IsImpostor ? 1 : 0), val.allImpostorsAlive && (!player.IsImpostor || !player.IsDead));
             if (EndState!.EndReason == GameEndReason.Situation && EndState!.EndCondition == NebulaGameEnd.ImpostorWin &&
+                /* 自陣営2人以上で仲間が全員生存 */ MetChallengeCond(allModPlayers.Values.Aggregate((0, true), AggregateFunc)) &&
                 /*キル数2以上*/ allModPlayers.Values.Count(p => p.MyKiller?.AmOwner ?? false) >= 2 &&
                 /*最後の死亡者をキルしている*/ (allModPlayers.Values.MaxBy(p => p.Unbox().DeathTimeStamp ?? 0f)?.MyKiller?.AmOwner ?? false))
                 new StaticAchievementToken("challenge.impostor");

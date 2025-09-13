@@ -17,7 +17,7 @@ public static class AdjustedNumImpostorsModded
         {
             num = intArray[players];
         }
-        return Mathf.Clamp(numImpostors, 0, num);//0を許容する。
+        return Mathn.Clamp(numImpostors, 0, num);//0を許容する。
     }
 }
 
@@ -105,6 +105,7 @@ static class CreateOnlineGamePatch
     }
 }
 
+/*
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoStartGameHost))]
 static class CoStartGameHostPatch
 {
@@ -113,13 +114,14 @@ static class CoStartGameHostPatch
         var original = __result;
         System.Collections.IEnumerator CoStartGameHostMod()
         {
-            byte originalMapId = GameOptionsManager.Instance.normalGameHostOptions.MapId;
+            byte originalMapId = AmongUsUtil.GetCurrentNormalOption().MapId;
             //GameOptionsManager.Instance.normalGameHostOptions.MapId = 1;
             //ここで、マップをスポーンさせる前にランダムマップ生成用のパラメータを共有する
             yield return original;
-            GameOptionsManager.Instance.normalGameHostOptions.MapId = originalMapId;
+            AmongUsUtil.GetCurrentNormalOption().MapId = originalMapId;
         }
 
         __result = CoStartGameHostMod().WrapToIl2Cpp();
     }
 }
+*/

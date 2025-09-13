@@ -407,7 +407,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
                             if (!(inhalation < 1f)) acTokenChallenge.DoIf(a => a.Value.maxDelayKill = true);
                             acTokenChallenge.DoIf(a => a.Value.killed++);
 
-                            MyPlayer.MurderPlayer(ev.Target, PlayerStates.Gassed, EventDetails.Gassed, KillParameter.RemoteKill);
+                            MyPlayer.MurderPlayer(ev.Target, PlayerStates.Gassed, EventDetails.Gassed, KillParameter.RemoteKill, KillCondition.BothAlive);
                         }
                     }
 

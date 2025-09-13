@@ -112,4 +112,21 @@ public class SkeldData : MapData
 
     internal static IDividedSpriteLoader SealedDoorSpriteSkeldH = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedDoorSkeldH.png", 100f, 8, 1);
     internal static IDividedSpriteLoader SealedDoorSpriteSkeldV = DividedSpriteLoader.FromResource("Nebula.Resources.Sealed.SealedDoorSkeldV.png", 100f, 8, 2);
+
+    public override (SystemTypes room, Vector2 pos)[] AdminRooms { get; } = [
+        (SystemTypes.MedBay, new(-8.6f, -2.4f)),
+        (SystemTypes.UpperEngine, new(-17.6f,-0.5f)),
+        (SystemTypes.Security, new(-13.2f, -4.1f)),
+        (SystemTypes.Reactor, new(-20.9f, -5.5f)),
+        (SystemTypes.LowerEngine, new(-17.1f, -11.2f)),
+        (SystemTypes.Electrical, new(-8.0f,-9.0f)),
+        (SystemTypes.Storage, new(-3.0f,-14.1f)),
+        (SystemTypes.Admin, new(4.5f, -7.7f)),
+        (SystemTypes.Cafeteria, new(-0.5f, 1.0f)),
+        (SystemTypes.Weapons, new(9.5f, 1.4f)),
+        (SystemTypes.LifeSupp, new(6.5f, -3.5f)),
+        (SystemTypes.Nav, new(16.7f, -4.7f)),
+        (SystemTypes.Shields, new(9.1f, -12.3f)),
+        (SystemTypes.Comms, new(4.6f, -15.6f)),
+        ];
 }

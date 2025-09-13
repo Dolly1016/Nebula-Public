@@ -27,7 +27,7 @@ public static class LoadPatch
             p -= Time.deltaTime * 2.8f;
             float alpha = 1 - p;
             logo.color = Color.white.AlphaMultiplied(alpha);
-            logoGlow.color = Color.white.AlphaMultiplied(Mathf.Min(1f, alpha * (p * 2)));
+            logoGlow.color = Color.white.AlphaMultiplied(Mathn.Min(1f, alpha * (p * 2)));
             logo.transform.localScale = Vector3.one * (p * p * 0.012f + 1f);
             logoGlow.transform.localScale = Vector3.one * (p * p * 0.012f + 1f);
             yield return null;

@@ -13,13 +13,15 @@ namespace Nebula.Roles.Abilities
     {
         public GamePlayer Owner { get; private set; }
         protected SpriteRenderer Renderer { get; private set; }
+        private Transform RendererTransform { get; }
         virtual protected float Size => 1.15f;
         virtual protected float Distance => 1.25f;
         public EquipableAbility(GamePlayer owner, bool canSeeInShadow, string name) : base()
         {
             Owner = owner;
             Renderer = UnityHelper.CreateObject<SpriteRenderer>(name, owner.VanillaPlayer.transform, Vector3.zero, LayerExpansion.GetObjectsLayer());
-            Renderer.transform.localScale = new Vector3(Size, Size, 1f);
+            RendererTransform = Renderer.transform;
+            RendererTransform.localScale = new Vector3(Size, Size, 1f);
             Renderer.gameObject.layer = canSeeInShadow ? LayerExpansion.GetPlayerWithShadowLayer() : LayerExpansion.GetPlayersLayer();
         }
 
@@ -34,13 +36,12 @@ namespace Nebula.Roles.Abilities
 
             //少し横軸側に寄せる
             float rad = FixAngle(o.MouseAngle);
-            
 
-            Renderer.transform.localEulerAngles = new Vector3(0, 0, rad * 180f / Mathf.PI);
-            var pos = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), -1f) * Distance;
-            var diff = (pos - Renderer.transform.localPosition) * Time.deltaTime * 7.5f;
-            Renderer.transform.localPosition += diff;
-            Renderer.flipY = Mathf.Cos(rad) < 0f;
+            RendererTransform.localEulerAngles = new Vector3(0, 0, rad * 180f / Mathn.PI);
+            var pos = new Vector3(Mathn.Cos(rad), Mathn.Sin(rad), -1f) * Distance;
+            var diff = (pos - RendererTransform.localPosition) * Time.deltaTime * 7.5f;
+            RendererTransform.localPosition += diff;
+            Renderer.flipY = Mathn.Cos(rad) < 0f;
         }
 
         void IGameOperator.OnReleased()

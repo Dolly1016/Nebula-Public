@@ -115,14 +115,13 @@ public static class ToolsInstaller
     private static void InstallTool(string name, string? outputName)
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
-        Stream? stream = assembly.GetManifestResourceStream("Nebula.Resources.Tools." + name);
+        using Stream? stream = assembly.GetManifestResourceStream("Nebula.Resources.Tools." + name);
         if (stream == null) return;
 
-        var file = File.Create(outputName ?? name);
+        using var file = File.Create(outputName ?? name);
         byte[] data = new byte[stream.Length];
         stream.Read(data);
         file.Write(data);
-        stream.Close();
         file.Close();
     }
 }

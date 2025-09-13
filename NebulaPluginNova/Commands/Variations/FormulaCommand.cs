@@ -119,7 +119,7 @@ public class FormulaCommand : ICommand
         AddRule(FTokenType.AExpr, [FTokenType.AExpr, FTokenType.SPlus, FTokenType.ATerm], BinaryFunc<float, float>((v1, v2) => new FloatCommandToken(v1 + v2)));
         AddRule(FTokenType.AExpr, [FTokenType.AExpr, FTokenType.SMinus, FTokenType.ATerm], BinaryFunc<float, float>((v1, v2) => new FloatCommandToken(v1 - v2)));
         AddRule(FTokenType.ATerm, [FTokenType.ATerm, FTokenType.SCross, FTokenType.AFactor], BinaryFunc<float, float>((v1, v2) => new FloatCommandToken(v1 * v2)));
-        AddRule(FTokenType.ATerm, [FTokenType.ATerm, FTokenType.SDivide, FTokenType.AFactor], BinaryFunc<float, float>((v1, v2) => new FloatCommandToken(Mathf.Abs(v2) > 0 ? v1 / v2 : 0f)));
+        AddRule(FTokenType.ATerm, [FTokenType.ATerm, FTokenType.SDivide, FTokenType.AFactor], BinaryFunc<float, float>((v1, v2) => new FloatCommandToken(Mathn.Abs(v2) > 0 ? v1 / v2 : 0f)));
 
         AddRule(FTokenType.LFactor, [FTokenType.AExpr, FTokenType.SLessThan, FTokenType.AExpr], BinaryFunc<float, float>((v1, v2) => new BooleanCommandToken(v1 < v2)));
         AddRule(FTokenType.LFactor, [FTokenType.AExpr, FTokenType.SMoreThan, FTokenType.AExpr], BinaryFunc<float, float>((v1, v2) => new BooleanCommandToken(v1 > v2)));

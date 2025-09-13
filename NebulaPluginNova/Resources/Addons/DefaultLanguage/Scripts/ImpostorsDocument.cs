@@ -15,7 +15,7 @@ public class CleanerDocument : IDocument
     Virial.Media.GUIWidget? IDocument.Build(Artifact<GUIScreen>? target)
     {
         var gui = NebulaAPI.GUI;
-        var syncCoolDown = RoleDocumentHelper.ConfigBool("options.role.cleaner.syncKillAndCleanCoolDown", "role.cleaner.ability.main.cooldown");
+        var syncCoolDown = RoleDocumentHelper.ConfigBool("options.role.cleaner.syncKillAndCleanCoolDown", "role.cleaner.ability.main.cooldown", "role.cleaner.ability.main.notSyncCoolDown");
         return RoleDocumentHelper.GetRoleWidget("cleaner",
             RoleDocumentHelper.GetChapter("role.cleaner.ability", [
                 RoleDocumentHelper.GetImageLocalizedContent("Buttons.CleanButton.png", "role.cleaner.ability.main", t => t.Replace("#COOLDOWN", syncCoolDown))

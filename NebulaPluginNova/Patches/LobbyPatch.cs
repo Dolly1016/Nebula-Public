@@ -102,9 +102,9 @@ public class GameStartManagerUpdatePatch
         {
             if (__instance.startState == GameStartManager.StartingStates.Countdown)
             {
-                int num = Mathf.CeilToInt(__instance.countDownTimer);
+                int num = Mathn.CeilToInt(__instance.countDownTimer);
                 __instance.countDownTimer -= Time.deltaTime;
-                int num2 = Mathf.CeilToInt(__instance.countDownTimer);
+                int num2 = Mathn.CeilToInt(__instance.countDownTimer);
                 if (!__instance.GameStartTextParent.activeSelf) SoundManager.Instance.PlaySound(__instance.gameStartSound, false, 1f, null);
 
                 __instance.GameStartTextParent.SetActive(true);
@@ -526,10 +526,10 @@ public class GlobalCosMismatchShowerPatch
                 UpdateUnacquiredItems();
                 bool show = MoreCosmic.UnacquiredItems.Count > 0;
                 renderer.gameObject.SetActive(show);
-
+                
                 //たまに大きくなるアニメーション
                 var t = Mathf.Repeat(Time.time, 2.4f);
-                animRenderer.transform.localScale = Vector3.one * (1f + Helpers.MountainCurve(Mathf.Clamp01(t / 0.25f), 0.6f));
+                animRenderer.transform.localScale = Vector3.one * (1f + Helpers.MountainCurve(Mathn.Clamp01(t / 0.25f), 0.6f));
 
                 yield return null;
             }

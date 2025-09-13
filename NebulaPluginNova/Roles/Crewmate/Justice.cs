@@ -47,7 +47,7 @@ public class RandomMultibandMeter : IMultibandMater{
                 float pos = (float)i / Length;
                 float x = (pos - center) / width;
                 float y = height / (float)Math.Sqrt((x * x) + Math.Cos(x));
-                secretBand[i] = Mathf.Max(y, secretBand[i]);
+                secretBand[i] = Mathn.Max(y, secretBand[i]);
             }
         }
 
@@ -510,9 +510,9 @@ public class JusticeMeetingHud : MonoBehaviour
                 var topText = NebulaAsset.InstantiateText("AchievementTopText", back.transform, new(0.67f, 0.87f, -0.5f), NebulaAsset.JusticeFont, 0.14f, Virial.Text.TextAlignment.Center, new(0.5f, 0.5f), "a.k.a.", Color.white.AlphaMultiplied(0.8f));
                 if ((NebulaGameManager.Instance?.TryGetTitle(player.PlayerId, out var title) ?? false) && title != null)
                 {
-                    var textComponent = new NoSGUIText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.MeetingTitle), title!.GetTitleComponent(null))
+                    var textComponent = new NoSGUIText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.MeetingTitle), GUI.API.RawTextComponent(title!.GetLocalizedText()))
                     {
-                        OverlayWidget = title.GetOverlayWidget(false, true, false, true, true),
+                        OverlayWidget = title.GetDetailWidget(),
                         PostBuilder = text =>
                         {
                             text.outlineWidth = 0.1f;

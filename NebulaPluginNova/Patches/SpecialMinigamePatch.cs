@@ -1,4 +1,5 @@
 ﻿using Nebula.Behavior;
+using UnityEngine.UIElements;
 
 namespace Nebula.Patches;
 
@@ -47,8 +48,38 @@ class FungleSurveillanceMinigameBeginPatch
 {
     public static void Prefix(FungleSurveillanceMinigame __instance)
     {
+        NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Camera, __instance.transform, new Vector3(3.4f, -2f, -50f));
+
         var isc = __instance.securityCamera.cam.gameObject.AddComponent<IgnoreShadowCamera>();
         isc.ShowNameText = false;
+    }
+}
+
+[HarmonyPatch(typeof(FungleSurveillanceMinigame), nameof(FungleSurveillanceMinigame.Update))]
+class FungleSurveillanceMinigameUpdatePatch
+{
+    public static void Postfix(FungleSurveillanceMinigame __instance)
+    {
+        var localY = __instance.transform.localPosition.y;
+        if (localY < -5f) localY = -5f;
+        __instance.viewport.transform.localPosition = new(0f, localY * 0.4f, 1f);
+
+        if (ConsoleTimer.IsOpenedByAvailableWay()) return;
+
+        //カメラが使用できないとき
+        if(__instance.securityCamera.cam.enabled)
+        {
+            RenderTexture rt = new RenderTexture(32, 32, 32);
+            rt.Create();
+
+            var cam = __instance.securityCamera.cam;
+            cam.targetTexture = rt;
+            cam.cullingMask &= ~(1 << LayerExpansion.GetPlayersLayer());
+            cam.Render();
+            cam.enabled = false;
+
+            __instance.viewport.sharedMaterial.mainTexture = cam.targetTexture;
+        }
     }
 }
 

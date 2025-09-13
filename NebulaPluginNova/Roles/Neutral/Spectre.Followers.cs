@@ -179,7 +179,7 @@ internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole
 
                 var removeButton =NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     0f, "immoralist.remove", friesRemoveButtonSprite,
-                    _ => friesTracker.CurrentTarget != null, asGhostButton: true);
+                    _ => friesTracker.CurrentTarget != null, _ => !(MySpectre?.MyPlayer.IsDead ?? true), asGhostButton: true);
                 removeButton.OnClick = (button) => {
                     FriesDishManager.RpcUpdateFries.Invoke((friesTracker.CurrentTarget!.DishId, true, null));
                     StatsRemoveFries.Progress();

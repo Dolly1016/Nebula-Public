@@ -60,8 +60,10 @@ public static class PlayerState
     public static TranslatableTag Lost = new("state.lost");
     public static TranslatableTag Laser = new("state.laser");
     public static TranslatableTag Drill = new("state.drill");
+    public static TranslatableTag Dissolved = new("state.dissolved");
     public static TranslatableTag Disconnected = new("state.disconnected") { Color = Color.gray };
-    public static TranslatableTag[] AllDeadStates = [Dead, Exiled, Guessed, Misguessed, Embroiled, Suicide, Trapped, Pseudocide, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved, Balloon, Lost];
+    public static TranslatableTag[] AllKillStates = [Dead, Exiled, Guessed, Embroiled, Trapped, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved, Balloon, Laser, Drill, Dissolved];
+    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, Misguessed, Pseudocide];
     static PlayerState()
     {
         Virial.Text.PlayerStates.Alive = Alive;
@@ -156,6 +158,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public bool IsBlown => MyControl.MyPhysics.Animations.IsPlayingSpawnAnimation();
     public bool IsTeleporting { get; internal set; } = false;
 
+    public PlayerDeathPosition DeathPosition { get; set; }
+
     /// <summary>
     /// マウスの角度を弧度法で返します。
     /// -PIからPIの範囲で返します。
@@ -186,9 +190,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
 
     public FakeSabotageStatus FakeSabotage { get; private set; } = new();
-    public Vector2? GoalPos = null;
-    public void ResetDeadBodyGoalPos() => GoalPos = null;
-
+    
     public bool WillDie { get; set; } = false;
 
     public bool HasAnyTasks
@@ -323,6 +325,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         DefaultStampShower = new ArrowStampShower(this);
 
         playerLogic = new(myPlayer, this);
+
+        //一部オブジェクトがDefaultレイヤーになっている問題を修正。
+        myPlayer.cosmetics.bodySprites.GetFastEnumerator().Do(pbs => pbs.BodySprite.gameObject.layer = LayerExpansion.GetPlayersLayer());
 
         //PlayerScaler.gameObject.AddComponent<SortingGroup>();
         //PlayerScaler.gameObject.GetComponentsInChildren<SpriteRenderer>(true).Do(r => r.sortingOrder = 10);
@@ -525,6 +530,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     private void SetRole(DefinedRole role, int[] arguments)
     {
+        GameOperatorManager.Instance?.Run(new PlayerTryToChangeRoleEvent(this, myRole, role));
         myRole?.Inactivate();
         GameOperatorManager.Instance?.WrapUpDeadLifespans();
 
@@ -769,9 +775,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             if (viewer.localScale.x < 0f) vec.x *= -1;
             if (viewer.localScale.y < 0f) vec.y *= -1;
 
-            float currentAngle = Mathf.Atan2(vec.y, vec.x) - (viewer.localEulerAngles.z / 180f * Mathf.PI);
-            while (currentAngle < -Mathf.PI) currentAngle += Mathf.PI * 2f;
-            while (currentAngle > Mathf.PI) currentAngle -= Mathf.PI * 2f;
+            float currentAngle = Mathn.Atan2(vec.y, vec.x) - (viewer.localEulerAngles.z / 180f * Mathn.PI);
+            while (currentAngle < -Mathn.PI) currentAngle += Mathn.PI * 2f;
+            while (currentAngle > Mathn.PI) currentAngle -= Mathn.PI * 2f;
 
             float ratio = (Camera.main.orthographicSize * 2f) / (float)Screen.height;
             return (currentAngle, vec.magnitude * ratio);
@@ -787,7 +793,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (requiredUpdateMouseAngle)
         {
-            if (Mathf.Repeat(currentAngle - lastSentAngle, Mathf.PI * 2f) > 0.02f)
+            if (Mathf.Repeat(currentAngle - lastSentAngle, Mathn.PI * 2f) > 0.02f)
             {
                 RpcUpdateAngle.Invoke((PlayerId, currentAngle));
                 lastSentAngle = currentAngle;
@@ -835,7 +841,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         MyControl.MyPhysics.Speed = CalcSpeed(ref directionalPlayerSpeed);
 
         //移動できない称号のチェック
-        if (!speedAchievementChecked && Mathf.Abs(directionalPlayerSpeed.x) + Mathf.Abs(directionalPlayerSpeed.y) + Mathf.Abs(directionalPlayerSpeed.z) + Mathf.Abs(directionalPlayerSpeed.w) == 0f)
+        if (!speedAchievementChecked && Mathn.Abs(directionalPlayerSpeed.x) + Mathn.Abs(directionalPlayerSpeed.y) + Mathn.Abs(directionalPlayerSpeed.z) + Mathf.Abs(directionalPlayerSpeed.w) == 0f)
         {
             new StaticAchievementToken("movable");
             speedAchievementChecked = true;
@@ -1007,7 +1013,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         }
 
         var diff = smoothPlayerSize - targetSize;
-        smoothPlayerSize -= diff * Mathf.Clamp01(Time.deltaTime * 2f);
+        smoothPlayerSize -= diff * Mathn.Clamp01(Time.deltaTime * 2f);
 
         PlayerScaler.transform.localScale = (smoothPlayerSize * nonSmoothSize).AsVector3(1f);
     }
@@ -1062,7 +1068,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             else
                 VisibilityAlpha += 0.85f * Time.deltaTime;
 
-            VisibilityAlpha = Mathf.Clamp(VisibilityAlpha, min, max);
+            VisibilityAlpha = Mathn.Clamp(VisibilityAlpha, min, max);
         }
     }
 
@@ -1127,7 +1133,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             }
 
             int visualInvisibleLevel = visibilityCache;
-            int mixedVisualInvisibleLevel = Mathf.Max(visibilityCache, immediateVisibilityCache);
+            int mixedVisualInvisibleLevel = Mathn.Max(visibilityCache, immediateVisibilityCache);
 
             //情報が開示済みの場合、あるいは自分自身を見る場合は半透明までにしかならない
             if (AmOwner || NebulaGameManager.Instance!.CanBeSpectator)
@@ -1136,20 +1142,23 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 mixedVisualInvisibleLevel = Math.Min(1, mixedVisualInvisibleLevel);
             }
 
-            MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText && MyControl.cosmetics.bodyType != PlayerBodyTypes.Long);
+
+            var myCosmetics = MyControl.cosmetics;
+
+            myCosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText && MyControl.cosmetics.bodyType != PlayerBodyTypes.Long);
 
             if (IsDead)
             {
-                if (MyControl.cosmetics.currentBodySprite.BodySprite != null) MyControl.cosmetics.currentBodySprite.BodySprite.color = Color.white;
+                if (myCosmetics.currentBodySprite.BodySprite != null) myCosmetics.currentBodySprite.BodySprite.color = Color.white;
 
-                if (!MyControl.AmOwner && MyControl.cosmetics.currentPet)
+                if (!MyControl.AmOwner && myCosmetics.currentPet)
                 {
-                    foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = Color.clear;
-                    foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = Color.clear;
+                    foreach (var rend in myCosmetics.currentPet.renderers) rend.color = Color.clear;
+                    foreach (var rend in myCosmetics.currentPet.shadows) rend.color = Color.clear;
                 }
 
                 Color c = new(1f, 1f, 1f, 0.5f);
-                MyControl.cosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = c);
+                myCosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = c);
                 foreach (var r in playerAdditionalRenderers) if (r) r.color = c;
                 foreach (var r in playerAdditionalMeshRenderers)
                 {
@@ -1178,7 +1187,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     //自分自身であれば常に見える。
                     if (AmOwner) return false;
                     //ろくろ首はどこからでも見える
-                    if (MyControl.cosmetics.bodyType == PlayerBodyTypes.Long) return false;
+                    if (myCosmetics.bodyType == PlayerBodyTypes.Long) return false;
 
                     int shadowMask = Constants.ShadowMask;
                     int objectMask = Constants.ShipAndAllObjectsMask;
@@ -1209,33 +1218,33 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             }
 
             var shadowHidesPlayer =  !ignoreShadow && IsInShadowCache;
-            if (shadowHidesPlayer) MyControl.cosmetics.nameText.transform.parent.gameObject.SetActive(false);
+            if (shadowHidesPlayer) myCosmetics.nameText.transform.parent.gameObject.SetActive(false);
 
             float immadiateAlpha = immediateVisibilityCache switch { 2 => 0f, 1 => 0.25f, _ => 1f };
-            alpha = Mathf.Min(immadiateAlpha, shadowHidesPlayer ? 0f : VisibilityAlpha);
+            alpha = Mathn.Min(immadiateAlpha, shadowHidesPlayer ? 0f : VisibilityAlpha);
             alphaIgnoresWall = VisibilityAlpha;
             var color = new Color(1f, 1f, 1f, alpha);
             
 
-            if (MyControl.cosmetics.currentBodySprite.BodySprite != null) MyControl.cosmetics.currentBodySprite.BodySprite.color = color;
+            if (myCosmetics.currentBodySprite.BodySprite != null) myCosmetics.currentBodySprite.BodySprite.color = color;
 
-            if (MyControl.cosmetics.skin.layer != null) MyControl.cosmetics.skin.layer.color = color;
+            if (myCosmetics.skin.layer != null) myCosmetics.skin.layer.color = color;
 
-            if (MyControl.cosmetics.hat)
+            if (myCosmetics.hat)
             {
-                if (MyControl.cosmetics.hat.FrontLayer != null) MyControl.cosmetics.hat.FrontLayer.color = color;
-                if (MyControl.cosmetics.hat.BackLayer != null) MyControl.cosmetics.hat.BackLayer.color = color;
+                if (myCosmetics.hat.FrontLayer != null) myCosmetics.hat.FrontLayer.color = color;
+                if (myCosmetics.hat.BackLayer != null) myCosmetics.hat.BackLayer.color = color;
             }
 
-            if (MyControl.cosmetics.currentPet)
+            if (myCosmetics.currentPet)
             {
-                foreach (var rend in MyControl.cosmetics.currentPet.renderers) rend.color = color;
-                foreach (var rend in MyControl.cosmetics.currentPet.shadows) rend.color = color;
+                foreach (var rend in myCosmetics.currentPet.renderers) rend.color = color;
+                foreach (var rend in myCosmetics.currentPet.shadows) rend.color = color;
             }
 
-            if (MyControl.cosmetics.visor != null) MyControl.cosmetics.visor.Image.color = color;
+            if (myCosmetics.visor != null) myCosmetics.visor.Image.color = color;
 
-            MyControl.cosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = color);
+            myCosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = color);
             foreach (var r in playerAdditionalRenderers) if (r) r.color = color;
             foreach (var r in playerAdditionalMeshRenderers)
             {
@@ -1261,11 +1270,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     private void UpdateFlipX()
     {
         if (AmOwner) return;
-        if (MyControl.MyPhysics.Velocity.sqrMagnitude > 0) return;
-        if (MyControl.MyPhysics.FlipX != CachedFlipX)
+        var myPhysics = MyControl.MyPhysics;
+        if (myPhysics.Velocity.sqrMagnitude > 0) return;
+        if (myPhysics.FlipX != CachedFlipX)
         {
-            MyControl.MyPhysics.FlipX = CachedFlipX;
-            var anim = MyControl.MyPhysics.Animations;
+            myPhysics.FlipX = CachedFlipX;
+            var anim = myPhysics.Animations;
             if (anim.IsPlayingRunAnimation()) anim.PlayRunAnimation();
             else if (anim.Animator.GetCurrentAnimation() == anim.group.IdleAnim) anim.PlayIdleAnimation();
         }
@@ -1274,15 +1284,17 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     {
         if (IsDead && ModSingleton<ShowUp>.Instance.ShowedUp(this)) MyControl.Visible = true;
 
-        UpdateNameText(MyControl.cosmetics.nameText, false, NebulaGameManager.Instance?.CanSeeAllInfo ?? false);
+        var nameText = MyControl.cosmetics.nameText;
+        UpdateNameText(nameText, false, NebulaGameManager.Instance?.CanSeeAllInfo ?? false);
         UpdateRoleText(roleText, false);
 
         var viewerScale = NebulaGameManager.Instance!.WideCamera.ViewerTransform.localScale;
         var textScale = new Vector3(viewerScale.x < 0f ? -1f : 1f, viewerScale.y < 0f ? -1f : 1f, 1f);
         var textAngle = -NebulaGameManager.Instance!.WideCamera.ViewerTransform.localEulerAngles * (textScale.x * textScale.y);
-        MyControl.cosmetics.nameText.transform.parent.localEulerAngles = textAngle;
-        MyControl.cosmetics.nameText.transform.parent.localScale = textScale;
-        if(AmOwner) MyControl.cosmetics.nameText.transform.parent.SetWorldZ(-15f);
+        var nameParent = nameText.transform.parent;
+        nameParent.localEulerAngles = textAngle;
+        nameParent.localScale = textScale;
+        if(AmOwner) nameParent.SetWorldZ(-15f);
 
         UpdateMouseAngle();
         UpdateModulators();
@@ -1318,7 +1330,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         FakeSabotage.OnMeetingStart();
 
-        ResetDeadBodyGoalPos();
+        DeathPosition = null;
     }
 
     //////////////////////////////////////////

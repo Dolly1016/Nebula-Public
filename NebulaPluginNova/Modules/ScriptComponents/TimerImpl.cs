@@ -103,7 +103,7 @@ public class TimerImpl : FlexibleLifespan, GameTimer, IGameOperator
                 deltaTime *= coeff;
             }
 
-            currentTime = Mathf.Clamp(currentTime - deltaTime, min, max);
+            currentTime = Mathn.Clamp(currentTime - deltaTime, min, max);
         }
     }
 
@@ -168,7 +168,7 @@ public class TimerImpl : FlexibleLifespan, GameTimer, IGameOperator
     GameTimer GameTimer.SetTime(float time) => SetTime(time);
 
     GameTimer GameTimer.Expand(float time) => Expand(time);
-    string IVisualTimer.TimerText => currentTime > 0f ? Mathf.CeilToInt(currentTime).ToString() : null;
+    string IVisualTimer.TimerText => currentTime > 0f ? Mathn.CeilToInt(currentTime).ToString() : null;
     internal class TimerCoolDownHelper : IGameOperator
     {
         private TimerImpl myTimer;
@@ -209,7 +209,7 @@ public class AdvancedTimer : TimerImpl
 
     public override TimerImpl Start(float? time = null) => base.Start(time ?? defaultMax);
 
-    public override float Percentage { get => Mathf.Min(1f, visualMax > min ? (currentTime - min) / (visualMax - min) : 0f); }
+    public override float Percentage { get => Mathn.Min(1f, visualMax > min ? (currentTime - min) / (visualMax - min) : 0f); }
 }
 
 internal class ScriptVisualTimer : SimpleLifespan, IVisualTimer
@@ -242,7 +242,7 @@ internal class VanillaKillTimer : IVisualTimer
     }
 
 
-    string? IVisualTimer.TimerText => Mathf.CeilToInt(PlayerControl.LocalPlayer.killTimer).ToString();
+    string? IVisualTimer.TimerText => Mathn.CeilToInt(PlayerControl.LocalPlayer.killTimer).ToString();
 
     float IVisualTimer.Percentage
     {
@@ -283,7 +283,7 @@ internal class CurrentKillTimer : IVisualTimer
         get
         {
             float cooldown = GetKillButton()?.Cooldown ?? 0f;
-            return cooldown > 0f ? Mathf.CeilToInt(cooldown).ToString() : null;
+            return cooldown > 0f ? Mathn.CeilToInt(cooldown).ToString() : null;
         }
     }
 

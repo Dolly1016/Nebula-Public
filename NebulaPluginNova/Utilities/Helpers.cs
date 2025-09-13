@@ -1,4 +1,5 @@
 ﻿using Nebula.Modules.GUIWidget;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using TMPro;
@@ -175,11 +176,15 @@ public static class Helpers
         return builder.ToString();
     }
 
-    public static IEnumerable<DeadBody> AllDeadBodies()
+    public static IEnumerable<DeadBody> AllDeadBodies(bool includesDissolvedBodies = false)
     {
         //Componentで探すよりタグで探す方が相当はやい
         var bodies = GameObject.FindGameObjectsWithTag("DeadBody");
-        for (int i = 0; i < bodies.Count; i++) yield return bodies[i].GetComponent<DeadBody>();
+        for (int i = 0; i < bodies.Count; i++)
+        {
+            if (bodies[i].TryGetComponent<DeadBody>(out var body)) yield return body;
+            else if(includesDissolvedBodies) yield return null!;
+        }
     }
 
     public static int[] GetRandomArray(int length)
@@ -522,5 +527,26 @@ public static class Helpers
     static public float Diff(Color color1, Color color2)
     {
         return Math.Max(Math.Max(Math.Abs(color1.r - color2.r), Math.Abs(color1.g - color2.g)), Math.Abs(color1.b - color2.b));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static public double ScaledRepeatTime(float speed)
+    {
+        if(speed > 0f) return Math.IEEERemainder(Time.time, Math.PI * 2f / speed) * speed;
+        return 0f;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static public double ScaledSin(float speed)
+    {
+        
+        return Math.Sin(ScaledRepeatTime(speed));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static public double ScaledCos(float speed)
+    {
+
+        return Math.Cos(ScaledRepeatTime(speed));
     }
 }

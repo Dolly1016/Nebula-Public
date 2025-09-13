@@ -178,7 +178,7 @@ public class GUIScrollDynamicView : AbstractGUIWidget
 
         if (ScrollerTag != null)
             scroller.Inner.transform.localPosition = scroller.Inner.transform.localPosition +
-                new UnityEngine.Vector3(0f, Mathf.Clamp(GUIScrollView.TryGetDistHistory(ScrollerTag) + scroller.ContentYBounds.min, scroller.ContentYBounds.min, scroller.ContentYBounds.max), 0f);
+                new UnityEngine.Vector3(0f, Mathn.Clamp(GUIScrollView.TryGetDistHistory(ScrollerTag) + scroller.ContentYBounds.min, scroller.ContentYBounds.min, scroller.ContentYBounds.max), 0f);
 
         if (ScrollerTag != null)
             scroller.Inner.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += () => { GUIScrollView.UpdateDistHistory(ScrollerTag, scroller.Inner.transform.localPosition.y - scroller.ContentYBounds.min); };

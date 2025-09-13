@@ -201,6 +201,7 @@ public interface GUI
     /// <param name="onRightClick">右クリックされた際に実行するアクション</param>
     /// <param name="color">ボタンの色</param>
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
+    /// <param name="margin">余白の幅 デフォルトは0.26</param>
     /// <returns>生成されたウィジェット定義</returns>
     GUIWidget RawButton(GUIAlignment alignment, TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null);
 

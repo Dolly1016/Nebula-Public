@@ -87,14 +87,18 @@ public class TrackerPlayerMapLayer : MonoBehaviour
 
 public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>, HasCitation, DefinedRole
 {
-    private EvilTracker() : base("evilTracker", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ShowKillFlashOption, TaskTrackingOption, TrackCoolDownOption, CanChangeTargetOption, CanChangeTargetOnMeetingOption, UpdateArrowIntervalOption, TrackImpostorsOption,ShowTrackingTargetOnMapOption, CanCheckTrackingTasksInTaskPhaseOption, ShowWhereTrackingIsOption]) { }
+    private EvilTracker() : base("evilTracker", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [
+        ShowKillFlashOption, TrackImpostorsOption,
+        new GroupConfiguration("options.role.evilTracker.group.playerTracking", [TrackCoolDownOption, CanChangeTargetOption, CanChangeTargetOnMeetingOption, UpdateArrowIntervalOption, ShowTrackingTargetOnMapOption, ShowWhereTrackingIsOption], GroupConfigurationColor.ImpostorRed),
+        new GroupConfiguration("options.role.evilTracker.group.taskTracking", [TaskTrackingOption,CanCheckTrackingTasksInTaskPhaseOption], GroupConfigurationColor.ImpostorRed)
+        ]) { }
     Citation? HasCitation.Citation => Citations.TheOtherRolesGMH;
 
     static private readonly BoolConfiguration ShowKillFlashOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.showKillFlash", false);
     static private readonly ValueConfiguration<int> TaskTrackingOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.taskTracking", ["options.role.evilTracker.taskTracking.off", "options.role.evilTracker.taskTracking.onlyTarget", "options.role.evilTracker.taskTracking.on"], 0);
     static private readonly FloatConfiguration TrackCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.trackCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly BoolConfiguration CanChangeTargetOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.canChangeTarget", false);
-    static private readonly BoolConfiguration CanChangeTargetOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.canChangeTargetOnMeeting", false, ()=>CanChangeTargetOption && TaskTrackingOption.GetValue() == 2);
+    static private readonly BoolConfiguration CanChangeTargetOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.canChangeTargetOnMeeting", false);
     static private readonly FloatConfiguration UpdateArrowIntervalOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.updateArrowInterval", (0f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private readonly BoolConfiguration TrackImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.trackImpostors", false);
     static private readonly BoolConfiguration ShowTrackingTargetOnMapOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.showTrackingTargetOnMap", false);
@@ -223,30 +227,33 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
         [Local]
         void OnMeetingStart(MeetingStartEvent ev)
         {
-            int optionValue = TaskTrackingOption.GetValue();
-            if (optionValue > 0)
-            {
-                GamePlayer? isChecked = null;
-                NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new Behavior.MeetingPlayerAction(
-                    MeetingPlayerButtonManager.Icons.AsLoader(1),
-                    p =>
+            int taskTrackingOption = TaskTrackingOption.GetValue();
+            //タスク追跡Offかつ会議中の追跡対象の変更オフ
+            if (taskTrackingOption == 0 && !CanChangeTargetOnMeetingOption) return;
+
+            bool canSelectOnlyCurrentTarget = taskTrackingOption == 1 && !CanChangeTargetOnMeetingOption;
+
+            GamePlayer? isChecked = null;
+            NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new Behavior.MeetingPlayerAction(
+                MeetingPlayerButtonManager.Icons.AsLoader(1),
+                p =>
+                {
+                    if (isChecked == null)
                     {
-                        if (isChecked == null)
-                        {
-                            RpcShareTaskLoc.Invoke((MyPlayer.PlayerId, p.MyPlayer.PlayerId));
-                            isChecked = p.MyPlayer;
-                            if(CanChangeTargetOnMeetingOption && CanChangeTargetOption) ChangeTrackingTarget(p.MyPlayer);
-                        }
-                        else if (mapLayer)
-                        {
-                            MapBehaviour.Instance.ShowNormalMap();
-                            MapBehaviour.Instance.taskOverlay.gameObject.SetActive(false);
-                            mapLayer!.gameObject.SetActive(true);
-                        }
-                    },
-                    p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && (optionValue == 2 || trackingTarget == p.MyPlayer) && (isChecked == null || isChecked == p.MyPlayer)
-                    ));
-            }
+                        if (taskTrackingOption != 0) RpcShareTaskLoc.Invoke((MyPlayer.PlayerId, p.MyPlayer.PlayerId));
+                        isChecked = p.MyPlayer;
+                        if (CanChangeTargetOnMeetingOption) ChangeTrackingTarget(p.MyPlayer);
+                    }
+                    else if (taskTrackingOption != 0 && mapLayer)
+                    {
+                        MapBehaviour.Instance.ShowNormalMap();
+                        MapBehaviour.Instance.taskOverlay.gameObject.SetActive(false);
+                        mapLayer!.gameObject.SetActive(true);
+                    }
+                },
+                p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && (!canSelectOnlyCurrentTarget || trackingTarget == p.MyPlayer) && (isChecked == null || (taskTrackingOption != 0 && isChecked == p.MyPlayer)) && (taskTrackingOption != 0 || trackingTarget != p.MyPlayer)
+                ));
+
         }
 
         [Local]

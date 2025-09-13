@@ -106,14 +106,14 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
 
                 if(VoteAssignment > 0) UpdateMayorVotes(myVote + VoteAssignment);
 
-                int min = Mathf.Min(MinVote, myVote);
-                int max = Mathf.Min(MaxVote, myVote);
-                currentVote = Mathf.Clamp(currentVote, min, max);
+                int min = Mathn.Min(MinVote, myVote);
+                int max = Mathn.Min(MaxVote, myVote);
+                currentVote = Mathn.Clamp(currentVote, min, max);
                 countText.text = currentVote.ToString() + "/" + myVote;
 
                 void UpdateVotes(bool increment)
                 {
-                    currentVote = Mathf.Clamp(currentVote + (increment ? 1 : -1), min, max);
+                    currentVote = Mathn.Clamp(currentVote + (increment ? 1 : -1), min, max);
                     countText.text = currentVote.ToString() + "/" + myVote;
                 }
 
@@ -220,7 +220,7 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
 
         private void UpdateMayorVotes(int vote)
         {
-            myVote = Mathf.Clamp(vote, 0, VotesStock);
+            myVote = Mathn.Clamp(vote, 0, VotesStock);
             RpcUpdateVotes.Invoke((MyPlayer, myVote));
         }
         static private RemoteProcess<(GamePlayer player, int vote)> RpcUpdateVotes = new("UpdateMayorVotes", (message, _) =>

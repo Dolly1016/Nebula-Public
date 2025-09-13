@@ -710,4 +710,14 @@ public static class AmongUsUtil
     }
 
     public static Vector2? GetPetPosition(this CosmeticsLayer cLayer) => cLayer.currentPet ? cLayer.currentPet.transform.position : null;
+
+    public static void ChangeMoveMode(this PlayerControl player, bool movable)
+    {
+        player.moveable = movable;
+        player.NetTransform.enabled = movable;
+        if(movable) player.SetKinematic(false);
+        player.NetTransform.SetPaused(!movable);
+    }
+
+    public static NormalGameOptionsV10 GetCurrentNormalOption() => GameOptionsManager.Instance.currentNormalGameOptions; //GameOptionsManager.Instance.CurrentGameOptions.CastFast<NormalGameOptionsV10>();
 }

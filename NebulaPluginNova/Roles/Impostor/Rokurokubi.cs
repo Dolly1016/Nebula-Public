@@ -14,7 +14,7 @@ namespace Nebula.Roles.Impostor;
 
 internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>, DefinedRole
 {
-    private Rokurokubi() : base("rokurokubi", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CraneSpeedOption, MaxNeckLengthOption])
+    private Rokurokubi() : base("rokurokubi", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CraneSpeedOption, MaxNeckLengthOption, AutoKillOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
         //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Berserker.png");
@@ -22,7 +22,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
 
     static private readonly FloatConfiguration CraneSpeedOption = NebulaAPI.Configurations.Configuration("options.role.rokurokubi.craneSpeed", (2.5f, 15f, 2.5f), 7.5f, FloatConfigurationDecorator.Ratio);
     static private readonly FloatConfiguration MaxNeckLengthOption = NebulaAPI.Configurations.Configuration("options.role.rokurokubi.maxNeckLength", (2.5f, 45f, 2.5f), 15f, FloatConfigurationDecorator.Ratio);
-
+    static private readonly BoolConfiguration AutoKillOption = NebulaAPI.Configurations.Configuration("options.role.rokurokubi.autoKillInCraning", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     bool DefinedRole.IsJackalizable => true;
@@ -127,6 +127,8 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 {
                     new StaticAchievementToken("rokurokubi.common2");
                 }
+
+                if (myPlayer.HasAttribute(PlayerAttributes.Invisible) && ev.Dead.Position.Distance(myPlayer.Position) > 10f) new StaticAchievementToken("rokurokubi.common3");
 
                 
                 if (NebulaGameManager.Instance.GameStatistics.AllEvents.Any(e =>
@@ -366,7 +368,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 calmButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "rokurokubi.pause");
 
                 var killAchToken = new AchievementToken<int>("rokurokubi.common1", 0, (val, _) => val >= 2);
-                var tracker = ObjectTrackers.ForPlayerlike(this, AmongUsUtil.VanillaKillDistance + 0.5f, () => CurrentLongNeckMode?.GetHeadPos() ?? MyPlayer.VanillaPlayer.transform.position, ObjectTrackers.PlayerlikeLocalKillablePredicate, null, Color.red, false, true);
+                var tracker = ObjectTrackers.ForPlayerlike(this, AmongUsUtil.VanillaKillDistance + (AutoKillOption ? 0.2f : 0.5f), () => CurrentLongNeckMode?.GetHeadPos() ?? MyPlayer.VanillaPlayer.transform.position, ObjectTrackers.PlayerlikeLocalKillablePredicate, null, Color.red, false, true);
                 var killButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, new Virial.Events.Player.PlayerInteractParameter(IsKillInteraction: true), true, Virial.Compat.VirtualKeyInput.Kill, null, 1f, "kill", ModAbilityButton.LabelType.Impostor, null,
                     (target, button) => {
                         var myPos = MyPlayer.Position;
@@ -395,6 +397,13 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
 
 
                     }, tracker, null, (button) => InLongNeckMode);
+                killButton.OnUpdate = button =>
+                {
+                    if(AutoKillOption && killButton.IsAvailable && killButton.IsVisible)
+                    {
+                        killButton.DoClick();
+                    }
+                };
             }
         }
 
@@ -409,11 +418,11 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             longBoi.calculatedNeckHeight = height;
 
 
-            longBoi.neckSprite.size = new Vector2(longBoi.neckSprite.size.x, Mathf.Clamp(height, 0f, 1.1f));
-            longBoi.foregroundNeckSprite.size = new Vector2(longBoi.foregroundNeckSprite.size.x, Mathf.Max(height - 1.1f, 0f));
+            longBoi.neckSprite.size = new Vector2(longBoi.neckSprite.size.x, Mathn.Clamp(height, 0f, 1.1f));
+            longBoi.foregroundNeckSprite.size = new Vector2(longBoi.foregroundNeckSprite.size.x, Mathn.Max(height - 1.1f, 0f));
         }
 
-        internal float CalcBaseNeckRadius(float absAngle) => NeckBaseCurveLength * 180 / absAngle / Mathf.PI;
+        internal float CalcBaseNeckRadius(float absAngle) => NeckBaseCurveLength * 180 / absAngle / Mathn.PI;
         internal Vector2 CalcBaseNeckEndPos(float neckAngle, float neckSumP, out bool containsCurvePart)
         {
             float absAngle = Math.Abs(neckAngle);
@@ -421,8 +430,8 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             {
                 float curveP = (NeckBaseSumLength * neckSumP - NeckBaseStraightLength) / NeckBaseCurveLength;
                 float r = CalcBaseNeckRadius(absAngle);
-                float x = r * (1f - Mathf.Cos(absAngle.DegToRad() * curveP));
-                float y = r * Mathf.Sin(absAngle.DegToRad() * curveP);
+                float x = r * (1f - Mathn.Cos(absAngle.DegToRad() * curveP));
+                float y = r * Mathn.Sin(absAngle.DegToRad() * curveP);
                 containsCurvePart = true;
                 return new(neckAngle < 0f ? -x : x, y + NeckBaseStraightLength);
             }
@@ -438,15 +447,19 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         private float LastNeckCurveP = 0f;
         private float LastNeckAngle = 0f;
         private bool LastFlipX = false;
+        private float LastCurveNeckWidth = 0f;
         internal void UpdateNeck(LongBoiPlayerBody longBoi, ref MeshRenderer? meshRenderer, ref MeshFilter? meshFilter)
         {
+            var neckRenderer = longBoi.neckSprite;
+            var foregroundNeck = longBoi.foregroundNeckSprite;
+
             //根本部分は表示しない(カーブ可能な根元部分で代替)
-            longBoi.neckSprite.enabled = false;
+            neckRenderer.enabled = false;
 
             // 延長された首の画像と横幅を揃える。
-            longBoi.foregroundNeckSprite.sprite = longBoi.neckSprite.sprite;
-            longBoi.foregroundNeckSprite.size = new Vector2(longBoi.neckSprite.size.x, longBoi.foregroundNeckSprite.size.y);
-            longBoi.foregroundNeckSprite.flipX = longBoi.neckSprite.flipX;
+            foregroundNeck.sprite = neckRenderer.sprite;
+            foregroundNeck.size = new Vector2(neckRenderer.size.x, foregroundNeck.size.y);
+            foregroundNeck.flipX = neckRenderer.flipX;
 
             bool inSpawnAnim = false;
 
@@ -458,8 +471,8 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             else
             {
                 //スポーンアニメーション中は首は不要
-                longBoi.neckSprite.size = new Vector2(longBoi.neckSprite.size.x, 0f);
-                longBoi.foregroundNeckSprite.size = new Vector2(longBoi.foregroundNeckSprite.size.x, 0f);
+                neckRenderer.size = new Vector2(neckRenderer.size.x, 0f);
+                foregroundNeck.size = new Vector2(foregroundNeck.size.x, 0f);
                 if (meshRenderer) meshRenderer.enabled = false;
                 inSpawnAnim = true;
             }
@@ -475,31 +488,32 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             var curveP = longBoi.GetBaseCurveNeckRate();
 
             //延長された首の縦方向の位置は起点の位置でよい。(=中央下の位置に合わせる。)延長された首は首の子オブジェクト。
-            longBoi.foregroundNeckSprite.gameObject.transform.localPosition = endPos.AsVector3(num);
-            longBoi.foregroundNeckSprite.gameObject.transform.localEulerAngles = new(0f, 0f, -neckAngle * curveP);
+            foregroundNeck.transform.localPosition = endPos.AsVector3(num);
+            foregroundNeck.transform.localEulerAngles = new(0f, 0f, -neckAngle * curveP);
 
-            var neckBasePos = new Vector2(0f, longBoi.neckSprite.transform.localPosition.y);
+            var neckBasePos = new Vector2(0f, neckRenderer.transform.localPosition.y);
 
 
             Vector2 neckDir = Vector2.up.Rotate(-neckAngle * curveP);
 
             //頭は首からみて伸ばした分の長さだけ延長した先に置けばよい。長さを0.01fだけ減じているのに注意。
-            longBoi.headSprite.gameObject.transform.localPosition =
-                (neckBasePos + endPos + neckDir * (longBoi.foregroundNeckSprite.size.y - 0.01f)).AsVector3(num);
-            longBoi.headSprite.gameObject.transform.localEulerAngles = new(0f, 0f, inSpawnAnim ? 0f : -neckAngle * curveP);
+            longBoi.headSprite.transform.localPosition =
+                (neckBasePos + endPos + neckDir * (foregroundNeck.size.y - 0.01f)).AsVector3(num);
+            longBoi.headSprite.transform.localEulerAngles = new(0f, 0f, inSpawnAnim ? 0f : -neckAngle * curveP);
 
-            Vector3 offset = neckBasePos + endPos + (neckDir * longBoi.foregroundNeckSprite.size.y);
+            Vector3 offset = neckBasePos + endPos + (neckDir * foregroundNeck.size.y);
 
             //曲がる部分
-            if (!inSpawnAnim && (Mathf.Abs(LastNeckAngle - neckAngle) > 0f || Mathf.Abs(LastNeckCurveP - curveP) > 0f || LastFlipX != longBoi.cosmeticLayer.FlipX))
+            if (!inSpawnAnim && (Mathn.Abs(LastNeckAngle - neckAngle) > 0f || Mathn.Abs(LastNeckCurveP - curveP) > 0f || Mathn.Abs(LastCurveNeckWidth - neckRenderer.size.x) > 0f || LastFlipX != longBoi.cosmeticLayer.FlipX))
             {
                 LastNeckAngle = neckAngle;
                 LastNeckCurveP = curveP;
                 LastFlipX = longBoi.cosmeticLayer.FlipX;
+                LastCurveNeckWidth = neckRenderer.size.x;
 
                 if (!meshRenderer || !meshFilter)
                 {
-                    Transform meshTransform = longBoi.neckSprite.transform.FindChild(MeshRendererObjName);
+                    Transform meshTransform = neckRenderer.transform.FindChild(MeshRendererObjName);
                     if (meshTransform)
                     {
                         meshRenderer = meshTransform.GetComponent<MeshRenderer>();
@@ -507,7 +521,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                     }
                     if (!meshRenderer || !meshFilter)
                     {
-                        var pair = UnityHelper.CreateMeshRenderer(MeshRendererObjName, longBoi.neckSprite.transform, Vector3.zero, null, null, longBoi.cosmeticLayer.currentBodySprite.BodySprite.sharedMaterial);
+                        var pair = UnityHelper.CreateMeshRenderer(MeshRendererObjName, neckRenderer.transform, Vector3.zero, null, null, longBoi.cosmeticLayer.currentBodySprite.BodySprite.sharedMaterial);
                         MyPlayer.Unbox().AddPlayerColorRenderers((pair.renderer, null));
 
                         meshRenderer = pair.renderer;
@@ -517,17 +531,17 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
 
                 if (containsCurvePart)
                 {
-                    float absAngle = Mathf.Abs(NeckAngle);
+                    float absAngle = Mathn.Abs(NeckAngle);
                     if (absAngle > Mathf.Epsilon)
                     {
                         float r = CalcBaseNeckRadius(absAngle);
                         float p = longBoi.GetBaseCurveNeckRate();
-                        int n = 2 + (int)(Mathf.Abs(absAngle) * p / 14);//除数を大きくするとカーブが荒くなる
-                        float unitAngle = Mathf.Abs(absAngle) * p / (float)n;
+                        int n = 2 + (int)(Mathn.Abs(absAngle) * p / 14);//除数を大きくするとカーブが荒くなる
+                        float unitAngle = Mathn.Abs(absAngle) * p / (float)n;
 
                         float centerX = NeckAngle > 0f ? r : -r;
-                        float centerSign = Mathf.Sign(centerX);
-                        float width = longBoi.neckSprite.size.x;
+                        float centerSign = Mathn.Sign(centerX);
+                        float width = neckRenderer.size.x;
                         float halfWidth = width * centerSign * 0.5f;
                         float rInner = r - halfWidth;
                         float rOuter = r + halfWidth;
@@ -576,7 +590,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 else
                 {
                     float rate = longBoi.GetBaseSumNeckRate();
-                    meshFilter.CreateRectMesh(new(longBoi.neckSprite.size.x * (longBoi.cosmeticLayer.FlipX ? -1f : 1f), NeckBaseSumLength * rate), new(0f, NeckBaseSumLength * 0.5f * rate));
+                    meshFilter.CreateRectMesh(new(neckRenderer.size.x * (longBoi.cosmeticLayer.FlipX ? -1f : 1f), NeckBaseSumLength * rate), new(0f, NeckBaseSumLength * 0.5f * rate));
                     UpdateColors(meshFilter);
                 }
                 meshRenderer.localBounds = new(Vector3.zero, new(8f, 8f, 0f));
@@ -596,7 +610,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             if (meshRenderer != null && meshRenderer)
             {
                 //テクスチャを更新
-                UnityHelper.ReflectSpriteST(meshRenderer!.material, longBoi.neckSprite.sprite);
+                UnityHelper.ReflectSpriteST(meshRenderer!.material, neckRenderer.sprite);
 
                 meshRenderer.SetBothOrder(1008);
                 meshRenderer.enabled = longBoi.foregroundNeckSprite.enabled;

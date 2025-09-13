@@ -70,7 +70,11 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
 
         bool CheckNonAssignedElse(GamePlayer player, DefinedRole role) => !NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.Role.Role == role && p.PlayerId != player.PlayerId);
         if (CheckNonAssignedElse(oracle, Oracle.MyRole)) excludedRoles.Add(Oracle.MyRole);
-        if(oracle.TryGetModifier<Lover.Instance>(out var lover) && !lover.IsAloneLover && CheckNonAssignedElse(lover.MyLover.Get(), lover.MyLover.Get().Role.Role)) excludedRoles.Add(lover.MyLover.Get().Role.Role);
+        foreach (var lover in oracle.GetModifiers<Lover.Instance>())
+        {
+            if (!lover.IsAloneLover && CheckNonAssignedElse(lover.MyLover.Get(), lover.MyLover.Get().Role.Role)) 
+                excludedRoles.Add(lover.MyLover.Get().Role.Role);
+        }
         if (!NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && p.Role.Role == Neutral.Scarlet.MyRole)) excludedRoles.Add(Neutral.Scarlet.MyRole);
         return excludedRoles;
     }
@@ -179,7 +183,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
 
                 void PredicateRole()
                 {
-                    var result = ModSingleton<OracleSystem>.Instance.GetRoleCandidate(MyPlayer, playerTracker.CurrentTarget!.RealPlayer, 3);
+                    var result = ModSingleton<OracleSystem>.Instance.GetRoleCandidate(MyPlayer, playerTracker.CurrentTarget!.RealPlayer, NumOfCandidatesOption);
                     var shuffled = Helpers.GetRandomArray(result.Length).Select(i => result[i]).ToArray();
                     divideResults[playerTracker.CurrentTarget!.RealPlayer.PlayerId] = (
                         string.Join(", ", shuffled.Select(r => r.DisplayColoredName)),

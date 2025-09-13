@@ -35,7 +35,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
             .Add<bool>("isRightSide", (structure, val) => structure.isLeftSide = !val)
             .Add<bool>("always", (structure, val) => structure.showAlways = val)
             .Add<bool>("asKillButton", (structure, val) => structure.arrangedAsKillButton = val)
-            .Add<int>("priority", (structure, val) => structure.priority = Mathf.Clamp(val, 0, 9999))
+            .Add<int>("priority", (structure, val) => structure.priority = Mathn.Clamp(val, 0, 9999))
             .Add<string>("rawLabel", (structure, val) => structure.label = new RawTextComponent(val))
             .Add<string>("localizedLabel", (structure, val) => structure.label = new TranslateTextComponent(val))
             .Add<IExecutable>("action", (structure, val) => structure.onClick = val)

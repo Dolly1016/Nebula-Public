@@ -10,6 +10,20 @@ public class ShipStatusPatch
 {
     static public void Prefix(ShipStatus __instance)
     {
+        //マップIDが正しく設定されていなかったときのための救済措置 (ちゃんとオプションが更新されるようにする方がよさそう)
+        byte mapId = 0;
+        if (__instance.TryCast<SkeldShipStatus>())
+            mapId = 0;
+        else if (__instance.TryCast<MiraShipStatus>())
+            mapId = 1;
+        else if (__instance.TryCast<PolusShipStatus>())
+            mapId = 2;
+        else if (__instance.TryCast<AirshipStatus>())
+            mapId = 4;
+        else if (__instance.TryCast<FungleShipStatus>())
+            mapId = 5;
+        AmongUsUtil.GetCurrentNormalOption().MapId = mapId;
+
         //ModdedMap
         if (false)
         {

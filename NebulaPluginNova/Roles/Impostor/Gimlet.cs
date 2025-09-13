@@ -24,6 +24,9 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
     private Gimlet() : base("gimlet", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [DrillCooldownOption, DrillSizeOption, DrillSpeedOption, DrillFrictionResistanceOption, DrillSEStrengthOption, CanKillImpostorOption])
     {
         GameActionTypes.DrillAction = new("gimlet.drill", this, isPhysicalAction: true);
+
+        MetaAbility.RegisterCircle(new("role.gimlet.soundRange", () => DrillSEStrengthOption, () => null, UnityColor));
+        MetaAbility.RegisterCircle(new("role.gimlet.drillSize", () => DrillSizeOption * 0.82f + 0.25f, () => null, UnityColor));
     }
 
     
@@ -89,7 +92,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
                 if(killstreak >= 4) new StaticAchievementToken("gimlet.common2");
             }
 
-            if(SabotageRepairPlayers.Any(tuple => tuple.player.PlayerId == ev.Dead.PlayerId && tuple.time + 10f < (NebulaGameManager.Instance?.CurrentTime ?? 0f)))
+            if(SabotageRepairPlayers.Any(tuple => tuple.player.PlayerId == ev.Dead.PlayerId && tuple.time + 10f > (NebulaGameManager.Instance?.CurrentTime ?? 0f)))
             {
                 lastSabotageDead = ev.Dead;
             }
@@ -109,7 +112,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
             var task = ev.Console.FindTask(PlayerControl.LocalPlayer);
             if (task.TryCast<SabotageTask>())
             {
-
+                RpcBeginSabotageMinigame.Invoke(ev.Player);
             }
         }
 
@@ -133,8 +136,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
     private const string GimletSizeAttrTag = "nebula::gimlet::size";
     private readonly static MultiImage DrillImage = DividedSpriteLoader.FromResource("Nebula.Resources.Drill.png", 100f, 3, 3);
 
-    private static float DrillSize => 0.82f * DrillSizeOption;
-    private static float DrillVisualSize => Mathf.Max(0.7f, 0.82f * DrillSizeOption);
+    private static float DrillVisualSize => Mathn.Max(0.7f, 0.82f * DrillSizeOption);
 
     static readonly private RemoteProcess<(GamePlayer player, Vector2 pos, float degree)> RpcDrill = new("Drill", (message, _)=>{
         NebulaManager.Instance.StartCoroutine(CoDrill(message.player, message.pos, message.degree).WrapToIl2Cpp());

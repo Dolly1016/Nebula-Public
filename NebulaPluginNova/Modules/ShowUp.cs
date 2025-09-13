@@ -212,7 +212,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
 
         string text = player.name;
         string titleText = "";
-        if (NebulaGameManager.Instance!.TitleMap.TryGetValue(player.PlayerId, out var title) && title != null) titleText = title.GetTitleComponent(null).GetString();
+        if (NebulaGameManager.Instance!.TitleMap.TryGetValue(player.PlayerId, out var title) && title != null) titleText = title.GetLocalizedText();
 
         NebulaManager.Instance.StartCoroutine(ManagedEffects.Wait(() => AnyoneShowedUp, () =>
         {

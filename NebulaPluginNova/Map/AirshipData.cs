@@ -142,7 +142,7 @@ public class AirshipData : MapData
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
 
     protected override SystemTypes[] SabotageTypes => [SystemTypes.HeliSabotage, SystemTypes.Comms, SystemTypes.Electrical];
-    override public Vector2[][] RaiderIgnoreArea { get => [
+    override public Vector2[][] RaiderIgnoreArea { get; } = [
         [new(9.87f,9.78f),new(9.87f,7.8f), new(5.81f,7.8f),new(5.81f,9.78f)],//昇降機上
         [new(10.64f,6.39f), new(10.64f, 5.49f), new(10.1f, 5.49f), new(10.1f, 6.39f)],//昇降機下
         [new(26.66f,1.16f),new(28.17f,1.16f),new(28.17f,-2.5f),new(26.66f,-2.5f)],//通気口
@@ -150,8 +150,7 @@ public class AirshipData : MapData
         [new(9.8f, -14.5f), new(9.8f, -17.5f), new(4.2f, -17.5f), new(4.2f, -14.5f)],//セキュ下展望
         [new(5.5f, -14.5f), new(5.5f, -17.5f), new(4.8f, -17.5f), new(4.8f, -14.5f)],//セキュ下展望左端
         [new(-11.7f, -14f), new(-11.7f, -18f), new(-13.7f, -18f), new(-13.7f, -14f)],//左展望
-
-        ]; }
+        ];
 
     protected override IDividedSpriteLoader SealedVentSprite => SkeldData.SealedVentSpriteSkeld;
     private HashSet<string> altSealedVents = ["EjectionVent", "HallwayVent2"];
@@ -172,4 +171,27 @@ public class AirshipData : MapData
         if (2.9f < position.x && position.x < 16.1f && 5.7f < position.y && position.y < 11.9f) return WindType.AirshipGapRoom;
         return WindType.NoWind;
     }
+
+    public override (SystemTypes room, Vector2 pos)[] AdminRooms { get; } = [
+        (SystemTypes.Cockpit, new(-20.5f,2f)),
+        (SystemTypes.Armory, new(-12.1f,-6.3f)),
+        (SystemTypes.Comms, new(-12.9f,3f)),
+        (SystemTypes.Engine, new(-2f,0f)),
+        (SystemTypes.ViewingDeck, new(-13.5f,-14.5f)),
+        (SystemTypes.Kitchen, new(-5.0f,-8.3f)),
+        (SystemTypes.HallOfPortraits, new(1.5f,-15.2f)),
+        (SystemTypes.Security, new(7.0f,-9f)),
+        (SystemTypes.Electrical, new(16.3f,-8.8f)),
+        (SystemTypes.MainHall, new(10.6f,-0.1f)),
+        (SystemTypes.Showers, new(21.0f,0.0f)),
+        (SystemTypes.Ventilation, new(27.5f,2.6f)),
+        (SystemTypes.Medical, new(28.4f,-6.8f)),
+        (SystemTypes.CargoBay, new(35f,-1.5f)),
+        (SystemTypes.Lounge, new(29.0f,6.4f)),
+        (SystemTypes.Records, new(19.8f,9.1f)),
+        (SystemTypes.GapRoom, new(9.9f,9f)),
+        (SystemTypes.MeetingRoom, new(10.2f,17.5f)),
+        (SystemTypes.Brig, new(-0.4f,12f)),
+        (SystemTypes.VaultRoom, new(-8.7f,8.0f)),
+        ];
 }

@@ -263,11 +263,11 @@ public class ClientOption
 
     static public IEnumerator CoChangeAmbientVolume(bool mute) {
         float volume = DataManager.Settings.Audio.AmbienceVolume;
-        float fromVol = Mathf.Pow(10f, Mathf.Clamp(SoundManager.ambienceVolume / 20f, -4f, 0f));
+        float fromVol = Mathn.Pow(10f, Mathn.Clamp(SoundManager.ambienceVolume / 20f, -4f, 0f));
         float toVol = mute ? 0f : volume;
         return ManagedEffects.Lerp(0.8f, p => {
             float lastVal = 0f;
-            SoundManager.Instance.SetChannelVolume(Mathf.Lerp(fromVol, toVol, p), ref lastVal, "AmbienceVolume");
+            SoundManager.Instance.SetChannelVolume(Mathn.Lerp(fromVol, toVol, p), ref lastVal, "AmbienceVolume");
             SoundManager.ambienceVolume = lastVal;
         });
     }

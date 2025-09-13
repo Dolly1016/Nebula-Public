@@ -1,5 +1,6 @@
 ﻿using NAudio.MediaFoundation;
 using Nebula.Behavior;
+using Nebula.Map;
 using System.Reflection.Metadata;
 using Virial.Events.Game.Minimap;
 using Virial.Game;
@@ -73,49 +74,58 @@ public static class CountOverlayUpdatePatch
         void AddToMask(byte playerId) => mask |= (1 << playerId);
 
         FakeAdmin admin = MapBehaviourExtension.AffectedByFakeAdmin ? FakeInformation.Instance!.CurrentAdmin : FakeInformation.AdminFromActuals;
-
+        var roomFlags = MapData.GetCurrentMapData().AdminRooms;
         foreach (var counterArea in __instance.CountAreas)
         {
-            if (ShipStatus.Instance.FastRooms.TryGetValue(counterArea.RoomType, out var plainShipRoom) && plainShipRoom.roomArea)
+            var index = roomFlags.FindIndex(e => e.room == counterArea.RoomType);
+            if (index != -1 && (MapBehaviourExtension.RoomFlag & (0b10 << index)) == 0)
             {
-                int counter = 0;
-                int deadBodies = 0, impostors = 0;
-
-                if (MeetingHud.Instance)
+                counterArea.UpdateCount(0, 0, 0);
+            }
+            else
+            {
+                if (ShipStatus.Instance.FastRooms.TryGetValue(counterArea.RoomType, out var plainShipRoom) && plainShipRoom.roomArea)
                 {
-                    //会議中のアドミン (PreMeetingPointを参照する)
-                    foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
-                    {
-                        if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.Unbox().PreMeetingPoint) && !AlreadyAdded(p.PlayerId)) {
-                            AddToMask(p.PlayerId);
-                            counter++;
-                            if (p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
-                        }
-                    }
-                }
-                else
-                {
-                    //タスクターン中のアドミン
-                    foreach(var p in admin.Players)
-                    {
-                        if (p.isDead && !MapBehaviourExtension.ShowDeadBodies) continue;
-                        if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetPlayer(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
+                    int counter = 0;
+                    int deadBodies = 0, impostors = 0;
 
-                        if (AlreadyAdded(p.playerId)) continue;
-
-                        if (plainShipRoom.roomArea.OverlapPoint(p.position))
+                    if (MeetingHud.Instance)
+                    {
+                        //会議中のアドミン (PreMeetingPointを参照する)
+                        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                         {
-                            counter++;
-
-                            if (p.isDead && MapBehaviourExtension.CanIdentifyDeadBodies) deadBodies++;
-                            if (p.isImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
-
-                            AddToMask(p.playerId);
+                            if (!p.IsDead && plainShipRoom.roomArea.OverlapPoint(p.Unbox().PreMeetingPoint) && !AlreadyAdded(p.PlayerId))
+                            {
+                                AddToMask(p.PlayerId);
+                                counter++;
+                                if (p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
+                            }
                         }
                     }
-                }
+                    else
+                    {
+                        //タスクターン中のアドミン
+                        foreach (var p in admin.Players)
+                        {
+                            if (p.isDead && !MapBehaviourExtension.ShowDeadBodies) continue;
+                            if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetPlayer(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
 
-                counterArea.UpdateCount(counter, impostors, deadBodies);
+                            if (AlreadyAdded(p.playerId)) continue;
+
+                            if (plainShipRoom.roomArea.OverlapPoint(p.position))
+                            {
+                                counter++;
+
+                                if (p.isDead && MapBehaviourExtension.CanIdentifyDeadBodies) deadBodies++;
+                                if (p.isImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
+
+                                AddToMask(p.playerId);
+                            }
+                        }
+                    }
+
+                    counterArea.UpdateCount(counter, impostors, deadBodies);
+                }
             }
         }
 
@@ -205,6 +215,7 @@ static class MapBehaviourGenericShowPatch
     static void Postfix(MapBehaviour __instance)
     {
         __instance.transform.localPosition = new Vector3(0, 0, -50f);
+        __instance.ColorControl.GetComponent<SpriteRenderer>().sprite = ShipStatus.Instance.MapPrefab.ColorControl.GetComponent<SpriteRenderer>().sprite;
         MapBehaviourExtension.UpdateScale(__instance);
     }
 }

@@ -39,6 +39,7 @@ using Hazel.Udp;
 using BepInEx.Configuration;
 using Virial.Utilities;
 using System.Runtime.Loader;
+using AmongUs.Data.Player;
 
 [assembly: System.Reflection.AssemblyFileVersionAttribute(Nebula.NebulaPlugin.PluginEpochStr + "."  + Nebula.NebulaPlugin.PluginBuildNumStr)]
 
@@ -49,14 +50,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.25.0.0";
+    public const string PluginVersion = "2.25.4.2";
 
-    public const string VisualVersion = "v2.25";
-    //public const string VisualVersion = "Snapshot 25.08.09a";
+    //public const string VisualVersion = "v2.25.4.2";
+    public const string VisualVersion = "Snapshot 25.09.13b";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
-    public const string PluginEpochStr = "107";
-    public const string PluginBuildNumStr = "1435";
+    public const string PluginEpochStr = "108";
+    public const string PluginBuildNumStr = "1454";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -104,12 +105,16 @@ public class NebulaPlugin
 
     static public void Load()
     {
-        
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Core.dll")!.ReadBytes()));
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Wasapi.dll")!.ReadBytes()));
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.WinMM.dll")!.ReadBytes()));
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.OpusDotNet.dll")!.ReadBytes()));
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes()));
+        void LoadLibrary(string path)
+        {
+            using var stream = StreamHelper.OpenFromResource(path);
+            if(stream != null) NebulaPlugin.NoSAssemblyContext.LoadFromStream(stream);
+        }
+        LoadLibrary("Nebula.Resources.API.NAudio.Core.dll");
+        LoadLibrary("Nebula.Resources.API.NAudio.Wasapi.dll");
+        LoadLibrary("Nebula.Resources.API.NAudio.WinMM.dll");
+        LoadLibrary("Nebula.Resources.API.OpusDotNet.dll");
+        LoadLibrary("Nebula.Resources.API.NebulaAPI.dll");
         /*
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Core.dll")!.ReadBytes());
         Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Wasapi.dll")!.ReadBytes());
@@ -166,19 +171,9 @@ public static class AmongUsClientAwakePatch
     }
 }
 
-/*
-[HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
-public static class AmBannedPatch
-{
-    public static void Postfix(out bool __result)
-    {
-        __result = false;
-    }
-}
-*/
 
 [HarmonyPatch(typeof(AprilFoolsMode), nameof(AprilFoolsMode.ShouldFlipSkeld))]
-public static class AmBannedPatch
+public static class AprilFoolsModePatch
 {
     public static bool Prefix(out bool __result)
     {

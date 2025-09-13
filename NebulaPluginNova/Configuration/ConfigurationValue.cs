@@ -166,7 +166,7 @@ internal static class ConfigurationValues
                 int done = 0;
                 while (done < AllEntries.Count)
                 {
-                    int max = Mathf.Min(AllEntries.Count, done + 100);
+                    int max = Mathn.Min(AllEntries.Count, done + 100);
                     yield return new Tuple<int, int>(done, max);
                     done = max;
                 }

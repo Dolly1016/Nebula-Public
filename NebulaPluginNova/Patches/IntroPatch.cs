@@ -91,7 +91,7 @@ public static class ShowIntroPatch
         __instance.BackgroundBar.material.SetColor("_Color", fromC);
         __instance.TeamTitle.text = Language.Translate(myInfo.Role.Role.Team.TranslationKey);
         __instance.TeamTitle.color = fromC;
-        int maxDepth = Mathf.CeilToInt(7.5f);
+        int maxDepth = Mathn.CeilToInt(7.5f);
         for (int i = 0; i < shownPlayers.Length; i++)
         {
             PlayerControl playerControl = shownPlayers[i];
@@ -121,9 +121,9 @@ public static class ShowIntroPatch
         while (timer < duration)
         {
             timer += Time.deltaTime;
-            float num = Mathf.Min(1f, timer / duration);
+            float num = Mathn.Min(1f, timer / duration);
             __instance.Foreground.material.SetFloat("_Rad", __instance.ForegroundRadius.ExpOutLerp(num * 2f));
-            fade.a = Mathf.Lerp(1f, 0f, num * 3f);
+            fade.a = Mathn.Lerp(1f, 0f, num * 3f);
             __instance.FrontMost.color = fade;
 
 
@@ -131,14 +131,14 @@ public static class ShowIntroPatch
             __instance.BackgroundBar.material.SetColor("_Color", Color.Lerp(fromC, toC, p));
 
             Color c = fromC;
-            c.a = Mathf.Clamp(FloatRange.ExpOutLerp(num, 0f, 1f), 0f, 1f);
+            c.a = Mathn.Clamp(FloatRange.ExpOutLerp(num, 0f, 1f), 0f, 1f);
             __instance.TeamTitle.color = c;
             __instance.RoleText.color = c;
-            impColor.a = Mathf.Lerp(0f, 1f, (num - 0.3f) * 3f);
+            impColor.a = Mathn.Lerp(0f, 1f, (num - 0.3f) * 3f);
             __instance.ImpostorText.color = impColor;
             titlePos.y = 2.7f - num * 0.3f;
             __instance.TeamTitle.transform.localPosition = titlePos;
-            __instance.overlayHandle.color = c.AlphaMultiplied(Mathf.Min(1f, timer * 2f));
+            __instance.overlayHandle.color = c.AlphaMultiplied(Mathn.Min(1f, timer * 2f));
             yield return null;
         }
         timer = 0f;
@@ -146,7 +146,7 @@ public static class ShowIntroPatch
         {
             timer += Time.deltaTime;
             float num2 = timer / 1f;
-            fade.a = Mathf.Lerp(0f, 1f, num2 * 3f);
+            fade.a = Mathn.Lerp(0f, 1f, num2 * 3f);
             __instance.FrontMost.color = fade;
             __instance.overlayHandle.color = fromC.AlphaMultiplied(1f - fade.a);
             yield return null;

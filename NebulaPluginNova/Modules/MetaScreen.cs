@@ -86,7 +86,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return 0f;
         }
 
-        size.x = size.x > 0f ? Mathf.Min(MaxWidth ?? size.x, size.x) : (MaxWidth ?? size.x);
+        size.x = size.x > 0f ? Mathn.Min(MaxWidth ?? size.x, size.x) : (MaxWidth ?? size.x);
 
         float widthMin = size.x / 2;
         float widthMax = cursor.x;
@@ -243,7 +243,8 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
                     renderer.color = new Color(0.05f, 0.2f, 1f, 1f);
 
                     var canvas = UnityHelper.CreateObject("OnMapContent", renderer.transform, new Vector3(0, 0, -1f));
-
+                    var order = canvas.AddComponent<SortingGroup>();
+                    order.sortingOrder = 15;
                     var posCenter = VanillaAsset.GetMapCenter(mapId);
                     var posScale = VanillaAsset.GetMapScale(mapId);
                     Vector2 GetMapPos(Vector2 pos) => (Vector2)(pos / posScale) + posCenter;
@@ -616,7 +617,12 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         public float Generate(GameObject screen, Vector2 center, out float width)
         {
             var result = Widget.Instantiate(new Anchor(new(0.5f, 0.5f), new(0f, 0f)), new(10f, 10f), out var actual);
-            if (result != null) result.transform.SetParent(screen.transform, false);
+            if (result != null)
+            {
+                result.transform.SetParent(screen.transform, false);
+                var z = result.transform.localPosition.z;
+                result.transform.localPosition = center.AsVector3(z);
+            }
 
             width = actual.Width;
             return actual.Height;
@@ -764,7 +770,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
 
             if (ScrollerTag != null && distDic.TryGetValue(ScrollerTag, out var val))
                 scroller.Inner.transform.localPosition = scroller.Inner.transform.localPosition +
-                    new Vector3(0f, Mathf.Clamp(val + scroller.ContentYBounds.min, scroller.ContentYBounds.min, scroller.ContentYBounds.max), 0f);
+                    new Vector3(0f, Mathn.Clamp(val + scroller.ContentYBounds.min, scroller.ContentYBounds.min, scroller.ContentYBounds.max), 0f);
             if(ScrollerTag != null)
             {
                 scroller.Inner.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += () => { distDic[ScrollerTag] = scroller.Inner.transform.localPosition.y - scroller.ContentYBounds.min; };
@@ -984,8 +990,8 @@ public class ParallelWidgetOld : IMetaWidgetOld
             float myX = (c.Item2 / sum) * size.x;
             float temp = c.Item1.Generate(screen, cursor, new Vector2(myX, size.y),out var innerWidth);
 
-            widthMin = Mathf.Min(widthMin, innerWidth.min);
-            widthMax = Mathf.Min(widthMax, innerWidth.max);
+            widthMin = Mathn.Min(widthMin, innerWidth.min);
+            widthMax = Mathn.Min(widthMax, innerWidth.max);
 
             cursor.x += myX;
             if (temp > height) height = temp;
@@ -1022,7 +1028,7 @@ public class CombinedWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         foreach(var c in contents)
         {
             var alloc = UnityHelper.CreateObject("Allocator", combinedScreen.transform, new Vector3(x, 0f, 0f));
-            height = Mathf.Max(height, c.Generate(alloc, Vector2.zero,out float cWidth));
+            height = Mathn.Max(height, c.Generate(alloc, Vector2.zero,out float cWidth));
             alloc.transform.localPosition += new Vector3(cWidth * 0.5f, 0f);
             x += cWidth;
         }
@@ -1059,7 +1065,7 @@ public class CombinedWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         foreach (var c in contents)
         {
             var alloc = UnityHelper.CreateObject("Allocator", combinedScreen.transform, new Vector3(x, 0f, 0f));
-            height = Mathf.Max(height, c.Generate(alloc, Vector2.zero, out float cWidth));
+            height = Mathn.Max(height, c.Generate(alloc, Vector2.zero, out float cWidth));
             alloc.transform.localPosition += new Vector3(cWidth * 0.5f, 0f);
             x += cWidth;
         }

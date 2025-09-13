@@ -44,7 +44,9 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
     static public Jackal MyRole = new Jackal();
     static private GameStatsEntry StatsSidekick = NebulaAPI.CreateStatsEntry("stats.jackal.sidekick", GameStatsCategory.Roles, MyRole);
-    
+
+    bool DefinedRole.IsKiller => true;
+
     public static bool IsJackalLeader(GamePlayer player, int teamId, bool excludeDefeatedJackal = false)
     {
         if (player.Role is Instance j) return j.JackalTeamId == teamId && (!excludeDefeatedJackal || !j.IsDefeatedJackal);
@@ -223,7 +225,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                             if (inherited > 0) new StaticAchievementToken("sidekick.common2");
                             StatsSidekick.Progress();
                         },
-                        _ => LeftKillingToCreateSidekick <= 0,
+                        _ => LeftKillingToCreateSidekick <= 0 && !MyPlayer.IsDived,
                         _ => !hasSidekick);
 
                     if (LeftKillingToCreateSidekick > 0)
@@ -233,16 +235,17 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                     }
                 }
 
-                var killButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, true, false, Virial.Compat.VirtualKeyInput.Kill, null,
-                    KillCooldown,"kill", null!,
+                var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
+                    KillCooldown, "kill", ModAbilityButton.LabelType.Impostor, null!,
+                    (target, _) =>
+                    {
+                        MyPlayer.MurderPlayer(target!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
+                        NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
+                    },
+                    null,
                     _ => myTracker.CurrentTarget != null && !MyPlayer.IsDived,
                     _ => MyPlayer.AllowToShowKillButtonByAbilities
-                    ).SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
-                killButton.OnClick = (button) =>
-                {
-                    MyPlayer.MurderPlayer(myTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
-                    NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
-                };
+                    );
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
 
                 GameOperatorManager.Instance?.Subscribe<PlayerMurderedEvent>(ev =>
@@ -418,7 +421,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
     static public Sidekick MyRole = new Sidekick();
     static public bool SidekickShouldBeCountAsKillers => CanPromoteToJackal || (!IsModifierOption && SidekickCanKillOption);
     bool ISpawnable.IsSpawnable { get => (Jackal.MyRole as DefinedSingleAssignable).IsSpawnable && Jackal.CanCreateSidekickOption && !IsModifierOption; }
-
+    bool DefinedRole.IsKiller => SidekickShouldBeCountAsKillers;
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

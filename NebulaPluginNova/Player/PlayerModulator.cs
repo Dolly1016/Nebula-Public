@@ -155,5 +155,5 @@ public class SpeedModulator : TimeLimitedModulator
 
     public bool IsAccelModulator => (IsMultiplier ? AbsNum > 1f : AbsNum > 0f) || AbsDirectionalNum.x > 1f || AbsDirectionalNum.y > 1f;
     public bool IsDecelModulator => (IsMultiplier ? AbsNum < 1f : AbsNum < 0f) || AbsDirectionalNum.x < 1f || AbsDirectionalNum.y < 1f;
-    public bool IsInverseModulator => (IsMultiplier ? Num < 0f : false) || DirectionalNum.x < 0f || DirectionalNum.w < 0f || Mathf.Abs(DirectionalNum.y) > 0f || Mathf.Abs(DirectionalNum.z) > 0f;
+    public bool IsInverseModulator => (IsMultiplier ? Num < 0f : false) || DirectionalNum.x < 0f || DirectionalNum.w < 0f || Mathn.Abs(DirectionalNum.y) > 0f || Mathn.Abs(DirectionalNum.z) > 0f;
 }

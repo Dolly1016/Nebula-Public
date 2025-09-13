@@ -16,6 +16,7 @@ public class DeadBody
     public bool IsActive => VanillaDeadBody;
     public Player Player { get; private init; }
     public Player? CurrentHolder { get; internal set; }
+    public bool IsFullyDissolved => (VanillaDeadBody.ParentId & 0x80) != 0;
 
     internal DeadBody(global::DeadBody vanillaDeadBody, int id, Player player)
     {

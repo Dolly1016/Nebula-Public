@@ -230,6 +230,28 @@ public class NebulaSettingMenu : MonoBehaviour
             UpdateRightImage(h.Illustration);
         }
 
+        void SetUpButton(IConfigurationHolder holder, PassiveButton button)
+        {
+            button.OnMouseOver.AddListener(() =>
+            {
+                ShowOptionsOnRightViewer(holder);
+            });
+
+            if (CurrentTab != ConfigurationTab.Settings)
+            {
+                var exButton = button.gameObject.AddComponent<ExtraPassiveBehaviour>();
+                exButton.OnRightClicked = () =>
+                {
+                    var text = "【" + holder.Title.GetString() + "】\n" + holder.Detail.GetString();
+                    text = text.Replace("<br>", "\n");
+                    ClipboardHelper.PutClipboardString(Regex.Replace(text, "<[^<>]*>", ""));
+                    NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.copied"));
+                };
+                button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                //button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.click")));
+            }
+        }
+
         if (ClientOption.UseSimpleConfigurationViewerEntry.Value)
         {
             widget.Append(holders,
@@ -241,10 +263,7 @@ public class NebulaSettingMenu : MonoBehaviour
                         renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                         renderer.sortingOrder = 10;
 
-                        button.OnMouseOver.AddListener(() =>
-                        {
-                            ShowOptionsOnRightViewer(h);
-                        });
+                        SetUpButton(h, button);
                     },
                     Alignment = IMetaWidgetOld.AlignmentOption.Center,
                     Color = HolderToColor(h)
@@ -292,24 +311,7 @@ public class NebulaSettingMenu : MonoBehaviour
                             tagCount++;
                         }
 
-                        button.OnMouseOver.AddListener(() =>
-                        {
-                            ShowOptionsOnRightViewer(copiedHolder);
-                        });
-
-                        if(CurrentTab != ConfigurationTab.Settings)
-                        {
-                            var exButton = button.gameObject.AddComponent<ExtraPassiveBehaviour>();
-                            exButton.OnRightClicked = () =>
-                            {
-                                var text = "【" + holder.Title.GetString() + "】\n" + holder.Detail.GetString();
-                                text = text.Replace("<br>", "\n");
-                                ClipboardHelper.PutClipboardString(Regex.Replace(text, "<[^<>]*>", ""));
-                                NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.copied"));
-                            };
-                            //button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.configuration.click")));
-                            //button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-                        }
+                        SetUpButton(holder, button);
                     },
                     Alignment = IMetaWidgetOld.AlignmentOption.Center,
                     Color = HolderToColor(copiedHolder)

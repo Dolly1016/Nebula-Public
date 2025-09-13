@@ -364,7 +364,7 @@ public class SerializableDocument : IDocument
 
             float fontSize = FontSize.HasValue ? FontSize.Value : attr.FontSize.FontSizeDefault;
             attr = new(attr) {
-                FontSize = new Virial.Text.FontSize(fontSize, Mathf.Min(fontSize, attr.FontSize.FontSizeMin), Mathf.Max(fontSize, attr.FontSize.FontSizeMax)),
+                FontSize = new Virial.Text.FontSize(fontSize, Mathn.Min(fontSize, attr.FontSize.FontSizeMin), Mathn.Max(fontSize, attr.FontSize.FontSizeMax)),
                 Color = new(Color?.AsColor(arguments) ?? UnityEngine.Color.white),
                 Style = IsBold.HasValue ? (IsBold.Value ? Virial.Text.FontStyle.Bold : Virial.Text.FontStyle.Normal) : attr.Style,
                 Alignment = GetTextAlignment(),
@@ -490,7 +490,7 @@ public class SerializableDocument : IDocument
 
 static public class DocumentTipManager
 {
-    static private OrderedList<WinConditionTip, int> endConditionList = OrderedList<WinConditionTip, int>.AscendingList(end => end.End.Id);
+    static private OrderedList<WinConditionTip, int> endConditionList = OrderedList<WinConditionTip, int>.AscendingList(end => (end.End.Priority << 16) | (end.End.Id & 0xFFFF));
     static public IEnumerable<WinConditionTip> WinConditionTips => endConditionList.Where(e => e.IsActive);
     public static void Register(IDocumentTip tip)
     {

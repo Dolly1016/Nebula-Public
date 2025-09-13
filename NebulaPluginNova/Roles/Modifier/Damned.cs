@@ -14,12 +14,14 @@ namespace Nebula.Roles.Modifier;
 [NebulaRPCHolder]
 public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
-    private Damned() : base("damned", "DMD", new(Palette.ImpostorRed), [TakeOverRoleOfKillerOption, DamnedMurderMyKillerOption, KillDelayOption]) {
+    private Damned() : base("damned", "DMD", new(Palette.ImpostorRed), [DamnedActionOption, DamnedMurderMyKillerOption, KillDelayOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Damned.png");
     }
     
-    static private BoolConfiguration TakeOverRoleOfKillerOption = NebulaAPI.Configurations.Configuration("options.role.damned.takeOverRoleOfKiller", true);
+    //static private BoolConfiguration TakeOverRoleOfKillerOption = NebulaAPI.Configurations.Configuration("options.role.damned.takeOverRoleOfKiller", true);
+    //static private BoolConfiguration PromoteToMadmateOption = NebulaAPI.Configurations.Configuration("options.role.damned.promoteToMadmate", false);
+    static private ValueConfiguration<int> DamnedActionOption = NebulaAPI.Configurations.Configuration("options.role.damned.damnedAction", ["options.role.damned.damnedAction.impostor", "options.role.damned.damnedAction.takeOver", "options.role.damned.damnedAction.madmate"], 0);
     static private BoolConfiguration DamnedMurderMyKillerOption = NebulaAPI.Configurations.Configuration("options.role.damned.damnedMurderMyKiller", true);
     static private FloatConfiguration KillDelayOption = NebulaAPI.Configurations.Configuration("options.role.damned.killDelay", (0f, 20f, 2.5f), 0f, FloatConfigurationDecorator.Second);
 
@@ -93,8 +95,13 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                 {
                     yield return Effects.Wait(KillDelayOption);
 
-                    DefinedRole myNextRole = TakeOverRoleOfKillerOption ? nextRole! : Impostor.DamnedImpostor.MyRole;
-                    var myNextArgs = TakeOverRoleOfKillerOption ? nextArgs! : null;
+                    DefinedRole myNextRole = DamnedActionOption.GetValue() switch
+                    {
+                        0 => Impostor.DamnedImpostor.MyRole,
+                        1 => nextRole,
+                        _ => Crewmate.Madmate.MyRole,
+                    };
+                    var myNextArgs = DamnedActionOption.GetValue() == 1 ? nextArgs! : null;
                     CheckAchievement(myNextRole);
 
                     using (RPCRouter.CreateSection("DamedAction"))
@@ -136,15 +143,20 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
         void OnMurdered(PlayerMurderedEvent ev) { 
             if(ev.Murderer.Role.Role == Avenger.MyRole && (ev.Murderer.Role as Avenger.Instance)?.AvengerTarget == ev.Dead && ev.Dead.PlayerState == PlayerState.Dead)
             {
-                nextRole = TakeOverRoleOfKillerOption ? ev.Dead.Role.Role : Impostor.DamnedImpostor.MyRole;
-                nextArgs = TakeOverRoleOfKillerOption ? ev.Dead.Role.RoleArguments : [];
-                GamePlayer? loverPair = null;
-                if (ev.Murderer.TryGetModifier<Lover.Instance>(out var lover)) loverPair = lover.MyLover.Get();
+                nextRole = DamnedActionOption.GetValue() switch
+                {
+                    0 => Impostor.DamnedImpostor.MyRole,
+                    1 => ev.Dead.Role.Role,
+                    _ => Crewmate.Madmate.MyRole
+                };
+                nextArgs = DamnedActionOption.GetValue() == 1 ? ev.Dead.Role.RoleArguments : [];
+                GamePlayer[] lovers = ev.Murderer.GetModifiers<Lover.Instance>().Select(lover => lover.MyLover.Get()).ToArray();
+                
 
                 using (RPCRouter.CreateSection("DamedAction"))
                 {
                     ev.Murderer.RemoveModifier(Lover.MyRole);
-                    loverPair?.RemoveModifier(Lover.MyRole);
+                    foreach(var l in lovers) l?.RemoveModifier(Lover.MyRole);
                     ev.Murderer.SetRole(nextRole, nextArgs);
                     ev.Dead.SetRole(Ember.MyRole);
                 }
@@ -158,8 +170,13 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
             {
                 NebulaManager.Instance.ScheduleDelayAction(() =>
                 {
-                    DefinedRole myNextRole = TakeOverRoleOfKillerOption ? nextRole! : Impostor.DamnedImpostor.MyRole;
-                    var myNextArgs = TakeOverRoleOfKillerOption ? nextArgs! : null;
+                    DefinedRole myNextRole = DamnedActionOption.GetValue() switch
+                    {
+                        0 => Impostor.DamnedImpostor.MyRole,
+                        1 => nextRole!,
+                        _ => Crewmate.Madmate.MyRole
+                    };
+                    var myNextArgs = DamnedActionOption.GetValue() == 1 ? nextArgs : [];
                     CheckAchievement(myNextRole);
 
                     using (RPCRouter.CreateSection("DamnedAction"))

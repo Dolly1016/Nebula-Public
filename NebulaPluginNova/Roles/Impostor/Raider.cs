@@ -82,7 +82,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                 MyRenderer.flipY = diff.x < 0f;
             }
 
-            MyRenderer.transform.eulerAngles = new Vector3(0f, 0f, thrownAngle * 180f / Mathf.PI);
+            MyRenderer.transform.eulerAngles = new Vector3(0f, 0f, thrownAngle * 180f / Mathn.PI);
         }
 
         void HudUpdate(GameHudUpdateEvent ev)
@@ -90,11 +90,11 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
             if (state == 0)
             {
                 if (AmOwner) Owner.Unbox().RequireUpdateMouseAngle();
-                MyRenderer.transform.localEulerAngles = new Vector3(0, 0, Owner.Unbox().MouseAngle * 180f / Mathf.PI);
-                var pos = Owner.VanillaPlayer.transform.position + new Vector3(Mathf.Cos(Owner.Unbox().MouseAngle), Mathf.Sin(Owner.Unbox().MouseAngle), -1f) * 0.67f;
+                MyRenderer.transform.localEulerAngles = new Vector3(0, 0, Owner.Unbox().MouseAngle * 180f / Mathn.PI);
+                var pos = Owner.VanillaPlayer.transform.position + new Vector3(Mathn.Cos(Owner.Unbox().MouseAngle), Mathn.Sin(Owner.Unbox().MouseAngle), -1f) * 0.67f;
                 var diff = (pos - MyRenderer.transform.position) * Time.deltaTime * 7.5f;
                 Position += (Vector2)diff;
-                MyRenderer.flipY = Mathf.Cos(Owner.Unbox().MouseAngle) < 0f;
+                MyRenderer.flipY = Mathn.Cos(Owner.Unbox().MouseAngle) < 0f;
 
                 if (AmOwner)
                 {
@@ -108,7 +108,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
             else if (state == 1)
             {
                 //進行方向ベクトル
-                var vec = new Vector2(Mathf.Cos(thrownAngle), Mathf.Sin(thrownAngle));
+                var vec = new Vector2(Mathn.Cos(thrownAngle), Mathn.Sin(thrownAngle));
 
                 if (AmOwner)
                 {
@@ -134,7 +134,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
 
                                 if(GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(Owner, p, new(IsKillInteraction: true))).IsCanceled ?? false) continue;
 
-                                Owner.MurderPlayer(p, PlayerState.Beaten, EventDetail.Kill, KillParameter.RemoteKill, KillCondition.TargetAlive, result =>
+                                Owner.MurderPlayer(p, PlayerState.Beaten, EventDetail.Kill, KillParameter.RemoteKill, KillCondition.TargetAlive | KillCondition.InTaskPhase, result =>
                                 {
                                     if(result == KillResult.Kill)
                                     {
@@ -188,9 +188,9 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                 if (fakeLocal)
                 {
                     var angle = PlayerModInfo.LocalMouseInfo.angle;
-                    var dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    var dir = new Vector2(Mathn.Cos(angle), Mathn.Sin(angle));
                     MyRenderer.flipY = dir.x < 0f;
-                    MyRenderer.transform.localEulerAngles = new Vector3(0, 0, angle * 180f / Mathf.PI);
+                    MyRenderer.transform.localEulerAngles = new Vector3(0, 0, angle * 180f / Mathn.PI);
                     var hits = Physics2D.RaycastAll(Owner.Position, dir, 0.8f, Constants.ShipAndAllObjectsMask | (1 << LayerExpansion.GetHookshotWallLayer())).Where(h => !h.collider.isTrigger).ToArray();
 
                     if(hits.Length > 0)

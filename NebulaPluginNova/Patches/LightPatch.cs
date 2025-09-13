@@ -39,9 +39,12 @@ public class LightPatch
 
         if (ignoreBlackOut) t = 1f;
 
-        float radiusRate = Mathf.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, t);
+        float radiusRate = Mathn.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, t);
         float range = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(hasImpostorVision ? FloatOptionNames.ImpostorLightMod : FloatOptionNames.CrewLightMod);
-        float rate = GameOperatorManager.Instance?.Run(new LightRangeUpdateEvent(1f)).LightRange ?? 1f;
+        var ev = GameOperatorManager.Instance?.Run(new LightRangeUpdateEvent(1f));
+        float rate = ev?.LightRange ?? 1f;
+        float quickRate = ev?.LightQuickRange ?? 1f;
+
         rate *= GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
 
         lastRange -= (lastRange - rate).Delta(0.7f, 0.005f);
@@ -53,6 +56,7 @@ public class LightPatch
             lastRangeForDive += (1f - lastRangeForDive).Delta(6f, 0.005f);
 
         __result *= lastRangeForDive;
+        __result *= quickRate;
 
         return false;
     }

@@ -28,10 +28,10 @@ public class GuideLineAbility : IGameOperator
     {
         guideRenderer.gameObject.SetActive(predicate.Invoke());
         float angle = player.Unbox().MouseAngle;
-        float degree = angle * 180f / Mathf.PI;
+        float degree = angle * 180f / Mathn.PI;
         guideRenderer.transform.localEulerAngles = new(0f, 0f, degree);
         float p = Mathf.Repeat(Time.time / 1.2f, 1f);
-        guideRenderer.transform.localPosition = (Vector2.right.Rotate(degree) * (1.4f + Mathf.Sin(p * Mathf.PI * 0.5f) * 0.8f)).AsVector3(-10f);
+        guideRenderer.transform.localPosition = (Vector2.right.Rotate(degree) * (1.4f + Mathn.Sin(p * Mathn.PI * 0.5f) * 0.8f)).AsVector3(-10f);
         guideRenderer.color = new(1f, 1f, 1f, 1f - (p * p * p));
     }
 

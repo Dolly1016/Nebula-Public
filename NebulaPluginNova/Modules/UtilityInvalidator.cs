@@ -210,7 +210,7 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
         if (Instance!.ventMap.TryGetValue(message.ventId, out var invalidVent)) level += invalidVent.Level;
         else level--;
 
-        level = Mathf.Clamp(level, 0, 7);
+        level = Mathn.Clamp(level, 0, 7);
         RpcUpdateVentLevel?.LocalInvoke((message.ventId, level, false, -1));
     });
     public static RemoteProcess<(int ventId, int level, bool remove, int graphic)> RpcUpdateVentLevel = new("SetInvalidVentLevel", (message, _) =>
@@ -241,7 +241,7 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
         if (Instance!.doorMap.TryGetValue(message.doorId, out var invalidDoor)) level += invalidDoor.Level;
         else level--;
 
-        level = Mathf.Clamp(level, 0, 7);
+        level = Mathn.Clamp(level, 0, 7);
         RpcUpdateDoorLevel?.LocalInvoke((message.doorId, level, false, -1));
     });
     public static RemoteProcess<(int doorId, int level, bool remove, int graphic)> RpcUpdateDoorLevel = new("SetInvalidDoorLevel", (message, _) =>

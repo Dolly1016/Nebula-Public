@@ -122,7 +122,8 @@ public interface IModuleFactory
             availability = b => tracker.CurrentTarget != null && givenAvailability.Invoke(b);
         }
 
-        SetUpAbilityOrKillButton(button, lifespan, player, input, false, inputHelp, cooldown, isKillButton, label, image, availability, visibility, asGhostButton);
+        SetUpAbilityOrKillButton(button, lifespan, player, input, false, inputHelp, cooldown, !isKillButton, label, image, availability, visibility, asGhostButton);
+        button.SetLabelType(labelType);
         return button;
     }
 

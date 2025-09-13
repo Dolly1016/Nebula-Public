@@ -1,7 +1,9 @@
 ﻿using Nebula.Behavior;
+using Nebula.Map;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
 using Nebula.Roles.Assignment;
+using System.Linq;
 using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
@@ -118,38 +120,27 @@ public static class GeneralConfigurations
         MapEditorOption
         ]);
 
-    static private T MapCustomization<T>(byte mapId, MapOptionType mapOptionType, Vector2 pos,T config) where T : ISharableEntry
+    static private T MapCustomization<T>(byte mapId, MapOptionType mapOptionType, Vector2 pos,T config, int adminIndex = -1) where T : ISharableEntry
     {
-        MapCustomizations[mapId].Add(new(config, pos, mapOptionType));
+        MapCustomizations[mapId].Add(new(config, pos, mapOptionType, adminIndex));
         return config;
     }
 
     internal static List<MapConfiguration>[] MapCustomizations = [[], [], [], [], [], []];
 
-    internal class MapConfiguration {
-        public ISharableEntry Entry { get; init; }
-        public Vector2 Position { get; init; }
-        public MapOptionType OptionType { get; init; }
-
-        public MapConfiguration(ISharableEntry entry, Vector2 position, MapOptionType optionType)
-        {
-            this.Entry = entry;
-            this.Position = position;
-            this.OptionType = optionType;
-        }
-    }
-
-    static internal ISharableVariable<bool> SkeldAdminOption = MapCustomization(0, MapOptionType.Console, new(4.7f,-8.6f), NebulaAPI.Configurations.SharableVariable("options.map.customization.skeld.useAdmin", true));
+    internal record MapConfiguration(ISharableEntry Entry, Vector2 Position, MapOptionType OptionType, int AdminIndex = -1);
+        
+    static internal ISharableVariable<bool> SkeldAdminOption = MapCustomization(0, MapOptionType.Console, new(4.7f,-8.6f), NebulaAPI.Configurations.SharableVariable("options.map.customization.skeld.useAdmin", true), 0);
     static internal ISharableVariable<bool> SkeldCafeVentOption = MapCustomization(0, MapOptionType.Vent, new(-2.4f, 5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.skeld.cafeVent", false));
     static internal ISharableVariable<bool> SkeldStorageVentOption = MapCustomization(0, MapOptionType.Vent, new(-1f, -16.7f), NebulaAPI.Configurations.SharableVariable("options.map.customization.skeld.storageVent", false));
     
-    static internal ISharableVariable<bool> MiraAdminOption = MapCustomization(1, MapOptionType.Console, new(20f, 19f), NebulaAPI.Configurations.SharableVariable("options.map.customization.mira.useAdmin", true));
+    static internal ISharableVariable<bool> MiraAdminOption = MapCustomization(1, MapOptionType.Console, new(20f, 19f), NebulaAPI.Configurations.SharableVariable("options.map.customization.mira.useAdmin", true), 0);
     
-    static internal ISharableVariable<bool> PolusAdminOption = MapCustomization(2, MapOptionType.Console, new(24f, -21.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.polus.useAdmin", true));
+    static internal ISharableVariable<bool> PolusAdminOption = MapCustomization(2, MapOptionType.Console, new(24f, -21.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.polus.useAdmin", true), 0);
     static internal ISharableVariable<bool> PolusSpecimenVentOption = MapCustomization(2, MapOptionType.Vent, new(37f, -22f), NebulaAPI.Configurations.SharableVariable("options.map.customization.polus.specimenVent", false));
     
-    static internal ISharableVariable<bool> AirshipCockpitAdminOption = MapCustomization(4, MapOptionType.Console, new(-22f, 1f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.useCockpitAdmin", true));
-    static internal ISharableVariable<bool> AirshipRecordAdminOption = MapCustomization(4, MapOptionType.Console, new(19.9f, 12f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.useRecordsAdmin", true));
+    static internal ISharableVariable<bool> AirshipCockpitAdminOption = MapCustomization(4, MapOptionType.Console, new(-22f, 1f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.useCockpitAdmin", true), 0);
+    static internal ISharableVariable<bool> AirshipRecordAdminOption = MapCustomization(4, MapOptionType.Console, new(19.9f, 12f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.useRecordsAdmin", true), 1);
     static internal ISharableVariable<bool> AirshipMeetingVentOption = MapCustomization(4, MapOptionType.Vent, new(6.6f, 14f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.meetingVent", false));
     static internal ISharableVariable<bool> AirshipElectricalVentOption = MapCustomization(4, MapOptionType.Vent, new(16.3f, -8.8f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.electricalVent", false));
     static internal ISharableVariable<bool> AirshipOneWayMeetingRoomOption = MapCustomization(4, MapOptionType.Blueprint, new(13.5f, 12.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.oneWayMeetingRoom", false));
@@ -260,17 +251,35 @@ public static class GeneralConfigurations
 
     static public FloatConfiguration EarlyDiscussionReductionOption = NebulaAPI.Configurations.Configuration("options.meeting.earlyDiscussionReduction", (0f, 180f, 15f), 0f, FloatConfigurationDecorator.Second);
     static public FloatConfiguration DeathPenaltyOption = NebulaAPI.Configurations.Configuration("options.meeting.deathPenalty", (0f, 20f, 0.5f), 0f, FloatConfigurationDecorator.Second);
-    static public BoolConfiguration NoticeExtraVictimsOption = NebulaAPI.Configurations.Configuration("options.meeting.noticeExtraVictims", false);
     static public IntegerConfiguration NumOfMeetingsOption = NebulaAPI.Configurations.Configuration("options.meeting.numOfMeeting", (0, 15), 10);
     static public BoolConfiguration EmergencyCooldownAtGameStart = NebulaAPI.Configurations.Configuration("options.meeting.emergencyCooldownAtGameStart", false);
-    static public BoolConfiguration ShowRoleOfExiled = NebulaAPI.Configurations.Configuration("options.meeting.showRoleOfExiled", false, () => GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor);
+    
     static public FloatConfiguration EarlyExtraEmergencyCoolDownOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarly", (0f, 20f, 2.5f), 0f, FloatConfigurationDecorator.Second);
     static public IntegerConfiguration EarlyExtraEmergencyCoolDownCondOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarlyCondition", (1, 10), 2, () => EarlyExtraEmergencyCoolDownOption > 0f || EarlyDiscussionReductionOption > 0f);
     static public BoolConfiguration ShowVoteStateOption = NebulaAPI.Configurations.Configuration("options.meeting.showVoteState", true);
     static public BoolConfiguration ProhibitMeetingTool = NebulaAPI.Configurations.Configuration("options.meeting.prohibitMeetingTool", false);
     static public BoolConfiguration ShortenCooldownAtGameStart = NebulaAPI.Configurations.Configuration("options.meeting.shortenCooldownAtGameStart", true);
     static internal IConfigurationHolder MeetingOptions = NebulaAPI.Configurations.Holder("options.meeting", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        DeathPenaltyOption, NoticeExtraVictimsOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart,ShortenCooldownAtGameStart, EarlyExtraEmergencyCoolDownOption, EarlyDiscussionReductionOption, EarlyExtraEmergencyCoolDownCondOption, ProhibitMeetingTool, ShowVoteStateOption, ShowRoleOfExiled
+        DeathPenaltyOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart,ShortenCooldownAtGameStart, EarlyExtraEmergencyCoolDownOption, EarlyDiscussionReductionOption, EarlyExtraEmergencyCoolDownCondOption, ProhibitMeetingTool, ShowVoteStateOption
+        ]);
+
+    static private bool ConfirmEjectIsEnable() => AmongUsUtil.GetCurrentNormalOption().ConfirmImpostor;
+    static public BoolConfiguration ShowRoleOfExiled = NebulaAPI.Configurations.Configuration("options.meeting.showRoleOfExiled", false, ConfirmEjectIsEnable);
+    static public BoolConfiguration NoticeExtraVictimsOption = NebulaAPI.Configurations.Configuration("options.meeting.noticeExtraVictims", false);
+    static public ValueConfiguration<int> ConfirmEjectConditionOption = NebulaAPI.Configurations.Configuration("options.exile.confirmEjectCondition", [
+        "options.exile.confirmEject.all",
+        "options.exile.confirmEject.impostors",
+        "options.exile.confirmEject.killers",
+        "options.exile.confirmEject.nonCrewmates"
+    ], 0, ConfirmEjectIsEnable);
+    static public ValueConfiguration<int> ConfirmEjectTargetOption = NebulaAPI.Configurations.Configuration("options.exile.confirmEjectTarget", [
+        "options.exile.confirmEject.impostors",
+        "options.exile.confirmEject.killers",
+        "options.exile.confirmEject.nonCrewmates"
+    ], 0, ConfirmEjectIsEnable);
+    static internal IConfigurationHolder ExileOptions = NebulaAPI.Configurations.Holder("options.exile", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
+            NoticeExtraVictimsOption, 
+            new GroupConfiguration("options.exile.group.confirmEject", [ShowRoleOfExiled, ConfirmEjectConditionOption, ConfirmEjectTargetOption], GroupConfigurationColor.Gray, ConfirmEjectIsEnable)
         ]);
 
     static public bool IsInEarlyPhase => (NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.IsDead) ?? 0) < EarlyExtraEmergencyCoolDownCondOption;
@@ -329,7 +338,7 @@ public static class GeneralConfigurations
 
     static private readonly XOnlyDividedSpriteLoader mapCustomizationSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.MapCustomizations.png", 100f, 50, true);
     
-    static void OpenMapConfigurationEditor(MetaScreen? screen, byte? mapId, Func<byte,IEnumerable<(IMetaParallelPlacableOld button, Vector2 pos)>> widgetBuilder)
+    static MetaScreen OpenMapConfigurationEditor(MetaScreen? screen, byte? mapId, Func<byte,IEnumerable<(IMetaParallelPlacableOld button, Vector2 pos)>> widgetBuilder, int mapMask = 0xFFFFFFF, string? altanativeText = null)
     {
         if (screen == null) screen = MetaScreen.GenerateWindow(new(7.5f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, false);
 
@@ -364,17 +373,25 @@ public static class GeneralConfigurations
         }
 
 
-
-        widget.Append(new CombinedWidgetOld(
-            new MetaWidgetOld.Button(() => OpenMapConfigurationEditor(screen, Lessen(),widgetBuilder), new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = "<<" },
-            new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { RawText = Constants.MapNames[mapId.Value] },
-            new MetaWidgetOld.Button(() => OpenMapConfigurationEditor(screen, Increase(), widgetBuilder), new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = ">>" }
-            ));
+        if (altanativeText == null)
+        {
+            widget.Append(new CombinedWidgetOld(
+                new MetaWidgetOld.Button(() => OpenMapConfigurationEditor(screen, Lessen(), widgetBuilder), new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = "<<" },
+                new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { RawText = Constants.MapNames[mapId.Value] },
+                new MetaWidgetOld.Button(() => OpenMapConfigurationEditor(screen, Increase(), widgetBuilder), new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = ">>" }
+                ));
+        }
+        else
+        {
+            widget.Append(new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { RawText = altanativeText, Alignment = IMetaWidgetOld.AlignmentOption.Center });
+        }
         if (mapId.Value is 0 or 4) widget.Append(new MetaWidgetOld.VerticalMargin(0.35f));
 
-        widget.Append(MetaWidgetOld.Image.AsMapImage(mapId.Value, 5.6f, widgetBuilder.Invoke(mapId.Value)));
+        widget.Append(MetaWidgetOld.Image.AsMapImage(mapId.Value, 5.6f, widgetBuilder.Invoke(mapId.Value), mapMask));
 
         screen.SetWidget(widget);
+
+        return screen;
     }
 
     static public void OpenMapEditor(MetaScreen? screen, byte? mapId = null, bool asEditor = true) => OpenMapConfigurationEditor(screen, mapId, mapId =>
@@ -404,19 +421,75 @@ public static class GeneralConfigurations
                             button.OnMouseOver.AddListener(() =>
                             {
                                 MetaWidgetOld widget = new();
-                                widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = c.Entry.Name }).Append(new MetaWidgetOld.WrappedWidget(ConfigurationAssets.GetOptionOverlay(c.Entry.Name)?.Invoke() ?? new GUIEmptyWidget()));
+                                widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = c.Entry.Name });
+                                widget.Append(new MetaWidgetOld.WrappedWidget(ConfigurationAssets.GetOptionOverlay(c.Entry.Name)?.Invoke() ?? new GUIEmptyWidget()));
+                                if (c.AdminIndex != -1) widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = "options.map.customization.admin." + (asEditor ? "editor" : "viewer") });
                                 NebulaManager.Instance.SetHelpWidget(button, widget);
                             });
                             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-                            if(asEditor) button.OnClick.AddListener(() => { variable.ChangeValue(true); renderer.color = variable.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.45f); });
-                            var collider = button.gameObject.AddComponent<BoxCollider2D>();
+                            if (asEditor) {
+                                button.OnClick.AddListener(() => { variable.ChangeValue(true); renderer.color = variable.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.45f); });
+
+                                if (c.AdminIndex != -1)
+                                {
+                                    button.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked = () => {
+                                        OpenAdminEditor(null, mapId, c.AdminIndex, true);
+                                    };
+                                }
+                            }
+                            else
+                            {
+                                if(c.AdminIndex != -1)
+                                {
+                                    button.OnClick.AddListener(() => { OpenAdminEditor(null, mapId, c.AdminIndex, false); });
+                                }
+                            }
+                                var collider = button.gameObject.AddComponent<BoxCollider2D>();
                             collider.isTrigger = true;
                             collider.size = new(0.5f, 0.5f);
+
+                            
                         }
                     }, c.Position);
                 };
             })
     );
+
+    static public readonly ISharableVariable<int>[][] AdminRoomOptions = [
+        [NebulaAPI.Configurations.SharableVariable("options.map.customization.skeld.adminRooms", 0xFFFFFFF, 0xFFFFFFF)],
+        [NebulaAPI.Configurations.SharableVariable("options.map.customization.mira.adminRooms", 0xFFFFFFF, 0xFFFFFFF)],
+        [NebulaAPI.Configurations.SharableVariable("options.map.customization.polus.adminRooms", 0xFFFFFFF, 0xFFFFFFF)],
+        [],
+        [
+            NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.adminRooms.cockpit", 0xFFFFFFF, 0xFFFFFFF),
+            NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.adminRooms.record", 0xFFFFFFF, 0xFFFFFFF),
+        ],
+        [],
+        ];
+    static public void OpenAdminEditor(MetaScreen? screen, byte mapId, int adminIndex, bool asEditor = true)
+    {
+        screen = OpenMapConfigurationEditor(screen, mapId, mapId =>
+            {
+                var rooms = MapData.GetMapData(mapId).AdminRooms;
+                var option = AdminRoomOptions[mapId][adminIndex];
+
+                if (asEditor)
+                {
+                    return Helpers.Sequential(rooms.Length).Select(i => ((IMetaParallelPlacableOld button, Vector2 pos))(new MetaWidgetOld.WrappedWidget(GUI.API.Button(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), GUI.API.RawTextComponent(TranslationController.Instance.GetString(rooms[i].room)),
+                        _ =>
+                        {
+                            option.CurrentValue ^= 1 << i;
+                            OpenAdminEditor(screen, mapId, adminIndex, asEditor);
+                        }, margin: 0.14f)), rooms[i].pos));
+                }
+                else
+                {
+                    return Helpers.Sequential(rooms.Length).Where(i => (option.Value & (1 << i)) != 0).Select(i => ((IMetaParallelPlacableOld button, Vector2 pos))(new MetaWidgetOld.WrappedWidget(GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), TranslationController.Instance.GetString(rooms[i].room))), rooms[i].pos));
+                }
+            }, (AdminRoomOptions[mapId][adminIndex].Value << 1), Language.Translate("options.map.admin." + AmongUsUtil.ToMapName(mapId) + "." + adminIndex)
+            );
+    }
+    
 
     static public void OpenCandidatesFilter(MetaScreen? screen, byte? mapId = null, bool asEditor = true) => OpenMapConfigurationEditor(screen, mapId, mapId =>
             NebulaPreSpawnLocation.Locations[mapId].Where(l => asEditor || l.Configuration.Value).Select(

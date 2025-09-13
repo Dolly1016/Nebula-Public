@@ -69,18 +69,18 @@ public class FakeSabotageStatus
                     if(message.task == SystemTypes.Reactor || message.task == SystemTypes.Laboratory)
                     {
                         var reactor = ShipStatus.Instance.Systems[message.task].CastFast<ReactorSystemType>();
-                        reactor.Countdown = Mathf.Min(reactor.Countdown, reactor.ReactorDuration);
+                        reactor.Countdown = Mathn.Min(reactor.Countdown, reactor.ReactorDuration);
                     }else if (message.task == SystemTypes.LifeSupp)
                     {
                         var reactor = ShipStatus.Instance.Systems[message.task].CastFast<LifeSuppSystemType>();
                         Debug.Log(reactor.Countdown);
                         Debug.Log(reactor.LifeSuppDuration);
-                        reactor.Countdown = Mathf.Min(reactor.Countdown, reactor.LifeSuppDuration);
+                        reactor.Countdown = Mathn.Min(reactor.Countdown, reactor.LifeSuppDuration);
                     }
                     else if (message.task == SystemTypes.HeliSabotage)
                     {
                         var reactor = ShipStatus.Instance.Systems[message.task].CastFast<HeliSabotageSystem>();
-                        reactor.Countdown = Mathf.Min(reactor.Countdown, GeneralConfigurations.AirshipHeliDurationOption.CurrentValue);
+                        reactor.Countdown = Mathn.Min(reactor.Countdown, GeneralConfigurations.AirshipHeliDurationOption.CurrentValue);
                         reactor.CompletedConsoles.Clear();
                         reactor.ActiveConsoles.Clear();
                     }

@@ -62,6 +62,7 @@ public struct Vector2
 
     static public implicit operator UnityEngine.Vector2(Vector2 v) => v.ToUnityVector();
     static public implicit operator Vector2(UnityEngine.Vector2 v) => new(v);
+    static public implicit operator Vector2(UnityEngine.Vector3 v) => new(v);
     static public Compat.Vector2 operator +(Vector2 v1, Vector2 v2) => new(v1.x + v2.x, v1.y + v2.y);
     static public Compat.Vector2 operator -(Vector2 v1, Vector2 v2) => new(v1.x - v2.x, v1.y - v2.y);
     public float Distance(Vector2 v) => MathF.Sqrt(SquaredDistance(v));

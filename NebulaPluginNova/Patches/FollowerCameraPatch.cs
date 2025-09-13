@@ -7,12 +7,13 @@ static public class FollowerCameraPatch
     {
         try
         {
-            if (!__instance.Target) __instance.Target = PlayerControl.LocalPlayer;
+            var localPlayer = PlayerControl.LocalPlayer;
+            if (!__instance.Target) __instance.Target = localPlayer;
 
-            if (PlayerControl.LocalPlayer && PlayerControl.LocalPlayer.lightSource)
+            if (localPlayer && localPlayer.lightSource)
             {
-                PlayerControl.LocalPlayer.lightSource.transform.SetParent(null);
-                PlayerControl.LocalPlayer.lightSource.transform.position = __instance.Target.transform.position;
+                localPlayer.lightSource.transform.SetParent(null);
+                localPlayer.lightSource.transform.position = __instance.Target.transform.position;
             }
         }
         catch { }

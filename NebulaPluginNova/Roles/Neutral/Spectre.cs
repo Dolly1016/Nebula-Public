@@ -335,7 +335,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
 
         static private IDividedSpriteLoader guageIconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.SpectreGuageIcon.png", 100f, 2, 1);
         static private IDividedSpriteLoader guageFriesSprite = DividedSpriteLoader.FromResource("Nebula.Resources.SpectreGuageFries.png", 100f, 5, 2);
-        static private ResourceExpandableSpriteLoader guageBackgroundSprite = new("Nebula.Resources.SpectreGuageBackground.png", 100f, 10, 10);
+        
 
         private IFunctionalGetProperty<float> leftAliveTime;
         
@@ -359,7 +359,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
             center.transform.localScale = new(gaugeScale, gaugeScale, 1f);
 
             var gaugeRenderer = UnityHelper.CreateObject<SpriteRenderer>("GaugeSprite", center.transform, new(0f, 0f, 0f));
-            gaugeRenderer.sprite = guageBackgroundSprite.GetSprite();
+            gaugeRenderer.sprite = AbilityGauge.GuageBackgroundSprite.GetSprite();
             gaugeRenderer.drawMode = SpriteDrawMode.Sliced;
             gaugeRenderer.tileMode = SpriteTileMode.Continuous;
             gaugeRenderer.size = new(gaugeWidth, 0.75f);
@@ -379,7 +379,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
                 gauge.gameObject.SetActive(!player.IsDead);
                 float foodLevel = leftAliveTime.Value / SatietyRateOption;
                 if (center) guageFries.Do(g => g.Update(foodLevel));
-                foxRenderer.sprite = guageIconSprite.GetSprite(foodLevel < 1f ? 0 : 1);
+                foxRenderer.sprite = guageIconSprite.GetSprite(foodLevel < (float)Spectre.RequiredSatietyForWinningOption ? 0 : 1);
             }, this);
         }
     }
@@ -599,7 +599,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
             if (ev.EndState.EndCondition == NebulaGameEnd.SpectreWin && ev.EndState.Winners.Test(MyPlayer))
             {
                 if (MoreCosmic.GetTags(MyPlayer.DefaultOutfit.outfit).Contains("hat.role.spectre")) new StaticAchievementToken("spectre.costume1");
-                if (ev.EndState.OriginalEndReason == GameEndReason.SpecialSituation && ev.EndState.OriginalEndCondition != NebulaGameEnd.SpectreWin) new StaticAchievementToken("spectre.common3");
+                if (ev.EndState.OriginalEndReason.IsSpecial() && ev.EndState.OriginalEndCondition != NebulaGameEnd.SpectreWin) new StaticAchievementToken("spectre.common3");
                 if(NebulaGameManager.Instance!.AllPlayerInfo.All(p => !p.IsImpostor || !p.IsDead) && NebulaGameManager.Instance!.AllPlayerInfo.Count(p => p.IsImpostor) >= 2) new StaticAchievementToken("spectre.challenge");
             }
         }

@@ -373,6 +373,8 @@ public static class ArrowUpdatePatch
     {
         try
         {
+            var transform = __instance.transform;
+
             __instance.gameObject.layer = LayerExpansion.GetArrowLayer();
             __instance.image.sortingOrder = 10;
 
@@ -398,22 +400,22 @@ public static class ArrowUpdatePatch
             if (__instance.Between(vector.x, 0f, 1f) && __instance.Between(vector.y, 0f, 1f))
             {
                 Vector2 temp = worldCam.transform.position + (__instance.target - worldCam.transform.position) * (worldCam.orthographicSize / Camera.main.orthographicSize);
-                __instance.transform.position = temp - del.normalized * 0.6f * (worldCam.orthographicSize / Camera.main.orthographicSize);
-                __instance.transform.localScale = Vector3.one * Mathf.Clamp(num, 0f, 1f);
+                transform.position = temp - del.normalized * 0.6f * (worldCam.orthographicSize / Camera.main.orthographicSize);
+                transform.localScale = Vector3.one * Mathn.Clamp(num, 0f, 1f);
             }
             else
                 __instance.DistancedBehaviour(vector, del, num, main);
 
-            __instance.transform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
+            transform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
 
             __instance.target = tempTarget;
 
-            __instance.transform.LookAt2d(__instance.target);
+            transform.LookAt2d(__instance.target);
 
             //Zの位置を調整
-            var localPos = __instance.transform.localPosition;
+            var localPos = transform.localPosition;
             localPos.z = -100f;
-            __instance.transform.localPosition = localPos;
+            transform.localPosition = localPos;
         }catch(System.Exception e) { }
         return false;
     }
@@ -497,7 +499,10 @@ class ZiplineSetCoolDownPatch
                     modPlayer?.Unbox().AddPlayerColorRenderers(apjz.hand.handRenderer);
                     try
                     {
-                        modPlayer?.Unbox().GoalPos = __instance.fromTop ? __instance.__4__this.landingPositionBottom.position : __instance.__4__this.landingPositionTop.position;
+                        modPlayer?.DeathPosition = new(
+                            __instance.fromTop ? __instance.__4__this.landingPositionBottom.position : __instance.__4__this.landingPositionTop.position,
+                            __instance.fromTop ?__instance.__4__this.landingPositionTop.position : __instance.__4__this.landingPositionBottom.position
+                            );
                     }
                     catch
                     {
@@ -506,7 +511,7 @@ class ZiplineSetCoolDownPatch
                 }
                 else if (current?.TryCast<ZiplineBehaviour._CoAlightPlayerFromZipline_d__46>(out var apfz) ?? false)
                 {
-                    __instance.player.GetModInfo()?.Unbox().ResetDeadBodyGoalPos();
+                    __instance.player.GetModInfo()?.DeathPosition = null;
 
                     __instance.__2__current = Effects.Sequence(current?.CastFast<Il2CppSystem.Collections.IEnumerator>(),
                         ManagedEffects.Action(() =>
@@ -537,5 +542,18 @@ class ZiplineCoolDownUpdatePatch
         __instance.CoolDown = maxCoolDown;
         return false;
 
+    }
+}
+
+//Admin
+[HarmonyPatch(typeof(MapConsole), nameof(MapConsole.Use))]
+public static class MapConsoleUsePatch
+{
+    public static void Postfix(MapConsole __instance)
+    {
+        int mapId = AmongUsUtil.CurrentMapId;
+        int consoleId = 0;
+        if (mapId == 4 && __instance.transform.position.x > 10f) consoleId = 1;
+        MapBehaviourExtension.RestrictRoom(MapBehaviour.Instance, GeneralConfigurations.AdminRoomOptions[mapId][consoleId].Value << 1);
     }
 }

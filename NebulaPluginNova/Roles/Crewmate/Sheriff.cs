@@ -134,7 +134,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
         void OnGameStart(GameStartEvent ev)
         {
             int impostors = NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.Role.Role.Category == RoleCategory.ImpostorRole) ?? 0;
-            if (impostors > 0) acTokenChallenge = new("sheriff.challenge", impostors, (val, _) => val == 0);
+            if (impostors >= 2) acTokenChallenge = new("sheriff.challenge", impostors, (val, _) => val == 0);
         }
 
         private bool CanKill(GamePlayer target)

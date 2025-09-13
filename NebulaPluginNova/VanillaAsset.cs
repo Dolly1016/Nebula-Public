@@ -91,6 +91,18 @@ public class VanillaAsset
     public static void PlaySelectSE() => SoundManager.Instance.PlaySound(SelectClip.Clip, false, 0.8f);
     public static void PlayHoverSE() => SoundManager.Instance.PlaySound(HoverClip.Clip, false, 0.8f);
 
+    static private Dictionary<string, UnityEngine.Object> VanillaAudioClips = [];
+    static public AudioClip? GetAudioClip(string name)
+    {
+        if(VanillaAudioClips.TryGetValue(name, out var found))
+        {
+            return found.TryCast<AudioClip>();
+        }
+        return null;
+    }
+
+    static public string[] GetAudioKeys() => VanillaAudioClips.Keys.ToArray();
+
     static public IEnumerator CoLoadAssetOnTitle()
     {
         PlayerOptionsMenuPrefab = UnityHelper.FindAsset<PlayerCustomizationMenu>("LobbyPlayerCustomizationMenu")!;
@@ -118,6 +130,11 @@ public class VanillaAsset
             var handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(AmongUsClient.Instance.ShipPrefabs[i].RuntimeKey);
             yield return handle;
             MapAsset[i] = handle.Result.GetComponent<ShipStatus>();
+        }
+
+        foreach(var audio in UnityEngine.Object.FindObjectsOfTypeAll(Il2CppType.Of<AudioClip>()))
+        {
+            if (audio.name != null) VanillaAudioClips[audio.name] = audio;
         }
 
         //マップの部屋名フォントを読み込んだうえで再度フォントを適用
@@ -184,6 +201,21 @@ public class VanillaAsset
             }
         }
         return new Material(highlightMaterial);
+    }
+
+    private static Material? maskMaterial = null;
+    public static Material GetMaskingMaterial()
+    {
+        if (maskMaterial != null) return new Material(maskMaterial);
+        foreach (var mat in UnityEngine.Resources.FindObjectsOfTypeAll(Il2CppType.Of<Material>()))
+        {
+            if (mat.name == "MaskingShader")
+            {
+                maskMaterial = mat.TryCast<Material>();
+                break;
+            }
+        }
+        return new Material(maskMaterial);
     }
 
     public static PlayerDisplay GetPlayerDisplay(bool withPhysicComponents = false, bool withScaler = false)

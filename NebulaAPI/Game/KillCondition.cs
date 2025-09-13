@@ -17,5 +17,7 @@ public enum KillCondition
     NoCondition = 0x00,
     KillerAlive = 0x01,
     TargetAlive = 0x02,
+    InTaskPhase = 0x10,
     BothAlive = KillerAlive | TargetAlive,
+    NormalKill = BothAlive | InTaskPhase, 
 }

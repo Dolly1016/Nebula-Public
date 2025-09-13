@@ -26,7 +26,7 @@ public static class GraphicsHelper
     {
         Texture2D texture = new(2, 2, TextureFormat.ARGB32, false);
         Assembly assembly = Assembly.GetExecutingAssembly();
-        Stream? stream = assembly.GetManifestResourceStream(path);
+        using Stream? stream = assembly.GetManifestResourceStream(path);
         if (stream == null) return null!;
         var byteTexture = new byte[stream.Length];
         stream.Read(byteTexture, 0, (int)stream.Length);
@@ -38,7 +38,7 @@ public static class GraphicsHelper
     {
         Texture2D texture = new(2, 2, TextureFormat.ARGB32, false);
         Assembly assembly = Assembly.GetExecutingAssembly();
-        Stream? stream = assembly.GetManifestResourceStream(path);
+        using Stream? stream = assembly.GetManifestResourceStream(path);
         if (stream == null) yield break;
         var byteTexture = new byte[stream.Length];
         yield return stream.ReadAsync(byteTexture, 0, (int)stream.Length).WaitAsCoroutine();
@@ -154,12 +154,18 @@ public static class GraphicsHelper
         return Sprite.CreateSprite(texture, rect, new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.FullRect, new Vector4(x, y, x, y), false, new(0));
     }
 
+    public static Sprite ToExpandableSprite(this Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, int x, int y)
+    {
+        return Sprite.CreateSprite(texture, rect, pivot, pixelsPerUnit, 0, SpriteMeshType.FullRect, new Vector4(x, y, x, y), false, new(0));
+    }
+
     internal delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
     internal static d_LoadImage iCall_LoadImage = null!;
     public static bool LoadImage(Texture2D tex, byte[] data, bool markNonReadable)
     {
         if (iCall_LoadImage == null) iCall_LoadImage = IL2CPP.ResolveICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage");
         var il2cppArray = (Il2CppStructArray<byte>)data;
+        tex.wrapMode = TextureWrapMode.Clamp;
         return iCall_LoadImage.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
     }
 }
@@ -733,6 +739,7 @@ public class DividedExpandableSpriteLoader : Virial.Media.MultiImage, Image, IDi
     ITextureLoader texture;
     Tuple<int, int>? division, size;
     private int edgeX, edgeY;
+    private Vector2 pivot = new(0.5f, 0.5f);
 
     public DividedExpandableSpriteLoader(ITextureLoader textureLoader, float pixelsPerUnit, int edgeX, int edgeY, int x, int y, bool isSize = false)
     {
@@ -772,7 +779,7 @@ public class DividedExpandableSpriteLoader : Virial.Media.MultiImage, Image, IDi
             var texture2D = texture.GetTexture();
             int _x = index % division!.Item1;
             int _y = index / division!.Item1;
-            sprites[index] = texture2D.ToExpandableSprite(new Rect(_x * size.Item1, (division.Item2 - _y - 1) * size.Item2, size.Item1, size.Item2), pixelsPerUnit, edgeX, edgeY);
+            sprites[index] = texture2D.ToExpandableSprite(new Rect(_x * size.Item1, (division.Item2 - _y - 1) * size.Item2, size.Item1, size.Item2), pivot, pixelsPerUnit, edgeX, edgeY);
         }
         return sprites[index];
     }
@@ -792,6 +799,12 @@ public class DividedExpandableSpriteLoader : Virial.Media.MultiImage, Image, IDi
 
     static public DividedExpandableSpriteLoader FromResource(string address, float pixelsPerUnit, int edgeX, int edgeY, int x, int y, bool isSize = false)
          => new(new ResourceTextureLoader(address), pixelsPerUnit, edgeX, edgeY, x, y, isSize);
+    static public DividedExpandableSpriteLoader FromResource(string address, float pixelsPerUnit, int edgeX, int edgeY, Vector2 pivot, int x, int y, bool isSize = false)
+    {
+        DividedExpandableSpriteLoader loader = new(new ResourceTextureLoader(address), pixelsPerUnit, edgeX, edgeY, x, y, isSize);
+        loader.pivot = pivot;
+        return loader;
+    }
     static public DividedExpandableSpriteLoader FromDisk(string address, float pixelsPerUnit, int edgeX, int edgeY, int x, int y, bool isSize = false)
          => new(new DiskTextureLoader(address), pixelsPerUnit, edgeX, edgeY, x, y, isSize);
 

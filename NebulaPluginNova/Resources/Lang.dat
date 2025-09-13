@@ -174,6 +174,8 @@
 "tutorial.variations.stamp.caption" : "You can send stamps by pressing the %KEY% key."
 "tutorial.variations.ambienceOnMeeting.title" : "Mute Ambience Option"
 "tutorial.variations.ambienceOnMeeting.caption" : "Instead you can use the "Mute Ambience On Meeting" option."
+"tutorial.variations.meetingTool.advance.title" : "The shortcut for generating player icons"
+"tutorial.variations.meetingTool.advance.caption" : "Draw a line on the minimap and right-click <b>just before</b> releasing the mouse to<br>generate icons of all players in the game."
 
 # Versions
 
@@ -329,6 +331,13 @@
 "options.map.customization.fungle.blackOutDropship" : "Blackout Console (Dropship)"
 "options.map.customization.fungle.blackOutJungle" : "Blackout Console (Jungle)"
 "options.map.customization.fungle.blackOutMiningPit" : "Blackout Console (Mining Pit)"
+"options.map.customization.admin.editor" : "Right Click: Open room settings"
+"options.map.customization.admin.viewer" : "Click: Show room settings"
+"options.map.admin.skeld.0" : "Admin Customization"
+"options.map.admin.mira.0" : "Admin Customization"
+"options.map.admin.polus.0" : "Admin Customization"
+"options.map.admin.airship.0" : "Admin Customization (Cockpit)"
+"options.map.admin.airship.1" : "Admin Customization (Records)"
 "options.map.group.spawning" : "Spawning Settings"
 "options.map.group.utilities" : "Utilities Settings"
 "options.map.group.footstep" : "Footstep SE Settings"
@@ -365,6 +374,23 @@
 "options.meeting.showVoteState" : "Show Vote State"
 "options.meeting.prohibitMeetingTool" : "Prohibit Meeting Tool"
 "options.meeting.shortenCooldownAtGameStart" : "Shorten Cooldown At Game Start"
+
+"options.exile" : "Exile Options"
+"options.exile.detail" : "About Player Exile"
+"options.exile.group.confirmEject" : "Settings for Confirm Eject"
+"options.exile.confirmEjectCondition" : "# Can Check The Remaining Number"
+"options.exile.confirmEjectTarget" : "# Is Counted As Remaining Number"
+"options.exile.confirmEject.all" : "All"
+"options.exile.confirmEject.impostors" : "Impostors"
+"options.exile.confirmEject.killers" : "Killers"
+"options.exile.confirmEject.nonCrewmates" : "Non-Crewmates"
+"exile.confirmEject.impostor.s" : "%NUM% Impostor Is Remaining..."
+"exile.confirmEject.impostor.p" : "%NUM% Impostors Are Remaining..."
+"exile.confirmEject.killer.s" : "%NUM% Killer Is Remaining..."
+"exile.confirmEject.killer.p" : "%NUM% Killers Are Remaining..."
+"exile.confirmEject.nonCrewmate.s" : "%NUM% Non-crewmate Is Remaining..."
+"exile.confirmEject.nonCrewmate.p" : "%NUM% Non-crewmates Are Remaining..."
+
 
 "options.consoleRestriction" : "Console Restriction"
 "options.consoleRestriction.detail" : "About restriction for vitals, admin and cameras"
@@ -983,12 +1009,14 @@
 "options.role.evilTracker.taskTracking.onlyTarget" : "Only Target"
 "options.role.evilTracker.taskTracking.on" : "On"
 "options.role.evilTracker.updateArrowInterval" : "Update Arrow Interval"
-"options.role.evilTracker.canChangeTarget" : "Can Change Target"
+"options.role.evilTracker.canChangeTarget" : "Can Change Target On Task Phase"
 "options.role.evilTracker.canChangeTargetOnMeeting" : "Can Change Target On Meeting"
 "options.role.evilTracker.trackImpostors" : "Track Impostors"
 "options.role.evilTracker.showTrackingTargetOnMap" : "Show Tracking Target On Map"
 "options.role.evilTracker.canCheckTrackingTasksInTaskPhase" : "Can Check Tracking Tasks In Task Phase"
 "options.role.evilTracker.showWhereTrackingIs" : "Show Where Tracking Is"
+"options.role.evilTracker.group.playerTracking" : "Tracking Settings"
+"options.role.evilTracker.group.taskTracking" : "Task Tracking Settings"
 
 "role.evilTrapper.name" : "Evil Trapper"
 "role.evilTrapper.short" : "Tp"
@@ -1010,6 +1038,8 @@
 "options.role.gimlet.frictionResistance" : "Friction Resistance"
 "stats.gimlet.drill" : "Uses of Drill"
 "ui.action.gimlet.drill" : "Transform into a drill and take off."
+"role.gimlet.soundRange" : "Sniper: <color=white>Sound Range</color>"
+"role.gimlet.drillSize" : "Sniper<color=white>: Drill Size</color>"
 
 "role.hadar.name" : "Hadar"
 "role.hadar.short" : "H"
@@ -1124,6 +1154,7 @@
 "options.role.rokurokubi.detail" : "Rokurokubi can stretch its neck to straddle walls<br>and kill players above it."
 "options.role.rokurokubi.craneSpeed" : "Crane Speed"
 "options.role.rokurokubi.maxNeckLength" : "Max Neck Length"
+"options.role.rokurokubi.autoKillInCraning" :  "Auto Kill"
 "ui.action.rokurokubi.pause" : "While holding down,<br>stop extending your neck."
 
 "role.sculptor.name" : "Sculptor"
@@ -1204,6 +1235,15 @@
 "options.role.thurifer.activationDelay" : "Activation Delay"
 "stats.thurifer.activate" : "Num of Activated Thuribulums"
 "stats.thurifer.impute" : "Num of Imputing"
+
+"role.viper.name" : "Viper"
+"role.viper.short" : "V"
+"role.viper.blurb" : "Kill to dissolve bodies"
+"options.role.viper.detail" : "Vipers are imposters who kill using poison that dissolves corpses."
+"options.role.viper.acidCooldown" : "Kill Cooldown"
+"options.role.viper.dissolveDuration" : "Dissolve Duration"
+"options.role.viper.acidLeavesBone" : "Acid Leaves Bone"
+"options.role.viper.canReportBone" : "Can Report Bone"
 
 "role.whammy.name" : "Whammy"
 "role.whammy.short" : "W"
@@ -1365,7 +1405,13 @@
 "options.role.scarlet.numOfKept" : "# Of Kept"
 "options.role.scarlet.numOfCommand" : "# Of Commands"
 "options.role.scarlet.canOverrideTaskWin" : "Can Override Task Win"
+"options.role.scarlet.favoriteGauge" : "Favorite Gauge"
+"options.role.scarlet.requiredGaugeToWin" : "Required Gauge To Win"
+"options.role.scarlet.surplusGauge" : "Surplus Gauge"
+"options.role.scarlet.gaugeReductionRatio" : "Reduction Ratio"
+"options.role.scarlet.canLocateLovers" : "Can Locate Lovers"
 "stats.scarlet.kept" : "Num of Kept"
+"options.role.scarlet.group.gauge" : "Gauge Option"
 
 "role.spectre.name" : "Spectre"
 "role.spectre.short" : "S"
@@ -1500,6 +1546,10 @@
 "options.role.damned.takeOverRoleOfKiller" : "Take Over Role Of Killer"
 "options.role.damned.damnedMurderMyKiller" : "Damned Murder My Killer"
 "options.role.damned.killDelay" : "Kill Delay"
+"options.role.damned.damnedAction" : "Damned Action"
+"options.role.damned.damnedAction.impostor" : "Impostor"
+"options.role.damned.damnedAction.madmate" : "Madmate"
+"options.role.damned.damnedAction.takeOver" : "Take Over"
 
 "role.disclosure.name" : "Disclosure"
 "options.role.disclosure.detail" : "Disclosure makes their cursor visible to everyone during an emergency meeting."
@@ -1915,6 +1965,7 @@
 "button.label.sculptor.command" : "command"
 "button.label.rokuro" : "crane"
 "button.label.rokuro.reset" : "reset"
+"button.label.acid" : "acid"
 
 # Game
 
@@ -2005,6 +2056,7 @@
 "state.lost" : "Lost"
 "state.laser" : "Laser"
 "state.drill" : "Drill"
+"state.dissolved" : "Dissolved"
 
 # Endings
 
@@ -2302,9 +2354,20 @@
 "achievement.ui.unselected" : "(Unselected)"
 "achievement.ui.unselected.detail" : "CLICK To Select Your Title."
 "achievement.ui.globalProgress" : "%RATE%% of players achieved"
+"achievement.ui.suggestToEdit" : " Let's craft your title!"
+"achievement.ui.craft" : "Craft"
+"achievement.ui.craft.determine" : "Apply"
+"achievement.ui.craft.unavailable" : "Unlocked by obtaining<br>%NUM% titles!"
+"achievement.ui.unset" : "(Unset)"
+"achievement.ui.craft.empty" : "(Empty)"
+"achievement.ui.cannotReflect" : "Please set parts in two or more places!"
+"achievement.ui.bonusParts" : "Bonus Parts: "
 "achievement.title.hidden" : "Unachieved"
 "achievement.title.hiddenDetail" : "Details have not been disclosed..."
 "achievement.title.unachieved" : "?????"
+"achievement.title.custom.unavailable" : "Unlocked by obtaining %NUM% titles!"
+"achievement.title.custom.empty" : "(Empty Craft Title)"
+"achievement.part.unachieved" : "???"
 "achievement.type.challenge" : "Challenge"
 "achievement.type.secret" : "Secret"
 "achievement.type.seasonal" : "Seasonal"
@@ -2321,6 +2384,7 @@
 "achievement.group.costume" : "Costume"
 "achievement.group.others" : "Others"
 "achievement.group.innersloth" : "Innersloth"
+"achievement.group.custom" : "Craft"
 
 "achievement.filter" : "Filtering"
 "achievement.filter.all" : "All"

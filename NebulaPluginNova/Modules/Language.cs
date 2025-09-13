@@ -233,6 +233,7 @@ public class Language
         }
     }
 
+    public static string TranslateIfNotNull(string? translationKey, string ifNull = "") => translationKey == null ? ifNull : Translate(translationKey);
     public static string Translate(string? translationKey)
     {
         if (translationKey == null) return "Invalid Key";

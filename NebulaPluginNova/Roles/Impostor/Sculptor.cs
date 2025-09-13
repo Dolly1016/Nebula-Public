@@ -26,7 +26,9 @@ namespace Nebula.Roles.Impostor;
 
 internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, DefinedRole
 {
-    private Sculptor() : base("sculptor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MaxSamplesOption, CreateCoolDownOption, StayDurationOption, DecoyDetectionRadiusOption]) { }
+    private Sculptor() : base("sculptor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MaxSamplesOption, CreateCoolDownOption, StayDurationOption, DecoyDetectionRadiusOption]) {
+        GameActionTypes.SculptorAction = new("sculptor.summon", this, isPlacementAction: true);
+    }
 
     static private FloatConfiguration SampleCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.sculptor.sampleCoolDown", (0f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration CreateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.sculptor.createCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
@@ -127,6 +129,7 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
                         this.samples.RemoveAt(0);
                         GameObject.Destroy(removed.display.gameObject);
                     }
+
                     var icon = AmongUsUtil.GetPlayerIcon(outfit, playersHolder.transform, Vector3.zero, Vector3.one * 0.5f, includePet: false);
                     icon.transform.localPosition = new((float)lastCount * 0.29f, -0.1f, -(float)this.samples.Count * 0.01f);
                     this.samples.Add((player.RealPlayer.PlayerId, icon, outfit));
@@ -241,6 +244,7 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
                    );
             StatsCreate.Progress();
             DecoyOriginalMask |= 1 << playerId;
+            NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.SculptorAction);
             return true;
         }
         [Local]

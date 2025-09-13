@@ -202,48 +202,10 @@ class ReportDeadBodyPatch
 {
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo target)
     {
-        //会議室が開くか否かのチェック
-        if (AmongUsClient.Instance.IsGameOver || MeetingHud.Instance) return false;
-        
-        //フェイクタスクでない緊急タスクがある場合ボタンは押せない
-        if (target == null &&
-            PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)
-            (task => PlayerTask.TaskIsEmergency(task) && 
-                (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.All(
-                    type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true))) != null)
-                return false;
-            
-        
-
-        if (__instance.Data.IsDead) return false;
-        MeetingRoomManager.Instance.AssignSelf(__instance, target);
-        if (!AmongUsClient.Instance.AmHost) return false;
-        
-        HudManager.Instance.OpenMeetingRoom(__instance);
-        __instance.RpcStartMeeting(target);
-
-        MeetingModRpc.RpcNoticeStartMeeting.Invoke((__instance.PlayerId, target?.PlayerId ?? 255));
-
-        if (target == null)
-        {
-            NebulaGameManager.Instance!.EmergencyCalls++;
-            if (NebulaGameManager.Instance!.EmergencyCalls == GeneralConfigurations.NumOfMeetingsOption) MeetingModRpc.RpcBreakEmergencyButton.Invoke();
-        }
-
+        MeetingHudExtension.ModReportDeadBody(__instance, target, target == null ? MeetingHudExtension.ReportType.EmergencyMeeting : MeetingHudExtension.ReportType.ReportDeadBody);
         return false;
     }
 }
-
-[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.StartMeeting))]
-class StartMeetingPatch
-{
-    public static void Prefix()
-    {
-        //会議前の位置を共有する
-        PlayerModInfo.RpcSharePreMeetingPoint.Invoke((PlayerControl.LocalPlayer.PlayerId, PlayerControl.LocalPlayer.transform.position));
-    }
-}
-
 
 [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.canBeHighlighted))]
 class MeetingCanBeHighlightedPatch
@@ -458,7 +420,7 @@ class MeetingHudUpdatePatch
                 if (MeetingHudExtension.DiscussionTimer > 0f)
                 {
                     //議論時間中
-                    __instance.UpdateTimerText(StringNames.MeetingVotingBegins, Mathf.CeilToInt(MeetingHudExtension.DiscussionTimer));
+                    __instance.UpdateTimerText(StringNames.MeetingVotingBegins, Mathn.CeilToInt(MeetingHudExtension.DiscussionTimer));
                     for (int i = 0; i < __instance.playerStates.Length; i++) __instance.playerStates[i].SetDisabled();
                     __instance.SkipVoteButton.SetDisabled();
                     return false;
@@ -483,13 +445,13 @@ class MeetingHudUpdatePatch
                 if (MeetingHudExtension.VotingTimer > 0f)
                 {
                     //投票時間中
-                    int intCnt = Mathf.CeilToInt(MeetingHudExtension.VotingTimer);
+                    int intCnt = Mathn.CeilToInt(MeetingHudExtension.VotingTimer);
                     __instance.UpdateTimerText(StringNames.MeetingVotingEnds, intCnt);
                     if (__instance.state == MeetingHud.VoteStates.NotVoted && intCnt < __instance.lastSecond)
                     {
                         __instance.lastSecond = intCnt;
                         __instance.StartCoroutine(Effects.PulseColor(__instance.TimerText, Color.red, Color.white, 0.25f));
-                        SoundManager.Instance.PlaySound(__instance.VoteEndingSound, false, 1f, null).pitch = Mathf.Lerp(1.5f, 0.8f, (float)__instance.lastSecond / 10f);
+                        SoundManager.Instance.PlaySound(__instance.VoteEndingSound, false, 1f, null).pitch = Mathn.Lerp(1.5f, 0.8f, (float)__instance.lastSecond / 10f);
                     }
 
                     //定期的に時間を同期させる。投票漏れを防ぐためにわずかに時間を短く見積もる。
@@ -515,7 +477,7 @@ class MeetingHudUpdatePatch
                 if (AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame)
                 {
                     MeetingHudExtension.ResultTimer -= Time.deltaTime;
-                    __instance.UpdateTimerText(StringNames.MeetingProceeds, Mathf.CeilToInt(MeetingHudExtension.ResultTimer));
+                    __instance.UpdateTimerText(StringNames.MeetingProceeds, Mathn.CeilToInt(MeetingHudExtension.ResultTimer));
                     if (AmongUsClient.Instance.AmHost && MeetingHudExtension.ResultTimer <= 0f) __instance.HandleProceed();
                 }
                 break;
@@ -567,7 +529,7 @@ class VoteAreaVCPatch
                     frame.sprite = VCFrameSprite.GetSprite();
                     frame.color = Color.clear;
                     var col = DynamicPalette.PlayerColors[pva.TargetPlayerId];
-                    if (Mathf.Max((int)col.r, (int)col.g, (int)col.b) < 100) col = Color.Lerp(col, Color.white, 0.4f);
+                    if (Mathn.Max((int)col.r, (int)col.g, (int)col.b) < 100) col = Color.Lerp(col, Color.white, 0.4f);
 
                     var client = NebulaGameManager.Instance?.VoiceChatManager?.GetClient(pva.TargetPlayerId);
                     float alpha = 0f;
@@ -577,9 +539,9 @@ class VoteAreaVCPatch
                         script.UpdateHandler += () =>
                         {
                             if (client.IsSpeaking)
-                                alpha = Mathf.Clamp(alpha + Time.deltaTime * 8f, 0f, 1f);
+                                alpha = Mathn.Clamp(alpha + Time.deltaTime * 8f, 0f, 1f);
                             else
-                                alpha = Mathf.Clamp(alpha - Time.deltaTime * 8f, 0f, 1f);
+                                alpha = Mathn.Clamp(alpha - Time.deltaTime * 8f, 0f, 1f);
                             col.a = alpha;
                             frame.color = col;
                         };
@@ -613,23 +575,28 @@ class VoteAreaPatch
 
             __instance.Background.material = __instance.Megaphone.material;
 
-            __instance.PlayerIcon.cosmetics.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            var cosmetics = __instance.PlayerIcon.cosmetics;
+            cosmetics.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
 
-            __instance.PlayerIcon.cosmetics.hat.FrontLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
-            __instance.PlayerIcon.cosmetics.hat.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-            __instance.PlayerIcon.cosmetics.hat.BackLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
-            __instance.PlayerIcon.cosmetics.hat.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-            __instance.PlayerIcon.cosmetics.visor.Image.gameObject.AddComponent<ZOrderedSortingGroup>();
-            __instance.PlayerIcon.cosmetics.visor.Image.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-            __instance.PlayerIcon.cosmetics.skin.layer.gameObject.AddComponent<ZOrderedSortingGroup>();
-            __instance.PlayerIcon.cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-            __instance.PlayerIcon.cosmetics.currentBodySprite.BodySprite.gameObject.AddComponent<ZOrderedSortingGroup>();
-            var nebulaLayer = __instance.PlayerIcon.cosmetics.GetComponent<NebulaCosmeticsLayer>();
+            var hat = cosmetics.hat;
+            hat.FrontLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
+            hat.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            hat.BackLayer.gameObject.AddComponent<ZOrderedSortingGroup>();
+            hat.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            var visor = cosmetics.visor.Image;
+            visor.gameObject.AddComponent<ZOrderedSortingGroup>();
+            visor.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            cosmetics.skin.layer.gameObject.AddComponent<ZOrderedSortingGroup>();
+            cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            cosmetics.currentBodySprite.BodySprite.gameObject.AddComponent<ZOrderedSortingGroup>();
+            var nebulaLayer = cosmetics.GetComponent<NebulaCosmeticsLayer>();
             nebulaLayer.AdditionalRenderers().Do(r =>
             {
                 r.gameObject.AddComponent<ZOrderedSortingGroup>().SetConsiderParentsTo(nebulaLayer.transform);
                 r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             });
+
+            __instance.ThumbsDown.transform.SetLocalZ(-0.55f);
         }
     }
 }
@@ -909,30 +876,6 @@ class PopulateResultPatch
         }
 
         return false;
-    }
-}
-
-
-//死体の拾い漏れチェック
-[HarmonyPatch(typeof(MeetingIntroAnimation), nameof(MeetingIntroAnimation.Init))]
-class MeetingIntroAnimationPatch
-{
-    public static void Prefix(MeetingIntroAnimation __instance, [HarmonyArgument(1)] ref Il2CppReferenceArray<NetworkedPlayerInfo> deadBodies)
-    {
-        List<NetworkedPlayerInfo> dBodies = new List<NetworkedPlayerInfo>();
-        //既に発見されている死体
-        foreach (var dBody in deadBodies) dBodies.Add(dBody);
-        
-        //遅れて発見された死体
-        foreach (var dBody in Helpers.AllDeadBodies())
-        {
-            dBodies.Add(GameData.Instance.GetPlayerById(dBody.ParentId));
-            GameObject.Destroy(dBody.gameObject);
-        }
-        deadBodies = new Il2CppReferenceArray<NetworkedPlayerInfo>(dBodies.OrderBy(d => d.PlayerId).ToArray());
-
-        //生死を再確認
-        MeetingHud.Instance.ResetPlayerState();
     }
 }
 

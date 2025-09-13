@@ -446,8 +446,8 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
         static private void InstantiateCollider(Vector2 pos1, Vector2 pos2, float duration)
         {
-            float absX = Mathf.Abs(pos1.x - pos2.x);
-            float absY = Mathf.Abs(pos1.y - pos2.y);
+            float absX = Mathn.Abs(pos1.x - pos2.x);
+            float absY = Mathn.Abs(pos1.y - pos2.y);
             bool isVertical = absX > 0f ? (absY / absX) > 1.75f : true;
 
             if(isVertical ? pos1.y > pos2.y : pos1.x > pos2.x) {
@@ -478,7 +478,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
             //障壁の座標
             Vector3 colliderPos = (pos1 + pos2) * 0.5f;
-            colliderPos.z = Mathf.Max(pos1.y, pos2.y) / 1000f;
+            colliderPos.z = Mathn.Max(pos1.y, pos2.y) / 1000f;
             obj.transform.localPosition = colliderPos;
 
             Vector2 pos1Rel = pos1 - (Vector2)colliderPos;

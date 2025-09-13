@@ -49,7 +49,7 @@ internal class DebugAbility : DependentLifespan, IGameOperator
                 Vector2 center = (pos1.Value + pos2.Value) * 0.5f;
                 Vector2 diff = (pos1.Value - pos2.Value) * 0.5f;
 
-                ClipboardHelper.PutClipboardString("new(" + center.x.ToString("F2") + "f, " + center.y.ToString("F2") + "f, " + Mathf.Abs(diff.x).ToString("F2") + "f, " + Mathf.Abs(diff.y).ToString("F2") + "f)");
+                ClipboardHelper.PutClipboardString("new(" + center.x.ToString("F2") + "f, " + center.y.ToString("F2") + "f, " + Mathn.Abs(diff.x).ToString("F2") + "f, " + Mathf.Abs(diff.y).ToString("F2") + "f)");
                 DebugScreen.Push(new FunctionalDebugTextContent(() => "範囲オブジェクトの生成式をコピーしました。", FunctionalLifespan.GetTimeLifespan(2f)));
 
                 pos1 = null;

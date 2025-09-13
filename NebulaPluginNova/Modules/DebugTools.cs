@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmongUs.Data.Player;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -27,6 +28,7 @@ public static class DebugTools
     private static readonly DebugValueEntry<bool> writeAllAchievementsData = new BooleanDataEntry("WriteAllAchievementsData", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> showCostumeMetadata = new BooleanDataEntry("ShowCostumeMetadata", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> useRoomPointEditor = new BooleanDataEntry("UseRoomPointEditor", saver, false, shouldWrite: false);
+    private static readonly DebugValueEntry<bool> useAudioPlayer = new BooleanDataEntry("UseAudioPlayer", saver, false, shouldWrite: false);
 
     public static bool ShowConfigurationId => DebugMode && showConfigurationId.Value;
     public static bool WriteAllAchievementsData => DebugMode && writeAllAchievementsData.Value;
@@ -35,6 +37,7 @@ public static class DebugTools
     public static bool ShowCostumeMetadata => DebugMode && showCostumeMetadata.Value;
     public static bool AllowVanillaLog => DebugMode && allowVanillaLog.Value;
     public static bool UseRoomPointEditor => DebugMode && useRoomPointEditor.Value;
+    public static bool UseAudioPlayer => DebugMode && useAudioPlayer.Value;
 
     internal static void RegisterDebugVariable(IDebugVariable variable) => debugVariables.Add(variable);
     internal static IEnumerable<IDebugVariable> DebugVariables => debugVariables;
@@ -64,6 +67,16 @@ public static class DebugTools
             }, MaxLines = 1 }
             )
         ));
+    }
+}
+
+
+[HarmonyPatch(typeof(PlayerBanData), nameof(PlayerBanData.IsBanned), MethodType.Getter)]
+public static class AmBannedPatch
+{
+    public static void Postfix(ref bool __result)
+    {
+        if (DebugTools.DebugMode) __result = false;
     }
 }
 

@@ -190,4 +190,22 @@ public class FungleData : MapData
         }
         return WindType.NoWind;
     }
+
+    public override (SystemTypes room, Vector2 pos)[] AdminRooms { get; } = [
+        (SystemTypes.RecRoom, new(-17.7f, -0.6f)),
+        (SystemTypes.FishingDock, new(-21.2f,-7.3f)),
+        (SystemTypes.Kitchen, new(-15.2f, -8.1f)),
+        (SystemTypes.Laboratory, new(-4.2f, -9.1f)),
+        (SystemTypes.Greenhouse, new(9.3f, -11.2f)),
+        (SystemTypes.Reactor, new(22.2f,-7.2f)),
+        (SystemTypes.MeetingRoom, new(-2.8f,-1.2f)),
+        (SystemTypes.SleepingQuarters, new(2.5f, -1.4f)),
+        (SystemTypes.Storage, new(1.7f, 5.4f)),
+        (SystemTypes.Comms, new(21.7f, 12.9f)),
+        (SystemTypes.UpperEngine, new(22.7f, 3.0f)),
+        (SystemTypes.MiningPit, new(12.9f, 9.2f)),
+        (SystemTypes.Lookout, new(8.4f, 2.3f)),
+        (SystemTypes.Dropship, new(-7.8f, 11.1f)),
+        (SystemTypes.Cafeteria, new(-16.0f, 6.1f)),
+        ];
 }

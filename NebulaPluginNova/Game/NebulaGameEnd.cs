@@ -25,11 +25,11 @@ public class NebulaGameEnd
     static public readonly GameEnd LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.UnityColor, 19);
     static public readonly GameEnd PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.UnityColor, 31);
     static public readonly GameEnd AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.UnityColor, 62);
-    static public readonly GameEnd DancerWin = new(31, "dancer", Roles.Neutral.Dancer.MyRole.UnityColor, 32);
+    static public readonly GameEnd DancerWin = new(31, "dancer", Roles.Neutral.Dancer.MyRole.UnityColor, 30);
     static public readonly GameEnd ScarletWin = new(32, "scarlet", Roles.Neutral.Scarlet.MyRole.UnityColor, 64);
     static public readonly GameEnd SpectreWin = new(33, "spectre", Roles.Neutral.Spectre.MyRole.UnityColor, 63);
     static public readonly GameEnd TrilemmaWin = new(34, "trilemma", Roles.Modifier.Trilemma.MyRole.UnityColor, 61);
-    static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.UnityColor, 30);
+    static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.UnityColor, 29);
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
     static public readonly ExtraWin ExtraLoversWin = new(0, "lover", (Roles.Modifier.Lover.MyRole as DefinedAssignable).Color);
@@ -327,17 +327,17 @@ public class EndGameManagerSetUpPatch
             }
         }
 
-        int num = Mathf.CeilToInt(7.5f);
+        int num = Mathn.CeilToInt(7.5f);
         for (int i = 0; i < winners.Count; i++)
         {
             int num2 = (i % 2 == 0) ? -1 : 1;
             int num3 = (i + 1) / 2;
             float num4 = (float)num3 / (float)num;
-            float num5 = Mathf.Lerp(1f, 0.75f, num4);
+            float num5 = Mathn.Lerp(1f, 0.75f, num4);
             float num6 = (float)((i == 0) ? -8 : -1);
             PoolablePlayer poolablePlayer = UnityEngine.Object.Instantiate<PoolablePlayer>(__instance.PlayerPrefab, __instance.transform);
             poolablePlayer.transform.localPosition = new Vector3(1f * (float)num2 * (float)num3 * num5, FloatRange.SpreadToEdges(-1.125f, 0f, num3, num), num6 + (float)num3 * 0.01f) * 0.9f;
-            float num7 = Mathf.Lerp(1f, 0.65f, num4) * 0.9f;
+            float num7 = Mathn.Lerp(1f, 0.65f, num4) * 0.9f;
             Vector3 vector = new Vector3(num7, num7, 1f);
             poolablePlayer.transform.localScale = vector;
 

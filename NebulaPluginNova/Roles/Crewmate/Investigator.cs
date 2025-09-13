@@ -81,9 +81,9 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
         public void TrySpawn(Vector2 cameraPos)
         {
             if (spawned) return;
-            if (Mathf.Abs(cameraPos.x - Position.x) > 10f || Mathf.Abs(cameraPos.y - Position.y) > 10f) return;
+            if (Mathn.Abs(cameraPos.x - Position.x) > 10f || Mathn.Abs(cameraPos.y - Position.y) > 10f) return;
 
-            Renderer = AmongUsUtil.GenerateFootprint(Position, Color.black.AlphaMultiplied(Mathf.Pow(Magnitude, 0.5f)), null);
+            Renderer = AmongUsUtil.GenerateFootprint(Position, Color.black.AlphaMultiplied(Mathn.Pow(Magnitude, 0.5f)), null);
             spawned = true;
         }
 

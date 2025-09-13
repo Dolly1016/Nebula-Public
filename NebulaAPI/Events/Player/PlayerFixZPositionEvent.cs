@@ -9,6 +9,7 @@ namespace Virial.Events.Player;
 internal class PlayerFixZPositionEvent : AbstractPlayerEvent
 {
     public float Y;
+    public float? Z = null;
     internal PlayerFixZPositionEvent(Virial.Game.Player player, float y) : base(player)
     {
         this.Y = y;

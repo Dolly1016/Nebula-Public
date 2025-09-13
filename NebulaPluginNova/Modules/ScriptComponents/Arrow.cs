@@ -126,6 +126,8 @@ public class Arrow : FlexibleLifespan, IGameOperator
 
         bool Between(float value, float min, float max) => value > min && value < max;
 
+        var arrowTransform = arrowRenderer.transform;
+
         //スクリーン上の位置
         Vector2 viewportPoint = worldCam.WorldToViewportPoint(TargetPos);
 
@@ -135,39 +137,39 @@ public class Arrow : FlexibleLifespan, IGameOperator
             else
             {
                 //画面内を指す矢印
-                arrowRenderer.transform.localPosition = (del - (OnJustPoint ? Vector2.zero : del.normalized * (WithSmallArrow ? 0.9f : 0.6f) * (worldCam.orthographicSize / Camera.main.orthographicSize))).AsVector3(2f);
-                arrowRenderer.transform.localScale = IsSmallenNearPlayer ? Vector3.one * Mathf.Clamp(num, 0f, 1f) : Vector3.one;
+                arrowTransform.localPosition = (del - (OnJustPoint ? Vector2.zero : del.normalized * (WithSmallArrow ? 0.9f : 0.6f) * (worldCam.orthographicSize / Camera.main.orthographicSize))).AsVector3(2f);
+                arrowTransform.localScale = IsSmallenNearPlayer ? Vector3.one * Mathn.Clamp(num, 0f, 1f) : Vector3.one;
             }
         }
         else
         {
             //画面外を指す矢印
-            Vector2 vector3 = new Vector2(Mathf.Clamp(viewportPoint.x * 2f - 1f, -1f, 1f), Mathf.Clamp(viewportPoint.y * 2f - 1f, -1f, 1f));
+            Vector2 vector3 = new Vector2(Mathn.Clamp(viewportPoint.x * 2f - 1f, -1f, 1f), Mathn.Clamp(viewportPoint.y * 2f - 1f, -1f, 1f));
             
             //UIのカメラに合わせて位置を調節する
             float orthographicSize = main.orthographicSize;
             float num3 = main.orthographicSize * main.aspect;
-            Vector3 vector4 = new Vector3(Mathn.Lerp(0f, num3 * (WithSmallArrow ? 0.82f : 0.88f), vector3.x), Mathn.Lerp(0f, orthographicSize * (WithSmallArrow ? 0.72f : 0.79f), vector3.y), 2f);
-            arrowRenderer.transform.localPosition = vector4;
-            arrowRenderer.transform.localScale = Vector3.one;
+            Vector3 vector4 = new Vector3(Mathn.LerpUnclamped(0f, num3 * (WithSmallArrow ? 0.82f : 0.88f), vector3.x), Mathn.LerpUnclamped(0f, orthographicSize * (WithSmallArrow ? 0.72f : 0.79f), vector3.y), 2f);
+            arrowTransform.localPosition = vector4;
+            arrowTransform.localScale = Vector3.one;
         }
 
-        arrowRenderer.transform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
+        arrowTransform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
 
 
         //角度の計算のために正規化する(しなくてもいいのかも)
         del.Normalize();
 
         if(FixedAngle)
-            arrowRenderer.transform.eulerAngles = new Vector3(0f, 0f, 0f);
+            arrowTransform.eulerAngles = new Vector3(0f, 0f, 0f);
         else
-            arrowRenderer.transform.eulerAngles = new Vector3(0f, 0f, Mathf.Atan2(del.y, del.x) * 180f / Mathf.PI);
+            arrowTransform.eulerAngles = new Vector3(0f, 0f, Mathn.Atan2(del.y, del.x) * 180f / Mathn.PI);
 
         if(smallRenderer != null)
         {
             if (FixedAngle)
             {
-                var angle = Mathf.Atan2(del.y, del.x) * 180f / Mathf.PI;
+                var angle = Mathn.Atan2(del.y, del.x) * 180f / Mathn.PI;
                 smallRenderer.transform.localPosition = Vector3.right.RotateZ(angle) * 0.45f;
                 smallRenderer.transform.eulerAngles = new Vector3(0f, 0f, angle);
             }

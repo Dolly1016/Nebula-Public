@@ -438,8 +438,8 @@ public class GameStatisticsViewer : MonoBehaviour
 
         while (true)
         {
-            float log = Mathf.Log(t + 1f, 1.92f);
-            float exp = t > 1.3f ? Mathf.Pow((t - 1.3f) * 0.86f, 3f) : 0f;
+            float log = Mathn.Log(t + 1f, 1.92f);
+            float exp = t > 1.3f ? Mathn.Pow((t - 1.3f) * 0.86f, 3f) : 0f;
             t += Time.deltaTime;
 
             timelineBack.SetPosition(1, new Vector3(log < 1 ? log * LineHalfWidth : LineHalfWidth, 0));
@@ -606,7 +606,7 @@ public class GameStatisticsViewer : MonoBehaviour
                 if ((target.TargetIdMask & 1 << p.PlayerId) != 0)
                     objects.Add(GeneratePlayerView(p.PlayerId).Value.gameObject);
 
-            float width = Mathf.Min(1.2f, (objects.Count - 1) * 0.5f);
+            float width = Mathn.Min(1.2f, (objects.Count - 1) * 0.5f);
             for (int i = 0; i < objects.Count; i++)
             {
                 float pos = objects.Count == 1 ? 0 : width * ((float)i / (objects.Count - 1) * 2f - 1f);

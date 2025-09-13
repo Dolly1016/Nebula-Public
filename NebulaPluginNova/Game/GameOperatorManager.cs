@@ -10,13 +10,14 @@ namespace Nebula.Game;
 internal record GameOperatorInstance(ILifespan lifespan, Action<object> action, int Priority);
 internal class GameOperatorBuilder
 {
-    List<(Type type, Func<object, (Action<object> generator, int priority)> action)> allActions;
+    List<(Type type, Func<object, (Action<object>? generator, int priority)> action)> allActions;
 
-    private GameOperatorBuilder(List<(Type type, Func<object, (Action<object> generator, int priority)> action)> actions)
+    private GameOperatorBuilder(List<(Type type, Func<object, (Action<object>? generator, int priority)> action)> actions)
     {
         this.allActions = actions;
     }
 
+    int num = 0;
     /// <summary>
     /// ゲーム作用素を登録します。
     /// </summary>
@@ -24,13 +25,14 @@ internal class GameOperatorBuilder
     {
         foreach (var action in allActions) {
             var result = action.action.Invoke(operation);
+            if (result.generator == null) continue;
             registerFunc.Invoke(action.type, new(lifespan, result.generator, result.priority));
         }
     }
 
     static public GameOperatorBuilder GetBuilderFromType(Type entityType)
     {
-        List<(Type type, Func<object, (Action<object> generator, int priority)> action)> builderActions = new();
+        List<(Type type, Func<object, (Action<object>? generator, int priority)> action)> builderActions = new();
 
         //公開メソッドをすべて拾い上げる
         IEnumerable<MethodInfo> methods = entityType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
@@ -66,46 +68,53 @@ internal class GameOperatorBuilder
 
             Action<object, object> procedure = exp/*(instance, e) => method.Invoke(instance, [e])*/;
 
-            if (method.GetCustomAttribute<OnlyMyPlayer>() != null)
-            {
-                var lastAction = procedure;
-                procedure = (instance, e) =>
-                {
-                    byte p = Unsafe.As<AbstractPlayerEvent>(e).Player.PlayerId;
-                    if (p == ((instance as IBindPlayer)?.MyPlayer.PlayerId ?? byte.MaxValue)) lastAction.Invoke(instance, e);
-                };
-            }
+            Func<object, Action<object>> curried = instance => (e => procedure.Invoke(instance, e));
 
-            if (method.GetCustomAttribute<Local>() != null)
-            {
-                var lastAction = procedure;
-                procedure = (instance, e) =>
-                {
-                    if ((instance as IBindPlayer)?.AmOwner ?? false) lastAction.Invoke(instance, e);
-                };
-            }
+            bool hasOnlyMyPlayerAttr = method.GetCustomAttribute<OnlyMyPlayer>() != null;
+            bool hasLocalAttr = method.GetCustomAttribute<Local>() != null;
+            bool hasOnlyLocalPlayerAttr = method.GetCustomAttribute<OnlyLocalPlayer>() != null;
+            bool hasOnlyHostAttr = method.GetCustomAttribute<OnlyHost>() != null;
 
-            if (method.GetCustomAttribute<OnlyLocalPlayer>() != null)
+            Action<object>? BuildAction(object instance)
             {
-                var lastAction = procedure;
-                procedure = (instance, e) =>
-                {
-                    if (Unsafe.As<AbstractPlayerEvent>(e).Player.AmOwner) lastAction.Invoke(instance, e);
-                };
-            }
+                var pBinder = instance as IBindPlayer;
+                Action<object>? myProcedure = e => procedure(instance, e);
 
-            if (method.GetCustomAttribute<OnlyHost>() != null)
-            {
-                var lastAction = procedure;
-                procedure = (instance, e) =>
+                if (hasOnlyMyPlayerAttr)
                 {
-                    if (AmongUsClient.Instance.AmHost) lastAction.Invoke(instance, e);
-                };
+                    var lastProcedure = myProcedure;
+                    myProcedure = e =>
+                    {
+                        byte p = Unsafe.As<AbstractPlayerEvent>(e).Player.PlayerId;
+                        if (p == (pBinder?.MyPlayer.PlayerId ?? byte.MaxValue)) lastProcedure.Invoke(e);
+                    };
+                }
+
+                if (hasLocalAttr && !(pBinder?.AmOwner ?? false)) return null;
+
+                if (hasOnlyLocalPlayerAttr)
+                {
+                    var lastProcedure = myProcedure;
+                    myProcedure = e =>
+                    {
+                        if (Unsafe.As<AbstractPlayerEvent>(e).Player.AmOwner) lastProcedure.Invoke(e);
+                    };
+                }
+
+                if (hasOnlyHostAttr)
+                {
+                    var lastProcedure = myProcedure;
+                    myProcedure = e =>
+                    {
+                        if (AmongUsClient.Instance.AmHost) lastProcedure.Invoke(e);
+                    };
+                }
+                return myProcedure;
             }
 
             int priority = method.GetCustomAttribute<EventPriority>()?.Priority ?? 100;
 
-            builderActions.Add((eventType, (instance) => ((e) => procedure.Invoke(instance, e), priority)));
+            builderActions.Add((eventType, (instance) => (BuildAction(instance), priority)));
         }
 
         return new(builderActions);

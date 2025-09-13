@@ -58,7 +58,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             renderer.transform.SetWorldZ(-1f);
             renderer.sprite = bubbleSprite.GetSprite(8);
             renderer.transform.localScale = new(bubbleSizeOption / 2f, bubbleSizeOption / 2f, 1f);
-            degreeAngle = angle * 180f / Mathf.PI;
+            degreeAngle = angle * 180f / Mathn.PI;
         }
 
         const float BubbleGraphicInterval = 0.1f;
@@ -104,7 +104,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                 var localPlayer = GamePlayer.LocalPlayer;
                 if (!used && !myPlayer.AmOwner && ObjectTrackers.StandardPredicateIgnoreOwner.Invoke(localPlayer) && (canKillImpostorOption || myPlayer.CanKill(localPlayer)))
                 {
-                    if (localPlayer.Position.Distance(renderer.transform.position) < bubbleOption)
+                    if (localPlayer.Position.Distance((Virial.Compat.Vector2)renderer.transform.position) < bubbleOption)
                     {
                         RpcBubbleKill.Invoke((myPlayer, localPlayer, localPlayer.Position, index));
                         used = true;
@@ -113,9 +113,9 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
 
                 foreach( var p in GamePlayer.AllOwningFakePlayers)
                 {
-                    if(p.IsActive && p.Position.Distance(renderer.transform.position) < bubbleOption)
+                    if(p.IsActive && p.Position.Distance((Virial.Compat.Vector2)renderer.transform.position) < bubbleOption)
                     {
-                        myPlayer.MurderPlayer(p, PlayerState.Bubbled, null, KillParameter.RemoteKill);
+                        myPlayer.MurderPlayer(p, PlayerState.Bubbled, null, KillParameter.RemoteKill, KillCondition.TargetAlive | KillCondition.InTaskPhase);
                     }
                 }
             }
@@ -210,7 +210,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                     .SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor)
                     .SetAsMouseClickButton().SetAsUsurpableButton(this);
                 killButton.OnClick = (button) => {
-                    Vector2 pos = (Vector2)MyPlayer.Position + new Vector2(1f, 0f).Rotate(MyPlayer.Unbox().MouseAngle * 180f / Mathf.PI) * (0.7f + 0.1f * bubbleSizeOption);
+                    Vector2 pos = (Vector2)MyPlayer.Position + new Vector2(1f, 0f).Rotate(MyPlayer.Unbox().MouseAngle * 180f / Mathn.PI) * (0.7f + 0.1f * bubbleSizeOption);
                     RpcFire.Invoke((MyPlayer.PlayerId, pos, MyPlayer.Unbox().MouseAngle, Bubbles.Count));
                     equipButton.SetLabel("equip");
                     NebulaAsset.PlaySE(Helpers.Prob(50) ? NebulaAudioClip.Bubble1 : NebulaAudioClip.Bubble2, oneshot: true, volume: 1f);
@@ -418,7 +418,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                     angle += Time.deltaTime * 15f;
                     sin += Time.deltaTime * 1f;
                     bubbleInner.transform.localEulerAngles = new(0f, 0f, -angle);
-                    bubble.transform.localPosition = new(0f, Mathf.Sin(sin) * 0.12f, 0f);
+                    bubble.transform.localPosition = new(0f, Mathn.Sin(sin) * 0.12f, 0f);
                     if (angle > 360f) angle -= 360f;
 
                     allBubbles.Do(b =>

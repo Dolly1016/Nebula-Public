@@ -294,9 +294,15 @@ public enum KillParameter
     WithAssigningGhostRole = 0x04,
     WithKillSEWidely = 0x08,
     WithDeadBody = 0x10,
+    WithViperDeadBody = 0x20, //WithDeadBodyがない限り無視されます。
     RemoteKill = WithOverlay | WithAssigningGhostRole | WithDeadBody,
     NormalKill = WithBlink | RemoteKill,
     MeetingKill = WithOverlay | WithAssigningGhostRole | WithKillSEWidely
+}
+
+public record PlayerDeathPosition(Virial.Compat.Vector2 StartPos, Virial.Compat.Vector2 GoalPos)
+{
+    public Virial.Compat.Vector2 GetNearestPos(Virial.Compat.Vector2 pos) => StartPos.Distance(pos) < GoalPos.Distance(pos) ? StartPos : GoalPos;
 }
 
 public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
@@ -348,6 +354,11 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// 陣営の基本的なキルクールダウンです。
     /// </summary>
     float TeamKillCooldown => Role.Role.Team.KillCooldown;
+
+    /// <summary>
+    /// 現在の死亡地点です。
+    /// </summary>
+    PlayerDeathPosition? DeathPosition { get; set; }
 
     // HoldingAPI
 
@@ -420,7 +431,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <param name="killParams">キルのパラメータ。</param>
     /// <param name="callBack">キル時に呼び出されるコールバック。</param>
     void MurderPlayer(IPlayerlike player, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParams, Action<KillResult>? callBack = null)
-        => MurderPlayer(player, playerState, eventDetail, killParams, KillCondition.BothAlive, callBack);
+        => MurderPlayer(player, playerState, eventDetail, killParams, KillCondition.NormalKill, callBack);
     /// <summary>
     /// 自殺します。
     /// このAPIはRPCを送信します。

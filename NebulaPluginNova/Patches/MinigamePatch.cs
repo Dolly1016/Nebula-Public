@@ -215,7 +215,7 @@ public static class EmergencyUpdatePatch
     {
         //int num = Mathf.CeilToInt(15f - ShipStatus.Instance.Timer);
         //num = Mathf.Max(Mathf.CeilToInt(ShipStatus.Instance.EmergencyCooldown), num);
-        int num = Mathf.CeilToInt(leftTime);
+        int num = Mathn.CeilToInt(leftTime);
         __instance.ButtonActive = false;
         __instance.StatusText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.EmergencyNotReady);
         __instance.NumberText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.SecondsAbbv, num);
@@ -257,7 +257,7 @@ public static class EmergencyUpdatePatch
 
     public static bool Prefix(EmergencyMinigame __instance)
     {
-        float Cooldown = Mathf.Max(GeneralConfigurations.EmergencyCooldownAtGameStart ? 15f - ShipStatus.Instance.Timer : 0f, ShipStatus.Instance.EmergencyCooldown);
+        float Cooldown = Mathn.Max(GeneralConfigurations.EmergencyCooldownAtGameStart ? 15f - ShipStatus.Instance.Timer : 0f, ShipStatus.Instance.EmergencyCooldown);
 
         var checkCanPushEv = GameOperatorManager.Instance!.Run<CheckCanPushEmergencyButtonEvent>(new());
 
@@ -325,5 +325,15 @@ public static class TowelMinigamePatch
         clickGuard.gameObject.SetUpButton();
         clickGuard.isTrigger = true;
         clickGuard.size = new(100f, 100f);
+    }
+}
+
+[HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.PopulateRoot))]
+public static class TaskAdderGamePatch
+{
+    public static bool Prefix(TaskAdderGame __instance, [HarmonyArgument(0)] TaskAdderGame.FolderType folderType)
+    {
+        if(folderType == TaskAdderGame.FolderType.Roles) return false;
+        return true;
     }
 }

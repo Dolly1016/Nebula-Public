@@ -280,7 +280,7 @@ internal class FakePlayerNetTransform : IGameOperator
         float num = Vector2.Distance(lastPos, currentPos);
         float num2 = Vector2.Distance(currentPos, nextPos);
         float num3 = Vector2.Distance(lastPos, nextPos);
-        return Mathf.Abs(num - (num3 + num2)) < REPLAY_POSITION_THRESHOLD;
+        return Mathn.Abs(num - (num3 + num2)) < REPLAY_POSITION_THRESHOLD;
     }
 
     private void SetMovementSmoothingModifier()
@@ -294,12 +294,12 @@ internal class FakePlayerNetTransform : IGameOperator
                 4 or 5 => 0.9f, 
                 _ => 1.2f
             };
-            rubberbandModifier = Mathf.Lerp(rubberbandModifier, num, Time.fixedDeltaTime * 3f);
+            rubberbandModifier = Mathn.Lerp(rubberbandModifier, num, Time.fixedDeltaTime * 3f);
         }
         else
         {
             float num = ((incomingPosQueue.Count <= QUEUE_THRESHOLD_FOR_SMOOTHING) ? SMOOTHING_BAND_MODIFIER : NEUTRAL_BAND_MODIFIER);
-            rubberbandModifier = Mathf.Lerp(rubberbandModifier, num, Time.fixedDeltaTime * SMOOTHING_LERP_RATE);
+            rubberbandModifier = Mathn.Lerp(rubberbandModifier, num, Time.fixedDeltaTime * SMOOTHING_LERP_RATE);
         }
     }
 
@@ -392,7 +392,7 @@ internal class FakePet : IGameOperator
                 vanillaPet.transform.position = truePosition;
                 return;
             }
-            vector2 *= 5f * GameOptionsManager.Instance.currentNormalGameOptions.PlayerSpeedMod;
+            vector2 *= 5f * AmongUsUtil.GetCurrentNormalOption().PlayerSpeedMod;
             vector = vector * 0.8f + vector2 * 0.2f;
         }
         else
@@ -664,7 +664,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
                 var mod = 1f;
                 if (GameManager.Instance != null)
                 {
-                    mod = GameOptionsManager.Instance.currentNormalGameOptions.PlayerSpeedMod;
+                    mod = AmongUsUtil.GetCurrentNormalOption().PlayerSpeedMod;
                     //死んでいたらちょっと早くなるが、幽霊状態を考慮していないのでスキップ
                 }
                 return speed * mod;
@@ -769,17 +769,19 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             Transform start;
             Transform end;
             Transform landing;
+            ZiplineBehaviour zBehaviour = zipline.zipline;
+
             if (zipline.atTop)
             {
-                start = zipline.zipline.handleTop;
-                end = zipline.zipline.handleBottom;
-                landing = zipline.zipline.landingPositionBottom;
+                start = zBehaviour.handleTop;
+                end = zBehaviour.handleBottom;
+                landing = zBehaviour.landingPositionBottom;
             }
             else
             {
-                start = zipline.zipline.handleBottom;
-                end = zipline.zipline.handleTop;
-                landing = zipline.zipline.landingPositionTop;
+                start = zBehaviour.handleBottom;
+                end = zBehaviour.handleTop;
+                landing = zBehaviour.landingPositionTop;
             }
             bool fromTop = zipline.atTop;
 
@@ -799,13 +801,13 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             {
                 if (fromTop)
                 {
-                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zipline.zipline.downSound, false, (DynamicSound.GetDynamicsFunction)(zipline.zipline.SoundDynamics), SoundManager.Instance.SfxChannel);
-                    yield return new WaitForSeconds(zipline.zipline.downSound.length - 0.05f);
-                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zipline.zipline.downLoopSound, true, (DynamicSound.GetDynamicsFunction)(zipline.zipline.SoundDynamics), SoundManager.Instance.SfxChannel);
+                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zBehaviour.downSound, false, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), SoundManager.Instance.SfxChannel);
+                    yield return new WaitForSeconds(zBehaviour.downSound.length - 0.05f);
+                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zBehaviour.downLoopSound, true, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), SoundManager.Instance.SfxChannel);
                 }
-                if (zipline.zipline.ShouldPlaySound())
+                if (zBehaviour.ShouldPlaySound())
                 {
-                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zipline.zipline.upSound, true, (DynamicSound.GetDynamicsFunction)(zipline.zipline.SoundDynamics), SoundManager.Instance.SfxChannel);
+                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zBehaviour.upSound, true, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), SoundManager.Instance.SfxChannel);
                 }
             }
             void ZiplineStopsound()
@@ -827,9 +829,10 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
 
             yield return WalkPlayerTo(start.position, 0.001f, 1f, true);
             player.displayPlayer.Cosmetics.TogglePetVisible(false);
-            HandZiplinePoolable currentHand = zipline.zipline.GetHand();
+            HandZiplinePoolable currentHand = zBehaviour.GetHand();
+            Transform handTransform = currentHand.transform;
             currentHand.SetPlayerColor((player as IPlayerlike).RealPlayer!.CurrentOutfit.outfit, PlayerMaterial.MaskType.None, 1f);
-            ZiplinePlaySound(zipline.zipline.attachSound, start.position);
+            ZiplinePlaySound(zBehaviour.attachSound, start.position);
 
             //CoAnimatePlayerJumpingOnToZipline ここから
             player.additionalRenderers.Add(currentHand.handRenderer);
@@ -838,20 +841,20 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             if (fromTop)
             {
                 currentHand.StartDownAnimation();
-                currentHand.transform.position = zipline.zipline.upHandPosition.position;
-                animationCurve = zipline.zipline.jumpZiplineCurve;
+                handTransform.position = zBehaviour.upHandPosition.position;
+                animationCurve = zBehaviour.jumpZiplineCurve;
             }
             else
             {
                 currentHand.StartUpAnimation();
-                currentHand.transform.position = zipline.zipline.downHandPosition.position;
-                animationCurve = zipline.zipline.jumpZiplineCurveBottom;
+                handTransform.position = zBehaviour.downHandPosition.position;
+                animationCurve = zBehaviour.jumpZiplineCurveBottom;
             }
             player.displayPlayer.Cosmetics.UpdateBounceHatZipline();
             player.displayPlayer.Cosmetics.AnimateSkinJump();
             yield return Effects.All(
-                Effects.CurvePositionY(player.displayPlayer.transform, animationCurve, zipline.zipline.timeJump, 0f),
-                Effects.CurvePositionY(currentHand.transform, zipline.zipline.jumpZiplineHandCurve, zipline.zipline.timeJump, 0f),
+                Effects.CurvePositionY(player.displayPlayer.transform, animationCurve, zBehaviour.timeJump, 0f),
+                Effects.CurvePositionY(handTransform, zBehaviour.jumpZiplineHandCurve, zBehaviour.timeJump, 0f),
                 player.displayPlayer.Animations.CoPlayJumpAnimation()
             );
             yield return Effects.Wait(0.1f);
@@ -864,33 +867,33 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             Vector3 handleEndPosition;
             if (fromTop)
             {
-                travelSeconds = zipline.zipline.downTravelTime;
-                handleEndPosition = zipline.zipline.dropPositionBottom.position;
+                travelSeconds = zBehaviour.downTravelTime;
+                handleEndPosition = zBehaviour.dropPositionBottom.position;
             }
             else
             {
-                travelSeconds = zipline.zipline.upTravelTime;
-                handleEndPosition = zipline.zipline.dropPositionTop.position;
+                travelSeconds = zBehaviour.upTravelTime;
+                handleEndPosition = zBehaviour.dropPositionTop.position;
             }
             Vector3 vector = Vector3.zero;
             Vector3 startPos = Position;
-            Vector3 handOffset = currentHand.transform.position - startPos;
+            Vector3 handOffset = handTransform.position - startPos;
             for (float time = 0f; time < travelSeconds; time += Time.deltaTime)
             {
                 float num = time / travelSeconds;
-                vector.x = Mathf.SmoothStep(startPos.x, handleEndPosition.x, num);
-                vector.y = Mathf.SmoothStep(startPos.y, handleEndPosition.y, num);
+                vector.x = Mathn.SmoothStep(startPos.x, handleEndPosition.x, num);
+                vector.y = Mathn.SmoothStep(startPos.y, handleEndPosition.y, num);
                 vector.z = vector.y / 1000f;
                 player.displayPlayer.transform.position = vector;
                 vector += handOffset;
-                vector.z = currentHand.transform.position.z;
-                currentHand.transform.position = vector;
+                vector.z = handTransform.position.z;
+                handTransform.position = vector;
                 yield return null;
             }
             //CoAnimateZiplineAndPlayer ここまで
 
             ZiplineStopsound();
-            ZiplinePlaySound(zipline.zipline.detachSound, end.position);
+            ZiplinePlaySound(zBehaviour.detachSound, end.position);
 
             //CoAlightPlayerFromZipline ここから
             //player.MyPhysics.enabled = true;
@@ -899,7 +902,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             if (fromTop) currentHand.StartDownOutroAnimation();
             else currentHand.StartUpOutroAnimation();
             
-            yield return WalkPlayerTo(zipline.zipline.transform.TransformPoint(landing.position), 0.01f, 1f, false);
+            yield return WalkPlayerTo(zBehaviour.transform.TransformPoint(landing.position), 0.01f, 1f, false);
             player.displayPlayer.Cosmetics.SetPetPosition(player.Position.ToUnityVector());
             player.displayPlayer.Cosmetics.TogglePetVisible(true);
             //REMOVE: Petの再表示
@@ -1004,7 +1007,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             Vector2 del = worldPos - Position;
             while (del.sqrMagnitude > tolerance)
             {
-                float num = Mathf.Clamp(del.magnitude * 2f, 0.05f, 1f);
+                float num = Mathn.Clamp(del.magnitude * 2f, 0.05f, 1f);
                 player.body.velocity = del.normalized * PlayerModInfo.OriginalSpeed * num * speedMul;
                 yield return null;
                 if (player.body.velocity.magnitude < 0.005f && (double)del.sqrMagnitude < 0.1)
@@ -1100,7 +1103,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             else if (velocity.x > 0.01f) FlipX = false;
         }
 
-        UpdateVisibility(true);
+        UpdateVisibility(true, false, true);
     }
 
     bool IsInShadowCache = false;
@@ -1166,10 +1169,10 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             }
 
             var shadowHidesPlayer = !ignoreShadow && IsInShadowCache;
-            displayPlayer.Cosmetics.nameText.transform.parent.gameObject.SetActive(!shadowHidesPlayer);
+            displayPlayer.Cosmetics.nameText.transform.parent.gameObject.SetActive(!shadowHidesPlayer && showNameText);
 
             float immadiateAlpha = 0 switch { 2 => 0f, 1 => 0.25f, _ => 1f };
-            float alpha = Mathf.Min(immadiateAlpha, shadowHidesPlayer ? 0f : 1f);
+            float alpha = Mathn.Min(immadiateAlpha, shadowHidesPlayer ? 0f : 1f);
 
             SetPlayerAlpha(alpha, alpha);
         }

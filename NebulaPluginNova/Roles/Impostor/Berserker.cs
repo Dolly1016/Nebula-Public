@@ -92,7 +92,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
             }
             else
             {
-                ev.UpdateSaturation(Mathf.Max(0f, 1f - killing * 0.4f), true);
+                ev.UpdateSaturation(Mathn.Max(0f, 1f - killing * 0.4f), true);
             }
 
             if (killingFlash > 0f) killingFlash -= Time.deltaTime;

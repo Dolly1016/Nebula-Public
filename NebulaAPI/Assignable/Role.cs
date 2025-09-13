@@ -447,6 +447,8 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// </summary>
     bool IsMadmate => false;
 
+    bool IsKiller => Category == RoleCategory.ImpostorRole;
+
     /// <summary>
     /// 追加割り当てされる役職を一覧で全て返します。割り当て数と一致する必要はありません。
     /// </summary>

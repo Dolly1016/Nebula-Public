@@ -17,7 +17,7 @@ public class EffectCommand : ICommand
         public bool allowDuplicate = false;
 
         public static CommandStructureConverter<EffectStructure> Converter = new CommandStructureConverter<EffectStructure>()
-            .Add<float>("duration", (structure, val) => structure.duration = Mathf.Max(val, 0))
+            .Add<float>("duration", (structure, val) => structure.duration = Mathn.Max(val, 0))
             .Add<bool>("infinity", (structure, val) => structure.duration = val ? 500000f : structure.duration)
             .Add<float>("ratio", (structure, val) => structure.ratio = val)
             .Add<float>("x", (structure, val) => structure.ratioVec.x = val)

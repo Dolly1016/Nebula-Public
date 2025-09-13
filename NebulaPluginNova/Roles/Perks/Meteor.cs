@@ -155,7 +155,7 @@ internal class Meteor : PerkFunctionalInstance
             //被弾した場合
             if(distance < ExplosionSize && !localPlayer.IsDead && !localPlayer.VanillaPlayer.inVent && !localPlayer.IsDived)
             {
-                invoker.MurderPlayer(localPlayer, PlayerState.Meteor, EventDetail.Meteor, Virial.Game.KillParameter.WithAssigningGhostRole | Virial.Game.KillParameter.WithDeadBody, KillCondition.TargetAlive, result =>
+                invoker.MurderPlayer(localPlayer, PlayerState.Meteor, EventDetail.Meteor, Virial.Game.KillParameter.WithAssigningGhostRole | Virial.Game.KillParameter.WithDeadBody, KillCondition.TargetAlive | KillCondition.InTaskPhase, result =>
                 {
                     if (result == Virial.Game.KillResult.Kill && Constants.ShouldPlaySfx()) NebulaManager.Instance.StartDelayAction(0.8f, () => Helpers.PlayKillStingerSE());
                 });

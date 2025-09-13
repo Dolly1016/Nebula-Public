@@ -192,7 +192,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             yield return new WaitForSeconds(0.15f);
 
             //死体を生成
-            DeadBody deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.DeadBodyPrefab);
+            DeadBody deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.deadBodyPrefab[0]);
             GameObject deadBodyObj = deadBody.gameObject;
             deadBody.enabled = CanReportKillSceneOption;
             deadBody.Reported = !CanReportKillSceneOption;

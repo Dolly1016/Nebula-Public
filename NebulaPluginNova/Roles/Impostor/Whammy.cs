@@ -123,6 +123,8 @@ internal class Balloon
 
     public void Update()
     {
+        if (!holder) return;
+
         bool lastActive = holder.active;
 
         if (target.IsDead || !target.VanillaPlayer.Visible)

@@ -12,52 +12,52 @@ public class NebulaPreSpawnLocation
 
     static public NebulaPreSpawnLocation[][] Locations = [
         [ 
-            new("Admin", new Vector2(2.9753f, -7.4595f)),
-            new("Cafeteria", new Vector2(-0.8721f, 3.6115f)),
+            new("Admin", new Vector2(2.9753f, -7.4595f), "panel_enterID01"),
+            new("Cafeteria", new Vector2(-0.8721f, 3.6115f), "FootstepMetal07"),
             new("Comms", new Vector2(4.5986f, -15.618f)),
-            new("Electrical", new Vector2(-7.6091f, -8.7664f)),
+            new("Electrical", new Vector2(-7.6091f, -8.7664f), "AMB_Electricshock1"),
             new("LifeSupport", new Vector2(6.5236f, -3.5375f)),
-            new("LowerEngine", new Vector2(-17.1282f, -13.2787f)),
-            new("MedBay", new Vector2(-8.6636f, -4.4547f)),
+            new("LowerEngine", new Vector2(-17.1282f, -13.2787f), "rollover_engine"),
+            new("MedBay", new Vector2(-8.6636f, -4.4547f), "panel_medtext"), 
             new("Navigation", new Vector2(16.6989f, -4.7736f)),
-            new("Reactor", new Vector2(-20.9127f, -5.5454f)),
-            new("Security", new Vector2(-13.2544f, -4.1371f)),
+            new("Reactor", new Vector2(-20.9127f, -5.5454f), "panel_reactorhand"),
+            new("Security", new Vector2(-13.2544f, -4.1371f), "utility_security_close"),
             new("Shields", new Vector2(9.1997f, -12.3562f)),
-            new("Storage", new Vector2(-2.3901f, -15.1296f)),
-            new("UpperEngine", new Vector2(-17.6972f, -0.9157f)),
-            new("Weapons", new Vector2(9.5354f, 1.3911f))
+            new("Storage", new Vector2(-2.3901f, -15.1296f), "panel_O2Drop"),
+            new("UpperEngine", new Vector2(-17.6972f, -0.9157f), "rollover_engine"),
+            new("Weapons", new Vector2(9.5354f, 1.3911f), "panel_weaponfire")
         ],
         [
-            new("Admin", new Vector2(19.4462f, 19.0366f)),
-            new("Balcony", new Vector2(26.7091f, -1.9142f)),
-            new("Cafeteria", new Vector2(25.433f, 2.553f)),
-            new("Comms", new Vector2(14.4909f, 4.0153f)),
-            new("Decontamination", new Vector2(6.1333f, 6.27f)),
-            new("Greenhouse", new Vector2(17.857f, 23.5425f)),
-            new("Laboratory", new Vector2(9.0136f, 12.081f)),
-            new("Launchpad", new Vector2(-4.4f, 2.1969f)),
-            new("LockerRoom", new Vector2(9.0862f, 1.3112f)),
-            new("MedBay", new Vector2(15.3094f, -0.4085f)),
-            new("Office", new Vector2(14.7004f, 20.0933f)),
+            new("Admin", new Vector2(19.4462f, 19.0366f), "panel_enterID01"),
+            new("Balcony", new Vector2(26.7091f, -1.9142f), "Door_balconyOpen"),
+            new("Cafeteria", new Vector2(25.433f, 2.553f), "panel_emergencyButton"), 
+            new("Comms", new Vector2(14.4909f, 4.0153f), "panel_enterIDBad"),
+            new("Decontamination", new Vector2(6.1333f, 6.27f), "Decontamination_Button"),
+            new("Greenhouse", new Vector2(17.857f, 23.5425f), "panel_storagePlantFinish03"),
+            new("Laboratory", new Vector2(9.0136f, 12.081f), "task_samples_correct"),
+            new("Launchpad", new Vector2(-4.4f, 2.1969f), "panel_beverageLand"),
+            new("LockerRoom", new Vector2(9.0862f, 1.3112f), "panel_safespin"),
+            new("MedBay", new Vector2(15.3094f, -0.4085f), "panel_medtext"), 
+            new("Office", new Vector2(14.7004f, 20.0933f), "FootstepMetal07"),
             new("Reactor", new Vector2(2.4809f, 13.2443f)),
             new("Rendezvous", new Vector2(17.8176f, 11.3095f)),
-            new("Storage", new Vector2(19.9159f, 4.718f))
+            new("Storage", new Vector2(19.9159f, 4.718f), "panel_storageGrabcan")
         ],
         [
-            new("Abditory", new Vector2(25.7226f, -12.8779f)),
-            new("Admin", new Vector2(21.1384f, -22.7731f)),
+            new("Abditory", new Vector2(25.7226f, -12.8779f), "ventMoveGround2"),
+            new("Admin", new Vector2(21.1384f, -22.7731f), "panel_enterID01"),
             new("Drill", new Vector2(27.5518f, -7.3609f)),
-            new("Dropship", new Vector2(16.6f, -1.5f)),
+            new("Dropship", new Vector2(16.6f, -1.5f), "rollover_brig"),
             new("Ejection", new Vector2(32.1547f, -15.7529f)),
-            new("Electrical", new Vector2(7.4f, -9.6f)),
-            new("Laboratory", new Vector2(34.8f, -6.0f)),
-            new("LifeSupport", new Vector2(3.5f, -21.5f)),
-            new("Office", new Vector2(19.5f, -17.6f)),
-            new("Security", new Vector2(3.0694f, -11.9939f)),
-            new("Snowdrift", new Vector2(12.918f, -13.0296f)),
-            new("Specimens", new Vector2(36.5f, -21.2f)),
-            new("Storage", new Vector2(20.6f, -11.7f)),
-            new("Weapons", new Vector2(12.2f, -23.3f))
+            new("Electrical", new Vector2(7.4f, -9.6f), "AMB_Electricshock1"),
+            new("Laboratory", new Vector2(34.8f, -6.0f), "panel_weatherSwitch"), 
+            new("LifeSupport", new Vector2(3.5f, -21.5f), "panel_storagePlantFinish03"),
+            new("Office", new Vector2(19.5f, -17.6f), "FootstepMetal07"),
+            new("Security", new Vector2(3.0694f, -11.9939f), "utility_security_close"),
+            new("Snowdrift", new Vector2(12.918f, -13.0296f), "FootstepSnow05"),
+            new("Specimens", new Vector2(36.5f, -21.2f), "panel_specimenOpen"),
+            new("Storage", new Vector2(20.6f, -11.7f), "panel_O2Drop"),
+            new("Weapons", new Vector2(12.2f, -23.3f), "panel_weaponfire")
         ],
         [],
         [
@@ -67,35 +67,35 @@ public class NebulaPreSpawnLocation
             new("Kitchen",3,180,new(-7f,-11.5f)),
             new("Record",4,173,new(19.8f,10.3f)),
             new("Storage",5,188,new(33.5f,0f)),
-            new("Armory", new Vector2(-10.141f, -6.3739f)),
-            new("Cockpit", new Vector2(-23.5643f, -1.4405f)),
-            new("Comms", new Vector2(-12.9433f, 1.4259f)),
-            new("Electrical", new Vector2(16.3201f, -8.808f)),
-            new("GapRoom", new Vector2(11.9727f, 8.6011f)),
+            new("Armory", new Vector2(-10.141f, -6.3739f), "panel_gungrabrifle"),
+            new("Cockpit", new Vector2(-23.5643f, -1.4405f), "task_crank_turn2"),
+            new("Comms", new Vector2(-12.9433f, 1.4259f), "panel_enterIDBad"),
+            new("Electrical", new Vector2(16.3201f, -8.808f), "AMB_Electricshock4"),
+            new("GapRoom", new Vector2(11.9727f, 8.6011f), "task_weights_fail"),
             new("Lounge", new Vector2(24.8702f, 6.459f)),
-            new("Medical", new Vector2(28.4471f, -5.8789f)),
-            new("MeetingRoom", new Vector2(11.1469f, 16.0138f)),
-            new("Security", new Vector2(7.0693f, -11.6312f)),
-            new("Shower", new Vector2(24.0106f, 2.0266f)),
-            new("Toilet", new Vector2(32.3184f, 7.0118f)),
+            new("Medical", new Vector2(28.4471f, -5.8789f), "panel_medtext"), 
+            new("MeetingRoom", new Vector2(11.1469f, 16.0138f), "panel_cafeteria_leverpull"),
+            new("Security", new Vector2(7.0693f, -11.6312f), "utility_security_close"),
+            new("Shower", new Vector2(24.0106f, 2.0266f), "panel_towelland"),
+            new("Toilet", new Vector2(32.3184f, 7.0118f), "panel_toiletFlush"),
             new("Vault", new Vector2(-8.789f, 8.049f)),
-            new("ViewingDeck", new Vector2(-13.9798f, -15.8316f))
+            new("ViewingDeck", new Vector2(-13.9798f, -15.8316f), "panel_beverageLand")
         ],
         [
-            new("Campfire", new Vector2(-9.79f, 3.0949f)),
-            new("Comms", new Vector2(24.0248f, 13.625f)),
-            new("Laboratory", new Vector2(-5.2573f, -9.1099f)),
-            new("Greenhouse", new Vector2(9.3125f, -11.8004f)),
-            new("MeetingRoom", new Vector2(-1.2941f, -1.5503f)),
-            new("Cafeteria", new Vector2(-16.2874f, 7.1993f)),
-            new("Dropship", new Vector2(-9.4613f, 13.3676f)),
-            new("SplashZone", new Vector2(-16.9936f, -0.2838f)),
-            new("Kitchen", new Vector2(-17.0477f, -7.7723f)),
-            new("Storage", new Vector2(1.2842f, 4.2345f)),
-            new("UpperEngine", new Vector2(21.9515f, 2.8107f)),
-            new("MiningPit", new Vector2(11.9868f, 9.4421f)),
-            new("Lookout", new Vector2(7.1789f, 1.5662f)),
-            new("Reactor", new Vector2(21.9125f, -7.0967f)),
+            new("Campfire", new Vector2(-9.79f, 3.0949f), "task_roast_burnt"), 
+            new("Comms", new Vector2(24.0248f, 13.625f), "panel_enterIDBad"),
+            new("Laboratory", new Vector2(-5.2573f, -9.1099f), "task_samples_pickupmush"), 
+            new("Greenhouse", new Vector2(9.3125f, -11.8004f), "panel_storageWaterplant"),
+            new("MeetingRoom", new Vector2(-1.2941f, -1.5503f), "panel_safespin"), 
+            new("Cafeteria", new Vector2(-16.2874f, 7.1993f), "FootstepSand01"),
+            new("Dropship", new Vector2(-9.4613f, 13.3676f), "rollover_brig"),
+            new("SplashZone", new Vector2(-16.9936f, -0.2838f), "task_sandcastle_grab"),
+            new("Kitchen", new Vector2(-17.0477f, -7.7723f), "task_fish_onhook"),
+            new("Storage", new Vector2(1.2842f, 4.2345f), "rollover_storage"),
+            new("UpperEngine", new Vector2(21.9515f, 2.8107f), "rollover_engine"),
+            new("MiningPit", new Vector2(11.9868f, 9.4421f), "task_mine_rockrelease2"),
+            new("Lookout", new Vector2(7.1789f, 1.5662f), "utility_security_close"),
+            new("Reactor", new Vector2(21.9125f, -7.0967f), "panel_reactorhand"),
             new("Jungle", new Vector2[]{ 
                 new Vector2(18.44f, -12.3383f),//リアクター左下
                 new Vector2(9.4571f, -15.5648f),//グリーンハウス下
@@ -103,10 +103,14 @@ public class NebulaPreSpawnLocation
                 new Vector2(-4.2053f, -14.8184f),//ラボ下
                 new Vector2(2.3421f, -12.0085f),//グリーンハウス・ラボ間
                 new Vector2(15.2272f, -6.1833f)//リアクター左
-                })
+                }, "sporemushroom_respawn")
         ],
         []
         ];
+
+    //task_crank_turn2
+    //panel_admin_cardaccept
+    //panel_sortsampleDrop04
 
     public string LocationName { get; private init; }
     public string GetDisplayName(byte mapId)
@@ -114,6 +118,13 @@ public class NebulaPreSpawnLocation
         return "location." + MapName[mapId].HeadLower() + "." + LocationName.HeadLower();
     }
     public string? AudioClip { get; private init; }
+    private AudioClip? clipCache = null;
+    public AudioClip? GetClip()
+    {
+        if (AudioClip == null) return null;
+        clipCache ??= VanillaAsset.GetAudioClip(AudioClip);
+        return clipCache;
+    }
     public Vector2[]? Positions { get; set; }
     public Vector2? Position => Positions != null ? Positions[System.Random.Shared.Next(Positions.Length)] : null;
     public int? VanillaIndex { get; private init; }
@@ -193,7 +204,7 @@ public class NebulaPreSpawnMinigame : Minigame
         for (float timer = 0f; timer < 0.25f; timer += Time.deltaTime)
         {
             float num = timer / 0.25f;
-            base.transform.localPosition = new Vector3(0f, Mathf.SmoothStep(0f, -8f, num), -50f);
+            base.transform.localPosition = new Vector3(0f, Mathn.SmoothStep(0f, -8f, num), -50f);
             yield return null;
         }
 
@@ -228,7 +239,7 @@ public class NebulaPreSpawnMinigame : Minigame
         UnderText.text = "";
 
 
-        int candidates = Mathf.Min(GeneralConfigurations.SpawnCandidatesOption, cand.Length);
+        int candidates = Mathn.Min(GeneralConfigurations.SpawnCandidatesOption, cand.Length);
 
         if (GeneralConfigurations.SpawnMethodOption.GetValue() == 2) candidates = 1;
 
@@ -265,7 +276,7 @@ public class NebulaPreSpawnMinigame : Minigame
 
             while (true)
             {
-                othersAlpha = Mathf.Clamp01(othersAlpha - Time.deltaTime * 1.45f);
+                othersAlpha = Mathn.Clamp01(othersAlpha - Time.deltaTime * 1.45f);
 
                 for (int i = 0; i < candidates; i++)
                 {
@@ -323,7 +334,7 @@ public class NebulaPreSpawnMinigame : Minigame
             while (t > 0f)
             {
                 t -= Time.deltaTime;
-                int next = Mathf.CeilToInt(t);
+                int next = Mathn.CeilToInt(t);
                 if (next != ceilCount)
                 {
                     ceilCount = next;
@@ -386,7 +397,7 @@ public class NebulaPreSpawnMinigame : Minigame
             text.fontSizeMin = 1f;
             text.text = Language.Translate(loc.GetDisplayName(mapId));
             text.font = VanillaAsset.PreSpawnFont;
-            AudioClip hoverClip = VanillaAsset.HoverClip.Clip;
+            AudioClip hoverClip = loc.GetClip() ?? VanillaAsset.HoverClip.Clip;
 
             if (loc.VanillaIndex.HasValue)
                 hoverClip = minigamePrefab!.Locations[loc.VanillaIndex.Value].RolloverSfx;

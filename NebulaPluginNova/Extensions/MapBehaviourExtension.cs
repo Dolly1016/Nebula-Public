@@ -11,6 +11,7 @@ public static class MapBehaviourExtension
     public static bool AffectedByFakeAdmin = true;
     public static bool ShowDeadBodies = true;
     public static Color? MapColor = null;
+    public static int RoomFlag = 0xFFFFFFF;
     public static void InitializeModOption(this MapCountOverlay overlay)
     {
         CanIdentifyImpostors = false;
@@ -19,6 +20,7 @@ public static class MapBehaviourExtension
         AffectedByFakeAdmin = true;
         ShowDeadBodies = GeneralConfigurations.ShowDeadBodiesOnAdminOption;
         MapColor = null;
+        RoomFlag = 0xFFFFFFF;
     }
 
     public static void SetModOption(this MapCountOverlay overlay, bool? canIdentifyImpostors = null, bool? canIdentifyDeadBodies = null, bool? affectedByCommSab = null, bool? affectedByFakeAdmin = null, bool? showDeadBodies = null, Color ? mapColor = null)
@@ -33,6 +35,12 @@ public static class MapBehaviourExtension
             MapColor = mapColor.Value;
             overlay.BackgroundColor.SetColor(MapBehaviourExtension.MapColor ?? Color.green);
         }
+    }
+
+    public static void RestrictRoom(this MapBehaviour map, int roomFlag)
+    {
+        RoomFlag = roomFlag;
+        map.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(AmongUsUtil.CurrentMapId, roomFlag);
     }
 
     public static void UpdateCount(this CounterArea counterArea, int cnt, int impostors, int deadBodies)
@@ -53,7 +61,7 @@ public static class MapBehaviourExtension
         {
             int num = i % counterArea.MaxColumns;
             int num2 = i / counterArea.MaxColumns;
-            float num3 = (float)(Mathf.Min(cnt - num2 * counterArea.MaxColumns, counterArea.MaxColumns) - 1) * counterArea.XOffset / -2f;
+            float num3 = (float)(Mathn.Min(cnt - num2 * counterArea.MaxColumns, counterArea.MaxColumns) - 1) * counterArea.XOffset / -2f;
             counterArea.myIcons[i].transform.position = counterArea.transform.position + new Vector3(num3 + (float)num * counterArea.XOffset, (float)num2 * counterArea.YOffset, -1f);
 
             if (impostors > 0)

@@ -96,7 +96,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
         void OnGameEnd(GameEndEvent ev)
         {
             if (hasCreatedLover && selected1!.IsDead && selected2!.IsDead && !MyPlayer.IsDead &&
-                GamePlayer.AllPlayers.Count(p => p.PlayerState == PlayerState.Laser && (p.MyKiller == MyPlayer || p.MyKiller == selected1 || p.MyKiller == selected2)) >= 5 &&
+                GamePlayer.AllPlayers.Count(p => p.PlayerState == PlayerState.Laser && (p.MyKiller == MyPlayer || p.MyKiller == selected1 || p.MyKiller == selected2)) >= 4 &&
                 GamePlayer.AllPlayers.All(p => p == MyPlayer || p.IsDead) &&
                 ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && ev.EndState.Winners.Test(MyPlayer)
                 )
@@ -338,7 +338,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
             {
                 return player2.Position.Distance(myPos) < LaserRadius;
             }
-            return Mathf.Abs(y) < LaserRadius; 
+            return Mathn.Abs(y) < LaserRadius; 
         }
 
         void CheckAndRequestLocalKill()
@@ -430,7 +430,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
                 if (center.Distance(player1Pos) < center.Distance(player2Pos)) posDiff = -posDiff;
                 edgeFrontRenderer.transform.position = (player1Pos + player2Pos) * 0.5f;
                 edgeFrontRenderer.transform.SetWorldZ(-2.5f);
-                edgeFrontRenderer.transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(posDiff.y, posDiff.x).RadToDeg());
+                edgeFrontRenderer.transform.localEulerAngles = new(0f, 0f, Mathn.Atan2(posDiff.y, posDiff.x).RadToDeg());
                 edgeFrontRenderer.size = new(posDiff.magnitude, 0.4f);
                 edgeBackRenderer.size = new(posDiff.magnitude, 0.4f);
 
@@ -510,7 +510,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
                 var dirNorm = dir.normalized;
                 var diff = Vector2.Dot(localPos, dirNorm);
                 var mag = dir.magnitude;
-                diff = Mathf.Clamp(diff, 0f, mag);
+                diff = Mathn.Clamp(diff, 0f, mag);
                 soundSource.transform.position = (Vector3)player1.Position.ToUnityVector() + (Vector3)(dirNorm * diff);
             }
         }

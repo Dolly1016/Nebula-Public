@@ -114,9 +114,9 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
                     while (wifiBlockedMark)
                     {
                         float p = 0f;
-                        while (p < Mathf.PI) {
+                        while (p < Mathn.PI) {
                             if (!wifiBlockedMark) break;
-                            var sin = Mathf.Sin(p);
+                            var sin = Mathn.Sin(p);
                             wifiBlockedMark.color = new(1f, 1f, 1f, 1f - sin * 0.4f);
                             p += Time.deltaTime * 3.3f;
                             yield return null;
@@ -128,23 +128,24 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
 
                 var noise = UnityHelper.CreateMeshRenderer("NoiseRenderer", pva, new(0f,0f,-0.1f), null, null, new(NebulaAsset.MeshDistShader));
                 noise.filter.CreateRectMesh(new(2.85f, 0.7f));
-                noise.renderer.material.SetFloat("_GlitchYSize", 0.045f);
-                noise.renderer.material.SetFloat("_GlitchBlockSize", 0.007f);
+                var noiseMat = noise.renderer.material;
+                noiseMat.SetFloat("_GlitchYSize", 0.045f);
+                noiseMat.SetFloat("_GlitchBlockSize", 0.007f);
                 IEnumerator CoNoiseUpdate()
                 {
                     void SetInactive() {
                         if (noise.renderer)
                         {
-                            noise.renderer.material.SetFloat("_GlitchYAmount", 0f);
-                            noise.renderer.material.SetFloat("_GlitchBlockAmount", 0.001f);
+                            noiseMat.SetFloat("_GlitchYAmount", 0f);
+                            noiseMat.SetFloat("_GlitchBlockAmount", 0.001f);
                         }
                     }
                     void SetActive()
                     {
                         if (noise.renderer)
                         {
-                            noise.renderer.material.SetFloat("_GlitchYAmount", 0.01f);
-                            noise.renderer.material.SetFloat("_GlitchBlockAmount", 0.005f);
+                            noiseMat.SetFloat("_GlitchYAmount", 0.01f);
+                            noiseMat.SetFloat("_GlitchBlockAmount", 0.005f);
                         }
                     }
                     while (noise.renderer)

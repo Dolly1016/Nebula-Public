@@ -88,10 +88,11 @@ public static class RevivePatch
         __instance.cosmetics.SetNameMask(true);
         if (__instance.AmOwner)
         {
-            DestroyableSingleton<HudManager>.Instance.ShadowQuad.gameObject.SetActive(true);
-            DestroyableSingleton<HudManager>.Instance.SetHudActive(true);
-            DestroyableSingleton<HudManager>.Instance.Chat.ForceClosed();
-            DestroyableSingleton<HudManager>.Instance.Chat.SetVisible(false);
+            var hudManager = HudManager.Instance;
+            hudManager.ShadowQuad.gameObject.SetActive(true);
+            hudManager.SetHudActive(true);
+            hudManager.Chat.ForceClosed();
+            hudManager.Chat.SetVisible(false);
         }
 
         return false;
@@ -121,7 +122,7 @@ public static class KillButtonClickPatch
 {
     static bool Prefix(KillButton __instance)
     {
-        if (__instance.enabled && NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget != null && !__instance.isCoolingDown && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
+        if (__instance.enabled && NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget != null && !__instance.isCoolingDown && __instance.graphic.color.a > 0.9f && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
         {
             var target = NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget!;
             var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(GamePlayer.LocalPlayer!, target));
@@ -167,18 +168,19 @@ class BlockInitializePatch
     {
         __instance.Player = player;
         if (!player.AmOwner) return false;
-        
+
+        var hudManager = HudManager.Instance;
         if (__instance.IsImpostor)
         {
             if (__instance.CanUseKillButton)
             {
-                DestroyableSingleton<HudManager>.Instance.KillButton.Show();
+                hudManager.KillButton.Show();
                 if(player.killTimer < 10f) player.SetKillTimer(10f);
             }
-            DestroyableSingleton<HudManager>.Instance.SabotageButton.Show();
-            DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.Show();
+            hudManager.SabotageButton.Show();
+            hudManager.ImpostorVentButton.Show();
         }
-        DestroyableSingleton<HudManager>.Instance.SetHudActive(player, __instance, true);
+        hudManager.SetHudActive(player, __instance, true);
         PlayerNameColor.SetForRoleDirectly(player, __instance);
         __instance.InitializeAbilityButton();
 

@@ -175,15 +175,16 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
         private IEnumerator CoShakeTube(int index)
         {
             var tube = allSamples[index].tube;
+            var transform = tube.transform;
             float p = 0f;
             while (p < 1f) {
                 p += Time.deltaTime * 1.15f;
-                tube.transform.localEulerAngles = new(0f, 0f, 24f * Mathf.Sin(p * 29.2f) * (1f - p));
-                tube.transform.localScale = Vector3.one * (1f + (1f - (p * p)) * 0.4f);
+                transform.localEulerAngles = new(0f, 0f, 24f * Mathn.Sin(p * 29.2f) * (1f - p));
+                transform.localScale = Vector3.one * (1f + (1f - (p * p)) * 0.4f);
                 yield return null;
             }
-            tube.transform.localEulerAngles = new(0f, 0f, 0f);
-            tube.transform.localScale = Vector3.one;
+            transform.localEulerAngles = new(0f, 0f, 0f);
+            transform.localScale = Vector3.one;
         }
 
         AchievementToken<EditableBitMask<GamePlayer>>? acTokenChallenge = null;
