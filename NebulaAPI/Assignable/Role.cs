@@ -1,4 +1,7 @@
-﻿using Virial.Attributes;
+﻿using DiscordConnect;
+using System.Diagnostics;
+using System.Reflection;
+using Virial.Attributes;
 using Virial.Configuration;
 using Virial.Game;
 
@@ -481,30 +484,9 @@ public interface DefinedSingleAbilityRole<Ability> : DefinedRole, RuntimeAssigna
     IPlayerAbility DefinedRole.GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => IsJackalizable ? CreateAbility(jackal, arguments) : null!;
     IPlayerAbility DefinedRole.GetMaddenAbility(Virial.Game.Player madmate, int[] arguments) => IsLoadableToMadmate ? CreateAbility(madmate, arguments) : null!;
     IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments) => CreateUsurpedAbility(player, arguments);
-    /// <summary>
-    /// 能力から役職の表示名を取得します。
-    /// </summary>
-    /// <param name="ability">能力</param>
-    /// <returns></returns>
-    string? GetDisplayAbilityName(Ability ability) => null;
-    string DefinedRole.GetDisplayName(IPlayerAbility ability)
-    {
-        if(ability is Ability a)
-        {
-            return GetDisplayAbilityName(a) ?? DisplayName;
-        }
-        return DisplayName;
-    }
 
-    string? GetDisplayAbilityShort(Ability ability) => null;
-    string DefinedRole.GetDisplayShort(IPlayerAbility ability)
-    {
-        if (ability is Ability a)
-        {
-            return GetDisplayAbilityShort(a) ?? DisplayShort;
-        }
-        return DisplayShort;
-    }
+    string DefinedRole.GetDisplayName(IPlayerAbility ability) => DisplayName;
+    string DefinedRole.GetDisplayShort(IPlayerAbility ability) => DisplayShort;
 }
 
 /// <summary>

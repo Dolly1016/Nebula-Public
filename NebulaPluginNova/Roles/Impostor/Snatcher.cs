@@ -9,7 +9,7 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, DefinedRole
+internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, DefinedRole, DefinedSingleAbilityRole<Snatcher.Ability>
 {
     private Snatcher() : base("snatcher", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [
         new GroupConfiguration("options.role.snatcher.group.snatch", [SnatchMethodOption, SnatchCoolDownOption, ObviousGuessFailureOption, KillCooldownRewindAfterUsurpOption], GroupConfigurationColor.ImpostorRed),
@@ -34,11 +34,11 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
     static public readonly Snatcher MyRole = new();
     static private readonly GameStatsEntry StatsSnatch = NebulaAPI.CreateStatsEntry("stats.snatcher.snatch", GameStatsCategory.Roles, MyRole);
 
-    public override string? GetDisplayAbilityName(Ability ability)
+    string? DefinedRole.GetDisplayName(IPlayerAbility ability)
     {
-        if(ability.UsurpedRole != null)
-            return Language.Translate("role.snatcher.prefix") + " " + ability.UsurpedRole.GetDisplayName(ability.UsurpedAbility!) ?? ability.UsurpedRole.DisplayName ?? null;
-        return null;
+        if(ability is Ability snatcher && snatcher.UsurpedRole != null)
+            return Language.Translate("role.snatcher.prefix") + " " + snatcher.UsurpedRole.GetDisplayName(snatcher.UsurpedAbility!) ?? snatcher.UsurpedRole.DisplayName ?? null;
+        return (MyRole as DefinedRole).DisplayName;
     }
 
 

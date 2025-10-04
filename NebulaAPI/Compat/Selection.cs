@@ -1,11 +1,4 @@
-﻿using Rewired.Utils.Platforms.Windows;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
-using Virial.Helpers;
+﻿using Virial.Helpers;
 
 namespace Virial.Compat;
 

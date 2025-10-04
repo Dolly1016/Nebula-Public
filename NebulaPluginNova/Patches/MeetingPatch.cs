@@ -7,6 +7,8 @@ using Virial.Events.Player;
 using UnityEngine;
 using BepInEx.Unity.IL2CPP.Utils;
 using Nebula.Modules.Cosmetics;
+using System.Runtime.CompilerServices;
+using Nebula.VoiceChat;
 
 namespace Nebula.Patches;
 
@@ -521,6 +523,7 @@ class VoteAreaVCPatch
     {
         try
         {
+
             if (GeneralConfigurations.UseVoiceChatOption)
             {
                 foreach (var pva in __instance.playerStates)
@@ -531,20 +534,21 @@ class VoteAreaVCPatch
                     var col = DynamicPalette.PlayerColors[pva.TargetPlayerId];
                     if (Mathn.Max((int)col.r, (int)col.g, (int)col.b) < 100) col = Color.Lerp(col, Color.white, 0.4f);
 
-                    var client = NebulaGameManager.Instance?.VoiceChatManager?.GetClient(pva.TargetPlayerId);
-                    float alpha = 0f;
-                    if (client != null)
+                    if (ModSingleton<NoSVCRoom>.Instance?.TryGetPlayer(pva.TargetPlayerId, out var vcPlayer) ?? false)
                     {
+                        float alpha = 0f;
+
                         var script = frame.gameObject.AddComponent<ScriptBehaviour>();
                         script.UpdateHandler += () =>
                         {
-                            if (client.IsSpeaking)
+                            if (vcPlayer.Level > 0.12f)
                                 alpha = Mathn.Clamp(alpha + Time.deltaTime * 8f, 0f, 1f);
                             else
                                 alpha = Mathn.Clamp(alpha - Time.deltaTime * 8f, 0f, 1f);
                             col.a = alpha;
                             frame.color = col;
                         };
+
                     }
                 }
             }
@@ -811,6 +815,20 @@ class CancelVotingCompleteByRPCPatch
             return false;
         }
         return true;
+    }
+}
+
+[HarmonyPatch(typeof(VoteSpreader), nameof(VoteSpreader.Update))]
+class VoteSpreaderUpdatePatch
+{
+    public static void Postfix(VoteSpreader __instance)
+    {
+        int num = __instance.Votes.Count;
+        for (int i = 0; i < num; i++) {
+            var renderer = __instance.Votes[i];
+            if (!renderer || !renderer.enabled) continue;
+            renderer.transform.SetLocalZ((float)(-(float)i) / 50f - 0.05f);
+        }
     }
 }
 

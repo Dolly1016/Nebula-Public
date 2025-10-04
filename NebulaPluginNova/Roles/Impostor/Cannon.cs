@@ -276,12 +276,16 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
     {
         player.moveable = false;
         bool isLeft = to.x < from.x;
-        player.MyPhysics.FlipX = isLeft;
-        player.MyPhysics.Animations.Animator.Play(player.MyPhysics.Animations.group.SpawnAnim, 0f);
-        player.MyPhysics.Animations.Animator.SetTime(animOffset);
-        var skinAnim = player.cosmetics.skin.skin.SpawnLeftAnim && isLeft ? player.cosmetics.skin.skin.SpawnLeftAnim : player.cosmetics.skin.skin.SpawnAnim;
-        player.cosmetics.skin.animator.Play(skinAnim, 0f);
-        player.cosmetics.skin.animator.SetTime(animOffset);
+        var physics = player.MyPhysics;
+        physics.FlipX = isLeft;
+        var anim = physics.Animations;
+        anim.Animator.Play(anim.group.SpawnAnim, 0f);
+        anim.Animator.SetTime(animOffset);
+        var skin = player.cosmetics.skin;
+        var skinAnim = (skin.skin.SpawnLeftAnim && isLeft) ? skin.skin.SpawnLeftAnim : skin.skin.SpawnAnim;
+        skin.animator.Play(skinAnim, 0f);
+        skin.Flipped = isLeft; //SpawnLeftAnimを使用する場合、実際には反転しない。このプロパティのセッタがそのへんをうまくやってくれるので呼び出す。
+        skin.animator.SetTime(animOffset);
 
         //Spawnアニメーションの最終位置はずれがあるので、アニメーションに合わせてずれを補正
         var animTo = to - new Vector2(isLeft ? -0.3f : 0.3f, -0.24f);

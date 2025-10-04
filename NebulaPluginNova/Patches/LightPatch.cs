@@ -10,6 +10,7 @@ public class LightPatch
 {
     public static float lastRange = 1f;
     public static float lastRangeForDive = 1f;
+    public static float LastCalculatedRange = 1f;
 
     public static bool Prefix(ref float __result, ShipStatus __instance, [HarmonyArgument(0)] NetworkedPlayerInfo? player)
     {
@@ -49,6 +50,7 @@ public class LightPatch
 
         lastRange -= (lastRange - rate).Delta(0.7f, 0.005f);
         __result = radiusRate * range * lastRange;
+        LastCalculatedRange = __result;
 
         if (info?.IsDived ?? false)
             lastRangeForDive = 0f;
@@ -68,7 +70,7 @@ public class LightPatch
 public static class LightSourceGpuRendererPatch
 {
     static Il2CppReferenceArray<Collider2D> origArray = null!;
-    static Il2CppReferenceArray<Collider2D> zeroArray = new(0);
+    static Il2CppReferenceArray<Collider2D> zeroArray = new(0L);
 
     public static void Prefix(LightSourceGpuRenderer __instance)
     {
@@ -86,7 +88,7 @@ public static class LightSourceGpuRendererPatch
 public static class LightSourceRaycastRendererPatch
 {
     static Il2CppReferenceArray<Collider2D> origArray = null!;
-    static Il2CppReferenceArray<Collider2D> zeroArray = new(0);
+    static Il2CppReferenceArray<Collider2D> zeroArray = new(0L);
 
     public static void Prefix(LightSourceRaycastRenderer __instance)
     {

@@ -199,6 +199,7 @@ public static class Helpers
 
     public static string GetClipboardString()
     {
+#if PC
         uint type = 0;
         if (ClipboardHelper.IsClipboardFormatAvailable(1U)) { type = 1U; Debug.Log("ASCII"); }
         if (ClipboardHelper.IsClipboardFormatAvailable(13U)) { type = 13U; Debug.Log("UNICODE"); }
@@ -244,6 +245,9 @@ public static class Helpers
             ClipboardHelper.CloseClipboard();
         }
         return result;
+#else
+        return "";
+#endif
     }
 
     static public int[] Sequential(int length)

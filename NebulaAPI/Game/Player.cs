@@ -651,6 +651,10 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <c>IsCrewmate &amp;&amp; !IsMadmate</c>と等価です。
     /// </summary>
     bool IsTrueCrewmate => IsCrewmate && !IsMadmate;
+    /// <summary>
+    /// キル役職の場合、trueを返します。
+    /// </summary>
+    bool IsKiller => Role.Role.IsKiller;
 
 
     /// <summary>
@@ -696,7 +700,6 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <summary>
     /// 視界が壁を無視する場合、trueを返します。
     /// </summary>
-    [Obsolete(AttributeConstants.ObsoleteText)]
     bool EyesightIgnoreWalls => (Role?.EyesightIgnoreWalls ?? false) || AllAbilities.Any(a => a.EyesightIgnoreWalls);
 
     /// <summary>

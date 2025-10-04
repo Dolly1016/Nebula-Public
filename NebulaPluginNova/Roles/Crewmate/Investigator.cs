@@ -114,6 +114,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
         private InvestigatorManager()
         {
             ModSingleton<InvestigatorManager>.Instance = this;
+            ModSingleton<NightVision>.Instance = null!;
             this.Register(NebulaAPI.CurrentGame!);    
         }
 

@@ -126,7 +126,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     {
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (NebulaInput.SomeUiIsActive || (MapBehaviour.Instance && MapBehaviour.Instance.IsOpen)) return false;
+            if (NebulaInput.SomeUiIsActive || AmongUsUtil.MapIsOpen) return false;
 
             var dis = (UnityEngine.Vector2)Input.mousePosition - new UnityEngine.Vector2(Screen.width, Screen.height) * 0.5f;
             return dis.magnitude < 280f;
@@ -522,6 +522,8 @@ public static class ButtonEffect
         {
             if (keyCode == KeyCode.Return)
                 return "Return";
+            if (keyCode == KeyCode.Slash)
+                return "/";
             if (AllKeyInfo.TryGetValue(keyCode, out var val)) return val.TranslationKey;
             return null;
         }
@@ -617,6 +619,7 @@ public static class ButtonEffect
     static public Image InfoImage => infoSprite;
     static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide, bool isAidAction = false, string? action = null, int backVariation = 0)
     {
+#if PC
         if(removeExistingGuide)button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "HotKeyGuide") GameObject.Destroy(obj); }));
 
         Sprite? numSprite = null;
@@ -642,6 +645,9 @@ public static class ButtonEffect
         SetHintOverlay(obj, isAidAction, key, action);
 
         return obj;
+#else
+        return null;
+#endif
     }
     static public GameObject? SetKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide = true, string? action = null, int backVariation = 0)
     {
@@ -684,6 +690,7 @@ public static class ButtonEffect
 
     static public GameObject? SetMouseActionIcon(GameObject button,bool show, ActionIconType actionType = ActionIconType.ClickAction, string? action = "mouseClick", bool atBottom = true)
     {
+#if PC
         if (!show)
         {
             button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "MouseAction") GameObject.Destroy(obj); }));
@@ -707,7 +714,10 @@ public static class ButtonEffect
             if(action != null) SetHintOverlay(obj, false, KeyCode.None, action);
 
             return obj;
-        }   
+        }
+#else
+        return null;
+#endif
     }
 
     public enum ActionIconType

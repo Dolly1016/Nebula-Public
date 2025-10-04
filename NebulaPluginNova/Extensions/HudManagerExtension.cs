@@ -25,7 +25,7 @@ public static class HudManagerExtension
         GamePlayer? modPlayer = GamePlayer.LocalPlayer;
         RuntimeRole? modRole = modPlayer?.Role;
 
-        manager.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && GameManager.Instance.CanReportBodies() && ShipStatus.Instance != null);
+        manager.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && ShipStatus.Instance != null);
         manager.KillButton.ToggleVisible((modPlayer?.ShowKillButton ?? true) && !flag);
         manager.SabotageButton.ToggleVisible((modRole?.CanInvokeSabotage ?? false));
         manager.ImpostorVentButton.ToggleVisible(!flag && ((modRole?.CanUseVent ?? false) || PlayerControl.LocalPlayer.walkingToVent || PlayerControl.LocalPlayer.inVent));
@@ -34,6 +34,7 @@ public static class HudManagerExtension
 
     static public void ShowVanillaKeyGuide(this HudManager manager)
     {
+#if PC
         //ボタンのガイドを表示
         var keyboardMap = Rewired.ReInput.mapping.GetKeyboardMapInstanceSavedOrDefault(0, 0, 0);
         Il2CppReferenceArray<Rewired.ActionElementMap> actionArray;
@@ -87,5 +88,6 @@ public static class HudManagerExtension
             actionMap = actionArray[0];
             ButtonEffect.SetKeyGuide(HudManager.Instance.ImpostorVentButton.gameObject, actionMap.keyCode);
         }
+#endif
     }
 }

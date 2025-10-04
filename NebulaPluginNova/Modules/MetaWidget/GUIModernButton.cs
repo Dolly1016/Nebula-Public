@@ -264,8 +264,14 @@ internal class GUIModernButton : NoSGUIText
 
         if (OverlayWidget != null)
         {
+#if PC
             passiveButton.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(passiveButton, OverlayWidget()));
             passiveButton.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(passiveButton));
+#elif ANDROID
+            if(OnClick == null){
+                passiveButton.OnClick.AddListener(() => NebulaManager.Instance.SetHelpWidget(passiveButton, OverlayWidget()));
+            }
+#endif
         }
 
         if (OnRightClick != null) passiveButton.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked += () => OnRightClick(clickable);

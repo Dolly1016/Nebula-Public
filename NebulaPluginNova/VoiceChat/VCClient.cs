@@ -1,8 +1,10 @@
-﻿using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+﻿#if PC
+using Interstellar.Routing;
+using Interstellar.Routing.Router;
 
 namespace Nebula.VoiceChat;
 
+/*
 public class VCClient : IDisposable
 {
     public enum VCState
@@ -14,14 +16,10 @@ public class VCClient : IDisposable
         Comm,
     }
 
-    private OpusDotNet.OpusDecoder myDecoder;
-    private BufferedWaveProvider bufferedProvider;
-    private VolumeSampleProvider volumeFilter;
-    private VolumeMeter volumeMeter;
-    private PanningSampleProvider panningFilter;
+    private StereoRouter imager;
+
     private PlayerControl relatedControl;
     private GamePlayer? relatedInfo = null;
-    public MixingSampleProvider? myRoute = null;
     private float wallRatio = 1f;
     private int radioMask;
     private DataEntry<float>? volumeEntry = null;
@@ -84,13 +82,6 @@ public class VCClient : IDisposable
     public VCClient(PlayerControl player) {
         relatedControl = player;
 
-        myDecoder = new(24000, 1);
-        bufferedProvider = new(new(22050, 1));
-        var floatConverter = new WaveToSampleProvider(new Wave16ToFloatProvider(bufferedProvider));
-        volumeFilter = new(floatConverter);
-        volumeMeter = new(volumeFilter, player.AmOwner ? (() => !(NebulaGameManager.Instance?.VoiceChatManager?.CanListenSelf ?? false)) : (() => false));
-        panningFilter = new(volumeMeter);
-        panningFilter.Pan = 0f;
 
         
         IEnumerator CoSetVolumeEntry()
@@ -263,94 +254,12 @@ public class VCClient : IDisposable
         
         level -= Time.deltaTime * 1.4f;
         level = Mathf.Max(level, volumeMeter.Level);
-
-        stock.RemoveAll(s => s.sId <= this.sId);
-        while (stock.Count > 0)
-        {
-            var lastCount = stock.Count;
-            for(int i = 0; i < stock.Count; i++)
-            {
-                if(stock[i].sId == this.sId + 1)
-                {
-                    PushData(stock[i].sId, stock[i].isRadio, stock[i].radioMask, stock[i].data);
-                    stock.RemoveAt(i);
-                    break;
-                }
-            }
-            if (lastCount == stock.Count) break;
-        }
     }
 
     public void Dispose()
     {
-        myDecoder?.Dispose();
-        myDecoder = null!;
-
         SetRoute(null);
     }
-
-    public ISampleProvider MyProvider { get => panningFilter; }
-
-    private byte[] rawAudioData = new byte[5760]; 
-
-    private void PushData(uint sId, bool isRadio, int radioMask, byte[] data)
-    {
-        this.sId = sId;
-
-        SetVoiceType((isRadio && !(relatedControl.Data?.IsDead ?? false)) ? VoiceType.Radio : VoiceType.Normal);
-
-
-        if (InputtedVoiceType != VoiceType.Radio)
-        {
-            if ((relatedControl.Data?.IsDead ?? false) && VoiceChatManager.CanListenGhostVoice(relatedInfo))
-                SetVoiceType(VoiceType.Ghost);
-            else
-                SetVoiceType(VoiceType.Normal);
-        }
-
-        //聴こえない音に対しては何もしない
-        if (InputtedVoiceType != VoiceType.Ghost && !CanHear) return;
-
-        this.radioMask = radioMask;
-
-        int rawSize = myDecoder!.Decode(data, data.Length, rawAudioData, rawAudioData.Length);
-
-        try
-        {
-            if (bufferedProvider!.BufferedBytes == 0)
-                bufferedProvider!.AddSamples(new byte[1024], 0, 1024);
-            
-
-            bufferedProvider!.AddSamples(rawAudioData, 0, rawSize);
-        }
-        catch (Exception e)
-        {
-            Debug.Log(e.Message);
-        }
-    }
-
-    private List<(uint sId, bool isRadio, int radioMask, byte[] data)> stock = new();
-
-    private void KeepData(uint sId, bool isRadio, int radioMask, byte[] data)
-    {
-        stock.Add((sId, isRadio, radioMask, data));
-        stock.Sort((a,b) => (int)((long)b.sId - (long)a.sId));
-        //常に末尾に直近のデータがある
-    }
-
-    public void OnReceivedData(uint sId, bool isRadio, int radioMask, byte[] data)
-    {
-        if (sId < this.sId) return;
-
-        if (sId == this.sId + 1 || sId > this.sId + 10) PushData(sId, isRadio, radioMask, data);
-        else KeepData(sId, isRadio, radioMask, data);
-        
-    }
-
-    public void SetRoute(MixingSampleProvider? route)
-    {
-        if (myRoute != null) myRoute.RemoveMixerInput(MyProvider);
-        myRoute = route;
-        myRoute?.AddMixerInput(MyProvider);
-    }
 }
+*/
+#endif

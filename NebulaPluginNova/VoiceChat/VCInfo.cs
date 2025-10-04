@@ -2,6 +2,7 @@
 
 namespace Nebula.VoiceChat;
 
+/*
 public class VoiceChatInfo : MonoBehaviour
 {
     static VoiceChatInfo() => ClassInjector.RegisterTypeInIl2Cpp<VoiceChatInfo>();
@@ -19,7 +20,7 @@ public class VoiceChatInfo : MonoBehaviour
     private IMetaWidgetOld? radioWidget = null;
     private float timer = 0f;
     private bool isMute = false;
-    private VCFilteringMode filter => NebulaGameManager.Instance?.VoiceChatManager?.FilteringMode ?? VCFilteringMode.All;
+    private VCFilteringMode filter => VCFilteringMode.All;
     private bool MustShow => timer > 0f || radioWidget != null || isMute || filter != VCFilteringMode.All;
 
     public void SetRadioWidget(string displayText,Color color)
@@ -51,6 +52,7 @@ public class VoiceChatInfo : MonoBehaviour
     {
         timer = 2.7f;
 
+        
         if (isMute && filter != VCFilteringMode.All)
             myScreen.SetWidget(new MetaWidgetOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.mute") + "\n" + Language.Translate("voiceChat.info.filtering" + (int)filter), Alignment = IMetaWidgetOld.AlignmentOption.Center });
         else if (filter != VCFilteringMode.All)
@@ -61,6 +63,7 @@ public class VoiceChatInfo : MonoBehaviour
             myScreen.SetWidget(radioWidget);
         else
             myScreen.SetWidget(new MetaWidgetOld.Text(TextAttribute) { RawText = Language.Translate("voiceChat.info.unmute"), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+        
     }
 
     public static TextAttributeOld TextAttribute { get; private set; } = new(TextAttributeOld.BoldAttr) { Size = new(1.2f, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaxSize = 1.8f, FontMinSize = 1f, FontSize = 1.8f };
@@ -89,3 +92,4 @@ public class VoiceChatInfo : MonoBehaviour
         transform.localPosition = new Vector3(0f, y, transform.localPosition.z);
     }
 }
+*/

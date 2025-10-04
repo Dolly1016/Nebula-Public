@@ -1,7 +1,4 @@
 ﻿using AmongUs.GameOptions;
-using Il2CppSystem.Text.Json;
-using NAudio.CoreAudioApi;
-using Nebula.Behavior;
 using Nebula.Game.Achievements;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
@@ -62,8 +59,8 @@ public static class PlayerState
     public static TranslatableTag Drill = new("state.drill");
     public static TranslatableTag Dissolved = new("state.dissolved");
     public static TranslatableTag Disconnected = new("state.disconnected") { Color = Color.gray };
-    public static TranslatableTag[] AllKillStates = [Dead, Exiled, Guessed, Embroiled, Trapped, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved, Balloon, Laser, Drill, Dissolved];
-    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, Misguessed, Pseudocide];
+    public static TranslatableTag[] AllKillStates = [Dead, Guessed, Embroiled, Trapped, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved, Balloon, Laser, Drill, Dissolved];
+    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, Misguessed, Pseudocide, Exiled];
     static PlayerState()
     {
         Virial.Text.PlayerStates.Alive = Alive;
@@ -494,8 +491,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         if (!canSeeAll)
         {
             var ev = GameOperatorManager.Instance?.Run(new PlayerCheckRoleInfoVisibilityLocalEvent(this));
-            canSeeRole |= ev.CanSeeRole;
-            canSeeTask |= ev.CanSeeTask;
+            canSeeRole |= ev?.CanSeeRole ?? false;
+            canSeeTask |= ev?.CanSeeTask ?? false;
         }
 
 
@@ -512,7 +509,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             text = GameOperatorManager.Instance?.Run(new PlayerSetFakeRoleNameEvent(this, inMeeting)).Text ?? "";
         }
 
-        if (canSeeTask) { 
+        if (canSeeTask) {
             if (HasAnyTasks && ((this as GamePlayer).Tasks.Quota > 0 || (this as GamePlayer).Tasks.TotalTasks > 0))
                 text += (" (" + (this as GamePlayer).Tasks.Unbox().ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((FeelLikeHaveCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
         }
@@ -543,8 +540,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (isDead) MyControl.Die(DeathReason.Kill, false);
 
-        myRole = role.CreateInstance(this, arguments);
-
+        myRole = role.CreateInstance(this, arguments);        
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
             myRole.OnActivated(); (myRole as IGameOperator)?.Register(myRole);
             GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(this, myRole));
@@ -767,9 +763,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     //         マウス位置の情報更新         //
     //                                      //
     //////////////////////////////////////////
-
+#if ANDROID
+    static private Vector2 LastRightVector = Vector2.zero;
+#endif
     static public (float angle, float distance) LocalMouseInfo { get
         {
+#if PC
             Vector2 vec = (Vector2)Input.mousePosition - new Vector2(Screen.width / 2, Screen.height / 2);
             var viewer = NebulaGameManager.Instance!.WideCamera.ViewerTransform;
             if (viewer.localScale.x < 0f) vec.x *= -1;
@@ -781,6 +780,15 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
             float ratio = (Camera.main.orthographicSize * 2f) / (float)Screen.height;
             return (currentAngle, vec.magnitude * ratio);
+#elif ANDROID
+            if (HudManager.Instance.joystickR.IsDragged) LastRightVector = HudManager.Instance.joystickR.DeltaR;
+            var viewer = NebulaGameManager.Instance!.WideCamera.ViewerTransform;
+            float currentAngle = Mathn.Atan2(LastRightVector.y, LastRightVector.x) - (viewer.localEulerAngles.z / 180f * Mathn.PI);
+            return (Mathn.Atan2(LastRightVector.y, LastRightVector.x), LastRightVector.magnitude * 2.4f);
+#else
+            return (0f, 0f);
+#endif
+
         }
     }
 
@@ -1145,7 +1153,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
             var myCosmetics = MyControl.cosmetics;
 
-            myCosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText && MyControl.cosmetics.bodyType != PlayerBodyTypes.Long);
+            myCosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText /*&& MyControl.cosmetics.bodyType != PlayerBodyTypes.Long*/);
 
             if (IsDead)
             {

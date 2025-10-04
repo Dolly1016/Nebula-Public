@@ -1,13 +1,7 @@
 ﻿// 各種使用可能なオブジェクトに関するパッチ
 
-
-using NAudio.Codecs;
-using UnityEngine.XR;
-using Virial;
-using Virial.DI;
 using Virial.Events.Player;
 using Virial.Game;
-using Virial.Runtime;
 
 namespace Nebula.Patches;
 
@@ -369,14 +363,14 @@ class SystemConsoleStartPatch
 [HarmonyPatch(typeof(ArrowBehaviour), nameof(ArrowBehaviour.UpdatePosition))]
 public static class ArrowUpdatePatch
 {
-    public static bool Prefix(ArrowBehaviour __instance)
-    {
+    public static bool Prefix(ArrowBehaviour __instance) => FixInternal(__instance, __instance.transform);
+    internal static bool FixInternal(ArrowBehaviour __instance, Transform lookAt) {
         try
         {
             var transform = __instance.transform;
 
             __instance.gameObject.layer = LayerExpansion.GetArrowLayer();
-            __instance.image.sortingOrder = 10;
+            if(__instance.image != null) __instance.image.sortingOrder = 10;
 
             //表示するのはUIカメラ
             Camera main = NebulaGameManager.Instance?.WideCamera.Camera ?? UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
@@ -401,7 +395,10 @@ public static class ArrowUpdatePatch
             {
                 Vector2 temp = worldCam.transform.position + (__instance.target - worldCam.transform.position) * (worldCam.orthographicSize / Camera.main.orthographicSize);
                 transform.position = temp - del.normalized * 0.6f * (worldCam.orthographicSize / Camera.main.orthographicSize);
-                transform.localScale = Vector3.one * Mathn.Clamp(num, 0f, 1f);
+                if (__instance.alwaysMaxSize)
+                    transform.localScale = Vector3.one * __instance.MaxScale;
+                else
+                    transform.localScale = Vector3.one * Mathn.Clamp(num, 0f, __instance.MaxScale);
             }
             else
                 __instance.DistancedBehaviour(vector, del, num, main);
@@ -410,13 +407,15 @@ public static class ArrowUpdatePatch
 
             __instance.target = tempTarget;
 
-            transform.LookAt2d(__instance.target);
+            lookAt.LookAt2d(__instance.target);
 
             //Zの位置を調整
             var localPos = transform.localPosition;
             localPos.z = -100f;
             transform.localPosition = localPos;
-        }catch(System.Exception e) { }
+        }catch(System.Exception e) {
+            LogUtils.WriteToConsole(e.ToString());
+        }
         return false;
     }
 }
@@ -424,7 +423,27 @@ public static class ArrowUpdatePatch
 [HarmonyPatch(typeof(PingBehaviour), nameof(PingBehaviour.UpdatePosition))]
 public static class PingUpdatePatch
 {
-    public static bool Prefix(PingBehaviour __instance) => ArrowUpdatePatch.Prefix(__instance);
+    public static bool Prefix(PingBehaviour __instance) => ArrowUpdatePatch.FixInternal(__instance, __instance.transform);
+}
+
+
+[HarmonyPatch(typeof(NoisemakerArrow), nameof(NoisemakerArrow.UpdatePosition))]
+public static class NoisemakerArrowUpdatePatch
+{
+    public static bool Prefix(NoisemakerArrow __instance) => ArrowUpdatePatch.FixInternal(__instance, __instance.pivot);
+}
+
+[HarmonyPatch(typeof(NoisemakerArrow), nameof(NoisemakerArrow.Awake))]
+public static class NoisemakerArrowAwakePatch
+{
+    public static void postfix(NoisemakerArrow __instance)
+    {
+        foreach(var renderer in __instance.pivot.GetComponentsInChildren<SpriteRenderer>())
+        {
+            renderer.gameObject.layer = LayerExpansion.GetArrowLayer();
+            renderer.SetBothOrder(10);
+        }
+    }
 }
 
 

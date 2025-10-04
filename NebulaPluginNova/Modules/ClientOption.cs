@@ -4,6 +4,7 @@ using Hazel.Crypto;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
+using Nebula.VoiceChat;
 using Rewired.UI.ControlMapper;
 using System.Diagnostics;
 using TMPro;
@@ -55,8 +56,8 @@ public class ClientOption
     static public readonly BooleanDataEntry CanAppealInLobbyDefault = new("canAppealInLobbyDefault", ClientOptionSaver, true);
     static public readonly IntegerDataEntry AppealDuration = new("appealDuration", ClientOptionSaver, 0);
 
-    static public readonly Dictionary<ClientOptionType,ClientOption> AllOptions = [];
-    static public int GetValue(ClientOptionType option) => AllOptions[option].Value;
+    static internal readonly Dictionary<ClientOptionType,ClientOption> AllOptions = [];
+    static public int GetValue(ClientOptionType option) => AllOptions.TryGetValue(option, out var entry) ? entry.Value : 0;
     DataEntry<int> configEntry;
     string id;
     string[] selections;
@@ -197,6 +198,7 @@ public class ClientOption
     {
         string[] simpleSwitch = ["options.switch.off", "options.switch.on"];
 
+#if PC
         new ClientOption(ClientOptionType.OutputCosmicHash, "outputHash", simpleSwitch, 0);
         //new ClientOption(ClientOptionType.UseNoiseReduction, "noiseReduction", simpleSwitch, 0);
         new ClientOption(ClientOptionType.ProcessorAffinity, "processorAffinity", [
@@ -205,6 +207,7 @@ public class ClientOption
         "config.client.processorAffinity.dualCore",
         "config.client.processorAffinity.singleCore"], 0)
         { OnValueChanged = ReflectProcessorAffinity };
+#endif
         new ClientOption(ClientOptionType.ForceSkeldMeetingSE, "forceSkeldMeetingSE", simpleSwitch, 0);
         new ClientOption(ClientOptionType.SpoilerAfterDeath, "spoilerAfterDeath", simpleSwitch, 1);
         new ClientOption(ClientOptionType.PlayLobbyMusic, "playLobbyMusic", simpleSwitch, 1) { 
@@ -230,7 +233,9 @@ public class ClientOption
         ], 0);
         new ClientOption(ClientOptionType.ShowNoSLogoInLobby, "showNebulaLogoInLobby", simpleSwitch, 1);
         new ClientOption(ClientOptionType.ShowOnlySpawnableAssignableOnFilter, "showOnlySpawnableAssignableOnFilter", simpleSwitch, 0) { ShowOnClientSetting = false };
+#if PC
         new ClientOption(ClientOptionType.ShowVanillaColor, "externalModColor", simpleSwitch, 0);
+#endif
         new ClientOption(ClientOptionType.AvoidingColorDuplication, "avoidingColorDuplication", [
             "config.client.avoidingColorDuplication.off",
             "config.client.avoidingColorDuplication.soft",
@@ -256,9 +261,11 @@ public class ClientOption
                 if (MeetingHud.Instance) ChangeAmbientVolumeIfNecessary(mute, true);
             }
         };
+#if PC
         new ClientOption(ClientOptionType.OutputPaparazzoPhoto, "outputPaparazzoPhoto", simpleSwitch, 0);
 
         ReflectProcessorAffinity();
+#endif
     }
 
     static public IEnumerator CoChangeAmbientVolume(bool mute) {
@@ -302,7 +309,7 @@ public class ClientOption
         try
         {
             string? mode = null;
-            switch (AllOptions[ClientOptionType.ProcessorAffinity].Value)
+            switch (GetValue(ClientOptionType.ProcessorAffinity))
             {
                 case 0:
                     mode = "0";
@@ -365,7 +372,7 @@ public static class StartOptionMenuPatch
         nebulaTab.transform.localScale = new Vector3(1f, 1f, 1f);
         nebulaTab.SetActive(false);
 
-        var nebulaScreen = MetaScreen.GenerateScreen(new(5f, 4.5f), nebulaTab.transform, new(0f, -0.28f, -10f), false, false, false);
+        var nebulaScreen = MetaScreen.GenerateScreen(new(5.6f, 4.5f), nebulaTab.transform, new(0f, -0.28f, -10f), false, false, false);
 
         void SetNebulaWidget()
         {
@@ -405,12 +412,16 @@ public static class StartOptionMenuPatch
                     }
                     });
             }
-            
-            if(NebulaGameManager.Instance?.VoiceChatManager != null)
+
+#if PC
+
+            if(ModSingleton<NoSVCRoom>.Instance != null)
             {
-                AddBottomButton("vcSettings", () => NebulaGameManager.Instance?.VoiceChatManager?.OpenSettingScreen(__instance));
-                AddBottomButton("vcRejoin", () => NebulaGameManager.Instance?.VoiceChatManager?.Rejoin());
+                AddBottomButton("vcSettings", () => NoSVCRoom.VCSettings.OpenSettingScreen(__instance));
+                //AddBottomButton("vcRejoin", () => NebulaGameManager.Instance?.VoiceChat?.Rejoin());
             }
+            
+#endif
 
             if (!AmongUsClient.Instance || AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started)
             {
@@ -421,7 +432,9 @@ public static class StartOptionMenuPatch
                 });
             }
 
+#if PC
             AddBottomButton("webhook", ()=>ClientOption.ShowWebhookSetting());
+#endif
             AddBottomButton("social", () => ClientOption.ShowSocialSetting());
 
             nebulaWidget.Append(bottomButtons, b => b, 2, -1, 0, 0.51f);

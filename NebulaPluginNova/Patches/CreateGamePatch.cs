@@ -30,6 +30,15 @@ public static class CreateGameOptionsPatch
     }
 }
 
+[HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.Show))]
+public static class CreateGameOptionsShowPatch
+{
+    static void Postfix(CreateGameOptions __instance)
+    {
+        __instance.UpdateServerText(__instance.serverTexts[0].text);
+    }
+}
+
 [HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.UpdateServerText))]
 public static class CreateGameOptionsUpdateRegionPatch
 {

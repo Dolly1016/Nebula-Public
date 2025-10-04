@@ -9,12 +9,14 @@ using Nebula.Patches;
 using Nebula.Roles.Crewmate;
 using Nebula.VisualProgramming;
 using Nebula.VisualProgramming.UI;
+using Nebula.VoiceChat;
 using Sentry.Unity.NativeUtils;
 using System.Data;
 using System.Runtime.Loader;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Virial;
 using Virial.Events.Game;
@@ -57,6 +59,10 @@ public class MouseOverPopup : MonoBehaviour
 
     private Virial.Compat.Size lastSize = new(0f, 0f);
     private bool followMouseCursor = false;
+
+#if ANDROID
+    private float lastEditTime = 0f;
+#endif
     static MouseOverPopup()
     {
         ClassInjector.RegisterTypeInIl2Cpp<MouseOverPopup>();
@@ -94,10 +100,7 @@ public class MouseOverPopup : MonoBehaviour
         myScreen = MetaScreen.GenerateScreen(screenSize,group.transform,Vector3.zero,false,false,false);
 
         gameObject.SetActive(false);
-
-        NebulaGameManager.Instance?.OnSceneChanged();
     }
-
     public void Irrelevantize()
     {
         Parameters = new();
@@ -161,6 +164,9 @@ public class MouseOverPopup : MonoBehaviour
             diff = (transform.position.y + yRange[1]) - upper.y;
             if (diff > 0f) transform.position -= new Vector3(0f, diff);
         }
+#if ANDROID
+        lastEditTime = Time.time;
+#endif
 
         UpdateArea(new((width.min + width.max) / 2f, screenSize.y / 2f - height / 2f), new((width.max - width.min) + 0.22f, height + 0.1f));
         Update();
@@ -216,6 +222,9 @@ public class MouseOverPopup : MonoBehaviour
             widget.GrayoutedBackImage ? 0.46f : 0.4f, 
             imagePos, scale, imageScale, widget.GrayoutedBackImage);
 
+#if ANDROID
+        lastEditTime = Time.time;
+#endif
 
         UpdateArea(new(0f, 0f), scale);
         UpdatePosition();
@@ -289,10 +298,16 @@ public class MouseOverPopup : MonoBehaviour
 
     public void Update()
     {
-        if((Parameters.RelatedButton is not null && !Parameters.RelatedButton) || !(Parameters.RelatedPredicate?.Invoke() ?? true))
+        if (((Il2CppSystem.Object)Parameters.RelatedButton! != (Il2CppSystem.Object)null! && !Parameters.RelatedButton) || !(Parameters.RelatedPredicate?.Invoke() ?? true))
         {
             SetWidget(null, null);
         }
+#if ANDROID
+        else if (Time.time > lastEditTime + 0.5f && PassiveButtonManager.Instance.GetTouch(false).x > -1000f)
+        {
+            SetWidget(null, null);
+        }
+#endif
 
         if (followMouseCursor)
             UpdatePosition(Parameters.RelatedPosition?.Invoke());
@@ -410,6 +425,17 @@ public class NebulaManager : MonoBehaviour
         )
         { DefaultKeyInput = new(KeyCode.F2) });
 
+        commands.Add(new("help.command.hideHud",
+            () => HudManager.InstanceExists && AmongUsUtil.IsLocalServer(),
+            () =>
+            {
+                if (!HudManager.InstanceExists) return;
+                var uiCam = HudManager.Instance.UICamera;
+                uiCam.nearClipPlane = uiCam.nearClipPlane > 0f ? -1000f : 18f;
+            }
+        )
+        { DefaultKeyInput = new(KeyCode.Slash) });
+
         commands.Add(new("help.command.console",
             () => true,
             ()=>NebulaManager.Instance.ToggleConsole()
@@ -491,7 +517,9 @@ public class NebulaManager : MonoBehaviour
 
         File.WriteAllBytesAsync(GetPicturePath(out _), tex.EncodeToPNG());
 
+#if PC
         DevTeamContact.PushScreenshot(tex);
+#endif
     }
 
     internal void ShowRingMenu(RingMenuElement[] elements, Func<bool> showWhile, Action? ifEmpty, Vector2? menuPosition = null)
@@ -525,8 +553,6 @@ public class NebulaManager : MonoBehaviour
                 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    NebulaPlugin.Log.Print("ViperBlurb: " + TranslationController.Instance.GetString(StringNames.ViperBlurb));
-                    NebulaPlugin.Log.Print("ViperBlurbLong: " + TranslationController.Instance.GetString(StringNames.ViperBlurbLong));
                     //DiscordVC.Start();
 
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
@@ -647,6 +673,8 @@ public class NebulaManager : MonoBehaviour
 
         MoreCosmic.Update();
         ringMenu.Update();
+
+        OnUpdate(SceneManager.GetActiveScene().name);
     }
 
     public void Awake()
@@ -658,7 +686,32 @@ public class NebulaManager : MonoBehaviour
         debugScreen = new DebugScreen(transform);
 
         PopupProviders = [];
+
+        OnSceneChanged(SceneManager.GetActiveScene().name);
     }
+
+    private void OnSceneChanged(string sceneName)
+    {
+        switch (sceneName)
+        {
+            case "MainMenu":
+            case "MatchMaking":
+                NoSVCRoom.CloseCurrentRoom();
+                break;
+        }
+    }
+
+    private void OnUpdate(string sceneName)
+    {
+        switch (sceneName)
+        {
+            case "OnlineGame":
+            case "EndGame":
+                NoSVCRoom.Update();
+                break;
+        }
+    }
+
 
     public void LateUpdate()
     {

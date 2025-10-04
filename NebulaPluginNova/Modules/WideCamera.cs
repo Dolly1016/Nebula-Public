@@ -1,5 +1,4 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Rewired.Utils.Platforms.Windows;
 using UnityEngine;
 using Virial;
 using Virial.Events.Game;

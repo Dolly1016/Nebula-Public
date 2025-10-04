@@ -1,5 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppSystem.Threading;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Map;
@@ -719,5 +720,34 @@ public static class AmongUsUtil
         player.NetTransform.SetPaused(!movable);
     }
 
+    public static void SetAsUIAspectContent(this GameObject obj, AspectPosition.EdgeAlignments alignment, Vector3 distanceFromEdge)
+    {
+        var aspectPos = obj.AddComponent<AspectPosition>();
+        aspectPos.Alignment = alignment;
+        aspectPos.parentCam = HudManager.InstanceExists ? HudManager.Instance.UICamera : Camera.main; 
+        aspectPos.DistanceFromEdge = distanceFromEdge;
+        aspectPos.AdjustPosition();
+    }
+
+    public static void SetAsUIAspectContent(this GameObject obj, Vector2 anchorPoint, Vector3 distanceFromAnchor)
+    {
+        var aspectPos = obj.AddComponent<AspectPosition>();
+        aspectPos.Alignment = AspectPosition.EdgeAlignments.Center;
+        aspectPos.parentCam = HudManager.InstanceExists ? HudManager.Instance.UICamera : Camera.main;
+        aspectPos.anchorPoint = anchorPoint;
+        aspectPos.DistanceFromEdge = distanceFromAnchor;
+        aspectPos.AdjustPosition();
+    }
+
+    public static void AddScaledSprite(this AspectScaledAsset scaledAsset, SpriteRenderer renderer)
+    {
+        if (scaledAsset.initialized)
+            scaledAsset.allSprites.Add(new(renderer.size.x, renderer));
+        else
+            scaledAsset.spritesToScale.Add(renderer);
+    }
+
     public static NormalGameOptionsV10 GetCurrentNormalOption() => GameOptionsManager.Instance.currentNormalGameOptions; //GameOptionsManager.Instance.CurrentGameOptions.CastFast<NormalGameOptionsV10>();
+
+    public static bool MapIsOpen => MapBehaviour.Instance && MapBehaviour.Instance.IsOpen;
 }

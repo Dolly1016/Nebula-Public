@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<LangVersion>preview</LangVersion>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<DefineConstants>ANDROID</DefineConstants>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Reference Include="$(AmongUsAndroid)\core\*.dll" />
+		<Reference Include="$(AmongUsAndroid)\interop\*.dll" />
+		<Reference Include="$(AmongUsRelease)\Interstellar.dll" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Compile Include="..\NebulaPluginNova\**\*.cs" Exclude="..\NebulaPluginNova\bin\**\*.cs;..\NebulaPluginNova\obj\**\*.cs;..\NebulaPluginNova\Modules\LobbySlide\**\*.cs">
+			<Link>LinkedFiles\Nova\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		</Compile>
+		<Compile Include="..\NebulaAPI\**\*.cs" Exclude="..\NebulaAPI\bin\**\*.cs;..\NebulaAPI\obj\**\*.cs">
+			<Link>LinkedFiles\API\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		</Compile>
+		<EmbeddedResource Include="..\NebulaPluginNova\Resources\**\*.*" Exclude="..\NebulaPluginNova\Resources\Libs\*.*;..\NebulaPluginNova\Resources\Addons\*\**\*.*;..\NebulaPluginNova\Resources\API\**\*.*;..\NebulaPluginNova\Resources\Assets\**\*.*;..\NebulaPluginNova\Resources\Tools\*.*">
+			<Link>LinkedResources\%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<LogicalName>Nebula.Resources.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="..\NebulaPluginNova\Resources\Assets\Android\nebula_asset">
+			<Link>LinkedResources\nebula_asset</Link>
+			<LogicalName>Nebula.Resources.Assets.nebula_asset</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="$(AmongUsRelease)\Interstellar.dll">
+			<Link>LinkedResources\Interstellar.dll</Link>
+			<LogicalName>Nebula.Resources.Interstellar.dll</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<Target Name="RenameEmbeddedResources" AfterTargets="Build">
+		<PropertyGroup>
+			<RenamerProject>$(SolutionDir)ResourceRenamer\ResourceRenamer.csproj</RenamerProject>
+		</PropertyGroup>
+
+		<Exec Command="dotnet run --project $(RenamerProject) -- &quot;$(TargetPath)&quot;" />
+	</Target>
+</Project>

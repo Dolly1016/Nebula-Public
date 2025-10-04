@@ -133,5 +133,10 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
             if (morphButton != null && acTokenChallenge != null && morphButton.EffectActive)
                 acTokenChallenge.Value.kill = true;
         }
+
+        void IGameOperator.OnReleased()
+        {
+            if (AmOwner) MyPlayer.Unbox().RemoveOutfit("Morphing");
+        }
     }
 }

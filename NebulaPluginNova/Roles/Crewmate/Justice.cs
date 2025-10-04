@@ -1,12 +1,9 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using NAudio.CoreAudioApi;
 using Nebula.Behavior;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Patches;
-using Steamworks;
 using UnityEngine.Rendering;
-using UnityEngine.UI;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;

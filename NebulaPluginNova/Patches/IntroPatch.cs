@@ -4,19 +4,16 @@ using Virial.Game;
 
 namespace Nebula.Patches;
 
-[HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
-public static class EndIntroPatch
-{
-    static void Postfix(IntroCutscene __instance)
-    {
-        NebulaGameManager.Instance?.OnGameStart();
-        HudManager.Instance.ShowVanillaKeyGuide();
-    }
-}
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.CoBegin))]
 public static class ShowIntroPatch
 {
+    static void OnDestroy()
+    {
+        NebulaGameManager.Instance?.OnGameStart();
+        HudManager.Instance.ShowVanillaKeyGuide();
+    }
+
     static bool Prefix(IntroCutscene __instance,ref Il2CppSystem.Collections.IEnumerator __result)
     {
         //ゲームモードに沿ってモジュールを追加
@@ -71,15 +68,18 @@ public static class ShowIntroPatch
         yield return CoShowTeam(__instance,myInfo!,shownPlayers.ToArray(), 3f);
         yield return CoShowRole(__instance,myInfo!);
         ShipStatus.Instance.StartSFX();
+        OnDestroy();
         GameObject.Destroy(__instance.gameObject);
     }
 
     static IEnumerator CoShowTeam(IntroCutscene __instance, GamePlayer myInfo, PlayerControl[] shownPlayers, float duration)
     {
+#if PC
         if (__instance.overlayHandle == null)
         {
             __instance.overlayHandle = DestroyableSingleton<DualshockLightManager>.Instance.AllocateLight();
         }
+#endif
         yield return ShipStatus.Instance.CosmeticsCache.PopulateFromPlayers();
 
         Color fromC = myInfo.Role!.Role.Team.UnityColor;
@@ -109,8 +109,9 @@ public static class ShowIntroPatch
             }
         }
 
+#if PC
         __instance.overlayHandle.color = fromC;
-
+#endif
         
         Color fade = Color.black;
         Color impColor = Color.white;
@@ -138,7 +139,9 @@ public static class ShowIntroPatch
             __instance.ImpostorText.color = impColor;
             titlePos.y = 2.7f - num * 0.3f;
             __instance.TeamTitle.transform.localPosition = titlePos;
+#if PC
             __instance.overlayHandle.color = c.AlphaMultiplied(Mathn.Min(1f, timer * 2f));
+#endif
             yield return null;
         }
         timer = 0f;
@@ -148,7 +151,9 @@ public static class ShowIntroPatch
             float num2 = timer / 1f;
             fade.a = Mathn.Lerp(0f, 1f, num2 * 3f);
             __instance.FrontMost.color = fade;
+#if PC
             __instance.overlayHandle.color = fromC.AlphaMultiplied(1f - fade.a);
+#endif
             yield return null;
         }
         yield break;

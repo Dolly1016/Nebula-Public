@@ -185,6 +185,11 @@ public class UbiquitousDetachedDrone : MonoBehaviour, IVoiceComponent
 
     Vector2 IVoiceComponent.Position => transform.position;
 
+    bool IVoiceComponent.CanPlaySoundFrom(IVoiceComponent mic)
+    {
+        return (mic != (this as IVoiceComponent)) && mic is UbiquitousDetachedDrone;
+    }
+
     public void Update()
     {
         updateTimer -= Time.deltaTime;
@@ -195,11 +200,6 @@ public class UbiquitousDetachedDrone : MonoBehaviour, IVoiceComponent
         }
 
         droneRenderer.transform.localPosition = new Vector3(0f,  Mathn.Sin(Time.time * 1.4f) * 0.08f + DroneHeight, -3f);
-    }
-
-    bool IVoiceComponent.CanPlaySoundFrom(IVoiceComponent mic)
-    {
-        return (mic != (this as IVoiceComponent)) && mic is UbiquitousDetachedDrone;
     }
 }
 
@@ -474,8 +474,8 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
     static RemoteProcess<Vector2> RpcSpawnDetachedDrone = new("SpawnDetachedDrone",
         (message,_) => {
             var drone = UnityHelper.CreateObject<UbiquitousDetachedDrone>("DetachedDrone", null, message);
-            NebulaGameManager.Instance?.VoiceChatManager?.AddMicrophone(drone);
-            NebulaGameManager.Instance?.VoiceChatManager?.AddSpeaker(drone);
+            ModSingleton<NoSVCRoom>.Instance.AddVirtualMicrophone(drone);
+            ModSingleton<NoSVCRoom>.Instance.AddVirtualSpeaker(drone);
         });
     
 }

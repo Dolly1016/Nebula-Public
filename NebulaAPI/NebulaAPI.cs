@@ -35,7 +35,7 @@ internal interface INebula
     IResourceAllocator InnerslothAsset { get; }
     IResourceAllocator? GetAddonResource(string addonId);
     IResourceAllocator GetCallingAddonResource(Assembly assembly);
-    
+
     // GameAPI
 
     Game.Game? CurrentGame { get; }
@@ -62,7 +62,7 @@ internal interface INebula
     //DocumentTipAPI
     void RegisterTip(IDocumentTip tip);
 
-    E RunEvent<E>(E ev) where E : class, Event;
+    E RunEvent<E>(E ev) where E : class, Virial.Events.Event;
 
     IModuleFactory Modules { get; }
 
@@ -79,6 +79,7 @@ public static class NebulaAPI
     static public IResourceAllocator NebulaAsset => instance.NebulaAsset;
     static public IResourceAllocator InnerslothAsset => instance.InnerslothAsset;
     static public IResourceAllocator AddonAsset => instance.GetCallingAddonResource(Assembly.GetCallingAssembly());
+
     static public IResourceAllocator? GetAddon(string addonId) => instance.GetAddonResource(addonId);
 
     static public T? Get<T>() where T : class => instance.Get<T>();
@@ -143,7 +144,7 @@ public static class NebulaAPI
     /// <typeparam name="E"></typeparam>
     /// <param name="ev"></param>
     /// <returns></returns>
-    static public E RunEvent<E>(E ev) where E : class, Event => instance.RunEvent(ev);
+    static public E RunEvent<E>(E ev) where E : class, Virial.Events.Event => instance.RunEvent(ev);
     static public GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable = null, TextComponent? displayTitle = null, int innerPriority = 0) => instance.CreateStatsEntry(id, category, assignable, displayTitle, innerPriority);
     static public void Progress(this GameStatsEntry entry, int num = 1) => instance.IncrementStatsEntry(entry.Id, num);
     static public void IncrementStatsEntry(string  entryId, int num = 1) => instance.IncrementStatsEntry(entryId, num);

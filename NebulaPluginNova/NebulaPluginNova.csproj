@@ -41,7 +41,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DefineConstants>STEAM</DefineConstants>
+		<DefineConstants>STEAM;PC</DefineConstants>
 		<Optimize>True</Optimize>
 	</PropertyGroup>
 
@@ -58,19 +58,20 @@
 	<ItemGroup>
 		<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
 		<Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
+		<Reference Include="$(AmongUsRelease)\Interstellar.dll" />
 		<Compile Remove="Resources\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Resources\*\*.*" Exclude="Resources\Libs\*.*" />
+		<EmbeddedResource Include="Resources\*\*.*" Exclude="Resources\Libs\*.*;Resources\Assets\Android\*.*" />
 		<EmbeddedResource Include="Resources\*.*" />
+		<EmbeddedResource Include="$(AmongUsRelease)\Interstellar.dll">
+			<LogicalName>Nebula.Resources.Interstellar.dll</LogicalName>
+			<Link>Resources\Interstellar.dll</Link>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="NAudio.Core" Version="2.2.1" />
-	  <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
-	  <PackageReference Include="NAudio.WinMM" Version="2.2.1" />
-	  <PackageReference Include="OpusDotNet" Version="1.0.3" />
 	  <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
 	</ItemGroup>
 

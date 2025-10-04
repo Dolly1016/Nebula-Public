@@ -190,6 +190,7 @@ internal class KillRequestHandler
     }
     );
 
+    static private bool ShouldHideKillerIfNotBlink => GeneralConfigurations.HideFarKillerOption;
     static RemoteProcess<KillExecutionParameter> RpcKill = new(
         "Kill",
        (KillExecutionParameter param, bool _) =>
@@ -236,7 +237,22 @@ internal class KillRequestHandler
                    if (param.KillParam.HasFlag(KillParameter.WithOverlay))
                    {
                        if (param.Killer != null) param.Killer.VanillaPlayer.Data.Role.CustomKillAnimations = useViperDeadBody ? AmongUsUtil.GetRolePrefab<ViperRole>()!.CustomKillAnimations : new(0);
-                       DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(vanillaKiller?.Data, param.RealTarget.VanillaPlayer.Data);
+
+                       if (!withBlink && ShouldHideKillerIfNotBlink && param.Killer != param.Target)
+                       {
+                           //ShowKillAnimationをさらに改変
+                           OverlayKillAnimation[] killAnims = HudManager.Instance.KillOverlay.KillAnims.ToArray();
+                           var physAnims = vanillaKiller!.Data.Object.MyPhysics.Animations.GetKillAnimations();
+                           if (physAnims.Length > 0) killAnims = physAnims.ToArray();
+                           var roleKillAnims = vanillaKiller.Data.Role.CustomKillAnimations;
+                           if (roleKillAnims.Length > 0) killAnims = roleKillAnims.ToArray();
+                           var anim = killAnims[System.Random.Shared.Next(killAnims.Length)];
+                           DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(anim, new KillOverlayInitData(NebulaGameManager.Instance!.UnknownOutfit.outfit, vanillaKiller!.cosmetics.bodyType, param.RealTarget.DefaultOutfit.outfit, PlayerBodyTypes.Normal));
+                       }
+                       else
+                       {
+                           DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(vanillaKiller?.Data, param.RealTarget.VanillaPlayer.Data);
+                       }
                    }
                    param.RealTarget.VanillaPlayer.cosmetics.SetNameMask(false);
                    param.RealTarget.VanillaPlayer.RpcSetScanner(false);
@@ -335,7 +351,10 @@ internal class KillRequestHandler
 
               if (target.AmOwner)
               {
-                  if (param.KillParam.HasFlag(KillParameter.WithOverlay)) DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer?.VanillaPlayer.Data, target.VanillaPlayer.Data);
+                  if (param.KillParam.HasFlag(KillParameter.WithOverlay))
+                  {
+                      DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer?.VanillaPlayer.Data, target.VanillaPlayer.Data);
+                  }
                   NebulaGameManager.Instance!.ChangeToSpectator();
               }
 

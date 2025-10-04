@@ -26,7 +26,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
     private NebulaPreprocessorImpl()
     {
         NebulaAPI.preprocessor = this;
-        preprocessList = new List<IEnumerator>[(int)PreprocessPhase.NumOfPhases];
+        preprocessList = new List<Func<IEnumerator>>[(int)PreprocessPhase.NumOfPhases];
 
         for (int i = 0; i < preprocessList.Length; i++) preprocessList[i] = [];
     }
@@ -41,13 +41,13 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
             var method = t.GetMethod("Preprocess", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, [typeof(NebulaPreprocessor)]);
             if (method == null)
             {
-                preprocessList[(int)attr.MyPhase].Add(((Action)(() => Helpers.RunStaticConstructor(t))).ToCoroutine());
+                preprocessList[(int)attr.MyPhase].Add(() => ManagedEffects.Action(() => Helpers.RunStaticConstructor(t)));
                 NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, t.Name + " doesn't have preprocessor. its static constructor is called instead.");
             }
             else if(method.ReturnType == typeof(void))
-                preprocessList[(int)attr.MyPhase].Add(((Action)(() => method.Invoke(null, [this]))).ToCoroutine());
+                preprocessList[(int)attr.MyPhase].Add(() => ManagedEffects.Action(()=> method.Invoke(null, [this])));
             else if (method.ReturnType == typeof(IEnumerator))
-                preprocessList[(int)attr.MyPhase].Add((method.Invoke(null, [this]) as IEnumerator)!);
+                preprocessList[(int)attr.MyPhase].Add(() => (method.Invoke(null, [this]) as IEnumerator)!);
             else
                 NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, t.Name + " has invalid preprocess that returns unsupported type.");
         }
@@ -71,13 +71,13 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
     
     void NebulaPreprocessor.SchedulePreprocess(PreprocessPhase phase, IEnumerator process)
     {
-        preprocessList[(int)phase].Add(process);
+        preprocessList[(int)phase].Add(() => process);
     }
 
     IEnumerator NebulaPreprocessor.RunPreprocess(Virial.Attributes.PreprocessPhase preprocess)
     {
         for(int i=0; i < preprocessList[(int)preprocess].Count; i++) {
-            yield return preprocessList[(int)preprocess][i];
+            yield return preprocessList[(int)preprocess][i].Invoke();
         }
     }
 
@@ -92,7 +92,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
     ExtraWin NebulaPreprocessor.CreateExtraWin(string localizedName, Virial.Color color) => new(localizedName, color);
     ExtraWin NebulaPreprocessor.CreateExtraWin(string immutableId, TextComponent displayText, Virial.Color color) => new(immutableId, displayText, color);
 
-    private List<IEnumerator>[] preprocessList;
+    private List<Func<IEnumerator>>[] preprocessList;
 }
 
 
@@ -101,6 +101,7 @@ public static class ToolsInstaller
 {
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
+#if PC
         if (NebulaPlugin.Log.IsPreferential)
         {
             Patches.LoadPatch.LoadingText = "Installing Tools";
@@ -110,6 +111,9 @@ public static class ToolsInstaller
 
             InstallTool(Environment.Is64BitProcess ? "opus_x64.dll" : "opus_x86.dll", "opus.dll");
         }
+#else
+        yield break;
+#endif
     }
 
     private static void InstallTool(string name, string? outputName)

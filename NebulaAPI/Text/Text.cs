@@ -253,11 +253,13 @@ public enum AttributeAsset
     /// 配役タブの人数設定で使用している横長の小さなテキスト属性です。
     /// </summary>
     SmallWideButton,
+    SmallWideButtonMasked,
 
     /// <summary>
     /// 配役タブの人数設定で使用している小さな矢印のためのテキスト属性です。
     /// </summary>
     SmallArrowButton,
+    SmallArrowButtonMasked,
 }
 
 [Flags]

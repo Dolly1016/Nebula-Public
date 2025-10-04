@@ -53,14 +53,17 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
     static ImpostorBasicRuleOperator() => DIManager.Instance.RegisterModule(() => new ImpostorBasicRuleOperator());
 
     public ImpostorBasicRuleOperator() => this.Register(NebulaAPI.CurrentGame!);
+
+#if PC
     [OnlyMyPlayer]
     void OnSetRole(PlayerRoleSetEvent ev)
     {
         if (GeneralConfigurations.ImpostorsRadioOption && ev.Role.Role.Category == RoleCategory.ImpostorRole)
         {
-            VoiceChatManager.RegisterRadio(ev.Role, (p) => p.Role.Role.Category == RoleCategory.ImpostorRole, "voiceChat.info.impostorRadio", Palette.ImpostorRed);
+            //VoiceChatManager.RegisterRadio(ev.Role, (p) => p.Role.Role.Category == RoleCategory.ImpostorRole, "voiceChat.info.impostorRadio", Palette.ImpostorRed);
         }
     }
+#endif
 
     void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
     {

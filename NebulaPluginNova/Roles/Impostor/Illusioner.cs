@@ -93,7 +93,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                     PlayerModInfo.RpcRemoveOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, "Morphing"));
                     morphButton.CoolDownTimer?.Start();
                 };
-
+                
                 paintButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
                     PaintCoolDownOption, "paint", Painter.Ability.PaintButtonSprite, _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 paintButton.OnClick = (button) => {
@@ -129,6 +129,11 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                     }
                 }, this);
             }
+        }
+
+        void IGameOperator.OnReleased()
+        {
+            if(AmOwner) MyPlayer.Unbox().RemoveOutfit("Morphing");
         }
     }
 }

@@ -11,5 +11,9 @@ public static class LogUtils
     public static void WriteToConsole(string line)
     {
         BepInEx.ConsoleManager.StandardOutStream.WriteLine(line);
+#if PC
+#else
+        NebulaAndroid.NebulaLoader.MyPlugin.Log.LogInfo(line);
+#endif
     }
 }

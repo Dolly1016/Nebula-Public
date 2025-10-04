@@ -1,6 +1,4 @@
 ﻿using Epic.OnlineServices.Presence;
-using NAudio.CoreAudioApi;
-
 using Nebula.Game.Statistics;
 using Nebula.Roles.Complex;
 using Nebula.Roles.Modifier;
@@ -239,8 +237,15 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                     KillCooldown, "kill", ModAbilityButton.LabelType.Impostor, null!,
                     (target, _) =>
                     {
-                        MyPlayer.MurderPlayer(target!, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
-                        NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
+                        var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(MyPlayer, target));
+                        if (!(cancelable?.IsCanceled ?? false))
+                        {
+                            //キャンセルされなければキルを実行する
+                            MyPlayer.MurderPlayer(target, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
+                        }
+
+                        //クールダウンをリセットする
+                        if (cancelable?.ResetCooldown ?? false) NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                     },
                     null,
                     _ => myTracker.CurrentTarget != null && !MyPlayer.IsDived,
@@ -271,7 +276,9 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                     }
                 }, this);
 
-                if (GeneralConfigurations.JackalRadioOption) VoiceChatManager.RegisterRadio(this, IsMySidekick, "voiceChat.info.jackalRadio", MyRole.RoleColor.ToUnityColor());
+#if PC
+                //if (GeneralConfigurations.JackalRadioOption) VoiceChatManager.RegisterRadio(this, IsMySidekick, "voiceChat.info.jackalRadio", MyRole.RoleColor.ToUnityColor());
+#endif
             }
 
             JackalizedAbility = MyJackalized?.GetJackalizedAbility(MyPlayer, StoredJackalizedArgument)?.Register(this);
@@ -326,7 +333,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                     }
                     else
                     {
-                        sidekick.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
+                        sidekick.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.NormalKill);
                     }
                 }
 
@@ -461,8 +468,9 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
                 }
 
-                if (GeneralConfigurations.JackalRadioOption)
-                    VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);
+#if PC
+                //if (GeneralConfigurations.JackalRadioOption) VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);
+#endif
             }
         }
 
@@ -526,8 +534,9 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
                 AmongUsUtil.PlayCustomFlash(Jackal.MyRole.UnityColor, 0f, 0.25f, 0.4f);
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
-                if (GeneralConfigurations.JackalRadioOption)
-                    VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);                
+#if PC
+                //if (GeneralConfigurations.JackalRadioOption) VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);                
+#endif
 
                 if (MyPlayer.Role.Role.Category == RoleCategory.ImpostorRole && MyPlayer.TryGetModifier<Lover.Instance>(out _))
                     new StaticAchievementToken("threeRoles");

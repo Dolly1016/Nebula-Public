@@ -3,6 +3,7 @@ using System.Reflection;
 
 namespace Nebula.Modules;
 
+#if PC
 public class ModUpdater
 {
     class ReleaseContent
@@ -166,3 +167,4 @@ public class ModUpdater
         yield break;
     }
 }
+#endif

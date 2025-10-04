@@ -33,8 +33,6 @@ public static class PlayerStartPatch
                 {
                     __instance.lightSource.lightChild.layer = LayerExpansion.GetVanillaShadowLightLayer();
                 }
-
-                if (AmongUsClient.Instance.AmHost) ConfigurationValues.ShareAll();
             }))
             );
 
@@ -118,7 +116,7 @@ public static class PlayerUpdatePatch
 
         if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted)
         {
-            bool showVanillaColor = ClientOption.AllOptions[ClientOption.ClientOptionType.ShowVanillaColor].Value == 1;
+            bool showVanillaColor = ClientOption.GetValue(ClientOption.ClientOptionType.ShowVanillaColor) == 1;
             try
             {
                 if (showVanillaColor) __instance.cosmetics.nameText.text = __instance.Data.PlayerName + " ■".Color(DynamicPalette.VanillaColorsPalette[__instance.PlayerId]);
@@ -879,7 +877,7 @@ public class DissolvedDeadBodyClickPatch
     {
         if((__instance.ParentId & DissolvedDeadBodyMask) != 0)
         {
-            if (__instance.Reported || !GameManager.Instance.CanReportBodies()) return false;
+            if (__instance.Reported) return false;
 
             var localPlayer = PlayerControl.LocalPlayer;
             Vector2 truePosition = localPlayer.GetTruePosition();
@@ -887,7 +885,7 @@ public class DissolvedDeadBodyClickPatch
             if (Vector2.Distance(truePosition2, truePosition) <= localPlayer.MaxReportDistance && localPlayer.CanMove && !PhysicsHelpers.AnythingBetween(truePosition, truePosition2, Constants.ShipAndObjectsMask, false))
             {
                 __instance.Reported = true;
-                MeetingHudExtension.RpcCmdReportDissolvedDeadBody.Invoke((GamePlayer.LocalPlayer, GamePlayer.GetPlayer((byte)(__instance.ParentId & ~DissolvedDeadBodyMask))));
+                MeetingHudExtension.ModCmdReportDeadBody(GamePlayer.LocalPlayer, GamePlayer.GetPlayer((byte)(__instance.ParentId & ~DissolvedDeadBodyMask)), MeetingHudExtension.ReportType.ReportDissolvedBody);
             }
             return false;
         }

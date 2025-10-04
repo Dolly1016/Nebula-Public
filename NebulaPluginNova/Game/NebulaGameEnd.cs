@@ -187,6 +187,7 @@ public class LastGameHistory
 [HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.SetEverythingUp))]
 public class EndGameManagerSetUpPatch
 {
+#if PC
     static private bool SendDiscordWebhook(byte[] pngImage)
     {
         try
@@ -205,6 +206,7 @@ public class EndGameManagerSetUpPatch
             return false;
         }
     }
+#endif
 
 
     static internal SpriteLoader InfoButtonSprite = SpriteLoader.FromResource("Nebula.Resources.InformationButton.png", 100f);
@@ -380,6 +382,7 @@ public class EndGameManagerSetUpPatch
 
         LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
 
+#if PC
         GameStatisticsViewer? viewer;
 
         IEnumerator CoShowStatistics()
@@ -389,6 +392,7 @@ public class EndGameManagerSetUpPatch
             viewer.Initialize(NebulaGameManager.Instance!, __instance.PlayerPrefab, NebulaGameManager.Instance!.RuntimeAsset.MinimapPrefab, NebulaGameManager.Instance!.RuntimeAsset.MapScale,__instance.WinText, false);
         }
         __instance.StartCoroutine(CoShowStatistics().WrapToIl2Cpp());
+#endif
 
         var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", __instance.transform, new Vector3(-2.9f, 2.5f, -50f), LayerExpansion.GetUILayer());
         buttonRenderer.sprite = InfoButtonSprite.GetSprite();
@@ -398,6 +402,7 @@ public class EndGameManagerSetUpPatch
         button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
 
 
+#if PC
         if (NebulaPlugin.AllowHttpCommunication)
         {
             if (!AmongUsClient.Instance.AmHost || ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !ClientOption.WebhookOption.autoSendEntry.Value)
@@ -418,8 +423,8 @@ public class EndGameManagerSetUpPatch
             {
                 SendDiscordWebhook(LastGameHistory.GenerateTexture().EncodeToPNG());
             }
-;
         }
+#endif
 
         //Achievements
         NebulaAchievementManager.ClearHistory();

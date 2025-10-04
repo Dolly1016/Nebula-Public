@@ -1,6 +1,4 @@
-﻿using NAudio.CoreAudioApi;
-
-using Nebula.Modules.GUIWidget;
+﻿using Nebula.Modules.GUIWidget;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -48,6 +46,7 @@ internal class NoSRoleSetUp
         SetTabs();
 
         SetNebulaTeams();
+
         foreach (var assembly in AddonScriptManager.ScriptAssemblies.Where(script => script.Behaviour.LoadRoles).Select(s => s.Assembly).Prepend(Assembly.GetAssembly(typeof(Roles))))
         {
             var types = assembly?.GetTypes().Where((type) => type.IsAssignableTo(typeof(DefinedAssignable)) || type.IsAssignableTo(typeof(PerkFunctionalInstance)));
@@ -263,7 +262,7 @@ internal static class RoleOptionHelper
     {
         if (!screen) screen = MetaScreen.GenerateWindow(new Vector2(6.7f, setAndShare != null ? 4.5f : 3.7f), HudManager.Instance.transform, Vector3.zero, true, true);
 
-        bool showOnlySpawnable = ClientOption.AllOptions[ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter].Value == 1;
+        bool showOnlySpawnable = ClientOption.GetValue(ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter) == 1;
 
         IEnumerable<R> allRolesFiltered = showOnlySpawnable ? allRoles.Where(r => (r as ISpawnable)?.IsSpawnable ?? true) : allRoles;
 

@@ -38,7 +38,7 @@ public static class AdminButtonPatch
                 if (logicGameFlowHnS != null)
                 {
                     __instance.useable = logicGameFlowHnS.SeekerAdminMapEnabled(PlayerControl.LocalPlayer);
-                    if (!__instance.useable || (MapBehaviour.Instance && MapBehaviour.Instance.IsOpen))
+                    if (!__instance.useable || AmongUsUtil.MapIsOpen)
                         __instance.SetDisabled();
                     else
                         __instance.SetEnabled();

@@ -7,6 +7,7 @@ using Nebula.Utilities;
 using PowerTools;
 using Rewired.UI.ControlMapper;
 using Sentry;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http.Headers;
@@ -14,6 +15,7 @@ using System.Security.Cryptography;
 using System.Text;
 using TMPro;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Networking;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
@@ -95,6 +97,8 @@ public abstract class CustomCosmicItem : CustomItemGrouped
     public CostumeAction? GhostAlternative = null;
     [JsonSerializableField(true)]
     public CostumeAction? LongNeckAlternative = null;
+    [JsonSerializableField(true)]
+    public CostumeAction? SeekerAlternative = null;
 
     [JsonSerializableField(true)]
     public bool IsUnlockable = false;
@@ -140,11 +144,11 @@ public abstract class CustomCosmicItem : CustomItemGrouped
         }
     }
 
-    public async Task Preactivate()
+    public IEnumerator CoPreactivate()
     {
         string holder = SubholderPath;
 
-        async Task CheckAndDownload(string? hash, string address)
+        IEnumerator CheckAndDownload(string? hash, string address)
         {
             var stream = MyBundle.OpenStream(Category + "/" + holder + "/" + address);
             string? existingHash = null;
@@ -156,14 +160,14 @@ public abstract class CustomCosmicItem : CustomItemGrouped
             if (MyBundle.RelatedRemoteAddress != null && (existingHash == null || !(hash?.Equals(existingHash) ?? true)))
             {
                 //更新を要する場合
-                await MyBundle.DownloadAsset(Category, holder, address);
+                yield return MyBundle.DownloadAsset(Category, holder, address);
             }
         }
 
         foreach (var image in AllImage())
         {
-            if (image.Address != null) await CheckAndDownload(image.Hash, image.Address);
-            if (image.ExAddress != null) await CheckAndDownload(image.ExHash, image.ExAddress);
+            if (image.Address != null) yield return CheckAndDownload(image.Hash, image.Address);
+            if (image.ExAddress != null) yield return CheckAndDownload(image.ExHash, image.ExAddress);
 
             image.MyItem = this;
         }
@@ -409,8 +413,6 @@ public class CosmicHat : CustomCosmicAnimationItem
     public bool IsSkinny = false;
     [JsonSerializableField(true)]
     public bool SeekerCostume = true;
-    [JsonSerializableField(true)]
-    public CostumeAction? SeekerAlternative = null;
     [JsonSerializableField(true)]
     public bool? DoAnimationIfDead = null;
 
@@ -838,6 +840,21 @@ public class CustomItemBundle : CostumePermissionHolder
         foreach (var item in AllCosmicItem()) yield return item;
         foreach (var item in Packages) yield return item;
     }
+
+    public IEnumerator CoLoad()
+    {
+        if (IsActive) yield break;
+
+        if (RelatedLocalAddress != null && !RelatedLocalAddress.EndsWith("/")) RelatedLocalAddress += "/";
+        if (RelatedRemoteAddress != null && !RelatedRemoteAddress.EndsWith("/")) RelatedRemoteAddress += "/";
+
+        foreach (var item in AllContents()) item.MyBundle = this;
+        foreach (var item in AllCosmicItem()) yield return item.CoPreactivate();
+
+        if (AllBundles.ContainsKey(BundleName!)) throw new Exception("Duplicated Bundle Error");
+    }
+
+    /*
     public async Task Load()
     {
         if (IsActive) return;
@@ -850,6 +867,7 @@ public class CustomItemBundle : CostumePermissionHolder
 
         if (AllBundles.ContainsKey(BundleName!)) throw new Exception("Duplicated Bundle Error");
     }
+    */
 
     public IEnumerator Activate(bool addToMoreCosmic)
     {
@@ -903,15 +921,17 @@ public class CustomItemBundle : CostumePermissionHolder
         return null;
     }
 
-    public async Task DownloadAsset(string category, string localHolder, string address)
+    public IEnumerator DownloadAsset(string category, string localHolder, string address)
     {
         //リモートリポジトリやローカルの配置先が無い場合はダウンロードできない
-        if (RelatedRemoteAddress == null || RelatedLocalAddress == null) return;
+        if (RelatedRemoteAddress == null || RelatedLocalAddress == null) yield break;
 
-        var hatFileResponse = await NebulaPlugin.HttpClient.GetAsync(RelatedRemoteAddress + category + "/" + address, HttpCompletionOption.ResponseContentRead);
-        if (hatFileResponse.StatusCode != HttpStatusCode.OK) return;
+        byte[] rawData = null;
+        yield return NebulaWebRequest.CoGetRaw(RelatedRemoteAddress + category + "/" + address, true, data => {
+            rawData = data;
+        });
+        if (rawData == null) yield break;
 
-        var responseStream = await hatFileResponse.Content.ReadAsByteArrayAsync();
         //サブディレクトリまでを作っておく
         string localPath = RelatedLocalAddress + category + "/" + localHolder + "/" + address;
 
@@ -920,11 +940,11 @@ public class CustomItemBundle : CostumePermissionHolder
 
         using var fileStream = File.Create(localPath);
 
-        await fileStream.WriteAsync(responseStream);
+        yield return fileStream.WriteAsync(rawData).AsTask().WaitAsCoroutine();
 
-        if (AllOptions[ClientOptionType.OutputCosmicHash].Value == 1)
+        if (GetValue(ClientOptionType.OutputCosmicHash) == 1)
         {
-            string hash = BitConverter.ToString(MD5.ComputeHash(responseStream)).Replace("-", "").ToLowerInvariant();
+            string hash = BitConverter.ToString(MD5.ComputeHash(rawData)).Replace("-", "").ToLowerInvariant();
 
             NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, $"Hash: {hash} ({category}/{address})");
         }
@@ -948,57 +968,52 @@ public class CustomItemBundle : CostumePermissionHolder
         }
     }
 
-
-    static public async Task<CustomItemBundle?> LoadOnline(LocalMarketplaceItem? item, string url)
+    static public IEnumerator CoLoadOnline(LocalMarketplaceItem? item, string url, Virial.Compat.Wrapping<CustomItemBundle> result)
     {
-        NebulaPlugin.HttpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-        var response = await NebulaPlugin.HttpClient.GetAsync(new Uri($"{url}/Contents.json"), HttpCompletionOption.ResponseContentRead);
-        if (response.StatusCode != HttpStatusCode.OK) return null;
-
-        using StreamReader stream = new(await response.Content.ReadAsStreamAsync(), Encoding.UTF8);
-        string json = stream.ReadToEnd();
-
-        CustomItemBundle? bundle = null;
-        try
+        result.Value = null!;
+        yield return NebulaWebRequest.CoGet($"{url}/Contents.json", true, json =>
         {
-            bundle = (CustomItemBundle?)JsonStructure.Deserialize(json, typeof(CustomItemBundle));
-        }
-        catch (Exception ex)
+            try
+            {
+                result.Value = (CustomItemBundle?)JsonStructure.Deserialize(json, typeof(CustomItemBundle));
+            }
+            catch (Exception ex)
+            {
+                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, $"Error occurred in costume deserialize (URL: {url})\n" + ex.ToString());
+            }
+        });
+
+        var bundle = result.Value;
+        if(bundle != null)
         {
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, $"Error occurred in costume deserialize (URL: {url})\n" + ex.ToString());
-            return null;
+            bundle.RelatedMarketplaceItem = item;
+            bundle.RelatedRemoteAddress = url;
+            bundle.RelatedLocalAddress = PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "MoreCosmic" + Path.DirectorySeparatorChar;
+            bundle.BundleName ??= url;
+
+            yield return bundle.CoLoad();
         }
-
-        if (bundle == null) return null;
-
-        bundle.RelatedMarketplaceItem = item;
-        bundle.RelatedRemoteAddress = url;
-        bundle.RelatedLocalAddress = "MoreCosmic/";
-        bundle.BundleName ??= url;
-        await bundle.Load();
-
-        return bundle;
     }
 
-    static public async Task<CustomItemBundle?> LoadOffline(NebulaAddon addon)
+    static public IEnumerator CoLoadOffline(NebulaAddon addon, Virial.Compat.Wrapping<CustomItemBundle> result)
     {
         using var stream = addon.OpenStream("MoreCosmic/Contents.json");
 
-        if (stream == null) return null;
+        if (stream == null) yield break;
 
         string json = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
         CustomItemBundle? bundle = (CustomItemBundle?)JsonStructure.Deserialize(json, typeof(CustomItemBundle));
 
-        if (bundle == null) return null;
+        if (bundle == null) yield break;
 
         bundle.RelatedRemoteAddress = null;
         bundle.RelatedLocalAddress = addon.InZipPath + "MoreCosmic/";
         bundle.RelatedZip = addon.Archive;
         bundle.BundleName ??= addon.AddonName;
 
-        await bundle.Load();
+        yield return bundle.CoLoad();
 
-        return bundle;
+        result.Value = bundle;
     }
 }
 
@@ -1014,6 +1029,10 @@ public static class MoreCosmic
     public static Dictionary<string, HashSet<string>> VanillaTags = [];
     internal static readonly CustomHooksManager<SimpleActionList> NodeSyncHooks = new(() => new());
     internal static readonly CustomHooksManager<SimpleActionList> LongNeckHooks = new(() => new());
+
+    public static bool TryGetModData(this HatData hat, [MaybeNullWhen(false)] out CosmicHat modHat) => AllHats.TryGetValue(hat.ProductId, out modHat);
+    public static bool TryGetModData(this VisorData visor, [MaybeNullWhen(false)] out CosmicVisor modVisor) => AllVisors.TryGetValue(visor.ProductId, out modVisor);
+    public static bool TryGetModData(this NamePlateData nameplate, [MaybeNullWhen(false)] out CosmicNameplate modPlate) => AllNameplates.TryGetValue(nameplate.ProductId, out modPlate);
 
     public record LocalizedSpriteLoader(string Address, IResourceAllocator Allocator)
     {
@@ -1085,62 +1104,48 @@ public static class MoreCosmic
         return null;
     }
 
-    private static async Task LoadLocal()
+    private static IEnumerator CoLoadLocal()
     {
         foreach (var addon in NebulaAddon.AllAddons)
         {
-            var bundle = await CustomItemBundle.LoadOffline(addon);
+            Virial.Compat.Wrapping<CustomItemBundle> result = new(null!);
+            yield return CustomItemBundle.CoLoadOffline(addon, result);
 
-            lock (loadedBundles)
-            {
-                loadedBundles.Add(bundle);
-            }
+            if(result.Value != null) loadedBundles.Add(result.Value);
         }
     }
 
     private static List<(LocalMarketplaceItem? onlineItem, string url)> allRepos = [];
-    private static async Task LoadOnline()
+    private static IEnumerator CoLoadOnline()
     {
-        if (!NebulaPlugin.AllowHttpCommunication) return;
+        if (!NebulaPlugin.AllowHttpCommunication) yield break;
 
-        var response = await NebulaPlugin.HttpClient.GetAsync(new Uri(Helpers.ConvertUrl("https://raw.githubusercontent.com/Dolly1016/MoreCosmic/master/UserCosmics.dat")), HttpCompletionOption.ResponseContentRead);
-        if (response.StatusCode != HttpStatusCode.OK) return;
+        while (!HatManager.InstanceExists) yield return Effects.Wait(1f);
 
-        string repos = await response.Content.ReadAsStringAsync();
-
-        while (!HatManager.InstanceExists) await Task.Delay(1000);
-
-        allRepos.AddRange(repos.Split("\n").Select(url => ((LocalMarketplaceItem? onlineItem, string url))(null, url)));
+        yield return NebulaWebRequest.CoGet(Helpers.ConvertUrl("https://raw.githubusercontent.com/Dolly1016/MoreCosmic/master/UserCosmics.dat"), true, (repos) =>
+        {
+            allRepos.AddRange(repos.Split("\n").Select(url => ((LocalMarketplaceItem? onlineItem, string url))(null, url)));
+        });
         allRepos.AddRange(MarketplaceData.Data?.OwningCostumes.Where(item => item.ToCostumeUrl.Length > 3 && !allRepos.Any(r => r.url == item.ToCostumeUrl)).Select(item => ((LocalMarketplaceItem? onlineItem, string url))(item, item.ToCostumeUrl)) ?? []);
 
         foreach (var repo in allRepos.ToArray())
         {
-            try
-            {
-                var result = await CustomItemBundle.LoadOnline(repo.onlineItem, repo.url);
-
-                lock (loadedBundles)
-                {
-                    loadedBundles.Add(result);
-                }
-            }
-            catch { }
+            Virial.Compat.Wrapping<CustomItemBundle> result = new(null!);
+            yield return CustomItemBundle.CoLoadOnline(repo.onlineItem, repo.url, result);
+            if(result.Value != null) loadedBundles.Add(result.Value);
         }
     }
 
-    public static async Task LoadOnlineExtra(LocalMarketplaceItem? onlineItem, string url)
+    public static IEnumerator LoadOnlineExtra(LocalMarketplaceItem? onlineItem, string url)
     {
-        if (allRepos.Any(r => r.url == url)) return;
+        if (allRepos.Any(r => r.url == url)) yield break;
         allRepos.Add((onlineItem, url));
 
         try
         {
-            var result = await CustomItemBundle.LoadOnline(onlineItem, url);
-
-            lock (loadedBundles)
-            {
-                loadedBundles.Add(result);
-            }
+            Virial.Compat.Wrapping<CustomItemBundle> result = new(null!);
+            CustomItemBundle.CoLoadOnline(onlineItem, url, result);
+            if(result.Value != null) loadedBundles.Add(result.Value);
         }
         catch (Exception e)
         {
@@ -1188,17 +1193,17 @@ public static class MoreCosmic
         }
     }
 
-    private static async Task LoadAll()
+    private static IEnumerator CoLoadAll()
     {
-        await LoadLocal();
-        await LoadOnline();
+        yield return CoLoadLocal();
+        yield return CoLoadOnline();
     }
 
     static void Preprocess(NebulaPreprocessor preprocessor)
     {
         if (isLoaded) return;
 
-        _ = LoadAll();
+        CoLoadAll().StartOnProcess();
 
         isLoaded = true;
 
@@ -2183,6 +2188,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             var visualVisor = functionalVisor;
             string? visualVisorId = null;
             if (ShipStatus.Instance && AmongUsUtil.InAnySab) visualVisorId = (AmongUsUtil.InCommSab ? functionalVisor.CommSabAlternative ?? functionalVisor.SabotageAlternative : functionalVisor.SabotageAlternative)?.Costume;
+            if (MyLayer.bodyType == PlayerBodyTypes.Seeker && functionalVisor.SeekerAlternative != null) visualVisorId = functionalVisor.SeekerAlternative?.Costume;
             if (MyLayer.bodyType == PlayerBodyTypes.Long && functionalVisor.LongNeckAlternative != null) visualVisorId = functionalVisor.LongNeckAlternative?.Costume;
             if (isDead && functionalVisor.GhostAlternative != null) visualVisorId = functionalVisor.GhostAlternative?.Costume;
             visualVisor = CheckAndUpdateCache(visualVisor, ref CurrentVisualModVisorCache, visualVisorId, CosmicVisor.IdToProductId, pi => MoreCosmic.AllVisors.TryGetValue(pi, out var v) ? v : null!);
@@ -2492,9 +2498,13 @@ public static class TabEnablePatch
                 ColorChip colorChip = UnityEngine.Object.Instantiate(__instance.ColorTabPrefab, __instance.scroller.Inner);
                 colorChip.transform.localPosition = new Vector3(itemX, itemY, -1f);
 
+#if PC
                 colorChip.Button.OnMouseOver.AddListener(() => selector.Invoke(vanillaItem));
                 colorChip.Button.OnMouseOut.AddListener(() => selector.Invoke(defaultProvider.Invoke()));
                 colorChip.Button.OnClick.AddListener(__instance.ClickEquip);
+#else
+                colorChip.Button.OnClick.AddListener(() => selector.Invoke(vanillaItem));
+#endif
 
                 if (DebugTools.ShowCostumeMetadata)
                 {

@@ -1,7 +1,5 @@
 ﻿using AmongUs.Data;
 using Il2CppInterop.Runtime.Injection;
-using MS.Internal.Xml.XPath;
-using NAudio.CoreAudioApi;
 using Nebula.Behavior;
 using Nebula.Patches;
 using Nebula.Roles.Abilities;
@@ -74,7 +72,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
                 {
                     deadBody.SetUp(DissolveDurationOption, AcidLeavesBoneOption, !AcidLeavesBoneOption || CanReportBoneOption);
 
-                    HookCommon2Achievement(ev.DeadBody);
+                    if(AmOwner) HookCommon2Achievement(ev.DeadBody);
                 }
             }
         }

@@ -1,4 +1,6 @@
-﻿using Nebula.Behavior;
+﻿using Interstellar.Routing.Router;
+using Interstellar.VoiceChat;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
 using Nebula.Roles.Abilities;
@@ -237,8 +239,11 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public HudGrid HudGrid { get; private set; }
     public GameStatistics GameStatistics { get; private set; } = new();
     public CriteriaManager CriteriaManager { get; private set; } = new();
+
+#if PC
     internal LobbySlideManager LobbySlideManager { get; private set; } = new();
-    internal VoiceChatManager? VoiceChatManager { get; set; }
+#endif
+
     public ConsoleRestriction ConsoleRestriction { get; private set; } = new();
     public AttributeShower AttributeShower { get; private set; } = new();
     public RPCScheduler Scheduler { get; private set; } = new();
@@ -295,38 +300,46 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         allPlayerlikes = [];
         instance = this;
         HudGrid = HudManager.Instance.gameObject.AddComponent<HudGrid>();
+
+#if PC
         RuntimeAsset = new();
 
+        /*
         var vcConnectButton = new Modules.ScriptComponents.ModAbilityButtonImpl(true).Register(this);
-        vcConnectButton.Visibility = (_) => VoiceChatManager != null && GameState == NebulaGameStates.NotStarted;
+        vcConnectButton.Visibility = (_) => VoiceChat != null && GameState == NebulaGameStates.NotStarted;
         vcConnectButton.Availability = (_) =>true;
         vcConnectButton.SetSprite(vcConnectSprite.GetSprite());
-        vcConnectButton.OnClick = (_) => VoiceChatManager!.Rejoin();
+        vcConnectButton.OnClick = (_) => VoiceChat!.Rejoin();
         vcConnectButton.SetLabel("rejoin");
+        */
+#endif
 
-        VoiceChatManager = GeneralConfigurations.UseVoiceChatOption ? new() : null;
+#if ANDROID
+        var joystickSpaceL = HudContent.InstantiateContent("JoystickSpaceL");
+        joystickSpaceL.SetPriority(100000);
+
+        var joystickSpaceR = HudContent.InstantiateContent("JoystickSpaceR", isLeftSide: false);
+        joystickSpaceR.SetPriority(100000);
+
+        GameOperatorManager.Instance?.Subscribe<UpdateEvent>(e =>
+        {
+            joystickSpaceL.gameObject.SetActive(HudManager.Instance.joystickR != null);
+            joystickSpaceR.gameObject.SetActive(HudManager.Instance.joystickR != null && !LobbyBehaviour.Instance);
+        }, this);
+#endif
 
         localPlayerCache = new(() => GetPlayer(PlayerControl.LocalPlayer ? PlayerControl.LocalPlayer.PlayerId : (byte)255)!);
     }
 
     public void Abandon()
     {
+#if PC
         RuntimeAsset.Abandon();
         LobbySlideManager.Abandon();
+#endif
         GameEntityManager.Abandon();
 
         instance = null;
-    }
-
-    public void OnSceneChanged()
-    {
-        if (SceneManager.GetActiveScene().name == "EndGame")
-            VoiceChatManager?.OnGameEndScene();
-        else
-        {
-            VoiceChatManager?.Dispose();
-            VoiceChatManager = null;
-        }
     }
 
     void Virial.Game.Game.RegisterEntity(IGameOperator entity, ILifespan lifespan, Action? onSubscribed = null) => GameEntityManager.Subscribe(entity, lifespan, onSubscribed);
@@ -458,9 +471,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         //WideCamera.Update();
         GameEntityManager.Update();
 
-        if (VoiceChatManager == null && GeneralConfigurations.UseVoiceChatOption) VoiceChatManager = new();
-        VoiceChatManager?.Update();
-
         GameEntityManager.Run(new GameHudUpdateFasterEvent(this));
         GameEntityManager.Run(new GameHudUpdateEvent(this));
         GameEntityManager.Run(new GameHudUpdateLaterEvent(this));
@@ -499,6 +509,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             //ローカルモジュール
             AttributeShower.Update(localModInfo);
         }
+
     }
 
     public void OnFixedAlwaysUpdate()
@@ -552,13 +563,13 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     {
         WideCamera.OnGameStart();
 
+#if PC
         //マップの取得
         RuntimeAsset.MinimapPrefab = ShipStatus.Instance.MapPrefab;
         RuntimeAsset.MinimapPrefab.gameObject.MarkDontUnload();
         RuntimeAsset.MapScale = ShipStatus.Instance.MapScale;
 
-        //VC
-        VoiceChatManager?.OnGameStart();
+#endif
 
         foreach (var p in allModPlayers) p.Value.Unbox().OnGameStart();
         GameEntityManager.Run(new GameStartEvent(this), true);
@@ -639,7 +650,10 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             case NebulaGameStates.NotStarted:
                 if (PlayerControl.AllPlayerControls.Count == allModPlayers.Count)
                 {
+#if PC
                     LobbySlideManager.Abandon();
+#endif
+                    ModSingleton<NoSVCRoom>.Instance?.OnGameStart();
                     DestroyableSingleton<HudManager>.Instance.StartCoroutine(DestroyableSingleton<HudManager>.Instance.CoShowIntro());
                     DestroyableSingleton<HudManager>.Instance.HideGameLoader();
                     GameState = NebulaGameStates.Initialized;

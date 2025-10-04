@@ -325,7 +325,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
                 ModAbilityButton disturbButton = null!;
 
                 var openMapButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "disturber.place",
-                    0f, "place", placeButtonSprite, _ => !disturbButton.IsInEffect, _ => !MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
+                    0f, "place", placeButtonSprite, _ => !disturbButton.IsInEffect, _ => !AmongUsUtil.MapIsOpen);
                 openMapButton.OnClick = button => {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
@@ -339,13 +339,13 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
                     .BindKey(Virial.Compat.VirtualKeyInput.Ability, "disturber.place")
                     .SetImage(placeButtonSprite).ShowUsesIcon(0, "").SetLabel("place").SetAsUsurpableButton(this);
                 placeButton.Availability = (button) => mapLayer && mapLayer.Positions.Count >= 2;
-                placeButton.Visibility = (button) => !MyPlayer.IsDead && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && mapLayer && mapLayer.gameObject.active;
+                placeButton.Visibility = (button) => !MyPlayer.IsDead && AmongUsUtil.MapIsOpen && mapLayer && mapLayer.gameObject.active;
                 placeButton.OnClick = button => PlacePoles();
                 updatePoleTextFunc = (num) => placeButton.UpdateUsesIcon(num.ToString());
 
                 disturbButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, "disturber.disturb",
                     DisturbCoolDownOption, DisturbDurationOption, "disturb", disturbButtonSprite).SetAsUsurpableButton(this);
-                disturbButton.Availability = (button) => poles.Count > 0 && (!MapBehaviour.Instance || !MapBehaviour.Instance.IsOpen);
+                disturbButton.Availability = (button) => poles.Count > 0 && !AmongUsUtil.MapIsOpen;
                 disturbButton.OnEffectStart = (button) =>
                 {
                     new StaticAchievementToken("disturber.common1");

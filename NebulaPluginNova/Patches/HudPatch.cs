@@ -1,4 +1,5 @@
-﻿using Nebula.Behavior;
+﻿using AmongUs.Data;
+using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
 using Virial.DI;
@@ -27,6 +28,43 @@ public static class HudManagerStartPatch
         __instance.TaskPanel.transform.localPosition = new(0, 0, 0);
     }
 }
+
+#if ANDROID
+[HarmonyPatch(typeof(HudManager), nameof(HudManager.SetTouchType))]
+public static class SetJoyStickSizePatch
+{
+    public static void Postfix(HudManager __instance, [HarmonyArgument(0)] ControlTypes type)
+    {
+        if(type == ControlTypes.VirtualJoystick)
+        {
+            MonoBehaviour monoBehaviour2 = GameObject.Instantiate<MonoBehaviour>(__instance.RightVJoystick);
+            if (monoBehaviour2 != null)
+            {
+                monoBehaviour2.transform.SetParent(__instance.transform, false);
+                __instance.joystickR = monoBehaviour2.GetComponent<VirtualJoystick>();
+                __instance.joystickR.ToggleVisuals(LobbyBehaviour.Instance == null);
+            }
+
+            var leftAspectPos = __instance.joystick.CastFast<VirtualJoystick>().gameObject.GetComponent<AspectPosition>();
+            leftAspectPos.DistanceFromEdge = new(0.7f, 0.64f, -10f);
+            leftAspectPos.transform.localScale = new(0.85f, 0.85f, 1f);
+            leftAspectPos.AdjustPosition();
+
+            var rightAspectPos = __instance.joystickR.gameObject.GetComponent<AspectPosition>();
+            rightAspectPos.Alignment = AspectPosition.EdgeAlignments.RightBottom;
+            rightAspectPos.DistanceFromEdge = new(0.7f, 0.64f, -10f);
+            rightAspectPos.transform.localScale = new(0.85f, 0.85f, 1f);
+            rightAspectPos.AdjustPosition();
+        }
+    }
+}
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.AdjustLighting))]
+public static class SetFlashlightInputMethodPatch
+{
+    public static bool Prefix() => false;
+}
+#endif
 
 
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]

@@ -1,11 +1,13 @@
 ﻿using AmongUs.Data;
 using AmongUs.HTTP;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Innersloth.IO;
 using Nebula.Behavior;
 using Newtonsoft.Json;
 using UnityEngine.Events;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement;
+using Virial.Helpers;
 using static HttpMatchmakerManager;
 
 namespace Nebula.Patches;
@@ -85,7 +87,10 @@ public static class RegionMenuOpenPatch
         //マージ時、DefaultRegionsに含まれている要素のほうが優先される(重複時に生き残る方)
         ServerManager.DefaultRegions = regions;
         serverManager.LoadServers();
-
+        if(serverManager.CurrentRegion.TranslateName != StringNames.NoTranslation)
+        {
+            serverManager.StartCoroutine(ManagedEffects.Sequence(ManagedEffects.Wait(3f), ManagedEffects.Action(()=> serverManager.SetRegion(ModASRegion.CastFast<IRegionInfo>()))).WrapToIl2Cpp());
+        }
     }
 
     static RegionMenuOpenPatch()
@@ -154,43 +159,64 @@ public static class RegionMenuOpenPatch
     */
 }
 
-[HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.OnEnable))]
-public static class RegionMenuOnEnablePatch
+[HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.UpdateServerText))]
+public static class UpdateGameOptionRegionTextPatch
 {
-    private const int ButtonsPerColumn = 6;
-    public static void Postfix(RegionMenu __instance)
+    static void Prefix(CreateGameOptions __instance, [HarmonyArgument(0)] ref string text)
     {
-        int activeButtons = 0;
-        bool IsAvailable(ServerListButton button) => true /*button.textTranslator.TargetText == StringNames.NoTranslation*/;
-        foreach (var button in __instance.ButtonPool.activeChildren)
+        text = ServerDropdownPatch.TranslateText(text);
+    }
+}
+
+[HarmonyPatch(typeof(ServerDropdown), nameof(ServerDropdown.FillServerOptions))]
+public static class ServerDropdownPatch
+{
+    internal static string TranslateText(string text) => Language.TryTranslate("regions." + text, out var translated) ? translated : text;
+
+    const float BaseX = 4.2f;
+    const int RegionsPerColumn = 5;
+    public static bool Prefix(ServerDropdown __instance)
+    {
+        var regions = DestroyableSingleton<ServerManager>.Instance.AvailableRegions.Where(r => r.TranslateName == StringNames.NoTranslation).ToArray();
+        var defaultRegions = ServerManager.DefaultRegions.ToArray();
+        regions = regions.OrderBy(r => defaultRegions.FindIndex(d => d.Name == r.Name)).ToArray();
+        int num = 0;
+
+        List<ServerListButton> buttons = [];
+
+        foreach (IRegionInfo regionInfo in regions)
         {
-            var active = IsAvailable(button.CastFast<ServerListButton>());
-            button.gameObject.SetActive(active);
-            if(active)activeButtons++;
-        }
-
-        int columns = (activeButtons - 1) / ButtonsPerColumn + 1;
-        int i = 0;
-
-        foreach (var button in __instance.ButtonPool.activeChildren)
-        {
-            var serverButton = button.CastFast<ServerListButton>();
-            if (!IsAvailable(serverButton)) continue;
-
-            serverButton.transform.localPosition = new Vector3(((columns - 1) * -0.5f + (float)(int)(i / ButtonsPerColumn)) * 2.2f, 2f - 0.5f * (float)(i % ButtonsPerColumn), 0f);
-
-            serverButton.Button.OnClick.RemoveAllListeners();
-            serverButton.Button.OnClick.AddListener((UnityAction)(() =>
+            if (DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name == regionInfo.Name)
             {
-                //入力中のカスタムサーバーの情報を確定させたうえでサーバーを選択する
-                TextField.ChangeFocus(null);
-
-                var region = ServerManager.Instance.AvailableRegions.FirstOrDefault(region => region.Name.Equals(serverButton.textTranslator.defaultStr));
-                if (region != null) __instance.ChooseOption(region);
-            }));
-
-            i++;
+                __instance.defaultButtonSelected = __instance.firstOption;
+                __instance.firstOption.ChangeButtonText(TranslateText(regionInfo.Name));
+            }
+            else
+            {
+                IRegionInfo region = regionInfo;
+                ServerListButton serverListButton = __instance.ButtonPool.Get<ServerListButton>();
+                serverListButton.transform.localPosition = new Vector3(BaseX * (float)(num / RegionsPerColumn), __instance.y_posButton + -0.55f * (float)(num % RegionsPerColumn), -1f);
+                serverListButton.transform.localScale = Vector3.one;
+                serverListButton.Text.text = TranslateText(regionInfo.Name);
+                serverListButton.Text.ForceMeshUpdate(false, false);
+                serverListButton.Button.OnClick.RemoveAllListeners();
+                serverListButton.Button.OnClick.AddListener(() => __instance.ChooseOption(region));
+                buttons.Add(serverListButton);
+                __instance.controllerSelectable.Add(serverListButton.Button);
+                num++;
+            }
         }
+
+        int columns = (num - 1) / RegionsPerColumn + 1;
+        __instance.background.transform.localPosition = new Vector3(0f, __instance.initialYPos + -0.3f * (float)(Math.Min(num, RegionsPerColumn) - 1), 0f);
+        __instance.background.size = new Vector2(columns * BaseX, 0.6f + 0.6f * (float)(Math.Min(num, RegionsPerColumn)));
+        if(columns > 1)
+        {
+            foreach (var button in buttons) button.transform.localPosition -= new Vector3((columns - 1) * BaseX * 0.5f, 0f, 0f);
+        }
+
+
+        return false;
     }
 }
 

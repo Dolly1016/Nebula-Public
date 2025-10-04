@@ -1,5 +1,4 @@
 ﻿using Nebula.Behavior;
-using NebulaLoader;
 using System.IO.Compression;
 using System.Net;
 using System.Reflection;
@@ -8,7 +7,6 @@ using UnityEngine;
 using Virial.Compat;
 using Virial.Media;
 using Virial.Runtime;
-using static Nebula.Modules.ModUpdater;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Modules;
@@ -78,9 +76,10 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         return null;
     }
 
+    static private string AddonsDirectoryPath => PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "Addons";
     static private IEnumerable<string> ExternalAddons()
     {
-        foreach (var file in Directory.GetFiles("Addons"))
+        foreach (var file in Directory.GetFiles(AddonsDirectoryPath))
         {
             var ext = Path.GetExtension(file);
             if (ext == null) continue;
@@ -89,33 +88,39 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         }
     }
 
-    private static async Task FetchAndDownloadAddon(string url, long? lastId, int entryId, Action? onDownload = null)
+    private static IEnumerator FetchAndDownloadAddon(string url, long? lastId, int entryId, Action? onDownload = null)
     {
-        if (!NebulaPlugin.AllowHttpCommunication) return;
+        if (!NebulaPlugin.AllowHttpCommunication) yield break;
 
-        var response = await NebulaPlugin.HttpClient.GetAsync(url);
-        if (response.StatusCode != HttpStatusCode.OK) return;
-        string json = await response.Content.ReadAsStringAsync();
+        LogUtils.WriteToConsole("Start Download: " + url);
 
-        var assets = JsonStructure.Deserialize<GitHubReleaseContent>(json);
-
+        GitHubReleaseContent assets = null!;
+        yield return NebulaWebRequest.CoGet(url, true, json =>
+        {
+            assets = JsonStructure.Deserialize<GitHubReleaseContent>(json);
+        }, null, request => request.SetRequestHeader("User-Agent", "Nebula Updater"));
+        
         var addonAsset = assets?.assets?.FirstOrDefault(a => a.name.EndsWith(".zip") || a.name.EndsWith(".addon"));
-        if (addonAsset == null) return;
+        if (addonAsset == null) yield break;
 
         if(!lastId.HasValue || lastId.Value != addonAsset.id)
         {
             onDownload?.Invoke();
-            response = await NebulaPlugin.HttpClient.GetAsync(addonAsset.browser_download_url);
-            if (response.StatusCode != HttpStatusCode.OK) return;
-            var dllStream = await response.Content.ReadAsStreamAsync();
+            byte[] rawData = null!;
+            yield return NebulaWebRequest.CoGetRaw(addonAsset.browser_download_url, true, d =>
+            {
+                rawData = d;
+            }, null, request => request.SetRequestHeader("User-Agent", "Nebula Updater")); 
+
+            if (rawData == null) yield break;
 
             try
             {
                 //ダウンロードしたファイルを配置
-                string path = "Addons" + Path.DirectorySeparatorChar + "[M" + entryId + "]" + addonAsset.name;
+                string path = PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "Addons" + Path.DirectorySeparatorChar + "[M" + entryId + "]" + addonAsset.name;
                 using (var fileStream = File.Create(path))
                 {
-                    dllStream.CopyTo(fileStream);
+                    fileStream.Write(rawData, 0, rawData.Length);
                     fileStream.Flush();
                 }
 
@@ -142,17 +147,20 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
     static public IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
-        Directory.CreateDirectory("Addons");
+        string addonsPath = AddonsDirectoryPath;
+        Directory.CreateDirectory(addonsPath);
+
+        LogUtils.WriteToConsole("AddonLoader: " + addonsPath);
 
         yield return preprocessor.SetLoadingText("Fetching Addons");
 
         //ローカルなアドオンを更新
-        foreach (var dir in Directory.GetDirectories("Addons", "*"))
+        foreach (var dir in Directory.GetDirectories(addonsPath, "*"))
         {
             string id = Path.GetFileName(dir);
-            string filePath = dir + "/" + id + ".zip";
+            string filePath = dir + Path.DirectorySeparatorChar + id + ".zip";
             
-            if (File.Exists(filePath)) File.Move(filePath, "Addons/" + id + ".zip", true);
+            if (File.Exists(filePath)) File.Move(filePath, addonsPath + Path.DirectorySeparatorChar + id + ".zip", true);
         }
 
         List<int> existingEntry = [];
@@ -179,17 +187,16 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
             else if (marketplaceData.AutoUpdate)
             {
                 //自動アップデートが必要な場合
-                yield return FetchAndDownloadAddon(marketplaceData.ToAddonUrl, meta.Release, marketplaceData.EntryId, preprocessor.SetLoadingText("Update Addon - " + marketplaceData.Title).Do).WaitAsCoroutine();
+                yield return FetchAndDownloadAddon(marketplaceData.ToAddonUrl, meta.Release, marketplaceData.EntryId, preprocessor.SetLoadingText("Update Addon - " + marketplaceData.Title).Do);
             }
 
             existingEntry.Add(meta.Id);
         }
 
-        
-
         foreach (var addon in MarketplaceData.Data!.OwningAddons.Where(a => !existingEntry.Contains(a.EntryId)))
         {
-            yield return FetchAndDownloadAddon(addon.ToAddonUrl, null, addon.EntryId, preprocessor.SetLoadingText("Download Addon - " + addon.Title).Do).WaitAsCoroutine();
+            LogUtils.WriteToConsole("Start Fetching: " + addon.Title);
+            yield return FetchAndDownloadAddon(addon.ToAddonUrl, null, addon.EntryId, preprocessor.SetLoadingText("Download Addon - " + addon.Title).Do);
         }
 
 
@@ -220,7 +227,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         }
 
         //外部アドオンの読み込み
-        foreach (var file in Directory.GetFiles("Addons"))
+        foreach (var file in Directory.GetFiles(addonsPath))
         {
             var ext = Path.GetExtension(file);
             if (ext == null) continue;

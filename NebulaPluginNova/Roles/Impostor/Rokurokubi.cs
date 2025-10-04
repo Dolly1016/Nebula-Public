@@ -8,6 +8,7 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
+using Virial.Events.VoiceChat;
 using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
@@ -115,6 +116,11 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 RpcCalmDown.Invoke((myPlayer, false));
             });
             NebulaManager.Instance.StartDelayAction(1f, () => this.Release());
+        }
+
+        void OnFixMicPosition(FixMicPositionEvent ev)
+        {
+            if (!calmDownInvoked) ev.CanIgnoreWalls = true;
         }
 
 
@@ -239,8 +245,11 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                     var visor = message.player.VanillaCosmetics.visor;
                     MoreCosmic.NodeSyncHooks.Get(visor.gameObject).AddAction(() =>
                     {
-                        visor.transform.localPosition = RotateLocalPos(visor.transform.localPosition);
-                        visor.transform.localEulerAngles += new Vector3(0f, 0f, GetRotateAngle());
+                        if (!visor.visorData.TryGetModData(out var modVisor) || !modVisor.Fixed)
+                        {
+                            visor.transform.localPosition = RotateLocalPos(visor.transform.localPosition);
+                            visor.transform.localEulerAngles += new Vector3(0f, 0f, GetRotateAngle());
+                        }
                         return longBoiBody.isActiveAndEnabled && rokurokubi.GetNeckEpoch() == epoch && !rokurokubi.IsDeadObject;
                     });
 
@@ -385,7 +394,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                         else
                         {
                             killAchToken.Value++;
-                            if(mag > 10f && MyPlayer.HasAttribute(PlayerAttributes.Invisible))
+                            if(mag > 10f && (MyPlayer.HasAttribute(PlayerAttributes.Invisible) || (MyPlayer.IsImpostor && MyPlayer.HasAttribute(PlayerAttributes.InvisibleElseImpostor))))
                             {
 
                             }
@@ -627,10 +636,27 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         [OnlyMyPlayer]
         void OnFixZ(PlayerFixZPositionEvent ev)
         {
-            if (InLongNeckMode)
+            if(ev.Player.VanillaCosmetics.bodyType == PlayerBodyTypes.Long)
             {
-                var y = CurrentLongNeckMode?.HeadTracker.transform.position.y;
-                if (y.HasValue && ev.Y > y.Value) ev.Y = y.Value;
+                var longBoi = GetLongBody(MyPlayer);
+                if (longBoi)
+                {
+                    var y = longBoi.headSprite.transform.position.y;
+                    if (ev.Y > y) ev.Y = y;
+                }
+            }
+        }
+
+        [OnlyMyPlayer]
+        void OnFixMicPosition(FixSpeakerPositionEvent ev)
+        {
+            if (ev.Player.VanillaCosmetics.bodyType == PlayerBodyTypes.Long)
+            {
+                var longBoi = GetLongBody(MyPlayer);
+                if (longBoi)
+                {
+                    ev.Position = longBoi.headSprite.transform.position;
+                }
             }
         }
 

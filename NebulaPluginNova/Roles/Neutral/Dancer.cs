@@ -440,7 +440,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                 else if(MeetingHud.Instance || ExileController.Instance)
                     activeDanceLooked.Where(p => !p.IsDead).Do(p => p.Suicide(PlayerState.Suicide, null, KillParameter.MeetingKill));
                 else
-                    activeDanceLooked.Where(p => !p.IsDead).Do(p => p.Suicide(PlayerState.Suicide, null, KillParameter.RemoteKill));
+                    activeDanceLooked.Where(p => !p.IsDead).Do(p => p.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill));
             }
 
             if (AmOwner)

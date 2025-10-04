@@ -192,6 +192,7 @@ class ExileControllerBeginPatch
     {
         GameOperatorManager.Instance?.Run(new ExileSceneStartEvent(MeetingHudExtension.ExiledAllModCache!));
 
+        bool impostorTextShouldNotBeChanged = false;
         if (init.networkedPlayer != null)
         {
 
@@ -209,7 +210,11 @@ class ExileControllerBeginPatch
                 if (role != null)
                 {
                     __instance.completeString = Language.Translate("game.meeting.roleText").Replace("%PLAYER%", init.networkedPlayer.PlayerName).Replace("%ROLE%", role.Role.DisplayName);
-                    if (role.Role == Roles.Neutral.Jester.MyRole) __instance.ImpostorText.text = Language.Translate("game.meeting.roleJesterText");
+                    if (role.Role == Roles.Neutral.Jester.MyRole)
+                    {
+                        __instance.ImpostorText.text = Language.Translate("game.meeting.roleJesterText");
+                        impostorTextShouldNotBeChanged = true;
+                    }
                 }
             }
         }
@@ -222,7 +227,7 @@ class ExileControllerBeginPatch
         impostorText.alignment = TMPro.TextAlignmentOptions.Top;
 
         //追放を確認の詳細設定
-        if (init.confirmImpostor)
+        if (init.confirmImpostor && !impostorTextShouldNotBeChanged)
         {
             var confirmText = impostorText.text;
             int num = 0;

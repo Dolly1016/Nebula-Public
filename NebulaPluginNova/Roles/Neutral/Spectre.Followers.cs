@@ -194,7 +194,7 @@ internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole
                     suicideButton.OnClick = (button) =>
                     {
                         StatsSuicide.Progress();
-                        MyPlayer.Suicide(PlayerState.Suicide, null, KillParameter.RemoteKill);
+                        MyPlayer.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill);
                     };
                 }
 

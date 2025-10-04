@@ -9,8 +9,14 @@ public class NebulaLog
     int number;
     public bool IsPreferential => number == 0;
     private static string FileName = "NebulaLog";
-    public NebulaLog()
+    public NebulaLog(bool isDummy = false)
     {
+        if (isDummy)
+        {
+            writer = null!;
+            return;
+        }
+
         int counter = 0;
         Stream? stream;
 
@@ -106,6 +112,8 @@ public class NebulaLog
 
     public void Print(LogLevel level, LogCategory? category, string message)
     {
+        if (writer == null) return;
+
         message = message.Replace("\n", "\n    ");
         string header = (category?.Category ?? "Generic");
         if (level.Level != null) header = level.Level + " | " + header;

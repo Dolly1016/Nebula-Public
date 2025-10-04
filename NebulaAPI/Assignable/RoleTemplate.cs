@@ -258,10 +258,6 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
 public abstract class DefinedSingleAbilityRoleTemplate<Ability> : DefinedRoleTemplate, DefinedSingleAbilityRole<Ability> where Ability : class, IPlayerAbility
 {
     public abstract Ability CreateAbility(Virial.Game.Player player, int[] arguments);
-    public virtual string? GetDisplayAbilityName(Ability ability) => null;
-    public virtual string? GetDisplayAbilityShort(Ability ability) => null;
-    string DefinedRole.GetDisplayName(Virial.Game.IPlayerAbility ability) => (ability is Ability a ? GetDisplayAbilityName(a) : null) ?? (this as DefinedRole).DisplayName;
-    string DefinedRole.GetDisplayShort(Virial.Game.IPlayerAbility ability) => (ability is Ability a ? GetDisplayAbilityShort(a) : null) ?? (this as DefinedRole).DisplayShort;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new RuntimeSingleAbilityAssignable<Ability>(player, this, arguments);
     
     public DefinedSingleAbilityRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true, Func<bool>? optionHolderPredicate = null) : base(localizedName, color, category, team, configurations, withAssignmentOption, withOptionHolder, optionHolderPredicate)
@@ -278,36 +274,8 @@ public abstract class DefinedUsurpableAdvancedRoleTemplate<Ability, UsurpedAbili
 {
     public abstract Ability CreateAbility(Virial.Game.Player player, int[] arguments);
     public abstract UsurpedAbility CreateUsurpedAbility(Virial.Game.Player player, int[] arguments);
-    public virtual string? GetDisplayAbilityName(Ability ability) => null;
-    public virtual string? GetDisplayAbilityShort(Ability ability) => null;
-    public virtual string? GetDisplayUsurpedAbilityName(UsurpedAbility ability) => null;
-    public virtual string? GetDisplayUsurpedAbilityShort(UsurpedAbility ability) => null;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new RuntimeSingleAbilityAssignable<Ability>(player, this, arguments);
     IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments) => CreateUsurpedAbility(player, arguments);
-    string DefinedRole.GetDisplayName(IPlayerAbility ability)
-    {
-        if (ability is Ability a)
-        {
-            return GetDisplayAbilityName(a) ?? (this as DefinedRole).DisplayName;
-        }else if (ability is UsurpedAbility u)
-        {
-            return GetDisplayUsurpedAbilityName(u) ?? (this as DefinedRole).DisplayName;
-        }
-        return (this as DefinedRole).DisplayName;
-    }
-
-    string DefinedRole.GetDisplayShort(IPlayerAbility ability)
-    {
-        if (ability is Ability a)
-        {
-            return GetDisplayAbilityShort(a) ?? (this as DefinedRole).DisplayShort;
-        }
-        else if (ability is UsurpedAbility u)
-        {
-            return GetDisplayUsurpedAbilityShort(u) ?? (this as DefinedRole).DisplayShort;
-        }
-        return (this as DefinedRole).DisplayShort;
-    }
 
     public DefinedUsurpableAdvancedRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true, Func<bool>? optionHolderPredicate = null) : base(localizedName, color, category, team, configurations, withAssignmentOption, withOptionHolder, optionHolderPredicate)
     {
@@ -665,7 +633,7 @@ public class RuntimeSingleAbilityAssignable<Ability> : RuntimeAssignableTemplate
         this.cachedArguments = arguments;
     }
 
-    public virtual void OnActivated()
+    void RuntimeAssignable.OnActivated()
     {
         MyAbility = role.CreateAbility(MyPlayer, cachedArguments).Register(this);
     }
@@ -674,11 +642,13 @@ public class RuntimeSingleAbilityAssignable<Ability> : RuntimeAssignableTemplate
     int[] RuntimeRole.UsurpedAbilityArguments => MyAbility.AbilityArguments;
     IEnumerable<IPlayerAbility> GetAbilities()
     {
+        if (MyAbility == null) yield break;
+
         yield return MyAbility;
         foreach (var sa in MyAbility.SubAbilities) yield return sa;
     }
     IEnumerable<IPlayerAbility> RuntimeAssignable.MyAbilities => GetAbilities();
 
-    string RuntimeAssignable.DisplayName => role.GetDisplayAbilityName(MyAbility) ?? role.DisplayName;
-    string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(role.UnityColor);
+    string RuntimeAssignable.DisplayName => role.GetDisplayName(MyAbility);
+    string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(role.UnityColor); 
 }

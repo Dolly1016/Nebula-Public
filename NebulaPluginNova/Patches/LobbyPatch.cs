@@ -32,8 +32,10 @@ public class GameStartManagerUpdatePatch
         if (GameData.Instance == null || !GameData.Instance) return false;
         if (!GameManager.Instance) return false;
 
+#if PC
         //公開ルームではスライド使用不可 (不特定多数への画像配信を禁止)
         if (AmongUsClient.Instance.IsGamePublic) NebulaGameManager.Instance?.LobbySlideManager.Abandon();
+#endif
 
         __instance.MinPlayers = GeneralConfigurations.CurrentGameMode.MinPlayers;
 
@@ -109,7 +111,11 @@ public class GameStartManagerUpdatePatch
 
                 __instance.GameStartTextParent.SetActive(true);
                 __instance.GameStartText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GameStarting, num2);
-                if (num != num2) PlayerControl.LocalPlayer.RpcSetStartCounter(num2);
+                if (num != num2)
+                {
+                    PlayerControl.LocalPlayer.RpcSetStartCounter(num2);
+                    if(num2 == 3) ConfigurationValues.ShareAll(); //設定を共有
+                }
                 if (num2 <= 0) __instance.FinallyBegin();
             }
             else
@@ -266,6 +272,8 @@ public class DelayPlayDropshipAmbiencePatch
 
         var logoHolder = UnityHelper.CreateObject("NebulaLogoHolder", HudManager.Instance.transform, new(-4.15f, 2.75f));
         logoHolder.AddComponent<SortingGroup>();
+        logoHolder.SetAsUIAspectContent(AspectPosition.EdgeAlignments.LeftTop, new(1.15f, 0.26f));
+
         var logo = UnityHelper.CreateObject<SpriteRenderer>("NebulaLogo", logoHolder.transform, Vector3.zero);
         logo.sprite = Citations.NebulaOnTheShip.LogoImage!.GetSprite();
         logo.color = new(1f, 1f, 1f, 0.75f);
@@ -504,7 +512,7 @@ public class GlobalCosMismatchShowerPatch
             __instance.HostInfoPanel.playerHolder.AddComponent<SortingGroup>();
             __instance.HostInfoPanel.playerHolder.GetComponentInChildren<NebulaCosmeticsLayer>().SetSortingProperty(true, 10000f, 1000);
             __instance.HostInfoPanel.playerHolder.transform.SetLocalZ(1f);
-            var mask = __instance.HostInfoPanel.playerHolder.GetComponentInChildren<SpriteMask>();
+            var mask = __instance.HostInfoPanel.playerHolder.GetComponentInChildren<SpriteMask>(true);
             mask.gameObject.AddComponent<SortingGroupOrderFixer>().Initialize(mask, 500);
         }).WrapToIl2Cpp());
         

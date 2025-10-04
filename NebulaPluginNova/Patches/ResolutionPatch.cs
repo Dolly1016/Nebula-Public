@@ -7,6 +7,7 @@ using Virial.Runtime;
 
 namespace Nebula.Patches;
 
+/*
 [NebulaPreprocess(PreprocessPhase.BuildNoSModuleContainer)]
 internal static class ResolutionSetUp
 {
@@ -52,3 +53,4 @@ internal static class UnrecommendedResolutionSettingPatch
         }
     }
 }
+*/

@@ -348,14 +348,15 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
 
             this.leftAliveTime = leftAliveTime;
 
-            var gauge = HudContent.InstantiateContent("SpectreGauge", true, true, false);
+            var gauge = HudContent.InstantiateContent("SpectreGauge", true, true, false, true);
             this.BindGameObject(gauge.gameObject);
+            var adjuster = gauge.gameObject.AddAdjuster();
 
             float friesScale = MaxSatietyOption > 5 ? 0.6f : 0.8f;
             float friesOffset = MaxSatietyOption > 5 ? 1f : 1.15f;
             float gaugeWidth = 0.9f + friesScale * MaxSatietyOption;
             float gaugeScale = 0.6f;
-            var center = UnityHelper.CreateObject("Adjuster", gauge.transform, new(-0.04f + gaugeWidth * gaugeScale * 0.5f, -0.2f, -0.1f));
+            var center = UnityHelper.CreateObject("Adjuster", adjuster.transform, new(-0.04f + gaugeWidth * gaugeScale * 0.5f, -0.2f, -0.1f));
             center.transform.localScale = new(gaugeScale, gaugeScale, 1f);
 
             var gaugeRenderer = UnityHelper.CreateObject<SpriteRenderer>("GaugeSprite", center.transform, new(0f, 0f, 0f));
@@ -376,8 +377,18 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
             foxRenderer.sprite = guageIconSprite.GetSprite(1);
 
             GameOperatorManager.Instance?.Subscribe<GameHudUpdateEvent>((ev) => {
-                gauge.gameObject.SetActive(!player.IsDead);
-                float foodLevel = leftAliveTime.Value / SatietyRateOption;
+                gauge.gameObject.SetActive(!player.IsDead && !AmongUsUtil.MapIsOpen && !ExileController.Instance);
+                if (MeetingHud.Instance)
+                {
+                    adjuster.localScale = new(0.8f, 0.8f, 1f);
+                    adjuster.localPosition = new(-0.35f, -0.25f);
+                }
+                else
+                {
+                    adjuster.localScale = Vector3.one;
+                    adjuster.localPosition = Vector3.zero;
+                }
+                    float foodLevel = leftAliveTime.Value / SatietyRateOption;
                 if (center) guageFries.Do(g => g.Update(foodLevel));
                 foxRenderer.sprite = guageIconSprite.GetSprite(foodLevel < (float)Spectre.RequiredSatietyForWinningOption ? 0 : 1);
             }, this);
@@ -467,7 +478,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
                 if (!MyPlayer.IsDead && NebulaGameManager.Instance!.CurrentTime > lastSuicideRequestTime + 0.2f)
                 {
                     lastSuicideRequestTime = NebulaGameManager.Instance!.CurrentTime;
-                    MyPlayer.Suicide(PlayerState.Starved, null, KillParameter.NormalKill);
+                    MyPlayer.Suicide(PlayerState.Starved, PlayerState.Starved, KillParameter.NormalKill);
                 }
             }
 
@@ -587,7 +598,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
                 if(ev is PlayerExiledEvent)
                     p.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide);
                 else
-                    p.Suicide(PlayerState.Suicide, null, KillParameter.RemoteKill);
+                    p.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill);
             });
         }
 

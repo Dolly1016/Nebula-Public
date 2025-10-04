@@ -129,7 +129,16 @@ public static class KillAnimationExtension
 
         if (blink)
         {
-            if (!source.Data.IsDead) yield return source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);
+            if (!source.Data.IsDead)
+            {
+                float timeout = 0.2f;
+                var anim = source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);
+                while(timeout > 0f && anim.MoveNext())
+                {
+                    timeout -= Time.deltaTime;
+                    yield return null;
+                }
+            }
             source.NetTransform.SnapTo(target.Position);
             sourcePhys.Animations.PlayIdleAnimation();
             KillAnimation.SetMovement(source, true);

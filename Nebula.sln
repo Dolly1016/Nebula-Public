@@ -11,6 +11,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NebulaAPI", "NebulaAPI\NebulaAPI.csproj", "{1FFF1FD1-FED0-430C-BAEB-13D64B28B6C4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NebulaBuilder", "NebulaBuilder\NebulaBuilder.csproj", "{DACDCF63-1B74-4F6F-8845-77A17FFDDFE8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB} = {B7A084CA-DBE4-4572-90D8-9FDC397B13EB}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NebulaLoader", "NebulaLoader\NebulaLoader.csproj", "{BA8043D5-0200-4BE6-9DFD-E4111603B381}"
 EndProject
@@ -21,6 +24,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NebulaAddonDevEnv", "NebulaAddonDevEnv\NebulaAddonDevEnv.csproj", "{1F1AA4EF-735A-4544-9141-9954B0E808DA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddonScriptLoader", "AddonScriptLoader\AddonScriptLoader.csproj", "{E7EDC5F4-097B-41FC-BCFD-888AAAEE5339}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NebulaAndroid", "NebulaAndroid\NebulaAndroid.csproj", "{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceRenamer", "ResourceRenamer\ResourceRenamer.csproj", "{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -146,6 +153,30 @@ Global
 		{E7EDC5F4-097B-41FC-BCFD-888AAAEE5339}.Release|x64.Build.0 = Release|Any CPU
 		{E7EDC5F4-097B-41FC-BCFD-888AAAEE5339}.Release|x86.ActiveCfg = Release|Any CPU
 		{E7EDC5F4-097B-41FC-BCFD-888AAAEE5339}.Release|x86.Build.0 = Release|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Debug|x64.Build.0 = Debug|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Debug|x86.Build.0 = Debug|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Release|x64.ActiveCfg = Release|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Release|x64.Build.0 = Release|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{B7A084CA-DBE4-4572-90D8-9FDC397B13EB}.Release|x86.Build.0 = Release|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Debug|x64.Build.0 = Debug|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Debug|x86.Build.0 = Debug|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|x64.ActiveCfg = Release|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|x64.Build.0 = Release|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|x86.ActiveCfg = Release|Any CPU
+		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

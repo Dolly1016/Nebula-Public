@@ -27,7 +27,7 @@ public class HudGrid : MonoBehaviour
         {
             var content = obj.AddComponent<HudContent>();
             content.SetPriority(priority);
-            content.ActiveFunc = () => obj.activeSelf && !(MapBehaviour.Instance && MapBehaviour.Instance.IsOpen);
+            content.ActiveFunc = () => obj.activeSelf && !AmongUsUtil.MapIsOpen;
             RegisterContentToRight(content);
 
             return content;
@@ -126,11 +126,15 @@ public class HudContent : MonoBehaviour
     public bool IsStaticContent = false;
     public Func<bool>? ActiveFunc = null;
     public bool IsActive => ActiveFunc?.Invoke() ?? gameObject.activeSelf;
+
+    private const float EdgeY = -(3.0f - 0.7f);
+    private static float EdgeX => 3.0f * (float)Screen.width / (float)Screen.height - 0.8f;
+
     public Vector3 ToLocalPos
     {
         get
         {
-            var pos = new Vector3((4.5f - CurrentPos.x) * (isLeftSide ? -1 : 1), -2.3f + CurrentPos.y, 0f);
+            var pos = new Vector3((EdgeX - CurrentPos.x) * (isLeftSide ? -1 : 1), EdgeY + CurrentPos.y, 0f);
 
             var arrangement = ClientOption.AllOptions[ClientOption.ClientOptionType.ButtonArrangement].Value;
             if (!MeetingHud.Instance && ((arrangement == 1 && isLeftSide) || arrangement == 2)) pos.y += 0.85f;

@@ -1,5 +1,4 @@
-﻿using NAudio.Dmo;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -181,8 +180,10 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
             ButtonEffect.SetKeyGuideOnSmallButton(helpButton.Button.gameObject, NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).TypicalKey);
         }, MyContainer);
 
+#if PC
         var formButton = new CustomUpperRightContent(102, 2, () => DevTeamContact.OpenContactWindow(HudManager.Instance.transform), () => LobbyBehaviour.Instance && !PlayerCustomizationMenu.Instance, () => DevTeamContact.IsShown);
         Register(formButton);
+#endif
 
         OnUpdate(null!);
     }

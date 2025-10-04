@@ -220,6 +220,12 @@ $Color
 "log.loadCostume" : "読み込みが完了しました。"
 "log.awaiting" : "応答を待っています... (Tag: %TAG%)"
 
+# Regions
+
+"regions.Modded NA (MNA)" : "北米 (Mod)"
+"regions.Modded EU (MEU)" : "欧州 (Mod)"
+"regions.Modded Asia (MAS)" : "アジア (Mod)"
+
 # Options
 
 "ui.options.nav.1.left" : "オプションを開く"
@@ -345,6 +351,7 @@ $Color
 "options.map.admin.polus.0" : "アドミン設定"
 "options.map.admin.airship.0" : "アドミン設定 (コックピット)"
 "options.map.admin.airship.1" : "アドミン設定 (アーカイブ)"
+"options.map.hideFarKiller" : "遠隔キルの犯人を秘匿"
 "options.map.group.spawning" : "スポーン設定"
 "options.map.group.utilities" : "移動ツール設定"
 "options.map.group.footstep" : "他人の足音設定"
@@ -434,8 +441,9 @@ $Color
 "options.voiceChat.canTalkInWanderingPhase" : "近くのプレイヤーとの通話"
 "options.voiceChat.wallsBlockAudio" : "壁による声の遮蔽"
 "options.voiceChat.killersHearDead" : "幽霊の語り掛け"
-"options.voiceChat.killersHearDead.onlyMyKiller" : "対自身のキラーのみ"
-"options.voiceChat.killersHearDead.onlyImpostors" : "対インポスターのみ"
+"options.voiceChat.killersHearDead.onlyMyKiller" : "自身のキラーのみ"
+"options.voiceChat.killersHearDead.onlyImpostors" : "インポスターのみ"
+"options.voiceChat.killersHearDead.allKillers" : "キラーのみ"
 "options.voiceChat.impostorsRadio" : "インポスターラジオ"
 "options.voiceChat.jackalRadio" : "ジャッカルラジオ"
 "options.voiceChat.loversRadio" : "ラバーズラジオ"
@@ -578,10 +586,10 @@ $Color
 "stats.climber.gust" : "フックショットの使用回数"
 "stats.climber.distance" : "フックショットによる移動距離"
 
-"role.collator.name" : "コレイタ―"
+"role.collator.name" : "コレイター"
 "role.collator.short" : "コレ"
 "role.collator.blurb" : "実験の時間"
-"options.role.collator.detail" : "コレイタ―はプレイヤーからサンプルを採取し、照合できます。<br>照合結果は推理に役立てられます。"
+"options.role.collator.detail" : "コレイターはプレイヤーからサンプルを採取し、照合できます。<br>照合結果は推理に役立てられます。"
 "options.role.collator.sampleCoolDown" : "採取クールダウン"
 "options.role.collator.selectiveCollating" : "選択式の照合"
 "options.role.collator.maxTrials" : "最大照合回数"
@@ -1245,7 +1253,7 @@ $Color
 
 "role.viper.name" : "ヴァイパー"
 "role.viper.short" : "ヴ"
-"role.viper.blurb" : "キルして死体を溶かす"
+"role.viper.blurb" : "毒牙が覗く口元"
 "options.role.viper.detail" : "ヴァイパーは死体を溶かす毒を使ってキルするインポスターです。"
 "options.role.viper.acidCooldown" : "キルクールダウン"
 "options.role.viper.dissolveDuration" : "死体溶解の所要時間"
@@ -2136,6 +2144,7 @@ $Color
 "help.command.console" : "コンソール"
 "help.command.saveResult" : "最後のゲーム結果を保存"
 "help.command.toggleSocial" : "ゲーム内アピール可否の切り替え"
+"help.command.hideHud" : "HUDの表示切り替え"
 
 # Voice Chat
 
@@ -2150,6 +2159,7 @@ $Color
 "voiceChat.info.loversRadio" : "ラバーズラジオ"
 "voiceChat.info.roomHostRadio" : "部屋主ラジオ"
 "voiceChat.settings.inputDevice" : "入力デバイス"
+"voiceChat.settings.inputVolume" : "入力音量"
 "voiceChat.settings.noiseGate" : "ノイズゲート設定"
 "voiceChat.settings.outputDevice" : "出力デバイス"
 "voiceChat.settings.outputVolume" : "出力音量"
@@ -2397,6 +2407,8 @@ $Color
 "achievement.ui.equipped" : "[装着中]"
 "achievement.ui.setTitle" : "クリックで称号を装着します。"
 "achievement.ui.unsetTitle" : "クリックで称号を外せます。"
+"achievement.ui.setTitle.button" : "装着"
+"achievement.ui.unsetTitle.button" : "外す"
 "achievement.ui.unselected" : "(称号未選択)"
 "achievement.ui.unselected.detail" : "クリックで称号を選択できます。"
 "achievement.ui.globalProgress" : "全プレイヤーの%RATE%%が達成"

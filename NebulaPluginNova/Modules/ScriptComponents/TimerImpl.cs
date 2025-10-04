@@ -1,5 +1,4 @@
 ﻿using AmongUs.GameOptions;
-using Rewired.Utils.Platforms.Windows;
 using Virial;
 using Virial.Components;
 using Virial.DI;

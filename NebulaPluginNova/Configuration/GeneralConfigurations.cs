@@ -58,18 +58,18 @@ public static class GeneralConfigurations
             NebulaAPI.Configurations.Configuration(()=>null, ()=>GUI.API.VerticalHolder(GUIAlignment.Center,
                 GUI.API.HorizontalMargin(5.5f),
                 GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "options.assignment.preview"),
-                HelpScreen.GetPreviewIconsWidget(out _, l => l >= 20 ? 0.26f : l >= 15 ? 0.32f : l >= 7 ? 0.38f : 0.44f),
+                HelpScreen.GetPreviewIconsWidget(out _, l => l >= 20 ? 0.26f : l >= 15 ? 0.32f : l >= 7 ? 0.38f : 0.44f, true),
                 GUI.API.HorizontalHolder(GUIAlignment.Right,
-                    GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.SmallArrowButton), "<<", _ =>
+                    GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.SmallArrowButtonMasked), "<<", _ =>
                     {
                         HelpScreen.ChangePreviewSimulation(HelpScreen.GetNextSimulatePlayerArgument(false));
                         NebulaAPI.Configurations.RequireUpdateSettingScreen();
                     }),
-                    new NoSGUIText(GUIAlignment.Right, GUI.API.GetAttribute(AttributeAsset.SmallWideButton),
+                    new NoSGUIText(GUIAlignment.Right, GUI.API.GetAttribute(AttributeAsset.SmallWideButtonMasked),
                     HelpScreen.PreviewSimulation == -1 ?
                     new TranslateTextComponent("help.overview.pattern.realCount") :
                     new RawTextComponent(Language.Translate("help.overview.pattern.custom").Replace("%NUM%", HelpScreen.PreviewSimulation.ToString()))),
-                    GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.SmallArrowButton), ">>", _ =>
+                    GUI.API.RawButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.SmallArrowButtonMasked), ">>", _ =>
                     {
                         HelpScreen.ChangePreviewSimulation(HelpScreen.GetNextSimulatePlayerArgument(true));
                         NebulaAPI.Configurations.RequireUpdateSettingScreen();
@@ -111,12 +111,14 @@ public static class GeneralConfigurations
     static internal BoolConfiguration MapFlipYOption = NebulaAPI.Configurations.Configuration("options.map.flipY", false);
     static internal BoolConfiguration CanHearOthersFootstepOption = NebulaAPI.Configurations.Configuration("options.map.canHearOthersFootstep", false);
     static internal FloatConfiguration OthersFootstepRangeOption = NebulaAPI.Configurations.Configuration("options.map.othersFootstepRange", (float[])[1f, 2.5f, 5f, 7.5f, 10f, 15f, 20f], 5f, FloatConfigurationDecorator.Ratio, () => CanHearOthersFootstepOption);
+    static internal BoolConfiguration HideFarKillerOption = NebulaAPI.Configurations.Configuration("options.map.hideFarKiller", false);
     static internal IConfigurationHolder MapOptions = NebulaAPI.Configurations.Holder("options.map", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
         new GroupConfiguration("options.map.group.spawning", [SpawnMethodOption, SpawnCandidatesOption, SpawnCandidateFilterOption], GroupConfigurationColor.Gray),
         new GroupConfiguration("options.map.group.utilities", [SilentVentOption, CanOpenMapWhileUsingUtilityOption, LadderCoolDownOption, ZiplineCoolDownOption], GroupConfigurationColor.Gray),
         new GroupConfiguration("options.map.group.footstep", [CanHearOthersFootstepOption, OthersFootstepRangeOption], GroupConfigurationColor.Gray),
         new GroupConfiguration("options.map.group.teleporter", [NumOfTeleportationPortalOption, NonCrewmateCanUseTeleporterImmediatelyOption],GroupConfigurationColor.Gray),
         new GroupConfiguration("options.map.group.flip", [MapFlipXOption, MapFlipYOption], GroupConfigurationColor.Gray),
+        HideFarKillerOption,
         MapEditorOption
         ]);
 
@@ -289,15 +291,15 @@ public static class GeneralConfigurations
 
     static public readonly BoolConfiguration UseVoiceChatOption = NebulaAPI.Configurations.Configuration("options.voiceChat.useVoiceChat", false);
     static public readonly BoolConfiguration CanTalkInWanderingPhaseOption = NebulaAPI.Configurations.Configuration("options.voiceChat.canTalkInWanderingPhase", true, () => UseVoiceChatOption);
-    static public readonly BoolConfiguration WallsBlockAudioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.wallsBlockAudio",true, () => CanTalkInWanderingPhaseOption);
-    static public readonly ValueConfiguration<int> KillersHearDeadOption = NebulaAPI.Configurations.Configuration("options.voiceChat.killersHearDead", ["options.switch.off", "options.voiceChat.killersHearDead.onlyMyKiller", "options.voiceChat.killersHearDead.onlyImpostors"], 0, () => UseVoiceChatOption);
+    //static public readonly BoolConfiguration WallsBlockAudioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.wallsBlockAudio",true, () => CanTalkInWanderingPhaseOption);
+    static public readonly ValueConfiguration<int> KillersHearDeadOption = NebulaAPI.Configurations.Configuration("options.voiceChat.killersHearDead", ["options.switch.off", "options.voiceChat.killersHearDead.onlyMyKiller", "options.voiceChat.killersHearDead.onlyImpostors", "options.voiceChat.killersHearDead.allKillers"], 0, () => UseVoiceChatOption);
     static public readonly BoolConfiguration ImpostorsRadioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.impostorsRadio", false, () => UseVoiceChatOption);
     static public readonly BoolConfiguration JackalRadioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.jackalRadio", false, () => UseVoiceChatOption);
     static public readonly BoolConfiguration LoversRadioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.loversRadio", false, () => UseVoiceChatOption);
     static public readonly BoolConfiguration AffectedByCommsSabOption = NebulaAPI.Configurations.Configuration("options.voiceChat.affectedByCommsSab", false, () => CanTalkInWanderingPhaseOption);
     static public readonly BoolConfiguration IsolateGhostsStrictlyOption = NebulaAPI.Configurations.Configuration("options.voiceChat.isolateGhostsStrictly", false, () => UseVoiceChatOption);
-    static internal readonly IConfigurationHolder VoiceChatOptions = NebulaAPI.Configurations.Holder("options.voiceChat", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        UseVoiceChatOption, CanTalkInWanderingPhaseOption, WallsBlockAudioOption, KillersHearDeadOption, ImpostorsRadioOption, JackalRadioOption, LoversRadioOption, AffectedByCommsSabOption, IsolateGhostsStrictlyOption
+    static internal readonly IConfigurationHolder VoiceChatOptions = NebulaAPI.Configurations.Holder("options.voiceChat", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard], () => !AmongUsUtil.IsLocalServer()).AppendConfigurations([
+        UseVoiceChatOption, CanTalkInWanderingPhaseOption, /*WallsBlockAudioOption,*/ KillersHearDeadOption, /*ImpostorsRadioOption, JackalRadioOption, LoversRadioOption,*/ AffectedByCommsSabOption, IsolateGhostsStrictlyOption
         ]);
 
     static public readonly BoolConfiguration LowLatencyPlayerSyncOption = NebulaAPI.Configurations.Configuration("options.quality.lowLatencyPlayerSync", true);

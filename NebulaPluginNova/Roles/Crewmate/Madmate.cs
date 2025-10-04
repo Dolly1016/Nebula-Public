@@ -148,7 +148,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
                     "madmate.suicide", suicideButtonSprite);
                 suicideButton.OnClick = (button) =>
                 {
-                    MyPlayer.Suicide(PlayerState.Suicide, null, KillParameter.RemoteKill);
+                    MyPlayer.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill);
                 };
                 suicideButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
             }

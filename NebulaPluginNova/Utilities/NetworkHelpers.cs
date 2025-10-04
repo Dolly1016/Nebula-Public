@@ -5,27 +5,28 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.UI;
+using Virial.Compat;
 
 namespace Nebula.Utilities;
 
 internal static class RestAPIHelpers
 {
-    async public static Task<T?> GetRequestAsync<T>(string url, IEnumerable<KeyValuePair<string, string>> parameters) where T : class
+    public static IEnumerator CoGetRequest<T>(string url, IEnumerable<KeyValuePair<string, string>> parameters, Wrapping<T> result) where T : class
     {
         if (NebulaPlugin.AllowHttpCommunication)
         {
-            var content = new FormUrlEncodedContent(parameters);
-            var request = new HttpRequestMessage(HttpMethod.Get, url){ Content = content };
-            var response = await NebulaPlugin.HttpClient.SendAsync(request).ConfigureAwait(false);
-            var rawResponse = await response.Content.ReadAsStringAsync();
-            return JsonStructure.Deserialize<T>(rawResponse);
+            yield return NebulaWebRequest.CoGetWithParameters(url, true, parameters, json =>
+            {
+                result.Value = JsonStructure.Deserialize<T>(json);
+            });
         }
         else
         {
-            return null;
+            yield break;
         }
     }
 
+#if PC
     async public static Task<HttpStatusCode> PostRequestAsync(string url, IEnumerable<KeyValuePair<string, string>> parameters)
     {
         if (NebulaPlugin.AllowHttpCommunication)
@@ -55,4 +56,5 @@ internal static class RestAPIHelpers
             return;
         }
     }
+#endif
 }

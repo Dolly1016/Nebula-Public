@@ -28,9 +28,12 @@ public class NebulaLoader : BasePlugin
 {
     private long GetVanillaSize()
     {
-        if (!System.IO.File.Exists("GameAssembly.dll")) return -1;
+        var path = BepInEx.Paths.GameRootPath + Path.DirectorySeparatorChar + "GameAssembly.dll";
+        Log.LogInfo("GameAssembly Path: " + path);
 
-        FileInfo file = new FileInfo("GameAssembly.dll");
+        if (!System.IO.File.Exists(path)) return -1;
+
+        FileInfo file = new FileInfo(path);
         return file.Length;
     }
 
@@ -146,7 +149,7 @@ public class NebulaLoader : BasePlugin
 
         bool autoUpdate = AutoUpdate.Value;
         bool autoUpdateIfVersionMismatch = AutoUpdateIfVersionMismatch.Value;
-        string dllDirectoryPath = "BepInEx" + Path.DirectorySeparatorChar + "nebula";
+        string dllDirectoryPath = BepInEx.Paths.BepInExRootPath + Path.DirectorySeparatorChar + "nebula";
         string dllFilePath = dllDirectoryPath + Path.DirectorySeparatorChar + "Nebula.dll";
 
         if (!SkipCheckingConsistency.Value)

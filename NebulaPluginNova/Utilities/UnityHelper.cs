@@ -45,6 +45,11 @@ public static class UnityHelper
         renderer.tileMode = SpriteTileMode.Continuous;
     }
 
+    public static Transform AddAdjuster(this GameObject gameObject)
+    {
+        return UnityHelper.CreateObject("Adjuster", gameObject.transform, Vector3.zero).transform;
+    }
+
     public static void SetBothOrder(this Renderer renderer, int order)
     {
         renderer.sortingOrder = order;

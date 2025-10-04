@@ -263,7 +263,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                     PostBuilder = text => { nameCandText = text; text.text = ""; }
                 }
                 ));
-            NebulaManager.Instance.MouseOverPopup.Parameters.RelatedPredicate = (() => MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && Line);
+            NebulaManager.Instance.MouseOverPopup.Parameters.RelatedPredicate = (() => AmongUsUtil.MapIsOpen && Line);
         }
     }
 
@@ -372,7 +372,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                         //チュートリアル
                         Tutorial.ShowTutorial(
                                     new TutorialBuilder().AsSimpleTitledOnceTextWidget("meetingTool.advance")
-                                    .ShowWhile(() => MeetingHud.Instance && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen)
+                                    .ShowWhile(() => MeetingHud.Instance && AmongUsUtil.MapIsOpen)
                                     );
                     })
                     {
@@ -397,7 +397,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                     }
                     ) : null
                 ));
-            NebulaManager.Instance.MouseOverPopup.Parameters.RelatedPredicate = (() => MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && Renderer);
+            NebulaManager.Instance.MouseOverPopup.Parameters.RelatedPredicate = (() => AmongUsUtil.MapIsOpen && Renderer);
         }
 
         public void ResetRelation()
@@ -458,7 +458,11 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
     }
     void OnMapOpen(AbstractMapOpenEvent ev)
     {
+#if PC
         if(MeetingHud.Instance && ev is MapOpenNormalEvent && !GeneralConfigurations.ProhibitMeetingTool)
+#else
+        if(false)
+#endif
         {
             if (!meetingLayer)
             {
@@ -509,7 +513,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                 //チュートリアル
                 Tutorial.ShowTutorial(
                             new TutorialBuilder().AsSimpleTitledOnceTextWidget("meetingTool")
-                            .ShowWhile(() => MeetingHud.Instance && MapBehaviour.Instance && MapBehaviour.Instance.IsOpen && lines.Count == 0 && icons.Count == 0)
+                            .ShowWhile(() => MeetingHud.Instance && AmongUsUtil.MapIsOpen && lines.Count == 0 && icons.Count == 0)
                             );
             }
         }
@@ -592,7 +596,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                 if (clickBackLayer && Input.GetMouseButtonUp(0))
                 {
                     clickBackLayer = false;
-                    if (currentLineDrawer == null && cursorIsOnMeetingLayer && !isSpecialSpawning && MapBehaviour.Instance.IsOpen)
+                    if (currentLineDrawer == null && cursorIsOnMeetingLayer && !isSpecialSpawning && AmongUsUtil.MapIsOpen)
                     {
                         var icon = GenerateIcon(downPos, null);
                         icon.OpenEditorOverlay();

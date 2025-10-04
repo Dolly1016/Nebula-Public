@@ -29,10 +29,11 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
     private static Vector2 RendererLocalPos = new(0.36f,-0.47f);
     private SpriteRenderer IconRenderer, GaugeRenderer, GaugeBaseRenderer;
     private GameObject Scaler;
-
+    private Transform Adjuster;
+    private bool isActive = true;
     public void SetActive(bool active)
     {
-        GaugeObject.SetActive(active);
+        this.isActive = active;
     }
 
     GameObject GaugeObject;
@@ -45,14 +46,15 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
         this.isInProgress = isInProgress;
         this.Max = max;
 
-        var gauge = HudContent.InstantiateContent("Gauge", true, false, false);
+        var gauge = HudContent.InstantiateContent("Gauge", true, false, false, true);
+        Adjuster = gauge.gameObject.AddAdjuster();
         GaugeObject = gauge.gameObject;
         this.BindGameObject(GaugeObject);
 
-        Scaler = UnityHelper.CreateObject("Scaler", gauge.transform, RendererLocalPos);
+        Scaler = UnityHelper.CreateObject("Scaler", Adjuster, RendererLocalPos);
         Scaler.transform.localScale = new Vector3(0.85f, 0.85f, 1f);
 
-        var background = UnityHelper.CreateObject<SpriteRenderer>("Background", gauge.transform, new(0f, -0.37f, 0.01f));
+        var background = UnityHelper.CreateObject<SpriteRenderer>("Background", Adjuster, new(0f, -0.37f, 0.01f));
         background.SetAsExpandableRenderer();
         background.sprite = GuageBackgroundSprite.GetSprite();
         background.size = new(0.8f,0.2f);
@@ -77,7 +79,7 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
         GaugeRenderer.material = new(NebulaAsset.HSVShader);
         GaugeRenderer.material.SetFloat("_Hue", 360 - hue);
 
-        IconRenderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", gauge.transform, new(-0.12f, -0.46f, -0.03f));
+        IconRenderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", Adjuster, new(-0.12f, -0.46f, -0.03f));
         IconRenderer.sprite = lowIconSprite.GetSprite();
 
         var scaleRenderer = UnityHelper.CreateObject<SpriteRenderer>("Scale", Scaler.transform, new(0f, GaugeMargin + (threshold / max) * GaugeValueActualHeight, -0.025f));
@@ -86,7 +88,19 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
 
     void OnUpdate(GameUpdateEvent ev)
     {
-        float currentVal = Math.Clamp(Value, 0f, Max);
+        GaugeObject.SetActive(isActive && !AmongUsUtil.MapIsOpen && !ExileController.Instance);
+        if (MeetingHud.Instance)
+        {
+            Adjuster.localScale = new(0.8f, 0.8f, 1f);
+            Adjuster.localPosition = new(-0.3f, -0.2f);
+        }
+        else
+        {
+            Adjuster.localScale = Vector3.one;
+            Adjuster.localPosition = Vector3.zero;
+        }
+
+            float currentVal = Math.Clamp(Value, 0f, Max);
         bool lastLow = lastValue < Threshold;
         bool low = currentVal < Threshold;
 

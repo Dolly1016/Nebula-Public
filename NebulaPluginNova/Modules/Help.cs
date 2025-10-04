@@ -1,5 +1,4 @@
 ﻿using Hazel.Crypto;
-using NAudio.CoreAudioApi;
 using Nebula.Behavior;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
@@ -8,9 +7,6 @@ using Nebula.Roles;
 using Nebula.Roles.Assignment;
 using Nebula.Roles.Crewmate;
 using Nebula.Roles.Neutral;
-using Nebula.Utilities;
-using Sentry.Unity.NativeUtils;
-using Steamworks;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using UnityEngine.Rendering;
@@ -86,7 +82,9 @@ public static class HelpScreen
         MyInfo = 0x01,
         Roles = 0x02,
         Options = 0x04,
+#if PC
         Slides = 0x08,
+#endif
         Achievements = 0x10,
         Overview = 0x20,
         Stamps = 0x40,
@@ -103,7 +101,9 @@ public static class HelpScreen
         new(HelpTab.Roles, "help.tabs.roles"),
         new(HelpTab.Overview, "help.tabs.overview"),
         new(HelpTab.Options, "help.tabs.options"),
+#if PC
         new(HelpTab.Slides, "help.tabs.slides"),
+#endif
         new(HelpTab.Achievements, "help.tabs.achievements"),
         new(HelpTab.Stamps, "help.tabs.stamps"),
     ];
@@ -154,8 +154,10 @@ public static class HelpScreen
         HelpTab validTabs = HelpTab.Roles | HelpTab.Overview | HelpTab.Options | HelpTab.Achievements | HelpTab.Stamps;
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) validTabs |= HelpTab.MyInfo;
-        
+
+#if PC
         if (AmongUsClient.Instance.AmHost && (NebulaGameManager.Instance?.LobbySlideManager.IsValid ?? false) && LobbySlideManager.AllTemplates.Count > 0) validTabs |= HelpTab.Slides;
+#endif
 
         //開こうとしているタブが存在しない場合は、ロール一覧を開く
         if ((tab & validTabs) == (HelpTab)0) tab = PlayerControl.AllPlayerControls.Count > 5 ? HelpTab.Overview : HelpTab.Roles;
@@ -199,9 +201,11 @@ public static class HelpScreen
             case HelpTab.Options:
                 widget.Append(ShowOptionsScreen());
                 break;
+#if PC
             case HelpTab.Slides:
                 widget.Append(ShowSlidesScreen());
                 break;
+#endif
             case HelpTab.Achievements:
                 widget.Append(ShowAchievementsScreen());
                 break;
@@ -319,6 +323,7 @@ public static class HelpScreen
     }
 
 
+#if PC
     private static TextAttributeOld SlideTitleAttr = new(TextAttributeOld.NormalAttr) { Alignment = TMPro.TextAlignmentOptions.Left, Size = new(3.6f, 0.28f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
     private static TextAttributeOld SlideButtonAttr = new(TextAttributeOld.BoldAttr) { Size = new(0.8f, 0.25f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
     private static IMetaWidgetOld ShowSlidesScreen()
@@ -340,6 +345,7 @@ public static class HelpScreen
 
         return new MetaWidgetOld.ScrollView(new(7.4f, HelpHeight), inner) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
     }
+#endif
 
     private static readonly TextAttributeOld OptionsAttr = new(TextAttributeOld.BoldAttr) { FontSize = 1.6f, FontMaxSize = 1.6f, FontMinSize = 1.6f, Size = new(4f, 10f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial, Alignment = TMPro.TextAlignmentOptions.TopLeft };
     private static Variable<ScrollView.InnerScreen>? optionsInner = new();
@@ -455,7 +461,7 @@ public static class HelpScreen
         return widget;
     }
 
-    internal static Virial.Media.GUIWidget GetPreviewIconsWidget(out AssignmentPreview.AssignmentFlag flagSum, Func<int, float>? scaler = null)
+    internal static Virial.Media.GUIWidget GetPreviewIconsWidget(out AssignmentPreview.AssignmentFlag flagSum, Func<int, float>? scaler = null, bool masked = false)
     {
         scaler ??= l => l >= 18 ? 0.33f : 0.48f;
         int players = lastArgument.PreviewSimulation == -1 ? PlayerControl.AllPlayerControls.Count : lastArgument.PreviewSimulation;
@@ -483,7 +489,7 @@ public static class HelpScreen
                 if ((f & AssignmentFlag.VanillaCrewmate) != 0) text += "<br>" + Language.Translate("help.rolePreview.vanillaCrewmate").Color(Palette.CrewmateBlue);
 
                 return GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), text);
-            })
+            }){ IsMasked = masked }
             ), 0.48f);
     }
     private static IMetaWidgetOld ShowAchievementsScreen()

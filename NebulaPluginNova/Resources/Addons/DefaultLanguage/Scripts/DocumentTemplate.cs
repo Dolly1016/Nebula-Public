@@ -92,11 +92,13 @@ static public class RoleDocumentHelper
                 NebulaAPI.GUI.VerticalMargin(-0.12f),
                 new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { 
                     OverlayWidget = a.GetOverlayWidget(true, false, true, false, a.IsCleared),
-                    OnClickText = a.IsCleared ? (() =>
+#if PC
+                    OnClickText = a.IsCleared ? ((Action)(() =>
                     {
                         NebulaAchievementManager.SetOrToggleTitle(a);
                         VanillaAsset.PlaySelectSE();
-                    }, true) : null
+                    }), true) : null
+#endif
                 }
                 ));
 

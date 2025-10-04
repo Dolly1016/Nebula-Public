@@ -95,8 +95,14 @@ public class NoSGUIText : AbstractGUIWidget
 
             if (OverlayWidget != null)
             {
+#if PC
                 button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, OverlayWidget()));
                 button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+#elif ANDROID
+                if(OnClickText == null){
+                    button.OnClick.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, OverlayWidget()));    
+                }
+#endif
             }
             if (OnClickText != null)
             {

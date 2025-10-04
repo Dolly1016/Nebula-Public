@@ -933,6 +933,7 @@ class NebulaRPCInGameHandlerPatch
             throw new Exception("RPC Error Occurred. (Not found: " + id + ")");
         }
     }
+     
 
     static void Postfix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
     {

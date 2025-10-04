@@ -40,9 +40,12 @@ using BepInEx.Configuration;
 using Virial.Utilities;
 using System.Runtime.Loader;
 using AmongUs.Data.Player;
+using Interstellar;
+using System.Runtime.CompilerServices;
 
+#if PC
 [assembly: System.Reflection.AssemblyFileVersionAttribute(Nebula.NebulaPlugin.PluginEpochStr + "."  + Nebula.NebulaPlugin.PluginBuildNumStr)]
-
+#endif
 namespace Nebula;
 
 public class NebulaPlugin
@@ -50,27 +53,34 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.25.4.2";
+    public const string PluginVersion = "2.25.6.0";
 
-    //public const string VisualVersion = "v2.25.4.2";
-    public const string VisualVersion = "Snapshot 25.09.13b";
+    //public const string VisualVersion = "v2.25.6";
+    public const string VisualVersion = "Snapshot 25.10.04a";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1454";
+    public const string PluginBuildNumStr = "1465";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
     public static AssemblyLoadContext NoSAssemblyContext = new AssemblyLoadContext("NoSAssemblyContext");
 
     private static Dictionary<string, ConfigEntryBase> loaderConfigurations = [];
+
     internal static ConfigEntry<T>? GetLoaderConfig<T>(string name)
     {
+#if PC
         if (loaderConfigurations.TryGetValue(name, out var entry)) return entry as ConfigEntry<T>;
         ConfigEntryBase? entryBase = typeof(NebulaLoader.NebulaLoader).GetProperty(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)?.GetValue(null) as ConfigEntryBase;
         if (entryBase != null) loaderConfigurations[name] = entryBase;
         return entryBase as ConfigEntry<T>;
+#else
+        return null;
+#endif
     }
+
+#if PC
     internal static bool AllowHttpCommunication => NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.AllowHttpCommunication))?.Value ?? true;
 
     static public HttpClient HttpClient
@@ -86,9 +96,11 @@ public class NebulaPlugin
         }
     }
     static private HttpClient? httpClient = null;
+#else
+    internal static bool AllowHttpCommunication => true;
+#endif
 
-    
-    public static new NebulaLog Log { get; private set; } = new();
+    public static new NebulaLog Log { get; private set; }
 
 
     public static string GetNebulaVersionString()
@@ -103,25 +115,46 @@ public class NebulaPlugin
     public static NebulaPlugin MyPlugin { get; private set; } = null!;
     public static BasePlugin LoaderPlugin = null!;
 
+    static public void LoadForAndroid()
+    {
+        LoadInternal(true);
+    }
+
     static public void Load()
     {
+        LoadInternal(false);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    static private void LoadInterstellar()
+    {
+        InterstellarLoader.Load();
+    }
+
+    static internal void LoadInternal(bool android)
+    {
+        Log = new(android);
+
         void LoadLibrary(string path)
         {
             using var stream = StreamHelper.OpenFromResource(path);
-            if(stream != null) NebulaPlugin.NoSAssemblyContext.LoadFromStream(stream);
+            if (stream != null)
+            {
+                if (android)
+                {
+                    var loaded = Assembly.Load(stream.ReadBytes());
+                }
+                else
+                    NebulaPlugin.NoSAssemblyContext.LoadFromStream(stream);
+            }
         }
-        LoadLibrary("Nebula.Resources.API.NAudio.Core.dll");
-        LoadLibrary("Nebula.Resources.API.NAudio.Wasapi.dll");
-        LoadLibrary("Nebula.Resources.API.NAudio.WinMM.dll");
-        LoadLibrary("Nebula.Resources.API.OpusDotNet.dll");
-        LoadLibrary("Nebula.Resources.API.NebulaAPI.dll");
-        /*
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Core.dll")!.ReadBytes());
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.Wasapi.dll")!.ReadBytes());
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NAudio.WinMM.dll")!.ReadBytes());
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.OpusDotNet.dll")!.ReadBytes());
-        Assembly.Load(StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!.ReadBytes());
-        */
+
+        if (!android)
+        {
+            LoadLibrary("Nebula.Resources.API.NebulaAPI.dll");
+        }
+        LoadLibrary("Nebula.Resources.Interstellar.dll");
+        LoadInterstellar();
 
         Harmony.PatchAll();
 
@@ -145,6 +178,7 @@ public class NebulaPlugin
                 residentObj.MarkDontUnload();
             }
         });
+
         SetUpNebulaImpl();
     }
 

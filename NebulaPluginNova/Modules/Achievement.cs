@@ -3,8 +3,9 @@ using BepInEx.Unity.IL2CPP.Utils;
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
-using Nebula.Roles;
+#if PC
 using Steamworks;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using TMPro;
@@ -331,10 +332,21 @@ public interface INebulaAchievement
         if (showTitleInfo && IsCleared)
         {
             list.Add(new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.2f)));
+#if PC
             list.Add(new NoSGUIText(GUIAlignment.Left, DetailContentAttribute, new LazyTextComponent(() =>
             (NebulaAchievementManager.AmEquipping(this)) ?
             (Language.Translate("achievement.ui.equipped").Color(Color.green).Bold() + "<br>" + Language.Translate("achievement.ui.unsetTitle")) :
             Language.Translate("achievement.ui.setTitle"))));
+#elif ANDROID
+            list.Add(GUI.API.Button(GUIAlignment.Left, AttributeAsset.SmallWideButton, 
+                new LazyTextComponent(() => Language.Translate(NebulaAchievementManager.AmEquipping(this) ? "achievement.ui.unsetTitle.button" : "achievement.ui.setTitle.button")),
+                _ =>
+                {
+                    NebulaAchievementManager.SetOrToggleTitle(this);
+                    NebulaManager.Instance.HideHelpWidget();
+                }
+                ));
+#endif
         }
         return new VerticalWidgetsHolder(GUIAlignment.Left, list) { BackImage = BackImage, GrayoutedBackImage = !(IsCleared || !hiddenNotClearedAchievement) };
     }
@@ -430,6 +442,7 @@ public interface INebulaAchievement
             button.gameObject.layer = LayerExpansion.GetUILayer();
             button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, GetOverlayWidget(false, true, IsCleared, true, true, true, true)));
             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+#if PC
             if (IsCleared)
             {
                 button.OnClick.AddListener(() =>
@@ -439,6 +452,7 @@ public interface INebulaAchievement
                     button.OnMouseOver.Invoke();
                 });
             }
+#endif
             var collider = button.gameObject.AddComponent<BoxCollider2D>();
             collider.isTrigger = true;
             collider.size = size.ToUnityVector();
@@ -520,7 +534,12 @@ public class InnerslothAchievement : INebulaAchievement
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
+#if PC
     bool IsClearedSteam => SteamUserStats.GetAchievement(Id.Split('.', 2)[1], out var cleared) && cleared;
+#else
+    bool IsClearedSteam => false;
+#endif
+
     bool INebulaAchievement.IsCleared
     {
         get
@@ -821,7 +840,12 @@ static public class NebulaAchievementManager
     static public void SetOrToggleTitle(INebulaAchievement? achievement)
     {
         if (achievement?.IsCleared ?? false)
-            myTitleEntry.Value = achievement.Id;
+        {
+            if(myTitleEntry.Value != achievement.Id)
+                myTitleEntry.Value = achievement.Id;
+            else
+                myTitleEntry.Value = "-";
+        }
         else
             myTitleEntry.Value = "-";
 
@@ -830,7 +854,10 @@ static public class NebulaAchievementManager
 
     static internal void SetCustomTitle(CustomAchievement achievement)
     {
-        myTitleEntry.Value = achievement.Id;
+        if(myTitleEntry.Value != achievement.Id)
+            myTitleEntry.Value = achievement.Id;
+        else
+            myTitleEntry.Value = "-";
         if (PlayerControl.LocalPlayer && !ShipStatus.Instance) Certification.RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, MyTitleData));
     }
 
@@ -1216,11 +1243,13 @@ static public class NebulaAchievementManager
             var button = billboard.SetUpButton();
             button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, achievement.GetOverlayWidget(true, false, true, false, true, true, true)));
             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+#if PC
             button.OnClick.AddListener(() => {
                 NebulaAchievementManager.SetOrToggleTitle(achievement);
                 button.OnMouseOut.Invoke();
                 button.OnMouseOver.Invoke();
             });
+#endif
 
             white.material.shader = NebulaAsset.WhiteShader;
             icon.sprite = trophySprite.GetSprite(achievement.Trophy);
@@ -1253,7 +1282,7 @@ static public class NebulaAchievementManager
                 Shake(billboard.animator.transform, 0.2f, 0.02f),
                 Shake(billboard.animator.transform, 0.3f, 0.03f),
                 Shake(billboard.animator.transform, 0.3f, 0.04f)
-                ));
+                ).WrapToIl2Cpp());
 
             float t;
             
@@ -1358,29 +1387,30 @@ static public class NebulaAchievementManager
             var currentHash = text.ComputeConstantLongHash();
             if (currentHash != onlineEntry.Value)
             {
-                _ = RestAPIHelpers.PostRequestAsync("http://168.138.44.249:22020/titles/push/", [new("titles", text), new("friendCode", "\"" + EOSManager.Instance.FriendCode + "\"")], code =>
+                NebulaWebRequest.CoPost("https://www.nebula-on-the-ship.com:22020/titles/push/", "{" + $"\"titles\":{text},\"friendCode\":\"{EOSManager.Instance.FriendCode}\"" + "}", true, _ =>
                 {
-                    if (code == System.Net.HttpStatusCode.OK) NebulaManager.Instance.ScheduleDelayAction(() => onlineEntry.Value = currentHash);
-                });
+                    onlineEntry.Value = currentHash;
+                }).StartOnProcess();
             }
-        }));
+        }).WrapToIl2Cpp());
     }
 
     static public bool GotOnlineProgress { get; private set; } = false;
     static private void GetOnlineGlobalProgress()
     {
-        var task = RestAPIHelpers.GetRequestAsync<Dictionary<string, float>>("http://168.138.44.249:22020/titles/get/", []);
-        ModSingleton<ResidentBehaviour>.Instance.StartCoroutine(ManagedEffects.Sequence(task.WaitAsCoroutine(), ManagedEffects.Action(() =>
+        Virial.Compat.Wrapping<Dictionary<string, float>> result = new(null);
+        var enumerator = RestAPIHelpers.CoGetRequest("https://www.nebula-on-the-ship.com:22020/titles/get/", [],  result);
+        ModSingleton<ResidentBehaviour>.Instance.StartCoroutine(ManagedEffects.Sequence(enumerator, ManagedEffects.Action(() =>
         {
-            if ((task.Result?.Count ?? 0) > 0)
+            if ((result.Value?.Count ?? 0) > 0)
             {
-                foreach (var entry in task.Result!)
+                foreach (var entry in result.Value!)
                 {
                     if (NebulaAchievementManager.GetAchievement(entry.Key, out var achievement)) achievement.GlobalProgress = entry.Value;
                 }
                 GotOnlineProgress = true;
             }
-        })));
+        })).WrapToIl2Cpp());
     }
 }
 

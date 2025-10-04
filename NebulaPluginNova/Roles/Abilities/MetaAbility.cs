@@ -1,5 +1,4 @@
 ﻿using Cpp2IL.Core.Extensions;
-using NAudio.CoreAudioApi;
 using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles.Crewmate;

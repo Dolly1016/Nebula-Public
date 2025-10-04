@@ -8,6 +8,7 @@ public class ScriptBehaviour : MonoBehaviour
 
     public event Action? UpdateHandler;
     public event Action? ActiveHandler;
+    public event Action? DestroyHandler;
     public void Update()
     {
         UpdateHandler?.Invoke();
@@ -17,4 +18,9 @@ public class ScriptBehaviour : MonoBehaviour
     {
         ActiveHandler?.Invoke();
     }
+    public void OnDestroy()
+    {
+        DestroyHandler?.Invoke();
+    }
+
 }

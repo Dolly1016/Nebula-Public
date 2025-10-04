@@ -1,13 +1,14 @@
-﻿using Il2CppInterop.Runtime.Injection;
+﻿using Discord;
+using Il2CppInterop.Runtime.Injection;
 using LibCpp2IL.Wasm;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.MetaWidget;
 using Nebula.Utilities;
-using NebulaLoader;
 using Sentry.Unity.NativeUtils;
 using System.Text;
 using TMPro;
+using UnityEngine.Networking;
 using Virial.Media;
 using Virial.Runtime;
 using Virial.Text;
@@ -31,19 +32,10 @@ public class DeveloperMarketplaceItem
     public string Discord;
     public string Key = GetRandomizedString(64);
 
-    public async Task<bool> TryOnlineCheck()
+    public IEnumerator TryOnlineCheck(Action onSucceeded, Action onFailed)
     {
         LocalMarketplaceItem item = new() { Url = Url };
-        if (IsAddon)
-        {
-            var response = await NebulaPlugin.HttpClient.GetAsync(item.ToAddonUrl);
-            return response.StatusCode == System.Net.HttpStatusCode.OK;
-        }
-        else
-        {
-            var response = await NebulaPlugin.HttpClient.GetAsync(item.ToCostumeUrl + "/Contents.json");
-            return response.StatusCode == System.Net.HttpStatusCode.OK;
-        }
+        yield return NebulaWebRequest.CoGet(IsAddon ? item.ToAddonUrl : item.ToCostumeUrl + "/Contents.json", true, _ => onSucceeded.Invoke(), onFailed);
     }
 }
 
@@ -334,6 +326,7 @@ public class Marketplace : MonoBehaviour
             GUI.API.HorizontalHolder(GUIAlignment.Center,
                 GUI.API.VerticalHolder(GUIAlignment.Top, GenerateCategoryWidget(false), GenerateCategoryWidget(true)).AsButtonGroup().Enmask(),
                 GUI.API.VerticalHolder(GUIAlignment.Left,
+#if PC
                     GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.TopLeft,
                         textField,
                         new GUIButton(Virial.Media.GUIAlignment.Center, Virial.Text.AttributeAsset.OptionsButton, TextSearch)
@@ -366,6 +359,7 @@ public class Marketplace : MonoBehaviour
                             }
                         }
                     ).Enmask(),
+#endif
                     viewer
                 )));
 
@@ -440,9 +434,11 @@ public class Marketplace : MonoBehaviour
     {
         (string key, Action action, bool defaultSelection, bool cannotSelect)[] buttons = [
             ("marketplace", () => ShowMarketplaceScreen(), true, false), 
-            ("inventory", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.OwningAddons : MarketplaceData.Data?.OwningCostumes) ?? [], item =>OpenDetailWindow(isAddonOnItemsScreen, item.EntryId, transform, () => { if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen(); }))); }, false, false), 
+            ("inventory", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.OwningAddons : MarketplaceData.Data?.OwningCostumes) ?? [], item =>OpenDetailWindow(isAddonOnItemsScreen, item.EntryId, transform, () => { if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen(); }))); }, false, false),
+#if PC
             ("contents", () => { ShowMyItemScreen(); SetActionOnItemsScreen((isAddon => (isAddon ? MarketplaceData.Data?.DevAddons : MarketplaceData.Data?.DevCostumes) ?? [], item => EditContent(isAddonOnItemsScreen, (item as DevMarketplaceItem)!))); }, false, false),
-            ("publish", () => { ShowPublishWindow(); }, false, true)
+            ("publish", () => { ShowPublishWindow(); }, false, true),
+#endif
             ];
         
         //ロビー内では公開・管理機能はナシ。
@@ -533,17 +529,15 @@ public class Marketplace : MonoBehaviour
 
             isChecking = true;
 
-            var task = item.TryOnlineCheck();
-            yield return task.WaitAsCoroutine();
-            if (task.Result)
+            yield return item.TryOnlineCheck(() =>
             {
                 callback.Invoke(item);
                 window.CloseScreen();
-            }
-            else
+            }, () =>
             {
                 repositoryField.Artifact.Do(t => { t.SetText(""); t.SetHint(Language.Translate("marketplace.ui.publish.invalidRepos" + (isAddon ? ".addons" : ".cosmetics")).Color(new UnityEngine.Color(0.6f, 0f, 0f))); });
-            }
+            });
+
             isChecking = false;
         }
 
@@ -622,14 +616,14 @@ internal static class OnlineMarketplace
     {
         if (NebulaPlugin.AllowHttpCommunication)
         {
-            var json = contents.Prepend(("request", method)).Select(tuple => (tuple.Item1, Uri.EscapeDataString(tuple.Item2))).Join(tuple => $"\"{tuple.Item1}\" : \"{tuple.Item2}\"", ",");
-            var content = new StringContent("{" + json + "}", Encoding.UTF8, @"application/json");
-            var task = NebulaPlugin.HttpClient.PostAsync(Helpers.ConvertUrl(APIURL), content);
-            yield return task.WaitAsCoroutine();
-            var strTask = task.Result.Content.ReadAsStringAsync();
-            yield return strTask.WaitAsCoroutine();
-            yield return callback.Invoke(JsonStructure.Deserialize<OnlineResponse<T>>(strTask.Result)!.data);
+            IEnumerator? callbackCoroutine = null;
+            var json = "{" + contents.Prepend(("request", method)).Select(tuple => (tuple.Item1, Uri.EscapeDataString(tuple.Item2))).Join(tuple => $"\"{tuple.Item1}\" : \"{tuple.Item2}\"", ",") + "}";
+            yield return NebulaWebRequest.CoPost(APIURL, json, true, result => {
+                callbackCoroutine = callback.Invoke(JsonStructure.Deserialize<OnlineResponse<T>>(result)!.data);
+            });
+            if (callbackCoroutine != null) yield return callbackCoroutine;
         }
+        yield break;
     }
 
     public class SearchContentResult

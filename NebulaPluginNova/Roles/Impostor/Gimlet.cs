@@ -225,14 +225,12 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
             {
                 if (currentPos.Distance(lastPos) < 0.005f)
                 {
-                    LogUtils.WriteToConsole("Break 1");
                     break;
                 }
                 float dotProd = Vector2.Dot((currentPos - lastPos).normalized, dir);
                 //1未満で擦れる音、0.6未満で終了
                 if (dotProd < (0.9f - frictionResistance))
                 {
-                    LogUtils.WriteToConsole("Break 2");
                     break;
                 }
 

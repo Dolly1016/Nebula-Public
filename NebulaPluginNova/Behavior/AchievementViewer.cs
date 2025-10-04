@@ -2,7 +2,6 @@
 using Nebula.Dev;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.MetaWidget;
-using Steamworks;
 using TMPro;
 using Virial;
 using Virial.Media;
@@ -156,10 +155,21 @@ internal class AchievementViewer : MonoBehaviour
 
                 GUIWidget[] equipOverlay = [
                     new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.2f)),
+#if PC
                     new NoSGUIText(GUIAlignment.Left, AttributeAsset.OverlayContent, new LazyTextComponent(() =>
                         NebulaAchievementManager.AmEquipping(a) ?
                         (Language.Translate("achievement.ui.equipped").Color(Color.green).Bold() + "<br>" + Language.Translate("achievement.ui.unsetTitle")) :
                         Language.Translate("achievement.ui.setTitle")))
+#elif ANDROID
+                    GUI.API.Button(GUIAlignment.Left, AttributeAsset.SmallWideButton, 
+                        new LazyTextComponent(() => Language.Translate(NebulaAchievementManager.AmEquipping(a) ? "achievement.ui.unsetTitle.button" : "achievement.ui.setTitle.button")),
+                        _ =>
+                        {
+                            NebulaAchievementManager.SetCustomTitle(a);
+                            NebulaManager.Instance.HideHelpWidget();
+                        }
+                        )
+#endif
                     ];
 
 
@@ -168,8 +178,11 @@ internal class AchievementViewer : MonoBehaviour
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.02f)),
                 isAvailable ?
                 new NoSGUIText(GUIAlignment.Left, attr, GUI.API.RawTextComponent(isEmpty ? Language.Translate("achievement.title.custom.empty").Color(Color.gray) : a.LocalizedTitle)) { 
-                    OverlayWidget = isEmpty ? GUI.API.LocalizedText(GUIAlignment.Left, AttributeAsset.OverlayContent, "achievement.ui.suggestToEdit") : GUI.API.VerticalHolder(GUIAlignment.Left, a.Achievements.Select(a => a.GetOverlayWidget(true, false, false, false,a.IsCleared)).Join(GUI.API.VerticalMargin(0.08f)).Concat(equipOverlay)), 
-                    OnClickText = ((Action)(() => { NebulaAchievementManager.SetCustomTitle(a); VanillaAsset.PlaySelectSE(); onClicked?.Invoke(); }), true), PostBuilder = t => t.outlineWidth = 0.12f} :
+                    OverlayWidget = isEmpty ? GUI.API.LocalizedText(GUIAlignment.Left, AttributeAsset.OverlayContent, "achievement.ui.suggestToEdit") : GUI.API.VerticalHolder(GUIAlignment.Left, a.Achievements.Select(a => a.GetOverlayWidget(true, false, false, false,a.IsCleared)).Join(GUI.API.VerticalMargin(0.08f)).Concat(equipOverlay)),
+#if PC
+                    OnClickText = ((Action)(() => { NebulaAchievementManager.SetCustomTitle(a); VanillaAsset.PlaySelectSE(); onClicked?.Invoke(); }), true), 
+#endif
+                    PostBuilder = t => t.outlineWidth = 0.12f} :
                 new NoSGUIText(GUIAlignment.Left, attr, GUI.API.RawTextComponent(Language.Translate("achievement.title.custom.unavailable").Replace("%NUM%", requiredAchievements.ToString()))) {
                     PostBuilder = t => t.outlineWidth = 0.12f},
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, -0.01f)),
@@ -311,7 +324,12 @@ internal class AchievementViewer : MonoBehaviour
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.05f)),
                 new NoSGUIText(GUIAlignment.Left, headerAttr, a.GetHeaderComponent()){ PostBuilder = t => t.outlineWidth = 0.22f },
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, -0.03f)),
-                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) { OverlayWidget = a.GetOverlayWidget(true, false, true, false,a.IsCleared,true,true), OnClickText = (() => { if (a.IsCleared) { NebulaAchievementManager.SetOrToggleTitle(a); VanillaAsset.PlaySelectSE(); onClicked?.Invoke(); } }, true), PostBuilder = t => t.outlineWidth = 0.12f},
+                new NoSGUIText(GUIAlignment.Left, attr, a.GetTitleComponent(INebulaAchievement.HiddenComponent)) {
+                    OverlayWidget = a.GetOverlayWidget(true, false, true, false,a.IsCleared,true,true),
+#if PC
+                    OnClickText = (() => { if (a.IsCleared) { NebulaAchievementManager.SetOrToggleTitle(a); VanillaAsset.PlaySelectSE(); onClicked?.Invoke(); } }, true),
+#endif
+                    PostBuilder = t => t.outlineWidth = 0.12f},
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.05f))
                 ];
 

@@ -652,7 +652,7 @@ public class DynamicPalette
         {
             void UpdateInvalidColor()
             {
-                int option = ClientOption.AllOptions[ClientOption.ClientOptionType.AvoidingColorDuplication].Value;
+                int option = ClientOption.GetValue(ClientOption.ClientOptionType.AvoidingColorDuplication);
                 if (!LobbyBehaviour.Instance) option = 0;
 
                 if (option == 0)
@@ -924,9 +924,10 @@ public class NebulaPlayerTab : MonoBehaviour
     {
         distance = (byte)(pos.magnitude / 2.1f * 24);
         if (distance > 23) distance = 23;
-        hue = (byte)(Mathn.Atan2(-pos.x, pos.y) / (2f * Mathn.PI) * 64);
-        while (hue < 0) hue += 64;
-        while (hue >= 64) hue -= 64;
+        int h = (int)(Mathn.Atan2(-pos.x, pos.y) / (2f * Mathn.PI) * 64);
+        while (h < 0) h += 64;
+        while (h >= 64) h -= 64;
+        hue = (byte)h;
     }
 
     byte lastH = 0, lastD = 0;

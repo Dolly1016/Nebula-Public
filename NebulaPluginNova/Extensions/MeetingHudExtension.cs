@@ -1,5 +1,8 @@
 ﻿using AmongUs.Data;
+using AmongUs.InnerNet.GameDataMessages;
 using Assets.CoreScripts;
+using Epic.OnlineServices.Presence;
+using Hazel;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
 using Nebula.Patches;
@@ -272,10 +275,14 @@ public static class MeetingHudExtension
         ReportDissolvedBody,
     }
 
-    //溶解した死体版CmdReportBody
-    public static readonly RemoteProcess<(GamePlayer player, GamePlayer? deadBody)> RpcCmdReportDissolvedDeadBody = new("ReportDeadBody", (message, _) =>
+    internal static void ModCmdReportDeadBody(GamePlayer player, GamePlayer? deadBody, ReportType reportType)
     {
-        if (AmongUsClient.Instance.AmHost) ModReportDeadBody(message.player.VanillaPlayer, GameData.Instance.GetPlayerById(message.deadBody?.PlayerId ?? 255), ReportType.ReportDissolvedBody);
+        LogUtils.WriteToConsole("Called ModCmdReportDeadBody");
+        RpcModCmdReportDeadBody.Invoke((player, deadBody, reportType));
+    }
+    private static readonly RemoteProcess<(GamePlayer player, GamePlayer? deadBody, ReportType reportType)> RpcModCmdReportDeadBody = new("ReportDissolvedDeadBody", (message, _) =>
+    {
+        if (AmongUsClient.Instance.AmHost) ModReportDeadBody(message.player.VanillaPlayer, GameData.Instance.GetPlayerById(message.deadBody?.PlayerId ?? 255), message.reportType);
     });
 
     private static readonly RemoteProcess<(GamePlayer reporter, GamePlayer? dead, ReportType reportType)> RpcStartMeeting = new("ReportDeadBody", (message, _) =>
@@ -297,10 +304,10 @@ public static class MeetingHudExtension
                     type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true))) != null) return;
 
         if (reporter.Data.IsDead) return;
-        MeetingRoomManager.Instance.AssignSelf(reporter, deadBody);
         if (!AmongUsClient.Instance.AmHost) return;
 
         HudManager.Instance.OpenMeetingRoom(reporter);
+
         RpcStartMeeting.Invoke((reporter.GetModInfo()!, GamePlayer.GetPlayer(deadBody ? deadBody!.PlayerId : (byte)255), reportType));
 
         MeetingModRpc.RpcNoticeStartMeeting.Invoke((reporter.PlayerId, deadBody?.PlayerId ?? 255));

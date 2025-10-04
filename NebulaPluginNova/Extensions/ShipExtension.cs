@@ -2,6 +2,7 @@
 using Cpp2IL.Core.Extensions;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Nebula.Behavior;
+using Nebula.VoiceChat;
 using UnityEngine;
 using Virial;
 using Virial.Events.Game;
@@ -101,6 +102,11 @@ public static class ShipExtension
         ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.CurrentValue;
 
         for (int i = 0; i < ShipStatus.Instance.AllDoors.Count; i++) ShipStatus.Instance.AllDoors[i].Id = i;
+
+        if (GeneralConfigurations.UseVoiceChatOption)
+        {
+            CameraVC.Activate((new(-7.15f, 1.67f), 0), (new(-17.67f, -4.54f), 0), (new(0.54f, -6.18f), 0), (new(13.12f, -3.81f), 0));
+        }
     }
 
     private static void ModifyEarierMira() { }
@@ -138,6 +144,11 @@ public static class ShipExtension
 
         //崩壊したオブジェクトの前後関係を修正
         ShipStatus.Instance.FastRooms[SystemTypes.Electrical].transform.FindChild("fencebot").SetLocalZ(-1.0136f);
+
+        if (GeneralConfigurations.UseVoiceChatOption)
+        {
+            CameraVC.Activate((new(29.04f, -15.44f), 0), (new(15.54f, -15.44f), 1), (new(24.51f, -8.61f), 2), (new(17.09f, -20.39f), 3), (new(4.96f, -22.63f), 4), (new(11.41f, -8.31f), 5));
+        }
     }
 
     private static SpriteLoader medicalWiringSprite = SpriteLoader.FromResource("Nebula.Resources.AirshipWiringM.png",100f);
@@ -287,6 +298,11 @@ public static class ShipExtension
         }, NebulaAPI.CurrentGame!, 200);
 
         AddDoors(additionalDoors);
+
+        if (GeneralConfigurations.UseVoiceChatOption)
+        {
+            CameraVC.Activate((new(-8.24f, 0.0f), 0), (new(-4.06f, 9.43f), 1), (new(16.71f, 10.19f), 2), (new(4.92f, -11.20f), 3), (new(30.29f, -0.49f), 4), (new(3.20f, 16.20f), 5));
+        }
     }
 
     //Vert->左右通行のドア

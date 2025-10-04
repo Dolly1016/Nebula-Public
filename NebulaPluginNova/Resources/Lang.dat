@@ -338,6 +338,7 @@
 "options.map.admin.polus.0" : "Admin Customization"
 "options.map.admin.airship.0" : "Admin Customization (Cockpit)"
 "options.map.admin.airship.1" : "Admin Customization (Records)"
+"options.map.hideFarKiller" : "Conceal Killer At A Distance"
 "options.map.group.spawning" : "Spawning Settings"
 "options.map.group.utilities" : "Utilities Settings"
 "options.map.group.footstep" : "Footstep SE Settings"
@@ -428,6 +429,7 @@
 "options.voiceChat.killersHearDead" : "Killers Hear Dead"
 "options.voiceChat.killersHearDead.onlyMyKiller" : "Only My Killer"
 "options.voiceChat.killersHearDead.onlyImpostors" : "Only Impostors"
+"options.voiceChat.killersHearDead.allKillers" : "Only Killers"
 "options.voiceChat.impostorsRadio" : "Impostors Radio"
 "options.voiceChat.jackalRadio" : "Jackal Radio"
 "options.voiceChat.loversRadio" : "Lovers Radio"
@@ -2101,6 +2103,7 @@
 "help.command.console" : "Console"
 "help.command.saveResult" : "Save Result Image"
 "help.command.toggleSocial" : "Toggle Appealing"
+"help.command.hideHud" : "Hide/Show Hud"
 
 # Voice Chat
 
@@ -2589,7 +2592,7 @@
 "document.tip.winCond.impostor.sabotage.title" : "Sabotage Trigger"
 "document.tip.winCond.impostor.sabotage" : "Impostors win if the time runs out without the emergency sabotage being restored."
 "document.tip.winCond.jackal.kill.title" : "Kill Trigger"
-"document.tip.winCond.jackal.kill" : "Jaackals win when jackal team players account for more than half of all alive players. <br>%IMPOSTOR% team must be eliminated, and %LOVER% whose partner is still alive are not counted in jackal team."
+"document.tip.winCond.jackal.kill" : "Jackals win when jackal team players account for more than half of all alive players. <br>%IMPOSTOR% team must be eliminated, and %LOVER% whose partner is still alive are not counted in jackal team."
 "document.tip.winCond.jackal.extinction.title" : "Complete Domination Trigger"
 "document.tip.winCond.jackal.extinction" : "Jackals win when only jackal team players survive. <br>%LOVER% whose partner is still alive are not counted in jackal team."
 "document.tip.winCond.jester.title" : "Special Trigger"

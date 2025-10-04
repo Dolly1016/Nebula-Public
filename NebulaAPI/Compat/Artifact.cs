@@ -7,6 +7,12 @@ public interface Reference<T>
     T Value { get; }
 }
 
+public class Wrapping<T>
+{
+    public T Value { get; set; }
+    public Wrapping(T value) { Value = value; }
+}
+
 public interface Artifact<T> : IEnumerable<T>
 {
     void Do(Action<T> action);

@@ -15,9 +15,11 @@ static public class ScriptCompiler
             .WithOptimizationLevel(OptimizationLevel.Release)
             .WithMetadataImportOptions(MetadataImportOptions.All);
 
-    static public object[] SearchReferences(Assembly[] assemblies, byte[] additionalLibrary)
+    static public object[] SearchReferences(Assembly[] assemblies, byte[]? additionalLibrary)
     {
-        return assemblies.Where(a => { try { return ((a.Location?.Length ?? 0) > 0); } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location)).Append(MetadataReference.CreateFromImage(additionalLibrary)).ToArray();
+        var result = assemblies.Where(a => { try { return ((a.Location?.Length ?? 0) > 0); } catch { return false; } }).Select(a => MetadataReference.CreateFromFile(a.Location));
+        if(additionalLibrary != null) result = result.Append(MetadataReference.CreateFromImage(additionalLibrary));
+        return result.ToArray();
     }
 
     //loggerは、(severity, path, line, character, id, message)の順で引数を受け取る

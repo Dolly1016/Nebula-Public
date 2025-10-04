@@ -75,29 +75,12 @@ public class ModNewsHistory
 
         var lang = Language.GetCurrentLanguage();
 
-        HttpClient http = new HttpClient();
-        http.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-        System.Uri uri;
-        try
-        {
-            uri = new(Helpers.ConvertUrl($"https://raw.githubusercontent.com/Dolly1016/Nebula/master/Announcement_{lang}.json"));
-        }
-        catch
-        {
-            yield break;
-        }
+        string response = null!;
+        yield return NebulaWebRequest.CoGet(Helpers.ConvertUrl($"https://raw.githubusercontent.com/Dolly1016/Nebula/master/Announcement_{lang}.json"), true, r => response = r);
 
-        var task = http.GetAsync(uri, HttpCompletionOption.ResponseContentRead);
-        while (!task.IsCompleted) yield return null;
-        var response = task.Result;
+        if (response == null) yield break;
 
-
-        if (response.StatusCode != HttpStatusCode.OK || response.Content == null)
-        {
-            yield break;
-        }
-
-        AllModNews = JsonStructure.Deserialize<List<ModNews>>(response.Content.ReadAsStringAsync().Result) ?? new();
+        AllModNews = JsonStructure.Deserialize<List<ModNews>>(response) ?? new();
 
         foreach (var news in AllModNews)
         {

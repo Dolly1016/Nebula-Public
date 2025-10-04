@@ -99,12 +99,14 @@ public class NebulaSettingMenu : MonoBehaviour
 
     private void UpdateNav(OptionNav[] navs)
     {
+#if PC
         static IEnumerable<GUIWidget> GetNavContent(OptionNav nav)
         {
             yield return new NoSGUIImage(GUIAlignment.Left, MouseButton.AsLoader(nav.imgIndex), new(0.25f, 0.25f)) { IsMasked = false };
             yield return GUI.API.LocalizedText(GUIAlignment.Left, AttributeAsset.OverlayContent, nav.translationKey);
         }
         UnderScreen.SetWidget(GUI.API.HorizontalHolder(GUIAlignment.Left, navs.Select(GetNavContent).JoinMany(GUI.API.HorizontalMargin(0.05f))), new Vector2(1f, 1f), out _);
+#endif
     }
     private IEnumerator CoShowRightImage()
     {

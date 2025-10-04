@@ -183,7 +183,7 @@ internal static class ConfigurationValues
        {
            int index = reader.ReadInt32();
            int num = reader.ReadInt32();
-           Debug.Log($"Received Share All Option RPC, Index: {index}, Num: {num}");
+           LogUtils.WriteToConsole($"Received Share All Option RPC, Index: {index}, Num: {num}");
            for (int i = 0; i < num; i++)
            {
                int value = reader.ReadInt32();

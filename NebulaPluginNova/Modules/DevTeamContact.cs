@@ -11,6 +11,7 @@ using Virial.Text;
 
 namespace Nebula.Modules;
 
+#if PC
 static internal class DevTeamContact
 {
     static private byte[] CompressLog(byte[]? log)
@@ -193,3 +194,4 @@ static internal class DevTeamContact
     }
     private const string u2 = "jPj_halbh1I1ndQNn6poQdAIM74o26Wyaj7VNdWfcGIodQ4qCUVFd5z9cyxRhbzbPaPb";
 }
+#endif 

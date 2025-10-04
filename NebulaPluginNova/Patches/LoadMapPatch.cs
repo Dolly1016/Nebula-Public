@@ -3,6 +3,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Nebula.Patches;
 
+#if PC
 [HarmonyPatch(typeof(AssetReference), nameof(AssetReference.InstantiateAsync),typeof(Transform),typeof(bool))]
 public static class LoadShipInstancePatch
 {
@@ -21,3 +22,4 @@ public static class LoadShipInstancePatch
         return true;
     }
 }
+#endif

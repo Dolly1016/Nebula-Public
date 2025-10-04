@@ -19,6 +19,7 @@ public static class MainMenuSetUpPatch
 
     static void Postfix(MainMenuManager __instance)
     {
+        var scalerList = __instance.mainMenuUI.GetComponent<SlicedAspectScaler>();
 
         __instance.PlayOnlineButton.OnClick.AddListener(() => IsLocalGame = false);
         __instance.playLocalButton.OnClick.AddListener(() => IsLocalGame = true);
@@ -32,7 +33,6 @@ public static class MainMenuSetUpPatch
         }
 
         var leftPanel = __instance.mainMenuUI.transform.FindChild("AspectScaler").FindChild("LeftPanel");
-        leftPanel.GetComponent<SpriteRenderer>().size += new Vector2(0f, 0.5f);
         var auLogo = leftPanel.FindChild("Sizer").GetComponent<AspectSize>();
         auLogo.PercentWidth = 0.14f;
         auLogo.DoSetUp();
@@ -46,9 +46,10 @@ public static class MainMenuSetUpPatch
         reworkedPanel.sprite = oldPanel.sprite;
         reworkedPanel.tileMode = oldPanel.tileMode;
         reworkedPanel.drawMode = oldPanel.drawMode;
-        reworkedPanel.size = oldPanel.size;
+        reworkedPanel.size = oldPanel.size + new Vector2(0f, 0.5f);
+        leftPanel.gameObject.GetComponent<AspectScaledAsset>().AddScaledSprite(reworkedPanel);
         oldPanel.enabled = false;
-
+        
         //CreditsとQuit以外のボタンを上に寄せる
         foreach (var button in __instance.mainButtons.GetFastEnumerator())
             if (Math.Abs(button.transform.localPosition.x) < 0.1f) button.transform.localPosition += new Vector3(0f, height, 0f);
@@ -66,6 +67,8 @@ public static class MainMenuSetUpPatch
                 icon.GetComponent<SpriteRenderer>().sprite = nebulaIconSprite.GetSprite();
             }
         }));
+        scalerList.objectsToScale.Add(nebulaButton.GetComponent<AspectScaledAsset>());
+
         var nebulaPassiveButton = nebulaButton.GetComponent<PassiveButton>();
         nebulaPassiveButton.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         nebulaPassiveButton.OnClick.AddListener(() =>
@@ -81,7 +84,6 @@ public static class MainMenuSetUpPatch
         NebulaScreen.name = "NebulaScreen";
         NebulaScreen.transform.GetChild(0).GetChild(0).GetComponent<TextTranslatorTMP>().SetModText("title.label.nebula");
         __instance.mainButtons.Add(nebulaButton);
-
         GameObject.Destroy(NebulaScreen.transform.GetChild(4).gameObject);
 
         var temp = NebulaScreen.transform.GetChild(3);
@@ -100,11 +102,16 @@ public static class MainMenuSetUpPatch
                 clickAction.Invoke();
             });
 
+#if PC
             obj.transform.localPosition = new Vector3((index % 2 == 0) ? -1.45f : 1.45f, 0.98f - (index / 2) * 0.59f, 0f);
+#else
+            obj.transform.localPosition = new Vector3(-0.20f, 0.98f - index * 0.59f, 0f);
+#endif
             obj.transform.localScale = new Vector3(0.72f, 0.72f, 1f);
             index++;
         }
 
+#if PC
         if (NebulaPlugin.AllowHttpCommunication)
         {
             SetUpButton("title.buttons.update", () =>
@@ -115,6 +122,7 @@ public static class MainMenuSetUpPatch
                 __instance.screenTint.enabled = true;
             });
         }
+#endif
 
         SetUpButton("title.buttons.achievements", () =>
         {
@@ -136,16 +144,20 @@ public static class MainMenuSetUpPatch
             AddonsScreen?.SetActive(true);
             __instance.screenTint.enabled = true;
         });
+
+#if PC
         SetUpButton("title.buttons.developersStudio", () =>
         {
             DevStudio.Open(__instance);
         });
+#endif
 
         SetUpButton("title.buttons.stats", () =>
         {
             StatsViewer.Open(__instance);
         });
 
+#if PC
         if (NebulaPlugin.AllowHttpCommunication)
         {
             SetUpButton("title.buttons.form", () =>
@@ -153,6 +165,7 @@ public static class MainMenuSetUpPatch
                 DevTeamContact.OpenContactWindow(null);
             });
         }
+#endif
 
         if (DebugTools.DebugMode)
         {
@@ -161,6 +174,8 @@ public static class MainMenuSetUpPatch
                 RoomViewer.Open(__instance);
             });
         }
+
+        foreach (var asset in NebulaScreen.GetComponentsInChildren<AspectScaledAsset>()) scalerList.objectsToScale.Add(asset);
 
         var uiScaler = __instance.accountButtons.transform.parent.parent.parent;
         var discordRenderer = UnityHelper.CreateObject<SpriteRenderer>("DiscordButton", uiScaler, new Vector3(6f, -2.6f, -6f));
@@ -226,6 +241,7 @@ public static class MainMenuSetUpPatch
             screen.SetWidget(new MetaWidgetOld.ScrollView(new Vector2(6.2f, 4.1f), inner, true) { Alignment = IMetaWidgetOld.AlignmentOption.Center });
         }
 
+#if PC
         void CreateVersionsScreen()
         {
             VersionsScreen = UnityHelper.CreateObject("Versions", __instance.accountButtons.transform.parent, new Vector3(0, 0, -1f));
@@ -417,12 +433,12 @@ public static class MainMenuSetUpPatch
                 }).WrapToIl2Cpp());
             }
         }
+#endif
 
         foreach (var obj in GameObject.FindObjectsOfType<GameObject>(true))
         {
             if (obj.name is "FreePlayButton" or "HowToPlayButton") GameObject.Destroy(obj);
         }
-
     }
 }
 

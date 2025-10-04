@@ -1,6 +1,4 @@
 ﻿using Nebula.Behavior;
-using Rewired.ControllerExtensions;
-using Steamworks;
 using Virial.Runtime;
 
 namespace Nebula.Utilities;

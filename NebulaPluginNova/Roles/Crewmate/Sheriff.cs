@@ -99,7 +99,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                     }
                     else
                     {
-                        MyPlayer.Suicide(PlayerState.Misfired, null, Virial.Game.KillParameter.NormalKill);
+                        MyPlayer.Suicide(PlayerState.Misfired, PlayerState.Suicide, Virial.Game.KillParameter.NormalKill);
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Misfire, MyPlayer.VanillaPlayer, killTracker.CurrentTarget!.RealPlayer.VanillaPlayer);
                         RpcShareExtraInfo.Invoke((MyPlayer, killTracker.CurrentTarget!.RealPlayer));
 

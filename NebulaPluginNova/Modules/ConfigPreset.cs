@@ -92,12 +92,13 @@ public class ConfigPreset : IConfigPreset
         }
     }
 
+    private static string PresetsFolderPath => PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "Presets";
     //ローカルのプリセットを再読み込みします
     public static void LoadLocal(bool reload = true)
     {
         if(reload) foreach (var entry in IConfigPreset.allPresets) if (entry.Value is ConfigPreset cp && cp.addon == null) IConfigPreset.allPresets.Remove(entry.Key);
 
-        string presetsFolder = "Presets";
+        string presetsFolder = PresetsFolderPath;
         Directory.CreateDirectory(presetsFolder);
         foreach (var fullName in Directory.GetFiles(presetsFolder))
         {
@@ -134,7 +135,7 @@ public class ConfigPreset : IConfigPreset
     {
         try
         {
-            Stream? stream = addon != null ? addon.OpenStream("Presets/" + path) : File.OpenRead("Presets/" + path);
+            Stream? stream = addon != null ? addon.OpenStream("Presets/" + path) : File.OpenRead(PresetsFolderPath + Path.DirectorySeparatorChar + path);
 
             if (stream != null) return new StreamReader(stream, Encoding.UTF8).ReadToEnd();
             return null;
@@ -278,7 +279,7 @@ public class ConfigPreset : IConfigPreset
         return true;
     }
 
-    static public string GetPathFromId(string id) => "Presets/" + id + ".dat";
+    static public string GetPathFromId(string id) => PresetsFolderPath + Path.DirectorySeparatorChar + id + ".dat";
     static public bool DeleteAndReloadSettings(string name)
     {
         File.Delete(GetPathFromId(name));
