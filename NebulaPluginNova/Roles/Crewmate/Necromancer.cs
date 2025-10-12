@@ -20,7 +20,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly FloatConfiguration ReviveCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveCoolDown", (5f, 60f, 5f), 30f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration ReviveDurationOption = NebulaAPI.Configurations.Configuration("options.role.necromancer.reviveDuration", (0.5f, 10f, 0.5f), 3f, FloatConfigurationDecorator.Second);

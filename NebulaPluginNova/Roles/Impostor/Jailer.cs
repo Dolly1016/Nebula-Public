@@ -22,8 +22,7 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
 
     static public BoolConfiguration CanMoveWithMapWatchingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canMoveWithMapWatching", false);
     static public BoolConfiguration CanUseAdminOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.jailer.canUseAdminOnMeeting", true);
@@ -44,6 +43,7 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
             {
                 JailerAbility.TryAddAndBind(() => !this.IsDeadObject && !this.IsUsurped);
                 acTokenCommon2 ??= new("jailer.common2", 0f, (val, _) => val > 10f);
+                acTokenChallenge ??= new("jailer.challenge", 0, (val, _) => val >= 2);
             }
         }
 

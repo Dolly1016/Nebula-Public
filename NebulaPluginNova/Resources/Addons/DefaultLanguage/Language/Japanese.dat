@@ -80,6 +80,7 @@ $Color
 "ui.warning.unrecommendedResolution" : "アスペクト比が16:9でない解像度は<br>推奨されません。"
 "ui.error.failedToSearchRoom" : "以下のリージョンで部屋の検索に失敗しました:"
 "ui.error.quickStart.cannotStart" : "人数が足りないためスタートできません。"
+"ui.utility.premultipliedConversion" : "乗算済みα変換"
 "ui.utility.premultipliedConversion.folderGenerated" : "乗算前の画像を格納するフォルダ Utility/Original を<br>作成しました。処理したい画像を配置してください。"
 "ui.utility.premultipliedConversion.noImages" : "変換できる画像がありません。<br>png画像のみ変換できます。"
 "ui.utility.premultipliedConversion.start" : "%NUM%枚の画像の変換を開始します..."
@@ -444,11 +445,13 @@ $Color
 "options.voiceChat.killersHearDead.onlyMyKiller" : "自身のキラーのみ"
 "options.voiceChat.killersHearDead.onlyImpostors" : "インポスターのみ"
 "options.voiceChat.killersHearDead.allKillers" : "キラーのみ"
+"options.voiceChat.affectedByCommsSab" : "通信障害による通話の無効化"
+"options.voiceChat.isolateGhostsStrictly" : "厳密な幽霊チャットの隔離"
+"options.voiceChat.radio" : "ラジオの設定"
 "options.voiceChat.impostorsRadio" : "インポスターラジオ"
 "options.voiceChat.jackalRadio" : "ジャッカルラジオ"
 "options.voiceChat.loversRadio" : "ラバーズラジオ"
-"options.voiceChat.affectedByCommsSab" : "通信障害による通話の無効化"
-"options.voiceChat.isolateGhostsStrictly" : "厳密な幽霊チャットの隔離"
+"options.voiceChat.scarletRadio" : "スカーレットラジオ"
 
 "options.role.count" : "割当人数"
 "options.role.chance" : "割当確率"
@@ -457,6 +460,8 @@ $Color
 "options.role.chance.jackalized" : "ジャッカル割当確率"
 "options.role.count.madden" : "マッドメイト割当人数"
 "options.role.chance.madden" : "マッドメイト割当確率"
+"options.role.count.tyrant" : "タイラント割当人数"
+"options.role.chance.tyrant" : "タイラント割当確率"
 "options.role.count.short" : "割り当て"
 "options.modifier.chance" : "割り当て確率"
 "options.role.crewmateCount" : "クルーメイト割り当て"
@@ -1161,6 +1166,7 @@ $Color
 "role.reaper.blurb" : "ベント引き回しの上、磔獄門"
 "options.role.reaper.detail" : "死体を引きずって移動させてしまうインポスターです。<br>死体を持ったままベント間を自由に移動できます。"
 "options.role.reaper.useVentWhileHoldingDeadbody" : "死体を抱えながらのベント使用"
+"options.role.reaper.connectAllVents" : "全ベントを接続"
 "stats.reaper.ventWithDeadBody" : "死体と共にベントに潜入した回数"
 
 "role.rokurokubi.name" : "ろくろ首"
@@ -1481,6 +1487,14 @@ $Color
 "stats.spectreImmoralist.removeFries" : "お揚げを消し去った回数"
 "stats.spectreImmoralist.suicide" : "自決した回数"
 
+"role.tyrant.name" : "タイラント"
+"role.tyrant.short" : "タ"
+"role.tyrant.blurb" : "烈日の如く"
+"options.role.tyrant.detail" : "タイラントは指定数キルすると勝利します。<br>キルを重ねられる前に追放しましょう！"
+"options.role.tyrant.killCooldown" : "キルクールダウン"
+"options.role.tyrant.numOfKillingToWin" : "勝利に必要なキル数"
+"options.role.tyrant.useImpostorAbility" : "インポスター能力の使用"
+
 "role.vulture.name" : "ヴァルチャー"
 "role.vulture.short" : "ヴァ"
 "role.vulture.blurb" : "死体を食い漁れ"
@@ -1665,6 +1679,7 @@ $Color
 "teams.vulture" : "ヴァルチャー"
 "teams.spectre" : "妖狐"
 "teams.gambler" : "ギャンブラー"
+"teams.tyrant" : "タイラント"
 
 # Perks
 
@@ -1937,7 +1952,7 @@ $Color
 "button.label.paint" : "ペイント"
 "button.label.place" : "設置"
 "button.label.pseudocide" : "偽装死"
-"button.label.rejoin" : "VC再接続"
+"button.label.rejoin" : "VC更新"
 "button.label.release" : "離す"
 "button.label.revive" : "復活"
 "button.label.sample" : "採取"
@@ -2116,6 +2131,7 @@ $Color
 "end.spectre" : "妖狐%EXTRA%勝利"
 "end.trilemma" : "トリレンマ%EXTRA%勝利"
 "end.gambler" : "ギャンブラー%EXTRA%勝利"
+"end.tyrant" : "タイラント%EXTRA%勝利"
 "end.nogame" : "無効なゲーム"
 
 "end.extra.lover" : " <color=#FFFFFF>+</color> ラバーズ"
@@ -2151,19 +2167,24 @@ $Color
 "voiceChat.dialog.confirm" : "VCに参加してもよろしいですか？"
 "voiceChat.info.mute" : "ミュート中"
 "voiceChat.info.unmute" : "通話中"
+"voiceChat.info.nomic" : "マイク入力なし"
 "voiceChat.info.filtering1" : "フィルタリング中: 生存者のみ"
 "voiceChat.info.filtering2" : "フィルタリング中: 死亡者のみ"
 "voiceChat.info.radio" : "ラジオ"
 "voiceChat.info.impostorRadio" : "インポスターラジオ"
 "voiceChat.info.jackalRadio" : "ジャッカルラジオ"
 "voiceChat.info.loversRadio" : "ラバーズラジオ"
+"voiceChat.info.scarletRadio" : "スカーレットラジオ"
 "voiceChat.info.roomHostRadio" : "部屋主ラジオ"
+"voiceChat.info.returnToVC" : "ラジオを終了"
 "voiceChat.settings.inputDevice" : "入力デバイス"
 "voiceChat.settings.inputVolume" : "入力音量"
 "voiceChat.settings.noiseGate" : "ノイズゲート設定"
 "voiceChat.settings.outputDevice" : "出力デバイス"
 "voiceChat.settings.outputVolume" : "出力音量"
 "voiceChat.settings.device.default" : "既定"
+"voiceChat.settings.server" : "接続先VCサーバー"
+"voiceChat.settings.server.apply" : "適用"
 
 # Console
 
@@ -2213,6 +2234,7 @@ $Color
 "input.screenshot" : "スクリーンショット"
 "input.mute" : "ミュート"
 "input.vcFilter" : "VCフィルタリング"
+"input.radio" : "ラジオ切替"
 "input.help" : "ヘルプ"
 "input.spectator" : "観戦退出"
 "input.spectatorRight" : "視点変更 (左)"
@@ -2226,8 +2248,8 @@ $Color
 "config.client.keyBindings.detail" : "Modのキー割り当てを変更します。<br>ゲーム中は変更できません。" 
 "config.client.vcSettings" : "VC設定"
 "config.client.vcSettings.detail" : "VCの設定を開きます。"
-"config.client.vcRejoin" : "VC再接続"
-"config.client.vcRejoin.detail" : "VCに再接続します。VCの調子が悪い時にお試しください。"
+"config.client.vcRejoin" : "VC再更新"
+"config.client.vcRejoin.detail" : "VCのステータスを最更新します。VCの調子が悪い時にお試しください。"
 "config.client.outputHash" : "画像ハッシュ値の出力"
 "config.client.outputHash.detail" : "コスチュームデザイナー向けの機能です。<br>オンにすると、コスチューム画像をダウンロードしたとき<br>そのハッシュ値をログに出力します。"
 "config.client.processorAffinity" : "プロセッサ制限"
@@ -2270,6 +2292,8 @@ $Color
 "config.client.avoidingColorDuplication.strict" : "厳密"
 "config.client.muteAmbienceOnMeeting" : "会議中の環境音ミュート"
 "config.client.muteAmbienceOnMeeting.detail" : "会議中に限り環境音をミュートできます。"
+"config.client.vcServerSettings" : "VCサーバー設定"
+"config.client.vcServerSettings.detail" : "VC使用時に接続するVCサーバーを設定します。"
 
 # Preset
 
@@ -2520,6 +2544,9 @@ $Color
 "help.rolePreview.inner.jackalized.random" : "ジャッカル化 ランダム出現"
 "help.rolePreview.inner.madden.100" : "マッド化 確定出現"
 "help.rolePreview.inner.madden.random" : "マッド化 ランダム出現"
+"help.rolePreview.inner.tyrant.100" : "タイラント化 確定出現"
+"help.rolePreview.inner.tyrant.random" : "タイラント化 ランダム出現"
+"help.rolePreview.winCond" : "勝利条件"
 
 # Tag
 
@@ -2671,6 +2698,8 @@ $Color
 "document.tip.winCond.trilemma" : "トリレンマの残りの二人が死亡したうえで生きて勝利条件を満たすと勝利を上書きします。<br>残り二人を蹴落として勝利条件を満たした一人が勝利します。"
 "document.tip.winCond.gambler.title" : "特殊勝利"
 "document.tip.winCond.gambler" : "生存しながらギャンブルに勝ち、%NUM%枚のチップを手に入れると勝利します。"
+"document.tip.winCond.tyrant.title" : "キル勝利"
+"document.tip.winCond.tyrant" : "%NUM%人のプレイヤーをキルすると勝利します。"
 
 "options.assignment.assignOpToHost.detail" : "オンにすると、ホストはゲーム中にコマンドを使用できるようになります。<br>特にコマンドを使用しない場合はオフにすることをお勧めします。"
 "options.assignment.ghostAssignmentMethod.detail" : "幽霊役職の割り当て方法を変更できます。<br> -<b>標準</b>: 死亡者には割り当てられる役職の何れかが必ず割り当てられます。<br> -<b>スリリング</b>: 割当確率が役職を割り当てられるか否かにまで影響を及ぼします。"
@@ -2777,6 +2806,8 @@ $Color
 "options.role.scarlet.requiredGaugeToWin.detail" : "スカーレットは本命のそばに設定した時間だけ居続ける必要があります。<br>継続して傍に居続ける必要はありませんが、本命から離れるとゲージは少しずつ減少します。"
 "options.role.scarlet.surplusGauge.detail" : "スカーレットは必要量より多くゲージを溜められます。<br>この値を大きくするほど、本命から離れて立ち回る余裕が生まれます。"
 "options.role.scarlet.gaugeReductionRatio.detail" : "本命のそばにいない間、溜まる速度にこの設定値を乗じた速度でゲージが減少します。<br>1xで溜まる速度と同じ速度で減少します。1未満の数値を推奨します。"
+"options.role.lover.allowExtraWin.detail" : "オンにすると、相方が生きて勝利すれば自身も一緒に勝利できます。"
+"options.role.lover.blockRoleWin.detail" : "オンにすると、自身の役職によって勝利できなくなります。<br><br>・オフの場合: ラバーズとして勝利できなくとも、自身の役職で勝利すれば勝利できます。<br>・オンの場合: ラバーズの勝利条件以外で勝利できなくなります。"
 
 "role.guesser.doc.main" : "会議中に役職を<b>推察</b>できます。推察された相手はキルされます。<br>ただし、推察に失敗すると<b>自身が死んでしまいます。</b>"
 "role.guesser.doc.guess" : "プレイヤーの上に表示されるアイコンをクリックすると推察画面が開きます。<br>表示された役職を選択することで<b>推察</b>を行います。"

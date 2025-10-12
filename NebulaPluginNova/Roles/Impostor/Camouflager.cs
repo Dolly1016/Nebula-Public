@@ -26,8 +26,8 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
     static public readonly Camouflager MyRole = new();
     static private readonly GameStatsEntry StatsCamo = NebulaAPI.CreateStatsEntry("stats.camouflager.camo", GameStatsCategory.Roles, MyRole);
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
 
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {

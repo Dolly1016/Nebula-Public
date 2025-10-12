@@ -38,7 +38,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
     static private readonly FloatConfiguration DrillSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.gimlet.drillSeStrength", (1f, 5f, 0.5f), 2f, FloatConfigurationDecorator.Ratio);
     static private readonly FloatConfiguration DrillFrictionResistanceOption = NebulaAPI.Configurations.Configuration("options.role.gimlet.frictionResistance", (0f, 0.875f, 0.125f), 0.25f, FloatConfigurationDecorator.Ratio);
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Gimlet MyRole = new();
     static private readonly GameStatsEntry StatsDrill = NebulaAPI.CreateStatsEntry("stats.gimlet.drill", GameStatsCategory.Roles, MyRole);
 
@@ -216,6 +216,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
         float frictionResistance = DrillFrictionResistanceOption;
         float frictionTime = 0f;
 
+        player.VanillaPlayer.MyPhysics.body.isKinematic = false;
         while (walkTo.MoveNext())
         {
             count++;
@@ -248,7 +249,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
                 killInvoked = true;
             }
 
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
         player.VanillaPlayer.MyPhysics.body.velocity = Vector2.zero;
 

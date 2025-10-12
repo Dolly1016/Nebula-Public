@@ -61,16 +61,16 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
         private Func<AllocationParameters.ExtraAssignmentInfo[]?>? teamAssignments, othersAssignments;
         AllocationParameters.ExtraAssignmentInfo[] AllocationParameters.TeamAssignment => teamAssignments?.Invoke() ?? [];
         AllocationParameters.ExtraAssignmentInfo[] AllocationParameters.OthersAssignment => othersAssignments?.Invoke() ?? [];
-        public StandardAssignmentParameters(string id, bool isImpostor, bool jacalized = false, bool madden = false, Func<AllocationParameters.ExtraAssignmentInfo[]?>? teamAssignments = null, Func<AllocationParameters.ExtraAssignmentInfo[]?>? othersAssignments = null)
+        public StandardAssignmentParameters(string id, bool isImpostor, AssignmentType? assignmentType, Func<AllocationParameters.ExtraAssignmentInfo[]?>? teamAssignments = null, Func<AllocationParameters.ExtraAssignmentInfo[]?>? othersAssignments = null)
         {
             this.teamAssignments = teamAssignments;
             this.othersAssignments = othersAssignments;
 
-            string countKey = jacalized ? "options.role.count.jackalized" : madden ? "options.role.count.madden" : "options.role.count";
-            string chanceKey = jacalized ? "options.role.chance.jackalized" : madden ? "options.role.chance.madden" : "options.role.chance";
-            UnityEngine.Color color = jacalized ? NebulaTeams.JackalTeam.UnityColor : madden ? NebulaTeams.ImpostorTeam.UnityColor : UnityEngine.Color.white;
+            string countKey = assignmentType?.CountTranslationKey ?? "options.role.count";
+            string chanceKey = assignmentType?.ChanceTranslationKey ?? "options.role.chance";
+            UnityEngine.Color color = assignmentType?.Color ?? UnityEngine.Color.white;
 
-            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 6 : 24), 0, title: NebulaAPI.GUI.TextComponent(new(color), countKey), predicate: ()=> (jacalized && NebulaAPI.Configurations.CanJackalize) || (madden && NebulaAPI.Configurations.CanMadden) || (!jacalized && !madden));
+            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 6 : 24), 0, title: NebulaAPI.GUI.TextComponent(new(color), countKey), predicate: ()=> assignmentType?.IsActive ?? true);
 
             roleChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".chance", (10, 100, 10), 100);
             roleSecondaryChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".secondaryChance", (0, 100, 10), 0);
@@ -87,7 +87,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                     if (roleCountOption.GetValue() <= 1)
                     {
                         return gui.HorizontalHolder(Media.GUIAlignment.Left,
-                        gui.Text(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), gui.TextComponent(jacalized ? NebulaTeams.JackalTeam.Color : madden ? NebulaTeams.ImpostorTeam.Color : Color.White, jacalized ? "options.role.chance.jackalized" : madden ? "options.role.chance.madden" : "options.role.chance")),
+                        gui.Text(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), gui.TextComponent(new(assignmentType?.Color ?? UnityEngine.Color.white), chanceKey)),
                         gui.HorizontalMargin(0.1f),
                         gui.RawText(GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsFlexible), ":"),
                         gui.HorizontalMargin(0.1f),
@@ -114,7 +114,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                         );
                     }
                 },
-                () => roleCountOption.GetValue() > 0　&& (!jacalized || NebulaAPI.Configurations.CanJackalize));
+                () => roleCountOption.GetValue() > 0　&& (assignmentType?.IsActive ?? true));
         }
 
         IEnumerable<IConfiguration> AllocationParameters.Configurations => [roleCountOption, roleChanceEditor];
@@ -133,11 +133,8 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
 
     private AllocationParameters? myAssignmentParameters = null;
     AllocationParameters? DefinedSingleAssignable.AllocationParameters => myAssignmentParameters;
-
-    private AllocationParameters? myJackalAssignmentParameters = null;
-    AllocationParameters? DefinedSingleAssignable.JackalAllocationParameters => myJackalAssignmentParameters;
-    private AllocationParameters? myMaddenAssignmentParameters = null;
-    AllocationParameters? DefinedSingleAssignable.MadmateAllocationParameters => myMaddenAssignmentParameters;
+    private AllocationParameters[]? customAllocationParams = null;
+    AllocationParameters? DefinedSingleAssignable.GetCustomAllocationParameters(AssignmentType assignmentType) => customAllocationParams != null ? customAllocationParams[assignmentType.Id] : null;
 
     protected RoleCategory Category { get; private init; }
     RoleCategory DefinedCategorizedAssignable.Category => Category;
@@ -152,22 +149,27 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
 
         if (withAssignmentOption)
         {
-            myAssignmentParameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName, category == RoleCategory.ImpostorRole, teamAssignments: teamAssignments, othersAssignments: othersAssignments);
+            myAssignmentParameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName, category == RoleCategory.ImpostorRole, null, teamAssignments: teamAssignments, othersAssignments: othersAssignments);
             ConfigurationHolder?.AppendConfigurations(myAssignmentParameters.Configurations);
 
             ConfigurationHolder?.SetDisplayState(() =>
             {
                 bool spawnRandom = false;
                 bool spawn100 = false;
-                if (myJackalAssignmentParameters != null && NebulaAPI.Configurations.CanJackalize && myJackalAssignmentParameters.RoleCountSum > 0)
+                if(customAllocationParams != null)
                 {
-                    spawnRandom = true;
-                    if (myJackalAssignmentParameters.GetRoleChance(1) == 100) spawn100 = true;
-                }
-                if (myMaddenAssignmentParameters != null && NebulaAPI.Configurations.CanMadden && myMaddenAssignmentParameters.RoleCountSum > 0)
-                {
-                    spawnRandom = true;
-                    if (myMaddenAssignmentParameters.GetRoleChance(1) == 100) spawn100 = true;
+                    foreach(var type in AssignmentType.AllTypes)
+                    {
+                        var assignParam = customAllocationParams[type.Id];
+                        if(assignParam != null)
+                        {
+                            if(type.IsActive && assignParam.RoleCountSum > 0)
+                            {
+                                spawnRandom = true;
+                                if (assignParam.GetRoleChance(1) == 100) spawn100 = true;
+                            }
+                        }
+                    }
                 }
                 if (myAssignmentParameters.RoleCountSum > 0)
                 {
@@ -180,15 +182,17 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                 return ConfigurationHolderState.Inactivated;
             });
 
-            if((this as DefinedRole)?.IsJackalizable ?? false)
-            {
-                myJackalAssignmentParameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName + ".jackalized", false, jacalized: true);
-                ConfigurationHolder?.AppendConfigurations(myJackalAssignmentParameters.Configurations);
-            }
-            if ((this as DefinedRole)?.IsLoadableToMadmate ?? false)
-            {
-                myMaddenAssignmentParameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName + ".madden", false, madden: true);
-                ConfigurationHolder?.AppendConfigurations(myMaddenAssignmentParameters.Configurations);
+            if (this is DefinedRole dr) {
+                customAllocationParams = new AllocationParameters[AssignmentType.NumOfTypes];
+                foreach (var type in AssignmentType.AllTypes)
+                {
+                    if (type.Predicate.Invoke(dr.AssignmentStatus, dr))
+                    {
+                        AllocationParameters parameters = new StandardAssignmentParameters("role." + (this as DefinedAssignable).InternalName + "." + type.Postfix, false, type);
+                        customAllocationParams[type.Id] = parameters;
+                        ConfigurationHolder?.AppendConfigurations(parameters.Configurations);
+                    }
+                }
             }
         }
     }

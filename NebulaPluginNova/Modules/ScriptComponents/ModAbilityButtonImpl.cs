@@ -1,4 +1,5 @@
-﻿using AmongUs.GameOptions;
+﻿using AmongUs.Data;
+using AmongUs.GameOptions;
 using Nebula.Commands.Variations;
 using Virial;
 using Virial.Command;
@@ -237,7 +238,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         VanillaButton.cooldownTimerText.text = timerText;
         VanillaButton.cooldownTimerText.color = EffectActive ? Color.green : Color.white;
 
-        if ((keyCode?.KeyDownInGame ?? false) || (canUseByMouseClick && CheckMouseClick())) DoClick();
+        if ((keyCode?.KeyDownInGame ?? false) || (canUseByMouseClick && CheckMouseClick() && !AmongUsUtil.UsingMouseMovement)) DoClick();
         if (subKeyCode?.KeyDownInGame ?? false) DoSubClick();
         
     }
@@ -460,7 +461,11 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     public ModAbilityButtonImpl SetCanUseByMouseClick(bool onlyLook = false, ButtonEffect.ActionIconType iconType = ButtonEffect.ActionIconType.ClickAction, string? action = "mouseClick", bool atBottom = true)
     {
         if(!onlyLook)canUseByMouseClick = true;
-        ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, iconType, action, atBottom);
+
+        if (!AmongUsUtil.UsingMouseMovement)
+        {
+            ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, iconType, action, atBottom);
+        }
         return this;
     }
 

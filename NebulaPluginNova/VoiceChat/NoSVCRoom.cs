@@ -1,9 +1,9 @@
-﻿using Il2CppSystem.IO;
-using Interstellar;
+﻿using Interstellar;
 using Interstellar.Routing;
 using Interstellar.Routing.Router;
 using Interstellar.VoiceChat;
 using Nebula.Behavior;
+using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Patches;
 using System;
@@ -14,15 +14,18 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
-using UnityEngine.UIElements;
+using UnityEngine;
+using Virial;
 using Virial.Events.VoiceChat;
 using Virial.Media;
+using Virial.Text;
 using static Interstellar.VoiceChat.VCRoom;
 using static Nebula.Modules.MetaWidgetOld;
 using static UnityEngine.AudioClip;
 
 namespace Nebula.VoiceChat;
 
+[NebulaRPCHolder]
 internal class NoSVCRoom
 {
     internal class VCSettings
@@ -30,6 +33,7 @@ internal class NoSVCRoom
         private static DataSaver VCSaver = new("VoiceChat");
         private static DataEntry<string> VCPlayerEntry = new StringDataEntry("@PlayerDevice", VCSaver, "");
         private static DataEntry<string> VCMicEntry = new StringDataEntry("@MicDeviceName", VCSaver, Microphone.devices.Length > 0 ? Microphone.devices[0] : "");
+        private static DataEntry<string> VCServerEntry = new StringDataEntry("@VCServer", VCSaver, "");
         private static DataEntry<float> MasterVolumeEntry = new FloatDataEntry("@PlayerVolume", VCSaver, 1f);
         public static DataEntry<float> MicVolumeEntry = new FloatDataEntry("@MicVolume", VCSaver, 1f);
         //public static DataEntry<float> MicGateEntry = new FloatDataEntry("@MicGate", VCSaver, 0.1f);
@@ -60,6 +64,7 @@ internal class NoSVCRoom
             }
         }
 
+        public static string ServerAddress => VCServerEntry.Value;
 #if PC
         public static string? SpeakerDevice
         {
@@ -213,6 +218,23 @@ internal class NoSVCRoom
 
             screen.SetWidget(widget);
         }
+
+        internal static void OpenServerSettingScreen(OptionsMenuBehaviour menu)
+        {
+            var window = MetaScreen.GenerateWindow(new(5f, 1.35f), null, Vector3.zero, true, false);
+
+            var field = new GUITextField(GUIAlignment.Center, new(4.8f, 0.4f)) { IsSharpField = false, MaxLines = 1, HintText = "ws://<address>:<port>".Color(Color.gray), DefaultText = VCSettings.VCServerEntry.Value, WithMaskMaterial = false };
+            window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center, [
+                GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.OverlayBold, "voiceChat.settings.server"),
+                field,
+                GUI.API.LocalizedButton(GUIAlignment.Center, AttributeAsset.OverlayBold, "voiceChat.settings.server.apply", _ =>
+                {
+                    VCSettings.VCServerEntry.Value = field.Artifact.FirstOrDefault()?.Text ?? "";
+                    window.CloseScreen();
+                })
+                ]), new Vector2(0.5f, 1f), out _);
+
+        }
     }
 
 
@@ -224,7 +246,7 @@ internal class NoSVCRoom
             private string playerName = null!;
             private PlayerControl mappedPlayer = null!;
             private GamePlayer? mappedModPlayer = null!;
-            public string CachedPlayerName => playerName ?? "Unknown";
+            public string CachedPlayerName => mappedPlayer ? mappedPlayer.name : playerName ?? "Unknown";
             public bool IsMapped => HasBeenMapped || mappedPlayer != null && mappedPlayer;
             private bool HasBeenMapped = false;
             private FloatDataEntry? volumeEntry = null;
@@ -363,17 +385,25 @@ internal class NoSVCRoom
             droneVolume.Volume = 0f;
         }
 
+        private bool IsInRadio(GamePlayer? player, [MaybeNullWhen(false)] out VoiceState state)
+        {
+            state = null;
+            return Room?.voiceStates.TryGetValue(player?.PlayerId ?? byte.MaxValue, out state) ?? false && state.IsRadio;
+        }
+
         private void UpdateMeeting()
         {
             var localIsDead = GamePlayer.LocalPlayer?.IsDead ?? false;
             var targetIsDead = mapping.MappedModPlayer?.IsDead ?? true;
 
-            bool canHear = localIsDead || !targetIsDead;
+            var isInRadio = IsInRadio(mapping.MappedModPlayer, out var state);
+            bool canHearOnRadio = isInRadio && (state?.CanHear ?? false);
+            bool canHear = (localIsDead || !targetIsDead) && !isInRadio;
 
             imager.Pan = 0f;
             normalVolume.Volume = canHear ? 1f : 0f;
             ghostVolume.Volume = 0f;
-            radioVolume.Volume = 0f;
+            radioVolume.Volume = canHearOnRadio ? 1f: 0f;
             droneVolume.Volume = 0f;
         }
 
@@ -386,6 +416,15 @@ internal class NoSVCRoom
 
             if (GeneralConfigurations.CanTalkInWanderingPhaseOption)
             {
+                if(IsInRadio(mapping.MappedModPlayer, out var state))
+                {
+                    normalVolume.Volume = 0f;
+                    ghostVolume.Volume = 0f;
+                    radioVolume.Volume = state.CanHear ? 1f : 0f;
+                    droneVolume.Volume = 0f;
+                    return;
+                }
+
                 var affectedByCommSab = !(localPlayer?.IsDead ?? false) && GeneralConfigurations.AffectedByCommsSabOption && !(localPlayer?.IsImpostor ?? false) && AmongUsUtil.InCommSab;
 
                 if (affectedByCommSab)
@@ -507,6 +546,9 @@ internal class NoSVCRoom
     private VCRoom interstellarRoom;
     private Dictionary<int, VCPlayer> clients = [];
     private IEnumerable<VCPlayer> AllClients => clients.Values;
+    private record VoiceState(bool IsRadio, bool CanHear);
+    private Dictionary<int, VoiceState> voiceStates = [];
+    public bool UsingMicrophone => interstellarRoom.Microphone != null;
     /// <summary>
     /// 通常音声・幽霊音声のステレオイメージャ
     /// </summary>
@@ -530,6 +572,7 @@ internal class NoSVCRoom
     {
         if (ModSingleton<NoSVCRoom>.Instance != null) ModSingleton<NoSVCRoom>.Instance.Close();
         ModSingleton<NoSVCRoom>.Instance = this;
+
         SimpleRouter source = new();
         SimpleEndpoint endpoint = new();
 
@@ -572,8 +615,10 @@ internal class NoSVCRoom
                                 radioDistortion.Connect(masterVolumeRouter);
 
         masterVolumeRouter.Connect(endpoint);
-       
-        interstellarRoom = new VCRoom(source, roomCode, region, "ws://www.nebula-on-the-ship.com:22010/vc",
+
+        string server = VCSettings.ServerAddress;
+        if (server.Length == 0) server = "ws://www.nebula-on-the-ship.com:22010";
+        interstellarRoom = new VCRoom(source, roomCode, region, server + "/vc",
             new VCRoomParameters()
             {
                 OnConnectClient = (clientId, instance, isLocal) =>
@@ -629,9 +674,15 @@ internal class NoSVCRoom
 #else
         SetSpeaker(VCSettings.SpeakerDevice);
 #endif
+        RegisterWidget(Language.Translate("voiceChat.info.mute"), new(1f,0.2f,0.2f), null, new FunctionalLifespan(() => true), () => interstellarRoom.Mute, 100);
+    }
 
-
-        CoShareProfile().StartOnScene();
+    private void UpdateVoiceChatInfo()
+    {
+        if (ModSingleton<VoiceChatInfo>.Instance == null)
+        {
+            var vcInfo = UnityHelper.CreateObject<VoiceChatInfo>("VCInfo", HudManager.Instance.transform, new Vector3(0f, 4f, -400f));
+        }
     }
 
     private static bool UserAllowedUsingMic = false;
@@ -688,12 +739,7 @@ internal class NoSVCRoom
     {
         if (clients.TryGetValue(clientId, out var player)) player.SetVolume(volume);
     }
-    internal IEnumerator CoShareProfile()
-    {
-        while (!PlayerControl.LocalPlayer) yield return null;
-        LogUtils.WriteToConsole("Sharing profile to voice chat server: " + PlayerControl.LocalPlayer.name  + ", ID :" + PlayerControl.LocalPlayer.PlayerId);
-        interstellarRoom.UpdateProfile(PlayerControl.LocalPlayer.name, PlayerControl.LocalPlayer.PlayerId);
-    }
+
 
     internal void SetMasterVolume(float volume)
     {
@@ -710,6 +756,11 @@ internal class NoSVCRoom
         interstellarRoom.SetLoopBack(loopback);
     }
 
+    internal void Rejoin()
+    {
+        if(!UserAllowedUsingMic) SetMicrophone(VCSettings.MicrophoneDevice);
+        interstellarRoom.Rejoin();
+    }
     private void Close()
     {
         interstellarRoom.Disconnect();
@@ -775,11 +826,32 @@ internal class NoSVCRoom
         unityMic?.PushAudioData(audioData);
     }
 #endif
+
+    byte myLastId = byte.MaxValue;
+    string myLastName = null;
+    private void TryUpdateLocalProfile()
+    {
+        var localPlayer = PlayerControl.LocalPlayer;
+        if (!localPlayer) return;
+        if (localPlayer.PlayerId != myLastId || localPlayer.name != myLastName)
+        {
+            myLastId = localPlayer.PlayerId;
+            myLastName = localPlayer.name;
+            interstellarRoom.UpdateProfile(myLastName, myLastId);
+        }
+    
+    }
+
     private void UpdateInternal()
     {
 #if ANDROID
         PushAudioData();
 #endif
+
+        if (LobbyBehaviour.Instance) TryUpdateLocalProfile();
+        
+        if(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDown) interstellarRoom.SetMute(!interstellarRoom.Mute);
+
         float hearDistance = HearDistance;
         var localPlayer = GamePlayer.LocalPlayer;
         var camTarget = HudManager.InstanceExists ? AmongUsUtil.CurrentCamTarget : null;
@@ -837,7 +909,165 @@ internal class NoSVCRoom
                 NoSVCRoom.StartVoiceChat(region, roomId);
             }
 
-            ModSingleton<NoSVCRoom>.Instance?.UpdateInternal();
+            var vc = ModSingleton<NoSVCRoom>.Instance;
+            if (vc != null)
+            {
+                vc.UpdateVoiceChatInfo();
+                vc.UpdateInternal();
+                vc.UpdateRadio();
+            }
         }
     }
+
+    static public Image IconRadioImage = SpriteLoader.FromResource("Nebula.Resources.UpperIconRadio.png", 100f);
+    private class RadioChannel
+    {
+        static readonly private IDividedSpriteLoader radioImages = DividedSpriteLoader.FromResource("Nebula.Resources.RadioIcons.png", 100f, 50, 50, true);
+        private int ImageId { get; }
+        public Color Color { get; }
+        public string LocalizedName { get; }
+        public Image Image => radioImages.AsLoader(ImageId);
+        Func<GamePlayer, bool> canHear;
+        private readonly ILifespan lifespan;
+        public ILifespan Lifespan => lifespan;
+        public bool IsDead => lifespan.IsDeadObject;
+        public bool CanHear(GamePlayer player) => canHear.Invoke(player);
+        public RadioChannel(string localizedName,int imageId, Func<GamePlayer, bool> canHear, ILifespan lifespan, Color color)
+        {
+            this.LocalizedName = localizedName;
+            this.ImageId = imageId;
+            this.canHear = canHear;
+            this.lifespan = lifespan;
+            Color = color;
+        }
+    }
+
+    public void RegisterRadioChannel(string localizedName, int imageId, Func<GamePlayer, bool> canHear, ILifespan lifespan, Color color)
+    {
+        var radio = new RadioChannel(localizedName, imageId, canHear, lifespan, color);
+        radios.Add(radio);
+        RegisterWidget(localizedName, color, radio.Image, lifespan, () => CurrentRadio == radio, 10);
+    }
+
+    private List<RadioChannel> radios = [];
+    private RadioChannel? CurrentRadio { get; set; }
+
+    private VirtualInput radioInput = NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.VCRadio);
+    private void UpdateRadio()
+    {
+        radios.RemoveAll(r => r.IsDead);
+        if (CurrentRadio?.IsDead ?? false) CurrentRadio = null;
+
+        ulong mask = 0;
+        bool radio = CurrentRadio != null;
+        if (radio) GamePlayer.AllPlayers.Where(CurrentRadio!.CanHear).Do(p => mask |= 1UL << p.PlayerId);
+        UpdateVoiceState(radio, mask);
+
+        if (radioInput.KeyDownInGame && radios.Count > 0)
+        {
+            NebulaManager.Instance.ShowRingMenu(
+                radios.Select(r => new RingMenu.RingMenuElement(new NoSGUIImage(GUIAlignment.Center, IconRadioImage, new(null, 0.54f))
+                {
+                    PostBuilder = origRenderer =>
+                    {
+                        var renderer = UnityHelper.CreateSpriteRenderer("Icon", origRenderer.transform, new(0.18f, 0.12f, -0.01f));
+                        renderer.sprite = r.Image.GetSprite();
+                        renderer.SetBothOrder(0);
+                        origRenderer.SetBothOrder(0);
+                    }
+                }, () => CurrentRadio = r, GUI.API.RawText(GUIAlignment.Center, AttributeAsset.OverlayContent, r.LocalizedName)))
+                .Prepend(new RingMenu.RingMenuElement(new NoSGUIImage(GUIAlignment.Center, DynamicPalette.colorInvalidSprite, new(0.9f,0.9f)), () => CurrentRadio = null, GUI.API.RawText(GUIAlignment.Center, AttributeAsset.OverlayContent, Language.Translate("voiceChat.info.returnToVC")))).ToArray(),
+                () => radioInput.KeyInGame, null);
+        }
+    }
+    
+    bool __lastRadio = false;
+    ulong __lastMask = 0;
+        
+    private void UpdateVoiceState(bool radio, ulong mask)
+    {
+        if (__lastRadio != radio || (radio && __lastMask != mask))
+        {
+            RpcUpdateVoiceState.Invoke((PlayerControl.LocalPlayer.PlayerId, radio, mask));
+        }
+    }
+
+    static private RemoteProcess<(int playerId, bool radio, ulong mask)> RpcUpdateVoiceState = new("VoiceState",
+        (message, calledByMe) =>
+        {
+            if (calledByMe) return;
+            var room = ModSingleton<NoSVCRoom>.Instance;
+            if (room == null) return;
+            if (GamePlayer.LocalPlayer == null) return;
+            room.voiceStates[message.playerId] = new(message.radio, !message.radio || (message.mask & (1LU << GamePlayer.LocalPlayer.PlayerId)) != 0);
+        });
+
+    internal IMetaWidgetOld UpdateWidget(out bool found)
+    {
+        if (!UsingMicrophone)
+        {
+            found = true;
+            return noMicWidget;
+        }
+        WidgetRecord? widget = null;
+        widgets.RemoveAll(w =>
+        {
+            var isDead = w.lifespan.IsDeadObject;
+            if (widget == null && !isDead && w.predicate.Invoke()) widget = w;
+            return isDead;
+        });
+        found = widget != null;
+        return widget?.widget ?? defaultWidget;
+    }
+
+    private IMetaWidgetOld? currentWidget = null;
+    private IMetaWidgetOld defaultWidget = GetNormalWidget(Language.Translate("voiceChat.info.unmute"), null);
+    private IMetaWidgetOld noMicWidget = GetNormalWidget(Language.Translate("voiceChat.info.nomic"), null);
+    private record WidgetRecord(IMetaWidgetOld widget, ILifespan lifespan, Func<bool> predicate, int priority);
+    private OrderedList<WidgetRecord, int> widgets = OrderedList<WidgetRecord, int>.DescendingList(v => v.priority);
+
+    static private IMetaWidgetOld GetNormalWidget(string localizedText, Color? color) => new MetaWidgetOld.Text(TextAttribute) { Alignment = IMetaWidgetOld.AlignmentOption.Center, RawText = color.HasValue ? localizedText.Color(color.Value) : localizedText };
+    private void RegisterWidget(string localizedText, Color? color, Image? radioIcon, ILifespan lifespan, Func<bool> predicate, int priority)
+    {
+        MetaWidgetOld GetRadioWidget()
+        {
+            var widget = new MetaWidgetOld();
+
+            widget.Append(
+                new ParallelWidgetOld(
+                new(new MetaWidgetOld.Image(NoSVCRoom.IconRadioImage.GetSprite())
+                {
+                    Width = 0.22f,
+                    Alignment = IMetaWidgetOld.AlignmentOption.Center,
+                    PostBuilder = renderer =>
+                    {
+                        var icon = UnityHelper.CreateObject<SpriteRenderer>("icon", renderer.transform, new(0.18f, 0.12f, -0.01f));
+                        icon.sprite = radioIcon.GetSprite();
+                        icon.SetBothOrder(20);
+                    }
+                }, 0.35f),
+                new(new MetaWidgetOld()
+                .Append(new MetaWidgetOld.VerticalMargin(0.015f))
+                .Append(new MetaWidgetOld.Text(SmallTextAttribute) { Alignment = IMetaWidgetOld.AlignmentOption.Center, TranslationKey = "voiceChat.info.radio" })
+                .Append(new MetaWidgetOld.VerticalMargin(-0.07f))
+                .Append(new MetaWidgetOld.Text(TextAttribute) { Alignment = IMetaWidgetOld.AlignmentOption.Center, RawText = color.HasValue ? localizedText.Color(color.Value) : localizedText })
+                , 1.6f))
+                { Alignment = IMetaWidgetOld.AlignmentOption.Center });
+            return widget;
+        }
+
+        if (radioIcon != null)
+        {
+            widgets.Add(new(GetRadioWidget(), lifespan, predicate, priority));
+        }
+        else
+        {
+            widgets.Add(new(GetNormalWidget(localizedText, color), lifespan, predicate, priority));
+        }
+    }
+
+    public static TextAttributeOld TextAttribute { get; private set; } = new(TextAttributeOld.BoldAttr) { Size = new(1.2f, 0.4f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaxSize = 1.8f, FontMinSize = 1f, FontSize = 1.8f };
+    public static TextAttributeOld SmallTextAttribute { get; private set; } = new(TextAttributeOld.BoldAttr) { Size = new(1.2f, 0.15f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaxSize = 1.2f, FontMinSize = 0.7f, FontSize = 1.2f };
 }
+
+    

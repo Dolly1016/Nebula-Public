@@ -277,7 +277,7 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
 
     static private readonly FloatConfiguration droneCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.ubiquitous.droneCoolDown", (5f, 120f, 2.5f), 15f, FloatConfigurationDecorator.Second);

@@ -67,6 +67,9 @@ internal interface INebula
     IModuleFactory Modules { get; }
 
     IDisposable CreateRPCSection(string? label);
+
+    bool IsAndroid { get; }
+    bool IsPC => !IsAndroid;
 }
 
 public static class NebulaAPI

@@ -30,6 +30,7 @@ public class NebulaGameEnd
     static public readonly GameEnd SpectreWin = new(33, "spectre", Roles.Neutral.Spectre.MyRole.UnityColor, 63);
     static public readonly GameEnd TrilemmaWin = new(34, "trilemma", Roles.Modifier.Trilemma.MyRole.UnityColor, 61);
     static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.UnityColor, 29);
+    static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.UnityColor, 32);
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
     static public readonly ExtraWin ExtraLoversWin = new(0, "lover", (Roles.Modifier.Lover.MyRole as DefinedAssignable).Color);
@@ -62,6 +63,7 @@ public class NebulaGameEnd
         RegisterWinCondTip(DancerWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Dancer.MyRole as ISpawnable).IsSpawnable, "dancer");
         RegisterWinCondTip(SpectreWin, () => (Roles.Neutral.Spectre.MyRole as ISpawnable).IsSpawnable, "spectre");
         RegisterWinCondTip(TrilemmaWin, () => (Roles.Modifier.Trilemma.MyRole as ISpawnable).IsSpawnable && Roles.Modifier.Trilemma.WinConditionOption.GetValue() == 2, "trilemma");
+        RegisterWinCondTip(TyrantWin, () => (Roles.Neutral.Tyrant.MyRole as ISpawnable).IsSpawnable, "tyrant", text => text.Replace("%NUM%", Roles.Neutral.Tyrant.RequiredKillingToWin.ToString()));
     }
 
     private static void RegisterWinCondTip(GameEnd gameEnd, Func<bool> predicate, string name, Func<string,string>? decorator = null)

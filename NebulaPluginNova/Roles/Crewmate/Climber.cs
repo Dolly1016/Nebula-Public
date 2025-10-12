@@ -31,7 +31,8 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         GameActionTypes.HookshotAction = new("hookshot", this, isPhysicalAction: true);
     }
-    bool DefinedRole.IsLoadableToMadmate => true;
+
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private FloatConfiguration GustCooldownOption = NebulaAPI.Configurations.Configuration("options.role.climber.gustCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
 

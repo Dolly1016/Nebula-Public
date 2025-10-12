@@ -163,7 +163,7 @@ public class DevStudio : MonoBehaviour
                 new(new MetaWidgetOld.Text(new Utilities.TextAttributeOld(Utilities.TextAttributeOld.TitleAttr) { Font = VanillaAsset.BrookFont, Styles = TMPro.FontStyles.Normal, Size = new(4f, 0.45f) }.EditFontSize(5.2f)) { TranslationKey = "devStudio.ui.main.title" }, 3f),
                 new(new MetaWidgetOld.Button(()=> {
                     PremultipliedConversion.ConvertImages("Utility/Original", "Utility/Multiplied");
-                }, new Utilities.TextAttributeOld(Utilities.TextAttributeOld.NormalAttr) { Styles = TMPro.FontStyles.Normal, Size = new(1.1f, 0.25f) }.EditFontSize(1.5f)) { RawText = "乗算済みα変換" }, 1.2f)
+                }, new Utilities.TextAttributeOld(Utilities.TextAttributeOld.NormalAttr) { Styles = TMPro.FontStyles.Normal, Size = new(1.1f, 0.25f) }.EditFontSize(1.5f)) { TranslationKey = "ui.utility.premultipliedConversion" }, 1.2f)
                 )
             );
         widget.Append(new MetaWidgetOld.VerticalMargin(0.2f));

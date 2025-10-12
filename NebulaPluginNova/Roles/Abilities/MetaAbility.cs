@@ -100,15 +100,20 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
                 {
                     GamePlayer.LocalPlayer?.SetRole(r);
                     window.CloseScreen();
-                })).Concat(Roles.AllRoles.Where(r => r.IsJackalizable).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayName.Color(Jackal.MyRole.UnityColor), button =>
+                }))
+                    /*
+                    .Concat(Roles.AllRoles.Where(r => r.IsJackalizable).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayName.Color(Jackal.MyRole.UnityColor), button =>
                 {
                     GamePlayer.LocalPlayer?.SetRole(Jackal.MyRole, Jackal.GenerateArgument(0, r));
                     window.CloseScreen();
-                }))).Concat(Roles.AllRoles.Where(r => r.IsLoadableToMadmate).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, (Language.Translate("role.madmate.prefix") + r.DisplayName).Color(Madmate.MyRole.UnityColor), button =>
+                })))
+                    .Concat(Roles.AllRoles.Where(r => r.IsLoadableToMadmate).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, (Language.Translate("role.madmate.prefix") + r.DisplayName).Color(Madmate.MyRole.UnityColor), button =>
                 {
                     GamePlayer.LocalPlayer?.SetRole(Madmate.MyRole, Madmate.GenerateArgument(r));
                     window.CloseScreen();
-                }))), 4);
+                })))
+                    */
+                    , 4);
             }
             else if (tab == 1)
             {

@@ -44,8 +44,7 @@ public class Nexus : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Define
 
 
     public bool IsEvil => Category == RoleCategory.ImpostorRole;
-    bool DefinedRole.IsJackalizable => IsEvil;
-    bool DefinedRole.IsLoadableToMadmate => !IsEvil;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => IsEvil ? AbilityAssignmentStatus.KillersSide : AbilityAssignmentStatus.CanLoadToMadmate;
     public override IUsurpableAbility CreateAbility(GamePlayer player, int[] arguments) => IsEvil ? new EvilAbility(player, arguments.GetAsBool(0)) : new NiceAbility(player, arguments.GetAsBool(0));
 
     //static internal readonly IntegerConfiguration NumOfChargesOption = NebulaAPI.Configurations.Configuration("options.role.trapper.numOfCharges", (1, 15), 3);

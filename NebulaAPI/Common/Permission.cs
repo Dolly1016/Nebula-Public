@@ -1,4 +1,6 @@
-﻿namespace Virial.Common;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Virial.Common;
 
 [Flags]
 internal enum PermissionResult
@@ -7,6 +9,31 @@ internal enum PermissionResult
     Denied = 0x01,
     Accepted = 0x10,
     Confused = 0x11,
+}
+
+public static class Permissions
+{
+    static private Dictionary<string, Permission> permissions = [];
+    static public bool Register(string name, Permission permission)
+    {
+        if (!permissions.ContainsKey(name))
+        {
+            permissions[name] = permission;
+            return true;
+        }
+        return false;
+    }
+    static public bool TryGetPermission(string name, [MaybeNullWhen(false)]out Permission permission) => permissions.TryGetValue(name, out permission);
+
+    public static Permission OpPermission { get; }
+    public static Permission HideHudPermission { get; }
+    static Permissions()
+    {
+        OpPermission = new();
+        Register("op", OpPermission);
+        HideHudPermission = new();
+        Register("nebula.metaAction.hideHud", HideHudPermission);
+    }
 }
 
 public class Permission
@@ -72,6 +99,12 @@ public class VariablePermissionHolder : IPermissionHolder
     public VariablePermissionHolder AddPermission(Permission permission, bool inverse = false)
     {
         permissions.Add(new(permission, inverse));
+        return this;
+    }
+
+    public VariablePermissionHolder RemovePermission(Permission permission, bool inverse = false)
+    {
+        permissions.RemoveAll(p => p.permission == permission && p.inverse == inverse);
         return this;
     }
 

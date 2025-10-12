@@ -52,7 +52,7 @@ public class Ghost : FlexibleLifespan, IGameOperator
 
         if (indexTime < 0f)
         {
-            index = time > 0f ? (index + 1) % 3 : index + 1;
+            index = time > 0f ? (index + 1) % 2 : index + 1;
             indexTime = 0.2f;
 
             if (index < 9) renderer.sprite = (isWhiteGhost ? ghostWSprite : ghostBSprite).GetSprite(index);
@@ -80,7 +80,7 @@ public class GhostAndFlashAbility : IGameOperator
         if (ev.Player.AmOwner) return;
         if (!ev.Dead.HasAttribute(PlayerAttributes.BuskerEffect))
         {
-            new Ghost(ev.Dead.VanillaPlayer.transform.position, GhostDuration, CommonToken, CanSeeGhostInShadow);
+            new Ghost(ev.Dead.VanillaPlayer.transform.position, GhostDuration, CommonToken, CanSeeGhostInShadow).Register(NebulaAPI.CurrentGame!);
             AmongUsUtil.PlayFlash(FlashColor);
         }
     }
@@ -94,7 +94,7 @@ public class Seer : DefinedSingleAbilityRoleTemplate<Seer.Ability>, HasCitation,
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly FloatConfiguration GhostDurationOption = NebulaAPI.Configurations.Configuration("options.role.seer.ghostDuration", (15f,300f,15f),90f,FloatConfigurationDecorator.Second);
     static public readonly BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("options.role.seer.canSeeGhostsInShadow", false);

@@ -33,7 +33,7 @@ public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>
     private Provocateur() : base("provocateur", new(112, 225, 89), RoleCategory.CrewmateRole, Crewmate.MyTeam, [EmbroilCoolDownOption, EmbroilAdditionalCoolDownOption, EmbroilDurationOption]) { }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, 0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly FloatConfiguration EmbroilCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration EmbroilAdditionalCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.provocateur.embroilAdditionalCoolDown", (0f, 30f, 2.5f), 5f, FloatConfigurationDecorator.Second);

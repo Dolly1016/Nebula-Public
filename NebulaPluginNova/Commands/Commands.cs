@@ -30,12 +30,12 @@ static public class Commands
         CommandManager.RegisterCommand(new WaitCommand(), "nebula::wait");
         CommandManager.RegisterCommand(new RandomCommand(), "nebula::random");
         CommandManager.RegisterCommand(new ShowCommand(), "nebula::show");
+        CommandManager.RegisterCommand(new PermissionCommand(), "nebula::permission");
         CommandManager.RegisterCommand(new EffectCommand(), "nebula::effect");
         CommandManager.RegisterCommand(new GuiHolderCommand(), "gui::holder");
         CommandManager.RegisterCommand(new GuiTextCommand(), "gui::text");
         CommandManager.RegisterCommand(new GuiButtonCommand(), "gui::button");
         CommandManager.RegisterCommand(new GuiArrayerCommand(), "gui::arrayer");
-        CommandManager.RegisterCommand(new RoomCommand(), "gui::room");
         //CommandManager.RegisterCommand(new WalkCommand(), "nebula::walk");
     }
 }

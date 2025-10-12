@@ -21,7 +21,8 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly FloatConfiguration PseudocideCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.busker.pseudocideCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration PseudocideDurationOption = NebulaAPI.Configurations.Configuration("options.role.busker.pseudocideDuration", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);

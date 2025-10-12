@@ -81,8 +81,8 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
 
     static private readonly FloatConfiguration DisturbCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbCoolDown", (10f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration DisturbDurationOption = NebulaAPI.Configurations.Configuration("options.role.disturber.disturbDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);

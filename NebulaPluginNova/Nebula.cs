@@ -56,11 +56,11 @@ public class NebulaPlugin
     public const string PluginVersion = "2.25.6.0";
 
     //public const string VisualVersion = "v2.25.6";
-    public const string VisualVersion = "Snapshot 25.10.04a";
+    public const string VisualVersion = "Snapshot 25.10.12b";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1465";
+    public const string PluginBuildNumStr = "1471";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -131,8 +131,11 @@ public class NebulaPlugin
         InterstellarLoader.Load();
     }
 
+    static public bool IsAndroid { get; private set; }
+    
     static internal void LoadInternal(bool android)
     {
+        IsAndroid = android;
         Log = new(android);
 
         void LoadLibrary(string path)

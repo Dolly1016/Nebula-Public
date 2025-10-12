@@ -102,8 +102,5 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
      => new KillCoolDownConfiguration(title, id, defaultType, immediateSelection.Selection, immediateDefaultValue, relativeSelection.Selection, relativeDefaultValue, ratioSelection.Selection, ratioDefaultValue, predicate, baseKillCooldown);
 
     ITaskConfiguration Configurations.TaskConfiguration(string id, bool forceTasks, bool containsCommonTasks, Func<bool>? predicate, string? translationKey) => new TaskConfiguration(id, forceTasks, containsCommonTasks, predicate, translationKey);
-
-    bool Configurations.CanJackalize => Jackal.JackalizedImpostorOption;
-    bool Configurations.CanMadden =>  Madmate.MaddenRoleOption;
 }
  

@@ -63,9 +63,9 @@ public enum VirtualKeyInput
     /// </summary>
     Mute,
     /// <summary>
-    /// ボイスチャットのフィルタリング操作。
+    /// ボイスチャットのラジオ切り替え操作。
     /// </summary>
-    VCFilter,
+    VCRadio,
     /// <summary>
     /// ヘルプ画面を開く操作。
     /// </summary>

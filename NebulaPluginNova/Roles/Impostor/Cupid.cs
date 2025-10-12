@@ -37,7 +37,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
     //static private readonly BoolConfiguration SyncKillAndCleanCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cleaner.syncKillAndCleanCoolDown", true);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), GamePlayer.GetPlayer((byte)arguments.Get(1, 255)), GamePlayer.GetPlayer((byte)arguments.Get(2, 255)), arguments.Get(3, 0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Cupid MyRole = new();
     static private readonly GameStatsEntry StatsLovers = NebulaAPI.CreateStatsEntry("stats.cupid.lovers", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsLaserCupid = NebulaAPI.CreateStatsEntry("stats.cupid.laserCupid", GameStatsCategory.Roles, MyRole);

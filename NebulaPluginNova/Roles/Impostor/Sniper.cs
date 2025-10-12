@@ -43,7 +43,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillImpostor", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, player.IsImpostor ? AmongUsUtil.VanillaKillCoolDown : Jackal.KillCooldown, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     static public Sniper MyRole = new Sniper();
 
@@ -196,7 +196,11 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
 
-                    if (StoreRifleOnFireOption) RpcEquip.Invoke((MyPlayer.PlayerId, false));
+                    if (StoreRifleOnFireOption)
+                    {
+                        RpcEquip.Invoke((MyPlayer.PlayerId, false));
+                        equipButton.SetLabel("equip");
+                    }
 
                     acTokenAnother.Value.triggered = true;
 

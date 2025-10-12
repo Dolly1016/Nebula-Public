@@ -211,7 +211,10 @@ public class Secret : DefinedRoleTemplate, DefinedRole
             if (AmongUsClient.Instance.AmHost && ShownSecret.EvilConditionTypeOption.GetValue() == 1)
             {
                 //死者、非インポスター、シークレットしかいないとき
-                if (NebulaGameManager.Instance?.AllPlayerInfo.All(p => p.IsDead || p.Role.Role.Category != RoleCategory.ImpostorRole || p.Role.Role == MyEvilRole) ?? false)
+                //if (NebulaGameManager.Instance?.AllPlayerInfo.All(p => p.IsDead || p.Role.Role.Category != RoleCategory.ImpostorRole || p.Role.Role == MyEvilRole) ?? false)
+                
+                //死んだプレイヤーがインポスターのとき
+                if(ev.Player.IsImpostor)
                 {
                     var selected = NebulaGameManager.Instance?.AllPlayerInfo.Where(p => p.Role.Role == MyEvilRole).ToArray().Random();
                     if(selected != null && selected.Role is EvilInstance ei) ScheduleSendArousalRpc(selected, ei.savedArgs);

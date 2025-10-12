@@ -123,6 +123,7 @@ public enum AttributeAsset
     /// 主にオーバーレイ向けの本文用可変サイズテキスト属性です。
     /// </summary>
     OverlayContent,
+    OverlayBold,
 
     /// <summary>
     /// SerializableDocumentのTextStyle"Standard"で提供されているテキスト属性です。

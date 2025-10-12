@@ -23,8 +23,8 @@ public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCit
     static private readonly BoolConfiguration SyncKillAndCleanCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cleaner.syncKillAndCleanCoolDown", true);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     static public readonly Cleaner MyRole = new();
     static private readonly GameStatsEntry StatsClean = NebulaAPI.CreateStatsEntry("stats.cleaner.clean", GameStatsCategory.Roles, MyRole);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility

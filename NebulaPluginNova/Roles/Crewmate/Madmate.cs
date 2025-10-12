@@ -1,6 +1,7 @@
 ﻿using Epic.OnlineServices;
 using Nebula.Game.Statistics;
 using Nebula.Modules.GUIWidget;
+using Nebula.Roles.Neutral;
 using UnityEngine;
 using Virial;
 using Virial.Assignable;
@@ -11,9 +12,19 @@ using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
 using Virial.Media;
+using Virial.Runtime;
 using Virial.Text;
 
 namespace Nebula.Roles.Crewmate;
+
+[NebulaPreprocess(PreprocessPhase.BuildAssignmentTypes)]
+internal static class MadmateAssignmentSetUp
+{
+    public static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        preprocessor.RegisterAssignmentType(() => Madmate.MyRole, (lastArgs, role) => Madmate.GenerateArgument(role), "madden", new(Palette.ImpostorRed), (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToMadmate), () => (Madmate.MyRole as ISpawnable).IsSpawnable && Madmate.MaddenRoleOption);
+    }
+}
 
 public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 {
@@ -153,7 +164,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
                 suicideButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
             }
 
-            if (MyMadden != null) MaddenAbility = MyMadden.GetMaddenAbility(MyPlayer, evacuatedArguments)?.Register(this);
+            if (MyMadden != null) MaddenAbility = MyMadden.GetAbilityOnRole(MyPlayer, AbilityAssignmentStatus.CanLoadToMadmate, evacuatedArguments)?.Register(this);
         }
 
         public void OnGameStart(GameStartEvent ev)

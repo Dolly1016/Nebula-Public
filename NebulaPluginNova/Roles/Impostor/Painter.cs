@@ -19,8 +19,7 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
     static private BoolConfiguration TransformAfterMeetingOption = NebulaAPI.Configurations.Configuration("options.role.painter.transformAfterMeeting", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
 
     static public Painter MyRole = new Painter();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.painter.sample", GameStatsCategory.Roles, MyRole);

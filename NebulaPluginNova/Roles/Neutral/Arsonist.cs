@@ -13,7 +13,11 @@ namespace Nebula.Roles.Neutral;
 public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.arsonist", new(229, 93, 0), TeamRevealType.OnlyMe);
-    private Arsonist():base("arsonist", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [DouseCoolDownOption, DouseDurationOption, VentConfiguration]) { }
+    private Arsonist():base("arsonist", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [DouseCoolDownOption, DouseDurationOption, VentConfiguration])
+    {
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Arsonist.png");
+
+    }
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player,arguments);

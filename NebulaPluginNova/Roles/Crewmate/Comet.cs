@@ -20,7 +20,7 @@ public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRol
     }
     
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly FloatConfiguration BlazeCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeCoolDown", (5f,60f,2.5f),20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration BlazeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeSpeed", (0.5f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);

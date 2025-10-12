@@ -11,12 +11,46 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
 
 namespace Nebula.Roles.Neutral;
 
+[NebulaPreprocess(PreprocessPhase.BuildAssignmentTypes)]
+internal static class JackalAssignmentSetUp
+{
+    static public Virial.Color Color = new(8, 190, 245);
+    public static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        preprocessor.RegisterAssignmentType(() => Neutral.Jackal.MyRole, (lastArgs, role) => Jackal.GenerateArgument(lastArgs[0], role), "jackalized", Color, (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToKillNeutral), () => (Jackal.MyRole as ISpawnable).IsSpawnable && Jackal.JackalizedImpostorOption);
+    }
+}
+
+internal class UsurpedImpostorAbility : FlexibleLifespan, IUsurpableAbility
+{
+    public DefinedRole Role => jackalizedRole;
+    private DefinedRole jackalizedRole;
+    private IUsurpableAbility jackalizedAbility;
+    public IUsurpableAbility Ability => jackalizedAbility;
+    bool IUsurpableAbility.IsUsurped => jackalizedAbility.IsUsurped;
+    bool IUsurpableAbility.Usurp() => jackalizedAbility.Usurp();
+    public GamePlayer MyPlayer { get; private init; }
+    public bool AmOwner => MyPlayer.AmOwner;
+
+    public UsurpedImpostorAbility(GamePlayer player, DefinedRole role, IUsurpableAbility ability)
+    {
+        this.MyPlayer = player;
+        this.jackalizedRole = role;
+        this.jackalizedAbility = ability.Register(this);
+    }
+
+    IEnumerable<IPlayerAbility> IPlayerAbility.SubAbilities => [jackalizedAbility];
+    int[] IPlayerAbility.AbilityArguments => [jackalizedRole.Id, .. jackalizedAbility.AbilityArguments];
+}
+
+
 public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static readonly public RoleTeam MyTeam = new Team("teams.jackal", new(8, 190, 245), TeamRevealType.OnlyMe, () => KillCooldown);
+    static readonly public RoleTeam MyTeam = new Team("teams.jackal", JackalAssignmentSetUp.Color, TeamRevealType.OnlyMe, () => KillCooldown);
 
     private Jackal() : base("jackal", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [KillCoolDownOption, CanCreateSidekickOption, NumOfKillingToCreateSidekickOption, JackalizedImpostorOption],
     othersAssignments: () => {
@@ -25,6 +59,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
     })
     {
         ConfigurationHolder?.ScheduleAddRelated(() => [Sidekick.MyRole.ConfigurationHolder!]);
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Jackal.png");
     }
 
     DefinedRole[] DefinedRole.AdditionalRoles => Sidekick.AssignedSidekickOption && !Sidekick.IsModifierOption ? [Sidekick.MyRole] : [];
@@ -74,41 +109,19 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
     {
         var role = Roles.GetRole(arguments.Get(0, -1));
         var ability = role?.GetUsurpedAbility(player, arguments.Skip(1).ToArray());
-        if (ability != null) return new UsurpedJackalizedAbility(player, role!, ability);
+        if (ability != null) return new UsurpedImpostorAbility(player, role!, ability);
         return null;
-    }
-
-    private class UsurpedJackalizedAbility : FlexibleLifespan, IUsurpableAbility
-    {
-        public DefinedRole Role => jackalizedRole;
-        private DefinedRole jackalizedRole;
-        private IUsurpableAbility jackalizedAbility;
-        public IUsurpableAbility Ability => jackalizedAbility;
-        bool IUsurpableAbility.IsUsurped => jackalizedAbility.IsUsurped;
-        bool IUsurpableAbility.Usurp() => jackalizedAbility.Usurp();
-        public GamePlayer MyPlayer { get; private init; }
-        public bool AmOwner => MyPlayer.AmOwner;
-
-        public UsurpedJackalizedAbility(GamePlayer player, DefinedRole role, IUsurpableAbility ability)
-        {
-            this.MyPlayer = player;
-            this.jackalizedRole = role;
-            this.jackalizedAbility = ability.Register(this);
-        }
-
-        IEnumerable<IPlayerAbility> IPlayerAbility.SubAbilities => [jackalizedAbility];
-        int[] IPlayerAbility.AbilityArguments => [jackalizedRole.Id, ..jackalizedAbility.AbilityArguments];
     }
 
     string DefinedRole.GetDisplayName(IPlayerAbility ability)
     {
-        if (ability is UsurpedJackalizedAbility a) return a.Role.GetDisplayName(a.Ability);
+        if (ability is UsurpedImpostorAbility a) return a.Role.GetDisplayName(a.Ability);
         return (this as DefinedRole).DisplayName;
     }
 
     string DefinedRole.GetDisplayShort(IPlayerAbility ability)
     {
-        if (ability is UsurpedJackalizedAbility a) return a.Role.GetDisplayShort(a.Ability);
+        if (ability is UsurpedImpostorAbility a) return a.Role.GetDisplayShort(a.Ability);
         return (this as DefinedRole).DisplayShort;
     }
 
@@ -207,10 +220,10 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                 TMPro.TextMeshPro? leftText = null;
                 ModAbilityButton? sidekickButton = null;
 
-                if ((inherited == 0 && CanCreateSidekickOption && !Sidekick.AssignedSidekickOption) || Sidekick.CanCreateSidekickChainlyOption)
+                if (CanCreateSidekickOption && ((inherited == 0 && !Sidekick.AssignedSidekickOption) || Sidekick.CanCreateSidekickChainlyOption))
                 {
                     sidekickButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, myTracker, new PlayerInteractParameter(RealPlayerOnly: true), false, true, Virial.Compat.VirtualKeyInput.SidekickAction, null,
-                        15f, "sidekick",sidekickButtonSprite,
+                        15f, "sidekick", sidekickButtonSprite,
                         (p, button) =>
                         {
                             if (Sidekick.IsModifierOption)
@@ -276,12 +289,13 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                     }
                 }, this);
 
-#if PC
-                //if (GeneralConfigurations.JackalRadioOption) VoiceChatManager.RegisterRadio(this, IsMySidekick, "voiceChat.info.jackalRadio", MyRole.RoleColor.ToUnityColor());
-#endif
+                if (GeneralConfigurations.JackalRadioOption)
+                {
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, IsMySidekick, this, MyRole.UnityColor);
+                }
             }
 
-            JackalizedAbility = MyJackalized?.GetJackalizedAbility(MyPlayer, StoredJackalizedArgument)?.Register(this);
+            JackalizedAbility = MyJackalized?.GetAbilityOnRole(MyPlayer, AbilityAssignmentStatus.CanLoadToKillNeutral, StoredJackalizedArgument)?.Register(this);
         }
 
         //ジャッカルはサイドキックとジャッカルを識別できる
@@ -468,9 +482,10 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
                 }
 
-#if PC
-                //if (GeneralConfigurations.JackalRadioOption) VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);
-#endif
+                if (GeneralConfigurations.JackalRadioOption)
+                {
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p=> p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.UnityColor);
+                }
             }
         }
 
@@ -534,9 +549,10 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
                 AmongUsUtil.PlayCustomFlash(Jackal.MyRole.UnityColor, 0f, 0.25f, 0.4f);
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
-#if PC
-                //if (GeneralConfigurations.JackalRadioOption) VoiceChatManager.RegisterRadio(this, (p) => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, "voiceChat.info.jackalRadio", MyRole.UnityColor);                
-#endif
+                if (GeneralConfigurations.JackalRadioOption)
+                {
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.UnityColor);
+                }
 
                 if (MyPlayer.Role.Role.Category == RoleCategory.ImpostorRole && MyPlayer.TryGetModifier<Lover.Instance>(out _))
                     new StaticAchievementToken("threeRoles");

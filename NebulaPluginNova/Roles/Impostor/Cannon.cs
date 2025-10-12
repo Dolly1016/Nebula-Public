@@ -23,8 +23,8 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
 
     static private readonly FloatConfiguration MarkCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cannon.markCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration CannonCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
@@ -331,7 +331,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
         NebulaManager.Instance.StartCoroutine(CoPlayJumpAnimation(message.player.VanillaPlayer, message.player.Position, message.to).WrapToIl2Cpp());
 
         //Cannon自身は称号に関する情報を更新する。
-        if(GamePlayer.LocalPlayer.PlayerId == message.cannonId && GamePlayer.LocalPlayer.Role is Ability cannon)
+        if(GamePlayer.LocalPlayer?.PlayerId == message.cannonId && GamePlayer.LocalPlayer.TryGetAbility<Ability>(out var cannon))
         {
             cannon.UpdateAchievementData(message.num, message.player);
         }

@@ -2,6 +2,8 @@
 using Nebula.Roles.Crewmate;
 using Nebula.Roles.Neutral;
 using Virial.Assignable;
+using Virial.Events.Role;
+using static Rewired.Glyphs.UnityUI.UnityUITextMeshProGlyphHelper.Tag;
 
 namespace Nebula.Roles.Assignment;
 
@@ -57,6 +59,7 @@ public class FreePlayRoleAllocator : IRoleAllocator
         foreach(var p in impostors.Concat(others))
         {
             table.SetRole(p, Crewmate.Crewmate.MyRole);
+            GameOperatorManager.Instance?.Run<RoleAllocatorSetRoleEvent>(new(this, Crewmate.Crewmate.MyRole, null));
         }
 
         table.Determine();
@@ -83,8 +86,8 @@ public class StandardRoleAllocator : IRoleAllocator
     private void OnSetRole(DefinedRole role,params List<RoleChance>[] pool)
     {
         foreach(var remove in GeneralConfigurations.exclusiveAssignmentOptions.Select(e => e.OnAssigned(role))) foreach(var removeRole in remove) foreach (var p in pool) p.RemoveAll(r => r.role == removeRole);
+        GameOperatorManager.Instance?.Run<RoleAllocatorSetRoleEvent>(new(this, role, role => { foreach (var p in pool) p.RemoveAll(r => r.role == role); }));
     }
-
 
     private void CategoryAssign(RoleTable table, int left,List<byte> main, List<byte> others, List<RoleChance> rolePool, List<RoleChance>[] allRolePool, Action<DefinedRole, byte>? onSelected = null)
     {
@@ -178,46 +181,40 @@ public class StandardRoleAllocator : IRoleAllocator
 
         //ロールプールを作る
         List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r) { cost = 1,otherCost = 0 }));
-        List<RoleChance> GetJackalizedRolePool() => new(Roles.AllRoles.Where(r => r.IsJackalizable && (r.JackalAllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.JackalAllocationParameters) { cost = 1, otherCost = 0 }));
-        List<RoleChance> GetMaddenRolePool() => new(Roles.AllRoles.Where(r => r.IsLoadableToMadmate && (r.MadmateAllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.MadmateAllocationParameters) { cost = 1, otherCost = 0 }));
+        List<RoleChance>[] customChances = AssignmentType.AllTypes.Select(t => new List<RoleChance>(Roles.AllRoles.Where(r => t.Predicate.Invoke(r.AssignmentStatus, r) && (r.GetCustomAllocationParameters(t)?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.GetCustomAllocationParameters(t)) { cost = 1, otherCost = 0 }))).ToArray();
 
         List<RoleChance> crewmateRoles = GetRolePool(RoleCategory.CrewmateRole);
         List<RoleChance> impostorRoles = GetRolePool(RoleCategory.ImpostorRole);
         List<RoleChance> neutralRoles = GetRolePool(RoleCategory.NeutralRole);
-        List<RoleChance> jackalizedRoles = GetJackalizedRolePool();
-        List<RoleChance> maddenRoles = GetMaddenRolePool();
-        List<RoleChance>[] allRoles = [crewmateRoles, impostorRoles, neutralRoles, jackalizedRoles, maddenRoles];
+        List<RoleChance>[] allRoles = [crewmateRoles, impostorRoles, neutralRoles, ..customChances];
+
+        void AssignCustomAbilities(RoleCategory category)
+        {
+            foreach (var t in AssignmentType.AllTypes)
+            {
+                if (t.Category == category)
+                {
+                    var targetRole = t.RelatedRole;
+                    var players = table.roles.Where(r => r.role == targetRole).Select(r => r.playerId).ToList();
+
+                    CategoryAssign(table, players.Count, players, players, customChances[t.Id], allRoles, (role, player) => table.EditRole(player, last => (last.role, t.EditArguments(last.argument, role))));
+                }
+            }
+        }
 
         CategoryAssign(table, GeneralConfigurations.AssignmentImpostorOption, impostors, others, impostorRoles, allRoles);
+        AssignCustomAbilities(RoleCategory.ImpostorRole);
         CategoryAssign(table, GeneralConfigurations.AssignmentNeutralOption, others, others, neutralRoles, allRoles);
-
         var jackals = table.roles.Where(r => r.role == Jackal.MyRole).Select(r => r.playerId).ToList();
         //ジャッカルIDの割り振り
         for (int i = 0; i < jackals.Count; i++) table.EditRole(jackals[i], (last) => (last.role, [i]));
-        //ジャッカル化役職の割り当て
-        if (Jackal.JackalizedImpostorOption)
-        {
-            CategoryAssign(table, jackals.Count, jackals, jackals, jackalizedRoles, allRoles, (role, player) =>
-            {
-                table.EditRole(player, last => (last.role,  Jackal.GenerateArgument(last.argument[0], role)));
-            });
-        }
+        AssignCustomAbilities(RoleCategory.NeutralRole);
 
         CategoryAssign(table, GeneralConfigurations.AssignmentCrewmateOption, others, others, crewmateRoles, allRoles);
+        AssignCustomAbilities(RoleCategory.CrewmateRole);
 
         foreach (var p in impostors) table.SetRole(p, Impostor.Impostor.MyRole);
         foreach (var p in others) table.SetRole(p, Crewmate.Crewmate.MyRole);
-
-        var madmates = table.roles.Where(r => r.role == Madmate.MyRole).Select(r => r.playerId).ToList();
-        //マッド化役職の割り当て
-        if (Madmate.MaddenRoleOption)
-        {
-            CategoryAssign(table, madmates.Count, madmates, madmates, maddenRoles, allRoles, (role, player) =>
-            {
-                table.EditRole(player, last => (last.role, Madmate.GenerateArgument(role)));
-            });
-        }
-
 
 
         foreach (var m in Roles.AllAllocatableModifiers().OrderBy(im => im.AssignPriority)) m.TryAssign(table);

@@ -25,8 +25,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
     static private readonly FloatConfiguration AccelRateUndergroundOption = NebulaAPI.Configurations.Configuration("options.role.hadar.accelRateUnderground", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
 
     static public readonly Hadar MyRole = new();
     static private readonly GameStatsEntry StatsDive = NebulaAPI.CreateStatsEntry("stats.hadar.dive", GameStatsCategory.Roles, MyRole);

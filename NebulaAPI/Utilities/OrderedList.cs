@@ -39,6 +39,16 @@ public class OrderedList<T, Key> : IEnumerable<T>, IReadOnlyCollection<T>
     }
 
     public bool Remove(T item) => list.Remove(item);
+    public void RemoveAll(Func<T, bool> remove)
+    {
+        var node = list.First;
+        while (node != null)
+        {
+            var nextNode = node.Next;
+            if (remove.Invoke(node.Value)) list.Remove(node);
+            node = nextNode;
+        }
+    }
 
     public OrderedList(Func<T, Key> keySelector, Func<Key, Key, int> keyComparer)
     {

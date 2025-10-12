@@ -580,7 +580,7 @@ public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCit
     Citation? HasCitation.Citation => Citations.SuperNewRoles;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.GetAsBool(1));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly BoolConfiguration PutJusticeOnTheBalanceOption = new BoolConfigurationImpl("options.role.justice.putJusticeOnTheBalance", false);
     static public readonly FloatConfiguration JusticeMeetingTimeOption = NebulaAPI.Configurations.Configuration("options.role.justice.justiceMeetingTime", (30f,300f,15f), 60f, FloatConfigurationDecorator.Second);

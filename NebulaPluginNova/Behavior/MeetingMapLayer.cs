@@ -330,7 +330,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
             {
                 NebulaManager.Instance.SetHelpWidget(Button, GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
                     IsPlayerImage ? GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
-                    (NebulaGameManager.Instance!.TryGetTitle(PlayerId, out var title) && title != null) ? GUI.API.RawText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), Language.Translate(title.GetLocalizedText()).Sized(80).Color(DynamicPalette.PlayerColors[PlayerId])) : null,
+                    (NebulaGameManager.Instance!.TryGetTitle(PlayerId, out var title) && title != null) ? GUI.API.RawText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), title.GetLocalizedText().Sized(80).Color(DynamicPalette.PlayerColors[PlayerId])) : null,
                     GUI.API.RawText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), player.PlayerName)
                     ) : null,
                     GUI.API.LocalizedText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), "meeting.memo.control.icon")

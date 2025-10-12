@@ -25,7 +25,7 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly FloatConfiguration SearchCooldownOption = NebulaAPI.Configurations.Configuration("options.role.psychic.searchCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration SearchDurationOption = NebulaAPI.Configurations.Configuration("options.role.psychic.searchDuration", (float[])([1f,2f,3f,4f,5f,7.5f,10f,15f,20f]), 5f, FloatConfigurationDecorator.Second);
@@ -57,7 +57,6 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
         GamePlayer? lastReported = null;
 
         [Local]
-        [OnlyMyPlayer]
         void OnReportedDead(PlayerDieEvent ev)
         {
             if (lastReported == ev.Player && (ev.Player.PlayerState == PlayerState.Guessed || ev.Player.PlayerState == PlayerState.Exiled)) new StaticAchievementToken("psychic.challenge");

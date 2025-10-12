@@ -201,10 +201,9 @@ public static class PlayerRemoveTaskPatch
 {
     static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerTask task)
     {
-        if (__instance.AmOwner)
+        if (__instance.AmOwner && (NebulaGameManager.Instance?.GameState ?? 0) < NebulaGameStates.WaitGameResult)
         {
             GameOperatorManager.Instance?.Run(new PlayerTaskRemoveLocalEvent(GamePlayer.LocalPlayer, task));
-            Debug.Log("Remove Task");
         }
     }
 }

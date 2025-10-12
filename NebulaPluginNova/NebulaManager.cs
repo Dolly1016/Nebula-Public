@@ -19,6 +19,7 @@ using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Virial;
+using Virial.Common;
 using Virial.Events.Game;
 using Virial.Helpers;
 using Virial.Media;
@@ -426,7 +427,7 @@ public class NebulaManager : MonoBehaviour
         { DefaultKeyInput = new(KeyCode.F2) });
 
         commands.Add(new("help.command.hideHud",
-            () => HudManager.InstanceExists && AmongUsUtil.IsLocalServer(),
+            () => HudManager.InstanceExists && (AmongUsUtil.IsLocalServer() || (GamePlayer.LocalPlayer?.Test(Permissions.HideHudPermission) ?? false)),
             () =>
             {
                 if (!HudManager.InstanceExists) return;

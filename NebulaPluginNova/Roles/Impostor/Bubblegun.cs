@@ -37,7 +37,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
     static private readonly BoolConfiguration bubblePopWhenHitWallOption = NebulaAPI.Configurations.Configuration("options.role.bubblegun.bubblePopWhenHitWall", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0), arguments.Get(1, maxBubblesOption));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     static public readonly Bubblegun MyRole = new();
     static private readonly GameStatsEntry StatsBubble = NebulaAPI.CreateStatsEntry("stats.bubblegun.bubble", GameStatsCategory.Roles, MyRole);

@@ -33,7 +33,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
     static private readonly FloatConfiguration maxBerserkDurationOption = NebulaAPI.Configurations.Configuration("options.role.berserker.maxBerserkDuration", (10f, 180f, 5f), 30f, FloatConfigurationDecorator.Second, () => canCalmDownOption);
     
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Berserker MyRole = new();
     static private readonly GameStatsEntry StatsBerserk = NebulaAPI.CreateStatsEntry("stats.berserker.berserk", GameStatsCategory.Roles, MyRole);
     public class BerserkMode : FlexibleLifespan, IGameOperator, IBindPlayer

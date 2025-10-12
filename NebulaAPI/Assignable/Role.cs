@@ -248,14 +248,7 @@ public interface DefinedSingleAssignable : DefinedCategorizedAssignable, ISpawna
     /// 割り当てのパラメータを返します。ゲーム内オプションで設定した割り当てを表します。
     /// </summary>
     AllocationParameters? AllocationParameters { get; }
-    /// <summary>
-    /// ジャッカル化割り当てのパラメータを返します。ゲーム内オプションで設定した割り当てを表します。
-    /// </summary>
-    AllocationParameters? JackalAllocationParameters { get => null; }
-    /// <summary>
-    /// マッド化割り当てのパラメータを返します。ゲーム内オプションで設定した割り当てを表します。
-    /// </summary>
-    AllocationParameters? MadmateAllocationParameters { get => null; }
+    AllocationParameters? GetCustomAllocationParameters(AssignmentType assignmentType);
 }
 
 /// <summary>
@@ -292,6 +285,62 @@ public interface IGuessed
     /// Guesserによる推測対象になるか設定する変数を返します。通常、オプションがこの値を変更します。
     /// </summary>
     ISharableVariable<bool>? CanBeGuessVariable { get; internal set; }
+}
+
+public class AssignmentType
+{
+    private static List<AssignmentType> types = [];
+    internal static int NumOfTypes => types.Count;
+    private int id = -1;
+    internal int Id => id;
+    private string postfix;
+    public string Postfix => postfix;
+    private Func<DefinedRole> relatedRole;
+    public DefinedRole RelatedRole => relatedRole.Invoke();
+    public RoleCategory Category => RelatedRole.Category;
+    private Func<int[], DefinedRole, int[]> argumentEditor;
+    private string GetTranslationKey(string orig) => orig + "." + postfix;
+    internal int[] EditArguments(int[] args, DefinedRole abilityRole) => argumentEditor.Invoke(args, abilityRole);
+    internal AssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Virial.Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive)
+    {
+        this.argumentEditor = argumentEditor;
+        this.relatedRole = relatedRole;
+        this.postfix = postfix;
+        Predicate = predicate;
+        this.isActive = isActive;
+        Color = color?.ToUnityColor() ?? UnityEngine.Color.white;
+
+        types.Add(this);
+    }
+
+    internal static void SortAllTypes()
+    {
+        types.Sort((t1, t2) => string.Compare(t1.postfix, t2.postfix));
+        for(int i = 0; i < types.Count; i++) types[i].id = i;
+    }
+
+    static public IEnumerable<AssignmentType> AllTypes => types;
+
+    public string CountTranslationKey => GetTranslationKey("options.role.count");
+    public string ChanceTranslationKey => GetTranslationKey("options.role.chance");
+
+    internal UnityEngine.Color Color { get; }
+    public Func<AbilityAssignmentStatus, DefinedRole, bool> Predicate { get; }
+    private Func<bool> isActive { get; }
+    public bool IsActive => isActive.Invoke();
+}
+
+[Flags]
+public enum AbilityAssignmentStatus
+{
+    CannotLoad = 0x00,
+    CanLoadToCrewmate = 0x01,
+    CanLoadToMadmate = 0x02,
+    CanLoadToImpostor = 0x04,
+    CanLoadToKillNeutral = 0x08,
+    CanLoadToNeutral = 0x10,
+    Killers = CanLoadToImpostor | CanLoadToKillNeutral,
+    KillersSide = CanLoadToImpostor | CanLoadToKillNeutral | AbilityAssignmentStatus.CanLoadToMadmate,
 }
 
 /// <summary>
@@ -407,35 +456,8 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// </summary>
     string DisplayIntroBlurb => GeneralBlurb;
 
-    /// <summary>
-    /// ジャッカル化可能な場合はtrueを返します。
-    /// ジャッカル用作用素を生成できる必要があります。
-    /// </summary>
-    bool IsJackalizable => false;
-
-    /// <summary>
-    /// ジャッカル化可能な場合はジャッカル化能力を生成します。
-    /// ジャッカル化可能でない場合の動作は未定義で構いません。
-    /// </summary>
-    /// <param name="jackal">割り当て対象のプレイヤー。</param>
-    /// <param name="arguments">割り当てのパラメータ。</param>
-    /// <returns></returns>
-    IPlayerAbility GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => null!;
-
-    /// <summary>
-    /// マッド化可能な場合はtrueを返します。
-    /// マッドメイト用作用素を生成できる必要があります。
-    /// </summary>
-    bool IsLoadableToMadmate => false;
-
-    /// <summary>
-    /// マッド化可能な場合はマッドメイト化能力を生成します。
-    /// マッドメイト化可能でない場合の動作は未定義で構いません。
-    /// </summary>
-    /// <param name="madmate">割り当て対象のプレイヤー。</param>
-    /// <param name="arguments">割り当てのパラメータ。</param>
-    /// <returns></returns>
-    IPlayerAbility GetMaddenAbility(Virial.Game.Player madmate, int[] arguments) => null!;
+    AbilityAssignmentStatus AssignmentStatus => AbilityAssignmentStatus.CannotLoad;
+    IPlayerAbility GetAbilityOnRole(Virial.Game.Player player, AbilityAssignmentStatus assignmentType, int[] arguments) => null!;
 
     /// <summary>
     /// 簒奪された能力を生成します。
@@ -481,8 +503,8 @@ public interface DefinedSingleAbilityRole<Ability> : DefinedRole, RuntimeAssigna
     Ability CreateAbility(Virial.Game.Player player, int[] arguments);
     private IUsurpableAbility? CreateUsurpedAbility(Virial.Game.Player player, int[] arguments) => typeof(Ability).IsAssignableTo(typeof(IUsurpableAbility)) ? CreateAbility(player, arguments) as IUsurpableAbility : null;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new RuntimeSingleAbilityAssignable<Ability>(player, this, arguments);
-    IPlayerAbility DefinedRole.GetJackalizedAbility(Virial.Game.Player jackal, int[] arguments) => IsJackalizable ? CreateAbility(jackal, arguments) : null!;
-    IPlayerAbility DefinedRole.GetMaddenAbility(Virial.Game.Player madmate, int[] arguments) => IsLoadableToMadmate ? CreateAbility(madmate, arguments) : null!;
+    IPlayerAbility DefinedRole.GetAbilityOnRole(Virial.Game.Player player, AbilityAssignmentStatus assignmentType, int[] arguments) => CreateAbility(player, arguments);
+
     IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments) => CreateUsurpedAbility(player, arguments);
 
     string DefinedRole.GetDisplayName(IPlayerAbility ability) => DisplayName;

@@ -36,7 +36,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.raider.canKillImpostor", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Raider MyRole = new();
     static private GameStatsEntry StatsThrown = NebulaAPI.CreateStatsEntry("stats.raider.thrown", GameStatsCategory.Roles, MyRole);
     [NebulaPreprocess(PreprocessPhase.PostRoles)]

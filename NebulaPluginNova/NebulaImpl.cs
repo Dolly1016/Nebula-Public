@@ -78,6 +78,8 @@ public class NebulaImpl : INebula
     Virial.Utilities.IHasher Hasher => NebulaHasher.API;
 
     IModuleFactory INebula.Modules => factory;
+
+    bool INebula.IsAndroid =>  NebulaPlugin.IsAndroid;
 }
 
 internal static class UnboxExtension

@@ -42,7 +42,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
 
 
     static public readonly Doppelganger MyRole = new();
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     //static private readonly GameStatsEntry StatsBait = NebulaAPI.CreateStatsEntry("stats.bait.bait", GameStatsCategory.Roles, MyRole);
     //static private readonly GameStatsEntry StatsKiller = NebulaAPI.CreateStatsEntry("stats.bait.killer", GameStatsCategory.Roles, MyRole);

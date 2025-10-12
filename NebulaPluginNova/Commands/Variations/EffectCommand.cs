@@ -1,4 +1,5 @@
 ﻿using Virial.Command;
+using Virial.Common;
 using Virial.Compat;
 using Virial.Game;
 
@@ -38,7 +39,7 @@ public class EffectCommand : ICommand
 
     CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
     {
-        if (CommandHelper.DenyByPermission(env, PlayerModInfo.OpPermission, out var p)) return p;
+        if (CommandHelper.DenyByOpPermission(env, out var p)) return p;
 
         if (arguments.Count != 3)
             return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " <type> <target> <structure>");

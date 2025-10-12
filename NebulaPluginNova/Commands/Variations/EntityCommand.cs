@@ -41,7 +41,7 @@ public class EntityCommand : ICommand
 
     CoTask<ICommandToken> ICommand.Evaluate(string label, IReadOnlyArray<ICommandToken> arguments, CommandEnvironment env)
     {
-        if (CommandHelper.DenyByPermission(env, PlayerModInfo.OpPermission, out var p)) return p;
+        if (CommandHelper.DenyByOpPermission(env, out var p)) return p;
 
         if (arguments.Count < 2)
             return new CoImmediateErrorTask<ICommandToken>(env.Logger, label + " add|remove ...");

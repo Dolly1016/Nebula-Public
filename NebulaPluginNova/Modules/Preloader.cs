@@ -18,6 +18,7 @@ namespace Nebula.Modules;
 internal class NebulaPreprocessorImpl : NebulaPreprocessor
 {
     static public bool Finished => Instance.FinishPreprocess;
+    private PreprocessPhase currentPhase = PreprocessPhase.BuildNoSModuleContainer;
     static internal NebulaPreprocessor Instance { get; private set; } = new NebulaPreprocessorImpl();
 
     DIManager NebulaPreprocessor.DIManager => DIManager.Instance;
@@ -65,6 +66,12 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
             NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, assignable.GetType().Name + " is unknown type.");
     }
 
+    AssignmentType NebulaPreprocessor.RegisterAssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Virial.Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive)
+    {
+        if (currentPhase >= PreprocessPhase.PreRoles) return null!;
+        return new AssignmentType(relatedRole, argumentEditor, postfix, color, predicate, isActive);
+    }
+
     RoleTeam NebulaPreprocessor.CreateTeam(string translationKey, Virial.Color color, TeamRevealType revealType) => new Team(translationKey, color, revealType);
 
     void NebulaPreprocessor.SchedulePreprocess(PreprocessPhase phase, Action process) => (this as NebulaPreprocessor).SchedulePreprocess(phase, process.ToCoroutine());
@@ -77,6 +84,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
     IEnumerator NebulaPreprocessor.RunPreprocess(Virial.Attributes.PreprocessPhase preprocess)
     {
         for(int i=0; i < preprocessList[(int)preprocess].Count; i++) {
+            currentPhase = (PreprocessPhase)i;
             yield return preprocessList[(int)preprocess][i].Invoke();
         }
     }

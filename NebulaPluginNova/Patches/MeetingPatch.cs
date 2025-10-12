@@ -398,7 +398,11 @@ class MeetingStartPatch
         }
 
         //会議開始時に死亡したプレイヤーを考慮したソート
-        __instance.StartCoroutine(Effects.Sequence(Effects.Wait(2f), ManagedEffects.Action(() => MeetingHud.Instance.SortVotingArea(p => p.IsDead ? 2 : 1)).WrapToIl2Cpp()));
+        __instance.StartCoroutine(Effects.Sequence(Effects.Wait(2f), ManagedEffects.Action(() =>
+        {
+            MeetingHud.Instance.SortVotingArea(p => (p.IsDead || p.WillDie) ? 2 : 1);
+            MeetingHud.Instance.UpdatePlayerState();
+        }).WrapToIl2Cpp()));
     }
 }
 
@@ -605,6 +609,16 @@ class VoteAreaPatch
     }
 }
 
+
+[HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.SetCosmetics))]
+class VoteAreaSetPatch
+{
+    public static void Postfix(PlayerVoteArea __instance, [HarmonyArgument(0)] NetworkedPlayerInfo playerInfo)
+    {
+        var p = GamePlayer.GetPlayer(playerInfo.PlayerId);
+        if(p != null) GameOperatorManager.Instance?.Run<SetUpVotingAreaEvent>(new(__instance, p));
+    }
+}
 
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Confirm))]

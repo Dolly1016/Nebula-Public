@@ -187,10 +187,4 @@ public interface Configurations
     /// <param name="id"></param>
     /// <returns></returns>
     ISharableVariable<T>? GetSharableVariable<T>(string id);
-
-    /// <summary>
-    /// 現在、ジャッカライズ可能であればtrueを返します。
-    /// </summary>
-    bool CanJackalize { get; }
-    bool CanMadden { get; }
 }

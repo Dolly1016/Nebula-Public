@@ -78,6 +78,11 @@
 "ui.warning.unrecommendedResolution" : "Resolutions that do not have<br>a 16:9 aspect ratio are not recommended."
 "ui.error.failedToSearchRoom" : "Room search failed in the following regions:"
 "ui.error.quickStart.cannotStart" : "Not enough players to start the game!"
+"ui.utility.premultipliedConversion" : "Alpha Multiplication"
+"ui.utility.premultipliedConversion.folderGenerated" : "A folder Utility/Original has been created to store images before multiplication. <br>Place the images you want to process there."
+"ui.utility.premultipliedConversion.noImages" : "There are no images that can be converted.<br>Only .png images can be converted."
+"ui.utility.premultipliedConversion.start" : "Start converting %NUM% images..."
+"ui.utility.premultipliedConversion.finish" : "Conversion complete. Premultiplied images are output in Utility/Premultiplied. <br>%NUM% of %MAX% images were found to be unmultiplied and have been converted."
 
 "ui.attribute.accel" : "Acceleration"
 "ui.attribute.accel.detail" : "You can move faster."
@@ -430,11 +435,13 @@
 "options.voiceChat.killersHearDead.onlyMyKiller" : "Only My Killer"
 "options.voiceChat.killersHearDead.onlyImpostors" : "Only Impostors"
 "options.voiceChat.killersHearDead.allKillers" : "Only Killers"
+"options.voiceChat.affectedByCommsSab" : "Affected By Comms. Sabotage"
+"options.voiceChat.isolateGhostsStrictly" : "Isolate Ghosts Strictly"
+"options.voiceChat.radio" : "Radio Settings"
 "options.voiceChat.impostorsRadio" : "Impostors Radio"
 "options.voiceChat.jackalRadio" : "Jackal Radio"
 "options.voiceChat.loversRadio" : "Lovers Radio"
-"options.voiceChat.affectedByCommsSab" : "Affected By Comms. Sabotage"
-"options.voiceChat.isolateGhostsStrictly" : "Isolate Ghosts Strictly"
+"options.voiceChat.scarletRadio" : "Scarlet Radio"
 
 "options.role.count" : "Role Assignment"
 "options.role.chance" : "Assignment Chance"
@@ -443,6 +450,8 @@
 "options.role.chance.jackalized" : "Jackalized Assignment Chance"
 "options.role.count.madden" : "Madden Assignment"
 "options.role.chance.madden" : "Madden Assignment Chance"
+"options.role.count.tyrant" : "Tyrant Assignment"
+"options.role.chance.tyrant" : "Tyrant Assignment Chance"
 "options.role.count.short" : "Assignment"
 "options.modifier.chance" : "Assignment Chance"
 "options.role.crewmateCount" : "Crewmate Assignment"
@@ -1148,6 +1157,7 @@
 "role.reaper.blurb" : "Kill and Deceive the Crewmates"
 "options.role.reaper.detail" : "Reaper can drag dead bodies."
 "options.role.reaper.useVentWhileHoldingDeadbody" : "Use Vent While Holding Deadbody"
+"options.role.reaper.connectAllVents" : "Connect All Vents"
 "stats.reaper.ventWithDeadBody" : "Num of Using Vents With Corpses"
 
 "role.rokurokubi.name" : "Rokurokubi"
@@ -1465,6 +1475,14 @@
 "stats.spectreImmoralist.removeFries" : "Num of Disappearance"
 "stats.spectreImmoralist.suicide" : "Num of Suicide"
 
+"role.tyrant.name" : "Tyrant"
+"role.tyrant.short" : "T"
+"role.tyrant.blurb" : "Intense Sunburst"
+"options.role.tyrant.detail" : "Tyrant will win by killing some players.<br>Get rid of them quickly!"
+"options.role.tyrant.killCooldown" : "Kill Cooldown"
+"options.role.tyrant.numOfKillingToWin" : "# Killing to Win"
+"options.role.tyrant.useImpostorAbility" : "Use Impostor Ability"
+
 "role.vulture.name" : "Vulture"
 "role.vulture.short" : "V"
 "role.vulture.blurb" : "Eat Corpses to Win"
@@ -1634,6 +1652,8 @@
 "teams.scarlet" : "Scarlet"
 "teams.vulture" : "Vulture"
 "teams.spectre" : "Spectre"
+"teams.gambler" : "Gambler"
+"teams.tyrant" : "Tyrant"
 
 # Perks
 
@@ -2075,6 +2095,8 @@
 "end.scarlet" : "Scarlet Wins%EXTRA%"
 "end.spectre" : "Spectre Wins%EXTRA%"
 "end.trilemma" : "Trilemma Wins %EXTRA%"
+"end.gambler" : "Gambler Wins %EXTRA%"
+"end.tyrant" : "Tyrant Wins %EXTRA%"
 "end.nogame" : "No Game"
 
 "end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
@@ -2110,13 +2132,16 @@
 "voiceChat.dialog.confirm" : "Are you sure you want to join the voice chat?"
 "voiceChat.info.mute" : "Muted"
 "voiceChat.info.unmute" : "Unmuted"
+"voiceChat.info.nomic" : "No Input"
 "voiceChat.info.filtering1" : "Filtering: Alive Only"
 "voiceChat.info.filtering2" : "Filtering: Dead Only"
 "voiceChat.info.radio" : "Radio"
 "voiceChat.info.impostorRadio" : "Impostor Radio"
 "voiceChat.info.jackalRadio" : "Jackal Radio"
 "voiceChat.info.loversRadio" : "Lovers Radio"
+"voiceChat.info.scarletRadio" : "Scarlet Radio"
 "voiceChat.info.roomHostRadio" : "Room Host Radio"
+"voiceChat.info.returnToVC" : "Return to VC"
 "voiceChat.settings.inputDevice" : "Input Device"
 "voiceChat.settings.inputVolume" : "Input Volume"
 "voiceChat.settings.noiseGate" : "Noise Gate"
@@ -2125,6 +2150,8 @@
 "voiceChat.settings.device.default" : "Default"
 "voiceChat.settings.micTest" : "Mic. Test"
 "voiceChat.settings.micTest.end" : "Interrupt Mic. Test"
+"voiceChat.settings.server" : "VC Server"
+"voiceChat.settings.server.apply" : "Apply"
 
 # Console
 
@@ -2173,6 +2200,7 @@
 "input.screenshot" : "Screenshot"
 "input.mute" : "Mute"
 "input.vcFilter" : "VC Filtering"
+"input.radio" : "Radio"
 "input.help" : "Help"
 "input.spectator" : "Exit Spectator"
 "input.spectatorRight" : "Change Target (Left)"
@@ -2215,6 +2243,7 @@
 "config.client.avoidingColorDuplication.soft" : "Soft"
 "config.client.avoidingColorDuplication.strict" : "Strict"
 "config.client.muteAmbienceOnMeeting" : "Mute Ambience On Meeting"
+"config.client.vcServerSettings" : "VC Server Settings"
 
 # Preset
 
@@ -2468,6 +2497,9 @@
 "help.rolePreview.inner.jackalized.random" : "Jackalized Random"
 "help.rolePreview.inner.madden.100" : "Madden 100%"
 "help.rolePreview.inner.madden.random" : "Madden Random"
+"help.rolePreview.inner.tyrant.100" : "Tyrant 100%"
+"help.rolePreview.inner.tyrant.random" : "Tyrant Random"
+"help.rolePreview.winCond" : "Win Conditions"
 
 # Tag
 
@@ -2619,3 +2651,5 @@
 "document.tip.winCond.trilemma" : "If two player in the trilemma die and then survive and meet the victory conditions,<br>it will overwrite the winning."
 "document.tip.winCond.gambler.title" : "Special Trigger"
 "document.tip.winCond.gambler" : "The gambler win if they survive, and get %NUM% chips."
+"document.tip.winCond.tyrant.title" : "Kill Trigger"
+"document.tip.winCond.tyrant" : "The Tyrant wins by killing %NUM% players."

@@ -521,6 +521,8 @@ public class StandardAchievement : AbstractAchievement
 public class InnerslothAchievement : INebulaAchievement
 {
     private bool noHint;
+    private readonly Image? specifiedImage;
+
     public bool NoHint => noHint;
     public int Attention => 0;
 
@@ -529,7 +531,7 @@ public class InnerslothAchievement : INebulaAchievement
     int INebulaAchievement.Trophy => 3;
 
     bool INebulaAchievement.IsHidden => false;
-    Image? INebulaAchievement.SpecifiedBackImage => null;
+    Image? INebulaAchievement.SpecifiedBackImage => specifiedImage;
     public float GlobalProgress { get; set; }
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
@@ -561,9 +563,10 @@ public class InnerslothAchievement : INebulaAchievement
 
     IEnumerable<DefinedAssignable> INebulaAchievement.RelatedRole => [];
 
-    public InnerslothAchievement(bool noHint, string key)
+    public InnerslothAchievement(bool noHint, string key, Image? specifiedImage)
     {
         Id = key;
+        this.specifiedImage = specifiedImage;
         this.noHint = noHint;
         NebulaAchievementManager.RegisterNonrecord(this, key);
     }
@@ -1075,7 +1078,7 @@ static public class NebulaAchievementManager
             }
 
             if (innersloth)
-                new InnerslothAchievement(noHint, args[0]) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new InnerslothAchievement(noHint, args[0], specifiedImage) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else if (isRecord)
                 new DisplayProgressRecord(args[0], goal, "record." + args[0], defaultSource);
             else if (!records.IsEmpty())
@@ -1243,6 +1246,7 @@ static public class NebulaAchievementManager
             var button = billboard.SetUpButton();
             button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, achievement.GetOverlayWidget(true, false, true, false, true, true, true)));
             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+
 #if PC
             button.OnClick.AddListener(() => {
                 NebulaAchievementManager.SetOrToggleTitle(achievement);

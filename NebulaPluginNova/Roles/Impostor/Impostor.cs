@@ -12,7 +12,9 @@ public class Impostor : DefinedRoleTemplate, DefinedRole
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.impostor", new(Palette.ImpostorRed), TeamRevealType.Teams);
     
-    private Impostor():base("impostor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, MyTeam, [CanKillHidingPlayerOption]) { }
+    private Impostor():base("impostor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, MyTeam, [CanKillHidingPlayerOption]) {
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Impostor.png");
+    }
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
@@ -52,18 +54,16 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
 {
     static ImpostorBasicRuleOperator() => DIManager.Instance.RegisterModule(() => new ImpostorBasicRuleOperator());
 
-    public ImpostorBasicRuleOperator() => this.Register(NebulaAPI.CurrentGame!);
+    private ImpostorBasicRuleOperator() => this.Register(NebulaAPI.CurrentGame!);
 
-#if PC
-    [OnlyMyPlayer]
+    [OnlyLocalPlayer]
     void OnSetRole(PlayerRoleSetEvent ev)
     {
         if (GeneralConfigurations.ImpostorsRadioOption && ev.Role.Role.Category == RoleCategory.ImpostorRole)
         {
-            //VoiceChatManager.RegisterRadio(ev.Role, (p) => p.Role.Role.Category == RoleCategory.ImpostorRole, "voiceChat.info.impostorRadio", Palette.ImpostorRed);
+            ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.impostorRadio"), 0, p => p.Role.Role.Category == RoleCategory.ImpostorRole, ev.Role, Palette.ImpostorRed);
         }
     }
-#endif
 
     void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
     {

@@ -34,7 +34,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
     static private BoolConfiguration CanReportBoneOption = NebulaAPI.Configurations.Configuration("options.role.viper.canReportBone", true);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     static public Viper MyRole = new Viper();
 

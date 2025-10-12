@@ -16,7 +16,7 @@ internal class RingMenu
     [DllImport("user32.dll")]
     static extern bool GetCursorPos(out System.Drawing.Point lpPoint);
 
-    public record RingMenuElement(GUIWidgetSupplier Widget, Action OnClick);
+    public record RingMenuElement(GUIWidgetSupplier Widget, Action OnClick, GUIWidgetSupplier? Overlay = null);
     GameObject obj = null!;
     SpriteRenderer ringRenderer = null!;
     PassiveButton button = null!;
@@ -114,7 +114,13 @@ internal class RingMenu
                     var nextSelection = (int)((float)(Math.Atan2(pos.y, pos.x) + Math.PI) / (Math.PI * 2.0) * length);
                     if (nextSelection != currentSelection)
                     {
-                        ringRenderer.material.SetFloat("_Guage", 1f / length);
+                        var overlay = elements.Get(nextSelection, null)?.Overlay;
+                        if (overlay != null)
+                            NebulaManager.Instance.SetHelpWidget(button, overlay.Invoke());
+                        else
+                            NebulaManager.Instance.HideHelpWidgetIf(button);
+
+                            ringRenderer.material.SetFloat("_Guage", 1f / length);
                         var unit = 360f / length;
                         ringRenderer.transform.localEulerAngles = new(0f, 0f, -90f - 180f + unit * (nextSelection + 1));
                         currentSelection = nextSelection;
@@ -124,6 +130,7 @@ internal class RingMenu
                 }
                 else if (currentSelection != -1)
                 {
+                    NebulaManager.Instance.HideHelpWidgetIf(button);
                     currentSelection = -1;
                     ringRenderer.material.SetFloat("_Guage", 0f);
                 }

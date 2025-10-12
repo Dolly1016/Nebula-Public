@@ -20,15 +20,14 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
     static private BoolConfiguration LoseSampleOnMeetingOption = NebulaAPI.Configurations.Configuration("options.role.morphing.loseSampleOnMeeting", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     static public Morphing MyRole = new Morphing();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.morphing.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.morphing.morph", GameStatsCategory.Roles, MyRole);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        private ModAbilityButtonImpl? sampleButton = null;
-        private ModAbilityButtonImpl? morphButton = null;
+        private ModAbilityButton? sampleButton = null;
+        private ModAbilityButton? morphButton = null;
 
         static public Image SampleButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SampleButton.png", 115f);
         static public Image MorphButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MorphButton.png", 115f);
@@ -51,8 +50,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                 PoolablePlayer? sampleIcon = null;
                 var sampleTracker = NebulaAPI.Modules.PlayerlikeTracker(this, MyPlayer);
 
-                ModAbilityButton morphButton = null!;
-                var sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
+                sampleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "illusioner.sample",
                     SampleCoolDownOption, "sample", SampleButtonSprite,
                     _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 sampleButton.OnClick = (button) => {
@@ -130,7 +128,7 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
             if (sampleId.HasValue && targetId == sampleId.Value)
                 acTokenAnother1 ??= new("morphing.another1");
 
-            if (morphButton != null && acTokenChallenge != null && morphButton.EffectActive)
+            if (morphButton != null && acTokenChallenge != null && morphButton.IsInEffect)
                 acTokenChallenge.Value.kill = true;
         }
 

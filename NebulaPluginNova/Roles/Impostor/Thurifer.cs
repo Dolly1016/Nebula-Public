@@ -164,7 +164,14 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         public bool IsAvailable { get; private set; } = false;
         void OnGameStarted(GameStartEvent _)
         {
-            IsAvailable = GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.FreePlay || (Thurifer.MyRole as ISpawnable).IsSpawnable || ((Jackal.MyRole as ISpawnable).IsSpawnable && Jackal.JackalizedImpostorOption && (Thurifer.MyRole as DefinedRole).JackalAllocationParameters!.RoleCountSum > 0);
+            IsAvailable = GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.FreePlay || (Thurifer.MyRole as ISpawnable).IsSpawnable || AssignmentType.AllTypes.Any(t =>
+            {
+                if (!t.IsActive) return false;
+                var param = (Thurifer.MyRole as DefinedRole).GetCustomAllocationParameters(t);
+                if (param == null) return false;
+                if (param.RoleCountSum > 0) return true;
+                return false;
+            });
 
             if (!IsAvailable) return;
 
@@ -290,7 +297,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ThuriferButton.png", 115f);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     static public Thurifer MyRole = new Thurifer();
 

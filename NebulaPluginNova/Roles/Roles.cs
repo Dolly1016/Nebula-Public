@@ -1,12 +1,11 @@
 ﻿using Nebula.Modules.GUIWidget;
+using Nebula.Roles.Crewmate;
+using Nebula.Roles.Neutral;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
-using Virial.Game;
 using Virial.Runtime;
 using Virial.Text;
 using static Nebula.Configuration.ConfigurationValues;
@@ -41,10 +40,11 @@ internal class NoSRoleSetUp
         Virial.Assignable.NebulaTeams.VultureTeam = Neutral.Vulture.MyTeam;
     }
 
+
     static NoSRoleSetUp()
     {
+        AssignmentType.SortAllTypes();
         SetTabs();
-
         SetNebulaTeams();
 
         foreach (var assembly in AddonScriptManager.ScriptAssemblies.Where(script => script.Behaviour.LoadRoles).Select(s => s.Assembly).Prepend(Assembly.GetAssembly(typeof(Roles))))

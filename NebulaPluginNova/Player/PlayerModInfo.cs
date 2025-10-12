@@ -142,7 +142,6 @@ public class PlayerAttributeImpl : IPlayerAttribute
 [NebulaRPCHolder]
 internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, Virial.Game.Player, ICommandExecutor, IPermissionHolder
 {
-    public static Permission OpPermission = new Permission();
 
     public PlayerControl MyControl { get; private set; }
     public byte PlayerId { get; private set; }
@@ -1445,4 +1444,23 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     private VanillaPlayerLogics playerLogic;
     IPlayerLogics IPlayerlike.Logic => playerLogic;
+
+    public readonly static RemoteProcess<(GamePlayer player, string permission, bool inverse, bool add)> RpcEditPermission = new(
+   "EditPermission", (message, _) =>
+   {
+       var player = message.player.Unbox();
+       if (player == null) return;
+
+       if (Permissions.TryGetPermission(message.permission, out var perm))
+       {
+           if (message.add)
+           {
+               player.PermissionHolder.AddPermission(perm, message.inverse);
+           }
+           else
+           {
+               player.PermissionHolder.RemovePermission(perm, message.inverse);
+           }
+       }
+   }, false);
 }

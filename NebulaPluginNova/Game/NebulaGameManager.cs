@@ -12,6 +12,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using Virial;
 using Virial.Assignable;
+using Virial.Common;
 using Virial.Components;
 using Virial.DI;
 using Virial.Events.Game;
@@ -304,14 +305,14 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 #if PC
         RuntimeAsset = new();
 
-        /*
+        
         var vcConnectButton = new Modules.ScriptComponents.ModAbilityButtonImpl(true).Register(this);
-        vcConnectButton.Visibility = (_) => VoiceChat != null && GameState == NebulaGameStates.NotStarted;
+        vcConnectButton.Visibility = (_) => ModSingleton<NoSVCRoom>.Instance != null && GameState == NebulaGameStates.NotStarted;
         vcConnectButton.Availability = (_) =>true;
         vcConnectButton.SetSprite(vcConnectSprite.GetSprite());
-        vcConnectButton.OnClick = (_) => VoiceChat!.Rejoin();
+        vcConnectButton.OnClick = (_) => ModSingleton<NoSVCRoom>.Instance.Rejoin();
         vcConnectButton.SetLabel("rejoin");
-        */
+        
 #endif
 
 #if ANDROID
@@ -354,7 +355,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         allModPlayers.Add(player.PlayerId, info);
         allPlayerlikes.Add(player.PlayerId, info);
 
-        if (player.AmHost() && (GeneralConfigurations.AssignOpToHostOption) || GeneralConfigurations.CurrentGameMode == GameModes.FreePlay) info.Unbox().PermissionHolder.AddPermission(PlayerModInfo.OpPermission);
+        if (player.AmHost() && (GeneralConfigurations.AssignOpToHostOption) || GeneralConfigurations.CurrentGameMode == GameModes.FreePlay) info.Unbox().PermissionHolder.AddPermission(Permissions.OpPermission);
 
         return info;
     }

@@ -1248,8 +1248,7 @@ public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedR
     static public readonly IntegerConfiguration StoneAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.whammy.stoneAssignment", (1, 7), 3);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0), arguments.Get(1, NumOfBalloonsInStartingOption));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     static public readonly Whammy MyRole = new();
     static private readonly GameStatsEntry StatsBalloon = NebulaAPI.CreateStatsEntry("stats.whammy.balloon", GameStatsCategory.Roles, MyRole);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility

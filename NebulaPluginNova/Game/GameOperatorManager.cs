@@ -45,17 +45,23 @@ internal class GameOperatorBuilder
             baseType = baseType.BaseType;
         }
 
-        foreach(var method in methods)
+        LogUtils.WriteToConsole($"Type: {entityType.Name}");
+
+        foreach (var method in methods)
         {
             var parameters = method.GetParameters();
             if (parameters.Length != 1) continue;
 
             if (!parameters[0].ParameterType.IsAssignableTo(typeof(Virial.Events.Event))) continue;
 
-            //Debug.Log($"{method.Name} (Event: {parameters[0].ParameterType.Name})");
-            
+            LogUtils.WriteToConsole($"{method.Name} (Event: {parameters[0].ParameterType.Name})");
+
             //メソッドとして抽出された匿名関数を除外 (意図して作ったメソッドではない)
-            if (method.Name.StartsWith("<")) continue;
+            if (method.Name.StartsWith("<"))
+            {
+                LogUtils.WriteToConsole($" -Excluded!");
+                continue;
+            }
 
             var eventType = parameters[0].ParameterType;
 

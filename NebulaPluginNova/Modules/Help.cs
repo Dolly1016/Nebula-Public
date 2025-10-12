@@ -605,12 +605,6 @@ public static class HelpScreen
         { AssignmentFlag.ModImpostor | AssignmentFlag.ModNeutral | AssignmentFlag.VanillaCrewmate | AssignmentFlag.ModCrewmate, 16},
     };
 
-    private enum AssignmentType
-    {
-        Jackalized,
-        Madden,
-        Normal
-    }
     private static IMetaWidgetOld ShowPreviewScreen(MetaScreen screen, HelpTab validTabs, out Image? backImage)
     {
         backImage = null;
@@ -640,25 +634,25 @@ public static class HelpScreen
             list?.Add(holder);
         }
 
-        Virial.Media.GUIWidget GetRoleOverview(RoleCategory category, string categoryName, List<Virial.Media.GUIWidget> additionalList, bool with100View, bool withRandomView, bool withJackalizedView = false, bool withMaddenView = false)
+        Virial.Media.GUIWidget GetRoleOverview(RoleCategory category, string categoryName, List<Virial.Media.GUIWidget> additionalList, bool with100View, bool withRandomView)
         {
             List<Virial.Media.GUIWidget> list100 = [], listRandom = [], ghosts = [], modifiers = [];
 
-            void CheckRoles(List<Virial.Media.GUIWidget> list100, List<Virial.Media.GUIWidget> listRandom, bool with100View, bool withRandomView, AssignmentType type = AssignmentType.Normal)
+            void CheckRoles(List<Virial.Media.GUIWidget> list100, List<Virial.Media.GUIWidget> listRandom, bool with100View, bool withRandomView, AssignmentType? type = null)
             {
-                foreach (var role in Roles.Roles.AllRoles.Where(r => type != AssignmentType.Normal || r.Category == category))
+                foreach (var role in Roles.Roles.AllRoles.Where(r => type != null || r.Category == category))
                 {
-                    var param = type switch { AssignmentType.Jackalized => role.JackalAllocationParameters, AssignmentType.Madden => role.MadmateAllocationParameters, _ => role.AllocationParameters };
+                    var param = type == null ? role.AllocationParameters : role.GetCustomAllocationParameters(type);
 
-                    string? roleName = type switch { AssignmentType.Jackalized => role.DisplayName.Color(Jackal.MyRole.UnityColor), AssignmentType.Madden => (Language.Translate("role.madmate.prefix") + role.DisplayName).Color(Palette.ImpostorRed), _ => null };
+                    string? customColoredRoleName = type == null ? null : role.DisplayName.Color(type.Color);
                     if ((param?.RoleCount100 ?? 0) > 0)
                     {
                         if (with100View)
                         {
                             string numText = "x" + param!.RoleCount100;
                             if (param.RoleCountRandom > 0) numText += $" (+{param.RoleCountRandom}, {param.GetRoleChance(param!.RoleCount100 + 1)}%)";
-                            list100.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GetAssignableText(role, roleName), GUI.API.HorizontalMargin(0.1f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, numText)));
-                            if (type == AssignmentType.Normal) role.AdditionalRoles.Do(a => AddAdditionalRole(a, role));
+                            list100.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GetAssignableText(role, customColoredRoleName), GUI.API.HorizontalMargin(0.1f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, numText)));
+                            if (type == null) role.AdditionalRoles.Do(a => AddAdditionalRole(a, role));
                         }
                     }
                     else if ((param?.RoleCountRandom ?? 0) > 0)
@@ -666,8 +660,8 @@ public static class HelpScreen
                         if (withRandomView)
                         {
                             string numText = $"x{param!.RoleCountRandom} ({param.GetRoleChance(1)}%)";
-                            listRandom.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GetAssignableText(role, roleName), GUI.API.HorizontalMargin(0.1f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, numText)));
-                            if (type == AssignmentType.Normal) role.AdditionalRoles.Do(a => AddAdditionalRole(a, role));
+                            listRandom.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, GetAssignableText(role, customColoredRoleName), GUI.API.HorizontalMargin(0.1f), GUI.API.RawText(GUIAlignment.Left, maskedAttr, numText)));
+                            if (type == null) role.AdditionalRoles.Do(a => AddAdditionalRole(a, role));
                         }
                     }
                 }
@@ -702,23 +696,17 @@ public static class HelpScreen
             result.Add(new LazyGUIWidget(GUIAlignment.Center, () => additionalList.IsEmpty() ? GUIEmptyWidget.Default : GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.additional") + "-").Bold()), ..additionalList, GUI.API.Margin(new(2f, 0.3f))])));
             if (modifiers.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.modifiers") + "-").Bold()), .. modifiers, GUI.API.Margin(new(2f, 0.3f))]));
             if (ghosts.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.ghostRoles") + "-").Bold()), .. ghosts, GUI.API.Margin(new(2f, 0.3f))]));
-            if (withJackalizedView)
+            
+            foreach(var type in AssignmentType.AllTypes)
             {
-                List<Virial.Media.GUIWidget> listJ100 = [];
-                List<Virial.Media.GUIWidget> listJRandom = [];
-                CheckRoles(listJ100, listJRandom, true, true, AssignmentType.Jackalized);
+                if (type.Category != category) continue;
+                if (!type.IsActive) continue;
 
-                if (listJ100.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.jackalized.100") + "-").Bold()), .. listJ100, GUI.API.Margin(new(2f, 0.3f))]));
-                if (listJRandom.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.jackalized.random") + "-").Bold()), .. listJRandom, GUI.API.Margin(new(2f, 0.3f))]));
-            }
-            if (withMaddenView)
-            {
-                List<Virial.Media.GUIWidget> listM100 = [];
-                List<Virial.Media.GUIWidget> listMRandom = [];
-                CheckRoles(listM100, listMRandom, true, true, AssignmentType.Madden);
-
-                if (listM100.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.madden.100") + "-").Bold()), .. listM100, GUI.API.Margin(new(2f, 0.3f))]));
-                if (listMRandom.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate("help.rolePreview.inner.madden.random") + "-").Bold()), .. listMRandom, GUI.API.Margin(new(2f, 0.3f))]));
+                List<Virial.Media.GUIWidget> listC100 = [];
+                List<Virial.Media.GUIWidget> listCRandom = [];
+                CheckRoles(listC100, listCRandom, true, true, type);
+                if (listC100.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate($"help.rolePreview.inner.{type.Postfix}.100") + "-").Bold()), .. listC100, GUI.API.Margin(new(2f, 0.3f))]));
+                if (listCRandom.Count > 0) result.Add(GUI.API.VerticalHolder(GUIAlignment.Center, [GUI.API.RawText(GUIAlignment.Center, maskedAttr, ("-" + Language.Translate($"help.rolePreview.inner.{type.Postfix}.random") + "-").Bold()), .. listCRandom, GUI.API.Margin(new(2f, 0.3f))]));
             }
 
             return GUI.API.VerticalHolder(GUIAlignment.Top, result);
@@ -731,7 +719,7 @@ public static class HelpScreen
         var iconHolder = GetPreviewIconsWidget(out var allFlag);
 
         List<Virial.Media.GUIWidget> winConds = [
-            GUI.API.RawText(GUIAlignment.Left, maskedTitleAttr,"勝利条件"),
+            GUI.API.LocalizedText(GUIAlignment.Left, maskedTitleAttr,"help.rolePreview.winCond"),
             ];
         GameEnd? end = null;
         foreach(var tip in DocumentTipManager.WinConditionTips)
@@ -772,8 +760,8 @@ public static class HelpScreen
             GUI.API.VerticalHolder(GUIAlignment.Center,
                 GUI.API.HorizontalHolder(GUIAlignment.Center, 
                 GetRoleOverview(RoleCategory.ImpostorRole,"impostor", listAdditionalImp, allFlag.HasFlag(AssignmentFlag.ModImpostor100), allFlag.HasFlag(AssignmentFlag.ModImpostorPrb)), 
-                GeneralConfigurations.NeutralSpawnable ? GetRoleOverview(RoleCategory.NeutralRole, "neutral", listAdditionalNeu, allFlag.HasFlag(AssignmentFlag.ModNeutral100), allFlag.HasFlag(AssignmentFlag.ModNeutralPrb), withJackalizedView: (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.JackalizedImpostorOption) : GUI.API.EmptyWidget, 
-                GetRoleOverview(RoleCategory.CrewmateRole, "crewmate", listAdditionalCrew, allFlag.HasFlag(AssignmentFlag.ModCrewmate100), allFlag.HasFlag(AssignmentFlag.ModCrewmatePrb), withMaddenView: (Madmate.MyRole as DefinedRole).IsSpawnable && Madmate.MaddenRoleOption)),
+                GeneralConfigurations.NeutralSpawnable ? GetRoleOverview(RoleCategory.NeutralRole, "neutral", listAdditionalNeu, allFlag.HasFlag(AssignmentFlag.ModNeutral100), allFlag.HasFlag(AssignmentFlag.ModNeutralPrb)) : GUI.API.EmptyWidget, 
+                GetRoleOverview(RoleCategory.CrewmateRole, "crewmate", listAdditionalCrew, allFlag.HasFlag(AssignmentFlag.ModCrewmate100), allFlag.HasFlag(AssignmentFlag.ModCrewmatePrb))),
                 specialAssignmentsWidget,
                 GUI.API.VerticalHolder(GUIAlignment.Left, winConds)
             )));

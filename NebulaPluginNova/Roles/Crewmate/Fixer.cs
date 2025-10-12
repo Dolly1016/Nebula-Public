@@ -24,7 +24,7 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
 
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly IntegerConfiguration NumOfJammingOption = NebulaAPI.Configurations.Configuration("options.role.fixer.numOfJamming", (1, 10), 2);
     static private readonly BoolConfiguration CanJamPlayerContinuouslyOption = NebulaAPI.Configurations.Configuration("options.role.fixer.canJamPlayerContinuously", false);

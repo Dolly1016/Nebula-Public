@@ -120,7 +120,8 @@ public static class MeetingHudExtension
     {
         foreach (PlayerVoteArea pva in meetingHud.playerStates)
         {
-            bool isDead = NebulaGameManager.Instance?.GetPlayer(pva.TargetPlayerId)?.IsDead ?? true;
+            var p = NebulaGameManager.Instance?.GetPlayer(pva.TargetPlayerId);
+            bool isDead = p == null || p.IsDead || p.WillDie;
 
             if (pva.AmDead == isDead) continue;
 

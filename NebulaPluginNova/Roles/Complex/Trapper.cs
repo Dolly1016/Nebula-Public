@@ -113,8 +113,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
 
 
     public bool IsEvil => Category == RoleCategory.ImpostorRole;
-    bool DefinedRole.IsJackalizable => IsEvil;
-    bool DefinedRole.IsLoadableToMadmate => !IsEvil;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => IsEvil ? AbilityAssignmentStatus.KillersSide : AbilityAssignmentStatus.CanLoadToMadmate;
     public override IUsurpableAbility CreateAbility(GamePlayer player, int[] arguments) => IsEvil ? new EvilAbility(player, arguments.GetAsBool(0), arguments.Get(1, NumOfChargesOption)) : new NiceAbility(player, arguments.GetAsBool(0), arguments.Get(1, NumOfChargesOption));
 
     static internal readonly IntegerConfiguration NumOfChargesOption = NebulaAPI.Configurations.Configuration("options.role.trapper.numOfCharges", (1, 15), 3);

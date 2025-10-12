@@ -70,7 +70,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, player.PlayerId), (float)arguments.Get(1, (int)(InitialSatietyOption * SatietyRateOption)));
 
-    static private IntegerConfiguration NumOfDishesOption = NebulaAPI.Configurations.Configuration("options.role.spectre.numOfDishes", (0, 20), 10);
+    static private IntegerConfiguration NumOfDishesOption = NebulaAPI.Configurations.Configuration("options.role.spectre.numOfDishes", (0, 20), 6);
     static private FloatConfiguration VanishCostOption = NebulaAPI.Configurations.Configuration("options.role.spectre.vanishCost", (0f, 2f, 0.25f), 0.5f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration VanishCooldownOption = NebulaAPI.Configurations.Configuration("options.role.spectre.vanishCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration VanishDurationOption = NebulaAPI.Configurations.Configuration("options.role.spectre.vanishDuration", (2.5f, 30f, 2.5f), 15f, FloatConfigurationDecorator.Second);

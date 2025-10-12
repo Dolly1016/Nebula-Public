@@ -24,7 +24,7 @@ public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Abilit
     static private readonly FloatConfiguration ChangeBountyIntervalOption = NebulaAPI.Configurations.Configuration("options.role.bountyHunter.changeBountyInterval", (5f, 120f, 5f), 45f, FloatConfigurationDecorator.Second);
 
     static public readonly BountyHunter MyRole = new();
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     static private readonly GameStatsEntry StatsBountyKill = NebulaAPI.CreateStatsEntry("stats.bountyHunter.bountyKill", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsOthersKill = NebulaAPI.CreateStatsEntry("stats.bountyHunter.othersKill", GameStatsCategory.Roles, MyRole);

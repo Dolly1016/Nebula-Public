@@ -38,8 +38,8 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
     static private IntegerConfiguration MaxUsesOfCommand = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfCommand", (1, 10), 2);
     static internal BoolConfiguration CanOverrideTaskWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.canOverrideTaskWin", false);
     static private BoolConfiguration WithFavoriteGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.favoriteGauge", true);
-    static private FloatConfiguration RequiredGaugeToWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.requiredGaugeToWin", (10f, 150f, 5f), 40f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
-    static private FloatConfiguration SurplusGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.surplusGauge", (10f, 80f, 5f), 25f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
+    static private FloatConfiguration RequiredGaugeToWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.requiredGaugeToWin", (10f, 150f, 5f), 20f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
+    static private FloatConfiguration SurplusGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.surplusGauge", (5f, 80f, 5f), 20f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
     static private FloatConfiguration GaugeReductionSpeed = NebulaAPI.Configurations.Configuration("options.role.scarlet.gaugeReductionRatio", (0f, 2f, 0.125f), 0.25f, FloatConfigurationDecorator.Ratio, () => WithFavoriteGauge);
     static private BoolConfiguration CanLocateLovers = NebulaAPI.Configurations.Configuration("options.role.scarlet.canLocateLovers", false);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.scarlet.vent", true);
@@ -88,10 +88,17 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         Cache<GamePlayer> MyFavorite = null!;
         private AbilityGauge Gauge = null!;
 
-        void ShowArrow(GamePlayer player, bool isFavorite)
+        void OnAddLover(GamePlayer player, bool isFavorite)
         {
-            UnityEngine.Color arrowColor = isFavorite ? MyRole.UnityColor : Color.white;
-            var arrow = new TrackingArrowAbility(player, 0f, arrowColor).Register(this);
+            if (CanLocateLovers)
+            {
+                UnityEngine.Color arrowColor = isFavorite ? MyRole.UnityColor : Color.white;
+                var arrow = new TrackingArrowAbility(player, 0f, arrowColor).Register(this);
+            }
+            if (GeneralConfigurations.ScarletRadioOption)
+            {
+                ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(player.Name, 3, p => p == player, this, MyRole.UnityColor);
+            }
         }
 
         public override void OnActivated()
@@ -100,8 +107,8 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
 
             if (AmOwner)
             {
-                //矢印を表示
-                if (CanLocateLovers) foreach (var p in GamePlayer.AllPlayers) if (IsMyLover(p)) ShowArrow(p, IsMyFavorite(p));
+                //既存のラバーズに対する操作
+                foreach (var p in GamePlayer.AllPlayers) if (IsMyLover(p)) OnAddLover(p, IsMyFavorite(p));
 
                 var hourglass = new Modules.ScriptComponents.ModAbilityButtonImpl().Register(this);
                 hourglass.SetSprite(hourglassButtonSprite.GetSprite());
@@ -155,7 +162,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
                     StatsKept.Progress();
                     CheckAndClearAch1(false);
 
-                    if (CanLocateLovers) ShowArrow(playerTracker.CurrentTarget?.RealPlayer!, false);
+                    OnAddLover(playerTracker.CurrentTarget?.RealPlayer!, false);
                 };
                 flirtButton.CoolDownTimer = new TimerImpl(2f).SetAsAbilityCoolDown().Start().Register(this);
                 flirtButton.SetLabel("seduce");
@@ -176,7 +183,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
 
                     CheckAndClearAch1(true);
 
-                    if (CanLocateLovers) ShowArrow(playerTracker.CurrentTarget?.RealPlayer!, true);
+                    OnAddLover(playerTracker.CurrentTarget?.RealPlayer!, true);
                 };
                 favoriteButton.CoolDownTimer = new TimerImpl(2f).SetAsAbilityCoolDown().Start().Register(this);
                 favoriteButton.SetLabel("favorite");
@@ -437,14 +444,20 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
         public int FlirtatiousId => flirtatiousId;
         bool amFavorite;
         public bool AmFavorite => amFavorite;
-        Scarlet.Instance? MyScarlet => NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault(p => p.Role is Scarlet.Instance f && f.FlirtatiousId == flirtatiousId)?.Role as Scarlet.Instance;
+        Scarlet.Instance? MyScarlet => NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault(IsMyScarlet)?.Role as Scarlet.Instance;
+        bool IsMyScarlet(GamePlayer player) => player.Role.Role == Scarlet.MyRole && player.Role is Scarlet.Instance f && f.FlirtatiousId == flirtatiousId;
         public Instance(GamePlayer player, int flirtatiousId, bool amFavorite) : base(player)
         {
             this.flirtatiousId = flirtatiousId;
             this.amFavorite = amFavorite;
         }
 
-        void RuntimeAssignable.OnActivated() { }
+        void RuntimeAssignable.OnActivated() {
+            if (AmOwner && GeneralConfigurations.ScarletRadioOption)
+            {
+                ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.scarletRadio"), 3, IsMyScarlet, this, MyRole.UnityColor);
+            }
+        }
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {

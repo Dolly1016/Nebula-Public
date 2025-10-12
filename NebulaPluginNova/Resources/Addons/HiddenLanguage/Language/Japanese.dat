@@ -119,7 +119,7 @@
 "achievement.provocateur.common2.cond" : ""
 
 "achievement.provocateur.challenge.title" : "第六感の解放"
-"achievement.provocateur.challenge.goal" : "10m以上離れたRaiderもしくはSniperを巻き込んで死亡する。"
+"achievement.provocateur.challenge.goal" : "10m以上離れたレイダーもしくはスナイパーを巻き込んで死亡する。"
 "achievement.provocateur.challenge.cond" : ""
 
 "achievement.seer.common1.title" : "亡者を見る者"
@@ -240,7 +240,7 @@
 
 "achievement.morphing.common1.title" : "浮つくアリバイ"
 "achievement.morphing.common1.goal" : "サンプルを採取し、変身する。"
-"achievement.morphing.common1.cond" : "Illusionerでもクリア可能"
+"achievement.morphing.common1.cond" : "イリュージョナーでもクリア可能"
 
 "achievement.morphing.another1.title" : "デスマスク"
 "achievement.morphing.another1.goal" : "サンプルと同じ見た目の相手をキルする。"
@@ -256,7 +256,7 @@
 
 "achievement.painter.common1.title" : "ペルソナとの永訣"
 "achievement.painter.common1.goal" : "サンプルを採取し、見た目を塗り替える。"
-"achievement.painter.common1.cond" : "Illusionerでもクリア可能"
+"achievement.painter.common1.cond" : "イリュージョナーでもクリア可能"
 
 "achievement.painter.challenge.title" : "正体不明の証人"
 "achievement.painter.challenge.goal" : "3人のプレイヤーの見た目をそれぞれ2回以上塗り替える"
@@ -311,11 +311,11 @@
 "achievement.arsonist.challenge.cond" : ""
 
 "achievement.chainShifter.common1.title" : "事の顛末"
-"achievement.chainShifter.common1.goal" : "Chain Shifterをキルする。"
+"achievement.chainShifter.common1.goal" : "チェインシフターをキルする。"
 "achievement.chainShifter.common1.cond" : ""
 
 "achievement.chainShifter.another1.title" : "回避不能"
-"achievement.chainShifter.another1.goal" : "Chain Shifterを受け取り、そのまま敗北する。"
+"achievement.chainShifter.another1.goal" : "チェインシフターを受け取り、そのまま敗北する。"
 "achievement.chainShifter.another1.cond" : ""
 
 "achievement.chainShifter.challenge.title" : "厄災が襲い来る"
@@ -331,16 +331,16 @@
 "achievement.jackal.challenge.cond" : "キルによってゲームが終了すること"
 
 "achievement.sidekick.common1.title" : "ずっと友だち"
-"achievement.sidekick.common1.goal" : "SidekickからJackalに昇格する。"
+"achievement.sidekick.common1.goal" : "サイドキックからジャッカルに昇格する。"
 "achievement.sidekick.common1.cond" : ""
 
 "achievement.sidekick.common2.title" : "友情の鎖"
-"achievement.sidekick.common2.goal" : "SidekickからJackalに昇格したのち、自身もSidekickを付与する。"
+"achievement.sidekick.common2.goal" : "サイドキックからジャッカルに昇格したのち、自身もサイドキックを付与する。"
 "achievement.sidekick.common2.cond" : ""
 
 "achievement.sidekick.challenge.title" : "裏社会の処世術"
-"achievement.sidekick.challenge.goal" : "インポスターからSidekickに変化したうえでジャッカル勝利する。"
-"achievement.sidekick.challenge.cond" : "ゲーム中にJackalに昇格しても達成可能"
+"achievement.sidekick.challenge.goal" : "インポスターからサイドキックに変化したうえでジャッカル勝利する。"
+"achievement.sidekick.challenge.cond" : "ゲーム中にジャッカルに昇格しても達成可能"
 
 "achievement.jester.common1.title" : "戯言に揺れて"
 "achievement.jester.common1.goal" : "会議で1票以上の票を得る。"
@@ -404,7 +404,7 @@
 "achievement.damned.common1.cond" : ""
 
 "achievement.damned.common2.title" : "呪われし者"
-"achievement.damned.common2.goal" : "呪詛によってインポスター役職 Damnedに変化する。"
+"achievement.damned.common2.goal" : "呪詛によってインポスター役職のダムドに変化する。"
 "achievement.damned.common2.cond" : ""
 
 "achievement.damned.common3.title" : "赤色のリバーシ"
@@ -432,7 +432,7 @@
 "achievement.avenger.common1.cond" : ""
 
 "achievement.avenger.common2.title" : "孤独は愛より強し"
-"achievement.avenger.common2.goal" : "復讐対象になったうえでAvengerをキルする。"
+"achievement.avenger.common2.goal" : "復讐対象になったうえでアヴェンジャーをキルする。"
 "achievement.avenger.common2.cond" : ""
 
 "achievement.avenger.another1.title" : "果たせぬ誓い"
@@ -444,7 +444,7 @@
 "achievement.avenger.another2.cond" : ""
 
 "achievement.avenger.challenge.title" : "アベンジャーズ"
-"achievement.avenger.challenge.goal" : "相方と自身がともにAvengerになったうえで、Avenger勝利する。"
+"achievement.avenger.challenge.goal" : "相方と自身がともにアヴェンジャーになったうえで、アヴェンジャー勝利する。"
 "achievement.avenger.challenge.cond" : ""
 
 "achievement.obsessional.common1.title" : "あなたを見ている"
@@ -456,15 +456,15 @@
 "achievement.obsessional.another1.cond" : ""
 
 "achievement.obsessional.another2.title" : "望まれぬ展開"
-"achievement.obsessional.another2.goal" : "インポスターでObsessionalになり、インポスター勝利によって敗北する。"
+"achievement.obsessional.another2.goal" : "インポスターでオブセッショナルになり、インポスター勝利によって敗北する。"
 "achievement.obsessional.another2.cond" : ""
 
 "achievement.obsessional.lover1.title" : "傍惚れのファンタジア"
-"achievement.obsessional.lover1.goal" : "執着対象がLovers単独勝利で勝利し、自身もともに勝利する。"
+"achievement.obsessional.lover1.goal" : "執着対象がラバーズ単独勝利で勝利し、自身もともに勝利する。"
 "achievement.obsessional.lover1.cond" : ""
 
 "achievement.obsessional.lover2.title" : "バウムクーヘンエンド"
-"achievement.obsessional.lover2.goal" : "執着対象がLovers追加勝利で勝利し、自身は勝利を逃す。"
+"achievement.obsessional.lover2.goal" : "執着対象がラバーズ追加勝利で勝利し、自身は勝利を逃す。"
 "achievement.obsessional.lover2.cond" : ""
 
 "achievement.obsessional.challenge.title" : "もう君しか映らない"
@@ -577,7 +577,7 @@
 "achievement.speedAttribute.cond" : ""
 
 "achievement.threeRoles.title" : "三つ巴"
-"achievement.threeRoles.goal" : "インポスター陣営でLoverとSidekickのモディファイアを付与される。"
+"achievement.threeRoles.goal" : "インポスター陣営でラバーとサイドキックのモディファイアを付与される。"
 "achievement.threeRoles.cond" : ""
 
 "achievement.doTaskEvenDead.title" : "死出の旅"

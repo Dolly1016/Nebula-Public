@@ -19,7 +19,7 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Skip(0).ToArray());
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly IntegerConfiguration NumOfLampsOption = NebulaAPI.Configurations.Configuration("options.role.phosphorus.numOfLamps", (1, 10), 2);
     static private readonly FloatConfiguration PlaceCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.phosphorus.placeCoolDown", (5f, 60f, 5f), 15f, FloatConfigurationDecorator.Second);

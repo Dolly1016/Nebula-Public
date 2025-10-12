@@ -12,7 +12,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
 {
     private Illusioner() : base("illusioner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption,MorphDurationOption,PaintCoolDownOption, LoseSampleOnMeetingOption, TransformAfterMeetingOption,SampleOriginalLookOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic, ConfigurationTags.TagDifficult);
-        //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Illusioner.png");
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Illusioner.png");
     }
 
 
@@ -25,8 +25,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
     static private readonly BoolConfiguration SampleOriginalLookOption = NebulaAPI.Configurations.Configuration("options.role.illusioner.sampleOriginalLook", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
 
     static public Illusioner MyRole = new Illusioner();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.illusioner.sample", GameStatsCategory.Roles, MyRole);

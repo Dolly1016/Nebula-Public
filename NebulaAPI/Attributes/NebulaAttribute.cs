@@ -42,6 +42,10 @@ public enum PreprocessPhase
     /// </summary>
     PostLoadAddons,
     /// <summary>
+    /// 割り当てタイプを構築するフェイズです。
+    /// </summary>
+    BuildAssignmentTypes,
+    /// <summary>
     /// 役職の追加をする直前のフェイズです。
     /// </summary>
     PreRoles,

@@ -22,8 +22,10 @@ public static class CommandHelper
         env.Logger.PushError("You don't have the necessary permission to execute.");
         task = new CoImmediateErrorTask<ICommandToken>();
         return true;
-
     }
+
+    static public bool DenyByOpPermission(CommandEnvironment env, [MaybeNullWhen(false)] out CoTask<ICommandToken> task)
+        => DenyByPermission(env, Permissions.OpPermission, out task);
 }
 public class CommandLogText : ICommandLogText
 {

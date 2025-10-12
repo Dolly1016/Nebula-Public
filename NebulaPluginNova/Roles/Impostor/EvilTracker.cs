@@ -107,8 +107,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
     //private NebulaConfiguration ShowRoomWhereTrackingTargetIsOption = null!;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
 
     static public readonly EvilTracker MyRole = new();
 

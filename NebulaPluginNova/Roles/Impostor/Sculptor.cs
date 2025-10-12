@@ -78,8 +78,7 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Skip(1));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     static public Sculptor MyRole = new Sculptor();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.sculptor.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsCreate = NebulaAPI.CreateStatsEntry("stats.sculptor.create", GameStatsCategory.Roles, MyRole);

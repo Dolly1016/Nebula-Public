@@ -44,7 +44,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
     static public readonly Destroyer MyRole = new();
     static private readonly GameStatsEntry StatsReported = NebulaAPI.CreateStatsEntry("stats.destroyer.reported", GameStatsCategory.Roles, MyRole);
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility

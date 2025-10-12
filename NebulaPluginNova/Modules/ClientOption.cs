@@ -413,15 +413,15 @@ public static class StartOptionMenuPatch
                     });
             }
 
-#if PC
-
             if(ModSingleton<NoSVCRoom>.Instance != null)
             {
                 AddBottomButton("vcSettings", () => NoSVCRoom.VCSettings.OpenSettingScreen(__instance));
-                //AddBottomButton("vcRejoin", () => NebulaGameManager.Instance?.VoiceChat?.Rejoin());
+                AddBottomButton("vcRejoin", () => ModSingleton<NoSVCRoom>.Instance?.Rejoin());
             }
-            
-#endif
+            if (!AmongUsClient.Instance || AmongUsClient.Instance.GameState < InnerNet.InnerNetClient.GameStates.Joined)
+            {
+                AddBottomButton("vcServerSettings", () => NoSVCRoom.VCSettings.OpenServerSettingScreen(__instance));
+            }
 
             if (!AmongUsClient.Instance || AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started)
             {

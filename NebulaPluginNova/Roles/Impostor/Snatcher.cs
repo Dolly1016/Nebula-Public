@@ -30,7 +30,7 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
     static private readonly FloatConfiguration ClockDurationOption = NebulaAPI.Configurations.Configuration("options.role.snatcher.clockDuration", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static public void RewindKillCooldown() => NebulaAPI.CurrentGame!.KillButtonLikeHandler.KillButtonLike.Do(killButton => killButton.StartCooldown(KillCooldownRewindAfterUsurpOption));
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.Get(0,0) == 1, arguments.Get(1,0) == 1, Roles.GetRole(arguments.Get(2, -1)), arguments.Skip(3).ToArray());
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Snatcher MyRole = new();
     static private readonly GameStatsEntry StatsSnatch = NebulaAPI.CreateStatsEntry("stats.snatcher.snatch", GameStatsCategory.Roles, MyRole);
 

@@ -15,7 +15,7 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
     private Mayor() : base("mayor", new(30,96,85), RoleCategory.CrewmateRole, Crewmate.MyTeam, [FixedVotesOption, MinVoteOption, MaxVoteOption, MaxVoteStockOption, VoteAssignmentOption, VoteAssignmentOnReportingOption, VoteAssignmentPerTasksOption]) { }
     Citation? HasCitation.Citation => Citations.TownOfImpostors;
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, 0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly BoolConfiguration FixedVotesOption = NebulaAPI.Configurations.Configuration("options.role.mayor.fixedVotes", false);
     static private readonly IntegerConfiguration MinVoteOption = NebulaAPI.Configurations.Configuration("options.role.mayor.minVote", (0, 20), 1, () => !FixedVotesOption);

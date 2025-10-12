@@ -19,6 +19,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
         //ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Berserker.png");
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Rokurokubi.png");
     }
 
     static private readonly FloatConfiguration CraneSpeedOption = NebulaAPI.Configurations.Configuration("options.role.rokurokubi.craneSpeed", (2.5f, 15f, 2.5f), 7.5f, FloatConfigurationDecorator.Ratio);
@@ -26,7 +27,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
     static private readonly BoolConfiguration AutoKillOption = NebulaAPI.Configurations.Configuration("options.role.rokurokubi.autoKillInCraning", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Rokurokubi MyRole = new();
     
 

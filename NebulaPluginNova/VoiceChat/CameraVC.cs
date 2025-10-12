@@ -16,6 +16,7 @@ internal class CameraVC : IGameOperator
     {
         new CameraVC();
         var room = ModSingleton<NoSVCRoom>.Instance;
+        if (room == null) return;
         foreach (var c in cameras)
         {
             var component = new CameraTerminalVCComponent(c.id, c.pos);

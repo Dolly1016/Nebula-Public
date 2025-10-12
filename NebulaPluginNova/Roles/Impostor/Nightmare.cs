@@ -37,8 +37,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
     static private FloatConfiguration inShadowLightSizeOption = NebulaAPI.Configurations.Configuration("options.role.nightmare.inShadowLightSize", (0f, 2f, 0.25f), 0.5f, FloatConfigurationDecorator.Ratio);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsJackalizable => true;
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     static public Nightmare MyRole = new Nightmare();
     static private GameStatsEntry StatsPlaceNightSeed = NebulaAPI.CreateStatsEntry("stats.nightmare.place", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsNightmare = NebulaAPI.CreateStatsEntry("stats.nightmare.nightmare", GameStatsCategory.Roles, MyRole);

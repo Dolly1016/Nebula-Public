@@ -42,8 +42,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
         public Instance(GamePlayer player) : base(player) { }
 
         static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GhostButton.png", 115f);
-
-        private AchievementToken<bool>? acTokenChallenge = null;
+        AchievementToken<bool>? acTokenChallenge;
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)
@@ -52,7 +51,10 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
                 GameOperatorManager.Instance?.Subscribe<PlayerTaskRemoveLocalEvent>(ev => {
                     try
                     {
-                        if (ev.Task.TryCast<SabotageTask>() != null) acTokenChallenge.Value = false;
+                        if (ev.Task.TryCast<SabotageTask>() != null)
+                        {
+                            acTokenChallenge.Value = false;
+                        }
                     }catch (Exception ex) { }
                 }, this);
 
@@ -68,6 +70,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
 
                     new StaticAchievementToken("clog.common1");
                     if (AmongUsUtil.InAnySab) acTokenChallenge.Value = true;
+                    
 
                     left--;
                     if(left > 0) ghostButton.UpdateUsesIcon(left.ToString());

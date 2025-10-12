@@ -1,4 +1,5 @@
-﻿using AmongUs.GameOptions;
+﻿using AmongUs.Data;
+using AmongUs.GameOptions;
 using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Threading;
 using Nebula.Behavior;
@@ -750,4 +751,16 @@ public static class AmongUsUtil
     public static NormalGameOptionsV10 GetCurrentNormalOption() => GameOptionsManager.Instance.currentNormalGameOptions; //GameOptionsManager.Instance.CurrentGameOptions.CastFast<NormalGameOptionsV10>();
 
     public static bool MapIsOpen => MapBehaviour.Instance && MapBehaviour.Instance.IsOpen;
+
+    public static bool UsingMouseMovement
+    {
+        get
+        {
+            var settings = DataManager.Settings.Input;
+            var mode = settings.InputMode;
+            if (mode == ControlTypes.Keyboard)
+                return DataManager.Settings.Input.MouseMovementEnabled;
+            return mode == ControlTypes.ScreenJoystick;
+        }
+    }       
 }

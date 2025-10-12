@@ -18,7 +18,7 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
 
     public override Ability CreateAbility(Virial.Game.Player player, int[] arguments) => new(player, arguments.GetAsBool(0), (float)arguments.Get(1, (int)(PortableVitalsChargeOption * 10)) / 10f);
     public override UsurpedAbility CreateUsurpedAbility(Virial.Game.Player player, int[] arguments) => new(player, arguments.GetAsBool(0));
-    bool DefinedRole.IsLoadableToMadmate => true;
+    AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private readonly FloatConfiguration PortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.portableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration MaxPortableVitalsChargeOption = NebulaAPI.Configurations.Configuration("options.role.doctor.maxPortableVitalsCharge", (2.5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second);

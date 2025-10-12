@@ -139,6 +139,7 @@ public static class StampHelpers
     {
 
         bool gameIsNotStated = !GameManager.Instance || !GameManager.Instance.GameHasStarted;
+        bool gameIsEnd = !HudManager.InstanceExists || !PlayerControl.LocalPlayer;
         bool inMeeting = MeetingHud.Instance || ExileController.Instance || IntroCutscene.Instance || NebulaPreSpawnMinigame.PreSpawnMinigame;
         bool isDead = PlayerControl.LocalPlayer && PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.IsDead;
         bool canSeeSomeStamps = inMeeting || (isDead && NebulaGameManager.Instance!.CanSeeAllInfo);
@@ -148,7 +149,7 @@ public static class StampHelpers
 
         if (shouldShowEmoteMenu)
         {
-            if (ModSingleton<ShowUp>.Instance.CanUseStamps && (gameIsNotStated || ModSingleton<ShowUp>.Instance.CanUseEmotes))
+            if (ModSingleton<ShowUp>.Instance.CanUseStamps && !gameIsEnd && (gameIsNotStated || ModSingleton<ShowUp>.Instance.CanUseEmotes))
             {
                 var emotes = EmoteManager.AllEmotes.Where(e => !LobbyBehaviour.Instance || e.Value.CanPlayInLobby);
                 NebulaManager.Instance.ShowRingMenu(emotes.Select(emote => new RingMenu.RingMenuElement(emote.Value.LocalIconSupplier, () =>

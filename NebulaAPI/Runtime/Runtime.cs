@@ -81,6 +81,7 @@ public interface NebulaPreprocessor
 
     internal IEnumerator RunPreprocess(PreprocessPhase preprocess);
     internal void PickUpPreprocess(System.Reflection.Assembly assembly);
+    AssignmentType RegisterAssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive);
 
     public bool FinishPreprocess { get; }
 }

@@ -207,12 +207,13 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
 
         void RuntimeAssignable.OnActivated()
         {
-#if PC
             if (AmOwner)
             {
-                //if (GeneralConfigurations.LoversRadioOption) VoiceChatManager.RegisterRadio(this, p=>p == MyLover, "voiceChat.info.loversRadio", MyRole.UnityColor);
+                if (GeneralConfigurations.LoversRadioOption)
+                {
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.loversRadio"), 2, p => p == MyLover, this, MyRole.UnityColor);
+                }
             }
-#endif
         }
 
         [OnlyMyPlayer]
