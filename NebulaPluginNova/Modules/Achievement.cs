@@ -380,7 +380,7 @@ public interface INebulaAchievement
     {
         float rate100 = GlobalProgress * 100f;
         //(GlobalProgress * 100f).ToString("F1")
-        return GUI.API.FunctionalTextComponent(() => Language.Translate("achievement.ui.globalProgress").Replace("%RATE%", rate100.ToString("F1"))).Color(GlobalProgressColor);
+        return GUI.API.FunctionalTextComponent(() => Language.Translate("achievement.ui.globalProgress").Replace("%RATE%", rate100 > 0f && rate100 < 0.1f ? "<0.1" : rate100.ToString("F1"))).Color(GlobalProgressColor);
     }
     TextComponent? GetFlavorComponent()
     {

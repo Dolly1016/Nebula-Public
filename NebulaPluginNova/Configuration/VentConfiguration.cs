@@ -47,8 +47,8 @@ internal class VentConfiguration : IVentConfiguration
             string str = Language.Translate("role.general.ventOption") + ": (";
             string?[] vals = [
                 usesEntry != null ? (Language.Translate("role.general.ventUses") + ": " + usesEntry.Value) : null,
-                coolDownEntry != null ? (Language.Translate("role.general.ventCoolDown") + ": " + coolDownEntry.Value + Language.Translate("options.sec")) : null,
-                durationEntry != null ? (Language.Translate("role.general.ventDuration") + ": " + durationEntry.Value + Language.Translate("options.sec")) : null,
+                (coolDownEntry != null && coolDownEntry.Value > 0f) ? (Language.Translate("role.general.ventCoolDown") + ": " + coolDownEntry.Value + Language.Translate("options.sec")) : null,
+                (durationEntry != null && durationEntry.Value > 0f) ? (Language.Translate("role.general.ventDuration") + ": " + durationEntry.Value + Language.Translate("options.sec")) : null,
             ];
             str += vals.Where(s => s != null).Join(null, ", ") + ")";
             sb.Add(str);
@@ -82,7 +82,7 @@ internal class VentConfiguration : IVentConfiguration
             if (canUseEntry == null) widgets.AddRange([GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), "role.general.ventOption"), GUI.API.HorizontalMargin(0.2f)]);
             if (usesEntry != null) AddOptionToEditor(usesEntry, () => usesEntry.Value.ToString(), "role.general.ventUses");
             if (coolDownEntry != null) AddOptionToEditor(coolDownEntry, () => coolDownEntry.Value + Language.Translate("options.sec"), "role.general.ventCoolDown");
-            if (durationEntry != null) AddOptionToEditor(durationEntry, () => durationEntry.Value + Language.Translate("options.sec"), "role.general.ventDuration");
+            if (durationEntry != null) AddOptionToEditor(durationEntry, () => durationEntry.Value > 0f ? (durationEntry.Value + Language.Translate("options.sec")) : Language.Translate("options.noLimit"), "role.general.ventDuration");
 
             result.Add(new HorizontalWidgetsHolder(GUIAlignment.Left, widgets));
         }

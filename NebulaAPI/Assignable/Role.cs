@@ -783,6 +783,11 @@ public interface RuntimeRole : RuntimeAssignable
     /// 現在の状態を簒奪可能能力の引数に変換します。
     /// </summary>
     int[]? UsurpedAbilityArguments { get => null; }
+
+    /// <summary>
+    /// 勝機を取得します。
+    /// </summary>
+    float WinningOpportunity => NebulaAPI.CurrentGame?.GetModule<IWinningOpportunity>()?.GetOpportunity(Role.Team) ?? 0f;
 }
 
 /// <summary>

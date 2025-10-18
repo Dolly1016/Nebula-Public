@@ -400,7 +400,7 @@ public class NebulaManager : MonoBehaviour
     {
         commands.Add(new( "help.command.nogame",
             () => NebulaGameManager.Instance != null && AmongUsClient.Instance &&  AmongUsClient.Instance.AmHost && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started,
-            () => NebulaGameManager.Instance?.RpcInvokeForcelyWin(NebulaGameEnd.NoGame, 0)
+            () => NebulaGameManager.Instance?.RpcInvokeForciblyWin(NebulaGameEnd.NoGame, 0)
         ){ DefaultKeyInput = new(KeyCode.F5) });
         
         commands.Add(new("help.command.quickStart",
@@ -554,8 +554,6 @@ public class NebulaManager : MonoBehaviour
                 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    //DiscordVC.Start();
-
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
 
                     /*

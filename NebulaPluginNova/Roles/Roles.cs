@@ -186,6 +186,10 @@ public class Roles
         CheckNeedingHandshake(team);
     }
 
+    static public Team GetTeamById(int id)
+    {
+        return AllTeams.Find(t => t.Id == id, out var team) ? team : null!;
+    }
     static public IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         yield return preprocessor.SetLoadingText("Building Roles Database");
@@ -215,6 +219,7 @@ public class Roles
         for (int i = 0; i < allRoles!.Count; i++) allRoles![i].Id = i;
         for (int i = 0; i < allGhostRoles!.Count; i++) allGhostRoles![i].Id = i;
         for (int i = 0; i < allModifiers!.Count; i++) allModifiers![i].Id = i;
+        for (int i = 0; i < allTeams!.Count; i++) allTeams![i].Id = i;
 
         AllRoles = allRoles!.AsReadOnly();
         AllGhostRoles = allGhostRoles!.AsReadOnly();

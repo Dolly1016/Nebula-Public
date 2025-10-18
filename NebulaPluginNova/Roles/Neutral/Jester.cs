@@ -76,7 +76,8 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
                 acTokenCommon ??= new StaticAchievementToken("jester.common1");
             if (NebulaGameManager.Instance?.AllPlayerInfo.All(p => p.IsDead || ev.Voters.Any(v => v.PlayerId == p.PlayerId)) ?? false)
                 new StaticAchievementToken("jester.challenge");
-
+            
+            if(ev.Voters.Count > 0) ModSingleton<IWinningOpportunity>.Instance?.RpcSetOpportunity(MyTeam, ev.Voters.Count / 4f + 0.1f);
         }
 
         RoleTaskType RuntimeRole.TaskType => TaskConfiguration.RequiresTasks ? RoleTaskType.RoleTask : RoleTaskType.NoTask;

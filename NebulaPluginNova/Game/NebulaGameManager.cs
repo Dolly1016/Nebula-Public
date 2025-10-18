@@ -540,7 +540,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
         {
             var info = GamePlayer.LocalPlayer;
-            if (info != null && (info.IsDived || info.IsBlown))
+            if (info != null && (info.IsDived || info.IsBlown || info.VanillaPlayer.inVent))
             {
                 HudManager.Instance.KillButton.SetTarget(null);
             }
@@ -728,7 +728,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         }
     });
 
-    public void RpcInvokeForcelyWin(GameEnd endCondition, int winnersMask)
+    public void RpcInvokeForciblyWin(GameEnd endCondition, int winnersMask)
     {
         RpcSpecialWin.Invoke(new(endCondition.Id, winnersMask));
     }

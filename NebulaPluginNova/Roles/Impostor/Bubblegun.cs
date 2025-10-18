@@ -35,7 +35,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
     static private readonly BoolConfiguration eraseBubblesOnMeeting = NebulaAPI.Configurations.Configuration("options.role.bubblegun.eraseBubblesOnMeeting", true);
     static private readonly BoolConfiguration canKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.bubblegun.canKillImpostor", false);
     static private readonly BoolConfiguration bubblePopWhenHitWallOption = NebulaAPI.Configurations.Configuration("options.role.bubblegun.bubblePopWhenHitWall", false);
-
+    static internal float BubbleSize => bubbleSizeOption;
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0), arguments.Get(1, maxBubblesOption));
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
@@ -49,9 +49,10 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
         private float degreeAngle;
         private int index;
         private GamePlayer myPlayer;
-        
-        public BubblegunBubble(GamePlayer player, Vector2 pos, float angle, int index)
+        private bool isFake;
+        public BubblegunBubble(GamePlayer player, Vector2 pos, float angle, int index, bool isFake = false)
         {
+            this.isFake = isFake;
             this.index = index;
             myPlayer = player;
             renderer = UnityHelper.CreateObject<SpriteRenderer>("Bubble", null, pos, LayerExpansion.GetObjectsLayer());
@@ -97,7 +98,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             if (moving) renderer.gameObject.transform.position += (new Vector2(1f, 0f).Rotate(degreeAngle) * 0.8f * bubbleSpeedOption * Time.deltaTime).AsVector3(0f);
 
 
-            if (!MeetingHud.Instance && moving)
+            if (!MeetingHud.Instance && moving && !isFake)
             {
                 float bubbleOption = (1.7f / 2f * bubbleSizeOption);
 
@@ -213,7 +214,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                     Vector2 pos = (Vector2)MyPlayer.Position + new Vector2(1f, 0f).Rotate(MyPlayer.Unbox().MouseAngle * 180f / Mathn.PI) * (0.7f + 0.1f * bubbleSizeOption);
                     RpcFire.Invoke((MyPlayer.PlayerId, pos, MyPlayer.Unbox().MouseAngle, Bubbles.Count));
                     equipButton.SetLabel("equip");
-                    NebulaAsset.PlaySE(Helpers.Prob(50) ? NebulaAudioClip.Bubble1 : NebulaAudioClip.Bubble2, oneshot: true, volume: 1f);
+                    PlayFireSE();
 
                     equipButton.UpdateUsesIcon(LeftUses.ToString());
 
@@ -467,5 +468,17 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             return (position.AsVector3(-1f), bubbleHolder);
         });
 
+    }
+
+    static internal BubblegunBubble FireFakeBubble(GamePlayer player, Vector2 pos, float angle)
+    {
+        var bubble = new BubblegunBubble(player, pos, angle, -1, true);
+        bubble.Register(bubble);
+        return bubble;
+    }
+
+    static internal void PlayFireSE()
+    {
+        NebulaAsset.PlaySE(Helpers.Prob(50) ? NebulaAudioClip.Bubble1 : NebulaAudioClip.Bubble2, oneshot: true, volume: 1f);
     }
 }

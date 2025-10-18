@@ -396,14 +396,12 @@ internal class NoSVCRoom
             var localIsDead = GamePlayer.LocalPlayer?.IsDead ?? false;
             var targetIsDead = mapping.MappedModPlayer?.IsDead ?? true;
 
-            var isInRadio = IsInRadio(mapping.MappedModPlayer, out var state);
-            bool canHearOnRadio = isInRadio && (state?.CanHear ?? false);
-            bool canHear = (localIsDead || !targetIsDead) && !isInRadio;
+            bool canHear = (localIsDead || !targetIsDead);
 
             imager.Pan = 0f;
             normalVolume.Volume = canHear ? 1f : 0f;
             ghostVolume.Volume = 0f;
-            radioVolume.Volume = canHearOnRadio ? 1f: 0f;
+            radioVolume.Volume = 0f;
             droneVolume.Volume = 0f;
         }
 

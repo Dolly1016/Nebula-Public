@@ -192,6 +192,7 @@ public class StandardRoleAllocator : IRoleAllocator
         {
             foreach (var t in AssignmentType.AllTypes)
             {
+                if (!t.IsActive) continue;
                 if (t.Category == category)
                 {
                     var targetRole = t.RelatedRole;

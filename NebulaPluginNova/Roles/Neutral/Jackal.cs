@@ -214,7 +214,8 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 bool hasSidekick = false;
 
-                var myTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeLocalKillablePredicate(p) && !IsMySidekick(p.RealPlayer), null, Impostor.Impostor.CanKillHidingPlayerOption);
+                var myKillTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeLocalKillablePredicate(p) && !IsMySidekick(p.RealPlayer), null, Impostor.Impostor.CanKillHidingPlayerOption);
+                var mySidekickTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeStandardPredicate(p) && !IsMySidekick(p.RealPlayer), null, false);
 
                 GameObject? lockSprite = null;
                 TMPro.TextMeshPro? leftText = null;
@@ -222,14 +223,14 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 if (CanCreateSidekickOption && ((inherited == 0 && !Sidekick.AssignedSidekickOption) || Sidekick.CanCreateSidekickChainlyOption))
                 {
-                    sidekickButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, myTracker, new PlayerInteractParameter(RealPlayerOnly: true), false, true, Virial.Compat.VirtualKeyInput.SidekickAction, null,
+                    sidekickButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, mySidekickTracker, new PlayerInteractParameter(RealPlayerOnly: true), false, true, Virial.Compat.VirtualKeyInput.SidekickAction, null,
                         15f, "sidekick", sidekickButtonSprite,
                         (p, button) =>
                         {
                             if (Sidekick.IsModifierOption)
-                                myTracker.CurrentTarget?.RealPlayer.AddModifier(SidekickModifier.MyRole, [1, JackalTeamId]);
+                                myKillTracker.CurrentTarget?.RealPlayer.AddModifier(SidekickModifier.MyRole, [1, JackalTeamId]);
                             else
-                                myTracker.CurrentTarget?.RealPlayer.SetRole(Sidekick.MyRole, [1, JackalTeamId]);
+                                myKillTracker.CurrentTarget?.RealPlayer.SetRole(Sidekick.MyRole, [1, JackalTeamId]);
                             hasSidekick = true;
 
                             new StaticAchievementToken("jackal.common1");
@@ -261,7 +262,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
                         if (cancelable?.ResetCooldown ?? false) NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                     },
                     null,
-                    _ => myTracker.CurrentTarget != null && !MyPlayer.IsDived,
+                    _ => myKillTracker.CurrentTarget != null && !MyPlayer.IsDived,
                     _ => MyPlayer.AllowToShowKillButtonByAbilities
                     );
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
@@ -395,6 +396,11 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 PromoteSidekick(false);
             }
+        }
+
+        void OnPlayerDie(PlayerDieEvent ev)
+        {
+            ModSingleton<IWinningOpportunity>.Instance.SetOpportunity(NebulaTeams.JackalTeam, Impostor.KillerOpportunityHelpers.CalcTeamOpportunity(p => MyPlayer == p, IsMySidekick));
         }
     }
 }

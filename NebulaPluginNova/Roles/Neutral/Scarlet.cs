@@ -423,6 +423,18 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         {
             if (message.scarlet.Role is Instance scarlet) scarlet.FavoriteGauge = message.gauge;
         }, false);
+
+        float RuntimeRole.WinningOpportunity
+        {
+            get
+            {
+                if(MyPlayer.IsDead) return 0f;
+                var favorite = GetMyFavorite();
+                if(favorite == null) return 0f;
+                if (favorite.Role.Role == MyRole) return 0f; //本命が自分自身の場合は勝機自体はないものとする。(無限ループ防止)
+                return (WithFavoriteGauge ? (FavoriteGauge / FavoriteGaugeThreshold) : 1f) * (favorite.Role.WinningOpportunity);
+            }
+        }
     }
 }
 

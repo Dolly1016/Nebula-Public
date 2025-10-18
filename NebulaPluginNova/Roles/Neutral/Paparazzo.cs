@@ -413,7 +413,12 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
 
         internal bool CheckPaparazzoWin()
         {
-            return !MyPlayer.IsDead && (GetActivatedBits(CapturedMask) >= RequiredSubjectsOption && GetActivatedBits(DisclosedMask) >= RequiredDisclosedOption) && DisclosedPhotos >= RequiredPicturesOption;
+            var numOfSubjects = GetActivatedBits(CapturedMask);
+            var numOfDisclosed = GetActivatedBits(DisclosedMask);
+            var opportunity = Mathn.Max(1f - (RequiredSubjectsOption - numOfSubjects) * 0.1f, 1f - (RequiredDisclosedOption - numOfDisclosed) * 0.1f);
+            ModSingleton<IWinningOpportunity>.Instance?.RpcSetOpportunity(MyTeam, opportunity);
+
+            return !MyPlayer.IsDead && (numOfSubjects >= RequiredSubjectsOption && numOfDisclosed >= RequiredDisclosedOption) && DisclosedPhotos >= RequiredPicturesOption;
         }
 
         [Local]

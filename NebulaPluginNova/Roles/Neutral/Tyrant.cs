@@ -1,5 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Nebula.Game.Statistics;
+using Nebula.Roles.Modifier;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -44,6 +46,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
     static public float KillCooldown => KillCoolDownOption.CoolDown;
 
     static public Tyrant MyRole = new Tyrant();
+    static private GameStatsEntry StatsKill = NebulaAPI.CreateStatsEntry("stats.tyrant.kill", GameStatsCategory.Roles, MyRole);
 
     bool DefinedRole.IsKiller => true;
     IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments)
@@ -138,6 +141,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
                 if (ev.Dead == ev.Player) return; //自滅は除外
                 
                 killingTotal++;
+                if (AmOwner) StatsKill.Progress();
                 killMask.Add(ev.Dead);
 
                 if ((GamePlayer.LocalPlayer?.AmHost ?? false) && killingTotal >= NumOfKillingToWinOption) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.TyrantWin, 1 << MyPlayer.PlayerId);
@@ -160,6 +164,31 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
                     ev.VoteArea.StartCoroutine(CoUpdateXMark().WrapToIl2Cpp());
                 }
             }, NebulaAPI.CurrentGame!);
+        }
+
+        [OnlyMyPlayer, Local]
+        void OnDead(PlayerDieEvent ev)
+        {
+            if (killingTotal == RequiredKillingToWin - 1) new StaticAchievementToken("tyrant.another1");
+        }
+
+        float RuntimeRole.WinningOpportunity => killingTotal / RequiredKillingToWin * 0.6f + 0.4f;
+
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
+        {
+            if(!MyPlayer.IsDead && ev.EndState.EndCondition == NebulaGameEnd.TyrantWin && ev.EndState.Winners.Test(MyPlayer))
+            {
+                HashSet<RoleTeam> teams = [];
+                foreach(var p in GamePlayer.AllPlayers) if (p.Role.Role.Team != MyTeam && p.Role.WinningOpportunity > 0.75f) teams.Add(p.Role.Role.Team);
+                int teamsCount = teams.Count;
+                
+                //Lovers単独勝利を考慮に入れる
+                if (GamePlayer.AllPlayers.Any(p => p.TryGetModifier<Lover.Instance>(out var lover) && !(lover.MyLover.Get()?.IsDead ?? true) && !p.IsDead) && GamePlayer.AllPlayers.Count(p => !p.IsDead) <= 4) teamsCount++;
+                
+                if (teams.Count >= 3) new StaticAchievementToken("tyrant.challenge");
+                
+            }
         }
 
         string RuntimeAssignable.DisplayName => MyImpAbilityRole?.GetDisplayName(ImpAbility!) ?? (MyRole as DefinedRole).DisplayName;

@@ -426,6 +426,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
 
         private float leftAliveTime;
         public float LeftAliveTime => leftAliveTime;
+        public float Satiety => leftAliveTime / SatietyRateOption;
         public void AddSatiety(float satiety)
         {
             leftAliveTime = Mathf.Clamp(leftAliveTime + satiety * SatietyRateOption, 0f, MaxSatietyOption * SatietyRateOption);
@@ -563,7 +564,10 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
 
         static public RemoteProcess<(GamePlayer player, float satiety)> RpcAddSatiety = new("SpectreAddSatiety", (message, _) =>
         {
-            if (message.player.Role is Spectre.Instance spectre) spectre.AddSatiety(message.satiety);
+            if (message.player.Role is Spectre.Instance spectre)
+            {
+                spectre.AddSatiety(message.satiety);
+            }
         });
 
         private bool IsSameTeam(GamePlayer? player)
@@ -601,6 +605,9 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
                     p.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill);
             });
         }
+
+        float RuntimeRole.WinningOpportunity => MyPlayer.IsDead ? 0f : Mathn.Clamp01(Satiety / RequiredSatietyForWinningOption * 0.9f);
+
 
         #region Achievements
 

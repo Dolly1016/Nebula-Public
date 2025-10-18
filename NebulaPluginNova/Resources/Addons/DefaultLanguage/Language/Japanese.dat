@@ -240,6 +240,7 @@ $Color
 "options.percentage" : "%"
 "options.cross" : "x"
 "options.sec" : "s"
+"options.noLimit" : "無制限"
 "options.taskPhase" : "ターン"
 "options.followPrimaryChance" : "-"
 "options.inactivated" : "無効"
@@ -1494,6 +1495,7 @@ $Color
 "options.role.tyrant.killCooldown" : "キルクールダウン"
 "options.role.tyrant.numOfKillingToWin" : "勝利に必要なキル数"
 "options.role.tyrant.useImpostorAbility" : "インポスター能力の使用"
+"stats.tyrant.kill" : "キル回数"
 
 "role.vulture.name" : "ヴァルチャー"
 "role.vulture.short" : "ヴァ"
@@ -1608,7 +1610,7 @@ $Color
 
 "role.trilemma.name" : "トリレンマ"
 "role.trilemma.generalBlurb" : "倶に天を戴かず"
-"options.role.trilemma.detail" : "トリレンマはプレイヤー間の三すくみの関係です。<br>トリレマは他の二人が死亡しないと勝利できません。"
+"options.role.trilemma.detail" : "トリレンマはプレイヤー間の三すくみの関係です。<br>トリレンマは他の二人が死亡しないと勝利できません。"
 "role.trilemma.blurb" : "トリレンマに陥った！"
 "options.role.trilemma.numOfTrilemma" : "最大組数"
 "options.role.trilemma.impostorAssignment" : "インポスターへの割り当て"
@@ -1717,6 +1719,9 @@ $Color
 
 "perk.raiderEvidence.name" : "憤怒"
 "perk.raiderEvidence.detail" : "すぐ近くの壁に斧を突き刺す。<br>このパークには%CD%秒のクールダウンがある。<br>レイダーはこのパークを使用できない。"
+
+"perk.fakeBubble.name" : "景気よし"
+"perk.fakeBubble.detail" : "その場でキル能力を持たないバブルを撃つ。<br>このパークには%CD%秒のクールダウンがある。"
 
 "perk.accelTrap.name" : "可能性の増幅"
 "perk.accelTrap.detail" : "その場に加速トラップを設置する。<br>設置したトラップは会議を挟んでから有効化する。"
@@ -3118,9 +3123,9 @@ $Color
 "role.gambler.ability.deceive" : "プレイヤーにイカサマを仕掛けます。<br>直後の会議でそのプレイヤーの投票先を即座に把握できます。"
 
 "role.extraMission.winCond" : "自身の勝利条件を満たしたうえで、ゲーム終了時にターゲットが死亡していること。<br>ターゲットが生存している場合、勝利を失います。"
-"role.trilemma.winCond.block" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレマがどちらも死亡していること。<br>残りのどちらか一方でも生存している場合、勝利を失います。"
-"role.trilemma.winCond.additional" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレマがどちらも死亡していること。<br>残りのどちらか一方でも生存している場合、勝利を失います。"
-"role.trilemma.winCond.overwrite" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレマがどちらも死亡していると<br>勝利を乗っ取ります。残りのどちらか一方でも生存している場合、勝利を失います。"
+"role.trilemma.winCond.block" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレンマがどちらも死亡していること。<br>残りのどちらか一方でも生存している場合、勝利を失います。"
+"role.trilemma.winCond.additional" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレンマがどちらも死亡していること。<br>残りのどちらか一方でも生存している場合、勝利を失います。"
+"role.trilemma.winCond.overwrite" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレンマがどちらも死亡していると<br>勝利を乗っ取ります。残りのどちらか一方でも生存している場合、勝利を失います。"
 "role.lover.winCond" : "全生存者が3人以下になった段階で、相方とともに生存していること。#ADD"
 "role.lover.winCond.additional" : "<br>または、相方が勝利し、かつ生存していると自身も<var>追加勝利</var>できます。"
 "role.lover.tips.standard" : "・相方が死亡すると、自身も後を追って<var>自殺</var>します。"

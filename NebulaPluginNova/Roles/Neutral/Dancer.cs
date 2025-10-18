@@ -210,6 +210,10 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
             danceShareVersion = version;
             activeDanceLooked = new(active);
             completedDanceLooked = new(completed);
+
+            float opportunity = (completed.Length / (float)NumOfSuccessfulForecastToWinOption);
+            opportunity += active.Count(p => !p.IsDead && !completed.Contains(p)) * 0.07f;
+            ModSingleton<IWinningOpportunity>.Instance?.SetOpportunity(MyTeam, opportunity);
         }
         void UpdateButtonGraphic()
         {

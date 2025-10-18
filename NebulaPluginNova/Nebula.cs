@@ -42,6 +42,7 @@ using System.Runtime.Loader;
 using AmongUs.Data.Player;
 using Interstellar;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 #if PC
 [assembly: System.Reflection.AssemblyFileVersionAttribute(Nebula.NebulaPlugin.PluginEpochStr + "."  + Nebula.NebulaPlugin.PluginBuildNumStr)]
@@ -56,11 +57,11 @@ public class NebulaPlugin
     public const string PluginVersion = "2.25.6.0";
 
     //public const string VisualVersion = "v2.25.6";
-    public const string VisualVersion = "Snapshot 25.10.12b";
+    public const string VisualVersion = "Snapshot 25.10.18a";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1471";
+    public const string PluginBuildNumStr = "1474";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -136,6 +137,7 @@ public class NebulaPlugin
     static internal void LoadInternal(bool android)
     {
         IsAndroid = android;
+        if (!IsAndroid) System.Console.OutputEncoding = Encoding.UTF8;
         Log = new(android);
 
         void LoadLibrary(string path)

@@ -3,6 +3,7 @@ using Nebula.Roles.Impostor;
 using Nebula.Roles.Modifier;
 using Nebula.Roles.Neutral;
 using Virial;
+using Virial.Assignable;
 using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
@@ -114,6 +115,7 @@ public class NebulaEndCriteria
                 quota += p.Tasks.Quota;
                 completed += p.Tasks.TotalCompleted;
             }
+            if (quota > 0) ModSingleton<IWinningOpportunity>.Instance?.RpcSetOpportunity(NebulaTeams.CrewmateTeam, (completed * 0.93f) / (float)quota);
             if (quota > 0 && quota <= completed) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Task);
         }
     };
@@ -273,6 +275,9 @@ public class CriteriaManager
             triggeredGameEnds.RemoveAll(t => t.reason is GameEndReason.Situation or GameEndReason.SpecialSituation);
             return; //追放中はゲーム終了条件の判定をスキップする。
         }
+
+        //条件にそぐわない勝利条件の削除
+        triggeredGameEnds.RemoveAll(t => GameOperatorManager.Instance?.Run<EndCriteriaPreMetEvent>(new(t.gameEnd, t.reason))?.IsBlocked ?? false);
 
         if(triggeredGameEnds.Count == 0) return;
 

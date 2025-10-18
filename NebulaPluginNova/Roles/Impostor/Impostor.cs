@@ -69,4 +69,26 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
     {
         if (ev.Player.IsImpostor && ev.Target.IsImpostor) ev.SetAsCannotKillBasically(); 
     }
+
+    void OnPlayerDie(PlayerDieEvent ev)
+    {
+        ModSingleton<IWinningOpportunity>.Instance.SetOpportunity(NebulaTeams.ImpostorTeam, KillerOpportunityHelpers.CalcTeamOpportunity(p => p.IsImpostor, p => p.IsMadmate));
+    }
+}
+
+internal static class KillerOpportunityHelpers { 
+    static public float CalcTeamOpportunity(Predicate<GamePlayer> isKiller, Predicate<GamePlayer> isFriend,float coeff = 0.15f)
+    {
+        float killerScore = 0f, allPlayerScore = 0f;
+        foreach (var p in GamePlayer.AllPlayers)
+        {
+            if (!p.IsDead)
+            {
+                allPlayerScore += 1f;
+                if (isKiller.Invoke(p)) killerScore += 2f;
+                else if (isFriend.Invoke(p)) killerScore += 1f;
+            }
+        }
+        return 1f + (killerScore - allPlayerScore) * coeff;
+    }
 }

@@ -230,6 +230,7 @@
 "options.percentage" : "%"
 "options.cross" : "x"
 "options.sec" : "s"
+"options.noLimit" : "No Limit"
 "options.taskPhase" : " turns"
 "options.followPrimaryChance" : "-"
 "options.inactivated" : "Inactivated"
@@ -1691,6 +1692,9 @@
 
 "perk.raiderEvidence.name" : "Rampage"
 "perk.raiderEvidence.detail" : "Punch the axe into the nearby wall.<br>This perk has a %CD% second cooldown.<br>Raider CANNOT use this perk."
+
+"perk.fakeBubble.name" : "Boom"
+"perk.fakeBubble.detail" : "Shoots bubbles that have no kill ability on the spot.<br>This perk has a %CD% second cooldown. "
 
 "perk.accelTrap.name" : "Amplifying"
 "perk.accelTrap.detail" : "Place an acceleration trap. <br>The placed traps will be activated after the meeting. "

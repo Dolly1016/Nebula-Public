@@ -24,7 +24,7 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private BoolConfiguration ConnectVentsOption = NebulaAPI.Configurations.Configuration("options.role.reaper.connectAllVents", true);
-    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.reaper.vent", false, null, -1, (0f, 60f, 2.5f), 15f, (2.5f, 30f, 2.5f), 10f);
+    static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.reaper.vent", false, null, -1, (0f, 60f, 2.5f), 15f, (0f, 30f, 2.5f), 10f);
     static private BoolConfiguration CanUseVentWhileHoldingDeadbodyOption = NebulaAPI.Configurations.Configuration("options.role.reaper.useVentWhileHoldingDeadbody", true);
     
 

@@ -548,7 +548,8 @@ public class DynamicPalette
     public static void OpenCatalogue(NebulaPlayerTab playerTab, SpriteRenderer TargetRenderer, Action ShownColor, bool isBodyColor = true)
     {
         var screen = MetaScreen.GenerateWindow(new Vector2(6.7f, 4.2f), HudManager.InstanceExists ? HudManager.Instance.transform : PlayerCustomizationMenu.Instance.transform, new Vector3(0f, 0f, 0f), true, false);
-        screen.transform.parent.FindChild("Background").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.85f);
+        var background = screen.transform.parent.FindChild("Background");
+        if(background) background.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.85f);
 
         MetaWidgetOld widget = new();
 

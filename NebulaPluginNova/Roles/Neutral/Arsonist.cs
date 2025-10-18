@@ -59,7 +59,11 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
         private bool CheckDoused((byte playerId, PoolablePlayer icon) p) => p.icon.GetAlpha() > 0.8f;
         private bool CheckIgnitable()
         {
-            canIgnite = playerIcons.All(CheckDoused);
+            int doused = playerIcons.Count(CheckDoused);
+            int num = playerIcons.Count;
+            ModSingleton<IWinningOpportunity>.Instance.RpcSetOpportunity(MyTeam, 1f - (num - doused) * 0.1f);
+            
+            canIgnite = doused == num;
             return canIgnite;
         }
 

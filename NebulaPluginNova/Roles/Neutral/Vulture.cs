@@ -77,6 +77,15 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
                     eatButton.StartCoolDown();
 
                     acTokenCommon ??= new("vulture.common1");
+
+                    ModSingleton<IWinningOpportunity>.Instance?.RpcSetOpportunity(MyTeam, leftEaten switch
+                    {
+                        3 => 0.2f,
+                        2 => 0.5f,
+                        1 => 0.8f,
+                        _ => 0f
+                    });
+
                     StatsEaten.Progress();
 
                     if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId);

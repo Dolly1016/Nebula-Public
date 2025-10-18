@@ -16,11 +16,10 @@ namespace Virial.Events.Game.Meeting;
 /// </remarks>
 public class PlayerVotedLocalEvent : AbstractPlayerEvent
 {
-    public IEnumerable<Virial.Game.Player> Voters { get { foreach (var v in voters) yield return v; } }
-    private Virial.Game.Player[] voters;
+    public IReadOnlyList<Virial.Game.Player> Voters { get; }
 
-    internal PlayerVotedLocalEvent(Virial.Game.Player player, Virial.Game.Player[] voters) : base(player)
+    internal PlayerVotedLocalEvent(Virial.Game.Player player, IReadOnlyList<Virial.Game.Player> voters) : base(player)
     {
-        this.voters = voters;
+        this.Voters = voters;
     }
 }
