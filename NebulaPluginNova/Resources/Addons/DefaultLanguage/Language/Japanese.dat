@@ -1313,6 +1313,7 @@ $Color
 "stats.avenger.killTarget" : "復讐対象のキル回数"
 "stats.avenger.failed" : "返り討ちに遭った回数"
 "stats.avenger.defend" : "キラーとして返り討ちに成功した回数"
+"role.avenger.hudText" : "You became AVENGER."
 
 "role.chainShifter.name" : "チェインシフター"
 "role.chainShifter.short" : "チ"
@@ -2028,6 +2029,7 @@ $Color
 "button.label.rokuro" : "ろくろ首"
 "button.label.rokuro.reset" : "収縮"
 "button.label.acid" : "アシッド"
+"button.label.mobile.switch" : "切替"
 
 # Game
 

@@ -1,9 +1,10 @@
 ﻿global using System;
 global using System.Collections.Generic;
-global using System.Reflection;
-global using System.Linq;
 global using System.IO;
+global using System.Linq;
+global using System.Reflection;
 using System.Runtime.CompilerServices;
+using Virial.Achievements;
 using Virial.Assignable;
 using Virial.Compat;
 using Virial.Components;
@@ -65,6 +66,8 @@ internal interface INebula
     E RunEvent<E>(E ev) where E : class, Virial.Events.Event;
 
     IModuleFactory Modules { get; }
+
+    TitlesRegister Titles { get; }
 
     IDisposable CreateRPCSection(string? label);
 

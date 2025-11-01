@@ -153,7 +153,7 @@
 "ui.action.snatcher.snatch" : "Steals player's ability."
 "ui.action.snatcher.clock" : "Change cooldown speed."
 "ui.action.cupid.lover" : "Select the players you want to make lovers."
-"ui.action.cupid.laser" : "Makes Fate lasers appear between lovers.<br>There is a delay before the laser appears."
+"ui.action.cupid.string" : "Makes Fate lasers appear between lovers.<br>There is a delay before the laser appears."
 
 "ui.contact.title" : "Report Form"
 "ui.contact.guide" : "Please let us know about any bugs you notice or requests you have.<br>* Note that the form will be sent anonymously, so you will not receive a direct response from the development team.<br><br>If you need a response, please contact us on the official Discord server."
@@ -1303,6 +1303,7 @@
 "stats.avenger.killTarget" : "Num of Killing Target"
 "stats.avenger.failed" : "Num of Killed By Target"
 "stats.avenger.defend" : "Num of Killing Avenger"
+"role.avenger.hudText" : "You became AVENGER."
 
 "role.chainShifter.name" : "Chain Shifter"
 "role.chainShifter.short" : "C"
@@ -1992,6 +1993,7 @@
 "button.label.rokuro" : "crane"
 "button.label.rokuro.reset" : "reset"
 "button.label.acid" : "acid"
+"button.label.mobile.switch" : "toggle"
 
 # Game
 

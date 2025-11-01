@@ -53,7 +53,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 
         static private Image douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DouseButton.png", 115f);
         static private Image IgniteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.IgniteButton.png", 115f);
-        private List<(byte playerId,PoolablePlayer icon)> playerIcons = new();
+        private List<(byte playerId,PoolablePlayer icon)> playerIcons = [];
         private bool canIgnite;
 
         private bool CheckDoused((byte playerId, PoolablePlayer icon) p) => p.icon.GetAlpha() > 0.8f;
@@ -123,6 +123,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                 douseButton.OnEffectEnd = (button) =>
                 {
                     if (douseTracker.CurrentTarget == null) return;
+                    if (MeetingHud.Instance) return;
 
                     if (!button.EffectTimer!.IsProgressing)
                     {

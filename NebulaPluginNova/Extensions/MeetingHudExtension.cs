@@ -278,7 +278,6 @@ public static class MeetingHudExtension
 
     internal static void ModCmdReportDeadBody(GamePlayer player, GamePlayer? deadBody, ReportType reportType)
     {
-        LogUtils.WriteToConsole("Called ModCmdReportDeadBody");
         RpcModCmdReportDeadBody.Invoke((player, deadBody, reportType));
     }
     private static readonly RemoteProcess<(GamePlayer player, GamePlayer? deadBody, ReportType reportType)> RpcModCmdReportDeadBody = new("ReportDissolvedDeadBody", (message, _) =>

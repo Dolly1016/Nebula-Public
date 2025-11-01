@@ -125,7 +125,11 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
             float scale = MaxDistanceBetweenPolesOption / VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
             collider = UnityHelper.CreateObject<CircleCollider2D>("Click", transform, new(0f, 0f, -5f));
+#if ANDROID
+            collider.radius = 20f;
+#else
             collider.radius = scale;
+#endif
             collider.isTrigger = true;
             circleRenderer = UnityHelper.CreateObject<SpriteRenderer>("CircleRenderer", collider.transform, new(0f, 0f, -20f));
             circleRenderer.transform.localScale = Vector3.one * scale;

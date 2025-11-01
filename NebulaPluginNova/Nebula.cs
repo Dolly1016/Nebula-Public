@@ -54,14 +54,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "2.25.6.0";
+    public const string PluginVersion = "2.26.0.0";
 
-    //public const string VisualVersion = "v2.25.6";
-    public const string VisualVersion = "Snapshot 25.10.18a";
+    public const string VisualVersion = "v2.26";
+    //public const string VisualVersion = "Snapshot 25.10.27b";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1474";
+    public const string PluginBuildNumStr = "1479";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -137,7 +137,7 @@ public class NebulaPlugin
     static internal void LoadInternal(bool android)
     {
         IsAndroid = android;
-        if (!IsAndroid) System.Console.OutputEncoding = Encoding.UTF8;
+        //if (!IsAndroid) System.Console.OutputEncoding = Encoding.UTF8;
         Log = new(android);
 
         void LoadLibrary(string path)

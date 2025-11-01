@@ -58,7 +58,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         {
             if (AmOwner)
             {
-                NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText("You became AVENGER.", MyRole.RoleColor.ToUnityColor(), 5.5f, true);
+                NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText(Language.Translate("role.avenger.hudText"), MyRole.RoleColor.ToUnityColor(), 5.5f, true);
                 AmongUsUtil.PlayCustomFlash(MyRole.RoleColor.ToUnityColor(), 0f, 0.8f, 0.7f);
 
                 var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,

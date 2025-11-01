@@ -125,7 +125,7 @@ internal class AchievementViewer : MonoBehaviour
         }
 
     }
-    static public GUIWidget GenerateWidget(float scrollerHeight,float width, string? scrollerTag = null, bool showTrophySum = true, Predicate<INebulaAchievement>? predicate = null, string? shownText = null, Action? onClicked = null, Action? onUpdated = null, SortRule sortRule = SortRule.Categorized)
+    static public GUIWidget GenerateWidget(float scrollerHeight,float width, string? scrollerTag = null, bool showTrophySum = true, Predicate<INebulaAchievement>? predicate = null, string? shownText = null, Action? onClicked = null, Action? onUpdated = null, SortRule sortRule = SortRule.Categorized, bool showCustomAchievement = true)
     {
         scrollerTag ??= "Achievements";
 
@@ -369,7 +369,7 @@ internal class AchievementViewer : MonoBehaviour
                 break;
             default:
                 AddGroup("recently", NebulaAchievementManager.RecentlyCleared);
-                AddCustomTitle();
+                if (showCustomAchievement) AddCustomTitle();
                 CalcCategorizedAchievements();
                 AddGroup("roles", rolesAchsCache!);
                 AddGroup("seasonal", seasonalAchsCache!);

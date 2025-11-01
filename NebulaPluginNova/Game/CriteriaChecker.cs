@@ -277,7 +277,7 @@ public class CriteriaManager
         }
 
         //条件にそぐわない勝利条件の削除
-        triggeredGameEnds.RemoveAll(t => GameOperatorManager.Instance?.Run<EndCriteriaPreMetEvent>(new(t.gameEnd, t.reason))?.IsBlocked ?? false);
+        triggeredGameEnds.RemoveAll(t => GameOperatorManager.Instance?.Run<EndCriteriaPreMetEvent>(new(t.gameEnd, t.reason), needToCheckGameEnd: false)?.IsBlocked ?? false);
 
         if(triggeredGameEnds.Count == 0) return;
 

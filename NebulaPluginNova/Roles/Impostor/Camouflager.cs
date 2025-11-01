@@ -64,6 +64,12 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
                 GameOperatorManager.Instance?.Subscribe<PlayerMurderedEvent>(ev => acTokenChallenge.Value.killed++, this);
             }
         }
+
+        [OnlyHost]
+        void OnPlayerDisconnect(PlayerDisconnectEvent ev)
+        {
+            RpcCamouflage.Invoke(new(MyPlayer.PlayerId, false));
+        }
     }
 
     public static RemoteProcess<(byte camouflagerId, bool on)> RpcCamouflage = new(

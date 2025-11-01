@@ -22,7 +22,7 @@ internal class Hookshot : PerkFunctionalInstance
     public override bool HasAction => true;
     public override void OnClick()
     {
-        if (used || !MyPlayer.CanMove || MyPlayer.IsDead) return;
+        if (used || !MyPlayer.CanMove || MyPlayer.IsDead || Climber.Hookshot.LocalIsActive) return;
 
         Climber.SearchPointAndSendJump();
         used = true;

@@ -132,4 +132,10 @@ public class FlexibleLifespan : DependentLifespan, INestedLifespan, IReleasable
     {
         isDead = true;
     }
+
+    public FlexibleLifespan(): base() { }
+    public FlexibleLifespan(ILifespan parentLifespan): base()
+    {
+        this.Bind(parentLifespan);
+    }
 }

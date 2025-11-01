@@ -4,6 +4,7 @@ using Nebula.Roles;
 using Nebula.Scripts;
 using System.Reflection;
 using Virial;
+using Virial.Achievements;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
@@ -80,6 +81,8 @@ public class NebulaImpl : INebula
     IModuleFactory INebula.Modules => factory;
 
     bool INebula.IsAndroid =>  NebulaPlugin.IsAndroid;
+
+    TitlesRegister INebula.Titles => TitleRegisterImpl.Instance;
 }
 
 internal static class UnboxExtension

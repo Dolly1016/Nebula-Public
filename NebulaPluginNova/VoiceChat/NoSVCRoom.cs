@@ -361,7 +361,8 @@ internal class NoSVCRoom
 
             var gameState = AmongUsClient.Instance.GameState;
             var inLobby = gameState < InnerNet.InnerNetClient.GameStates.Started || (gameState == InnerNet.InnerNetClient.GameStates.Ended && !HudManager.InstanceExists);
-            if (inLobby)
+            var inIntro = GameManager.Instance && !GameManager.Instance.GameHasStarted;
+            if (inLobby || inIntro)
             {
                 UpdateLobby();
                 return;
@@ -414,7 +415,8 @@ internal class NoSVCRoom
 
             if (GeneralConfigurations.CanTalkInWanderingPhaseOption)
             {
-                if(IsInRadio(mapping.MappedModPlayer, out var state))
+
+                if (IsInRadio(mapping.MappedModPlayer, out var state))
                 {
                     normalVolume.Volume = 0f;
                     ghostVolume.Volume = 0f;
@@ -423,13 +425,14 @@ internal class NoSVCRoom
                     return;
                 }
 
+                radioVolume.Volume = 0f;
+
                 var affectedByCommSab = !(localPlayer?.IsDead ?? false) && GeneralConfigurations.AffectedByCommsSabOption && !(localPlayer?.IsImpostor ?? false) && AmongUsUtil.InCommSab;
 
                 if (affectedByCommSab)
                 {
                     normalVolume.Volume = 0f;
                     ghostVolume.Volume = 0f;
-                    radioVolume.Volume = 0f;
                     droneVolume.Volume = 0f;
                 }
                 
@@ -673,6 +676,13 @@ internal class NoSVCRoom
         SetSpeaker(VCSettings.SpeakerDevice);
 #endif
         RegisterWidget(Language.Translate("voiceChat.info.mute"), new(1f,0.2f,0.2f), null, new FunctionalLifespan(() => true), () => interstellarRoom.Mute, 100);
+
+        /*
+        DebugScreen.Push(new FunctionalDebugTextContent(() =>
+        {
+            return string.Join("<br>", clients.Select(entry => entry.Value.PlayerName + ": " + entry.Value.Level));
+        }, NebulaAPI.CurrentGame));
+        */
     }
 
     private void UpdateVoiceChatInfo()

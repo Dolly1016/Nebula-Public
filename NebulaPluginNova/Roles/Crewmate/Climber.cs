@@ -54,7 +54,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
         {
             if (AmOwner)
             {
-                var gustButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, GustCooldownOption, "gust", buttonSprite)
+                var gustButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, GustCooldownOption, "gust", buttonSprite, _ => !Hookshot.LocalIsActive)
                     .SetAsUsurpableButton(this)
                     .SetAsMouseClickButton();
                 gustButton.OnClick = (button) =>
@@ -212,6 +212,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
         }
 
         public static Hookshot? LocalHookshot = null;
+        public static bool LocalIsActive => LocalHookshot != null && !LocalHookshot.IsDeadObject;
         public Hookshot(GamePlayer player, Vector2 target)
         {
             if (player.AmOwner) LocalHookshot = this;

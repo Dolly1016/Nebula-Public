@@ -45,7 +45,7 @@ internal class GameOperatorBuilder
             baseType = baseType.BaseType;
         }
 
-        LogUtils.WriteToConsole($"Type: {entityType.Name}");
+        //LogUtils.WriteToConsole($"Type: {entityType.Name}");
 
         foreach (var method in methods)
         {
@@ -54,12 +54,12 @@ internal class GameOperatorBuilder
 
             if (!parameters[0].ParameterType.IsAssignableTo(typeof(Virial.Events.Event))) continue;
 
-            LogUtils.WriteToConsole($"{method.Name} (Event: {parameters[0].ParameterType.Name})");
+            //LogUtils.WriteToConsole($"{method.Name} (Event: {parameters[0].ParameterType.Name})");
 
             //メソッドとして抽出された匿名関数を除外 (意図して作ったメソッドではない)
             if (method.Name.StartsWith("<"))
             {
-                LogUtils.WriteToConsole($" -Excluded!");
+                //LogUtils.WriteToConsole($" -Excluded!");
                 continue;
             }
 
@@ -186,7 +186,7 @@ public class GameOperatorManager
         }
     }
 
-    public E Run<E>(E ev, bool retroactive = false) where E : class, Virial.Events.Event
+    public E Run<E>(E ev, bool retroactive = false, bool needToCheckGameEnd = true) where E : class, Virial.Events.Event
     {
         if (retroactive)
             DoRetroactiveOperation(ev, ev.GetType());
@@ -194,7 +194,7 @@ public class GameOperatorManager
             DoSingleOperation(ev, ev.GetType());
 
         //イベントを通して発生したゲーム終了をチェックする。
-        NebulaGameManager.Instance?.CriteriaManager.CheckAndTriggerGameEnd();
+        if(needToCheckGameEnd) NebulaGameManager.Instance?.CriteriaManager.CheckAndTriggerGameEnd();
 
         return ev;
     }

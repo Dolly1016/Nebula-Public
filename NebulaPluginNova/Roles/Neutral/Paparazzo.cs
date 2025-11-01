@@ -381,10 +381,9 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
 
                     StatsPhoto.Progress();
                 };
-                shotButton.OnSubAction = (button) =>
-                {
+                ButtonEffect.SetAidAction(shotButton, this, null, MyPlayer, () => {
                     if (lastFinder) lastFinder!.ToggleDirection();
-                };
+                });
 
                 void DestroyFinder()
                 {

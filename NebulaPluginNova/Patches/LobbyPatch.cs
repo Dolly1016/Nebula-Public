@@ -162,9 +162,9 @@ public class GameStartManagerBeginGame
                     for (int n = 0; n < num; n++) AmongUsUtil.SpawnDummy();
                 }
             }
-        }
 
-        Certification.RequireHandshake();
+            Certification.RequireHandshake();
+        }
         GameStartNotification.Notification();
 
         return true;
@@ -189,7 +189,7 @@ public class RequireHandshakePatch
     {
         __result = ManagedEffects.Sequence(__result.WrapToManaged(), ManagedEffects.Action(()=>
         {
-            Certification.RequireHandshake();
+            //Certification.RequireHandshake();
             PlayerControl.AllPlayerControls.GetFastEnumerator().Do(p => { if (p.PlayerId != p.cosmetics.ColorId) p.SetColor(p.PlayerId); });
         })).WrapToIl2Cpp();
     }

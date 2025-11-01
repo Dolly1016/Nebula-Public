@@ -116,7 +116,7 @@ public class PresetSettingMenu : MonoBehaviour
                                     bool success = ConfigPreset.OutputAndReloadSettings(preset.Id, preset.DisplayName);
                                     ShowInner();
                                     MetaUI.ShowConfirmDialog(HudManager.Instance.transform, new TranslateTextComponent(success ? "preset.saveSuccess" : "preset.saveFailed"));
-                                }, () => { }, Language.Translate("preset.delete.overwrite"), true);
+                                }, () => { }, Language.Translate("preset.overwrite.confirm"), true);
                             }) : null,
                             isEditablePreset ? GUI.API.LocalizedButton(GUIAlignment.Center, AttributeAsset.OptionsButtonLonger, "preset.delete", _ => {
                                 MetaUI.ShowYesOrNoDialog(HudManager.Instance.transform, () => {

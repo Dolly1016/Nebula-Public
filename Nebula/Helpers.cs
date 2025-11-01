@@ -391,12 +391,15 @@ public static class Helpers
         return GetModData(player.ParentId);
     }
 
-    public static DeadBody[] AllDeadBodies()
+    public static IReadOnlyList<DeadBody> AllDeadBodies()
     {
         //Componentで探すよりタグで探す方が相当はやい
         var bodies = GameObject.FindGameObjectsWithTag("DeadBody");
-        DeadBody[] deadBodies = new DeadBody[bodies.Count];
-        for (int i = 0; i < bodies.Count; i++) deadBodies[i] = bodies[i].GetComponent<DeadBody>();
+        List<DeadBody> deadBodies = new(bodies.Count);
+        for (int i = 0; i < bodies.Count; i++)
+        {
+            if (bodies[i].TryGetComponent<DeadBody>(out var deadBody)) deadBodies.Add(deadBody);
+        }
         return deadBodies;
     }
 

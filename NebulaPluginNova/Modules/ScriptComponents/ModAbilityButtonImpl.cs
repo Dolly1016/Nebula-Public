@@ -78,6 +78,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     private SpriteRenderer? brokenAlternative = null!;
     public bool IsBroken { get; set; } = false;
     public IUsurpableAbility? RelatedAbility { get; set; } = null;
+    private HudContent gridContent;
     public ModAbilityButtonImpl(bool isLeftSideButton = false, bool isArrangedAsKillButton = false,int priority = 0, bool alwaysShow = false)
     {
         VanillaButton = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton, HudManager.Instance.KillButton.transform.parent);
@@ -91,7 +92,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         passiveButton.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         passiveButton.OnClick.AddListener(() => DoClick());
 
-        var gridContent = VanillaButton.gameObject.GetComponent<HudContent>();
+        gridContent = VanillaButton.gameObject.GetComponent<HudContent>();
         gridContent.UpdateSubPriority();
         gridContent.MarkAsKillButtonContent(isArrangedAsKillButton);
         gridContent.SetPriority(priority);
@@ -102,6 +103,11 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
         NebulaManager.Instance.ScheduleDelayAction(PlayFlashOnce);
     }
+
+    int IHudContent.Priority { get => gridContent.Priority; set => gridContent.SetPriority(Mathn.Clamp(value, -5000, 9999)); }
+    bool IHudContent.IsLeftSide => gridContent.IsLeftSide;
+    bool IHudContent.IsKillButtonContent { get => gridContent.MarkedAsKillButtonContent; set => gridContent.MarkAsKillButtonContent(value); }
+    bool IHudContent.IsStaticContent => gridContent.IsStaticContent;
 
     void TryGenerateBrokenAlternative()
     {
@@ -721,6 +727,25 @@ public static class ButtonEffect
             return obj;
         }
 #else
+        return null;
+#endif
+    }
+
+    private static Image switchButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MobileSwitchButton.png", 115f);
+    internal static Image SwitchButtonImage => switchButtonSprite;
+    public static ModAbilityButton? SetAidAction(ModAbilityButton originalButton, ILifespan lifespan, IUsurpableAbility? usurpable, GamePlayer myPlayer, Action aidAction, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, string mobileButtonLabel = "mobile.switch")
+    {
+#if ANDROID
+        var switchButton = NebulaAPI.Modules.AbilityButton(lifespan, myPlayer, Virial.Compat.VirtualKeyInput.None,
+            0f, "mobile.switch", switchButtonSprite, availability ?? (_ => originalButton.IsAvailable), visibility ?? (_ => originalButton.IsVisible));
+        if(usurpable != null) switchButton.SetAsUsurpableButton(usurpable);
+        switchButton.OnClick = (button) =>
+        {
+            aidAction.Invoke();
+        };
+        return switchButton;
+#else
+        originalButton.OnSubAction = _ => aidAction.Invoke();
         return null;
 #endif
     }

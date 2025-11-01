@@ -61,12 +61,12 @@ file static class TrapperSystem
                 new StaticAchievementToken("niceTrapper.common1");
 
         };
-        placeButton.OnSubAction = (button) =>
+        ButtonEffect.SetAidAction(placeButton, myRole, myRole, myRole.MyPlayer,() =>
         {
-            if (button.IsInEffect) return;
+            if (placeButton.IsInEffect) return;
             buttonIndex = (buttonIndex + 1) % buttonVariation.Length;
             placeButton.SetImage(buttonSprites[buttonVariation[buttonIndex].id]!);
-        };
+        });
     }
 
     public static void OnMeetingStart(List<Trapper.Trap> localTraps, List<Trapper.Trap>? specialTraps)

@@ -330,6 +330,24 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 #endif
 
         localPlayerCache = new(() => GetPlayer(PlayerControl.LocalPlayer ? PlayerControl.LocalPlayer.PlayerId : (byte)255)!);
+
+        SendHandshakeRequest();
+    }
+
+    void SendHandshakeRequest() {
+        IEnumerator CoHandshake()
+        {
+            while (!PlayerControl.LocalPlayer) yield return Effects.Wait(0.2f);
+            var localPlayer = PlayerControl.LocalPlayer;
+            PlayerControl hostPlayer = null!;
+            do
+            {
+                hostPlayer = PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.AmHost()));
+            } while (!hostPlayer);
+
+            Certification.RequireHandshake();
+        }
+        CoHandshake().StartOnScene();
     }
 
     public void Abandon()

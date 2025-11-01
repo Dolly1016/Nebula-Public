@@ -502,8 +502,8 @@ public static class HelpScreen
         AchievementViewer.SortRule sortRule = AchievementViewer.SortRule.Categorized;
         string scrollerTagPostfix = "_categorized";
 
-        Virial.Media.GUIWidget GenerateWidget() => AchievementViewer.GenerateWidget(3.15f, 6.2f, scrollerTagPrefix + scrollerTagPostfix, true, achPredicate, shownPredicate, onClicked: lastArgument.CanCloseEasily ? () => TryCloseHelpScreen() : null, onUpdated: ShowInnerWidget, sortRule: sortRule);
-        void ShowInnerWidget() => artifact.Do(screen => screen.SetWidget(GenerateWidget(), out var _));
+        Virial.Media.GUIWidget GenerateWidget(bool searchMode = false) => AchievementViewer.GenerateWidget(3.15f, 6.2f, scrollerTagPrefix + scrollerTagPostfix, true, achPredicate, shownPredicate, onClicked: lastArgument.CanCloseEasily ? () => TryCloseHelpScreen() : null, onUpdated: () => ShowInnerWidget(searchMode), sortRule: sortRule, showCustomAchievement: !searchMode);
+        void ShowInnerWidget(bool searchMode = false) => artifact.Do(screen => screen.SetWidget(GenerateWidget(searchMode), out var _));
 
         List<Virial.Media.GUIWidget> categorizeButtons = [
             GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.StandardMediumMasked, "achievement.filter"),
@@ -535,7 +535,7 @@ public static class HelpScreen
 
                     achPredicate = a => keyword.All(k => a.GetKeywords().Any(acK => acK.Contains(k)));
                     shownPredicate = Language.Translate("achievement.ui.shown.search").Replace("%KEYWORD%", rawKeyword);
-                    ShowInnerWidget();
+                    ShowInnerWidget(true);
                 }
 
                 var textField = new GUITextField(GUIAlignment.Left, new(4.3f,0.4f)){ HintText = Language.Translate("ui.dialog.keyword").Color(Color.gray), IsSharpField = false, WithMaskMaterial = true, EnterAction = (rawKeyword) => {ShowResult(rawKeyword); return true; } };

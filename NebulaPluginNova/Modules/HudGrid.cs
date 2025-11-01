@@ -126,6 +126,7 @@ public class HudContent : MonoBehaviour
     public bool IsStaticContent = false;
     public Func<bool>? ActiveFunc = null;
     public bool IsActive => ActiveFunc?.Invoke() ?? gameObject.activeSelf;
+    public bool IsLeftSide => isLeftSide;
 
     private const float EdgeY = -(3.0f - 0.7f);
     private static float EdgeX => 3.0f * (float)Screen.width / (float)Screen.height - 0.8f;

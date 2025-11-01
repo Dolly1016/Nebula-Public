@@ -7,7 +7,7 @@ namespace Virial.Components;
 /// <summary>
 /// 能力ボタンを表します。
 /// </summary>
-public interface ModAbilityButton : ILifespan
+public interface ModAbilityButton : ILifespan, IHudContent
 {
     /// <summary>
     /// ボタンのラベルの種類を表します。

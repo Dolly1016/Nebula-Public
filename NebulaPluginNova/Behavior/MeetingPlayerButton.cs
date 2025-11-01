@@ -1,4 +1,5 @@
 ﻿using Nebula.Modules.GUIWidget;
+using UnityEngine.UIElements;
 using Virial;
 using Virial.DI;
 using Virial.Events.Game;
@@ -120,6 +121,14 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
             var epb = button.gameObject.AddComponent<ExtraPassiveBehaviour>();
             epb.OnRightClicked = IncrementCurrentAction;
         }
+
+#if ANDROID
+        var switchButton = NebulaAPI.Modules.AbilityButton(new FunctionalLifespan(() => MeetingHud.Instance), alwaysShow: true);
+        switchButton.SetLabel("mobile.switch");
+        switchButton.SetImage(ButtonEffect.SwitchButtonImage);
+        switchButton.Visibility = _ => allActions.Count > 1;
+        switchButton.OnClick = _ => IncrementCurrentAction();
+#endif
     }
 
     private void SetAction(MeetingPlayerAction? action)

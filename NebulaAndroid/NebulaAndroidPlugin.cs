@@ -28,17 +28,6 @@ public class NebulaLoader : BasePlugin
 
     public override void Load()
     {
-        foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            try
-            {
-                LogUtils.WriteToConsole(a.FullName ?? "Null");
-            }
-            catch (Exception e)
-            {
-
-            }
-        }
         MyPlugin = this;
         Nebula.NebulaPlugin.LoadForAndroid();
         

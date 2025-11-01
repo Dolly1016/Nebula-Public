@@ -1103,6 +1103,8 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             else if (velocity.x > 0.01f) FlipX = false;
         }
 
+        PlayerModInfo.UpdateNameTextTransform(cosmetics.nameText.transform.parent);
+
         UpdateVisibility(true, false, true);
     }
 

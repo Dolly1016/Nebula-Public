@@ -25,8 +25,13 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
         {
             if (AmOwner)
             {
-                target = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && MyPlayer.CanKill(p)).ToArray().Random();
-                NebulaManager.Instance.StartDelayAction(5f, () => RpcSetExtraMissionTarget.Invoke((MyPlayer.PlayerId, target.PlayerId)));
+                var targets = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && MyPlayer.CanKill(p));
+                NebulaManager.Instance.StartDelayAction(0.2f,
+                    () =>
+                    {
+                        target = targets.ToArray().Random();
+                        NebulaManager.Instance.StartDelayAction(2f, () => RpcSetExtraMissionTarget.Invoke((MyPlayer.PlayerId, target.PlayerId)));
+                    });
             }
         }
 

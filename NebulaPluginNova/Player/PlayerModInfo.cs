@@ -1287,6 +1287,16 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             else if (anim.Animator.GetCurrentAnimation() == anim.group.IdleAnim) anim.PlayIdleAnimation();
         }
     }
+
+    static internal void UpdateNameTextTransform(Transform nameParent)
+    {
+        var viewerScale = NebulaGameManager.Instance!.WideCamera.ViewerTransform.localScale;
+        var textScale = new Vector3(viewerScale.x < 0f ? -1f : 1f, viewerScale.y < 0f ? -1f : 1f, 1f);
+        var textAngle = -NebulaGameManager.Instance!.WideCamera.ViewerTransform.localEulerAngles * (textScale.x * textScale.y);
+        nameParent.localEulerAngles = textAngle;
+        nameParent.localScale = textScale;
+    }
+
     public void Update()
     {
         if (IsDead && ModSingleton<ShowUp>.Instance.ShowedUp(this)) MyControl.Visible = true;
@@ -1295,12 +1305,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         UpdateNameText(nameText, false, NebulaGameManager.Instance?.CanSeeAllInfo ?? false);
         UpdateRoleText(roleText, false);
 
-        var viewerScale = NebulaGameManager.Instance!.WideCamera.ViewerTransform.localScale;
-        var textScale = new Vector3(viewerScale.x < 0f ? -1f : 1f, viewerScale.y < 0f ? -1f : 1f, 1f);
-        var textAngle = -NebulaGameManager.Instance!.WideCamera.ViewerTransform.localEulerAngles * (textScale.x * textScale.y);
         var nameParent = nameText.transform.parent;
-        nameParent.localEulerAngles = textAngle;
-        nameParent.localScale = textScale;
+        UpdateNameTextTransform(nameParent);
         if(AmOwner) nameParent.SetWorldZ(-15f);
 
         UpdateMouseAngle();

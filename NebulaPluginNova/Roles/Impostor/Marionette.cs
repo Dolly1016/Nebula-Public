@@ -143,6 +143,14 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
 
                     StatsSwap.Progress();
                 };
+                swapButton.SetLabel("swap");
+                
+
+                monitorButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
+                    0f, "monitor", monitorButtonSprite, null, _ => MyDecoy != null).SetAsUsurpableButton(this);
+                monitorButton.OnClick = (button) => AmongUsUtil.ToggleCamTarget(MyDecoy!.MyBehaviour, null);
+                monitorButton.OnBroken = (button) => AmongUsUtil.SetCamTarget(null);
+
                 swapButton.OnSubAction = (button) =>
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
@@ -152,15 +160,6 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
                         monitorButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
                     });
                 };
-                swapButton.SetLabel("swap");
-                
-
-                monitorButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
-                    0f, "monitor", monitorButtonSprite, null, _ => MyDecoy != null).SetAsUsurpableButton(this);
-                monitorButton.Availability = (button) => true;
-                monitorButton.Visibility = (button) => !MyPlayer.IsDead && MyDecoy != null;
-                monitorButton.OnClick = (button) => AmongUsUtil.ToggleCamTarget(MyDecoy!.MyBehaviour, null);
-                monitorButton.OnBroken = (button) => AmongUsUtil.SetCamTarget(null);
                 monitorButton.OnSubAction = (button) =>
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
@@ -170,6 +169,7 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
                         swapButton!.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "marionette.switch");
                     });
                 };
+
 
                 GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev => {
                     if (MyDecoy != null) NebulaSyncObject.RpcDestroy(MyDecoy!.ObjectId);

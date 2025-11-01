@@ -40,7 +40,7 @@ internal class VentConfiguration : IVentConfiguration
         bool hasParameter = usesEntry != null || coolDownEntry != null || durationEntry != null;
 
         if (canUseEntry != null && (!canUseEntry.GetValue() || !hasParameter)) 
-            sb.Add(Language.Translate("role.general.canUseVent") + ": " + Language.Translate(canUseEntry.GetValue() ? "options.switch.on" : "options.switch.off"));
+            sb.Add(Language.Translate("role.general.canUseVent") + ": " + BoolConfigurationImpl.GetDisplayValue(canUseEntry.GetValue()));
 
         if (hasParameter && (canUseEntry == null || canUseEntry.GetValue()))
         {
@@ -50,8 +50,16 @@ internal class VentConfiguration : IVentConfiguration
                 (coolDownEntry != null && coolDownEntry.Value > 0f) ? (Language.Translate("role.general.ventCoolDown") + ": " + coolDownEntry.Value + Language.Translate("options.sec")) : null,
                 (durationEntry != null && durationEntry.Value > 0f) ? (Language.Translate("role.general.ventDuration") + ": " + durationEntry.Value + Language.Translate("options.sec")) : null,
             ];
-            str += vals.Where(s => s != null).Join(null, ", ") + ")";
-            sb.Add(str);
+            var joined = vals.Where(s => s != null).Join(null, ", ");
+            if (joined.Length > 0)
+            {
+                str += joined + ")";
+                sb.Add(str);
+            }
+            else
+            {
+                sb.Add(Language.Translate("role.general.canUseVent") + ": " + BoolConfigurationImpl.GetDisplayValue(true));
+            }
         }
         return sb.Join(null, "\n");
     }

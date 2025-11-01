@@ -44,7 +44,11 @@ namespace Nebula.Behavior
             }, false);
 
         private static RemoteProcess RpcRequireHandshake = new(
-            "RequireHandshake", (_) => Handshake()
+            "RequireHandshake", (calledByMe) =>
+            {
+                //LogUtils.WriteToConsole("ReceivedHandshake (self: " + calledByMe + ")");
+                Handshake();
+            }
             , false);
 
         private static void Handshake()
@@ -110,17 +114,11 @@ namespace Nebula.Behavior
             {
                 yield return new WaitForSeconds(0.8f);
 
-                int tried = 0;
-
-                do
+                for(int i = 0; i < 16; i++)
                 {
-                    if (tried > 0)
-                    {
-                        Certification.RequireHandshake();
-                    }
+                    if (State != UncertifiedReason.Waiting) break;
                     yield return new WaitForSeconds(0.5f);
-                    tried++;
-                } while (tried < 10 && State == UncertifiedReason.Waiting);
+                }
 
                 if (State == UncertifiedReason.Waiting) Reject(UncertifiedReason.Uncertified);
             }
