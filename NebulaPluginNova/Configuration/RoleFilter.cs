@@ -191,10 +191,11 @@ public static class RoleFilterHelper
         List<DefinedRole> nonAssignableImpostor = new();
         List<DefinedRole> assignableNeutral = new();
         List<DefinedRole> nonAssignableNeutral = new();
-        foreach(var r in Roles.Roles.AllRoles)
+        foreach (var r in Roles.Roles.AllRoles)
         {
             //ヘルプ画面に出現しない役職はスルー
             if (!r.ShowOnHelpScreen) continue;
+            if (!r.IsSpawnable) continue;
 
             bool assignable = true;
 
@@ -220,19 +221,18 @@ public static class RoleFilterHelper
 
         int allAssignableSum = assignableCrewmate.Count + assignableImpostor.Count + assignableNeutral.Count;
         int allNonAssignableSum = nonAssignableCrewmate.Count + nonAssignableImpostor.Count + nonAssignableNeutral.Count;
-        int byCategorySum = Math.Min(assignableCrewmate.Count, nonAssignableCrewmate.Count) + Math.Min(assignableImpostor.Count, nonAssignableImpostor.Count) + Math.Min(assignableNeutral.Count, nonAssignableNeutral.Count);
 
-        if(allAssignableSum == 0)
+        if (allAssignableSum == 0)
         {
             //出現なし
             return Language.Translate("roleFilter.none");
         }
-        if(allNonAssignableSum == 0)
+        if (allNonAssignableSum == 0)
         {
             //割り当て不可能なし
             return Language.Translate("roleFilter.allPattern.all");
         }
-        if(allAssignableSum <= 8) {
+        if (allAssignableSum <= 8) {
             //割当先が比較的少ない場合
             return string.Join(Language.Translate("roleFilter.separator"), assignableImpostor.Concat(assignableCrewmate).Concat(assignableNeutral).Select(r => r.DisplayColoredName));
         }
@@ -242,37 +242,26 @@ public static class RoleFilterHelper
             string roles = string.Join(Language.Translate("roleFilter.separator"), nonAssignableImpostor.Concat(nonAssignableCrewmate).Concat(nonAssignableNeutral).Select(r => r.DisplayColoredName));
             return Language.Translate("roleFilter.exceptPattern.all").Replace("%ROLES%", roles);
         }
-        if(byCategorySum <= 6)
+
+        //陣営ごとに文字列を作成して結合
+
+        bool useShortName = Mathn.Min(assignableCrewmate.Count, nonAssignableCrewmate.Count) + Mathn.Min(assignableImpostor.Count, nonAssignableImpostor.Count) + Mathn.Min(assignableNeutral.Count, nonAssignableNeutral.Count) > 7;
+        string separator = Language.Translate("roleFilter.separator");
+
+        string GetCategoryString(string category, List<DefinedRole> assignable, List<DefinedRole> nonAssignable)
         {
-            //陣営ごとに最適な表示をした方が良い場合
-            string separator = Language.Translate("roleFilter.separator");
-            string impostorStr, crewmateStr, neutralStr;
-
-            string GetCategoryString(string category, List<DefinedRole> assignable, List<DefinedRole> nonAssignable)
-            {
-                if (assignable.Count == 0) return "";
-                if (nonAssignable.Count == 0) return Language.Translate("roleFilter.allPattern." + category);
-                if (assignable.Count <= nonAssignable.Count)
-                    return string.Join(separator, assignable.Select(r => r.DisplayColoredName));
-                else
-                    return Language.Translate("roleFilter.exceptPattern." + category).Replace("%ROLES%", string.Join(separator, nonAssignable.Select(r => r.DisplayColoredName)));
-            }
-
-            impostorStr = GetCategoryString("impostor", assignableImpostor, nonAssignableImpostor);
-            crewmateStr = GetCategoryString("crewmate", assignableCrewmate, nonAssignableCrewmate);
-            neutralStr = GetCategoryString("neutral", assignableNeutral, nonAssignableNeutral);
-
-            return string.Join(Language.Translate("roleFilter.categorySeparator"), ((string[])[impostorStr, crewmateStr, neutralStr]).Where(s => s.Length > 0));
+            if (assignable.Count == 0) return "";
+            if (nonAssignable.Count == 0) return Language.Translate("roleFilter.allPattern." + category);
+            if (assignable.Count <= nonAssignable.Count)
+                return string.Join(separator, assignable.Select(r => r.DisplayColoredName));
+            else
+                return Language.Translate("roleFilter.exceptPattern." + category).Replace("%ROLES%", string.Join(separator, nonAssignable.Select(r => useShortName ? r.DisplayColoredShort : r.DisplayColoredName)));
         }
 
-        //どうしようもない場合は略称で表示
-        if(allAssignableSum <= allNonAssignableSum)
-        {
-            return string.Join(Language.Translate("roleFilter.separator"), assignableImpostor.Concat(assignableCrewmate).Concat(assignableNeutral).Select(r => r.DisplayColoredShort));
-        }
-        else
-        {
-            return string.Join(Language.Translate("roleFilter.separator"), assignableImpostor.Concat(assignableCrewmate).Concat(assignableNeutral).Select(r => r.DisplayColoredShort));
-        }
+        string impostorStr = canAssignToImpostor ? GetCategoryString("impostor", assignableImpostor, nonAssignableImpostor) : "";
+        string crewmateStr = canAssignToCrewmate ? GetCategoryString("crewmate", assignableCrewmate, nonAssignableCrewmate) : "";
+        string neutralStr = canAssignToNeutral ? GetCategoryString("neutral", assignableNeutral, nonAssignableNeutral) : "";
+
+        return string.Join(Language.Translate("roleFilter.categorySeparator"), ((IEnumerable<string>)[impostorStr, crewmateStr, neutralStr]).Where(s => s.Length > 0));
     }
 }

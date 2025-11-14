@@ -68,7 +68,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
         if (ability is UsurpedImpostorAbility a) return a.Role.GetDisplayShort(a.Ability);
         return (this as DefinedRole).DisplayShort;
     }
-
+    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).IsSpawnable && !UseImpostorAbilityOption) ? [this] : [];
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -83,7 +83,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
         string RuntimeRole.DisplayIntroRoleName => (MyImpAbilityRole ?? MyRole).DisplayName;
 
         IEnumerable<IPlayerAbility?> RuntimeAssignable.MyAbilities => ImpAbility != null ? [ImpAbility, .. ImpAbility.SubAbilities] : [];
-
+        bool RuntimeRole.CheckGuessAbility(DefinedRole abilityRole) => abilityRole == MyImpAbilityRole || abilityRole == MyRole;
         public Instance(GamePlayer player, int totalKilling, DefinedRole? jackalized, int[] jackalizedArgument) : base(player)
         {
             killingTotal = totalKilling;

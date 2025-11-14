@@ -567,7 +567,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
         {
             if (MeetingHud.Instance) return;
             if (message.invoker.AmOwner && message.player1.Position.Distance(message.player2.Position) > 30f) new StaticAchievementToken("cupid.common1");
-            var redStr = new RedString(message.invoker,message.player1, message.player2).Register(NebulaAPI.CurrentGame!);
+            var redStr = new RedString(message.invoker,message.player1, message.player2).RegisterSelf();
             NebulaManager.Instance.StartDelayAction(LaserDurationOption, () => redStr.Inactivate());
         });
     });

@@ -134,7 +134,11 @@ public static class MeetingHudExtension
 
     public static void ResetPlayerState(this MeetingHud meetingHud)
     {
-        if (MeetingHud.Instance.state <= MeetingHud.VoteStates.Discussion) return;
+        if (MeetingHud.Instance.state <= MeetingHud.VoteStates.Discussion)
+        {
+            meetingHud.UpdatePlayerState();
+            return;
+        }
 
         Reset();
 

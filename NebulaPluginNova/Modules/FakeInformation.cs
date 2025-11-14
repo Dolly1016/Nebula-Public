@@ -38,7 +38,7 @@ internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameOperator
 
     public FakeInformation()
     {
-        this.Register(Virial.NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     void HudUpdate(GameHudUpdateEvent ev)

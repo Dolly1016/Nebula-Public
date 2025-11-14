@@ -76,13 +76,12 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                     {
                         morphButton.ResetKeyBinding();
                         paintButton.BindKey(Virial.Compat.VirtualKeyInput.SecondaryAbility,"illusioner.paint");
-                        paintButton.BindKey(Virial.Compat.VirtualKeyInput.AidAction, "illusioner.switch");
+                        paintButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "illusioner.switch");
                     });
                 };
                 morphButton.OnEffectStart = (button) =>
                 {
                     PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", OutfitPriority.Morph, true)));
-
                     acTokenMorphingCommon ??= new("morphing.common1");
                     if (acTokenPainterCommon != null) acTokenCommon ??= new("illusioner.common1");
                     StatsMorph.Progress();
@@ -96,7 +95,7 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                 paintButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
                     PaintCoolDownOption, "paint", Painter.Ability.PaintButtonSprite, _ => sampleTracker.CurrentTarget != null).SetAsUsurpableButton(this);
                 paintButton.OnClick = (button) => {
-                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.RealPlayer.PlayerId, new(sample ?? MyPlayer.GetOutfit(OutfitThrethold), "Paint", OutfitPriority.Paint, false)));
+                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.RealPlayer.PlayerId, new(sample ?? MyPlayer.GetOutfit(OutfitThrethold), "Paint", OutfitPriority.Paint, false, BitMasks.AsPlayer(MyPlayer))));
                     if (TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else

@@ -56,7 +56,7 @@ public class ShowPlayersMapLayer : MonoBehaviour
 
             if (showPredicate.Invoke(p))
             {
-                var icon = (DynamicPalette.IsLightColor(DynamicPalette.PlayerColors[p.CurrentOutfit.outfit.ColorId]) ? lightIconPool : darkIconPool).Instantiate();
+                var icon = (ModSingleton<BalancedColorManager>.Instance.IsLightColor(DynamicPalette.PlayerColors[p.CurrentOutfit.outfit.ColorId]) ? lightIconPool : darkIconPool).Instantiate();
                 icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.Position.ToUnityVector().AsVector3(p.Position.y / 1000f), center, scale);
                 shown++;
             }

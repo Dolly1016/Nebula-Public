@@ -68,6 +68,7 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
             }
         }
 
+        [OnlyMyPlayer]
         void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
             if(VoteAssignmentPerTasksOption > 0 && !FixedVotesOption) UpdateMayorVotes(myVote + VoteAssignmentPerTasksOption);

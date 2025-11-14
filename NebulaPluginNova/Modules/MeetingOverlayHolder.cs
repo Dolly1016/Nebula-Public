@@ -22,7 +22,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
 
     public MeetingOverlayHolder()
     {
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     public void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color)

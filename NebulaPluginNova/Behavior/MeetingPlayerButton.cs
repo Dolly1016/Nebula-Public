@@ -49,7 +49,7 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
 
     public MeetingPlayerButtonManager()
     {
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     List<MeetingPlayerAction> allActions = new();

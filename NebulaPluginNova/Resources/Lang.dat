@@ -39,6 +39,7 @@
 "ui.dialog.yes" : "Yes"
 "ui.dialog.no" : "No"
 "ui.dialog.ok" : "OK"
+"ui.dialog.confirmation" : "Confirm"
 "ui.dialog.exit" : "Exit"
 "ui.dialog.search" : "Search"
 "ui.dialog.keyword" : "Keyword"
@@ -1278,6 +1279,16 @@
 "stats.whammy.balloon" : "Num of Balloons Set"
 "roles.whammy.taskText" : "Pop The Balloon (%TIME%s)"
 
+"role.zeal.name" : "Zeal"
+"role.zeal.short" : "Z"
+"role.zeal.blurb" : "Go crazy!"
+"options.role.zeal.detail" : "Zeal steals the enthusiasm, or kill button, from crewmates.<br>They can kill multiple players at once."
+"options.role.zeal.killCooldown" : "Kill Cooldown"
+"options.role.zeal.absorbCooldown" : "Absorb Cooldown"
+"options.role.zeal.absorbDuration" : "Absorb Duration"
+"options.role.zeal.absorbAdditionalDuration" : "Absorb Additional Duration"
+"options.role.zeal.enthusiasmCooldown" : "Enthusiasm Cooldown"
+
 # Neutral Roles
 
 "role.arsonist.name" : "Arsonist"
@@ -1485,6 +1496,18 @@
 "options.role.tyrant.numOfKillingToWin" : "# Killing to Win"
 "options.role.tyrant.useImpostorAbility" : "Use Impostor Ability"
 
+"role.vanity.name" : "Vanity"
+"role.vanity.short" : "V"
+"role.vanity.blurb" : "What the Gratest Power!"
+"options.role.vanity.detail" : "Vanity fancies themselve the Sheriff."
+"options.role.vanity.canExtraWinEvenIfVanityDied" : "Can Extra Win Even If Vanity Died"
+"options.role.vanity.independentTeam" : "Independent Killer Team"
+"options.role.vanity.becomeAwareOfVanityWhenKillCrewmate" : "Become Aware Of Vanity When Kill Crewmate"
+"options.role.vanity.canBecomeAwareOfVanity" : "Can Become Aware Of Vanity via Task"
+"options.role.vanity.taskProgressRequiredForSelfAdmission" : "# Tasks Required For Self-admission"
+"options.role.vanity.group.task" : "Self-admission Settings"
+"stats.vanity.kill" : "Num of Killing"
+
 "role.vulture.name" : "Vulture"
 "role.vulture.short" : "V"
 "role.vulture.blurb" : "Eat Corpses to Win"
@@ -1572,6 +1595,9 @@
 "options.role.damned.damnedAction.impostor" : "Impostor"
 "options.role.damned.damnedAction.madmate" : "Madmate"
 "options.role.damned.damnedAction.takeOver" : "Take Over"
+"options.role.damned.canBecomeAwareOfDamned" : "Can Become Aware Of Damned"
+"options.role.damned.taskProgressRequiredForSelfAdmission" : "# Tasks Required For Self-admission"
+"options.role.damned.group.task" : "Self-admission Settings"
 
 "role.disclosure.name" : "Disclosure"
 "options.role.disclosure.detail" : "Disclosure makes their cursor visible to everyone during an emergency meeting."
@@ -1994,6 +2020,7 @@
 "button.label.rokuro.reset" : "reset"
 "button.label.acid" : "acid"
 "button.label.mobile.switch" : "toggle"
+"button.label.absorb" : "absorb"
 
 # Game
 
@@ -2103,12 +2130,16 @@
 "end.trilemma" : "Trilemma Wins %EXTRA%"
 "end.gambler" : "Gambler Wins %EXTRA%"
 "end.tyrant" : "Tyrant Wins %EXTRA%"
+"end.vanity" : "Vanity Wins %EXTRA%"
 "end.nogame" : "No Game"
+
+"end.status.noWinners" : "No Winners"
 
 "end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
 "end.extra.obsessional" : " <color=#FFFFFF>with</color> Obsessional"
 "end.extra.grudge" : " <color=#FFFFFF>with</color> Grudge"
 "end.extra.trilemma" : " <color=#FFFFFF>with</color> Trilemma"
+"end.extra.vanity" : " <color=#FFFFFF>with</color> Vanity"
 
 # Help
 
@@ -2171,6 +2202,16 @@
 # Inventory
 
 "inventory.palette.catalogue" : "Catalogue"
+"inventory.palette.colorCode" : "Color Code"
+"inventory.palette.colorCode.mainColor" : "Main Color"
+"inventory.palette.colorCode.shadowColor" : "Shadow Color"
+"inventory.palette.colorCode.visorColor" : "Visor Color"
+"inventory.palette.colorCode.colorName" : "Color Name"
+"inventory.palette.colorCode.copy" : "Copy"
+"inventory.palette.colorCode.paste" : "Paste"
+"inventory.palette.colorCode.copied" : "Copied Successfully!"
+"inventory.palette.colorCode.pasted" : "Pasted Successfully!"
+"inventory.palette.colorCode.pasted.failed" : "The format is incorrect."
 "inventory.catalogue.innersloth" : "Vanilla Collection"
 "inventory.color.vanilla0" : "Red"
 "inventory.color.vanilla1" : "Blue"
@@ -2250,6 +2291,7 @@
 "config.client.avoidingColorDuplication.strict" : "Strict"
 "config.client.muteAmbienceOnMeeting" : "Mute Ambience On Meeting"
 "config.client.vcServerSettings" : "VC Server Settings"
+"config.client.smallHud" : "Compact Hud"
 
 # Preset
 
@@ -2659,3 +2701,10 @@
 "document.tip.winCond.gambler" : "The gambler win if they survive, and get %NUM% chips."
 "document.tip.winCond.tyrant.title" : "Kill Trigger"
 "document.tip.winCond.tyrant" : "The Tyrant wins by killing %NUM% players."
+"document.tip.winCond.vanity.kill.title" : "Kill Trigger"
+"document.tip.winCond.vanity.kill" : "If Vanity has killed a Crewmate, Vanity will win when they have wiped out the other killing teams and<br>accounts for more than half of all alive players."
+"document.tip.winCond.vanity.extra.crewOnly.title" : "Extra Winning"
+"document.tip.winCond.vanity.extra.crewOnly" : "If Vanity has not killed any crewmates and crewmates win, Vanity will also win."
+"document.tip.winCond.vanity.extra.title" : "Extra Winning"
+"document.tip.winCond.vanity.extra" : "If Vanity has not killed any crewmates and crewmates win, Vanity will also win.<br>If Vanity has not killed any crewmates and crewmates lose, Vanity will win together."
+"document.tip.winCond.vanity.extra.surviveCond" : "Vanity must be ALIVE to win."

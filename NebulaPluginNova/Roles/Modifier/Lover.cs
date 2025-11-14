@@ -6,6 +6,7 @@ using System.Linq;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
@@ -236,8 +237,8 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         public Cache<GamePlayer> MyLover;
         
         string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover.Get()?.Name ?? "ERROR").Color(MyRole.UnityColor));
-        bool RuntimeModifier.InvalidateCrewmateTask => true;
-        bool RuntimeModifier.MyCrewmateTaskIsIgnored => true;
+        bool RuntimeAssignable.InvalidateCrewmateTask => true;
+        bool RuntimeAssignable.MyCrewmateTaskIsIgnored => true;
 
         [OnlyMyPlayer]
         void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
@@ -246,3 +247,28 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         }
     }
 }
+
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
+internal class LoversCriteria : AbstractModule<IGameModeStandard>, IGameOperator
+{
+    static LoversCriteria() => DIManager.Instance.RegisterModule(() => new LoversCriteria().RegisterPermanently());
+
+    [OnlyHost]
+    void OnUpdate(GameUpdateEvent ev)
+    {
+        int totalAlive = NebulaGameManager.Instance!.AllPlayerInfo.Count((p) => !p.IsDead);
+        if (totalAlive > 3) return;
+
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
+        {
+            if (p.IsDead) continue;
+            foreach (var lover in p.GetModifiers<Lover.Instance>())
+            {
+                if (lover.MyLover.Get()?.IsDead ?? true) continue;
+                NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.LoversWin, GameEndReason.Situation);
+            }
+        }
+
+        return;
+    }
+};

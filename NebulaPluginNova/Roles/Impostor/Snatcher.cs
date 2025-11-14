@@ -89,8 +89,7 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
                             NebulaAsset.PlaySE(NebulaAudioClip.SnatcherSuccess);
 
                             //エフェクトの再生
-                            var text = PlayerControl.LocalPlayer.cosmetics.nameText;
-                            text.StartCoroutine(AnimationEffects.CoPlayRoleNameEffect(text.transform.parent, new(0f, 0.185f, -0.1f), GamePlayer.LocalPlayer!.Role.Role.UnityColor, text.gameObject.layer, 1f / 0.7f).WrapToIl2Cpp());
+                            AnimationEffects.CoPlayRoleNameEffect(GamePlayer.LocalPlayer!).StartOnScene();
                         });
                         UpdateHasTried.RpcSync(MyPlayer, 1);
                     },
@@ -108,11 +107,11 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
             {
                 var p = state.MyPlayer;
                 MetaScreen lastWindow = null!;
-                lastWindow = Complex.MeetingRoleSelectWindow.OpenRoleSelectWindow(r => r.IsSpawnable, " ", r =>
+                lastWindow = Complex.MeetingRoleSelectWindow.OpenRoleSelectWindow(null, null, true, " ", r =>
                 {
                     if (PlayerControl.LocalPlayer.Data.IsDead) return;
 
-                    var isMatched = p?.Role.ExternalRecognitionRole == r;
+                    var isMatched = p.Role.CheckGuessAbility(r);
                     UpdateHasTried.RpcSync(MyPlayer, 1);
 
                     if (isMatched || !ObviousGuessFailureOption)

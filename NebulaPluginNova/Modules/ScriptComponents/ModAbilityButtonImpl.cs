@@ -108,6 +108,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     bool IHudContent.IsLeftSide => gridContent.IsLeftSide;
     bool IHudContent.IsKillButtonContent { get => gridContent.MarkedAsKillButtonContent; set => gridContent.MarkAsKillButtonContent(value); }
     bool IHudContent.IsStaticContent => gridContent.IsStaticContent;
+    bool IHudContent.ShouldBeInLastLine { get => gridContent.ShouldBeInLastLine; set => gridContent.ShouldBeInLastLine = value; }
 
     void TryGenerateBrokenAlternative()
     {
@@ -246,7 +247,6 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
         if ((keyCode?.KeyDownInGame ?? false) || (canUseByMouseClick && CheckMouseClick() && !AmongUsUtil.UsingMouseMovement)) DoClick();
         if (subKeyCode?.KeyDownInGame ?? false) DoSubClick();
-        
     }
 
     void OnMeetingStart(MeetingStartEvent ev)
@@ -433,7 +433,8 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         VanillaButton.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((c) => { if (c.name.Equals("HotKeyGuide")) GameObject.Destroy(c); }));
 
         this.keyCode= keyCode;
-        ButtonEffect.SetKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, action: action, backVariation: holdingDown ? 1 : 0);
+        var obj = ButtonEffect.SetKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, action: action, backVariation: holdingDown ? 1 : 0);
+        if (obj) obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
         
         return this;
     }
@@ -447,6 +448,8 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
         if (guideObj != null)
         {
+            if (guideObj) guideObj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
+
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("HotKeyOption", guideObj.transform, new UnityEngine.Vector3(0.12f, 0.07f, -2f));
             renderer.sprite = aidActionSprite.GetSprite();
 
@@ -470,14 +473,16 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
         if (!AmongUsUtil.UsingMouseMovement)
         {
-            ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, iconType, action, atBottom);
+            var obj = ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, iconType, action, atBottom);
+            if (obj) obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
         }
         return this;
     }
 
     public ModAbilityButtonImpl SetInfoIcon(string action, bool atBottom = false)
     {
-        ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, ButtonEffect.ActionIconType.Info, action, atBottom);
+        var obj = ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, ButtonEffect.ActionIconType.Info, action, atBottom);
+        if (obj) obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
         return this;
     }
 
@@ -664,6 +669,13 @@ public static class ButtonEffect
     {
         return AddKeyGuide(button, key, new(0.48f, 0.48f), removeExistingGuide, action: action, backVariation: backVariation);
     }
+    static public GameObject? SetKeyGuideForVanillaButton(GameObject button, KeyCode key, bool removeExistingGuide = true, string? action = null, int backVariation = 0)
+    {
+        var obj = AddKeyGuide(button, key, new(0.48f, 0.48f), removeExistingGuide, action: action, backVariation: backVariation);
+        obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
+        return obj;
+    }
+
 
     static public GameObject? SetSubKeyGuide(GameObject button, KeyCode key, bool removeExistingGuide, string? action = null)
     {

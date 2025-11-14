@@ -69,7 +69,7 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
                     if (sampleTracker.CurrentTarget!.RealPlayer.GetOutfit(OutfitPriority.TransformedThrethold).outfit.ColorId != outfit.outfit.ColorId)
                         acTokenChallenge.Value[sampleTracker.CurrentTarget!.RealPlayer.PlayerId]++;
 
-                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.RealPlayer.PlayerId, new(outfit, "Paint", OutfitPriority.Paint, false)));
+                    var invoker = PlayerModInfo.RpcAddOutfit.GetInvoker(new(sampleTracker.CurrentTarget!.RealPlayer.PlayerId, new(outfit, "Paint", OutfitPriority.Paint, false, BitMasks.AsPlayer(MyPlayer))));
                     if (TransformAfterMeetingOption)
                         NebulaGameManager.Instance?.Scheduler.Schedule(RPCScheduler.RPCTrigger.AfterMeeting, invoker);
                     else

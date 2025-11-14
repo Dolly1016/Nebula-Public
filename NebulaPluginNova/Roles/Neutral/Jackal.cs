@@ -8,6 +8,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
+using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
@@ -54,7 +55,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
     private Jackal() : base("jackal", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [KillCoolDownOption, CanCreateSidekickOption, NumOfKillingToCreateSidekickOption, JackalizedImpostorOption],
     othersAssignments: () => {
-        return (Sidekick.AssignedSidekickOption && !Sidekick.IsModifierOption) ? [new((_, playerId)=> (Sidekick.MyRole, [0, playerId]), RoleCategory.NeutralRole)] : [];
+        return (Sidekick.AssignedSidekickOption /*&& !Sidekick.IsModifierOption*/) ? [new((_, playerId)=> (Sidekick.MyRole, [0, playerId]), RoleCategory.NeutralRole)] : [];
         
     })
     {
@@ -62,8 +63,8 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Jackal.png");
     }
 
-    DefinedRole[] DefinedRole.AdditionalRoles => Sidekick.AssignedSidekickOption && !Sidekick.IsModifierOption ? [Sidekick.MyRole] : [];
-
+    DefinedRole[] DefinedRole.AdditionalRoles => Sidekick.AssignedSidekickOption /*&& !Sidekick.IsModifierOption*/ ? [Sidekick.MyRole] : [];
+    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).IsSpawnable && !JackalizedImpostorOption) ? [this] : [];
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, 0), arguments.Get(2, 0), arguments.Get(3, 0), Roles.GetRole(arguments.Get(4, -1)), arguments.Skip(5).ToArray());
@@ -161,6 +162,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
         int[] JackalArguments => [JackalTeamId, killingTotal, myKillingTotal, inherited, MyJackalized?.Id ?? -1];
         int[]? RuntimeAssignable.RoleArguments => JackalArguments.Concat(JackalizedAbility?.AbilityArguments ?? []).ToArray();
         int[]? RuntimeRole.UsurpedAbilityArguments => (JackalizedAbility?.AbilityArguments ?? []).Prepend(MyJackalized?.Id ?? -1).ToArray();
+        bool RuntimeRole.CheckGuessAbility(DefinedRole abilityRole) => abilityRole == MyJackalized || abilityRole == MyRole;
         public int[] RoleArgumentsForSidekick
         {
             get
@@ -402,6 +404,12 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             ModSingleton<IWinningOpportunity>.Instance.SetOpportunity(NebulaTeams.JackalTeam, Impostor.KillerOpportunityHelpers.CalcTeamOpportunity(p => MyPlayer == p, IsMySidekick));
         }
+
+        void ClaimJackalRemaining(KillerTeamCallback callback)
+        {
+            if (callback.ExcludedTeam == Jackal.MyTeam) return;
+            if(MyPlayer.IsAlive) callback.MarkRemaining();
+        }
     }
 }
 
@@ -434,7 +442,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
     static internal BoolConfiguration IsModifierOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.isModifier", false, () => !AssignedSidekickOption!);
     static internal BoolConfiguration SidekickCanKillOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canKill", false, () => !IsModifierOption);
     static internal BoolConfiguration CanCreateSidekickChainlyOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canCreateSidekickChainly", false, () => CanPromoteToJackal!);
-    static internal BoolConfiguration CanWinAsOriginalTeamOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canWinAsOriginalTeam", true, () => IsModifierOption);
+    static internal BoolConfiguration CanWinAsOriginalTeamOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canWinAsOriginalTeam", true, () => IsModifierOption || AssignedSidekickOption!);
     static internal BoolConfiguration AssignedSidekickOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.assignedSidekick", false);
     static internal ValueConfiguration<int> InheritanceRuleOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.inheritanceRule", [
         "options.role.sidekick.inheritanceRule.inherit",
@@ -501,6 +509,13 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
         [OnlyMyPlayer]
         void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev) {
             if (ev.Target.Role is Jackal.Instance ji && ji.IsSameTeam(MyPlayer)) ev.SetAsCannotKillBasically();
+        }
+
+        void ClaimJackalRemaining(KillerTeamCallback callback)
+        {
+            if (callback.ExcludedTeam == Jackal.MyTeam) return;
+            if (!SidekickShouldBeCountAsKillers) return;
+            if (MyPlayer.IsAlive) callback.MarkRemaining();
         }
     }
 }
@@ -571,6 +586,73 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
             if (ev.Target.Role is Jackal.Instance ji && ji.IsSameTeam(MyPlayer)) ev.SetAsCannotKillBasically();
         }
 
-        bool RuntimeModifier.MyCrewmateTaskIsIgnored => true;
+        void ClaimJackalRemaining(KillerTeamCallback callback)
+        {
+            if (callback.ExcludedTeam == Jackal.MyTeam) return;
+            if (!Sidekick.SidekickShouldBeCountAsKillers) return;
+            if (MyPlayer.IsAlive) callback.MarkRemaining();
+        }
+
+        bool RuntimeAssignable.MyCrewmateTaskIsIgnored => true;
     }
 }
+
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
+internal class JackalCriteria : AbstractModule<IGameModeStandard>, IGameOperator
+{
+    static JackalCriteria() => DIManager.Instance.RegisterModule(() => new JackalCriteria().Register(NebulaAPI.CurrentGame!));
+
+    List<Jackal.Instance> allAliveJackals = [];
+    [OnlyHost]
+    void OnUpdate(GameUpdateEvent ev)
+    {
+        bool sidekickShouldBeCountKillers = Sidekick.SidekickShouldBeCountAsKillers;
+
+        int totalAlive = 0;
+        bool leftOtherKillers = GameOperatorManager.Instance?.Run(new KillerTeamCallback(NebulaTeams.JackalTeam)).RemainingOtherTeam ?? false; //帆かキラーが残っていても殲滅勝利は可能
+
+        //全生存者数を数え、生存しているジャッカルチームを発見する。
+        allAliveJackals.Clear();
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
+        {
+            if (p.IsDead) continue;
+            if (p.Role is Jackal.Instance jRole) allAliveJackals.Add(jRole);
+            totalAlive++;
+        }
+
+
+
+        ulong jackalMask = 0;
+        int teamCount = 0;
+        int winningJackalTeams = 0;
+        ulong completeWinningJackalMask = 0;
+
+        //全ジャッカルに対して、各チームごとに勝敗を調べる
+        foreach (var jackal in allAliveJackals)
+        {
+            //ジャッカル陣営の数をカウントする
+            ulong myMask = 1ul << jackal!.JackalTeamId;
+            if ((jackalMask & myMask) == 0) teamCount++;
+            else continue; //既に考慮したチームはスキップしてよい
+            jackalMask |= myMask;
+
+            //死亡しておらず、同チーム、かつラバーズでないか相方死亡ラバー。ただし、サイドキックがキル人外でないならジャッカル本人のみ
+            int aliveJackals = sidekickShouldBeCountKillers ? NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && jackal!.IsSameTeam(p) && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover) && !p.IsMadmate) : 1;
+
+
+            //完全殲滅勝利
+            if (aliveJackals == totalAlive) completeWinningJackalMask |= myMask;
+            //キル勝利
+            if (aliveJackals * 2 >= totalAlive && !leftOtherKillers) winningJackalTeams++;
+        }
+
+        //キル勝利のトリガー
+        if (teamCount == 1 && winningJackalTeams > 0) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JackalWin, GameEndReason.Situation);
+        //完全殲滅勝利のトリガー
+        if (completeWinningJackalMask != 0)
+        {
+            allAliveJackals.Do(j => j.IsDefeatedJackal = (completeWinningJackalMask & (1ul << j.JackalTeamId)) == 0ul);
+            NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JackalWin, GameEndReason.Situation);
+        }
+    }
+};

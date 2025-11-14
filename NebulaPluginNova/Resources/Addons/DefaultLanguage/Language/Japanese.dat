@@ -41,6 +41,7 @@ $Color
 "ui.dialog.yes" : "はい"
 "ui.dialog.no" : "いいえ"
 "ui.dialog.ok" : "OK"
+"ui.dialog.confirmation" : "決定"
 "ui.dialog.exit" : "退出"
 "ui.dialog.search" : "検索"
 "ui.dialog.keyword" : "キーワード"
@@ -783,7 +784,7 @@ $Color
 "role.niceGuesser.name" : "ナイスゲッサー"
 "role.niceGuesser.short" : "ゲ"
 "role.niceGuesser.blurb" : "敵を撃ち抜け"
-"options.role.niceGuesser.detail" : "ゲッサーは会議中にプレイヤーの役職を推察してキルできます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
+"options.role.niceGuesser.detail" : "ゲッサーは会議中にプレイヤーの能力を推察してキルできます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
 
 "role.niceTrapper.name" : "ナイストラッパー"
 "role.niceTrapper.short" : "ト"
@@ -1015,7 +1016,7 @@ $Color
 "role.evilGuesser.name" : "イビルゲッサー"
 "role.evilGuesser.short" : "ベ"
 "role.evilGuesser.blurb" : "推察し、キルせよ"
-"options.role.evilGuesser.detail" : "ゲッサーは会議中にプレイヤーの役職を推察してキルできます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
+"options.role.evilGuesser.detail" : "ゲッサーは会議中にプレイヤーの能力を推察してキルできます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
 
 "role.evilTracker.name" : "イビルトラッカー"
 "role.evilTracker.short" : "イビトラ"
@@ -1287,6 +1288,16 @@ $Color
 "stats.whammy.balloon" : "風船を仕掛けた回数"
 "roles.whammy.taskText" : "風船を割る (%TIME%s)"
 
+"role.zeal.name" : "ジール"
+"role.zeal.short" : "ジ"
+"role.zeal.blurb" : "熱狂せよ！"
+"options.role.zeal.detail" : "ジールは生存者たちの熱狂を殺意に昇華させるインポスターです。<br>吸収した熱狂はキルボタンになり、ジールは複数のキルボタンをストックできます。"
+"options.role.zeal.killCooldown" : "キルクールダウン"
+"options.role.zeal.absorbCooldown" : "吸収クールダウン"
+"options.role.zeal.absorbDuration" : "吸収の所要時間"
+"options.role.zeal.absorbAdditionalDuration" : "吸収の追加所要時間"
+"options.role.zeal.enthusiasmCooldown" : "熱狂クールダウン"
+
 # Neutral Roles
 
 "role.arsonist.name" : "アーソニスト"
@@ -1498,8 +1509,20 @@ $Color
 "options.role.tyrant.useImpostorAbility" : "インポスター能力の使用"
 "stats.tyrant.kill" : "キル回数"
 
+"role.vanity.name" : "ヴァニティ"
+"role.vanity.short" : "ヴ"
+"role.vanity.blurb" : "あなたの正義でありたい"
+"options.role.vanity.detail" : "ヴァニティは自身をシェリフだと思い込んでいるキラーです。<br>自身のキルに応じて勝利条件が変化します。"
+"options.role.vanity.canExtraWinEvenIfVanityDied" : "自身の生死に依らず追加勝利可能"
+"options.role.vanity.independentTeam" : "単独キラー陣営"
+"options.role.vanity.becomeAwareOfVanityWhenKillCrewmate" : "クルーをキルするとヴァニティを自覚可能"
+"options.role.vanity.canBecomeAwareOfVanity" : "タスクでヴァニティを自覚可能"
+"options.role.vanity.taskProgressRequiredForSelfAdmission" : "自覚に必要なタスク数"
+"options.role.vanity.group.task" : "自覚に関する設定"
+"stats.vanity.kill" : "Num of Killing"
+
 "role.vulture.name" : "ヴァルチャー"
-"role.vulture.short" : "ヴァ"
+"role.vulture.short" : "ヴ"
 "role.vulture.blurb" : "死体を食い漁れ"
 "options.role.vulture.detail" : "ヴァルチャーは指定数の死体を捕食することで勝利します。<br>クルーメイトは素早く死体を発見する必要があります。"
 "options.role.vulture.eatCoolDown" : "捕食クールダウン"
@@ -1592,6 +1615,9 @@ $Color
 "options.role.damned.damnedAction.impostor" : "インポスター昇格"
 "options.role.damned.damnedAction.madmate" : "マッドメイト昇格"
 "options.role.damned.damnedAction.takeOver" : "キラー役職乗っ取り"
+"options.role.damned.canBecomeAwareOfDamned" : "ダムドを自覚可能"
+"options.role.damned.taskProgressRequiredForSelfAdmission" : "自覚に必要なタスク数"
+"options.role.damned.group.task" : "自覚に関する設定"
 
 "role.disclosure.name" : "ディスクロージャ"
 "role.disclosure.generalBlurb" : "それは啓示ではない"
@@ -2030,6 +2056,7 @@ $Color
 "button.label.rokuro.reset" : "収縮"
 "button.label.acid" : "アシッド"
 "button.label.mobile.switch" : "切替"
+"button.label.absorb" : "吸収"
 
 # Game
 
@@ -2139,12 +2166,16 @@ $Color
 "end.trilemma" : "トリレンマ%EXTRA%勝利"
 "end.gambler" : "ギャンブラー%EXTRA%勝利"
 "end.tyrant" : "タイラント%EXTRA%勝利"
+"end.vanity" : "ヴァニティ%EXTRA%勝利"
 "end.nogame" : "無効なゲーム"
+
+"end.status.noWinners" : "勝者なし" 
 
 "end.extra.lover" : " <color=#FFFFFF>+</color> ラバーズ"
 "end.extra.obsessional" : " <color=#FFFFFF>+</color> オブセッショナル"
 "end.extra.grudge" : " <color=#FFFFFF>+</color> グラッジ"
 "end.extra.trilemma" : " <color=#FFFFFF>+</color> トリレンマ"
+"end.extra.vanity" : " <color=#FFFFFF>+</color> ヴァニティ"
 
 # Help
 
@@ -2206,6 +2237,16 @@ $Color
 # Inventory
 
 "inventory.palette.catalogue" : "カタログ"
+"inventory.palette.colorCode" : "色コード指定"
+"inventory.palette.colorCode.mainColor" : "メインカラー"
+"inventory.palette.colorCode.shadowColor" : "シャドウカラー"
+"inventory.palette.colorCode.visorColor" : "バイザーカラー"
+"inventory.palette.colorCode.colorName" : "色名"
+"inventory.palette.colorCode.copy" : "コピー"
+"inventory.palette.colorCode.paste" : "ペースト"
+"inventory.palette.colorCode.copied" : "クリップボードにコピーしました。"
+"inventory.palette.colorCode.pasted" : "クリップボードから色を指定しました。"
+"inventory.palette.colorCode.pasted.failed" : "フォーマットに合っていません！"
 "inventory.catalogue.innersloth" : "バニラコレクション"
 "inventory.color.vanilla0" : "レッド"
 "inventory.color.vanilla1" : "ブルー"
@@ -2301,6 +2342,8 @@ $Color
 "config.client.muteAmbienceOnMeeting.detail" : "会議中に限り環境音をミュートできます。"
 "config.client.vcServerSettings" : "VCサーバー設定"
 "config.client.vcServerSettings.detail" : "VC使用時に接続するVCサーバーを設定します。"
+"config.client.smallHud" : "コンパクトなHUD"
+"config.client.smallHud.detail" : "画面下部のボタン等をより小さくコンパクトに表示します。"
 
 # Preset
 
@@ -2672,13 +2715,13 @@ $Color
 "document.tip.winCond.crewmate.exile.title" : "追放勝利"
 "document.tip.winCond.crewmate.exile" : "全%IMPOSTOR%陣営、%JACKAL%陣営プレイヤーを追放すると勝利します。"
 "document.tip.winCond.impostor.kill.title" : "キル勝利"
-"document.tip.winCond.impostor.kill" : "自陣営の生存者が全生存者の半数以上を占めると勝利します。<br>%JACKAL%陣営が全滅している必要があり、相方が生存している%LOVER%は自陣営にカウントしません。"
+"document.tip.winCond.impostor.kill" : "自陣営の生存者が全生存者の半数以上を占めると勝利します。<br>他のキル陣営が全滅している必要があり、相方が生存している%LOVER%は自陣営にカウントしません。"
 "document.tip.winCond.impostor.extinction.title" : "完全殲滅勝利"
 "document.tip.winCond.impostor.extinction" : "全生存者が自陣営のプレイヤーになると勝利します。相方が生存している%LOVER%は自陣営にカウントしません。"
 "document.tip.winCond.impostor.sabotage.title" : "サボタージュ勝利"
 "document.tip.winCond.impostor.sabotage" : "緊急サボタージュが復旧されないまま時間切れになると勝利します。"
 "document.tip.winCond.jackal.kill.title" : "キル勝利"
-"document.tip.winCond.jackal.kill" : "自陣営の生存者が全生存者の半数以上を占めると勝利します。<br>%IMPOSTOR%陣営が全滅している必要があり、%LOVER%は自陣営にカウントしません。"
+"document.tip.winCond.jackal.kill" : "自陣営の生存者が全生存者の半数以上を占めると勝利します。<br>他のキル陣営が全滅している必要があり、%LOVER%は自陣営にカウントしません。"
 "document.tip.winCond.jackal.extinction.title" : "完全殲滅勝利"
 "document.tip.winCond.jackal.extinction" : "全生存者が自陣営のプレイヤーになると勝利します。相方が生存している%LOVER%は自陣営にカウントしません。"
 "document.tip.winCond.jester.title" : "特殊勝利"
@@ -2706,7 +2749,14 @@ $Color
 "document.tip.winCond.gambler.title" : "特殊勝利"
 "document.tip.winCond.gambler" : "生存しながらギャンブルに勝ち、%NUM%枚のチップを手に入れると勝利します。"
 "document.tip.winCond.tyrant.title" : "キル勝利"
-"document.tip.winCond.tyrant" : "%NUM%人のプレイヤーをキルすると勝利します。"
+"document.tip.winCond.tyrant" : "%NUM%人のプレイヤーをキルすると勝利します。<br>この陣営は他のキル陣営が殲滅すべきキル陣営にカウントされません。"
+"document.tip.winCond.vanity.kill.title" : "キル勝利"
+"document.tip.winCond.vanity.kill" : "クルーメイトをキルしている場合、他のキル陣営を殲滅したうえで<br>自陣営の生存者が全生存者の半数以上を占めると勝利します。"
+"document.tip.winCond.vanity.extra.crewOnly.title" : "追加勝利"
+"document.tip.winCond.vanity.extra.crewOnly" : "クルーメイトをキルしていない場合、クルーメイトが勝利すれば追加勝利します。"
+"document.tip.winCond.vanity.extra.title" : "追加勝利"
+"document.tip.winCond.vanity.extra" : "クルーメイトをキルしていない場合、クルーメイトが勝利すれば追加勝利します。<br>クルーメイトをキルした場合、クルーメイトが敗北すれば追加勝利します。"
+"document.tip.winCond.vanity.extra.surviveCond" : "追加勝利するには、ヴァニティは<b>生存</b>している必要があります。"
 
 "options.assignment.assignOpToHost.detail" : "オンにすると、ホストはゲーム中にコマンドを使用できるようになります。<br>特にコマンドを使用しない場合はオフにすることをお勧めします。"
 "options.assignment.ghostAssignmentMethod.detail" : "幽霊役職の割り当て方法を変更できます。<br> -<b>標準</b>: 死亡者には割り当てられる役職の何れかが必ず割り当てられます。<br> -<b>スリリング</b>: 割当確率が役職を割り当てられるか否かにまで影響を及ぼします。"
@@ -2815,6 +2865,8 @@ $Color
 "options.role.scarlet.gaugeReductionRatio.detail" : "本命のそばにいない間、溜まる速度にこの設定値を乗じた速度でゲージが減少します。<br>1xで溜まる速度と同じ速度で減少します。1未満の数値を推奨します。"
 "options.role.lover.allowExtraWin.detail" : "オンにすると、相方が生きて勝利すれば自身も一緒に勝利できます。"
 "options.role.lover.blockRoleWin.detail" : "オンにすると、自身の役職によって勝利できなくなります。<br><br>・オフの場合: ラバーズとして勝利できなくとも、自身の役職で勝利すれば勝利できます。<br>・オンの場合: ラバーズの勝利条件以外で勝利できなくなります。"
+"options.role.zeal.absorbAdditionalDuration.detail" : "熱狂の吸収に要する時間は、(吸収の所要時間)＋(吸収の追加所要時間)×(キルボタンの数) で計算されます。<br>このオプションの値をより大きくすると、同時に多数のキルボタンを所有するのがより困難になります。"
+"options.role.zeal.enthusiasmCooldown.detail" : "同じプレイヤーから熱狂を再度吸収できるまでのクールダウンです。"
 
 "role.guesser.doc.main" : "会議中に役職を<b>推察</b>できます。推察された相手はキルされます。<br>ただし、推察に失敗すると<b>自身が死んでしまいます。</b>"
 "role.guesser.doc.guess" : "プレイヤーの上に表示されるアイコンをクリックすると推察画面が開きます。<br>表示された役職を選択することで<b>推察</b>を行います。"

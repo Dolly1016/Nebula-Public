@@ -94,6 +94,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
     static public int[] GenerateArgument(DefinedRole? madden) => [madden?.Id ?? -1];
     static private readonly GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
+    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).IsSpawnable && !MaddenRoleOption) ? [this] : [];
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -122,6 +123,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
         string RuntimeRole.DisplayShort => MaddenAbility != null ? Language.Translate("role.madmate.prefix") + MyMadden!.GetDisplayShort(MaddenAbility) : (MyRole as DefinedRole).DisplayShort;
         string RuntimeRole.DisplayIntroBlurb =>  MyMadden?.DisplayIntroBlurb ?? (MyRole as DefinedRole).DisplayIntroBlurb;
         string RuntimeRole.DisplayIntroRoleName => (this as RuntimeAssignable).DisplayName;
+        bool RuntimeRole.CheckGuessAbility(DefinedRole abilityRole) => abilityRole == MyMadden || abilityRole == MyRole;
 
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev) => ev.IsWin |= ev.GameEnd == NebulaGameEnd.ImpostorWin;

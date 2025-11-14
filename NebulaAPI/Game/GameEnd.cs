@@ -112,6 +112,7 @@ public enum ExtraWinCheckPhase
     TrilemmaPhase = Phase2,
     ScarletPhase = Phase1,
     MadmatePhase = Phase0,
+    VanityPhase = Phase0,
 }
 
 public static class NebulaGameEnds

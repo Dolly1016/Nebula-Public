@@ -125,7 +125,13 @@ internal class AchievementViewer : MonoBehaviour
         }
 
     }
-    static public GUIWidget GenerateWidget(float scrollerHeight,float width, string? scrollerTag = null, bool showTrophySum = true, Predicate<INebulaAchievement>? predicate = null, string? shownText = null, Action? onClicked = null, Action? onUpdated = null, SortRule sortRule = SortRule.Categorized, bool showCustomAchievement = true)
+    static private int TrophyFullMask = 0xFFFF;
+    public class ViewerArguments
+    {
+        public SortRule SortRule { get; set; } = SortRule.Categorized;
+        public int TrophyMask { get; set; } = TrophyFullMask;
+    }
+    static public GUIWidget GenerateWidget(float scrollerHeight,float width, ViewerArguments argument, string? scrollerTag = null, bool showTrophySum = true, Predicate<INebulaAchievement>? predicate = null, string? shownText = null, Action? onClicked = null, Action? onUpdated = null, bool showCustomAchievement = true)
     {
         scrollerTag ??= "Achievements";
 
@@ -289,7 +295,7 @@ internal class AchievementViewer : MonoBehaviour
                                 {
                                     window.CloseScreen();
                                     crafting.ReflectTo(a);
-                                    NebulaAchievementManager.SetCustomTitle(a);
+                                    NebulaAchievementManager.SetCustomTitle(a, false);
                                     onUpdated?.Invoke();
                                     onClicked?.Invoke();
                                 }
@@ -312,7 +318,7 @@ internal class AchievementViewer : MonoBehaviour
         void AddGroup(string? group, IEnumerable<INebulaAchievement> achievements)
         {
             bool first = true;
-            foreach (var a in achievements.Where(a => (predicate?.Invoke(a) ?? true) && !a.IsHidden))
+            foreach (var a in achievements.Where(a => (predicate?.Invoke(a) ?? true) && !a.IsHidden && (((1 << a.Trophy) & argument.TrophyMask) != 0)))
             {
                 if (first)
                 {
@@ -353,7 +359,7 @@ internal class AchievementViewer : MonoBehaviour
                     achievementContent
                     );
 
-                if (sortRule is SortRule.GlobalProgress)
+                if (argument.SortRule is SortRule.GlobalProgress)
                 {
                     aContenxt = new GUIPercentageBackground(GUIAlignment.Left, aContenxt, a.GlobalProgress, new(0.8f, 0.8f, 0.8f, 0.2f), false) { WithMask = true };
                 }
@@ -361,7 +367,7 @@ internal class AchievementViewer : MonoBehaviour
             }
         }
 
-        switch (sortRule)
+        switch (argument.SortRule)
         {
             case SortRule.GlobalProgress:
                 CalcSortedAchievements();
@@ -390,7 +396,15 @@ internal class AchievementViewer : MonoBehaviour
                 int copiedIndex = i;
                 if (footerList.Count != 0) footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.2f, 0f)));
 
-                footerList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(copiedIndex)), new(0.5f, 0.5f)));
+                footerList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(copiedIndex)), new(0.5f, 0.5f),
+                    ((1 << i) & argument.TrophyMask) != 0 ? Color.white : new(0.25f,0.25f,0.25f,0.95f), _ =>
+                    {
+                        if (argument.TrophyMask != 1 << copiedIndex)
+                            argument.TrophyMask = 1 << copiedIndex;
+                        else
+                            argument.TrophyMask = TrophyFullMask;
+                        onUpdated?.Invoke();
+                    }));
                 footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.05f, 0f)));
                 footerList.Add(new NoSGUIText(GUIAlignment.Left, detailDetailAttr, new RawTextComponent(cul[i].num + "/" + cul[i].max)));
             }
@@ -412,9 +426,10 @@ internal class AchievementViewer : MonoBehaviour
         var title = new NoSGUIText(GUIAlignment.Left, gui.GetAttribute(Virial.Text.AttributeAsset.OblongHeader), new TranslateTextComponent("achievement.ui.title"));
 
         gameObject.SetActive(true);
+        ViewerArguments args = new();
         void SetWidget()
         {
-            myScreen.SetWidget(new Modules.GUIWidget.VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, title, GenerateWidget(3.85f, 9f, onUpdated: SetWidget)), out _);
+            myScreen.SetWidget(new Modules.GUIWidget.VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, title, GenerateWidget(3.85f, 9f, args, onUpdated: SetWidget)), out _);
         }
         SetWidget();
 

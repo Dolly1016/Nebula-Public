@@ -321,7 +321,7 @@ class MeetingStartPatch
             player.NameText.fontSizeMin = 1.5f;
             player.NameText.enableAutoSizing = true;
 
-            bool isLightColor = DynamicPalette.IsLightColor(DynamicPalette.PlayerColors[player.TargetPlayerId]);
+            bool isLightColor = ModSingleton<BalancedColorManager>.Instance.IsLightColor(DynamicPalette.PlayerColors[player.TargetPlayerId]);
 
             SpriteRenderer renderer = UnityHelper.CreateObject<SpriteRenderer>("Color", player.transform, new Vector3(1.2f, -0.18f, -1f));
             renderer.sprite = isLightColor ? LightColorSprite.GetSprite() : DarkColorSprite.GetSprite();
@@ -390,7 +390,7 @@ class MeetingStartPatch
                     cosmetics.visor.Image.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                     cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                     cosmetics.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                    nebulaCosmetics.AdditionalRenderers().Do(r => r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask);
+                    nebulaCosmetics.AdditionalRenderersAndMasks().Do(r => r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask);
                     player.XMark.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
                 }
                 catch { }
@@ -598,7 +598,7 @@ class VoteAreaPatch
             cosmetics.skin.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             cosmetics.currentBodySprite.BodySprite.gameObject.AddComponent<ZOrderedSortingGroup>();
             var nebulaLayer = cosmetics.GetComponent<NebulaCosmeticsLayer>();
-            nebulaLayer.AdditionalRenderers().Do(r =>
+            nebulaLayer.AdditionalRenderersAndMasks().Do(r =>
             {
                 r.gameObject.AddComponent<ZOrderedSortingGroup>().SetConsiderParentsTo(nebulaLayer.transform);
                 r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;

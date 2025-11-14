@@ -156,7 +156,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         private ThuribulumManager()
         {
             ModSingleton<ThuribulumManager>.Instance = this;
-            this.Register(NebulaAPI.CurrentGame!);
+            this.RegisterPermanently();
         }
 
         public void RegisterThuribulum(Thuribulum thuribulum) => allThuribulums.Add(thuribulum);

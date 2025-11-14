@@ -24,7 +24,7 @@ public static class DebugTools
     private static readonly DebugValueEntry<bool> showConfigurationId = new BooleanDataEntry("ShowConfigurationId", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> releaseAllAchievement = new BooleanDataEntry("ReleaseAllAchievement", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> lockAllAchievement = new BooleanDataEntry("LockAllAchievement", saver, false, shouldWrite: false);
-    private static readonly DebugValueEntry<bool> allowVanillaLog = new BooleanDataEntry("AllowVanillaLog", saver, false, shouldWrite: false);
+    private static readonly DebugValueEntry<bool> allowVanillaLog = new BooleanDataEntry("AllowVanillaLog", saver, false);
     private static readonly DebugValueEntry<bool> writeAllAchievementsData = new BooleanDataEntry("WriteAllAchievementsData", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> showCostumeMetadata = new BooleanDataEntry("ShowCostumeMetadata", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> useRoomPointEditor = new BooleanDataEntry("UseRoomPointEditor", saver, false, shouldWrite: false);
@@ -35,7 +35,7 @@ public static class DebugTools
     public static bool ReleaseAllAchievement => DebugMode && releaseAllAchievement.Value;
     public static bool LockAllAchievement => DebugMode && lockAllAchievement.Value;
     public static bool ShowCostumeMetadata => DebugMode && showCostumeMetadata.Value;
-    public static bool AllowVanillaLog => DebugMode && allowVanillaLog.Value;
+    public static bool AllowVanillaLog => allowVanillaLog.Value;
     public static bool UseRoomPointEditor => DebugMode && useRoomPointEditor.Value;
     public static bool UseAudioPlayer => DebugMode && useAudioPlayer.Value;
 

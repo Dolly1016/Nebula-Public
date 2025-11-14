@@ -420,19 +420,27 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
             return !MyPlayer.IsDead && (numOfSubjects >= RequiredSubjectsOption && numOfDisclosed >= RequiredDisclosedOption) && DisclosedPhotos >= RequiredPicturesOption;
         }
 
+        void RemoveInvalidPhotos()
+        {
+            int aliveMask = 0;
+            GamePlayer.AllPlayers.Where(p => !p.IsDead).Do(p => aliveMask |= (1 << p.PlayerId));
+
+            int mask = (~DisclosedMask) & aliveMask;
+            shots.RemoveAll(shot => {
+                if ((shot.playerMask & mask) == 0)
+                {
+                    GameObject.Destroy(shot.holder.gameObject);
+                    return true;
+                }
+                return false;
+            });
+        }
+
         [Local]
         void LocalHudUpdate(GameHudUpdateEvent ev)
         {
             if (shotsHolder != null) {
                 int num = 0;
-                shots.RemoveAll(shot => {
-                    if ((shot.playerMask & (~DisclosedMask)) == 0)
-                    {
-                        GameObject.Destroy(shot.holder.gameObject);
-                        return true;
-                    }
-                    return false;
-                });
 
                 int mask = 0;
                 foreach (var shot in shots) mask |= shot.playerMask;
@@ -461,10 +469,14 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         }
 
         static private SpriteLoader hourGlassSprite = SpriteLoader.FromResource("Nebula.Resources.Hourglass.png", 100f);
-        
+
+        void OnMeetingPreStart(MeetingPreStartEvent ev) => RemoveInvalidPhotos();
+
         [Local]
         void OnMeetingStart(MeetingStartEvent ev)
         {
+            RemoveInvalidPhotos();
+
             if (!MyPlayer.IsDead)
             {
                 bool shareFlag = false;
@@ -532,6 +544,8 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         [Local]
         void OnMeetingEnd(MeetingEndEvent ev)
         {
+            RemoveInvalidPhotos();
+
             if (acTokenChallenge != null)
             {
                 acTokenChallenge.Value.cleared |= (acTokenChallenge.Value.lastAlive ?? 0) - NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && !p.AmOwner) >= 4;

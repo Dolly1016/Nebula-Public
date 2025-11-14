@@ -153,7 +153,7 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
     void OnGameStart(GameStartEvent ev)
     {
         var localPlayer = GamePlayer.LocalPlayer;
-        var desealButton =  new Modules.ScriptComponents.ModAbilityButtonImpl(priority: -100).Register(NebulaAPI.CurrentGame!);
+        var desealButton =  new Modules.ScriptComponents.ModAbilityButtonImpl(priority: -100).RegisterPermanently();
         desealButton.SetSprite(desealButtonSprite.GetSprite());
         desealButton.Availability = (button) => localPlayer.CanMove;
         desealButton.Visibility = (button) => (MyContainer.LocalPlayer?.Role?.CanUseVent ?? false) && (CurrentInvalidVent != null || CurrentInvalidDoor != null) && !localPlayer.IsDead;

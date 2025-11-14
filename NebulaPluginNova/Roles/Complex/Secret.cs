@@ -110,6 +110,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
         DefinedRole RuntimeRole.Role => MyNiceRole;
         DefinedRole RuntimeRole.ExternalRecognitionRole => savedRole;
         IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [ShownSecret.OptionRole];
+        bool RuntimeRole.CheckGuessAbility(DefinedRole abilityRole) => abilityRole == savedRole;
 
         public NiceInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
@@ -174,6 +175,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
         DefinedRole RuntimeRole.Role => MyEvilRole;
         DefinedRole RuntimeRole.ExternalRecognitionRole => savedRole;
         IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [ShownSecret.OptionRole];
+        bool RuntimeRole.CheckGuessAbility(DefinedRole abilityRole) => abilityRole == savedRole;
         public EvilInstance(GamePlayer player, int[] savedArgs) : base(player)
         {
             this.savedArgs = savedArgs;

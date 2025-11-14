@@ -1,4 +1,10 @@
-﻿namespace Nebula.Utilities;
+﻿using Il2CppSystem.Text.Json;
+using Nebula.Modules.Cosmetics;
+using Virial.DI;
+using Virial.Events.Game;
+using Virial.Game;
+
+namespace Nebula.Utilities;
 
 public static class ColorHelper
 {
@@ -55,5 +61,64 @@ public static class ColorHelper
     {
         color.ToHSV(out _, out var s, out _);
         return s > 0.85f;
+    }
+
+    static public float GetLuminance(Color color)
+    {
+        return color.r * 0.299f + color.g * 0.587f + color.b * 0.114f;
+    }
+
+    public static bool IsLightColor(Color color)
+    {
+        var max = Mathn.Max(color.r, color.g, color.b);
+        var sum = color.r + color.g + color.b;
+        return max > 0.8f || sum > 2.1f;
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
+public class BalancedColorManager : AbstractModule<Virial.Game.Game>, IGameOperator
+{
+    static BalancedColorManager() => DIManager.Instance.RegisterModule(() => new BalancedColorManager());
+
+    private BalancedColorManager()
+    {
+        ModSingleton<BalancedColorManager>.Instance = this;
+        this.RegisterPermanently();
+    }
+
+    float middleLuminance = 0.5f;
+    public float MiddleLuminance => middleLuminance;
+    public bool IsLightColor(Color color) => ColorHelper.GetLuminance(color) > middleLuminance;
+    void OnGameStarted(GameStartEvent _)
+    {
+        if (GamePlayer.AllPlayers.Count() == 1)
+        {
+            middleLuminance = ColorHelper.IsLightColor(DynamicPalette.PlayerColors[GamePlayer.LocalPlayer!.PlayerId]) ? 0f : 1f;
+        }
+        else
+        {
+            middleLuminance = GetMedian(GamePlayer.AllPlayers.Select(p => ColorHelper.GetLuminance(DynamicPalette.PlayerColors[p.PlayerId])));
+        }
+    }
+
+    private static float GetMedian(IEnumerable<float> numbers)
+    {
+        var sortedNumbers = numbers.OrderBy(n => n).ToArray();
+        int n = sortedNumbers.Length;
+
+        if (n == 0) return 0f;
+        
+        // 4. 中央のインデックスを計算
+        int midIndex = n / 2;
+
+        if (n % 2 == 1)
+        {
+            return sortedNumbers[midIndex];
+        }
+        else
+        {
+            return (sortedNumbers[midIndex - 1] + sortedNumbers[midIndex]) / 2f;
+        }
     }
 }

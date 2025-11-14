@@ -91,7 +91,7 @@ public class Echo : DefinedSingleAbilityRoleTemplate<Echo.Ability>, DefinedRole
             if (!AmOwner) return;
             if (ev.Player.AmOwner) return;
 
-            var arrow = new Arrow(iconSprite.GetSprite(), false, true) { FixedAngle = true, IsAffectedByComms = false }.Register(NebulaAPI.CurrentGame!);
+            var arrow = new Arrow(iconSprite.GetSprite(), false, true) { FixedAngle = true, IsAffectedByComms = false }.RegisterSelf();
 
             StatsActions.Progress();
             arrow.FixedAngle = true;

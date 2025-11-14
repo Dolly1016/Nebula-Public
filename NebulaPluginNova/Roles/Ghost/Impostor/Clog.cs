@@ -83,7 +83,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
     static public readonly RemoteProcess<Vector2> RpcSpawnGhost = new(
         "GhostGhost", (pos, calledBeMe) =>
         {
-            var ghost = new Nebula.Roles.Crewmate.Ghost(pos, GhostDurationOption, null, Seer.CanSeeGhostsInShadowOption, GhostSizeOption).Register(NebulaAPI.CurrentGame!);
+            var ghost = new Nebula.Roles.Crewmate.Ghost(pos, GhostDurationOption, null, Seer.CanSeeGhostsInShadowOption, GhostSizeOption).RegisterSelf();
             if (calledBeMe)
             {
                 bool achieved = false;

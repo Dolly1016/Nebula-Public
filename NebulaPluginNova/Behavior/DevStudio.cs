@@ -358,10 +358,10 @@ public class DevStudio : MonoBehaviour
             var window = MetaScreen.GenerateWindow(new(2.2f, 2.4f), transform, Vector3.zero, true, true);
 
             var holder = GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
-                GUI.Instance.RawText(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeAsset.CenteredBold), Language.GetLanguageShownString(languageId)),
+                GUI.Instance.RawText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBold), Language.GetLanguageShownString(languageId)),
                 GUI.API.VerticalMargin(0.22f),
                 exists ?
-                GUI.Instance.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.editFile", _ => {
+                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.editFile", _ => {
                     System.Diagnostics.ProcessStartInfo processStartInfo = new();
                     processStartInfo.FileName = addon.FolderPath + Path.DirectorySeparatorChar + fPath;
                     processStartInfo.CreateNoWindow = true;
@@ -370,7 +370,7 @@ public class DevStudio : MonoBehaviour
                     window.CloseScreen();
                     ReopenScreen(true);
                 }) : 
-                GUI.Instance.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.newFile", _ => {
+                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.newFile", _ => {
                     if(NebulaPlugin.GuardVanillaLangData)
                         addon.WriteFile(fPath, "");
                     else
@@ -380,7 +380,7 @@ public class DevStudio : MonoBehaviour
 
                     MetaUI.ShowConfirmDialog(transform, GUI.API.LocalizedTextComponent("devStudio.ui.language.newFile.confirm"));
                 }),
-                (!exists || NebulaPlugin.GuardVanillaLangData) ? null : GUI.Instance.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.addMissing", _ => {
+                (!exists || NebulaPlugin.GuardVanillaLangData) ? null : GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.addMissing", _ => {
                     int num = 0;
                     string newText = "";
                     var myLang = new Language();
@@ -437,7 +437,7 @@ public class DevStudio : MonoBehaviour
                 string lName = Language.GetLanguage(l);
                 bool exists = addon.ExistsFile("Language/" + lName + ".dat");
 
-                return GUI.Instance.RawButton(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeParams.StandardBoldNonFlexible),
+                return GUI.API.RawButton(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeParams.StandardBoldNonFlexible),
                     Language.GetLanguageShownString(l), _ => OpenDetailWindow(l), color: (exists ? Virial.Color.White : new(0.5f, 0.5f, 0.5f, 1f)));
             })), out var artifact) };
 

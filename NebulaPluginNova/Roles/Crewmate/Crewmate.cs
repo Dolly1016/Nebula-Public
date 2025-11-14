@@ -1,6 +1,7 @@
 ﻿using Virial;
 using Virial.Assignable;
 using Virial.DI;
+using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -32,7 +33,32 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
 public class CrewmateGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 {
     static CrewmateGameRule() => DIManager.Instance.RegisterModule(() => new CrewmateGameRule());
-    public CrewmateGameRule() => this.Register(NebulaAPI.CurrentGame!);
+    public CrewmateGameRule() => this.RegisterPermanently();
     void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.Player.Role.Role.Category == RoleCategory.CrewmateRole && ev.GameEnd == NebulaGameEnd.CrewmateWin);
-    
+
+    [OnlyHost]
+    void CheckExileWin(GameUpdateEvent ev)
+    {
+        //キル人外が生存している間は勝利できない。
+        if (GameOperatorManager.Instance?.Run(new KillerTeamCallback(NebulaTeams.CrewmateTeam)).RemainingOtherTeam ?? true) return;
+
+        NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Situation);
+    }
+
+    [OnlyHost]
+    void CheckTaskWin(PlayerTaskUpdateEvent ev)
+    {
+        int quota = 0;
+        int completed = 0;
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
+        {
+            if (p.IsDisconnected) continue;
+
+            if (!p.Tasks.IsCrewmateTask) continue;
+            quota += p.Tasks.Quota;
+            completed += p.Tasks.TotalCompleted;
+        }
+        if (quota > 0) ModSingleton<IWinningOpportunity>.Instance?.RpcSetOpportunity(NebulaTeams.CrewmateTeam, (completed * 0.93f) / (float)quota);
+        if (quota > 0 && quota <= completed) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Task);
+    }
 }

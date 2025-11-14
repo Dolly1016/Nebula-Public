@@ -25,7 +25,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
 
     private AchievementManagerModule()
     {
-        this.Register(NebulaGameManager.Instance!);
+        this.RegisterPermanently();
         ModSingleton<AchievementManagerModule>.Instance = this;
     }
 

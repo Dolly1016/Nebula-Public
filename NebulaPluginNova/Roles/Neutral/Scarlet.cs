@@ -541,6 +541,6 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
             }            
         }
 
-        bool RuntimeModifier.MyCrewmateTaskIsIgnored => !Scarlet.CanOverrideTaskWin && AmFavorite;
+        bool RuntimeAssignable.MyCrewmateTaskIsIgnored => !Scarlet.CanOverrideTaskWin && AmFavorite;
     }
 }

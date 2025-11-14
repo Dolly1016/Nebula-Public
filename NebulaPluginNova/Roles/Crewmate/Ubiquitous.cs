@@ -252,7 +252,7 @@ public class UbiquitousMapLayer : MonoBehaviour
                 float d = pos.Distance(p.VanillaPlayer.transform.position);
                 if(d < Ubiquitous.droneDetectionRadiousOption)
                 {
-                    var icon = (DynamicPalette.IsLightColor(DynamicPalette.PlayerColors[p.PlayerId]) ? lightIconPool : darkIconPool).Instantiate();
+                    var icon = (ModSingleton<BalancedColorManager>.Instance.IsLightColor(DynamicPalette.PlayerColors[p.PlayerId]) ? lightIconPool : darkIconPool).Instantiate();
                     icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.VanillaPlayer.transform.position, center, scale);
                     shown++;
                     if (alive >= 10 && alive == shown) challengeToken.Value = true;

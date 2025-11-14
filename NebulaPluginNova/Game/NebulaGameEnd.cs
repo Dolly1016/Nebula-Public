@@ -31,12 +31,14 @@ public class NebulaGameEnd
     static public readonly GameEnd TrilemmaWin = new(34, "trilemma", Roles.Modifier.Trilemma.MyRole.UnityColor, 61);
     static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.UnityColor, 29);
     static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.UnityColor, 32);
+    static public readonly GameEnd VanityWin = new(37, "vanity", Roles.Neutral.Vanity.MyRole.UnityColor, 18);
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
     static public readonly ExtraWin ExtraLoversWin = new(0, "lover", (Roles.Modifier.Lover.MyRole as DefinedAssignable).Color);
     static public readonly ExtraWin ExtraObsessionalWin = new(1, "obsessional", (Roles.Modifier.Obsessional.MyRole as DefinedAssignable).Color);
     static public readonly ExtraWin ExtraGrudgeWin = new(2, "grudge", (Roles.Ghost.Neutral.Grudge.MyRole as DefinedAssignable).Color);
     static public readonly ExtraWin ExtraTrilemmaWin = new(3, "trilemma", (Roles.Modifier.Trilemma.MyRole as DefinedAssignable).Color);
+    static public readonly ExtraWin ExtraVanityWin = new(4, "vanity", (Roles.Neutral.Vanity.MyRole as DefinedAssignable).Color);
 
     static void Preprocess(NebulaPreprocessor preprocessor)
     {
@@ -64,6 +66,9 @@ public class NebulaGameEnd
         RegisterWinCondTip(SpectreWin, () => (Roles.Neutral.Spectre.MyRole as ISpawnable).IsSpawnable, "spectre");
         RegisterWinCondTip(TrilemmaWin, () => (Roles.Modifier.Trilemma.MyRole as ISpawnable).IsSpawnable && Roles.Modifier.Trilemma.WinConditionOption.GetValue() == 2, "trilemma");
         RegisterWinCondTip(TyrantWin, () => (Roles.Neutral.Tyrant.MyRole as ISpawnable).IsSpawnable, "tyrant", text => text.Replace("%NUM%", Roles.Neutral.Tyrant.RequiredKillingToWin.ToString()));
+        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.kill");
+        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra.crewOnly", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
+        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && !Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
     }
 
     private static void RegisterWinCondTip(GameEnd gameEnd, Func<bool> predicate, string name, Func<string,string>? decorator = null)
@@ -379,7 +384,7 @@ public class EndGameManagerSetUpPatch
 
         __instance.BackgroundBar.material.SetColor("_Color", endCondition?.Color ?? new Color(1f, 1f, 1f));
 
-        __instance.WinText.text = DestroyableSingleton<TranslationController>.Instance.GetString(amWin ? StringNames.Victory : StringNames.Defeat);
+        __instance.WinText.text = winners.Count == 0 ? Language.Translate("end.status.noWinners") : DestroyableSingleton<TranslationController>.Instance.GetString(amWin ? StringNames.Victory : StringNames.Defeat);
         __instance.WinText.color = amWin ? new Color(0f, 0.549f, 1f, 1f) : Color.red;
 
         LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));

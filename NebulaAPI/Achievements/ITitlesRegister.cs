@@ -7,7 +7,7 @@ using Virial.Assignable;
 
 namespace Virial.Achievements;
 
-interface TitlesRegister
+public interface ITitlesRegister
 {
     bool Register(string group, string id, bool isSecret, DefinedAssignable? relatedRole);
 }

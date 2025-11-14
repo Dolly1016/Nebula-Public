@@ -18,7 +18,7 @@ public class PerkHolder : AbstractModule<Virial.Game.Game>, IGameOperator
         myHolder = HudContent.InstantiateContent("PerkHolder", true, true).gameObject;
         myHolder.transform.localScale = new Vector3(0.42f, 0.42f, 1f);
 
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     public PerkInstance RegisterPerk(PerkDefinition perk) {

@@ -54,6 +54,12 @@ public static class BitMasks
     public static EditableBitMask<T> CreateMask<T>(Func<T, uint> converter) => new BitMask32<T>(converter, 0u);
     public static BitMask<T> CreateFunctionalMask<T>(Predicate<T> predicate) => new FunctionalMask<T>(predicate);
     public static EditableBitMask<Game.Player> AsPlayer(uint bitMask = 0) => new BitMask32<Game.Player>(gamePlayerConverter, bitMask);
+    public static EditableBitMask<Game.Player> AsPlayer(Game.Player addedPlayer)
+    {
+        EditableBitMask<Game.Player> mask = new BitMask32<Game.Player>(gamePlayerConverter, 0u);
+        mask.Add(addedPlayer);
+        return mask;
+    }
     internal static EditableBitMask<PlayerControl> AsPlayerControl(uint bitMask = 0) => new BitMask32<PlayerControl>(p => 1u << p.PlayerId, bitMask);
 
     public static BitMask<B> Bits<B>(params B[] elements) where B : IBit32 => new BitMask32<B>(t => t.AsBit, elements.Aggregate(0u, (val, t) => val | t.AsBit));

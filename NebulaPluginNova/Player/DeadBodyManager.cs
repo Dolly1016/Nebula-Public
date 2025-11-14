@@ -24,7 +24,7 @@ internal class DeadBodyManager : AbstractModule<Virial.Game.Game>, IGameOperator
     private DeadBodyManager()
     {
         ModSingleton<DeadBodyManager>.Instance = this;
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     static public int GenerateId(byte requestSender, int requestId, int variation)

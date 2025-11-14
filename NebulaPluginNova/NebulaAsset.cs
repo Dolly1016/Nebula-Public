@@ -112,6 +112,8 @@ public static class NebulaAsset
         MeshRendererUVMaskedShader = Load<Shader>("Sprites-ForMeshRendererUVMask");
         RingMenuShader = Load<Shader>("Sprites-RingMenu");
         MeshDistShader = Load<Shader>("Mesh-HortDist");
+        CostumeMaskPreShader = Load<Shader>("Sprites-CostumeMaskPre");
+        CostumeMaskPostShader = Load<Shader>("Sprites-CostumeMaskPost");
 
         DivMap[0] = Load<GameObject>("SkeldDivMap");
         DivMap[1] = Load<GameObject>("MIRADivMap");
@@ -247,6 +249,8 @@ public static class NebulaAsset
     static public Shader MeshRendererUVMaskedShader { get; private set; } = null!;
     static public Shader RingMenuShader { get; private set; } = null!;
     static public Shader MeshDistShader { get; private set; } = null!;
+    static public Shader CostumeMaskPreShader { get; private set; } = null!;
+    static public Shader CostumeMaskPostShader { get; private set; } = null!;
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public Material BrokenShaderMat { get; private set; } = null!;

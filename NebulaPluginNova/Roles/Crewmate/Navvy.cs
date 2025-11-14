@@ -51,6 +51,9 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
         List<int> nextSealedVents = [];
         List<int> nextSealedDoors = [];
         int leftTapes = CostOption;
+
+        static private readonly RoleRPC.Definition UpdateState = RoleRPC.Get<Ability>("navvy.seal", (ability, num, calledByMe) => ability.leftTapes = num);
+
         public Ability(GamePlayer player, bool isUsurped, int left) : base(player, isUsurped)
         {
             UtilityInvalidationSystem.Instance.GraphicVentLevels = RedundantSealingOption ? VisualStandardSteps : VisualSteps[VentRemoveStepsOption];
@@ -97,7 +100,7 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
                     SpriteRenderer sealRenderer = null!;
                     if (tracker.CurrentTarget != null)
                     {
-                        leftTapes -= CostForVentSealingOption;
+                        UpdateState.RpcSync(MyPlayer, leftTapes - CostForVentSealingOption);
                         nextSealedVents.Add(tracker.CurrentTarget!.Id);
 
                         //テープを設置
@@ -115,7 +118,7 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
                     }
                     else if(currentTargetDoor != null)
                     {
-                        leftTapes -= CostForDoorSealingOption;
+                        UpdateState.RpcSync(MyPlayer, leftTapes - CostForDoorSealingOption);
                         nextSealedDoors.Add(currentTargetDoor!.Id);
 
                         //テープを設置

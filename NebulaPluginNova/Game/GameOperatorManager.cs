@@ -344,6 +344,14 @@ public class GameOperatorManager
         newFuncOperations.Add((typeof(Event), obj => operation.Invoke((Event)obj), lifespan, priority));
     }
 
+    public void SubscribeAchievement<Event>(string achievement, Func<Event, bool> predicate, ILifespan lifespan, int priority = 100) =>
+        Subscribe<Event>(ev =>
+        {
+            if (predicate.Invoke(ev))
+            {
+                new StaticAchievementToken(achievement);
+            }
+        }, lifespan, priority);
     public void SubscribeSingleListener<Event>(Action<Event> operation, ILifespan? lifespan = null, int priority = 100)
     {
         bool called = false;

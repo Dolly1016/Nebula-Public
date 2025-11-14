@@ -16,14 +16,46 @@ namespace Nebula.Roles.Complex;
 static public class MeetingRoleSelectWindow
 {
     static TextAttributeOld ButtonAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new(1.3f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(2f, 1f, 2f);
-    static public MetaScreen OpenRoleSelectWindow(Func<DefinedRole, bool> predicate, string underText, Action<DefinedRole> onSelected)
+
+    static public MetaScreen OpenRoleSelectWindow(IEnumerable<DefinedRole>? roles, Predicate<DefinedRole>? predicate, bool impRolesArrangeAtFirst, string underText, Action<DefinedRole> onSelected)
     {
         var window = MetaScreen.GenerateWindow(new(7.6f, 4.2f), HudManager.Instance.transform, new Vector3(0, 0, -50f), true, false);
 
         MetaWidgetOld widget = new();
 
         MetaWidgetOld inner = new();
-        inner.Append(Roles.AllRoles.Where(predicate), r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+
+        if(roles == null)
+        {
+            HashSet<DefinedRole> roleSet = [];
+            foreach (var r in Roles.AllRoles) foreach (var abilityRole in r.GetGuessableAbilityRoles()) roleSet.Add(abilityRole);
+            foreach (var type in AssignmentType.AllTypes)
+            {
+                if (!type.CanGuessAsAbility) continue;
+                foreach (var r in Roles.AllRoles)
+                {
+                    if (type.Predicate.Invoke(r.AssignmentStatus, r) && r.GetCustomAllocationParameters(type)?.RoleCountSum > 0) roleSet.Add(r);
+                }
+            }
+            roles = roleSet;
+        }
+        if(predicate != null) roles = roles.Where(r => predicate.Invoke(r));
+        
+        int CategoryToInt(RoleCategory roleCategory) => roleCategory switch
+        {
+            RoleCategory.ImpostorRole => impRolesArrangeAtFirst ? 0 : 1,
+            RoleCategory.CrewmateRole => impRolesArrangeAtFirst ? 1 : 0,
+            _ => 2
+        };
+        var ary = roles.ToArray();
+        roles = ary;
+        ary.Sort((r1, r2) =>
+        {
+            if (r1.Category == r2.Category) return r1.InternalName.CompareTo(r2.InternalName);
+            return CategoryToInt(r1.Category).CompareTo(CategoryToInt(r2.Category));
+        });
+
+        inner.Append(roles, r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
         MetaWidgetOld.ScrollView scroller = new(new(6.9f, 3.8f), inner, true) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
         widget.Append(scroller);
 
@@ -60,7 +92,7 @@ static file class GuesserSystem
 
     public static MetaScreen LastGuesserWindow = null!;
 
-    static public MetaScreen OpenGuessWindow(int leftGuessPerMeeting, int leftGuess,Action<DefinedRole> onSelected)
+    static public MetaScreen OpenGuessWindow(int leftGuessPerMeeting, int leftGuess, Action<DefinedRole> onSelected)
     {
         string leftStr;
         if (leftGuessPerMeeting < leftGuess)
@@ -68,7 +100,9 @@ static file class GuesserSystem
         else
             leftStr = leftGuess.ToString();
 
-        return MeetingRoleSelectWindow.OpenRoleSelectWindow(r => r.CanBeGuess && r.IsSpawnable, Language.Translate("role.guesser.leftGuess") + " : " + leftStr, onSelected);
+        IEnumerable<DefinedRole> roles;
+
+        return MeetingRoleSelectWindow.OpenRoleSelectWindow(null, r => r.CanBeGuess, GamePlayer.LocalPlayer?.IsTrueCrewmate ?? false, Language.Translate("role.guesser.leftGuess") + " : " + leftStr, onSelected);
     }
 
     static public void OnMeetingStart(int leftGuess,Action guessDecrementer, Func<bool>? guessIf = null)
@@ -88,9 +122,9 @@ static file class GuesserSystem
                     if (guessIf?.Invoke() ?? true)
                     {
                         GuesserModifier.StatsAllGuessed.Progress();
-                        if (p?.Role.ExternalRecognitionRole == r)
+                        if (Guesser.AbilityGuessOption ? p.Role.CheckGuessAbility(r) : (p.Role.ExternalRecognitionRole == r))
                         {
-                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p!, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill, KillCondition.BothAlive);
+                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill, KillCondition.BothAlive);
                         }
                         else
                         {
@@ -191,6 +225,7 @@ public class Guesser : DefinedSingleAbilityRoleTemplate<Guesser.Ability>, HasCit
     static internal IntegerConfiguration NumOfGuessOption = NebulaAPI.Configurations.Configuration("options.role.guesser.numOfGuess", (1, 15), 3);
     static internal IntegerConfiguration NumOfGuessPerMeetingOption = NebulaAPI.Configurations.Configuration("options.role.guesser.numOfGuessPerMeeting", (1, 15), 1);
     static internal BoolConfiguration CanCallEmergencyMeetingOption = NebulaAPI.Configurations.Configuration("options.role.guesser.canCallEmergencyMeeting", true);
+    static internal BoolConfiguration AbilityGuessOption = NebulaAPI.Configurations.Configuration("options.role.guesser.abilityGuess", true);
     static internal IConfiguration GuessableFilterEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "role.guesser.guessableFilter", _ => OpenFilterEditor()));
 
     static public Guesser MyNiceRole = new(false);

@@ -7,6 +7,7 @@ using Nebula.Game.Statistics;
 using Nebula.Player;
 using TMPro;
 using UnityEngine.Rendering;
+using Virial.Assignable;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
@@ -203,4 +204,19 @@ public static class PlayerExtension
         cosmetics.zIndexSpacing = 0f;
         scaler.transform.localScale = new(1f, 1f, 0f);
     }
+
+    private static readonly RemoteProcess<(GamePlayer src, GamePlayer dst, DefinedRole role, PlayerRoleSwapEvent.SwapType type)> RpcSwap = new("swapDesc", (message, _) =>
+    {
+        GameOperatorManager.Instance?.Run(new PlayerRoleSwapEvent(message.src, message.dst, message.role, message.type));
+    });
+
+    /// <summary>
+    /// 役職の交換を通知します。
+    /// Madmateの背信者設定のように、役職の交換を追跡したい場合に使用します。
+    /// </summary>
+    /// <param name="src"></param>
+    /// <param name="dst"></param>
+    /// <param name="role"></param>
+    /// <param name="swapType"></param>
+    public static void SendRoleSwapping(GamePlayer src, GamePlayer dst, DefinedRole role, PlayerRoleSwapEvent.SwapType swapType) => RpcSwap.Invoke((src, dst, role, swapType));
 }

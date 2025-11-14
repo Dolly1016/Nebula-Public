@@ -141,7 +141,7 @@ public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator
 
         SetPivot(new(0.5f, 0.5f));
 
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     public TitleShower SetPivot(Vector2 pivot)
@@ -775,12 +775,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         {
             NebulaGameManager.Instance?.CheckGameState();
             NebulaGameManager.Instance?.AllAssignableAction(r=> {
-                r.OnActivated(); (r as IGameOperator)?.Register(r);
-                if (r is RuntimeRole role)
-                    GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(r.MyPlayer, role));
-                if (r is RuntimeModifier modifier)
-                    GameOperatorManager.Instance?.Run(new PlayerModifierSetEvent(r.MyPlayer, modifier));
-                
+                r.ActivateAssignable();
             });
         }
 

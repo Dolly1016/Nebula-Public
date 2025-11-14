@@ -17,4 +17,9 @@ public interface IHudContent
     bool IsRightSide => !IsLeftSide;
     bool IsKillButtonContent { get; set; }
     bool IsStaticContent { get; }
+
+    /// <summary>
+    /// 末尾の行に配置されるべき要素
+    /// </summary>
+    bool ShouldBeInLastLine { get; set; }
 }

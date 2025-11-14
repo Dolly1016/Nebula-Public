@@ -173,7 +173,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
             }
         }
 
-        bool RuntimeModifier.MyCrewmateTaskIsIgnored => !(obsession?.IsTrueCrewmate ?? false);
+        bool RuntimeAssignable.MyCrewmateTaskIsIgnored => !(obsession?.IsTrueCrewmate ?? false);
 
         [OnlyMyPlayer]
         void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)

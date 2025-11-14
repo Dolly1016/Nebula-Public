@@ -6,6 +6,7 @@ namespace Nebula.Roles;
 public class Team : RoleTeam
 {
     public string TranslationKey { get; private init; }
+    public string DisplayName => Language.Translate(TranslationKey);
     public UnityEngine.Color UnityColor { get; private init; }
     public Virial.Color Color { get;private init; }
     public int Id { get; set; }

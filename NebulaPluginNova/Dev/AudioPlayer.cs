@@ -18,7 +18,7 @@ internal class AudioPlayer : AbstractModule<Virial.Game.Game>, IGameOperator
     public AudioPlayer()
     {
         ModSingleton<AudioPlayer>.Instance = this;
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     string[] keys = VanillaAsset.GetAudioKeys();

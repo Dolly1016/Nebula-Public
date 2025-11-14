@@ -54,7 +54,7 @@ public class PresetSettingMenu : MonoBehaviour
                 }
 
                 var isEditablePreset = (preset is ConfigPreset cp && cp.Addon == null);
-                widget.Add(GUI.Instance.RawButton(
+                widget.Add(GUI.API.RawButton(
                     GUIAlignment.Center, GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.StandardLargeWideMasked),
                     preset.DisplayName,
                     _ => LoadPreset(), elem => NebulaManager.Instance.SetHelpWidget(elem.uiElement, preset.Detail), elem => NebulaManager.Instance.HideHelpWidgetIf(elem.uiElement),
@@ -133,7 +133,7 @@ public class PresetSettingMenu : MonoBehaviour
         }
 
         var widget = NebulaAPI.GUI.VerticalHolder(Virial.Media.GUIAlignment.Center,
-            GUI.Instance.LocalizedButton(
+            GUI.API.LocalizedButton(
                 Virial.Media.GUIAlignment.Center,
                 GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.StandardMediumMasked),
                 "preset.saveAs",
@@ -161,7 +161,7 @@ public class PresetSettingMenu : MonoBehaviour
                     popup.SetWidget(widget);
                     TextField.EditFirstField();
                 }),
-            GUI.Instance.LocalizedButton(
+            GUI.API.LocalizedButton(
                 Virial.Media.GUIAlignment.Center,
                 GUI.Instance.GetAttribute(Virial.Text.AttributeAsset.StandardMediumMasked),
                 "preset.reload",

@@ -218,10 +218,13 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
             if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
         }
 
-        [Local]
         void OnMeetingStart(MeetingStartEvent ev)
         {
-            if (MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
+            if (MyRifle != null)
+            {
+                if (AmOwner) RpcEquip.Invoke((MyPlayer.PlayerId, false));
+                else RpcEquip.LocalInvoke((MyPlayer.PlayerId, false));
+            }
         }
 
         void OnMeetingEnd(GamePlayer[] exiled)

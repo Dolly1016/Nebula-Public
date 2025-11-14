@@ -45,8 +45,21 @@ public class HudGrid : MonoBehaviour
         HudManager.Instance.ImpostorVentButton.cooldownTimerText = GameObject.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.ImpostorVentButton.transform);
     }
 
+    static public bool UseSmallerHud => ClientOption.GetValue(ClientOption.ClientOptionType.SmallHud) == 1;
+    bool lastUseSmallerHud = false;
+
+    private void UpdateHudSize()
+    {
+        lastUseSmallerHud = UseSmallerHud;
+        Vector3 scale = lastUseSmallerHud ? new(0.72f, 0.72f, 1f) : new(1f, 1f, 1f);
+        ButtonsHolder.transform.localScale = scale;
+        StaticButtonsHolder.transform.localScale = scale;
+    }
     public void LateUpdate()
     {
+        if (UseSmallerHud != lastUseSmallerHud) UpdateHudSize();
+
+
         for (int i = 0; i < 2; i++)
         {
             Contents[i].RemoveAll(c => !c.Value);
@@ -63,12 +76,60 @@ public class HudGrid : MonoBehaviour
             bool killButtonPosArranged = false;
 
             int row = 0, column = 0;
-            foreach(var c in Contents[i])
-            {
-                if (!c.Value.IsActive) continue;
-                if (MeetingHud.Instance && !c.Value.gameObject.active) continue; //会議中はstaticContents以外除外する
 
-                if(!killButtonPosArranged && c.Value.MarkedAsKillButtonContent)
+            bool ShouldBeShown(HudContent c)
+            {
+                if (!c.IsActive) return false;
+                if (MeetingHud.Instance && !c.gameObject.active) return false; //会議中はstaticContents以外除外する
+                return true;
+            }
+            for (int e = 0; e < Contents[i].Count; e++)
+            {
+                var c = Contents[i][e];
+
+                if(!ShouldBeShown(c.Value)) continue;
+
+                if (c.Value.ShouldBeInLastLine)
+                {
+                    void DoForRemains(Action<HudContent> action)
+                    {
+                        for (int k = e; k < Contents[i].Count; k++)
+                        {
+                            var cc = Contents[i][k];
+                            if (ShouldBeShown(cc.Value)) action.Invoke(cc.Value);
+                        }
+                    }
+
+                    //最後の行に全て圧縮して並べる
+                    int numOfLastLineContents = 0;
+                    DoForRemains(_ => numOfLastLineContents++);
+                    if (numOfLastLineContents <= 3 - column)
+                    {
+                        DoForRemains(c =>
+                        {
+                            c.CurrentPos = new(column, row);
+                            column++;
+                        });
+                    }
+                    else if(numOfLastLineContents == 1)
+                    {
+                        //間違いなくいらないけど。
+                        DoForRemains(c => c.CurrentPos = new(column, row));
+                    } else
+                    {
+                        float widthSum = 3 - column - 1;
+                        float div = numOfLastLineContents - 1;
+                        int index = 0;
+                        DoForRemains(c =>
+                        {
+                            c.CurrentPos = new(column + widthSum * (float)index / div , row);
+                            index++;
+                        });
+                    }
+                    break;
+                }
+
+                if (!killButtonPosArranged && c.Value.MarkedAsKillButtonContent)
                 {
                     killButtonPosArranged = true;
                     c.Value.CurrentPos = new Vector2(0, 1);
@@ -124,18 +185,25 @@ public class HudContent : MonoBehaviour
     private bool isDirty = true;
     public bool OccupiesLine = false;
     public bool IsStaticContent = false;
+    private bool shouldBeInLastLine = false;
+    public bool ShouldBeInLastLine { get => !OccupiesLine && shouldBeInLastLine; set => shouldBeInLastLine = value; }
+
     public Func<bool>? ActiveFunc = null;
     public bool IsActive => ActiveFunc?.Invoke() ?? gameObject.activeSelf;
     public bool IsLeftSide => isLeftSide;
 
-    private const float EdgeY = -(3.0f - 0.7f);
-    private static float EdgeX => 3.0f * (float)Screen.width / (float)Screen.height - 0.8f;
+    private static float EdgeY => HudGrid.UseSmallerHud ? 
+        -(3.0f / 0.72f - 0.6f) :
+        -(3.0f - 0.7f);
+    private static float EdgeX => HudGrid.UseSmallerHud ?
+        (3.0f / 0.72f) * (float)Screen.width / (float)Screen.height - 0.67f :
+        3.0f * (float)Screen.width / (float)Screen.height - 0.8f;
 
     public Vector3 ToLocalPos
     {
         get
         {
-            var pos = new Vector3((EdgeX - CurrentPos.x) * (isLeftSide ? -1 : 1), EdgeY + CurrentPos.y, 0f);
+            var pos = new Vector3((EdgeX - CurrentPos.x) * (isLeftSide ? -1 : 1), EdgeY + CurrentPos.y, CurrentPos.x * 0.05f);
 
             var arrangement = ClientOption.AllOptions[ClientOption.ClientOptionType.ButtonArrangement].Value;
             if (!MeetingHud.Instance && ((arrangement == 1 && isLeftSide) || arrangement == 2)) pos.y += 0.85f;

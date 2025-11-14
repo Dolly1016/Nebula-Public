@@ -1,7 +1,4 @@
-﻿
-using Virial.Game;
-
-namespace Nebula.Utilities;
+﻿namespace Nebula.Utilities;
 
 [NebulaRPCHolder]
 public static class ManagedEffects
@@ -89,6 +86,61 @@ public static class ManagedEffects
                 if (current[i] == null && next < coroutines.Length) current[i] = current[i] = coroutines[next++];
             }
             if (!hasCoroutine) break;
+            yield return null;
+        }
+    }
+
+    static public IEnumerator ConditionalBeamSequence(int width, params Tuple<IEnumerator, Func<bool>>[] coroutines)
+    {
+        Tuple<IEnumerator, int>?[] current = new Tuple<IEnumerator, int>[width];
+        bool[] pickedList = new bool[coroutines.Length];
+        int picked = 0;
+        int done = 0;
+        int lastIndex = 0;
+
+        Tuple<IEnumerator, int>? GetNextEnumerator()
+        {
+            if (picked == coroutines.Length) return null;
+            for(int i = 0;i < coroutines.Length; i++)
+            {
+                int index = (lastIndex + i) % coroutines.Length;
+                if (pickedList[index]) continue;
+                if (coroutines[index].Item2.Invoke())
+                {
+                    lastIndex = index;
+                    pickedList[index] = true;
+                    picked++;
+                    return new(coroutines[index].Item1, index);
+                }
+            }
+            for (int i = 0; i < coroutines.Length; i++)
+            {
+                if (!pickedList[i])
+                {
+                    pickedList[i] = true;
+                    picked++;
+                    return new(coroutines[i].Item1, i);
+                }
+            }
+            return null;
+        }            
+
+        while (true)
+        {
+            for (int i = 0; i < width; i++)
+            {
+                if (current[i] != null)
+                {
+                    var tuple = current[i]!;
+                    if (!tuple.Item1.MoveNext())
+                    {
+                        done++;
+                        current[i] = null!;
+                    }
+                }
+                if (current[i] == null) current[i] = GetNextEnumerator();
+            }
+            if (done == coroutines.Length) break;
             yield return null;
         }
     }

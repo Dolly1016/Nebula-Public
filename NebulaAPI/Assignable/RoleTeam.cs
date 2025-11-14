@@ -22,6 +22,7 @@ public enum TeamRevealType
 public interface RoleTeam
 {
     public string TranslationKey { get; }
+    public string DisplayName { get; }
     internal UnityEngine.Color UnityColor { get; }
     public Virial.Color Color { get; }
     public int Id { get; }

@@ -450,7 +450,7 @@ public interface INebulaAchievement
             {
                 button.OnClick.AddListener(() =>
                 {
-                    NebulaAchievementManager.SetOrToggleTitle(this);
+                    NebulaAchievementManager.SetOrToggleTitle(this, false);
                     button.OnMouseOut.Invoke();
                     button.OnMouseOver.Invoke();
                 });
@@ -749,7 +749,7 @@ public class CompleteAchievement : SumUpAchievement, INebulaAchievement
     }
 }
 
-public class TitleRegisterImpl : TitlesRegister
+public class TitleRegisterImpl : ITitlesRegister
 {
     static public TitleRegisterImpl Instance { get {
             if (field == null) field = new();
@@ -757,7 +757,7 @@ public class TitleRegisterImpl : TitlesRegister
         }
     }
 
-    bool TitlesRegister.Register(string group, string id, bool isSecret, DefinedAssignable? relatedRole)
+    bool ITitlesRegister.Register(string group, string id, bool isSecret, DefinedAssignable? relatedRole)
     {
         if (group == null || group.Length <= 0) return false;
         if (id == null || id.Length <= 0) return false;
@@ -878,11 +878,11 @@ static public class NebulaAchievementManager
     
             
 
-    static public void SetOrToggleTitle(INebulaAchievement? achievement)
+    static public void SetOrToggleTitle(INebulaAchievement? achievement, bool canUnset = true)
     {
         if (achievement?.IsCleared ?? false)
         {
-            if(myTitleEntry.Value != achievement.Id)
+            if(!canUnset || myTitleEntry.Value != achievement.Id)
                 myTitleEntry.Value = achievement.Id;
             else
                 myTitleEntry.Value = "-";
@@ -893,9 +893,9 @@ static public class NebulaAchievementManager
         if (PlayerControl.LocalPlayer && !ShipStatus.Instance) Certification.RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, MyTitleData));
     }
 
-    static internal void SetCustomTitle(CustomAchievement achievement)
+    static internal void SetCustomTitle(CustomAchievement achievement, bool canUnset = true)
     {
-        if(myTitleEntry.Value != achievement.Id)
+        if(!canUnset || myTitleEntry.Value != achievement.Id)
             myTitleEntry.Value = achievement.Id;
         else
             myTitleEntry.Value = "-";

@@ -62,6 +62,7 @@ public class WideCamera
 
     public bool IsShown => myCamera.gameObject.active;
     public float TargetRate { get => targetRate; set => targetRate = value; }
+    public float CurrentRate => orthographicCache / 3f;
     public Camera Camera => myCamera;
     private MeshRenderer meshRenderer;
     private MeshFilter meshFilter;

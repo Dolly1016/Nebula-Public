@@ -115,7 +115,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
         {
             ModSingleton<InvestigatorManager>.Instance = this;
             ModSingleton<NightVision>.Instance = null!;
-            this.Register(NebulaAPI.CurrentGame!);    
+            this.RegisterPermanently();
         }
 
         static internal Virial.Media.GUIWidget GetWidget(KillData data) => GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,

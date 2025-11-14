@@ -499,10 +499,10 @@ public static class HelpScreen
         Predicate<INebulaAchievement>? achPredicate = null;
         string? shownPredicate = null;
         string scrollerTagPrefix = "ingameAchievementViewer";
-        AchievementViewer.SortRule sortRule = AchievementViewer.SortRule.Categorized;
+        AchievementViewer.ViewerArguments arguments = new();
         string scrollerTagPostfix = "_categorized";
 
-        Virial.Media.GUIWidget GenerateWidget(bool searchMode = false) => AchievementViewer.GenerateWidget(3.15f, 6.2f, scrollerTagPrefix + scrollerTagPostfix, true, achPredicate, shownPredicate, onClicked: lastArgument.CanCloseEasily ? () => TryCloseHelpScreen() : null, onUpdated: () => ShowInnerWidget(searchMode), sortRule: sortRule, showCustomAchievement: !searchMode);
+        Virial.Media.GUIWidget GenerateWidget(bool searchMode = false) => AchievementViewer.GenerateWidget(3.15f, 6.2f, arguments, scrollerTagPrefix + scrollerTagPostfix, true, achPredicate, shownPredicate, onClicked: lastArgument.CanCloseEasily ? () => TryCloseHelpScreen() : null, onUpdated: () => ShowInnerWidget(searchMode), showCustomAchievement: !searchMode);
         void ShowInnerWidget(bool searchMode = false) => artifact.Do(screen => screen.SetWidget(GenerateWidget(searchMode), out var _));
 
         List<Virial.Media.GUIWidget> categorizeButtons = [
@@ -562,12 +562,12 @@ public static class HelpScreen
         Virial.Media.GUIWidget[] sortButtons = [
             GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.StandardMediumMasked, "achievement.sort"),
             new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.sort.categorized")){ OnClick = _ => {
-                sortRule = AchievementViewer.SortRule.Categorized;
+                arguments.SortRule = AchievementViewer.SortRule.Categorized;
                 scrollerTagPostfix = "_categorized";
                 ShowInnerWidget();
             },SelectedDefault = true, WithCheckMark = true},
             new GUIModernButton(GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, new TranslateTextComponent("achievement.sort.progress")){ OnClick = _ => {
-                sortRule = AchievementViewer.SortRule.GlobalProgress;
+                arguments.SortRule = AchievementViewer.SortRule.GlobalProgress;
                 scrollerTagPrefix = "_progress";
                 ShowInnerWidget();
             }, WithCheckMark = true},

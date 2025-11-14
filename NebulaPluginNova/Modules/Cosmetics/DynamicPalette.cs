@@ -2,8 +2,13 @@
 using Cpp2IL.Core.Extensions;
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behavior;
+using Nebula.Modules.GUIWidget;
+using Sentry.Unity.NativeUtils;
 using TMPro;
+using Unity.Properties;
+using Virial.Media;
 using Virial.Runtime;
+using static Nebula.Roles.Impostor.Cupid;
 
 namespace Nebula.Modules.Cosmetics;
 
@@ -506,13 +511,6 @@ public class DynamicPalette
         public bool AllowEditShadowColor => true;
     }
 
-    public static bool IsLightColor(Color color)
-    {
-        var max = Mathn.Max(color.r, color.g, color.b);
-        var sum = color.r + color.g + color.b;
-        return max > 0.8f || sum > 2.1f;
-    }
-
     public static string HDToTranslationKey(int h, int d) => "color." + h + "." + d;
     public static string GetColorName(int colorId)
     {
@@ -733,6 +731,145 @@ public class NebulaPlayerTab : MonoBehaviour
 
     static private SpriteLoader saveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.ColorSave.png", 100f);
 
+    private void TryShareMyColor()
+    {
+        if (AmongUsClient.Instance && AmongUsClient.Instance.IsInGame && PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
+    }
+
+    static private Image squareImage = SpriteLoader.FromResource("Nebula.Resources.White.png", 100f);
+
+#if PC
+    private void OpenColorCodeWindow()
+    {
+        string ToText(Color color)
+        {
+            Color32 c = color;
+            return "#" + c.r.ToString("X2") + c.g.ToString("X2") + c.b.ToString("X2");
+        }
+
+        bool ToColor(string text, out Color color)
+        {
+            bool IsHexChar(char c) => ('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
+            color = Color.white;
+            if (text.Length != 7) return false;
+            if (text[0] != '#') return false;
+            for (int i = 1; i < text.Length; i++) if (!IsHexChar(text[i])) return false;
+            color = new(
+                (float)Convert.ToInt32(text.Substring(1, 2), 16) / 255f,
+                (float)Convert.ToInt32(text.Substring(3, 2), 16) / 255f,
+                (float)Convert.ToInt32(text.Substring(5, 2), 16) / 255f);
+            return true;
+        }
+
+        var screen = MetaScreen.GenerateWindow(new Vector2(5.8f, 3.4f), HudManager.InstanceExists ? HudManager.Instance.transform : PlayerCustomizationMenu.Instance.transform, new Vector3(0f, 0f, 0f), true, false, true);
+
+        var myColor = DynamicPalette.MyColor;
+        Color myMainColor = myColor.mainColor;
+        Color myShadowColor = myColor.shadowColor;
+        Color myVisorColor = DynamicPalette.MyVisorColor.ToColor(Palette.VisorColor);
+        string colorName = myColor.Name;
+
+        var attr = GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleShortest);
+        
+        Virial.Media.GUIWidget GetTextField(Color color, Action<Color> enterAction)
+        {
+            SpriteRenderer squareRenderer = null!;
+            NoSGUIImage image = new(Virial.Media.GUIAlignment.Left, squareImage, new(0.3f, 0.3f),color)
+            {
+                PostBuilder = renderer => squareRenderer = renderer
+            };
+            GUITextField field = null!;
+            bool OnEnter(string text)
+            {
+                if (ToColor(text, out var color))
+                {
+                    enterAction.Invoke(color);
+                    squareRenderer.color = color;
+                    return true;
+                }
+                else
+                {
+                    field.Artifact.Do(a =>
+                    {
+                        a.SetText("");
+                        a.SetHint("無効な色コード".Color(Color.red.RGBMultiplied(0.5f)));
+                    });
+                    return false;
+                }
+            }
+            field = new GUITextField(Virial.Media.GUIAlignment.Left, new(3f, 0.33f))
+            {
+                IsSharpField = false,
+                HintText = "#FF0000".Color(Color.gray),
+                DefaultText = ToText(color),
+                EnterAction = OnEnter,
+                LostFocusAction = (text) => OnEnter(text),
+                MaxLines = 1,
+                WithMaskMaterial = false,
+                TextPredicate = c => ('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F') || c == '#'
+            };
+            return GUI.API.HorizontalHolder(GUIAlignment.Left, field, image);
+        }
+
+        var fixButtonAttr = GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed);
+        Virial.Text.TextAttribute shareButtonAttr = new(fixButtonAttr) { Size = new(0.9f, 0.22f) };
+
+        Virial.Media.GUIWidget ColorEditor(string translationKey, Color color, Action<Color> enterAction) => GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Left, GUI.API.LocalizedText(Virial.Media.GUIAlignment.Left, attr, translationKey), GetTextField(color, enterAction));
+        var widget = GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Top,
+            ColorEditor("inventory.palette.colorCode.mainColor",myMainColor, c => myMainColor = c),
+            ColorEditor("inventory.palette.colorCode.shadowColor", myShadowColor, c => myShadowColor = c),
+            ColorEditor("inventory.palette.colorCode.visorColor", myVisorColor, c => myVisorColor = c),
+            GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Left, GUI.API.LocalizedText(Virial.Media.GUIAlignment.Left, attr, "inventory.palette.colorCode.colorName"),
+                new GUITextField(Virial.Media.GUIAlignment.Left, new(4f, 0.33f)) { DefaultText = colorName, LostFocusAction = t => colorName = t.Length > 16 ? t.Substring(0, 16) : t, IsSharpField = false, MaxLines = 1, TextPredicate = c => c != '<' && c != '>' }
+            ),
+            GUI.API.VerticalMargin(0.01f),
+            GUI.API.HorizontalHolder(GUIAlignment.Center, 
+                GUI.API.LocalizedButton(GUIAlignment.Center, shareButtonAttr, "inventory.palette.colorCode.copy", _ => {
+                    string text = ToText(myMainColor) + ToText(myShadowColor) + ToText(myVisorColor) + colorName;
+                    ClipboardHelper.PutClipboardString(text);
+                    DebugScreen.Push(Language.Translate("inventory.palette.colorCode.copied"), 3f);
+                }),
+                GUI.API.LocalizedButton(GUIAlignment.Center, shareButtonAttr, "inventory.palette.colorCode.paste", _ => {
+                    var text = ClipboardHelper.GetClipboardString();
+                    //LogUtils.WriteToConsole(text);
+                    if(text.Length < 22)
+                    {
+                        DebugScreen.Push(Language.Translate("inventory.palette.colorCode.pasted.failed"), 3f);
+                        return;
+                    }
+                    var mainColorText = text.Substring(0, 7);
+                    var shadowColorText = text.Substring(7, 7);
+                    var visorColorText = text.Substring(14, 7);
+                    var colorName = text.Substring(21);
+                    if(!ToColor(mainColorText, out var mainColorTemp) || !ToColor(shadowColorText, out var shadowColorTemp) || !ToColor(visorColorText, out var visorColorTemp))
+                    {
+                        DebugScreen.Push(Language.Translate("inventory.palette.colorCode.pasted.failed"), 3f);
+                        return;
+                    }
+
+                    DynamicPalette.MyColor.RestoreColor(mainColorTemp, shadowColorTemp, byte.MaxValue, null, null, colorName);
+                    DynamicPalette.MyVisorColor.Edit(visorColorTemp);
+                    TryShareMyColor();
+                    PreviewColor(null, null, null);
+                    DebugScreen.Push(Language.Translate("inventory.palette.colorCode.pasted"), 3f);
+                    screen.CloseScreen();
+                })),
+            GUI.API.VerticalMargin(0.05f),
+            GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed), "ui.dialog.confirmation", _ =>
+            {
+                TextField.LoseAllFocus();
+                DynamicPalette.MyColor.RestoreColor(myMainColor, myShadowColor, byte.MaxValue, null, null, colorName);
+                DynamicPalette.MyVisorColor.Edit(myVisorColor);
+                TryShareMyColor();
+                PreviewColor(null, null, null);
+
+                screen.CloseScreen();
+            })
+            );
+
+        screen.SetWidget(widget, new Virial.Compat.Vector2(0.5f, 1f), out _);
+    }
+#endif
 
     public void Start()
     {
@@ -744,11 +881,14 @@ public class NebulaPlayerTab : MonoBehaviour
             var collider = button.gameObject.AddComponent<BoxCollider2D>();
             collider.isTrigger = true;
             collider.size = new(0.46f, 0.46f);
-
             return renderer;
         }, transform);
 
-        new MetaWidgetOld.Button(() => DynamicPalette.OpenCatalogue(this, TargetRenderer, () => PreviewColor(null, null, null)), TextAttributeOld.BoldAttr) { TranslationKey = "inventory.palette.catalogue" }.Generate(gameObject, new Vector2(2.9f, 2.25f), out _);
+        TextAttributeOld buttonAttr = new(TextAttributeOld.BoldAttr) { Size = new(1.4f, 0.26f) };
+        new MetaWidgetOld.Button(() => DynamicPalette.OpenCatalogue(this, TargetRenderer, () => PreviewColor(null, null, null)), buttonAttr) { TranslationKey = "inventory.palette.catalogue" }.Generate(gameObject, new Vector2(2.65f, 2.25f), out _);
+#if PC
+        new MetaWidgetOld.Button(() => OpenColorCodeWindow(), buttonAttr) { TranslationKey = "inventory.palette.colorCode" }.Generate(gameObject, new Vector2(4.4f, 2.25f), out _);
+#endif
 
         DynamicPaletteRenderer = UnityHelper.CreateObject<SpriteRenderer>("DynamicPalette", transform, new Vector3(0.4f, -0.1f, -80f), LayerExpansion.GetUILayer());
         DynamicPaletteRenderer.sprite = spritePalette.GetSprite();
@@ -779,7 +919,7 @@ public class NebulaPlayerTab : MonoBehaviour
                 TargetRenderer.transform.localPosition = ToPalettePosition(h, d);
             }
 
-            if (AmongUsClient.Instance && AmongUsClient.Instance.IsInGame && PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
+            TryShareMyColor();
         });
         PaletteButton.OnMouseOut.AddListener(() =>
         {
@@ -830,8 +970,7 @@ public class NebulaPlayerTab : MonoBehaviour
             targetLocPos.y = Mathn.Clamp(pos.y, -BrightnessHeight * 0.5f, BrightnessHeight * 0.5f);
             BrightnessTargetRenderer.transform.localPosition = targetLocPos;
 
-            if (AmongUsClient.Instance && AmongUsClient.Instance.IsInGame && PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
-
+            TryShareMyColor();
             PreviewColor(null, null, null);
         });
 
@@ -841,7 +980,7 @@ public class NebulaPlayerTab : MonoBehaviour
         for (int i = 0; i < DynamicPalette.SavedColor.Length; i++)
         {
             int copiedIndex = i;
-            var renderer = UnityHelper.CreateObject<SpriteRenderer>("SavedColor", transform, new(4.45f + i * 0.81f, 2.25f, -50f));
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("SavedColor", transform, new(5.67f + i * 0.58f, 2.25f, -50f));
             renderer.sprite = DynamicPalette.colorButtonSprite.GetSprite();
             renderer.color = DynamicPalette.SavedColor[copiedIndex].color.MainColor;
             var baseRenderer = UnityHelper.CreateObject<SpriteRenderer>("ShadowColor", renderer.transform, new(0f, 0f, 1f));
@@ -857,7 +996,7 @@ public class NebulaPlayerTab : MonoBehaviour
                 DynamicPalette.MyVisorColor.Edit(DynamicPalette.SavedColor[copiedIndex].visorColor.ToColor());
                 SetTargetRendererPos();
 
-                if (AmongUsClient.Instance && AmongUsClient.Instance.IsInGame && PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
+                TryShareMyColor();
 
                 PreviewColor(null, null, null);
             });
@@ -874,6 +1013,8 @@ public class NebulaPlayerTab : MonoBehaviour
                 baseRenderer.color = DynamicPalette.MyColor.shadowColor;
             });
             saveButton.gameObject.AddComponent<BoxCollider2D>().size = new Vector2(0.25f, 0.25f);
+
+            renderer.transform.localScale = new(0.7f, 0.7f, 1f);
         }
 
         var SwitchRenderer = UnityHelper.CreateObject<SpriteRenderer>("Switch", transform, new Vector3(2.5f, -1.73f, -50f));

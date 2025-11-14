@@ -166,6 +166,11 @@ public class Language
         {
             using var stream = addon.OpenStream("Language/" + lang + ".dat");
             if (stream != null) CurrentLanguage.Deserialize(stream, name => addon.OpenStream("Language/" + lang + "_" + name + ".dat"));
+
+            foreach(var s in addon.FindStreams("Language/" + lang + "/", path => path.EndsWith(".dat")))
+            {
+                CurrentLanguage.Deserialize(stream);
+            }
         }
     }
 

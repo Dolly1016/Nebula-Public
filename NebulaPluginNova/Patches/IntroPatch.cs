@@ -1,5 +1,6 @@
 ﻿
 using Virial;
+using Virial.Events.Game;
 using Virial.Game;
 
 namespace Nebula.Patches;
@@ -38,9 +39,13 @@ public static class ShowIntroPatch
         __instance.ImpostorTitle.gameObject.SetActive(false);
         __instance.ImpostorText.gameObject.SetActive(false);
 
+
         IEnumerable<PlayerControl> shownPlayers = PlayerControl.AllPlayerControls.GetFastEnumerator().OrderBy(p => p.AmOwner ? 0 : 1);
         var myInfo = GamePlayer.LocalPlayer;
-        switch (myInfo?.Role.Role.Team.RevealType)
+
+        var introInfo = GameOperatorManager.Instance!.Run(new GameShowIntroLocalEvent(myInfo!.Role.Role.Team, myInfo!.Role));
+
+        switch (introInfo.RevealType)
         {
             case Virial.Assignable.TeamRevealType.OnlyMe:
                 shownPlayers = new PlayerControl[] { PlayerControl.LocalPlayer };
@@ -65,14 +70,14 @@ public static class ShowIntroPatch
             PlayerModInfo.RpcAttrModulator.LocalInvoke((myInfo!.PlayerId, new SpeedModulator(1f, vec, true, 100000f, true, 0, null, false), true));
         }
 
-        yield return CoShowTeam(__instance,myInfo!,shownPlayers.ToArray(), 3f);
-        yield return CoShowRole(__instance,myInfo!);
+        yield return CoShowTeam(__instance,myInfo!,shownPlayers.ToArray(), 3f, introInfo);
+        yield return CoShowRole(__instance,myInfo!, introInfo);
         ShipStatus.Instance.StartSFX();
         OnDestroy();
         GameObject.Destroy(__instance.gameObject);
     }
 
-    static IEnumerator CoShowTeam(IntroCutscene __instance, GamePlayer myInfo, PlayerControl[] shownPlayers, float duration)
+    static IEnumerator CoShowTeam(IntroCutscene __instance, GamePlayer myInfo, PlayerControl[] shownPlayers, float duration, GameShowIntroLocalEvent introInfo)
     {
 #if PC
         if (__instance.overlayHandle == null)
@@ -82,14 +87,14 @@ public static class ShowIntroPatch
 #endif
         yield return ShipStatus.Instance.CosmeticsCache.PopulateFromPlayers();
 
-        Color fromC = myInfo.Role!.Role.Team.UnityColor;
-        Color toC = myInfo.IsMadmate ? Palette.ImpostorRed : fromC;
+        Color fromC = introInfo.TeamColor.ToUnityColor();
+        Color toC = introInfo.TeamFadeColor?.ToUnityColor() ?? fromC;
 
         Vector3 position = __instance.BackgroundBar.transform.position;
         position.y -= 0.25f;
         __instance.BackgroundBar.transform.position = position;
         __instance.BackgroundBar.material.SetColor("_Color", fromC);
-        __instance.TeamTitle.text = Language.Translate(myInfo.Role.Role.Team.TranslationKey);
+        __instance.TeamTitle.text = introInfo.TeamName;
         __instance.TeamTitle.color = fromC;
         int maxDepth = Mathn.CeilToInt(7.5f);
         for (int i = 0; i < shownPlayers.Length; i++)
@@ -159,11 +164,11 @@ public static class ShowIntroPatch
         yield break;
     }
 
-    static IEnumerator CoShowRole(IntroCutscene __instance, GamePlayer myInfo)
+    static IEnumerator CoShowRole(IntroCutscene __instance, GamePlayer myInfo, GameShowIntroLocalEvent introInfo)
     {
         var role = myInfo.Role;
-        __instance.RoleText.text = role.DisplayIntroRoleName;
-        __instance.RoleBlurbText.text = role.DisplayIntroBlurb;
+        __instance.RoleText.text = introInfo.RoleName;
+        __instance.RoleBlurbText.text = introInfo.RoleBlurb;
         __instance.RoleBlurbText.transform.localPosition = new(0.0965f, -2.12f, -36f);
         __instance.RoleBlurbText.rectTransform.sizeDelta = new(12.8673f, 0.7f);
         __instance.RoleBlurbText.alignment = TMPro.TextAlignmentOptions.Top;
@@ -173,9 +178,11 @@ public static class ShowIntroPatch
             string? mBlurb = m.DisplayIntroBlurb;
             if (mBlurb != null) __instance.RoleBlurbText.text += "\n" + mBlurb;
         }
-        __instance.RoleText.color = role.Role.UnityColor;
-        __instance.YouAreText.color = role.Role.UnityColor;
-        __instance.RoleBlurbText.color = role.Role.UnityColor;
+
+        var unityColor = introInfo.RoleColor.ToUnityColor();
+        __instance.RoleText.color = unityColor;
+        __instance.YouAreText.color = unityColor;
+        __instance.RoleBlurbText.color = unityColor;
         SoundManager.Instance.PlaySound(PlayerControl.LocalPlayer.Data.Role.IntroSound, false, 1f, null);
         __instance.YouAreText.gameObject.SetActive(true);
         __instance.RoleText.gameObject.SetActive(true);

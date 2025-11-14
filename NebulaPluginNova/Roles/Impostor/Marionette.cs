@@ -1,4 +1,5 @@
-﻿using Nebula.Behavior;
+﻿using BepInEx.Unity.IL2CPP.Utils;
+using Nebula.Behavior;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
@@ -50,6 +51,18 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
         {
             NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new Decoy(new Vector2(args[0], args[1]), args[2] < 0f));
         }
+
+        public override void OnReleased()
+        {
+            base.OnReleased();
+
+            try
+            {
+                NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(LayerExpansion.GetObjectsLayer(), null, Position.AsVector3(-1f)));
+            }
+            catch { }
+        }
+
     }
 
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
@@ -144,10 +157,14 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
                     StatsSwap.Progress();
                 };
                 swapButton.SetLabel("swap");
+                var cooldownTimer = swapButton.CoolDownTimer as TimerImpl;
+                var lastPredicate = cooldownTimer!.Predicate;
+                cooldownTimer.SetPredicate(() => lastPredicate!.Invoke() || HudManager.Instance.PlayerCam.Target == MyDecoy?.MyBehaviour);
                 
 
                 monitorButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
                     0f, "monitor", monitorButtonSprite, null, _ => MyDecoy != null).SetAsUsurpableButton(this);
+                monitorButton.Availability = (button) => true; //通常のボタンより使用できる条件が緩い
                 monitorButton.OnClick = (button) => AmongUsUtil.ToggleCamTarget(MyDecoy!.MyBehaviour, null);
                 monitorButton.OnBroken = (button) => AmongUsUtil.SetCamTarget(null);
 

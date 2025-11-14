@@ -291,6 +291,8 @@ public class AssignmentType
 {
     private static List<AssignmentType> types = [];
     internal static int NumOfTypes => types.Count;
+    private bool canGuessAsAbility;
+    public bool CanGuessAsAbility => canGuessAsAbility;
     private int id = -1;
     internal int Id => id;
     private string postfix;
@@ -301,11 +303,12 @@ public class AssignmentType
     private Func<int[], DefinedRole, int[]> argumentEditor;
     private string GetTranslationKey(string orig) => orig + "." + postfix;
     internal int[] EditArguments(int[] args, DefinedRole abilityRole) => argumentEditor.Invoke(args, abilityRole);
-    internal AssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Virial.Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive)
+    internal AssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Virial.Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive, bool canGuessAsAbility)
     {
         this.argumentEditor = argumentEditor;
         this.relatedRole = relatedRole;
         this.postfix = postfix;
+        this.canGuessAsAbility = canGuessAsAbility;
         Predicate = predicate;
         this.isActive = isActive;
         Color = color?.ToUnityColor() ?? UnityEngine.Color.white;
@@ -486,6 +489,8 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// <returns></returns>
     string GetDisplayName(IPlayerAbility ability) => DisplayName;
     string GetDisplayShort(IPlayerAbility ability) => DisplayShort;
+
+    IEnumerable<DefinedRole> GetGuessableAbilityRoles() => this.IsSpawnable ? [this] : [];
 }
 
 /// <summary>
@@ -538,6 +543,11 @@ public interface IAssignToCategorizedRole
 public interface DefinedModifier : DefinedAssignable, RuntimeAssignableGenerator<RuntimeModifier>
 {
     string DefinedAssignable.GeneralBlurb => NebulaAPI.Language.Translate("role." + LocalizedName + ".generalBlurb");
+
+    /// <summary>
+    /// マッドメイト系のモディファイアの場合はtrueを返します。
+    /// </summary>
+    bool IsMadmate => false;
 }
 
 /// <summary>
@@ -683,6 +693,16 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
     /// <param name="player"></param>
     /// <returns></returns>
     bool CanKill(Virial.Game.Player player) => true;
+
+    /// <summary>
+    /// クルーメイトタスクを持っていた場合、明示的に無効化する場合はtrue
+    /// </summary>
+    bool InvalidateCrewmateTask => false;
+
+    /// <summary>
+    /// クルーメイトタスクを持っていたとしても、クルーメイトタスクの総数に計上されない場合はtrue
+    /// </summary>
+    bool MyCrewmateTaskIsIgnored => false;
 }
 
 /// <summary>
@@ -788,6 +808,8 @@ public interface RuntimeRole : RuntimeAssignable
     /// 勝機を取得します。
     /// </summary>
     float WinningOpportunity => NebulaAPI.CurrentGame?.GetModule<IWinningOpportunity>()?.GetOpportunity(Role.Team) ?? 0f;
+
+    bool CheckGuessAbility(DefinedRole abilityRole) => abilityRole == Role;
 }
 
 /// <summary>
@@ -822,14 +844,4 @@ public interface RuntimeModifier : RuntimeAssignable
     /// ゲーム開始時に割り当てられているとき、役職開示画面で表示されます。
     /// </summary>
     string? DisplayIntroBlurb => null;
-
-    /// <summary>
-    /// クルーメイトタスクを持っていた場合、明示的に無効化する場合はtrue
-    /// </summary>
-    public virtual bool InvalidateCrewmateTask => false;
-
-    /// <summary>
-    /// クルーメイトタスクを持っていたとしても、クルーメイトタスクの総数に計上されない場合はtrue
-    /// </summary>
-    public virtual bool MyCrewmateTaskIsIgnored => false;
 }

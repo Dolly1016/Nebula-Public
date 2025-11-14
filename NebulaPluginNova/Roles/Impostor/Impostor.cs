@@ -1,8 +1,10 @@
-﻿using Nebula.VoiceChat;
+﻿using Nebula.Roles.Modifier;
+using Nebula.VoiceChat;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.DI;
+using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -40,12 +42,65 @@ public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 {
     static ImpostorGameRule() => DIManager.Instance.RegisterModule(() => new ImpostorGameRule());
 
-    public ImpostorGameRule() => this.Register(NebulaAPI.CurrentGame!);
+    public ImpostorGameRule() => this.RegisterPermanently();
     void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.Player.IsImpostor && ev.GameEnd == NebulaGameEnd.ImpostorWin);  
     
     void DecoratePlayerColor(PlayerDecorateNameEvent ev)
     {
         if (ev.Player.IsImpostor && (GamePlayer.LocalPlayer?.IsImpostor ?? false)) ev.Color = new(Palette.ImpostorRed);
+    }
+
+    [OnlyHost]
+    void CheckSabotageWin(GameUpdateEvent ev)
+    {
+        if (ShipStatus.Instance != null)
+        {
+            var status = ShipStatus.Instance;
+            if (status.Systems != null)
+            {
+                ISystemType? systemType = status.Systems.ContainsKey(SystemTypes.LifeSupp) ? status.Systems[SystemTypes.LifeSupp] : null;
+                if (systemType != null)
+                {
+                    LifeSuppSystemType lifeSuppSystemType = systemType.TryCast<LifeSuppSystemType>()!;
+                    if (lifeSuppSystemType != null && lifeSuppSystemType.Countdown < 0f)
+                    {
+                        lifeSuppSystemType.Countdown = 10000f;
+                        NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.ImpostorWin, GameEndReason.Sabotage);
+                    }
+                }
+
+                foreach (ISystemType systemType2 in ShipStatus.Instance.Systems.Values)
+                {
+                    ICriticalSabotage? criticalSabotage = systemType2.TryCast<ICriticalSabotage>();
+                    if (criticalSabotage != null && criticalSabotage.Countdown < 0f)
+                    {
+                        criticalSabotage.ClearSabotage();
+                        NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.ImpostorWin, GameEndReason.Sabotage);
+                    }
+                }
+            }
+        }
+    }
+
+    [OnlyHost]
+    void CheckKillWin(GameUpdateEvent ev)
+    {
+        //他陣営が生き残っていれば勝利しない
+        if (GameOperatorManager.Instance?.Run(new KillerTeamCallback(NebulaTeams.ImpostorTeam)).RemainingOtherTeam ?? false) return;
+
+        int impostors = 0;
+        int totalAlive = 0;
+
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
+        {
+            if (p.IsDead) continue;
+            totalAlive++;
+
+            //相方生存Loversではないインポスターのみカウントに入れる
+            if (p.Role.Role.Team == Impostor.MyTeam && (!p.TryGetModifier<Lover.Instance>(out var lover) || lover.IsAloneLover)) impostors++;
+        }
+
+        if (impostors * 2 >= totalAlive) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.ImpostorWin, GameEndReason.Situation);
     }
 }
 
@@ -54,7 +109,7 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
 {
     static ImpostorBasicRuleOperator() => DIManager.Instance.RegisterModule(() => new ImpostorBasicRuleOperator());
 
-    private ImpostorBasicRuleOperator() => this.Register(NebulaAPI.CurrentGame!);
+    private ImpostorBasicRuleOperator() => this.RegisterPermanently();
 
     [OnlyLocalPlayer]
     void OnSetRole(PlayerRoleSetEvent ev)
@@ -74,6 +129,11 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
     {
         ModSingleton<IWinningOpportunity>.Instance.SetOpportunity(NebulaTeams.ImpostorTeam, KillerOpportunityHelpers.CalcTeamOpportunity(p => p.IsImpostor, p => p.IsMadmate));
     }
+
+    void ClaimImpostorRemaining(KillerTeamCallback callback)
+    {
+        if (callback.ExcludedTeam != NebulaTeams.ImpostorTeam && GamePlayer.AllPlayers.Any(p => p.IsImpostor && p.IsAlive)) callback.MarkRemaining();
+    }
 }
 
 internal static class KillerOpportunityHelpers { 
@@ -82,7 +142,7 @@ internal static class KillerOpportunityHelpers {
         float killerScore = 0f, allPlayerScore = 0f;
         foreach (var p in GamePlayer.AllPlayers)
         {
-            if (!p.IsDead)
+            if (p.IsAlive)
             {
                 allPlayerScore += 1f;
                 if (isKiller.Invoke(p)) killerScore += 2f;

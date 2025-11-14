@@ -316,7 +316,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
         
         if (inShadowLightSizeOption > 0f)
         {
-            var inShdowLight = new InShadowLight(pos).Register(NebulaAPI.CurrentGame!);
+            var inShdowLight = new InShadowLight(pos).RegisterSelf();
             NebulaManager.Instance.StartDelayAction(nightmareDurationOption, () => inShdowLight.IsDisappearing = true);
         }
 

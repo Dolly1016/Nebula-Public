@@ -368,12 +368,11 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
         return result;
     }
 
-    public Virial.Media.GUIWidget LocalizedButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null)
-        => new GUIButton(alignment, attribute, new TranslateTextComponent(translationKey)) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor(), TextMargin = margin ?? 0.26f };
-    public Virial.Media.GUIWidget RawButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null)
-        => new GUIButton(alignment, attribute, new RawTextComponent(rawText)) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor(), TextMargin = margin ?? 0.26f };
     public Virial.Media.GUIWidget Button(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null)
         => new GUIButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor(), TextMargin = margin ?? 0.26f };
+
+    public Virial.Media.GUIWidget ModernButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null, bool withCheckMark = false, bool selectedDefault = false) 
+        => new GUIModernButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, TextMargin = margin ?? 0.26f, WithCheckMark = withCheckMark, SelectedDefault = selectedDefault };
 
     public Virial.Media.GUIWidget SpinButton(GUIAlignment alignment, Action<bool> onClick) => new GUISpinButton(alignment, onClick);
 

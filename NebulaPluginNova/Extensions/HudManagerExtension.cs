@@ -46,7 +46,7 @@ public static class HudManagerExtension
         {
             actionMap = actionArray[0];
             ButtonEffect.SetKeyGuideOnVanillaSmallButton(HudManager.Instance.MapButton.gameObject, actionMap.keyCode);
-            ButtonEffect.SetKeyGuide(HudManager.Instance.SabotageButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.SabotageButton.gameObject, actionMap.keyCode);
         }
         HudManager.Instance.MapButton.transform.SetLocalZ(-60f);
         if(HudManager.Instance.MapButton.gameObject.TryGetComponent<AspectPosition>(out var aspectPosition))
@@ -61,8 +61,8 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuide(HudManager.Instance.UseButton.gameObject, actionMap.keyCode);
-            ButtonEffect.SetKeyGuide(HudManager.Instance.PetButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.UseButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.PetButton.gameObject, actionMap.keyCode);
         }
 
         //レポート
@@ -70,7 +70,7 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuide(HudManager.Instance.ReportButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.ReportButton.gameObject, actionMap.keyCode);
         }
 
         //キル
@@ -78,7 +78,7 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuide(HudManager.Instance.KillButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.KillButton.gameObject, actionMap.keyCode);
         }
 
         //ベント
@@ -86,7 +86,7 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuide(HudManager.Instance.ImpostorVentButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.ImpostorVentButton.gameObject, actionMap.keyCode);
         }
 #endif
     }

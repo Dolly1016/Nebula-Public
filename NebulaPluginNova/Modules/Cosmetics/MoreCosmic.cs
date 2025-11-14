@@ -168,6 +168,7 @@ public abstract class CustomCosmicItem : CustomItemGrouped
         {
             if (image.Address != null) yield return CheckAndDownload(image.Hash, image.Address);
             if (image.ExAddress != null) yield return CheckAndDownload(image.ExHash, image.ExAddress);
+            if (image.MaskAddress != null) yield return CheckAndDownload(image.MaskHash, image.MaskAddress);
 
             image.MyItem = this;
         }
@@ -198,10 +199,11 @@ public abstract class CustomCosmicItem : CustomItemGrouped
         {
             var loader = GetLoader(image.Address);
             var exLoader = GetLoader(image.ExAddress);
+            var maskLoader = GetLoader(image.MaskAddress);
 
             try
             {
-                if (!image.SetTextureLoader(loader, exLoader))
+                if (!image.SetTextureLoader(loader, exLoader, maskLoader))
                 {
                     IsValid = false;
                 }
@@ -257,6 +259,11 @@ public class CosmicImage
     public bool ExIsFront = false;
 
     [JsonSerializableField(true)]
+    public string? MaskHash = null;
+    [JsonSerializableField(true)]
+    public string? MaskAddress = null;
+
+    [JsonSerializableField(true)]
     public int? Length = null;
 
     [JsonSerializableField(true)]
@@ -271,6 +278,7 @@ public class CosmicImage
     {
         spriteLoader?.MarkAsUnloadAsset();
         exSpriteLoader?.MarkAsUnloadAsset();
+        maskSpriteLoader?.MarkAsUnloadAsset();
     }
 
     public int GetLength() => X.HasValue && Y.HasValue ? Length.HasValue ? Math.Min(Length.Value, X.Value * Y.Value) : X.Value * Y.Value : Length ?? 1;
@@ -281,6 +289,7 @@ public class CosmicImage
     public bool RequirePlayFirstState = false;
     private MultiImage? spriteLoader = null;
     private MultiImage? exSpriteLoader = null;
+    private MultiImage? maskSpriteLoader = null;
     private MultiImage? localizedSpriteLoader = null;
     private MultiImage? localizedExSpriteLoader = null;
     private void CheckLocalizedSprite()
@@ -319,24 +328,25 @@ public class CosmicImage
         }
     }
 
-    public bool HasExImage => ExAddress != null;
+    public MultiImage? MaskSpriteLoader => maskSpriteLoader;
 
-    public bool SetTextureLoader(ITextureLoader textureLoader, ITextureLoader? exTextureLoader)
+    public bool HasExImage => ExAddress != null;
+    public bool HasMask => MaskAddress != null;
+
+    public bool SetTextureLoader(ITextureLoader textureLoader, ITextureLoader? exTextureLoader, ITextureLoader? maskTextureLoader)
     {
         spriteLoader = new DividedSpriteLoader(textureLoader, PixelsPerUnit, X ?? Length ?? 1, Y ?? 1) { Pivot = Pivot };
-        //for (int i = 0; i < length; i++) if (!spriteLoader.GetSprite(i)) return false;
 
-        if (ExAddress != null)
-        {
-            exSpriteLoader = new DividedSpriteLoader(exTextureLoader!, PixelsPerUnit, X ?? Length ?? 1, Y ?? 1) { Pivot = Pivot };
-            //for (int i = 0; i < length; i++) if (!exSpriteLoader!.GetSprite(i)) return false;
-        }
+        if (ExAddress != null) exSpriteLoader = new DividedSpriteLoader(exTextureLoader!, PixelsPerUnit, X ?? Length ?? 1, Y ?? 1) { Pivot = Pivot };
+        if (MaskAddress != null) maskSpriteLoader = new DividedSpriteLoader(maskTextureLoader!, PixelsPerUnit, X ?? Length ?? 1, Y ?? 1) { Pivot = Pivot };
+
 
         return true;
     }
 
     public Sprite? GetSprite(int index) => MainSpriteLoader?.GetSprite(index) ?? null;
     public Sprite? GetExSprite(int index) => ExSpriteLoader?.GetSprite(index) ?? null;
+    public Sprite? GetMaskSprite(int index) => MaskSpriteLoader?.GetSprite(index) ?? null;
 
     public static string ComputeImageHash(Stream stream)
     {
@@ -347,6 +357,7 @@ public class CosmicImage
     {
         yield return spriteLoader?.LoadAsset();
         yield return exSpriteLoader?.LoadAsset();
+        yield return maskSpriteLoader?.LoadAsset();
         yield return localizedSpriteLoader?.LoadAsset();
         yield return localizedExSpriteLoader?.LoadAsset();
     }
@@ -402,6 +413,10 @@ public class CosmicHat : CustomCosmicAnimationItem
     [JsonSerializableField(true)]
     public CosmicImage? ExitVentBackFlip;
     [JsonSerializableField(true)]
+    public CosmicImage? Exile;
+    [JsonSerializableField(true)]
+    public CosmicImage? ExileBack;
+    [JsonSerializableField(true)]
     public CosmicImage? Preview;
     [JsonSerializableField(true)]
     public bool Bounce = false;
@@ -413,6 +428,8 @@ public class CosmicHat : CustomCosmicAnimationItem
     public bool IsSkinny = false;
     [JsonSerializableField(true)]
     public bool SeekerCostume = true;
+    [JsonSerializableField(true)]
+    public bool LongNeckCostume = true;
     [JsonSerializableField(true)]
     public bool? DoAnimationIfDead = null;
 
@@ -845,11 +862,18 @@ public class CustomItemBundle : CostumePermissionHolder
     {
         if (IsActive) yield break;
 
+        Hats.RemoveAll(c => c == null);
+        Visors.RemoveAll(c => c == null);
+        Nameplates.RemoveAll(c => c == null);
+        Stamps.RemoveAll(c => c == null);
+        Packages.RemoveAll(c => c == null);
+
         if (RelatedLocalAddress != null && !RelatedLocalAddress.EndsWith("/")) RelatedLocalAddress += "/";
         if (RelatedRemoteAddress != null && !RelatedRemoteAddress.EndsWith("/")) RelatedRemoteAddress += "/";
 
-        foreach (var item in AllContents()) item.MyBundle = this;
-        foreach (var item in AllCosmicItem()) yield return item.CoPreactivate();
+        foreach (var item in AllContents()) item?.MyBundle = this;
+        foreach (var item in AllCosmicItem()) yield return item?.CoPreactivate();
+        
 
         if (AllBundles.ContainsKey(BundleName!)) throw new Exception("Duplicated Bundle Error");
     }
@@ -1756,12 +1780,16 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     private SpriteRenderer? visorBackRenderer;
     private SpriteRenderer? visorBackExRenderer;
 
-    private SpriteMask? bodyMaskByHat;
-    private SpriteMask? bodyMaskByVisor;
 
     private Renderer[] renderersCache = null!;
     private Renderer[] bodyRenderersCache = null!;
     public SpriteRenderer? VisorBackRenderer => visorBackRenderer;
+    
+    public IEnumerable<SpriteRenderer> AdditionalRenderersAndMasks()
+    {
+        foreach (var r in AdditionalRenderers()) yield return r;
+        foreach (var r in MaskRenderers()) yield return r;
+    }
     public IEnumerable<SpriteRenderer> AdditionalRenderers()
     {
         foreach (var r in AdditionalHatRenderers()) yield return r;
@@ -1779,10 +1807,10 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         if (visorBackExRenderer != null) yield return visorBackExRenderer;
     }
 
-    public IEnumerable<SpriteMask> AdditionalMasks()
+    public IEnumerable<SpriteRenderer> MaskRenderers()
     {
-        if (bodyMaskByHat != null) yield return bodyMaskByHat;
-        if (bodyMaskByVisor != null) yield return bodyMaskByVisor;
+        if (BodyPreMask != null) yield return BodyPreMask;
+        if (BodyPostMask != null) yield return BodyPostMask;
     }
 
     private bool useDefaultShader = true;//追加したRendererのマテリアルを変更する必要があるか否か調べるために使用
@@ -1792,6 +1820,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     public bool ShouldSort = false;
     public int SortingBaseOrder = 0;
     public float SortingScale = 1000f;
+
+    public bool IsExileCut { get; set; } = false;
 
     static NebulaCosmeticsLayer()
     {
@@ -1830,9 +1860,19 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             bodyParent.gameObject.AddComponent<SortingGroup>();
         }
 
-        //PoolablePlayer相手には取得できない
         try
         {
+            BodyPreMask = UnityHelper.CreateObject<SpriteRenderer>("BodyPreMask", MyLayer.hat.transform, Vector3.zero);
+            BodyPreMask.material = new(NebulaAsset.CostumeMaskPreShader);
+            BodyPreMask.material.renderQueue = 3000;
+            BodyPreMask.gameObject.SetActive(false);
+
+            BodyPostMask = UnityHelper.CreateObject<SpriteRenderer>("BodyPostMask", MyLayer.hat.transform, Vector3.zero);
+            BodyPostMask.material = new(NebulaAsset.CostumeMaskPostShader);
+            BodyPostMask.material.renderQueue = 3000;
+            BodyPostMask.gameObject.SetActive(false);
+
+            //PoolablePlayer相手には取得できない
             if (transform.parent && transform.parent.parent)
             {
                 MyAnimations = transform.parent.parent.GetComponentInChildren<PlayerAnimations>();
@@ -1888,6 +1928,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         catch { }
     }
 
+    public SpriteRenderer BodyPreMask, BodyPostMask;
     public bool IsDead => (MyPhysics && MyPhysics!.myPlayer.Data && MyPhysics!.myPlayer.Data.IsDead) || (fakePlayerCache?.IsDead ?? false);
     public bool IsGamePlayer => (MyPhysics && MyPhysics!.myPlayer) || IsFakePlayer;
     public bool IsFakePlayer => fakePlayerCache != null;
@@ -1900,11 +1941,11 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     private struct CosmeticsOrder
     {
         public const int HatFrontDefault = 1000 + 20;
-        public const int HatFrontSkinny = 1000 + 10;
+        public const int HatFrontSkinny = 1000 + 11;
         public const int HatBackDefault = 1000 - 20;
         public const int VisorFrontDefault = 1000 + 30;
         public const int VisorFrontBehindHat = 1000 + 15;
-        public const int VisorBackDefault = 1000 - 10;
+        public const int VisorBackDefault = 1000 - 11;
         public const int VisorBackBackmost = 1000 - 30;
 
         public int HatFront = HatFrontDefault;
@@ -1920,6 +1961,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         public int VisorBackExDiff = 1;
         public int VisorBackEx => VisorBack + VisorBackExDiff;
         public int Body = 1000;
+        public int BodyPreMask => Body - 9;
+        public int BodyPostMask => Body + 9;
         public int Skin = 1015;
 
         public void ResetHatToDefault()
@@ -1950,7 +1993,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             {
                 //自身のGamePlayerを入手したとき
                 var actionButton = new ModAbilityButtonImpl(isLeftSideButton: true);
-                actionButton.Register(NebulaGameManager.Instance);
+                actionButton.RegisterPermanently();
                 actionButton.SetSprite(buttonSprite.GetSprite());
                 actionButton.Availability = (button) => !requiredAction;
                 actionButton.Visibility = (button) => !myModPlayerCache.IsDead && ((CurrentFunctionalModHatCache ?? CurrentModHat)?.OnButton != null || (CurrentFunctionalModVisorCache ?? CurrentModVisor)?.OnButton != null);
@@ -2064,6 +2107,18 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             {
                 //シーカー着用不可かつ現在シーカーであるならばなにもしない
             }
+            else if (!visualHat.LongNeckCostume && MyLayer.bodyType == PlayerBodyTypes.Long)
+            {
+                //長い首モードで着用不可かつ現在長い首であるならばなにもしない
+            }else if (IsExileCut)
+            {
+                //追放シーン
+                SetImage(ref frontImage, visualHat.Main, visualHat.Flip);
+                SetImage(ref backImage, visualHat.Back, visualHat.BackFlip);
+
+                SetImage(ref frontImage, visualHat.Exile, visualHat.Exile);
+                SetImage(ref backImage, visualHat.ExileBack, visualHat.ExileBack);
+            }
             else
             {
                 if (LastAnimState is not PlayerAnimState.ClimbUp and not PlayerAnimState.ClimbDown)
@@ -2137,15 +2192,13 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             hatBackExRenderer!.gameObject.SetActive(backHasExImage);
             if (backHasExImage) hatBackExRenderer.sprite = backImage?.GetExSprite(HatBackIndex) ?? null;
 
-            /*
-            var hatHasMask = frontImage?.HasMaskImage ?? false;
-            bodyMaskByHat!.gameObject.SetActive(hatHasMask);
-            if (hatHasMask)
+            //マスク
+            var hasMask = frontImage?.HasMask ?? false;
+            foreach (var mask in MaskRenderers())
             {
-                bodyMaskByHat.sprite = frontImage?.GetMaskSprite(HatFrontIndex);
-                //MyLayer.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
+                mask.gameObject.SetActive(hasMask);
+                if(hasMask) mask.sprite = frontImage!.GetMaskSprite(HatFrontIndex);
             }
-            */
 
             if (ZOrdering)
             {
@@ -2174,6 +2227,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
             hatFrontExRenderer!.gameObject.SetActive(false);
             hatBackExRenderer!.gameObject.SetActive(false);
+
+            foreach (var mask in MaskRenderers()) mask.gameObject.SetActive(false);
         }
 
         CosmicVisor? currentVisualVisor = null;
@@ -2311,8 +2366,10 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             }
         }
 
-        AdditionalRenderers().Do(r => r.enabled = MyLayer.visible);
-        AdditionalRenderers().Do(r => r.flipX = MyLayer.FlipX);
+        AdditionalRenderersAndMasks().Do(r => {
+            r.flipX = MyLayer.FlipX;
+            r.enabled = MyLayer.visible;
+            });
 
         if (requiredAction)
         {
@@ -2327,6 +2384,11 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             }
         }
 
+        if (ZOrdering)
+        {
+            if (BodyPreMask != null) BodyPreMask.transform.SetLocalZ(MyLayer.zIndexSpacing * 0.125f);
+            if (BodyPostMask != null) BodyPostMask.transform.SetLocalZ(MyLayer.zIndexSpacing * -0.125f);
+        }
 
         UpdateZ();
     }
@@ -2348,6 +2410,9 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             visorFrontExRenderer?.SetBothOrder(Order.VisorFrontEx);
             visorBackRenderer?.SetBothOrder(Order.VisorBack);
             visorBackExRenderer?.SetBothOrder(Order.VisorBackEx);
+
+            BodyPreMask?.SetBothOrder(Order.BodyPreMask);
+            BodyPostMask?.SetBothOrder(Order.BodyPostMask);
         }
         catch { }
         /*
@@ -2461,7 +2526,7 @@ public static class TabEnablePatch
 
         int colorId = __instance.HasLocalPlayer() ? PlayerControl.LocalPlayer.Data.DefaultOutfit.ColorId : DataManager.Player.Customization.Color;
 
-        List<IEnumerator> loader = [];
+        List<Tuple<IEnumerator, Func<bool>>> loader = [];
 
         foreach (var group in groups)
         {
@@ -2614,13 +2679,19 @@ public static class TabEnablePatch
                     catch (Exception e) { }
                 }
 
+                void AddToLoader(IEnumerator enumerator) => loader.Add(new(enumerator, () =>
+                {
+                    var y = __instance.transform.InverseTransformPoint(colorChip.transform.position).y;
+                    return -5f < y && y < 0f;
+                }));
+
                 if (modItem != null)
                 {
-                    loader.Add(modItem.LoadForPreview(() => SetItemPreview()));
+                    AddToLoader(modItem.LoadForPreview(() => SetItemPreview()));
                 }
                 else
                 {
-                    loader.Add(ManagedEffects.Action(() => SetItemPreview()));
+                    AddToLoader(ManagedEffects.Action(() => SetItemPreview()));
                 }
 
                 int iconNum = 0;
@@ -2658,7 +2729,7 @@ public static class TabEnablePatch
         __instance.scroller.ContentYBounds.max = -(y - __instance.YStart) - 3.5f;
         __instance.scroller.UpdateScrollBars();
 
-        __instance.StartCoroutine(ManagedEffects.Sequence([ManagedEffects.Wait(0.1f), ManagedEffects.BeamSequence(5, loader.ToArray())]).WrapToIl2Cpp());
+        __instance.StartCoroutine(ManagedEffects.Sequence([ManagedEffects.Wait(0.1f), ManagedEffects.ConditionalBeamSequence(5, loader.ToArray())]).WrapToIl2Cpp());
     }
 
     [HarmonyPatch(typeof(HatsTab), nameof(HatsTab.OnEnable))]

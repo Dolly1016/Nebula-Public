@@ -72,15 +72,15 @@ public interface IModuleFactory
     ModAbilityButton EffectButton(ILifespan lifespan, Player player, VirtualKeyInput input, float cooldown, float duration, string label, Image image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false, bool isToggleEffect = false)
         => EffectButton(lifespan, player, input, null, cooldown, duration, label, image, availability, visibility, asGhostButton);
 
-    ModAbilityButton KillButton(ILifespan lifespan, Player player, Virial.Events.Player.PlayerInteractParameter parameters, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<Player, ModAbilityButton> onKill, Func<Player, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<Player, bool>? filterHeavier = null)
+    ModAbilityButton KillButton(ILifespan lifespan, Player player, Virial.Events.Player.PlayerInteractParameter parameters, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<Player, ModAbilityButton> onKill, Func<Player, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<Player, bool>? filterHeavier = null, bool canTrackInVentPlayer = false)
     {
-        var tracker = KillTracker(lifespan, player, filter);
+        var tracker = KillTracker(lifespan, player, filter, canTrackInVentPlayer: canTrackInVentPlayer);
         return InteractButtonInner(lifespan, player, tracker, parameters, true, arrangeAsKillButton, false, input, inputHelp, cooldown, label, labelType, image, onKill, availability, visibility, filterHeavier);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton KillButton(ILifespan lifespan, Player player, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<Player, ModAbilityButton> onKill, Func<Player, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<Player, bool>? filterHeavier = null)
-        => KillButton(lifespan, player, new Events.Player.PlayerInteractParameter(IsKillInteraction: true), arrangeAsKillButton, input, inputHelp, cooldown, label, labelType, image, onKill, filter, availability, visibility, filterHeavier);
+    ModAbilityButton KillButton(ILifespan lifespan, Player player, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<Player, ModAbilityButton> onKill, Func<Player, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<Player, bool>? filterHeavier = null, bool canTrackInVentPlayer = false)
+        => KillButton(lifespan, player, new Events.Player.PlayerInteractParameter(IsKillInteraction: true), arrangeAsKillButton, input, inputHelp, cooldown, label, labelType, image, onKill, filter, availability, visibility, filterHeavier, canTrackInVentPlayer);
 
     ModAbilityButton PlayerlikeKillButton(ILifespan lifespan, Player player, Virial.Events.Player.PlayerInteractParameter parameters, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<IPlayerlike, ModAbilityButton> onKill, ObjectTracker<IPlayerlike> tracker, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<IPlayerlike, bool>? filterHeavier = null)
     {
@@ -88,15 +88,15 @@ public interface IModuleFactory
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton PlayerlikeKillButton(ILifespan lifespan, Player player, Virial.Events.Player.PlayerInteractParameter parameters, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<IPlayerlike, ModAbilityButton> onKill, Func<IPlayerlike, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<IPlayerlike, bool>? filterHeavier = null)
+    ModAbilityButton PlayerlikeKillButton(ILifespan lifespan, Player player, Virial.Events.Player.PlayerInteractParameter parameters, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<IPlayerlike, ModAbilityButton> onKill, Func<IPlayerlike, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<IPlayerlike, bool>? filterHeavier = null, bool canTrackInVentPlayer = false)
     {
-        var tracker = PlayerlikeKillTracker(lifespan, player, filter);
+        var tracker = PlayerlikeKillTracker(lifespan, player, filter, canTrackInVentPlayer: canTrackInVentPlayer);
         return PlayerlikeKillButton(lifespan, player, parameters, arrangeAsKillButton, input, inputHelp, cooldown, label, labelType, image, onKill, tracker, availability, visibility, filterHeavier);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton PlayerlikeKillButton(ILifespan lifespan, Player player, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<IPlayerlike, ModAbilityButton> onKill, Func<IPlayerlike, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<IPlayerlike, bool>? filterHeavier = null)
-        => PlayerlikeKillButton(lifespan, player, new Events.Player.PlayerInteractParameter(IsKillInteraction: true), arrangeAsKillButton, input, inputHelp, cooldown, label, labelType, image, onKill, filter, availability, visibility, filterHeavier);
+    ModAbilityButton PlayerlikeKillButton(ILifespan lifespan, Player player, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<IPlayerlike, ModAbilityButton> onKill, Func<IPlayerlike, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<IPlayerlike, bool>? filterHeavier = null, bool canTrackInVentPlayer = false)
+        => PlayerlikeKillButton(lifespan, player, new Events.Player.PlayerInteractParameter(IsKillInteraction: true), arrangeAsKillButton, input, inputHelp, cooldown, label, labelType, image, onKill, filter, availability, visibility, filterHeavier, canTrackInVentPlayer);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,9 +141,9 @@ public interface IModuleFactory
     /// <param name="filter">さらにプレイヤーを限定するフィルタ。</param>
     /// <param name="filterHeavier">さらにプレイヤーを限定するフィルタ。コストの高い計算をここに記述してください。</param>
     /// <returns></returns>
-    ObjectTracker<Player> KillTracker(ILifespan lifespan, Player player, Func<Player, bool>? filter = null, Func<Player, bool>? filterHeavier = null);
+    ObjectTracker<Player> KillTracker(ILifespan lifespan, Player player, Func<Player, bool>? filter = null, Func<Player, bool>? filterHeavier = null, bool canTrackInVentPlayer = false);
 
-    ObjectTracker<Player> PlayerTracker(ILifespan lifespan, Player player, Func<Player, bool>? filter = null, Func<Player, bool>? filterHeavier = null);
+    ObjectTracker<Player> PlayerTracker(ILifespan lifespan, Player player, Func<Player, bool>? filter = null, Func<Player, bool>? filterHeavier = null, bool canTrackInVentPlayer = false);
 
     /// <summary>
     /// キル対象を選択するトラッカーを返します。
@@ -154,9 +154,9 @@ public interface IModuleFactory
     /// <param name="filter">さらにプレイヤーを限定するフィルタ。</param>
     /// <param name="filterHeavier">さらにプレイヤーを限定するフィルタ。コストの高い計算をここに記述してください。</param>
     /// <returns></returns>
-    ObjectTracker<IPlayerlike> PlayerlikeKillTracker(ILifespan lifespan, Player player, Func<IPlayerlike, bool>? filter = null, Func<IPlayerlike, bool>? filterHeavier = null);
+    ObjectTracker<IPlayerlike> PlayerlikeKillTracker(ILifespan lifespan, Player player, Func<IPlayerlike, bool>? filter = null, Func<IPlayerlike, bool>? filterHeavier = null, bool canTrackInVentPlayer = false);
 
-    ObjectTracker<IPlayerlike> PlayerlikeTracker(ILifespan lifespan, Player player, Func<IPlayerlike, bool>? filter = null, Func<IPlayerlike, bool>? filterHeavier = null);
+    ObjectTracker<IPlayerlike> PlayerlikeTracker(ILifespan lifespan, Player player, Func<IPlayerlike, bool>? filter = null, Func<IPlayerlike, bool>? filterHeavier = null, bool canTrackInVentPlayer = false);
 
     /// <summary>
     /// タイマーを生成します。

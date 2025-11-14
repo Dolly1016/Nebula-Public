@@ -498,7 +498,7 @@ public class JusticeMeetingHud : MonoBehaviour
                 maskRenderer.sprite = votingHolderMaskSprite.GetSprite();
 
                 var playerColor = DynamicPalette.PlayerColors[player.PlayerId];
-                var textColor = Color.Lerp(playerColor, DynamicPalette.IsLightColor(playerColor) ? new(0.18f, 0.18f, 0.18f, 1f) : new(1f, 1f, 1f, 1f), 0.4f);
+                var textColor = Color.Lerp(playerColor, ColorHelper.IsLightColor(playerColor) ? new(0.18f, 0.18f, 0.18f, 1f) : new(1f, 1f, 1f, 1f), 0.4f);
 
                 var graphColor = Color.Lerp(Color.Lerp(DynamicPalette.PlayerColors[player.PlayerId], DynamicPalette.ShadowColors[player.PlayerId], 0.25f), Color.white, 0.28f);
                 for (int x = 0; x < 3; x++) InstantiateCircleGraph(back.transform, new(-0.6f + (0.28f * x), -0.5f, -0.2f), graphColor);

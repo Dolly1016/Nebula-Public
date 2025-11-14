@@ -66,11 +66,11 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
 
     public bool WarpedPlantsAreSpawnable => GeneralConfigurations.NumOfWarpedPlantsOption > 0 && Roles.Roles.AllPerks.Any(p => p.PerkCategory == PerkFunctionalDefinition.Category.NoncrewmateOnly && p.SpawnRate.Value > 0);
     public bool PlantsAreSpawnable => GeneralConfigurations.NumOfPlantsOption > 0 && Roles.Roles.AllPerks.Any(p => p.PerkCategory == PerkFunctionalDefinition.Category.Standard && p.SpawnRate.Value > 0);
-    void OnRoleChanged(PlayerRoleSetEvent ev)
+    void OnRoleChanged(PlayerUpdateCrewRecognitionEvent ev)
     {
         if (!ev.Player.AmOwner) return;
 
-        bool isCrewmate = ev.Player.IsTrueCrewmate;
+        bool isCrewmate = ev.Player.FeelBeTrueCrewmate;
         if (isCrewmate) SetPerk(null, null, true);
         else if (ActiveNoncrewPerk == null)
         {
@@ -96,7 +96,8 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
                 var functional = perk?.Instantiate(newInstance).Register(newInstance);
                 if (functional?.HasAction ?? false)
                 {
-                    ButtonEffect.AddKeyGuide(newInstance.RelatedGameObject, NebulaInput.GetInput(noncrewmate ? VirtualKeyInput.PerkAction2 : VirtualKeyInput.PerkAction1).TypicalKey, new(0f, -0.75f), false);
+                    var obj = ButtonEffect.AddKeyGuide(newInstance.RelatedGameObject, NebulaInput.GetInput(noncrewmate ? VirtualKeyInput.PerkAction2 : VirtualKeyInput.PerkAction1).TypicalKey, new(0f, -0.75f), false);
+                    obj.transform.localScale = new(1f / 0.42f, 1 / 0.42f, 1f);
                     newInstance.Button.OnClick.AddListener(functional.OnClick);
                 }
                 newInstance.Priority = priority;
@@ -277,7 +278,7 @@ public class ItemSupplier : NebulaSyncStandardObject
         }
     }
 
-    bool CanObtainForRole => !NoncrewmateOnly || (!GamePlayer.LocalPlayer!.IsTrueCrewmate);
+    bool CanObtainForRole => !NoncrewmateOnly || (!GamePlayer.LocalPlayer!.FeelBeTrueCrewmate);
 
     void OnUpdate(GameUpdateEvent ev)
     {

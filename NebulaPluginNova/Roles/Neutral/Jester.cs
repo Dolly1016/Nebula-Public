@@ -81,6 +81,12 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
         }
 
         RoleTaskType RuntimeRole.TaskType => TaskConfiguration.RequiresTasks ? RoleTaskType.RoleTask : RoleTaskType.NoTask;
+
+        [OnlyHost, OnlyMyPlayer]
+        void OnExiled(PlayerExiledEvent ev)
+        {
+            if (!RequiresTasksForWin || (ev.Player?.Tasks.IsCompletedCurrentTasks ?? false)) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.JesterWin, GameEndReason.Special, BitMasks.AsPlayer(1u << ev.Player.PlayerId));
+        }
     }
 }
 

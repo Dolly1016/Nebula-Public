@@ -73,6 +73,7 @@ public interface IPlayerlike : IModuleContainer, IGameObject
     /// 死亡しているとき、Trueを返します。
     /// </summary>
     bool IsDead { get; }
+    bool IsAlive => !IsDead;
 
     /// <summary>
     /// オブジェクトが有効なとき、Trueを返します。

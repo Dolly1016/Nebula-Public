@@ -25,7 +25,7 @@ internal class WinningOpportunity : AbstractModule<Virial.Game.Game>, IWinningOp
     {
         ModSingleton<WinningOpportunity>.Instance = this;
         ModSingleton<IWinningOpportunity>.Instance = this;
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     private class Opportunity

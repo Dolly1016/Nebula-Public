@@ -48,6 +48,11 @@ public class TextField : MonoBehaviour
 
         return null;
     }
+    
+    static public void LoseAllFocus()
+    {
+        if (validField != null) validField.LoseFocus();
+    }
 
     public TextField GainFocus()
     {

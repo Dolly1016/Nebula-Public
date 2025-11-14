@@ -186,7 +186,8 @@ public interface GUI
     /// <param name="color">ボタンの色</param>
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
     /// <returns>生成されたウィジェット定義</returns>
-    GUIWidget LocalizedButton(GUIAlignment alignment, TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null);
+    GUIWidget LocalizedButton(GUIAlignment alignment, TextAttribute attribute, string translationKey, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null)
+        => Button(alignment, attribute, LocalizedTextComponent(translationKey), onClick, onMouseOver, onMouseOut, onRightClick, color, selectedColor, margin);
 
     /// <summary>
     /// 生文字列を表示するボタンです。
@@ -203,7 +204,8 @@ public interface GUI
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
     /// <param name="margin">余白の幅 デフォルトは0.26</param>
     /// <returns>生成されたウィジェット定義</returns>
-    GUIWidget RawButton(GUIAlignment alignment, TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null);
+    GUIWidget RawButton(GUIAlignment alignment, TextAttribute attribute, string rawText, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null)
+        => Button(alignment, attribute, RawTextComponent(rawText), onClick, onMouseOver, onMouseOut, onRightClick, color, selectedColor, margin);
 
     /// <summary>
     /// テキストを表示するボタンです。
@@ -219,6 +221,8 @@ public interface GUI
     /// <param name="selectedColor">カーソルが重なっている時のボタンの色</param>
     /// <returns>生成されたウィジェット定義</returns>
     GUIWidget Button(GUIAlignment alignment, TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null);
+
+    GUIWidget ModernButton(GUIAlignment alignment, TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Color? color = null, Color? selectedColor = null, float? margin = null, bool withCheckMark = false, bool selectedDefault = false);
 
     /// <summary>
     /// 値の増減に使うことができるボタンです。

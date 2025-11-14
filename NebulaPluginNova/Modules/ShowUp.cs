@@ -139,7 +139,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
     {
         this.Register(container);
 
-        var showUpButton = new ModAbilityButtonImpl(true).Register(NebulaAPI.CurrentGame!);
+        var showUpButton = new ModAbilityButtonImpl(true).RegisterPermanently();
         showUpButton.SetSprite(buttonSprite.GetSprite());
         showUpButton.Availability = (button) => true;
         showUpButton.Visibility = (button) => LobbyBehaviour.Instance ? CanAppealInLobby : CanAppealInGame;
@@ -152,7 +152,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         showUpButton.SetLabel("appeal");
 
         bool fired = false;
-        var playButton = new ModAbilityButtonImpl(true).Register(NebulaAPI.CurrentGame!);
+        var playButton = new ModAbilityButtonImpl(true).RegisterPermanently();
         playButton.SetSprite(playButtonSprite.GetSprite());
         playButton.Availability = (button) => true;
         playButton.Visibility = (button) => LobbyBehaviour.Instance && NebulaAchievementManager.HasAnyAchievementResult && AmongUsClient.Instance.AmHost && !fired;

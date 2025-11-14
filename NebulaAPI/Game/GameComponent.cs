@@ -47,4 +47,16 @@ public static class GameEntityExtension
         NebulaAPI.CurrentGame?.RegisterEntity(gameEntity, lifespan, onSubscribed != null ? () => onSubscribed.Invoke(gameEntity) : null);
         return gameEntity;
     }
+
+    /// <summary>
+    /// Entityをゲームに追加します。ゲーム終了まで作用素は削除されません。
+    /// </summary>
+    /// <typeparam name="Entity"></typeparam>
+    /// <param name="gameEntity"></param>
+    /// <param name="onSubscribed"></param>
+    /// <returns></returns>
+    public static Entity RegisterPermanently<Entity>(this Entity gameEntity, Action<Entity>? onSubscribed = null) where Entity : IGameOperator => Register(gameEntity, NebulaAPI.CurrentGame!, onSubscribed);
+
+    public static Entity RegisterSelf<Entity>(this Entity gameEntity, Action<Entity>? onSubscribed = null) where Entity : IGameOperator, ILifespan => Register(gameEntity, gameEntity, onSubscribed);
+
 }

@@ -170,14 +170,17 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                 var myPos = MyPlayer.VanillaPlayer.GetTruePosition();
                 float maxDis = DetectedRangeOption;
 
-                byte currentHolding = MyPlayer.HoldingDeadBody?.Player.PlayerId ?? byte.MaxValue;
-                foreach (var deadbody in Helpers.AllDeadBodies())
+                if (!MyPlayer.IsDead)
                 {
-                    if (currentHolding == deadbody.ParentId) continue;
-                    if ((deadbody.TruePosition - myPos).magnitude > maxDis) continue;
+                    byte currentHolding = MyPlayer.HoldingDeadBody?.Player.PlayerId ?? byte.MaxValue;
+                    foreach (var deadbody in Helpers.AllDeadBodies())
+                    {
+                        if (currentHolding == deadbody.ParentId) continue;
+                        if ((deadbody.TruePosition - myPos).magnitude > maxDis) continue;
 
-                    detected = true;
-                    break;
+                        detected = true;
+                        break;
+                    }
                 }
 
                 float a = fullScreen!.color.a;

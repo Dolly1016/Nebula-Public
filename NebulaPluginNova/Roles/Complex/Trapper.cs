@@ -255,7 +255,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                         if ((lastCommPlayersMask & (1u << p.PlayerId)) != 0) continue;
 
                         //Camo貫通(Morphingまで効果を受ける)
-                        var arrow = new Arrow().SetColorByOutfit(p.GetOutfit(OutfitPriority.TransformedThrethold).outfit).Register(NebulaAPI.CurrentGame!);
+                        var arrow = new Arrow().SetColorByOutfit(p.GetOutfit(OutfitPriority.TransformedThrethold).outfit).RegisterSelf();
                         arrow.TargetPos = commTrap.Position;
                         NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
 

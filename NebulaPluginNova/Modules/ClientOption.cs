@@ -37,6 +37,7 @@ public class ClientOption
         SimpleNameplate,
         MuteAmbienceOnMeeting,
         OutputPaparazzoPhoto,
+        SmallHud,
     }
 
     /*
@@ -265,6 +266,8 @@ public class ClientOption
         new ClientOption(ClientOptionType.OutputPaparazzoPhoto, "outputPaparazzoPhoto", simpleSwitch, 0);
 
         ReflectProcessorAffinity();
+
+        new ClientOption(ClientOptionType.SmallHud, "smallHud", simpleSwitch, 0);
 #endif
     }
 
@@ -392,7 +395,7 @@ public static class StartOptionMenuPatch
                         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
                     }
                 }
-            }, 2, -1, 0, 0.51f);
+            }, 2, -1, 0, 0.5f);
             nebulaWidget.Append(new MetaWidgetOld.VerticalMargin(0.2f));
 
             List<MetaWidgetOld.Button> bottomButtons = new();
@@ -437,7 +440,7 @@ public static class StartOptionMenuPatch
 #endif
             AddBottomButton("social", () => ClientOption.ShowSocialSetting());
 
-            nebulaWidget.Append(bottomButtons, b => b, 2, -1, 0, 0.51f);
+            nebulaWidget.Append(bottomButtons, b => b, 2, -1, 0, 0.5f);
 
             nebulaScreen.SetWidget(nebulaWidget);
         }

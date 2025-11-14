@@ -6,6 +6,7 @@ using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine.IO;
+using Virial;
 using Virial.Assignable;
 using Virial.Game;
 using Virial.Runtime;
@@ -302,10 +303,11 @@ public abstract class RemoteProcessArgumentBase
             writer.Write(outfit.Tag);
             writer.Write(outfit.Priority);
             writer.Write(outfit.SelfAware);
+            writer.Write(outfit.IgnoreMask?.AsRawPattern ?? 0u);
         }, reader => {
             OutfitDefinition? outfit = null;
             NebulaGameManager.Instance?.TryGetOutfit(new(reader.ReadInt32(), reader.ReadInt32()), out outfit);
-            return new OutfitCandidate(outfit!, reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean());
+            return new OutfitCandidate(outfit!, reader.ReadString(), reader.ReadInt32(), reader.ReadBoolean(), BitMasks.AsPlayer(reader.ReadUInt32()));
         });
 
         new RemoteProcessArgument<TimeLimitedModulator>((writer, mod) =>

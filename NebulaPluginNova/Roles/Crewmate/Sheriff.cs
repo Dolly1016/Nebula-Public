@@ -30,6 +30,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Sheriff.png");
+        ConfigurationHolder?.ScheduleAddRelated(() => [Neutral.Vanity.MyRole.ConfigurationHolder!]);
     }
 
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
@@ -37,12 +38,12 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1,NumOfShotsOption));
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
-    static private readonly IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sheriff.killCoolDown", CoolDownType.Relative, (10f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
-    static private readonly IntegerConfiguration NumOfShotsOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.numOfShots", (1, 15), 3);
+    static internal readonly IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sheriff.killCoolDown", CoolDownType.Relative, (10f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
+    static internal readonly IntegerConfiguration NumOfShotsOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.numOfShots", (1, 15), 3);
     static private readonly BoolConfiguration CanKillMadmateOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillMadmate", false);
     static private readonly BoolConfiguration CanKillLoversOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillLovers", false);
-    static private readonly BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillHidingPlayer", false);
-    static private readonly BoolConfiguration SealAbilityUntilReportingDeadBodiesOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.sealAbilityUntilReportingDeadBodies", false);
+    static internal readonly BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillHidingPlayer", false);
+    static internal readonly BoolConfiguration SealAbilityUntilReportingDeadBodiesOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.sealAbilityUntilReportingDeadBodies", false);
 
     static public readonly Sheriff MyRole = new();
     static private readonly GameStatsEntry StatsShot = NebulaAPI.CreateStatsEntry("stats.sheriff.shot", GameStatsCategory.Roles, MyRole);
@@ -52,7 +53,8 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
         private ModAbilityButtonImpl? killButton = null;
 
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SheriffKillButton.png", 100f);
-        
+        static internal Image KillButtonSprite => buttonSprite;
+
         private int leftShots = NumOfShotsOption;
         public Ability(GamePlayer player, bool isUsurped, int shots) : base(player, isUsurped)
         {
@@ -82,6 +84,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                     lockSprite = killButton.VanillaButton.AddLockedOverlay();
                 }
 
+                bool killedAnyone = false;
                 killButton.Availability = (button) => killTracker.CurrentTarget != null && MyPlayer.CanMove && !MyPlayer.WillDie && lockSprite == null;
                 killButton.Visibility = (button) => !MyPlayer.IsDead && leftShots > 0;
                 killButton.OnClick = (button) => {
@@ -96,6 +99,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                         MyPlayer.MurderPlayer(killTracker.CurrentTarget!, PlayerState.Dead, EventDetail.Kill, Virial.Game.KillParameter.NormalKill);
 
                         acTokenAnother3.Value.triggered = true;
+                        killedAnyone = true;
                     }
                     else
                     {
@@ -122,6 +126,16 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                     }
                 };
                 killButton.RelatedAbility = this;
+
+                if((Neutral.Vanity.MyRole as DefinedRole).IsSpawnable)
+                {
+                    GamePlayer? lastMyExile = null;
+                    GameOperatorManager.Instance?.Subscribe<PlayerVoteDisclosedLocalEvent>(ev =>
+                    {
+                        if (ev.VoteToWillBeExiled) lastMyExile = ev.VoteFor;
+                    }, this);
+                    GameOperatorManager.Instance?.SubscribeAchievement<GameEndEvent>("combination.2.sheriff.vanity.common2", ev => lastMyExile != null && NebulaGameManager.Instance?.LastDead == lastMyExile && !ev.EndState.Winners.Test(MyPlayer), this);
+                }
             }
         }
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), leftShots];

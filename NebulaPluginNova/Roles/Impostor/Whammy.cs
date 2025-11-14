@@ -231,7 +231,7 @@ internal class BalloonHolder : AbstractModule<GamePlayer>, IGameOperator, IBindP
     static BalloonHolder() => DIManager.Instance.RegisterModule(() => new BalloonHolder());
     private BalloonHolder()
     {
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     protected override void OnInjected(GamePlayer container)
@@ -533,7 +533,7 @@ public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
     private BalloonManager()
     {
         ModSingleton<BalloonManager>.Instance = this;
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
     public bool IsAvailable { get; private set; } = false;
     public int GoalStone = 1, CurrentStone = 0;

@@ -19,6 +19,8 @@ public static class MainMenuSetUpPatch
 
     static void Postfix(MainMenuManager __instance)
     {
+        MainMenuManagerInstance.SetPrefab(__instance);
+
         var scalerList = __instance.mainMenuUI.GetComponent<SlicedAspectScaler>();
 
         __instance.PlayOnlineButton.OnClick.AddListener(() => IsLocalGame = false);
@@ -178,7 +180,9 @@ public static class MainMenuSetUpPatch
         foreach (var asset in NebulaScreen.GetComponentsInChildren<AspectScaledAsset>()) scalerList.objectsToScale.Add(asset);
 
         var uiScaler = __instance.accountButtons.transform.parent.parent.parent;
-        var discordRenderer = UnityHelper.CreateObject<SpriteRenderer>("DiscordButton", uiScaler, new Vector3(6f, -2.6f, -6f));
+        var discordRenderer = UnityHelper.CreateObject<SpriteRenderer>("DiscordButton", __instance.transform, Vector3.zero);
+        discordRenderer.gameObject.SetAsUIAspectContent(AspectPosition.EdgeAlignments.RightBottom, new(0.34f, 0.24f, -6f));
+        discordRenderer.transform.localScale = new(0.8f, 0.8f, 1f);
         discordRenderer.sprite = discordIconSprite.GetSprite();
         var discordButton = discordRenderer.gameObject.SetUpButton(true, discordRenderer);
         discordButton.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(discordButton, Language.Translate("title.label.discord")));

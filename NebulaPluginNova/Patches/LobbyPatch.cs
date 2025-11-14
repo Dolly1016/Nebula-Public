@@ -510,7 +510,9 @@ public class GlobalCosMismatchShowerPatch
         __instance.StartCoroutine(ManagedEffects.Wait(()=> !__instance.HostInfoPanel.content.active, () =>
         {
             __instance.HostInfoPanel.playerHolder.AddComponent<SortingGroup>();
-            __instance.HostInfoPanel.playerHolder.GetComponentInChildren<NebulaCosmeticsLayer>().SetSortingProperty(true, 10000f, 1000);
+            var layer = __instance.HostInfoPanel.playerHolder.GetComponentInChildren<NebulaCosmeticsLayer>();
+            layer.SetSortingProperty(true, 10000f, 1000);
+            layer.MaskRenderers().Do(r => r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask);
             __instance.HostInfoPanel.playerHolder.transform.SetLocalZ(1f);
             var mask = __instance.HostInfoPanel.playerHolder.GetComponentInChildren<SpriteMask>(true);
             mask.gameObject.AddComponent<SortingGroupOrderFixer>().Initialize(mask, 500);

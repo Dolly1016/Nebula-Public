@@ -7,6 +7,7 @@ using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Media;
 using Virial.Text;
 
 namespace Nebula.Roles.Modifier;
@@ -14,7 +15,9 @@ namespace Nebula.Roles.Modifier;
 [NebulaRPCHolder]
 public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
-    private Damned() : base("damned", "DMD", new(Palette.ImpostorRed), [DamnedActionOption, DamnedMurderMyKillerOption, KillDelayOption]) {
+    private Damned() : base("damned", "DMD", new(Palette.ImpostorRed), [DamnedActionOption, DamnedMurderMyKillerOption, KillDelayOption,
+        new GroupConfiguration("options.role.damned.group.task", [CanBecomeAwareOfOption, TaskProgressOption], GroupConfigurationColor.ImpostorRed)
+        ]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Damned.png");
     }
@@ -23,6 +26,8 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
     //static private BoolConfiguration PromoteToMadmateOption = NebulaAPI.Configurations.Configuration("options.role.damned.promoteToMadmate", false);
     static private ValueConfiguration<int> DamnedActionOption = NebulaAPI.Configurations.Configuration("options.role.damned.damnedAction", ["options.role.damned.damnedAction.impostor", "options.role.damned.damnedAction.takeOver", "options.role.damned.damnedAction.madmate"], 0);
     static private BoolConfiguration DamnedMurderMyKillerOption = NebulaAPI.Configurations.Configuration("options.role.damned.damnedMurderMyKiller", true);
+    static private BoolConfiguration CanBecomeAwareOfOption = NebulaAPI.Configurations.Configuration("options.role.damned.canBecomeAwareOfDamned", false);
+    static private FloatConfiguration TaskProgressOption = NebulaAPI.Configurations.Configuration("options.role.damned.taskProgressRequiredForSelfAdmission", (10, 100, 10), 80, FloatConfigurationDecorator.Percentage, () => CanBecomeAwareOfOption);
     static private FloatConfiguration KillDelayOption = NebulaAPI.Configurations.Configuration("options.role.damned.killDelay", (0f, 20f, 2.5f), 0f, FloatConfigurationDecorator.Second);
 
     static public Damned MyRole = new Damned();
@@ -31,6 +36,8 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
+        static private MultiImage DamnedAnimImage = DividedSpriteLoader.FromResource("Nebula.Resources.Damned.png", 100f, 6, 1);
+
         DefinedModifier RuntimeModifier.Modifier => MyRole;
 
         private bool hasGuard = true;
@@ -115,7 +122,8 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                         else
                         {
                             ShareNextRole.Invoke((MyPlayer, myNextRole.Id, myNextArgs ?? []));
-                            MyPlayer.MurderPlayer(ev.Murderer, PlayerState.Cursed, EventDetail.Curse, KillParameter.RemoteKill);
+                            MyPlayer.MurderPlayer(ev.Murderer, PlayerState.Cursed, EventDetail.Curse, KillParameter.RemoteKill, KillCondition.BothAlive );
+                            if(DamnedActionOption.GetValue() == 1) PlayerExtension.SendRoleSwapping(ev.Murderer, MyPlayer, myNextRole, PlayerRoleSwapEvent.SwapType.Duplicate);
                         }
                     }
 
@@ -185,6 +193,29 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                         MyPlayer.SetRole(myNextRole, myNextArgs);
                     }
                 });
+            }
+        }
+
+        bool amAware = false;
+        [OnlyMyPlayer, Local]
+        void OnTaskUpdate(PlayerTaskUpdateEvent ev)
+        {
+            if (!CanBecomeAwareOfOption) return;
+            if (MyPlayer.Tasks.CurrentTasks == 0) return;
+            if (!(((float)MyPlayer.Tasks.CurrentCompleted / (float)MyPlayer.Tasks.CurrentTasks) < TaskProgressOption / 100f))
+            {
+                if (!amAware)
+                {
+                    amAware = true;
+                    var animator = UnityHelper.SimpleAnimator(MyPlayer.VanillaPlayer.transform, new(0f, 0.7f, 0.1f), 0.12f, i => DamnedAnimImage.GetSprite(i % 6));
+                    animator.transform.localEulerAngles = new(0f, 0f, -10f);
+                    animator.material = new(NebulaAsset.MultiplyShader);
+                    animator.transform.localScale = new(1.6f, 1.6f, 1f);
+                    animator.color = new(1f, 1f, 1f, 0.75f);
+                    GameOperatorManager.Instance?.RegisterReleasedAction(() => {
+                        if (animator) GameObject.Destroy(animator.gameObject);
+                    }, this);
+                }
             }
         }
 

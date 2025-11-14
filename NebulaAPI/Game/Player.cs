@@ -274,13 +274,14 @@ public class OutfitCandidate
     public string Tag { get; private set; }
     public int Priority { get; private set; }
     public bool SelfAware { get; private set; }
-
-    public OutfitCandidate(OutfitDefinition definition, string tag, int priority, bool selfAware)
+    public BitMask<Virial.Game.Player>? IgnoreMask { get; private set; }
+    public OutfitCandidate(OutfitDefinition definition, string tag, int priority, bool selfAware, BitMask<Player>? ignoreMask = null)
     {
         this.Outfit = definition;
         Tag = tag;
         Priority = priority;
         SelfAware = selfAware;
+        IgnoreMask = ignoreMask;
     }
 }
 
@@ -354,6 +355,8 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// 陣営の基本的なキルクールダウンです。
     /// </summary>
     float TeamKillCooldown => Role.Role.Team.KillCooldown;
+
+    internal TMPro.TextMeshPro RoleText { get; }
 
     /// <summary>
     /// 現在の死亡地点です。
@@ -645,7 +648,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <summary>
     /// マッドメイトの場合、trueを返します。
     /// </summary>
-    bool IsMadmate => Role.Role.IsMadmate;
+    bool IsMadmate => Role.Role.IsMadmate || Modifiers.Any(m => m.Modifier.IsMadmate);
     /// <summary>
     /// クルー陣営かつマッドメイトでないクルーメイトであればtrueを返します。
     /// <c>IsCrewmate &amp;&amp; !IsMadmate</c>と等価です。
@@ -671,6 +674,9 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <param name="minPriority">見た目の優先度の最小値</param>
     /// <returns></returns>
     OutfitDefinition? GetOutfit(int? maxPriority, int minPriority);
+
+    void AddOutfit(OutfitCandidate outfit);
+    void RemoveOutfitByTag(string tag);
 
     /// <summary>
     /// プレイヤーの本来の見た目を取得します。
@@ -714,6 +720,12 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// 全プレイヤーをPlayerIdの順で取得します。
     /// </summary>
     public static IReadOnlyList<Player> AllOrderedPlayers => NebulaAPI.instance.CurrentGame?.GetAllOrderedPlayers() ?? [];
+
+    /// <summary>
+    /// 自分自身が通常のクルーメイトだと自認している場合、trueを返します。
+    /// </summary>
+    bool FeelBeTrueCrewmate { get; set; }
+
     /// <summary>
     /// プレイヤーを取得します。
     /// </summary>

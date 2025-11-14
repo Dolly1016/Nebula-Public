@@ -27,7 +27,7 @@ internal class CameraVC : IGameOperator
 
     public CameraVC()
     {
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
         ModSingleton<CameraVC>.Instance = this;
     }
 

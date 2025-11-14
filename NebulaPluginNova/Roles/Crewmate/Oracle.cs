@@ -27,7 +27,7 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
     private OracleSystem()
     {
         ModSingleton<OracleSystem>.Instance = this;
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     private record RolePool(List<DefinedRole> CrewmateRoles, List<DefinedRole> ImpostorRoles, List<DefinedRole> NeutralRoles)
@@ -207,6 +207,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 oracleButton.OnEffectEnd = (button) =>
                 {
                     if (playerTracker.CurrentTarget == null) return;
+                    if (MeetingHud.Instance) return;
 
                     if (GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, playerTracker.CurrentTarget, new(RealPlayerOnly: true))).IsCanceled ?? true) return;
 

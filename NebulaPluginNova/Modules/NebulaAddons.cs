@@ -338,6 +338,18 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         return Archive.GetEntry(InZipPath + path.Replace('\\', '/'))?.Open();
     }
 
+    public IEnumerable<Stream> FindStreams(string startsWith, Func<string, bool>? filter = null)
+    {
+        foreach(var entry in Archive.Entries)
+        {
+            if (entry.FullName.StartsWith(InZipPath + startsWith) && (filter?.Invoke(entry.FullName) ?? true))
+            {
+                using var stream = entry.Open();
+                yield return stream;
+            }
+        }
+    }
+
     public void Dispose()
     {
         Archive.Dispose();

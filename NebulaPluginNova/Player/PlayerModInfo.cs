@@ -9,6 +9,7 @@ using Nebula.Roles.Impostor;
 using Sentry.Unity.NativeUtils;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine.Rendering;
+using Virial;
 using Virial.Assignable;
 using Virial.Command;
 using Virial.Common;
@@ -184,6 +185,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     private List<Virial.Game.OutfitCandidate> outfits = new();
     private TMPro.TextMeshPro roleText;
 
+    TMPro.TextMeshPro GamePlayer.RoleText => roleText;
+
 
     public FakeSabotageStatus FakeSabotage { get; private set; } = new();
     
@@ -205,7 +208,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         get
         {
             bool hasCrewmateTasks = Role.TaskType == RoleTaskType.CrewmateTask;
-            ModifierAction((modifier) => { hasCrewmateTasks &= !(modifier.InvalidateCrewmateTask || modifier.MyCrewmateTaskIsIgnored); });
+            AssignableAction((assignable) => { hasCrewmateTasks &= !(assignable.InvalidateCrewmateTask || assignable.MyCrewmateTaskIsIgnored); });
             return hasCrewmateTasks;
         }
     }
@@ -217,10 +220,17 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             if (NebulaGameManager.Instance?.CanBeSpectator ?? false) return HasCrewmateTasks;
 
             bool hasCrewmateTasks = Role.TaskType == RoleTaskType.CrewmateTask;
-            ModifierAction((modifier) => { hasCrewmateTasks &= !modifier.InvalidateCrewmateTask; });
+            AssignableAction((assignable) => { hasCrewmateTasks &= !assignable.InvalidateCrewmateTask; });
             return hasCrewmateTasks;
         }
     }
+
+    public bool FeelBeTrueCrewmate { get => (this as GamePlayer).IsTrueCrewmate || field; set {
+            field = value;
+            GameOperatorManager.Instance?.Run<PlayerUpdateCrewRecognitionEvent>(new(this));
+        }
+    }
+    
 
     public VariablePermissionHolder PermissionHolder = new([]);
     bool IPermissionHolder.Test(Virial.Common.Permission permission) => PermissionHolder.Test(permission);
@@ -294,10 +304,6 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         }
         modifier = null;
         return false;
-    }
-
-    public PlayerModInfo()
-    {
     }
 
     internal void SetPlayer(PlayerControl myPlayer)
@@ -448,6 +454,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         UpdateOutfit();
     }
 
+    void GamePlayer.AddOutfit(OutfitCandidate outfit) => RpcAddOutfit.Invoke((PlayerId, outfit));
+    void GamePlayer.RemoveOutfitByTag(string tag) => RpcRemoveOutfit.Invoke((PlayerId, tag));
+
     public OutfitCandidate GetOutfit(int maxPriority)
     {
         foreach (var outfit in outfits)
@@ -462,15 +471,24 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     public void UpdateNameText(TMPro.TextMeshPro nameText, bool onMeeting = false, bool showDefaultName = false)
     {
-        var text = onMeeting ? DefaultName : CurrentOutfit.Outfit.outfit.PlayerName;
+        var currentOutfit = CurrentOutfit;
+        var text = onMeeting ? DefaultName : currentOutfit.Outfit.outfit.PlayerName;
 
         AssignableAction(r => r.DecorateNameConstantly(ref text, NebulaGameManager.Instance?.CanSeeAllInfo ?? false));
         var ev = GameOperatorManager.Instance?.Run(new PlayerDecorateNameEvent(this, text));
         text = ev?.Name ?? text;
         var color = (ev?.Color.HasValue ?? false) ? ev.Color.Value.ToUnityColor() : Color.white;
 
-        if (showDefaultName && !CurrentOutfit.Outfit.outfit.PlayerName.Equals(DefaultName))
-            text += (" (" + DefaultName + ")").Color(Color.gray);
+        if (!currentOutfit.Outfit.outfit.PlayerName.Equals(DefaultName))
+        {
+            if (showDefaultName)
+            {
+                text += (" (" + DefaultName + ")").Color(Color.gray);
+            }else if(currentOutfit.IgnoreMask?.Test(GamePlayer.LocalPlayer) ?? false)
+            {
+                text += (" (" + GetOutfit(currentOutfit.Priority - 1).Outfit.outfit.PlayerName + ")").Color(Color.gray);
+            }
+        }
 
         nameText.text = text;
         nameText.color = color;
@@ -540,10 +558,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         if (isDead) MyControl.Die(DeathReason.Kill, false);
 
         myRole = role.CreateInstance(this, arguments);        
-        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
-            myRole.OnActivated(); (myRole as IGameOperator)?.Register(myRole);
-            GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(this, myRole));
-        }
+        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) myRole.ActivateAssignable();
+        
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myRole, IsDead));
     }
@@ -555,10 +571,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         myGhostRole = role.CreateInstance(this, arguments);
 
-        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized)
-        {
-            myGhostRole.OnActivated(); (myGhostRole as IGameOperator)?.Register(myGhostRole);
-        }
+        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) myGhostRole?.ActivateAssignable();
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myGhostRole, IsDead));
     }
@@ -568,10 +581,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         var modifier = role.CreateInstance(this, arguments);
         myModifiers.Add(modifier);
 
-        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) {
-            modifier.OnActivated(); (modifier as IGameOperator)?.Register(modifier);
-            GameOperatorManager.Instance?.Run(new PlayerModifierSetEvent(this, modifier));
-        }
+        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) modifier.ActivateAssignable();
 
         NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, modifier, true, IsDead));
     }

@@ -17,6 +17,7 @@ public class GUITextField : AbstractGUIWidget
     public bool WithMaskMaterial { get; init; } = true;
     public int MaxLines { get; init; } = 1;
     public Predicate<string>? EnterAction { get; init; } = null;
+    public Action<string>? LostFocusAction { get; init; } = null;
     public GUITextField(GUIAlignment alignment, Size size) : base(alignment)
     {
         FieldSize = size;
@@ -31,6 +32,7 @@ public class GUITextField : AbstractGUIWidget
         field.SetSize(unitySize, FontSize, MaxLines);
         field.InputPredicate = TextPredicate;
         field.EnterAction = EnterAction;
+        field.LostFocusAction = LostFocusAction;
         if (WithMaskMaterial) field.AsMaskedText();
 
         var background = UnityHelper.CreateObject<SpriteRenderer>("Background", obj.transform, UnityEngine.Vector3.zero, LayerExpansion.GetUILayer());

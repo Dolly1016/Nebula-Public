@@ -24,7 +24,7 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
     public RoomPointEditor()
     {
         ModSingleton<RoomPointEditor>.Instance = this;
-        this.Register(NebulaAPI.CurrentGame!);
+        this.RegisterPermanently();
     }
 
     Transform nodeParent = null!, pathParent = null!;

@@ -87,12 +87,14 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                 if (!canExecuteShift) yield break;
                 if (shiftTarget == null) yield break;
                 if (!(shiftTarget.VanillaPlayer)) yield break;
+                if (MyPlayer.PlayerState == PlayerState.Misguessed) yield break;//推察失敗時に限り、役職交換をキャンセルする。
+
                 var player = shiftTarget.Unbox();
 
                 //会議終了時に死亡している相手とはシフトできない
                 if (player == null || player.IsDead) yield break;
 
-                int[] targetArgument = new int[0];
+                int[] targetArgument = [];
                 var targetRole = player.Role.Role;
                 int targetGuess = -1;
                 yield return player.CoGetRoleArgument((args) => targetArgument = args);
@@ -138,6 +140,9 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                     //タスクを整えたうえで役職を変更する
                     MyPlayer.Unbox().RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
                     player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
+
+                    PlayerExtension.SendRoleSwapping(MyPlayer, player, MyRole, PlayerRoleSwapEvent.SwapType.Swap);
+                    PlayerExtension.SendRoleSwapping(player, MyPlayer, targetRole, PlayerRoleSwapEvent.SwapType.Swap);
 
                     if (targetGuess != -1) player.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
                     if (myGuess != -1) MyPlayer.Unbox().RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();

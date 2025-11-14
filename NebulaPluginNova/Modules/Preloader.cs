@@ -66,10 +66,10 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
             NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, assignable.GetType().Name + " is unknown type.");
     }
 
-    AssignmentType NebulaPreprocessor.RegisterAssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Virial.Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive)
+    AssignmentType NebulaPreprocessor.RegisterAssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Virial.Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive, bool canGuessAsAbility)
     {
         if (currentPhase >= PreprocessPhase.PreRoles) return null!;
-        return new AssignmentType(relatedRole, argumentEditor, postfix, color, predicate, isActive);
+        return new AssignmentType(relatedRole, argumentEditor, postfix, color, predicate, isActive, canGuessAsAbility);
     }
 
     RoleTeam NebulaPreprocessor.CreateTeam(string translationKey, Virial.Color color, TeamRevealType revealType) => new Team(translationKey, color, revealType);

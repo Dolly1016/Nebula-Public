@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.Events;
+using UnityEngine.Rendering;
 
 namespace Nebula.Patches;
 
@@ -99,7 +100,11 @@ internal class SkeldMultipleExilePatch
         MultipleExileHelper.SpawnMultiplePlayers(__instance, (p, i) => {
 
             __instance.StartCoroutine(CoAnimate(p, i).WrapToIl2Cpp());
-        }, p => MultipleExileHelper.SetExiledStampShower(p, false, new(0.7f, 0.18f)));
+        }, p =>
+        {
+            MultipleExileHelper.SetExiledStampShower(p, false, new(0.7f, 0.18f));
+            p.cosmetics.GetComponent<NebulaCosmeticsLayer>().IsExileCut = true;
+        });
     }
 }
 
@@ -120,7 +125,11 @@ internal class MiraMultipleExilePatch
         MultipleExileHelper.SpawnMultiplePlayers(__instance, (p, i) => {
 
             __instance.StartCoroutine(CoAnimate(p, i).WrapToIl2Cpp());
-        }, p => MultipleExileHelper.SetExiledStampShower(p, false, new(0.55f, 0.18f)));
+        }, p =>
+        {
+            MultipleExileHelper.SetExiledStampShower(p, false, new(0.55f, 0.18f));
+            p.cosmetics.GetComponent<NebulaCosmeticsLayer>().IsExileCut = true;
+        });
     }
 }
 
@@ -151,10 +160,19 @@ internal class PbMultipleExilePatch
             float l = Camera.main.orthographicSize + 1f;
             yield return MultipleExileHelper.CoSpin(p, i, Vector2.up * l, Vector2.down * 2.81f, Vector2.left, __instance.Duration / 1.4f, __instance.LerpCurve, 5f, (vec) => __instance.StartCoroutine(CoWaitAndPlaySplash(p, vec).WrapToIl2Cpp()));
         }
-        MultipleExileHelper.SpawnMultiplePlayers(__instance, (p, i) => {
 
+        var mask = __instance.transform.FindChild("New Sprite Mask").GetComponent<SpriteMask>();
+        mask.isCustomRangeActive = true;
+        mask.backSortingOrder = -1000;
+        mask.frontSortingOrder = 0;
+        
+        MultipleExileHelper.SpawnMultiplePlayers(__instance, (p, i) => {
             __instance.StartCoroutine(CoAnimate(p, i).WrapToIl2Cpp());
-        }, p => MultipleExileHelper.SetExiledStampShower(p, true, new(0.1f, 0.5f)));
+        }, p =>
+        {
+            MultipleExileHelper.SetExiledStampShower(p, true, new(0.1f, 0.5f));
+            p.cosmetics.GetComponent<NebulaCosmeticsLayer>().IsExileCut = true;
+        });
     }
 }
 
@@ -199,7 +217,11 @@ internal class AirshipMultipleExilePatch
         MultipleExileHelper.SpawnMultiplePlayers(__instance, (p, i) => {
 
             __instance.StartCoroutine(CoAnimate(p, i).WrapToIl2Cpp());
-        }, p => MultipleExileHelper.SetExiledStampShower(p, false, new(0.6f, 0.18f)));
+        }, p =>
+        {
+            MultipleExileHelper.SetExiledStampShower(p, false, new(0.6f, 0.18f));
+            p.cosmetics.GetComponent<NebulaCosmeticsLayer>().IsExileCut = true;
+        });
     }
 }
 

@@ -67,7 +67,7 @@ internal interface INebula
 
     IModuleFactory Modules { get; }
 
-    TitlesRegister Titles { get; }
+    ITitlesRegister Titles { get; }
 
     IDisposable CreateRPCSection(string? label);
 
@@ -167,6 +167,7 @@ public static class NebulaAPI
     /// モジュールを生成するファクトリメソッド群です。
     /// </summary>
     static public IModuleFactory Modules => instance.Modules;
+    static public ITitlesRegister Titles => instance.Titles;
 
     /// <summary>
     /// 一括で送信するRPCをまとめるセクションを取得します。

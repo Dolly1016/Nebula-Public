@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 using Virial.Media;
 
 namespace Nebula.Utilities;
@@ -25,4 +26,6 @@ static internal class AnimationEffects
         if (renderer) UnityEngine.Object.Destroy(renderer.gameObject);
         yield break;
     }
+
+    static public IEnumerator CoPlayRoleNameEffect(GamePlayer player) => CoPlayRoleNameEffect(player.RoleText.transform, new(0f, 0f, -0.1f), player.Role.Role.Color.ToUnityColor(), player.RoleText.gameObject.layer, 1f / 0.7f);
 }
