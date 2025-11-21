@@ -560,7 +560,6 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         myRole = role.CreateInstance(this, arguments);        
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) myRole.ActivateAssignable();
         
-
         NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myRole, IsDead));
     }
 

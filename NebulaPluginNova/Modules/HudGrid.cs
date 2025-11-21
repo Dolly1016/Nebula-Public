@@ -193,7 +193,7 @@ public class HudContent : MonoBehaviour
     public bool IsLeftSide => isLeftSide;
 
     private static float EdgeY => HudGrid.UseSmallerHud ? 
-        -(3.0f / 0.72f - 0.6f) :
+        -(3.0f / 0.72f - 0.65f) :
         -(3.0f - 0.7f);
     private static float EdgeX => HudGrid.UseSmallerHud ?
         (3.0f / 0.72f) * (float)Screen.width / (float)Screen.height - 0.67f :

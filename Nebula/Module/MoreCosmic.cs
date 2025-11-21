@@ -124,7 +124,7 @@ public class CustomVImage : CustomVariable
                 return;
 
             foreach (var c in item.Author.Value) pathBuilder.Append(((int)c).ToString("X4"));
-            pathBuilder.Append("/");
+            pathBuilder.Append('/');
             foreach (var c in item.Name.Value) pathBuilder.Append(((int)c).ToString("X4"));
 
             string path = pathBuilder.ToString();

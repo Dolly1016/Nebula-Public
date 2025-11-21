@@ -127,7 +127,7 @@ public static class RPCRouter
             writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 128, shouldBeReliable ? SendOption.Reliable : SendOption.None, -1);
             writer.Write(hash);
             sender.Invoke(writer);
-            //NebulaPlugin.Log.Print("sent RPC:" + name + "(size:" + writer.Length + ")");
+            //NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Log, null, "sent RPC:" + name + "(size:" + writer.Length + ")");
 
             AmongUsClient.Instance.FinishRpcImmediately(writer);
 
@@ -138,10 +138,10 @@ public static class RPCRouter
             }
             catch(Exception ex)
             {
-                NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.System, $"Error in RPC(Invoke: {name})\n" + ex.ToString());
+                //NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.System, $"Error in RPC(Invoke: {name})\n" + ex.ToString());
             }
 
-            //NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Called RPC : {name}");
+            //NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Log, null, $"Called RPC : {name}");
         }
         else
         {

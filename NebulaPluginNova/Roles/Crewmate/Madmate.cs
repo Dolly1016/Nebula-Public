@@ -257,6 +257,16 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
                 new StaticAchievementToken("madmate.challenge");
         }
 
+        [Local]
+        void OnRoleShift(PlayerRoleSwapEvent ev)
+        {
+            if(ev.Role.Team == NebulaTeams.ImpostorTeam && impostors.Contains(ev.Source.PlayerId))
+            {
+                impostors.Remove(ev.Source.PlayerId);
+                impostors.Add(ev.Destination.PlayerId);
+            }
+        }
+
         RoleTaskType RuntimeRole.TaskType => CanIdentifyImpostorsOption > 0 ? RoleTaskType.RoleTask : RoleTaskType.NoTask;
 
         bool RuntimeAssignable.CanFixComm => CanFixCommsOption;

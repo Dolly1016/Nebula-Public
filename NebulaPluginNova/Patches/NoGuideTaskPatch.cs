@@ -97,9 +97,9 @@ file static class NoGuideHelpers
         {
             sb.Append(" (");
             sb.Append(task.taskStep);
-            sb.Append("/");
+            sb.Append('/');
             sb.Append(task.MaxStep);
-            sb.Append(")");
+            sb.Append(')');
         }
         if (shouldYellow) sb.Append("</color>");
 

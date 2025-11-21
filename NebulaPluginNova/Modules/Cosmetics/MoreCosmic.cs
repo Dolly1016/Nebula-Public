@@ -11,9 +11,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using TMPro;
+using Unity.Profiling.LowLevel.Unsafe;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
@@ -24,6 +26,7 @@ using Virial.Game;
 using Virial.Media;
 using Virial.Runtime;
 using Virial.Utilities;
+using static Il2CppMono.Security.X509.X520;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 using static Nebula.Modules.ClientOption;
 using static PlayerMaterial;
@@ -103,7 +106,7 @@ public abstract class CustomCosmicItem : CustomItemGrouped
     [JsonSerializableField(true)]
     public bool IsUnlockable = false;
 
-    public bool ShowOnWardrobe => !(IsHidden ?? false);
+    public virtual bool ShowOnWardrobe => !(IsHidden ?? false);
 
     public string Id => Author + "_" + Name;
     abstract public string ProductId { get; }
@@ -225,10 +228,7 @@ public abstract class CustomCosmicItem : CustomItemGrouped
     abstract public IEnumerator LoadForPreview(Action? onLoad);
     abstract public void UnloadForGame(Action? onUnload);
     abstract public void UnloadForPreview(Action? onUnload);
-}
 
-public abstract class CustomCosmicAnimationItem : CustomCosmicItem
-{
     [JSFieldAmbiguous]
     public int FPS = 1;
     public float GetFPS(int index, CosmicImage? image)
@@ -236,6 +236,22 @@ public abstract class CustomCosmicAnimationItem : CustomCosmicItem
         if (image?.FPSCurve != null) return image.FPSCurve.Get(index, FPS);
         return FPS;
     }
+}
+
+public abstract class CustomCosmicGenericItem<Impl, VanillaData> : CustomCosmicItem where Impl : CustomCosmicGenericItem<Impl, VanillaData> where VanillaData : CosmeticData
+{
+    [JsonSerializableField(true)]
+    public string? MainItem = null;
+    public CustomCosmicItem? MainCosmicItem = null;
+
+    public override bool ShowOnWardrobe => base.ShowOnWardrobe && MainItem == null;
+
+    private List<Impl> subItems = [];
+    public IReadOnlyList<Impl> SubItems => subItems;
+
+    abstract public VanillaData VanillaItem { get; }
+
+    internal void AddSubItem(Impl subItem) => subItems.Add(subItem);
 }
 
 public class CosmicImage
@@ -370,7 +386,7 @@ public class CosmicImage
     }
 }
 
-public class CosmicHat : CustomCosmicAnimationItem
+public class CosmicHat : CustomCosmicGenericItem<CosmicHat, HatData>
 {
     [JsonSerializableField(true)]
     public CosmicImage? Main;
@@ -438,6 +454,7 @@ public class CosmicHat : CustomCosmicAnimationItem
 
     public HatData MyHat { get; private set; } = null!;
     public HatViewData MyView { get; private set; } = null!;
+    public override HatData VanillaItem => MyHat;
     public override IEnumerator Activate(bool addToMoreCosmic)
     {
         foreach (var image in AllImage())
@@ -466,7 +483,7 @@ public class CosmicHat : CustomCosmicAnimationItem
         MyHat.InFront = true;
         MyHat.NoBounce = !Bounce;
         MyHat.ChipOffset = new Vector2(0f, 0.2f);
-        MyHat.Free = ShowOnWardrobe;
+        MyHat.Free = true;
         MyHat.PreviewCrewmateColor = Adaptive;
 
         MyView.MatchPlayerColor = Adaptive;
@@ -528,7 +545,7 @@ public class CosmicHat : CustomCosmicAnimationItem
     }
 }
 
-public class CosmicVisor : CustomCosmicAnimationItem
+public class CosmicVisor : CustomCosmicGenericItem<CosmicVisor, VisorData>
 {
     [JsonSerializableField(true)]
     public CosmicImage? Main;
@@ -588,6 +605,7 @@ public class CosmicVisor : CustomCosmicAnimationItem
     public static string IdToProductId(string id) => "nosvisor_" + id;
     public VisorData MyVisor { get; private set; } = null!;
     public VisorViewData MyView { get; private set; } = null!;
+    public override VisorData VanillaItem => MyVisor;
     public bool HasClimbUpImage => Climb != null;
     public bool HasClimbDownImage => (ClimbDown ?? Climb) != null;
 
@@ -617,7 +635,7 @@ public class CosmicVisor : CustomCosmicAnimationItem
         MyVisor.displayOrder = 99;
         MyVisor.ProductId = ProductId;
         MyVisor.ChipOffset = new Vector2(0f, 0.2f);
-        MyVisor.Free = ShowOnWardrobe;
+        MyVisor.Free = true;
         MyVisor.PreviewCrewmateColor = Adaptive;
         //MyVisor.SpritePreview = Preview?.GetSprite(0) ?? Main?.GetSprite(0);
 
@@ -680,7 +698,7 @@ public class CosmicVisor : CustomCosmicAnimationItem
     }
 }
 
-public class CosmicNameplate : CustomCosmicItem
+public class CosmicNameplate : CustomCosmicGenericItem<CosmicNameplate, NamePlateData>
 {
     [JsonSerializableField(true)]
     public CosmicImage? Plate;
@@ -692,6 +710,7 @@ public class CosmicNameplate : CustomCosmicItem
     public static string IdToProductId(string id) => "nosplate_" + id;
     public NamePlateData MyPlate { get; private set; } = null!;
     public NamePlateViewData MyView { get; private set; } = null!;
+    public override NamePlateData VanillaItem => MyPlate;
     public override IEnumerator Activate(bool addToMoreCosmic)
     {
         yield return base.Activate(addToMoreCosmic);
@@ -713,7 +732,7 @@ public class CosmicNameplate : CustomCosmicItem
         MyPlate.displayOrder = 99;
         MyPlate.ProductId = ProductId;
         MyPlate.ChipOffset = new Vector2(0f, 0.2f);
-        MyPlate.Free = ShowOnWardrobe;
+        MyPlate.Free = true;
         //MyPlate.SpritePreview = Plate?.GetSprite(0);
 
         MyPlate.CreateAddressableAsset();
@@ -749,7 +768,7 @@ public class CosmicNameplate : CustomCosmicItem
     }
 }
 
-public class CosmicStamp : CustomCosmicAnimationItem
+public class CosmicStamp : CustomCosmicItem
 {
     [JsonSerializableField(true)]
     public CosmicImage? Image;
@@ -858,6 +877,19 @@ public class CustomItemBundle : CostumePermissionHolder
         foreach (var item in Packages) yield return item;
     }
 
+    private void SolveSubItems<ModItem, T>(IList<ModItem> items) where ModItem : CustomCosmicGenericItem<ModItem, T> where T : CosmeticData
+    {
+        foreach (var item in items)
+        {
+            if (item.IsHidden ?? false) continue;
+            if (item.MainItem != null && items.Find(i => i.Name == item.MainItem, out var mainItem))
+            {
+                item.MainCosmicItem = mainItem;
+                mainItem.AddSubItem(item);
+            }
+        }
+    }
+
     public IEnumerator CoLoad()
     {
         if (IsActive) yield break;
@@ -870,6 +902,11 @@ public class CustomItemBundle : CostumePermissionHolder
 
         if (RelatedLocalAddress != null && !RelatedLocalAddress.EndsWith("/")) RelatedLocalAddress += "/";
         if (RelatedRemoteAddress != null && !RelatedRemoteAddress.EndsWith("/")) RelatedRemoteAddress += "/";
+
+        SolveSubItems<CosmicHat, HatData>(Hats);
+        SolveSubItems<CosmicVisor, VisorData>(Visors);
+
+        //if (Hats.Count > 2) Hats[0].AddSubItem(Hats[1]);
 
         foreach (var item in AllContents()) item?.MyBundle = this;
         foreach (var item in AllCosmicItem()) yield return item?.CoPreactivate();
@@ -1788,7 +1825,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     public IEnumerable<SpriteRenderer> AdditionalRenderersAndMasks()
     {
         foreach (var r in AdditionalRenderers()) yield return r;
-        foreach (var r in MaskRenderers()) yield return r;
+        foreach (var r in HatMaskRenderers()) yield return r;
+        foreach (var r in VisorMaskRenderers()) yield return r;
     }
     public IEnumerable<SpriteRenderer> AdditionalRenderers()
     {
@@ -1809,8 +1847,20 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
     public IEnumerable<SpriteRenderer> MaskRenderers()
     {
-        if (BodyPreMask != null) yield return BodyPreMask;
-        if (BodyPostMask != null) yield return BodyPostMask;
+        foreach (var r in HatMaskRenderers()) yield return r;
+        foreach (var r in VisorMaskRenderers()) yield return r;
+    }
+
+    public IEnumerable<SpriteRenderer> HatMaskRenderers()
+    {
+        if (BodyHatPreMask != null) yield return BodyHatPreMask;
+        if (BodyHatPostMask != null) yield return BodyHatPostMask;
+    }
+
+    public IEnumerable<SpriteRenderer> VisorMaskRenderers()
+    {
+        if (BodyVisorPreMask != null) yield return BodyVisorPreMask;
+        if (BodyVisorPostMask != null) yield return BodyVisorPostMask;
     }
 
     private bool useDefaultShader = true;//追加したRendererのマテリアルを変更する必要があるか否か調べるために使用
@@ -1862,15 +1912,18 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
         try
         {
-            BodyPreMask = UnityHelper.CreateObject<SpriteRenderer>("BodyPreMask", MyLayer.hat.transform, Vector3.zero);
-            BodyPreMask.material = new(NebulaAsset.CostumeMaskPreShader);
-            BodyPreMask.material.renderQueue = 3000;
-            BodyPreMask.gameObject.SetActive(false);
-
-            BodyPostMask = UnityHelper.CreateObject<SpriteRenderer>("BodyPostMask", MyLayer.hat.transform, Vector3.zero);
-            BodyPostMask.material = new(NebulaAsset.CostumeMaskPostShader);
-            BodyPostMask.material.renderQueue = 3000;
-            BodyPostMask.gameObject.SetActive(false);
+            SpriteRenderer SetUpMaskRenderer(string name, Shader shader, Transform parent)
+            {
+                var mask = UnityHelper.CreateObject<SpriteRenderer>(name, parent, Vector3.zero);
+                mask.material = new(shader);
+                mask.material.renderQueue = 3000;
+                mask.gameObject.SetActive(false);
+                return mask;
+            }
+            BodyHatPreMask = SetUpMaskRenderer("BodyPreMask", NebulaAsset.CostumeMaskPreShader, MyLayer.hat.transform);
+            BodyHatPostMask = SetUpMaskRenderer("BodyPostMask", NebulaAsset.CostumeMaskPostShader, MyLayer.hat.transform);
+            BodyVisorPreMask = SetUpMaskRenderer("BodyPreMask", NebulaAsset.CostumeMaskPreShader, MyLayer.visor.transform);
+            BodyVisorPostMask = SetUpMaskRenderer("BodyPostMask", NebulaAsset.CostumeMaskPostShader, MyLayer.visor.transform);
 
             //PoolablePlayer相手には取得できない
             if (transform.parent && transform.parent.parent)
@@ -1928,7 +1981,14 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         catch { }
     }
 
-    public SpriteRenderer BodyPreMask, BodyPostMask;
+    public void SetUpAsMeetingMask()
+    {
+        if (BodyHatPostMask != null) BodyHatPostMask.material = new(NebulaAsset.CostumeMaskPostJustPosShader);
+        if (BodyVisorPostMask != null) BodyVisorPostMask.material = new(NebulaAsset.CostumeMaskPostJustPosShader);
+    }
+
+    public SpriteRenderer BodyHatPreMask = null!, BodyHatPostMask = null!;
+    public SpriteRenderer BodyVisorPreMask = null!, BodyVisorPostMask = null!;
     public bool IsDead => (MyPhysics && MyPhysics!.myPlayer.Data && MyPhysics!.myPlayer.Data.IsDead) || (fakePlayerCache?.IsDead ?? false);
     public bool IsGamePlayer => (MyPhysics && MyPhysics!.myPlayer) || IsFakePlayer;
     public bool IsFakePlayer => fakePlayerCache != null;
@@ -2194,7 +2254,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
             //マスク
             var hasMask = frontImage?.HasMask ?? false;
-            foreach (var mask in MaskRenderers())
+            foreach (var mask in HatMaskRenderers())
             {
                 mask.gameObject.SetActive(hasMask);
                 if(hasMask) mask.sprite = frontImage!.GetMaskSprite(HatFrontIndex);
@@ -2228,7 +2288,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             hatFrontExRenderer!.gameObject.SetActive(false);
             hatBackExRenderer!.gameObject.SetActive(false);
 
-            foreach (var mask in MaskRenderers()) mask.gameObject.SetActive(false);
+            foreach (var mask in HatMaskRenderers()) mask.gameObject.SetActive(false);
         }
 
         CosmicVisor? currentVisualVisor = null;
@@ -2312,15 +2372,13 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             visorBackExRenderer!.gameObject.SetActive(backImage?.HasExImage ?? false);
             visorBackExRenderer.sprite = backImage?.GetExSprite(VisorBackIndex) ?? null;
 
-            /*
-            var visorHasMask = image?.HasMaskImage ?? false;
-            bodyMaskByVisor!.gameObject.SetActive(visorHasMask);
-            if (visorHasMask)
+            //マスク
+            var hasMask = image?.HasMask ?? false;
+            foreach (var mask in VisorMaskRenderers())
             {
-                bodyMaskByVisor.sprite = image?.GetMaskSprite(VisorIndex);
-                //MyLayer.currentBodySprite.BodySprite.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
+                mask.gameObject.SetActive(hasMask);
+                if (hasMask) mask.sprite = image!.GetMaskSprite(VisorIndex);
             }
-            */
 
             if (ZOrdering)
             {
@@ -2344,6 +2402,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             visorBackRenderer!.gameObject.SetActive(false);
             visorFrontExRenderer!.gameObject.SetActive(false);
             visorBackExRenderer!.gameObject.SetActive(false);
+
+            foreach (var mask in VisorMaskRenderers()) mask.gameObject.SetActive(false);
         }
 
         var shouldUseDefault = !(MyLayer.bodyMatProperties.MaskType is MaskType.ComplexUI or MaskType.ScrollingUI);
@@ -2386,8 +2446,10 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
         if (ZOrdering)
         {
-            if (BodyPreMask != null) BodyPreMask.transform.SetLocalZ(MyLayer.zIndexSpacing * 0.125f);
-            if (BodyPostMask != null) BodyPostMask.transform.SetLocalZ(MyLayer.zIndexSpacing * -0.125f);
+            if (BodyHatPreMask != null) BodyHatPreMask.transform.SetLocalZ(MyLayer.zIndexSpacing * 0.125f);
+            if (BodyHatPostMask != null) BodyHatPostMask.transform.SetLocalZ(MyLayer.zIndexSpacing * -0.125f);
+            if (BodyVisorPreMask != null) BodyVisorPreMask.transform.SetLocalZ(MyLayer.zIndexSpacing * 0.125f);
+            if (BodyVisorPostMask != null) BodyVisorPostMask.transform.SetLocalZ(MyLayer.zIndexSpacing * -0.125f);
         }
 
         UpdateZ();
@@ -2411,8 +2473,10 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             visorBackRenderer?.SetBothOrder(Order.VisorBack);
             visorBackExRenderer?.SetBothOrder(Order.VisorBackEx);
 
-            BodyPreMask?.SetBothOrder(Order.BodyPreMask);
-            BodyPostMask?.SetBothOrder(Order.BodyPostMask);
+            BodyHatPreMask?.SetBothOrder(Order.BodyPreMask);
+            BodyHatPostMask?.SetBothOrder(Order.BodyPostMask);
+            BodyVisorPreMask?.SetBothOrder(Order.BodyPreMask);
+            BodyVisorPostMask?.SetBothOrder(Order.BodyPostMask);
         }
         catch { }
         /*
@@ -2499,13 +2563,33 @@ public static class TabEnablePatch
 
     private static List<TMP_Text> customTexts = [];
 
-    private static IDividedSpriteLoader additionalIconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CostumeIcon.png", 100f, 2, 1);
+    private static IDividedSpriteLoader additionalIconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CostumeIcon.png", 100f, 3, 1);
 
-    public static void SetUpTab<ItemTab, VanillaItem, ModItem>(ItemTab __instance, VanillaItem emptyItem, (VanillaItem, ModItem?)[] items, Func<VanillaItem> defaultProvider, Action<VanillaItem> selector, Action<VanillaItem, ColorChip>? chipSetter = null) where ItemTab : InventoryTab where ModItem : CustomCosmicItem where VanillaItem : CosmeticData
+    public static void SetUpTab<ItemTab, VanillaItem, ModItem>(ItemTab __instance, VanillaItem emptyItem, IEnumerable<(VanillaItem, ModItem?)> items, Func<VanillaItem> defaultProvider, Action<VanillaItem> selector, Action<VanillaItem, ColorChip>? chipSetter = null, bool allowSubItems = true) where ItemTab : InventoryTab where ModItem : CustomCosmicGenericItem<ModItem, VanillaItem> where VanillaItem : CosmeticData
     {
         Helpers.RefreshMemory();
 
+        List<ColorChip> subItems = [];
+
+        items = items.Where(tuple => tuple.Item2?.ShowOnWardrobe ?? true).ToArray();
+
         textTemplate = __instance.transform.FindChild("Text").gameObject.GetComponent<TMP_Text>();
+
+        TMP_Text subItemsText = null!;
+        if (allowSubItems)
+        {
+            subItemsText = UnityEngine.Object.Instantiate(textTemplate, __instance.transform);
+            subItemsText.GetComponent<TextTranslatorTMP>().enabled = false;
+
+            subItemsText.transform.localPosition = new Vector3(4.1f, -0.6f, -1f);
+            subItemsText.text = Language.Translate("inventory.costume.variants");
+            subItemsText.alignment = TextAlignmentOptions.Center;
+            subItemsText.fontSize = 2f;
+            subItemsText.fontWeight = FontWeight.Thin;
+            subItemsText.enableAutoSizing = false;
+
+            subItemsText.gameObject.SetActive(false);
+        }
 
         var groups = items.GroupBy((tuple) => tuple.Item2?.Package ?? "InnerSloth").OrderBy(group => MoreCosmic.AllPackages.TryGetValue(group.Key, out var package) ? package.Priority : 10000);
 
@@ -2562,40 +2646,79 @@ public static class TabEnablePatch
 
                 ColorChip colorChip = UnityEngine.Object.Instantiate(__instance.ColorTabPrefab, __instance.scroller.Inner);
                 colorChip.transform.localPosition = new Vector3(itemX, itemY, -1f);
+                SetUpChip(colorChip, selector, vanillaItem, modItem, defaultProvider);
+                if(allowSubItems) colorChip.Button.OnClick.AddListener(() => SetUpSubCostumes(vanillaItem, modItem));
 
+                void ClearSubCostumes()
+                {
+                    __instance.ColorChips.RemoveRange(__instance.ColorChips.Count - subItems.Count, subItems.Count);
+                    subItems.Do(chip => GameObject.Destroy(chip.gameObject));
+                    subItems.Clear();
+                }
+
+                void SetUpSubCostumes(VanillaItem vanillaItem, ModItem? modItem)
+                {
+                    ClearSubCostumes();
+                    int sub_index = 0;
+                    foreach (var subItem in modItem?.SubItems.Prepend(modItem) ?? [])
+                    {
+                        var vanillaSubItem = subItem.VanillaItem;
+
+                        ColorChip colorChip = UnityEngine.Object.Instantiate(__instance.ColorTabPrefab, __instance.transform);
+                        colorChip.transform.localPosition = new Vector3(4.1f, -1.2f - __instance.YOffset * sub_index, -1f);
+                        SetUpChip(colorChip, selector, vanillaSubItem, subItem, defaultProvider);
+                        colorChip.name = "SubItem";
+                        foreach (var renderer in colorChip.GetComponentsInChildren<SpriteRenderer>(true)) renderer.maskInteraction = SpriteMaskInteraction.None;
+                        subItems.Add(colorChip);
+
+                        sub_index++;
+
+                        subItem.LoadForPreview(() => SetItemPreview(colorChip, subItem, vanillaSubItem, false)).StartOnScene();
+                    }
+                    subItemsText.gameObject.SetActive(sub_index > 0);
+                }
+
+                void SetUpChip(ColorChip colorChip, Action<VanillaItem> onSelect, VanillaItem vanillaItem, ModItem? modItem, Func<VanillaItem> onSelectDefault)
+                {
+                    colorChip.name = vanillaItem.ProductId;
 #if PC
-                colorChip.Button.OnMouseOver.AddListener(() => selector.Invoke(vanillaItem));
-                colorChip.Button.OnMouseOut.AddListener(() => selector.Invoke(defaultProvider.Invoke()));
-                colorChip.Button.OnClick.AddListener(__instance.ClickEquip);
+                    colorChip.Button.OnMouseOver.AddListener(() => onSelect.Invoke(vanillaItem));
+                    colorChip.Button.OnMouseOut.AddListener(() => onSelect.Invoke(onSelectDefault.Invoke()));
+                    colorChip.Button.OnClick.AddListener(__instance.ClickEquip);
 #else
-                colorChip.Button.OnClick.AddListener(() => selector.Invoke(vanillaItem));
+                colorChip.Button.OnClick.AddListener(() => onSelect.Invoke(vanillaItem));
 #endif
 
-                if (DebugTools.ShowCostumeMetadata)
-                {
-                    IEnumerable<string>? tags = modItem != null ? modItem.Tags : MoreCosmic.VanillaTags.TryGetValue(vanillaItem.ProductId, out var t) ? t : [];
-                    string name = modItem != null ? modItem.Name : vanillaItem.name;
-                    colorChip.Button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(colorChip.Button, name.Bold() + "<br>" + string.Join("<br>", (tags ?? []).Select(text => "  " + text))));
-                    colorChip.Button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(colorChip.Button));
-                    var extraButton = colorChip.Button.gameObject.AddComponent<ExtraPassiveBehaviour>();
-                    extraButton.OnRightClicked = () =>
+                    if (DebugTools.ShowCostumeMetadata)
                     {
-                        ClipboardHelper.PutClipboardString(name);
-                        DebugScreen.Push("クリップボードにコピーしました。", 3f);
-                    };
+                        IEnumerable<string>? tags = modItem != null ? modItem.Tags : MoreCosmic.VanillaTags.TryGetValue(vanillaItem.ProductId, out var t) ? t : [];
+                        string name = modItem != null ? modItem.Name : vanillaItem.name;
+                        colorChip.Button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(colorChip.Button, name.Bold() + "<br>" + string.Join("<br>", (tags ?? []).Select(text => "  " + text))));
+                        colorChip.Button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(colorChip.Button));
+                        var extraButton = colorChip.Button.gameObject.AddComponent<ExtraPassiveBehaviour>();
+                        extraButton.OnRightClicked = () =>
+                        {
+                            ClipboardHelper.PutClipboardString(name);
+                            DebugScreen.Push("クリップボードにコピーしました。", 3f);
+                        };
+                    }
+                    colorChip.ProductId = vanillaItem.ProductId;
+
+                    colorChip.Tag = vanillaItem;
+                    colorChip.SelectionHighlight.gameObject.SetActive(false);
+                    __instance.ColorChips.Add(colorChip);
                 }
 
                 colorChip.Button.ClickMask = __instance.scroller.Hitbox;
 
-                colorChip.ProductId = vanillaItem.ProductId;
 
-
-                void SetItemPreview()
+                void SetItemPreview(ColorChip colorChip, ModItem? modItem, VanillaItem vanillaItem, bool forScrollingUI = true)
                 {
+                    SpriteMaskInteraction maskInteraction = forScrollingUI ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None;
 
                     if (chipSetter == null)
                     {
-                        colorChip.Inner.SetMaskType(MaskType.ScrollingUI);
+                        colorChip.Inner.SetMaskType(forScrollingUI ? MaskType.ScrollingUI : MaskType.None);
                         __instance.UpdateMaterials(colorChip.Inner.FrontLayer, vanillaItem);
                         vanillaItem.SetPreview(colorChip.Inner.FrontLayer, colorId);
 
@@ -2604,7 +2727,7 @@ public static class TabEnablePatch
                         {
                             var ex = UnityEngine.Object.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
                             ex.sharedMaterial = HatManager.Instance.DefaultShader;
-                            ex.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                            ex.maskInteraction = maskInteraction;
                             ex.sprite = previewAdditionalSprite;
                             ex.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f, 0f, modItem!.PreviewAdditionalInFront ? -0.1f : 0.1f);
                         }
@@ -2615,7 +2738,7 @@ public static class TabEnablePatch
                             {
                                 var exFront = UnityEngine.Object.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
                                 exFront.sharedMaterial = HatManager.Instance.DefaultShader;
-                                exFront.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                                exFront.maskInteraction = maskInteraction;
                                 exFront.sprite = mHat.Main.GetExSprite(0);
                                 exFront.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f, 0f, mHat.Main.ExIsFront ? -0.1f : 0.1f);
                             }
@@ -2631,7 +2754,7 @@ public static class TabEnablePatch
                                 {
                                     var exBack = UnityEngine.Object.Instantiate(colorChip.Inner.BackLayer, colorChip.Inner.BackLayer.transform.parent);
                                     exBack.sharedMaterial = HatManager.Instance.DefaultShader;
-                                    exBack.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                                    exBack.maskInteraction = maskInteraction;
                                     exBack.sprite = mHat.Back.GetExSprite(0);
                                     exBack.transform.localPosition = colorChip.Inner.BackLayer.transform.localPosition + new Vector3(0f, 0f, mHat.Back.ExIsFront ? -0.1f : 0.1f);
                                 }
@@ -2643,7 +2766,7 @@ public static class TabEnablePatch
                             {
                                 var exFront = UnityEngine.Object.Instantiate(colorChip.Inner.FrontLayer, colorChip.Inner.FrontLayer.transform.parent);
                                 exFront.sharedMaterial = HatManager.Instance.DefaultShader;
-                                exFront.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                                exFront.maskInteraction = maskInteraction;
                                 exFront.sprite = mVisor.Main.GetExSprite(0);
                                 exFront.transform.localPosition = colorChip.Inner.FrontLayer.transform.localPosition + new Vector3(0f, 0f, mVisor.Main.ExIsFront ? -0.1f : 0.1f);
                             }
@@ -2659,7 +2782,7 @@ public static class TabEnablePatch
                                 {
                                     var exBack = UnityEngine.Object.Instantiate(colorChip.Inner.BackLayer, colorChip.Inner.BackLayer.transform.parent);
                                     exBack.sharedMaterial = HatManager.Instance.DefaultShader;
-                                    exBack.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                                    exBack.maskInteraction = maskInteraction;
                                     exBack.sprite = mVisor.Back.GetExSprite(0);
                                     exBack.transform.localPosition = colorChip.Inner.BackLayer.transform.localPosition + new Vector3(0f, 0f, mVisor.Back.ExIsFront ? -0.1f : 0.1f);
                                 }
@@ -2673,8 +2796,8 @@ public static class TabEnablePatch
 
                     try
                     {
-                        colorChip.Inner.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                        colorChip.Inner.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                        colorChip.Inner.BackLayer.maskInteraction = maskInteraction;
+                        colorChip.Inner.FrontLayer.maskInteraction = maskInteraction;
                     }
                     catch (Exception e) { }
                 }
@@ -2687,11 +2810,11 @@ public static class TabEnablePatch
 
                 if (modItem != null)
                 {
-                    AddToLoader(modItem.LoadForPreview(() => SetItemPreview()));
+                    AddToLoader(modItem.LoadForPreview(() => SetItemPreview(colorChip, modItem, vanillaItem)));
                 }
                 else
                 {
-                    AddToLoader(ManagedEffects.Action(() => SetItemPreview()));
+                    AddToLoader(ManagedEffects.Action(() => SetItemPreview(colorChip, modItem, vanillaItem)));
                 }
 
                 int iconNum = 0;
@@ -2704,21 +2827,25 @@ public static class TabEnablePatch
                     SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
                     renderer.sprite = additionalIconSprite.GetSprite(iconIndex);
                     renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+
+                    var button = obj.SetUpButton(false);
+                    button.SetAsDelegateButton(colorChip.Button, true);
+                    var collider = obj.AddComponent<BoxCollider2D>();
+                    collider.size = new(0.3f, 0.3f);
+                    collider.isTrigger = true;
+                    button.SetLocalizedOverlay("inventory.costume.tag." + iconIndex);
                 }
 
                 if (modItem?.HasAnimation ?? false) AddIcon(0);
                 if (modItem?.OnButton != null) AddIcon(1);
-
-                colorChip.Tag = vanillaItem;
-                colorChip.SelectionHighlight.gameObject.SetActive(false);
-                __instance.ColorChips.Add(colorChip);
+                if (modItem?.SubItems.Count > 0) AddIcon(2);
 
                 try
                 {
                     colorChip.Inner.BackLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                     colorChip.Inner.FrontLayer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                 }
-                catch (Exception e) { }
+                catch (Exception) { }
 
                 index++;
             }
@@ -2732,12 +2859,26 @@ public static class TabEnablePatch
         __instance.StartCoroutine(ManagedEffects.Sequence([ManagedEffects.Wait(0.1f), ManagedEffects.ConditionalBeamSequence(5, loader.ToArray())]).WrapToIl2Cpp());
     }
 
+    static private void UpdateTab<Impl, VanillaData>(InventoryTab __instance, CustomCosmicGenericItem<Impl, VanillaData> currentCostume, IEnumerable<ColorChip> colorChips) where Impl : CustomCosmicGenericItem<Impl, VanillaData> where VanillaData : CosmeticData
+    {
+        var mainItem = currentCostume.MainItem;
+        if (mainItem != null)
+        {
+            var mainItemName = currentCostume.MainCosmicItem?.ProductId ?? mainItem;
+            foreach (var colorChip in __instance.ColorChips.GetFastEnumerator())
+            {
+                if (!colorChip.PlayerEquippedForeground.activeSelf) colorChip.PlayerEquippedForeground.SetActive(mainItemName == colorChip.name);
+            }
+        }
+    }
+
+
     [HarmonyPatch(typeof(HatsTab), nameof(HatsTab.OnEnable))]
     public class HatsTabOnEnablePatch
     {
         public static bool Prefix(HatsTab __instance)
         {
-            (HatData, CosmicHat?)[] unlockedHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats().Select(hat => MoreCosmic.AllHats.TryGetValue(hat.ProductId, out var modHat) ? (hat, modHat) : (hat, null)).ToArray();
+            var unlockedHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats().Select(hat => MoreCosmic.AllHats.TryGetValue(hat.ProductId, out var modHat) ? (hat, modHat) : (hat, null));
             __instance.currentHat = DestroyableSingleton<HatManager>.Instance.GetHatById(DataManager.Player.Customization.Hat);
 
             SetUpTab(__instance, HatManager.Instance.allHats.First(h => h.IsEmpty), unlockedHats,
@@ -2749,12 +2890,24 @@ public static class TabEnablePatch
         }
     }
 
+    [HarmonyPatch(typeof(HatsTab), nameof(HatsTab.Update))]
+    public class HatsTabUpdatePatch
+    {
+        public static void Postfix(HatsTab __instance)
+        {
+            HatData hatById = DestroyableSingleton<HatManager>.Instance.GetHatById(DataManager.Player.Customization.Hat);
+            if (hatById.TryGetModData(out var modHat)) {
+                UpdateTab(__instance, modHat, __instance.ColorChips.GetFastEnumerator());
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(VisorsTab), nameof(VisorsTab.OnEnable))]
     public class VisorsTabOnEnablePatch
     {
         public static bool Prefix(VisorsTab __instance)
         {
-            (VisorData, CosmicVisor?)[] unlockedVisors = DestroyableSingleton<HatManager>.Instance.GetUnlockedVisors().Select(visor => MoreCosmic.AllVisors.TryGetValue(visor.ProductId, out var modVisor) ? (visor, modVisor) : (visor, null)).ToArray();
+            var unlockedVisors = DestroyableSingleton<HatManager>.Instance.GetUnlockedVisors().Select(visor => MoreCosmic.AllVisors.TryGetValue(visor.ProductId, out var modVisor) ? (visor, modVisor) : (visor, null));
 
             SetUpTab(__instance, HatManager.Instance.allVisors.First(v => v.IsEmpty), unlockedVisors,
                 () => HatManager.Instance.GetVisorById(DataManager.Player.Customization.Visor),
@@ -2764,13 +2917,25 @@ public static class TabEnablePatch
             return false;
         }
     }
+    [HarmonyPatch(typeof(VisorsTab), nameof(VisorsTab.Update))]
+    public class VisorsTabUpdatePatch
+    {
+        public static void Postfix(VisorsTab __instance)
+        {
+            VisorData visorById = DestroyableSingleton<HatManager>.Instance.GetVisorById(DataManager.Player.Customization.Visor);
+            if (visorById.TryGetModData(out var modVisor))
+            {
+                UpdateTab(__instance, modVisor, __instance.ColorChips.GetFastEnumerator());
+            }
+        }
+    }
 
     [HarmonyPatch(typeof(NameplatesTab), nameof(NameplatesTab.OnEnable))]
     public class NameplatesTabOnEnablePatch
     {
         public static bool Prefix(NameplatesTab __instance)
         {
-            (NamePlateData, CosmicNameplate?)[] unlockedNamePlates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(nameplate => MoreCosmic.AllNameplates.TryGetValue(nameplate.ProductId, out var modNameplate) ? (nameplate, modNameplate) : (nameplate, null)).ToArray();
+            var unlockedNamePlates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(nameplate => MoreCosmic.AllNameplates.TryGetValue(nameplate.ProductId, out var modNameplate) ? (nameplate, modNameplate) : (nameplate, null));
 
             __instance.previewArea.TargetPlayerId = NebulaPlayerTab.PreviewColorId;
             SetUpTab(__instance, HatManager.Instance.allNamePlates.First(v => v.IsEmpty), unlockedNamePlates,
@@ -2796,7 +2961,7 @@ public static class TabEnablePatch
                             SetColors(NebulaPlayerTab.PreviewColorId, adaptiveChip);
                         }
                     })));
-                }
+                }, false
             );
 
             return false;

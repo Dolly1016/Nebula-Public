@@ -194,9 +194,6 @@ public static class Helpers
         return array.OrderBy(i => Guid.NewGuid()).ToArray();
     }
 
-    public static T[] Shuffle<T>(this IReadOnlyList<T> array) => GetRandomArray(array.Count).Select(i => array[i]).ToArray();
-    public static T[] Shuffle<T>(this IEnumerable<T> enumerable) => Shuffle(enumerable.ToArray());
-
     public static string GetClipboardString()
     {
 #if PC

@@ -2267,7 +2267,10 @@ $Color
 "inventory.color.vanilla16" : "タン"
 "inventory.color.vanilla17" : "コーラル"
 "inventory.color.visor" : "デフォルト"
-
+"inventory.costume.variants" : "バリアント"
+"inventory.costume.tag.0" : "このコスチュームはアニメーションがあります！"
+"inventory.costume.tag.1" : "このコスチュームはゲーム中に着替えができます！"
+"inventory.costume.tag.2" : "このコスチュームはいくつかのバリアントがあります。"
 # Input
 
 "input.kill" : "キル (Additional)"
@@ -3022,6 +3025,9 @@ $Color
 "role.fixer.ability.title" : "固有能力 "緊急会議の調停者""
 "role.fixer.ability.main" : "会議中にプレイヤーに妨害工作を施し、タブレット通信を遮断できます。<br>タブレット通信を遮断されたプレイヤーは投票権を奪われ、その会議で能力を使用できなくなります。<br>また、他のプレイヤーは遮断されたプレイヤーへの投票や能力行使が不可能になります。<br>戦略的にタブレット通信を遮断して、クルーメイトを勝利に導きましょう。"
 "role.fixer.ability.meeting" : "選択したプレイヤーのタブレット通信を遮断します。<br>能力の発動回数には制限があります。"
+"role.sheriff.ability.title" : "固有能力 "正義の執行""
+"role.sheriff.ability.main" : "自身に仇なすプレイヤーを始末できます。慎重に敵を見極めてキルしましょう。"
+"role.sheriff.ability.kill" : "キルを試みます。相手がクルーメイトであった場合、誤射し自分が死亡します。"
 
 "role.jekyllAndHyde.winCond" : "ジキルの場合: タスクをこなしているとクルーメイト勝利で勝利します。<br>ハイドの場合: インポスター勝利で勝利します。"
 "role.jekyllAndHyde.ability.title" : "固有能力 "多重人格""
@@ -3136,6 +3142,10 @@ $Color
 "role.thurifer.ability.main" : "マップ上の香炉で香を焚き、プレイヤーを"禍の薫陶"で侵します。<br>サリファーのキルは、プレイヤーの"禍の薫陶"の進行度に合わせて遅延されます。"
 "role.thurifer.ability.curse" : "香炉を活性化させ、煙を焚きます。<br>活性化された香炉はサリファーを暴くための推理材料になります。<br>活性化した香炉はしばらく時間がたつと再び活性を失います。"
 "role.thurifer.ability.impute" : "自身の"禍の薫陶"が50%以上進行すると、一度だけ非活性の香炉に<b>転移</b>して進行度をリセットできます。<br>クルーメイトによる<b>転移</b>は香炉を永続的に活性化させます。注意しましょう。<br>サリファーは自身の進行度を<b>転移</b>できません。"
+"role.zeal.ability.title" : "固有能力 "赤熱する殺意""
+"role.zeal.ability.main" : "ジールはプレイヤーに近寄ってキルボタンを獲得します。キルボタンを複数ストックして一気に使用すると、<br>大量キルを決められます。"
+"role.zeal.ability.absorb" : "他のプレイヤーのそばに居続けると熱狂を吸収し、キルボタンを獲得します。<br>熱狂の吸収には、プレイヤーごとにもクールダウンがあります。"
+"role.zeal.ability.kill" : "キルボタンは使い切り式で、同時に複数所持できます。<br>キルボタンが残っている限り、キルしてもキルクールはリセットされません。"
 
 "role.dancer.winCond" : "生存しながら、<b>ダンス</b>によって<var>#NUM</var>人の死の預言を完遂させる。#ADD"
 "role.dancer.winCond.main.lastDance" : "<br>また、上の条件を満たしたときに生存者に<var>ラストダンス</var>を見せる。"
@@ -3175,6 +3185,9 @@ $Color
 "role.gambler.ability.title" : "固有能力 "打算的な勝負師""
 "role.gambler.ability.main" : "ギャンブラーは緊急会議で投票する代わりに<b>投票結果を予想</b>し、<b>チップ</b>を賭けます。<br>所持チップがすべて無くなると死亡します。<br>より有利に立ち回るため、タスクフェイズ中には<b>イカサマ</b>に勤しみます。<br><br>緊急会議では次の2種類の賭けができます。予想的中すると賭けた2倍のチップを手に入れます。<br>・<b>ゼロ票賭け</b>: 票を全く集めない3人を選んで賭けます。3人とも全く票を集めなければ予想的中です。<br>・<b>最多票賭け</b>: 最多数の票を集める1人を選んで賭けます。選んだプレイヤーが最多票を集めれば予想的中です。<br>"
 "role.gambler.ability.deceive" : "プレイヤーにイカサマを仕掛けます。<br>直後の会議でそのプレイヤーの投票先を即座に把握できます。"
+"role.vanity.ability.title" : "固有能力 "正義の執行？""
+"role.vanity.ability.main" : "シェリフとは異なり、キルに失敗しません。"
+"role.vanity.ability.kill" : "相手の陣営を問わずキルできます。"
 
 "role.extraMission.winCond" : "自身の勝利条件を満たしたうえで、ゲーム終了時にターゲットが死亡していること。<br>ターゲットが生存している場合、勝利を失います。"
 "role.trilemma.winCond.block" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレンマがどちらも死亡していること。<br>残りのどちらか一方でも生存している場合、勝利を失います。"

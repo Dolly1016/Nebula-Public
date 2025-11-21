@@ -234,6 +234,24 @@ public static class UnityHelper
     }
 
 
+    public static PassiveButton SetAsDelegateButton(this PassiveButton button, PassiveButton mainButton, bool delegateHoverAction = false)
+    {
+        button.OnClick.AddListener(() => mainButton.OnClick.Invoke());
+        if (delegateHoverAction)
+        {
+            button.OnMouseOver.AddListener(() => mainButton.OnMouseOver.Invoke());
+            button.OnMouseOut.AddListener(() => mainButton.OnMouseOut.Invoke());
+        }
+        return button;
+    }
+
+    public static void SetLocalizedOverlay(this PassiveButton button, string translationKey) => SetRawOverlay(button, Language.Translate(translationKey));
+    public static void SetRawOverlay(this PassiveButton button, string rawText)
+    {
+        button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, rawText));
+        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+    }
+
     public static PassiveButton SetUpButton(this GameObject gameObject, bool withSound = false, SpriteRenderer? buttonRenderer = null, Color? defaultColor = null, Color? selectedColor = null)
         => SetUpButton(gameObject, withSound, buttonRenderer != null ? [buttonRenderer] : [], defaultColor, selectedColor);
 

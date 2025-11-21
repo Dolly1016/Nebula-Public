@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Il2CppSystem.Net;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -193,5 +194,22 @@ public static class EnumerableHelper
     static public void DoIf<T>(this T? nullableObj, Action<T> action)
     {
         if (nullableObj != null) action.Invoke(nullableObj!);
+    }
+
+    static public T[] Shuffle<T>(this IEnumerable<T> enumerable)
+    {
+        return Shuffled(enumerable.ToArray());
+    }
+
+    static public T[] Shuffled<T>(this T[] array)
+    {
+        return RandomArray(array.Length).Select(i => array[i]).ToArray();
+    }
+
+    static public int[] RandomArray(int length)
+    {
+        var array = new int[length];
+        for (int i = 0; i < length; i++) array[i] = i;
+        return array.OrderBy(i => Guid.NewGuid()).ToArray();
     }
 }

@@ -603,6 +603,7 @@ class VoteAreaPatch
                 r.gameObject.AddComponent<ZOrderedSortingGroup>().SetConsiderParentsTo(nebulaLayer.transform);
                 r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             });
+            nebulaLayer.SetUpAsMeetingMask();
 
             __instance.ThumbsDown.transform.SetLocalZ(-0.55f);
         }

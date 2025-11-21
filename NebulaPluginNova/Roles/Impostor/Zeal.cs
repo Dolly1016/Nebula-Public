@@ -110,12 +110,14 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
                     _ => interactTracker.CurrentTarget != null);
                 interactButton.OnEffectStart = (button) =>
                 {
+                    interactTracker.KeepAsLongAsPossible = true;
                     var timer = button.EffectTimer as GameTimer;
                     timer!.SetRange(AbsorbDurationOption + AbsorbAdditionalDurationOption * killButtons.Count);
                     timer.Start();
                 };
                 interactButton.OnEffectEnd = (button) =>
                 {
+                    interactTracker.KeepAsLongAsPossible = false;
                     if (interactTracker.CurrentTarget == null) return;
                     if (MeetingHud.Instance) return;
 

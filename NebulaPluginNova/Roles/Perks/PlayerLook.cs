@@ -5,10 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.TextCore.Text;
 using Virial;
 using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Text;
 
 namespace Nebula.Roles.Perks;
 

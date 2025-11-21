@@ -55,7 +55,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
                         {
                             acTokenChallenge.Value = false;
                         }
-                    }catch (Exception ex) { }
+                    }catch (Exception) { }
                 }, this);
 
                 int left = NumOfGhostsOption.GetValue();

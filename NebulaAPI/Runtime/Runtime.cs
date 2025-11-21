@@ -41,7 +41,7 @@ public interface NebulaPreprocessor
     /// <param name="color">色。</param>
     /// <param name="priority">勝利の優先度。この値が大きいほど優先されます。</param>
     /// <returns></returns>
-    GameEnd CreateEnd(string localizedName, Color color, int priority = 32);
+    GameEnd CreateEnd(string localizedName, Color color, int priority = 32, bool specifyNobodyWins = true);
     /// <summary>
     /// 新たなゲーム終了を追加します。
     /// </summary>
@@ -50,7 +50,7 @@ public interface NebulaPreprocessor
     /// <param name="color">色。</param>
     /// <param name="priority">勝利の優先度。この値が大きいほど優先されます。</param>
     /// <returns></returns>
-    GameEnd CreateEnd(string immutableId, TextComponent displayText, Color color, int priority = 32);
+    GameEnd CreateEnd(string immutableId, TextComponent displayText, Color color, int priority = 32, bool specifyNobodyWins = true);
     /// <summary>
     /// 新たな追加勝利を追加します。
     /// </summary>

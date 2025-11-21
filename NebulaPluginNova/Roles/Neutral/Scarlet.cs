@@ -322,7 +322,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            Color loverColor = Lover.Colors[0];
+            Color loverColor = Scarlet.MyRole.UnityColor;
 
             if (IsMyLover(GamePlayer.LocalPlayer)) name += " ♡".Color(loverColor);
         }
@@ -473,7 +473,7 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            Color loverColor = Lover.Colors[0];
+            Color loverColor = Scarlet.MyRole.UnityColor;
             
             var myFlirtatious = MyScarlet;
             RuntimeRole? myFlirtatiousRuntimeRole = myFlirtatious;
@@ -483,7 +483,7 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
 
             if (AmOwner) canSee = true;
             if ((myFlirtatiousRuntimeRole?.AmOwner ?? false) || canSeeAllInfo) canSeeAll = true;
-            
+
             if (canSee || canSeeAll) name += ((canSeeAll && amFavorite) ? " ♥" : " ♡").Color(loverColor);
         }
 

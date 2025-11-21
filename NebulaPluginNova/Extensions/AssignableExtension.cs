@@ -18,7 +18,7 @@ internal static class AssignableExtension
         if (assignable is RuntimeRole role)
         {
             GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(assignable.MyPlayer, role));
-            assignable.MyPlayer.FeelBeTrueCrewmate = true;
+            assignable.MyPlayer.FeelBeTrueCrewmate = false;
         }
         else if (assignable is RuntimeModifier modifier)
             GameOperatorManager.Instance?.Run(new PlayerModifierSetEvent(assignable.MyPlayer, modifier));

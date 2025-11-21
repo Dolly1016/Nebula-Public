@@ -130,7 +130,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         [Local, OnlyMyPlayer]
         void OnDead(PlayerDieEvent ev)
         {
-            if(CheckKillCondition) new StaticAchievementToken("avenger.another2");
+            if(KillCondition) new StaticAchievementToken("avenger.another2");
         }
 
         [Local, OnlyMyPlayer]

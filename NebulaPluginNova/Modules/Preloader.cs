@@ -95,8 +95,8 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
         yield break;
     }
 
-    GameEnd NebulaPreprocessor.CreateEnd(string localizedName, Virial.Color color, int priority) => new(localizedName, color, priority);
-    GameEnd NebulaPreprocessor.CreateEnd(string immutableId, TextComponent displayText, Virial.Color color, int priority) => new(immutableId, displayText, color, priority);
+    GameEnd NebulaPreprocessor.CreateEnd(string localizedName, Virial.Color color, int priority, bool specifyNobodyWins) => new(localizedName, color, priority, specifyNobodyWins);
+    GameEnd NebulaPreprocessor.CreateEnd(string immutableId, TextComponent displayText, Virial.Color color, int priority, bool specifyNobodyWins) => new(immutableId, displayText, color, priority, specifyNobodyWins);
     ExtraWin NebulaPreprocessor.CreateExtraWin(string localizedName, Virial.Color color) => new(localizedName, color);
     ExtraWin NebulaPreprocessor.CreateExtraWin(string immutableId, TextComponent displayText, Virial.Color color) => new(immutableId, displayText, color);
 

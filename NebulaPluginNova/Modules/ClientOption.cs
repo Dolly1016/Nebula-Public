@@ -391,8 +391,7 @@ public static class StartOptionMenuPatch
                     var detail = option.DisplayDetail;
                     if(detail != null)
                     {
-                        button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, detail));
-                        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                        button.SetRawOverlay(detail);
                     }
                 }
             }, 2, -1, 0, 0.5f);
@@ -409,8 +408,7 @@ public static class StartOptionMenuPatch
                     {
                         if (Language.TryTranslate("config.client." + translationKey + ".detail", out var detail))
                         {
-                            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, detail));
-                            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                            button.SetRawOverlay(detail);
                         }
                     }
                     });

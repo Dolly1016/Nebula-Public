@@ -384,7 +384,7 @@ public class EndGameManagerSetUpPatch
 
         __instance.BackgroundBar.material.SetColor("_Color", endCondition?.Color ?? new Color(1f, 1f, 1f));
 
-        __instance.WinText.text = winners.Count == 0 ? Language.Translate("end.status.noWinners") : DestroyableSingleton<TranslationController>.Instance.GetString(amWin ? StringNames.Victory : StringNames.Defeat);
+        __instance.WinText.text = (winners.Count == 0 && (endCondition?.SpecifyNobodyWins ?? true)) ? Language.Translate("end.status.noWinners") : DestroyableSingleton<TranslationController>.Instance.GetString(amWin ? StringNames.Victory : StringNames.Defeat);
         __instance.WinText.color = amWin ? new Color(0f, 0.549f, 1f, 1f) : Color.red;
 
         LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));

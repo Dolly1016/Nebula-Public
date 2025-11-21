@@ -17,6 +17,10 @@ public interface ObjectTracker<T>
     /// 現在追跡しているターゲットをロックして変更させない場合は<c>true</c>にしてください。
     /// </summary>
     public bool IsLocked { get; set; }
+    /// <summary>
+    /// 現在追跡しているターゲットをできるだけキープします。
+    /// </summary>
+    public bool KeepAsLongAsPossible { get; set; }
     internal void SetColor(UnityEngine.Color color);
 
     /// <summary>

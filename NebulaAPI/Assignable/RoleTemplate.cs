@@ -214,7 +214,6 @@ public class DefinedRoleTemplate : DefinedSingleAssignableTemplate, IGuessed, As
     /// <summary>
     /// デフォルト設定で幽霊役職/モディファイアを割り当てられるかどうか返します。
     /// </summary>
-    /// <param name="modifier"></param>
     /// <returns></returns>
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable);
 

@@ -78,6 +78,7 @@ public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, I
 {
     V? ObjectTracker<V>.CurrentTarget => currentTarget?.Item2;
     bool ObjectTracker<V>.IsLocked { get => isLocked; set => isLocked = value; }
+    bool ObjectTracker<V>.KeepAsLongAsPossible { get => isSoftLocked; set => isSoftLocked = value; }
 
     private Tuple<T,V>? currentTarget = null;
 
@@ -93,6 +94,7 @@ public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, I
     bool ignoreShadows;
     float maxDistance;
     private bool isLocked = false;
+    private bool isSoftLocked = false;
     public bool MoreHighlight = false;
 
     public ObjectTrackerUnityImpl(PlayerControl tracker, float maxDistance, Func<IEnumerable<T>> allTargets, Predicate<V> predicate, Predicate<V>? predicateHeavier, Func<T, V> converter, Func<T, IEnumerable<Vector2>> positionConverter, Func<T, SpriteRenderer> rendererConverter, Color? color = null, bool ignoreColliders = false, bool ignoreShadows = true)
@@ -177,6 +179,7 @@ public class ObjectTrackerUnityImpl<V,T> : FlexibleLifespan, ObjectTracker<V>, I
             if (!ignoreShadows && pos.All(p => NebulaPhysicsHelpers.AnyShadowBetween(p, myPos, out _))) continue;
             if (!(predicateHeavier?.Invoke(v) ?? true)) continue;
 
+            if (candidate != null && currentTarget != null && isSoftLocked && candidate.Item2 == currentTarget.Item2) continue;
             candidate = new(t,v);
             distance = magnitude;
         }

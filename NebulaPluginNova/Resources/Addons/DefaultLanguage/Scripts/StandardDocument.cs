@@ -48,6 +48,9 @@ namespace DefaultLang.Documents;
 [AddonDocument("role.sculptor", RoleType.Role, (string[])["Buttons.SampleButton.png;role.sculptor.ability.sample", "Buttons.DecoyMapImpostorButton.png;role.sculptor.ability.map"], false, true)]
 [AddonDocument("role.fixer", RoleType.Role, (string[])["FixerIcon.png;role.fixer.ability.meeting"], false, false)]
 [AddonDocument("role.rokurokubi", RoleType.Role, (string[])["Buttons.RokurokubiButton.png;role.rokurokubi.ability.rokurokubi", "Buttons.RokurokubiResetButton.png;role.rokurokubi.ability.reset"], false, false)]
+[AddonDocument("role.zeal", RoleType.Role, (string[])["Buttons.ZealButton.png;role.zeal.ability.absorb", "Buttons.VanillaKillButton.png;role.zeal.ability.kill"], false, false)]
+[AddonDocument("role.vanity", RoleType.Role, (string[])["Buttons.SheriffKillButton.png;role.vanity.ability.kill"], false, false)]
+[AddonDocument("role.sheriff", RoleType.Role, (string[])["Buttons.SheriffKillButton.png;role.sheriff.ability.kill"], false, false)]
 public class StandardDocument : IDocumentWithId
 {
     string documentId;

@@ -1495,6 +1495,7 @@
 "options.role.tyrant.killCooldown" : "Kill Cooldown"
 "options.role.tyrant.numOfKillingToWin" : "# Killing to Win"
 "options.role.tyrant.useImpostorAbility" : "Use Impostor Ability"
+"stats.tyrant.kill" : "Num of Killing"
 
 "role.vanity.name" : "Vanity"
 "role.vanity.short" : "V"
@@ -2232,6 +2233,10 @@
 "inventory.color.vanilla16" : "Tan"
 "inventory.color.vanilla17" : "Coral"
 "inventory.color.visor" : "Default"
+"inventory.costume.variants" : "Variants"
+"inventory.costume.tag.0" : "This costume has animations!"
+"inventory.costume.tag.1" : "This costume is functional!"
+"inventory.costume.tag.2" : "This costume has some variants."
 
 # Input
 

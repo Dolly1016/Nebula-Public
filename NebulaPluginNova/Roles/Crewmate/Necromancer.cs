@@ -126,7 +126,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                         var currentHolding = MyPlayer.HoldingDeadBody!;
 
                         new StaticAchievementToken("necromancer.common1");
-                        if (!currentHolding.Player.IsCrewmate) new StaticAchievementToken("necromancer.another1");
+                        if (!currentHolding.Player.IsCrewmate) new StaticAchievementToken("necromancer.another");
                         acTokenChalenge.Value.cleared |= (acTokenChalenge.Value.bitFlag & (1 << currentHolding.Player.PlayerId)) != 0;
                         acTokenChalenge.Value.bitFlag |= 1 << currentHolding.Player.PlayerId;
 

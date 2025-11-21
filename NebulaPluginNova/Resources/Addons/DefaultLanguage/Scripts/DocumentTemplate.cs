@@ -112,7 +112,7 @@ static public class RoleDocumentHelper
     {
         return NebulaAPI.GUI.VerticalHolder(GUIAlignment.TopLeft,
             NebulaAPI.GUI.LocalizedText(GUIAlignment.TopLeft, ChapterTitleAttribute, chapterName + ".title"),
-            NebulaAPI.GUI.HorizontalHolder(GUIAlignment.TopLeft, NebulaAPI.GUI.HorizontalMargin(0.1f), NebulaAPI.GUI.VerticalHolder(GUIAlignment.Left, inner.Where(w => w != null).Delimit(NebulaAPI.GUI.VerticalMargin(0.1f)))),
+            NebulaAPI.GUI.HorizontalHolder(GUIAlignment.TopLeft, NebulaAPI.GUI.HorizontalMargin(0.1f), NebulaAPI.GUI.VerticalHolder(GUIAlignment.Left, inner.Where(w => w != null).Join(NebulaAPI.GUI.VerticalMargin(0.1f)))),
             NebulaAPI.GUI.VerticalMargin(0.1f)
             );
     }

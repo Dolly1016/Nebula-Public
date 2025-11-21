@@ -25,10 +25,8 @@ public class ShipStatusPatch
         AmongUsUtil.GetCurrentNormalOption().MapId = mapId;
 
         //ModdedMap
-        if (false)
-        {
-            ModShipStatus.CleanOriginalShip(__instance);
-        }
+        //ModShipStatus.CleanOriginalShip(__instance);
+        
     }
 
     static public void Postfix(ShipStatus __instance)

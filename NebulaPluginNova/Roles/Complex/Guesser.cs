@@ -100,9 +100,7 @@ static file class GuesserSystem
         else
             leftStr = leftGuess.ToString();
 
-        IEnumerable<DefinedRole> roles;
-
-        return MeetingRoleSelectWindow.OpenRoleSelectWindow(null, r => r.CanBeGuess, GamePlayer.LocalPlayer?.IsTrueCrewmate ?? false, Language.Translate("role.guesser.leftGuess") + " : " + leftStr, onSelected);
+        return MeetingRoleSelectWindow.OpenRoleSelectWindow(null, r => r.CanBeGuess, GamePlayer.LocalPlayer?.FeelBeTrueCrewmate ?? false, Language.Translate("role.guesser.leftGuess") + " : " + leftStr, onSelected);
     }
 
     static public void OnMeetingStart(int leftGuess,Action guessDecrementer, Func<bool>? guessIf = null)

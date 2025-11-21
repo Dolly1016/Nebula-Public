@@ -57,3 +57,13 @@ class PlayerCustomizationMenuUpdatePatch
         }
     }
 }
+
+[HarmonyPatch(typeof(PlayerCustomizationMenu), nameof(PlayerCustomizationMenu.Start))]
+class PlayerCustomizationMenuStartPatch
+{
+    public static void Postfix(PlayerCustomizationMenu __instance)
+    {
+        var bottomGradient = __instance.transform.FindChild("Bottom Gradient");
+        if (bottomGradient) bottomGradient.transform.SetLocalZ(-20f);
+    }
+}

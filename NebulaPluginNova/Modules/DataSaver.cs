@@ -290,12 +290,12 @@ public class DataSaver
 
     private string CalcRawText()
     {
-        string strContents = "";
+        StringBuilder sb = new();
         foreach (var entry in contents)
         {
-            strContents += entry.Key + ":" + entry.Value + "\n";
+            sb.Append(entry.Key).Append(':').Append(entry.Value).Append('\n');
         }
-        return strContents;
+        return sb.ToString();
     }
 
     private bool IsRunningAsyncOutput = false;
@@ -305,13 +305,16 @@ public class DataSaver
         async Task WriteAsyncSingle(string contents)
         {
             IsRunningAsyncOutput = true;
-            try
+            await Task.Run(async () =>
             {
-                await File.WriteAllTextAsync(ToDataSaverPath(filename),contents);
-            }
-            catch (Exception)
-            {
-            }
+                try
+                {
+                    await File.WriteAllTextAsync(ToDataSaverPath(filename), contents).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                }
+            }).ConfigureAwait(false);
         }
 
         IsRunningAsyncOutput = true;

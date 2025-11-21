@@ -44,8 +44,8 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
     }
     private RolePool initialPool = null!;
 
-    static private bool IsCrewmateRole(DefinedRole role) => role.Category == RoleCategory.CrewmateRole && !role.IsMadmate;
-    static private bool IsImpostorRole(DefinedRole role) => role.Category == RoleCategory.ImpostorRole || role.IsMadmate;
+    static private bool IsCrewmateRole(DefinedRole role) => role.Category == RoleCategory.CrewmateRole;
+    static private bool IsImpostorRole(DefinedRole role) => role.Category == RoleCategory.ImpostorRole;
     static private bool IsNeutralRole(DefinedRole role) => role.Category == RoleCategory.NeutralRole;
     static private RoleCategory GetCategory(DefinedRole role) => IsNeutralRole(role) ? RoleCategory.NeutralRole : IsImpostorRole(role) ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole;
     private RolePool GetCurrentRolePool()
@@ -157,7 +157,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
     static private readonly FloatConfiguration OracleCooldownOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration OracleAdditionalCooldownOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleAdditionalCooldown", (float[])[0f,0.5f,1f,2f,2.5f,3f,4f,5f,7.5f,10f,12.5f,15f,20f,30f], 1f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration OracleDurationOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleDuration", (float[])[0f,0.5f,1f,1.5f,2f,2.5f,3f,3.5f,4f,5f,6f,7f,8f,9f,10f], 2f, FloatConfigurationDecorator.Second);
-    static private readonly IntegerConfiguration NumOfCandidatesOption = NebulaAPI.Configurations.Configuration("options.role.oracle.numOfCandidates", (1, 3), 3);
+    static private readonly IntegerConfiguration NumOfCandidatesOption = NebulaAPI.Configurations.Configuration("options.role.oracle.numOfCandidates", (1, 6), 6);
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
@@ -184,7 +184,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 void PredicateRole()
                 {
                     var result = ModSingleton<OracleSystem>.Instance.GetRoleCandidate(MyPlayer, playerTracker.CurrentTarget!.RealPlayer, NumOfCandidatesOption);
-                    var shuffled = Helpers.GetRandomArray(result.Length).Select(i => result[i]).ToArray();
+                    var shuffled = result.Shuffled();
                     divideResults[playerTracker.CurrentTarget!.RealPlayer.PlayerId] = (
                         string.Join(", ", shuffled.Select(r => r.DisplayColoredName)),
                         string.Join(", ", shuffled.Select(r => shuffled.Length >= 2 ? r.DisplayColoredShort : r.DisplayColoredName))
@@ -196,6 +196,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 oracleButton.OnClick = (button) => {
                     if (OracleDurationOption > 0f)
                     {
+                        playerTracker.KeepAsLongAsPossible = true;
                         button.StartEffect();
                     }
                     else
@@ -206,6 +207,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 };
                 oracleButton.OnEffectEnd = (button) =>
                 {
+                    playerTracker.KeepAsLongAsPossible = false;
                     if (playerTracker.CurrentTarget == null) return;
                     if (MeetingHud.Instance) return;
 

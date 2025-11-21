@@ -11,7 +11,9 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.crewmate", new(Palette.CrewmateBlue), TeamRevealType.Everyone);
 
-    private Crewmate() : base("crewmate", new(Palette.CrewmateBlue), RoleCategory.CrewmateRole, MyTeam) { }
+    private Crewmate() : base("crewmate", new(Palette.CrewmateBlue), RoleCategory.CrewmateRole, MyTeam) {
+        ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Crewmate.png");
+    }
 
     static public readonly Crewmate MyRole = new();
 
