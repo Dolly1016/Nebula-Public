@@ -15,6 +15,7 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Neutral;
@@ -87,6 +88,12 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
         GamePlayer? GetMyFavorite() => NebulaGameManager.Instance?.AllPlayerInfo.FirstOrDefault(IsMyFavorite);
         Cache<GamePlayer> MyFavorite = null!;
         private AbilityGauge Gauge = null!;
+
+        GUIWidget RuntimeAssignable.ProgressWidget =>  ProgressGUI.Holder(
+            (MyFavorite.Get() != null) ? ProgressGUI.OneLineText(Language.Translate("role.scarlet.gui.favorite") + ": " + MyFavorite.Get().Name) : null,
+            (MyFavorite.Get() != null && WithFavoriteGauge) ? ProgressGUI.OneLineText(Language.Translate("role.scarlet.gui.gauge"), ":", 0.8f, (() => ((FavoriteGauge / FavoriteGaugeThreshold) * 100f).ToString("F1") + "%", 4)) : null
+            );
+         
 
         void OnAddLover(GamePlayer player, bool isFavorite)
         {
@@ -254,12 +261,14 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
             }
         }
 
+        [EventPriority(-1)]
         void OnCheckGameEnd(EndCriteriaMetEvent ev)
         {
             var favorite = GetMyFavorite();
             if (favorite == null) return;
             if (WithFavoriteGauge && FavoriteGauge < FavoriteGaugeThreshold) return; //ゲージがたまりきっていなければ乗っ取らない。
             if (!CanOverrideTaskWin && ev.EndReason == GameEndReason.Task) return;//タスク勝利の乗っ取り
+            if (ev.OverwrittenGameEnd == NebulaGameEnd.AvengerWin && (favorite.Role != Avenger.MyRole || !ev.Winners.Test(favorite))) return; //Avenger勝利は本命がAvengerで勝利していない限り乗っ取らない。
             if (!MyPlayer.IsDead && !favorite.IsDead && ev.Winners.Test(favorite)) ev.TryOverwriteEnd(NebulaGameEnd.ScarletWin, GameEndReason.Special);
         }
 

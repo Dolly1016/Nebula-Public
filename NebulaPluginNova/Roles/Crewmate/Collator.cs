@@ -10,6 +10,7 @@ using Virial.Events.Player;
 using Virial.Events.Role;
 using Virial.Game;
 using Virial.Helpers;
+using Virial.Media;
 using Virial.Text;
 
 namespace Nebula.Roles.Crewmate;
@@ -41,6 +42,8 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
     static private readonly GameStatsEntry StatsCollating = NebulaAPI.CreateStatsEntry("stats.collator.collating", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsMatched = NebulaAPI.CreateStatsEntry("stats.collator.matched", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsUnmatched = NebulaAPI.CreateStatsEntry("stats.collator.unmatched", GameStatsCategory.Roles, MyRole);
+
+    [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CollatorSampleButton.png", 100f);
@@ -65,7 +68,24 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
             }
         }
 
-        
+        GUIWidget? IPlayerAbility.ProgressWidget => sharedResults.Count == 0 ? null : ProgressGUI.Holder(
+            ProgressGUI.OneLineText(Language.Translate("role.collator.gui.results")),
+                (sharedResults.Count == 0 ? 
+                    ProgressGUI.OneLineText(Language.Translate("role.collator.gui.results.zero")) : 
+                    ProgressGUI.Holder(
+                    sharedResults.Select(result => ProgressGUI.OneLineText(result.player1.ColoredName + ", " + result.player2.ColoredName + " ⇒" + (result.matched ? Language.Translate("role.collator.ui.matched").Color(Color.green) : Language.Translate("role.collator.ui.unmatched").Color(Color.red))))
+                )).Move(new(0.1f, 0f))
+            );
+
+        List<(GamePlayer player1, GamePlayer player2, bool matched)> sharedResults = [];
+        static private readonly RemoteProcess<(GamePlayer collator, GamePlayer player1, GamePlayer player2, bool matched)> ShareResult = new("collator.shareResult", (message, _) =>
+        {
+            if(message.collator?.TryGetAbility<Ability>(out var collator) ?? false)
+            {
+                collator.sharedResults.Add((message.player1, message.player2, message.matched));
+            }
+        });
+
         void RegisterResult((GamePlayer player, RoleTeam team) player1, (GamePlayer player, RoleTeam team) player2)
         {
             bool matched = player1.team == player2.team;
@@ -82,12 +102,13 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                 new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), 
                 new RawTextComponent(
                     Language.Translate("role.collator.ui.target") + ":<br>"
-                    + "  " + player1.player.Unbox().ColoredDefaultName + "<br>"
-                    + "  " + player2.player.Unbox().ColoredDefaultName + "<br>"
+                    + "  " + player1.player.ColoredName + "<br>"
+                    + "  " + player2.player.ColoredName + "<br>"
                     + "<br>"
                     + Language.Translate("role.collator.ui.result") + ": " + (matched ? Language.Translate("role.collator.ui.matched").Color(Color.green) : Language.Translate("role.collator.ui.unmatched").Color(Color.red)).Bold()                     
                 )))
                 , MeetingOverlayHolder.IconsSprite[2], MyRole.RoleColor);
+            ShareResult.Invoke((MyPlayer, player1.player, player2.player, matched));
         }
 
         [Local]

@@ -103,14 +103,14 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
             }, NebulaAPI.CurrentGame!);
         }
 
-        [Local]
-        void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
+        [Local, EventPriority(EventPriority.Low)]
+        void DecorateOtherPlayerName(PlayerSetFakeRoleNameEvent ev)
         {
             if(sabotageChargeMap.TryGetValue(ev.Player.PlayerId,out int val))
             {
                 if (ev.Player.IsImpostor) return;
                 if (val <= 0) return;
-                ev.Name += StringExtensions.Color(" (" + val + ")", Color.gray);
+                ev.Append(StringExtensions.Color(" (" + val + ")", Color.gray));
             }
         }
     }

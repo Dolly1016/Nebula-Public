@@ -1,7 +1,6 @@
 ﻿using AmongUs.Data;
 using AmongUs.GameOptions;
 using Il2CppInterop.Runtime.Injection;
-using Il2CppSystem.Threading;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Map;
@@ -95,7 +94,8 @@ public static class AmongUsUtil
         return Language.Translate("location.outside");
     }
 
-    public static void SetHighlight(Renderer renderer, bool on, Color? color = null)
+    public static void SetHighlight(Renderer renderer, bool on, Color? color = null) => SetHighlight(renderer, on, true, color);
+    public static void SetHighlight(Renderer renderer, bool on, bool mainTarget, Color? color = null)
     {
         if (on)
         {

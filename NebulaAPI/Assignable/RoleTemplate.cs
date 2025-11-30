@@ -262,7 +262,7 @@ public abstract class DefinedSingleAbilityRoleTemplate<Ability> : DefinedRoleTem
 {
     public abstract Ability CreateAbility(Virial.Game.Player player, int[] arguments);
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new RuntimeSingleAbilityAssignable<Ability>(player, this, arguments);
-    
+
     public DefinedSingleAbilityRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true, Func<bool>? optionHolderPredicate = null) : base(localizedName, color, category, team, configurations, withAssignmentOption, withOptionHolder, optionHolderPredicate)
     {
     }
@@ -279,7 +279,7 @@ public abstract class DefinedUsurpableAdvancedRoleTemplate<Ability, UsurpedAbili
     public abstract UsurpedAbility CreateUsurpedAbility(Virial.Game.Player player, int[] arguments);
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new RuntimeSingleAbilityAssignable<Ability>(player, this, arguments);
     IUsurpableAbility? DefinedRole.GetUsurpedAbility(Virial.Game.Player player, int[] arguments) => CreateUsurpedAbility(player, arguments);
-
+    
     public DefinedUsurpableAdvancedRoleTemplate(string localizedName, Virial.Color color, RoleCategory category, RoleTeam team, IEnumerable<IConfiguration>? configurations = null, bool withAssignmentOption = true, bool withOptionHolder = true, Func<bool>? optionHolderPredicate = null) : base(localizedName, color, category, team, configurations, withAssignmentOption, withOptionHolder, optionHolderPredicate)
     {
     }
@@ -653,5 +653,7 @@ public class RuntimeSingleAbilityAssignable<Ability> : RuntimeAssignableTemplate
     IEnumerable<IPlayerAbility> RuntimeAssignable.MyAbilities => GetAbilities();
 
     string RuntimeAssignable.DisplayName => role.GetDisplayName(MyAbility);
-    string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(role.UnityColor); 
+    string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(role.UnityColor);
+
+    IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [role, ..MyAbility.SubAssignableOnHelp];
 }

@@ -39,20 +39,18 @@ public static class NebulaExileWrapUp
         {
             GameOperatorManager.Instance?.Run(new MeetingPreSyncEvent(), true);
 
-            if ((MeetingHudExtension.ExiledAll?.Length ?? 0) > 0)
+            if ((MeetingHudExtension.ExiledAllModCache?.Length ?? 0) > 0)
             {
-                foreach (var exiled in MeetingHudExtension.ExiledAll!)
+                foreach (var exiled in MeetingHudExtension.ExiledAllModCache!)
                 {
-                    if (exiled)
-                    {
-                        exiled.Exiled();
-                        exiled.Data.IsDead = true;
-                        PlayerExtension.ResetOnDying(exiled);
-                    }
+                    if (exiled.VanillaPlayer) exiled.VanillaPlayer.Exiled();
+                    var vanillaInfo = GameData.Instance.GetPlayerById(exiled.PlayerId);
+                    if(vanillaInfo) vanillaInfo.IsDead = true;
+                    if(exiled.VanillaPlayer) PlayerExtension.ResetOnDying(exiled.VanillaPlayer);
 
                     NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Exile, null, 1 << exiled.PlayerId, GameStatisticsGatherTag.Spawn) { RelatedTag = EventDetail.Exiled });
 
-                    var info = exiled.GetModInfo();
+                    var info = exiled;
 
                     if (info != null)
                     {
@@ -107,8 +105,8 @@ public static class NebulaExileWrapUp
         NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.SendSync(SynchronizeTag.PostMeeting);
         yield return NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.CoSyncAndReset(Modules.SynchronizeTag.PostMeeting, true, true, false);
 
-        NebulaGameManager.Instance?.OnMeetingEnd(MeetingHudExtension.ExiledAll);
-        GamePlayer[] exiledArray = MeetingHudExtension.ExiledAll?.Select(p => p.GetModInfo()!).ToArray() ?? new GamePlayer[0];
+        NebulaGameManager.Instance?.OnMeetingEnd(MeetingHudExtension.ExiledAllModCache);
+        GamePlayer[] exiledArray = MeetingHudExtension.ExiledAllModCache?.ToArray() ?? new GamePlayer[0];
         GameOperatorManager.Instance?.Run(new MeetingEndEvent(exiledArray));
 
         NebulaGameManager.Instance?.AllPlayerInfo.Do(p => p.VanillaPlayer.MyPhysics.DoingCustomAnimation = false);
@@ -180,10 +178,10 @@ class ExileControllerBeginPatch
     public static void Prefix(ExileController __instance, [HarmonyArgument(0)] ref ExileController.InitProperties init)
     {
         init.voteTie = MeetingHudExtension.WasTie;
-        var first = MeetingHudExtension.ExiledAll?.FirstOrDefault();
-        init.networkedPlayer = first?.Data!;
-        init.outfit = first?.GetModInfo()!.DefaultOutfit.outfit;
-        init.isImpostor = first?.GetModInfo()!.IsImpostor ?? false;
+        var first = MeetingHudExtension.ExiledAllModCache?.FirstOrDefault();
+        init.networkedPlayer = GameData.Instance.GetPlayerById(first?.PlayerId ?? byte.MaxValue);
+        init.outfit = first?.DefaultOutfit.outfit;
+        init.isImpostor = first?.IsImpostor ?? false;
 
         StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -505f, () => ExileController.Instance);
     }
@@ -200,7 +198,7 @@ class ExileControllerBeginPatch
             {
                 __instance.completeString = Language.Translate("game.meeting.obvious");
             }
-            else if ((MeetingHudExtension.ExiledAll?.Length ?? 0) > 1)
+            else if ((MeetingHudExtension.ExiledAllModCache?.Length ?? 0) > 1)
             {
                 __instance.completeString = Language.Translate("game.meeting.multiple");
             }
@@ -232,7 +230,7 @@ class ExileControllerBeginPatch
             var confirmText = impostorText.text;
             int num = 0;
             int exiledBitFlag = 0;
-            foreach (var exiled in MeetingHudExtension.ExiledAll) exiledBitFlag |= 1 << exiled.PlayerId;
+            foreach (var exiled in MeetingHudExtension.ExiledAllModCache ?? []) exiledBitFlag |= 1 << exiled.PlayerId;
             bool IsDead(GamePlayer p) => p.IsDead || (exiledBitFlag & (1 << p.PlayerId)) != 0;
             switch (GeneralConfigurations.ConfirmEjectTargetOption.GetValue())
             {

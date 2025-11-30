@@ -7,6 +7,7 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Media;
 
 namespace Nebula.Roles.Neutral;
 
@@ -28,6 +29,8 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 
     static public Arsonist MyRole = new Arsonist();
     static private GameStatsEntry StatsDouse = NebulaAPI.CreateStatsEntry("stats.arsonist.doused", GameStatsCategory.Roles, MyRole);
+
+    [NebulaRPCHolder]
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
@@ -43,17 +46,32 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
             get
             {
                 int mask = 0;
-                foreach (var icon in playerIcons.Where(icon => icon.icon.GetAlpha() > 0.8f))
+                foreach (var icon in dousedPlayers)
                 {
-                    mask |= 1 << icon.playerId;
+                    mask |= 1 << icon.PlayerId;
                 }
                 return new int[] { mask };
             }
         }
 
+        static private readonly RemoteProcess<(GamePlayer arsonist, GamePlayer target)> RpcUpdateStatus = new("UpdateArsonist", (message, _) => { 
+            if(message.arsonist.Role is Instance arsonist)
+            {
+                arsonist.dousedPlayers.Add(message.target);
+            }
+        });
+
+        GUIWidget RuntimeAssignable.ProgressWidget => ProgressGUI.Holder(
+            ProgressGUI.OneLineText(Language.Translate("role.arsonist.gui.left")),
+            ProgressGUI.Holder(GamePlayer.AllOrderedPlayers.Where(p => p != MyPlayer && !dousedPlayers.Contains(p)).Select(p => 
+                ProgressGUI.OneLineText("-" + p.ColoredName + (p.IsDead ? ("(" + Language.Translate("role.arsonist.gui.left.dead") + ")").Color(Color.gray) : ""))
+            )).Move(new(0.04f, 0f))
+            );
+
         static private Image douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DouseButton.png", 115f);
         static private Image IgniteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.IgniteButton.png", 115f);
         private List<(byte playerId,PoolablePlayer icon)> playerIcons = [];
+        private HashSet<GamePlayer> dousedPlayers = [];
         private bool canIgnite;
 
         private bool CheckDoused((byte playerId, PoolablePlayer icon) p) => p.icon.GetAlpha() > 0.8f;
@@ -77,6 +95,15 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 
         public override void OnActivated()
         {
+            //共有している進捗を進める
+            {
+                var mask = BitMasks.AsPlayer((uint)initialDousedMask);
+                foreach(var p in GamePlayer.AllPlayers)
+                {
+                    if (mask.Test(p) || p.IsDead) dousedPlayers.Add(p);
+                }
+            }
+
             if (AmOwner)
             {
                 var IconsHolder = HudContent.InstantiateContent("ArsonistIcons", true, true, false, true);
@@ -105,7 +132,6 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                     icon.ToggleName(false);
                     icon.SetAlpha(0.35f);
                     playerIcons.Add((p.PlayerId,icon));
-
                     UpdateIcons();
                 }
 
@@ -131,6 +157,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
                         if (!(GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, douseTracker.CurrentTarget, new(RealPlayerOnly: true))).IsCanceled ?? false))
                         {
                             foreach (var icon in playerIcons) if (icon.playerId == douseTracker.CurrentTarget.RealPlayer.PlayerId) icon.icon.SetAlpha(1f);
+                            RpcUpdateStatus.Invoke((MyPlayer, douseTracker.CurrentTarget.RealPlayer));
                             StatsDouse.Progress();
                             CheckIgnitable();
                         }
@@ -157,19 +184,23 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void LocalUpdate(GameUpdateEvent ev) => UpdateIcons();
         
-        [Local]
+        
         void OnMeetingEnd(MeetingEndEvent ev)
         {
-            playerIcons.RemoveAll(tuple =>
+            if (AmOwner)
             {
-                if (NebulaGameManager.Instance?.GetPlayer(tuple.playerId)?.IsDead ?? true)
+                playerIcons.RemoveAll(tuple =>
                 {
-                    GameObject.Destroy(tuple.icon.gameObject);
-                    return true;
-                }
-                return false;
-            });
-            CheckIgnitable();
+                    if (NebulaGameManager.Instance?.GetPlayer(tuple.playerId)?.IsDead ?? true)
+                    {
+                        GameObject.Destroy(tuple.icon.gameObject);
+                        return true;
+                    }
+                    return false;
+                });
+                CheckIgnitable();
+            }
+            GamePlayer.AllPlayers.Where(p => p.IsDead).Do(p => dousedPlayers.Add(p));
         }
 
         StaticAchievementToken? acTokenCommon;

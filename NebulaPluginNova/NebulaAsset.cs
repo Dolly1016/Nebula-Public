@@ -115,6 +115,7 @@ public static class NebulaAsset
         CostumeMaskPreShader = Load<Shader>("Sprites-CostumeMaskPre");
         CostumeMaskPostShader = Load<Shader>("Sprites-CostumeMaskPost");
         CostumeMaskPostJustPosShader = Load<Shader>("Sprites-CostumeMaskJustPos");
+        LineEdgeShader = Load<Shader>("Line-Edge");
 
         DivMap[0] = Load<GameObject>("SkeldDivMap");
         DivMap[1] = Load<GameObject>("MIRADivMap");
@@ -253,6 +254,7 @@ public static class NebulaAsset
     static public Shader CostumeMaskPreShader { get; private set; } = null!;
     static public Shader CostumeMaskPostShader { get; private set; } = null!;
     static public Shader CostumeMaskPostJustPosShader { get; private set; } = null!;
+    static public Shader LineEdgeShader { get; private set; } = null!;
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public Material BrokenShaderMat { get; private set; } = null!;

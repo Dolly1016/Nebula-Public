@@ -60,7 +60,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     public IVisualTimer? CurrentTimer => (EffectActive && (EffectTimer?.IsProgressing ?? false)) ? EffectTimer : CoolDownTimer;
     public bool EffectActive = false;
 
-    public float CoolDownOnGameStart = 10f;
+    public static float CoolDownOnGameStart => GeneralConfigurations.ShortenCooldownAtGameStartOption;
 
     public Action<ModAbilityButtonImpl>? OnEffectStart { get; set; } = null;
     public Action<ModAbilityButtonImpl>? OnEffectEnd { get; set; } = null;
@@ -298,7 +298,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     public void OnGameStart(GameStartEvent ev) {
         if (UseCoolDownSupport && CoolDownTimer != null && CoolDownTimer is TimerImpl timer)
         {
-            if (GeneralConfigurations.ShortenCooldownAtGameStart)
+            if (GeneralConfigurations.UseShortenCooldownAtGameStartOption)
                 timer.Start(Mathf.Min(timer.Max, CoolDownOnGameStart));
             else
                 StartCoolDown();
@@ -427,23 +427,36 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         return this;
     }
 
-    public ModAbilityButtonImpl KeyBind(Virial.Compat.VirtualKeyInput keyCode, bool holdingDown = false, string? action = null) => KeyBind(NebulaInput.GetInput(keyCode), action, holdingDown);
+    public ModAbilityButtonImpl KeyBind(Virial.Compat.VirtualKeyInput keyCode, bool holdingDown = false, string? action = null)
+    {
+        var input = NebulaInput.GetInput(keyCode);
+        if (!input.IsEmpty) KeyBind(input, action, holdingDown);
+        return this;
+    }
+
     public ModAbilityButtonImpl KeyBind(VirtualInput keyCode, string? action = null, bool holdingDown = false)
     {
         VanillaButton.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((c) => { if (c.name.Equals("HotKeyGuide")) GameObject.Destroy(c); }));
 
-        this.keyCode= keyCode;
+        this.keyCode = keyCode;
+
         var obj = ButtonEffect.SetKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, action: action, backVariation: holdingDown ? 1 : 0);
         if (obj) obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
-        
+
         return this;
     }
 
     private static SpriteLoader aidActionSprite = SpriteLoader.FromResource("Nebula.Resources.KeyBindOption.png", 100f);
-    public ModAbilityButtonImpl SubKeyBind(Virial.Compat.VirtualKeyInput keyCode, string? action = null, bool isCriticalSubAction = false) => SubKeyBind(NebulaInput.GetInput(keyCode), action, isCriticalSubAction);
+    public ModAbilityButtonImpl SubKeyBind(Virial.Compat.VirtualKeyInput keyCode, string? action = null, bool isCriticalSubAction = false)
+    {
+        var input = NebulaInput.GetInput(keyCode);
+        if(!input.IsEmpty) SubKeyBind(input, action, isCriticalSubAction);
+        return this;
+    }
     public ModAbilityButtonImpl SubKeyBind(VirtualInput keyCode, string? action = null, bool isCriticalSubAction = false)
     {
         this.subKeyCode = keyCode;
+
         var guideObj = ButtonEffect.SetSubKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, false, action);
 
         if (guideObj != null)
@@ -457,12 +470,11 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
             {
                 Tutorial.WaitAndShowTutorial(() => !VanillaButton.gameObject.activeSelf || !PlayerControl.LocalPlayer.CanMove,
                     new TutorialBuilder(() => renderer.transform.position, true)
-                    .ShowWhile(()=>VanillaButton && renderer)
+                    .ShowWhile(() => VanillaButton && renderer)
                     .BindHistory("subaction")
                     .AsGraphicalWidget(aidActionSprite, new(0.3f, 0.3f), Language.Translate("tutorial.variations.subAction")));
             }
         }
-
         return this;
     }
 
@@ -672,7 +684,7 @@ public static class ButtonEffect
     static public GameObject? SetKeyGuideForVanillaButton(GameObject button, KeyCode key, bool removeExistingGuide = true, string? action = null, int backVariation = 0)
     {
         var obj = AddKeyGuide(button, key, new(0.48f, 0.48f), removeExistingGuide, action: action, backVariation: backVariation);
-        obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
+        if(obj != null) obj.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
         return obj;
     }
 

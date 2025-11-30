@@ -111,6 +111,8 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
 
     static public readonly EvilTracker MyRole = new();
 
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility 
     {

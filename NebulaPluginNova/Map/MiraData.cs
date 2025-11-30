@@ -50,6 +50,7 @@ public class MiraData : MapData
         new(-3.0f, 3.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ右上
         new(-5.7f, -2.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ下外
         new(1.4f, -0.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ下通路右方
+        new(-2.8f, 0.3f, MapObjectType.DepoisonBox), //ドロップシップ右下端
         new(8.5f, -1.9f,MapObjectType.SmallOrTabletopOutOfSight), //メッドベイ、O2復旧コンソール間
         new(13.2f, -1.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //メッドベイ左外
         new(16.7f, -1.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //メッドベイ右下
@@ -80,6 +81,7 @@ public class MiraData : MapData
         new(21.6f, -2.3f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //カフェ下展望
         new(20.2f, 2.0f, MapObjectType.SmallInCorner), //ストレージ下
         new(19.8f, 4.1f, MapObjectType.SmallOrTabletopOutOfSight), //ストレージ中
+        new(18.6f, 5.65f, MapObjectType.DepoisonBox), //ストレージ最奥
         ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
     protected override Vector2[] MapArea => MapPositions;

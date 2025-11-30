@@ -48,7 +48,7 @@ public class CombiImageInfo {
 
     private static bool CheckSpawnable(params ISpawnable[] spawnables)
     {
-        return spawnables.All(s => s.IsSpawnable && (s is not DefinedRole dr || GeneralConfigurations.exclusiveAssignmentOptions.All(option => !option.OnAssigned(dr).Any(r => spawnables.Contains(r)))));
+        return spawnables.All(s => s.IsSpawnable) && IExclusiveAssignmentRule.AllRules.All(option => spawnables.Count(spawnable => spawnable is DefinedRole dr && option.Contains(dr)) <= 1);
     }
 
     public static bool TryGetSuitableImage([MaybeNullWhen(false)]out CombiImageInfo info)
@@ -765,12 +765,6 @@ public static class HelpScreen
                 specialAssignmentsWidget,
                 GUI.API.VerticalHolder(GUIAlignment.Left, winConds)
             )));
-
-        //背景画像の選定
-        bool CheckSpawnable(params ISpawnable[] spawnables)
-        {
-            return spawnables.All(s => s.IsSpawnable && (s is not DefinedRole dr || GeneralConfigurations.exclusiveAssignmentOptions.All(option => !option.OnAssigned(dr).Any(r => spawnables.Contains(r)))));
-        }
 
         CombiImageInfo.TryGetSuitableImage(out var info);
         backImage = info?.Image;

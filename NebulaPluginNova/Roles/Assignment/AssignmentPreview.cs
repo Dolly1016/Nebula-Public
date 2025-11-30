@@ -11,6 +11,8 @@ namespace Nebula.Roles.Assignment;
 
 internal class AssignmentPreview
 {
+    private const bool ChooseExclusiveRolesAtFirst = true; //最初に排他割り当てを抽選する場合、true
+
     [Flags]
     public enum AssignmentFlag
     {
@@ -52,6 +54,7 @@ internal class AssignmentPreview
         /// <param name="usedCountMin">既にほかの理由で占有された割り当ての最小数</param>
         /// <param name="additionalMargin">追加割り当てのための余裕</param>
         /// <param name="syncCountWithMargin">追加割り当てが割り当て可能数を同時に消費する場合true</param>
+        /// <param name="expectedSurplus">全プレイヤーに役職を割り当てられることを期待する場合true</param>
         /// <returns>可能な全割り当てパターン</returns>
         public IEnumerable<ResolvedAssignmentPhase> TryResolve(int count, int wholeCount, AssignmentPool[] followers, int preassigned, ExtraAssignmentInfo additionalAssignments, bool expectedSurplus)
         {
@@ -60,6 +63,8 @@ internal class AssignmentPreview
             {
                 if (ExclusiveElements.Length > 0)
                 {
+                    ulong myExclusiveGroupBits = 0ul;
+
                     //排他要素の選択パターンを試行する
                     for (int i = 0; i < ExclusiveElements.Length; i++)
                     {
@@ -69,10 +74,22 @@ internal class AssignmentPreview
 
                         //選択した排他要素から1人分を割り当てた場合をシミュレートする。
                         foreach (var pattern in resolved.TryResolve(count - 1, wholeCount - 1, resolvedFollowers, preassigned + 1, additionalAssignments, expectedSurplus || i > 0)) yield return pattern;
+
+                        //排他要素のグループビットを記録する。
+                        myExclusiveGroupBits |= selected.GroupBit;
                     }
 
                     //排他要素を全く選ばなかったケースをシミュレートする。
-                    foreach (var pattern in Filter(this, 0ul, -1, 0, ExclusiveElements.Length, 0).TryResolve(count, wholeCount, followers, preassigned, additionalAssignments, true)) yield return pattern;
+                    bool exceptsFullAssignment = true;
+                    if (ChooseExclusiveRolesAtFirst)
+                    {
+                        ulong followersGroupBits = 0ul;
+                        //全排他要素がまだ選択されうる余地を残しているなら、全員への不足ない割り当てを期待する必要はない。
+                        followers.Do(f => f.ExclusiveElements.Do(e => followersGroupBits |= e.GroupBit));
+                        if((followersGroupBits & myExclusiveGroupBits) == myExclusiveGroupBits) exceptsFullAssignment = false;
+                    }
+
+                    foreach (var pattern in Filter(this, 0ul, -1, 0, ExclusiveElements.Length, 0).TryResolve(count, wholeCount, followers, preassigned, additionalAssignments, exceptsFullAssignment)) yield return pattern;
 
                     yield break;
                 }
@@ -158,7 +175,7 @@ internal class AssignmentPreview
         int modCrewmates = GeneralConfigurations.AssignmentCrewmateOption;
         if (modCrewmates < 0) modCrewmates = 99;
 
-        var exOptions = GeneralConfigurations.exclusiveAssignmentOptions;
+        var exOptions = IExclusiveAssignmentRule.AllRules.ToArray();
 
         ulong PickUpExOptionsIndecies(DefinedRole role)
         {

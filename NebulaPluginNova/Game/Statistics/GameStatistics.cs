@@ -39,6 +39,7 @@ public static class EventDetail
     static public readonly TranslatableTag Bubbled = new("statistics.events.bubbled");
     static public readonly TranslatableTag Meteor = new("statistics.events.meteor");
     static public readonly TranslatableTag Balloon = new("statistics.events.balloon");
+    static public readonly TranslatableTag Poisoned = new("statistics.events.poisoned");
 
     static EventDetail()
     {

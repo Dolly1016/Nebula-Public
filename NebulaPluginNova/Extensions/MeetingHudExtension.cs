@@ -54,7 +54,6 @@ public static class MeetingHudExtension
 
     static public GamePlayer? LastReporter = null;
     //直近の投票の結果吊られるプレイヤー
-    static public PlayerControl[]? ExiledAll = null;
     static public GamePlayer[]? ExiledAllModCache = null;
     
     //直近の投票がタイであったかどうか
@@ -80,7 +79,7 @@ public static class MeetingHudExtension
         CanSkip = true;
         ExileEvenIfTie = false;
         IsObvious = false;
-        ExiledAll = null;
+        ExiledAllModCache = null;
         CanShowPhotos = true;
         ActionCoolDown = 0f;
         LastSharedCount = 110;

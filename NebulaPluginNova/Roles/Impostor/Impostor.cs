@@ -7,6 +7,7 @@ using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
 
 namespace Nebula.Roles.Impostor;
 

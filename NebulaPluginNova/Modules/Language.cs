@@ -169,7 +169,7 @@ public class Language
 
             foreach(var s in addon.FindStreams("Language/" + lang + "/", path => path.EndsWith(".dat")))
             {
-                CurrentLanguage.Deserialize(stream);
+                CurrentLanguage.Deserialize(s);
             }
         }
     }
@@ -301,4 +301,46 @@ public static class ChangeLanguagePatch
     {
         Language.OnChangeLanguage((uint)AmongUs.Data.DataManager.Settings.Language.CurrentLanguage);
     }
+}
+
+//Do not rewrite the text provided by this class.
+//If you would like to translate, please send your translation proposal to Dolly, who will then approve it.
+public static class BuiltInLanguage
+{
+    public record TextSet(
+        string MarketplaceTermsTitle,
+        string MarketplaceTermsContent,
+        string MarketplaceTermsOk,
+        string MarketplaceTermsReject
+        );
+    
+    private static Dictionary<uint, TextSet> texts = [];
+
+    static BuiltInLanguage()
+    {
+        texts[0 /*English*/] = new(
+            "Marketplace Terms of Service",
+            "The Marketplace allows users to download user-created costumes and addons.<br>We request that developers of costumes and addons ensure their creations do not infringe upon the rights of others and adhere to standards of public decency. regarding fan works or derivative content based on third-party IPs, please strictly observe the guidelines provided by the respective rights holders.<br><br>Please be aware that all liability regarding costumes and addons lies solely with the creator of the work. Neither Innersloth nor NoS assumes any responsibility. We reserve the right to remove or suspend the availability of any content if a dispute or violation occurs.<br><br>For issues regarding costumes or addons, please contact the developer of the content first. If the issue remains unresolved, you may contact NoS. Innersloth is not involved in any issues related to these costumes and addons. Please strictly refrain from contacting Innersloth regarding these matters.<br>Nebula on the Ship Contact: nebula.on.the.ship@gmail.com",
+            "Accept",
+            "Decline"
+            );
+        texts[11 /*Japanese*/] = new(
+            "マーケットプレイスのご利用にあたって",
+            "マーケットプレイスでは、ユーザが制作したコスチュームやアドオンをダウンロードできます。<br><br>コスチュームおよびアドオンの開発者には、他者の権利を侵害せず、公序良俗に沿った制作をしていただくようお願い申し上げます。他IPの二次創作に関しては、権利者の提示するガイドラインを遵守してください。<br><br>コスチュームおよびアドオンに関する責任はすべてその制作物の作者に帰属します。InnerslothおよびNoSは責任を負いかねますので、ご了承ください。トラブルが発生した場合、当該コスチュームおよびアドオンの公開を停止する措置をとる可能性がございます。<br><br>トラブルに関してご相談なさる場合は、コスチュームおよびアドオンの開発者、次いでNoSにお問い合わせください。コスチュームおよびアドオンに関して発生したトラブルについて、Innerslothは一切関係ありませんから、Innerslothへのお問い合わせは厳にお控えください。<br>Nebula on the Ship お問い合わせ先: nebula.on.the.ship@gmail.com",
+            "同意する",
+            "同意しない"
+            );
+        texts[13 /*SChinese*/] = new(
+            "创意工坊使用条款",
+            "创意工坊允许玩家下载由其他玩家创作的装饰品和插件。<br><br>我们要求装饰品和插件的开发者确保其作品不侵犯他人权利，并遵守公共礼仪标准。关于基于第三方知识产权的衍生内容，请严格遵守各权利方提供的指导原则。<br><br>请注意，与装饰品和插件相关的所有责任均由作品的创作者独自承担。Innersloth和NoS均不承担任何责任。若发生争议或违规行为，我们保留移除或暂停任何内容的权利。<br><br>如遇与装饰品或插件相关的问题，请首先联系该内容的开发者。若问题未得到解决，您可以联系NoS。Innersloth不参与任何与这些装饰品和插件相关的问题，请避免就因这些事而联系Innersloth开发人员。<br>NoS联系方式nebula.on.the.ship@gmail.com",
+            "接受",
+            "拒绝");
+        texts[14 /*TChinese*/] = new(
+            "創意工坊使用條款",
+            "創意工坊允許玩家下載由其他玩家創作的裝飾品和插件。<br><br>我們要求裝飾品和插件的開發者確保其作品不侵犯他人權利，並遵守公共禮儀標準。關於基於第三方知識產權的衍生內容，請嚴格遵守各權利方提供的指導原則。<br><br>請注意，與裝飾品和插件相關的所有責任均由作品的創作者單獨承擔。Innersloth和NoS均不承擔任何責任。若發生爭議或違規行為，我們保留移除或暫停任何內容的權利。<br><br>如遇與裝飾品或插件相關的問題，請首先聯繫該內容的開發者。若問題未得到解決，您可以聯繫NoS。Innersloth不參與任何與這些裝飾品和插件相關的問題，請避免就因這些事而聯繫Innersloth開發人員。<br>NoS聯繫方式：nebula.on.the.ship@gmail.com",
+            "接受",
+            "拒絕");
+    }
+
+    public static BuiltInLanguage.TextSet CurrentTextSet => texts.TryGetValue((uint)AmongUs.Data.DataManager.Settings.Language.CurrentLanguage, out var textSet) ? textSet : texts[0];
 }

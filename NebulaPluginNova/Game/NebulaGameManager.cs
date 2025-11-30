@@ -3,6 +3,7 @@ using Interstellar.VoiceChat;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
+using Nebula.Modules.PreStartProcess;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Crewmate;
 using Nebula.VoiceChat;
@@ -83,6 +84,14 @@ public static class RoleHistoryHelper {
         }
     }
 
+    /// <summary>
+    /// あとから見返すための役職名に変換します。全ての情報が開示されている必要があります。
+    /// </summary>
+    /// <param name="role"></param>
+    /// <param name="ghostRole"></param>
+    /// <param name="modifier"></param>
+    /// <param name="isShort"></param>
+    /// <returns></returns>
     static public string ConvertToRoleName(RuntimeRole role, RuntimeGhostRole? ghostRole, List<RuntimeAssignable> modifier, bool isShort)
     {
         string result;
@@ -104,7 +113,7 @@ public static class RoleHistoryHelper {
 
         foreach (var m in modifier)
         {
-            var newName = m.OverrideRoleName(result, isShort);
+            var newName = m.OverrideRoleName(result, isShort, true);
             if (newName != null) result = newName;
         }
         
@@ -206,7 +215,6 @@ public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator
         shadowText.color = Color.black.AlphaMultiplied(0.6f * alpha);
     }
 }
-
 
 [NebulaRPCHolder]
 internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHolder, Virial.Game.Game
@@ -444,11 +452,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         }
     }
 
-    public void OnTaskUpdated(GamePlayer player)
-    {
-        GameEntityManager.Run(new PlayerTaskUpdateEvent(player));
-    }
-
     public void OnMeetingStart()
     {
 
@@ -462,11 +465,9 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         Scheduler.Execute(RPCScheduler.RPCTrigger.PreMeeting);
     }
 
-    public void OnMeetingEnd(PlayerControl[]? players)
+    public void OnMeetingEnd(GamePlayer[]? players)
     {
         if (PlayerControl.LocalPlayer.Data.IsDead) ChangeToSpectator();
-
-        foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) p.onLadder = false;
 
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) p.onLadder = false;
 
@@ -491,7 +492,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         GameEntityManager.Update();
 
         GameEntityManager.Run(new GameHudUpdateFasterEvent(this));
-        GameEntityManager.Run(new GameHudUpdateEvent(this));
+        GameEntityManager.Run(new GameHudUpdateEvent(this, Time.deltaTime, CurrentTime, Time.time));
         GameEntityManager.Run(new GameHudUpdateLaterEvent(this));
 
         if (!PlayerControl.LocalPlayer) return;
@@ -554,7 +555,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
 
     public void OnFixedUpdate() {
-        GameEntityManager.Run(new GameUpdateEvent(this));
+        GameEntityManager.Run(new GameUpdateEvent(this, Time.fixedDeltaTime, CurrentTime, Time.time));
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
         {
             var info = GamePlayer.LocalPlayer;
@@ -681,6 +682,27 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         }
     }
 
+    IPreStartProcess? preStartProcess = null;
+
+    public void StartPreStartProcess(IPreStartProcess process)
+    {
+        if(GameState == NebulaGameStates.NotStarted)
+        {
+#if PC
+            LobbySlideManager.Abandon();
+#endif
+            DestroyableSingleton<HudManager>.Instance.HideGameLoader();
+
+            //プレゲームプロセスの開始
+            if (preStartProcess == null)
+            {
+                preStartProcess = process;
+                if(process == null) return;
+                preStartProcess.Start(this);
+            }
+        }
+    }
+
     public IEnumerator CoWaitAndEndGame()
     {
         if(GameState != NebulaGameStates.Finished) GameState = NebulaGameStates.WaitGameResult;
@@ -726,11 +748,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public void AllAssignableAction(Action<RuntimeAssignable> action)
     {
         foreach (var p in AllPlayerInfo) p.Unbox().AssignableAction(action);
-    }
-
-    public void AllRoleAction(Action<RuntimeRole> action)
-    {
-        foreach (var p in AllPlayerInfo) action.Invoke(p.Role);
     }
 
     public void RpcInvokeSpecialWin(Virial.Game.GameEnd endCondition, int winnersMask)
@@ -835,8 +852,30 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public bool HavePassed(float since, float duration) => since + duration < CurrentTime;
 
     internal void RemovePlayerlike(IPlayerlike player) => allPlayerlikes.Remove(player.PlayerlikeId);
+
+    private List<KeyInputMapper> inputMappers = [];
+    public Virial.Compat.VirtualKeyInput MapInput(Virial.Compat.VirtualKeyInput input)
+    {
+        Virial.Compat.VirtualKeyInput Postfix(Virial.Compat.VirtualKeyInput input)
+        {
+            if (input == Virial.Compat.VirtualKeyInput.FixedAbility) return Virial.Compat.VirtualKeyInput.Ability;
+            return input;
+        }
+        for (int i = inputMappers.Count - 1; i >= 0; i--)
+        {
+            if (inputMappers[i].lifespan.IsDeadObject) continue;
+            return Postfix(inputMappers[i].mapper.Invoke(input));
+        }
+        return Postfix(input);
+    }
+
+    public void RegisterInputMapper(Func<Virial.Compat.VirtualKeyInput, Virial.Compat.VirtualKeyInput> mapper, ILifespan lifespan)
+    {
+        inputMappers.Add(new(mapper, lifespan));
+    }
 }
 
+internal record KeyInputMapper(Func<Virial.Compat.VirtualKeyInput, Virial.Compat.VirtualKeyInput> mapper, ILifespan lifespan);
 internal static class NebulaGameManagerExpansion
 {
     static internal GamePlayer? GetModInfo(this PlayerControl? player)

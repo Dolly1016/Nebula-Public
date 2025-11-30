@@ -83,7 +83,7 @@ public class PolusData : MapData
         new(1.2f, -17.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //O2グリーン
         new(0.6f, -15.7f, MapObjectType.SmallOrTabletopOutOfSight),//O2グリーン左上
         new(1.9f, -20.3f,MapObjectType.SmallInCorner), //O2缶タスク
-        new(1.2f, -18.7f, MapObjectType.SmallOrTabletopOutOfSight), //O2缶タスク上
+        new(1.2f, -18.7f, MapObjectType.SmallOrTabletopOutOfSight | MapObjectType.DepoisonBox), //O2缶タスク上
         new(0.6f, -21.8f, MapObjectType.Reachable), //O2缶タスク前
         new(2.3f, -24.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ボイラー
         new(5.0f, -25.0f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //O2,Weapon間左
@@ -103,8 +103,9 @@ public class PolusData : MapData
         new(29.6f, -8.2f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボドリル右の部屋
         new(34.9f, -5.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //望遠鏡
         new(40.6f, -8.0f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ラボ右端
+        new(38.85f, -8.15f, MapObjectType.DepoisonBox), //ラボ奥ベッド
         new(34.9f, -10.4f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボトイレ
-        new(26.3f, -14.1f,MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //大岩前
+        new(26.3f, -14.15f,MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //大岩前
         new(32.0f, -13.5f,MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //溶岩湖上
         new(30.9f, -17.2f,MapObjectType.SmallInCorner | MapObjectType.Reachable), //オフィス右
         new(18.7f, -18.7f, MapObjectType.SmallInCorner), //会議室

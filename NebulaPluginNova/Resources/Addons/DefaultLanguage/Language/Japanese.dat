@@ -184,8 +184,8 @@ $Color
 "tutorial.variations.stamp.caption" : "%KEY%キーでスタンプを送れます！(生存時のタスクフェイズ中は使用不可)<br>使用できるスタンプはヘルプ画面で設定できます。"
 "tutorial.variations.ambienceOnMeeting.title" : "会議中の環境音ミュート"
 "tutorial.variations.ambienceOnMeeting.caption" : "会議中にのみ環境音をミュートしたい場合は「会議中の環境音ミュート」を有効にすると便利です。<br>この設定は歯車マークのボタンから開ける設定のNoSタブ内からアクセスできます。"
-"tutorial.variations.meetingTool.advance.title" : "全プレイヤーのアイコン作成ショートカット"
-"tutorial.variations.meetingTool.advance.caption" : "ミニマップに線を描き、マウスを離す<b>直前に右クリック</b>すると<br>ゲームに参加している全プレイヤーのアイコンを生成できます。"
+"tutorial.variations.meetingTool.line.title" : "全プレイヤーのアイコン作成ショートカット"
+"tutorial.variations.meetingTool.line.caption" : "ミニマップに線を描き、マウスを離す<b>前に右クリック</b>すると<br>ゲームに参加している全プレイヤーのアイコンを作成できます。"
 
 # Versions
 
@@ -391,6 +391,7 @@ $Color
 "options.meeting.showVoteState" : "投票状況の表示"
 "options.meeting.prohibitMeetingTool" : "盤面整理アシストの使用禁止"
 "options.meeting.shortenCooldownAtGameStart" : "ゲーム開始時の短縮クールダウン"
+"options.meeting.shortenCooldown" : "短縮クールダウン"
 
 "options.exile" : "追放オプション"
 "options.exile.detail" : "プレイヤー追放に関する設定です。"
@@ -478,8 +479,8 @@ $Color
 "options.killCoolDown.type.relative" : "相対"
 "options.killCoolDown.type.ratio" : "比率"
 
-"options.exclusiveAssignment" : "排他的割り当て"
-"options.exclusiveAssignment.detail" : "役職を排他的(≒二者択一的に)に割り当てさせられます。"
+"options.exclusiveAssignment" : "排他割り当て設定"
+"options.exclusiveAssignment.detail" : "役職を排他的(=択一式)に割り当てられます。"
 "options.exclusiveAssignment.category.0" : "カテゴリ 1"
 "options.exclusiveAssignment.category.1" : "カテゴリ 2"
 "options.exclusiveAssignment.category.2" : "カテゴリ 3"
@@ -590,6 +591,7 @@ $Color
 "role.climber.blurb" : "掴め！勝利の頂"
 "options.role.climber.detail" : "クライマーはフックショットで長距離移動ができるクルーメイトです。"
 "options.role.climber.gustCooldown" : "フックショットクールダウン"
+"options.role.climber.canSeeInShadow" : "視界外のフックショットを視認可能"
 "stats.climber.gust" : "フックショットの使用回数"
 "stats.climber.distance" : "フックショットによる移動距離"
 
@@ -616,6 +618,8 @@ $Color
 "stats.collator.collating" : "照合回数"
 "stats.collator.matched" : "適合した回数"
 "stats.collator.unmatched" : "不適合の回数"
+"role.collator.gui.results" : "照合結果"
+"role.collator.gui.results.zero" : "なし"
 
 "role.comet.name" : "コメット"
 "role.comet.short" : "コメ"
@@ -899,6 +903,18 @@ $Color
 "options.role.alien.invalidateCoolDown" : "無効化クールダウン"
 "options.role.alien.numOfInvalidations" : "無効化使用可能回数"
 
+"role.amalgam.name" : "アマルガム"
+"role.amalgam.short" : "ア"
+"role.amalgam.blurb" : "不定形の恐怖"
+"options.role.amalgam.detail" : "アマルガムはさまざまな役職の能力を融合できます。"
+"options.role.amalgam.maxRoles" : "役職の最大融合回数"
+"options.role.amalgam.randomAssignment" : "ランダム融合"
+"options.role.amalgam.abilityFilter" : "役職フィルタ"
+"options.role.amalgam.canBeGuessedAsLoadedRoles" : "融合した役職で推察可能"
+"role.amalgam.tabs.kill" : "キル役職"
+"role.amalgam.tabs.map" : "マップ役職"
+"role.amalgam.tabs.others" : "その他役職"
+
 "role.berserker.name" : "バーサーカー"
 "role.berserker.short" : "バー"
 "role.berserker.blurb" : "[FATAL ERROR] 制御不能"
@@ -956,16 +972,26 @@ $Color
 "options.role.cannon.cannonCooldown" : "空気砲クールダウン"
 "options.role.cannon.cannonPower" : "空気砲の威力"
 "options.role.cannon.cannonPowerAttenuation" : "空気砲の威力減衰率"
+"options.role.cannon.canBlowPlayerUsingConsole" : "タスク中のプレイヤーを吹っ飛ばし可能"
 "stats.cannon.fire" : "空気砲の発砲回数"
 "stats.cannon.players" : "空気砲で吹き飛ばした人数"
 
 "role.cleaner.name" : "クリーナー"
-"role.cleaner.short" : "ク"
+"role.cleaner.short" : "クリーナ"
 "role.cleaner.blurb" : "証拠を抹消せよ"
 "options.role.cleaner.detail" : "クリーナーは死体を消し去れるインポスターです。"
 "options.role.cleaner.cleanCoolDown" : "消去クールダウン"
 "options.role.cleaner.syncKillAndCleanCoolDown" : "キルと能力クールダウンの同期"
 "stats.cleaner.clean" : "消去した死体の数"
+
+"role.creeping.name" : "クリーピング"
+"role.creeping.short" : "クリーピ"
+"role.creeping.blurb" : "気づいた頃にはもう遅い"
+"options.role.creeping.detail" : "クリーピングは遅効性の毒でクルーメイトに襲い掛かります。<br>毒を仕掛けられたら、一定時間以内に解毒しないと死亡してしまいます。"
+"options.role.creeping.depoisonDuration" : "解毒に要する時間"
+"options.role.creeping.poisonDelay" : "毒が回るまでの所要時間"
+"options.role.creeping.poisonCooldown" : "毒のクールダウン"
+"role.creeping.minigame.depoison" : "解毒"
 
 "role.cupid.name" : "キューピッド"
 "role.cupid.short" : "キ"
@@ -1101,6 +1127,10 @@ $Color
 "role.marionette.short" : "マリ"
 "role.marionette.blurb" : "そこに意思は無い"
 "options.role.marionette.detail" : "マリオネットはデコイを設置できます。<br>デコイと自分自身の位置を入れ替えて長距離移動ができます。"
+"options.role.marionette.mannequinMode" : "デコイの見た目"
+"options.role.marionette.mannequinMode.mannequin" : "マネキン"
+"options.role.marionette.mannequinMode.player" : "プレイヤー"
+"options.role.marionette.fixDecoyAppearance" : "デコイの見た目を固定"
 "options.role.marionette.placeCoolDown" : "設置クールダウン"
 "options.role.marionette.swapCoolDown" : "入れ替えクールダウン"
 "options.role.marionette.decoyDuration" : "デコイの有効時間"
@@ -1307,6 +1337,8 @@ $Color
 "options.role.arsonist.douseCoolDown" : "油塗りクールダウン"
 "options.role.arsonist.douseDuration" : "油塗りの所要時間"
 "stats.arsonist.doused" : "油を塗った回数"
+"role.arsonist.gui.left" : "残りプレイヤー"
+"role.arsonist.gui.left.dead" : "死亡"
 
 "role.avenger.name" : "アヴェンジャー"
 "role.avenger.short" : "ア"
@@ -1449,6 +1481,8 @@ $Color
 "options.role.scarlet.canLocateLovers" : "恋人の位置を表示"
 "stats.scarlet.kept" : "キープを誑かした回数"
 "options.role.scarlet.group.gauge" : "本命ゲージの設定"
+"role.scarlet.gui.gauge" : "本命ゲージ"
+"role.scarlet.gui.favorite" : "本命"
 
 "role.spectre.name" : "妖狐"
 "role.spectre.short" : "狐"
@@ -1478,6 +1512,7 @@ $Color
 "options.role.spectre.group.vanish" : "透明化能力"
 "stats.spectre.vanish" : "透明化した回数"
 "stats.spectre.eatFries" : "お揚げを食べた回数"
+"role.spectre.gui.gauge" : "お揚げゲージ"
 
 "role.spectreFollower.name" : "子狐"
 "role.spectreFollower.short" : "子"
@@ -1625,6 +1660,14 @@ $Color
 "options.role.disclosure.anonymousCursor" : "匿名カーソル"
 "options.role.disclosure.showCursorAtLateVoting" : "投票終盤のカーソル表示"
 
+"role.nighty.name" : "ナイティ"
+"role.nighty.generalBlurb" : "おねんねしてな！"
+"options.role.nighty.detail" : "ナイティはプレイヤーの視野を奪うボムを設置できます。"
+"options.role.nighty.placeCooldown" : "おやすみボムの設置クールダウン"
+"options.role.nighty.mineDuration" : "おやすみボムの有効時間"
+"options.role.nighty.mineSize" : "おやすみボムの当たり判定"
+"options.role.nighty.blindDuration" : "視野縮小の効果時間"
+
 "role.extraMission.name" : "追加ミッション"
 "role.extraMission.generalBlurb" : "特別極秘任務"
 "options.role.extraMission.detail" : "プレイヤーに他人の死亡を仕向けさせる追加のミッションを課します。<br>ミッションが完遂できなければ、勝利はありません。"
@@ -1660,6 +1703,7 @@ $Color
 "options.role.lover.numOfPairs" : "ラバーズのペア数"
 "options.role.lover.chanceOfAssigningImpostors" : "インポスターの割り当て確率"
 "options.role.lover.allowExtraWin" : "ラバーズの追加勝利"
+"options.role.lover.allowExtraWinViaCrewmateWin" : "クルーメイト勝利による追加勝利"
 "options.role.lover.blockRoleWin" : "役職による勝利をブロック"
 "options.role.lover.avengerMode" : "アヴェンジャーモード" 
 
@@ -1763,7 +1807,7 @@ $Color
 "perk.ventRelocate.detail" : "一度だけ、ベントを移設できる。<br>ベントを掴んでから%D%秒間、ベントを引きずって移動させられる。<br>効果時間中にもう一度使用するとその場でベントを手放し、効果が終了する。"
 "perk.ventRelocate.duration" : "ベント移設の効果時間"
 
-"perk.emergencyButton.name" : "緊急招集"
+"perk.emergencyButton.name" : "緊急召集"
 "perk.emergencyButton.detail" : "どこからでも緊急ボタンを押せる。<br>このパークは緊急ボタンの使用回数制限を緩和させない。"
 
 "perk.teamLook.name" : "輝く水晶玉"
@@ -2057,6 +2101,8 @@ $Color
 "button.label.acid" : "アシッド"
 "button.label.mobile.switch" : "切替"
 "button.label.absorb" : "吸収"
+"button.label.poison" : "毒"
+"button.label.select" : "選択"
 
 # Game
 
@@ -2118,6 +2164,7 @@ $Color
 "statistics.events.gassed" : "ガス中毒"
 "statistics.events.bubbled" : "バブル"
 "statistics.events.meteor" : "隕石墜落"
+"statistics.events.poisoned" : "毒死"
 
 # States
 
@@ -2148,6 +2195,8 @@ $Color
 "state.laser" : "赤い糸"
 "state.drill" : "掘削"
 "state.dissolved" : "溶解"
+"state.poisoned" : "毒死"
+"state.layoff" : "解雇"
 
 # Endings
 
@@ -2199,6 +2248,7 @@ $Color
 "help.command.saveResult" : "最後のゲーム結果を保存"
 "help.command.toggleSocial" : "ゲーム内アピール可否の切り替え"
 "help.command.hideHud" : "HUDの表示切り替え"
+"help.command.vcState" : "VC情報の表示切り替え"
 
 # Voice Chat
 
@@ -2706,6 +2756,8 @@ $Color
 "roleFilter.shortcut.allImpostor" : "全インポスター"
 "roleFilter.shortcut.allNeutral" : "全第三陣営"
 "roleFilter.shortcut.allCrewmate" : "全クルーメイト"
+"roleFilter.preview.excludes" : "%ROLES% 以外"
+"roleFilter.preview.etc" : "%ROLES% など"
 "roleFilter.showOnlySpawnable" : "出現しうる役職のみ表示"
 
 # Documents
@@ -2744,9 +2796,9 @@ $Color
 "document.tip.winCond.dancer.title" : "特殊勝利"
 "document.tip.winCond.dancer" : "指定の回数だけ死の預言を完遂させると勝利します。"
 "document.tip.winCond.scarlet.title" : "乗っ取り勝利"
-"document.tip.winCond.scarlet" : "本命の相手が生きて勝利すると、勝利を上書きします。本命とスカーレット本人が勝利します。"
+"document.tip.winCond.scarlet" : "本命の相手が生きて勝利すると、勝利を乗っ取ります。本命とスカーレット本人が勝利します。<br>ただしアヴェンジャー勝利については、本命がアヴェンジャーとして勝利しない限り乗っ取りません。"
 "document.tip.winCond.spectre.title" : "乗っ取り勝利"
-"document.tip.winCond.spectre" : "満腹ゲージを指定の量以上満たした妖狐が生存していれば、勝利を上書きします。<br>サボタージュ勝利は上書きしません。"
+"document.tip.winCond.spectre" : "満腹ゲージを指定の量以上満たした妖狐が生存していれば、勝利を乗っ取ります。<br>サボタージュ勝利は上書きしません。"
 "document.tip.winCond.trilemma.title" : "乗っ取り勝利"
 "document.tip.winCond.trilemma" : "トリレンマの残りの二人が死亡したうえで生きて勝利条件を満たすと勝利を上書きします。<br>残り二人を蹴落として勝利条件を満たした一人が勝利します。"
 "document.tip.winCond.gambler.title" : "特殊勝利"

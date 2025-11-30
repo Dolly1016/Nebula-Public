@@ -118,7 +118,7 @@ internal class GameOperatorBuilder
                 return myProcedure;
             }
 
-            int priority = method.GetCustomAttribute<EventPriority>()?.Priority ?? 100;
+            int priority = method.GetCustomAttribute<EventPriority>()?.Priority ?? 0;
 
             builderActions.Add((eventType, (instance) => (BuildAction(instance), priority)));
         }

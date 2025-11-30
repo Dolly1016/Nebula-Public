@@ -104,6 +104,10 @@ public enum ExtraWinCheckPhase
     Phase1,
     Phase2,
     Phase3,
+    Phase4,
+    Phase5,
+    Phase6,
+    Phase7,
     PhaseMax,
 
     LoversPhase = Phase2,
@@ -111,7 +115,7 @@ public enum ExtraWinCheckPhase
     DancerPhase = Phase0,
     GrudgePhase = Phase0,
     TrilemmaPhase = Phase2,
-    ScarletPhase = Phase1,
+    ScarletPhase = Phase0,
     MadmatePhase = Phase0,
     VanityPhase = Phase0,
 }

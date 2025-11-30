@@ -10,6 +10,19 @@
   <ItemGroup>
     <ProjectReference Include="..\NebulaAPI\NebulaAPI.csproj" />
     <ProjectReference Include="..\NebulaPluginNova\NebulaPluginNova.csproj" />
+	<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
+	<Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
   </ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="IgnoresAccessChecksToGenerator" Version="0.8.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<IgnoresAccessChecksTo Include="Nebula" />
+		<IgnoresAccessChecksTo Include="NebulaAPI" />
+	</ItemGroup>
 </Project>

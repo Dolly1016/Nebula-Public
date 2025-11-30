@@ -156,7 +156,7 @@ public class UbiquitousDetachedDrone : MonoBehaviour, IVoiceComponent
 
     public void Awake()
     {
-        droneRenderer = UnityHelper.CreateObject<SpriteRenderer>("Renderer", transform, new(0f,0f,-0.5f), LayerExpansion.GetShipLayer());
+        droneRenderer = UnityHelper.CreateObject<SpriteRenderer>("Renderer", transform, new(0f,0f,0f), LayerExpansion.GetShipLayer());
         droneRenderer.sprite = UbiquitousDroneAsset.droneSprite.GetSprite(0);
 
         var shadeRenderer = UnityHelper.CreateObject<SpriteRenderer>("ShadeRenderer", transform, Vector3.zero, LayerExpansion.GetDefaultLayer());

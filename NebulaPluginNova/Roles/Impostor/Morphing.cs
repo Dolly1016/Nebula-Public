@@ -24,6 +24,8 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
     static public Morphing MyRole = new Morphing();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.morphing.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.morphing.morph", GameStatsCategory.Roles, MyRole);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButton? sampleButton = null;

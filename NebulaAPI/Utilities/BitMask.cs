@@ -32,6 +32,7 @@ public interface BitMask<T>
 public interface EditableBitMask<T> : BitMask<T>
 {
     EditableBitMask<T> Add(T value);
+    EditableBitMask<T> Remove(T value);
     EditableBitMask<T> Clear();
 }
 
@@ -81,6 +82,13 @@ internal class BitMask32<T> : EditableBitMask<T>
     {
         if (value == null) return this;
         bitMask |= converter.Invoke(value);
+        return this;
+    }
+
+    EditableBitMask<T> EditableBitMask<T>.Remove(T? value)
+    {
+        if (value == null) return this;
+        bitMask &= ~converter.Invoke(value);
         return this;
     }
 
@@ -178,6 +186,13 @@ internal class HashSetMask<T> : EditableBitMask<T>
     {
         if (value == null) return this;
         set.Add(value);
+        return this;
+    }
+
+    EditableBitMask<T> EditableBitMask<T>.Remove(T? value)
+    {
+        if (value == null) return this;
+        set.Remove(value);
         return this;
     }
 

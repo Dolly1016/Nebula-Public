@@ -17,15 +17,17 @@ public class PlayerCheckKilledEvent : AbstractPlayerEvent
 {
     public Virial.Game.Player Killer { get; private init; }
     public KillResult Result { get; set; } = KillResult.Kill;
+    public KillParameter KillParameter { get; }
     public CommunicableTextTag PlayerState { get; private init; }
     public CommunicableTextTag? EventDetail { get; private init; }
     public bool IsMeetingKill { get; private init; }
 
-    internal PlayerCheckKilledEvent(Virial.Game.Player player, Virial.Game.Player killer, bool isMeetingKill, CommunicableTextTag playerState, CommunicableTextTag? eventDetail) : base(player)
+    internal PlayerCheckKilledEvent(Virial.Game.Player player, Virial.Game.Player killer, bool isMeetingKill, CommunicableTextTag playerState, CommunicableTextTag? eventDetail, KillParameter killParam) : base(player)
     {
         Killer = killer;
         IsMeetingKill = isMeetingKill;
         PlayerState = playerState;
         EventDetail = eventDetail;
+        KillParameter = killParam;
     }
 }

@@ -26,6 +26,23 @@ public static class HudManagerStartPatch
         renderer.color = Color.clear;
         
         __instance.TaskPanel.transform.localPosition = new(0, 0, 0);
+
+        IEnumerator CoUpdatePos(NotificationPopper popper)
+        {
+            void UpdateZ(float z)
+            {
+                var edge = popper.aspectPosition.DistanceFromEdge;
+                edge.z = z;
+                popper.aspectPosition.DistanceFromEdge = edge;
+            }
+            while (true)
+            {
+                if (LobbyBehaviour.Instance) UpdateZ(-34f);
+                if (ShipStatus.Instance) UpdateZ(-800f);
+                yield return null;
+            }
+        }
+        __instance.Notifier.StartCoroutine(CoUpdatePos(__instance.Notifier).WrapToIl2Cpp());
     }
 }
 
@@ -109,7 +126,7 @@ public static class HudManagerCoStartGamePatch
 
             yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform, GameStatistics.EventVariation.GameStart, EventDetail.GameStart);
 
-            float killCooldown = GeneralConfigurations.ShortenCooldownAtGameStart ? 10f : AmongUsUtil.VanillaKillCoolDown;
+            float killCooldown = GeneralConfigurations.UseShortenCooldownAtGameStartOption ? ModAbilityButtonImpl.CoolDownOnGameStart : AmongUsUtil.VanillaKillCoolDown;
             PlayerControl.LocalPlayer.killTimer = killCooldown;
             if (GeneralConfigurations.EmergencyCooldownAtGameStart) AmongUsUtil.SetEmergencyCoolDown(10f, false, false);
 

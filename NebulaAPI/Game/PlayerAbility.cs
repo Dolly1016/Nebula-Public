@@ -1,4 +1,6 @@
-﻿namespace Virial.Game;
+﻿using Virial.Assignable;
+
+namespace Virial.Game;
 
 public interface IPlayerAbility : IBindPlayer, IGameOperator, ILifespan
 {
@@ -10,6 +12,9 @@ public interface IPlayerAbility : IBindPlayer, IGameOperator, ILifespan
     bool BlockCallingEmergencyMeeting => false;
     bool BlockUsingUtility => false;
     IEnumerable<IPlayerAbility> SubAbilities => [];
+    IEnumerable<DefinedAssignable> SubAssignableOnHelp => [];
+
+    Virial.Media.GUIWidget? ProgressWidget => null;
 }
 
 public interface IUsurpableAbility : IPlayerAbility
@@ -34,7 +39,7 @@ public abstract class AbstractPlayerUsurpableAbility : DependentLifespan, IUsurp
     public Player MyPlayer { get; private init; }
     public bool AmOwner => MyPlayer.AmOwner;
     public bool IsUsurped { get; private set; } = false;
-    public bool Usurp()
+    public virtual bool Usurp()
     {
         if (IsUsurped) return false;
         IsUsurped = true;

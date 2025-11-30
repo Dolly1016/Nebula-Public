@@ -522,6 +522,17 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     bool HasAttribute(IPlayerAttribute attribute);
 
     /// <summary>
+    /// アトリビュートを削除します。
+    /// </summary>
+    /// <param name="duplicateTag"></param>
+    void RemoveAttributeByTag(string duplicateTag);
+
+    /// <summary>
+    /// アトリビュートを削除します。
+    /// </summary>
+    void RemoveAttribute(IPlayerAttribute attribute);
+
+    /// <summary>
     /// 現在有効化されているアトリビュートを列挙します。
     /// </summary>
     /// <returns></returns>

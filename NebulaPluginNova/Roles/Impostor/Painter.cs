@@ -24,6 +24,7 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
     static public Painter MyRole = new Painter();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.painter.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsPaint = NebulaAPI.CreateStatsEntry("stats.painter.paint", GameStatsCategory.Roles, MyRole);
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButtonImpl? sampleButton = null;

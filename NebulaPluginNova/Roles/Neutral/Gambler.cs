@@ -695,7 +695,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
         {
             if(!MyPlayer.IsDead) ModSingleton<IWinningOpportunity>.Instance?.RpcSetOpportunity(MyTeam, 1f - (GoalChipsOption - myChips) * 0.03f);
             if (!MyPlayer.IsDead && myChips <= 0) MyPlayer.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerStates.Lost, EventDetails.Kill);
-            if (!MyPlayer.IsDead && !(MeetingHudExtension.ExiledAll?.Any(p => p.AmOwner) ?? false) && myChips >= GoalChipsOption) NebulaAPI.CurrentGame?.RequestGameEnd(NebulaGameEnd.GamblerWin, BitMasks.AsPlayer(1u << MyPlayer.PlayerId));
+            if (!MyPlayer.IsDead && !(MeetingHudExtension.ExiledAllModCache?.Any(p => p.AmOwner) ?? false) && myChips >= GoalChipsOption) NebulaAPI.CurrentGame?.RequestGameEnd(NebulaGameEnd.GamblerWin, BitMasks.AsPlayer(1u << MyPlayer.PlayerId));
         }
 
         static private readonly RemoteProcess<(GamePlayer gambler, (int to, int num)[] bettings)> RpcShareBetting = new("ShareBetting", (message, _) =>

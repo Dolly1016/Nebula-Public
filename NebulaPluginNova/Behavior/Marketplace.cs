@@ -76,6 +76,9 @@ public class MyMarketplaceStructure
     public List<DevMarketplaceItem> DevCostumes = [];
     [JsonSerializableField]
     public List<DevMarketplaceItem> DevAddons = [];
+
+    [JsonSerializableField]
+    public bool Confirmed = false;
 }
 
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
@@ -166,6 +169,30 @@ public class Marketplace : MonoBehaviour
     {
         SetUpMarketplaceScreen();
         SetUpItemsScreen();
+
+        if (!MarketplaceData.Data.Confirmed)
+        {
+            var window = MetaScreen.GenerateWindow(new(7.3f, 4.3f), HudManager.InstanceExists ? HudManager.Instance.transform : null, Vector3.zero, true, false, true, BackgroundSetting.Modern, false);
+            var textSet = BuiltInLanguage.CurrentTextSet;
+            TextAttribute contentAttr = new(GUI.API.GetAttribute(AttributeAsset.DocumentStandard)) { FontSize = new(1.5f, 1.4f, 1.5f, true), Wrapping = true, Size = new(7.05f, 3.6f) };
+            window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center,
+                GUI.API.RawText(GUIAlignment.Center, AttributeAsset.DocumentTitle, textSet.MarketplaceTermsTitle),
+                GUI.API.VerticalMargin(0.1f),
+                GUI.API.RawText(GUIAlignment.Center, contentAttr, textSet.MarketplaceTermsContent),
+                GUI.API.VerticalMargin(0.1f),
+                GUI.API.HorizontalHolder(GUIAlignment.Center,
+                    GUI.API.RawButton(GUIAlignment.Center, AttributeAsset.OptionsValue, textSet.MarketplaceTermsReject, _ => {
+                        window.CloseScreen();
+                        Close();
+                    }),
+                    GUI.API.RawButton(GUIAlignment.Center, AttributeAsset.OptionsValue, textSet.MarketplaceTermsOk, _ => {
+                        MarketplaceData.Data.Confirmed = true;
+                        MarketplaceData.Save();
+                        window.CloseScreen();
+                    })
+                )
+                ), new Vector2(0.5f, 0.6f), out _);
+        }
     }
 
     void ShowMarketplaceScreen()

@@ -12,13 +12,13 @@ namespace Nebula.Patches;
 
 file static class MultipleExileHelper
 {
-    public static PoolablePlayer SpawnMultiplePlayer(ExileController __instance, PlayerControl exiled)
+    public static PoolablePlayer SpawnMultiplePlayer(ExileController __instance, NetworkedPlayerInfo exiled)
     {
         var result = GameObject.Instantiate(__instance.Player, __instance.Player.transform.parent);
-        result.UpdateFromEitherPlayerDataOrCache(exiled.Data, PlayerOutfitType.Default, PlayerMaterial.MaskType.Exile, false, (Il2CppSystem.Action)(()=>
+        result.UpdateFromEitherPlayerDataOrCache(exiled, PlayerOutfitType.Default, PlayerMaterial.MaskType.Exile, false, (Il2CppSystem.Action)(()=>
         {
-            SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(exiled.Data.Outfits[PlayerOutfitType.Default].SkinId);
-            if (!DestroyableSingleton<HatManager>.Instance.CheckLongModeValidCosmetic(exiled.Data.Outfits[PlayerOutfitType.Default].SkinId, result.GetIgnoreLongMode()))
+            SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(exiled.Outfits[PlayerOutfitType.Default].SkinId);
+            if (!DestroyableSingleton<HatManager>.Instance.CheckLongModeValidCosmetic(exiled.Outfits[PlayerOutfitType.Default].SkinId, result.GetIgnoreLongMode()))
             {
                 skin = ShipStatus.Instance.CosmeticsCache.GetSkin("skin_None");
             }
@@ -36,11 +36,11 @@ file static class MultipleExileHelper
     public static void SpawnMultiplePlayers(ExileController __instance, Action<PoolablePlayer, int> setup, Action<PoolablePlayer>? allPlayerPostfix = null)
     {
         int num = 0;
-        foreach (var p in MeetingHudExtension.ExiledAll ?? [])
+        foreach (var p in MeetingHudExtension.ExiledAllModCache ?? [])
         {
             if (p.PlayerId != (__instance.initData.networkedPlayer?.PlayerId ?? byte.MaxValue))
             {
-                var display = MultipleExileHelper.SpawnMultiplePlayer(__instance, p);
+                var display = MultipleExileHelper.SpawnMultiplePlayer(__instance, GameData.Instance.GetPlayerById(p.PlayerId));
                 setup.Invoke(display, num);
                 num++;
 

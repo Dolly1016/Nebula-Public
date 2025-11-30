@@ -536,6 +536,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
     GamePlayer? IPlayerlike.RealPlayer => visualPlayer;
 
     string IPlayerlike.Name => visualPlayer.Name;
+    string IPlayerlike.ColoredName => visualPlayer.ColoredName;
     public bool AmOwner => amOwner;
     public bool IsDead => isDead;
     public bool IsActive => !IsDeadObject;

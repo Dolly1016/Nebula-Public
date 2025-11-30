@@ -39,6 +39,9 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Raider MyRole = new();
     static private GameStatsEntry StatsThrown = NebulaAPI.CreateStatsEntry("stats.raider.thrown", GameStatsCategory.Roles, MyRole);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class RaiderAxe : NebulaSyncStandardObject, IGameOperator
     {

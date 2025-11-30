@@ -82,7 +82,8 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
     static public Sculptor MyRole = new Sculptor();
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.sculptor.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsCreate = NebulaAPI.CreateStatsEntry("stats.sculptor.create", GameStatsCategory.Roles, MyRole);
-    
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueMapAbility;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButtonImpl? sampleButton = null;

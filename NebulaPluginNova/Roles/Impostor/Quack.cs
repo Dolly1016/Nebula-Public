@@ -28,6 +28,7 @@ internal class Quack : DefinedSingleAbilityRoleTemplate<Quack.Ability>, DefinedR
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     static public readonly Quack MyRole = new();
     static private readonly GameStatsEntry StatsReport = NebulaAPI.CreateStatsEntry("stats.quack.report", GameStatsCategory.Roles, MyRole);
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImpostorVitalsButton.png", 100f);

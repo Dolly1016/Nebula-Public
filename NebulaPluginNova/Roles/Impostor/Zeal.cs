@@ -34,6 +34,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
     static public readonly Zeal MyRole = new();
 
     static private Image douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ZealButton.png", 115f);
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private class PlayerIcon

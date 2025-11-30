@@ -32,6 +32,8 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
     static private int VoteAssignment => VoteAssignmentOption;
     static private int VotesStock => FixedVotesOption ? VoteAssignmentOption : MaxVoteStockOption;
 
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {

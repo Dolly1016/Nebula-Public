@@ -49,6 +49,7 @@ public class EndCriteriaMetEvent : Event
     /// 乗っ取りが起こらない場合は<see cref="GameEnd"/>と同じものが返ります。
     /// </summary>
     public GameEnd OverwrittenGameEnd { get; private set; }
+    private int OverwrittenGameEndPriority { get; set; }
 
     /// <summary>
     /// 乗っ取りの末に実際に至るエンディングの終了理由。
@@ -68,11 +69,15 @@ public class EndCriteriaMetEvent : Event
     /// <param name="reason">ゲーム終了理由。</param>
     /// <param name="preWinners">上書き時の勝者マスク。これ以外でもプレイヤーは役職やモディファイア等の都合で勝利できます。</param>
     /// <returns></returns>
-    public bool TryOverwriteEnd(GameEnd end, GameEndReason reason, int preWinners = 0)
+    public bool TryOverwriteEnd(GameEnd end, GameEndReason reason, int preWinners = 0) => TryOverwriteEnd(end, end.Priority, reason, preWinners);
+
+    public bool TryOverwriteEnd(GameEnd end, int priority, GameEndReason reason, int preWinners = 0)
     {
-        if(end.Priority >= OverwrittenGameEnd.Priority)
+        if (end == this.GameEnd) return false;
+        if (priority >= OverwrittenGameEndPriority)
         {
             OverwrittenGameEnd = end;
+            OverwrittenGameEndPriority = priority;
             OverwrittenEndReason = reason;
             Overwritten = true;
             CheckWinners(preWinners);
@@ -86,6 +91,7 @@ public class EndCriteriaMetEvent : Event
         this.GameEnd = end;
         this.EndReason = reason;
         this.OverwrittenGameEnd = end;
+        this.OverwrittenGameEndPriority = end.Priority;
         this.OverwrittenEndReason = reason;
         this.winnerChecker = winnerChecker;
 

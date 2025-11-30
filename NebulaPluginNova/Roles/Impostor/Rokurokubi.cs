@@ -314,6 +314,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         });
     }
 
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.RokurokubiButton.png", 115f);

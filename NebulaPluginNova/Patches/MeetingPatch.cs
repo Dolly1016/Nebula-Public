@@ -154,8 +154,7 @@ public static class MeetingModRpc
 
         meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
         meetingHud.wasTie = tie;
-        MeetingHudExtension.ExiledAll = exiledAll.Select(p => Helpers.GetPlayer(p)!).ToArray();
-        MeetingHudExtension.ExiledAllModCache = MeetingHudExtension.ExiledAll.Select(p => p.GetModInfo()).Where(p => p != null).ToArray()!;
+        MeetingHudExtension.ExiledAllModCache = exiledAll.Select(p => GamePlayer.GetPlayer(p)!).ToArray();
         MeetingHudExtension.WasTie = tie;
         MeetingHudExtension.IsObvious = isObvious;
 
@@ -366,6 +365,8 @@ class MeetingStartPatch
             {
                 player.SetHighlighted(false);
             });
+            button.SetOverlay(() => (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) ? modPlayer?.ProgressWidget : null);
+
 
             var script = player.gameObject.AddComponent<ScriptBehaviour>();
             var cosmetics = player.PlayerIcon.cosmetics;

@@ -417,14 +417,12 @@ public class NebulaManager : MonoBehaviour
                     DebugScreen.Push(Language.Translate("ui.error.quickStart.cannotStart"), 3f);
                 }
             }
-        )
-        { DefaultKeyInput = new(KeyCode.F1) });
+        ){ DefaultKeyInput = new(KeyCode.F1) });
         
         commands.Add(new("help.command.cancelStarting",
             () => NebulaGameManager.Instance != null && AmongUsClient.Instance && AmongUsClient.Instance.AmHost && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Joined && GameStartManager.Instance && GameStartManager.Instance.startState == GameStartManager.StartingStates.Countdown,
             () => RpcResetGameStart.Invoke()
-        )
-        { DefaultKeyInput = new(KeyCode.F2) });
+        ){ DefaultKeyInput = new(KeyCode.F2) });
 
         commands.Add(new("help.command.hideHud",
             () => HudManager.InstanceExists && (AmongUsUtil.IsLocalServer() || (GamePlayer.LocalPlayer?.Test(Permissions.HideHudPermission) ?? false)),
@@ -434,14 +432,12 @@ public class NebulaManager : MonoBehaviour
                 var uiCam = HudManager.Instance.UICamera;
                 uiCam.nearClipPlane = uiCam.nearClipPlane > 0f ? -1000f : 18f;
             }
-        )
-        { DefaultKeyInput = new(KeyCode.Slash) });
+        ){ DefaultKeyInput = new(KeyCode.Slash) });
 
         commands.Add(new("help.command.console",
             () => true,
             ()=>NebulaManager.Instance.ToggleConsole()
-        )
-        { DefaultKeyInput = new(KeyCode.Return) });
+        ){ DefaultKeyInput = new(KeyCode.Return) });
 
         commands.Add(new("help.command.saveResult",
             () => LastGameHistory.LastWidget != null,
@@ -459,14 +455,17 @@ public class NebulaManager : MonoBehaviour
                 );
                 */
             }
-        )
-        { DefaultKeyInput = new(KeyCode.F3) });
+        ){ DefaultKeyInput = new(KeyCode.F3) });
 
         commands.Add(new("help.command.toggleSocial",
             () => AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && AmongUsClient.Instance.AmHost && (ModSingleton<ShowUp>.Instance?.ShouldBeShownSocialSettings ?? false),
             () => ShowUp.RpcShareSocialSettings.Invoke((false, !ModSingleton<ShowUp>.Instance.CanAppealInGame, ModSingleton<ShowUp>.Instance.CanUseStamps, ModSingleton<ShowUp>.Instance.CanUseEmotes))
-        )
-        { DefaultKeyInput = new(KeyCode.F4) });
+        ){ DefaultKeyInput = new(KeyCode.F4) });
+
+        commands.Add(new("help.command.vcState",
+            () => ModSingleton<NoSVCRoom>.Instance != null,
+            () => ModSingleton<NoSVCRoom>.Instance.ToggleDebugInfo()
+        ){ DefaultKeyInput = new(KeyCode.F9) });
 
 
     }
@@ -554,7 +553,27 @@ public class NebulaManager : MonoBehaviour
                 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
+                    /*
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
+                    foreach(var obj in UnityEngine.Resources.FindObjectsOfTypeAll(Il2CppType.Of<Texture2D>())){
+                        if (obj.name == null || obj.name.Length == 0) continue;
+
+                        var filepath = "AmongUsTextures/" + obj.name.Replace("|", "-") + ".png";
+                        Directory.CreateDirectory(Path.GetDirectoryName(filepath));
+                        if (File.Exists(filepath)) continue;
+                        var texture = Helpers.CreateReadableTexture(obj.CastFast<Texture2D>());
+                        byte[] bytes = UnityEngine.ImageConversion.EncodeToPNG(texture);
+                        MonoBehaviour.Destroy(texture);
+                        try
+                        {
+                            File.WriteAllBytes(filepath, bytes);
+                        }catch(IOException e)
+                        {
+                            LogUtils.WriteToConsole("Skipped: " + obj.name);
+                        }
+                    }
+                    */
+                    
 
                     /*
                     var generator = new EdgeGenerator(new(-1f, 0f), [new(2f, 2f), new(2f, 1f), new(2f, 0f), new(2f, -1f), new(2f, -2f)]);
@@ -583,17 +602,6 @@ public class NebulaManager : MonoBehaviour
                     {
                         LogUtils.WriteToConsole(output.Get(env1).GetString());
                     })).WrapToIl2Cpp());
-                    */
-
-                    /*
-                    if (MoreCosmic.AllStamps.Count > 0)
-                    {
-                        StampHelpers.SpawnStamp(0, MoreCosmic.AllStamps.FirstOrDefault().Value, MeetingBack.GetSprite(), new(-0.61f, 0.09f), HudManager.Instance.transform, Vector3.zero);
-                    }
-                    else
-                    {
-                        Debug.Log("no stamp!");
-                    }
                     */
 
                     //Vector2 center = ShipStatus.Instance.MapPrefab.HerePoint.transform.parent.localPosition * -1f * ShipStatus.Instance.MapScale;

@@ -71,6 +71,7 @@ public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>
         static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
 
         bool embroilActive = false;
+        public bool EffectIsActive => embroilActive;
         [OnlyHost, OnlyMyPlayer]
         void OnMurdered(PlayerMurderedEvent ev)
         {

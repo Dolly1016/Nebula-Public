@@ -382,6 +382,7 @@
 "options.meeting.showVoteState" : "Show Vote State"
 "options.meeting.prohibitMeetingTool" : "Prohibit Meeting Tool"
 "options.meeting.shortenCooldownAtGameStart" : "Shorten Cooldown At Game Start"
+"options.meeting.shortenCooldown" : "Shorten Cooldown"
 
 "options.exile" : "Exile Options"
 "options.exile.detail" : "About Player Exile"
@@ -582,6 +583,7 @@
 "role.climber.blurb" : "Like The Wind"
 "options.role.climber.detail" : "Climber can travel long distances using their hookshots."
 "options.role.climber.gustCooldown" : "Hookshot Cooldown"
+"options.role.climber.canSeeInShadow" : "Can See Hookshot In Shadow"
 "stats.climber.gust" : "Uses of Hookshots"
 "stats.climber.distance" : "Hookshot Distance Traveled"
 
@@ -883,13 +885,25 @@
 "options.role.impostor.canKillHidingPlayer" : "Can Kill Hiding Player"
 
 "role.alien.name" : "Alien"
-"role.alien.short" : "A"
+"role.alien.short" : "Al"
 "role.alien.blurb" : "The Being Beyond Intelligence"
 "options.role.alien.detail" : "Alien manipulates the information of admin and vitals,<br>causing confusion."
 "options.role.alien.emiCoolDown" : "E.M.I. Cooldown"
 "options.role.alien.emiDuration" : "E.M.I. Duration"
 "options.role.alien.invalidateCoolDown" : "Invalidate Cooldown"
 "options.role.alien.numOfInvalidations" : "# Invalidations"
+
+"role.amalgam.name" : "Amalgam"
+"role.amalgam.short" : "Am"
+"role.amalgam.blurb" : "Amorphous Being"
+"options.role.amalgam.detail" : "Amalgam can combine the abilities of various roles."
+"options.role.amalgam.maxRoles" : "# of Roles Can Load"
+"options.role.amalgam.randomAssignment" : "Random Assignment"
+"options.role.amalgam.abilityFilter" : "Ability Role Filter"
+"options.role.amalgam.canBeGuessedAsLoadedRoles" : "Can Be Guessed As Loaded Roles"
+"role.amalgam.tabs.kill" : "Kill Roles"
+"role.amalgam.tabs.map" : "Map Roles"
+"role.amalgam.tabs.others" : "Other Roles"
 
 "role.berserker.name" : "Berserker"
 "role.berserker.short" : "Be"
@@ -948,6 +962,7 @@
 "options.role.cannon.cannonCooldown" : "Cannon Cooldown"
 "options.role.cannon.cannonPower" : "Cannon Power"
 "options.role.cannon.cannonPowerAttenuation" : "Cannon Power Attenuation"
+"options.role.cannon.canBlowPlayerUsingConsole" : "Can Blow Player Using Console"
 "stats.cannon.fire" : "Num of Cannon Firing"
 "stats.cannon.players" : "Num of the Blown by Cannon"
 
@@ -958,6 +973,15 @@
 "options.role.cleaner.cleanCoolDown" : "Clean Cooldown"
 "options.role.cleaner.syncKillAndCleanCoolDown" : "Sync Kill And Clean Cooldown"
 "stats.cleaner.clean" : "Num of Cleaned Corpses"
+
+"role.creeping.name" : "Creeping"
+"role.creeping.short" : "Cr"
+"role.creeping.blurb" : "It's Too Late Now"
+"options.role.creeping.detail" : "Creeping uses a slow-acting poison that will kill them if they do not cure<br>themselves of the poison within a certain time frame."
+"options.role.creeping.depoisonDuration" : "Depoison Duration"
+"options.role.creeping.poisonDelay" : "Posion Kill Delay"
+"options.role.creeping.poisonCooldown" : "Poison Cooldown"
+"role.creeping.minigame.depoison" : "Depoison"
 
 "role.cupid.name" : "Cupid"
 "role.cupid.short" : "Cu"
@@ -1094,6 +1118,10 @@
 "role.marionette.short" : "Ma"
 "role.marionette.blurb" : "There Is No Intention"
 "options.role.marionette.detail" : "Marionette can place the decoy.<br>they and the decoy swap position each other."
+"options.role.marionette.mannequinMode" : "Decoy Appearance"
+"options.role.marionette.mannequinMode.mannequin" : "Mannequin"
+"options.role.marionette.mannequinMode.player" : "Player"
+"options.role.marionette.fixDecoyAppearance" : "Fix Decoy Appearance"
 "options.role.marionette.placeCoolDown" : "Place Cooldown"
 "options.role.marionette.swapCoolDown" : "Swap Cooldown"
 "options.role.marionette.decoyDuration" : "Decoy Duration"
@@ -1298,6 +1326,8 @@
 "options.role.arsonist.douseCoolDown" : "Douse Cooldown"
 "options.role.arsonist.douseDuration" : "Douse Duration"
 "stats.arsonist.doused" : "Num of Doused Players"
+"role.arsonist.gui.left" : "Left Players"
+"role.arsonist.gui.left.dead" : "Dead"
 
 "role.avenger.name" : "Avenger"
 "role.avenger.short" : "A"
@@ -1437,6 +1467,8 @@
 "options.role.scarlet.canLocateLovers" : "Can Locate Lovers"
 "stats.scarlet.kept" : "Num of Kept"
 "options.role.scarlet.group.gauge" : "Gauge Option"
+"role.scarlet.gui.gauge" : "Favorite Gauge"
+"role.scarlet.gui.favorite" : "Favorite"
 
 "role.spectre.name" : "Spectre"
 "role.spectre.short" : "S"
@@ -1466,6 +1498,7 @@
 "options.role.spectre.group.vanish" : "Vanish Ability Settings"
 "stats.spectre.vanish" : "Num of Vanish"
 "stats.spectre.eatFries" : "Num of Eaten Dishes"
+"role.spectre.gui.gauge" : "Dish Gauge"
 
 "role.spectreFollower.name" : "Spectre Follower"
 "role.spectreFollower.short" : "F"
@@ -1609,6 +1642,13 @@
 "options.role.extraMission.detail" : "Your mission is to make certain players die.<br>Otherwise you won't win."
 "role.extraMission.taskText" : "[Extra Mission] Death of %PLAYER%."
 
+"role.nighty.name" : "Nighty"
+"options.role.nighty.detail" : "Nighty can place bombs that narrow the player's field of vision."
+"options.role.nighty.placeCooldown" : "Bomb Place Cooldown"
+"options.role.nighty.mineDuration" : "Bomb Duration"
+"options.role.nighty.mineSize" : "Bomb Size"
+"options.role.nighty.blindDuration" : "Blind Effect Duration"
+
 "role.tieBreaker.name" : "Tie Breaker"
 "options.role.tieBreaker.detail" : "When the vote results in a tie, Tie Breaker cast an additional vote."
 "stats.tieBreaker.tieBreaking" : "Num of Tie Breaking"
@@ -1635,7 +1675,8 @@
 "role.lover.blurb" : "You're in <color=#fc04bdff>Love</color> with %NAME%"
 "options.role.lover.numOfPairs" : "# Pairs"
 "options.role.lover.chanceOfAssigningImpostors" : "% Assigning Impostors"
-"options.role.lover.allowExtraWin" : "Allow Extra Win" 
+"options.role.lover.allowExtraWin" : "Allow Extra Win"
+"options.role.lover.allowExtraWinViaCrewmateWin" : "Extra Win Via Crewmate Win"
 "options.role.lover.blockRoleWin" : "Block Role Win"
 "options.role.lover.avengerMode" : "Avenger Mode"
 
@@ -2022,6 +2063,8 @@
 "button.label.acid" : "acid"
 "button.label.mobile.switch" : "toggle"
 "button.label.absorb" : "absorb"
+"button.label.poison" : "poison"
+"button.label.select" : "select"
 
 # Game
 
@@ -2083,6 +2126,7 @@
 "statistics.events.gassed" : "Gassed"
 "statistics.events.bubbled" : "Bubbled"
 "statistics.events.meteor" : "Meteor"
+"statistics.events.poisoned" : "Poisoned"
 
 # States
 
@@ -2113,6 +2157,8 @@
 "state.laser" : "Laser"
 "state.drill" : "Drill"
 "state.dissolved" : "Dissolved"
+"state.poisoned" : "Poisoned"
+"state.layoff" : "Layoff"
 
 # Endings
 
@@ -2659,6 +2705,8 @@
 "roleFilter.shortcut.allImpostor" : "Impostor"
 "roleFilter.shortcut.allNeutral" : "Neutral"
 "roleFilter.shortcut.allCrewmate" : "Crewmates"
+"roleFilter.preview.excludes" : "Excepting %ROLES%"
+"roleFilter.preview.etc" : "%ROLES% etc."
 "roleFilter.showOnlySpawnable" : "Show only spawnable roles"
 
 # Documents

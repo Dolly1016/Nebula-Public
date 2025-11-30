@@ -870,7 +870,7 @@ public static class PropertyRPC
         }
     );
 
-    private static IEnumerator CoGetProperty(byte targetPlayerId, string propertyId, RequestType propertyType, Action<object>? callBack, Action? errorAction)
+    private static IEnumerator CoGetProperty(byte targetPlayerId, string propertyId, RequestType propertyType, Action<object>? callBack, Action? errorAction, float timeOut = 2f)
     {
         int id = System.Random.Shared.Next(int.MaxValue >> 1);
         PropertyRequest request = new() { Callback = callBack, ErrorCallback = errorAction, type = propertyType };
@@ -878,13 +878,17 @@ public static class PropertyRPC
 
         RpcPropertyRequest.Invoke((targetPlayerId, id, propertyId, propertyType));
 
-        while (MyRequests.ContainsKey(id)) yield return null;
+        float time = UnityEngine.Time.time;
+        while (MyRequests.ContainsKey(id) && time + timeOut > UnityEngine.Time.time)
+        {
+            yield return null;
+        }
 
         yield break;
     }
 
-    public static IEnumerator CoGetProperty<T>(byte targetPlayerId, string propertyId, Action<T>? callBack, Action? errorCallBack) =>
-        CoGetProperty(targetPlayerId, propertyId, RequestTypeMap.First(entry=>entry.Value == typeof(T)).Key, (obj)=>callBack?.Invoke((T)obj), errorCallBack);
+    public static IEnumerator CoGetProperty<T>(byte targetPlayerId, string propertyId, Action<T>? callBack, Action? errorCallBack, float timeOut = 2f) =>
+        CoGetProperty(targetPlayerId, propertyId, RequestTypeMap.First(entry=>entry.Value == typeof(T)).Key, (obj)=>callBack?.Invoke((T)obj), errorCallBack, timeOut);
 }
 
 public class RPCScheduler

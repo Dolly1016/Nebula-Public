@@ -263,7 +263,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         {
             if (circleEffect != null) circleEffect.Disappear();
         }
-
+        
         //ダンスの進捗について、クールダウンを考慮する
         [Local]
         void OnHudUpdate(GameHudUpdateEvent ev)

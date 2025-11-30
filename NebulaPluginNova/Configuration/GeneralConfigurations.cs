@@ -12,6 +12,7 @@ using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Game;
 using Virial.Media;
+using Virial.Runtime;
 using Virial.Text;
 using static Nebula.Modules.HelpScreen;
 
@@ -40,7 +41,11 @@ public static class GeneralConfigurations
             var locs = NebulaPreSpawnLocation.Locations[i];
             locs.Do(l => l.Configuration = NebulaAPI.Configurations.SharableVariable("location." + mapName + "." + l.LocationName.HeadLower(), true));
         }
+    }
 
+    static private void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        exclusiveAssignmentOptions.Do(preprocessor.RegisterExclusiveAssignmentRule);
     }
 
     static public GameModeDefinition CurrentGameMode => GameModes.GetGameMode(GameModeOption.GetValue());
@@ -260,9 +265,10 @@ public static class GeneralConfigurations
     static public IntegerConfiguration EarlyExtraEmergencyCoolDownCondOption = NebulaAPI.Configurations.Configuration("options.meeting.extraEmergencyCooldownInTheEarlyCondition", (1, 10), 2, () => EarlyExtraEmergencyCoolDownOption > 0f || EarlyDiscussionReductionOption > 0f);
     static public BoolConfiguration ShowVoteStateOption = NebulaAPI.Configurations.Configuration("options.meeting.showVoteState", true);
     static public BoolConfiguration ProhibitMeetingTool = NebulaAPI.Configurations.Configuration("options.meeting.prohibitMeetingTool", false);
-    static public BoolConfiguration ShortenCooldownAtGameStart = NebulaAPI.Configurations.Configuration("options.meeting.shortenCooldownAtGameStart", true);
+    static public BoolConfiguration UseShortenCooldownAtGameStartOption = NebulaAPI.Configurations.Configuration("options.meeting.shortenCooldownAtGameStart", true);
+    static public FloatConfiguration ShortenCooldownAtGameStartOption = NebulaAPI.Configurations.Configuration("options.meeting.shortenCooldown", (0f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => UseShortenCooldownAtGameStartOption);
     static internal IConfigurationHolder MeetingOptions = NebulaAPI.Configurations.Holder("options.meeting", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        DeathPenaltyOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart,ShortenCooldownAtGameStart, EarlyExtraEmergencyCoolDownOption, EarlyDiscussionReductionOption, EarlyExtraEmergencyCoolDownCondOption, ProhibitMeetingTool, ShowVoteStateOption
+        DeathPenaltyOption, NumOfMeetingsOption,EmergencyCooldownAtGameStart,UseShortenCooldownAtGameStartOption, ShortenCooldownAtGameStartOption, EarlyExtraEmergencyCoolDownOption, EarlyDiscussionReductionOption, EarlyExtraEmergencyCoolDownCondOption, ProhibitMeetingTool, ShowVoteStateOption
         ]);
 
     static private bool ConfirmEjectIsEnable() => AmongUsUtil.GetCurrentNormalOption().ConfirmImpostor;
@@ -286,7 +292,7 @@ public static class GeneralConfigurations
 
     static public bool IsInEarlyPhase => (NebulaGameManager.Instance?.AllPlayerInfo.Count(p => p.IsDead) ?? 0) < EarlyExtraEmergencyCoolDownCondOption;
 
-    static public ExclusiveAssignmentConfiguration[] exclusiveAssignmentOptions = Helpers.Sequential(10).Select(i => new ExclusiveAssignmentConfiguration("options.exclusiveAssignment.category." + i)).ToArray();
+    static public SimpleRoleFilterConfiguration[] exclusiveAssignmentOptions = Helpers.Sequential(10).Select(i => new SimpleRoleFilterConfiguration("options.exclusiveAssignment.category." + i)).ToArray();
     static public IConfigurationHolder ExclusiveAssignmentOptions = NebulaAPI.Configurations.Holder("options.exclusiveAssignment", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations(exclusiveAssignmentOptions);
 
     static public readonly BoolConfiguration UseVoiceChatOption = NebulaAPI.Configurations.Configuration("options.voiceChat.useVoiceChat", false);
@@ -517,147 +523,6 @@ public static class GeneralConfigurations
                     }
                 }, l.Position!.Value))
     );
-
-    public class ExclusiveAssignmentConfiguration : IConfiguration
-    {
-        private const int UnitSize = 30;
-        internal class FilterSharableVariable : ISharableVariable<int>
-        {
-            private string name;
-            private int id;
-            private int currentValue;
-            private ExclusiveAssignmentConfiguration myConfig;
-            private int index;
-
-            public FilterSharableVariable(ExclusiveAssignmentConfiguration config, int index)
-            {
-                this.name = config.dataEntry.Name + index;
-                this.id = -1;
-                this.index = index;
-                this.myConfig = config;
-
-                currentValue = config.ToSharableValueFromLocal(this.index);
-
-                ConfigurationValues.RegisterEntry(this);
-            }
-
-            string ISharableEntry.Name => name;
-
-            int ISharableEntry.Id { get => id; set => id = value; }
-            int ISharableEntry.RpcValue { get => currentValue; set => currentValue = value; }
-
-            int ISharableVariable<int>.CurrentValue
-            {
-                get => currentValue;
-                set
-                {
-                    ConfigurationValues.AssertOnChangeOptionValue();
-                    if (currentValue != value)
-                    {
-                        currentValue = value;
-                        ConfigurationValues.TryShareOption(this);
-                    }
-                }
-            }
-
-            int Virial.Compat.Reference<int>.Value => currentValue;
-
-            void ISharableVariable<int>.SetValueWithoutSaveUnsafe(int value) => currentValue = value;
-
-            void ISharableEntry.RestoreSavedValue() => currentValue = myConfig.ToSharableValueFromLocal(this.index);
-
-        }
-
-
-        StringArrayDataEntry dataEntry;
-        ISharableVariable<int>[] sharableVariables;
-
-        public ExclusiveAssignmentConfiguration(string id)
-        {
-            dataEntry = new(id, ConfigurationValues.ConfigurationSaver, []);
-
-            void GenerateSharable()
-            {
-                sharableVariables = new ISharableVariable<int>[Roles.Roles.AllRoles.Count / UnitSize + 1];
-
-                int length = Roles.Roles.AllRoles.Count / UnitSize + 1;
-
-                sharableVariables = new ISharableVariable<int>[length];
-                for (int i = 0; i < length; i++)
-                {
-                    sharableVariables[i] = new FilterSharableVariable(this, i);
-                }
-            }
-
-            NebulaAPI.Preprocessor?.SchedulePreprocess(Virial.Attributes.PreprocessPhase.FixStructureRoleFilter, GenerateSharable);
-        }
-
-        bool IConfiguration.IsShown => true;
-
-        public IEnumerable<DefinedRole> OnAssigned(DefinedRole role)
-        {
-            if (Contains(role)) foreach (var r in Roles.Roles.AllRoles.Where(r => r != role && Contains(r))) yield return r;
-        }
-
-        public void SaveLocal()
-        {
-            var cache = Roles.Roles.AllRoles.Where(r => Contains(r)).ToArray();
-            var array = cache.Select(r => r.InternalName).ToArray();
-            dataEntry.Value = array;
-        }
-        GUIWidgetSupplier IConfiguration.GetEditor()
-        {
-            return () => new HorizontalWidgetsHolder(GUIAlignment.Left,
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), new TranslateTextComponent(this.dataEntry.Name)) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(this.dataEntry.Name), OnClickText = ConfigurationAssets.GetCopyAction(this.dataEntry.Name) },
-            new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), new LazyTextComponent(() => ValueAsDisplayString ?? "None")),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), new TranslateTextComponent("options.exclusiveAssignment.edit")) { OnClick = _ => RoleOptionHelper.OpenFilterScreen("exclusiveRole", Roles.Roles.AllRoles, Contains, null, r => { ToggleAndShare(r); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }) }
-            );
-        }
-
-        string? ValueAsDisplayString
-        {
-            get
-            {
-                var roles = Roles.Roles.AllRoles.Where(r => Contains(r)).ToArray();
-                if (roles.Length == 0) return null;
-                return roles.Join(r => r.DisplayColoredName, ", ");
-            }
-        }
-
-        string? IConfiguration.GetDisplayText()
-        {
-            var str = ValueAsDisplayString;
-            if (str == null) return null;
-            return Language.Translate(this.dataEntry.Name) + ": " + str;
-        }
-
-        internal bool Contains(DefinedRole role) => (sharableVariables[role.Id / UnitSize].CurrentValue & (1 << (role.Id % UnitSize))) != 0;
-        internal void ToggleAndShare(DefinedRole role)
-        {
-            sharableVariables[role.Id / UnitSize].CurrentValue ^= (1 << (role.Id % UnitSize));
-            SaveLocal();
-        }
-
-        internal void SetAndShare(DefinedRole role, bool on)
-        {
-            if (on)
-                sharableVariables[role.Id / UnitSize].CurrentValue |= (1 << (role.Id % UnitSize));
-            else
-                sharableVariables[role.Id / UnitSize].CurrentValue &= ~(1 << (role.Id % UnitSize));
-            SaveLocal();
-        }
-
-        private int ToSharableValueFromLocal(int index)
-        {
-            int value = 0;
-            foreach (var role in Roles.Roles.GetRoles(UnitSize * index, UnitSize * (index + 1))) {
-                if(dataEntry.Value.Contains(role.InternalName)) value |= 1 << (role.Id % UnitSize);
-                
-            }
-
-            return value;
-        }
-    }
 }
 
 /*

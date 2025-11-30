@@ -13,6 +13,7 @@ public class LightPatch
     public static float lastRangeForDive = 1f;
     public static float LastCalculatedRange = 1f;
 
+
     public static bool Prefix(ref float __result, ShipStatus __instance, [HarmonyArgument(0)] NetworkedPlayerInfo? player)
     {
         if (__instance == null)
@@ -49,7 +50,7 @@ public class LightPatch
 
         rate *= GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
 
-        lastRange -= (lastRange - rate).Delta(0.7f, 0.005f);
+        lastRange -= (lastRange - rate).Delta(0.7f * (ev?.LightSpeed ?? 1f), 0.005f);
         __result = radiusRate * range * lastRange;
         LastCalculatedRange = __result;
 

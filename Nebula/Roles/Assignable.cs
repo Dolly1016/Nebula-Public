@@ -160,7 +160,8 @@ public class Assignable
                         RoleChanceOption.addSelection(1);
                         refresher();
                     }),
-                    new Module.MSString(0.2f,"(",TMPro.TextAlignmentOptions.MidlineRight,TMPro.FontStyles.Bold),
+                    new Module.MSString(0.2f,
+                    ",TMPro.TextAlignmentOptions.MidlineRight,TMPro.FontStyles.Bold),
                     new Module.MSButton(0.4f, 0.4f, "<<", TMPro.FontStyles.Bold, () => {
                         RoleChanceSecondaryOption.addSelection(-1);
                         refresher();

@@ -18,7 +18,7 @@ namespace Nebula.Roles.Modifier;
 
 public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCitation, RoleFilter
 {
-    private Lover() : base("lover", new(255, 0, 184), [NumOfPairsOption, RoleChanceOption, ChanceOfAssigningImpostorsOption, AllowExtraWinOption, BlockRoleWinOption, AvengerModeOption]) {
+    private Lover() : base("lover", new(255, 0, 184), [NumOfPairsOption, RoleChanceOption, ChanceOfAssigningImpostorsOption, AllowExtraWinOption, AllowExtraWinViaCrewWinOption, BlockRoleWinOption, AvengerModeOption]) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Neutral.Avenger.MyRole.ConfigurationHolder!]);
         ConfigurationHolder?.SetDisplayState(() => NumOfPairsOption == 0 ? ConfigurationHolderState.Inactivated : RoleChanceOption == 100 ? ConfigurationHolderState.Emphasized : ConfigurationHolderState.Activated);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Lover.png");
@@ -38,6 +38,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
     static internal IntegerConfiguration RoleChanceOption = NebulaAPI.Configurations.Configuration("options.role.lover.roleChance", (10, 100, 10), 100, decorator: num => num + "%",title: new TranslateTextComponent("options.role.chance"));
     static private IntegerConfiguration ChanceOfAssigningImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.lover.chanceOfAssigningImpostors", (0,100,10), 0, decorator: num => num + "%");
     static internal BoolConfiguration AllowExtraWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.allowExtraWin", true);
+    static internal BoolConfiguration AllowExtraWinViaCrewWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.allowExtraWinViaCrewmateWin", true, () => AllowExtraWinOption);
     static internal BoolConfiguration BlockRoleWinOption = NebulaAPI.Configurations.Configuration("options.role.lover.blockRoleWin", false);
     static internal BoolConfiguration AvengerModeOption = NebulaAPI.Configurations.Configuration("options.role.lover.avengerMode", false);
 
@@ -222,7 +223,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         {
             if (ev.Phase != ExtraWinCheckPhase.LoversPhase) return;
             if (!AllowExtraWinOption && ev.GameEnd != NebulaGameEnd.AvengerWin) return;
-
+            if (!AllowExtraWinViaCrewWinOption && ev.GameEnd == NebulaGameEnd.CrewmateWin) return;
             var myLover = MyLover.Get();
             if (myLover == null) return;
             if (myLover.IsDead && myLover.Role.Role != Jester.MyRole) return;

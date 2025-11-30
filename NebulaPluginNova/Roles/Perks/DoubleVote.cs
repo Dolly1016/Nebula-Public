@@ -19,7 +19,7 @@ internal class DoubleVote : PerkFunctionalInstance
     {
     }
 
-    [EventPriority(50)]
+    [EventPriority(EventPriority.Low)]
     void OnVoted(PlayerVoteCastLocalEvent ev)
     {
         //スキップ、白票、0票投票は対象外

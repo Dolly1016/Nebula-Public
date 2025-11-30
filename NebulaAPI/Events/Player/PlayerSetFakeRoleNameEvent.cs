@@ -8,21 +8,23 @@ namespace Virial.Events.Player;
 
 internal class PlayerSetFakeRoleNameEvent : AbstractPlayerEvent
 {
-    internal string Text { get; private set; }
+    internal string AdditionalText { get; private set; }
+    internal string? RoleAlternative { get; private set; }
     public bool InMeeting { get; private init; }
     internal PlayerSetFakeRoleNameEvent(Virial.Game.Player player, bool inMeeting) : base(player)
     {
-        Text = "";
+        AdditionalText = "";
+        RoleAlternative = null;
         InMeeting = inMeeting;
     }
 
     public void Append(string text)
     {
-        Text += text;
+        AdditionalText += text;
     }
 
-    public void Set(string text)
+    public void Alternate(string text)
     {
-        Text = text;
+        RoleAlternative = text;
     }
 }

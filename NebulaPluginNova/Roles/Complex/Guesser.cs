@@ -1,6 +1,7 @@
 ﻿using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Roles.Impostor;
+using System.Data;
 using System.Linq;
 using Virial;
 using Virial.Assignable;
@@ -16,8 +17,11 @@ namespace Nebula.Roles.Complex;
 static public class MeetingRoleSelectWindow
 {
     static TextAttributeOld ButtonAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new(1.3f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(2f, 1f, 2f);
-
+    static TextAttributeOld TabAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
     static public MetaScreen OpenRoleSelectWindow(IEnumerable<DefinedRole>? roles, Predicate<DefinedRole>? predicate, bool impRolesArrangeAtFirst, string underText, Action<DefinedRole> onSelected)
+        => OpenRoleSelectWindowUsingTabs(roles, [(null, predicate)], impRolesArrangeAtFirst, underText, onSelected);
+
+    static public MetaScreen OpenRoleSelectWindowUsingTabs(IEnumerable<DefinedRole>? roles, (string? tab, Predicate<DefinedRole>? predicate)[] tabs, bool impRolesArrangeAtFirst, string underText, Action<DefinedRole> onSelected)
     {
         var window = MetaScreen.GenerateWindow(new(7.6f, 4.2f), HudManager.Instance.transform, new Vector3(0, 0, -50f), true, false);
 
@@ -39,7 +43,6 @@ static public class MeetingRoleSelectWindow
             }
             roles = roleSet;
         }
-        if(predicate != null) roles = roles.Where(r => predicate.Invoke(r));
         
         int CategoryToInt(RoleCategory roleCategory) => roleCategory switch
         {
@@ -47,15 +50,24 @@ static public class MeetingRoleSelectWindow
             RoleCategory.CrewmateRole => impRolesArrangeAtFirst ? 1 : 0,
             _ => 2
         };
-        var ary = roles.ToArray();
-        roles = ary;
-        ary.Sort((r1, r2) =>
-        {
-            if (r1.Category == r2.Category) return r1.InternalName.CompareTo(r2.InternalName);
-            return CategoryToInt(r1.Category).CompareTo(CategoryToInt(r2.Category));
-        });
 
-        inner.Append(roles, r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+        bool isFirst = true;
+        foreach (var tab in tabs)
+        {
+            var ary = roles.Where(r => tab.predicate?.Invoke(r) ?? true).ToArray();
+            ary.Sort((r1, r2) =>
+            {
+                if (r1.Category == r2.Category) return r1.InternalName.CompareTo(r2.InternalName);
+                return CategoryToInt(r1.Category).CompareTo(CategoryToInt(r2.Category));
+            });
+
+            if (isFirst) isFirst = false;
+            else inner.Append(new MetaWidgetOld.VerticalMargin(0.1f));
+            
+            if (tab.tab != null) inner.Append(new MetaWidgetOld.Text(TabAttribute) { MyText = new RawTextComponent(tab.tab), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+            inner.Append(ary, r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+        }
+
         MetaWidgetOld.ScrollView scroller = new(new(6.9f, 3.8f), inner, true) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
         widget.Append(scroller);
 
@@ -65,8 +77,14 @@ static public class MeetingRoleSelectWindow
 
         IEnumerator CoCloseOnResult()
         {
-            while (MeetingHud.Instance.state != MeetingHud.VoteStates.Results) yield return null;
-
+            if (MeetingHud.Instance)
+            {
+                while (MeetingHud.Instance.state != MeetingHud.VoteStates.Results) yield return null;
+            }
+            else
+            {
+                while (!MeetingHud.Instance) yield return null;
+            }
             window.CloseScreen();
         }
 

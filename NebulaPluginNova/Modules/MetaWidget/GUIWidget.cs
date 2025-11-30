@@ -1,4 +1,5 @@
 ﻿
+using Nebula.Behavior;
 using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
 using Virial.Assignable;
@@ -381,7 +382,16 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     public Virial.Media.GUIWidget RawText(GUIAlignment alignment, Virial.Text.TextAttribute attribute, string rawText) => new NoSGUIText(alignment, attribute, new RawTextComponent(rawText));
     
     public Virial.Media.GUIWidget Text(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text) => new NoSGUIText(alignment, attribute, text);
+    public Virial.Media.GUIWidget RealtimeText(GUIAlignment alignment, Virial.Text.TextAttribute attribute, Func<string> textSupplier, int length) => new NoSGUIText(alignment, attribute, new RawTextComponent(new string('O', length))) { 
+        PostBuilder = text =>
+        {
+            text.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += () => text.text = textSupplier.Invoke();
+            text.text = textSupplier.Invoke();
+            text.ForceMeshUpdate();
+        }
+    };
     
+
 
     public Virial.Media.GUIWidget Margin(FuzzySize margin) => new NoSGUIMargin(GUIAlignment.Center, new(margin.Width ?? 0f, margin.Height ?? 0f));
 

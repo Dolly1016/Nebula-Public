@@ -105,9 +105,12 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                 bool targetMJailer = player.TryGetModifier<Impostor.JailerModifier.Instance>(out _);
                 bool myMJailer = MyPlayer.TryGetModifier<Impostor.JailerModifier.Instance>(out _);
 
+                
+                bool targetNighty = player.TryGetModifier<Modifier.Nighty.Instance>(out _);
+                
+
                 using (RPCRouter.CreateSection("ChainShift"))
                 {
-                    Debug.Log("Test1");
                     //タスクに関する書き換え
                     int leftCrewmateTask = 0;
                     int leftQuota = 0;
@@ -163,6 +166,14 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                             player.RpcInvokerUnsetModifier(Impostor.JailerModifier.MyRole).InvokeSingle();
                         }
                     }
+
+                    
+                    if (targetNighty)
+                    {
+                        MyPlayer.Unbox().RpcInvokerSetModifier(Modifier.Nighty.MyRole, []).InvokeSingle();
+                        player.RpcInvokerUnsetModifier(Modifier.Nighty.MyRole).InvokeSingle();
+                    }
+                    
 
                     new NebulaRPCInvoker(() => MyPlayer.Unbox().UpdateTaskState()).InvokeSingle();
                 }

@@ -68,6 +68,7 @@ public interface IPlayerlike : IModuleContainer, IGameObject
     /// プレイヤーの名前を返します。
     /// </summary>
     string Name { get; }
+    string ColoredName { get; }
 
     /// <summary>
     /// 死亡しているとき、Trueを返します。

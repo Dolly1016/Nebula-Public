@@ -229,7 +229,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
         [Local]
         void ReflectRoleName(PlayerSetFakeRoleNameEvent ev)
         {
-            if (divideResults.TryGetValue(ev.Player.PlayerId, out var roleName)) ev.Set(ev.InMeeting ? roleName.longName : roleName.shortName);
+            if (divideResults.TryGetValue(ev.Player.PlayerId, out var roleName)) ev.Alternate(ev.InMeeting ? roleName.longName : roleName.shortName);
         }
 
         #region Titles

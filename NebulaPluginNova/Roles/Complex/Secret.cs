@@ -156,10 +156,10 @@ public class Secret : DefinedRoleTemplate, DefinedRole
                 ScheduleSendArousalRpc(MyPlayer.Unbox(), savedRoleArgs, savedTasks);
         }
 
-        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort)
+        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)
         {
             string str = (isShort ? "?" : "???").Color(Palette.CrewmateBlue);
-            if(NebulaGameManager.Instance?.CanSeeAllInfo ?? false) str += $" ({savedRole.DisplayShort.Color(savedRole.UnityColor)})".Color(Color.gray);
+            if(canSeeAllInfo) str += $" ({savedRole.DisplayShort.Color(savedRole.UnityColor)})".Color(Color.gray);
             return str;
         }
 
@@ -195,10 +195,10 @@ public class Secret : DefinedRoleTemplate, DefinedRole
             leftKill--;
             if (leftKill <= 0 && AmOwner) ScheduleSendArousalRpc(MyPlayer, savedArgs);
         }
-        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort)
+        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)
         {
             string str = (isShort ? "?" : "???").Color(Palette.ImpostorRed);
-            if (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) str += $" ({savedRole.DisplayShort.Color(savedRole.UnityColor)})".Color(Color.gray);
+            if (canSeeAllInfo) str += $" ({savedRole.DisplayShort.Color(savedRole.UnityColor)})".Color(Color.gray);
             return str;
         }
 

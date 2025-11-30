@@ -42,6 +42,8 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
     static public readonly Gimlet MyRole = new();
     static private readonly GameStatsEntry StatsDrill = NebulaAPI.CreateStatsEntry("stats.gimlet.drill", GameStatsCategory.Roles, MyRole);
 
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {

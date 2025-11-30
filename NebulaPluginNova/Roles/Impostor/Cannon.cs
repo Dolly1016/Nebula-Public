@@ -15,7 +15,7 @@ namespace Nebula.Roles.Impostor;
 [NebulaRPCHolder]
 public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedRole
 {
-    public Cannon() : base("cannon", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MarkCoolDownOption, CannonCoolDownOption, NumOfMarksOption, CannonPowerOption, CannonPowerAttenuationOption])
+    public Cannon() : base("cannon", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MarkCoolDownOption, CannonCoolDownOption, NumOfMarksOption, CannonPowerOption, CannonPowerAttenuationOption, CanBlowPlayerUsingConsoleOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
 
@@ -31,7 +31,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
     static private readonly FloatConfiguration CannonPowerOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonPower", (5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Ratio);
     static private readonly FloatConfiguration CannonPowerAttenuationOption = NebulaAPI.Configurations.Configuration("options.role.cannon.cannonPowerAttenuation", (0.25f, 2f, 0.125f), 0.75f, FloatConfigurationDecorator.Ratio);
     static private readonly IntegerConfiguration NumOfMarksOption = NebulaAPI.Configurations.Configuration("options.role.cannon.numOfMarks", (1, 10), 3);
-
+    static private readonly BoolConfiguration CanBlowPlayerUsingConsoleOption = NebulaAPI.Configurations.Configuration("options.role.cannon.canBlowPlayerUsingConsole", true);
     static public readonly Cannon MyRole = new();
     static private readonly GameStatsEntry StatsFire = NebulaAPI.CreateStatsEntry("stats.cannon.fire", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsBlow = NebulaAPI.CreateStatsEntry("stats.cannon.players", GameStatsCategory.Roles, MyRole);
@@ -86,7 +86,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
             });
         }
     }
-
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueMapAbility;
     private class CannonFireLocalEvent : Virial.Events.Event
     {
         public CannonFireLocalEvent(){ }
@@ -300,7 +300,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
 
         IEnumerator CoAnimMovement()
         {
-            yield return player.MyPhysics.WalkPlayerTo(animTo, 0.01f, speedMul, true);
+            yield return player.MyPhysics.WalkPlayerTo(animTo, 0.01f, speedMul, true); //死んだらこのコルーチンをキャンセルすればバグを防げるかも。
 
             player.MyPhysics.Animations.Animator.SetSpeed(1f);
             player.cosmetics.skin.animator.SetSpeed(1f);
@@ -384,6 +384,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
         {
             if (Minigame.Instance.MyNormTask) isPlayerTask = true;
             Minigame.Instance.ForceClose();
+            if(CanBlowPlayerUsingConsoleOption) Minigame.Instance = null;
         }
         if (myPlayer.CanMove)
         {

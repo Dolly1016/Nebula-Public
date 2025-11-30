@@ -16,11 +16,14 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using Virial;
+using Virial.Components;
+using Virial.Events.Game.Meeting;
 using Virial.Events.VoiceChat;
 using Virial.Media;
 using Virial.Text;
 using static Interstellar.VoiceChat.VCRoom;
 using static Nebula.Modules.MetaWidgetOld;
+using static Rewired.Data.Player_Editor;
 using static UnityEngine.AudioClip;
 
 namespace Nebula.VoiceChat;
@@ -251,10 +254,16 @@ internal class NoSVCRoom
             private bool HasBeenMapped = false;
             private FloatDataEntry? volumeEntry = null;
             public GamePlayer? MappedModPlayer => mappedModPlayer;
+            public PlayerControl MappedPlayerControl => mappedPlayer;
             public void UpdateProfile(int playerId, string playerName)
             {
                 this.playerId = playerId;
                 this.playerName = playerName;
+                ResetMapping();
+            }
+
+            public void ResetMapping()
+            {
                 this.mappedPlayer = null!;
                 this.mappedModPlayer = null!;
             }
@@ -263,10 +272,9 @@ internal class NoSVCRoom
             {
                 if (playerId < 0) return;
 
-                if (mappedPlayer != null && !mappedPlayer)
+                if (mappedPlayer == null || mappedPlayer != null && (!mappedPlayer || mappedPlayer.PlayerId != playerId))
                 {
-                    mappedPlayer = null!;
-                    mappedModPlayer = null!;
+                    ResetMapping();
                 }
 
                 if (mappedPlayer == null && (LobbyBehaviour.Instance || ShipStatus.Instance))
@@ -276,16 +284,22 @@ internal class NoSVCRoom
                     IEnumerator CoSetVolumeEntry(PlayerControl player)
                     {
                         string puid = "";
-                        while (puid.Length == 0)
+                        int trial = 0;
+                        /*
+                        while (puid.Length == 0 && trial < 4)
                         {
-                            yield return new WaitForSeconds(1f);
                             if (!player) yield break;
+                            LogUtils.WriteToConsole($"Try Get PUID of {player.name} ({player.PlayerId})");
                             yield return PropertyRPC.CoGetProperty<string>(player.PlayerId, "myPuid", result => puid = result, null);
+                            yield return new WaitForSeconds(1f);
+                            trial++;
                         }
-                        Debug.Log($"Gain PUID of {player.name} ({player.PlayerId} : {puid})");
+                        */
+                        LogUtils.WriteToConsole($"Gain PUID of {player.name} ({player.PlayerId} : {puid})");
                         if (puid.Length == 0) puid = player.name;
                         volumeEntry = VCSettings.GetPlayerVolumeEntry(puid);
                         if(ModSingleton<NoSVCRoom>.Instance.TryGetPlayer(player.PlayerId, out var p)) p.SetVolume(volumeEntry.Value);
+                        yield break;
                     }
                     if(mappedPlayer) NebulaManager.Instance.StartCoroutine(CoSetVolumeEntry(mappedPlayer).WrapToIl2Cpp());
                 }
@@ -319,7 +333,8 @@ internal class NoSVCRoom
         public byte PlayerId => mapping.PlayerId;
         public float Volume => clientVolume.Volume;
         public float Level => levelMeter.Level;
-
+        public bool IsMapped => mapping.IsMapped;
+        internal PlayerControl MappedPlayerControl => mapping.MappedPlayerControl;
         public VCPlayer(NoSVCRoom vcRoom, AudioRoutingInstance instance)
         {
             Room = vcRoom;
@@ -359,9 +374,9 @@ internal class NoSVCRoom
                 return;
             }
 
-            var gameState = AmongUsClient.Instance.GameState;
+            var gameState = AmongUsClient.Instance != null ? AmongUsClient.Instance.GameState : InnerNet.InnerNetClient.GameStates.NotJoined;
             var inLobby = gameState < InnerNet.InnerNetClient.GameStates.Started || (gameState == InnerNet.InnerNetClient.GameStates.Ended && !HudManager.InstanceExists);
-            var inIntro = GameManager.Instance && !GameManager.Instance.GameHasStarted;
+            var inIntro = GameManager.Instance != null && GameManager.Instance && !GameManager.Instance.GameHasStarted;
             if (inLobby || inIntro)
             {
                 UpdateLobby();
@@ -377,6 +392,8 @@ internal class NoSVCRoom
             UpdateTaskPhase(position, speakers, canIgnoreWalls);
         }
 
+        public void ResetMapping() => mapping.ResetMapping();
+
         private void UpdateLobby()
         {
             imager.Pan = 0f;
@@ -389,26 +406,43 @@ internal class NoSVCRoom
         private bool IsInRadio(GamePlayer? player, [MaybeNullWhen(false)] out VoiceState state)
         {
             state = null;
-            return Room?.voiceStates.TryGetValue(player?.PlayerId ?? byte.MaxValue, out state) ?? false && state.IsRadio;
+            return (Room?.voiceStates.TryGetValue(player?.PlayerId ?? byte.MaxValue, out state) ?? false) && state.IsRadio;
+        }
+
+        private void CheckAndReflectProperties(VoiceUpdateEvent voiceEvent)
+        {
+            if (voiceEvent.Player != null) GameOperatorManager.Instance?.Run<VoiceUpdateEvent>(voiceEvent);
+
+            this.normalVolume.Volume = voiceEvent.NormalVolume;
+            this.imager.Pan = voiceEvent.NormalPan;
+            this.ghostVolume.Volume = voiceEvent.GhostVolume;
+            this.radioVolume.Volume = voiceEvent.RadioVolume;
+            this.droneVolume.Volume = voiceEvent.DroneVolume;
+            this.droneImager.Pan = voiceEvent.DronePan;
+        }
+
+        private void CheckAndReflectProperties(bool inMeeting, float normalVolume, float normalPan, float ghostVolume, float radioVolume, float droneVolume, float dronePan)
+        {
+            var mappedPlayer = mapping.MappedModPlayer;
+            var voiceEvent = new VoiceUpdateEvent(mappedPlayer!, true, normalVolume, normalPan, ghostVolume, radioVolume, droneVolume, dronePan);
+            CheckAndReflectProperties(voiceEvent);
         }
 
         private void UpdateMeeting()
         {
+            var mappedPlayer = mapping.MappedModPlayer;
             var localIsDead = GamePlayer.LocalPlayer?.IsDead ?? false;
-            var targetIsDead = mapping.MappedModPlayer?.IsDead ?? true;
+            var targetIsDead = mappedPlayer?.IsDead ?? true;
 
             bool canHear = (localIsDead || !targetIsDead);
 
-            imager.Pan = 0f;
-            normalVolume.Volume = canHear ? 1f : 0f;
-            ghostVolume.Volume = 0f;
-            radioVolume.Volume = 0f;
-            droneVolume.Volume = 0f;
+            CheckAndReflectProperties(true, canHear ? 1f : 0f, 0f, 0f, 0f, 0f, 0f);
         }
 
         float wallCoeff = 1f;
         private void UpdateTaskPhase(Vector2? hearingPosition, IEnumerable<SpeakerCache> speakers, bool canIgnoreWalls)
         {
+            var mappedPlayer = mapping.MappedModPlayer;
             var localPlayer = GamePlayer.LocalPlayer;
             var localIsDead = localPlayer?.IsDead ?? false;
             var targetIsDead = mapping.MappedModPlayer?.IsDead ?? true;
@@ -418,10 +452,7 @@ internal class NoSVCRoom
 
                 if (IsInRadio(mapping.MappedModPlayer, out var state))
                 {
-                    normalVolume.Volume = 0f;
-                    ghostVolume.Volume = 0f;
-                    radioVolume.Volume = state.CanHear ? 1f : 0f;
-                    droneVolume.Volume = 0f;
+                    CheckAndReflectProperties(false, 0f, 0f, 0f, state.CanHear ? 1f : 0f, 0f, 0f);
                     return;
                 }
 
@@ -431,13 +462,14 @@ internal class NoSVCRoom
 
                 if (affectedByCommSab)
                 {
-                    normalVolume.Volume = 0f;
-                    ghostVolume.Volume = 0f;
-                    droneVolume.Volume = 0f;
+                    CheckAndReflectProperties(false, 0f, 0f, 0f, 0f, 0f, 0f);
+                    return;
                 }
                 
 
                 var target = mapping.MappedModPlayer;
+
+                VoiceUpdateEvent ev = new(target!, false, 0f, 0f, 0f, 0f, 0f, 0f);
 
                 if (target != null && hearingPosition.HasValue && GamePlayer.LocalPlayer?.VanillaPlayer && target.VanillaPlayer)
                 {
@@ -471,8 +503,8 @@ internal class NoSVCRoom
                         //重み付き平均を計算するため、重みの和で割る。
                         pan /= volSum;
 
-                        droneImager.Pan = pan;
-                        droneVolume.Volume = volMax;
+                        ev.DronePan = pan;
+                        ev.DroneVolume = volMax;
                     }
 
                     //本体の音量
@@ -480,51 +512,48 @@ internal class NoSVCRoom
                         var volume = GetVolume(targetPos.Distance(hearingPosition.Value), HearDistance);
                         var pan = GetPan(hearingPosition.Value.x, targetPos.x);
 
-                        imager.Pan = pan;
+                        ev.NormalPan = pan;
                         if (localIsDead)
                         {
-                            normalVolume.Volume = volume;
-                            ghostVolume.Volume = 0f;
+                            ev.NormalVolume = volume;
+                            ev.GhostVolume = 0f;
                         }
                         else
                         {
                             CalcWall(ref wallCoeff, targetPos, hearingPosition.Value, canIgnoreWalls);
-                            
-                            normalVolume.Volume = targetIsDead ? 0f : (volume * wallCoeff);
+
+                            ev.NormalVolume = targetIsDead ? 0f : (volume * wallCoeff);
 
                             if (targetIsDead)
                             {
                                 switch (GeneralConfigurations.KillersHearDeadOption.GetValue())
                                 {
                                     case 0: //Off
-                                        ghostVolume.Volume = 0f;
+                                        ev.GhostVolume = 0f;
                                         break;
                                     case 1: //OnlyMyKiller
-                                        ghostVolume.Volume = (target?.MyKiller?.AmOwner ?? false) ? volume : 0f;
+                                        ev.GhostVolume = (target?.MyKiller?.AmOwner ?? false) ? volume : 0f;
                                         break;
                                     case 2: //OnlyImpostors
-                                        ghostVolume.Volume = (localPlayer?.IsImpostor ?? false) ? volume : 0f;
+                                        ev.GhostVolume = (localPlayer?.IsImpostor ?? false) ? volume : 0f;
                                         break;
                                     case 3: //OnlyAllKillers
-                                        ghostVolume.Volume = (localPlayer?.IsKiller ?? false) ? volume : 0f;
+                                        ev.GhostVolume = (localPlayer?.IsKiller ?? false) ? volume : 0f;
                                         break;
                                 }
                             }
                             else
                             {
-                                ghostVolume.Volume = 0f;
+                                ev.GhostVolume = 0f;
                             }
                         }
                     }
                 }
+                CheckAndReflectProperties(ev);
             }
             else
             {
-                imager.Pan = 0f;
-                normalVolume.Volume = targetIsDead && localIsDead ? 1f : 0f;
-                ghostVolume.Volume = 0f;
-                radioVolume.Volume = 0f;
-                droneVolume.Volume = 0f;
+                CheckAndReflectProperties(false, targetIsDead && localIsDead ? 1f : 0f, 0f, 0f, 0f, 0f, 0f);
             }
         }
 
@@ -689,7 +718,7 @@ internal class NoSVCRoom
     {
         if (ModSingleton<VoiceChatInfo>.Instance == null)
         {
-            var vcInfo = UnityHelper.CreateObject<VoiceChatInfo>("VCInfo", HudManager.Instance.transform, new Vector3(0f, 4f, -400f));
+            var vcInfo = UnityHelper.CreateObject<VoiceChatInfo>("VCInfo", HudManager.InstanceExists ? HudManager.Instance.transform : null, new Vector3(0f, 4f, -400f));
         }
     }
 
@@ -768,6 +797,8 @@ internal class NoSVCRoom
     {
         if(!UserAllowedUsingMic) SetMicrophone(VCSettings.MicrophoneDevice);
         interstellarRoom.Rejoin();
+        UpdateLocalProfile(true);
+        clients.Values.Do(c => c.ResetMapping());
     }
     private void Close()
     {
@@ -837,17 +868,19 @@ internal class NoSVCRoom
 
     byte myLastId = byte.MaxValue;
     string myLastName = null;
-    private void TryUpdateLocalProfile()
+    private void TryUpdateLocalProfile() => UpdateLocalProfile(false);
+
+    private void UpdateLocalProfile(bool always)
     {
         var localPlayer = PlayerControl.LocalPlayer;
         if (!localPlayer) return;
-        if (localPlayer.PlayerId != myLastId || localPlayer.name != myLastName)
+
+        if (always || localPlayer.PlayerId != myLastId || localPlayer.name != myLastName)
         {
             myLastId = localPlayer.PlayerId;
             myLastName = localPlayer.name;
             interstellarRoom.UpdateProfile(myLastName, myLastId);
         }
-    
     }
 
     private void UpdateInternal()
@@ -860,36 +893,43 @@ internal class NoSVCRoom
         
         if(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDown) interstellarRoom.SetMute(!interstellarRoom.Mute);
 
-        float hearDistance = HearDistance;
-        var localPlayer = GamePlayer.LocalPlayer;
-        var camTarget = HudManager.InstanceExists ? AmongUsUtil.CurrentCamTarget : null;
-        Vector2? position = camTarget ? camTarget!.transform.position : (localPlayer?.VanillaPlayer ? localPlayer!.Position : null);
-        bool canIgnoreWalls = false;
-        if (position.HasValue)
+        if (NebulaGameManager.Instance == null || NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted || NebulaGameManager.Instance.GameState == NebulaGameStates.Finished)
         {
-            if (localPlayer != null)
+            foreach (var c in clients.Values) c.Update(Vector2.zero, _speakerCache, true);
+        }
+        else
+        {
+            float hearDistance = HearDistance;
+            var localPlayer = GamePlayer.LocalPlayer;
+            var camTarget = HudManager.InstanceExists && HudManager.Instance && HudManager.Instance.PlayerCam ? AmongUsUtil.CurrentCamTarget : null;
+            Vector2? position = camTarget ? camTarget!.transform.position : (localPlayer?.VanillaPlayer ? localPlayer!.Position : null);
+            bool canIgnoreWalls = false;
+            if (position.HasValue)
             {
-                var ev = GameOperatorManager.Instance?.Run<FixMicPositionEvent>(new(localPlayer, position.Value, localPlayer.EyesightIgnoreWalls), true);
-                position = ev?.Position ?? position;
-                canIgnoreWalls = ev?.CanIgnoreWalls ?? false;
-            }
-
-            _speakerCache.Clear();
-            foreach (var v in virtualSpeakers)
-            {
-                float d = v.Position.Distance(position.Value);
-                if (d < hearDistance)
+                if (localPlayer != null)
                 {
-                    _speakerCache.Add(new(v, GetVolume(d, hearDistance), GetPan(position.Value.x, v.Position.x)));
+                    var ev = GameOperatorManager.Instance?.Run<FixMicPositionEvent>(new(localPlayer, position.Value, localPlayer.EyesightIgnoreWalls), true);
+                    position = ev?.Position ?? position;
+                    canIgnoreWalls = ev?.CanIgnoreWalls ?? false;
+                }
+
+                _speakerCache.Clear();
+                foreach (var v in virtualSpeakers)
+                {
+                    float d = v.Position.Distance(position.Value);
+                    if (d < hearDistance)
+                    {
+                        _speakerCache.Add(new(v, GetVolume(d, hearDistance), GetPan(position.Value.x, v.Position.x)));
+                    }
                 }
             }
-        }
-        else if (_speakerCache.Count > 0)
-        {
-            _speakerCache.Clear();
-        }
+            else if (_speakerCache.Count > 0)
+            {
+                _speakerCache.Clear();
+            }
 
-        foreach (var c in clients.Values) c.Update(position, _speakerCache, canIgnoreWalls);
+            foreach (var c in clients.Values) c.Update(position, _speakerCache, canIgnoreWalls);
+        }
     }
 
     internal void OnGameStart()
@@ -931,10 +971,9 @@ internal class NoSVCRoom
     private class RadioChannel
     {
         static readonly private IDividedSpriteLoader radioImages = DividedSpriteLoader.FromResource("Nebula.Resources.RadioIcons.png", 100f, 50, 50, true);
-        private int ImageId { get; }
         public Color Color { get; }
         public string LocalizedName { get; }
-        public Image Image => radioImages.AsLoader(ImageId);
+        public Image Image { get; }
         Func<GamePlayer, bool> canHear;
         private readonly ILifespan lifespan;
         public ILifespan Lifespan => lifespan;
@@ -943,7 +982,7 @@ internal class NoSVCRoom
         public RadioChannel(string localizedName,int imageId, Func<GamePlayer, bool> canHear, ILifespan lifespan, Color color)
         {
             this.LocalizedName = localizedName;
-            this.ImageId = imageId;
+            this.Image = radioImages.AsLoader(imageId);
             this.canHear = canHear;
             this.lifespan = lifespan;
             Color = color;
@@ -965,13 +1004,14 @@ internal class NoSVCRoom
     {
         radios.RemoveAll(r => r.IsDead);
         if (CurrentRadio?.IsDead ?? false) CurrentRadio = null;
-
+        if (MeetingHud.Instance && CurrentRadio != null) CurrentRadio = null;
+        
         ulong mask = 0;
         bool radio = CurrentRadio != null;
         if (radio) GamePlayer.AllPlayers.Where(CurrentRadio!.CanHear).Do(p => mask |= 1UL << p.PlayerId);
         UpdateVoiceState(radio, mask);
 
-        if (radioInput.KeyDownInGame && radios.Count > 0)
+        if (radioInput.KeyDownInGame && radios.Count > 0 && !MeetingHud.Instance)
         {
             NebulaManager.Instance.ShowRingMenu(
                 radios.Select(r => new RingMenu.RingMenuElement(new NoSGUIImage(GUIAlignment.Center, IconRadioImage, new(null, 0.54f))
@@ -996,6 +1036,8 @@ internal class NoSVCRoom
     {
         if (__lastRadio != radio || (radio && __lastMask != mask))
         {
+            __lastMask = mask;
+            __lastRadio = radio;
             RpcUpdateVoiceState.Invoke((PlayerControl.LocalPlayer.PlayerId, radio, mask));
         }
     }
@@ -1071,6 +1113,39 @@ internal class NoSVCRoom
         else
         {
             widgets.Add(new(GetNormalWidget(localizedText, color), lifespan, predicate, priority));
+        }
+    }
+
+    private bool showDebugInfo = false;
+    internal void ToggleDebugInfo()
+    {
+        showDebugInfo = !showDebugInfo;
+        if (showDebugInfo)
+        {
+            DebugScreen.Push(new FunctionalDebugTextContent(() =>
+            {
+                try
+                {
+                    string title = "<b>VC Status</b><br>";
+                    if (clients.Count == 0) return title + "No players connect to VC else you.";
+
+                    string players = title + string.Join("<br>", clients.Select(entry =>
+                    {
+                        return $"{entry.Value.PlayerName}({entry.Value.PlayerId}): {(entry.Value.IsMapped ? entry.Value.Level.ToString("F6") + "(" + entry.Value.MappedPlayerControl.name + "," + entry.Value.MappedPlayerControl.PlayerId + ")" : "Unmapped")}";
+                    }));
+                    var unmapped = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && !clients.Any(c => c.Value.MappedPlayerControl == p)).ToArray();
+                    if (unmapped.Length > 0)
+                    {
+                        players += "<br><br>Unconnected Players:<br>" + string.Join("<br>", unmapped.Select(p => " -" + p.name));
+                    }
+                    players += "<br><br> My Status: " + (this.myLastName ?? "NONAME") + ", " + this.myLastId;
+                    return players;
+                }
+                catch
+                {
+                    return "Error";
+                }
+            }, new FunctionalLifespan(() => IsActive && showDebugInfo)));
         }
     }
 

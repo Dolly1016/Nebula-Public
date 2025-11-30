@@ -151,16 +151,21 @@ public class OnlyHost : Attribute
 }
 
 /// <summary>
-/// リスナに優先度を設定します。デフォルトの優先度は100で、値が大きいほど優先して実行されます。
+/// リスナに優先度を設定します。デフォルトの優先度は0で、値が大きいほど優先して実行されます。
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class EventPriority : Attribute
 {
     public int Priority { get; private init; }
-    public EventPriority(int priority = 100)
+    public EventPriority(int priority = 0)
     {
         Priority = priority;
     }
+
+    public const int VeryHigh = 1000;
+    public const int High = 100;
+    public const int Low = -100;
+    public const int VeryLow = -1000;
 }
 
 /// <summary>

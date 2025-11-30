@@ -30,7 +30,9 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
 
     static public Reaper MyRole = new Reaper();
     static private GameStatsEntry StatsVent = NebulaAPI.CreateStatsEntry("stats.reaper.ventWithDeadBody", GameStatsCategory.Roles, MyRole);
-    
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];

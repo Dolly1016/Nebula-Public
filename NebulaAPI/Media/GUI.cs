@@ -172,6 +172,8 @@ public interface GUI
     /// <returns>生成されたウィジェット定義</returns>
     //GUIWidget Text(GUIAlignment alignment, TextAttribute attribute, TextComponent defaultText,out Artifact<GUIUpdatableText> artifact);
 
+    GUIWidget RealtimeText(GUIAlignment alignment, TextAttribute attribute, Func<string> textSupplier, int length);
+
     /// <summary>
     /// 翻訳テキストを表示するボタンです。
     /// Buttonメソッドの呼び出しを簡素化した冗長なメソッドです。

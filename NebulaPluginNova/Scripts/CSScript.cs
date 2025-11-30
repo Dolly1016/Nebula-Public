@@ -67,7 +67,7 @@ internal static class AddonScriptManagerLoader
         Assembly.Load(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.CSharp.dll")!);
         */
 
-        yield return AddonScriptManager.CoLoad(assemblies);
+        yield return AddonScriptManager.CoLoad(preprocessor, assemblies);
     }
 
     static internal MethodInfo CompileMethod { get; private set; } = null!;
@@ -83,7 +83,7 @@ internal static class AddonScriptManager
     static private void PrintToLog(int severity, string path, int line, int character, string id, string message) {
         NebulaPlugin.Log.Print(logLevels[severity], NebulaLog.LogCategory.Scripting, $"{id}: {message} at {path} (Line: {line + 1}, Character: {character + 1})");
     }
-    static public IEnumerator CoLoad(Assembly[] assemblies)
+    static public IEnumerator CoLoad(NebulaPreprocessor preprocessor, Assembly[] assemblies)
     {
 #if PC
         using var apiStream = StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!;
@@ -98,7 +98,9 @@ internal static class AddonScriptManager
 
             var sources = addon.Archive.Entries.Where(e => e.FullName.StartsWith(prefix) && e.FullName.EndsWith(".cs")).Select(e => (e.Open().ReadToEnd(), e.FullName.Substring(prefix.Length))).ToArray();
             if (sources.Length == 0) continue;
-            
+
+            yield return preprocessor.SetLoadingText("Compiling Addon Scripts\n" + addon.Id);
+
             AddonBehaviour? addonBehaviour = null;
             var behaviour = addon.Archive.GetEntry(prefix + ".behaviour");
             if (behaviour != null)

@@ -164,14 +164,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         public bool IsAvailable { get; private set; } = false;
         void OnGameStarted(GameStartEvent _)
         {
-            IsAvailable = GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.FreePlay || (Thurifer.MyRole as ISpawnable).IsSpawnable || AssignmentType.AllTypes.Any(t =>
-            {
-                if (!t.IsActive) return false;
-                var param = (Thurifer.MyRole as DefinedRole).GetCustomAllocationParameters(t);
-                if (param == null) return false;
-                if (param.RoleCountSum > 0) return true;
-                return false;
-            });
+            IsAvailable = GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.FreePlay || MyRole.IsSpawnableInSomeForm();
 
             if (!IsAvailable) return;
 
@@ -303,6 +296,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
 
     static private GameStatsEntry StatsActivate = NebulaAPI.CreateStatsEntry("stats.thurifer.activate", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsImpute = NebulaAPI.CreateStatsEntry("stats.thurifer.impute", GameStatsCategory.Roles, MyRole);
+
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         //画面左下のホルダ

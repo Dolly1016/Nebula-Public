@@ -31,7 +31,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
 
     private Doppelganger() : base("doppelganger", new(191, 103, 215), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SwapCooldownOption, SwapDurationOption, DecoyDetectionRadiusOption])
     {
-        GameActionTypes.SculptorAction = new("doppelganger.summon", this, isPlacementAction: true);
+        GameActionTypes.DoppelgangerAction = new("doppelganger.summon", this, isPlacementAction: true);
     }
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0, false));

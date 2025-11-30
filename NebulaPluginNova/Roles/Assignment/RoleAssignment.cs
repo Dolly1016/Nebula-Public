@@ -48,6 +48,11 @@ internal class RoleTable : IRoleTable
     {
         foreach (var tuple in roles) if ((tuple.role.Category & category) != 0) yield return (tuple.playerId, tuple.role);
     }
+
+    public IEnumerable<byte> GetPlayers(DefinedRole role)
+    {
+        foreach (var tuple in roles) if (tuple.role == role) yield return tuple.playerId;
+    }
 }
 
 public class FreePlayRoleAllocator : IRoleAllocator
@@ -59,8 +64,9 @@ public class FreePlayRoleAllocator : IRoleAllocator
         foreach(var p in impostors.Concat(others))
         {
             table.SetRole(p, Crewmate.Crewmate.MyRole);
-            GameOperatorManager.Instance?.Run<RoleAllocatorSetRoleEvent>(new(this, Crewmate.Crewmate.MyRole, null));
         }
+
+        GameOperatorManager.Instance?.Run(new PreFixAssignmentEvent(table));
 
         table.Determine();
     }
@@ -81,12 +87,6 @@ public class StandardRoleAllocator : IRoleAllocator
     public StandardRoleAllocator()
     {
         ghostRolePool = new(Roles.AllGhostRoles.Select(r => r.GenerateRoleAllocator()));
-    }
-
-    private void OnSetRole(DefinedRole role,params List<RoleChance>[] pool)
-    {
-        foreach(var remove in GeneralConfigurations.exclusiveAssignmentOptions.Select(e => e.OnAssigned(role))) foreach(var removeRole in remove) foreach (var p in pool) p.RemoveAll(r => r.role == removeRole);
-        GameOperatorManager.Instance?.Run<RoleAllocatorSetRoleEvent>(new(this, role, role => { foreach (var p in pool) p.RemoveAll(r => r.role == role); }));
     }
 
     private void CategoryAssign(RoleTable table, int left,List<byte> main, List<byte> others, List<RoleChance> rolePool, List<RoleChance>[] allRolePool, Action<DefinedRole, byte>? onSelected = null)
@@ -126,9 +126,6 @@ public class StandardRoleAllocator : IRoleAllocator
             //割り当て済み役職を排除
             selected.left--;
             if (selected.left == 0) rolePool.Remove(selected);
-
-            //排他的割り当てを考慮
-            OnSetRole(selected.role, allRolePool);
         }
 
         bool left100Roles = true;
@@ -175,18 +172,41 @@ public class StandardRoleAllocator : IRoleAllocator
         }
     }
 
+    void CreateRolePool(out List<RoleChance> impostorRoles, out List<RoleChance> crewmateRoles, out List<RoleChance> neutralRoles, out List<RoleChance>[] customChances, out List<RoleChance>[] allRoles)
+    {
+        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r) { cost = 1, otherCost = 0 }));
+        customChances = AssignmentType.AllTypes.Select(t => new List<RoleChance>(Roles.AllRoles.Where(r => t.Predicate.Invoke(r.AssignmentStatus, r) && (r.GetCustomAllocationParameters(t)?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.GetCustomAllocationParameters(t)) { cost = 1, otherCost = 0 }))).ToArray();
+
+        crewmateRoles = GetRolePool(RoleCategory.CrewmateRole);
+        impostorRoles = GetRolePool(RoleCategory.ImpostorRole);
+        neutralRoles = GetRolePool(RoleCategory.NeutralRole);
+        allRoles = [crewmateRoles, impostorRoles, neutralRoles, .. customChances];
+
+        //はじめに排他的割り当ての抽選を行う
+        foreach (var exclusiveOption in IExclusiveAssignmentRule.AllRules)
+        {
+            List<DefinedRole> cand = [];
+            foreach(var pool in allRoles)
+            {
+                foreach (var chance in pool)
+                {
+                    if (exclusiveOption.Contains(chance.role) && !cand.Contains(chance.role)) cand.Add(chance.role);
+                }
+            }
+            if (cand.Count <= 1) continue;
+
+            cand.RemoveRandomOne();
+            foreach (var pool in allRoles) pool.RemoveAll(chance => cand.Contains(chance.role));
+        }
+    }
+
+    public IRoleDraftAllocator? GetDraftAllocator() => new StandardRoleDraft();
     public void Assign(List<byte> impostors, List<byte> others)
     {
         RoleTable table = new();
 
         //ロールプールを作る
-        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r) { cost = 1,otherCost = 0 }));
-        List<RoleChance>[] customChances = AssignmentType.AllTypes.Select(t => new List<RoleChance>(Roles.AllRoles.Where(r => t.Predicate.Invoke(r.AssignmentStatus, r) && (r.GetCustomAllocationParameters(t)?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.GetCustomAllocationParameters(t)) { cost = 1, otherCost = 0 }))).ToArray();
-
-        List<RoleChance> crewmateRoles = GetRolePool(RoleCategory.CrewmateRole);
-        List<RoleChance> impostorRoles = GetRolePool(RoleCategory.ImpostorRole);
-        List<RoleChance> neutralRoles = GetRolePool(RoleCategory.NeutralRole);
-        List<RoleChance>[] allRoles = [crewmateRoles, impostorRoles, neutralRoles, ..customChances];
+        CreateRolePool(out var impostorRoles, out var crewmateRoles, out var neutralRoles, out var customChances, out var allRoles);
 
         void AssignCustomAbilities(RoleCategory category)
         {
@@ -206,9 +226,6 @@ public class StandardRoleAllocator : IRoleAllocator
         CategoryAssign(table, GeneralConfigurations.AssignmentImpostorOption, impostors, others, impostorRoles, allRoles);
         AssignCustomAbilities(RoleCategory.ImpostorRole);
         CategoryAssign(table, GeneralConfigurations.AssignmentNeutralOption, others, others, neutralRoles, allRoles);
-        var jackals = table.roles.Where(r => r.role == Jackal.MyRole).Select(r => r.playerId).ToList();
-        //ジャッカルIDの割り振り
-        for (int i = 0; i < jackals.Count; i++) table.EditRole(jackals[i], (last) => (last.role, [i]));
         AssignCustomAbilities(RoleCategory.NeutralRole);
 
         CategoryAssign(table, GeneralConfigurations.AssignmentCrewmateOption, others, others, crewmateRoles, allRoles);
@@ -219,6 +236,8 @@ public class StandardRoleAllocator : IRoleAllocator
 
 
         foreach (var m in Roles.AllAllocatableModifiers().OrderBy(im => im.AssignPriority)) m.TryAssign(table);
+
+        GameOperatorManager.Instance?.Run(new PreFixAssignmentEvent(table));
 
         table.Determine();
     }

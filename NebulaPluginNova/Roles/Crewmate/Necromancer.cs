@@ -189,7 +189,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
             }
         }
 
-        [OnlyMyPlayer, Local, EventPriority(101)] //Draggableが死体を手放すより先にチェックする
+        [OnlyMyPlayer, Local, EventPriority(+1)] //Draggableが死体を手放すより先にチェックする
         void ReleaseDeadBodyOnNecromancerDead(PlayerDieEvent ev)
         {
             if (MyPlayer.HoldingAnyDeadBody) new StaticAchievementToken("necromancer.another2");

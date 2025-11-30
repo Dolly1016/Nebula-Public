@@ -23,6 +23,10 @@ public enum VirtualKeyInput
     /// </summary>
     Use,
     /// <summary>
+    /// 能力発動操作。マッパーによって変更しない。
+    /// </summary>
+    FixedAbility,
+    /// <summary>
     /// 能力発動操作。
     /// </summary>
     Ability,

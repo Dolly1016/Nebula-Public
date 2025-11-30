@@ -33,7 +33,7 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
     static public Jailer MyRole = new Jailer();
 
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable != JailerModifier.MyRole;
-
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueMapAbility;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
@@ -134,7 +134,7 @@ public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocat
 
         DefinedModifier RuntimeModifier.Modifier => MyRole;
 
-        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort)
+        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)
         {
             if (isShort) return null;
             return lastRoleName + " " + (this as RuntimeModifier).DisplayColoredName;

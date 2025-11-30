@@ -1187,7 +1187,9 @@ public static class MoreCosmic
         {
             allRepos.AddRange(repos.Split("\n").Select(url => ((LocalMarketplaceItem? onlineItem, string url))(null, url)));
         });
-        allRepos.AddRange(MarketplaceData.Data?.OwningCostumes.Where(item => item.ToCostumeUrl.Length > 3 && !allRepos.Any(r => r.url == item.ToCostumeUrl)).Select(item => ((LocalMarketplaceItem? onlineItem, string url))(item, item.ToCostumeUrl)) ?? []);
+        allRepos.AddRange(MarketplaceData.Data?.OwningCostumes
+            .Where(item => item.EntryId != 34 && item.ToCostumeUrl.Length > 3 && !allRepos.Any(r => r.url == item.ToCostumeUrl))
+            .Select(item => ((LocalMarketplaceItem? onlineItem, string url))(item, item.ToCostumeUrl)) ?? []);
 
         foreach (var repo in allRepos.ToArray())
         {

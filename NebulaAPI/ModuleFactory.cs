@@ -30,34 +30,34 @@ public interface IModuleFactory
     /// ボタンの可用性と可視性には追加の条件を設けられます。
     /// </summary>
     /// <returns></returns>
-    ModAbilityButton AbilityButton(ILifespan lifespan, Player player, bool isArrangedAsKillButton, bool isLeftSideButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false)
+    ModAbilityButton AbilityButton(ILifespan lifespan, Player player, bool isArrangedAsKillButton, bool isLeftSideButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image? image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false)
     {
         var button = AbilityButton(lifespan, isArrangedAsKillButton: isArrangedAsKillButton, isLeftSideButton: isLeftSideButton);
         SetUpAbilityOrKillButton(button, lifespan, player, input, false, inputHelp, cooldown, true, label, image, availability, visibility, asGhostButton);
         return button;
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton AbilityButton(ILifespan lifespan, Player player, VirtualKeyInput input, float cooldown, string label, Image image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false)
+    ModAbilityButton AbilityButton(ILifespan lifespan, Player player, VirtualKeyInput input, float cooldown, string label, Image? image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false)
         => AbilityButton(lifespan, player, input, null, cooldown, label, image, availability, visibility, asGhostButton);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton AbilityButton(ILifespan lifespan, Player player, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false)
+    ModAbilityButton AbilityButton(ILifespan lifespan, Player player, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image? image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false)
         => AbilityButton(lifespan, player, false, false, input, inputHelp, cooldown, label, image, availability, visibility, asGhostButton);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton InteractButton<P>(ILifespan lifespan, Player player, ObjectTracker<P> tracker, Virial.Events.Player.PlayerInteractParameter parameters, bool isArrangedAsKillButton, bool isLeftSideButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image image, Action<P, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false) where P : IPlayerlike
+    ModAbilityButton InteractButton<P>(ILifespan lifespan, Player player, ObjectTracker<P> tracker, Virial.Events.Player.PlayerInteractParameter parameters, bool isArrangedAsKillButton, bool isLeftSideButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image? image, Action<P, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false) where P : IPlayerlike
     {
         return InteractButtonInner(lifespan, player, tracker, parameters, false, isArrangedAsKillButton, isLeftSideButton, input, inputHelp, cooldown, label, ModAbilityButton.LabelType.Standard, image, onClick, availability, visibility, null, asGhostButton);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton InteractButton<P>(ILifespan lifespan, Player player, ObjectTracker<P> tracker, Virial.Events.Player.PlayerInteractParameter parameters, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image image, Action<P, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false) where P : IPlayerlike
+    ModAbilityButton InteractButton<P>(ILifespan lifespan, Player player, ObjectTracker<P> tracker, Virial.Events.Player.PlayerInteractParameter parameters, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image? image, Action<P, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false) where P : IPlayerlike
         => InteractButton(lifespan, player, tracker, parameters, false, false, input, inputHelp, cooldown, label, image, onClick, availability, visibility, asGhostButton);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton InteractButton<P>(ILifespan lifespan, Player player, ObjectTracker<P> tracker, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image image, Action<P, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false) where P : IPlayerlike
+    ModAbilityButton InteractButton<P>(ILifespan lifespan, Player player, ObjectTracker<P> tracker, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image? image, Action<P, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false) where P : IPlayerlike
         => InteractButton(lifespan, player, tracker, new Events.Player.PlayerInteractParameter(), input, inputHelp, cooldown, label, image, onClick, availability, visibility, asGhostButton);
 
-    ModAbilityButton EffectButton(ILifespan lifespan, Player player, VirtualKeyInput input, string? inputHelp, float cooldown, float duration, string label, Image image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false, bool isToggleEffect = false)
+    ModAbilityButton EffectButton(ILifespan lifespan, Player player, VirtualKeyInput input, string? inputHelp, float cooldown, float duration, string label, Image? image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false, bool isToggleEffect = false)
     {
         var button = AbilityButton(lifespan, player, input, inputHelp, cooldown, label, image, availability, visibility, asGhostButton);
         button.EffectTimer = NebulaAPI.Modules.Timer(lifespan, duration);
@@ -69,7 +69,7 @@ public interface IModuleFactory
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ModAbilityButton EffectButton(ILifespan lifespan, Player player, VirtualKeyInput input, float cooldown, float duration, string label, Image image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false, bool isToggleEffect = false)
+    ModAbilityButton EffectButton(ILifespan lifespan, Player player, VirtualKeyInput input, float cooldown, float duration, string label, Image? image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false, bool isToggleEffect = false)
         => EffectButton(lifespan, player, input, null, cooldown, duration, label, image, availability, visibility, asGhostButton);
 
     ModAbilityButton KillButton(ILifespan lifespan, Player player, Virial.Events.Player.PlayerInteractParameter parameters, bool arrangeAsKillButton, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Virial.Components.ModAbilityButton.LabelType labelType, Image? image, Action<Player, ModAbilityButton> onKill, Func<Player, bool>? filter = null, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, Func<Player, bool>? filterHeavier = null, bool canTrackInVentPlayer = false)

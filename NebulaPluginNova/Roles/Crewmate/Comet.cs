@@ -30,6 +30,8 @@ public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRol
 
     static public readonly Comet MyRole = new();
     static private readonly GameStatsEntry StatsBlazing = NebulaAPI.CreateStatsEntry("stats.comet.blazing", GameStatsCategory.Roles, MyRole);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
 

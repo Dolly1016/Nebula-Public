@@ -17,6 +17,7 @@ using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Media;
 using Virial.Text;
 using static Nebula.Roles.Crewmate.Investigator;
 using static UnityEngine.GraphicsBuffer;
@@ -59,9 +60,11 @@ public static class PlayerState
     public static TranslatableTag Laser = new("state.laser");
     public static TranslatableTag Drill = new("state.drill");
     public static TranslatableTag Dissolved = new("state.dissolved");
+    public static TranslatableTag Poisoned = new("state.poisoned");
+    public static TranslatableTag Layoff = new("state.layoff");
     public static TranslatableTag Disconnected = new("state.disconnected") { Color = Color.gray };
-    public static TranslatableTag[] AllKillStates = [Dead, Guessed, Embroiled, Trapped, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved, Balloon, Laser, Drill, Dissolved];
-    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, Misguessed, Pseudocide, Exiled];
+    public static TranslatableTag[] AllKillStates = [Dead, Guessed, Embroiled, Trapped, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved, Balloon, Laser, Drill, Dissolved, Poisoned];
+    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, Misguessed, Pseudocide, Exiled, Layoff];
     static PlayerState()
     {
         Virial.Text.PlayerStates.Alive = Alive;
@@ -479,7 +482,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         text = ev?.Name ?? text;
         var color = (ev?.Color.HasValue ?? false) ? ev.Color.Value.ToUnityColor() : Color.white;
 
-        if (!currentOutfit.Outfit.outfit.PlayerName.Equals(DefaultName))
+        if (!currentOutfit.Outfit.outfit.PlayerName.Equals(DefaultName) && !onMeeting)
         {
             if (showDefaultName)
             {
@@ -500,7 +503,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         string text = "";
 
-        bool canSeeAll = (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || AmOwner;
+        bool canSeeAllMeta = (NebulaGameManager.Instance?.CanSeeAllInfo ?? false);
+        bool canSeeAll = canSeeAllMeta || AmOwner;
         bool canSeeRole = canSeeAll;
         bool canSeeTask = canSeeAll;
         bool canSeeFakeSabo = (NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || (PlayerControl.LocalPlayer.GetModInfo()?.Role.CanSeeOthersFakeSabotage ?? false);
@@ -513,17 +517,18 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         }
 
 
+        var editEv = GameOperatorManager.Instance?.Run(new PlayerSetFakeRoleNameEvent(this, inMeeting));
         if (canSeeRole)
         {
             var assignable = ((RuntimeAssignable?)(IsDead ? myGhostRole : myRole) ?? myRole);
             string? roleName = assignable.DisplayColoredName;
             text += roleName ?? "Undefined";
 
-            AssignableAction(r => { var newName = r.OverrideRoleName(text, false); if (newName != null) text = newName; });
+            AssignableAction(r => { var newName = r.OverrideRoleName(text, false, canSeeAllMeta); if (newName != null) text = newName; });
         }
         else
         {
-            text = GameOperatorManager.Instance?.Run(new PlayerSetFakeRoleNameEvent(this, inMeeting)).Text ?? "";
+            text = editEv.RoleAlternative ?? "";
         }
 
         if (canSeeTask) {
@@ -537,6 +542,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             if (fakeStr.Length > 0) fakeStr = ("(" + fakeStr + ")").Color(Color.gray);
             text += fakeStr;
         }
+
+        text += editEv?.AdditionalText ?? "";
 
         roleText.text = text;
         roleText.gameObject.SetActive(true);
@@ -630,12 +637,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     public IEnumerator CoGetRoleArgument(Action<int[]> callback)
     {
-        yield return PropertyRPC.CoGetProperty<int[]>(PlayerId, $"players.{PlayerId}.roleArgument", callback, () => callback.Invoke(new int[0]));
+        yield return PropertyRPC.CoGetProperty<int[]>(PlayerId, $"players.{PlayerId}.roleArgument", callback, () => callback.Invoke(new int[0]), 100f);
     }
 
     public IEnumerator CoGetLeftGuess(Action<int> callback)
     {
-        yield return PropertyRPC.CoGetProperty<int>(PlayerId, $"players.{PlayerId}.leftGuess", callback, () => callback.Invoke(-1));
+        yield return PropertyRPC.CoGetProperty<int>(PlayerId, $"players.{PlayerId}.leftGuess", callback, () => callback.Invoke(-1), 100f);
     }
 
     public readonly static RemoteProcess<(byte playerId, int assignableId, int[] arguments, RoleType roleType)> RpcSetAssignable = new(
@@ -965,7 +972,10 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
            var modulators = playerInfo!.timeLimitedModulators;
 
            var attr = PlayerAttributeImpl.GetAttributeById(message.attributeId);
-           modulators.RemoveAll(p => p.HasAttribute(attr));
+           if (attr != null)
+           {
+               modulators.RemoveAll(p => p.HasAttribute(attr));
+           }
        }
        );
 
@@ -1384,6 +1394,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     //Virial::PlayerAPI
 
     string IPlayerlike.Name => DefaultName;
+    string IPlayerlike.ColoredName => ColoredDefaultName;
     Virial.Compat.Vector2 IGameObject.Position => new(MyControl.transform.position);
     Virial.Compat.Vector2 IPlayerlike.TruePosition => new(MyControl.GetTruePosition());
     bool GamePlayer.CanMove => MyControl.CanMove;
@@ -1408,6 +1419,12 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         RpcAttrModulator.Invoke(new(PlayerId, new SizeModulator(size, duration, canPassMeeting, priority, duplicateTag), false));
     }
     void GamePlayer.GainSpeedAttribute(float speedRate, float duration, bool canPassMeeting, int priority, string? duplicateTag) => RpcAttrModulator.Invoke(new(PlayerId, new SpeedModulator(speedRate, Vector2.one, true, duration, canPassMeeting, priority, duplicateTag ?? ""), false));
+
+    void GamePlayer.RemoveAttributeByTag(string duplicateTag) => RpcRemoveAttrByTag.Invoke((PlayerId, duplicateTag));
+    void GamePlayer.RemoveAttribute(IPlayerAttribute attribute)
+    {
+        if (attribute != null) RpcRemoveAttr.Invoke((PlayerId, attribute.Id));
+    }
     IEnumerable<(IPlayerAttribute attribute, float percentage)> GamePlayer.GetAttributes() => GetValidAttributes();
 
     // Virial::OutfitAPI
@@ -1459,6 +1476,22 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     private VanillaPlayerLogics playerLogic;
     IPlayerLogics IPlayerlike.Logic => playerLogic;
+
+    public GUIWidget? ProgressWidget
+    {
+        get
+        {
+            var contents = AllAssigned()
+                .Select(assignable => (assignable, assignable.ProgressWidget))
+                .Where(tuple => tuple.ProgressWidget != null)
+                .Select(tuple => GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
+                    GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.OverlayTitle, tuple.assignable.DisplayColoredName),
+                    tuple.ProgressWidget!.Move(new(0.14f, 0f))
+                )).ToArray();
+            if(contents.Length == 0) return null;
+            return GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left, contents);
+        }
+    }
 
     public readonly static RemoteProcess<(GamePlayer player, string permission, bool inverse, bool add)> RpcEditPermission = new(
    "EditPermission", (message, _) =>

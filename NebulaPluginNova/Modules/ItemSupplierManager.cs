@@ -97,7 +97,7 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
                 if (functional?.HasAction ?? false)
                 {
                     var obj = ButtonEffect.AddKeyGuide(newInstance.RelatedGameObject, NebulaInput.GetInput(noncrewmate ? VirtualKeyInput.PerkAction2 : VirtualKeyInput.PerkAction1).TypicalKey, new(0f, -0.75f), false);
-                    obj.transform.localScale = new(1f / 0.42f, 1 / 0.42f, 1f);
+                    if(obj != null) obj.transform.localScale = new(1f / 0.42f, 1 / 0.42f, 1f);
                     newInstance.Button.OnClick.AddListener(functional.OnClick);
                 }
                 newInstance.Priority = priority;
@@ -117,8 +117,8 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
         if (perk != null && achTokenOmikuji != null) achTokenOmikuji.Value++;
     }
 
-    private VirtualInput perkInput1 = NebulaInput.GetInput(VirtualKeyInput.PerkAction1);
-    private VirtualInput perkInput2 = NebulaInput.GetInput(VirtualKeyInput.PerkAction2);
+    private VirtualInput perkInput1 = NebulaInput.GetInput(VirtualKeyInput.PerkAction1)!;
+    private VirtualInput perkInput2 = NebulaInput.GetInput(VirtualKeyInput.PerkAction2)!;
     void OnHudUpdate(GameHudUpdateEvent ev)
     {
         static void HandleKeyInput(PerkInstanceEntry? entry, VirtualInput input)

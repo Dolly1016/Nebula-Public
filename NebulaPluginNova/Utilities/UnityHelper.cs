@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
 using Virial.Events.Player;
+using Virial.Media;
 
 namespace Nebula.Utilities;
 
@@ -132,7 +133,7 @@ public static class UnityHelper
         return filter;
     }
 
-    public static MeshFilter CreateCircleMesh(this MeshFilter filter, Vector2 size, int vertices, Vector3? center = null)
+    public static MeshFilter CreateCircleMesh(this MeshFilter filter, Vector2 size, int vertices, Vector3? center = null, Func<int, Vector2>? uv = null)
     {
         center ??= Vector3.zero;
 
@@ -156,12 +157,12 @@ public static class UnityHelper
             var n = i / 3;
             return s == 0 ? n + 1 : (n + 1) % vertices + 1;
         }).ToArray(), 0);
-        mesh.SetUVs(0, sequential.Select(i =>
+        mesh.SetUVs(0, sequential.Select(uv ?? (i =>
         {
             if (i == 0) return new Vector2(0.5f, 0.5f);
             float n = (i - 1) / (float)vertices * Mathn.PI2;
             return new Vector2(Mathn.Cos(n) * 0.5f + 0.5f, Mathn.Sin(n) * 0.5f + 0.5f);
-        }).ToArray()!);
+        })).ToArray()!);
         mesh.SetUVs(1, sequential.Select(i =>
         {
             if (i == 0) return new Vector2(0f, 1f);
@@ -182,7 +183,7 @@ public static class UnityHelper
         line.SetPositions(new Vector3[] { Vector3.zero, Vector3.zero });
         line.useWorldSpace = false;
         line.SetWidth(width, width);
-        line.alignment = LineAlignment.View;
+        line.alignment = LineAlignment.TransformZ;
         
         return line;
     }
@@ -245,6 +246,18 @@ public static class UnityHelper
         return button;
     }
 
+    public static void SetOverlay(this PassiveButton button, Func<GUIWidget?> widget)
+    {
+        button.OnMouseOver.AddListener(() =>
+        {
+            var val = widget.Invoke();
+            if (val != null)
+            {
+                NebulaManager.Instance.SetHelpWidget(button, val);
+            }
+        });
+        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+    }
     public static void SetLocalizedOverlay(this PassiveButton button, string translationKey) => SetRawOverlay(button, Language.Translate(translationKey));
     public static void SetRawOverlay(this PassiveButton button, string rawText)
     {

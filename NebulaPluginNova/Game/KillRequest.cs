@@ -141,13 +141,19 @@ internal class KillRequestHandler
             if (willDieRealTarget)
             {
                 var targetRealPlayer = target.RealPlayer!;
-                result = GameOperatorManager.Instance?.Run(new PlayerCheckKilledEvent(targetRealPlayer, killer, isMeetingKill, playerState, recordState)).Result ?? KillResult.Kill;
+                result = GameOperatorManager.Instance?.Run(new PlayerCheckKilledEvent(targetRealPlayer, killer, isMeetingKill, playerState, recordState, killParam)).Result ?? KillResult.Kill;
                 if (result != KillResult.Kill) RpcOnGuard.Invoke((killer.PlayerId, targetRealPlayer.PlayerId, result == KillResult.ObviousGuard));
             }
             return result == KillResult.Kill;
         }
 
-        bool isMeetingKill = MeetingHud.Instance || ExileController.Instance || !killParam.HasFlag(KillParameter.WithDeadBody);
+        bool inMeetingActually = MeetingHud.Instance || ExileController.Instance;
+        bool isMeetingKill = inMeetingActually || !killParam.HasFlag(KillParameter.WithDeadBody);
+        if (inMeetingActually)
+        {
+            bool isAnimating = MeetingHud.Instance && MeetingHud.Instance.state <= MeetingHud.VoteStates.Animating;
+            if(!isAnimating) killParam |= KillParameter.WithKillSEWidely;
+        }
         if (CheckKill(isMeetingKill, out var result))
         {
             bool usingUtility = target.Logic.InMovingPlat || target.Logic.OnLadder;

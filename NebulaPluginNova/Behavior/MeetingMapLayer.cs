@@ -167,7 +167,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
     {
         public bool IsEmpty => Lines.IsEmpty() && Icons.IsEmpty();
     }
-    private record LineInfo(int Id, LineRenderer Line, LineRenderer BackLine1, LineRenderer BackLine2, PassiveButton Button, Collider2D Collider)
+    private record LineInfo(int Id, LineRenderer Line, MeshRenderer Cap1, MeshRenderer Cap2, PassiveButton Button, Collider2D Collider)
     {
         public StoredLineInfo ToStoredInfo() {
             var points = new Vector2[Line.positionCount];
@@ -183,12 +183,6 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
 
             PlayerId = playerId;
             SetColor(playerId == byte.MaxValue ? Color.gray : DynamicPalette.PlayerColors[playerId]);
-            float width = playerId == byte.MaxValue ? 0.015f : 0.03f;
-            Line.SetWidth(width, width);
-            float backWidth1 = width + 0.03f;
-            BackLine1.SetWidth(backWidth1, backWidth1);
-            float backWidth2 = width + 0.09f;
-            BackLine2.SetWidth(backWidth2, backWidth2);
 
             //関連するアイコンに変更を波及させる
             RelatedIcons.Do(icon => icon.SetPlayer(playerId));
@@ -196,7 +190,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
 
         public void SetColor(Color color)
         {
-            if (Line) Line.SetColors(color, color);
+            if (Line) Line.sharedMaterial.color = color;
         }
 
         public void ResetRelation()
@@ -368,12 +362,6 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                     {
                         SetPlayer(p.PlayerId);
                         NebulaManager.Instance.HideHelpWidget();
-
-                        //チュートリアル
-                        Tutorial.ShowTutorial(
-                                    new TutorialBuilder().AsSimpleTitledOnceTextWidget("meetingTool.advance")
-                                    .ShowWhile(() => MeetingHud.Instance && AmongUsUtil.MapIsOpen)
-                                    );
                     })
                     {
                         PostBuilder = renderer =>
@@ -644,6 +632,14 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
 
                     currentLineDrawer = null;
                     dragIcon = false;
+
+                    if (!NebulaManager.Instance.MouseOverPopup.ShowAnyOverlay)
+                    {
+                        Tutorial.ShowTutorial(
+                                new TutorialBuilder().AsSimpleTitledOnceTextWidget("meetingTool.line")
+                                .ShowWhile(() => MeetingHud.Instance && AmongUsUtil.MapIsOpen)
+                                );
+                    }
                 }
             }
 
@@ -706,18 +702,24 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
         return iconInfo;
     }
 
+    private MeshRenderer CreateCapObject(LineRenderer line, Vector3 capCenter, float width)
+    {
+        capCenter.z += 0.0001f;
+        var mesh = UnityHelper.CreateMeshRenderer("Cap", line.transform, capCenter, null);
+        mesh.filter.CreateCircleMesh(new(width, width), 10, uv: i => i == 0 ? new(0.5f, 0.5f) : new(1f, 1f));
+        mesh.renderer.sharedMaterial = line.sharedMaterial;
+        return mesh.renderer;
+    }
+
     private LineInfo GenerateLine(LineRenderer line, int? id)
     {
-        var backLine1 = GameObject.Instantiate(line, line.transform);
-        var backLine2 = GameObject.Instantiate(backLine1, line.transform);
-        backLine1.transform.localPosition = new(0f, 0f, 0.00001f);
-        backLine2.transform.localPosition = new(0f, 0f, 0.00002f);
-        backLine1.SetColors(Color.white, Color.white);
-        backLine2.SetColors(Color.black, Color.black);
+        line.material = new(NebulaAsset.LineEdgeShader);
+        line.SetWidth(0.08f, 0.08f);
+        var cap1 = CreateCapObject(line, line.GetPosition(0), line.endWidth);
+        var cap2 = CreateCapObject(line, line.GetPosition(line.positionCount - 1), line.endWidth);
 
-        line.numCapVertices = 5;
-        backLine1.numCapVertices = 5;
-        backLine2.numCapVertices = 5;
+        //line.numCapVertices = 5;
+        line.numCornerVertices = 5;
 
         var collider = line.gameObject.AddComponent<EdgeCollider2D>();
         collider.edgeRadius = 0.08f;
@@ -728,7 +730,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
         var button = collider.gameObject.SetUpButton(true);
         var exButton = collider.gameObject.AddComponent<ExtraPassiveBehaviour>();
 
-        var lineInfo = new LineInfo(id ?? lineIndex++, line, backLine1, backLine2, button, collider);
+        var lineInfo = new LineInfo(id ?? lineIndex++, line, cap1, cap2, button, collider);
         lineInfo.SetPlayer(byte.MaxValue, true);
 
         exButton.OnRightClicked = () => {

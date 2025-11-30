@@ -1,13 +1,20 @@
 ﻿using Il2CppSystem.Runtime.CompilerServices;
+using Nebula.Modules.GUIWidget;
+using Nebula.Roles;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.UIElements;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Player;
+using Virial.Media;
+using Virial.Text;
 
 namespace Nebula.Configuration;
 
@@ -232,11 +239,18 @@ public static class RoleFilterHelper
             //割り当て不可能なし
             return Language.Translate("roleFilter.allPattern.all");
         }
-        if (allAssignableSum <= 8) {
+
+        bool CheckCategoryAssignable(List<DefinedRole> assignables, List<DefinedRole> nonAssignables) => assignables.Count == allAssignableSum && nonAssignables.Count == 0;
+        if (CheckCategoryAssignable(assignableImpostor, nonAssignableImpostor)) return Language.Translate("roleFilter.allPattern.impostor");
+        if (CheckCategoryAssignable(assignableCrewmate, nonAssignableCrewmate)) return Language.Translate("roleFilter.allPattern.crewmate");
+        if (CheckCategoryAssignable(assignableNeutral, nonAssignableNeutral)) return Language.Translate("roleFilter.allPattern.neutral");
+
+        bool isMonoCategory = ((IEnumerable<IReadOnlyList<DefinedRole>>)[assignableCrewmate, assignableImpostor, assignableNeutral]).Count(list => list.Count > 0) == 1;
+        if (allAssignableSum <= 6 && !isMonoCategory) {
             //割当先が比較的少ない場合
             return string.Join(Language.Translate("roleFilter.separator"), assignableImpostor.Concat(assignableCrewmate).Concat(assignableNeutral).Select(r => r.DisplayColoredName));
         }
-        if (allNonAssignableSum <= 8)
+        if (allNonAssignableSum <= 6 && !isMonoCategory)
         {
             //割当不可能な対象が比較的少ない場合
             string roles = string.Join(Language.Translate("roleFilter.separator"), nonAssignableImpostor.Concat(nonAssignableCrewmate).Concat(nonAssignableNeutral).Select(r => r.DisplayColoredName));
@@ -263,5 +277,221 @@ public static class RoleFilterHelper
         string neutralStr = canAssignToNeutral ? GetCategoryString("neutral", assignableNeutral, nonAssignableNeutral) : "";
 
         return string.Join(Language.Translate("roleFilter.categorySeparator"), ((IEnumerable<string>)[impostorStr, crewmateStr, neutralStr]).Where(s => s.Length > 0));
+    }
+}
+
+public class SimpleRoleFilterConfiguration : IConfiguration, IExclusiveAssignmentRule
+{
+    private const int UnitSize = 30;
+    internal class FilterSharableVariable : ISharableVariable<int>
+    {
+        private string name;
+        private int id;
+        private int currentValue;
+        private SimpleRoleFilterConfiguration myConfig;
+        private int index;
+
+        public FilterSharableVariable(SimpleRoleFilterConfiguration config, int index)
+        {
+            this.name = config.dataEntry.Name + index;
+            this.id = -1;
+            this.index = index;
+            this.myConfig = config;
+
+            currentValue = config.ToSharableValueFromLocal(this.index);
+
+            ConfigurationValues.RegisterEntry(this);
+        }
+
+        string ISharableEntry.Name => name;
+
+        int ISharableEntry.Id { get => id; set => id = value; }
+        int ISharableEntry.RpcValue { get => currentValue; set => currentValue = value; }
+
+        int ISharableVariable<int>.CurrentValue
+        {
+            get => currentValue;
+            set
+            {
+                ConfigurationValues.AssertOnChangeOptionValue();
+                if (currentValue != value)
+                {
+                    currentValue = value;
+                    ConfigurationValues.TryShareOption(this);
+                }
+            }
+        }
+
+        int Virial.Compat.Reference<int>.Value => currentValue;
+
+        void ISharableVariable<int>.SetValueWithoutSaveUnsafe(int value) => currentValue = value;
+
+        void ISharableEntry.RestoreSavedValue() => currentValue = myConfig.ToSharableValueFromLocal(this.index);
+
+    }
+
+
+    StringArrayDataEntry dataEntry;
+    ISharableVariable<int>[] sharableVariables;
+
+    public SimpleRoleFilterConfiguration(string id)
+    {
+        dataEntry = new(id, ConfigurationValues.ConfigurationSaver, []);
+
+        void GenerateSharable()
+        {
+            sharableVariables = new ISharableVariable<int>[Roles.Roles.AllRoles.Count / UnitSize + 1];
+
+            int length = Roles.Roles.AllRoles.Count / UnitSize + 1;
+
+            sharableVariables = new ISharableVariable<int>[length];
+            for (int i = 0; i < length; i++)
+            {
+                sharableVariables[i] = new FilterSharableVariable(this, i);
+            }
+        }
+
+        NebulaAPI.Preprocessor?.SchedulePreprocess(Virial.Attributes.PreprocessPhase.FixStructureRoleFilter, GenerateSharable);
+    }
+
+    bool IConfiguration.IsShown => true;
+
+
+    /// <summary>
+    /// 同じくこのフィルタに含まれている他の役職を列挙します。
+    /// </summary>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    public IEnumerable<DefinedRole> OnAssigned(DefinedRole role)
+    {
+        if (Contains(role)) foreach (var r in Roles.Roles.AllRoles.Where(r => r != role && Contains(r))) yield return r;
+    }
+
+    public void SaveLocal()
+    {
+        var cache = Roles.Roles.AllRoles.Where(InvertOption ? r => !Contains(r) && (RolePredicate?.Invoke(r) ?? true) : r => Contains(r)).ToArray();
+        var array = cache.Select(r => r.InternalName).ToArray();
+        dataEntry.Value = array;
+    }
+
+    public string ScrollerTag { get; init; } = "exclusiveRole";
+    public bool InvertOption { get; init; } = false;
+    public bool PreviewOnlySpawnableRoles { get; init; } = false;
+
+    GUIWidgetSupplier IConfiguration.GetEditor()
+    {
+        return () => new HorizontalWidgetsHolder(GUIAlignment.Left,
+        new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), new TranslateTextComponent(this.dataEntry.Name)) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(this.dataEntry.Name), OnClickText = ConfigurationAssets.GetCopyAction(this.dataEntry.Name) },
+        ConfigurationAssets.Semicolon,
+        GUI.API.HorizontalMargin(0.08f),
+        new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), new LazyTextComponent(() => ValueAsDisplayString ?? "None")),
+        new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), new TranslateTextComponent("options.exclusiveAssignment.edit")) { OnClick = _ => RoleOptionHelper.OpenFilterScreen(ScrollerTag, Roles.Roles.AllRoles.Where(r => RolePredicate?.Invoke(r) ?? true), r => Contains(r), null, r => { ToggleAndShare(r); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }) }
+        );
+    }
+
+    public Predicate<DefinedRole>? RolePredicate { get; init; } = null;
+
+    private string? GetValuesString(int newLinesPer = 0, string newLineStr = "\n", int max = -1)
+    {
+        var roleCount = Roles.Roles.AllRoles.Count;
+        int[] flags = new int[roleCount];
+        int containedNum = 0, notContainedNum = 0;
+        for(int i = 0; i < roleCount; i++)
+        {
+            var role = Roles.Roles.AllRoles[i];
+            if (PreviewOnlySpawnableRoles && !role.IsSpawnable) continue;
+            if(RolePredicate?.Invoke(role) ?? true)
+            {
+                var contains = Contains(role);
+                flags[i] = contains ? 2 : 1;
+                if (contains)
+                    containedNum++;
+                else
+                    notContainedNum++;
+            }
+        }
+
+        if (containedNum == 0) return Language.Translate("roleFilter.none");
+        if (notContainedNum == 0) return Language.Translate("roleFilter.shortcut.all");
+
+        bool showContainedRoles = containedNum <= notContainedNum;
+        int checkNum = showContainedRoles ? 2 : 1;
+        StringBuilder builder = new();
+
+        int n = 0;
+        for (int i = 0; i < roleCount; i++)
+        {
+            if (flags[i] != checkNum) continue;
+
+            if (max > 0 && n >= max)
+            {
+                return Language.Translate("roleFilter.preview.etc").Replace("%ROLES%", builder.ToString());
+            }
+            if (n > 0)
+            {
+                builder.Append(", ");
+                if (newLinesPer > 0 && n % newLinesPer == 0)
+                    builder.Append(newLineStr);
+            }
+            builder.Append(Roles.Roles.AllRoles[i].DisplayColoredName);
+            n++;
+        }
+        if (!showContainedRoles) return Language.Translate("roleFilter.preview.excludes").Replace("%ROLES%", builder.ToString());
+        return builder.ToString();
+    }
+
+    string? ValueAsDisplayString => GetValuesString(-1, "\n", 4);
+
+    string? IConfiguration.GetDisplayText()
+    {
+        var str = GetValuesString(4, "\n    ");
+        if (str == null) return null;
+
+        return Language.Translate(this.dataEntry.Name) + ": " + str;
+    }
+
+    public bool Contains(DefinedRole role)
+    {
+        var result = (sharableVariables[role.Id / UnitSize].CurrentValue & (1 << (role.Id % UnitSize))) != 0;
+        if (InvertOption) result = !result;
+        result &= RolePredicate?.Invoke(role) ?? true;
+        return result;
+    }
+    internal void ToggleAndShare(DefinedRole role)
+    {
+        sharableVariables[role.Id / UnitSize].CurrentValue ^= (1 << (role.Id % UnitSize));
+        SaveLocal();
+    }
+
+    internal void SetAndShare(DefinedRole role, bool on)
+    {
+        if (InvertOption) on = !on;
+        if (on)
+            sharableVariables[role.Id / UnitSize].CurrentValue |= (1 << (role.Id % UnitSize));
+        else
+            sharableVariables[role.Id / UnitSize].CurrentValue &= ~(1 << (role.Id % UnitSize));
+        SaveLocal();
+    }
+
+    private int ToSharableValueFromLocal(int index)
+    {
+        int value = 0;
+        foreach (var role in Roles.Roles.GetRoles(UnitSize * index, UnitSize * (index + 1)))
+        {
+            if (dataEntry.Value.Contains(role.InternalName)) value |= 1 << (role.Id % UnitSize);
+        }
+
+        return value;
+    }
+
+    IEnumerable<DefinedRole> IExclusiveAssignmentRule.GetExclusiveRoles()
+    {
+        foreach(var role in Roles.Roles.AllRoles)
+        {
+            if (Contains(role))
+            {
+                yield return role;
+            }
+        }
     }
 }

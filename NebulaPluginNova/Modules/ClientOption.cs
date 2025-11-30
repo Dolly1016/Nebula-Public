@@ -379,12 +379,13 @@ public static class StartOptionMenuPatch
 
         void SetNebulaWidget()
         {
-            var buttonAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(2.05f, 0.22f) };
+            var buttonAttr = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new Vector2(2.11f, 0.22f) };
             MetaWidgetOld nebulaWidget = new();
             nebulaWidget.Append(ClientOption.AllOptions.Values.Where(o => o.ShowOnClientSetting), (option) => new MetaWidgetOld.Button(()=> {
                 option.Increment();
                 SetNebulaWidget();
             }, buttonAttr) { 
+                TextMargin = 0.19f,
                 RawText = option.DisplayName + " : " + option.DisplayValue,
                 PostBuilder = (button, _, _) =>
                 {
@@ -394,14 +395,15 @@ public static class StartOptionMenuPatch
                         button.SetRawOverlay(detail);
                     }
                 }
-            }, 2, -1, 0, 0.5f);
+            }, 2, -1, 0, 0.44f);
             nebulaWidget.Append(new MetaWidgetOld.VerticalMargin(0.2f));
 
             List<MetaWidgetOld.Button> bottomButtons = new();
             void AddBottomButton(string translationKey, Action action)
             {
                 bottomButtons.Add(new MetaWidgetOld.Button(action, buttonAttr)
-                { 
+                {
+                    TextMargin = 0.19f,
                     TranslationKey = "config.client." + translationKey, 
                     Alignment = IMetaWidgetOld.AlignmentOption.Center , 
                     PostBuilder = (button, _, _) =>
@@ -438,7 +440,7 @@ public static class StartOptionMenuPatch
 #endif
             AddBottomButton("social", () => ClientOption.ShowSocialSetting());
 
-            nebulaWidget.Append(bottomButtons, b => b, 2, -1, 0, 0.5f);
+            nebulaWidget.Append(bottomButtons, b => b, 2, -1, 0, 0.44f);
 
             nebulaScreen.SetWidget(nebulaWidget);
         }

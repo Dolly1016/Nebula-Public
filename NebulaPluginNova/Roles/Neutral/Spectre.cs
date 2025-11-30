@@ -432,6 +432,11 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
             leftAliveTime = Mathf.Clamp(leftAliveTime + satiety * SatietyRateOption, 0f, MaxSatietyOption * SatietyRateOption);
             
         }
+
+        GUIWidget RuntimeAssignable.ProgressWidget => ProgressGUI.Holder(
+            ProgressGUI.OneLineText(Language.Translate("role.spectre.gui.gauge"), ":", 0.08f, (() => Mathn.Max(0f, Satiety).ToString("F2"), 3), ("/" + MaxSatietyOption.GetValue()))
+            );
+
         static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectreButton.png", 115f);
         
         List<TrackingArrowAbility> killerArrows = [];

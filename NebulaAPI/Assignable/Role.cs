@@ -449,6 +449,13 @@ public interface AllocationParameters
     int GetRoleChance(int count);
 }
 
+public enum MultipleAssignmentType
+{
+    Allowed,
+    AsUniqueKillAbility,
+    AsUniqueMapAbility,
+    NotAllowed,
+}
 /// <summary>
 /// プレイヤーに割り当てられる役職の定義を表します。
 /// </summary>
@@ -491,6 +498,8 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     string GetDisplayShort(IPlayerAbility ability) => DisplayShort;
 
     IEnumerable<DefinedRole> GetGuessableAbilityRoles() => this.IsSpawnable ? [this] : [];
+
+    MultipleAssignmentType MultipleAssignment => MultipleAssignmentType.NotAllowed;
 }
 
 /// <summary>
@@ -647,7 +656,7 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
     /// <param name="lastRoleName"></param>
     /// <param name="isShort"></param>
     /// <returns></returns>
-    string? OverrideRoleName(string lastRoleName, bool isShort) => null;
+    string? OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo) => null;
 
     /// <summary>
     /// 役職の表示名です。特に指定しない場合、役職定義の表示名をそのまま使用します。
@@ -703,6 +712,21 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
     /// クルーメイトタスクを持っていたとしても、クルーメイトタスクの総数に計上されない場合はtrue
     /// </summary>
     bool MyCrewmateTaskIsIgnored => false;
+
+    /// <summary>
+    /// 進捗を表示するGUIウィジェットを返します。
+    /// 既に死亡し、ネタバレに寛容なプレイヤーのみ閲覧できます。
+    /// </summary>
+    Virial.Media.GUIWidget? ProgressWidget
+    {
+        get
+        {
+            var widgets = MyAbilities.Select(a => a.ProgressWidget).Where(w => w != null).ToArray();
+            if (widgets.Length == 0) return null;
+            if(widgets.Length == 1) return widgets[0];
+            return NebulaAPI.GUI.VerticalHolder(Media.GUIAlignment.Left, widgets);
+        }
+    }
 }
 
 /// <summary>
@@ -844,4 +868,25 @@ public interface RuntimeModifier : RuntimeAssignable
     /// ゲーム開始時に割り当てられているとき、役職開示画面で表示されます。
     /// </summary>
     string? DisplayIntroBlurb => null;
+}
+
+public static class AssignableHelpers
+{
+    /// <summary>
+    /// 能力として、あるいはその役職として出現するか調べます。
+    /// </summary>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    public static bool IsSpawnableInSomeForm(this DefinedRole role)
+    {
+        if (role.IsSpawnable) return true;
+        return AssignmentType.AllTypes.Any(t =>
+        {
+            if (!t.IsActive) return false;
+            var param = role.GetCustomAllocationParameters(t);
+            if (param == null) return false;
+            if (param.RoleCountSum > 0) return true;
+            return false;
+        });
+    }
 }

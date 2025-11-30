@@ -35,6 +35,7 @@ public class KeyAssignment : IKeyAssignment
 
 public class VirtualInput
 {
+    static public readonly VirtualInput EmptyInput = new();
     private Func<KeyCode>[] assignments;
     private IEnumerable<KeyCode>? assignmentEnumerator = null;
     public VirtualInput(params Func<KeyCode>[] assignments)
@@ -71,7 +72,9 @@ public class VirtualInput
     public bool KeyUp => AllKeyCode().Any(a => Input.GetKeyUp(a));
     public bool KeyState => AllKeyCode().Any(a => Input.GetKey(a));
 
-    public KeyCode TypicalKey => assignments[0].Invoke();
+    public KeyCode TypicalKey => IsEmpty ? KeyCode.None : assignments[0].Invoke();
+
+    public bool IsEmpty => assignments.Length == 0;
 
     public static void Preprocess(NebulaPreprocessor preprocessor)
     {
@@ -136,7 +139,11 @@ public class NebulaInput
 
     private static Dictionary<Virial.Compat.VirtualKeyInput, VirtualInput> modInput = [];
 
-    static public VirtualInput GetInput(Virial.Compat.VirtualKeyInput type) => modInput[type];
+    static public VirtualInput GetInput(Virial.Compat.VirtualKeyInput type)
+    {
+        type = NebulaGameManager.Instance?.MapInput(type) ?? type;
+        return modInput.TryGetValue(type, out var result) ? result : VirtualInput.EmptyInput;
+    }
 
     static NebulaInput()
     {

@@ -1251,6 +1251,7 @@ public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedR
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     static public readonly Whammy MyRole = new();
     static private readonly GameStatsEntry StatsBalloon = NebulaAPI.CreateStatsEntry("stats.whammy.balloon", GameStatsCategory.Roles, MyRole);
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BalloonButton.png", 115f);

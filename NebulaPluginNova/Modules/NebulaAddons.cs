@@ -150,8 +150,6 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         string addonsPath = AddonsDirectoryPath;
         Directory.CreateDirectory(addonsPath);
 
-        LogUtils.WriteToConsole("AddonLoader: " + addonsPath);
-
         yield return preprocessor.SetLoadingText("Fetching Addons");
 
         //ローカルなアドオンを更新

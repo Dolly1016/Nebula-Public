@@ -11,7 +11,15 @@ namespace Virial.Events.Game;
 /// </summary>
 public class GameUpdateEvent : AbstractGameEvent
 {
-    internal GameUpdateEvent(Virial.Game.Game game) : base(game) { }
+    public float DeltaTime { get; }
+    public float GameTime { get; }
+    public float ProcessTime { get; }
+    
+    internal GameUpdateEvent(Virial.Game.Game game, float deltaTime, float gameTime, float processTime) : base(game) {
+        this.DeltaTime = deltaTime;
+        this.GameTime = gameTime;
+        this.ProcessTime = processTime;
+    }
 }
 
 /// <summary>
@@ -29,7 +37,16 @@ public class UpdateEvent : Event
 /// </summary>
 public class GameHudUpdateEvent : AbstractGameEvent
 {
-    internal GameHudUpdateEvent(Virial.Game.Game game) : base(game) { }
+    public float DeltaTime { get; }
+    public float GameTime { get; }
+    public float ProcessTime { get; }
+
+    internal GameHudUpdateEvent(Virial.Game.Game game, float deltaTime, float gameTime, float processTime) : base(game)
+    {
+        this.DeltaTime = deltaTime;
+        this.GameTime = gameTime;
+        this.ProcessTime = processTime;
+    }
 }
 
 /// <summary>

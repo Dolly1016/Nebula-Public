@@ -26,7 +26,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
     private const float HookBackSuccessSpeed = 12f;
     private const float HookBackFailedSpeed = 19f;
 
-    private Climber() : base("climber", new(86, 171, 246), RoleCategory.CrewmateRole, Crewmate.MyTeam, [GustCooldownOption])
+    private Climber() : base("climber", new(86, 171, 246), RoleCategory.CrewmateRole, Crewmate.MyTeam, [GustCooldownOption, CanSeeInShadowOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         GameActionTypes.HookshotAction = new("hookshot", this, isPhysicalAction: true);
@@ -35,7 +35,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static private FloatConfiguration GustCooldownOption = NebulaAPI.Configurations.Configuration("options.role.climber.gustCooldown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-
+    static private BoolConfiguration CanSeeInShadowOption = NebulaAPI.Configurations.Configuration("options.role.climber.canSeeInShadow", true);
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
     static public readonly Climber MyRole = new();
@@ -44,6 +44,8 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
 
     static private readonly Image hookSprite = SpriteLoader.FromResource("Nebula.Resources.GustHook.png", 100f);
     static private readonly Image ropeSprite = SpriteLoader.FromResource("Nebula.Resources.GustRope.png", 100f);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
 
@@ -221,7 +223,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
             this.begin = player.Position;
             this.pMax = this.target.Distance(this.begin);
 
-            ropeRenderer = UnityHelper.CreateObject<SpriteRenderer>("GustRope", player.VanillaPlayer.cosmetics.transform, Vector3.zero, LayerExpansion.GetPlayerWithShadowLayer());
+            ropeRenderer = UnityHelper.CreateObject<SpriteRenderer>("GustRope", player.VanillaPlayer.cosmetics.transform, Vector3.zero, (CanSeeInShadowOption || player.AmOwner) ? LayerExpansion.GetPlayerWithShadowLayer() : LayerExpansion.GetPlayersLayer());
             ropeRenderer.sprite = ropeSprite.GetSprite();
             ropeRenderer.tileMode = SpriteTileMode.Continuous;
             ropeRenderer.drawMode = SpriteDrawMode.Tiled;

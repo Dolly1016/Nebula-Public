@@ -401,7 +401,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return this;
         }
 
-        private const float TextMargin = 0.26f;
+        public float TextMargin = 0.26f;
 
         private void Generate(SpriteRenderer button,out PassiveButton passiveButton,out TMPro.TextMeshPro text)
         {
@@ -1270,33 +1270,41 @@ public class MetaScreen : MonoBehaviour, GUIScreen
 
     static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask, bool withBackground)
         => GenerateWindow(size, parent, localPos, withBlackScreen, closeOnClickOutside, withMask, withBackground ? BackgroundSetting.Old : BackgroundSetting.Off);
-    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen,bool closeOnClickOutside, bool withMask = false, BackgroundSetting background = BackgroundSetting.Old)
+    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask = false, BackgroundSetting background = BackgroundSetting.Old, bool withCloseButton = true)
     {
         var screen = GenerateScreen(size, parent, localPos, background, withBlackScreen, true);
-        
+
         var obj = screen.transform.parent.gameObject;
 
-        if (background == BackgroundSetting.Modern)
+        if (withCloseButton)
         {
-            var collider = UnityHelper.CreateObject<BoxCollider2D>("CloseButton", obj.transform, new Vector3(-size.x / 2f - 0.3f, size.y / 2f + 0.2f, -1f));
-            collider.transform.localScale = new(0.57f, 0.57f, 1f);
-            collider.isTrigger = true;
-            collider.gameObject.layer = LayerExpansion.GetUILayer();
-            collider.size = new(0.85f, 0.85f);
-            SpriteRenderer? renderer = null;
-            renderer = collider.gameObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = closeButtonSprite.GetSprite(0);
-            var button = collider.gameObject.SetUpButton(true);
-            button.OnClick.AddListener(() => GameObject.Destroy(obj));
-            button.OnMouseOver.AddListener(() => renderer.sprite = closeButtonSprite.GetSprite(1));
-            button.OnMouseOut.AddListener(() => renderer.sprite = closeButtonSprite.GetSprite(0));
-            NebulaManager.Instance.RegisterUI(obj, button);
+            if (background == BackgroundSetting.Modern)
+            {
+                var collider = UnityHelper.CreateObject<BoxCollider2D>("CloseButton", obj.transform, new Vector3(-size.x / 2f - 0.3f, size.y / 2f + 0.2f, -1f));
+                collider.transform.localScale = new(0.57f, 0.57f, 1f);
+                collider.isTrigger = true;
+                collider.gameObject.layer = LayerExpansion.GetUILayer();
+                collider.size = new(0.85f, 0.85f);
+                SpriteRenderer? renderer = null;
+                renderer = collider.gameObject.AddComponent<SpriteRenderer>();
+                renderer.sprite = closeButtonSprite.GetSprite(0);
+                var button = collider.gameObject.SetUpButton(true);
+                button.OnClick.AddListener(() => GameObject.Destroy(obj));
+                button.OnMouseOver.AddListener(() => renderer.sprite = closeButtonSprite.GetSprite(1));
+                button.OnMouseOut.AddListener(() => renderer.sprite = closeButtonSprite.GetSprite(0));
+                NebulaManager.Instance.RegisterUI(obj, button);
+            }
+            else
+            {
+                var button = InstantiateCloseButton(screen, new Vector3(-size.x / 2f - 0.6f, size.y / 2f + 0.25f, 0f));
+                NebulaManager.Instance.RegisterUI(obj, button);
+            }
         }
         else
         {
-            var button = InstantiateCloseButton(screen, new Vector3(-size.x / 2f - 0.6f, size.y / 2f + 0.25f, 0f));
-            NebulaManager.Instance.RegisterUI(obj, button);
+            NebulaManager.Instance.RegisterUI(obj, null);
         }
+
 
         if (closeOnClickOutside)
         {

@@ -299,28 +299,32 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
             //会議中はなにもしない
             if (MeetingHud.Instance || ExileController.Instance) return;
 
-            if (!(PlayerControl.LocalPlayer.killTimer > 0f)) {
+            var killButton = NebulaAPI.CurrentGame?.KillButtonLikeHandler.KillButtonLike.FirstOrDefault();
+            
+            if (killButton != null && !(killButton.Cooldown > 0f)) {
+                bool fired = false;
                 killTraps.RemoveAll((killTrap) => {
-                foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
-                {
-                    if (p.AmOwner) continue;
-                    if (p.IsDead || p.VanillaPlayer.Data.Role.IsImpostor) continue;
-
-                    if (p.VanillaPlayer.transform.position.Distance(killTrap.Position) < KillTrapSizeOption * 0.35f)
+                    if (fired) return false;
+                    foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                     {
-                            using (RPCRouter.CreateSection("TrapKill"))
-                            {
-                                MyPlayer.MurderPlayer(p, PlayerState.Trapped,EventDetail.Trap, KillParameter.RemoteKill);
-                                NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
-                                RpcTrapKill.Invoke(killTrap.ObjectId);
-                                acTokenChallenge!.Value++;
-                            }
+                        if (p.AmOwner) continue;
+                        if (p.IsDead || p.VanillaPlayer.Data.Role.IsImpostor) continue;
 
-                            return true;
+                        if (p.VanillaPlayer.transform.position.Distance(killTrap.Position) < KillTrapSizeOption * 0.35f)
+                        {
+                                using (RPCRouter.CreateSection("TrapKill"))
+                                {
+                                    MyPlayer.MurderPlayer(p, PlayerState.Trapped,EventDetail.Trap, KillParameter.RemoteKill);
+                                    NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
+                                    RpcTrapKill.Invoke(killTrap.ObjectId);
+                                    acTokenChallenge!.Value++;
+                                }
+                                fired = true;
+                                return true;
+                            }
                         }
-                    }
-                    return false;
-                });
+                        return false;
+                    });
             }
         }
 

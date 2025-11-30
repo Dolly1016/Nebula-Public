@@ -11,18 +11,20 @@ using Virial.Configuration;
 using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
+using Virial.Events.Role;
 using Virial.Game;
 using Virial.Runtime;
 
 namespace Nebula.Roles.Neutral;
 
 [NebulaPreprocess(PreprocessPhase.BuildAssignmentTypes)]
-internal static class JackalAssignmentSetUp
+internal static class JackalAssignmentType
 {
     static public Virial.Color Color = new(8, 190, 245);
+    static public AssignmentType JackalizeType;
     public static void Preprocess(NebulaPreprocessor preprocessor)
     {
-        preprocessor.RegisterAssignmentType(() => Neutral.Jackal.MyRole, (lastArgs, role) => Jackal.GenerateArgument(lastArgs[0], role), "jackalized", Color, (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToKillNeutral), () => (Jackal.MyRole as ISpawnable).IsSpawnable && Jackal.JackalizedImpostorOption);
+        JackalizeType = preprocessor.RegisterAssignmentType(() => Neutral.Jackal.MyRole, (lastArgs, role) => Jackal.GenerateArgument(lastArgs.Get(0, 0), role), "jackalized", Color, (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToKillNeutral), () => (Jackal.MyRole as ISpawnable).IsSpawnable && Jackal.JackalizedImpostorOption);
     }
 }
 
@@ -51,7 +53,7 @@ internal class UsurpedImpostorAbility : FlexibleLifespan, IUsurpableAbility
 
 public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    static readonly public RoleTeam MyTeam = new Team("teams.jackal", JackalAssignmentSetUp.Color, TeamRevealType.OnlyMe, () => KillCooldown);
+    static readonly public RoleTeam MyTeam = new Team("teams.jackal", JackalAssignmentType.Color, TeamRevealType.OnlyMe, () => KillCooldown);
 
     private Jackal() : base("jackal", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [KillCoolDownOption, CanCreateSidekickOption, NumOfKillingToCreateSidekickOption, JackalizedImpostorOption],
     othersAssignments: () => {
@@ -134,7 +136,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
         private int killingTotal = 0;
         private int myKillingTotal = 0;
         private int inherited = 0;//継承回数
-        IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => MyJackalized != null ? [MyRole, MyJackalized] : [MyRole];
+        IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => MyJackalized != null ? [MyRole, MyJackalized, ..(JackalizedAbility?.SubAssignableOnHelp ?? [])] : [MyRole];
         public DefinedRole? MyJackalized { get; private set; }
         public IPlayerAbility? JackalizedAbility { get; private set; } = null;
         private int[] StoredJackalizedArgument { get; set; }
@@ -656,3 +658,28 @@ internal class JackalCriteria : AbstractModule<IGameModeStandard>, IGameOperator
         }
     }
 };
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+internal class JackalTeamAllocator : AbstractModule<Virial.Game.Game>, IGameOperator
+{
+    static private void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        preprocessor.DIManager.RegisterModule(() => new JackalTeamAllocator());
+    }
+    private JackalTeamAllocator()
+    {
+        this.RegisterPermanently();
+    }
+
+    void OnFixAssignmentTable(PreFixAssignmentEvent ev)
+    {
+        var jackals = ev.RoleTable.GetPlayers(Jackal.MyRole).ToArray();
+        //ジャッカルIDの割り振り
+        for (int i = 0; i < jackals.Length; i++) ev.RoleTable.EditRole(jackals[i], (last) =>
+        {
+            if(last.argument.Length < 1) return (last.role, [i]);
+            last.argument[0] = i;
+            return (last.role, last.argument);
+        });
+    }
+}

@@ -106,7 +106,7 @@ public class AirshipData : MapData
         new(9.6f, -6.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //電気室左上
         new(19.3f, -4.2f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //電気室アスタリスク
         new(19.8f, -11.3f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //電気室右下
-        new(13.3f, -10.8f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //電気室左下
+        new(13.3f, -10.8f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight | MapObjectType.DepoisonBox), //電気室左下
         new(23.3f, -10.2f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //医務室下
         new(29.1f, -5.9f, MapObjectType.Reachable), //医務室上
         new(25.7f, -10.1f, MapObjectType.SmallOrTabletopOutOfSight), //医務室右下
@@ -130,7 +130,8 @@ public class AirshipData : MapData
         new(20.9f, 2.5f, MapObjectType.SmallOrTabletopOutOfSight), //シャワー修理タスク
         new(8.5f, 1.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //メイン中央上
         new(6.7f, 2.8f, MapObjectType.SmallOrTabletopOutOfSight), //メイン左上の部屋右側
-        new(5.7f, 2.5f, MapObjectType.SmallInCorner), //メイン左上の部屋左側
+        new(5.7f, 2.5f, MapObjectType.SmallInCorner),
+        new(5.2f, 3.4f, MapObjectType.DepoisonBox), //メイン左上の部屋ベッド上
         new(5.8f, -3.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //メイン左下
         new(13.0f, -2.1f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //メイン電気間
         new(1.7f, -1.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //エンジン右下

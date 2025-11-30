@@ -59,7 +59,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole
                     //自分以外の通常以上のノルマを持つ生存者
                     if (!ev.Player.IsDead && ev.Player.Tasks.IsCrewmateTask && ev.Player.Tasks.Quota >= tasks && ev.Player.Tasks.IsAchievedQuota)
                     {
-                        MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Layoff, KillParameter.NormalKill);
+                        MyPlayer.Suicide(PlayerState.Layoff, EventDetail.Layoff, KillParameter.NormalKill);
                         new StaticAchievementToken("agent.another1");
                     }
                 }

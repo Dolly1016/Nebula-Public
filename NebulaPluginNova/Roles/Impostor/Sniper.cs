@@ -92,6 +92,8 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
         }
     }
 
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
@@ -119,6 +121,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         ModAbilityButton equipButton = null!;
+
         public Ability(GamePlayer player, float defaultCooldown, bool isUsurped) :base(player, isUsurped)
         {
             if (AmOwner)

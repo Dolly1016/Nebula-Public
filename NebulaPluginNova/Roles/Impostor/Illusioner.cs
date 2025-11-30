@@ -31,6 +31,8 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.illusioner.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.illusioner.morph", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsPaint = NebulaAPI.CreateStatsEntry("stats.illusioner.paint", GameStatsCategory.Roles, MyRole);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         StaticAchievementToken? acTokenMorphingCommon = null, acTokenPainterCommon = null, acTokenCommon = null;

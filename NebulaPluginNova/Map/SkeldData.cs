@@ -67,7 +67,7 @@ public class SkeldData : MapData
         new(2.8f, -2.4f, MapObjectType.SmallInCorner), //カフェ右下
         new(-7.2f, -2.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //メッドベイ右上
         new(-11.4f, 1.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //メッドベイ上通路
-        new(-10.3f, -2.8f, MapObjectType.SmallOrTabletopOutOfSight), //メッドベイ左ベッド
+        new(-10.3f, -2.8f, MapObjectType.SmallOrTabletopOutOfSight | MapObjectType.DepoisonBox), //メッドベイ左ベッド
         new(-18.4f, 2.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //アッパーエンジン上
         new(-16.4f, -4.1f, MapObjectType.SmallInCorner), //十字路上方
         new(-17.3f, -6.9f, MapObjectType.SmallInCorner), //十字路下方

@@ -17,6 +17,8 @@ public class LightRangeUpdateEvent : Event
     public float LightRange { get => lightRange; set => lightRange = MathF.Max(0f, value); }
     private float lightRange;
 
+    public float LightSpeed { get => lightSpeed; set => lightSpeed = MathF.Max(1f, value); }
+    private float lightSpeed = 1f;
     /// <summary>
     /// 即座に反映される視界の倍率を指定します。
     /// </summary>

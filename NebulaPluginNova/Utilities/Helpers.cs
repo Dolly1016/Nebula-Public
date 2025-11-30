@@ -254,14 +254,18 @@ public static class Helpers
         return array;
     }
 
-    static public T Random<T>(this T[] array)
+    static public int GetRandomIndex<T>(this IReadOnlyList<T> list) => System.Random.Shared.Next(list.Count);
+    static public T Random<T>(this IReadOnlyList<T> list)
     {
-        return array[System.Random.Shared.Next(array.Length)];
+        return list[list.GetRandomIndex()];
     }
 
-    static public T Random<T>(this List<T> list)
+    static public T RemoveRandomOne<T>(this List<T> list)
     {
-        return list[System.Random.Shared.Next(list.Count)];
+        int index = list.GetRandomIndex();
+        T val = list[index];
+        list.RemoveAt(index);
+        return val;
     }
 
     /// <summary>

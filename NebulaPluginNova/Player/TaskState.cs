@@ -249,7 +249,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
             }
             return task!;
         },
-        (message, isCalledByMe) => NebulaGameManager.Instance?.OnTaskUpdated(message.MyContainer)
+        (message, isCalledByMe) => { if (message != null) OnTaskUpdated(message.MyContainer); }
         );
 
     private enum TaskUpdateMessage
@@ -263,7 +263,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
     private static RemoteProcess<(byte playerId, TaskUpdateMessage type)> RpcUpdateTaskState = new(
         "UpdateTaskState",
         (message, isCalledByMe) => {
-            var player = NebulaGameManager.Instance?.GetPlayer(message.playerId);
+            var player = GamePlayer.GetPlayer(message.playerId);
             if (player == null) return;
             var task = player!.Tasks.Unbox();
             if (task != null)
@@ -286,7 +286,12 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
                         break;
                 }
             }
-            NebulaGameManager.Instance?.OnTaskUpdated(player);
+            OnTaskUpdated(player);
         }
         );
+
+    private static void OnTaskUpdated(GamePlayer player)
+    {
+        GameOperatorManager.Instance?.Run(new PlayerTaskUpdateEvent(player));
+    }
 }

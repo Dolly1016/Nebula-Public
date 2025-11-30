@@ -92,6 +92,7 @@ public class FungleData : MapData
         new(-23.0f, -1.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //レク左外
         new(-14.6f, -2.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //レク右下
         new(-15.8f, -2.3f, MapObjectType.SmallOrTabletopOutOfSight), //レク下卓上
+        new(-14.3f, 0.6f, MapObjectType.DepoisonBox),//レク上卓上
         new(-17.3f, -0.1f, MapObjectType.Reachable), //レク中央
         new(-19.3f, -4.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //レクキッチン間
         new(-13.9f, -7.6f, MapObjectType.Reachable), //キッチン中央
@@ -104,6 +105,7 @@ public class FungleData : MapData
         new(-7.6f, -7.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ラボ左
         new(-4.6f, -10.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ中
         new(-1.6f, -6.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ右上
+        new(-5.4f, -10.2f, MapObjectType.DepoisonBox), //ラボ左下の床
         new(1.8f, -5.2f, MapObjectType.SmallInCorner), //会議室右下外
         new(0.2f, -6.8f, MapObjectType.SmallOrTabletopOutOfSight), //会議室右下外下寄り
         new(-1.1f, -0.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //会議室

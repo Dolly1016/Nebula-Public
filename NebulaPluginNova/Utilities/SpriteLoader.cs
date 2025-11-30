@@ -843,3 +843,24 @@ public class WrapSpriteLoader : Image
     public System.Collections.IEnumerator LoadAsset(){ yield break; }
     public void MarkAsUnloadAsset() { }
 }
+
+public class CacheSpriteLoader : Image
+{
+    Func<Sprite> supplier;
+    Sprite cache = null!;
+    public CacheSpriteLoader(Func<Sprite> supplier)
+    {
+        this.supplier = supplier;
+    }
+
+    public Sprite GetSprite()
+    {
+        if (!cache) cache = supplier.Invoke();
+        return cache;
+    }
+
+    public void UnloadAsset() { }
+
+    public System.Collections.IEnumerator LoadAsset() { yield break; }
+    public void MarkAsUnloadAsset() { }
+}
