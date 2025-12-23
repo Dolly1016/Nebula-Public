@@ -161,15 +161,15 @@ public abstract class MapData
     }
     abstract public int Id { get; }
 
-    abstract protected Vector2[] MapArea { get; }
-    abstract protected Vector2[] NonMapArea { get; }
+    abstract public IReadOnlyList<Vector2> MapArea { get; }
+    abstract public IReadOnlyList<Vector2> NonMapArea { get; }
     abstract protected (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms { get; }
     abstract protected (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms { get; }
     abstract public (SystemTypes room, Vector2 pos)[] AdminRooms { get; } //DivMapと同じ順序で並べること。(Outsideを除いた順序)
     virtual public Vector2[][] RaiderIgnoreArea { get => []; }
     abstract protected SystemTypes[] SabotageTypes { get; }
     abstract public MapObjectPoint[] MapObjectPoints { get; }
-    public NavVerticesStructure MapNavData { get {
+    public virtual NavVerticesStructure MapNavData { get {
             if (field == null)
             {
                 using var stream = StreamHelper.OpenFromResource("Nebula.Resources.Pathfinding." + AmongUsUtil.ToMapName((byte)Id) + ".json");
@@ -227,12 +227,14 @@ public abstract class MapData
             magnitude = vector.magnitude;
             if (magnitude > 12.0f) continue;
 
-            if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.normalized, magnitude, Constants.ShipAndAllObjectsMask)) return true;
+            if (!Helpers.AnyCustomNonTriggersBetween(position, p, collider => collider.name != NonMapColliderName, Constants.ShipAndAllObjectsMask)) return true;
+            //if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.normalized, magnitude, Constants.ShipAndAllObjectsMask)) return true;
         }
 
         return false;
     }
 
+    public static string NonMapColliderName { get; } = "NonMap";
     public int CheckMapAreaDebug(Vector2 position)
     {
         Vector2 vector;

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Game;
 using Virial.Runtime;
 using Virial.Text;
 using static Nebula.Configuration.ConfigurationValues;
@@ -17,13 +18,14 @@ internal class NoSRoleSetUp
 {
     static private void SetTabs()
     {
+        Func<bool> roleVisibility = () => GeneralConfigurations.CurrentGameMode.WithRoleSettings;
         //Set Up Tabs
         ConfigurationTab.tabSetting = new ConfigurationTab(0x01, "options.tab.setting", new(0.75f, 0.75f, 0.75f));
-        ConfigurationTab.tabCrewmate = new ConfigurationTab(0x02, "options.tab.crewmate", new(Palette.CrewmateBlue));
-        ConfigurationTab.tabImpostor = new ConfigurationTab(0x04, "options.tab.impostor", new(Palette.ImpostorRed));
-        ConfigurationTab.tabNeutral = new ConfigurationTab(0x08, "options.tab.neutral", new(244f / 255f, 211f / 255f, 53f / 255f));
-        ConfigurationTab.tabGhost = new ConfigurationTab(0x10, "options.tab.ghost", new(150f / 255f, 150f / 255f, 150f / 255f));
-        ConfigurationTab.tabModifier = new ConfigurationTab(0x20, "options.tab.modifier", new(255f / 255f, 255f / 255f, 243f / 255f));
+        ConfigurationTab.tabCrewmate = new ConfigurationTab(0x02, "options.tab.crewmate", new(Palette.CrewmateBlue), roleVisibility);
+        ConfigurationTab.tabImpostor = new ConfigurationTab(0x04, "options.tab.impostor", new(Palette.ImpostorRed), roleVisibility);
+        ConfigurationTab.tabNeutral = new ConfigurationTab(0x08, "options.tab.neutral", new(244f / 255f, 211f / 255f, 53f / 255f), roleVisibility);
+        ConfigurationTab.tabGhost = new ConfigurationTab(0x10, "options.tab.ghost", new(150f / 255f, 150f / 255f, 150f / 255f), roleVisibility);
+        ConfigurationTab.tabModifier = new ConfigurationTab(0x20, "options.tab.modifier", new(255f / 255f, 255f / 255f, 243f / 255f), roleVisibility);
         ConfigurationTab.allTab = [ConfigurationTab.tabSetting, ConfigurationTab.tabCrewmate, ConfigurationTab.tabImpostor, ConfigurationTab.tabNeutral, ConfigurationTab.tabGhost, ConfigurationTab.tabModifier];
     }
 
@@ -251,8 +253,13 @@ public class Roles
         allModifiers = null;
         allTeams = null;
 
-        //色を登録する
-        AllAssignables().Do(a => SerializableDocument.RegisterColor("role." + a.InternalName, a.Color.ToUnityColor()));
+        //色とアイコンを登録する
+        AllAssignables().Do(a =>
+        {
+            SerializableDocument.RegisterColor("role." + a.InternalName, a.Color.ToUnityColor());
+            a.ConfigurationHolder?.RelatedAssignable = a;
+
+        });
     }
 }
 
@@ -263,13 +270,14 @@ internal static class RoleOptionHelper
 
     static internal void OpenFilterScreen<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, AssignableFilter<R>> filter, MetaScreen? screen = null) where R : DefinedAssignable
         => OpenFilterScreen(scrollerTag, allRoles, r => filter.Invoke(r).Test(r), (r, val) => filter.Invoke(r).SetAndShare(r, val), r => filter.Invoke(r).ToggleAndShare(r), screen);
-    static internal void OpenFilterScreen<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R,bool>? setAndShare, Action<R> toggleAndShare, MetaScreen? screen = null) where R : DefinedAssignable
+    static internal void OpenFilterScreen<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R,bool>? setAndShare, Action<R> toggleAndShare, MetaScreen? screen = null, bool canFilterSpawnable = true) where R : DefinedAssignable
     {
         if (!screen) screen = MetaScreen.GenerateWindow(new Vector2(6.7f, setAndShare != null ? 4.5f : 3.7f), HudManager.Instance.transform, Vector3.zero, true, true);
 
-        bool showOnlySpawnable = ClientOption.GetValue(ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter) == 1;
+        bool showOnlySpawnable = canFilterSpawnable && ClientOption.GetValue(ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter) == 1;
 
         IEnumerable<R> allRolesFiltered = showOnlySpawnable ? allRoles.Where(r => (r as ISpawnable)?.IsSpawnable ?? true) : allRoles;
+        allRolesFiltered = allRolesFiltered.Where(r => !(r is DefinedRole dr) || !dr.IsSystemRole);
 
         List<GUIWidget> shortcutButtons = [];
         if(setAndShare != null)
@@ -288,7 +296,7 @@ internal static class RoleOptionHelper
                             using var shareSegment = new ConfigurationUpdateBlocker();
                             onClicked.Invoke(invalid);
                         }
-                        OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen);
+                        OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen, canFilterSpawnable);
                     },
                     AsMaskedButton = false
                 });
@@ -318,14 +326,14 @@ internal static class RoleOptionHelper
 
         screen!.SetWidget(new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center,
             new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, shortcutButtons),
-            new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, new NoSGUICheckbox(Virial.Media.GUIAlignment.Center, showOnlySpawnable) { OnValueChanged = val =>
+            (canFilterSpawnable ? new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Center, new NoSGUICheckbox(Virial.Media.GUIAlignment.Center, showOnlySpawnable) { OnValueChanged = val =>
             {
                 ClientOption.AllOptions[ClientOption.ClientOptionType.ShowOnlySpawnableAssignableOnFilter].Increment();
-                OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen);
-            } }, GUI.API.HorizontalMargin(0.2f), GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), "roleFilter.showOnlySpawnable")),
+                OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen, canFilterSpawnable);
+            } } , GUI.API.HorizontalMargin(0.2f), GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), "roleFilter.showOnlySpawnable")) : null),
             new GUIScrollView(Virial.Media.GUIAlignment.Center, new(6.5f, 3.1f), GUI.API.Arrange(Virial.Media.GUIAlignment.Center,
             allRolesFiltered.Select(r => new GUIButton(Virial.Media.GUIAlignment.Center, RelatedInsideButtonAttr, GUI.API.RawTextComponent(r.DisplayColoredName)) { 
-                OnClick = _ => { toggleAndShare(r); OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen); },
+                OnClick = _ => { toggleAndShare(r); OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen, canFilterSpawnable); },
                 Color = test(r) ? Color.white : new Color(0.14f, 0.14f, 0.14f),
                 AsMaskedButton = true,
             })

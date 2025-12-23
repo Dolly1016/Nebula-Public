@@ -153,6 +153,12 @@ public static class NavVerticesHelpers
                     case "FungleLaboratory":
                         if (GeneralConfigurations.FungleSimpleLaboratoryOption.Value) AddBidirectionalEdge();
                         break;
+                    case "FungleLowerLadderLeft":
+                        AddSingleEdge();
+                        break;
+                    case "FungleLowerLadderRight":
+                        AddSingleEdge();
+                        break;
                     case "AirshipMeetingLeft":
                         if (GeneralConfigurations.AirshipOneWayMeetingRoomOption.Value) AddSingleEdge();
                         else AddBidirectionalEdge();

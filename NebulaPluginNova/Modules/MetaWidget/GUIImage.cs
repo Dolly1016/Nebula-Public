@@ -6,7 +6,7 @@ namespace Nebula.Modules.GUIWidget;
 
 public class NoSGUIImage : AbstractGUIWidget
 {
-    protected Virial.Media.Image Image;
+    protected Virial.Media.Image? Image;
     protected FuzzySize Size;
     public Color? Color = null;
     public GUIClickableAction? OnClick;
@@ -14,7 +14,7 @@ public class NoSGUIImage : AbstractGUIWidget
     public bool IsMasked { get; init; }
     public Action<SpriteRenderer>? PostBuilder = null;
 
-    public NoSGUIImage(GUIAlignment alignment, Virial.Media.Image image, FuzzySize size,Color? color = null, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) : base(alignment)
+    public NoSGUIImage(GUIAlignment alignment, Virial.Media.Image? image, FuzzySize size,Color? color = null, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) : base(alignment)
     {
         this.Image = image;
         this.Size = size;

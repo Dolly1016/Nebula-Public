@@ -9,6 +9,7 @@ using BepInEx.Unity.IL2CPP.Utils;
 using Nebula.Modules.Cosmetics;
 using System.Runtime.CompilerServices;
 using Nebula.VoiceChat;
+using Nebula.Roles;
 
 namespace Nebula.Patches;
 
@@ -103,10 +104,12 @@ public static class MeetingModRpc
 
         Resources.UnloadUnusedAssets();
 
+        var meeting = new EmergencyMeetingImpl(reported, reporter);
+
         if (reported != null)
-            GameOperatorManager.Instance?.Run(new ReportDeadBodyEvent(reporter!, reported), true);
+            GameOperatorManager.Instance?.Run(new ReportDeadBodyEvent(reporter!, reported, meeting), true);
         else
-            GameOperatorManager.Instance?.Run(new CalledEmergencyMeetingEvent(reporter!), true);
+            GameOperatorManager.Instance?.Run(new CalledEmergencyMeetingEvent(reporter!, meeting), true);
     });
 
     public static readonly RemoteProcess<(List<VoterState> states, byte exiled, byte[] exiledAll,  bool tie, bool isObvious)> RpcModCompleteVoting = new("CompleteVoting", 
@@ -335,6 +338,9 @@ class MeetingStartPatch
             roleText.transform.localPosition = new Vector3(0.3384f, -0.13f, -0.02f);
             roleText.transform.localScale = new Vector3(0.57f, 0.57f);
             roleText.rectTransform.sizeDelta += new Vector2(0.35f, 0f);
+            roleText.UseRoleIcon();
+
+            player.NameText.UseRoleIcon();
 
             player.CancelButton.GetComponent<SpriteRenderer>().material = __instance.Glass.material;
             player.ConfirmButton.GetComponent<SpriteRenderer>().material = __instance.Glass.material;
@@ -539,14 +545,26 @@ class VoteAreaVCPatch
                     var col = DynamicPalette.PlayerColors[pva.TargetPlayerId];
                     if (Mathn.Max((int)col.r, (int)col.g, (int)col.b) < 100) col = Color.Lerp(col, Color.white, 0.4f);
 
-                    if (ModSingleton<NoSVCRoom>.Instance?.TryGetPlayer(pva.TargetPlayerId, out var vcPlayer) ?? false)
+                    if (ModSingleton<NoSVCRoom>.Instance != null)
                     {
                         float alpha = 0f;
 
                         var script = frame.gameObject.AddComponent<ScriptBehaviour>();
+
+                        bool isLocal = GamePlayer.LocalPlayer?.PlayerId == pva.TargetPlayerId;
                         script.UpdateHandler += () =>
                         {
-                            if (vcPlayer.Level > 0.12f)
+                            float level = 0f;
+                            if (ModSingleton<NoSVCRoom>.Instance?.TryGetPlayer(pva.TargetPlayerId, out var vcPlayer) ?? false)
+                            {
+                                level = vcPlayer.Level;
+                            }
+                            else if (isLocal)
+                            {
+                                level = ModSingleton<NoSVCRoom>.Instance?.LocalMicLevel ?? 0f;
+                            }
+
+                            if (level > 0.12f)
                                 alpha = Mathn.Clamp(alpha + Time.deltaTime * 8f, 0f, 1f);
                             else
                                 alpha = Mathn.Clamp(alpha - Time.deltaTime * 8f, 0f, 1f);
@@ -751,6 +769,7 @@ static class CheckForEndVotingPatch
                 foreach (var state in __instance.playerStates)
                 {
                     if (!state.DidVote) continue;
+                    if (state.VotedFor == 254) continue;
                     voteForMap[state.TargetPlayerId] = NebulaGameManager.Instance?.GetPlayer(state.VotedFor);
                 }
 

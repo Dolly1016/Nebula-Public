@@ -79,6 +79,7 @@ public static class RPCRouter
     public class RPCSection : IDisposable
     {
         public string Name;
+        private WinCheckBlocker.WinCheckSection? checkWinningBlocker = null;
         public void Dispose()
         {
             if (currentSection != this) return;
@@ -88,11 +89,12 @@ public static class RPCRouter
 
             var rpcArray = evacuateds.ToArray();
             evacuateds.Clear();
-            CombinedRemoteProcess.CombinedRPC.Invoke(rpcArray);
-            
+            CombinedRemoteProcess.CombinedRPC.Invoke(checkWinningBlocker != null, rpcArray);
+
+            checkWinningBlocker?.Dispose();
         }
 
-        public RPCSection(string? name = null)
+        public RPCSection(string? name = null, bool blockCheckWinning = false)
         {
             Name = name ?? "Untitled";
             if (currentSection == null)
@@ -102,10 +104,12 @@ public static class RPCRouter
             }else {
                 //NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Rpc section \"{Name}\" is in \"{currentSection.Name}\"! It is ignored.");
             }
+
+            if (blockCheckWinning && currentSection.checkWinningBlocker == null) currentSection.checkWinningBlocker = WinCheckBlocker.CreateSection(name);
         }
     }
 
-    static public RPCSection CreateSection(string? label = null) => new RPCSection(label);
+    static public RPCSection CreateSection(string? label = null, bool blockCheckWinning = false) => new RPCSection(label, blockCheckWinning);
 
     static RPCSection? currentSection = null;
     static List<NebulaRPCInvoker> evacuateds = new();
@@ -577,28 +581,36 @@ public class CombinedRemoteProcess : RemoteProcessBase
     public static CombinedRemoteProcess CombinedRPC = new();
     CombinedRemoteProcess() : base("CombinedRPC", true) { }
 
+
     public override void Receive(MessageReader reader)
     {
+        bool blockCheckWinning = reader.ReadBoolean();
         int num = reader.ReadInt32();
 
-        for (int i = 0; i < num; i++)
+        using (blockCheckWinning ? WinCheckBlocker.CreateSection() : null)
         {
-            int id = reader.ReadInt32();
-            if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id,out var rpc)){
-                rpc.Receive(reader);
-            }
-            else
+
+            for (int i = 0; i < num; i++)
             {
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "RPC NotFound ID Error. id: " + id + " ,index: " + i + " ,length: " + num);
-                throw new Exception("Combined RPC Error");
+                int id = reader.ReadInt32();
+                if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id, out var rpc))
+                {
+                    rpc.Receive(reader);
+                }
+                else
+                {
+                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "RPC NotFound ID Error. id: " + id + " ,index: " + i + " ,length: " + num);
+                    throw new Exception("Combined RPC Error");
+                }
             }
         }
     }
 
-    public void Invoke(params NebulaRPCInvoker[] invokers)
+    public void Invoke(bool blockCheckWinning, params NebulaRPCInvoker[] invokers)
     {
         RPCRouter.SendRpc(Name, Hash, (writer) =>
         {
+            writer.Write(blockCheckWinning);
             writer.Write(invokers.Count(i=>!i.IsDummy));
             foreach (var invoker in invokers)
             {
@@ -917,7 +929,7 @@ public class RPCScheduler
         if(allDic.TryGetValue(trigger,out var list))
         {
             Debug.Log($"Execute RPC ({list.Count})");
-            CombinedRemoteProcess.CombinedRPC.Invoke(list.ToArray());
+            CombinedRemoteProcess.CombinedRPC.Invoke(false, list.ToArray());
             allDic.Remove(trigger);
         }
     }

@@ -6,9 +6,11 @@ namespace Nebula.Modules;
 
 public enum SynchronizeTag
 {
+    PreStartGame,
     PreSpawnMinigame,
     CheckExtraVictims,
-    PostMeeting
+    PostMeeting,
+    AeroGuessPreQuiz,
 }
 
 [NebulaRPCHolder]

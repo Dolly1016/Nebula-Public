@@ -222,6 +222,42 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         GainExtraTasks(shortTasks+longTasks+commonTasks,addQuota);
     }
 
+    private void RewindTasks(int numOfTasks)
+    {
+        numOfTasks = Mathn.Min(CurrentCompleted, numOfTasks);
+        CurrentCompleted -= numOfTasks;
+        TotalCompleted -= numOfTasks;
+
+        List<int> indexCand = [];
+        for (int i = 0; i < MyContainer.VanillaPlayer.Data.Tasks.Count; i++)
+        {
+            NetworkedPlayerInfo.TaskInfo taskInfo = MyContainer.VanillaPlayer.Data.Tasks[i];
+            if (!taskInfo.Complete) continue;
+            NormalPlayerTask normalPlayerTask = ShipStatus.Instance.GetTaskById(taskInfo.TypeId);
+            if (normalPlayerTask) indexCand.Add(i);
+        }
+
+        LogUtils.WriteToConsole("Count: " + indexCand.Count);
+
+        for (int i = 0; i < numOfTasks; i++)
+        {
+            var selectedIndex = indexCand.Random();
+            indexCand.Remove(selectedIndex);
+
+            NetworkedPlayerInfo.TaskInfo taskInfo = MyContainer.VanillaPlayer.Data.Tasks[selectedIndex];
+            taskInfo.Complete = false;
+            NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), MyContainer.VanillaPlayer.transform);
+            normalPlayerTask.Id = taskInfo.Id;
+            normalPlayerTask.Owner = MyContainer.VanillaPlayer;
+            normalPlayerTask.Initialize();
+            int index = MyContainer.VanillaPlayer.myTasks.FindIndex((Il2CppSystem.Predicate<PlayerTask>)(task => task.Id == taskInfo.Id));
+            var oldTask = MyContainer.VanillaPlayer.myTasks[index];
+            GameObject.Destroy(oldTask.gameObject);
+            MyContainer.VanillaPlayer.myTasks[index] = normalPlayerTask;
+        }
+
+        RpcSyncTaskState.Invoke(this);
+    }
 
     private static RemoteProcess<PlayerTaskState> RpcSyncTaskState = new RemoteProcess<PlayerTaskState>(
         "SyncTaskState",
@@ -293,5 +329,35 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
     private static void OnTaskUpdated(GamePlayer player)
     {
         GameOperatorManager.Instance?.Run(new PlayerTaskUpdateEvent(player));
+    }
+
+    bool PlayerTasks.ExemptTasks(int numOfTasks)
+    {
+        if (!MyContainer.AmOwner) return false;
+        if (Quota < numOfTasks) return false;
+        ExemptTasks(numOfTasks);
+        return true;
+    }
+
+    bool PlayerTasks.ReplaceTasks(int commonTasks, int shortTasks, int longTasks)
+    {
+        if (!MyContainer.AmOwner) return false;
+        ReplaceTasksAndRecompute(shortTasks, longTasks, commonTasks);
+        return true;
+    }
+
+    bool PlayerTasks.GainExtraTasks(int commonTasks, int shortTasks, int longTasks, bool addQuota)
+    {
+        if (!MyContainer.AmOwner) return false;
+        GainExtraTasksAndRecompute(shortTasks, longTasks, commonTasks, addQuota);
+        return true;
+    }
+
+    bool PlayerTasks.RewindTasks(int numOfTasks)
+    {
+        if (!MyContainer.AmOwner) return false;
+        if (CurrentCompleted < numOfTasks) return false;
+        RewindTasks(numOfTasks);
+        return true;
     }
 }

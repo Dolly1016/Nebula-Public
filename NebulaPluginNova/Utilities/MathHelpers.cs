@@ -63,8 +63,8 @@ public static class Mathn
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static public float SmoothStep(float from, float to, float t)
     {
-        t = Saturate((t - from) / (to - from));
-        return t * t * (3 - 2 * t);
+        t = t * t * (3 - 2 * t);
+        return to * t + from * (1.0f - t);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

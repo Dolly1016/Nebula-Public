@@ -68,7 +68,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
             }
         }
 
-        GUIWidget? IPlayerAbility.ProgressWidget => sharedResults.Count == 0 ? null : ProgressGUI.Holder(
+        GUIWidget? IPlayerAbility.ProgressWidget => ProgressGUI.Holder(
             ProgressGUI.OneLineText(Language.Translate("role.collator.gui.results")),
                 (sharedResults.Count == 0 ? 
                     ProgressGUI.OneLineText(Language.Translate("role.collator.gui.results.zero")) : 

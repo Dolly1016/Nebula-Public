@@ -1,6 +1,7 @@
 ﻿using Epic.OnlineServices.Presence;
 using Nebula.Game.Statistics;
 using Nebula.Roles.Complex;
+using Nebula.Roles.Crewmate;
 using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
 using System.ComponentModel;
@@ -70,7 +71,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, 0), arguments.Get(2, 0), arguments.Get(3, 0), Roles.GetRole(arguments.Get(4, -1)), arguments.Skip(5).ToArray());
-    static public int[] GenerateArgument(int jackalTeamId, DefinedRole? jackalized) => [jackalTeamId, 0, 0, 0, jackalized?.Id ?? -1];
+    static public int[] GenerateArgument(int jackalTeamId, DefinedRole? jackalized) => [jackalTeamId, 0, 0, 0, jackalized?.Id ?? -1, ..(jackalized?.DefaultAssignableArguments ?? [])];
     static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.jackal.killCoolDown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static public BoolConfiguration CanCreateSidekickOption = NebulaAPI.Configurations.Configuration("options.role.jackal.canCreateSidekick", false);
     static private IntegerConfiguration NumOfKillingToCreateSidekickOption = NebulaAPI.Configurations.Configuration("options.role.jackal.numOfKillingToCreateSidekick", (0, 10), 2, () => CanCreateSidekickOption);
@@ -431,12 +432,15 @@ file static class SidekickAchievementChecker
 
 public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, InheritanceRuleOption, AssignedSidekickOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption], false, optionHolderPredicate: ()=> (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.CanCreateSidekickOption ) {
+    private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, InheritanceRuleOption, AssignedSidekickOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption, CanSuicideOption, SuicideCoolDownOption, CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption], false, optionHolderPredicate: ()=> (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.CanCreateSidekickOption ) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Jackal.MyRole.ConfigurationHolder!]);
         ConfigurationHolder!.Title = ConfigurationHolder.Title.WithComparison("jackal.sidekick");
     }
+
+    static internal Image IconImage = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Icons/sidekick.png");
     IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Sidekick.MyRole, MyRole];
     string DefinedAssignable.InternalName => "jackal.sidekick";
+    Image? DefinedAssignable.IconImage => IconImage;
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.GetAsBool(0,false), arguments.Get(1, 0));
@@ -446,6 +450,16 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
     static internal BoolConfiguration CanCreateSidekickChainlyOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canCreateSidekickChainly", false, () => CanPromoteToJackal!);
     static internal BoolConfiguration CanWinAsOriginalTeamOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canWinAsOriginalTeam", true, () => IsModifierOption || AssignedSidekickOption!);
     static internal BoolConfiguration AssignedSidekickOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.assignedSidekick", false);
+
+    static private readonly BoolConfiguration CanSuicideOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canSuicide", false, () => !IsModifierOption);
+    static private readonly IRelativeCoolDownConfiguration SuicideCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sidekick.suicideCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => CanSuicideOption && !IsModifierOption);
+    static private readonly BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canFixLight", true, () => !IsModifierOption);
+    static private readonly BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canFixComms", true, () => !IsModifierOption);
+    static private readonly BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.hasImpostorVision", false, () => !IsModifierOption);
+    static private readonly BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canUseVents", false, () => !IsModifierOption);
+    static private readonly BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canMoveInVents", false, () => !IsModifierOption);
+
+
     static internal ValueConfiguration<int> InheritanceRuleOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.inheritanceRule", [
         "options.role.sidekick.inheritanceRule.inherit",
         "options.role.sidekick.inheritanceRule.suicide",
@@ -498,6 +512,14 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
                 }
 
+                if (CanSuicideOption)
+                {
+                    var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, SuicideCoolDownOption.CoolDown,
+                    "madmate.suicide", Crewmate.Madmate.Instance.SuicideButtonImage);
+                    suicideButton.OnClick = (button) => MyPlayer.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill);
+                    suicideButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
+                }
+
                 if (GeneralConfigurations.JackalRadioOption)
                 {
                     ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p=> p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.UnityColor);
@@ -519,6 +541,13 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
             if (!SidekickShouldBeCountAsKillers) return;
             if (MyPlayer.IsAlive) callback.MarkRemaining();
         }
+
+        bool RuntimeAssignable.CanFixComm => CanFixCommsOption;
+        bool RuntimeAssignable.CanFixLight => CanFixLightOption;
+        bool RuntimeRole.CanMoveInVent => CanMoveInVentsOption;
+        bool RuntimeRole.CanUseVent => CanUseVentsOption;
+        bool RuntimeRole.HasImpostorVision => HasImpostorVisionOption;
+        bool RuntimeRole.IgnoreBlackout => HasImpostorVisionOption;
     }
 }
 
@@ -528,6 +557,7 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
     private SidekickModifier() : base("sidekick", Jackal.MyTeam.Color, withConfigurationHolder: false) { }
     IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Sidekick.MyRole, MyRole];
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
+    Image? DefinedAssignable.IconImage => Sidekick.IconImage;
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.GetAsBool(0, false), arguments.Get(1, 0));
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
@@ -554,9 +584,10 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
             if (AmOwner || canSeeAllInfo) {
-                var append = " #";
-                append = Jackal.AppendTeamIdIfNecessary(append, JackalTeamId, canSeeAllInfo, true );
-                name += append.Color(Jackal.MyRole.UnityColor);
+                name += MyRole.GetRoleIconTag();
+                string teamId = "";
+                teamId = Jackal.AppendTeamIdIfNecessary(teamId, JackalTeamId, canSeeAllInfo, true );
+                name += teamId.Color(Jackal.MyRole.UnityColor);
             }
         }
 

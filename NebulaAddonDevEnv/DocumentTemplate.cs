@@ -11,6 +11,7 @@ using System.Linq;
 using Nebula.Player;
 using Nebula.Configuration;
 using Nebula;
+using Nebula.Roles;
 
 namespace DefaultLang.Documents;
 
@@ -44,7 +45,28 @@ static public class RoleDocumentHelper
             }
         }
 
-        return gui.VerticalHolder(GUIAlignment.TopLeft, gui.HorizontalHolder(GUIAlignment.Left, gui.VerticalHolder(GUIAlignment.Left, blurb, gui.VerticalMargin(-0.06f), title, gui.VerticalMargin(-0.05f)), gui.HorizontalMargin(0.25f), citationWidget), GetRoleFilterContent(assignable), gui.VerticalMargin(0.15f), GetDocumentText(assignable?.ConfigurationHolder?.Detail.GetString()), gui.VerticalMargin(0.15f));
+        return gui.VerticalHolder(GUIAlignment.TopLeft,
+                    gui.HorizontalHolder(GUIAlignment.Left,
+                        gui.HorizontalMargin(-0.07f),
+                        gui.VerticalHolder(GUIAlignment.Left, 
+                            gui.VerticalMargin(0.05f),
+                            gui.RoleIcon(GUIAlignment.Center, assignable, 0f, new(0.55f, 0.55f), 0.05f)
+                        ),
+                        gui.HorizontalMargin(0.02f),
+                        gui.VerticalHolder(GUIAlignment.Left,
+                            blurb,
+                            gui.VerticalMargin(-0.06f),
+                            title,
+                            gui.VerticalMargin(-0.05f)
+                        ),
+                        gui.HorizontalMargin(0.25f),
+                        citationWidget
+                    ),
+                    GetRoleFilterContent(assignable),
+                    gui.VerticalMargin(0.15f),
+                    GetDocumentText(assignable?.ConfigurationHolder?.Detail.GetString()),
+                    gui.VerticalMargin(0.15f)
+                );
     }
 
     static private GUIWidget GetConfigurationsWidget(DefinedAssignable assignable)

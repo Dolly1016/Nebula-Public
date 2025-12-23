@@ -62,7 +62,7 @@ public static class PolishTeleportStoneStartPatch
         var rubyGame = Minigame.Instance.TryCast<PolishRubyGame>();
         if (!rubyGame) return;
 
-        if (GeneralConfigurations.NonCrewmateCanUseTeleporterImmediatelyOption && !GamePlayer.LocalPlayer.IsCrewmate)
+        if (GeneralConfigurations.NonCrewmateCanUseTeleporterImmediatelyOption && !GamePlayer.LocalPlayer!.FeelBeTrueCrewmate)
         {
             ModSingleton<TeleportationSystem>.Instance.TryTeleport(PlayerControl.LocalPlayer.transform.position);
             rubyGame!.ForceClose();

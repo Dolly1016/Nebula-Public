@@ -206,6 +206,16 @@ public static class FixSandcastleMinigamePatch
     }
 }
 
+//DefaultレイヤーからUIレイヤーに変更
+[HarmonyPatch(typeof(FillCanistersGame), nameof(FillCanistersGame.Start))]
+public static class FixFillCanistersGamePatch
+{
+    public static void Postfix(FillCanistersGame __instance)
+    {
+        __instance.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetUILayer());
+    }
+}
+
 
 //緊急会議ボタン
 [HarmonyPatch(typeof(EmergencyMinigame), nameof(EmergencyMinigame.Update))]

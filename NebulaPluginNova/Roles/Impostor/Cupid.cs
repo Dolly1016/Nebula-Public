@@ -49,7 +49,11 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
     {
         static private Image loverButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CupidLoverButton.png", 115f);
 
-        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), selected1?.PlayerId ?? byte.MaxValue, selected2?.PlayerId ?? byte.MaxValue, used];
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), 
+            used == 0 ? byte.MaxValue : selected1?.PlayerId ?? byte.MaxValue,
+            used == 0 ? byte.MaxValue : selected2?.PlayerId ?? byte.MaxValue, 
+            used
+            ];
 
         private GamePlayer? selected1, selected2;
         private bool hasCreatedLover = false;

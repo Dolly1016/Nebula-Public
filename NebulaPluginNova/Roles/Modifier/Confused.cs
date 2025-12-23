@@ -34,7 +34,7 @@ public class Confused : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (canSeeAllInfo) name += " 〻".Color(MyRole.UnityColor);
+            if (canSeeAllInfo) name += MyRole.GetRoleIconTag();
         }
 
 

@@ -1,4 +1,5 @@
-﻿using Nebula.Behavior;
+﻿using Nebula.AeroGuesser;
+using Nebula.Behavior;
 using Nebula.Roles;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Crewmate;
@@ -153,6 +154,7 @@ public static class PreloadManager
         DIManager.Instance.RegisterContainer(() => new PlayerModInfo());
         DIManager.Instance.RegisterContainer(() => new GameModeFreePlayImpl());
         DIManager.Instance.RegisterContainer(() => new GameModeStandardImpl());
+        DIManager.Instance.RegisterContainer(() => new AeroGuesserSenario());
 
         //IModule<Virial.Game.Game>
         DIManager.Instance.RegisterModule(() => new Synchronizer());

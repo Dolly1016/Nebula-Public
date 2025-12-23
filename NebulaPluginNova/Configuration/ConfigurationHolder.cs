@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial;
+using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Game;
 using Virial.Runtime;
@@ -85,6 +86,7 @@ internal class ConfigurationHolder : IConfigurationHolder
     void IConfigurationHolder.SetDisplayState(Func<ConfigurationHolderState> state) => this.state = state;
 
     public Image? Illustration { get; set; }
+    public DefinedAssignable? RelatedAssignable { get; set; }
 }
 
 public class ConfigurationTags

@@ -176,6 +176,21 @@ public interface DefinedAssignable : IRoleID
     string InternalName => LocalizedName;
 
     /// <summary>
+    /// 役職アイコンを表します。nullの場合、デフォルトのアイコンが当てられます。
+    /// </summary>
+    Virial.Media.Image? IconImage => null;
+
+    /// <summary>
+    /// 役職アイコンの色です。nullの場合、役職の色がそのまま使われます。
+    /// </summary>
+    (Color mainColor, Color? subColor)? IconColor => null;
+
+    /// <summary>
+    /// 統計情報を収集する場合trueが返ります。
+    /// </summary>
+    bool WithStatistics => true;
+
+    /// <summary>
     /// 役職の表示名です。
     /// </summary>
     string DisplayName => NebulaAPI.Language.Translate("role." + LocalizedName + ".name");
@@ -209,8 +224,9 @@ public interface DefinedAssignable : IRoleID
     /// ヘルプ画面で表示する称号のグループです。
     /// このグループに含まれるすべての役職の称号が表示されます。
     /// </summary>
-
     IEnumerable<DefinedAssignable> AchievementGroups => [this];
+
+    int[]? DefaultAssignableArguments => null;
 }
 
 /// <summary>
@@ -285,6 +301,20 @@ public interface IGuessed
     /// Guesserによる推測対象になるか設定する変数を返します。通常、オプションがこの値を変更します。
     /// </summary>
     ISharableVariable<bool>? CanBeGuessVariable { get; internal set; }
+}
+
+public interface ICustomAssignableStatus
+{
+    static private List<ICustomAssignableStatus> allStatus = [];
+    internal static IEnumerable<ICustomAssignableStatus> AllStatus => allStatus;
+    private protected static void Register(ICustomAssignableStatus status) => allStatus.Add(status);
+
+    /// <summary>
+    /// この割り当てがassignableを出現させるか調べます。
+    /// </summary>
+    /// <param name="assignable"></param>
+    /// <returns></returns>
+    bool CanSpawn(DefinedAssignable assignable);
 }
 
 public class AssignmentType
@@ -485,6 +515,12 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     bool IsKiller => Category == RoleCategory.ImpostorRole;
 
     /// <summary>
+    /// システム上の役職の場合trueを返します。
+    /// 排他割り当てや役職フィルタで表示されなくなります。
+    /// </summary>
+    bool IsSystemRole => false;
+
+    /// <summary>
     /// 追加割り当てされる役職を一覧で全て返します。割り当て数と一致する必要はありません。
     /// </summary>
     DefinedRole[] AdditionalRoles => [];
@@ -615,17 +651,25 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
     bool CanBeAwareAssignment => true;
 
     /// <summary>
+    /// 役職定義で定めた役職アイコンを上書きする場合は上書きする画像を返します。
+    /// </summary>
+    (Virial.Media.Image image, Color? maincolor, Color? subColor)? OverriddenRoleIcon => null;
+
+    /// <summary>
     /// 自身の能力が追加するアビリティを取得します。
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<IPlayerAbility?> MyAbilities => [];
+    
+    IEnumerable<IPlayerAbility?> MyAbilities => [];
+
+
 
     /// <summary>
     /// アビリティを取得します。
     /// </summary>
     /// <typeparam name="Ability"></typeparam>
     /// <returns></returns>
-    public Ability? GetAbility<Ability>() where Ability : class, IPlayerAbility
+    Ability? GetAbility<Ability>() where Ability : class, IPlayerAbility
     {
         foreach(var a in MyAbilities) if (a is Ability returned) return returned;
         return null;
@@ -721,6 +765,7 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
     {
         get
         {
+
             var widgets = MyAbilities.Select(a => a.ProgressWidget).Where(w => w != null).ToArray();
             if (widgets.Length == 0) return null;
             if(widgets.Length == 1) return widgets[0];
@@ -880,13 +925,15 @@ public static class AssignableHelpers
     public static bool IsSpawnableInSomeForm(this DefinedRole role)
     {
         if (role.IsSpawnable) return true;
-        return AssignmentType.AllTypes.Any(t =>
+        if(AssignmentType.AllTypes.Any(t =>
         {
             if (!t.IsActive) return false;
             var param = role.GetCustomAllocationParameters(t);
             if (param == null) return false;
             if (param.RoleCountSum > 0) return true;
             return false;
-        });
+        })) return true;
+        if(ICustomAssignableStatus.AllStatus.Any(s => s.CanSpawn(role))) return true;
+        return false;
     }
 }

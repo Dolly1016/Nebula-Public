@@ -129,7 +129,7 @@ public class TimerImpl : FlexibleLifespan, GameTimer, IGameOperator
     public TimerImpl SetAsKillCoolDown()
     {
         AffectedByCooldownEffect = true;
-        return SetPredicate(() => PlayerControl.LocalPlayer.IsKillTimerEnabled);
+        return SetPredicate(() => PlayerControl.LocalPlayer.IsKillTimerEnabled || PlayerControl.LocalPlayer.ForceKillTimerContinue);
     }
 
     public TimerImpl SetAsAbilityCoolDown()

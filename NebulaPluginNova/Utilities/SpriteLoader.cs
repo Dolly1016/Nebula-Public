@@ -494,6 +494,31 @@ internal class NebulaSpriteLoader : AssetBundleResource<Sprite>, Image
     public void MarkAsUnloadAsset() { }
 }
 
+internal class NebulaSpriteLoaderWithDefault : AssetBundleResource<Sprite>, Image
+{
+    protected override AssetBundle AssetBundle => NebulaAsset.AssetBundle;
+    private Image defaultImage;
+    private bool failed = false;
+    Sprite Image.GetSprite()
+    {
+        if (!failed)
+        {
+            var asset = Asset;
+            if (Asset != null) return Asset;
+            failed = true;
+        }
+        return defaultImage.GetSprite();
+    }
+
+    public NebulaSpriteLoaderWithDefault(string name, Image defaultImage) : base(name) {
+        this.defaultImage = defaultImage;
+    }
+
+    public void UnloadAsset() { }
+    public System.Collections.IEnumerator LoadAsset() { yield break; }
+    public void MarkAsUnloadAsset() { }
+}
+
 public class ResourceExpandableSpriteLoader : Image
 {
     Sprite sprite = null!;

@@ -18,7 +18,7 @@ public static class ShowIntroPatch
     static bool Prefix(IntroCutscene __instance,ref Il2CppSystem.Collections.IEnumerator __result)
     {
         //ゲームモードに沿ってモジュールを追加
-        NebulaAPI.CurrentGame!.AddModule(GeneralConfigurations.CurrentGameMode.InstantiateModule());
+        NebulaAPI.CurrentGame!.SetGameMode(GeneralConfigurations.CurrentGameMode.InstantiateModule());
 
         __result = CoBegin(__instance).WrapToIl2Cpp();
         return false;

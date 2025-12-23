@@ -1,7 +1,9 @@
 ﻿using BepInEx.Unity.IL2CPP;
 using Cpp2IL.Core.Extensions;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppSystem.Net;
 using Nebula.Behavior;
+using Nebula.Map;
 using Nebula.VoiceChat;
 using UnityEngine;
 using Virial;
@@ -35,7 +37,8 @@ public static class ShipCache
 public static class ShipExtension
 {
 
-
+    public static string ReverseScalerObjName = "ReverseScaler";
+    private static Transform ReverseScaler = null!;
     public static void PatchModification(byte mapId)
     {
         switch (mapId)
@@ -60,6 +63,10 @@ public static class ShipExtension
 
     public static void PatchEarlierModification(byte mapId)
     {
+        var obj = UnityHelper.CreateObject(ReverseScalerObjName, ShipStatus.Instance.transform, Vector3.zero);
+        obj.transform.localScale = new(1f / ShipStatus.Instance.transform.localScale.x, 1f / ShipStatus.Instance.transform.localScale.y, 1f);
+        ReverseScaler = obj.transform;
+
         switch (mapId)
         {
             case 0:
@@ -78,17 +85,36 @@ public static class ShipExtension
                 ModifyEarlierFungle();
                 break;
         }
+
+        foreach (var vectors in MapData.GetCurrentMapData().RaiderIgnoreArea)
+        {
+            var collider = UnityHelper.CreateObject<PolygonCollider2D>("RaiderIgnoreArea", ReverseScaler, Vector3.zero, LayerExpansion.GetRaiderColliderLayer());
+            collider.SetPath(0, vectors);
+            collider.isTrigger = true;
+        }
     }
 
     private static void CreateAxeWall(string name, Vector2[] points)
     {
-        var collider = UnityHelper.CreateObject<EdgeCollider2D>(name, null, Vector3.zero, LayerExpansion.GetHookshotWallLayer());
+        var collider = UnityHelper.CreateObject<EdgeCollider2D>(name, ReverseScaler, Vector3.zero, LayerExpansion.GetHookshotWallLayer());
         collider.SetPoints(points.ToIl2CppList());
     }
 
     private static void ModifyEarlierSkeld() { }
     private static void ModifySkeld()
     {
+        if (GeneralConfigurations.SkeldShadowOption.CurrentValue)
+        {
+            var mat = ShipStatus.Instance.FastRooms[SystemTypes.Nav].transform.parent.GetChild(0).GetComponent<Renderer>().material;
+            var renderer = ShipStatus.Instance.transform.GetChild(0).GetComponent<Renderer>();
+            renderer.material = mat;
+            renderer.gameObject.layer = LayerExpansion.GetShipLayer();
+
+            SkeldData.SkeldShadowEdges.Do(points =>
+            {
+                AddModShadow(points);
+            });
+        }
         if (GeneralConfigurations.SkeldCafeVentOption.CurrentValue) CreateVent(SystemTypes.Cafeteria, "CafeUpperVent", new UnityEngine.Vector2(-2.1f, 3.8f));
         if (GeneralConfigurations.SkeldStorageVentOption.CurrentValue) CreateVent(SystemTypes.Storage, "StorageVent", new UnityEngine.Vector2(0.45f, -3.6f));
 
@@ -100,6 +126,11 @@ public static class ShipExtension
 
         ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.SkeldO2DurationOption.CurrentValue;
         ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.CurrentValue;
+
+        //ファンが隠れる問題を修正
+        var fan = ShipStatus.Instance.FastRooms[SystemTypes.LifeSupp].transform.parent.GetChild(0).GetChild(3);
+        fan.SetLocalZ(-0.09f);
+        fan.gameObject.layer = LayerExpansion.GetShipLayer();
 
         for (int i = 0; i < ShipStatus.Instance.AllDoors.Count; i++) ShipStatus.Instance.AllDoors[i].Id = i;
 
@@ -125,6 +156,28 @@ public static class ShipExtension
     private static void ModifyEarlierPolus() { }
     private static void ModifyPolus()
     {
+        var ship = ShipStatus.Instance;
+        {
+            var mat = ship.FastRooms[SystemTypes.Weapons].transform.GetChild(0).GetComponent<Renderer>().material;
+            var parallaxBg = ship.transform.GetChild(2);
+            parallaxBg.GetChild(0).GetComponent<Renderer>().material = mat;
+            var background = ship.transform.GetChild(3);
+            background.GetComponent<Renderer>().material = mat;
+            background.GetChild(1).GetComponent<Renderer>().material = mat;
+            var cliff = background.GetChild(0);
+            cliff.SetLocalZ(-15f);
+            cliff.GetComponent<Renderer>().material = mat;
+        }
+        {
+            var labo = ship.FastRooms[SystemTypes.Laboratory].transform;
+            labo.GetChild(9).SetLocalZ(-2f);
+            labo.GetChild(10).SetLocalZ(-2f);
+
+            var o2 = ship.FastRooms[SystemTypes.LifeSupp].transform;
+            o2.GetChild(10).SetLocalZ(-4f);
+        }
+
+
         var commRoom = ShipStatus.Instance.FastRooms[SystemTypes.Comms];
         var commPos = commRoom.transform.localPosition;
         commPos.z = 0.0001f;
@@ -161,7 +214,7 @@ public static class ShipExtension
         ActivateWiring("taks_wiresLounge", 5);
         if (GeneralConfigurations.AirshipMedicalWireOption.CurrentValue)
         {
-            CreateConsole(SystemTypes.Medical, "task_wireMedical", medicalWiringSprite.GetSprite(), new Vector2(-0.84f, 5.63f), 0f);
+            CreateConsole(SystemTypes.Medical, "task_wireMedical", medicalWiringSprite.GetSprite(), new Vector2(-0.84f, 5.63f));
             ActivateWiring("task_wireMedical", 6).Room = SystemTypes.Medical;
         }
         if (GeneralConfigurations.AirshipHallwayWireOption.CurrentValue) ActivateWiring("panel_wireHallwayL", 7);
@@ -171,6 +224,22 @@ public static class ShipExtension
     }
     private static void ModifyAirship()
     {
+        //船体左下がやけに黒い問題を修正
+        {
+            var exterior = ShipStatus.Instance.transform.GetChild(23);
+            var hull = exterior.GetChild(0);
+            var mat = hull.GetChild(9).GetComponent<Renderer>().material;
+            var itahull = hull.GetChild(14);
+            itahull.GetComponent<Renderer>().material = mat;
+            itahull.gameObject.layer = LayerExpansion.GetShipLayer();
+        }
+
+        //メインの写真が明るすぎる問題を修正
+        {
+            var mainHall = ShipStatus.Instance.FastRooms[SystemTypes.MainHall];
+            mainHall.transform.GetChild(2).SetLocalZ(-3f);
+        }
+
         //宿舎下ダウンロード
         EditConsole(SystemTypes.Engine, "panel_data", (c) =>
         {
@@ -350,11 +419,11 @@ public static class ShipExtension
             console.ConsoleId = lightConsoleId++;
             return console;
         }
-        if (GeneralConfigurations.FungleLightJungleOption.Value) SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightJungle", fungleLight1Sprite.GetSprite(), new(-6.9618f, -5.9982f), 0f));
-        if(GeneralConfigurations.FungleLightDropshipOption.Value) SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightDropship", fungleLight2Sprite.GetSprite(), new(-7.8f, 13.46f), 0f));
+        if (GeneralConfigurations.FungleLightJungleOption.Value) SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightJungle", fungleLight1Sprite.GetSprite(), new(-6.9618f, -5.9982f), -0.5f));
+        if(GeneralConfigurations.FungleLightDropshipOption.Value) SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightDropship", fungleLight2Sprite.GetSprite(), new(-7.8f, 13.46f)));
         if (GeneralConfigurations.FungleLightMiningPitOption.Value)
         {
-            var miningConsole = SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightMining", fungleLight3Sprite.GetSprite(), new(13.68f, 7.83f), 0f));
+            var miningConsole = SetUpAsLightConsole(CreateConsole(SystemTypes.Electrical, "lightMining", fungleLight3Sprite.GetSprite(), new(13.68f, 7.83f)));
             UnityHelper.CreateObject<BoxCollider2D>("Collider", miningConsole.transform, new(0f, 0f, 0f)).size = new(0.6f, 0.3f);
         }
     }
@@ -407,6 +476,14 @@ public static class ShipExtension
 
         if (GeneralConfigurations.FungleSimpleLaboratoryOption.CurrentValue) ModifyLaboratory();
 
+        {
+            //鉱山下部の影
+            AddModShadow([new(11.79f, 6.78f), new(9.91f, 7.07f)]);
+            AddModShadow([new(13.65f, 6.77f), new(14.39f, 6.66f), new(15.73f, 7.16f)]);
+        }
+
+        if (GeneralConfigurations.FungleForClassicGameOption.CurrentValue) ModifyFungleForClassicGame();
+
         if (GeneralConfigurations.FungleThinFogOption.CurrentValue)
         {
             var renderer = ShipStatus.Instance.transform.FindChild("FungleJungleShadow").GetChild(0).GetComponent<MeshRenderer>();
@@ -437,7 +514,7 @@ public static class ShipExtension
                 light.transform.SetParent(obj.transform);
                 light.material.SetColor("_Color", Color.white.AlphaMultiplied(0.35f));
                 light.transform.localScale = Vector3.one * 1.9f;
-                light.transform.localPosition = new Vector3(0f, 0f, -10f);
+                light.transform.localPosition = new Vector3(0f, 0f, -15f);
             }
             ShipStatus.Instance.transform.FindChild("Outside").GetChild(0).GetChild(5).gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)SetUpGlowingMush);
             SetUpGlowingMush(ShipStatus.Instance.FastRooms[SystemTypes.Reactor].transform.FindChild("GlowingMushroom").gameObject);
@@ -540,11 +617,11 @@ public static class ShipExtension
         return console;
     }
 
-    private static Console CreateConsole(SystemTypes room, string objectName, Sprite sprite, Vector2 pos, float z)
+    private static Console CreateConsole(SystemTypes room, string objectName, Sprite sprite, Vector2 pos, float z = 0f)
     {
         GameObject obj = new GameObject(objectName);
         obj.transform.SetParent(ShipStatus.Instance.FastRooms.TryGetValue(room, out var roomObj) ? roomObj.transform : ShipStatus.Instance.transform);
-        obj.transform.localPosition = (Vector3)pos - new Vector3(0, 0, z);
+        obj.transform.localPosition = pos.AsVector3(z);
         SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;
 
@@ -779,6 +856,139 @@ public static class ShipExtension
         var labSample = GameObject.Instantiate(collectSampleConsole, collectSampleConsole.transform.parent);
         labSample.name = "CollectSamples (Lab)";
         labSample.transform.GetChild(0).GetComponent<Console>().ConsoleId = 8;
-        labSample.transform.localPosition = new(-8.393f, -2.4575f, 1f);
+        labSample.transform.localPosition = new(-8.393f, -2.4575f, 0.05f);
+
+        //行き止まりを作成
+        var jungleOutside = ShipStatus.Instance.transform.GetChild(5).GetChild(0);
+        var obstacle = jungleOutside.GetChild(6).GetChild(2);
+        var crystal = GameObject.Instantiate(obstacle.GetChild(0), ReverseScaler);
+        crystal.localPosition = new(-6.2764f, -11.9491f, -1.0115f);
+        crystal.localScale = new(-1f, 1f, 1f);
+        AddModWall([new(-5.90f, -11.46f), new(-5.89f, -12.50f), new(-6.75f, -12.44f), new(-6.71f, -11.37f)]);
+    }
+
+    static private TextureReplacer greenhouseReplacer = new(new ResourceTextureLoader("Nebula.Resources.ShipModification.Greenhouse.png"));
+    static private TextureReplacer fungleMeetingReplacer = new(new ResourceTextureLoader("Nebula.Resources.ShipModification.MeetingRoom.png"));
+    static private Image fungleCustomLadderImage = SpriteLoader.FromResource("Nebula.Resources.ShipModification.FungleLadder.png", 100f);
+    static private Image fungleJungleOverlay1Image = SpriteLoader.FromResource("Nebula.Resources.ShipModification.JungleOverlay1.png", 100f);
+    static private Image fungleJungleOverlay2Image = SpriteLoader.FromResource("Nebula.Resources.ShipModification.JungleOverlay2.png", 100f);
+    static private Image fungleJungleReplaced1Image = SpriteLoader.FromResource("Nebula.Resources.ShipModification.JungleReplaced1.png", 100f);
+
+    static private Image fungleWallImage = SpriteLoader.FromResource("Nebula.Resources.ShipModification.FungleWall.png", 100f);
+    static private void ModifyFungleForClassicGame()
+    {
+        var ship = ShipStatus.Instance;
+        var shipTransform = ship.transform;
+
+        var jungleOutside = shipTransform.GetChild(5).GetChild(0);
+        var jungleWalls = jungleOutside.GetChild(0);
+
+        var labBack1 = jungleWalls.GetChild(6);
+        var labBottom1 = jungleWalls.GetChild(7);
+        var labLeft1 = jungleWalls.GetChild(8);
+        var labRight1 = jungleWalls.GetChild(9);
+        var greenhouse_lowerleft = jungleWalls.GetChild(16);
+        var greenhouse_lowerright = jungleWalls.GetChild(17);
+        var greenhouse_upperleft = jungleWalls.GetChild(18);
+        var uppermid_bottom = jungleWalls.GetChild(22);
+        var lab_bottom1 = jungleWalls.GetChild(7);
+
+        var mushroom3 = jungleOutside.GetChild(1).GetChild(2);
+
+        mushroom3.GetComponent<Mushroom>().origPosition = new(10.7582f, -14.7846f, 0.5f);
+        mushroom3.transform.position = new(10.7582f, -14.7846f, 0.5f);
+
+        {
+            var overlay = greenhouse_upperleft.GetChild(1).GetComponent<SpriteRenderer>();
+            overlay.sprite = fungleJungleOverlay1Image.GetSprite();
+            overlay.transform.localPosition = new(-0.005f, 0.155f, -1.111f);
+        }
+
+        //キノコの壁
+        greenhouse_lowerleft.gameObject.SetActive(false);
+        greenhouse_lowerright.GetChild(0).gameObject.SetActive(false);
+        GameObject.Instantiate(labBack1, shipTransform).localPosition = new Vector3(4.0736f, -12.6781f, -1.0119f);
+        var belowGreenhouse = GameObject.Instantiate(uppermid_bottom, shipTransform);
+        belowGreenhouse.localPosition = new Vector3(8.0559f, -14.8162f, -1.1f);
+        belowGreenhouse.GetChild(0).gameObject.SetActive(false);
+
+        //ミーティング下
+        {
+            var belowMeeting = GameObject.Instantiate(lab_bottom1, shipTransform);
+            belowMeeting.localPosition = new Vector3(-1.79f, -4.7546f, -0.05f);
+            belowMeeting.localScale = new(-1f, 1f, 1f);
+            var overlay = belowMeeting.GetChild(1);
+            overlay.transform.localPosition = new(-0.025f, 0.74f, -1f);
+            overlay.GetComponent<SpriteRenderer>().sprite = fungleJungleOverlay2Image.GetSprite();
+        }
+
+        //ラボ上改変
+        var replacedLabBack = UnityHelper.CreateSpriteRenderer("replacedImage", labBack1, new(-0.29f, 0f, 0f));
+        replacedLabBack.sprite = fungleJungleReplaced1Image.GetSprite();
+        labBack1.GetComponent<SpriteRenderer>().enabled = false;
+        labBack1.SetLocalZ(-0.155f);
+        labLeft1.SetLocalZ(-0.156f); //少しずつ手前にずらす
+        labBottom1.SetLocalZ(-0.157f); //少しずつ手前にずらす
+        labRight1.SetLocalZ(-1f);
+
+        //ミーティング下の影
+        AddModShadow([new(-3.74f, -3.53f), new(-3.52f, -3.84f), new(-2.63f, -3.95f), new(-2.00f, -3.87f), new(-1.94f, -3.55f)]);
+        fungleMeetingReplacer.ReplaceSprite(ship.FastRooms[SystemTypes.MeetingRoom].transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>());
+
+        //温室左下の採集タスク
+        {
+            var sampleTask = jungleOutside.GetChild(2).GetChild(1);
+            sampleTask.localPosition = new(2.5655f, -6.6045f, -0.01f);
+            sampleTask.GetChild(0).GetComponent<CircleCollider2D>().isTrigger = true;
+            var newCollider = sampleTask.GetChild(0).gameObject.AddComponent<CircleCollider2D>();
+            newCollider.radius = 0.1f;
+            newCollider.offset = new(0f, -0.19f);
+        }
+
+        //温室下部の小物
+        var obstacle = jungleOutside.GetChild(6).GetChild(2);
+        obstacle.localPosition = new(1.6472f, -10.8309f, 0.004f);
+
+        //温室の画像差し替え
+        {
+            var greenhouseFloor = ship.FastRooms[SystemTypes.Greenhouse].transform.GetChild(0).GetChild(1).GetComponent<SpriteRenderer>();
+            greenhouseReplacer.ReplaceSprite(greenhouseFloor);
+
+            AddModShadow([new(7.04f, -12.75f), new(7.31f, -12.08f), new(7.32f, -11.87f)]);
+        }
+
+        //梯子の一方通行化
+        {
+            var ladders = shipTransform.GetChild(5).GetChild(1).GetChild(2);
+            
+            var leftLadder = ladders.GetChild(0);
+            leftLadder.GetChild(0).gameObject.SetActive(false);
+
+            var rightLadder = ladders.GetChild(1);
+            rightLadder.GetChild(1).gameObject.SetActive(false);
+            rightLadder.GetChild(3).GetComponent<SpriteRenderer>().sprite = fungleCustomLadderImage.GetSprite();
+        }
+
+        //高台の壁
+        {
+            var wall = UnityHelper.CreateSpriteRenderer("highlandWall", shipTransform, new(14.2091f, 4.4364f, 0f));
+            wall.sprite = fungleWallImage.GetSprite();
+
+            AddModShadow([new(14.41f, 2.85f), new(14.38f, 3.82f), new(14.15f, 4.98f), new(14.10f, 5.74f), new(14.32f, 6.66f), new(16.13f, 7.25f)]);
+            AddModWall([new(14.23f, 2.53f), new(14.02f, 4.63f), new(13.88f, 6.45f)]);
+            AddModWall([new(14.57f, 2.70f), new(14.39f, 4.76f), new(14.28f, 5.79f)]);
+        }
+    }
+
+    static void AddModShadow(IEnumerable<Vector2> points)
+    {
+        var edge = UnityHelper.CreateObject<EdgeCollider2D>("ModShadow", ReverseScaler, Vector3.zero, LayerExpansion.GetShadowLayer());
+        edge.SetPoints(points.ToList().ToIl2CppList());
+    }
+
+    static void AddModWall(IEnumerable<Vector2> points)
+    {
+        var edge = UnityHelper.CreateObject<EdgeCollider2D>("ModWall", ReverseScaler, Vector3.zero, LayerExpansion.GetShipLayer());
+        edge.SetPoints(points.ToList().ToIl2CppList());
     }
 }

@@ -16,7 +16,7 @@ namespace Nebula.Roles.Complex;
 
 static public class MeetingRoleSelectWindow
 {
-    static TextAttributeOld ButtonAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new(1.3f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(2f, 1f, 2f);
+    static TextAttributeOld ButtonAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { Size = new(1.05f, 0.3f), Alignment = TMPro.TextAlignmentOptions.Center, FontMaterial = VanillaAsset.StandardMaskedFontMaterial }.EditFontSize(2f, 1f, 2f);
     static TextAttributeOld TabAttribute = new TextAttributeOld(TextAttributeOld.BoldAttr) { FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
     static public MetaScreen OpenRoleSelectWindow(IEnumerable<DefinedRole>? roles, Predicate<DefinedRole>? predicate, bool impRolesArrangeAtFirst, string underText, Action<DefinedRole> onSelected)
         => OpenRoleSelectWindowUsingTabs(roles, [(null, predicate)], impRolesArrangeAtFirst, underText, onSelected);
@@ -65,7 +65,20 @@ static public class MeetingRoleSelectWindow
             else inner.Append(new MetaWidgetOld.VerticalMargin(0.1f));
             
             if (tab.tab != null) inner.Append(new MetaWidgetOld.Text(TabAttribute) { MyText = new RawTextComponent(tab.tab), Alignment = IMetaWidgetOld.AlignmentOption.Center });
-            inner.Append(ary, r => new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, PostBuilder = (_, renderer, _) => renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask }, 4, -1, 0, 0.59f);
+            inner.Append(ary, r => new CombinedWidgetOld(new MetaWidgetOld.HorizonalMargin(0.1f), new MetaWidgetOld.Button(() => onSelected.Invoke(r), ButtonAttribute) { RawText = r.DisplayColoredName, TextHorizonotalExtraMargin = 0.15f, PostBuilder = (button, renderer, text) =>
+            {
+                renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                button.transform.localPosition += new Vector3(0.05f, 0f, 0f);
+                text.transform.localPosition += new Vector3(0.072f, 0f, 0f);
+
+                var icon = UnityHelper.CreateObject<SpriteRenderer>("Icon", button.transform, new(-0.65f, 0f, -0.1f));
+                icon.sprite = r.GetRoleIcon()?.GetSprite();
+                icon.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                icon.material = RoleIcon.GetRoleIconMaterial(r, 0.8f);
+                icon.transform.localScale = new(0.253f, 0.253f, 1f);
+                icon.SetBothOrder(15);
+            }
+            }), 4, -1, 0, 0.59f);
         }
 
         MetaWidgetOld.ScrollView scroller = new(new(6.9f, 3.8f), inner, true) { Alignment = IMetaWidgetOld.AlignmentOption.Center };
@@ -232,7 +245,9 @@ static file class GuesserSystem
 
 public class Guesser : DefinedSingleAbilityRoleTemplate<Guesser.Ability>, HasCitation, DefinedRole
 {
+    static internal Image IconImage = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Icons/guesser.png");
     public bool IsEvil => Category == RoleCategory.ImpostorRole;
+    Image? DefinedAssignable.IconImage => IconImage;
 
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, NumOfGuessOption));
@@ -251,7 +266,7 @@ public class Guesser : DefinedSingleAbilityRoleTemplate<Guesser.Ability>, HasCit
     
     public Guesser(bool isEvil) : base(
         isEvil ? "evilGuesser" : "niceGuesser", 
-        isEvil ? new(Palette.ImpostorRed) : new(255, 255, 0f), 
+        isEvil ? new(Palette.ImpostorRed) : new(1f, 1f, 0f), 
         isEvil ? RoleCategory.ImpostorRole : RoleCategory.CrewmateRole,
         isEvil ? Impostor.Impostor.MyTeam : Crewmate.Crewmate.MyTeam,
         [NumOfGuessOption, NumOfGuessPerMeetingOption, CanCallEmergencyMeetingOption, GuessableFilterEditorOption])
@@ -306,6 +321,7 @@ public class GuesserModifier : DefinedAllocatableModifierTemplate, DefinedAlloca
     IEnumerable<DefinedAssignable> DefinedAssignable.AchievementGroups => [Guesser.MyNiceRole, Guesser.MyNiceRole, MyRole];
 
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
+    Image? DefinedAssignable.IconImage => Guesser.IconImage;
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
 

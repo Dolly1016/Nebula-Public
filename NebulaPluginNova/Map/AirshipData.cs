@@ -1,4 +1,6 @@
-﻿using Virial.Game;
+﻿using Il2CppSystem.Collections.Specialized;
+using Rewired.Utils.Classes.Data;
+using Virial.Game;
 
 namespace Nebula.Map;
 
@@ -56,6 +58,8 @@ public class AirshipData : MapData
         new(3.8f, 8.8f),
         //ミーティング
         new(6.5f, 15.3f), new(11.8f, 14.1f), new(11.8f, 16f), new(16.3f, 15.2f),
+        //絵画の通路
+        new(1.5f, -12.5f),
         ];
 
     static private readonly (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
@@ -137,8 +141,8 @@ public class AirshipData : MapData
         new(1.7f, -1.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //エンジン右下
         ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    protected override Vector2[] MapArea => MapPositions;
-    protected override Vector2[] NonMapArea => [];
+    public override IReadOnlyList<Vector2> MapArea => MapPositions;
+    public override IReadOnlyList<Vector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
 

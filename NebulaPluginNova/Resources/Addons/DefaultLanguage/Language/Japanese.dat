@@ -171,6 +171,9 @@ $Color
 "ui.contact.finished" : "フォームが正常に送信されました。<br>ありがとうございます。"
 "ui.contact.failed" : "フォームの送信に失敗しました。<br><br>%DETAIL%"
 
+"ui.afk.title" : "離席中"
+"ui.afk.detail" : "戻ってきたら、いずれかのキーを押してAFKを解除してください。"
+
 # Tutorial
 
 "tutorial.guide.canClose" : "クリックでチュートリアルを閉じられます。"
@@ -211,6 +214,7 @@ $Color
 "gamemode.standard" : "標準"
 "gamemode.hostMode" : "Host Mode"
 "gamemode.freeplay" : "フリープレイ"
+"gamemode.aeroguesser" : "アモゲッサー"
 
 # Notification
 
@@ -238,6 +242,8 @@ $Color
 "options.switch.off" : "Off"
 "options.switch.on" : "On"
 "options.switch.nonCrewmateOnly" : "非クルーのみ"
+"options.switch.nonCrewmate" : "非クルー"
+"options.switch.impostor" : "インポスター"
 "options.percentage" : "%"
 "options.cross" : "x"
 "options.sec" : "s"
@@ -309,6 +315,7 @@ $Color
 "options.map.customization.skeld.storageVent" : "追加ベント (ストレージ)"
 "options.map.customization.skeld.reactorDuration" : "リアクターサボ"
 "options.map.customization.skeld.lifeSupportDuration" : "O2サボ"
+"options.map.customization.skeld.wholeShipInShadow" : "船全体に影を適用"
 "options.map.customization.mira.useAdmin" : "アドミン端末"
 "options.map.customization.mira.reactorDuration" : "リアクターサボ"
 "options.map.customization.mira.lifeSupportDuration" : "O2サボ"
@@ -347,6 +354,7 @@ $Color
 "options.map.customization.fungle.blackOutDropship" : "配電盤 (ドロップシップ)"
 "options.map.customization.fungle.blackOutJungle" : "配電盤 (ジャングル)"
 "options.map.customization.fungle.blackOutMiningPit" : "配電盤 (採掘場)"
+"options.map.customization.fungle.forClassicGame" : "クラシックゲーム用ファングル"
 "options.map.customization.admin.editor" : "右クリックで部屋表示設定"
 "options.map.customization.admin.viewer" : "クリックで部屋表示設定を確認"
 "options.map.admin.skeld.0" : "アドミン設定"
@@ -374,6 +382,7 @@ $Color
 "options.task.noGuide.collectSamples" : "サンプル収集タスク"
 "options.map.randomizedWiring" : "配線タスクの順番ランダム化"
 "options.map.stepsOfWiringGame" : "配線タスクのステップ数"
+"options.task.fakeScan" : "フェイクスキャン"
 "options.task.group.wiring" : "配線タスクの設定"
 "options.task.group.noGuide" : "場所不明タスクの設定"
 
@@ -392,6 +401,11 @@ $Color
 "options.meeting.prohibitMeetingTool" : "盤面整理アシストの使用禁止"
 "options.meeting.shortenCooldownAtGameStart" : "ゲーム開始時の短縮クールダウン"
 "options.meeting.shortenCooldown" : "短縮クールダウン"
+"options.meeting.nonCrewCanSeeTaskTracker" : "緊急会議中のタスク進捗確認"
+"options.meeting.nonCrewCanSeeSabotageStatus" : "緊急会議中のサボタージュ状態確認"
+"options.meeting.group.gameStart" : "短縮クールダウンの設定"
+"options.meeting.group.earlySettings" : "ゲーム序盤の緊急会議設定"
+"options.meeting.group.nonCrewmateInformation" : "非クルーに開示される情報の設定"
 
 "options.exile" : "追放オプション"
 "options.exile.detail" : "プレイヤー追放に関する設定です。"
@@ -417,6 +431,21 @@ $Color
 "options.consoleRestriction.cameraRestriction" : "カメラ & ログ"
 "options.consoleRestriction.resetRestrictions" : "会議ごとの制限リセット"
 "options.consoleRestriction.showDeadBodiesOnAdmin" : "アドミンに死体を計上"
+
+"options.aeroGuesser" : "アモゲッサー設定"
+"options.aeroGuesser.detail" : "アモゲッサーの設定です。"
+"options.aeroGuesser.guessTime" : "推察時間"
+"options.aeroGuesser.numOfQuiz" : "クイズの出題数"
+"options.aeroGuesser.monochromeMode" : "モノクロモード"
+"options.aeroGuesser.skeld" : "Skeld"
+"options.aeroGuesser.mira" : "MIRA HQ"
+"options.aeroGuesser.polus" : "Polus"
+"options.aeroGuesser.airship" : "Airship"
+"options.aeroGuesser.fungle" : "Fungle"
+"options.aeroGuesser.normal" : "Normal"
+"options.aeroGuesser.hard" : "Hard"
+"options.aeroGuesser.group.filter.difficulty" : "難易度の設定"
+"options.aeroGuesser.group.filter.map" : "出題対象マップの設定"
 
 "options.quality" : "クオリティオプション"
 "options.quality.detail" : "ゲームのクオリティに関する設定です。<br>パフォーマンスに影響を及ぼす恐れがあります。参加者の様子を見て調整してください。"
@@ -807,11 +836,14 @@ $Color
 "role.oracle.short" : "オ"
 "role.oracle.blurb" : "心を視よ"
 "options.role.oracle.detail" : "オラクルは占いで他人の役職をいくつかの候補に絞ります。"
+"options.role.oracle.maxOracle" : "最大占い回数"
 "options.role.oracle.oracleCooldown" : "占いクールダウン"
 "options.role.oracle.oracleAdditionalCooldown" : "占いの追加クールダウン"
 "options.role.oracle.oracleDuration" : "占いの所要時間"
 "options.role.oracle.numOfCandidates" : "役職候補数"
 "stats.oracle.oracle" : "占った回数"
+"role.oracle.gui.results" : "占い結果"
+"role.oracle.gui.results.zero" : "なし"
 
 "role.phosphorus.name" : "ホスフォラス"
 "role.phosphorus.short" : "ホ"
@@ -870,6 +902,7 @@ $Color
 "options.role.sheriff.numOfShots" : "キル可能回数"
 "options.role.sheriff.canKillHidingPlayer" : "隠れているプレイヤーをキル可能"
 "options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "第一犠牲者の発覚までキル能力を封印"
+"options.role.sheriff.unsealOnReportButtonTurningOn" : "レポートボタンが光ったときに解禁"
 "stats.sheriff.shot" : "発砲回数"
 "stats.sheriff.misshot" : "誤射回数"
 
@@ -916,7 +949,7 @@ $Color
 "role.amalgam.tabs.others" : "その他役職"
 
 "role.berserker.name" : "バーサーカー"
-"role.berserker.short" : "バー"
+"role.berserker.short" : "バ"
 "role.berserker.blurb" : "[FATAL ERROR] 制御不能"
 "options.role.berserker.detail" : "バーサーカーは、その正体を明らかにしてパワーアップするインポスターです。<br>暴走中はキルクールが短くなり、移動速度が上昇します。"
 "options.role.berserker.killCooldown" : "暴走中のキルクールダウン"
@@ -929,7 +962,7 @@ $Color
 "stats.berserker.berserk" : "暴走回数"
 
 "role.bountyHunter.name" : "バウンティハンター"
-"role.bountyHunter.short" : "バウ"
+"role.bountyHunter.short" : "バ"
 "role.bountyHunter.blurb" : "めざせ、一刻千金"
 "options.role.bountyHunter.detail" : "賞金首をキルするとキルクールが短くなります。<br>ただし、それ以外のプレイヤーをキルするとキルクールが長くなってしまいます。"
 "options.role.bountyHunter.bountyKillCoolDown" : "キルクールダウン(バウンティキル)"
@@ -941,7 +974,7 @@ $Color
 "stats.bountyHunter.othersKill" : "賞金首以外のキル回数"
 
 "role.bubblegun.name" : "バブルガン"
-"role.bubblegun.short" : "バブ"
+"role.bubblegun.short" : "バ"
 "role.bubblegun.blurb" : "札束と泡に黙する"
 "options.role.bubblegun.detail" : "プレイヤーを閉じ込める泡を放つバブルガンを撃てます。<br>泡に閉じ込められたプレイヤーは死亡しますが、この死体は通報できません。"
 "options.role.bubblegun.bubbleCooldown" : "バブル発砲クールダウン"
@@ -955,7 +988,7 @@ $Color
 "stats.bubblegun.bubble" : "バブル発砲回数"
 
 "role.camouflager.name" : "カモフラージャー"
-"role.camouflager.short" : "カモ"
+"role.camouflager.short" : "カ"
 "role.camouflager.blurb" : "迷彩に紛れてキルせよ"
 "options.role.camouflager.detail" : "カモフラージュによってプレイヤーは互いを識別できなくなります。"
 "options.role.camouflager.camoCoolDown" : "カモフラージュクールダウン"
@@ -964,7 +997,7 @@ $Color
 "stats.camouflager.camo" : "カモフラージュ発動回数" 
 
 "role.cannon.name" : "カノン"
-"role.cannon.short" : "カノ"
+"role.cannon.short" : "カ"
 "role.cannon.blurb" : "ぶっ飛ばせ！"
 "options.role.cannon.detail" : "カノンは空気砲を打ち出して、周囲のプレイヤーを吹き飛ばします。"
 "options.role.cannon.markCooldown" : "マーククールダウン"
@@ -977,7 +1010,7 @@ $Color
 "stats.cannon.players" : "空気砲で吹き飛ばした人数"
 
 "role.cleaner.name" : "クリーナー"
-"role.cleaner.short" : "クリーナ"
+"role.cleaner.short" : "ク"
 "role.cleaner.blurb" : "証拠を抹消せよ"
 "options.role.cleaner.detail" : "クリーナーは死体を消し去れるインポスターです。"
 "options.role.cleaner.cleanCoolDown" : "消去クールダウン"
@@ -985,8 +1018,8 @@ $Color
 "stats.cleaner.clean" : "消去した死体の数"
 
 "role.creeping.name" : "クリーピング"
-"role.creeping.short" : "クリーピ"
-"role.creeping.blurb" : "気づいた頃にはもう遅い"
+"role.creeping.short" : "ク"
+"role.creeping.blurb" : "這い寄る終焉"
 "options.role.creeping.detail" : "クリーピングは遅効性の毒でクルーメイトに襲い掛かります。<br>毒を仕掛けられたら、一定時間以内に解毒しないと死亡してしまいます。"
 "options.role.creeping.depoisonDuration" : "解毒に要する時間"
 "options.role.creeping.poisonDelay" : "毒が回るまでの所要時間"
@@ -1009,7 +1042,7 @@ $Color
 "stats.cupid.laserLover" : "ラバーズで赤い糸を顕現させた回数"
 
 "role.destroyer.name" : "デストロイヤー"
-"role.destroyer.short" : "デス"
+"role.destroyer.short" : "デ"
 "role.destroyer.blurb" : "圧し潰せ"
 "options.role.destroyer.detail" : "デストロイヤーはプレイヤーを押し潰し、死体を残さないキルができます。<br>しかし、キルには少し時間がかかるので注意！"
 "options.role.destroyer.destroyCoolDown" : "キルクールダウン"
@@ -1020,7 +1053,7 @@ $Color
 "stats.destroyer.reported" : "キル現場をレポートされた回数"
 
 "role.disturber.name" : "ディスターバー"
-"role.disturber.short" : "ディ"
+"role.disturber.short" : "デ"
 "role.disturber.blurb" : "行く手を阻め"
 "options.role.disturber.detail" : "ディスターバーは障壁を発生させるポールを置けます。<br>ポール間に障壁が張られると、プレイヤーはその間を移動できなくなります。"
 "options.role.disturber.placeCoolDown" : "設置クールダウン"
@@ -1032,7 +1065,7 @@ $Color
 "stats.disturber.disturb" : "障壁による妨害回数"
 
 "role.effacer.name" : "イフェイサー"
-"role.effacer.short" : "イフェ"
+"role.effacer.short" : "イ"
 "role.effacer.blurb" : "その死は、誰の記憶にも残らない"
 "options.role.effacer.detail" : "イフェイサーは仲間や他のプレイヤーに透明化能力を与えられます。<br>視認がとりづらくなり、会議に混乱をもたらします。"
 "options.role.effacer.effaceCoolDown" : "透明化クールダウン"
@@ -1040,12 +1073,12 @@ $Color
 "stats.effacer.efface" : "透明化回数"
 
 "role.evilGuesser.name" : "イビルゲッサー"
-"role.evilGuesser.short" : "ベ"
+"role.evilGuesser.short" : "ゲ"
 "role.evilGuesser.blurb" : "推察し、キルせよ"
 "options.role.evilGuesser.detail" : "ゲッサーは会議中にプレイヤーの能力を推察してキルできます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
 
 "role.evilTracker.name" : "イビルトラッカー"
-"role.evilTracker.short" : "イビトラ"
+"role.evilTracker.short" : "ト"
 "role.evilTracker.blurb" : "陰湿な追跡"
 "options.role.evilTracker.detail" : "イビルトラッカーはプレイヤーを追跡し、その位置を把握できます。<br>会議中はタスクの進捗を見ることもできます。"
 "options.role.evilTracker.showKillFlash" : "キルフラッシュの表示"
@@ -1099,7 +1132,7 @@ $Color
 "stats.hadar.dive" : "地底への潜入回数"
 
 "role.illusioner.name" : "イリュージョナー"
-"role.illusioner.short" : "イリュ"
+"role.illusioner.short" : "イ"
 "role.illusioner.blurb" : "信念を凌ぐ邪悪"
 "options.role.illusioner.detail" : "イリュージョナーはモーフィングとペインターの両方の能力を併せ持つインポスターです。"
 "options.role.illusioner.sampleCoolDown" : "サンプルクールダウン"
@@ -1114,7 +1147,7 @@ $Color
 "stats.illusioner.paint" : "ペイント回数"
 
 "role.jailer.name" : "ジェイラー"
-"role.jailer.short" : "ジェ"
+"role.jailer.short" : "ジ"
 "role.jailer.blurb" : "全てを掌握せよ"
 "options.role.jailer.detail" : "ジェイラーはマップ上でいつでもアドミンを確認できます。"
 "options.role.jailer.canMoveWithMapWatching" : "アドミンマップを開きながらの移動"
@@ -1124,7 +1157,7 @@ $Color
 "options.role.jailer.inheritAbilityOnDying" : "仲間へのジェイラー能力の継承"
 
 "role.marionette.name" : "マリオネット"
-"role.marionette.short" : "マリ"
+"role.marionette.short" : "マ"
 "role.marionette.blurb" : "そこに意思は無い"
 "options.role.marionette.detail" : "マリオネットはデコイを設置できます。<br>デコイと自分自身の位置を入れ替えて長距離移動ができます。"
 "options.role.marionette.mannequinMode" : "デコイの見た目"
@@ -1439,6 +1472,13 @@ $Color
 "options.role.sidekick.inheritanceRule.suicide" : "自殺"
 "options.role.sidekick.inheritanceRule.none" : "なし"
 "options.role.sidekick.assignedSidekick" : "ゲーム開始時に割り当て"
+"options.role.sidekick.canSuicide" : "自決可能"
+"options.role.sidekick.suicideCooldown" : "自決クールダウン"
+"options.role.sidekick.canFixLight" : "停電を修理可能"
+"options.role.sidekick.canFixComms" : "通信障害を修理可能"
+"options.role.sidekick.hasImpostorVision" : "インポスター視界"
+"options.role.sidekick.canUseVents" : "ベントの使用"
+"options.role.sidekick.canMoveInVents" : "ベント間の移動"
 
 "role.jester.name" : "ジェスター"
 "role.jester.short" : "ジ"
@@ -1639,7 +1679,8 @@ $Color
 
 "role.damned.name" : "ダムド"
 "role.damnedImpostor.name" : "ダムド"
-"role.damned.short" : "Da"
+"role.damned.short" : "ダ"
+"role.damnedImpostor.short" : "ダ"
 "options.role.damned.detail" : "ダムドは自覚できないモディファイアです。<br>キルを一度だけ防ぐことができ、<b>呪い</b>が設定によって様々な効果をもたらします。"
 "role.damned.prefix" : "ダムド"
 "role.damned.generalBlurb" : "呪われし者"
@@ -1753,6 +1794,7 @@ $Color
 "teams.spectre" : "妖狐"
 "teams.gambler" : "ギャンブラー"
 "teams.tyrant" : "タイラント"
+"teams.vanity" : "ヴァニティ"
 
 # Perks
 
@@ -2103,6 +2145,8 @@ $Color
 "button.label.absorb" : "吸収"
 "button.label.poison" : "毒"
 "button.label.select" : "選択"
+"button.label.afk" : "AFK"
+"button.label.scan" : "スキャン"
 
 # Game
 
@@ -2216,6 +2260,7 @@ $Color
 "end.gambler" : "ギャンブラー%EXTRA%勝利"
 "end.tyrant" : "タイラント%EXTRA%勝利"
 "end.vanity" : "ヴァニティ%EXTRA%勝利"
+"end.gameEnd" : "ゲーム終了"
 "end.nogame" : "無効なゲーム"
 
 "end.status.noWinners" : "勝者なし" 
@@ -2283,6 +2328,12 @@ $Color
 "task.unknownPlace" : "？？？"
 "task.divertPower" : "電力を変換する"
 
+# Meta Information
+
+"metaInfo.meeting.sabotage" : "発生中のサボタージュ"
+"metaInfo.meeting.sabotage.electrical" : "停電"
+"metaInfo.meeting.sabotage.communications" : "通信障害"
+"metaInfo.meeting.task" : "平均完了タスク数: "
 
 # Inventory
 
@@ -2433,7 +2484,7 @@ $Color
 "devStudio.ui.common.preview" : "プレビュー"
 "devStudio.ui.common.delete" : "削除"
 "devStudio.ui.common.clone" : "複製"
-"devStudio,ui.common.original" : "オリジナル"
+"devStudio.ui.common.original" : "オリジナル"
 "devStudio.ui.common.generate" : "生成"
 "devStudio.ui.common.confirmSaving" : "保存してもよろしいですか？"
 "devStudio.ui.common.confirmDeletingAddon" : "アドオンを削除してもよろしいですか？"
@@ -2557,6 +2608,7 @@ $Color
 "achievement.type.secret" : "シークレット"
 "achievement.type.seasonal" : "期間限定"
 "achievement.type.costume" : "コスチューム"
+"achievement.type.aeroGuesser" : "アモゲッサー"
 "achievement.type.innersloth" : "Among Us"
 "achievement.type.perk" : "パーク"
 
@@ -2565,6 +2617,7 @@ $Color
 "achievement.group.seasonal" : "期間限定"
 "achievement.group.perk" : "パーク"
 "achievement.group.costume" : "コスチューム"
+"achievement.group.aeroGuesser" : "アモゲッサー"
 "achievement.group.others" : "その他"
 "achievement.group.innersloth" : "Among Us"
 "achievement.group.custom" : "クラフト"
@@ -2594,6 +2647,7 @@ $Color
 "stats.group.game" : "ゲーム"
 "stats.group.roles" : "ロール"
 "stats.group.perks" : "パーク"
+"stats.group.aeroGuesser" : "アモゲッサー"
 "stats.role.common.assigned" : "%ROLE% プレイ回数"
 "stats.role.common.won" : "%ROLE%として勝利"
 "stats.modifier.common.assigned" : "%MODIFIER% プレイ回数"
@@ -2608,6 +2662,9 @@ $Color
 "stats.plants.gain.normal" : "通常のプラントからのパーク獲得回数"
 "stats.plants.gain.warped" : "歪んだプラントからのパーク獲得回数"
 "stats.perk.common.gain" : "%PERK% 獲得回数"
+"stats.aeroGuesser.gamePlay" : "総ゲーム数"
+"stats.aeroGuesser.totalScore" : "累計獲得スコア"
+"stats.aeroGuesser.perfectScore" : "フルスコア獲得回数"
 
 # Social
 
@@ -2760,6 +2817,40 @@ $Color
 "roleFilter.preview.etc" : "%ROLES% など"
 "roleFilter.showOnlySpawnable" : "出現しうる役職のみ表示"
 
+# AeroGuesser
+
+"aeroGuesser.rank.1" : "1位"
+"aeroGuesser.rank.2" : "2位"
+"aeroGuesser.rank.3" : "3位"
+"aeroGuesser.rank.4" : "4位"
+"aeroGuesser.rank.5" : "5位"
+"aeroGuesser.rank.6" : "6位"
+"aeroGuesser.rank.7" : "7位"
+"aeroGuesser.rank.8" : "8位"
+"aeroGuesser.rank.9" : "9位"
+"aeroGuesser.rank.10" : "10位"
+"aeroGuesser.rank.11" : "11位"
+"aeroGuesser.rank.12" : "12位"
+"aeroGuesser.rank.13" : "13位"
+"aeroGuesser.rank.14" : "14位"
+"aeroGuesser.rank.15" : "15位"
+"aeroGuesser.rank.16" : "16位"
+"aeroGuesser.rank.17" : "17位"
+"aeroGuesser.rank.18" : "18位"
+"aeroGuesser.rank.19" : "19位"
+"aeroGuesser.rank.20" : "20位"
+"aeroGuesser.rank.21" : "21位"
+"aeroGuesser.rank.22" : "22位"
+"aeroGuesser.rank.23" : "23位"
+"aeroGuesser.rank.24" : "24位"
+"aeroguesser.answerInfo.view" : "実際のマップ"
+"aeroguesser.answerInfo.minimap" : "ミニマップ"
+"aeroguesser.answerInfo.singleScore" : "獲得スコア"
+"aeroguesser.answerInfo.sumScore" : "累計スコア"
+"aeroGuesser.ui.proceed" : "次へ"
+"aeroGuesser.ui.determine" : "確定"
+"aeroGuesser.ui.back" : "戻る"
+
 # Documents
 
 "document.tip.winCond.teams.impostor" : "インポスター"
@@ -2820,12 +2911,15 @@ $Color
 "options.map.canOpenMapWhileUsingUtility.detail" : "オンにすると、はしごや昇降機の使用中やベント潜伏中でも<br>マップが開けるようになります。" 
 "options.map.numOfTeleporter.detail" : "マップ上に、プレイヤーを転移させる宝石のペアが出現します。<br>プレイヤーは宝石を磨くことで対応する宝石の元へテレポートします。"
 "options.map.nonCrewmateCanUseTeleporterImmediately.detail" : "オンにするとインポスターおよび第三陣営は宝石を磨くミニゲーム無しに<br>テレポートができるようになります。"
+"options.map.customization.skeld.wholeShipInShadow.detail" : "船体全体に影を適用します。通路にはみ出た名前が見えなくなります。"
 "options.map.customization.airship.oneWayMeetingRoom.detail" : "会議室左側のはしごを上り専用にし、<br>新たに会議室右側に下降専用のはしごを追加します。"
 "options.map.customization.airship.betterImpostorVision.detail" : "インポスター視界で昇降機の上下階の様子を双方から視認できるようにします。"
 "options.map.customization.airship.shadedLowerFloor.detail" : "非インポスター視界で昇降機上階から下の階が見えなくなります。"
 "options.map.customization.fungle.growingMushroom.detail" : "光るキノコの周囲の様子がぼんやりと見えるようになります。"
 "options.map.customization.fungle.thinFog.detail" : "ジャングルの影をより薄くします。"
 "options.map.customization.fungle.simpleLaboratory.detail" : "実験室下のガラスを撤去します。<br>部屋下側から実験室に直接進入できます。"
+"options.map.customization.fungle.forClassicGame.detail" : "クラシックゲームの推理に適したマップに改変します。以下の改変が含まれます。<br>- はしご(下部)の一方通行化<br>- ミーティングルーム下の封鎖<br>- 温室・実験室間の封鎖<br>- 高台の宝石上部の封鎖"
+"options.task.fakeScan.detail" : "タスクを持たないプレイヤーもスキャン台の上に移動できるようになります。"
 "options.meeting.deathPenalty.detail" : "会議時間は設定値と死者の人数をかけた秒数だけ減少します。"
 "options.meeting.noticeExtraVictims.detail" : "追放時、巻き込みや後追い自殺で追加の死者がいるとき通知します。"
 "options.meeting.options.meeting.extraEmergencyCooldownInTheEarly.detail" : "ある程度死者が発生するまで緊急クールダウンをさらに引き伸ばします。"

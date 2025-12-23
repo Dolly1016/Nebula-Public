@@ -850,7 +850,7 @@ public class DevStudio : MonoBehaviour
             var screen = MetaScreen.GenerateWindow(new(5.9f, original != null ? 1.8f : 1.5f), transform, Vector3.zero, true, false);
             MetaWidgetOld widget = new();
 
-            if (original != null) widget.Append(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(1.5f, 0.3f) }) { RawText = Language.Translate("devStudio,ui.common.original") + " : " + original });
+            if (original != null) widget.Append(new MetaWidgetOld.Text(new TextAttributeOld(TextAttributeOld.BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Center, Size = new(1.5f, 0.3f) }) { RawText = Language.Translate("devStudio.ui.common.original") + " : " + original });
 
             Variable<TextField> refId = new();
             TMPro.TextMeshPro usingInfoText = null!;

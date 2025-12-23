@@ -48,11 +48,11 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole
     bool DefinedRole.IsMadmate => true;
     static public readonly JekyllAndHyde MyRole = new();
     static private readonly GameStatsEntry StatsMedicine = NebulaAPI.CreateStatsEntry("stats.jekyllAndHyde.medicine", GameStatsCategory.Roles, MyRole);
+    (Virial.Color mainColor, Virial.Color? subColor)? DefinedAssignable.IconColor => (Virial.Color.ImpostorColor, Virial.Color.CrewmateColor);
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
-
 
         public Instance(GamePlayer player, int[] argument) : base(player)
         {

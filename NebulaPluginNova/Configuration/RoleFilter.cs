@@ -204,6 +204,9 @@ public static class RoleFilterHelper
             if (!r.ShowOnHelpScreen) continue;
             if (!r.IsSpawnable) continue;
 
+            //システム役職はスルー
+            if (r.IsSystemRole) continue;
+
             bool assignable = true;
 
             switch (r.Category)
@@ -269,7 +272,7 @@ public static class RoleFilterHelper
             if (assignable.Count <= nonAssignable.Count)
                 return string.Join(separator, assignable.Select(r => r.DisplayColoredName));
             else
-                return Language.Translate("roleFilter.exceptPattern." + category).Replace("%ROLES%", string.Join(separator, nonAssignable.Select(r => useShortName ? r.DisplayColoredShort : r.DisplayColoredName)));
+                return Language.Translate("roleFilter.exceptPattern." + category).Replace("%ROLES%", string.Join(separator, nonAssignable.Select(r => useShortName ? r.GetRoleIconTag() + " " + r.DisplayColoredShort : r.DisplayColoredName)));
         }
 
         string impostorStr = canAssignToImpostor ? GetCategoryString("impostor", assignableImpostor, nonAssignableImpostor) : "";
@@ -385,7 +388,7 @@ public class SimpleRoleFilterConfiguration : IConfiguration, IExclusiveAssignmen
         ConfigurationAssets.Semicolon,
         GUI.API.HorizontalMargin(0.08f),
         new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), new LazyTextComponent(() => ValueAsDisplayString ?? "None")),
-        new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), new TranslateTextComponent("options.exclusiveAssignment.edit")) { OnClick = _ => RoleOptionHelper.OpenFilterScreen(ScrollerTag, Roles.Roles.AllRoles.Where(r => RolePredicate?.Invoke(r) ?? true), r => Contains(r), null, r => { ToggleAndShare(r); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }) }
+        new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), new TranslateTextComponent("options.exclusiveAssignment.edit")) { OnClick = _ => RoleOptionHelper.OpenFilterScreen(ScrollerTag, Roles.Roles.AllRoles.Where(r => RolePredicate?.Invoke(r) ?? true), r => Contains(r), null, r => { ToggleAndShare(r); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }, canFilterSpawnable: PreviewOnlySpawnableRoles) }
         );
     }
 
@@ -400,6 +403,7 @@ public class SimpleRoleFilterConfiguration : IConfiguration, IExclusiveAssignmen
         {
             var role = Roles.Roles.AllRoles[i];
             if (PreviewOnlySpawnableRoles && !role.IsSpawnable) continue;
+            if (role.IsSystemRole) continue;
             if(RolePredicate?.Invoke(role) ?? true)
             {
                 var contains = Contains(role);

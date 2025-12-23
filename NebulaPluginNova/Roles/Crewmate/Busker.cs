@@ -33,6 +33,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
     static private readonly GameStatsEntry StatsMissed = NebulaAPI.CreateStatsEntry("stats.busker.missed", GameStatsCategory.Roles, MyRole);
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable is not Lover;
 
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
 

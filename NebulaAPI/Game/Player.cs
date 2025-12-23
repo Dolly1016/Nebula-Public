@@ -266,14 +266,42 @@ public class OutfitDefinition
         OutfitTags = outfit.tags;
         this.outfit = outfit.outfit;
     }
+
+    public OutfitDefinition(OutfitDefinition original, bool keepOutfitId, string? overriddenHat = null, string? overriddenVisor = null, string? overriddenSkin = null, string? overriddenPet = null, int? overriddenColor = null, string? overriddenNameplate = null)
+    {
+        this.outfit = new NetworkedPlayerInfo.PlayerOutfit();
+        outfit.HatId = overriddenHat ?? original.outfit.HatId;
+        outfit.VisorId = overriddenHat ?? original.outfit.VisorId;
+        outfit.SkinId = overriddenHat ?? original.outfit.SkinId;
+        outfit.PetId = overriddenHat ?? original.outfit.PetId;
+        outfit.ColorId = overriddenColor ?? original.outfit.ColorId;
+        outfit.NamePlateId = overriddenNameplate ?? original.outfit.NamePlateId;
+        OutfitTags = [];
+        Id = keepOutfitId ? original.Id : new(-1, -1);
+    }
 }
 
 public class OutfitCandidate
 {
+    /// <summary>
+    /// 見た目に関する情報が含まれます。
+    /// </summary>
     public OutfitDefinition Outfit { get; private set; }
+    /// <summary>
+    /// 見た目の一括操作のために使用するタグです。
+    /// </summary>
     public string Tag { get; private set; }
+    /// <summary>
+    /// 見た目の優先度です。この数字が高いほど優先して表示されます。
+    /// </summary>
     public int Priority { get; private set; }
+    /// <summary>
+    /// 自覚できる見た目の場合true。
+    /// </summary>
     public bool SelfAware { get; private set; }
+    /// <summary>
+    /// この見た目が反映されないプレイヤーのマスクです。
+    /// </summary>
     public BitMask<Virial.Game.Player>? IgnoreMask { get; private set; }
     public OutfitCandidate(OutfitDefinition definition, string tag, int priority, bool selfAware, BitMask<Player>? ignoreMask = null)
     {
@@ -296,6 +324,7 @@ public enum KillParameter
     WithKillSEWidely = 0x08,
     WithDeadBody = 0x10,
     WithViperDeadBody = 0x20, //WithDeadBodyがない限り無視されます。
+    WithoutSelfSE = 0x40,
     RemoteKill = WithOverlay | WithAssigningGhostRole | WithDeadBody,
     NormalKill = WithBlink | RemoteKill,
     MeetingKill = WithOverlay | WithAssigningGhostRole | WithKillSEWidely

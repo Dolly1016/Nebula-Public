@@ -135,6 +135,7 @@ public class AchievementType
     static public readonly AchievementType Costume = new("costume");
     static public readonly AchievementType Innersloth = new("innersloth");
     static public readonly AchievementType Perk = new("perk");
+    static public readonly AchievementType AeroGuesser = new("aeroGuesser");
 
     static public readonly AchievementType Uljun = new("uljun");
     static public readonly AchievementType Mememura = new("meme");
@@ -477,6 +478,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
 
     public IEnumerable<DefinedAssignable> role;
     public IEnumerable<AchievementType> type;
+    public Cache<INebulaAchievement>? preAchievement;
     public int Trophy { get; private init; }
     public bool NoHint => noHint;
     public IEnumerable<DefinedAssignable> RelatedRole => role;
@@ -487,11 +489,9 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
-    public bool IsHidden { get {
-            return isSecret && !IsCleared;
-        } }
+    public bool IsHidden { get => (isSecret || !(preAchievement?.Get()?.IsCleared ?? true)) && !IsCleared; }
 
-    public AbstractAchievement(string? groupId, bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage) : base(groupId, key, goal, canClearOnce) 
+    public AbstractAchievement(string? groupId, bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement) : base(groupId, key, goal, canClearOnce) 
     {
         this.isSecret = isSecret;
         this.noHint = noHint;
@@ -500,6 +500,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
         this.Trophy = trophy;
         this.Attention = attention;
         this.SpecifiedBackImage = specifiedImage;
+        this.preAchievement = preAchievement == null ? null : new(() => NebulaAchievementManager.GetAchievement(preAchievement, out var ach) ? ach : null!);
     }
 
     /// <summary>
@@ -515,11 +516,11 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
 
 public class StandardAchievement : AbstractAchievement
 {
-    public StandardAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy,int attention, Image? specifiedImage)
-        : this(null, canClearOnce, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage) { }
+    public StandardAchievement(bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy,int attention, Image? specifiedImage, string? preAchievement)
+        : this(null, canClearOnce, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage, preAchievement) { }
 
-    public StandardAchievement(string? group, bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage)
-        : base(group, canClearOnce, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage) { }
+    public StandardAchievement(string? group, bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
+        : base(group, canClearOnce, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage, preAchievement) { }
 }
 
 public class InnerslothAchievement : INebulaAchievement
@@ -583,7 +584,7 @@ public class InnerslothAchievement : INebulaAchievement
 
 public class SumUpReferenceAchievement : INebulaAchievement
 {
-    public SumUpReferenceAchievement(bool isSecret, string key, string reference, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage)
+    public SumUpReferenceAchievement(bool isSecret, string key, string reference, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
     {
         this.Id = key;
         this.Trophy = trophy;
@@ -594,9 +595,11 @@ public class SumUpReferenceAchievement : INebulaAchievement
         this.achievementType = type;
         this.Attention = attention;
         this.SpecifiedBackImage = specifiedImage;
+        this.preAchievement = preAchievement == null ? null : new(() => NebulaAchievementManager.GetAchievement(preAchievement, out var ach) ? ach : null!);
         NebulaAchievementManager.RegisterNonrecord(this, key);
     }
 
+    private readonly Cache<INebulaAchievement>? preAchievement;
     static readonly SpriteLoader gaugeSprite = SpriteLoader.FromResource("Nebula.Resources.ProgressGauge.png", 100f);
 
     static private TextAttribute OblongAttribute = new(GUI.Instance.GetAttribute(AttributeParams.Oblong)) { FontSize = new(1.6f), Size = new(0.6f, 0.2f), Color = new(163, 204, 220) };
@@ -606,7 +609,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
 
     public int Trophy { get; private init; }
     private bool IsSecret { get; init; }
-    public bool IsHidden => IsSecret && !IsCleared;
+    public bool IsHidden => (IsSecret || !(preAchievement?.Get()?.IsCleared ?? true)) && !IsCleared;
     private int goal { get; init; }
     private string reference { get; init; }
     public float GlobalProgress { get; set; }
@@ -675,8 +678,8 @@ public class SumUpReferenceAchievement : INebulaAchievement
 
 public class SumUpAchievement : AbstractAchievement, INebulaAchievement
 {
-    public SumUpAchievement(bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage)
-        : base(null, true, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage)
+    public SumUpAchievement(bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
+        : base(null, true, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage, preAchievement)
     {
     }
 
@@ -720,8 +723,8 @@ public class SumUpAchievement : AbstractAchievement, INebulaAchievement
 public class CompleteAchievement : SumUpAchievement, INebulaAchievement
 {
     ProgressRecord[] records;
-    public CompleteAchievement(ProgressRecord[] allRecords, bool isSecret, bool noHint, string key, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage)
-        : base(isSecret, noHint, key, allRecords.Length, role,type, trophy, attention, specifiedImage) {
+    public CompleteAchievement(ProgressRecord[] allRecords, bool isSecret, bool noHint, string key, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
+        : base(isSecret, noHint, key, allRecords.Length, role,type, trophy, attention, specifiedImage, preAchievement) {
         this.records = allRecords;
     }
 
@@ -942,22 +945,26 @@ static public class NebulaAchievementManager
         RegisterStats("stats.plants.gain.normal", GameStatsCategory.Perks, null, null, 101);
         RegisterStats("stats.plants.gain.warped", GameStatsCategory.Perks, null, null, 100);
 
-        Roles.Roles.AllRoles.Do(r =>
+        Roles.Roles.AllRoles.Where(r => r.WithStatistics).Do(r =>
         {
-            RegisterStats("stats.role." + r.Id + ".assigned", GameStatsCategory.Roles, r, new LazyTextComponent(() => Language.Translate("stats.role.common.assigned").Replace("%ROLE%", r.DisplayColoredName)), 101);
-            RegisterStats("stats.role." + r.Id + ".won", GameStatsCategory.Roles, r, new LazyTextComponent(() => Language.Translate("stats.role.common.won").Replace("%ROLE%", r.DisplayColoredName)), 100);
+            RegisterStats("stats.role." + r.InternalName + ".assigned", GameStatsCategory.Roles, r, new LazyTextComponent(() => Language.Translate("stats.role.common.assigned").Replace("%ROLE%", r.DisplayColoredName)), 101);
+            RegisterStats("stats.role." + r.InternalName + ".won", GameStatsCategory.Roles, r, new LazyTextComponent(() => Language.Translate("stats.role.common.won").Replace("%ROLE%", r.DisplayColoredName)), 100);
         });
-        Roles.Roles.AllModifiers.Do(m =>
+        Roles.Roles.AllModifiers.Where(m => m.WithStatistics).Do(m =>
         {
-            RegisterStats("stats.modifier." + m.Id + ".assigned", GameStatsCategory.Roles, m, new LazyTextComponent(() => Language.Translate("stats.modifier.common.assigned").Replace("%MODIFIER%", m.DisplayColoredName)), 101);
-            RegisterStats("stats.modifier." + m.Id + ".won", GameStatsCategory.Roles, m, new LazyTextComponent(() => Language.Translate("stats.modifier.common.won").Replace("%MODIFIER%", m.DisplayColoredName)), 100);
+            RegisterStats("stats.modifier." + m.InternalName + ".assigned", GameStatsCategory.Roles, m, new LazyTextComponent(() => Language.Translate("stats.modifier.common.assigned").Replace("%MODIFIER%", m.DisplayColoredName)), 101);
+            RegisterStats("stats.modifier." + m.InternalName + ".won", GameStatsCategory.Roles, m, new LazyTextComponent(() => Language.Translate("stats.modifier.common.won").Replace("%MODIFIER%", m.DisplayColoredName)), 100);
         });
-        Roles.Roles.AllGhostRoles.Do(g =>
+        Roles.Roles.AllGhostRoles.Where(g => g.WithStatistics).Do(g =>
         {
-            RegisterStats("stats.ghostRole." + g.Id + ".assigned", GameStatsCategory.Roles, g, new LazyTextComponent(() => Language.Translate("stats.ghostRole.common.assigned").Replace("%GHOSTROLE%", g.DisplayColoredName)), 101);
-            RegisterStats("stats.ghostRole." + g.Id + ".won", GameStatsCategory.Roles, g, new LazyTextComponent(() => Language.Translate("stats.ghostRole.common.won").Replace("%GHOSTROLE%", g.DisplayColoredName)), 100);
+            RegisterStats("stats.ghostRole." + g.InternalName + ".assigned", GameStatsCategory.Roles, g, new LazyTextComponent(() => Language.Translate("stats.ghostRole.common.assigned").Replace("%GHOSTROLE%", g.DisplayColoredName)), 101);
+            RegisterStats("stats.ghostRole." + g.InternalName + ".won", GameStatsCategory.Roles, g, new LazyTextComponent(() => Language.Translate("stats.ghostRole.common.won").Replace("%GHOSTROLE%", g.DisplayColoredName)), 100);
         });
         Roles.Roles.AllPerks.Do(p => RegisterStats("stats.perk." + p.Id + ".gain", GameStatsCategory.Perks, null, new LazyTextComponent(()=> Language.Translate("stats.perk.common.gain").Replace("%PERK%", p.PerkDefinition.DisplayName.Color(p.PerkDefinition.perkColor))), 50));
+
+        RegisterStats("stats.aeroGuesser.gamePlay", GameStatsCategory.AeroGuesser, null, null, 1);
+        RegisterStats("stats.aeroGuesser.totalScore", GameStatsCategory.AeroGuesser, null, null, 2);
+        RegisterStats("stats.aeroGuesser.perfectScore", GameStatsCategory.AeroGuesser, null, null, 3);
 
         NebulaAchievementManager.SortStats();
 
@@ -997,6 +1004,7 @@ static public class NebulaAchievementManager
             bool hasPrefix = false, hasPostfix = false, hasInfix = false;
             string? reference = null;
             string? defaultSource = null;
+            string? preAchievement = null;
             int attention = 0;
             IEnumerable<ProgressRecord>? records = recordsList;
 
@@ -1019,6 +1027,9 @@ static public class NebulaAchievementManager
                         break;
                     case "secret":
                         secret = true;
+                        break;
+                    case "aeroGuesser":
+                        types.Add(AchievementType.AeroGuesser);
                         break;
                     case "seasonal":
                         types.Add(AchievementType.Seasonal);
@@ -1085,6 +1096,9 @@ static public class NebulaAchievementManager
                     case string a when a.StartsWith("collab-"):
                         if (AchievementType.TryGetCollabType(a.Substring(7), out var aType)) types.Add(aType);
                         break;
+                    case string a when a.StartsWith("pre-"):
+                        preAchievement = a.Substring(4);
+                        break;
                 }
             }
 
@@ -1123,13 +1137,13 @@ static public class NebulaAchievementManager
             else if (isRecord)
                 new DisplayProgressRecord(args[0], goal, "record." + args[0], defaultSource);
             else if (!records.IsEmpty())
-                new CompleteAchievement(records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new CompleteAchievement(records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else if (reference != null)
-                new SumUpReferenceAchievement(secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new SumUpReferenceAchievement(secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else if (goal > 1)
-                new SumUpAchievement(secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new SumUpAchievement(secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else
-                new StandardAchievement(clearOnce, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new StandardAchievement(clearOnce, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
 
             if (recordsList.Count > 0) recordsList.Clear();
         }
@@ -1143,7 +1157,7 @@ static public class NebulaAchievementManager
 
         foreach (var entry in registeredAchievements)
         {
-            new StandardAchievement(entry.Group, false, entry.IsSecret, false, entry.Id, 1, entry.DefinedAssignables, entry.IsSecret ? [AchievementType.Secret] : [], 0, 0, null);
+            new StandardAchievement(entry.Group, false, entry.IsSecret, false, entry.Id, 1, entry.DefinedAssignables, entry.IsSecret ? [AchievementType.Secret] : [], 0, 0, null, null);
         }
     }
 
@@ -1156,7 +1170,7 @@ static public class NebulaAchievementManager
     }
     static internal GameStatsEntry RegisterStats(string id, GameStatsCategory category, DefinedAssignable? relatedAssignable, TextComponent? displayName = null, int innerPriority = 0)
     {
-        var record = new ProgressRecord(null, id, 1000000, false);
+        var record = new ProgressRecord(null, id, 800000000, false);
         var statsEntry = new GameStatsEntryImpl(record, category, relatedAssignable, displayName, innerPriority);
         allStats.Add(statsEntry);
         return statsEntry;

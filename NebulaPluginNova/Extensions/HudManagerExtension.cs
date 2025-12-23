@@ -29,7 +29,7 @@ public static class HudManagerExtension
         manager.KillButton.ToggleVisible((modPlayer?.ShowKillButton ?? true) && !flag);
         manager.SabotageButton.ToggleVisible((modRole?.CanInvokeSabotage ?? false));
         manager.ImpostorVentButton.ToggleVisible(!flag && ((modRole?.CanUseVent ?? false) || PlayerControl.LocalPlayer.walkingToVent || PlayerControl.LocalPlayer.inVent));
-        manager.MapButton.gameObject.SetActive(true);
+        manager.MapButton.gameObject.SetActive(NebulaGameManager.Instance.GameMode?.ShowMap ?? true);
     }
 
     static public void ShowVanillaKeyGuide(this HudManager manager)

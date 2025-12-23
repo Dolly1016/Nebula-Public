@@ -15,6 +15,7 @@ public enum GameStatsCategory
     Game,
     Roles,
     Perks,
+    AeroGuesser,
 }
 
 public interface GameStatsEntry

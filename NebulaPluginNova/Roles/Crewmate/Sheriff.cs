@@ -26,7 +26,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
         }
     );
 
-    private Sheriff():base("sheriff", new(240,191,0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [KillCoolDownOption, NumOfShotsOption, CanKillMadmateOption, CanKillLoversOption, CanKillHidingPlayerOption, SealAbilityUntilReportingDeadBodiesOption])
+    private Sheriff():base("sheriff", new(240,191,0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [KillCoolDownOption, NumOfShotsOption, CanKillMadmateOption, CanKillLoversOption, CanKillHidingPlayerOption, SealAbilityUntilReportingDeadBodiesOption, UnsealOnReportButtonTurningOnOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Sheriff.png");
@@ -44,10 +44,13 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
     static private readonly BoolConfiguration CanKillLoversOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillLovers", false);
     static internal readonly BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillHidingPlayer", false);
     static internal readonly BoolConfiguration SealAbilityUntilReportingDeadBodiesOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.sealAbilityUntilReportingDeadBodies", false);
+    static internal readonly BoolConfiguration UnsealOnReportButtonTurningOnOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.unsealOnReportButtonTurningOn", false, () => SealAbilityUntilReportingDeadBodiesOption);
 
     static public readonly Sheriff MyRole = new();
     static private readonly GameStatsEntry StatsShot = NebulaAPI.CreateStatsEntry("stats.sheriff.shot", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsMisshot = NebulaAPI.CreateStatsEntry("stats.sheriff.misshot", GameStatsCategory.Roles, MyRole);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButtonImpl? killButton = null;
@@ -82,6 +85,20 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                 if (SealAbilityUntilReportingDeadBodiesOption && !NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.IsDead))
                 {
                     lockSprite = killButton.VanillaButton.AddLockedOverlay();
+
+                    if (UnsealOnReportButtonTurningOnOption)
+                    {
+                        //レポートが光ったら解禁
+                        GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
+                        {
+                            if (lockSprite != null && HudManager.InstanceExists && HudManager.Instance.ReportButton.canInteract)
+                            {
+                                killButton.PlayFlashOnce();
+                                GameObject.Destroy(lockSprite!.gameObject);
+                                lockSprite = null;
+                            }
+                        }, this);
+                    }
                 }
 
                 bool killedAnyone = false;
@@ -116,7 +133,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                 };
                 killButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer();
                 killButton.CoolDownTimer.Start();
-                killButton.SetLabel("kill");
+                killButton.SetLabel(MyPlayer.IsMadmate ? "madmate.suicide" : "kill");
                 killButton.OnMeeting = button =>
                 {
                     if (lockSprite && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.IsDead))

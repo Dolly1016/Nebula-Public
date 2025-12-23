@@ -9,6 +9,7 @@ public class ScriptBehaviour : MonoBehaviour
     public event Action? UpdateHandler;
     public event Action? ActiveHandler;
     public event Action? DestroyHandler;
+    public bool InvokeUpdateOnEnabed { get; set; }
     public void Update()
     {
         UpdateHandler?.Invoke();
@@ -17,6 +18,7 @@ public class ScriptBehaviour : MonoBehaviour
     public void OnEnable()
     {
         ActiveHandler?.Invoke();
+        if (InvokeUpdateOnEnabed) UpdateHandler?.Invoke();
     }
     public void OnDestroy()
     {

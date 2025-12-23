@@ -68,9 +68,9 @@ public static class CountOverlayUpdatePatch
             return false;
         }
 
-        int mask = 0;
-        bool AlreadyAdded(byte playerId) => (mask & (1 << playerId)) != 0;
-        void AddToMask(byte playerId) => mask |= (1 << playerId);
+        HashSet<int> mask = [];
+        bool AlreadyAdded(int id) => mask.Contains(id);
+        void AddToMask(int id) => mask.Add(id);
 
         FakeAdmin admin = MapBehaviourExtension.AffectedByFakeAdmin ? FakeInformation.Instance!.CurrentAdmin : FakeInformation.AdminFromActuals;
         var roomFlags = MapData.GetCurrentMapData().AdminRooms;
@@ -104,12 +104,14 @@ public static class CountOverlayUpdatePatch
                     else
                     {
                         //タスクターン中のアドミン
-                        foreach (var p in admin.Players)
+                        for (int i = 0;i< admin.Players.Length;i++)
                         {
+                            var p = admin.Players[i];
+
                             if (p.isDead && !MapBehaviourExtension.ShowDeadBodies) continue;
                             if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetPlayer(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
 
-                            if (AlreadyAdded(p.playerId)) continue;
+                            if (AlreadyAdded(i)) continue;
 
                             if (plainShipRoom.roomArea.OverlapPoint(p.position))
                             {
@@ -118,7 +120,7 @@ public static class CountOverlayUpdatePatch
                                 if (p.isDead && MapBehaviourExtension.CanIdentifyDeadBodies) deadBodies++;
                                 if (p.isImpostor && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
 
-                                AddToMask(p.playerId);
+                                AddToMask(i);
                             }
                         }
                     }
@@ -214,7 +216,7 @@ static class MapBehaviourGenericShowPatch
     static void Postfix(MapBehaviour __instance)
     {
         __instance.transform.localPosition = new Vector3(0, 0, -50f);
-        __instance.ColorControl.GetComponent<SpriteRenderer>().sprite = ShipStatus.Instance.MapPrefab.ColorControl.GetComponent<SpriteRenderer>().sprite;
+        __instance.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(AmongUsUtil.CurrentMapId, 0xFFFFFF); //ShipStatus.Instance.MapPrefab.ColorControl.GetComponent<SpriteRenderer>().sprite;
         MapBehaviourExtension.UpdateScale(__instance);
     }
 }
@@ -276,4 +278,11 @@ public static class MapUpdatePatch
     }
 }
 
-
+[HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.Close))]
+public static class MapClosePatch
+{
+    static void Postfix(MapBehaviour __instance)
+    {
+        GameOperatorManager.Instance?.Run(new MapCloseEvent());
+    }
+}

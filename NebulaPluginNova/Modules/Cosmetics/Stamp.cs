@@ -143,9 +143,10 @@ public static class StampHelpers
         bool inMeeting = MeetingHud.Instance || ExileController.Instance || IntroCutscene.Instance || NebulaPreSpawnMinigame.PreSpawnMinigame;
         bool isDead = PlayerControl.LocalPlayer && PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.IsDead;
         bool canSeeSomeStamps = inMeeting || (isDead && NebulaGameManager.Instance!.CanSeeAllInfo);
+        bool stampOnlyMode = NebulaGameManager.Instance?.GameMode?.CanUseStampOnly ?? false;
 
-        bool shouldShowStampMenu = canSeeSomeStamps;
-        bool shouldShowEmoteMenu = !inMeeting && (gameIsNotStated || !isDead);
+        bool shouldShowStampMenu = canSeeSomeStamps || stampOnlyMode;
+        bool shouldShowEmoteMenu = !inMeeting && (gameIsNotStated || !isDead) && !stampOnlyMode; 
 
         if (shouldShowEmoteMenu)
         {
@@ -179,6 +180,7 @@ public static class StampHelpers
         }
     }
 
+    public static void SetStampShowerToUnderHud(Func<bool>? aliveWhile = null) => SetStampShowerToUnderHud(HudManager.Instance.transform, -505f, aliveWhile);
     public static void SetStampShowerToUnderHud(Transform transform, float z, Func<bool>? aliveWhile = null)
     {
         GamePlayer.AllPlayers.Do(p =>

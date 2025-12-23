@@ -15,7 +15,10 @@ public class MeetingPreStartEvent : AbstractPlayerEvent
 {
     public Virial.Game.Player? Reported { get; private init; }
     public Virial.Game.Player Reporter => Player;
-    internal MeetingPreStartEvent(Virial.Game.Player reporter, Virial.Game.Player? reported) : base(reporter){
+    public Virial.Game.EmergencyMeeting Meeting { get; private init; }
+    internal MeetingPreStartEvent(Virial.Game.Player reporter, Virial.Game.Player? reported, Virial.Game.EmergencyMeeting meeting) : base(reporter)
+    {
         Reported = reported;
+        Meeting = meeting;
     }
 }

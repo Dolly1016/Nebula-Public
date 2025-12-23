@@ -249,12 +249,18 @@ internal class NoSVCRoom
             private string playerName = null!;
             private PlayerControl mappedPlayer = null!;
             private GamePlayer? mappedModPlayer = null!;
+            private VCPlayer myVCPlayer;
             public string CachedPlayerName => mappedPlayer ? mappedPlayer.name : playerName ?? "Unknown";
             public bool IsMapped => HasBeenMapped || mappedPlayer != null && mappedPlayer;
             private bool HasBeenMapped = false;
             private FloatDataEntry? volumeEntry = null;
             public GamePlayer? MappedModPlayer => mappedModPlayer;
             public PlayerControl MappedPlayerControl => mappedPlayer;
+
+            internal Mapping(VCPlayer player)
+            {
+                this.myVCPlayer = player;
+            }
             public void UpdateProfile(int playerId, string playerName)
             {
                 this.playerId = playerId;
@@ -298,7 +304,7 @@ internal class NoSVCRoom
                         LogUtils.WriteToConsole($"Gain PUID of {player.name} ({player.PlayerId} : {puid})");
                         if (puid.Length == 0) puid = player.name;
                         volumeEntry = VCSettings.GetPlayerVolumeEntry(puid);
-                        if(ModSingleton<NoSVCRoom>.Instance.TryGetPlayer(player.PlayerId, out var p)) p.SetVolume(volumeEntry.Value);
+                        myVCPlayer.SetVolume(volumeEntry.Value);
                         yield break;
                     }
                     if(mappedPlayer) NebulaManager.Instance.StartCoroutine(CoSetVolumeEntry(mappedPlayer).WrapToIl2Cpp());
@@ -325,7 +331,7 @@ internal class NoSVCRoom
             public byte PlayerId => (byte)playerId;
         }
         private NoSVCRoom? Room;
-        private Mapping mapping = new();
+        private Mapping mapping;
         private StereoRouter.Property imager, droneImager;
         private VolumeRouter.Property clientVolume, normalVolume, ghostVolume, radioVolume, droneVolume;
         private LevelMeterRouter.Property levelMeter;
@@ -335,9 +341,14 @@ internal class NoSVCRoom
         public float Level => levelMeter.Level;
         public bool IsMapped => mapping.IsMapped;
         internal PlayerControl MappedPlayerControl => mapping.MappedPlayerControl;
+        public int Elapsed => routingInstance.ElapsedSinceLastReceipt;
+        private AudioRoutingInstance routingInstance;
+        public int VCClientId => routingInstance.ClientId;
         public VCPlayer(NoSVCRoom vcRoom, AudioRoutingInstance instance)
         {
             Room = vcRoom;
+            this.mapping = new(this);
+            this.routingInstance = instance;
             this.imager = Room.imager.GetProperty(instance);
             this.droneImager = Room.droneImager.GetProperty(instance);
             this.normalVolume = Room.normalVolume.GetProperty(instance);
@@ -415,7 +426,7 @@ internal class NoSVCRoom
 
             this.normalVolume.Volume = voiceEvent.NormalVolume;
             this.imager.Pan = voiceEvent.NormalPan;
-            this.ghostVolume.Volume = voiceEvent.GhostVolume;
+            this.ghostVolume.Volume = voiceEvent.GhostVolume * 0.82f;
             this.radioVolume.Volume = voiceEvent.RadioVolume;
             this.droneVolume.Volume = voiceEvent.DroneVolume;
             this.droneImager.Pan = voiceEvent.DronePan;
@@ -446,11 +457,12 @@ internal class NoSVCRoom
             var localPlayer = GamePlayer.LocalPlayer;
             var localIsDead = localPlayer?.IsDead ?? false;
             var targetIsDead = mapping.MappedModPlayer?.IsDead ?? true;
+            var canHearAllVoice = NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
 
             if (GeneralConfigurations.CanTalkInWanderingPhaseOption)
             {
 
-                if (IsInRadio(mapping.MappedModPlayer, out var state))
+                if (IsInRadio(mapping.MappedModPlayer, out var state) && !targetIsDead)
                 {
                     CheckAndReflectProperties(false, 0f, 0f, 0f, state.CanHear ? 1f : 0f, 0f, 0f);
                     return;
@@ -515,7 +527,7 @@ internal class NoSVCRoom
                         ev.NormalPan = pan;
                         if (localIsDead)
                         {
-                            ev.NormalVolume = volume;
+                            ev.NormalVolume = canHearAllVoice ? 1f : volume;
                             ev.GhostVolume = 0f;
                         }
                         else
@@ -579,6 +591,7 @@ internal class NoSVCRoom
     private record VoiceState(bool IsRadio, bool CanHear);
     private Dictionary<int, VoiceState> voiceStates = [];
     public bool UsingMicrophone => interstellarRoom.Microphone != null;
+    public float LocalMicLevel => interstellarRoom.Microphone?.Level ?? 0f;
     /// <summary>
     /// 通常音声・幽霊音声のステレオイメージャ
     /// </summary>
@@ -669,10 +682,7 @@ internal class NoSVCRoom
                 },
                 OnDisconnect = (clientId) =>
                 {
-                    if (clients.TryGetValue(clientId, out var player))
-                    {
-                        clients.Remove(clientId);
-                    }
+                    clients.Remove(clientId);
                 },
             }.SetBufferLength(2048 *
 #if ANDROID 
@@ -772,10 +782,6 @@ internal class NoSVCRoom
         player = null;
         return false;
     }
-    public void SetClientVolume(int clientId, float volume)
-    {
-        if (clients.TryGetValue(clientId, out var player)) player.SetVolume(volume);
-    }
 
 
     internal void SetMasterVolume(float volume)
@@ -811,7 +817,7 @@ internal class NoSVCRoom
         if (ModSingleton<NoSVCRoom>.Instance != null)
         {
             ModSingleton<NoSVCRoom>.Instance.Close();
-            ModSingleton<NoSVCRoom>.Instance = null;
+            ModSingleton<NoSVCRoom>.Instance = null!;
         }
     }
 
@@ -889,7 +895,11 @@ internal class NoSVCRoom
         PushAudioData();
 #endif
 
-        if (LobbyBehaviour.Instance) TryUpdateLocalProfile();
+        if (LobbyBehaviour.Instance)
+        {
+            TryUpdateLocalProfile();
+            radios.Clear();
+        }
         
         if(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDown) interstellarRoom.SetMute(!interstellarRoom.Mute);
 
@@ -935,6 +945,11 @@ internal class NoSVCRoom
     internal void OnGameStart()
     {
         foreach (var c in clients.Values) c.UpdateMappedState();
+
+        voiceStates.Clear();
+        virtualMicrophones.Clear();
+        virtualSpeakers.Clear();
+        _speakerCache.Clear();
     }
 
     static internal void Update()
@@ -1131,7 +1146,16 @@ internal class NoSVCRoom
 
                     string players = title + string.Join("<br>", clients.Select(entry =>
                     {
-                        return $"{entry.Value.PlayerName}({entry.Value.PlayerId}): {(entry.Value.IsMapped ? entry.Value.Level.ToString("F6") + "(" + entry.Value.MappedPlayerControl.name + "," + entry.Value.MappedPlayerControl.PlayerId + ")" : "Unmapped")}";
+                        var mappedControl = entry.Value.MappedPlayerControl;
+                        string mappedName = "???";
+                        int mappedId = -1;
+                        if (mappedControl)
+                        {
+                            mappedName = mappedControl.name;
+                            mappedId = mappedControl.PlayerId;
+                        }
+
+                        return $"({entry.Value.VCClientId}) {entry.Value.PlayerName}({entry.Value.PlayerId}): {(entry.Value.IsMapped ? entry.Value.Level.ToString("F6") + "(" + mappedName + "," + mappedId + ")" : "Unmapped")}, Elapsed: {entry.Value.Elapsed}ms";
                     }));
                     var unmapped = PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => !p.AmOwner && !clients.Any(c => c.Value.MappedPlayerControl == p)).ToArray();
                     if (unmapped.Length > 0)

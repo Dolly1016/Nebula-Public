@@ -21,6 +21,46 @@ public static class AdjustedNumImpostorsModded
     }
 }
 
+[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoStartGameHost))]
+public static class GameStartHostPatch { 
+    static bool Prefix(AmongUsClient __instance, ref Il2CppSystem.Collections.IEnumerator __result)
+    {
+        var alternativeRoutine = GeneralConfigurations.CurrentGameMode.GetAlternativeRoutine(true);
+        if (alternativeRoutine == null) return true;
+
+        if (LobbyBehaviour.Instance) LobbyBehaviour.Instance.Despawn();
+        
+        __result = alternativeRoutine.WrapToIl2Cpp();
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(AmongUsClient._CoStartGameClient_d__30), nameof(AmongUsClient._CoStartGameClient_d__30.MoveNext))]
+public static class GameStartClientPatch
+{
+    static private AmongUsClient._CoStartGameClient_d__30? cache = null;
+    static private Il2CppSystem.Collections.IEnumerator? alternativeCoroutine = null;
+    static bool Prefix(AmongUsClient._CoStartGameClient_d__30 __instance, ref bool __result)
+    {
+        if(cache != __instance)
+        {
+            cache = __instance;
+            alternativeCoroutine = GeneralConfigurations.CurrentGameMode.GetAlternativeRoutine(false)?.WrapToIl2Cpp();
+
+            //ロビーの削除だけはやる
+            if(alternativeCoroutine != null && LobbyBehaviour.Instance) LobbyBehaviour.Instance.Despawn();
+        }
+
+        if(alternativeCoroutine != null)
+        {
+            __result = alternativeCoroutine.MoveNext();
+            __instance.__2__current = alternativeCoroutine.Current;
+            return false;
+        }
+        return true;
+    }
+}
+
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
 public static class InitializeRolePatch
 {

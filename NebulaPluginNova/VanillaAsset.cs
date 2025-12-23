@@ -76,6 +76,18 @@ public class VanillaAsset
     static public PlayerCustomizationMenu PlayerOptionsMenuPrefab { get; private set; } = null!;
 
     static public readonly ShipStatus[] MapAsset = new ShipStatus[6];
+
+    public record MapInfo(MapNames Name, Sprite MapIcon, Sprite MapImage, Sprite NameImage);
+    public static MapInfo[] MapImages = null!;
+    public static Sprite TitleBackgroundSprite = null!;
+
+    static public Material GetMapMaterial()
+    {
+        var mat = GetMinimapRenderer(0).material;
+        return mat;
+    }
+    static public Color MapBlue => new Color(0.05f, 0.2f, 1f, 1f);
+    static public SpriteRenderer GetMinimapRenderer(byte mapId) => MapAsset[mapId].MapPrefab.ColorControl.gameObject.GetComponent<SpriteRenderer>();
     static public Vector2 GetMapCenter(byte mapId) => MapAsset[mapId].MapPrefab.transform.GetChild(5).localPosition;
     static public float GetMapScale(byte mapId) => VanillaAsset.MapAsset[mapId].MapScale;
     static public Vector2 ConvertToMinimapPos(Vector2 pos,Vector2 center, float scale)=> (pos / scale) + center;
@@ -103,6 +115,11 @@ public class VanillaAsset
 
     static public string[] GetAudioKeys() => VanillaAudioClips.Keys.ToArray();
 
+    static public void LoadOnMainMenu(MainMenuManager mainMenu)
+    {
+        if (VanillaAsset.MapImages == null) VanillaAsset.MapImages = mainMenu.createGameScreen.mapPicker.AllMapIcons.ToArray().Select(m => new VanillaAsset.MapInfo(m.Name, m.MapIcon.MarkDontUnload(), m.MapImage.MarkDontUnload(), m.NameImage.MarkDontUnload())).ToArray();
+        if (VanillaAsset.TitleBackgroundSprite == null) VanillaAsset.TitleBackgroundSprite = mainMenu.transform.GetChild(5).GetChild(1).GetChild(2).GetComponent<SpriteRenderer>().sprite.MarkDontUnload();
+    }
     static public IEnumerator CoLoadAssetOnTitle()
     {
         PlayerOptionsMenuPrefab = UnityHelper.FindAsset<PlayerCustomizationMenu>("LobbyPlayerCustomizationMenu")!;

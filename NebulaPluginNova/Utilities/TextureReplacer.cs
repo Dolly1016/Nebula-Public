@@ -17,7 +17,7 @@ internal class TextureReplacer
         this.texture = texture;
     }
 
-    public Image GetImage(Rect rect, float pixelsPerUnit)
+    public Image GetImage(Rect rect, Vector2 pivot, float pixelsPerUnit)
     {
         foreach (var entry in images)
         {
@@ -31,7 +31,7 @@ internal class TextureReplacer
                 return entry.image;
             }
         }
-        var loader = new CacheSpriteLoader(() => texture.GetTexture().ToSprite(rect, pixelsPerUnit));
+        var loader = new CacheSpriteLoader(() => texture.GetTexture().ToSprite(rect, new(pivot.x / rect.width, pivot.y / rect.height), pixelsPerUnit));
         images.Add((new((int)rect.left, (int)rect.right, (int)rect.top, (int)rect.bottom), loader));
         return loader;
     }
@@ -41,5 +41,5 @@ internal class TextureReplacer
         renderer.sprite = Replace(renderer.sprite).GetSprite();
     }
 
-    public Image Replace(Sprite original) => GetImage(original.rect, original.pixelsPerUnit);
+    public Image Replace(Sprite original) => GetImage(original.rect, original.pivot, original.pixelsPerUnit);
 }

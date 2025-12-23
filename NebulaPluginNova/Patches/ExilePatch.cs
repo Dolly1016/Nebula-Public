@@ -183,7 +183,7 @@ class ExileControllerBeginPatch
         init.outfit = first?.DefaultOutfit.outfit;
         init.isImpostor = first?.IsImpostor ?? false;
 
-        StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -505f, () => ExileController.Instance);
+        StampHelpers.SetStampShowerToUnderHud(() => ExileController.Instance);
     }
 
     public static void Postfix(ExileController __instance, [HarmonyArgument(0)] ref ExileController.InitProperties init)

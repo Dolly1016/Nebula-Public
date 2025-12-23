@@ -537,10 +537,12 @@ public class NebulaManager : MonoBehaviour
             //スクリーンショット
             if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Screenshot).KeyDownForAction) StartCoroutine(CaptureAndSave().WrapToIl2Cpp());
 
-            if(DebugTools.DebugMode && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.RightShift))
-            {
-                var window = MetaScreen.GenerateWindow(new(8f, 4.7f), HudManager.InstanceExists ? HudManager.Instance.transform : null, new Vector3(0f, 0f, -400f), true, true, false, BackgroundSetting.Modern);
-                window.SetWidget(new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(7.8f, 4.5f), DebugTools.GetEditorWidget()), out _);
+            if (DebugTools.DebugMode) {
+                if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.RightShift))
+                {
+                    var window = MetaScreen.GenerateWindow(new(8f, 4.7f), HudManager.InstanceExists ? HudManager.Instance.transform : null, new Vector3(0f, 0f, -400f), true, true, false, BackgroundSetting.Modern);
+                    window.SetWidget(new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(7.8f, 4.5f), DebugTools.GetEditorWidget() /*DebugTools.GetMetaControllWidget(false, widget => window.SetWidget(widget, out _))*/), out _);
+                }
             }
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
@@ -573,7 +575,7 @@ public class NebulaManager : MonoBehaviour
                         }
                     }
                     */
-                    
+
 
                     /*
                     var generator = new EdgeGenerator(new(-1f, 0f), [new(2f, 2f), new(2f, 1f), new(2f, 0f), new(2f, -1f), new(2f, -2f)]);

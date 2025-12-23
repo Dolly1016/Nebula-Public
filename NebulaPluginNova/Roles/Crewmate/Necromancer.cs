@@ -30,6 +30,8 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
 
     static public readonly Necromancer MyRole = new();
     static private readonly GameStatsEntry StatsRevive = NebulaAPI.CreateStatsEntry("stats.necromancer.revive", GameStatsCategory.Roles, MyRole);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private Arrow? myArrow;

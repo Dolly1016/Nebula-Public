@@ -91,7 +91,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 
     bool DefinedRole.IsMadmate => true;
     static public readonly Madmate MyRole = new();
-    static public int[] GenerateArgument(DefinedRole? madden) => [madden?.Id ?? -1];
+    static public int[] GenerateArgument(DefinedRole? madden) => [madden?.Id ?? -1, ..(madden?.DefaultAssignableArguments ?? [])];
     static private readonly GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
     IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).IsSpawnable && !MaddenRoleOption) ? [this] : [];
@@ -149,7 +149,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
             }
         }
 
-        static private Image suicideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MadmateSuicideButton.png", 115f);
+        static internal Image SuicideButtonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.MadmateSuicideButton.png", 115f);
         void RuntimeAssignable.OnActivated()
         {
             SetMadmateTask();
@@ -158,7 +158,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
             if (AmOwner && CanSuicideOption)
             {
                 var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, MyMadden == Sheriff.MyRole ? Virial.Compat.VirtualKeyInput.SecondaryAbility : Virial.Compat.VirtualKeyInput.Kill, SuicideCoolDownOption.CoolDown,
-                    "madmate.suicide", suicideButtonSprite);
+                    "madmate.suicide", SuicideButtonImage);
                 suicideButton.OnClick = (button) =>
                 {
                     MyPlayer.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill);

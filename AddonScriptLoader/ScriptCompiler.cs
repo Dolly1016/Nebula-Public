@@ -9,6 +9,7 @@ namespace AddonScriptLoader;
 static public class ScriptCompiler
 {
     static private CSharpParseOptions ParseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp13);
+    //static private CSharpParseOptions ScriptParseOptions = ParseOptions.WithKind(SourceCodeKind.Script);
     static private CSharpCompilationOptions CompilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             .WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic")
             .WithNullableContextOptions(NullableContextOptions.Enable)

@@ -8,6 +8,8 @@ namespace Virial.Game;
 /// </summary>
 public interface Game : IModuleContainer, ILifespan, IArchivedGame
 {
+    IGameModeModule? GameMode { get; }
+
     /// <summary>
     /// プレイヤーを取得します。
     /// </summary>
@@ -27,6 +29,8 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
     /// 即ちこのプレイヤーの<see cref="Player.AmOwner"/>がtrueであることを意味します。
     /// </summary>
     Player LocalPlayer { get; }
+
+    EmergencyMeeting? CurrentMeeting { get; }
 
     /// <summary>
     /// ゲーム中の全プレイヤーを取得します。
@@ -57,4 +61,6 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
     /// <param name="gameEnd"></param>
     /// <param name="additionalWinners"></param>
     void RequestGameEnd(GameEnd gameEnd, BitMask<Virial.Game.Player> additionalWinners);
+    
+    internal void SetGameMode(IGameModeModule gameModeModule);
 }

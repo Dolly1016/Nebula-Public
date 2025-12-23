@@ -22,22 +22,75 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityRole<Amalgam.Ability>
+internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityRole<Amalgam.Ability>, ICustomAssignableStatus
 {
     private Amalgam() : base("amalgam", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MaxRolesOption, RandomAssignmentOption, CanBeGuessedAsLoadedRolesOption, RoleFilterOption])
     {
+        ICustomAssignableStatus.Register(this);
     }
 
     Ability DefinedSingleAbilityRole<Amalgam.Ability>.CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0), arguments.Length > 1 ? arguments.Skip(1) : null);
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(Virial.Game.Player player, int[] arguments) => new Instance(player, arguments);
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
+    bool ICustomAssignableStatus.CanSpawn(DefinedAssignable assignable)
+    {
+        bool amSpawnable = (this as ISpawnable).IsSpawnable;
+        if (assignable == this) return amSpawnable;
+        bool amSpawnableInAnyForm = (this as DefinedRole).IsSpawnableInSomeForm();
+        if (!amSpawnableInAnyForm) return false;
+        if (assignable is DefinedRole role) return RoleFilterOption.Contains(role);
+        return false;
+    }
 
     static private readonly IntegerConfiguration MaxRolesOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.maxRoles", (1, 16), 3);
     static private readonly BoolConfiguration CanBeGuessedAsLoadedRolesOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.canBeGuessedAsLoadedRoles", true);
     static private readonly BoolConfiguration RandomAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.randomAssignment", false);
-    static private readonly SimpleRoleFilterConfiguration RoleFilterOption = new("options.role.amalgam.abilityFilter") { RolePredicate = r => r.MultipleAssignment != MultipleAssignmentType.NotAllowed, ScrollerTag = "amalgamFilter", InvertOption = true, PreviewOnlySpawnableRoles = true };
+    static private readonly SimpleRoleFilterConfiguration RoleFilterOption = new("options.role.amalgam.abilityFilter") { RolePredicate = r => r.MultipleAssignment != MultipleAssignmentType.NotAllowed, ScrollerTag = "amalgamFilter", InvertOption = true, PreviewOnlySpawnableRoles = false };
     static public readonly Amalgam MyRole = new();
 
+    int[]? DefinedAssignable.DefaultAssignableArguments => RandomAssignmentOption ? GetRandomAssignment() : null;
+    static int[] GetRandomAssignment()
+    {
+        int leftNum = MaxRolesOption.GetValue();
+        if (leftNum > 0)
+        {
+            var cand = Roles.AllRoles.Where(CheckAssignable).ToList();
+            List<int> args = [0];
+
+            if (cand.Count <= leftNum && cand.Count(r => r.MultipleAssignment == MultipleAssignmentType.AsUniqueKillAbility) <= 1 && cand.Count(r => r.MultipleAssignment == MultipleAssignmentType.AsUniqueMapAbility) <= 1)
+            {
+                //候補を全て割り当て可能な場合はそのまま割り当てる
+                foreach (var c in cand)
+                {
+                    args.Add(c.Id);
+                    args.Add(0);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < leftNum; i++)
+                {
+                    if (cand.Count == 0) break;
+
+                    var selected = cand.Random();
+                    args.Add(selected.Id);
+                    args.Add(0); //サブ能力の引数長は0
+
+                    if (selected.MultipleAssignment == MultipleAssignmentType.Allowed)
+                    {
+                        cand.Remove(selected);
+                    }
+                    else
+                    {
+                        var targetType = selected.MultipleAssignment;
+                        cand.RemoveAll(r => r.MultipleAssignment == targetType);
+                    }
+                }
+            }
+            return args.ToArray();
+        }
+        return [];
+    }
 
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -88,7 +141,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
             }
         }
         IEnumerable<IPlayerAbility> RuntimeAssignable.MyAbilities => GetAbilities();
-        IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [MyRole, .. MyAbility.GetSubRoles()];
+        IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [MyRole, ..(MyAbility as IPlayerAbility).SubAssignableOnHelp];
 
         string RuntimeAssignable.DisplayName => (MyRole as DefinedRole).GetDisplayName(MyAbility);
         string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color((MyRole as DefinedRole).UnityColor);
@@ -99,73 +152,9 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
             if (CanBeGuessedAsLoadedRolesOption && MyAbility.GetSubRoles().Contains(abilityRole)) return true;
             return false;
         }
-
-        Virial.Media.GUIWidget? ProgressWidget => (MyAbility as IPlayerAbility).ProgressWidget;
     }
 
-    [NebulaPreprocess(PreprocessPhase.PostRoles)]
-    public class RandomAssignmentAllocator : AbstractModule<Virial.Game.Game>, IGameOperator
-    { 
-        static void Preprocess(NebulaPreprocessor preprocessor)
-        {
-            preprocessor.DIManager.RegisterModule(() => new RandomAssignmentAllocator().RegisterPermanently());
-        }
-
-        void OnFixAsasignmentTable(PreFixAssignmentEvent ev)
-        {
-            if (!RandomAssignmentOption) return;
-
-            foreach (var player in ev.RoleTable.GetPlayers(MyRole).ToArray())
-            {
-                ev.RoleTable.EditRole(player, _ => (MyRole, RandomAssignment()));
-            }
-        }
-
-        int[] RandomAssignment()
-        {
-            int leftNum = MaxRolesOption.GetValue();
-            if (leftNum > 0)
-            {
-                var cand = Roles.AllRoles.Where(CheckAssignable).ToList();
-                List<int> args = [0];
-
-                if (cand.Count <= leftNum && cand.Count(r => r.MultipleAssignment == MultipleAssignmentType.AsUniqueKillAbility) <= 1 && cand.Count(r => r.MultipleAssignment == MultipleAssignmentType.AsUniqueMapAbility) <= 1)
-                {
-                    //候補を全て割り当て可能な場合はそのまま割り当てる
-                    foreach (var c in cand)
-                    {
-                        args.Add(c.Id);
-                        args.Add(0);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < leftNum; i++)
-                    {
-                        if (cand.Count == 0) break;
-
-                        var selected = cand.Random();
-                        args.Add(selected.Id);
-                        args.Add(0); //サブ能力の引数長は0
-
-                        if (selected.MultipleAssignment == MultipleAssignmentType.Allowed)
-                        {
-                            cand.Remove(selected);
-                        }
-                        else
-                        {
-                            var targetType = selected.MultipleAssignment;
-                            cand.RemoveAll(r => r.MultipleAssignment == targetType);
-                        }
-                    }
-                }
-                return args.ToArray();
-            }
-            return [];
-        }
-    }
-
-    static bool CheckAssignable(DefinedRole role) => role.IsSpawnable && RoleFilterOption.Contains(role);
+    static bool CheckAssignable(DefinedRole role) => /*role.IsSpawnable &&*/ RoleFilterOption.Contains(role);
 
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
@@ -215,6 +204,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
         }
 
         IEnumerable<IPlayerAbility> IPlayerAbility.SubAbilities => GetSubAbilities();
+        IEnumerable<DefinedAssignable> IPlayerAbility.SubAssignableOnHelp => GetSubRoles();
 
         void AddAbility(DefinedRole role, int[] args) {
             abilities.Add((role, role.GetAbilityOnRole(MyPlayer, AbilityAssignmentStatus.CanLoadToImpostor, args).Register(this)));

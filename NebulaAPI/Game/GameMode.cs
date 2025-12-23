@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,8 +15,10 @@ public abstract class GameModeDefinition : IBit32
     abstract public uint AsBit { get; }
     abstract internal IGameModeModule InstantiateModule();
     abstract internal IRoleAllocator InstantiateRoleAllocator();
+    virtual internal IEnumerator? GetAlternativeRoutine(bool amHost) => null;
     abstract internal TextComponent DisplayName { get; }
     abstract internal int MinPlayers { get; }
+    virtual public bool WithRoleSettings => true;
     
 
     public static implicit operator uint(GameModeDefinition gamemode) => gamemode.AsBit;
@@ -24,6 +27,16 @@ public abstract class GameModeDefinition : IBit32
 public interface IGameModeModule : IModuleContainer, IModule
 {
     bool AllowSpecialGameEnd { get; }
+    bool ShowMap => true;
+    bool ShowStatistics => true;
+
+    bool ShowButtons => true;
+
+    bool CanUseStampOnly => false;
+    bool CanGetTitle => true;
+
+    string? GetAlternativeWinOrLoseText() => null;
+    string? GetAlternativePlayerStatusText() => null;
 }
 
 /// <summary>
@@ -40,6 +53,13 @@ public interface IGameModeFreePlay : IGameModeModule
 {
 }
 
+/// <summary>
+/// アモゲッサーモードのゲームで生成されるモジュールです。
+/// </summary>
+public interface IGameModeAeroGuesser : IGameModeModule
+{
+}
+
 
 public static class GameModes
 {
@@ -48,4 +68,5 @@ public static class GameModes
     public static GameModeDefinition GetGameMode(int id) => allGameModes[id];
     public static GameModeDefinition Standard { get; internal set; } = null!;
     public static GameModeDefinition FreePlay { get; internal set; } = null!;
+    public static GameModeDefinition AeroGuesser { get; internal set; } = null!;
 }

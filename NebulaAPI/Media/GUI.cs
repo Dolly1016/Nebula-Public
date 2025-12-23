@@ -241,7 +241,16 @@ public interface GUI
     /// <param name="image">画像</param>
     /// <param name="size">表示する大きさ</param>
     /// <returns>生成されたウィジェット定義</returns>
-    GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null);
+    GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null, bool isMasked = true);
+
+    /// <summary>
+    /// 役職アイコンを表示するウィジェットです。
+    /// </summary>
+    /// <param name="alignment">画像の表示位置</param>
+    /// <param name="image">画像</param>
+    /// <param name="size">表示する大きさ</param>
+    /// <returns>生成されたウィジェット定義</returns>
+    GUIWidget RoleIcon(GUIAlignment alignment, DefinedAssignable? assignable, float outline, FuzzySize size, float? white = null, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null, bool isMasked = true);
 
     /// <summary>
     /// スクロールビューです。

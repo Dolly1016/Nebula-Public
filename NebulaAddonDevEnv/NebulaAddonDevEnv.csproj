@@ -8,21 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NebulaAPI\NebulaAPI.csproj" />
-    <ProjectReference Include="..\NebulaPluginNova\NebulaPluginNova.csproj" />
 	<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
 	<Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
+	<Reference Include="$(AmongUsRelease)\Nebula.dll" />
+	<Reference Include="$(AmongUsRelease)\NebulaAPI.dll" />
   </ItemGroup>
-
+	
 	<ItemGroup>
-		<PackageReference Include="IgnoresAccessChecksToGenerator" Version="0.8.0">
+		<PackageReference Include="Krafs.Publicizer" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-	</ItemGroup>
 
-	<ItemGroup>
-		<IgnoresAccessChecksTo Include="Nebula" />
-		<IgnoresAccessChecksTo Include="NebulaAPI" />
+		<Publicize Include="Nebula" />
+		<Publicize Include="NebulaAPI" />
 	</ItemGroup>
 </Project>

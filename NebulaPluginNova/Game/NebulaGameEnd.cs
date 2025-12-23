@@ -32,6 +32,7 @@ public class NebulaGameEnd
     static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.UnityColor, 29);
     static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.UnityColor, 32);
     static public readonly GameEnd VanityWin = new(37, "vanity", Roles.Neutral.Vanity.MyRole.UnityColor, 18);
+    static public readonly GameEnd GameEnd = new(62, "gameEnd", Palette.CrewmateBlue, 128);
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
     static public readonly ExtraWin ExtraLoversWin = new(0, "lover", (Roles.Modifier.Lover.MyRole as DefinedAssignable).Color);
@@ -224,6 +225,8 @@ public class EndGameManagerSetUpPatch
         MetaWidgetOld widget = new();
 
         NebulaGameManager.Instance?.ChangeToSpectator();
+
+        string? alternativeText = NebulaGameManager.Instance?.GameMode?.GetAlternativePlayerStatusText();
         List<(string name, string state, string task, string role)> players = [];
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
         {
@@ -232,11 +235,7 @@ public class EndGameManagerSetUpPatch
             if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.Name ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.UnityColor);
             if (p.TryGetModifier<Obsessional.Instance>(out var obsessional)) nameText += (" <size=60%>(" + (obsessional.Obsession?.Name ?? "ERROR") + ")</size>").Color(Obsessional.MyRole.UnityColor);
 
-            string stateText = p.PlayerState.Text;
-            string stateExText = "";
-            if (p.PlayerStateExtraInfo != null && p.PlayerStateExtraInfo.State == p.PlayerState) stateExText = p.PlayerStateExtraInfo.ToStateText();
-            else if (p.IsDead && p.MyKiller != null) stateExText = "by " + (p.MyKiller?.Name ?? "ERROR");
-            if(stateExText.Length > 0) stateText += "<color=#FF6666><size=75%> " + stateExText + "</size></color>";
+            string stateText = p.Unbox().GetStateText();
             
             string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $"({p.Tasks.Unbox().ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
 
@@ -268,7 +267,15 @@ public class EndGameManagerSetUpPatch
         { Alignment = IMetaWidgetOld.AlignmentOption.Left,
         PreResizeBuilder = t =>
         {
-            
+            t.fontSizeMax = 1.4f;
+            t.fontSize = 1.4f;
+
+            if(alternativeText != null)
+            {
+                t.text = alternativeText;
+                return;
+            }
+
             (float nameMax, float stateMax, float taskMax, float roleMax) = (0f, 0f, 0f, 0f);
 
             float coeff = t.fontSize / t.font.faceInfo.pointSize * t.font.faceInfo.scale * 10f;
@@ -291,7 +298,6 @@ public class EndGameManagerSetUpPatch
             t.fontSizeMax = 1.4f;
             t.fontSize = 1.4f;
             t.text = string.Join("\n", players.Select(p => $"{p.name}{afterNameIndent}{p.task}</indent>{afterTaskIndent}{p.state}</indent>{afterStateIndent}{p.role}</indent>"));
-            //text += $"{nameText}<indent=20px>{taskText}</indent><indent=29px>{stateText}</indent><indent=47px>{roleText}</indent>\n";
         }
         });
 
@@ -384,10 +390,19 @@ public class EndGameManagerSetUpPatch
 
         __instance.BackgroundBar.material.SetColor("_Color", endCondition?.Color ?? new Color(1f, 1f, 1f));
 
-        __instance.WinText.text = (winners.Count == 0 && (endCondition?.SpecifyNobodyWins ?? true)) ? Language.Translate("end.status.noWinners") : DestroyableSingleton<TranslationController>.Instance.GetString(amWin ? StringNames.Victory : StringNames.Defeat);
-        __instance.WinText.color = amWin ? new Color(0f, 0.549f, 1f, 1f) : Color.red;
+        var customWinText = NebulaGameManager.Instance?.GameMode?.GetAlternativeWinOrLoseText();
+        if (customWinText == null)
+        {
+            __instance.WinText.text = (winners.Count == 0 && (endCondition?.SpecifyNobodyWins ?? true)) ? Language.Translate("end.status.noWinners") : DestroyableSingleton<TranslationController>.Instance.GetString(amWin ? StringNames.Victory : StringNames.Defeat);
+            __instance.WinText.color = amWin ? new Color(0f, 0.549f, 1f, 1f) : Color.red;
+        }
+        else
+        {
+            __instance.WinText.text = customWinText;
+            __instance.WinText.color = Color.white;
+        }
 
-        LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
+            LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
 
 #if PC
         GameStatisticsViewer? viewer;
@@ -398,7 +413,8 @@ public class EndGameManagerSetUpPatch
             viewer = UnityHelper.CreateObject<GameStatisticsViewer>("Statistics", __instance.transform, new Vector3(0f, 2.5f, -20f), LayerExpansion.GetUILayer());
             viewer.Initialize(NebulaGameManager.Instance!, __instance.PlayerPrefab, NebulaGameManager.Instance!.RuntimeAsset.MinimapPrefab, NebulaGameManager.Instance!.RuntimeAsset.MapScale,__instance.WinText, false);
         }
-        __instance.StartCoroutine(CoShowStatistics().WrapToIl2Cpp());
+
+        if(NebulaGameManager.Instance?.GameMode?.ShowStatistics ?? false) __instance.StartCoroutine(CoShowStatistics().WrapToIl2Cpp());
 #endif
 
         var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", __instance.transform, new Vector3(-2.9f, 2.5f, -50f), LayerExpansion.GetUILayer());
@@ -435,8 +451,8 @@ public class EndGameManagerSetUpPatch
 
         //Achievements
         NebulaAchievementManager.ClearHistory();
-        //標準ゲームモードで廃村でない、かつOP権限が誰にも付与されていないゲームの場合
-        if (GeneralConfigurations.CurrentGameMode == GameModes.Standard && endCondition != NebulaGameEnd.NoGame && !GeneralConfigurations.AssignOpToHostOption)
+        //称号を獲得できるゲームモードで廃村でない、かつOP権限が誰にも付与されていないゲームの場合
+        if ((NebulaGameManager.Instance?.GameMode?.CanGetTitle ?? false) && endCondition != NebulaGameEnd.NoGame && !GeneralConfigurations.AssignOpToHostOption)
         {
             NebulaManager.Instance.StartCoroutine(NebulaAchievementManager.CoShowAchievements(NebulaManager.Instance, NebulaAchievementManager.UniteAll()).WrapToIl2Cpp());
         }

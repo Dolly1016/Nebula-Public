@@ -13,9 +13,11 @@ public class PolusData : MapData
         //エレクトリカル
         new(7.5f, -9.7f), new(3.1f, -11.7f), new(5.4f, -11.5f), new(9.6f, -12.1f),
         //O2
-        new(4.7f, -19f), new(2.4f, -17f), new(3.1f, -21.7f), new(1.9f, -19.4f), new(2.4f, -23.6f), new(6.3f, -21.3f),
+        new(4.7f, -19f), new(2.4f, -17f), new(3.1f, -21.7f), new(1.9f, -19.4f), new(2.4f, -23.6f), new(6.3f, -21.3f),new(0.84f, -16.6f),
+        //ボイラー
+        new(3.1f, -24.8f),
         //Elec,O2,Comm周辺外
-        new(7.9f, -23.6f), new(9.4f, -20.1f), new(8.2f, -16.0f), new(8.0f, -14.3f), new(13.4f, -13f),
+        new(7.9f, -23.6f), new(9.4f, -20.1f), new(8.2f, -16.0f), new(8.0f, -14.3f), new(13.4f, -13f),new(8.2f, -25.6f),
         //左上リアクター前通路
         new(10.3f, -7.4f),
         //左上リアクター
@@ -45,7 +47,7 @@ public class PolusData : MapData
         //ラボ
         new(34.7f, -10.2f), new(36.4f, -8f), new(40.5f, -7.6f), new(34.5f, -6.2f), new(31.2f, -7.6f), new(28.4f, -9.6f), new(26.5f, -7f), new(26.5f, -8.3f),new(33.0f, -9.7f),
         //右リアクター
-        new(24.2f, -4.5f),
+        new(24.2f, -4.5f),new(23.7712f, -2.8594f),new(24.5666f, -3.3163f),
         //ストレージ・ラボ下・オフィス右
         new(24f, -14.6f), new(26f, -12.2f), new(29.8f, -15.7f)
     ];
@@ -122,8 +124,8 @@ public class PolusData : MapData
         new(40.6f, -10.4f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //上除染
     ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    protected override Vector2[] MapArea => MapPositions;
-    protected override Vector2[] NonMapArea => [];
+    public override IReadOnlyList<Vector2> MapArea => MapPositions;
+    public override IReadOnlyList<Vector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Laboratory, SystemTypes.Comms, SystemTypes.Electrical };

@@ -13,5 +13,5 @@ public interface OverlayHolder
     /// <param name="overlay">オーバーレイのGUIウィジェット。</param>
     /// <param name="icon">アイコン。</param>
     /// <param name="color">アイコンの色。</param>
-    void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, Color color);
+    void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, Color color, bool once = false);
 }

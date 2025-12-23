@@ -32,7 +32,7 @@ public class Bloody : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (AmOwner || canSeeAllInfo) name += " †".Color(MyRole.UnityColor);
+            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTag();
         }
 
         [OnlyMyPlayer]

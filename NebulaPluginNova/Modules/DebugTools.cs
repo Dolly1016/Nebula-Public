@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections.LowLevel.Unsafe;
 using Virial.Runtime;
+using Virial.Text;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 
 namespace Nebula.Modules;
@@ -28,6 +29,7 @@ public static class DebugTools
     private static readonly DebugValueEntry<bool> writeAllAchievementsData = new BooleanDataEntry("WriteAllAchievementsData", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> showCostumeMetadata = new BooleanDataEntry("ShowCostumeMetadata", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> useRoomPointEditor = new BooleanDataEntry("UseRoomPointEditor", saver, false, shouldWrite: false);
+    private static readonly DebugValueEntry<bool> useShadowEditor = new BooleanDataEntry("UseShadowEditor", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> useAudioPlayer = new BooleanDataEntry("UseAudioPlayer", saver, false, shouldWrite: false);
 
     public static bool ShowConfigurationId => DebugMode && showConfigurationId.Value;
@@ -37,11 +39,24 @@ public static class DebugTools
     public static bool ShowCostumeMetadata => DebugMode && showCostumeMetadata.Value;
     public static bool AllowVanillaLog => allowVanillaLog.Value;
     public static bool UseRoomPointEditor => DebugMode && useRoomPointEditor.Value;
+    public static bool UseShadowEditor => DebugMode && useShadowEditor.Value;
     public static bool UseAudioPlayer => DebugMode && useAudioPlayer.Value;
 
     internal static void RegisterDebugVariable(IDebugVariable variable) => debugVariables.Add(variable);
     internal static IEnumerable<IDebugVariable> DebugVariables => debugVariables;
 
+    public static Virial.Media.GUIWidget GetMetaControllWidget(bool script, Action<Virial.Media.GUIWidget> updater)
+    {
+        return GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
+            GUI.API.RawButton(Virial.Media.GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, "Change to " + (script ? "configs" : "scripts"), _ =>
+            {
+                updater.Invoke(GetMetaControllWidget(!script, updater));
+            }), script ? GetScriptWidget() : GetEditorWidget());
+    }
+    public static Virial.Media.GUIWidget GetScriptWidget()
+    {
+        return GUI.API.EmptyWidget;   
+    }
     public static Virial.Media.GUIWidget GetEditorWidget()
     {
         return GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center, debugVariables.Select(v => GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,

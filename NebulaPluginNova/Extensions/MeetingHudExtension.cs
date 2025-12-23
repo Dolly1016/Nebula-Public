@@ -453,5 +453,36 @@ public static class MeetingHudExtension
             DataManager.Player.Stats.IncrementStat(StatID.BodiesReported);
         }
     }
+
+    internal static RemoteProcess<int> RequestEditDiscussionTime = new("RequestEditDiscussionTime", (sec, _) =>
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        if(MeetingHud.Instance && MeetingHudExtension.DiscussionTimer > 0f) EditDiscussionTime!.Invoke(sec);
+    });
+
+    private static RemoteProcess<int> EditDiscussionTime = new("EditDiscussionTime", (sec, _) =>
+    {
+        static IEnumerator CoReduceDiscussionTime(int time)
+        {
+            for (int i = 0; i < time * 2; i++)
+            {
+                MeetingHudExtension.VotingTimer -= 0.5f;
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+
+        static IEnumerator CoExpandDiscussionTime(int time)
+        {
+            for (int i = 0; i < time; i++)
+            {
+                MeetingHudExtension.VotingTimer += 1f;
+                MeetingHud.Instance!.lastSecond = 11;
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+
+        (sec > 0 ? CoExpandDiscussionTime(sec) : CoReduceDiscussionTime(-sec)).StartOnScene();
+    });
+
 }
 

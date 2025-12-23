@@ -14,7 +14,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
     static Image NotificationSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingNotificationDot.png", 135f);
     static public Image[] IconsSprite = Helpers.Sequential(IconSprite.Length).Select(num => new WrapSpriteLoader(()=>IconSprite.GetSprite(num))).ToArray();
 
-    List<(GUIWidgetSupplier overlay, Image? icon, UnityEngine.Color color,Variable<bool> isNew)> icons = new();
+    List<(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color,Variable<bool> isNew)> icons = new();
     Transform? shower;
 
     //常駐エンティティ
@@ -25,30 +25,51 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
         this.RegisterPermanently();
     }
 
-    public void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color)
+    public void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, Virial.Color color, bool once = false)
     {
-        icons.Add((overlay, icon, color, new Variable<bool>() { Value = true }));
-        Generate(icons.Count - 1);
+        if (once)
+        {
+            Generate(overlay, icon, color.ToUnityColor(), null);
+        }
+        else
+        {
+            icons.Add((overlay, icon, color.ToUnityColor(), new Variable<bool>() { Value = true }));
+            Generate(icons.Count - 1);
+        }
     }
-    public void RegisterOverlay(GUIWidgetSupplier overlay, Image icon, Virial.Color color) => RegisterOverlay(overlay, icon, color.ToUnityColor());
 
     void Generate(int index)
     {
         if (!shower) return;
-
         if (icons.Count <= index) return;
+
         var icon = icons[index];
 
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", shower, new(-3.6f + index * 0.48f, 0f, 0f));
+        Generate(icon.overlay, icon.icon, icon.color, icon.isNew);
+    }
+    
+    void Generate(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color, Variable<bool>? isNew)
+    { 
+        if (!shower) return;
+
+        int showIndex = shownWidgets++;
+
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", shower, new(-3.6f + showIndex * 0.48f, 0f, 0f));
         renderer.sprite = IconSprite.GetSprite(0);
-        renderer.color = Color.Lerp(icon.color,Color.white,0.3f);
+        renderer.color = Color.Lerp(color,Color.white,0.3f);
 
         var iconInner = UnityHelper.CreateObject<SpriteRenderer>("Inner", renderer.transform, new(0f, 0f, -1f));
-        iconInner.sprite = icon.icon.GetSprite();
+        iconInner.sprite = icon.GetSprite();
+
+        bool IsNew() => isNew?.Value ?? true;
+        void UpdateIsNew()
+        {
+            if (isNew != null) isNew.Value = true;
+        }
 
         var notification = UnityHelper.CreateObject<SpriteRenderer>("Notification", renderer.transform, new(0.19f, 0.19f, -1.5f));
         notification.sprite = NotificationSprite.GetSprite();
-        notification.gameObject.SetActive(icon.isNew.Value);
+        notification.gameObject.SetActive(IsNew());
 
         IEnumerator CoAppear()
         {
@@ -68,20 +89,27 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
             renderer.transform.localScale = Vector3.one;
         }
 
-        if (icon.isNew.Value) NebulaManager.Instance.StartCoroutine(CoAppear().WrapToIl2Cpp());
+        if (IsNew()) NebulaManager.Instance.StartCoroutine(CoAppear().WrapToIl2Cpp());
 
         var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
         collider.isTrigger = true;
         collider.size = new(0.4f, 0.4f);
 
-        var button = renderer.gameObject.SetUpButton(false, [renderer], icon.color);
-        button.OnMouseOver.AddListener(() => { VanillaAsset.PlayHoverSE(); NebulaManager.Instance.SetHelpWidget(button, icon.overlay.Invoke()); notification.gameObject.SetActive(false); icon.isNew.Set(false); });
+        var button = renderer.gameObject.SetUpButton(false, [renderer], color);
+        button.OnMouseOver.AddListener(() => { VanillaAsset.PlayHoverSE(); NebulaManager.Instance.SetHelpWidget(button, overlay.Invoke()); notification.gameObject.SetActive(false); UpdateIsNew(); });
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
     }
 
+    int shownWidgets = 0;
+
+    [EventPriority(+1)]
     void OnMeetingStart(MeetingStartEvent ev)
     {
-        shower = UnityHelper.CreateObject("OverlayHolder", MeetingHud.Instance.transform, new(0f, 2.7f, -20f)).transform;
+        shownWidgets = 0;
+        shower = UnityHelper.CreateObject("OverlayHolder", MeetingHud.Instance.transform, new(0f, 2.5f, -20f)).transform;
+
+
+
         for (int i = 0; i < icons.Count; i++) Generate(i);
     }
 }

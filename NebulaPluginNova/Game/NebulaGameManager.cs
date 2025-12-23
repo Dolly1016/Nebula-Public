@@ -4,6 +4,7 @@ using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.PreStartProcess;
+using Nebula.Roles;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Crewmate;
 using Nebula.VoiceChat;
@@ -100,13 +101,13 @@ public static class RoleHistoryHelper {
 
         if (ghostRole != null)
         {
-            result = isShort ? ghostRole.Role.DisplayColoredShort : ghostRole.Role.DisplayColoredName;
+            result = isShort ? ghostRole.Role.GetRoleIconTag() + ghostRole.Role.DisplayColoredShort : ghostRole.Role.DisplayColoredName;
             color = ghostRole.Role.UnityColor;
             ghostRole.DecorateNameConstantly(ref result, true);
         }
         else
         {
-            result = isShort ? role.DisplayColoredShort : role.DisplayColoredName;
+            result = isShort ? role.Role.GetRoleIconTag() + role.DisplayColoredShort : role.DisplayColoredName;
             color = role.Role.UnityColor;
             role.DecorateNameConstantly(ref result, true);
         }
@@ -118,19 +119,43 @@ public static class RoleHistoryHelper {
         }
         
         foreach (var m in modifier) m.DecorateNameConstantly(ref result, true);
-        return result.Replace(" ", "").Color(color);
+        return result.Color(color);
     }
 }
 
-
-public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator
+public record TitleTrait(Action<ITitleShower> Updater);
+public interface ITitleShower
+{
+    Transform Transform { get; }
+    TMPro.TextMeshPro MainText { get; }
+    TMPro.TextMeshPro ShadowText { get; }
+    void SetTextColor(Color color);
+    void SetTextAlpha(float alpha);
+}
+public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator, ITitleShower
 {
     TextMeshPro mainText, shadowText;
     Transform textHolder;
 
+    Transform ITitleShower.Transform =>  textHolder;
+    TMPro.TextMeshPro ITitleShower.MainText => mainText;
+    TMPro.TextMeshPro ITitleShower.ShadowText => shadowText;
+    void ITitleShower.SetTextColor(Color color)
+    {
+        mainText.color = color;
+        shadowText.color = color * Color.black.AlphaMultiplied(0.6f);
+    }
+
+    void ITitleShower.SetTextAlpha(float alpha)
+    {
+        mainText.color = mainText.color.SetAlpha(alpha);
+        shadowText.color = shadowText.color.SetAlpha(alpha * 0.6f);
+    }
+
     public TitleShower()
     {
-        var holder = UnityHelper.CreateObject("TitleShower", HudManager.Instance.transform, new(0f, 0f, -100f), LayerExpansion.GetUILayer());
+        var parent = UnityHelper.CreateObject("TitleShowerHolder", HudManager.Instance.transform, new(0f, 0f, -100f));
+        var holder = UnityHelper.CreateObject("TitleShower", parent.transform, Vector3.zero);
         mainText = GameObject.Instantiate(HudManager.Instance.IntroPrefab.ImpostorTitle, holder.transform);
         mainText!.GetComponent<TextTranslatorTMP>().enabled = false;
         mainText.transform.localPosition = new(0f, 0f, 0f);
@@ -162,57 +187,66 @@ public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator
 
     public TitleShower SetText(string text, Color color, float duration, bool shake = false)
     {
-        mainText.text = text;
-        shadowText.text = text;
-        textColor = color;
 
-        HudUpdate(null!);
+        float alpha = 1f;
+        float timer = duration;
+        float shakeTimer = 0f;
+        SetText(text, color, new(_ =>
+        {
+            if (shake)
+            {
+                shakeTimer -= Time.deltaTime;
+                if (shakeTimer < 0f)
+                {
+                    shakeTimer = 0.08f;
+                    textHolder.localPosition = new(
+                        ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.06f,
+                        ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.06f);
+                }
+            }
+            else
+            {
+                textHolder.localPosition = Vector3.zero;
+            }
 
-        alpha = 1f;
-        timer = duration;
+            if (timer > 0f)
+            {
+                timer -= Time.deltaTime;
+                alpha = 1f;
+            }
+            else
+            {
+                alpha -= Time.deltaTime * 0.5f;
+            }
+            alpha = Mathn.Clamp01(alpha);
 
-        this.shake = shake;
+            mainText.color = textColor.AlphaMultiplied(alpha);
+            shadowText.color = Color.black.AlphaMultiplied(0.6f * alpha);
+        }));
 
         return this;
     }
 
-    float alpha = 1f;
-    float timer = 0f;
+    public TitleShower SetText(string text, Color color, TitleTrait trait)
+    {
+        textHolder.transform.localScale = Vector3.one;
+        textHolder.transform.localPosition = Vector3.zero;
+        textHolder.transform.localEulerAngles = Vector3.zero;
+
+        mainText.text = text;
+        shadowText.text = text;
+        textColor = color;
+        HudUpdate(null!);
+        this.trait = trait;
+        return this;
+    }
+
     Color textColor = Color.white;
-    bool shake = false;
-    float shakeTimer = 0f;
+    TitleTrait? trait = null;
 
     void HudUpdate(GameHudUpdateEvent? ev)
     {
-        if (shake)
-        {
-            shakeTimer -= Time.deltaTime;
-            if(shakeTimer < 0f)
-            {
-                shakeTimer = 0.08f;
-                textHolder.localPosition = new(
-                    ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.06f,
-                    ((float)System.Random.Shared.NextDouble() - 0.5f) * 0.06f, -100f);
-            }
-        }
-        else
-        {
-            textHolder.localPosition = new(0f, 0f, -100f);
-        }
-
-        if(timer > 0f)
-        {
-            timer -= Time.deltaTime;
-            alpha = 1f;
-        }
-        else
-        {
-            alpha -= Time.deltaTime * 0.5f;
-        }
-        alpha = Mathn.Clamp01(alpha);
-
-        mainText.color = textColor.AlphaMultiplied(alpha);
-        shadowText.color = Color.black.AlphaMultiplied(0.6f * alpha);
+        trait?.Updater.Invoke(this);
     }
 }
 
@@ -229,6 +263,13 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public List<AchievementTokenBase> AllAchievementTokens = new();
     public T? GetAchievementToken<T>(string achievement) where T : AchievementTokenBase {
         return AllAchievementTokens.FirstOrDefault(a => a.Achievement.Id == achievement) as T;
+    }
+
+    public IGameModeModule? GameMode { get; private set; } = null;
+    void Virial.Game.Game.SetGameMode(IGameModeModule gamemode)
+    {
+        (this as IModuleContainer).AddModule(gamemode);
+        GameMode = gamemode;
     }
 
     //ゲーム開始時からの経過時間
@@ -394,6 +435,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public void RpcPreSpawn(byte playerId,Vector2 spawnPos)
     {
         CombinedRemoteProcess.CombinedRPC.Invoke(
+            false,
             GameStatistics.RpcPoolPosition.GetInvoker(new(GameStatisticsGatherTag.Spawn, playerId, spawnPos)),
             Modules.Synchronizer.RpcSync.GetInvoker(new(SynchronizeTag.PreSpawnMinigame, PlayerControl.LocalPlayer.PlayerId))
             );
@@ -600,8 +642,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         //統計の更新
         new StaticAchievementToken("stats.gamePlay");
-        new StaticAchievementToken("stats.role." + LocalPlayer.Role.Role.Id + ".assigned");
-        LocalPlayer.Modifiers.Do(m => new StaticAchievementToken("stats.modifier." + m.Modifier.Id + ".assigned"));
+        new StaticAchievementToken("stats.role." + LocalPlayer.Role.Role.InternalName + ".assigned");
+        LocalPlayer.Modifiers.Do(m => new StaticAchievementToken("stats.modifier." + m.Modifier.InternalName + ".assigned"));
 
         if (GeneralConfigurations.LowLatencyPlayerSyncOption && (AmongUsUtil.IsCustomServer() || AmongUsUtil.IsLocalServer()))
         {
@@ -614,7 +656,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.GameEnd, null, 0) { RelatedTag = EventDetail.GameEnd });
 
         //幽霊役職の割り当てはここで確認する
-       if(LocalPlayer.GhostRole != null)new StaticAchievementToken("stats.ghostRole." + LocalPlayer.GhostRole.Role.Id + ".assigned");
+       if(LocalPlayer.GhostRole != null)new StaticAchievementToken("stats.ghostRole." + LocalPlayer.GhostRole.Role.InternalName + ".assigned");
 
         //実績
 
@@ -636,15 +678,16 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             static bool MetChallengeCond((int impostors, bool allImpostorsAlive) val) => val.impostors >= 2 && val.allImpostorsAlive;
             static (int impostors, bool allImpostorsAlive) AggregateFunc((int impostors, bool allImpostorsAlive) val, GamePlayer player) => (val.impostors + (player.IsImpostor ? 1 : 0), val.allImpostorsAlive && (!player.IsImpostor || !player.IsDead));
             if (EndState!.EndReason == GameEndReason.Situation && EndState!.EndCondition == NebulaGameEnd.ImpostorWin &&
-                /* 自陣営2人以上で仲間が全員生存 */ MetChallengeCond(allModPlayers.Values.Aggregate((0, true), AggregateFunc)) &&
+                /* 自陣営2人以上で仲間が全員生存 */
+    MetChallengeCond(allModPlayers.Values.Aggregate((0, true), AggregateFunc)) &&
                 /*キル数2以上*/ allModPlayers.Values.Count(p => p.MyKiller?.AmOwner ?? false) >= 2 &&
                 /*最後の死亡者をキルしている*/ (allModPlayers.Values.MaxBy(p => p.Unbox().DeathTimeStamp ?? 0f)?.MyKiller?.AmOwner ?? false))
                 new StaticAchievementToken("challenge.impostor");
 
             //各役職・終了条件の勝利回数に加算
-            new StaticAchievementToken("stats.role." + LocalPlayer!.Role.Role.Id + ".won");
-            LocalPlayer.Modifiers.Do(m => new StaticAchievementToken("stats.modifier." + m.Modifier.Id + ".won"));
-            if (LocalPlayer.GhostRole != null) new StaticAchievementToken("stats.ghostRole." + LocalPlayer.GhostRole.Role.Id + ".won");
+            new StaticAchievementToken("stats.role." + LocalPlayer!.Role.Role.InternalName + ".won");
+            LocalPlayer.Modifiers.Do(m => new StaticAchievementToken("stats.modifier." + m.Modifier.InternalName + ".won"));
+            if (LocalPlayer.GhostRole != null) new StaticAchievementToken("stats.ghostRole." + LocalPlayer.GhostRole.Role.InternalName + ".won");
         }
 
         new StaticAchievementToken($"stats.end.{(wasWon ? "win" : "lose")}.{(EndState.EndCondition.ImmutableId ?? "-")}");
@@ -663,7 +706,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         return allPlayerlikes.TryGetValue(playerlikeId, out var v) ? v : null;
     }
 
-    public void CheckGameState()
+    public void CheckGameState(bool asNormalGame = true)
     {
         switch (GameState)
         {
@@ -673,14 +716,20 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 #if PC
                     LobbySlideManager.Abandon();
 #endif
-                    ModSingleton<NoSVCRoom>.Instance?.OnGameStart();
-                    DestroyableSingleton<HudManager>.Instance.StartCoroutine(DestroyableSingleton<HudManager>.Instance.CoShowIntro());
-                    DestroyableSingleton<HudManager>.Instance.HideGameLoader();
+                    if (asNormalGame)
+                    {
+                        ModSingleton<NoSVCRoom>.Instance?.OnGameStart();
+                        DestroyableSingleton<HudManager>.Instance.StartCoroutine(DestroyableSingleton<HudManager>.Instance.CoShowIntro());
+                        DestroyableSingleton<HudManager>.Instance.HideGameLoader();
+                    }
                     GameState = NebulaGameStates.Initialized;
                 }
                 break;
         }
     }
+
+    internal void SetGameModeModule() => (this as Virial.Game.Game).SetGameMode(GeneralConfigurations.CurrentGameMode.InstantiateModule());
+    
 
     IPreStartProcess? preStartProcess = null;
 
@@ -756,7 +805,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
 
     private static readonly RemoteProcess<(int id, int winnersMask)> RpcInvokeSpecialTrigger = new("SpecialTrigger", (message, _) => {
-        if (NebulaAPI.CurrentGame?.GetModule<IGameModeModule>()?.AllowSpecialGameEnd ?? false)
+        if (NebulaAPI.CurrentGame?.GameMode?.AllowSpecialGameEnd ?? false)
         {
             GameEnd.TryGet((byte)message.id, out var end);
             Instance!.CriteriaManager.Trigger(end!, GameEndReason.Special, BitMasks.AsPlayer((uint)message.winnersMask));
@@ -786,11 +835,11 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         }
         );
 
-    public readonly static RemoteProcess RpcStartGame = new RemoteProcess(
+    public readonly static RemoteProcess<bool> RpcStartGame = new(
         "StartGame",
-        (_) =>
+        (asNormal, _) =>
         {
-            NebulaGameManager.Instance?.CheckGameState();
+            NebulaGameManager.Instance?.CheckGameState(asNormal);
             NebulaGameManager.Instance?.AllAssignableAction(r=> {
                 r.ActivateAssignable();
             });
@@ -819,6 +868,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     KillButtonLikeHandler Virial.Game.Game.KillButtonLikeHandler => killButtonLikeHandler;
 
     bool Virial.ILifespan.IsDeadObject => NebulaGameManager.Instance != this;
+    EmergencyMeeting? Virial.Game.Game.CurrentMeeting => ModSingleton<EmergencyMeeting>.Instance;
 
     public readonly static RemoteProcess<GamePlayer> RpcTryAssignGhostRole = new(
         "TryAssignGhostRole",

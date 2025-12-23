@@ -153,7 +153,7 @@ public static class HelpScreen
 
         HelpTab validTabs = HelpTab.Roles | HelpTab.Overview | HelpTab.Options | HelpTab.Achievements | HelpTab.Stamps;
 
-        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) validTabs |= HelpTab.MyInfo;
+        if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized && !OnHelpCurrentAssignables.IsEmpty()) validTabs |= HelpTab.MyInfo;
 
 #if PC
         if (AmongUsClient.Instance.AmHost && (NebulaGameManager.Instance?.LobbySlideManager.IsValid ?? false) && LobbySlideManager.AllTemplates.Count > 0) validTabs |= HelpTab.Slides;
@@ -230,7 +230,7 @@ public static class HelpScreen
         screen.SetWidget(scrollView, illustration, out _);
     }
 
-    private static readonly TextAttributeOld RoleTitleAttr = new(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
+    private static readonly TextAttributeOld RoleTitleAttr = new(TextAttributeOld.BoldAttr) { Size = new Vector2(1.2f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
     private static readonly TextAttributeOld RoleTitleAttrUnmasked = new(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f) };
     
     private static Virial.Media.GUIWidget GetAssignableOverlay(DefinedAssignable assignable)
@@ -291,7 +291,7 @@ public static class HelpScreen
         {
             AddContent(content.label, () =>
             {
-                inner.Append(content.roles, (role) => new MetaWidgetOld.Button(() =>
+                inner.Append(content.roles, (role) => new CombinedWidgetOld(new MetaWidgetOld.HorizonalMargin(0.12f), new MetaWidgetOld.Button(() =>
                 {
                     OpenAssignableHelp(role);
                 }, RoleTitleAttr)
@@ -305,9 +305,22 @@ public static class HelpScreen
                             NebulaManager.Instance.SetHelpWidget(button, GetAssignableOverlay(role));
                         });
                         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                        text.transform.localPosition += new Vector3(0.07f, 0f, 0f);
+                        button.transform.localPosition -= new Vector3(0.15f, 0f, 0f);
+
+                        var roleIcon = role.GetRoleIcon()?.GetSprite();
+                        if (roleIcon)
+                        {
+                            var icon = UnityHelper.CreateObject<SpriteRenderer>("Icon", button.transform, new(-0.73f, 0f, -0.01f));
+                            icon.sprite = roleIcon;
+                            icon.material = RoleIcon.GetRoleIconMaterial(role, 0.8f);
+                            icon.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                            icon.transform.localScale = new(0.275f, 0.275f, 1f);
+                        }
                     },
-                    Alignment = IMetaWidgetOld.AlignmentOption.Center
-                }, 4, -1, 0, 0.6f);
+                    Alignment = IMetaWidgetOld.AlignmentOption.Center, 
+                    TextHorizonotalExtraMargin = 0.15f,
+                }), 4, -1, 0, 0.6f);
             });
         }
 
@@ -422,13 +435,14 @@ public static class HelpScreen
         optionsInner.Value.SetWidget(GetOptionsWidget());
     }
 
+    private static IEnumerable<DefinedAssignable> OnHelpCurrentAssignables => GamePlayer.LocalPlayer?.AllAssigned().Where(a => a.CanBeAwareAssignment).Select(a => a.AssignableOnHelp).Smooth() ?? [];
     private static IMetaWidgetOld ShowMyRolesSrceen(MetaScreen outsideScreen, out Image? backImage)
     {
         MetaWidgetOld widget = new();
 
         Virial.Compat.Artifact<GUIScreen> inner = null!;
 
-        widget.Append(GamePlayer.LocalPlayer!.AllAssigned().Where(a => a.CanBeAwareAssignment).Select(a => a.AssignableOnHelp).Smooth(),
+        widget.Append(OnHelpCurrentAssignables,
             (role) => new MetaWidgetOld.Button(() =>
             {
                 var doc = DocumentManager.GetDocument("role." + role.InternalName);
@@ -613,7 +627,7 @@ public static class HelpScreen
         var maskedAttr = GUI.API.GetAttribute(AttributeAsset.DocumentStandard);
         var maskedTitleAttr = GUI.API.GetAttribute(AttributeAsset.DocumentTitle);
         var maskedSubtitleAttr = GUI.API.GetAttribute(AttributeAsset.DocumentSubtitle1);
-        Virial.Media.GUIWidget GetAssignableText(DefinedAssignable assignable, string? displayName = null) => new NoSGUIText(GUIAlignment.Center, maskedAttr, new RawTextComponent(displayName ?? assignable.DisplayColoredName))
+        Virial.Media.GUIWidget GetAssignableText(DefinedAssignable assignable, string? displayName = null) => new NoSGUIText(GUIAlignment.Center, maskedAttr, new RawTextComponent(assignable.GetRoleIconTag(true) + (displayName ?? assignable.DisplayColoredName)))
         {
             OverlayWidget = () => GetAssignableOverlay(assignable),
             OnClickText = (() => OpenAssignableHelp(assignable), false)

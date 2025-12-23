@@ -96,12 +96,12 @@ public class NebulaPreSpawnLocation
             new("MiningPit", new Vector2(11.9868f, 9.4421f), "task_mine_rockrelease2"),
             new("Lookout", new Vector2(7.1789f, 1.5662f), "utility_security_close"),
             new("Reactor", new Vector2(21.9125f, -7.0967f), "panel_reactorhand"),
-            new("Jungle", new Vector2[]{ 
+            new("Jungle", new Vector2[]{
+                new Vector2(-0.3278f, -10.797f),//グリーンハウス・ラボ間
                 new Vector2(18.44f, -12.3383f),//リアクター左下
-                new Vector2(9.4571f, -15.5648f),//グリーンハウス下
+                new Vector2(10.6214f, -14.7586f),//グリーンハウス下
                 new Vector2(3.8322f, -6.0519f),//グリーンハウス左上
                 new Vector2(-4.2053f, -14.8184f),//ラボ下
-                new Vector2(2.3421f, -12.0085f),//グリーンハウス・ラボ間
                 new Vector2(15.2272f, -6.1833f)//リアクター左
                 }, "sporemushroom_respawn")
         ],
@@ -127,6 +127,7 @@ public class NebulaPreSpawnLocation
     }
     public Vector2[]? Positions { get; set; }
     public Vector2? Position => Positions != null ? Positions[System.Random.Shared.Next(Positions.Length)] : null;
+    public Vector2? FixedPosition => Positions != null ? Positions[0] : null;
     public int? VanillaIndex { get; private init; }
     public string AssetImagePath(byte mapId) => "assets/SpawnCandidates/" + MapName[mapId] + "/" + LocationName + ".png";
     public IDividedSpriteLoader GetSprite(byte mapId) => new DividedSpriteLoader(new AssetTextureLoader(AssetImagePath(mapId)), 115f, ImageSize, ImageSize, true) { Pivot = new(0.5f, 0f) };

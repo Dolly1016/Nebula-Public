@@ -39,9 +39,9 @@ internal class RoleTable : IRoleTable
         foreach (var role in roles) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((role.playerId, role.role.Id, role.arguments, RoleType.Role)));
         foreach (var modifier in modifiers) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((modifier.playerId, modifier.modifier.Id, modifier.arguments, RoleType.Modifier)));
 
-        allInvokers.Add(NebulaGameManager.RpcStartGame.GetInvoker());
+        allInvokers.Add(NebulaGameManager.RpcStartGame.GetInvoker(true));
 
-        CombinedRemoteProcess.CombinedRPC.Invoke(allInvokers.ToArray());
+        CombinedRemoteProcess.CombinedRPC.Invoke(false, allInvokers.ToArray());
     }
 
     public IEnumerable<(byte playerId, DefinedRole role)> GetPlayers(RoleCategory category)
@@ -103,7 +103,7 @@ public class StandardRoleAllocator : IRoleAllocator
             else
             {
                 var player = main[0];
-                table.SetRole(main[0], selected.role);
+                table.SetRole(main[0], selected.role, selected.role.DefaultAssignableArguments);
                 main.RemoveAt(0);
 
                 selected.Param?.TeamAssignment?.Do(assignment =>

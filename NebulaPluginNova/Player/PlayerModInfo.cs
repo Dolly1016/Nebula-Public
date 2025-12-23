@@ -8,6 +8,7 @@ using Nebula.Roles.Crewmate;
 using Nebula.Roles.Impostor;
 using Sentry.Unity.NativeUtils;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using UnityEngine.Rendering;
 using Virial;
 using Virial.Assignable;
@@ -20,6 +21,7 @@ using Virial.Game;
 using Virial.Media;
 using Virial.Text;
 using static Nebula.Roles.Crewmate.Investigator;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Player;
@@ -318,12 +320,16 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         var outfitId = OutfitDefinition.OutfitId.PlayersDefault(myPlayer.PlayerId);
         var outfit = new OutfitDefinition(outfitId, myPlayer.Data.DefaultOutfit, OutfitTag.GetAllTags().Where(tag => tag.Checker.Invoke(myPlayer.Data.DefaultOutfit)).ToArray());
         NebulaGameManager.Instance!.OutfitMap[outfitId] = outfit;
-        DefaultOutfit = new(outfit, "", -100, true);    
+        DefaultOutfit = new(outfit, "", -100, true);
+
 
         roleText = GameObject.Instantiate(myPlayer.cosmetics.nameText, myPlayer.cosmetics.nameText.transform);
         roleText.transform.localPosition = new Vector3(0, 0.185f, 0f);
         roleText.fontSize = 1.7f;
         roleText.text = "Unassigned";
+        roleText.UseRoleIcon();
+
+        myPlayer.cosmetics.nameText.UseRoleIcon();
 
         PlayerScaler = myPlayer.transform.FindChild("Scaler");
 
@@ -1222,16 +1228,31 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     Vector2 pos = light.transform.position;
                     Vector2 myPos = MyControl.transform.position;
 
-                    var isAcrossWalls = VisibilityCheckVectors.All(v => Helpers.AnyNonTriggersBetween(pos, myPos + v * 0.22f, out _, objectMask));
+                    var isAcrossWalls = VisibilityCheckVectors.All(v =>
+                    {
+                        v = v * 0.22f;
+                        return Helpers.AnyNonTriggersBetween(pos, myPos + v, out _, objectMask);
+                    }
+                    );
+
 
                     var mag = isAcrossWalls ? 0.22f : 0.4f;
 
-                    //いずれかの追加ライトの範囲内にいない場合、壁の中にいる。
+                    //いずれかの追加ライトの範囲内にいない場合、壁の向こうにいるかもしれない。
                     if (!LightInfo.AllLightInfo.Any(info => VisibilityCheckVectors.Any(vec => info.CheckPoint(vec))))
                     {
-                        return VisibilityCheckVectors.All(v => Helpers.AnyCustomNonTriggersBetween(pos, myPos + v * mag,
+                        return VisibilityCheckVectors.All(v =>
+                        {
+                            //観測点がこのプレイヤーと壁を挟む場合、壁を挟んでいるとする。
+                            if (v.magnitude > 0.01f && Helpers.AnyCustomNonTriggersBetween(myPos, myPos + v * mag,
+                                collider => LightSource.OneWayShadows.TryGetValue(collider.gameObject, out var oneWayShadows) ? !oneWayShadows.IsIgnored(light) : true,
+                                shadowMask)) return true;
+
+                            //観測点と視点主の間に壁を挟む場合、壁を挟んでいるとする。
+                            return Helpers.AnyCustomNonTriggersBetween(pos, myPos + v * mag,
                             collider => LightSource.OneWayShadows.TryGetValue(collider.gameObject, out var oneWayShadows) ? !oneWayShadows.IsIgnored(light) : true,
-                            shadowMask));
+                            shadowMask);
+                        });
                     }
 
                     //特に何もなければ、壁の中にいない。
@@ -1477,6 +1498,15 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     private VanillaPlayerLogics playerLogic;
     IPlayerLogics IPlayerlike.Logic => playerLogic;
 
+    internal string GetStateText(string preEx = "<color=#FF6666><size=75%>", string postEx = "</size></color>")
+    {
+        string stateText = (this as GamePlayer).PlayerState.Text;
+        string? stateExText = null;
+        if ((this as GamePlayer).PlayerStateExtraInfo != null && (this as GamePlayer).PlayerStateExtraInfo?.State == (this as GamePlayer).PlayerState) stateExText = (this as GamePlayer).PlayerStateExtraInfo?.ToStateText();
+        else if ((this as GamePlayer).IsDead && (this as GamePlayer).MyKiller != null) stateExText = "by " + ((this as GamePlayer).MyKiller?.Name ?? "ERROR");
+        if ((stateExText?.Length ?? 0) > 0) stateText += preEx + " " + stateExText + postEx;
+        return stateText;
+    }
     public GUIWidget? ProgressWidget
     {
         get
@@ -1487,7 +1517,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 .Select(tuple => GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
                     GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.OverlayTitle, tuple.assignable.DisplayColoredName),
                     tuple.ProgressWidget!.Move(new(0.14f, 0f))
-                )).ToArray();
+                )).Prepend(NebulaAPI.GUI.RawText(Virial.Media.GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.DocumentBold), (this as GamePlayer).PlayerName + ": " + GetStateText("", ""))).ToArray();
             if(contents.Length == 0) return null;
             return GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left, contents);
         }

@@ -50,8 +50,15 @@ public class CrewmateGameRule : AbstractModule<IGameModeStandard>, IGameOperator
     [OnlyHost]
     void CheckTaskWin(PlayerTaskUpdateEvent ev)
     {
-        int quota = 0;
-        int completed = 0;
+        GetCurrentTaskState(out var quota, out var completed);
+        if (quota > 0) ModSingleton<IWinningOpportunity>.Instance?.RpcSetOpportunity(NebulaTeams.CrewmateTeam, (completed * 0.93f) / (float)quota);
+        if (quota > 0 && quota <= completed) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Task);
+    }
+
+    static public void GetCurrentTaskState(out int quota, out int completed)
+    {
+        quota = 0;
+        completed = 0;
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
         {
             if (p.IsDisconnected) continue;
@@ -60,7 +67,5 @@ public class CrewmateGameRule : AbstractModule<IGameModeStandard>, IGameOperator
             quota += p.Tasks.Quota;
             completed += p.Tasks.TotalCompleted;
         }
-        if (quota > 0) ModSingleton<IWinningOpportunity>.Instance?.RpcSetOpportunity(NebulaTeams.CrewmateTeam, (completed * 0.93f) / (float)quota);
-        if (quota > 0 && quota <= completed) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.CrewmateWin, GameEndReason.Task);
     }
 }

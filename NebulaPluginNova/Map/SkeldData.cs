@@ -97,8 +97,8 @@ public class SkeldData : MapData
         new(1.9f, -14.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //コミュ
         ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    protected override Vector2[] MapArea => MapPositions;
-    protected override Vector2[] NonMapArea => NonMapPositions;
+    public override IReadOnlyList<Vector2> MapArea => MapPositions;
+    public override IReadOnlyList<Vector2> NonMapArea => NonMapPositions;
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };
@@ -128,5 +128,14 @@ public class SkeldData : MapData
         (SystemTypes.Nav, new(16.7f, -4.7f)),
         (SystemTypes.Shields, new(9.1f, -12.3f)),
         (SystemTypes.Comms, new(4.6f, -15.6f)),
+        ];
+
+    static internal Vector2[][] SkeldShadowEdges = [
+        //外周
+        [new(17.47f, -2.06f), new(15.55f, -2.01f), new(15.54f, -3.39f), new(12.72f, -3.41f), new(12.73f, -2.08f), new(10.34f, -2.06f), new(10.33f, -0.92f), new(11.71f, -0.91f), new(11.73f, 2.25f), new(9.53f, 4.46f), new(7.02f, 4.44f), new(7.04f, 2.42f), new(4.98f, 2.42f), new(4.98f, 3.90f), new(2.13f, 6.77f), new(-4.30f, 6.79f), new(-6.24f, 4.80f), new(-6.29f, 2.41f), new(-14.79f, 2.41f), new(-14.80f, 3.65f), new(-18.33f, 3.64f), new(-19.59f, 2.62f), new(-19.59f, -1.63f), new(-17.77f, -1.64f), new(-17.76f, -4.06f), new(-19.15f, -4.10f), new(-19.15f, -2.64f), new(-20.75f, -2.62f), new(-20.74f, -0.96f), new(-21.84f, -0.92f), new(-23.60f, -2.13f), new(-23.59f, -7.93f), new(-21.83f, -9.13f), new(-20.73f, -9.09f), new(-20.73f, -7.42f), new(-19.16f, -7.41f), new(-19.14f, -6.13f), new(-17.78f, -6.16f), new(-17.75f, -8.74f), new(-19.58f, -8.79f), new(-19.59f, -13.05f), new(-18.30f, -14.05f), new(-14.81f, -14.05f), new(-14.83f, -12.42f), new(-12.96f, -12.41f), new(-12.94f, -15.25f), new(-5.15f, -15.25f), new(-5.17f, -15.49f), new(-3.07f, -17.57f), new(1.00f, -17.56f), new(1.01f, -12.96f), new(4.30f, -12.95f), new(4.32f, -13.66f), new(1.45f, -13.68f), new(1.47f, -16.52f), new(2.51f, -17.56f), new(5.52f, -17.54f), new(6.62f, -16.53f), new(6.57f, -13.67f), new(5.97f, -13.67f), new(5.95f, -12.96f), new(7.04f, -12.98f), new(7.09f, -15.01f), new(9.50f, -14.99f), new(11.71f, -12.81f), new(11.73f, -9.67f), new(10.33f, -9.67f), new(10.36f, -7.15f), new(12.70f, -7.16f), new(12.72f, -5.44f), new(15.58f, -5.44f), new(15.61f, -6.82f), new(17.48f, -6.85f), new(19.17f, -5.48f), new(19.20f, -3.50f), new(17.47f, -2.05f)],
+        //右側
+        [new(0.14f, -4.52f), new(0.14f, -5.81f), new(7.03f, -5.85f), new(7.04f, -9.49f), new(6.10f, -10.39f), new(1.98f, -10.40f), new(1.95f, -7.86f), new(0.15f, -7.81f), new(0.15f, -8.29f), new(0.97f, -8.35f), new(1.01f, -10.91f), new(7.04f, -10.94f), new(7.03f, -10.76f), new(8.08f, -9.68f), new(8.65f, -9.67f), new(8.68f, -5.16f), new(11.08f, -5.14f), new(11.09f, -4.11f), new(7.83f, -4.12f), new(7.83f, -5.24f), new(4.04f, -5.20f), new(4.05f, -3.63f), new(5.58f, -2.15f), new(5.59f, -1.68f), new(7.71f, -1.69f), new(7.71f, -2.04f), new(8.62f, -2.06f), new(8.64f, -0.90f), new(8.12f, -0.91f), new(7.05f, 0.17f), new(7.05f, 0.36f), new(5.01f, 0.38f), new(5.02f, -1.91f), new(2.40f, -4.50f), new(0.14f, -4.54f)],
+        //左側
+        [new(-1.55f, -4.53f), new(-3.77f, -4.53f), new(-6.30f, -2.00f), new(-6.27f, 0.38f), new(-8.32f, 0.37f), new(-8.31f, -0.26f), new(-6.91f, -0.28f), new(-6.90f, -2.81f), new(-5.11f, -4.57f), new(-5.16f, -5.89f), new(-10.37f, -5.87f), new(-11.21f, -4.86f), new(-11.18f, -0.25f), new(-9.99f, -0.26f), new(-10.00f, 0.38f), new(-14.82f, 0.38f), new(-14.82f, -1.65f), new(-16.10f, -1.70f), new(-16.12f, -4.08f), new(-14.55f, -4.05f), new(-14.53f, -2.90f), new(-13.60f, -1.99f), new(-12.60f, -1.96f), new(-11.85f, -2.71f), new(-11.84f, -7.35f), new(-14.57f, -7.40f), new(-14.54f, -6.13f), new(-16.08f, -6.13f), new(-16.09f, -8.74f), new(-14.82f, -8.79f), new(-14.82f, -10.38f), new(-11.27f, -10.42f), new(-11.25f, -13.20f), new(-10.32f, -13.21f), new(-10.31f, -6.88f), new(-5.14f, -6.88f), new(-5.13f, -8.21f), new(-6.34f, -9.44f), new(-6.36f, -11.44f), new(-7.41f, -12.49f), new(-8.77f, -12.50f), new(-8.73f, -13.24f), new(-5.17f, -13.22f), new(-5.16f, -9.82f), new(-3.62f, -8.32f), new(-1.52f, -8.29f), new(-1.56f, -4.53f)]
         ];
 }

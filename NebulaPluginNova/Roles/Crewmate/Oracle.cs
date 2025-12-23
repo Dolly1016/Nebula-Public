@@ -1,20 +1,22 @@
-﻿using System;
+﻿using Il2CppSystem.Runtime.Remoting.Messaging;
+using Nebula.Roles.Modifier;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
+using Virial.DI;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
-using Virial;
-using static Nebula.Roles.Neutral.Spectre;
-using Virial.DI;
-using Virial.Events.Game;
-using Nebula.Roles.Modifier;
+using Virial.Media;
 using Virial.Text;
-using Virial.Components;
+using static Nebula.Roles.Neutral.Spectre;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -149,7 +151,7 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
 }
 internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, DefinedRole
 {
-    private Oracle() : base("oracle", new(214, 156, 45), RoleCategory.CrewmateRole, Crewmate.MyTeam, [OracleCooldownOption, OracleAdditionalCooldownOption, OracleDurationOption, NumOfCandidatesOption])
+    private Oracle() : base("oracle", new(214, 156, 45), RoleCategory.CrewmateRole, Crewmate.MyTeam, [MaxOracleOption, OracleCooldownOption, OracleAdditionalCooldownOption, OracleDurationOption, NumOfCandidatesOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic);
     }
@@ -157,39 +159,75 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
     static private readonly FloatConfiguration OracleCooldownOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleCooldown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration OracleAdditionalCooldownOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleAdditionalCooldown", (float[])[0f,0.5f,1f,2f,2.5f,3f,4f,5f,7.5f,10f,12.5f,15f,20f,30f], 1f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration OracleDurationOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleDuration", (float[])[0f,0.5f,1f,1.5f,2f,2.5f,3f,3.5f,4f,5f,6f,7f,8f,9f,10f], 2f, FloatConfigurationDecorator.Second);
+    static private readonly IntegerConfiguration MaxOracleOption = NebulaAPI.Configurations.Configuration("options.role.oracle.maxOracle", (0, 10, 1), 5, null, num => num == 0 ? Language.Translate("options.noLimit") : num.ToString());
     static private readonly IntegerConfiguration NumOfCandidatesOption = NebulaAPI.Configurations.Configuration("options.role.oracle.numOfCandidates", (1, 6), 6);
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, -1), arguments.Skip(2).ToArray());
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     static public readonly Oracle MyRole = new();
     static private readonly GameStatsEntry StatsOracle = NebulaAPI.CreateStatsEntry("stats.oracle.oracle", GameStatsCategory.Roles, MyRole);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), leftUses, ..divideResults.Select(entry => (int[])[entry.Key, entry.Value.role.Length, ..entry.Value.role.Select(r => r.Id)]).Smooth()];
         static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.OracleButton.png", 115f);
 
-        Dictionary<byte, (string longName, string shortName)> divideResults = [];
+        GUIWidget? IPlayerAbility.ProgressWidget => ProgressGUI.Holder(
+            ProgressGUI.OneLineText(Language.Translate("role.oracle.gui.results")),
+                (divideResults.Count == 0 ?
+                    ProgressGUI.OneLineText(Language.Translate("role.oracle.gui.results.zero")) :
+                    ProgressGUI.Holder(
+                    divideResults.Select(result => ProgressGUI.OneLineText((GamePlayer.GetPlayer(result.Key)?.ColoredName ?? "???") + " ⇒" + result.Value.longName)))
+                ).Move(new(0.1f, 0f))
+            );
 
-        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
+
+        Dictionary<byte, (DefinedRole[] role, string longName, string shortName)> divideResults = [];
+        int leftUses;
+
+        void ParseResult(int[] result) {
+            int i = 0;
+            while(i + 1 < result.Length)
+            {
+                int targetId = result[i++];
+                int roleLength = result[i++];
+                if (i + roleLength > result.Length) break;
+                DefinedRole[] roles = new DefinedRole[roleLength];
+                bool error = false;
+                for (int k = 0; k < roleLength; k++)
+                {
+                    roles[k] = Roles.GetRole(result[i++])!;
+                    error |= roles[k] == null;
+                }
+                if (error) roles = roles.NotNull().ToArray();
+                AddResult((byte)targetId, roles);
+            }
+        }
+        public Ability(GamePlayer player, bool isUsurped, int leftUses, int[] result) : base(player, isUsurped)
         {
+            this.leftUses = leftUses;
+            if (this.leftUses == -1) this.leftUses = MaxOracleOption == 0 ? 1000 : MaxOracleOption;
+
+            ParseResult(result);
             if (AmOwner)
             {
                 var playerTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeStandardPredicate(p) && !divideResults.ContainsKey(p.RealPlayer.PlayerId));
 
                 var oracleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     OracleCooldownOption, "oracle", buttonSprite, 
-                    _ => playerTracker.CurrentTarget != null, null);
+                    _ => playerTracker.CurrentTarget != null, _ => this.leftUses > 0);
+                if(this.leftUses < 20) oracleButton.ShowUsesIcon(3, this.leftUses.ToString());
                 
 
                 void PredicateRole()
                 {
                     var result = ModSingleton<OracleSystem>.Instance.GetRoleCandidate(MyPlayer, playerTracker.CurrentTarget!.RealPlayer, NumOfCandidatesOption);
                     var shuffled = result.Shuffled();
-                    divideResults[playerTracker.CurrentTarget!.RealPlayer.PlayerId] = (
-                        string.Join(", ", shuffled.Select(r => r.DisplayColoredName)),
-                        string.Join(", ", shuffled.Select(r => shuffled.Length >= 2 ? r.DisplayColoredShort : r.DisplayColoredName))
-                        );
-
+                    oracleButton.UpdateUsesIcon((this.leftUses - 1).ToString());
+                    RpcOracle.Invoke((MyPlayer, playerTracker.CurrentTarget!.RealPlayer, shuffled));
                     (oracleButton.CoolDownTimer as GameTimer)?.Expand(OracleAdditionalCooldownOption);
                     StatsOracle.Progress();
                 }
@@ -225,6 +263,23 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 oracleButton.SetAsUsurpableButton(this);
             }
         }
+
+        void AddResult(byte targetId, DefinedRole[] result)
+        {
+            divideResults[targetId] = (
+                        result,
+                        string.Join(", ", result.Select(r => r.DisplayColoredName)),
+                        string.Join(", ", result.Select(r => result.Length >= 2 ? r.GetRoleIconTag() + " " + r.DisplayColoredShort : r.DisplayColoredName))
+                        );
+        }
+
+        static readonly RemoteProcess<(GamePlayer oracle, GamePlayer target, DefinedRole[] result)> RpcOracle = new("oracle.oracle", (message, _) => { 
+            if(message.oracle.TryGetAbility<Ability>(out var oracle))
+            {
+                oracle.AddResult(message.target.PlayerId, message.result);
+                oracle.leftUses--;
+            }
+        });
 
         [Local]
         void ReflectRoleName(PlayerSetFakeRoleNameEvent ev)

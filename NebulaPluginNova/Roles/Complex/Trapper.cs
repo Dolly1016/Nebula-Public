@@ -111,6 +111,8 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
             GameActionTypes.NiceTrapPlacementAction = new("trapper.placement.nice", this, isPlacementAction: true);
     }
 
+    static private Image iconImage = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Icons/trapper.png");
+    Image DefinedAssignable.IconImage => iconImage;
 
     public bool IsEvil => Category == RoleCategory.ImpostorRole;
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => IsEvil ? AbilityAssignmentStatus.KillersSide : AbilityAssignmentStatus.CanLoadToMadmate;

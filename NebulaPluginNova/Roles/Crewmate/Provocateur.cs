@@ -43,6 +43,8 @@ public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>
     static private readonly GameStatsEntry StatsTask = NebulaAPI.CreateStatsEntry("stats.provocateur.taskPhase", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsExile = NebulaAPI.CreateStatsEntry("stats.provocateur.exile", GameStatsCategory.Roles, MyRole);
 
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IGameOperator, IPlayerAbility
     {

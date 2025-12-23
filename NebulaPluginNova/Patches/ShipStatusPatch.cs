@@ -2,6 +2,7 @@
 using Nebula.Behavior;
 using Nebula.Map;
 using Nebula.Modules.CustomMap;
+using Virial.Game;
 
 namespace Nebula.Patches;
 
@@ -10,19 +11,23 @@ public class ShipStatusPatch
 {
     static public void Prefix(ShipStatus __instance)
     {
-        //マップIDが正しく設定されていなかったときのための救済措置 (ちゃんとオプションが更新されるようにする方がよさそう)
-        byte mapId = 0;
-        if (__instance.TryCast<SkeldShipStatus>())
-            mapId = 0;
-        else if (__instance.TryCast<MiraShipStatus>())
-            mapId = 1;
-        else if (__instance.TryCast<PolusShipStatus>())
-            mapId = 2;
-        else if (__instance.TryCast<AirshipStatus>())
-            mapId = 4;
-        else if (__instance.TryCast<FungleShipStatus>())
-            mapId = 5;
-        AmongUsUtil.GetCurrentNormalOption().MapId = mapId;
+        if (GeneralConfigurations.CurrentGameMode != GameModes.AeroGuesser)
+        {
+
+            //マップIDが正しく設定されていなかったときのための救済措置 (ちゃんとオプションが更新されるようにする方がよさそう)
+            byte mapId = 0;
+            if (__instance.TryCast<SkeldShipStatus>())
+                mapId = 0;
+            else if (__instance.TryCast<MiraShipStatus>())
+                mapId = 1;
+            else if (__instance.TryCast<PolusShipStatus>())
+                mapId = 2;
+            else if (__instance.TryCast<AirshipStatus>())
+                mapId = 4;
+            else if (__instance.TryCast<FungleShipStatus>())
+                mapId = 5;
+            AmongUsUtil.GetCurrentNormalOption().MapId = mapId;
+        }
 
         //ModdedMap
         //ModShipStatus.CleanOriginalShip(__instance);
@@ -39,13 +44,6 @@ public class ShipStatusPatch
     static private void ModifyEarlier()
     {
         ShipExtension.PatchEarlierModification(AmongUsUtil.CurrentMapId);
-
-        foreach(var vectors in MapData.GetCurrentMapData().RaiderIgnoreArea)
-        {
-            var collider = UnityHelper.CreateObject<PolygonCollider2D>("RaiderIgnoreArea", null, Vector3.zero, LayerExpansion.GetRaiderColliderLayer());
-            collider.SetPath(0, vectors);
-            collider.isTrigger = true;
-        }
     }
 
     static private void Modify() { 

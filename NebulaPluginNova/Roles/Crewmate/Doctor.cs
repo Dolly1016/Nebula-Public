@@ -173,7 +173,9 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
 
                         //生存者の数に変化がある
                         if (lastAliveCount != NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead))
-                            acTokenChallenge = new("doctor.challenge");
+                        {
+                            if(!(PortableVitalsChargeOption > 10f || ChargesPerTasksOption > 2f)) acTokenChallenge ??= new("doctor.challenge");
+                        }
 
 
                         if (vitalsMinigame.amClosing != Minigame.CloseState.Closing) vitalsMinigame.Close();

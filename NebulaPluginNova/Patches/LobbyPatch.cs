@@ -85,6 +85,7 @@ public class GameStartManagerUpdatePatch
         bool canStart = __instance.LastPlayerCount >= __instance.MinPlayers;
 
         canStart &= PlayerControl.AllPlayerControls.GetFastEnumerator().All(p => !p.gameObject.TryGetComponent<UncertifiedPlayer>(out _));
+        canStart &= ModSingleton<ShowUp>.Instance.AllPlayerIsNotAfk;
 
         LastChecked = canStart;
         __instance.StartButton.SetButtonEnableState(canStart);
@@ -293,7 +294,7 @@ public class DelayPlayDropshipAmbiencePatch
             }
         }
         __instance.StartCoroutine(CoUpdateLogo().WrapToIl2Cpp());
-        GameOperatorManager.Instance!.Subscribe<GameStartEvent>(_ => GameObject.Destroy(logoHolder), Virial.NebulaAPI.CurrentGame!);
+        GameOperatorManager.Instance!.Subscribe<LobbyDestroyEvent>(_ => GameObject.Destroy(logoHolder), Virial.NebulaAPI.CurrentGame!);
     }
 }
 
@@ -401,6 +402,7 @@ public class MarketplaceConsolePatch
             NebulaPlugin.Log.Print("Wardrobe console was not found ");
         }
 
+        ClientOption.ChangeAmbientVolumeIfNecessary(false, true);
     }
 }
 
@@ -464,6 +466,7 @@ public class GlobalCosMismatchShowerPatch
     private static IDividedSpriteLoader icons = DividedSpriteLoader.FromResource("Nebula.Resources.GlobalCosButton.png", 100f, 2, 1);
     public static void Postfix(GameStartManager __instance)
     {
+
         __instance.gameObject.ForEachAllChildren(c => c.layer = LayerExpansion.GetUILayer());
 
         //過去の未所持データをクリアする
@@ -571,5 +574,26 @@ public class HostInfoPanelUpdatePatch
         {
             __instance.playerName.text = string.IsNullOrEmpty(host.PlayerName) ? "..." : string.Concat("<color=#", text, ">", host.PlayerName, "</color>" ) + " (" + __instance.player.ColorBlindName + ")";
         }
+    }
+}
+
+
+[HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.ResetStartState))]
+public class ResetStartStatePatch
+{
+    public static void Postfix(GameStartManager __instance)
+    {
+        SoundManager.Instance.StopSound(__instance.gameStartSound);
+    }
+}
+
+
+[HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.OnDestroy))]
+public class LobbyBehaviourDestroyPatch
+{
+    public static void Postfix(LobbyBehaviour __instance)
+    {
+        GameOperatorManager.Instance?.Run<LobbyDestroyEvent>(new(), needToCheckGameEnd: false);
+
     }
 }

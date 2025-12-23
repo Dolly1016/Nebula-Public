@@ -208,7 +208,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
                 canSee = true;
             }
             
-            if (canSee) name += " ▲".Color(trilemmaColor);
+            if (canSee) name += MyRole.GetRoleIconTag();
         }
 
 

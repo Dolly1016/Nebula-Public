@@ -33,7 +33,7 @@ public class MeetingTieVoteHostEvent : Event
     /// </summary>
     /// <param name="voter">投票者</param>
     /// <param name="votedFor">投票先がある場合、投票先。スキップ票及び白票の場合は<c>null</c></param>
-    /// <returns></returns>
+    /// <returns>票を投じている場合、true</returns>
     public bool TryCheckVotedFor(Virial.Game.Player voter, out Virial.Game.Player? votedFor) => TryCheckVotedFor(voter.PlayerId, out votedFor);
 
     /// <summary>

@@ -342,7 +342,8 @@ internal class KillRequestHandler
           bool amKiller = param.Killer?.AmOwner ?? false;
           bool amTarget = param.Target.AmOwner;
           bool everyoneShouldHearSE = realTargetWillDie && param.KillParam.HasFlag(KillParameter.WithKillSEWidely);
-          if ((amKiller || (everyoneShouldHearSE && !amTarget)) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(param.RealTarget.VanillaPlayer.KillSfx, false, 0.8f, null);
+          bool dontPlaySe = param.KillParam.HasFlag(KillParameter.WithoutSelfSE);
+          if (((amKiller && !dontPlaySe) || (everyoneShouldHearSE && !amTarget)) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(param.RealTarget.VanillaPlayer.KillSfx, false, 0.8f, null);
 
           if (param.Target is IFakePlayer fp)
           {

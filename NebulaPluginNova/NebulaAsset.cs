@@ -106,6 +106,7 @@ public static class NebulaAsset
         ProgressShader = Load<Shader>("Sprites-Progress");
         HSVShader = Load<Shader>("Sprites-HSV");
         HSVNAShader = Load<Shader>("Sprites-HSV-NoAlpha");
+        HSVRectShader = Load<Shader>("Sprites-HSV-Rect");
         MeshRendererShader = Load<Shader>("Sprites-ForMeshRenderer");
         MeshRendererSTShader = Load<Shader>("Sprites-ForMeshRendererST");
         MeshRendererMaskedShader = Load<Shader>("Sprites-ForMeshRendererMasked");
@@ -116,13 +117,14 @@ public static class NebulaAsset
         CostumeMaskPostShader = Load<Shader>("Sprites-CostumeMaskPost");
         CostumeMaskPostJustPosShader = Load<Shader>("Sprites-CostumeMaskJustPos");
         LineEdgeShader = Load<Shader>("Line-Edge");
+        RoleIconShader = Load<Shader>("Sprites-RoleIcon");
 
-        DivMap[0] = Load<GameObject>("SkeldDivMap");
-        DivMap[1] = Load<GameObject>("MIRADivMap");
-        DivMap[2] = Load<GameObject>("PolusDivMap");
+        DivMap[0] = [Load<GameObject>("SkeldDivMap")];
+        DivMap[1] = [Load<GameObject>("MIRADivMap")];
+        DivMap[2] = [Load<GameObject>("PolusDivMap")];
         DivMap[3] = null!;
-        DivMap[4] = Load<GameObject>("AirshipDivMap");
-        DivMap[5] = Load<GameObject>("FungleDivMap");
+        DivMap[4] = [Load<GameObject>("AirshipDivMap")];
+        DivMap[5] = [Load<GameObject>("FungleDivMap"), Load<GameObject>("FungleDivMapModified")];
 
         audioMap[NebulaAudioClip.ThrowAxe] = Load<AudioClip>("RaiderThrow.wav");
         audioMap[NebulaAudioClip.SniperShot] = Load<AudioClip>("SniperShot.wav");
@@ -184,9 +186,16 @@ public static class NebulaAsset
         return AssetBundle.LoadAsset(name, Il2CppType.Of<T>())?.Cast<T>()!;
     }
 
+    private static int GetInMapId(byte mapId) { 
+        if(mapId == 5)
+        {
+            if (GeneralConfigurations.FungleForClassicGameOption.Value) return 1;
+        }
+        return 0;
+    }
     public static Sprite GetMapSprite(byte mapId, Int32 mask, Vector2? size = null)
     {
-        GameObject prefab = DivMap[mapId];
+        GameObject prefab = DivMap[mapId][GetInMapId(mapId)];
         if (prefab == null) return null!;
         if (size == null) size = prefab.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite.bounds.size * 100f;
         var obj = GameObject.Instantiate(prefab);
@@ -245,6 +254,7 @@ public static class NebulaAsset
     static public Shader ProgressShader { get; private set; } = null!;
     static public Shader HSVShader { get; private set; } = null!;
     static public Shader HSVNAShader { get; private set; } = null!;
+    static public Shader HSVRectShader { get; private set; } = null!;
     static public Shader MeshRendererShader { get; private set; } = null!;
     static public Shader MeshRendererSTShader { get; private set; } = null!;
     static public Shader MeshRendererMaskedShader { get; private set; } = null!;
@@ -255,12 +265,14 @@ public static class NebulaAsset
     static public Shader CostumeMaskPostShader { get; private set; } = null!;
     static public Shader CostumeMaskPostJustPosShader { get; private set; } = null!;
     static public Shader LineEdgeShader { get; private set; } = null!;
+    static public Shader RoleIconShader { get; private set; } = null!;
 
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public Material BrokenShaderMat { get; private set; } = null!;
     static public GameObject PaparazzoShot { get; private set; } = null!;
     static public GameObject FriesMinigame { get; private set; } = null!;
     static public GameObject SlingshotInMinigame { get; private set; } = null!;
+
 
     static public SpriteRenderer CreateSharpBackground(Vector2 size, Color color, Transform transform)
     {
@@ -278,7 +290,7 @@ public static class NebulaAsset
         return renderer;
     }
 
-    public static GameObject[] DivMap { get; private set; } = new GameObject[6];
+    public static GameObject[][] DivMap { get; private set; } = new GameObject[6][];
     private static Dictionary<NebulaAudioClip, AudioClip> audioMap = [];
 
     public static void PlayNamedLoopSE(NebulaAudioClip clip, string name, float volume = 0.8f, float pitch = 1.0f)

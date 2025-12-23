@@ -128,6 +128,15 @@ public class NebulaSettingMenu : MonoBehaviour
         RightImage.color = col;
     }
 
+    //現在のゲームモードで使用できるタブに切り替えます。
+    private void CheckTab()
+    {
+        if (CurrentTab.IsVisible) return;
+
+        var validTab = ConfigurationTab.AllTab.FirstOrDefault(tab => tab.IsVisible);
+        if (validTab != null) CurrentTab = validTab;
+    }
+
     private void UpdateLeftTab()
     {
         MetaWidgetOld widget = new();
@@ -136,12 +145,14 @@ public class NebulaSettingMenu : MonoBehaviour
         
         widget.Append(new MetaWidgetOld.Button(() => {
             GeneralConfigurations.GameModeOption.ChangeValue(true);
+            CheckTab();
             UpdateMainTab();
             UpdateLeftTab();
         }, new(TextAttributeOld.BoldAttr) { Size = new(1.5f, 0.3f) }) { Text = GeneralConfigurations.CurrentGameMode.DisplayName, Alignment = IMetaWidgetOld.AlignmentOption.Center});
         widget.Append(new MetaWidgetOld.VerticalMargin(0.2f));
         foreach (var tab in ConfigurationTab.AllTab)
         {
+            if (!tab.IsVisible) continue;
             ConfigurationTab copiedTab = tab;
             widget.Append(
                 new MetaWidgetOld.Button(() => {
@@ -286,7 +297,9 @@ public class NebulaSettingMenu : MonoBehaviour
                         renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                         renderer.sortingOrder = 10;
 
-                        text.transform.localPosition += new Vector3(0.03f, -0.03f, 0f);
+                        bool hasIcon = holder.RelatedAssignable != null;
+
+                        text.transform.localPosition += new Vector3(hasIcon ? 0.2f : 0.03f, -0.03f, 0f);
 
                         var subTxt = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, renderer.transform);
                         subTextAttr.Reflect(subTxt);
@@ -294,10 +307,20 @@ public class NebulaSettingMenu : MonoBehaviour
                         subTxt.transform.localPosition = new Vector3(0f, -0.15f, -0.5f);
                         subTxt.sortingOrder = 30;
 
+                        if(hasIcon)
+                        {
+                            var iconRenderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", renderer.transform, new(-1.62f, 0.2f, -1f));
+                            iconRenderer.transform.localScale = new(0.3f, 0.3f, 1f);
+                            iconRenderer.sprite = holder.RelatedAssignable.GetRoleIcon()?.GetSprite();
+                            iconRenderer.material = RoleIcon.GetRoleIconMaterial(holder.RelatedAssignable, 0.8f);
+                            iconRenderer.sortingOrder = 15;
+                            iconRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                        }
+
                         int tagCount = 0;
                         foreach (var tag in holder.Tags)
                         {
-                            var tagRenderer = UnityHelper.CreateObject<SpriteRenderer>("Tag", renderer.transform, new(-1.62f + tagCount * 0.25f, 0.4f, -1f));
+                            var tagRenderer = UnityHelper.CreateObject<SpriteRenderer>("Tag", renderer.transform, new(1.62f - tagCount * 0.25f, 0.4f, -1f));
                             tagRenderer.transform.localScale = new(0.7f, 0.7f, 1f);
                             tagRenderer.sprite = tag.Image.GetSprite();
                             tagRenderer.sortingOrder = 15;

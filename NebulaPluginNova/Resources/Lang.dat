@@ -167,6 +167,9 @@
 "ui.contact.finished" : "The form was submitted successfully. <br>Thank you!"
 "ui.contact.failed" : "Failed to submit your form.<br><br>%DETAIL%"
 
+"ui.afk.title" : "AFK"
+"ui.afk.detail" : "When you return, press any key to come back."
+
 # Tutorial
 
 "tutorial.guide.canClose" : "This tutorial remains while the cursor is hovering.<br>Click to close the tutorial."
@@ -180,8 +183,8 @@
 "tutorial.variations.stamp.caption" : "You can send stamps by pressing the %KEY% key."
 "tutorial.variations.ambienceOnMeeting.title" : "Mute Ambience Option"
 "tutorial.variations.ambienceOnMeeting.caption" : "Instead you can use the "Mute Ambience On Meeting" option."
-"tutorial.variations.meetingTool.advance.title" : "The shortcut for generating player icons"
-"tutorial.variations.meetingTool.advance.caption" : "Draw a line on the minimap and right-click <b>just before</b> releasing the mouse to<br>generate icons of all players in the game."
+"tutorial.variations.meetingTool.line.title" : "The shortcut for generating player icons"
+"tutorial.variations.meetingTool.line.caption" : "Draw a line on the minimap and right-click <b>just before</b> releasing the mouse to<br>generate icons of all players in the game."
 
 # Versions
 
@@ -207,6 +210,7 @@
 "gamemode.standard" : "Standard"
 "gamemode.hostMode" : "Host Mode"
 "gamemode.freeplay" : "Free Play"
+"gamemode.aeroguesser" : "AeroGuesser"
 
 # Notification
 
@@ -228,6 +232,8 @@
 "options.switch.off" : "Off"
 "options.switch.on" : "On"
 "options.switch.nonCrewmateOnly" : "Non-Crew Only"
+"options.switch.nonCrewmate" : "Non-Crew"
+"options.switch.impostor" : "Impostor"
 "options.percentage" : "%"
 "options.cross" : "x"
 "options.sec" : "s"
@@ -300,6 +306,7 @@
 "options.map.customization.skeld.storageVent" : "Extra Vent (Storage)"
 "options.map.customization.skeld.reactorDuration" : "Reactor Sabo."
 "options.map.customization.skeld.lifeSupportDuration" : "O2 Sabo."
+"options.map.customization.skeld.wholeShipInShadow" : "Whole Ship In Shadow"
 "options.map.customization.mira.useAdmin" : "Admin Console"
 "options.map.customization.mira.reactorDuration" : "Reactor Sabo."
 "options.map.customization.mira.lifeSupportDuration" : "O2 Sabo."
@@ -338,6 +345,7 @@
 "options.map.customization.fungle.blackOutDropship" : "Blackout Console (Dropship)"
 "options.map.customization.fungle.blackOutJungle" : "Blackout Console (Jungle)"
 "options.map.customization.fungle.blackOutMiningPit" : "Blackout Console (Mining Pit)"
+"options.map.customization.fungle.forClassicGame" : "Classic Game Modification"
 "options.map.customization.admin.editor" : "Right Click: Open room settings"
 "options.map.customization.admin.viewer" : "Click: Show room settings"
 "options.map.admin.skeld.0" : "Admin Customization"
@@ -365,6 +373,7 @@
 "options.task.noGuide.collectSamples" : "Collect Samples Task"
 "options.map.randomizedWiring" : "Randomized Wiring"
 "options.map.stepsOfWiringGame" : "Steps Of Wiring Game"
+"options.task.fakeScan" : "Fake Scan"
 "options.task.group.wiring" : "Wiring Task Settings"
 "options.task.group.noGuide" : "No Guide Task Settings"
 
@@ -383,6 +392,11 @@
 "options.meeting.prohibitMeetingTool" : "Prohibit Meeting Tool"
 "options.meeting.shortenCooldownAtGameStart" : "Shorten Cooldown At Game Start"
 "options.meeting.shortenCooldown" : "Shorten Cooldown"
+"options.meeting.nonCrewCanSeeTaskTracker" : "# Can See Task Tracker"
+"options.meeting.nonCrewCanSeeSabotageStatus" : "# Can See Sabotage Status"
+"options.meeting.group.gameStart" : "Shorten Cooldown Settings"
+"options.meeting.group.earlySettings" : "In The Early Settings"
+"options.meeting.group.nonCrewmateInformation" : "Information for Non-Crewmate Settings"
 
 "options.exile" : "Exile Options"
 "options.exile.detail" : "About Player Exile"
@@ -409,6 +423,21 @@
 "options.consoleRestriction.cameraRestriction" : "Security Cams & Logs"
 "options.consoleRestriction.resetRestrictions" : "Reset Restrictions Per Meetings"
 "options.consoleRestriction.showDeadBodiesOnAdmin" : "Show Dead Bodies On Admin"
+
+"options.aeroGuesser" : "AeroGuesser Options"
+"options.aeroGuesser.detail" : "About AeroGuesser mode"
+"options.aeroGuesser.guessTime" : "Guess Time"
+"options.aeroGuesser.numOfQuiz" : "# Quizzes"
+"options.aeroGuesser.monochromeMode" : "Monochrome Mode"
+"options.aeroGuesser.skeld" : "Skeld"
+"options.aeroGuesser.mira" : "MIRA HQ"
+"options.aeroGuesser.polus" : "Polus"
+"options.aeroGuesser.airship" : "Airship"
+"options.aeroGuesser.fungle" : "Fungle"
+"options.aeroGuesser.normal" : "Normal"
+"options.aeroGuesser.hard" : "Hard"
+"options.aeroGuesser.group.filter.difficulty" : "Difficulty Settings"
+"options.aeroGuesser.group.filter.map" : "Map Settings"
 
 "options.perk" : "Perk Options"
 "options.perk.detail" : "Plants that appear all over the map provide perks.<br>Perks provide benefits to their owners."
@@ -610,6 +639,8 @@
 "stats.collator.collating" : "Num of Collations"
 "stats.collator.matched" : "Num of Matched Collations"
 "stats.collator.unmatched" : "Num of Unmatched Collations"
+"role.collator.gui.results" : "Collation Results"
+"role.collator.gui.results.zero" : "None"
 
 "role.comet.name" : "Comet"
 "role.comet.short" : "C"
@@ -797,11 +828,14 @@
 "role.oracle.short" : "O"
 "role.oracle.blurb" : "Everything I Know"
 "options.role.oracle.detail" : "Oracle can narrow down other player's roles to a few candidates."
+"options.role.oracle.maxOracle" : "Max # Oracle"
 "options.role.oracle.oracleCooldown" : "Oracle Cooldown"
 "options.role.oracle.oracleAdditionalCooldown" : "Oracle Additional Cooldown"
 "options.role.oracle.oracleDuration" : "Oracle Duration"
 "options.role.oracle.numOfCandidates" : "# Role Candidates"
 "stats.oracle.oracle" : "Num of Oracle"
+"role.oracle.gui.results" : "Oracle Results"
+"role.oracle.gui.results.zero" : "None"
 
 "role.phosphorus.name" : "Phosphorus"
 "role.phosphorus.short" : "P"
@@ -824,7 +858,7 @@
 "options.role.psychic.message.elapsedTime" : "I died about %SEC%s ago..."
 "options.role.psychic.message.killersColor" : "My killer color was %COLOR%"
 "options.role.psychic.message.killersRole" : "My killer's role is %ROLE%"
-"options.role.psychic.message.killerIsDead" : "私をキルしたプレイヤーはもう死んでいる"
+"options.role.psychic.message.killerIsDead" : "My murderer is already dead..."
 "options.role.psychic.message.myRole" : "My role is %ROLE%"
 "options.role.psychic.message.myState" : "I have been %STATE%..."
 "options.role.psychic.message.inner.darkColor" : "dark"
@@ -860,6 +894,7 @@
 "options.role.sheriff.numOfShots" : "Num Of Shots"
 "options.role.sheriff.canKillHidingPlayer" : "Can Kill Hiding Player"
 "options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "Seal Ability Until Reporting Dead Bodies"
+"options.role.sheriff.unsealOnReportButtonTurningOn" : "Unseal Ability On Report Button Turning On"
 "stats.sheriff.shot" : "Num of Trying Kill"
 "stats.sheriff.misshot" : "Num of Misshot"
 
@@ -1425,6 +1460,13 @@
 "options.role.sidekick.inheritanceRule.suicide" : "Suicide"
 "options.role.sidekick.inheritanceRule.none" : "None"
 "options.role.sidekick.assignedSidekick" : "Initial Assignment"
+"options.role.sidekick.canSuicide" : "Can Suicide"
+"options.role.sidekick.suicideCooldown" : "Suicide Cooldown"
+"options.role.sidekick.canFixLight" : "Can Fix Light"
+"options.role.sidekick.canFixComms" : "Can Fix Comms"
+"options.role.sidekick.hasImpostorVision" : "Has Impostor Vision"
+"options.role.sidekick.canUseVents" : "Can Use Vents"
+"options.role.sidekick.canMoveInVents" : "Can Move In Vents"
 
 "role.jester.name" : "Jester"
 "role.jester.short" : "J"
@@ -1724,6 +1766,7 @@
 "teams.spectre" : "Spectre"
 "teams.gambler" : "Gambler"
 "teams.tyrant" : "Tyrant"
+"teams.vanity" : "Vanity"
 
 # Perks
 
@@ -2065,6 +2108,8 @@
 "button.label.absorb" : "absorb"
 "button.label.poison" : "poison"
 "button.label.select" : "select"
+"button.label.afk" : "afk"
+"button.label.scan" : "scan"
 
 # Game
 
@@ -2178,6 +2223,7 @@
 "end.gambler" : "Gambler Wins %EXTRA%"
 "end.tyrant" : "Tyrant Wins %EXTRA%"
 "end.vanity" : "Vanity Wins %EXTRA%"
+"end.gameEnd" : "Game Set"
 "end.nogame" : "No Game"
 
 "end.status.noWinners" : "No Winners"
@@ -2245,6 +2291,13 @@
 
 "task.unknownPlace" : "???"
 "task.divertPower" : "Divert Power"
+
+# Meta Information
+
+"metaInfo.meeting.sabotage" : "Current Sabotage"
+"metaInfo.meeting.sabotage.electrical" : "Power Outage"
+"metaInfo.meeting.sabotage.communications" : "Communications"
+"metaInfo.meeting.task" : "Ave. Completed: "
 
 # Inventory
 
@@ -2381,7 +2434,7 @@
 "devStudio.ui.common.preview" : "Preview"
 "devStudio.ui.common.delete" : "Delete"
 "devStudio.ui.common.clone" : "Clone"
-"devStudio,ui.common.original" : "Original"
+"devStudio.ui.common.original" : "Original"
 "devStudio.ui.common.generate" : "Generate"
 "devStudio.ui.common.confirmSaving" : "Are you sure to save?"
 "devStudio.ui.common.confirmDeletingAddon" : "Are you sure to delete add-on?"
@@ -2503,6 +2556,7 @@
 "achievement.type.secret" : "Secret"
 "achievement.type.seasonal" : "Seasonal"
 "achievement.type.costume" : "Cosmetics"
+"achievement.type.aeroGuesser" : "Aero Guesser"
 "achievement.type.innersloth" : "Among Us"
 "achievement.type.perk" : "Perk"
 "achievement.type.uljun" : "Ul-jun"
@@ -2513,6 +2567,7 @@
 "achievement.group.seasonal" : "Seasonal"
 "achievement.group.perk" : "Perk"
 "achievement.group.costume" : "Costume"
+"achievement.group.aeroGuesser" : "Aero Guesser"
 "achievement.group.others" : "Others"
 "achievement.group.innersloth" : "Innersloth"
 "achievement.group.custom" : "Craft"
@@ -2543,6 +2598,7 @@
 "stats.group.game" : "Game"
 "stats.group.roles" : "Roles"
 "stats.group.perks" : "Perks"
+"stats.group.aeroGuesser" : "Aero Guesser"
 "stats.role.common.assigned" : "Played %ROLE%"
 "stats.role.common.won" : "Won as %ROLE%"
 "stats.modifier.common.assigned" : "Played %MODIFIER%"
@@ -2557,6 +2613,9 @@
 "stats.plants.gain.normal" : "Num of Gained Perks from Normal Plants"
 "stats.plants.gain.warped" : "Num of Gained Perks from Warped Plants"
 "stats.perk.common.gain" : "Gained %PERK%"
+"stats.aeroGuesser.gamePlay" : "Play Games"
+"stats.aeroGuesser.totalScore" : "Total Score"
+"stats.aeroGuesser.perfectScore" : "Number of Perfect Score Recoreded"
 
 # Social
 
@@ -2709,6 +2768,40 @@
 "roleFilter.preview.etc" : "%ROLES% etc."
 "roleFilter.showOnlySpawnable" : "Show only spawnable roles"
 
+# AeroGuesser
+
+"aeroGuesser.rank.1" : "1st"
+"aeroGuesser.rank.2" : "2nd"
+"aeroGuesser.rank.3" : "3rd"
+"aeroGuesser.rank.4" : "4th"
+"aeroGuesser.rank.5" : "5th"
+"aeroGuesser.rank.6" : "6th"
+"aeroGuesser.rank.7" : "7th"
+"aeroGuesser.rank.8" : "8th"
+"aeroGuesser.rank.9" : "9th"
+"aeroGuesser.rank.10" : "10th"
+"aeroGuesser.rank.11" : "11th"
+"aeroGuesser.rank.12" : "12th"
+"aeroGuesser.rank.13" : "13th"
+"aeroGuesser.rank.14" : "14th"
+"aeroGuesser.rank.15" : "15th"
+"aeroGuesser.rank.16" : "16th"
+"aeroGuesser.rank.17" : "17th"
+"aeroGuesser.rank.18" : "18th"
+"aeroGuesser.rank.19" : "19th"
+"aeroGuesser.rank.20" : "20th"
+"aeroGuesser.rank.21" : "21st"
+"aeroGuesser.rank.22" : "22nd"
+"aeroGuesser.rank.23" : "23rd"
+"aeroGuesser.rank.24" : "24th"
+"aeroguesser.answerInfo.view" : "Graphical Map"
+"aeroguesser.answerInfo.minimap" : "Minimap"
+"aeroguesser.answerInfo.singleScore" : "Obtained Score"
+"aeroguesser.answerInfo.sumScore" : "Total Score"
+"aeroGuesser.ui.proceed" : "Proceed"
+"aeroGuesser.ui.determine" : "Determine"
+"aeroGuesser.ui.back" : "Back"
+
 # Documents
 
 "document.tip.winCond.teams.impostor" : "Impostor"
@@ -2719,13 +2812,13 @@
 "document.tip.winCond.crewmate.exile.title" : "Exile Trigger"
 "document.tip.winCond.crewmate.exile" : "Crewmates win by exiling all %IMPOSTOR% team and %JACKAL% team players."
 "document.tip.winCond.impostor.kill.title" : "Kill Trigger"
-"document.tip.winCond.impostor.kill" : "Impostors win when impostor team players account for more than half of all alive players. <br>%JACKAL% team must be eliminated, and %LOVER% whose partner is still alive are not counted in impostor team."
+"document.tip.winCond.impostor.kill" : "Impostors win when impostor team players account for more than half of all alive players. <br>%LOVER% whose partner is still alive are not counted in impostor team."
 "document.tip.winCond.impostor.extinction.title" : "Complete Domination Trigger"
 "document.tip.winCond.impostor.extinction" : "Impostors win when only impostor team players survive. <br>%LOVER% whose partner is still alive are not counted in impostor team."
 "document.tip.winCond.impostor.sabotage.title" : "Sabotage Trigger"
 "document.tip.winCond.impostor.sabotage" : "Impostors win if the time runs out without the emergency sabotage being restored."
 "document.tip.winCond.jackal.kill.title" : "Kill Trigger"
-"document.tip.winCond.jackal.kill" : "Jackals win when jackal team players account for more than half of all alive players. <br>%IMPOSTOR% team must be eliminated, and %LOVER% whose partner is still alive are not counted in jackal team."
+"document.tip.winCond.jackal.kill" : "Jackals win when jackal team players account for more than half of all alive players. <br>%LOVER% whose partner is still alive are not counted in jackal team."
 "document.tip.winCond.jackal.extinction.title" : "Complete Domination Trigger"
 "document.tip.winCond.jackal.extinction" : "Jackals win when only jackal team players survive. <br>%LOVER% whose partner is still alive are not counted in jackal team."
 "document.tip.winCond.jester.title" : "Special Trigger"

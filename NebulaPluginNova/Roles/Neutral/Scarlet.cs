@@ -455,6 +455,7 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
     }
 
     static public ScarletLover MyRole = new ScarletLover();
+    Image? DefinedAssignable.IconImage => Scarlet.MyRole.GetRoleIcon();
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0), arguments.Get(1, 0) == 1);
 
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier

@@ -167,14 +167,12 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                         }
                     }
 
-                    
                     if (targetNighty)
                     {
                         MyPlayer.Unbox().RpcInvokerSetModifier(Modifier.Nighty.MyRole, []).InvokeSingle();
                         player.RpcInvokerUnsetModifier(Modifier.Nighty.MyRole).InvokeSingle();
                     }
                     
-
                     new NebulaRPCInvoker(() => MyPlayer.Unbox().UpdateTaskState()).InvokeSingle();
                 }
 

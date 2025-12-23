@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using Nebula.Roles.Modifier;
+using Virial.Assignable;
 
 namespace Nebula.Roles.Impostor;
 
@@ -12,7 +13,7 @@ public class DamnedImpostor : DefinedRoleTemplate, DefinedRole
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     bool DefinedAssignable.ShowOnHelpScreen => false;
-
+    Image? DefinedAssignable.IconImage => Damned.MyRole.GetRoleIcon();
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

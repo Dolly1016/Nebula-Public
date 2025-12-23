@@ -1,4 +1,5 @@
-﻿using Virial.Game;
+﻿using Rewired.Utils.Classes.Data;
+using Virial.Game;
 
 namespace Nebula.Map;
 
@@ -84,8 +85,8 @@ public class MiraData : MapData
         new(18.6f, 5.65f, MapObjectType.DepoisonBox), //ストレージ最奥
         ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    protected override Vector2[] MapArea => MapPositions;
-    protected override Vector2[] NonMapArea => [];
+    public override IReadOnlyList<Vector2> MapArea => MapPositions;
+    public override IReadOnlyList<Vector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };

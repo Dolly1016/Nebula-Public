@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -32,10 +33,13 @@ public class ConfigurationTab : IBit32
     private uint bitFlag;
     private string translateKey { get; init; }
     public Color Color { get; private init; }
-    internal ConfigurationTab(uint bitFlag, string translateKey, Color color)
+    private Func<bool>? visibility;
+    public bool IsVisible => visibility?.Invoke() ?? true;
+    internal ConfigurationTab(uint bitFlag, string translateKey, Color color, Func<bool>? visibility = null)
     {
         this.bitFlag = bitFlag;
         this.translateKey = translateKey;
+        this.visibility = visibility;
         Color = color;
     }
 

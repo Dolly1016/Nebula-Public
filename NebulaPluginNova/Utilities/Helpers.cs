@@ -554,4 +554,17 @@ public static class Helpers
 
         return Math.Cos(ScaledRepeatTime(speed));
     }
+
+    static private readonly Image whiteCircleSprite = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
+    static public void DisplayDot(Vector2 position, string rawText, Color color)
+    {
+        var renderer = UnityHelper.CreateSpriteRenderer("Dot", null, position.AsVector3(-10f));
+        renderer.sprite = whiteCircleSprite.GetSprite();
+        renderer.color = color;
+        var button = renderer.gameObject.SetUpButton();
+        button.SetRawOverlay("(" + position.x.ToString("F2") + ", " + position.y.ToString("F2") + ")<br>" + rawText);
+        var collider = button.gameObject.AddComponent<CircleCollider2D>();
+        collider.radius = 0.2f;
+        collider.isTrigger = true;
+    }
 }

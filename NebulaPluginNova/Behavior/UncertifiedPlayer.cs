@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Modules.Cosmetics;
 using Nebula.VoiceChat;
+using Virial;
 
 namespace Nebula.Behavior
 {
@@ -56,6 +57,7 @@ namespace Nebula.Behavior
             byte id = PlayerControl.LocalPlayer.PlayerId;
             RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash, Application.version));
             RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaAchievementManager.MyTitleData));
+            ModSingleton<ShowUp>.Instance?.ShareLocalAfk();
             DynamicPalette.RpcShareMyColor();
             NebulaAchievementManager.SendLastClearedAchievements();
             if (AmongUsClient.Instance.AmHost)

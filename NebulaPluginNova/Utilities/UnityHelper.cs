@@ -471,5 +471,20 @@ public static class UnityHelper
         material.SetTextureScale("_MainTex", new Vector2(tilingX, tilingY));
         material.SetTextureOffset("_MainTex", new Vector2(offsetX, offsetY));
     }
+
+    public static Sprite Move(this Sprite sprite, int moveX, int moveY)
+    {
+        var rect = sprite.rect;
+        var loader = new CacheSpriteLoader(() => sprite.texture.ToSprite(new Rect(rect.left + moveX, rect.right + moveX, rect.top + moveY, rect.bottom + moveY), sprite.pixelsPerUnit));
+        return loader.GetSprite();
+    }
+
+    public static bool MouseCursorIsInWindow(int xMargin = 0, int yMargin = 0)
+    {
+        Vector3 mousePos = Input.mousePosition;
+        bool inWidth = mousePos.x >= xMargin && mousePos.x <= Screen.width - xMargin;
+        bool inHeight = mousePos.y >= yMargin && mousePos.y <= Screen.height - yMargin;
+        return inWidth && inHeight;
+    }
 }
 

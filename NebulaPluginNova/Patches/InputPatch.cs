@@ -23,7 +23,7 @@ public static class KeyboardInputPatch
 
         if (KeyboardJoystick.player.GetButtonDown(6)) HudManager.Instance.UseButton.DoClick();
 
-        if (KeyboardJoystick.player.GetButtonDown(4) && !HudManager.Instance.Chat.IsOpenOrOpening)
+        if (KeyboardJoystick.player.GetButtonDown(4) && !HudManager.Instance.Chat.IsOpenOrOpening && (NebulaGameManager.Instance?.GameMode?.ShowMap ?? true))
             HudManager.Instance.ToggleMapVisible(GameManager.Instance.GetMapOptions());
 
         if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Kill).KeyDown && AdditionalConditions.CanKill) HudManager.Instance.KillButton.DoClick();

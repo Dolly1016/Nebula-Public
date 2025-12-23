@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
+using Nebula.Roles;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Virial.Media;
@@ -239,8 +240,8 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
                 Width = width,
                 Alignment = AlignmentOption.Center,
                 PostBuilder = (renderer) => {
-                    renderer.material = VanillaAsset.MapAsset[mapId].MapPrefab.ColorControl.gameObject.GetComponent<SpriteRenderer>().material;
-                    renderer.color = new Color(0.05f, 0.2f, 1f, 1f);
+                    renderer.material = VanillaAsset.GetMapMaterial();
+                    renderer.color = VanillaAsset.MapBlue;
 
                     var canvas = UnityHelper.CreateObject("OnMapContent", renderer.transform, new Vector3(0, 0, -1f));
                     var order = canvas.AddComponent<SortingGroup>();
@@ -277,6 +278,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         public float Generate(GameObject screen, Vector2 center, out float width)
         {
             var text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, screen.transform);
+            text.UseRoleIcon();
             TextAttribute.Reflect(text);
             text.text = MyText?.GetString() ?? "";
             text.transform.localPosition = center;
@@ -294,6 +296,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             var text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, screen.transform);
             TextAttribute.Reflect(text);
             if (!(TextAttribute.Size.x > 0)) text.rectTransform.sizeDelta = new Vector2(size.x, TextAttribute.Size.y);
+            text.UseRoleIcon();
             text.text = MyText?.GetString() ?? "";
             text.transform.localPosition = ReflectAlignment(Alignment, TextAttribute.Size, cursor, size);
             text.sortingOrder = 10;
@@ -328,6 +331,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         {
             var text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, screen.transform);
             TextAttribute.Reflect(text);
+            text.UseRoleIcon();
             text.text = MyText?.GetString() ?? "";
             text.transform.localPosition = center;
             text.sortingOrder = 10;
@@ -351,6 +355,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             var text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, screen.transform);
             TextAttribute.Reflect(text);
             if (!(TextAttribute.Size.x > 0)) text.rectTransform.sizeDelta = new Vector2(size.x, TextAttribute.Size.y);
+            text.UseRoleIcon();
             text.text = MyText?.GetString() ?? "";
             text.sortingOrder = 10;
 
@@ -402,24 +407,26 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         }
 
         public float TextMargin = 0.26f;
+        public float TextHorizonotalExtraMargin = 0f;
 
         private void Generate(SpriteRenderer button,out PassiveButton passiveButton,out TMPro.TextMeshPro text)
         {
             button.sprite = VanillaAsset.TextButtonSprite;
             button.drawMode = SpriteDrawMode.Sliced;
             button.tileMode = SpriteTileMode.Continuous;
-            button.size = TextAttribute.Size + new Vector2(TextMargin * 0.84f, TextMargin * 0.84f);
+            button.size = TextAttribute.Size + new Vector2(TextMargin * 0.84f + TextHorizonotalExtraMargin, TextMargin * 0.84f);
             button.gameObject.layer = LayerExpansion.GetUILayer();
             button.gameObject.AddComponent<SortingGroup>();
 
             text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, button.transform);
+            text.UseRoleIcon();
             TextAttribute.Reflect(text);
             text.text = Text?.GetString() ?? "";
             text.transform.localPosition = new Vector3(0,0,-0.1f);
             text.sortingOrder = 15;
 
             var collider = button.gameObject.AddComponent<BoxCollider2D>();
-            collider.size = TextAttribute.Size + new Vector2(TextMargin * 0.6f, TextMargin * 0.6f);
+            collider.size = TextAttribute.Size + new Vector2(TextMargin * 0.6f + TextHorizonotalExtraMargin, TextMargin * 0.6f);
             collider.isTrigger = true;
 
             passiveButton = button.gameObject.SetUpButton(true, button, Color);
@@ -434,7 +441,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             Generate(renderer,out var button,out var text);
             PostBuilder?.Invoke(button, renderer, text);
 
-            width = TextAttribute.Size.x + TextMargin;
+            width = TextAttribute.Size.x + TextMargin + TextHorizonotalExtraMargin;
 
             return TextAttribute.Size.y + TextMargin;
         }
@@ -442,7 +449,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
         {
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("Button", screen.transform, 
-                ReflectAlignment(Alignment, TextAttribute.Size + new Vector2(TextMargin, TextMargin), cursor, size));
+                ReflectAlignment(Alignment, TextAttribute.Size + new Vector2(TextMargin + TextHorizonotalExtraMargin, TextMargin), cursor, size));
             renderer.sortingOrder = 5;
             Generate(renderer, out var button, out var text);
             PostBuilder?.Invoke(button, renderer, text);

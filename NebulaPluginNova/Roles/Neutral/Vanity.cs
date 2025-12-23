@@ -11,6 +11,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
+using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
@@ -117,9 +118,8 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole
                         lockSprite = null;
                     }
                 }, killButton);
-
-                MyPlayer.FeelBeTrueCrewmate = !amAware;
             }
+            MyPlayer.FeelBeTrueCrewmate = !amAware;
         }
 
         [Local]
@@ -194,6 +194,7 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole
         {
             if (!IndependentTeamOption) return;
             if (MyPlayer.IsDead) return;
+            if (!(ev.Game.GameMode?.AllowSpecialGameEnd ?? false)) return;
 
             //他陣営が生き残っていれば勝利しない
             if (GameOperatorManager.Instance?.Run(new KillerTeamCallback(MyTeam)).RemainingOtherTeam ?? false) return;
@@ -209,7 +210,7 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole
                 if (p.Role.Role == MyRole) vanities++;
             }
 
-            if (1 <= totalAlive && vanities == 1) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.VanityWin, GameEndReason.Situation, BitMasks.AsPlayer().Add(MyPlayer));
+            if (totalAlive <= 2 && vanities == 1) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.VanityWin, GameEndReason.Situation, BitMasks.AsPlayer().Add(MyPlayer));
         }
 
 
@@ -229,8 +230,15 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole
             (Sheriff.MyRole as DefinedRole).DisplayColoredName;
 
         IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => ShouldShowVanityRole ? [MyRole] : [Sheriff.MyRole];
+        (Image, Virial.Color?, Virial.Color?)? RuntimeAssignable.OverriddenRoleIcon => (Sheriff.MyRole.GetRoleIcon()!, (Sheriff.MyRole as DefinedRole).Color, null);
         RoleTaskType RuntimeRole.TaskType => amAware ? RoleTaskType.NoTask : RoleTaskType.CrewmateTask;
         bool RuntimeAssignable.MyCrewmateTaskIsIgnored => true;
     }
 }
 
+[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
+internal class VanityCriteria : AbstractModule<IGameModeStandard>, IGameOperator
+{
+    static VanityCriteria() => DIManager.Instance.RegisterModule(() => new JackalCriteria().Register(NebulaAPI.CurrentGame!));
+
+}

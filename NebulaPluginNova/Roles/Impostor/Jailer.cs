@@ -118,7 +118,7 @@ public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocat
     }
     string DefinedAssignable.InternalName => "jailerModifier";
     string DefinedAssignable.GeneralBlurb => (Jailer.MyRole as DefinedAssignable).GeneralBlurb;
-
+    Image? DefinedAssignable.IconImage => Jailer.MyRole.GetRoleIcon();
   
     int HasAssignmentRoutine.AssignPriority => 2;
 

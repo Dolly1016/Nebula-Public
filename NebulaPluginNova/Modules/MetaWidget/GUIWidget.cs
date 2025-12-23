@@ -280,6 +280,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.MarketplacePublishButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBold)) { FontSize = new(2.2f, 0.6f, 2.2f), Size = new(0.95f, 0.17f) },
                 AttributeAsset.MarketplaceCategoryButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBoldNonFlexible)) { FontSize = new(1.5f, 0.6f, 1.5f), Size = new(0.95f, 0.32f) },
                 AttributeAsset.MarketplaceTabButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBoldNonFlexible)) { FontSize = new(1.5f, 0.6f, 1.5f), Size = new(1.3f, 0.35f) },
+                AttributeAsset.MarketplaceTabNonMaskedButton => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldNonFlexible)) { FontSize = new(1.5f, 0.6f, 1.5f), Size = new(1.3f, 0.35f) },
 
                 AttributeAsset.MeetingTitle => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f,0.6f,1.8f), Size = new(2f,0.5f) },
                 AttributeAsset.VersionShower => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.Barlow), Virial.Text.FontStyle.Normal, new(1.28f, false), new(1f, 0.4f), new(255, 255, 255), true),
@@ -312,6 +313,8 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeTemplateFlag.FontStandard => FontAsset.GothicMasked,
                 AttributeTemplateFlag.FontOblong | AttributeTemplateFlag.MaterialBared => FontAsset.Oblong,
                 AttributeTemplateFlag.FontOblong => FontAsset.OblongMasked,
+                AttributeTemplateFlag.FontBarlow | AttributeTemplateFlag.MaterialBared => FontAsset.Barlow,
+                AttributeTemplateFlag.FontBarlow => FontAsset.Barlow,
                 _ => FontAsset.GothicMasked,
             }
             );
@@ -361,7 +364,8 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
 
     public Virial.Media.GUIWidget VerticalHolder(GUIAlignment alignment, IEnumerable<Virial.Media.GUIWidget?> inner, float? fixedWidth = null) => new VerticalWidgetsHolder(alignment, inner) { FixedWidth = fixedWidth };
 
-    public Virial.Media.GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) => new NoSGUIImage(alignment, image, size, null, onClick, overlay) { IsMasked = true };
+    public Virial.Media.GUIWidget Image(GUIAlignment alignment, Image image, FuzzySize size, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null, bool isMasked = true) => new NoSGUIImage(alignment, image, size, null, onClick, overlay) { IsMasked = isMasked };
+    public Virial.Media.GUIWidget RoleIcon(GUIAlignment alignment, DefinedAssignable? assignable, float outline, FuzzySize size, float? white = null, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null, bool isMasked = true) => new NoSGUIImage(alignment, assignable?.GetRoleIcon(), size, null, onClick, overlay) { IsMasked = isMasked, PostBuilder = renderer => renderer.material = Nebula.Roles.RoleIcon.GetRoleIconMaterial(assignable, outline, white)};
 
     public Virial.Media.GUIWidget ScrollView(GUIAlignment alignment, Size size, string? scrollerTag, Virial.Media.GUIWidget? inner, out Artifact<GUIScreen> artifact) {
         var result = new GUIScrollView(alignment, size.ToUnityVector(), inner) { ScrollerTag = scrollerTag, WithMask = true };

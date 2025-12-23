@@ -470,8 +470,9 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             var obj = new GameObject("ElecBarrior");
             var meshFilter = obj.AddComponent<MeshFilter>();
             var meshRenderer = obj.AddComponent<MeshRenderer>();
-            var colliderObj = UnityHelper.CreateObject("Collider", obj.transform, Vector3.zero, LayerExpansion.GetShipLayer());
+            var colliderObj = UnityHelper.CreateObject(MapData.NonMapColliderName, obj.transform, Vector3.zero, LayerExpansion.GetShipLayer());
             var collider = colliderObj.AddComponent<EdgeCollider2D>();
+            collider.tag = MapData.NonMapColliderName;
 
             //UV座標を更新
             void UpdateUV(int num)

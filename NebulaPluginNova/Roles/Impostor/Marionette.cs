@@ -209,10 +209,10 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
                     NebulaManager.Instance.ScheduleDelayAction(() =>
                     {
                         NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.DecoyPlacementAction);
+                        destroyButton.InterruptEffect();
 
                         SpawnDecoy();
 
-                        destroyButton.InterruptEffect();
                         destroyButton.StartEffect();
                     });
                     placeButton.StartCoolDown();

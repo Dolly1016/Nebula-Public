@@ -118,7 +118,7 @@ public static class HudManagerCoStartGamePatch
             DestroyableSingleton<HudManager>.Instance.FullScreen.transform.localPosition = new Vector3(0f, 0f, -250f);
 
             //スタンプの位置を変更
-            StampHelpers.SetStampShowerToUnderHud(HudManager.Instance.transform, -505f, () => !GameManager.Instance.GameHasStarted);
+            StampHelpers.SetStampShowerToUnderHud(() => !GameManager.Instance.GameHasStarted);
 
             yield return DestroyableSingleton<HudManager>.Instance.ShowEmblem(true);
             IntroCutscene introCutscene = GameObject.Instantiate<IntroCutscene>(__instance.IntroPrefab, __instance.transform);

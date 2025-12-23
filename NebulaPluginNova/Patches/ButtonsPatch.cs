@@ -64,7 +64,7 @@ public static class HudActivePatch
     {
         __instance.UpdateHudContent();
 
-        __instance.UseButton.transform.parent.gameObject.SetActive(isActive);
+        __instance.UseButton.transform.parent.gameObject.SetActive((NebulaGameManager.Instance?.GameMode?.ShowButtons ?? true) && isActive);
         __instance.TaskPanel.gameObject.SetActive(isActive);
         __instance.roomTracker.gameObject.SetActive(isActive);
         __instance.joystick?.ToggleVisuals(isActive);

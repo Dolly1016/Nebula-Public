@@ -31,6 +31,8 @@ public class Echo : DefinedSingleAbilityRoleTemplate<Echo.Ability>, DefinedRole
     static public readonly Echo MyRole = new();
     static private readonly GameStatsEntry StatsPlayers = NebulaAPI.CreateStatsEntry("stats.echo.players", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsActions = NebulaAPI.CreateStatsEntry("stats.echo.actions", GameStatsCategory.Roles, MyRole);
+
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
 

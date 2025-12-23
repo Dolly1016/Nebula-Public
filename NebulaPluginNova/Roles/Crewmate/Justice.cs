@@ -261,7 +261,7 @@ public class JusticeMeetingHud : MonoBehaviour
     public void Begin(GamePlayer player1, GamePlayer player2, Action onMeetingStart)
     {
         int photoIndex1 = player1.PlayerId % PhotoData.Length;
-        int photoIndex2 = (photoIndex1 + ((player2.PlayerId + 1) % (PhotoData.Length - 2))) % PhotoData.Length;
+        int photoIndex2 = (photoIndex1 + 1 + ((player2.PlayerId + 1) % (PhotoData.Length - 3))) % PhotoData.Length;
         StartCoroutine(SetUpJusticeMeeting(MeetingHud.Instance, player1, player2, onMeetingStart, photoIndex1, photoIndex2).WrapToIl2Cpp());
     }
 
@@ -602,6 +602,7 @@ public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCit
                 MeetingModRpc.RpcChangeVotingStyle.LocalInvoke(((1 << message.p1.PlayerId) | (1 << message.p2.PlayerId), false, Justice.JusticeMeetingTimeOption, true, false));
             });
         });
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility

@@ -71,7 +71,7 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
                     .SetAsUsurpableButton(this);
                 lanternButton.OnEffectStart = (button) =>
                 {
-                    CombinedRemoteProcess.CombinedRPC.Invoke(globalLanterns!.Select((id)=>RpcLantern.GetInvoker(id)).ToArray());
+                    CombinedRemoteProcess.CombinedRPC.Invoke(false, globalLanterns!.Select((id)=>RpcLantern.GetInvoker(id)).ToArray());
 
                     StatsLighting.Progress();
                     if (acTokenChallenge == null)

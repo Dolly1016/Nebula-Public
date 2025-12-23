@@ -1,4 +1,5 @@
 ﻿
+using Nebula.Roles;
 using TMPro;
 using Virial.Compat;
 using Virial.Media;
@@ -41,6 +42,7 @@ public class NoSGUIText : AbstractGUIWidget
         text.rectTransform.anchorMin = new UnityEngine.Vector2(0.5f, 0.5f);
         text.rectTransform.anchorMax = new UnityEngine.Vector2(0.5f, 0.5f);
         text.rectTransform.pivot = new UnityEngine.Vector2(0.5f, 0.5f);
+        text.UseRoleIcon();
         if (attr.Font != null)
         {
             text.font = attr.Font.Font;

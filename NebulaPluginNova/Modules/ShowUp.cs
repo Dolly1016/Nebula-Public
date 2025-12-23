@@ -1,5 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using Iced.Intel;
+using Nebula.Behavior;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using System;
@@ -99,9 +100,11 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
     static ShowUp() => DIManager.Instance.RegisterModule(() => new ShowUp());
     public ShowUp() => ModSingleton<ShowUp>.Instance = this;
 
+    static private readonly Image afkButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AFKButton.png", 115f);
     static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AppealButton.png", 115f);
     static private readonly Image playButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AchievementHistoryButton.png", 115f);
     static private readonly Image iconSprite = SpriteLoader.FromResource("Nebula.Resources.AppealIcon.png", 100f);
+    static private readonly Image afkSprite = SpriteLoader.FromResource("Nebula.Resources.AFKIcon.png", 100f);
 
     private PickedUpArchive? pickedUpArchive = null;
 
@@ -135,9 +138,22 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
 
     GameObject InLobbySetting = null!;
     public bool ShouldBeShownSocialSettings => ClientOption.ShowSocialSettingsOnLobby.Value || (CanAppealInGame || CanAppealInLobby);
+    private bool actualAfk = false;
     protected override void OnInjected(Virial.Game.Game container)
     {
         this.Register(container);
+
+        var lobbyLifespan = new FunctionalLifespan(() => NebulaGameManager.Instance!.GameState == NebulaGameStates.NotStarted);
+
+        var afkButton = new ModAbilityButtonImpl().Register(lobbyLifespan);
+        afkButton.SetSprite(afkButtonSprite.GetSprite());
+        afkButton.Availability = (button) => true;
+        afkButton.Visibility = (button) => LobbyBehaviour.Instance;
+        afkButton.OnClick = (button) =>
+        {
+            RpcAfk.Invoke((PlayerControl.LocalPlayer.PlayerId, !LocalPlayerIsAfk));
+        };
+        afkButton.SetLabel("afk");
 
         var showUpButton = new ModAbilityButtonImpl(true).RegisterPermanently();
         showUpButton.SetSprite(buttonSprite.GetSprite());
@@ -152,7 +168,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         showUpButton.SetLabel("appeal");
 
         bool fired = false;
-        var playButton = new ModAbilityButtonImpl(true).RegisterPermanently();
+        var playButton = new ModAbilityButtonImpl(true).Register(lobbyLifespan);
         playButton.SetSprite(playButtonSprite.GetSprite());
         playButton.Availability = (button) => true;
         playButton.Visibility = (button) => LobbyBehaviour.Instance && NebulaAchievementManager.HasAnyAchievementResult && AmongUsClient.Instance.AmHost && !fired;
@@ -196,6 +212,33 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
             var sent = lastClearedAchievementsQueue.Dequeue();
             RpcSendLastCleared.Invoke((sent.playerName, sent.achievement));
         }
+
+        if (LocalPlayerIsAfk)
+        {
+            if (Input.anyKey)
+            {
+                if (actualAfk)
+                {
+                    RpcAfk.Invoke((PlayerControl.LocalPlayer.PlayerId, false));
+                    actualAfk = false;
+                }
+            }
+            else
+            {
+                actualAfk = true;
+            }
+        }
+        else
+        {
+            actualAfk = false;
+        }
+    }
+
+    void OnGameStart(GameStartEvent ev)
+    {
+        if (LocalPlayerIsAfk) RpcAfk.LocalInvoke((PlayerControl.LocalPlayer.PlayerId, false));
+        foreach (var afk in afkList) if (afk.renderer) GameObject.Destroy(afk.renderer.gameObject);
+        afkList.Clear();
     }
 
     public PlayerControl? CurrentShowUp { get; private set; } = null;
@@ -264,6 +307,66 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         pickedUpArchive?.TryAdd(playerName, achievements);
     }
 
+    private List<(PlayerControl player, SpriteRenderer renderer)> afkList = [];
+    internal bool AllPlayerIsNotAfk => afkList.Count == 0 || afkList.All(entry => !entry.player);
+    internal bool AnyPlayerIsAfk => !AllPlayerIsNotAfk;
+    private bool LocalPlayerIsAfk => afkList.Any(entry => entry.player && entry.player.AmOwner);
+    internal void SetAfk(byte playerId, bool afk)
+    {
+        var player = Helpers.GetPlayer(playerId);
+        if (player == null) return;
+
+        if (afk)
+        {
+            if (afkList.Any(entry => entry.player == player)) return;
+
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("AFKIcon", player.transform, new(0f, 0f, -0.5f));
+            renderer.sprite = afkSprite.GetSprite();
+            IEnumerator CoUpdateIcon()
+            {
+                float time = 0f;
+                float interval = 2f;
+                float p = 0f;
+                while (renderer)
+                {
+                    time += Time.deltaTime;
+                    interval -= Time.deltaTime;
+                    renderer.transform.localPosition = new(0f, Mathn.Sin(time * 0.7f) * 0.08f, -0.5f);
+                    float scale = Mathn.Sin(p * Mathn.PI) * 0.23f + 1f;
+                    renderer.transform.localScale = new(scale, scale, 1f);
+                    renderer.transform.localEulerAngles = new(0f, 0f, p * 360f);
+                    p -= p.Delta(5f, 0.04f);
+                    if (p < 0f) p = 0f;
+                    if(interval < 0f)
+                    {
+                        interval = System.Random.Shared.NextSingle() * 5f + 5f;
+                        p = 1f;
+                    }
+                    yield return null;
+                }
+            }
+            CoUpdateIcon().StartOnScene();
+            afkList.Add((player, renderer));
+        }
+        else
+        {
+            afkList.RemoveAll(entry => { 
+                if(entry.player == player)
+                {
+                    GameObject.Destroy(entry.renderer.gameObject);
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+
+    internal void ShareLocalAfk()
+    {
+        if (LocalPlayerIsAfk) RpcAfk.Invoke((PlayerControl.LocalPlayer.PlayerId, true));
+    }
+
+
     public static RemoteProcess<(bool inLobby, bool inGame, bool canUseStamps, bool canUseEmotes)> RpcShareSocialSettings = new(
         "ShareSocialSetting",
         (message, _) =>
@@ -281,6 +384,17 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
             ModSingleton<ShowUp>.Instance.ShowPlayer(Helpers.GetPlayer(message.playerId), message.angle, message.duration);
         }
         );
+
+    public static RemoteProcess<(byte playerId, bool afk)> RpcAfk = new(
+        "Afk",
+        (message, calledByMe) =>
+        {
+            ModSingleton<ShowUp>.Instance?.SetAfk(message.playerId, message.afk);
+            if (calledByMe)
+            {
+                NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetPivot(new(0.5f, 0.5f)).SetText(message.afk ? $"<size=180%>{Language.Translate("ui.afk.title")}</size><br><br><size=75%>{Language.Translate("ui.afk.detail")}</size>" : "", new(0.9f, 0.5f, 0.2f), message.afk ? 99999f : 1f);
+            }
+        });
 
     public static RemoteProcess<byte> RpcRequestShowUp = new(
         "RequestShowUp",

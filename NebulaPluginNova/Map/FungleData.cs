@@ -1,4 +1,6 @@
-﻿using Virial.Game;
+﻿using Hazel;
+using Rewired.Utils.Classes.Data;
+using Virial.Game;
 
 namespace Nebula.Map;
 
@@ -30,15 +32,15 @@ public class FungleData : MapData
         //ミーティング・ドーム
         new(-0.15f,-1.77f),new(-4.65f,1.58f),new(-4.8f,-1.44f),
         //ラボ
-        new(-7.1f,-11.9f),new(-4.5f,-6.8f),new(-3.3f,-8.9f),new(-5.4f,-10.2f),
+        new(-2.7f, -12.1f), new(-7.3f, -9.1f), new(-4.5f,-6.8f),new(-3.3f,-8.9f),new(-5.4f,-10.2f),
         //ジャングル(左)
-        new(-1.44f,-13.3f),new(3.8f,-12.5f),
+        new(-1.44f,-13.3f),
         //ジャングル(中)
-        new(7.08f,-15.3f),new(11.6f,-14.3f),
+        new(11.6f,-14.3f), new(10.78f, -15.96f),
         //ジャングル(上)
         new(2.7f,-6.0f),new(12.1f,-7.3f),
         //グリーンハウス・ジャングル
-        new(13.6f,-12.1f),new(6.4f,-10f),
+        new(13.6f,-12.1f),new(6.4f,-9.9f),
         //ジャングル(右)
         new(15.0f,-6.7f),new(18.1f,-9.1f),
         //ジャングル(下)
@@ -56,6 +58,15 @@ public class FungleData : MapData
         //コミュ
         new(20.9f,10.8f),new(24.1f,13.2f),new(17.9f,12.7f),
         ];
+    static private readonly Vector2[] nonClassicMapPos = [
+        new(3.8f,-12.5f),new(7.08f,-15.3f),
+        ];
+    static private readonly Vector2[] classicMapPos = [
+        new(0.35f, -10.8f), new(12.65f, 4.00f),
+        ];
+
+    static private readonly Vector2[] combinedNonClassicMapPos = [.. MapPositions, .. nonClassicMapPos];
+    static private readonly Vector2[] combinedClassicMapPos = [.. MapPositions, .. classicMapPos];
 
     //先頭の部屋ほど優先される
     static private readonly (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
@@ -139,14 +150,17 @@ public class FungleData : MapData
         new(14.7f, -17.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ジャングル下方
         new(10.6f, -8.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //温室上
         new(13.4f, -12.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //温室右
-        new(7.7f, -14.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //温室下
         new(5.8f, -7.4f, MapObjectType.Reachable), //温室左上
+        ];
+    static private readonly MapObjectPoint[] nonClassicObjectPoints = [
+        new(7.7f, -14.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //温室下
         new(3.7f, -13.1f, MapObjectType.Reachable), //温室左下
         new(2.3f, -11.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ温室間
         ];
-    public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    protected override Vector2[] MapArea => MapPositions;
-    protected override Vector2[] NonMapArea => [];
+
+    public override MapObjectPoint[] MapObjectPoints => GeneralConfigurations.FungleForClassicGameOption.Value ? mapObjectPoints : [..mapObjectPoints, ..nonClassicObjectPoints];
+    public override IReadOnlyList<Vector2> MapArea => GeneralConfigurations.FungleForClassicGameOption.Value ? combinedClassicMapPos : combinedNonClassicMapPos;
+    public override IReadOnlyList<Vector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => [SystemTypes.Reactor, SystemTypes.Comms];
@@ -191,6 +205,32 @@ public class FungleData : MapData
             return WindType.FungleHighlands;
         }
         return WindType.NoWind;
+    }
+
+    NavVerticesStructure? normalNav = null, modifiedNav = null;
+    public override NavVerticesStructure MapNavData
+    {
+        get
+        {
+            if (GeneralConfigurations.FungleForClassicGameOption.Value)
+            {
+                if (modifiedNav == null)
+                {
+                    using var stream = StreamHelper.OpenFromResource("Nebula.Resources.Pathfinding.fungleModified.json");
+                    if (stream != null) modifiedNav = JsonStructure.Deserialize<NavVerticesStructure>(stream);
+                }
+                return modifiedNav!;
+            }
+            else
+            {
+                if (normalNav == null)
+                {
+                    using var stream = StreamHelper.OpenFromResource("Nebula.Resources.Pathfinding.fungle.json");
+                    if (stream != null) normalNav = JsonStructure.Deserialize<NavVerticesStructure>(stream);
+                }
+                return normalNav!;
+            }
+        }
     }
 
     public override (SystemTypes room, Vector2 pos)[] AdminRooms { get; } = [

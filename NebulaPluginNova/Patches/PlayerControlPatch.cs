@@ -840,7 +840,7 @@ public static class PlayerPhysicsPatch
             var ev = GameOperatorManager.Instance?.Run(new PlayerFixZPositionEvent(__instance.myPlayer.GetModInfo()!, position.y));
             if (ev != null)
             {
-                __instance.transform.SetWorldZ(ev.Z.HasValue ? ev.Z.Value : ev.Y / 1000f);
+                __instance.transform.SetWorldZ(ev.CalcZ);
             }
             return false;
         }

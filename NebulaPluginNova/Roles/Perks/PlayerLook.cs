@@ -45,7 +45,7 @@ internal class PlayerLook : PerkFunctionalInstance
                     new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), new TranslateTextComponent("perk."+PerkDefinition.localizedName +".ui.title")),
                     new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent),
                     new RawTextComponent(textGenerator.Invoke(p.MyPlayer))))
-                    , upperImage, PerkDefinition.perkColor.RGBMultiplied(0.7f));
+                    , upperImage, new(PerkDefinition.perkColor.RGBMultiplied(0.7f)));
 
                },
                p => !used && predicate.Invoke(p.MyPlayer) && !MyPlayer.IsDead && !p.MyPlayer.AmOwner

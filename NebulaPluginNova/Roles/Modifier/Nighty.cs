@@ -13,7 +13,6 @@ using Virial.Text;
 
 namespace Nebula.Roles.Modifier;
 
-
 internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, HasCitation
 {
     private Nighty() : base("nighty", "NHT", new(Palette.ImpostorRed), [PlaceCooldownOption, MineSizeOption, MineDurationOption, BlindDurationOption], allocateToCrewmate: false, allocateToNeutral: false)
@@ -62,16 +61,15 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
             }
         }
 
-        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (isShort) return null;
-            return (this as RuntimeModifier).DisplayColoredName + " " + lastRoleName;
+            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTag();
         }
 
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if(ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && usedBombCounter >= 8 && GamePlayer.AllPlayers.All(p => !p.IsImpostor || p.IsAlive) && ev.EndState.Winners.Test(MyPlayer))
+            if(ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && usedBombCounter >= 8 && GamePlayer.AllPlayers.Count(p => p.IsImpostor) >= 2 && GamePlayer.AllPlayers.All(p => !p.IsImpostor || p.IsAlive) && ev.EndState.Winners.Test(MyPlayer))
             {
                 HashSet<CommunicableTextTag> states = [];
                 foreach(var p in GamePlayer.AllPlayers)

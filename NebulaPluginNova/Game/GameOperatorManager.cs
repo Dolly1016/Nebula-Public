@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Hazel;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Virial;
@@ -194,11 +195,10 @@ public class GameOperatorManager
             DoSingleOperation(ev, ev.GetType());
 
         //イベントを通して発生したゲーム終了をチェックする。
-        if(needToCheckGameEnd) NebulaGameManager.Instance?.CriteriaManager.CheckAndTriggerGameEnd();
+        if (needToCheckGameEnd) WinCheckBlocker.TryCheckGameEnd();
 
         return ev;
     }
-
 
     // 作用素の反復中にこれを呼び出さないこと(InvalidOperationExceptionが発生する)
     public void Update()
@@ -382,4 +382,46 @@ public static class GameOperatorHelpers
         GameOperatorManager.Instance?.RegisterOnReleased(() => { if (obj) GameObject.Destroy(obj); }, lifespan, null);
         return obj;
     }
+}
+
+public static class WinCheckBlocker
+{
+    public class WinCheckSection : IDisposable
+    {
+        public string Name;
+        public bool blockedCheckWinning = false;
+        public void Dispose()
+        {
+            if (currentSection != this) return;
+            currentSection = null;
+            if (blockedCheckWinning) CheckGameEnd();
+        }
+
+        public WinCheckSection(string? name = null)
+        {
+            Name = name ?? "Untitled";
+            if (currentSection == null) currentSection = this;
+        }
+    }
+
+    static public WinCheckSection CreateSection(string? label = null) => new WinCheckSection(label);
+
+    static WinCheckSection? currentSection = null;
+
+    internal static void TryCheckGameEnd()
+    {
+        if (currentSection != null)
+        {
+            currentSection.blockedCheckWinning = true;
+        }
+        else
+        {
+            CheckGameEnd();
+        }
+    }
+    private static void CheckGameEnd()
+    {
+        NebulaGameManager.Instance?.CriteriaManager.CheckAndTriggerGameEnd();
+    }
+
 }

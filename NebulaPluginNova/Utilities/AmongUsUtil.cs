@@ -161,6 +161,7 @@ public static class AmongUsUtil
     public static float VanillaKillCoolDown => GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
     public static float VanillaKillDistance => GameManager.Instance.LogicOptions.GetKillDistance();
     public static bool InCommSab => PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer);
+    public static bool InElecSab => PlayerTask.PlayerHasTaskOfType<ElectricTask>(PlayerControl.LocalPlayer);
     public static bool InAnySab => PlayerTask.PlayerHasTaskOfType<SabotageTask>(PlayerControl.LocalPlayer);
     public static PoolablePlayer PoolablePrefab => HudManager.Instance.IntroPrefab.PlayerPrefab;
     public static PoolablePlayer GetPlayerIcon(OutfitCandidate outfit, Transform? parent, Vector3 position, Vector3 scale, bool flip = false, bool includePet = true)

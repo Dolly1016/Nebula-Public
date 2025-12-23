@@ -98,7 +98,7 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
             {
                 inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllRoles.Where(r => r.ShowOnFreeplayScreen).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
                 {
-                    GamePlayer.LocalPlayer?.SetRole(r);
+                    GamePlayer.LocalPlayer?.SetRole(r, r.DefaultAssignableArguments);
                     window.CloseScreen();
                 }))
                     /*

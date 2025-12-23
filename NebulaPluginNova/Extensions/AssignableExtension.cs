@@ -13,13 +13,12 @@ internal static class AssignableExtension
 {
     public static void ActivateAssignable(this RuntimeAssignable assignable)
     {
+        if(assignable is RuntimeRole) assignable.MyPlayer.FeelBeTrueCrewmate = false;
+
         assignable.OnActivated();
         (assignable as IGameOperator)?.Register(assignable);
         if (assignable is RuntimeRole role)
-        {
             GameOperatorManager.Instance?.Run(new PlayerRoleSetEvent(assignable.MyPlayer, role));
-            assignable.MyPlayer.FeelBeTrueCrewmate = false;
-        }
         else if (assignable is RuntimeModifier modifier)
             GameOperatorManager.Instance?.Run(new PlayerModifierSetEvent(assignable.MyPlayer, modifier));
     }

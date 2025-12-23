@@ -35,6 +35,8 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
 
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     static public readonly Creeping MyRole = new();
+    static private readonly GameStatsEntry StatsPoison = NebulaAPI.CreateStatsEntry("stats.creeping.poison", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsDepoison = NebulaAPI.CreateStatsEntry("stats.creeping.depoison", GameStatsCategory.Roles, MyRole);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
@@ -45,12 +47,16 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
         {
             if (AmOwner)
             {
+                List<GamePlayer> poisonedInPoison = [];
+
                 var poisonTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeLocalKillablePredicate.Invoke(p) && !ModSingleton<DepoisonBoxManager>.Instance.PoisonedTo(p.RealPlayer));
                 var poisonButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, poisonTracker, Virial.Compat.VirtualKeyInput.Ability, "creeping.poison",
                     PoisonCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "poison", buttonSprite, (target, button) =>
                     {
                         if (GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, target, new(RealPlayerOnly: true))).IsCanceled ?? true) return;
 
+                        StatsPoison.Progress();
+                        if (ModSingleton<DepoisonBoxManager>.Instance?.AmPoisoned ?? false) poisonedInPoison.Add(target.RealPlayer);
                         DepoisonBoxManager.RpcPoison.Invoke((MyPlayer, target.RealPlayer));
                         if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySoundImmediate(ViperAudio, false);
                         MyPlayer.VanillaPlayer.NetTransform.RpcSnapTo(target.RealPlayer.VanillaPlayer.transform.position);
@@ -58,6 +64,18 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                     }).SetAsUsurpableButton(this);
                 (poisonButton.CoolDownTimer as GameTimer)?.SetAsKillCoolTimer();
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(poisonButton.GetKillButtonLike());
+
+
+                GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
+                    var lastDead = NebulaGameManager.Instance?.LastDead;
+                    if (lastDead == null) return;
+                    if (lastDead.MyKiller?.AmOwner ?? false) return;
+                    if (lastDead.PlayerState != PlayerState.Poisoned) return;
+                    if (GamePlayer.AllPlayers.All(p => p.AmOwner == p.IsAlive) && (poisonedInPoison.Contains(lastDead) || (ModSingleton<DepoisonBoxManager>.Instance?.AmPoisoned ?? false)))
+                    {   
+                        new StaticAchievementToken("creeping.challenge");
+                    }
+                }, this);
             }
         }
 
@@ -68,6 +86,23 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                 if (!field) field = GameManager.Instance.deadBodyPrefab[1].CastFast<ViperDeadBody>().acidSplashSFX;
                 return field;
             }
+        }
+
+        [OnlyMyPlayer, Local]
+        private void OnMurderedAnyone(PlayerKillPlayerEvent ev)
+        {
+            var currentTime = NebulaGameManager.Instance?.CurrentTime ?? 0f;
+            if (GamePlayer.AllPlayers.Any(p => p != ev.Dead && p.IsDead && p.DeathTime + 2f > currentTime && (p.MyKiller?.AmOwner ?? false))) new StaticAchievementToken("creeping.common2");
+            if (ev.Dead.PlayerState == PlayerState.Poisoned) {
+                new StaticAchievementToken("creeping.common1");
+                if (MeetingHud.Instance) NebulaAchievementManager.RpcProgressStats.Invoke(("creeping.another1", ev.Dead));
+            }
+        }
+
+        [Local]
+        private void OnGameEnd(GameEndEvent ev)
+        {
+            if (MyPlayer.IsAlive && ev.EndState.Winners.Test(MyPlayer) && MeetingHud.Instance) new StaticAchievementToken("creeping.common3");
         }
     }
 
@@ -262,6 +297,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                     var doneSfx = VanillaAsset.MapAsset[5].CommonTasks[3].MinigamePrefab.CastFast<MultistageMinigame>().Stages[1].CastFast<RoastMarshmallowFireMinigame>().sfxMarshmallowDone;
                     SoundManager.Instance.PlaySoundImmediate(doneSfx, false, 1.5f, 1f, null);
                 }
+                StatsDepoison.Progress();
                 DepoisonBoxManager.RpcDepoison.Invoke(GamePlayer.LocalPlayer!);
                 base.StartCoroutine(base.CoStartClose(0.5f));
             }

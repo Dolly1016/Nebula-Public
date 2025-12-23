@@ -213,7 +213,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             {
                 if (GeneralConfigurations.LoversRadioOption)
                 {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.loversRadio"), 2, p => p == MyLover, this, MyRole.UnityColor);
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.loversRadio"), 2, p => p == MyLover.Get(), this, MyRole.UnityColor);
                 }
             }
         }

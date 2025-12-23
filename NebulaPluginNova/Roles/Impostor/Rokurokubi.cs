@@ -606,6 +606,10 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 }
                 meshRenderer.localBounds = new(Vector3.zero, new(8f, 8f, 0f));
             }
+            else
+            {
+                UpdateColors(meshFilter);
+            }
 
             void UpdateColors(MeshFilter meshFilter)
             {
@@ -633,7 +637,11 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             longBoi.cosmeticLayer.FlippedCosmeticOffset = offset;
             longBoi.myPlayerControl.MyPhysics.Animations.UpdateCosmeticOffset(offset, offset);
             longBoi.cosmeticLayer.UpdateCosmeticOffset(num, false);
+
+            lastHeadY = longBoi.headSprite.transform.position.y;
         }
+
+        private float lastHeadY = 0f;
 
         [OnlyMyPlayer]
         void OnFixZ(PlayerFixZPositionEvent ev)
@@ -643,8 +651,11 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 var longBoi = GetLongBody(MyPlayer);
                 if (longBoi)
                 {
-                    var y = longBoi.headSprite.transform.position.y;
-                    if (ev.Y > y) ev.Y = y;
+                    var y = lastHeadY;
+                    if (ev.Y > y)
+                    {
+                        ev.Y = y;
+                    }
                 }
             }
         }

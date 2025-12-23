@@ -19,6 +19,8 @@ public static class MainMenuSetUpPatch
 
     static void Postfix(MainMenuManager __instance)
     {
+        VanillaAsset.LoadOnMainMenu(__instance);
+
         MainMenuManagerInstance.SetPrefab(__instance);
 
         var scalerList = __instance.mainMenuUI.GetComponent<SlicedAspectScaler>();
@@ -51,10 +53,13 @@ public static class MainMenuSetUpPatch
         reworkedPanel.size = oldPanel.size + new Vector2(0f, 0.5f);
         leftPanel.gameObject.GetComponent<AspectScaledAsset>().AddScaledSprite(reworkedPanel);
         oldPanel.enabled = false;
-        
+
         //CreditsとQuit以外のボタンを上に寄せる
         foreach (var button in __instance.mainButtons.GetFastEnumerator())
+        {
             if (Math.Abs(button.transform.localPosition.x) < 0.1f) button.transform.localPosition += new Vector3(0f, height, 0f);
+        }
+
         leftPanel.FindChild("Main Buttons").FindChild("Divider").transform.localPosition += new Vector3(0f, height, 0f);
 
         var nebulaButton = GameObject.Instantiate(__instance.settingsButton, __instance.settingsButton.transform.parent);
@@ -87,6 +92,37 @@ public static class MainMenuSetUpPatch
         NebulaScreen.transform.GetChild(0).GetChild(0).GetComponent<TextTranslatorTMP>().SetModText("title.label.nebula");
         __instance.mainButtons.Add(nebulaButton);
         GameObject.Destroy(NebulaScreen.transform.GetChild(4).gameObject);
+
+        foreach (var button in __instance.mainButtons.GetFastEnumerator())
+        {
+            if (button.activeSprites)
+            {
+                var name = button.name;
+                bool shouldRotate = name != "NebulaButton" && name != "Inventory Button";
+                bool shouldMove = name != "NebulaButton";
+                var rendererTransform = button.activeSprites.transform.FindChild("Icon");
+                if (rendererTransform)
+                {
+
+                    if (shouldRotate) rendererTransform.localEulerAngles -= new Vector3(0f, 0f, 10f);
+                    rendererTransform.localScale += new Vector3(0.12f, 0.12f, 0f);
+
+                    if (shouldMove)
+                    {
+                        var aspectPos = rendererTransform.GetComponent<AspectPosition>();
+                        if (aspectPos)
+                        {
+                            aspectPos.DistanceFromEdge += new Vector3(-0.02f, 0.1f, 0f);
+                            aspectPos.AdjustPosition();
+                        }
+                        else
+                        {
+                            rendererTransform.localPosition += new Vector3(-0.02f, 0.1f, 0f);
+                        }
+                    }
+                }
+            }
+        }
 
         var temp = NebulaScreen.transform.GetChild(3);
         int index = 0;

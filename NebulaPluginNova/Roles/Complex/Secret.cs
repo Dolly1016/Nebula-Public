@@ -53,6 +53,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
     string DefinedAssignable.InternalName => IsEvil ? "evilSecret" : "niceSecret";
     string DefinedAssignable.DisplayName => "???";
 
+    Image? DefinedAssignable.IconImage => ShownSecret.OptionRole.GetRoleIcon();
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
     bool DefinedAssignable.ShowOnHelpScreen => false;
     bool IGuessed.CanBeGuessDefault => false;

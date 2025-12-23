@@ -55,6 +55,27 @@ public class CoActionTask<T> : CoTask<T>
     }
 }
 
+public class CoActionTask : CoTask<ICommandToken>
+{
+    public IEnumerator CoWait() {
+        if (!IsCompleted)
+        {
+            IsCompleted = true;
+            myAction.Invoke();
+        }
+        yield break; 
+    }
+    public bool IsCompleted { get; private set; } = false;
+    public bool IsFailed => false;
+    private Action myAction;
+    public ICommandToken Result => EmptyCommandToken.Token;
+
+    public CoActionTask(Action action)
+    {
+        myAction = action;
+    }
+}
+
 public class CoImmediateErrorTask<T> : CoTask<T>
 {
     ICommandLogger? logger;
@@ -305,16 +326,38 @@ public static class CoChainedTasksHelper
 
     public static CoTask<ICommandToken> DoParallel<T>(this CoTask<T> task, Func<T, CoTask<ICommandToken>>[] consumers, Action? onFailed = null)
     {
-        IEnumerator CoExecute(CoBuiltInTask<ICommandToken> myTask)
+        IEnumerator CoExecute()
         {
             var tasks = consumers.Select(c => c.Invoke(task.Result).CoWait().HighSpeedEnumerator()).ToArray();
             if(tasks.Length > 0) yield return tasks.WaitAll();
         }
-        return new CoChainedTask<ICommandToken, T>(task, val => new CoBuiltInTask<ICommandToken>(myTask => CoExecute(myTask)));
+        return new CoChainedTask<ICommandToken, T>(task, val => new CoBuiltInTask<ICommandToken>(self => CoExecute()));
     }
 
     public static CoTask<ICommandToken> Action<T>(this CoTask<T> task, Action<T> action, Action? onFailed = null)
         => task.Do([val => { action.Invoke(val); return new CoImmediateTask<ICommandToken>(EmptyCommandToken.Token); }], onFailed);
+
+    public static CoTask<IReadOnlyList<T>> SelectAsCoTask<T>(this IEnumerable<CoTask<T>> tasks, Action? onFailed = null)
+    {
+        var tasksArray = tasks.ToArray();
+        T[] resultsArray = new T[tasksArray.Length];
+        IEnumerator CoExecuteSingle(CoTask<T> myTask, int index)
+        {
+            yield return myTask.CoWait().HighSpeedEnumerator();
+            resultsArray[index] = myTask.Result;
+            yield break;
+        }
+        IEnumerator CoExecute(CoBuiltInTask<IReadOnlyList<T>> self)
+        {
+            for(int i = 0;i<tasksArray.Length;i++)
+            {
+                yield return CoExecuteSingle(tasksArray[i], i).HighSpeedEnumerator();
+            }
+            self.Result = resultsArray;
+        }
+        return new CoBuiltInTask<IReadOnlyList<T>>(self => CoExecute(self));
+    }
+        
 
     public static CoTask<T> Discard<T, S>(this CoTask<S> task)
     {

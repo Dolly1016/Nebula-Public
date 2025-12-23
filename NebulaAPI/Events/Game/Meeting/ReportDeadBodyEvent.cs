@@ -11,5 +11,5 @@ namespace Virial.Events.Game.Meeting;
 /// </summary>
 public class ReportDeadBodyEvent : MeetingPreStartEvent
 {
-    internal ReportDeadBodyEvent(Virial.Game.Player reporter, Virial.Game.Player? reported) : base(reporter, reported){ }
+    internal ReportDeadBodyEvent(Virial.Game.Player reporter, Virial.Game.Player? reported, Virial.Game.EmergencyMeeting meeting) : base(reporter, reported, meeting){ }
 }

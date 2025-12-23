@@ -1,4 +1,5 @@
-﻿using Virial.Attributes;
+﻿using Virial.Assignable;
+using Virial.Attributes;
 using Virial.Game;
 using Virial.Helpers;
 using Virial.Media;
@@ -117,6 +118,7 @@ public interface IConfigurationHolder
     /// </summary>
     ConfigurationHolderState DisplayOption { get; }
     Image? Illustration { get; set; }
+    DefinedAssignable? RelatedAssignable { get; internal set; }
 
     internal IEnumerable<ConfigurationUpperButton> RelatedInformation { get; }
 

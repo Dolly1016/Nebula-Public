@@ -53,7 +53,24 @@ public class FunctionalAttention : CameraAttention
     CameraAttention.Attention CameraAttention.GetAttention() => new(eulerAngle(), view(), center());
 }
 
-public class WideCamera
+public interface CustomCameraBehaviour
+{
+    void OnSet(ICustomWideCamera camera);
+    float OrthographicSize { get; }
+    void UpdateCamera(ICustomWideCamera camera, out Vector3 localPosition, out Vector2 localScale, out float localAngle);
+}
+
+public interface ICustomWideCamera
+{
+    void UpdateMesh(float x, float y);
+    void UseRectShader();
+    void UpdateRect(float u, float v);
+    void SetSaturation(float saturation);
+    void SetHue(float hue);
+    void SetBrightness(float brightness);
+}
+
+public class WideCamera : ICustomWideCamera
 {
     private GameObject myHolder;
     private Camera myCamera;
@@ -79,7 +96,28 @@ public class WideCamera
     {
         this.attention = attention;
     }
-        
+
+    private CustomCameraBehaviour? customBehviour = null;
+    public void SetCustomBehaviour(CustomCameraBehaviour? behaviour)
+    {
+        customBehviour = behaviour;
+        customBehviour?.OnSet(this);
+    }
+    public void UseRectShader()
+    {
+        meshRenderer.material = new Material(NebulaAsset.HSVRectShader);
+    }
+    /// <summary>
+    /// UseRectShaderを使用している場合にのみ効果あり。クリッピング範囲を設定する。
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="v"></param>
+    public void UpdateRect(float u, float v)
+    {
+        meshRenderer.material.SetFloat("_ClipU", u);
+        meshRenderer.material.SetFloat("_ClipV", v);
+    }
+
     public Transform ViewerTransform => meshRenderer.transform;
 
     public WideCamera()
@@ -146,11 +184,13 @@ public class WideCamera
 
     public bool DrawShadow => drawShadow && !(NebulaGameManager.Instance?.IgnoreWalls ?? false);
     private bool drawShadow = false;
-    public void SetDrawShadow(bool drawShadow)
-    {
+    public void SetDrawShadow(bool drawShadow) => SetCustomShadow(drawShadow, true, true);
+
+    public void SetCustomShadow(bool drawShadow, bool drawPlayer, bool drawArrow) {
         myCamera.cullingMask = drawShadow ? 97047 : 31511;
-        myCamera.cullingMask |= 1 << LayerExpansion.GetArrowLayer();
-        myCamera.cullingMask |= 1 << LayerExpansion.GetPlayerWithShadowLayer();
+        if(drawArrow) myCamera.cullingMask |= 1 << LayerExpansion.GetArrowLayer();
+        if(drawShadow && drawPlayer) myCamera.cullingMask |= 1 << LayerExpansion.GetPlayerWithShadowLayer();
+        if (!drawPlayer) myCamera.cullingMask &= ~(1 << LayerExpansion.GetPlayersLayer());
 
         this.drawShadow = drawShadow;
     }
@@ -183,9 +223,13 @@ public class WideCamera
 
     public void OnGameStart()
     {
-        myCamera.backgroundColor = ShipStatus.Instance.CameraColor;
+        ReflectShipColor();
     }
 
+    public void ReflectShipColor()
+    {
+        myCamera.backgroundColor = ShipStatus.Instance.CameraColor;
+    }
     private static int gcd(int n1, int n2)
     {
         static int gcdInner(int _n1, int _n2) => _n2 == 0 ? _n1 : gcdInner(_n2, _n1 % _n2);
@@ -297,9 +341,35 @@ public class WideCamera
         }
     }
 
+    /// <summary>
+    /// メッシュの大きさを変更する。
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    void ICustomWideCamera.UpdateMesh(float x, float y) {
+        meshRenderer.sharedMaterial.mainTexture = myCamera.SetCameraRenderTexture((int)(x * 100), (int)(y * 100));
+        meshFilter.CreateRectMesh(new(x, y));
+    }
+
     public void Update()
     {
         if (myCamera.gameObject.active) {
+            var meshTransform = meshRenderer.transform;
+
+            if (customBehviour != null)
+            {
+                customBehviour.UpdateCamera(this, out var localPos, out var localScale, out var localAngle);
+                var orthographicSize = customBehviour.OrthographicSize;
+                myCamera.orthographicSize = orthographicSize;
+                shadowCamera.orthographicSize = orthographicSize;
+                SubShadowCam.orthographicSize = orthographicSize;
+
+                meshTransform.localEulerAngles = new(0f, 0f, localAngle);
+                meshTransform.localPosition = localPos;
+                meshTransform.localScale = localScale;
+                return;
+            }
+
             //カメラの注目を制御する
             if (attention?.IsDeadObject ?? false) attention = null;
 
@@ -331,7 +401,6 @@ public class WideCamera
             while (meshAngleZ - goalRotate < -360f) meshAngleZ += 360f;
             meshAngleZ -= (meshAngleZ - goalRotate).Delta(2.7f, 0.11f);
 
-            var meshTransform = meshRenderer.transform;
             meshTransform.localScale -= (meshTransform.localScale - goalScale).Delta(2.4f, 0.003f);
             meshTransform.localEulerAngles = new(0f, 0f, meshAngleZ);
 
@@ -366,14 +435,25 @@ public class WideCamera
             }
 
             var camUpdateEv = GameOperatorManager.Instance?.Run<CameraUpdateEvent>(new CameraUpdateEvent());
-            meshRenderer.sharedMaterial.SetFloat("_Sat", camUpdateEv?.GetSaturation() ?? 1f);
-            meshRenderer.sharedMaterial.SetFloat("_Hue", camUpdateEv?.GetHue() ?? 0f);
-            meshRenderer.sharedMaterial.SetFloat("_Val", camUpdateEv?.GetBrightness() ?? 1f);
+            SetSaturation(camUpdateEv?.GetSaturation() ?? 1f);
+            SetHue(camUpdateEv?.GetHue() ?? 0f);
+            SetBrightness(camUpdateEv?.GetBrightness() ?? 1f);
             meshRenderer.sharedMaterial.color = camUpdateEv?.Color ?? Color.white;
 
             FixVentArrow();
         }
     }
 
+    public void SetActive(bool active)
+    {
+        meshRenderer.gameObject.SetActive(active);
+    }
+
+    private void SetHue(float hue) => meshRenderer.sharedMaterial.SetFloat("_Hue", hue);
+    private void SetSaturation(float saturation) => meshRenderer.sharedMaterial.SetFloat("_Sat", saturation);
+    private void SetBrightness(float brightness) => meshRenderer.sharedMaterial.SetFloat("_Val", brightness);
+    void ICustomWideCamera.SetHue(float hue) => SetHue(hue);
+    void ICustomWideCamera.SetSaturation(float saturation) => SetSaturation(saturation);
+    void ICustomWideCamera.SetBrightness(float brightness) => SetBrightness(brightness);
 
 }

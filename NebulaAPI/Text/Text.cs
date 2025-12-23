@@ -34,6 +34,7 @@ internal enum AttributeTemplateFlag
     FontMask        = 0b1111,
     FontStandard    = 0b0001,
     FontOblong      = 0b0010,
+    FontBarlow      = 0b0011,
 
     AlignmentMask   = 0b11 << 4,
     AlignmentLeft   = 0b01 << 4,
@@ -234,6 +235,11 @@ public enum AttributeAsset
     /// マーケットプレイスでタブボタンに使用されているテキスト属性です。
     /// </summary>
     MarketplaceTabButton,
+
+    /// <summary>
+    /// マーケットプレイスでタブボタンに使用されているテキスト属性の非マスク版です。
+    /// </summary>
+    MarketplaceTabNonMaskedButton,
 
     /// <summary>
     /// 会議中に表示される称号で使用されているテキスト属性です。

@@ -52,7 +52,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
         {
-            if (canSeeAllInfo) name = Language.Translate("role.damned.prefix").Color(MyRole.UnityColor) + "<space=0.5em>" + name;
+            if (canSeeAllInfo) name += MyRole.GetRoleIconTag();
         }
 
         [OnlyMyPlayer]
@@ -111,7 +111,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                     var myNextArgs = DamnedActionOption.GetValue() == 1 ? nextArgs! : null;
                     CheckAchievement(myNextRole);
 
-                    using (RPCRouter.CreateSection("DamedAction"))
+                    using (RPCRouter.CreateSection("DamedAction", true))
                     {
                         if (ev.Murderer.IsDead)
                         {
@@ -139,7 +139,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
         {
             if(ev.Dead.PlayerState ==  PlayerState.Cursed)
             {
-                using (RPCRouter.CreateSection("DamedAction"))
+                using (RPCRouter.CreateSection("DamedAction", true))
                 {
                     MyPlayer.RemoveModifier(MyRole);
                     MyPlayer.SetRole(nextRole ?? Impostor.DamnedImpostor.MyRole, nextArgs);
@@ -161,7 +161,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                 GamePlayer[] lovers = ev.Murderer.GetModifiers<Lover.Instance>().Select(lover => lover.MyLover.Get()).ToArray();
                 
 
-                using (RPCRouter.CreateSection("DamedAction"))
+                using (RPCRouter.CreateSection("DamedAction", true))
                 {
                     ev.Murderer.RemoveModifier(Lover.MyRole);
                     foreach(var l in lovers) l?.RemoveModifier(Lover.MyRole);
@@ -187,7 +187,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                     var myNextArgs = DamnedActionOption.GetValue() == 1 ? nextArgs : [];
                     CheckAchievement(myNextRole);
 
-                    using (RPCRouter.CreateSection("DamnedAction"))
+                    using (RPCRouter.CreateSection("DamnedAction", true))
                     {
                         MyPlayer.RemoveModifier(MyRole);
                         MyPlayer.SetRole(myNextRole, myNextArgs);
