@@ -8,9 +8,13 @@ namespace Virial.Events.Player;
 
 internal class PlayerTaskTextLocalEvent : AbstractPlayerEvent
 {
-    private string text = "";
-    public void AppendText(string text) {  this.text += "\n" + text; }
-    internal string Text { get => text; }
-    internal PlayerTaskTextLocalEvent(Virial.Game.Player player) : base(player) { }
+    private string body = "";
+    private string belowText = "";
+    public void AppendText(string text) {  this.belowText += "\n" + text; }
+    public void ReplaceBody(string text) { this.body = text; }
+    internal string Text { get => body + belowText; }
+    internal PlayerTaskTextLocalEvent(Virial.Game.Player player, string origText) : base(player) {
+        this.body = origText;
+    }
 }
 

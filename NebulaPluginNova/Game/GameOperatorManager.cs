@@ -187,7 +187,7 @@ public class GameOperatorManager
         }
     }
 
-    public E Run<E>(E ev, bool retroactive = false, bool needToCheckGameEnd = true) where E : class, Virial.Events.Event
+    public E Run<E>(E ev, bool retroactive = false, bool shouldNotCheckGameEnd = true) where E : class, Virial.Events.Event
     {
         if (retroactive)
             DoRetroactiveOperation(ev, ev.GetType());
@@ -195,7 +195,7 @@ public class GameOperatorManager
             DoSingleOperation(ev, ev.GetType());
 
         //イベントを通して発生したゲーム終了をチェックする。
-        if (needToCheckGameEnd) WinCheckBlocker.TryCheckGameEnd();
+        if (!shouldNotCheckGameEnd) WinCheckBlocker.TryCheckGameEnd();
 
         return ev;
     }

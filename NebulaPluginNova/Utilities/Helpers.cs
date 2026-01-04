@@ -556,15 +556,41 @@ public static class Helpers
     }
 
     static private readonly Image whiteCircleSprite = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
-    static public void DisplayDot(Vector2 position, string rawText, Color color)
+    static private readonly Image whiteBoxSprite = SpriteLoader.FromResource("Nebula.Resources.White.png", 100f);
+    static public void DisplayDot(Vector2 position, string rawText, Color color, Vector2 size)
     {
         var renderer = UnityHelper.CreateSpriteRenderer("Dot", null, position.AsVector3(-10f));
         renderer.sprite = whiteCircleSprite.GetSprite();
         renderer.color = color;
         var button = renderer.gameObject.SetUpButton();
         button.SetRawOverlay("(" + position.x.ToString("F2") + ", " + position.y.ToString("F2") + ")<br>" + rawText);
+        if (size.x > 0f && size.y > 0f)
+        {
+            var boxRenderer = UnityHelper.CreateSpriteRenderer("Box", renderer.transform, Vector3.zero);
+            boxRenderer.sprite = whiteBoxSprite.GetSprite();
+            boxRenderer.color = color.AlphaMultiplied(0.4f);
+            boxRenderer.transform.localScale = size.AsVector3(1f);
+            boxRenderer.enabled = false;
+            button.OnMouseOver.AddListener(() => {
+                boxRenderer.enabled = true;
+                renderer.enabled = false;
+            });
+            button.OnMouseOut.AddListener(() => {
+                boxRenderer.enabled = false;
+                renderer.enabled = true;
+            });
+        }
         var collider = button.gameObject.AddComponent<CircleCollider2D>();
         collider.radius = 0.2f;
         collider.isTrigger = true;
+    }
+
+    static public SpriteRenderer DisplayArea(Vector2 position, Color color, Vector2 size)
+    {
+        var boxRenderer = UnityHelper.CreateSpriteRenderer("Box", null, position.AsVector3(-10f));
+        boxRenderer.sprite = whiteBoxSprite.GetSprite();
+        boxRenderer.color = color.AlphaMultiplied(0.4f);
+        boxRenderer.transform.localScale = size.AsVector3(1f);
+        return boxRenderer;
     }
 }

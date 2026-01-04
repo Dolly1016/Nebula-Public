@@ -11,5 +11,10 @@ namespace Virial.Events.Game.Meeting;
 /// </summary>
 public class MeetingVoteEndEvent : Event
 {
-    internal MeetingVoteEndEvent() { }
+    private MeetingHud.VoterState[] voteStates;
+    internal MeetingHud.VoterState[] VoteStates => voteStates;
+    internal MeetingVoteEndEvent(MeetingHud.VoterState[] states)
+    {
+        this.voteStates = states;
+    } 
 }

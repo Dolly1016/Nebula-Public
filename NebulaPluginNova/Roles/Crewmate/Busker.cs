@@ -17,8 +17,10 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Busker.png");
 
-        GameActionTypes.BuskerRevivingAction = new("busker.revive", this, isPhysicalAction: true);
+        BuskerRevivingAction = new("busker.revive", this, isPhysicalAction: true);
     }
+
+    static private GameActionType BuskerRevivingAction;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
@@ -91,7 +93,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
                 reviveButton.OnClick = (button) => {
                     using (RPCRouter.CreateSection("ReviveBusker"))
                     {
-                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.BuskerRevivingAction);
+                        NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, BuskerRevivingAction);
                         PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
                         MyPlayer.Revive(null, MyPlayer.Position, true, false);
                         MyPlayer.VanillaPlayer.ModDive(false);

@@ -103,13 +103,13 @@ public static class RoleHistoryHelper {
         {
             result = isShort ? ghostRole.Role.GetRoleIconTag() + ghostRole.Role.DisplayColoredShort : ghostRole.Role.DisplayColoredName;
             color = ghostRole.Role.UnityColor;
-            ghostRole.DecorateNameConstantly(ref result, true);
+            ghostRole.DecorateNameConstantly(ref result, true, true);
         }
         else
         {
             result = isShort ? role.Role.GetRoleIconTag() + role.DisplayColoredShort : role.DisplayColoredName;
             color = role.Role.UnityColor;
-            role.DecorateNameConstantly(ref result, true);
+            role.DecorateNameConstantly(ref result, true, true);
         }
 
         foreach (var m in modifier)
@@ -118,7 +118,7 @@ public static class RoleHistoryHelper {
             if (newName != null) result = newName;
         }
         
-        foreach (var m in modifier) m.DecorateNameConstantly(ref result, true);
+        foreach (var m in modifier) m.DecorateNameConstantly(ref result, true, true);
         return result.Color(color);
     }
 }
@@ -597,7 +597,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
 
     public void OnFixedUpdate() {
-        GameEntityManager.Run(new GameUpdateEvent(this, Time.fixedDeltaTime, CurrentTime, Time.time));
+        GameEntityManager.Run(new GameUpdateEvent(this, Time.fixedDeltaTime, CurrentTime, Time.time), shouldNotCheckGameEnd: false);
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
         {
             var info = GamePlayer.LocalPlayer;
@@ -624,6 +624,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public void OnGameStart()
     {
         WideCamera.OnGameStart();
+        new GameMapImpl();
 
 #if PC
         //マップの取得
@@ -637,7 +638,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         GameEntityManager.Run(new GameStartEvent(this), true);
 
         HudManager.Instance.UpdateHudContent();
-
         ConsoleRestriction?.OnGameStart();
 
         //統計の更新
@@ -869,6 +869,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     bool Virial.ILifespan.IsDeadObject => NebulaGameManager.Instance != this;
     EmergencyMeeting? Virial.Game.Game.CurrentMeeting => ModSingleton<EmergencyMeeting>.Instance;
+    GameMap? Virial.Game.Game.CurrentMap => ModSingleton<GameMap>.Instance;
 
     public readonly static RemoteProcess<GamePlayer> RpcTryAssignGhostRole = new(
         "TryAssignGhostRole",

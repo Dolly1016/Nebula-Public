@@ -172,8 +172,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
 
         if (index != 0)
         {
-            for (; index < perLine; index++) widgetList[index] = new HorizonalMargin(0f);
-            Append(new CombinedWidgetOld(height, widgetList) { Alignment = alignment });
+            Append(new CombinedWidgetOld(height, widgetList.Take(index).ToArray()) { Alignment = alignment });
             leftLines--;
         }
 

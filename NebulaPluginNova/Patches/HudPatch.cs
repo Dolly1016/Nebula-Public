@@ -156,7 +156,7 @@ class TaskTextPatch
     {
         try
         {
-            __instance.taskText.text = __instance.taskText.text + GameOperatorManager.Instance?.Run(new PlayerTaskTextLocalEvent(GamePlayer.LocalPlayer)).Text;
+            __instance.taskText.text = GameOperatorManager.Instance?.Run(new PlayerTaskTextLocalEvent(GamePlayer.LocalPlayer, __instance.taskText.text)).Text;
         }
         catch { }
     }

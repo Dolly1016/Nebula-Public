@@ -106,7 +106,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
 
                 var interactTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeStandardPredicate(p) && playerIcons.All(icon => icon.Player != p));
 
-                interactButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                interactButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility,
                     AbsorbCooldownOption, AbsorbDurationOption, "absorb", douseButtonSprite,
                     _ => interactTracker.CurrentTarget != null);
                 interactButton.OnEffectStart = (button) =>

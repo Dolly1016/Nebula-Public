@@ -213,6 +213,7 @@ public static class FixFillCanistersGamePatch
     public static void Postfix(FillCanistersGame __instance)
     {
         __instance.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetUILayer());
+        __instance.transform.GetChild(3).SetLocalZ(1f);
     }
 }
 

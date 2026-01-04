@@ -9,6 +9,7 @@ using Nebula.Roles.Crewmate;
 using Nebula.Roles.Neutral;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using UnityEngine;
 using UnityEngine.Rendering;
 using Virial;
 using Virial.Assignable;
@@ -232,7 +233,8 @@ public static class HelpScreen
 
     private static readonly TextAttributeOld RoleTitleAttr = new(TextAttributeOld.BoldAttr) { Size = new Vector2(1.2f, 0.29f), FontMaterial = VanillaAsset.StandardMaskedFontMaterial };
     private static readonly TextAttributeOld RoleTitleAttrUnmasked = new(TextAttributeOld.BoldAttr) { Size = new Vector2(1.4f, 0.29f) };
-    
+    private static readonly TextAttributeOld RoleTitleIconAttrUnmasked = new(TextAttributeOld.BoldAttr) { Size = new Vector2(0.29f, 0.29f) };
+
     private static Virial.Media.GUIWidget GetAssignableOverlay(DefinedAssignable assignable)
     {
         List<Virial.Media.GUIWidget> widgets = [];
@@ -442,23 +444,68 @@ public static class HelpScreen
 
         Virial.Compat.Artifact<GUIScreen> inner = null!;
 
-        widget.Append(OnHelpCurrentAssignables,
-            (role) => new MetaWidgetOld.Button(() =>
-            {
-                var doc = DocumentManager.GetDocument("role." + role.InternalName);
-                if (doc == null) return;
+        void ClickRole(DefinedAssignable assignable)
+        {
+            var doc = DocumentManager.GetDocument("role." + assignable.InternalName);
+            if (doc == null) return;
 
-                inner.Do(screen =>
-                {
-                    screen.SetWidget(doc.Build(inner), out _);
-                    outsideScreen.ClearBackImage();
-                    outsideScreen.SetBackImage(role.ConfigurationHolder?.Illustration, 0.2f);
-                });
+            inner.Do(screen =>
+            {
+                screen.SetWidget(doc.Build(inner), out _);
+                outsideScreen.ClearBackImage();
+                outsideScreen.SetBackImage(assignable.ConfigurationHolder?.Illustration, 0.2f);
+            });
+        }
+
+        SpriteRenderer GenerateRoleIcon(DefinedAssignable assignable, Transform transform, Vector3 localPosition)
+        {
+            var iconRenderer = UnityHelper.CreateSpriteRenderer("Icon", transform, localPosition);
+            iconRenderer.sprite = assignable.GetRoleIcon()?.GetSprite();
+            iconRenderer.material = RoleIcon.GetRoleIconMaterial(assignable, 0.6f, 0.05f);
+            return iconRenderer;
+        }
+
+        IMetaParallelPlacableOld GetButtonWidget(DefinedAssignable assignable)
+        {
+            return new MetaWidgetOld.Button(() =>
+            {
+                ClickRole(assignable);
             }, RoleTitleAttrUnmasked)
             {
-                RawText = role.DisplayColoredName,
-                Alignment = IMetaWidgetOld.AlignmentOption.Center
-            }, 128, -1, 0, 0.6f);
+                RawText = assignable.DisplayColoredName,
+                Alignment = IMetaWidgetOld.AlignmentOption.Center,
+                PostBuilder = (button, renderer, text) =>
+                {
+                    text.transform.localPosition += new Vector3(0.07f, 0f, 0f);
+                    var iconRenderer = GenerateRoleIcon(assignable, renderer.transform, new(-0.82f, 0f, -0.1f));
+                    iconRenderer.transform.localScale = new(0.27f, 0.27f, 1f);
+                    renderer.size -= new Vector2(0.15f, 0f);
+                },
+                TextHorizonotalExtraMargin = 0.2f,
+            };
+        }
+
+        IMetaParallelPlacableOld GetImageWidget(DefinedAssignable assignable)
+        {
+            return new MetaWidgetOld.Button(() =>
+            {
+                ClickRole(assignable);
+            }, RoleTitleIconAttrUnmasked)
+            {
+                RawText = "",
+                Alignment = IMetaWidgetOld.AlignmentOption.Center,
+                PostBuilder = (button, renderer, text) =>
+                {
+                    var iconRenderer = GenerateRoleIcon(assignable, renderer.transform, new(0f, 0f, -0.1f));
+                    iconRenderer.transform.localScale = new(0.29f, 0.29f, 1f);
+                    button.SetRawOverlay(assignable.DisplayColoredName);
+                },
+            };
+        }
+
+        var assignables = OnHelpCurrentAssignables.ToArray();
+        widget.Append(assignables,
+            assignables.Length <= 4 ? GetButtonWidget : GetImageWidget, 128, -1, 0, 0.6f);
 
         var assignable = GamePlayer.LocalPlayer!.Role.AssignableOnHelp.First();
         var scrollView = new GUIScrollView(GUIAlignment.Left, new(7.4f, HelpHeight - 0.7f), () =>

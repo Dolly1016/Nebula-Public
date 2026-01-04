@@ -93,5 +93,10 @@ public interface PlayerTasks : IModule
     /// <returns></returns>
     bool RewindTasks(int numOfTasks);
 
-
+    /// <summary>
+    /// タスク進捗をカスタマイズします。
+    /// </summary>
+    /// <param name="completed"></param>
+    /// <param name="quota"></param>
+    void Custom(int completed, int quota, bool asCrewmateTask);
 }

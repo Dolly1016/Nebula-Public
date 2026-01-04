@@ -10,6 +10,7 @@ using Virial;
 using Virial.Events.Game;
 using Virial.Events.Game.Minimap;
 using Virial.Events.Player;
+using Virial.Game;
 
 namespace Nebula.Extensions;
 
@@ -482,7 +483,7 @@ public static class ShipExtension
             AddModShadow([new(13.65f, 6.77f), new(14.39f, 6.66f), new(15.73f, 7.16f)]);
         }
 
-        if (GeneralConfigurations.FungleForClassicGameOption.CurrentValue) ModifyFungleForClassicGame();
+        if (GeneralConfigurations.CurrentGameMode != GameModes.AeroGuesser && GeneralConfigurations.FungleForClassicGameOption.CurrentValue) ModifyFungleForClassicGame();
 
         if (GeneralConfigurations.FungleThinFogOption.CurrentValue)
         {
@@ -579,13 +580,17 @@ public static class ShipExtension
         vent.gameObject.SetActive(true);
         vent.name = ventName;
         vent.gameObject.name = ventName;
-        var console = vent.GetComponent<VentCleaningConsole>();
-        console.Room = room;
-        console.ConsoleId = ShipStatus.Instance.AllVents.Length;
 
-        var allConsolesList = ShipStatus.Instance.AllConsoles.ToList();
-        allConsolesList.Add(console);
-        ShipStatus.Instance.AllConsoles = allConsolesList.ToArray();
+        var console = vent.GetComponent<VentCleaningConsole>();
+        if (console)
+        {
+            console.Room = room;
+            console.ConsoleId = ShipStatus.Instance.AllVents.Length;
+
+            var allConsolesList = ShipStatus.Instance.AllConsoles.ToList();
+            allConsolesList.Add(console);
+            ShipStatus.Instance.AllConsoles = allConsolesList.ToArray();
+        }
 
         return vent;
     }
@@ -977,6 +982,14 @@ public static class ShipExtension
             AddModShadow([new(14.41f, 2.85f), new(14.38f, 3.82f), new(14.15f, 4.98f), new(14.10f, 5.74f), new(14.32f, 6.66f), new(16.13f, 7.25f)]);
             AddModWall([new(14.23f, 2.53f), new(14.02f, 4.63f), new(13.88f, 6.45f)]);
             AddModWall([new(14.57f, 2.70f), new(14.39f, 4.76f), new(14.28f, 5.79f)]);
+        }
+
+        //追加ベント
+        {
+            var miningPitVent = CreateVent(SystemTypes.MiningPit, "MiningPitVent", new UnityEngine.Vector2(0.62f, 0.68f));
+            var gemVent = CreateVent(SystemTypes.MiningPit, "GemVent", new UnityEngine.Vector2(2.20f, -4.57f));
+            miningPitVent.Right = gemVent;
+            gemVent.Left = miningPitVent;
         }
     }
 

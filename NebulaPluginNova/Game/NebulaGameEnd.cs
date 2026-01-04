@@ -32,7 +32,7 @@ public class NebulaGameEnd
     static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.UnityColor, 29);
     static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.UnityColor, 32);
     static public readonly GameEnd VanityWin = new(37, "vanity", Roles.Neutral.Vanity.MyRole.UnityColor, 18);
-    static public readonly GameEnd GameEnd = new(62, "gameEnd", Palette.CrewmateBlue, 128);
+    static public readonly GameEnd GameEnd = new(62, "gameEnd", Palette.CrewmateBlue, 128) { AlternativeClip = () => NebulaAsset.GetAudioClip(NebulaAudioClip.AeroGuesserGameEnd)};
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
     static public readonly ExtraWin ExtraLoversWin = new(0, "lover", (Roles.Modifier.Lover.MyRole as DefinedAssignable).Color);
@@ -40,6 +40,7 @@ public class NebulaGameEnd
     static public readonly ExtraWin ExtraGrudgeWin = new(2, "grudge", (Roles.Ghost.Neutral.Grudge.MyRole as DefinedAssignable).Color);
     static public readonly ExtraWin ExtraTrilemmaWin = new(3, "trilemma", (Roles.Modifier.Trilemma.MyRole as DefinedAssignable).Color);
     static public readonly ExtraWin ExtraVanityWin = new(4, "vanity", (Roles.Neutral.Vanity.MyRole as DefinedAssignable).Color);
+    static public readonly ExtraWin ExtraOpportunistWin = new(5, "opportunist", (Roles.Neutral.Opportunist.MyRole as DefinedAssignable).Color);
 
     static void Preprocess(NebulaPreprocessor preprocessor)
     {
@@ -259,7 +260,7 @@ public class EndGameManagerSetUpPatch
 
             if (roleText.Length > 0) roleText += " → ";
             roleText += entries[^1].Item2;
-
+            roleText = "\u200B" + roleText;
             players.Add((nameText, stateText, taskText, roleText));
         }
 
@@ -311,6 +312,9 @@ public class EndGameManagerSetUpPatch
         var endCondition = endState?.EndCondition;
 
         if (endState == null) return;
+
+        var altAudio = endState.EndCondition.AlternativeClip?.Invoke();
+        if (altAudio != null) SoundManager.Instance.PlayDynamicSound("Stinger", altAudio, false, (DynamicSound.GetDynamicsFunction)((v1, v2) => __instance.GetStingerVol(v1, v2)), SoundManager.Instance.MusicChannel);
 
         /*
         foreach(var h in NebulaGameManager.Instance.RoleHistory)

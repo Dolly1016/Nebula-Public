@@ -106,7 +106,7 @@ public static class KillAnimationExtension
 
         if (target.Player is IFakePlayer fp)
         {
-            GameOperatorManager.Instance?.Run(new PlayerKillFakePlayerEvent(fp, source.GetModInfo()!));
+            GameOperatorManager.Instance?.Run(new PlayerKillFakePlayerEvent(fp, source.GetModInfo()!), shouldNotCheckGameEnd: false);
             fp.Release();
         }
 

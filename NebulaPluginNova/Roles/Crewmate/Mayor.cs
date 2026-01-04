@@ -182,7 +182,10 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
 
                     }
                 }
-                Debug.Log($"Mayor: after:{myVote}");
+            }else if(myVote > 0 && ev.VoteStates.Any(s => s.VoterId == MyPlayer.PlayerId))
+            {
+                //投票していないのにゲーム中に自身の票がある場合、1票だけ取り去る。
+                UpdateMayorVotes(myVote - 1);
             }
         }
 

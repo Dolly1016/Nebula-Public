@@ -308,11 +308,11 @@ internal class KillRequestHandler
                    if (killerInfo != null)
                    {
                        GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
-                       GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, withBlink), true);
+                       GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, withBlink), true, shouldNotCheckGameEnd: false);
                    }
                    else
                    {
-                       GameOperatorManager.Instance?.Run(new PlayerDieEvent(targetInfo));
+                       GameOperatorManager.Instance?.Run(new PlayerDieEvent(targetInfo), shouldNotCheckGameEnd: false);
                    }
 
                    if (param.KillParam.HasFlag(KillParameter.WithAssigningGhostRole) && targetInfo.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(targetInfo);
@@ -383,10 +383,10 @@ internal class KillRequestHandler
               if (killer != null)
               {
                   GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killer, target), true);
-                  GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(target, killer, false), true);
+                  GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(target, killer, false), true, shouldNotCheckGameEnd: false);
               }
               else
-                  GameOperatorManager.Instance?.Run(new PlayerDieEvent(target));
+                  GameOperatorManager.Instance?.Run(new PlayerDieEvent(target), shouldNotCheckGameEnd: false);
 
               if (param.KillParam.HasFlag(KillParameter.WithAssigningGhostRole) && target.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(target);
 

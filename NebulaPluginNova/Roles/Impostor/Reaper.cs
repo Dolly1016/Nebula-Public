@@ -166,9 +166,17 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
                     GetVent("NorthEastJungleVent")!.Center = activate ? GetVent("SouthEastJungleVent") : null;
                     GetVent("SouthEastJungleVent")!.Center = activate ? GetVent("NorthEastJungleVent") : null;
 
-                    GetVent("StorageVent")!.Center = activate ? GetVent("CommunicationsVent") : null;
-                    GetVent("CommunicationsVent")!.Center = activate ? GetVent("StorageVent") : null;
+                    GetVent("StorageVent")!.Center = activate ? GetVent("LookoutVent") : null;
+                    GetVent("LookoutVent")!.Center = activate ? GetVent("StorageVent") : null;
 
+                    if (GetVent("MiningPitVent") != null && GetVent("GemVent") != null)
+                    {
+                        GetVent("MiningPitVent")!.Left = activate ? GetVent("CommunicationsVent") : null;
+                        GetVent("CommunicationsVent")!.Center = activate ? GetVent("MiningPitVent") : null;
+
+                        GetVent("GemVent")!.Right = activate ? GetVent("SouthEastJungleVent") : null;
+                        GetVent("SouthEastJungleVent")!.Right = activate ? GetVent("GemVent") : null;
+                    }
                     break;
             }
         }

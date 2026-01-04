@@ -329,11 +329,11 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
             if (IsMyLover(ev.Guesser)) ev.CanGuess = false;
         }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
             Color loverColor = Scarlet.MyRole.UnityColor;
 
-            if (IsMyLover(GamePlayer.LocalPlayer)) name += " ♡".Color(loverColor);
+            if (IsMyLover(GamePlayer.LocalPlayer)) name += "♡".Color(loverColor);
         }
 
         static private RemoteProcess<GamePlayer> RpcCommand = new("ScarletCommand", (p, calledByMe) =>
@@ -481,7 +481,7 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
             }
         }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
             Color loverColor = Scarlet.MyRole.UnityColor;
             
@@ -494,7 +494,7 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
             if (AmOwner) canSee = true;
             if ((myFlirtatiousRuntimeRole?.AmOwner ?? false) || canSeeAllInfo) canSeeAll = true;
 
-            if (canSee || canSeeAll) name += ((canSeeAll && amFavorite) ? " ♥" : " ♡").Color(loverColor);
+            if (canSee || canSeeAll) name += ((canSeeAll && amFavorite) ? "♥" : "♡").Color(loverColor);
         }
 
         [OnlyMyPlayer, Local]

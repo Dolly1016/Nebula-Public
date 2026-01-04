@@ -129,7 +129,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("sniper.another1");
                 AchievementToken<int> acTokenChallenge = new("sniper.challenge", 0, (val, _) => val >= 2);
 
-                equipButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "sniper.equip",
+                equipButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility, "sniper.equip",
                     0f, "equip", buttonSprite).SetAsUsurpableButton(this);
                 equipButton.OnClick = (button) =>
                 {

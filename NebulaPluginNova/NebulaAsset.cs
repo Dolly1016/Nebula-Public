@@ -50,7 +50,13 @@ public enum NebulaAudioClip {
     Drill,
     DrillEnd,
     DrillFric,
-    Fixer
+    Fixer,
+    AeroGuesserCountdown,
+    AeroGuesserGameEnd,
+    AeroGuesserConfirm,
+    AeroGuesserBell,
+    AeroGuesserQuizEnd,
+    AeroGuesserQuizStart,
 }
 
 public static class SoundManagerHelper
@@ -166,6 +172,12 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.DrillEnd] = Load<AudioClip>("DrillEnd.wav");
         audioMap[NebulaAudioClip.DrillFric] = Load<AudioClip>("DrillFrac.wav");
         audioMap[NebulaAudioClip.Fixer] = Load<AudioClip>("Fixer.mp3");
+        audioMap[NebulaAudioClip.AeroGuesserCountdown] = Load<AudioClip>("AeroCountdown.ogg");
+        audioMap[NebulaAudioClip.AeroGuesserGameEnd] = Load<AudioClip>("AeroEnd.ogg");
+        audioMap[NebulaAudioClip.AeroGuesserConfirm] = Load<AudioClip>("AeroConfirm.ogg");
+        audioMap[NebulaAudioClip.AeroGuesserBell] = Load<AudioClip>("AeroBellRinging.ogg");
+        audioMap[NebulaAudioClip.AeroGuesserQuizEnd] = Load<AudioClip>("AeroQuizEnd.ogg");
+        audioMap[NebulaAudioClip.AeroGuesserQuizStart] = Load<AudioClip>("AeroQuizStart.ogg");
         BrokenShaderMat = Load<Material>("BrokenShaderMat");
 
         PaparazzoShot = Load<GameObject>("PhotoObject");
@@ -293,9 +305,11 @@ public static class NebulaAsset
     public static GameObject[][] DivMap { get; private set; } = new GameObject[6][];
     private static Dictionary<NebulaAudioClip, AudioClip> audioMap = [];
 
-    public static void PlayNamedLoopSE(NebulaAudioClip clip, string name, float volume = 0.8f, float pitch = 1.0f)
+    public static void PlayNamedLoopSE(NebulaAudioClip clip, string name, float volume = 0.8f, float pitch = 1.0f) => PlayNamedSE(clip, name, true, volume, pitch);
+
+    public static void PlayNamedSE(NebulaAudioClip clip, string name, bool loop, float volume = 0.8f, float pitch = 1.0f)
     {
-        var source = SoundManager.Instance.PlayNamedSound(name, audioMap[clip], true, SoundManager.Instance.SfxChannel);
+        var source = SoundManager.Instance.PlayNamedSound(name, audioMap[clip], loop, SoundManager.Instance.SfxChannel);
         source.volume = volume;
         source.pitch = pitch;
     }
@@ -309,6 +323,8 @@ public static class NebulaAsset
         else
             SoundManager.Instance.PlaySound(audioMap[clip],false,volume).pitch = pitch;
     }
+
+    public static AudioClip GetAudioClip(NebulaAudioClip clip) => audioMap[clip];
 
     public static AudioSource PlaySE(NebulaAudioClip clip, Vector2 pos, float minDistance, float maxDistance, float volume = 1f, bool loop = false) => PlaySE(audioMap[clip], pos, minDistance, maxDistance, volume, loop);
 

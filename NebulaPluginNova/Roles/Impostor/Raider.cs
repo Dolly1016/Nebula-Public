@@ -257,7 +257,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
 
                 acTokenAnother = AbstractAchievement.GenerateSimpleTriggerToken("raider.another1");
 
-                equipButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "raider.equip",
+                equipButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility, "raider.equip",
                     0f, "equip", buttonSprite).SetAsUsurpableButton(this);
                 equipButton.OnClick = (button) =>
                 {

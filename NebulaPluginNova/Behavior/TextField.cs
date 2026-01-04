@@ -348,6 +348,22 @@ public class TextField : MonoBehaviour
 
 
     private bool PressingShift => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+    private class RepeatHandler
+    {
+        int count = 0;
+        public bool CheckDown(bool keyDown)
+        {
+            if (keyDown)
+            {
+                count++;
+                return count == 1 || (count > 24 && count % 4 == 0);
+            }
+            count = 0;
+            return false;
+        }
+    }
+    RepeatHandler leftArrow = new(), rightArrow = new();
     public void Update()
     {
         if(this != validField)
@@ -392,13 +408,13 @@ public class TextField : MonoBehaviour
             ShowCursor();
             requireUpdate = true;
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (leftArrow.CheckDown(Input.GetKey(KeyCode.LeftArrow)))
         {
             MoveCursor(false, PressingShift);
             ShowCursor();
             requireUpdate = true;
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (rightArrow.CheckDown(Input.GetKey(KeyCode.RightArrow)))
         {
             MoveCursor(true, PressingShift);
             ShowCursor();

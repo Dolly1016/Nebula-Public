@@ -43,17 +43,15 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         [Local]
         void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
         {
-            if(ev.Player == obsession) ev.Name += " #".Color(MyRole.UnityColor);
+            if (ev.Player == obsession) ev.Color = MyRole.RoleColor;
         }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (canSeeAllInfo)
-            {
-                name += " $".Color(MyRole.UnityColor);
-                if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
-                    name += $" <size=60%>({obsession?.Name ?? "ERROR" })</size>";
-            }
+            if (inEndScene || (canSeeAllInfo && !AmOwner))
+                name += $" ({(obsession?.Name ?? "Undefined")})".Color(MyRole.UnityColor).Sized(60);
+            else if (AmOwner)
+                name += MyRole.GetRoleIconTagSmall();
         }
 
 

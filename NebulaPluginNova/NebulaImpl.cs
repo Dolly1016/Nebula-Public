@@ -27,7 +27,7 @@ public class NebulaImpl : INebula
     {
         Instance = this;
 
-        allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API, NebulaHasher.API]);
+        allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API, NebulaHasher.API, Roles.Roles.API]);
     }
 
     public Version APIVersion => typeof(NebulaAPI).Assembly.GetName().Version!;
@@ -53,10 +53,6 @@ public class NebulaImpl : INebula
 
     Virial.Game.Game? INebula.CurrentGame => NebulaGameManager.Instance;
 
-    Virial.Assignable.DefinedRole? INebula.GetRole(string internalName) => Roles.Roles.AllRoles.FirstOrDefault(r => r.InternalName == internalName);
-    Virial.Assignable.DefinedModifier? INebula.GetModifier(string internalName) => Roles.Roles.AllModifiers.FirstOrDefault(r => r.InternalName == internalName);
-    Virial.Assignable.DefinedGhostRole? INebula.GetGhostRole(string internalName) => Roles.Roles.AllGhostRoles.FirstOrDefault(r => r.InternalName == internalName);
-
     E INebula.RunEvent<E>(E ev) => GameOperatorManager.Instance?.Run(ev)!;
 
     GameStatsEntry INebula.CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority) => NebulaAchievementManager.RegisterStats(id, category, assignable, displayTitle, innerPriority);
@@ -73,10 +69,11 @@ public class NebulaImpl : INebula
     IDisposable INebula.CreateRPCSection(string? label) => RPCRouter.CreateSection(label);
 
     //ショートカット
-    Virial.Configuration.Configurations Configurations => ConfigurationsAPI.API;
-    Virial.Media.GUI GUILibrary => GUI.API;
-    Virial.Media.Translator Language => Nebula.Modules.Language.API;
-    Virial.Utilities.IHasher Hasher => NebulaHasher.API;
+    Virial.Configuration.Configurations INebula.Configurations => ConfigurationsAPI.API;
+    Virial.Media.GUI INebula.GUILibrary => GUI.API;
+    Virial.Media.Translator INebula.Language => Nebula.Modules.Language.API;
+    Virial.Utilities.IHasher INebula.Hasher => NebulaHasher.API;
+    Virial.Assignable.Assignables INebula.Assignables => Nebula.Roles.Roles.API;
 
     IModuleFactory INebula.Modules => factory;
 

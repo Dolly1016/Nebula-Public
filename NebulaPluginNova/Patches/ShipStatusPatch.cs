@@ -9,29 +9,29 @@ namespace Nebula.Patches;
 [HarmonyPatch(typeof(ShipStatus),nameof(ShipStatus.Awake))]
 public class ShipStatusPatch
 {
+    static private byte cachedMapId = 0;
     static public void Prefix(ShipStatus __instance)
     {
-        if (GeneralConfigurations.CurrentGameMode != GameModes.AeroGuesser)
-        {
 
-            //マップIDが正しく設定されていなかったときのための救済措置 (ちゃんとオプションが更新されるようにする方がよさそう)
-            byte mapId = 0;
-            if (__instance.TryCast<SkeldShipStatus>())
-                mapId = 0;
-            else if (__instance.TryCast<MiraShipStatus>())
-                mapId = 1;
-            else if (__instance.TryCast<PolusShipStatus>())
-                mapId = 2;
-            else if (__instance.TryCast<AirshipStatus>())
-                mapId = 4;
-            else if (__instance.TryCast<FungleShipStatus>())
-                mapId = 5;
-            AmongUsUtil.GetCurrentNormalOption().MapId = mapId;
-        }
+        //マップIDが正しく設定されていなかったときのための救済措置 (ちゃんとオプションが更新されるようにする方がよさそう)
+        byte mapId = 0;
+        if (__instance.TryCast<SkeldShipStatus>())
+            mapId = 0;
+        else if (__instance.TryCast<MiraShipStatus>())
+            mapId = 1;
+        else if (__instance.TryCast<PolusShipStatus>())
+            mapId = 2;
+        else if (__instance.TryCast<AirshipStatus>())
+            mapId = 4;
+        else if (__instance.TryCast<FungleShipStatus>())
+            mapId = 5;
+        cachedMapId = mapId;
+        if (GeneralConfigurations.CurrentGameMode != GameModes.AeroGuesser) AmongUsUtil.GetCurrentNormalOption().MapId = mapId;
+
 
         //ModdedMap
         //ModShipStatus.CleanOriginalShip(__instance);
-        
+
     }
 
     static public void Postfix(ShipStatus __instance)
@@ -43,11 +43,11 @@ public class ShipStatusPatch
 
     static private void ModifyEarlier()
     {
-        ShipExtension.PatchEarlierModification(AmongUsUtil.CurrentMapId);
+        ShipExtension.PatchEarlierModification(cachedMapId);
     }
 
     static private void Modify() { 
-        ShipExtension.PatchModification(AmongUsUtil.CurrentMapId);
+        ShipExtension.PatchModification(cachedMapId);
         if (GeneralConfigurations.SilentVentOption)
         {
             //ベントを見えなくする

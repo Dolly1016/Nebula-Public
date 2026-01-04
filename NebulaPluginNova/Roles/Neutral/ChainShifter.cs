@@ -89,7 +89,7 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                 if (!(shiftTarget.VanillaPlayer)) yield break;
                 if (MyPlayer.PlayerState == PlayerState.Misguessed) yield break;//推察失敗時に限り、役職交換をキャンセルする。
 
-                var player = shiftTarget.Unbox();
+                var player = shiftTarget;
 
                 //会議終了時に死亡している相手とはシフトできない
                 if (player == null || player.IsDead) yield break;
@@ -97,8 +97,8 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                 int[] targetArgument = [];
                 var targetRole = player.Role.Role;
                 int targetGuess = -1;
-                yield return player.CoGetRoleArgument((args) => targetArgument = args);
-                yield return player.CoGetLeftGuess((guess) => targetGuess = guess);
+                yield return player.Unbox().CoGetRoleArgument((args) => targetArgument = args);
+                yield return player.Unbox().CoGetLeftGuess((guess) => targetGuess = guess);
 
                 int myGuess = MyPlayer.TryGetModifier<GuesserModifier.Instance>(out var guesser) ? guesser.LeftGuess : -1;
 
@@ -141,36 +141,36 @@ public class ChainShifter : DefinedRoleTemplate, HasCitation, DefinedRole
                     }
 
                     //タスクを整えたうえで役職を変更する
-                    MyPlayer.Unbox().RpcInvokerSetRole(targetRole, targetArgument).InvokeSingle();
-                    player.RpcInvokerSetRole(MyRole, null).InvokeSingle();
+                    MyPlayer.SetRole(targetRole, targetArgument);
+                    player.SetRole(MyRole, null);
 
                     PlayerExtension.SendRoleSwapping(MyPlayer, player, MyRole, PlayerRoleSwapEvent.SwapType.Swap);
                     PlayerExtension.SendRoleSwapping(player, MyPlayer, targetRole, PlayerRoleSwapEvent.SwapType.Swap);
 
-                    if (targetGuess != -1) player.RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
-                    if (myGuess != -1) MyPlayer.Unbox().RpcInvokerUnsetModifier(GuesserModifier.MyRole).InvokeSingle();
+                    if (targetGuess != -1) player.RemoveModifier(GuesserModifier.MyRole);
+                    if (myGuess != -1) MyPlayer.RemoveModifier(GuesserModifier.MyRole);
 
-                    if (myGuess != -1) player.RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { myGuess }).InvokeSingle();
-                    if (targetGuess != -1) MyPlayer.Unbox().RpcInvokerSetModifier(GuesserModifier.MyRole, new int[] { targetGuess }).InvokeSingle();
+                    if (myGuess != -1) player.AddModifier(GuesserModifier.MyRole, new int[] { myGuess });
+                    if (targetGuess != -1) MyPlayer.AddModifier(GuesserModifier.MyRole, new int[] { targetGuess });
 
                     if(myMJailer != targetMJailer)
                     {
                         if (myMJailer)
                         {
-                            MyPlayer.Unbox().RpcInvokerUnsetModifier(Impostor.JailerModifier.MyRole).InvokeSingle();
-                            player.RpcInvokerSetModifier(Impostor.JailerModifier.MyRole, []).InvokeSingle();
+                            MyPlayer.RemoveModifier(Impostor.JailerModifier.MyRole);
+                            player.AddModifier(Impostor.JailerModifier.MyRole, []);
                         }
                         else
                         {
-                            MyPlayer.Unbox().RpcInvokerSetModifier(Impostor.JailerModifier.MyRole, []).InvokeSingle();
-                            player.RpcInvokerUnsetModifier(Impostor.JailerModifier.MyRole).InvokeSingle();
+                            MyPlayer.AddModifier(Impostor.JailerModifier.MyRole, []);
+                            player.RemoveModifier(Impostor.JailerModifier.MyRole);
                         }
                     }
 
                     if (targetNighty)
                     {
-                        MyPlayer.Unbox().RpcInvokerSetModifier(Modifier.Nighty.MyRole, []).InvokeSingle();
-                        player.RpcInvokerUnsetModifier(Modifier.Nighty.MyRole).InvokeSingle();
+                        MyPlayer.AddModifier(Modifier.Nighty.MyRole, []);
+                        player.RemoveModifier(Modifier.Nighty.MyRole);
                     }
                     
                     new NebulaRPCInvoker(() => MyPlayer.Unbox().UpdateTaskState()).InvokeSingle();

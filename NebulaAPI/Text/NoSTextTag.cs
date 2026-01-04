@@ -62,6 +62,7 @@ public static class PlayerStates
     public static CommunicableTextTag Meteor { get; internal set; } = null!;
     public static CommunicableTextTag Balloon { get; internal set; } = null!;
     public static CommunicableTextTag Lost { get; internal set; } = null;
+    public static CommunicableTextTag Punished { get; internal set; } = null;
 }
 
 /// <summary>

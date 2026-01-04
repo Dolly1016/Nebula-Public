@@ -471,7 +471,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
                     nextIsFinalDance = true;
                     UpdateButtonGraphic();
                 }
-                else if (NebulaAPI.CurrentGame?.LocalPlayer.AmHost ?? false)
+                else if (GamePlayer.LocalPlayer?.AmHost ?? false)
                     NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.DancerWin, (int)WinnersMask.AsRawPattern);
             }
             

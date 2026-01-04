@@ -184,7 +184,7 @@ public static class GeneralConfigurations
     static internal ISharableVariable<bool> FungleLightDropshipOption = MapCustomization(5, MapOptionType.BlackOut, new(-7.8f, 13.46f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.blackOutDropship", false));
     static internal ISharableVariable<bool> FungleLightJungleOption = MapCustomization(5, MapOptionType.BlackOut, new(-6.9618f, -5.9982f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.blackOutJungle", false));
     static internal ISharableVariable<bool> FungleLightMiningPitOption = MapCustomization(5, MapOptionType.BlackOut, new(13.68f, 7.83f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.blackOutMiningPit", false));
-    static internal ISharableVariable<bool> FungleForClassicGameOption = MapCustomization(5, MapOptionType.Blueprint, new(9.0f, -4.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.forClassicGame", false));
+    static internal ISharableVariable<bool> FungleForClassicGameOption = MapCustomization(5, MapOptionType.Blueprint, new(11.0f, -4.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.forClassicGame", false));
 
 
     static IEnumerable<float> SabotageSelections()
@@ -366,6 +366,8 @@ public static class GeneralConfigurations
     static public FloatConfiguration GuessTimeOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.guessTime", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
     static public IntegerConfiguration NumOfQuizOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.numOfQuiz", (1, 10), 5);
     static public BoolConfiguration MonochromeModeOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.monochromeMode", false);
+    static public BoolConfiguration HurryTimerOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.hurryTimer", false);
+    static public FloatConfiguration HurryTimerDurationOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.hurryTimerDuration", (10f, 40f, 5f), 10f, FloatConfigurationDecorator.Second, () => HurryTimerOption);
     static public IntegerConfiguration AeroGuesserSkeldOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.skeld", (0, 10, 1), 1, decorator: num => num + "x");
     static public IntegerConfiguration AeroGuesserMIRAOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.mira", (0, 10, 1), 1, decorator: num => num + "x");
     static public IntegerConfiguration AeroGuesserPolusOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.polus", (0, 10, 1), 1, decorator: num => num + "x");
@@ -375,6 +377,10 @@ public static class GeneralConfigurations
     static public IntegerConfiguration AeroGuesserHardOption = NebulaAPI.Configurations.Configuration("options.aeroGuesser.hard", (0, 10, 1), 1, decorator: num => num + "x");
     static internal IConfigurationHolder AeroGuesserOption = NebulaAPI.Configurations.Holder("options.aeroGuesser", [ConfigurationTab.Settings], [GameModes.AeroGuesser]).AppendConfigurations([
         GuessTimeOption, NumOfQuizOption, MonochromeModeOption,
+        Group("options.aeroGuesser.group.hurryTimer",
+            HurryTimerOption,
+            HurryTimerDurationOption
+            ),
         Group("options.aeroGuesser.group.filter.difficulty",
             AeroGuesserNormalOption,
             AeroGuesserHardOption

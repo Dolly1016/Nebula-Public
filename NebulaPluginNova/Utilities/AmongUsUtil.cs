@@ -72,26 +72,45 @@ public static class AmongUsUtil
         return currentOver.GetInstanceID() == uiElem.GetInstanceID();
     }
 
-    public static string GetRoomName(UnityEngine.Vector2 position, bool detail = false, bool shortName = false)
+    public static string GetRoomName(UnityEngine.Vector2 position, bool detail = false, bool shortName = false, bool onlyVanillaRoom = false)
+    {
+        GetRoomName(position, out var roomName, detail, shortName, onlyVanillaRoom);
+        return roomName;
+    }
+
+    public static bool GetRoomName(UnityEngine.Vector2 position, out string roomName, bool detail = false, bool shortName = false, bool onlyVanillaRoom = false)
     {
         var mapData = MapData.GetCurrentMapData();
         foreach (var entry in ShipStatus.Instance.FastRooms)
         {
             if (entry.value.roomArea.OverlapPoint(position))
             {
-                if (detail)
+                if (detail && onlyVanillaRoom)
                 {
                     var overrideRoom = mapData.GetOverrideMapRooms(entry.Key, position);
-                    if (overrideRoom != null) return ToDisplayLocationString(overrideRoom, null, shortName);
+                    if (overrideRoom != null)
+                    {
+                        roomName = ToDisplayLocationString(overrideRoom, null, shortName);
+                        return true;
+                    }
                 }
-                return AmongUsUtil.ToDisplayString(entry.Key, null, shortName);
+                roomName = AmongUsUtil.ToDisplayString(entry.Key, null, shortName);
+                return true;
             }
         }
 
-        var additionalRoom = mapData.GetAdditionalMapRooms(position, detail);
-        if(additionalRoom != null) return ToDisplayLocationString(additionalRoom, null, shortName);
+        if (onlyVanillaRoom)
+        {
+            var additionalRoom = mapData.GetAdditionalMapRooms(position, detail);
+            if (additionalRoom != null)
+            {
+                roomName = ToDisplayLocationString(additionalRoom, null, shortName);
+                return true;
+            }
+        }
 
-        return Language.Translate("location.outside");
+        roomName = Language.Translate("location.outside");
+        return false;
     }
 
     public static void SetHighlight(Renderer renderer, bool on, Color? color = null) => SetHighlight(renderer, on, true, color);
@@ -763,5 +782,7 @@ public static class AmongUsUtil
                 return DataManager.Settings.Input.MouseMovementEnabled;
             return mode == ControlTypes.ScreenJoystick;
         }
-    }       
+    }
+
+    public static HideAndSeekManager HnSPrefab => GameManagerCreator.Instance.HideAndSeekManagerPrefab;
 }

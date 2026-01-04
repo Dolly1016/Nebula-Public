@@ -35,9 +35,12 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
             }
         }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (canSeeAllInfo) name += $" ({ (target?.Name ?? "Undefined") })".Color(MyRole.UnityColor);
+            if (inEndScene || (canSeeAllInfo && !AmOwner))
+                name += $" ({(target?.Name ?? "Undefined")})".Color(MyRole.UnityColor);
+            else if (AmOwner)
+                name += MyRole.GetRoleIconTagSmall();
         }
 
         [Local]

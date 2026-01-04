@@ -197,7 +197,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
             MyTrilemmas = NebulaGameManager.Instance!.AllPlayerInfo.Where(IsMyTrilemma).ToArray();
         }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
             Color trilemmaColor = colors[canSeeAllInfo ? trilemmaId : 0];
             
@@ -208,7 +208,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
                 canSee = true;
             }
             
-            if (canSee) name += MyRole.GetRoleIconTag();
+            if (canSee) name += MyRole.GetRoleIconTagSmall();
         }
 
 

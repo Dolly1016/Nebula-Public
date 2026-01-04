@@ -429,6 +429,8 @@
 "options.aeroGuesser.guessTime" : "Guess Time"
 "options.aeroGuesser.numOfQuiz" : "# Quizzes"
 "options.aeroGuesser.monochromeMode" : "Monochrome Mode"
+"options.aeroGuesser.hurryTimer" : "Hurry Timer"
+"options.aeroGuesser.hurryTimerDuration" : "Hurry Timer Duration"
 "options.aeroGuesser.skeld" : "Skeld"
 "options.aeroGuesser.mira" : "MIRA HQ"
 "options.aeroGuesser.polus" : "Polus"
@@ -436,6 +438,7 @@
 "options.aeroGuesser.fungle" : "Fungle"
 "options.aeroGuesser.normal" : "Normal"
 "options.aeroGuesser.hard" : "Hard"
+"options.aeroGuesser.group.hurryTimer" : "Hurry Timer Settings"
 "options.aeroGuesser.group.filter.difficulty" : "Difficulty Settings"
 "options.aeroGuesser.group.filter.map" : "Map Settings"
 
@@ -833,6 +836,8 @@
 "options.role.oracle.oracleAdditionalCooldown" : "Oracle Additional Cooldown"
 "options.role.oracle.oracleDuration" : "Oracle Duration"
 "options.role.oracle.numOfCandidates" : "# Role Candidates"
+"options.role.oracle.dieOnDividingOpportunist" : "Die On Dividing Opportunist"
+"options.role.oracle.dieOnDividingOracle" : "Die On Dividing Oracle"
 "stats.oracle.oracle" : "Num of Oracle"
 "role.oracle.gui.results" : "Oracle Results"
 "role.oracle.gui.results.zero" : "None"
@@ -1477,6 +1482,43 @@
 "options.role.jester.canFixLight" : "Can Fix Light"
 "options.role.jester.task" : "Requires Tasks For Winning"
 
+"role.opportunist.name" : "Opportunist"
+"role.opportunist.short" : "O"
+"role.opportunist.blurb" : "The Planet Goes"
+"options.role.opportunist.detail" : "Opportunists can earn additional wins by completing tasks and surviving."
+"options.role.opportunist.numOfTasks" : "# Staying Tasks"
+"options.role.opportunist.stayingDuration" : "Staying Duration Per Tasks"
+"options.role.opportunist.canFixComms" : "Can Fix Comms"
+"options.role.opportunist.canFixLight" : "Can Fix Light"
+"role.opportunist.task.veiled" : "Locked Task"
+"role.opportunist.task" : "Stay at %LOC%"
+"role.opportunist.task.room" : "Stay in the Room"
+"role.opportunist.task.loc.skeld.cafeteria.window" : "Window"
+"role.opportunist.task.loc.skeld.medbay.scan" : "Scanner"
+"role.opportunist.task.loc.mira.balcony.antenna" : "Antenna"
+"role.opportunist.task.loc.mira.cafeteria.vendingMachine" : "Vending Machiene"
+"role.opportunist.task.loc.polus.security.camera" : "Camera"
+"role.opportunist.task.loc.polus.comms.table" : "Table"
+"role.opportunist.task.loc.polus.lab.hole" : "the Hole"
+"role.opportunist.task.loc.polus.lab.toilet" : "Toilet"
+"role.opportunist.task.loc.polus.admin.bookshelf" : "Bookshelf"
+"role.opportunist.task.loc.polus.outside.ejection" : "Ejection"
+"role.opportunist.task.loc.polus.outside.comms" : "Snowman"
+"role.opportunist.task.loc.airship.mainHall.cleaning" : "Cleaning Room"
+"role.opportunist.task.loc.airship.mainHall.treasureBox" : "Treasure Box"
+"role.opportunist.task.loc.airship.mainHall.darkRoom" : "Dark Room"
+"role.opportunist.task.loc.airship.lounge.toilet" : "Toilet"
+"role.opportunist.task.loc.airship.cargoBay.safe" : "Safe"
+"role.opportunist.task.loc.airship.medical.vitals" : "Vitals"
+"role.opportunist.task.loc.airship.security.outside" : "Deck"
+"role.opportunist.task.loc.airship.viewingDeck.outside" : "Deck"
+"role.opportunist.task.loc.fungle.highlands.bigGem" : "the Huge Gem"
+"role.opportunist.task.loc.fungle.highlands.landing" : "the Landing"
+"role.opportunist.task.loc.fungle.jungle.monitoring" : "Monitoring Point"
+"options.role.opportunist.group.fallback" : "Opportunist Fallback Settings"
+"options.role.opportunist.fallback" : "Opportunist Fallback"
+"options.role.opportunist.fallback.tasks" : "# Staying Tasks"
+
 "role.paparazzo.name" : "Paparazzo"
 "role.paparazzo.short" : "P"
 "role.paparazzo.blurb" : "Take a Best Shot!"
@@ -1767,6 +1809,7 @@
 "teams.gambler" : "Gambler"
 "teams.tyrant" : "Tyrant"
 "teams.vanity" : "Vanity"
+"teams.opportunist" : "Opportunist"
 
 # Perks
 
@@ -2204,6 +2247,7 @@
 "state.dissolved" : "Dissolved"
 "state.poisoned" : "Poisoned"
 "state.layoff" : "Layoff"
+"status.punished" : "Punished"
 
 # Endings
 
@@ -2233,6 +2277,7 @@
 "end.extra.grudge" : " <color=#FFFFFF>with</color> Grudge"
 "end.extra.trilemma" : " <color=#FFFFFF>with</color> Trilemma"
 "end.extra.vanity" : " <color=#FFFFFF>with</color> Vanity"
+"end.extra.opportunist" : " <color=#FFFFFF>with</color> Opportunist"
 
 # Help
 

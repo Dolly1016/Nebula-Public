@@ -19,6 +19,9 @@ public class CommandConsole
 
     ConsoleShower log;
 
+    List<string> history = [];
+    int currentHistoryPos = -1;
+
     public bool IsShown { get => consoleObject.active; set => consoleObject.SetActive(value); }
 
     static private ICommandExecutor Guest = new GuestExecutor();
@@ -53,8 +56,40 @@ public class CommandConsole
             }
             NebulaManager.Instance.StartCoroutine(CoExecute().WrapToIl2Cpp());
 
+            history.Add(text);
             myInput.SetText("");
+            currentHistoryPos = -1;
             return false;
+        };
+
+        consoleObject.AddComponent<ScriptBehaviour>().UpdateHandler += () =>
+        {
+            int lastHistoryPos = currentHistoryPos;
+
+            void OnUpdateCurrentHistoryPos()
+            {
+                var lastText = myInput.Text;
+                if (lastHistoryPos == -1 && lastText.Length > 0) history.Add(lastText);
+
+                if (currentHistoryPos >= 0 && currentHistoryPos < history.Count)
+                    myInput.SetText(history[currentHistoryPos]);
+                else
+                    myInput.SetText("");
+            }
+
+            
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                if (currentHistoryPos == -1) currentHistoryPos = history.Count - 1;
+                else currentHistoryPos--;
+                OnUpdateCurrentHistoryPos();
+            }
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                if (currentHistoryPos >= 0) currentHistoryPos++;
+                if (currentHistoryPos >= history.Count) currentHistoryPos = -1;
+                OnUpdateCurrentHistoryPos();
+            }
         };
 
         var backGround = UnityHelper.CreateObject<SpriteRenderer>("Background", myInput.transform, new Vector3(0, 0, 1f));

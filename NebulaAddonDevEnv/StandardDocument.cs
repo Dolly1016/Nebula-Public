@@ -51,6 +51,9 @@ namespace DefaultLang.Documents;
 [AddonDocument("role.zeal", RoleType.Role, (string[])["Buttons.ZealButton.png;role.zeal.ability.absorb", "Buttons.VanillaKillButton.png;role.zeal.ability.kill"], false, false)]
 [AddonDocument("role.vanity", RoleType.Role, (string[])["Buttons.SheriffKillButton.png;role.vanity.ability.kill"], false, false)]
 [AddonDocument("role.sheriff", RoleType.Role, (string[])["Buttons.SheriffKillButton.png;role.sheriff.ability.kill"], false, false)]
+[AddonDocument("role.amalgam", RoleType.Role, (string[])["Buttons.AmalgamButton.png;role.amalgam.ability.amalgam"], false, false)]
+[AddonDocument("role.creeping", RoleType.Role, (string[])["Buttons.PoisonButton.png;role.creeping.ability.poison"], false, true)]
+[AddonDocument("role.nighty", RoleType.Modifier, (string[])["Buttons.BlindTrapButton.png;role.nighty.ability.place"], false, false)]
 public class StandardDocument : IDocumentWithId
 {
     string documentId;

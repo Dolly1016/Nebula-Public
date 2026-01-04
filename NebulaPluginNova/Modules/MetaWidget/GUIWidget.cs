@@ -2,10 +2,12 @@
 using Nebula.Behavior;
 using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
+using Virial;
 using Virial.Assignable;
 using Virial.Compat;
 using Virial.Media;
 using Virial.Text;
+using static Sentry.MeasurementUnit;
 
 namespace Nebula.Modules.GUIWidget;
 
@@ -417,8 +419,21 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
         RoleOptionHelper.OpenFilterScreen<R>(scrollerTag, allRoles, test, null, toggleAndShare);
     }
 
+    
 
-
+    private UnityEngine.Vector2 WorldToScreenPos(Virial.Compat.Vector2 worldPos)
+    {
+        return UnityHelper.WorldToScreenPoint(NebulaGameManager.Instance!.WideCamera.ConvertToWorldPos(worldPos), LayerExpansion.GetDefaultLayer());
+    }
+    public void ShowStickerOverlay(Virial.Media.GUIWidget widget, float duration, Virial.Compat.Vector2 stuckPosition)
+    {
+        var lifespan = FunctionalLifespan.GetTimeLifespan(duration);
+        NebulaManager.Instance.RegisterStaticPopup(() => lifespan.IsDeadObject, () => !NebulaInput.SomeUiIsActive && lifespan.IsAliveObject, () => (widget, () => WorldToScreenPos(stuckPosition), null));
+    }
+    public void ShowStickerOverlay(Virial.Media.GUIWidget widget, Virial.Compat.Vector2 stuckPosition, Func<bool> isFinallyDead, Func<bool> predicate) 
+    {
+        NebulaManager.Instance.RegisterStaticPopup(isFinallyDead, predicate, () => (widget, () => WorldToScreenPos(stuckPosition), null));
+    }
     public void ShowOverlay(Virial.Media.GUIWidget widget, GUIClickable? clickable = null) => NebulaManager.Instance?.SetHelpWidget(clickable?.uiElement, widget);
 
     public void HideOverlay() => NebulaManager.Instance.HideHelpWidget();

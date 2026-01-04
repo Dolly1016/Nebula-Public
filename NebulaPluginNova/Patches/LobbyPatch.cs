@@ -593,7 +593,7 @@ public class LobbyBehaviourDestroyPatch
 {
     public static void Postfix(LobbyBehaviour __instance)
     {
-        GameOperatorManager.Instance?.Run<LobbyDestroyEvent>(new(), needToCheckGameEnd: false);
+        GameOperatorManager.Instance?.Run<LobbyDestroyEvent>(new());
 
     }
 }

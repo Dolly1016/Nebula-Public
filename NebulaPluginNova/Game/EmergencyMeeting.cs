@@ -23,7 +23,7 @@ internal class EmergencyMeetingImpl : EmergencyMeeting
 
     GamePlayer EmergencyMeeting.InvokedBy => invokedBy;
 
-    bool ILifespan.IsDeadObject => ModSingleton<EmergencyMeeting>.Instance == this && !MeetingHud.Instance && !ExileController.Instance;
+    bool ILifespan.IsDeadObject => ModSingleton<EmergencyMeeting>.Instance != this || (!MeetingHud.Instance && !ExileController.Instance);
 
     void EmergencyMeeting.EditMeetingTime(int deltaSec)
     {

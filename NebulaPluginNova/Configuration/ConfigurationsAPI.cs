@@ -36,6 +36,7 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
     BoolConfiguration Configurations.Configuration(string id, bool defaultValue, Func<bool>? predicate, TextComponent? title)
     {
         var config = new BoolConfigurationImpl(id, defaultValue);
+        if(title != null) config.Title = title;
         config.Predicate = predicate;
         return config;
     }

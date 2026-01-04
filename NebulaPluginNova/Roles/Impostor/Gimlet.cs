@@ -14,6 +14,7 @@ using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Media;
+using Virial.Runtime;
 using Virial.Text;
 using static UnityEngine.GraphicsBuffer;
 
@@ -44,6 +45,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
 
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
@@ -59,7 +61,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
             {
                 var acTokenAnother2 = AchievementTokens.FirstFailedAchievementToken("gimlet.another2", MyPlayer, this);
 
-                var drillButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "gimlet.drill",
+                var drillButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility, "gimlet.drill",
                     DrillCooldownOption.CoolDown, "drill", buttonSprite, _ => !Helpers.LocalPlayerUsingHookshot).SetAsUsurpableButton(this);
                 drillButton.OnClick = (button) => {
                     acTokenAnother2.Value.triggered = true;

@@ -893,7 +893,7 @@ class PopulateResultPatch
     {
         Debug.Log("Called PopulateResults");
 
-        GameOperatorManager.Instance?.Run(new MeetingVoteEndEvent());
+        GameOperatorManager.Instance?.Run(new MeetingVoteEndEvent(states.ToArray()));
 
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.MeetingVotingResults);
         foreach (var voteArea in __instance.playerStates)

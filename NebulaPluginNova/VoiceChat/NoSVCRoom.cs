@@ -527,7 +527,7 @@ internal class NoSVCRoom
                         ev.NormalPan = pan;
                         if (localIsDead)
                         {
-                            ev.NormalVolume = canHearAllVoice ? 1f : volume;
+                            ev.NormalVolume = (canHearAllVoice && targetIsDead) ? 1f : volume;
                             ev.GhostVolume = 0f;
                         }
                         else

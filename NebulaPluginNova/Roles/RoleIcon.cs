@@ -66,7 +66,15 @@ static public class RoleIcon
         return mat;
     }
 
-    static public string GetRoleIconTag(this DefinedAssignable assignable, bool masked = false) => RuntimeSpriteGenerator.SpriteTagFromAssignable(assignable, masked);
+    static public string GetRoleIconTag(this DefinedAssignable assignable, bool masked = false, int size = 100)
+    {
+        var tag = RuntimeSpriteGenerator.SpriteTagFromAssignable(assignable, masked);
+        if (size == 100) return tag;
+        return (tag).Sized(size);
+    }
+
+    static public string GetRoleIconTagSmall(this DefinedAssignable assignable, bool masked = false) => GetRoleIconTag(assignable, masked, 70);
+
     static public void UseRoleIcon(this TMPro.TextMeshPro text) => text.spriteAsset = RuntimeSpriteGenerator.SpriteAsset;
 
     [NebulaPreprocess(PreprocessPhase.PostFixStructure)]

@@ -36,6 +36,9 @@ public class CriteriaManager
         //終了条件が確定済みなら何もしない
         if (NebulaGameManager.Instance?.EndState != null) return;
 
+        //ゲーム終了が許可されていなければ何もしない
+        if (!(NebulaAPI.CurrentGame?.GameMode?.AllowSpecialGameEnd ?? true)) return;
+
         if ((ExileController.Instance) && !Minigame.Instance)
         {
             triggeredGameEnds.RemoveAll(t => t.reason is GameEndReason.Situation or GameEndReason.SpecialSituation);
@@ -43,15 +46,20 @@ public class CriteriaManager
         }
 
         //条件にそぐわない勝利条件の削除
-        triggeredGameEnds.RemoveAll(t => GameOperatorManager.Instance?.Run<EndCriteriaPreMetEvent>(new(t.gameEnd, t.reason), needToCheckGameEnd: false)?.IsBlocked ?? false);
+        triggeredGameEnds.RemoveAll(t =>
+        {
+            return GameOperatorManager.Instance?.Run<EndCriteriaPreMetEvent>(new(t.gameEnd, t.reason))?.IsBlocked ?? false;
+        });
 
         if(triggeredGameEnds.Count == 0) return;
 
-        var end = triggeredGameEnds.MaxBy(g => g.gameEnd.Priority);
+        var max = triggeredGameEnds.Max(g => g.gameEnd.Priority);
+        var ends = triggeredGameEnds.Where(g => g.gameEnd.Priority == max).ToArray();
         triggeredGameEnds.Clear();
 
-        if (end == null) return;
-
-        NebulaGameManager.Instance?.InvokeEndGame(end.gameEnd, end.reason, end.additionalWinners != null ? (NebulaGameManager.Instance.AllPlayerInfo.Aggregate(0, (v, p) => end.additionalWinners.Test(p) ? (v | (1 << p.PlayerId)) : v)) : 0);
+        var basicEnd = ends[0];
+        var combinedWinners = ends.Where(g => g.gameEnd == basicEnd.gameEnd).Select(g => g.additionalWinners);
+        
+        NebulaGameManager.Instance?.InvokeEndGame(basicEnd.gameEnd, basicEnd.reason, NebulaGameManager.Instance.AllPlayerInfo.Aggregate(0, (v, p) => ends.Any(e => e.additionalWinners?.Test(p) ?? false) ? (v | (1 << p.PlayerId)) : v));
     }
 }

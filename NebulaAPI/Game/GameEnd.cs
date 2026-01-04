@@ -20,6 +20,7 @@ public sealed class GameEnd
     public TextComponent DisplayText { get; private init; }
     internal UnityEngine.Color Color { get; }
     internal string ImmutableId { get; private init; }
+    internal Func<UnityEngine.AudioClip?>? AlternativeClip { get; init; }
     public bool SpecifyNobodyWins { get; private init; }
 
 
@@ -114,6 +115,7 @@ public enum ExtraWinCheckPhase
     ObsessionPhase = Phase1,
     DancerPhase = Phase0,
     GrudgePhase = Phase0,
+    OpportunistPhase = Phase0,
     TrilemmaPhase = Phase2,
     ScarletPhase = Phase0,
     MadmatePhase = Phase0,

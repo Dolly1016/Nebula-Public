@@ -150,16 +150,17 @@ static file class GuesserSystem
 
                     if (guessIf?.Invoke() ?? true)
                     {
+                        var localPlayer = GamePlayer.LocalPlayer;
                         GuesserModifier.StatsAllGuessed.Progress();
                         if (Guesser.AbilityGuessOption ? p.Role.CheckGuessAbility(r) : (p.Role.ExternalRecognitionRole == r))
                         {
-                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(p, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill, KillCondition.BothAlive);
+                            localPlayer?.MurderPlayer(p, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill, KillCondition.BothAlive);
                         }
                         else
                         {
                             GuesserModifier.StatsMisguessed.Progress();
-                            NebulaAPI.CurrentGame?.LocalPlayer.MurderPlayer(NebulaAPI.CurrentGame.LocalPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill, KillCondition.BothAlive);
-                            RpcShareExtraInfo.Invoke((NebulaAPI.CurrentGame!.LocalPlayer, p!, r));
+                            localPlayer?.MurderPlayer(localPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill, KillCondition.BothAlive);
+                            RpcShareExtraInfo.Invoke((localPlayer!, p!, r));
                         }
                     }
                     else
@@ -335,9 +336,9 @@ public class GuesserModifier : DefinedAllocatableModifierTemplate, DefinedAlloca
         }
 
         void RuntimeAssignable.OnActivated() { }
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (AmOwner || canSeeAllInfo) name += " ⊕".Color(MyRole.UnityColor);
+            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
 
 

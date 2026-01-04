@@ -437,6 +437,8 @@ $Color
 "options.aeroGuesser.guessTime" : "推察時間"
 "options.aeroGuesser.numOfQuiz" : "クイズの出題数"
 "options.aeroGuesser.monochromeMode" : "モノクロモード"
+"options.aeroGuesser.hurryTimer" : "タイマー短縮"
+"options.aeroGuesser.hurryTimerDuration" : "短縮後の最大タイマー"
 "options.aeroGuesser.skeld" : "Skeld"
 "options.aeroGuesser.mira" : "MIRA HQ"
 "options.aeroGuesser.polus" : "Polus"
@@ -444,6 +446,7 @@ $Color
 "options.aeroGuesser.fungle" : "Fungle"
 "options.aeroGuesser.normal" : "Normal"
 "options.aeroGuesser.hard" : "Hard"
+"options.aeroGuesser.group.hurryTimer" : "タイマー短縮の設定"
 "options.aeroGuesser.group.filter.difficulty" : "難易度の設定"
 "options.aeroGuesser.group.filter.map" : "出題対象マップの設定"
 
@@ -841,6 +844,8 @@ $Color
 "options.role.oracle.oracleAdditionalCooldown" : "占いの追加クールダウン"
 "options.role.oracle.oracleDuration" : "占いの所要時間"
 "options.role.oracle.numOfCandidates" : "役職候補数"
+"options.role.oracle.dieOnDividingOpportunist" : "オポチュニストを占うと自殺"
+"options.role.oracle.dieOnDividingOracle" : "オラクルを占うと自殺"
 "stats.oracle.oracle" : "占った回数"
 "role.oracle.gui.results" : "占い結果"
 "role.oracle.gui.results.zero" : "なし"
@@ -944,7 +949,7 @@ $Color
 "options.role.amalgam.randomAssignment" : "ランダム融合"
 "options.role.amalgam.abilityFilter" : "役職フィルタ"
 "options.role.amalgam.canBeGuessedAsLoadedRoles" : "融合した役職で推察可能"
-"role.amalgam.tabs.kill" : "キル役職"
+"role.amalgam.tabs.kill" : "キル・エイム役職"
 "role.amalgam.tabs.map" : "マップ役職"
 "role.amalgam.tabs.others" : "その他役職"
 
@@ -1489,6 +1494,49 @@ $Color
 "options.role.jester.canFixLight" : "停電を修理可能"
 "options.role.jester.task" : "勝利にタスクが必要"
 
+"role.opportunist.name" : "オポチュニスト"
+"role.opportunist.short" : "オ"
+"role.opportunist.blurb" : "気ままな惑い星"
+"options.role.opportunist.detail" : "オポチュニストは特殊なタスクをこなして最後まで生存すると追加勝利します。"
+"options.role.opportunist.numOfTasks" : "滞在タスク数"
+"options.role.opportunist.stayingDuration" : "タスクごとの滞在時間"
+"options.role.opportunist.canFixComms" : "通信障害を修理可能"
+"options.role.opportunist.canFixLight" : "停電を修理可能"
+"role.opportunist.task.veiled" : "上のタスク完了後に解放"
+"role.opportunist.task" : "%LOC%にとどまる"
+"role.opportunist.task.room" : "部屋内にとどまる"
+"role.opportunist.task.loc.skeld.cafeteria.window" : "船外を望む窓"
+"role.opportunist.task.loc.skeld.storage.trash" : "ごみ排出口"
+"role.opportunist.task.loc.skeld.electrical.electrical" : "電気室奥"
+"role.opportunist.task.loc.skeld.lowerEngine.lowerEngine" : "給油口"
+"role.opportunist.task.loc.skeld.reactor.upper" : "原子炉上部"
+"role.opportunist.task.loc.skeld.medbay.scan" : "スキャナ"
+"role.opportunist.task.loc.mira.balcony.antenna" : "アンテナ"
+"role.opportunist.task.loc.mira.cafeteria.vendingMachine" : "自販機"
+"role.opportunist.task.loc.polus.security.camera" : "監視端末"
+"role.opportunist.task.loc.polus.comms.table" : "テーブル"
+"role.opportunist.task.loc.polus.lab.hole" : "掘削現場"
+"role.opportunist.task.loc.polus.lab.toilet" : "トイレ"
+"role.opportunist.task.loc.polus.admin.bookshelf" : "本棚"
+"role.opportunist.task.loc.polus.lifesupport.bottle" : "酸素サーバー"
+"role.opportunist.task.loc.polus.outside.ejection" : "追放の地"
+"role.opportunist.task.loc.polus.outside.comms" : "通信室左の雪だるま"
+"role.opportunist.task.loc.airship.meetingRoom.meetingRoom" : "会議室奥"
+"role.opportunist.task.loc.airship.mainHall.cleaning" : "掃除道具室"
+"role.opportunist.task.loc.airship.mainHall.treasureBox" : "宝箱"
+"role.opportunist.task.loc.airship.mainHall.darkRoom" : "暗室"
+"role.opportunist.task.loc.airship.lounge.toilet" : "トイレ"
+"role.opportunist.task.loc.airship.cargoBay.safe" : "金庫"
+"role.opportunist.task.loc.airship.medical.vitals" : "バイタル"
+"role.opportunist.task.loc.airship.security.outside" : "デッキ"
+"role.opportunist.task.loc.airship.viewingDeck.outside" : "デッキ"
+"role.opportunist.task.loc.fungle.highlands.bigGem" : "宝石"
+"role.opportunist.task.loc.fungle.highlands.landing" : "踊り場"
+"role.opportunist.task.loc.fungle.jungle.monitoring" : "観測地点"
+"options.role.opportunist.group.fallback" : "オポチュニストフォールバックの設定"
+"options.role.opportunist.fallback" : "オポチュニストフォールバック"
+"options.role.opportunist.fallback.tasks" : "滞在タスク数"
+
 "role.paparazzo.name" : "パパラッチ"
 "role.paparazzo.short" : "パ"
 "role.paparazzo.blurb" : "究極の一枚を目指して"
@@ -1795,6 +1843,7 @@ $Color
 "teams.gambler" : "ギャンブラー"
 "teams.tyrant" : "タイラント"
 "teams.vanity" : "ヴァニティ"
+"teams.opportunist" : "オポチュニスト"
 
 # Perks
 
@@ -2038,6 +2087,7 @@ $Color
 "location.fungle.beachCafeteria" : "カフェテリア近辺"
 "location.fungle.highlandsComm" : "通信室近辺"
 "location.fungle.highlandsComm.short" : "コミュ近辺"
+
 "location.outside" : "部屋外"
 
 # Button
@@ -2241,6 +2291,7 @@ $Color
 "state.dissolved" : "溶解"
 "state.poisoned" : "毒死"
 "state.layoff" : "解雇"
+"status.punished" : "天誅"
 
 # Endings
 
@@ -2270,6 +2321,7 @@ $Color
 "end.extra.grudge" : " <color=#FFFFFF>+</color> グラッジ"
 "end.extra.trilemma" : " <color=#FFFFFF>+</color> トリレンマ"
 "end.extra.vanity" : " <color=#FFFFFF>+</color> ヴァニティ"
+"end.extra.opportunist" : " <color=#FFFFFF>+</color> オポチュニスト"
 
 # Help
 
@@ -2372,6 +2424,7 @@ $Color
 "inventory.costume.tag.0" : "このコスチュームはアニメーションがあります！"
 "inventory.costume.tag.1" : "このコスチュームはゲーム中に着替えができます！"
 "inventory.costume.tag.2" : "このコスチュームはいくつかのバリアントがあります。"
+
 # Input
 
 "input.kill" : "キル (Additional)"
@@ -2918,7 +2971,7 @@ $Color
 "options.map.customization.fungle.growingMushroom.detail" : "光るキノコの周囲の様子がぼんやりと見えるようになります。"
 "options.map.customization.fungle.thinFog.detail" : "ジャングルの影をより薄くします。"
 "options.map.customization.fungle.simpleLaboratory.detail" : "実験室下のガラスを撤去します。<br>部屋下側から実験室に直接進入できます。"
-"options.map.customization.fungle.forClassicGame.detail" : "クラシックゲームの推理に適したマップに改変します。以下の改変が含まれます。<br>- はしご(下部)の一方通行化<br>- ミーティングルーム下の封鎖<br>- 温室・実験室間の封鎖<br>- 高台の宝石上部の封鎖"
+"options.map.customization.fungle.forClassicGame.detail" : "クラシックゲームの推理に適したマップに改変します。以下の改変が含まれます。<br>- はしご(下部)の一方通行化<br>- ミーティングルーム下の封鎖<br>- 温室・実験室間の封鎖<br>- 高台の宝石上部の封鎖<br>- 採掘場周辺にベント(2箇所)追加"
 "options.task.fakeScan.detail" : "タスクを持たないプレイヤーもスキャン台の上に移動できるようになります。"
 "options.meeting.deathPenalty.detail" : "会議時間は設定値と死者の人数をかけた秒数だけ減少します。"
 "options.meeting.noticeExtraVictims.detail" : "追放時、巻き込みや後追い自殺で追加の死者がいるとき通知します。"
@@ -2936,6 +2989,10 @@ $Color
 "options.task.noGuide.helpCritter.detail" : "オンにすると卵を改修するタスクの<br>場所が分からなくなります。"
 "options.task.noGuide.replaceParts.detail" : "オンにするとパーツの回収タスクの<br>場所が分からなくなります。"
 "options.task.noGuide.collectSamples.detail" : "オンにするとサンプルの回収タスクの<br>場所が分からなくなります。"
+
+"options.aeroGuesser.monochromeMode.detail" : "オンにすると、問題画像がモノクロで表示されます。"
+"options.aeroGuesser.hurryTimer.detail" : "オンにすると、誰かが推察を確定したときに<br>残り解答時間を短縮できます。"
+"options.aeroGuesser.hurryTimerDuration.detail" : "短縮後の残り解答時間です。<br>既に残り解答時間が設定された時間より短くなっている場合、残り時間は延長されません。"
 
 "options.role.agent.numOfExemptedTasks.detail" : "指定した数だけ、Agentの総タスク数が少なくなります。<br>総タスクが少なくなれば、追加タスクを手に入れるのにかかる時間は短縮します。"
 "options.role.agent.numOfExtraTasks.detail" : "一度のタスク代行で手に入れられるタスクの数を設定します。<br>死亡後はタスク代行による<b>さらなる</b>タスクの入手はできません。"
@@ -3016,6 +3073,7 @@ $Color
 "options.role.lover.blockRoleWin.detail" : "オンにすると、自身の役職によって勝利できなくなります。<br><br>・オフの場合: ラバーズとして勝利できなくとも、自身の役職で勝利すれば勝利できます。<br>・オンの場合: ラバーズの勝利条件以外で勝利できなくなります。"
 "options.role.zeal.absorbAdditionalDuration.detail" : "熱狂の吸収に要する時間は、(吸収の所要時間)＋(吸収の追加所要時間)×(キルボタンの数) で計算されます。<br>このオプションの値をより大きくすると、同時に多数のキルボタンを所有するのがより困難になります。"
 "options.role.zeal.enthusiasmCooldown.detail" : "同じプレイヤーから熱狂を再度吸収できるまでのクールダウンです。"
+"options.role.opportunist.numOfTasks.detail" : "オポチュニストには<b>指定の場所</b>にしばらくの間<b>滞在</b>するタスクが割り当てられます。"
 
 "role.guesser.doc.main" : "会議中に役職を<b>推察</b>できます。推察された相手はキルされます。<br>ただし、推察に失敗すると<b>自身が死んでしまいます。</b>"
 "role.guesser.doc.guess" : "プレイヤーの上に表示されるアイコンをクリックすると推察画面が開きます。<br>表示された役職を選択することで<b>推察</b>を行います。"
@@ -3334,6 +3392,16 @@ $Color
 "role.vanity.ability.title" : "固有能力 "正義の執行？""
 "role.vanity.ability.main" : "シェリフとは異なり、キルに失敗しません。"
 "role.vanity.ability.kill" : "相手の陣営を問わずキルできます。"
+"role.amalgam.ability.title" : "固有能力 "とけてつないで、いっぱいつよい""
+"role.amalgam.ability.main" : "さまざまな役職の能力を融合して使用できます。融合できる役職は設定から変更できます。"
+"role.amalgam.ability.amalgam" : "能力を融合します。<br>一度融合した能力は取り外せません。"
+"role.creeping.ability.title" : "固有能力 "這い寄る終焉""
+"role.creeping.ability.main" : "プレイヤーに毒を仕掛けます。毒を仕掛けられたプレイヤーは、指定の時間内に解毒しないと死亡してしまいます。"
+"role.creeping.ability.poison" : "プレイヤーに毒を仕掛けます。<br>ブリンクが発生します。"
+"role.creeping.tips" : "・緊急会議中にも毒はプレイヤーを蝕みます。毒が回り切れば、会議中でも死亡します。<br>・毒に侵されたプレイヤーは、マップ中の救急箱で解毒できます。<br>　救急箱はマップ中に1個だけ出現し、出現箇所はマップごとに一択か二択に限られます。<br>　-Skeld: 医務室<br>　-MIRA HQ: 発射台 or 保管庫奥<br>　-Polus: 研究室奥 or 酸素ルーム(ボンベの部屋奥)<br>　-Airship: メインホール(左上のベッド) or 電気室左下<br>　-Fungle: スプラッシュゾーン部屋内 or 研究室左下"
+"role.nighty.ability.title" : "固有能力 "おやすみボム""
+"role.nighty.ability.main" : "マップ中に<b>おやすみボム</b>を設置できます。<br>おやすみボムを踏んだプレイヤーはしばらくの間、視界が極端に制限されます。<br>自身や仲間のインポスターはおやすみボムを<b>踏みません</b>。"
+"role.nighty.ability.place" : "おやすみボムを設置します。"
 
 "role.extraMission.winCond" : "自身の勝利条件を満たしたうえで、ゲーム終了時にターゲットが死亡していること。<br>ターゲットが生存している場合、勝利を失います。"
 "role.trilemma.winCond.block" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレンマがどちらも死亡していること。<br>残りのどちらか一方でも生存している場合、勝利を失います。"

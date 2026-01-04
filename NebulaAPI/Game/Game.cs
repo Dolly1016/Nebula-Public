@@ -31,6 +31,7 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
     Player LocalPlayer { get; }
 
     EmergencyMeeting? CurrentMeeting { get; }
+    GameMap? CurrentMap { get; }
 
     /// <summary>
     /// ゲーム中の全プレイヤーを取得します。

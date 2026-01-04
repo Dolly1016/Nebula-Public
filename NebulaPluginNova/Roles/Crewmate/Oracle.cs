@@ -1,10 +1,4 @@
-﻿using Il2CppSystem.Runtime.Remoting.Messaging;
-using Nebula.Roles.Modifier;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Nebula.Roles.Modifier;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
@@ -16,7 +10,6 @@ using Virial.Events.Player;
 using Virial.Game;
 using Virial.Media;
 using Virial.Text;
-using static Nebula.Roles.Neutral.Spectre;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -72,6 +65,8 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
 
         bool CheckNonAssignedElse(GamePlayer player, DefinedRole role) => !NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.Role.Role == role && p.PlayerId != player.PlayerId);
         if (CheckNonAssignedElse(oracle, Oracle.MyRole)) excludedRoles.Add(Oracle.MyRole);
+        if (Oracle.DieOnDividingOpportunistOption) excludedRoles.Add(Neutral.Opportunist.MyRole);
+        if (Oracle.DieOnDividingOracleOption) excludedRoles.Add(Oracle.MyRole);
         foreach (var lover in oracle.GetModifiers<Lover.Instance>())
         {
             if (!lover.IsAloneLover && CheckNonAssignedElse(lover.MyLover.Get(), lover.MyLover.Get().Role.Role)) 
@@ -151,7 +146,7 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
 }
 internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, DefinedRole
 {
-    private Oracle() : base("oracle", new(214, 156, 45), RoleCategory.CrewmateRole, Crewmate.MyTeam, [MaxOracleOption, OracleCooldownOption, OracleAdditionalCooldownOption, OracleDurationOption, NumOfCandidatesOption])
+    private Oracle() : base("oracle", new(214, 156, 45), RoleCategory.CrewmateRole, Crewmate.MyTeam, [MaxOracleOption, OracleCooldownOption, OracleAdditionalCooldownOption, OracleDurationOption, NumOfCandidatesOption, DieOnDividingOpportunistOption, DieOnDividingOracleOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic);
     }
@@ -161,6 +156,9 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
     static private readonly FloatConfiguration OracleDurationOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleDuration", (float[])[0f,0.5f,1f,1.5f,2f,2.5f,3f,3.5f,4f,5f,6f,7f,8f,9f,10f], 2f, FloatConfigurationDecorator.Second);
     static private readonly IntegerConfiguration MaxOracleOption = NebulaAPI.Configurations.Configuration("options.role.oracle.maxOracle", (0, 10, 1), 5, null, num => num == 0 ? Language.Translate("options.noLimit") : num.ToString());
     static private readonly IntegerConfiguration NumOfCandidatesOption = NebulaAPI.Configurations.Configuration("options.role.oracle.numOfCandidates", (1, 6), 6);
+    static internal readonly BoolConfiguration DieOnDividingOpportunistOption = NebulaAPI.Configurations.Configuration("options.role.oracle.dieOnDividingOpportunist", true);
+    static internal readonly BoolConfiguration DieOnDividingOracleOption = NebulaAPI.Configurations.Configuration("options.role.oracle.dieOnDividingOracle", true);
+
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, -1), arguments.Skip(2).ToArray());
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
@@ -222,14 +220,25 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 if(this.leftUses < 20) oracleButton.ShowUsesIcon(3, this.leftUses.ToString());
                 
 
-                void PredicateRole()
+                bool PredicateRole()
                 {
-                    var result = ModSingleton<OracleSystem>.Instance.GetRoleCandidate(MyPlayer, playerTracker.CurrentTarget!.RealPlayer, NumOfCandidatesOption);
+                    var target = playerTracker.CurrentTarget!.RealPlayer;
+                    if (
+                        (DieOnDividingOracleOption && target.Role.Role == MyRole) ||
+                        (DieOnDividingOpportunistOption && target.Role.Role == Neutral.Opportunist.MyRole)
+                        )
+                    {
+                        MyPlayer.Suicide(PlayerStates.Punished, null, KillParameter.NormalKill);
+                        return false;
+                    }
+
+                    var result = ModSingleton<OracleSystem>.Instance.GetRoleCandidate(MyPlayer, target, NumOfCandidatesOption);
                     var shuffled = result.Shuffled();
                     oracleButton.UpdateUsesIcon((this.leftUses - 1).ToString());
-                    RpcOracle.Invoke((MyPlayer, playerTracker.CurrentTarget!.RealPlayer, shuffled));
+                    RpcOracle.Invoke((MyPlayer, target, shuffled));
                     (oracleButton.CoolDownTimer as GameTimer)?.Expand(OracleAdditionalCooldownOption);
                     StatsOracle.Progress();
+                    return true;
                 }
                 oracleButton.OnClick = (button) => {
                     if (OracleDurationOption > 0f)
@@ -269,7 +278,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
             divideResults[targetId] = (
                         result,
                         string.Join(", ", result.Select(r => r.DisplayColoredName)),
-                        string.Join(", ", result.Select(r => result.Length >= 2 ? r.GetRoleIconTag() + " " + r.DisplayColoredShort : r.DisplayColoredName))
+                        string.Join(", ", result.Select(r => result.Length >= 2 ? r.GetRoleIconTagSmall() + " " + r.DisplayColoredShort : r.DisplayColoredName))
                         );
         }
 

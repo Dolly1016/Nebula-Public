@@ -221,7 +221,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
 
             if (AmOwner && !RandomAssignmentOption)
             {
-                var selectButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility,
+                var selectButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
                         0f, "select", buttonSprite, null, _ => GetLeftNum() > 0);
                 selectButton.ShowUsesIcon(0, GetLeftNum().ToString());
                 selectButton.OnClick = _ =>

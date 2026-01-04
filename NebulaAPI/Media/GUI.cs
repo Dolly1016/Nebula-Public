@@ -464,6 +464,22 @@ public interface GUI
     internal void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable;
 
     /// <summary>
+    /// 船内の位置に張り付いたオーバーレイを表示します。
+    /// </summary>
+    /// <param name="widget"></param>
+    /// <param name="duration"></param>
+    /// <param name="stuckPosition"></param>
+    void ShowStickerOverlay(GUIWidget widget, float duration, Virial.Compat.Vector2 stuckPosition);
+    /// <summary>
+    /// 船内の位置に張り付いたオーバーレイを表示します。
+    /// </summary>
+    /// <param name="widget"></param>
+    /// <param name="stuckPosition"></param>
+    /// <param name="isFinallyDead"></param>
+    /// <param name="predicate"></param>
+    void ShowStickerOverlay(GUIWidget widget, Virial.Compat.Vector2 stuckPosition, Func<bool> isFinallyDead, Func<bool> predicate);
+
+    /// <summary>
     /// オーバーレイを表示します。
     /// </summary>
     /// <param name="widget"></param>

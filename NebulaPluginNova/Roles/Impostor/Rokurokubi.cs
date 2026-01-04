@@ -336,7 +336,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             if (AmOwner)
             {
                 ModAbilityButton calmButton = null!;
-                var rokuroButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                var rokuroButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility,
                     1.2f, "rokuro", buttonSprite, (button) => MyPlayer.CanMove, (button) => !MyPlayer.IsDead && !InLongNeckMode);
                 rokuroButton.SetAsMouseClickButton();
                 var killTimer = NebulaAPI.Modules.CurrentKillTimer();
@@ -358,7 +358,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 rokuroButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "rokurokubi.pause");
                 new GuideLineAbility(MyPlayer, () => !rokuroButton.IsInCooldown && !InLongNeckMode && MyPlayer.CanMove && !MyPlayer.IsDead).Register(new FunctionalLifespan(() => !this.IsDeadObject && !rokuroButton.IsBroken));
 
-                calmButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
+                calmButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility,
                     0.1f, "rokuro.reset", buttonCalmSprite, (button) => MyPlayer.CanMove, (button) => !MyPlayer.IsDead && InLongNeckMode);
                 void CalmDown()
                 {

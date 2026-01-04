@@ -17,6 +17,11 @@ public static class MainMenuSetUpPatch
 
     static public bool IsLocalGame = false;
 
+    static private void SetModText(TextTranslatorTMP textTranslator, string key)
+    {
+        Language.RegisterRealtimeText(textTranslator.GetComponent<TMPro.TextMeshPro>(), key);
+        textTranslator.SetModText(key);
+    }
     static void Postfix(MainMenuManager __instance)
     {
         VanillaAsset.LoadOnMainMenu(__instance);
@@ -85,11 +90,11 @@ public static class MainMenuSetUpPatch
             NebulaScreen?.SetActive(true);
             __instance.screenTint.enabled = true;
         });
-        nebulaButton.transform.FindChild("FontPlacer").GetChild(0).GetComponent<TextTranslatorTMP>().SetModText("title.buttons.nebula");
+        SetModText(nebulaButton.transform.FindChild("FontPlacer").GetChild(0).GetComponent<TextTranslatorTMP>(), "title.buttons.nebula");
 
         NebulaScreen = GameObject.Instantiate(__instance.accountButtons, __instance.accountButtons.transform.parent);
         NebulaScreen.name = "NebulaScreen";
-        NebulaScreen.transform.GetChild(0).GetChild(0).GetComponent<TextTranslatorTMP>().SetModText("title.label.nebula");
+        SetModText(NebulaScreen.transform.GetChild(0).GetChild(0).GetComponent<TextTranslatorTMP>(), "title.label.nebula");
         __instance.mainButtons.Add(nebulaButton);
         GameObject.Destroy(NebulaScreen.transform.GetChild(4).gameObject);
 
@@ -131,7 +136,7 @@ public static class MainMenuSetUpPatch
             GameObject obj = temp.gameObject;
             if (index > 0) obj = GameObject.Instantiate(obj, obj.transform.parent);
 
-            obj.transform.GetChild(0).GetChild(0).GetComponent<TextTranslatorTMP>().SetModText(button);
+            SetModText(obj.transform.GetChild(0).GetChild(0).GetComponent<TextTranslatorTMP>(), button);
             var passiveButton = obj.GetComponent<PassiveButton>();
             passiveButton.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
             passiveButton.OnClick.AddListener(() =>

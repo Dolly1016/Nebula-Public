@@ -32,13 +32,21 @@ internal class Timer
         SetTime(0);
 
         float y = -1f;
+        int lastCount = 0;
         var script = holderObj.AddComponent<ScriptBehaviour>();
         script.UpdateHandler += () =>
         {
             float goalY = isActive ? 0.3f : -1f;
             y -= (y - goalY).Delta(5f, 0.001f);
             aspectPosition.DistanceFromEdge = new(0f, y, z);
-            SetTime((int?)(timer?.Value + 1f) ?? 0);
+            int count = (int?)(timer?.Value + 1f) ?? 0;
+            if(count != lastCount)
+            {
+                lastCount = count;
+                if (count == 10 && isActive) NebulaAsset.PlayNamedSE(NebulaAudioClip.AeroGuesserCountdown, "Countdown", false);
+                
+            }
+            SetTime(count);
         };
     }
 

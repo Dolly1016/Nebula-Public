@@ -1,4 +1,5 @@
 ﻿using Il2CppSystem.Net.NetworkInformation;
+using Nebula.Map;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -34,7 +35,7 @@ public class Ghost : FlexibleLifespan, IGameOperator
 
         if (colliderSize > 0f)
         {
-            var collider = UnityHelper.CreateObject<CircleCollider2D>("Collider", renderer.transform, Vector3.zero, LayerExpansion.GetShortObjectsLayer());
+            var collider = UnityHelper.CreateObject<CircleCollider2D>(MapData.NonMapColliderName, renderer.transform, Vector3.zero, LayerExpansion.GetShortObjectsLayer());
             collider.radius = colliderSize;
         }
     }

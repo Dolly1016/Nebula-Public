@@ -45,16 +45,11 @@ internal interface INebula
 
     // Shortcuts
 
-    Configuration.Configurations Configurations => Get<Configuration.Configurations>()!;
-    Media.GUI GUILibrary => Get<Media.GUI>()!;
-    Media.Translator Language => Get<Media.Translator>()!;
-    Utilities.IHasher Hasher => Get<Utilities.IHasher>()!;
-
-    //AssignableAPI
-
-    Assignable.DefinedRole? GetRole(string internalName);
-    Assignable.DefinedModifier? GetModifier(string internalName);
-    Assignable.DefinedGhostRole? GetGhostRole(string internalName);
+    Configuration.Configurations Configurations { get; }
+    Media.GUI GUILibrary { get; }
+    Media.Translator Language { get; }
+    Utilities.IHasher Hasher { get; }
+    Assignable.Assignables Assignables { get; }
 
     //GameStatsAPI
     GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority = 0);
@@ -130,19 +125,22 @@ public static class NebulaAPI
     /// </summary>
     /// <param name="internalName"></param>
     /// <returns></returns>
-    static public Assignable.DefinedRole? GetRole(string internalName) => instance.GetRole(internalName);
+    [Obsolete("代わりにAssignables.GetRole()を使用してください。")]
+    static public Assignable.DefinedRole? GetRole(string internalName) => instance.Assignables.GetRole(internalName);
     /// <summary>
     /// 定義済みモディファイアを取得します。
     /// </summary>
     /// <param name="internalName"></param>
     /// <returns></returns>
-    static public Assignable.DefinedModifier? GetModifier(string internalName) => instance.GetModifier(internalName);
+    [Obsolete("代わりにAssignables.GetModifier()を使用してください。")]
+    static public Assignable.DefinedModifier? GetModifier(string internalName) => instance.Assignables.GetModifier(internalName);
     /// <summary>
     /// 定義済み幽霊役職を取得します。
     /// </summary>
     /// <param name="internalName"></param>
     /// <returns></returns>
-    static public Assignable.DefinedGhostRole? GetGhostRole(string internalName) => instance.GetGhostRole(internalName);
+    [Obsolete("代わりにAssignables.GetGhostRole()を使用してください。")]
+    static public Assignable.DefinedGhostRole? GetGhostRole(string internalName) => instance.Assignables.GetGhostRole(internalName);
 
     /// <summary>
     /// イベントを実行します。
@@ -173,9 +171,6 @@ public static class NebulaAPI
     /// 一括で送信するRPCをまとめるセクションを取得します。
     /// セクション内のRPCは、全クライアントでの同時かつ同順序の実行が保証されます。
     /// </summary>
-    /// <remarks>
-    /// v3.1.0で追加。<br />
-    /// </remarks>
     /// <param name="label"></param>
     /// <returns>RPCセクション。戻り値をusingステートメントで使用すると一括でまとめられるRPCを視覚的に把握しやすくなります。</returns>
     static public IDisposable CreateRPCSection(string? label = null) => instance.CreateRPCSection(label);

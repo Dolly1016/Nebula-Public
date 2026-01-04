@@ -100,14 +100,14 @@ public static class NebulaExileWrapUp
             yield return new WaitForSeconds(0.3f);
         }
 
-        yield return GameOperatorManager.Instance?.Run(new MeetingPreEndEvent()).Coroutines.WaitAll();
+        yield return GameOperatorManager.Instance?.Run(new MeetingPreEndEvent(), shouldNotCheckGameEnd: false).Coroutines.WaitAll();
         
         NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.SendSync(SynchronizeTag.PostMeeting);
         yield return NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.CoSyncAndReset(Modules.SynchronizeTag.PostMeeting, true, true, false);
 
         NebulaGameManager.Instance?.OnMeetingEnd(MeetingHudExtension.ExiledAllModCache);
         GamePlayer[] exiledArray = MeetingHudExtension.ExiledAllModCache?.ToArray() ?? new GamePlayer[0];
-        GameOperatorManager.Instance?.Run(new MeetingEndEvent(exiledArray));
+        GameOperatorManager.Instance?.Run(new MeetingEndEvent(exiledArray), shouldNotCheckGameEnd: false);
 
         NebulaGameManager.Instance?.AllPlayerInfo.Do(p => p.VanillaPlayer.MyPhysics.DoingCustomAnimation = false);
 

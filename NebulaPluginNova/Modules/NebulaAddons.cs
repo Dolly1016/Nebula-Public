@@ -193,7 +193,6 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
         foreach (var addon in MarketplaceData.Data!.OwningAddons.Where(a => !existingEntry.Contains(a.EntryId)))
         {
-            LogUtils.WriteToConsole("Start Fetching: " + addon.Title);
             yield return FetchAndDownloadAddon(addon.ToAddonUrl, null, addon.EntryId, preprocessor.SetLoadingText("Download Addon - " + addon.Title).Do);
         }
 

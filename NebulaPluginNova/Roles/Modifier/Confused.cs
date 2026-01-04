@@ -32,9 +32,9 @@ public class Confused : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
 
         void RuntimeAssignable.OnActivated() { }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (canSeeAllInfo) name += MyRole.GetRoleIconTag();
+            if (canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
 
 

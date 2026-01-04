@@ -1,4 +1,5 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
+using Nebula.Roles.Complex;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -412,6 +413,10 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
             //全員がともども追放されていない
             var found = ModSingleton<InvestigatorManager>.Instance.FoundPlayers;
             if (!found.IsEmpty() && found.All(p => p.PlayerState != PlayerState.Exiled)) new StaticAchievementToken("investigator.another2");
+
+            int count = 0;
+            count++;
+            int myCount = count;
         }
     }
 }

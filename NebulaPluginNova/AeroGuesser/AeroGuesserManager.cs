@@ -164,7 +164,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
             ]) : null;
         
         //Debug
-        //entries = AmongUsClient.Instance.AmHost ? AeroGuesserQuizData.GetAllEntry() : null;
+        //entries = AmongUsClient.Instance.AmHost ? AeroGuesserQuizData.GetAllEntry(0) : null;
         
         int entriesIndex = 0;
 
@@ -217,6 +217,8 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
 
         int ShowCount(int count)
         {
+            SoundManager.Instance.PlaySoundImmediate(AmongUsUtil.HnSPrefab.FinalHideCountdownSFX, false);
+
             var fastQ = Arithmetic.Decel(1f, 0f, 0.3f);
             var slowQ = Arithmetic.Decel(1f, 0f, 1.15f);
             var fadeOutQ = Arithmetic.Sequential((() => Arithmetic.FloatOne, 0.85f), (()=> Arithmetic.Decel(1f, 0, 0.4f), 1f));
@@ -251,6 +253,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
         answerQ = Arithmetic.FloatZero;
         endQuizQ = Arithmetic.FloatZero;
         mapViewer.SetReshowing(false);
+        hurryTimer = false;
 
         //マップのセットアップ
         yield return mapViewer.SetUpMap(entry.mapId, entry.position, entry.viewport);
@@ -274,7 +277,22 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
         timer.SetActive(true);
         timer.SetTimer(quizTimer);
 
-        while(quizTimer.Value > 0f && unprocessedStatus == null) yield return null;
+        NebulaAsset.PlaySE(NebulaAudioClip.AeroGuesserConfirm);
+        //NebulaAsset.PlaySE(NebulaAudioClip.AeroGuesserQuizStart);
+
+        while (quizTimer.Value > 0f && unprocessedStatus == null)
+        {
+            if (hurryTimer && quizTimer.Value > GeneralConfigurations.HurryTimerDurationOption)
+            {
+                quizTimer = Arithmetic.Timer(GeneralConfigurations.HurryTimerDurationOption);
+                timer.SetTimer(quizTimer);
+                NebulaAsset.PlaySE(NebulaAudioClip.AeroGuesserBell);
+
+            }
+            yield return null;
+        }
+
+        NebulaAsset.StopNamedSE("Countdown");
 
         //解答時間終了
         minimap.DisableToClick();
@@ -292,7 +310,10 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
 
         //答えの提示
         mapViewer.StartShowAnswer();
-        yield return Effects.Wait(3f);
+        NebulaAsset.PlaySE(NebulaAudioClip.AeroGuesserQuizEnd);
+        yield return Effects.Wait(1.1f);
+        NebulaAsset.PlaySE(NebulaAudioClip.AeroGuesserQuizStart);
+        yield return Effects.Wait(1.9f);
         answerMinimap.ShowAnswer(entry.mapId, entry.position, currentStatus);
         yield return Effects.Wait(3f);
 
@@ -387,7 +408,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
                     }
                     else if (distance < 15f)
                     {
-                        distance = (distance - 2f) / 9f;
+                        distance = (distance - 6f) / 9f;
                         score = 400 - (int)(distance * 350f);
                     }
                     else if (distance < 25f)
@@ -553,6 +574,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     static private readonly RemoteProcess<(byte playerId, byte mapId, Vector2 position, int num)> RpcSendSelection = new("AeroGuesser.SendSelection", (message, _) => {
         var cache = ModSingleton<AeroGuesserSenario>.Instance?.cachedPlayerSelections;
         if (cache == null) return;
+        if(message.num == -1 && GeneralConfigurations.HurryTimerOption) ModSingleton<AeroGuesserSenario>.Instance!.hurryTimer = true;
         if (message.num == -1 || (cache.TryGetValue(message.playerId, out var cached) ? !cached.Fixed && cached.Num < message.num : true))
         {
             cache[message.playerId] = new(message.mapId, message.position, message.num, message.num == -1);
@@ -568,6 +590,8 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     static private readonly RemoteProcess RpcProceeding = new("AeroGuesser.Proceeding", (_) => {
         ModSingleton<AeroGuesserSenario>.Instance!.proceedingToNext = true;
     });
+
+    private bool hurryTimer = false;
 }
 
 internal record AeroPlayerOneQuizStatus(byte PlayerId, int Score, byte selectedMap, Vector2 selectedPosition);

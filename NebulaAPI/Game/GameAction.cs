@@ -11,7 +11,6 @@ namespace Virial.Game;
 
 public static class GameActionTypes
 {
-
     static public GameActionType NiceTrapPlacementAction { get; internal set; }
     static public GameActionType EvilTrapPlacementAction { get; internal set; }
     static public GameActionType DecoyPlacementAction { get; internal set; }

@@ -71,9 +71,9 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
             }
         }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTag();
+            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
 
         Vector2 MouseToHudPos(Vector2 mousePos) => (mousePos - (new Vector2(Screen.width, Screen.height) * 0.5f)) / Screen.height * 2f * HudManager.Instance.UICamera.orthographicSize;

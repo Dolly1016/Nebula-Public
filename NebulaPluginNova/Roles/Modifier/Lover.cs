@@ -124,7 +124,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         [OnlyMyPlayer]
         void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= BlockRoleWinOption && ev.GameEnd != NebulaGameEnd.LoversWin;
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
             Color loverColor = colors[canSeeAllInfo ? loversId : 0];
             var myLover = MyLover.Get();
@@ -142,7 +142,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
                 }
             }
 
-            if (canSee) name += " ♥".Color(loverColor);
+            if (canSee) name += "♥".Color(loverColor);
         }
 
         [Local]
@@ -266,7 +266,9 @@ internal class LoversCriteria : AbstractModule<IGameModeStandard>, IGameOperator
             foreach (var lover in p.GetModifiers<Lover.Instance>())
             {
                 if (lover.MyLover.Get()?.IsDead ?? true) continue;
+
                 NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.LoversWin, GameEndReason.Situation);
+                return;
             }
         }
 

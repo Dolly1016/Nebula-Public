@@ -43,7 +43,7 @@ file static class TrapperSystem
         };
         placeButton.OnEffectEnd = (button) => 
         {
-            NebulaGameManager.Instance?.RpcDoGameAction(myRole.MyPlayer, myRole.MyPlayer.Position, myRole.MyPlayer.IsImpostor ? GameActionTypes.EvilTrapPlacementAction : GameActionTypes.NiceTrapPlacementAction);
+            NebulaGameManager.Instance?.RpcDoGameAction(myRole.MyPlayer, myRole.MyPlayer.Position, myRole.MyPlayer.IsImpostor ? Trapper.EvilTrapPlacementAction : Trapper.NiceTrapPlacementAction);
 
             placeButton.StartCoolDown();
             localTraps.Add(Trapper.Trap.GenerateTrap(buttonVariation[buttonIndex].id, pos!.Value));
@@ -106,10 +106,13 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
         ConfigurationHolder?.ScheduleAddRelated(() => [isEvil ? MyNiceRole.ConfigurationHolder! : MyEvilRole.ConfigurationHolder!]);
 
         if (IsEvil)
-            GameActionTypes.EvilTrapPlacementAction = new("trapper.placement.evil", this, isPlacementAction: true);
+            EvilTrapPlacementAction = new("trapper.placement.evil", this, isPlacementAction: true);
         else
-            GameActionTypes.NiceTrapPlacementAction = new("trapper.placement.nice", this, isPlacementAction: true);
+            NiceTrapPlacementAction = new("trapper.placement.nice", this, isPlacementAction: true);
     }
+    
+    static internal GameActionType NiceTrapPlacementAction;
+    static internal GameActionType EvilTrapPlacementAction;
 
     static private Image iconImage = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Icons/trapper.png");
     Image DefinedAssignable.IconImage => iconImage;

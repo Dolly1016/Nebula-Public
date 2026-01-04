@@ -486,6 +486,8 @@ public enum MultipleAssignmentType
     AsUniqueMapAbility,
     NotAllowed,
 }
+
+public record RoleFallback(DefinedRole Role, int[]? Arguments);
 /// <summary>
 /// プレイヤーに割り当てられる役職の定義を表します。
 /// </summary>
@@ -506,6 +508,14 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// <param name="arguments">割り当てのパラメータ。</param>
     /// <returns>簒奪された能力。簒奪不可能な場合はnull。</returns>
     IUsurpableAbility? GetUsurpedAbility(Virial.Game.Player player, int[] arguments) => null!;
+
+    /// <summary>
+    /// フォールバックするべきかを返します。
+    /// </summary>
+    /// <param name="player">役職を与えられるプレイヤー</param>
+    /// <param name="arguments">役職引数</param>
+    /// <returns></returns>
+    RoleFallback? CheckFallback(Virial.Game.Player player, int[] arguments) => null;
 
     /// <summary>
     /// マッドメイト系の役職の場合はtrueを返します。
@@ -738,7 +748,7 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
     /// </summary>
     /// <param name="name"></param>
     /// <param name="canSeeAllInfo"></param>
-    void DecorateNameConstantly(ref string name, bool canSeeAllInfo) { }
+    void DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene) { }
 
     /// <summary>
     /// プレイヤーをキルできるか調べます。

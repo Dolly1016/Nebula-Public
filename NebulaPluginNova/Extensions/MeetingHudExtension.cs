@@ -457,31 +457,37 @@ public static class MeetingHudExtension
     internal static RemoteProcess<int> RequestEditDiscussionTime = new("RequestEditDiscussionTime", (sec, _) =>
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        if(MeetingHud.Instance && MeetingHudExtension.DiscussionTimer > 0f) EditDiscussionTime!.Invoke(sec);
+        if(MeetingHud.Instance && MeetingHudExtension.LeftTime > 0f) EditDiscussionTime!.Invoke((sec, MeetingHudExtension.DiscussionTimer > 0f));
     });
 
-    private static RemoteProcess<int> EditDiscussionTime = new("EditDiscussionTime", (sec, _) =>
+    private static RemoteProcess<(int sec, bool discussion)> EditDiscussionTime = new("EditDiscussionTime", (message, _) =>
     {
-        static IEnumerator CoReduceDiscussionTime(int time)
+        static IEnumerator CoReduceDiscussionTime(int time, bool discussion)
         {
             for (int i = 0; i < time * 2; i++)
             {
-                MeetingHudExtension.VotingTimer -= 0.5f;
+                if(discussion && MeetingHudExtension.DiscussionTimer > 0f)
+                    MeetingHudExtension.DiscussionTimer -= 0.5f;
+                else
+                    MeetingHudExtension.VotingTimer -= 0.5f;
                 yield return new WaitForSeconds(0.1f);
             }
         }
 
-        static IEnumerator CoExpandDiscussionTime(int time)
+        static IEnumerator CoExpandDiscussionTime(int time, bool discussion)
         {
             for (int i = 0; i < time; i++)
             {
-                MeetingHudExtension.VotingTimer += 1f;
+                if(discussion)
+                    MeetingHudExtension.DiscussionTimer += 1f;
+                else
+                    MeetingHudExtension.VotingTimer += 1f;
                 MeetingHud.Instance!.lastSecond = 11;
                 yield return new WaitForSeconds(0.1f);
             }
         }
 
-        (sec > 0 ? CoExpandDiscussionTime(sec) : CoReduceDiscussionTime(-sec)).StartOnScene();
+        (message.sec > 0 ? CoExpandDiscussionTime(message.sec, message.discussion) : CoReduceDiscussionTime(-message.sec, message.discussion)).StartOnScene();
     });
 
 }

@@ -52,9 +52,9 @@ public class TieBreaker : DefinedAllocatableModifierTemplate, DefinedAllocatable
             if (ev.Player == lastVotedHost) NebulaAchievementManager.RpcClearAchievement.Invoke(("tieBreaker.challenge", MyPlayer));
         }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTag();
+            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
     }
 }

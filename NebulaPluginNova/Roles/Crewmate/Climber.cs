@@ -56,7 +56,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
         {
             if (AmOwner)
             {
-                var gustButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, GustCooldownOption, "gust", buttonSprite, _ => !Hookshot.LocalIsActive)
+                var gustButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility, GustCooldownOption, "gust", buttonSprite, _ => !Hookshot.LocalIsActive)
                     .SetAsUsurpableButton(this)
                     .SetAsMouseClickButton();
                 gustButton.OnClick = (button) =>

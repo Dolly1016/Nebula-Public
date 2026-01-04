@@ -61,9 +61,9 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
             }
         }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTag();
+            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
 
         [Local]
@@ -101,7 +101,7 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
         public override void OnInstantiated()
         {
             base.OnInstantiated();
-            if (!Owner.AmOwner && !(NebulaGameManager.Instance?.CanSeeAllInfo ?? false)) Color = Color.clear;
+            if (!Owner.AmOwner && !(NebulaGameManager.Instance?.CanSeeAllInfo ?? false) && !(GamePlayer.LocalPlayer?.IsImpostor ?? false)) Color = Color.clear;
         }
 
         void OnUpdate(GameUpdateEvent ev)

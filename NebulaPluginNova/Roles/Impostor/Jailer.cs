@@ -95,7 +95,7 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
         [OnlyMyPlayer]
         void InheritAbilityOnDead(PlayerDieEvent ev)
         {
-            var localPlayer = Virial.NebulaAPI.CurrentGame?.LocalPlayer;
+            var localPlayer = GamePlayer.LocalPlayer;
 
             if (localPlayer == null) return;
 
@@ -134,10 +134,9 @@ public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocat
 
         DefinedModifier RuntimeModifier.Modifier => MyRole;
 
-        string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (isShort) return null;
-            return lastRoleName + " " + (this as RuntimeModifier).DisplayColoredName;
+            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
 
         void RuntimeAssignable.OnActivated()

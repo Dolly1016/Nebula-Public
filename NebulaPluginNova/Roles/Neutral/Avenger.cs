@@ -16,7 +16,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.avenger", new(141,111,131), TeamRevealType.OnlyMe);
     private Avenger() : base("avenger", MyTeam.Color, RoleCategory.NeutralRole, MyTeam,
-        [KillCoolDownOption, VentOption, CanKnowExistanceOfAvengerOption, TargetCanKnowAvengerOption, AvengerFlashForMurdererOption, NotificationForMurdererIntervalOption, NotificationForAvengerIntervalOption],
+        [KillCoolDownOption, VentOption, CanKnowExistanceOfAvengerOption, TargetCanKnowAvengerOption, AvengerFlashForMurdererOption, NotificationForMurdererIntervalOption, NotificationForAvengerIntervalOption, OpportunistFallbackOption.Group],
         false, optionHolderPredicate: () => (Modifier.Lover.NumOfPairsOption > 0 && Modifier.Lover.AvengerModeOption))
     {
         ConfigurationHolder?.ScheduleAddRelated(() => [Modifier.Lover.MyRole.ConfigurationHolder!]);
@@ -25,7 +25,6 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
 
     AllocationParameters? DefinedSingleAssignable.AllocationParameters => null;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, -1));
 
     static public ValueConfiguration<int> CanKnowExistanceOfAvengerOption = NebulaAPI.Configurations.Configuration("options.role.avenger.canKnowExistanceOfAvenger", ["options.role.avenger.canKnowExistanceOfAvenger.off", "options.role.avenger.canKnowExistanceOfAvenger.onlyTarget", "options.role.avenger.canKnowExistanceOfAvenger.on"], 0);
     static private BoolConfiguration TargetCanKnowAvengerOption = NebulaAPI.Configurations.Configuration("options.role.avenger.targetCanKnowAvenger", true);
@@ -34,6 +33,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
     static private FloatConfiguration NotificationForMurdererIntervalOption = NebulaAPI.Configurations.Configuration("options.role.avenger.notificationForTargetInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.avenger.killCoolDown", CoolDownType.Relative, (2.5f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static private IVentConfiguration VentOption = NebulaAPI.Configurations.NeutralVentConfiguration("options.role.avenger.vent", false);
+    static private Opportunist.OpportunistFallbackOption OpportunistFallbackOption = Opportunist.FallbackConfiguration(null, null, "options.role.avenger");
 
     static public Avenger MyRole = new Avenger();
 
@@ -41,6 +41,14 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
     static private GameStatsEntry StatsFailed = NebulaAPI.CreateStatsEntry("stats.avenger.failed", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsDefendAsKiller = NebulaAPI.CreateStatsEntry("stats.avenger.defend", GameStatsCategory.Roles, MyRole);
     bool IGuessed.CanBeGuessDefault => false;
+
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, (byte)arguments.Get(0, -1));
+    RoleFallback? DefinedRole.CheckFallback(GamePlayer player, int[] arguments)
+    {
+        if (!OpportunistFallbackOption.Switch) return null;
+        if (!player.TryGetModifier<Modifier.Lover.Instance>(out _)) return Opportunist.GenerateFallback(OpportunistFallbackOption.Tasks);
+        return null;
+    }
 
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {

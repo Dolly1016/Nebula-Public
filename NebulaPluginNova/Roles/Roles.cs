@@ -60,6 +60,20 @@ internal class NoSRoleSetUp
 [NebulaPreprocess(PreprocessPhase.FixRoles)]
 public class Roles
 {
+    private class RolesAPI : Assignables
+    {
+        public IEnumerable<DefinedAssignable> AllAssignables => Roles.AllAssignables();
+        public IEnumerable<DefinedRole> AllRoles => Roles.AllRoles;
+        public IEnumerable<DefinedModifier> AllModifiers => Roles.AllModifiers;
+        public IEnumerable<DefinedGhostRole> AllGhostRoles => Roles.AllGhostRoles;
+        public DefinedRole? GetRole(string internalName) => Roles.AllRoles.FirstOrDefault(r => r.InternalName == internalName);
+        public DefinedRole? GetRoleById(int id) => Roles.GetRole(id);
+        public DefinedModifier? GetModifier(string internalName) => Roles.AllModifiers.FirstOrDefault(r => r.InternalName == internalName);
+        public DefinedModifier? GetModifierById(int id) => Roles.GetModifier(id);
+        public DefinedGhostRole? GetGhostRole(string internalName) => Roles.AllGhostRoles.FirstOrDefault(r => r.InternalName == internalName);
+        public DefinedGhostRole? GetGhostRoleById(int id) => Roles.GetGhostRole(id);
+    }
+    static public Assignables API { get; } = new RolesAPI();
     static public IReadOnlyList<DefinedRole> AllRoles { get; private set; } = [];
     static public IReadOnlyList<DefinedModifier> AllModifiers { get; private set; } = [];
     static public IReadOnlyList<DefinedGhostRole> AllGhostRoles { get; private set; } = [];

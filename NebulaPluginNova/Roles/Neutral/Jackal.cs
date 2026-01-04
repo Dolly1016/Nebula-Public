@@ -581,10 +581,10 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
 
         int[] RuntimeAssignable.RoleArguments => [1, JackalTeamId];
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
             if (AmOwner || canSeeAllInfo) {
-                name += MyRole.GetRoleIconTag();
+                name += MyRole.GetRoleIconTagSmall();
                 string teamId = "";
                 teamId = Jackal.AppendTeamIdIfNecessary(teamId, JackalTeamId, canSeeAllInfo, true );
                 name += teamId.Color(Jackal.MyRole.UnityColor);

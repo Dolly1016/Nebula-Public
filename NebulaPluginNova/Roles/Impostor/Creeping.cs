@@ -50,7 +50,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                 List<GamePlayer> poisonedInPoison = [];
 
                 var poisonTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeLocalKillablePredicate.Invoke(p) && !ModSingleton<DepoisonBoxManager>.Instance.PoisonedTo(p.RealPlayer));
-                var poisonButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, poisonTracker, Virial.Compat.VirtualKeyInput.Ability, "creeping.poison",
+                var poisonButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, poisonTracker, Virial.Compat.VirtualKeyInput.FixedAbility, "creeping.poison",
                     PoisonCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "poison", buttonSprite, (target, button) =>
                     {
                         if (GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, target, new(RealPlayerOnly: true))).IsCanceled ?? true) return;

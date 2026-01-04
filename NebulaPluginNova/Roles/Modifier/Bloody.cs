@@ -30,9 +30,9 @@ public class Bloody : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
         void RuntimeAssignable.OnActivated() { }
 
-        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo)
+        void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTag();
+            if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
 
         [OnlyMyPlayer]

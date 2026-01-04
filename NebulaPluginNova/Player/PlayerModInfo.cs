@@ -64,9 +64,10 @@ public static class PlayerState
     public static TranslatableTag Dissolved = new("state.dissolved");
     public static TranslatableTag Poisoned = new("state.poisoned");
     public static TranslatableTag Layoff = new("state.layoff");
+    public static TranslatableTag Punished = new("state.punished");
     public static TranslatableTag Disconnected = new("state.disconnected") { Color = Color.gray };
     public static TranslatableTag[] AllKillStates = [Dead, Guessed, Embroiled, Trapped, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved, Balloon, Laser, Drill, Dissolved, Poisoned];
-    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, Misguessed, Pseudocide, Exiled, Layoff];
+    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, Misguessed, Pseudocide, Exiled, Layoff, Punished];
     static PlayerState()
     {
         Virial.Text.PlayerStates.Alive = Alive;
@@ -79,6 +80,7 @@ public static class PlayerState
         Virial.Text.PlayerStates.Misguessed = Misguessed;
         Virial.Text.PlayerStates.Embroiled = Embroiled;
         Virial.Text.PlayerStates.Suicide = Suicide;
+        Virial.Text.PlayerStates.Trapped = Trapped;
         Virial.Text.PlayerStates.Revived = Revived;
         Virial.Text.PlayerStates.Pseudocide = Pseudocide;
         Virial.Text.PlayerStates.Gassed = Gassed;
@@ -86,6 +88,7 @@ public static class PlayerState
         Virial.Text.PlayerStates.Meteor = Meteor;
         Virial.Text.PlayerStates.Balloon = Balloon;
         Virial.Text.PlayerStates.Lost = Lost;
+        Virial.Text.PlayerStates.Punished = Punished;
     }
 }
 
@@ -483,7 +486,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         var currentOutfit = CurrentOutfit;
         var text = onMeeting ? DefaultName : currentOutfit.Outfit.outfit.PlayerName;
 
-        AssignableAction(r => r.DecorateNameConstantly(ref text, NebulaGameManager.Instance?.CanSeeAllInfo ?? false));
+        AssignableAction(r => r.DecorateNameConstantly(ref text, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, false));
         var ev = GameOperatorManager.Instance?.Run(new PlayerDecorateNameEvent(this, text));
         text = ev?.Name ?? text;
         var color = (ev?.Color.HasValue ?? false) ? ev.Color.Value.ToUnityColor() : Color.white;
@@ -1467,7 +1470,18 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         foreach (var m in myModifiers) if (m is Modifier m2) yield return m2;
     }
 
-    void GamePlayer.SetRole(DefinedRole role, int[]? arguments) => RpcInvokerSetRole(role, arguments).InvokeSingle();
+    void GamePlayer.SetRole(DefinedRole role, int[]? arguments)
+    {
+        var fallback = role.CheckFallback(this, arguments ?? []);
+        if (fallback != null)
+        {
+            (this as GamePlayer).SetRole(fallback.Role, fallback.Arguments ?? []);
+        }
+        else
+        {
+            RpcInvokerSetRole(role, arguments).InvokeSingle();
+        }
+    }
     void GamePlayer.SetGhostRole(DefinedGhostRole role, int[]? arguments) => RpcInvokerSetGhostRole(role, arguments).InvokeSingle();
 
     void GamePlayer.AddModifier(DefinedModifier modifier, int[]? arguments) => RpcInvokerSetModifier(modifier, arguments).InvokeSingle();

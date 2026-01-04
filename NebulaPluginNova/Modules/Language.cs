@@ -77,7 +77,9 @@ public class Language
     static private Language? CurrentLanguage = null;
     static private Language? GuestLanguage = null;
     static internal Language? DefaultLanguage = null;
-    static public Versioning LanguageVersion = new(); 
+    static public Versioning LanguageVersion = new();
+    static private List<(TMPro.TextMeshPro text, string translationKey)> realtimeUpdateTexts = [];
+
     /// <summary>
     /// 関数は言語を変更してもリセットしない。
     /// </summary>
@@ -150,6 +152,15 @@ public class Language
         EastAsianFontChanger.SetUpFont(lang);
     }
 
+    private static void UpdateRealtimeTexts()
+    {
+        realtimeUpdateTexts.RemoveAll(entry => {
+            if (!entry.text) return true;
+            entry.text.text = Language.Translate(entry.translationKey);
+            return false;
+        });
+    }
+    internal static void RegisterRealtimeText(TMPro.TextMeshPro text, string translationKey) => realtimeUpdateTexts.Add((text, translationKey));
     public static void OnChangeLanguage(uint language)
     {
         LanguageVersion.Update();
@@ -172,6 +183,7 @@ public class Language
                 CurrentLanguage.Deserialize(s);
             }
         }
+        UpdateRealtimeTexts();
     }
 
     public void Deserialize(Stream? stream, Func<string, Stream?>? subStreamProvider = null) => Deserialize(stream, (key, text) => translationMap[key] = text, subStreamProvider: subStreamProvider);

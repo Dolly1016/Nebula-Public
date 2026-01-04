@@ -210,6 +210,18 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         }
     }
 
+    public void Custom(int completed, int quota, bool asCrewmateTask)
+    {
+        RemoveAllTasks();
+        TotalCompleted = completed;
+        CurrentCompleted = completed;
+        TotalTasks = quota;
+        CurrentTasks = quota;
+        Quota = quota;
+        IsCrewmateTask = asCrewmateTask;
+        RpcSync();
+    }
+
     //実際に保持しているタスクも再計算します
     public void ReplaceTasksAndRecompute(int shortTasks,int longTasks,int commonTasks) {
         RecomputeTasks(shortTasks, longTasks, commonTasks);
@@ -236,8 +248,6 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
             NormalPlayerTask normalPlayerTask = ShipStatus.Instance.GetTaskById(taskInfo.TypeId);
             if (normalPlayerTask) indexCand.Add(i);
         }
-
-        LogUtils.WriteToConsole("Count: " + indexCand.Count);
 
         for (int i = 0; i < numOfTasks; i++)
         {
