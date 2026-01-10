@@ -1,0 +1,54 @@
+# Assignable
+
+"role.disturber.name" : "ディスターバー"
+"role.disturber.short" : "デ"
+"role.disturber.blurb" : "行く手を阻め"
+"role.disturber.hint" : "障壁で移動を妨害しよう"
+
+# Document
+
+"role.disturber.doc" : "電気障壁でプレイヤーの移動を妨害できるインポスターです。"
+"role.disturber.ability.title" : "固有能力 "電気障壁""
+"role.disturber.ability.main" : "専用のミニマップからポールを設置し、ポール間に障壁を発生させます。"
+"role.disturber.ability.place" : "<title>設置</title>ミニマップを開き、ポールを設置します。同時に設置できるポールの本数は<var>%POLES%</var>本です。<br>一続きのポール配置が決まったら、右下の設置ボタンを押してポールを設置できます。"
+"role.disturber.ability.disturb" : "<title>妨害</title>しばらくの間、ポール間に障壁を発生させます。"
+
+# Options
+
+"options.role.disturber.detail" : "ディスターバーは障壁を発生させるポールを置けます。<br>ポール間に障壁が張られると、プレイヤーはその間を移動できなくなります。"
+"options.role.disturber.placeCoolDown" : "設置クールダウン"
+"options.role.disturber.disturbCoolDown" : "妨害クールダウン"
+"options.role.disturber.disturbDuration" : "妨害効果時間"
+"options.role.disturber.maxNumOfPoles" : "ポールの最大設置数"
+"options.role.disturber.maxDistanceBetweenPoles" : "ポール間の最大距離"
+
+# Game
+
+
+# UI
+
+"button.label.place" : "設置"
+"button.label.destroy" : "破壊"
+"button.label.disturb" : "障壁"
+"ui.action.disturber.place" : "ポールを設置します。<br>2本目以降のポールは円で示された範囲内に設置する必要があります。"
+"ui.action.disturber.disturb" : "ポール間に障壁を張ります。<br>妨害効果の終了時に、一番古いポールは壊れて消滅します。"
+
+# Stats
+
+"stats.disturber.pole" : "ポールの設置本数"
+"stats.disturber.disturb" : "障壁による妨害回数"
+
+# Titles
+
+"achievement.disturber.common1.title" : "立ち入り禁止"
+"achievement.disturber.common1.goal" : "妨害能力で障壁を起動する。"
+
+"achievement.disturber.common2.title" : "電気仕掛けの大蛇"
+"achievement.disturber.common2.goal" : "ポールを6本繋ぎにして障壁を起動する。"
+"achievement.disturber.common2.splitted.0" : "電気仕掛けの"
+
+"achievement.disturber.challenge.title" : "苦悶は怒涛の如く"
+"achievement.disturber.challenge.goal" : "妨害能力を活用し、停電あるいは通信障害を40秒以上<br>長引かせたうえで3人が死亡する。"
+"achievement.disturber.challenge.cond" : "会議を跨いだサボタージュは無効"
+"achievement.disturber.challenge.flavor" : ""それ"は最悪のタイミングでやってくる。"
+"achievement.disturber.challenge.splitted.1" : "怒涛の"

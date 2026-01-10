@@ -28,7 +28,7 @@ internal class VanillaKillButtonHandler : IKillButtonLike
 
     void IKillButtonLike.StartCooldown(float ratio = 1f)
     {
-        PlayerControl.LocalPlayer.SetKillTimer(AmongUsUtil.VanillaKillCoolDown * ratio);
+        PlayerControl.LocalPlayer.SetKillTimer(AmongUsLLImpl.Instance.VanillaKillCooldown * ratio);
     }
     bool IKillButtonLike.IsShown => GamePlayer.LocalPlayer?.ShowKillButton ?? false;
 }

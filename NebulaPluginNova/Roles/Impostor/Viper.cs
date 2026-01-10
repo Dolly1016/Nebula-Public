@@ -28,7 +28,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
     }
     Citation? HasCitation.Citation => Citations.AmongUs;
 
-    static private IRelativeCoolDownConfiguration AcidCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.viper.acidCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), +5f, (0.125f, 2f, 0.125f), 1.25f);
+    static private IRelativeCooldownConfiguration AcidCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.viper.acidCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), +5f, (0.125f, 2f, 0.125f), 1.25f);
     static private FloatConfiguration DissolveDurationOption = NebulaAPI.Configurations.Configuration("options.role.viper.dissolveDuration", (5f, 120f, 5f), 15f, FloatConfigurationDecorator.Second);
     static private BoolConfiguration AcidLeavesBoneOption = NebulaAPI.Configurations.Configuration("options.role.viper.acidLeavesBone", true);
     static private BoolConfiguration CanReportBoneOption = NebulaAPI.Configurations.Configuration("options.role.viper.canReportBone", true);

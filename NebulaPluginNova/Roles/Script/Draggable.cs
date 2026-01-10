@@ -8,6 +8,7 @@ namespace Nebula.Roles.Scripts;
 public class Draggable : FlexibleLifespan, IGameOperator, IBindPlayer
 {
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DragAndDropButton.png", 115f);
+    static internal Image ButtonImage => buttonSprite;
 
     public Action<Virial.Game.DeadBody>? OnHoldingDeadBody { get; set; } = null;
     private GamePlayer myPlayer;

@@ -20,7 +20,7 @@ using Nebula.Roles.Abilities;
 namespace Nebula.Roles.Crewmate;
 
 [NebulaRPCHolder]
-internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, DefinedRole
+internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, DefinedRole, IAssignableDocument
 {
     private const float HookSpeed = 19f;
     private const float HookBackSuccessSpeed = 12f;
@@ -29,7 +29,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
     private Climber() : base("climber", new(86, 171, 246), RoleCategory.CrewmateRole, Crewmate.MyTeam, [GustCooldownOption, CanSeeInShadowOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
-        GameActionTypes.HookshotAction = new("hookshot", this, isPhysicalAction: true);
+        GameActionTypes.HookshotAction = new("climber.hookshot", this, isPhysicalAction: true);
     }
 
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
@@ -46,10 +46,18 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
     static private readonly Image ropeSprite = SpriteLoader.FromResource("Nebula.Resources.GustRope.png", 100f);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.climber.ability.hookshot");
+    }
+
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GustHookButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GustHookButton.png", 115f);
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)

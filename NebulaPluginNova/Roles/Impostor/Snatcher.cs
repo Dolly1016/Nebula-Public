@@ -9,7 +9,7 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, DefinedRole, DefinedSingleAbilityRole<Snatcher.Ability>
+internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, DefinedRole, DefinedSingleAbilityRole<Snatcher.Ability>, IAssignableDocument
 {
     private Snatcher() : base("snatcher", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [
         new GroupConfiguration("options.role.snatcher.group.snatch", [SnatchMethodOption, SnatchCoolDownOption, ObviousGuessFailureOption, KillCooldownRewindAfterUsurpOption], GroupConfigurationColor.ImpostorRed),
@@ -41,10 +41,31 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
         return (MyRole as DefinedRole).DisplayName;
     }
 
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        var guessSnatch = SnatchMethodOption.GetValue() == 0;
+        if (guessSnatch)
+        {
+            yield return new(MeetingIcon, "role.snatcher.ability.snatch.meeting");
+            yield return new(clockButtonSprite, "role.snatcher.ability.clock.meeting");
+        }
+        else
+        {
+            yield return new(buttonSprite, "role.snatcher.ability.snatch.taskPhase");
+            yield return new(clockButtonSprite, "role.snatcher.ability.clock.taskPhase");
+        }
+    }
+
+
+    static private Image MeetingIcon => MeetingPlayerButtonManager.Icons.AsLoader(6);
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnatchButton.png", 115f);
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnatchButton.png", 115f);
         public DefinedRole? UsurpedRole { get; private set; } = null;
         private bool HasTried = false;
         public IUsurpableAbility? UsurpedAbility { get; private set; } = null;
@@ -101,7 +122,7 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
         {
             if (!HasTried && SnatchMethodOption.GetValue() == 0)
             {
-                NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(6),
+                NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new(MeetingIcon,
             state =>
             {
                 var p = state.MyPlayer;
@@ -176,15 +197,15 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
         }
     }
 
+    private static readonly Image clockButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnatcherClockButton.png", 115f);
     public class ClockAbility : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        private static readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnatcherClockButton.png", 115f);
         public ClockAbility(GamePlayer player, bool isUsurped, float clockCooldown,float clockStrength, float clockDuration) : base(player, isUsurped)
         {
             if (AmOwner)
             {
                 var clockButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "snatcher.clock",
-                    clockCooldown, clockDuration, "clock", buttonSprite).SetAsUsurpableButton(this);
+                    clockCooldown, clockDuration, "clock", clockButtonSprite).SetAsUsurpableButton(this);
                 clockButton.OnEffectStart = button => player.GainAttribute(PlayerAttributes.CooldownSpeed, clockDuration, clockStrength, false, 100);
                 clockButton.OnEffectEnd = button => button.StartCoolDown();
             }

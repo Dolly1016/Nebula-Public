@@ -1,0 +1,15 @@
+# Header
+
+"options.consoleRestriction" : "情報端末制限"
+"options.consoleRestriction.detail" : "アドミンやバイタルの使用時間に制限をかけられます。"
+
+# Groups
+
+# Options
+
+"options.consoleRestriction.unlimited" : "無制限"
+"options.consoleRestriction.adminRestriction" : "アドミン"
+"options.consoleRestriction.vitalsRestriction" : "バイタル"
+"options.consoleRestriction.cameraRestriction" : "カメラ & ログ"
+"options.consoleRestriction.resetRestrictions" : "会議ごとの制限リセット"
+"options.consoleRestriction.showDeadBodiesOnAdmin" : "アドミンに死体を計上"

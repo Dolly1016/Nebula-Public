@@ -291,7 +291,7 @@ public class PaparazzoShot : MonoBehaviour
 
 
 [NebulaRPCHolder]
-public class Paparazzo : DefinedRoleTemplate, DefinedRole
+public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.paparazzo", new(202,118,140), TeamRevealType.OnlyMe);
 
@@ -314,6 +314,23 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
     static public readonly Paparazzo MyRole = new();
     static private GameStatsEntry StatsPhoto = NebulaAPI.CreateStatsEntry("stats.paparazzo.photo", GameStatsCategory.Roles, MyRole);
     static internal GameStatsEntry StatsPlayers = NebulaAPI.CreateStatsEntry("stats.paparazzo.players", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(cameraButtonSprite, "role.paparazzo.ability.camera");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%SUBJECT%", RequiredSubjectsOption.GetValue().ToString());
+        yield return new("%DISCLOSED%", RequiredDisclosedOption.GetValue().ToString());
+    }
+
+
+    static private Image cameraButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CameraButton.png", 115f);
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
@@ -327,10 +344,6 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole
         {
         }
 
-        //private Modules.ScriptComponents.ModAbilityButtonImpl? shotButton = null;
-        static private Image cameraButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CameraButton.png", 115f);
-
-        //private ComponentBinding<PaparazzoShot>? MyFinder = null;
 
         public int DisclosedMask = 0;
         public int CapturedMask = 0;

@@ -59,20 +59,6 @@ public class DocumentManager
 
             yield return null;
         }
-
-        foreach (var assembly in AddonScriptManager.ScriptAssemblies.Select(s => s.Assembly))
-        {
-            var types = assembly?.GetTypes().Where((type) => type.IsAssignableTo(typeof(IDocument)) && type.GetCustomAttributes<AddonDocumentAttribute>().Any(_ => true));
-            foreach (var type in types ?? [])
-            {
-                foreach (var attr in type.GetCustomAttributes<AddonDocumentAttribute>())
-                {
-                    var doc = type.GetConstructor(attr.Arguments.Select(a => a.GetType()).ToArray())?.Invoke(attr.Arguments) as IDocument;
-                    if (doc is IDocumentWithId idwi) idwi.OnSetId(attr.DocumentId);
-                    if (doc != null) allDocuments[attr.DocumentId] = doc;
-                }
-            }
-        }
     }
 
     public static void Register(string documentId, IDocument document)

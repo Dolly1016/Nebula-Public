@@ -28,7 +28,7 @@ public static class ExtraExileRoleSystem
     }
 }
 
-public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>, DefinedRole
+public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>, DefinedRole, IAssignableDocument
 {
     private Provocateur() : base("provocateur", new(112, 225, 89), RoleCategory.CrewmateRole, Crewmate.MyTeam, [EmbroilCoolDownOption, EmbroilAdditionalCoolDownOption, EmbroilDurationOption]) { }
 
@@ -43,7 +43,17 @@ public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>
     static private readonly GameStatsEntry StatsTask = NebulaAPI.CreateStatsEntry("stats.provocateur.taskPhase", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsExile = NebulaAPI.CreateStatsEntry("stats.provocateur.exile", GameStatsCategory.Roles, MyRole);
 
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.provocateur.ability.embroil");
+    }
+
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
 
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IGameOperator, IPlayerAbility
@@ -69,8 +79,6 @@ public class Provocateur : DefinedSingleAbilityRoleTemplate<Provocateur.Ability>
             }
         }
         private int embroilNum = 0;
-
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EmbroilButton.png", 115f);
 
         bool embroilActive = false;
         public bool EffectIsActive => embroilActive;

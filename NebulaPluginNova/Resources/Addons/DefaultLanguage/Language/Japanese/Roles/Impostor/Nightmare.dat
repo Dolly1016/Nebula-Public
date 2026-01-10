@@ -1,0 +1,63 @@
+# Assignable
+
+"role.nightmare.name" : "ナイトメア"
+"role.nightmare.short" : "ナ"
+"role.nightmare.blurb" : "落日の凶夢"
+
+# Document
+
+"role.nightmare.doc" : "視界を極端に制限する<b>夜の領域</b>を作り出せるインポスターです。"
+"role.nightmare.ability.title" : "固有能力 "夜闇の解放""
+"role.nightmare.ability.main" : "夜の領域を作り出す<b>夜のランタン</b>を使ってプレイヤーの視野を妨害できます。"
+"role.nightmare.ability.place" : "<title>設置</title>その場に<b>夜のランタン</b>を設置します。<br>設置されたランタンは、闇夜を発動するまで他プレイヤーからは見えません。"
+"role.nightmare.ability.nightmare" : "<title>闇夜</title>夜のランタンが夜の領域を展開します。夜の領域内では、視界が極端に制限されます。%DESTROY%"
+"role.nightmare.ability.nightmare.destroy" : "<br><var>夜の領域を展開したランタンは消滅します。</var>"
+"role.nightmare.tips" : "・ナイトメア自身と味方プレイヤーは、夜の領域内の様子を視認できます。"
+
+# Options
+
+"options.role.nightmare.detail" : "ナイトメアは暗い夜の領域をつくりだせます。"
+"options.role.nightmare.placeCooldown" : "設置クールダウン"
+"options.role.nightmare.nightmareCooldown" : "闇夜のクールダウン"
+"options.role.nightmare.nightmareDuration" : "闇夜の効果時間"
+"options.role.nightmare.nightSize" : "夜の大きさ"
+"options.role.nightmare.nightSize.detail" : "夜のランタンが展開する夜の大きさを変更できます。"
+"options.role.nightmare.disposableNightSeed" : "使い切り式の夜のランタン"
+"options.role.nightmare.disposableNightSeed.detail" : "オンにするとランタンは闇夜の発動とともに消滅します。"
+"options.role.nightmare.numOfNightSeed" : "夜のランタンの最大設置数"
+"options.role.nightmare.inShadowLightSize" : "夜の領域内での視界"
+"options.role.nightmare.inShadowLightSize.detail" : "夜の領域内での視界の広さを設定します。<br>設定値は停電時の視界の広さと対応しています。"
+
+# Game
+
+"gameAction.nightmare.nightSeed" : "夜のランタン設置"
+
+# UI
+
+"button.label.nightmare" : "闇夜"
+"ui.action.nightmare.place" : "足元に"夜のランタン"を設置します。<br>能力を発動するとランタンは夜の領域を展開します。"
+"ui.action.nightmare.nightmare" : "設置したランタンのまわりに夜の領域を展開します。"
+
+# Stats
+
+"stats.nightmare.place" : "夜のランタンの設置回数"
+"stats.nightmare.nightmare" : "闇夜の発動回数"
+
+# Titles
+
+"achievement.nightmare.common1.title" : "夜の支配者"
+"achievement.nightmare.common1.goal" : "闇夜を通算で10回発動する。"
+"achievement.nightmare.common1.splitted.2" : "支配者"
+
+"achievement.nightmare.common2.title" : "暴徒"
+"achievement.nightmare.common2.goal" : "夜の領域内で通算5回キルする。"
+
+"achievement.nightmare.another1.title" : "夜道に気をつけて"
+"achievement.nightmare.another1.goal" : "夜の領域内で死亡する。"
+
+"achievement.nightmare.another2.title" : "夢オチ希望"
+"achievement.nightmare.another2.goal" : "はじめて闇夜を発動した直後の会議で追放あるいは推察される。"
+
+"achievement.nightmare.challenge.title" : "ある一夜の凶変"
+"achievement.nightmare.challenge.goal" : "一度の闇夜で、夜の領域内で3人以上死亡する。"
+"achievement.nightmare.challenge.cond" : "ナイトメア自身も夜の領域内で1キル以上決めること"

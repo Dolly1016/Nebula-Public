@@ -1,0 +1,54 @@
+# Assignable
+
+"role.jackal.name" : "ジャッカル"
+"role.jackal.short" : "ジ"
+"role.jackal.blurb" : "敵を殲滅せよ"
+
+# Document
+
+"role.jackal.doc" : "敵を殲滅すると勝利する第三陣営です。"
+
+# Options
+
+"options.role.jackal.detail" : "ジャッカルは敵を殲滅することで勝利します。<br>ジャッカルの追放はインポスターとクルーメイトの共通の目標となります。"
+"options.role.jackal.killCoolDown" : "キルクールダウン"
+"options.role.jackal.canCreateSidekick" : "サイドキック生成"
+"options.role.jackal.numOfKillingToCreateSidekick" : "サイドキック生成に必要なキル数"
+"options.role.jackal.numOfKillingToWin" : "勝利に必要なキル数"
+"options.role.jackal.jacklizedImpostor" : "インポスター能力のジャッカル化"
+
+# Game
+
+
+# UI
+
+"button.label.sidekick" : "サイドキック"
+
+# Stats
+
+"stats.jackal.sidekick" : "サイドキックを作った回数"
+
+# Titles
+
+"achievement.jackal.common1.title" : "友情"
+"achievement.jackal.common1.goal" : "誰かにSidekickを付与する。"
+
+"achievement.jackal.challenge.title" : "血の騒ぐ最終決戦"
+"achievement.jackal.challenge.goal" : "インポスターと自身の2人だけが残った状態から勝利する。"
+"achievement.jackal.challenge.cond" : "キルによってゲームが終了すること"
+"achievement.jackal.challenge.flavor" : ""アツい戦いをしようぜ！" ―破られた議事録より"
+"achievement.jackal.challenge.splitted.0" : "血の騒ぐ"
+
+# Team
+
+"teams.jackal" : "ジャッカル"
+"end.jackal" : "ジャッカル%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.teams.jackal" : "ジャッカル"
+
+"document.tip.winCond.jackal.kill.title" : "キル勝利"
+"document.tip.winCond.jackal.kill" : "自陣営の生存者が全生存者の半数以上を占めると勝利します。<br>他のキル陣営が全滅している必要があり、%LOVER%は自陣営にカウントしません。"
+"document.tip.winCond.jackal.extinction.title" : "完全殲滅勝利"
+"document.tip.winCond.jackal.extinction" : "全生存者が自陣営のプレイヤーになると勝利します。相方が生存している%LOVER%は自陣営にカウントしません。"

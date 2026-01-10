@@ -26,7 +26,7 @@ using static Nebula.Roles.Impostor.Sculptor;
 
 namespace Nebula.Roles.Crewmate;
 
-internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Ability>, DefinedRole
+internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Ability>, DefinedRole, IAssignableDocument
 {
 
     private Doppelganger() : base("doppelganger", new(191, 103, 215), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SwapCooldownOption, SwapDurationOption, DecoyDetectionRadiusOption])
@@ -95,7 +95,18 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
         }
     }
 
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(mapButtonSprite, "role.doppelganger.ability.map");
+        yield return new(swapButtonSprite, "role.doppelganger.ability.swap");
+        yield return new(despawnButtonSprite, "role.doppelganger.ability.despawn");
+    }
 
+    static private Image mapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMapCrewmateButton.png", 115f);
+    static private Image swapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DoppelgangerSwapButton.png", 115f);
+    static private Image despawnButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DoppelgangerDespawnButton.png", 115f);
 
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
@@ -104,9 +115,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
         private FakePlayer? fakePlayer = null;
         private IReleasable? fakePlayerReleasable = null;
         private bool isMoving = false;
-        static private Image mapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMapCrewmateButton.png", 115f);
-        static private Image swapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DoppelgangerSwapButton.png", 115f);
-        static private Image despawnButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DoppelgangerDespawnButton.png", 115f);
+        
         int currentWalkCommandId = 0;
         private ModAbilityButton? swapButton = null;
         public bool HasFakePlayerLocal => fakePlayer != null;
@@ -244,7 +253,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
         [Local]
         void OnTaskComplete(PlayerTaskCompleteLocalEvent ev)
         {
-            if (MyPlayer.Tasks.IsCompletedTotalTasks)
+            if (MyPlayer.Tasks.IsCompletedTotalTasks && MyPlayer.Tasks.TotalTasks > 0)
             {
                 if (GamePlayer.AllPlayers.All(p => p.AmOwner || !p.Tasks.IsCrewmateTask || !p.Tasks.HasExecutableTasks || p.Tasks.TotalCompleted + 4 <= p.Tasks.Quota))
                     new StaticAchievementToken("doppelganger.challenge");

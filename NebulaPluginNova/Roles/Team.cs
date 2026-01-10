@@ -12,7 +12,7 @@ public class Team : RoleTeam
     public int Id { get; set; }
     public TeamRevealType RevealType { get; set; }
     private Func<float>? killCooldownSupplier;
-    public float KillCooldown => killCooldownSupplier?.Invoke() ?? AmongUsUtil.VanillaKillCoolDown;
+    public float KillCooldown => killCooldownSupplier?.Invoke() ?? AmongUsLLImpl.Instance.VanillaKillCooldown;
     public Team(string translationKey, Virial.Color color, TeamRevealType revealType, Func<float> killCooldown = null)
     {
         TranslationKey = translationKey;

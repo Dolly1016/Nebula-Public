@@ -1,0 +1,56 @@
+# Assignable
+
+"role.sculptor.name" : "スカルプター"
+"role.sculptor.short" : "スカ"
+"role.sculptor.blurb" : "混乱の創造主"
+
+# Document
+
+"role.sculptor.doc" : "歩く偶像を召喚できるインポスターです。"
+"role.sculptor.ability.title" : "固有能力 "ケイオスクリーチャー""
+"role.sculptor.ability.main" : ""
+"role.sculptor.ability.sample" : "<title>採取</title>偶像に適用できる見た目を採取します。"
+"role.sculptor.ability.map" : "<title>ミニマップ</title>偶像を召喚させるためのマップを開きます。<br>マップ上で偶像の目的地と見た目を選ぶとその場に偶像が出現し、歩き出します。"
+"role.sculptor.tips" : "・偶像がキルされるとその場で消え、実際には誰も死亡しません。"
+
+# Options
+
+"options.role.sculptor.detail" : "スカルプターはマップ中を歩くプレイヤーの偶像を生成します。<br>クルーメイトはすれ違った相手が本物なのか分からなくなってしまいます！"
+"options.role.sculptor.sampleCoolDown" : "採取クールダウン"
+"options.role.sculptor.createCoolDown" : "生成クールダウン"
+"options.role.sculptor.maxSamples" : "サンプルの最大保持数"
+"options.role.sculptor.stayDurationAfterMoving" : "移動後の偶像の滞在時間"
+"options.role.sculptor.detectionRadius" : "偶像のプレイヤー探知範囲"
+
+# Game
+
+"gameAction.sculptor.summon" : "偶像召喚"
+
+# UI
+
+"button.label.sculptor.command" : "生成"
+
+# Stats
+
+"stats.sculptor.sample" : "サンプルの採取回数"
+"stats.sculptor.create" : "偶像の生成回数"
+"ui.action.sculptor.sample" : "サンプルを取得します。"
+"ui.action.sculptor.create" : "偶像の移動先を指定するマップを開きます。<br>移動先と見た目を選択すると偶像が出現します。"
+
+# Titles
+
+"achievement.sculptor.common1.title" : "無駄、ムダぁ！"
+"achievement.sculptor.common1.goal" : "仲間以外のプレイヤーが偶像にキルを試みる。"
+
+"achievement.sculptor.common2.title" : "イドラ・デウス"
+"achievement.sculptor.common2.goal" : "通算で20体の偶像を生成する。"
+
+"achievement.sculptor.common3.title" : "傀儡の惑星"
+"achievement.sculptor.common3.goal" : "出現している偶像の数が生存者数を上回る。"
+"achievement.sculptor.common3.splitted.2" : "惑星"
+
+"achievement.sculptor.challenge.title" : "罪の憑坐"
+"achievement.sculptor.challenge.goal" : "生成した偶像のサンプルプレイヤーが生成直後の会議で追放される。"
+"achievement.sculptor.challenge.cond" : "自分自身、および仲間を除く"
+"achievement.sculptor.challenge.splitted.0" : "罪の"
+"achievement.sculptor.challenge.splitted.2" : "憑坐"

@@ -11,7 +11,7 @@ using Virial.Media;
 
 namespace Nebula.Roles.Neutral;
 
-public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.arsonist", new(229, 93, 0), TeamRevealType.OnlyMe);
     private Arsonist():base("arsonist", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [DouseCoolDownOption, DouseDurationOption, VentConfiguration])
@@ -30,6 +30,17 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
     static public Arsonist MyRole = new Arsonist();
     static private GameStatsEntry StatsDouse = NebulaAPI.CreateStatsEntry("stats.arsonist.doused", GameStatsCategory.Roles, MyRole);
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(douseButtonSprite, "role.arsonist.ability.douse");
+        yield return new(igniteButtonSprite, "role.arsonist.ability.ignite");
+    }
+
+    static private Image douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DouseButton.png", 115f);
+    static private Image igniteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.IgniteButton.png", 115f);
     [NebulaRPCHolder]
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
@@ -68,8 +79,6 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
             )).Move(new(0.04f, 0f))
             );
 
-        static private Image douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DouseButton.png", 115f);
-        static private Image IgniteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.IgniteButton.png", 115f);
         private List<(byte playerId,PoolablePlayer icon)> playerIcons = [];
         private HashSet<GamePlayer> dousedPlayers = [];
         private bool canIgnite;
@@ -171,7 +180,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 bool won = false;
                 var igniteButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
-                    0f, "ignite", IgniteButtonSprite,
+                    0f, "ignite", igniteButtonSprite,
                     null, _ => canIgnite && !won);
                 igniteButton.OnClick = (button) => {
                     NebulaGameManager.Instance.RpcInvokeSpecialWin(NebulaGameEnd.ArsonistWin, 1 << MyPlayer.PlayerId);

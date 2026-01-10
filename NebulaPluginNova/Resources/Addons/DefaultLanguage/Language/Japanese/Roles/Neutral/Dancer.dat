@@ -1,0 +1,108 @@
+# Assignable
+
+"role.dancer.name" : "ダンサー"
+"role.dancer.short" : "ダ"
+"role.dancer.blurb" : "その日に花を添えて"
+
+# Document
+
+"role.dancer.doc" : "ダンスを踊ってプレイヤーを惑わせる第三陣営です。"
+"role.dancer.winCond" : "生存しながら、<var>%NUM%</var>人の死の預言を完遂させる。%ADD%"
+"role.dancer.winCond.main.lastDance" : "<br>また、上の条件を満たしたときに生存者に<var>ラストダンス</var>を見せる。"
+"role.dancer.ability.title" : "固有能力 "死の舞踏""
+"role.dancer.ability.main" : "ダンサーは体を小刻みに動かしてダンスを踊れます。<br>ダンスを目撃した生存者は<b>死の預言</b>を受けます。<br>死の預言には有効時間があり、有効時間内に対象のプレイヤーが死亡することで<b>死の預言</b>が完遂されます。<br>有効時間を過ぎると、死の預言は解除されます。<br>死の預言を受けているプレイヤーが誰かのそばでダンスを踊ると、相手に死の預言を<b>なすれます</b>。<br><br>ダンスの目撃者はダンサーと運命を共にするか、誰かになすってしまうか、<br>あるいは預言の時間切れまで耐え忍ぶか、主にこの3つの選択肢から行動を選ぶことになります。"
+"role.dancer.ability.dance" : "<title>ダンス</title>その場で小刻みに動き続けてダンスを踊ります。ボタンクリック/キー入力では<b>発動できません</b>。<br>ボタンのタイマーが上がりきるまでダンスを踊ると、<b>死の預言</b>をします。"
+"role.dancer.ability.danceKill" : "<title>死のダンス</title>死体のそばでダンスを踊ると、次のダンスはプレイヤーをキルできる<b>死のダンス</b>に変化します。<br><b>死のダンス</b>によるキルは、完遂された死の預言としてカウントされます。"
+"role.dancer.tips" : "・<b>死の預言</b>を受けている間、対象のプレイヤーは勝利をブロックされます。<br>・<b>死の預言</b>をダンサー本人になすると、その死の預言は消失します。<br>・ダンスを目撃しても、そのプレイヤーがダンサーなのか、死の預言を擦りにきた他人なのかは判別できません。<br>・ダンサーが勝利したとき、死の預言が完遂したプレイヤーはダンサーと<b>ともに勝利</b>します。"
+
+# Options
+
+"options.role.dancer.detail" : "ダンサーはダンスを踊って死の預言をします。<br>死の預言はゲームや会議の進行に影響をもたらします。"
+"options.role.dancer.numOfSuccessfulForecastToWin" : "勝利に必要な完遂された死の預言の回数"
+"options.role.dancer.danceCoolDown" : "ダンスクールダウン"
+"options.role.dancer.danceDuration" : "ダンスに必要な時間"
+"options.role.dancer.danceRange" : "ダンスの効果範囲"
+"options.role.dancer.forecastDuration" : "死の預言の有効時間"
+"options.role.dancer.finalDance" : "ラストダンスモード"
+"options.role.dancer.deathNotification" : "死体発生の通知"
+"options.role.dancer.forecastedFollowingSuicide" : "ダンサー死亡時の後追い自殺"
+
+# Game
+
+"role.dancer.taskDanceText" : "死の預言を完遂させる。"
+"role.dancer.taskFinalText" : "ラストダンスを生存者に見せて勝利せよ。"
+
+# UI
+
+"button.label.dance" : "ダンス"
+"ui.action.danceAction" : "このボタンは<b>クリックで発動できません。</b><br>小刻みに動いて<b>ダンス</b>をすることで発動できます。"
+
+# Game Statictics
+
+"statistics.events.dance" : "ダンス"
+
+# Status
+
+"state.frenzied" : "狂乱"
+
+# Stats
+
+"stats.dancer.dance" : "ダンス回数"
+
+# Titles
+
+"achievement.dancer.common1.title" : "呪われた舞踊"
+"achievement.dancer.common1.goal" : "生存者の近くでダンスをする。"
+"achievement.dancer.common1.splitted.0" : "呪われた"
+
+"achievement.dancer.another2.title" : "燃えるような夜に副えて"
+"achievement.dancer.another2.goal" : "2人以上の生存者の近くでダンスをする。"
+"achievement.dancer.another2.splitted.1" : "夜に"
+
+"achievement.dancer.common8.title" : "蠱惑のダンサー"
+"achievement.dancer.common8.goal" : "累計で20回、生存者に死の預言をする。"
+"achievement.dancer.common8.splitted.2" : "ダンサー"
+
+"achievement.dancer.common2.title" : "死の舞踏"
+"achievement.dancer.common2.goal" : "死体の近くでダンスをする。"
+"achievement.dancer.common2.flavor" : "それは、死の病の運び屋。"
+
+"achievement.dancer.common3.title" : ""それ"が見えたら、終わり？"
+"achievement.dancer.common3.goal" : "ダンサーの踊りを目撃する。"
+"achievement.dancer.common3.splitted.0" : ""それ"が"
+
+"achievement.dancer.common4.title" : "メメント・モリ"
+"achievement.dancer.common4.goal" : "ダンサーの踊りを目撃しながらも最後まで生存し、勝利する。"
+
+"achievement.dancer.common5.title" : "日曜日の午後の夢"
+"achievement.dancer.common5.goal" : "ダンサーの預言通りに死亡しながらも、クルーメイト勝利で勝利する。"
+"achievement.dancer.common5.flavor" : "私たちは立ち上がる。なにがあろうとも。"
+"achievement.dancer.common5.splitted.0" : "日曜日の"
+"achievement.dancer.common5.splitted.1" : "午後の"
+
+"achievement.dancer.common6.title" : "ラストダンスは私に"
+"achievement.dancer.common6.goal" : "ラストダンスの目撃者になる。"
+
+"achievement.dancer.common7.title" : "クレイジービーンダンサーズ"
+"achievement.dancer.common7.goal" : "ダンサーと二人でダンスを踊る。"
+"achievement.dancer.common7.splitted.1" : "ビーン"
+
+"achievement.dancer.another1.title" : "幻覚性の残り香"
+"achievement.dancer.another1.goal" : "ダンスを目撃したプレイヤーに推察される。<br>あるいは票を投じられて追放される。"
+"achievement.dancer.another1.splitted.2" : "残り香"
+
+"achievement.dancer.challenge.title" : "惨禍をもたらす踊り子"
+"achievement.dancer.challenge.goal" : "ジャッカルあるいはインポスターに対して<br>死の預言を成功させたうえでダンサー勝利する。"
+"achievement.dancer.challenge.flavor" : "―その美貌で人の心を乱す怪物。"
+"achievement.dancer.challenge.splitted.1" : "もたらす"
+"achievement.dancer.challenge.splitted.2" : "踊り子"
+
+# Team
+
+"teams.dancer" : "ダンサー"
+"end.dancer" : "ダンサー<color=#FFFFFF> + 亡霊</color>%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.dancer.title" : "特殊勝利"
+"document.tip.winCond.dancer" : "指定の回数だけ死の預言を完遂させると勝利します。"

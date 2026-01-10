@@ -13,7 +13,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>, DefinedRole
+internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>, DefinedRole, IAssignableDocument
 {
     private Rokurokubi() : base("rokurokubi", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CraneSpeedOption, MaxNeckLengthOption, AutoKillOption])
     {
@@ -29,7 +29,19 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Rokurokubi MyRole = new();
-    
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.rokurokubi.ability.rokurokubi");
+        yield return new(buttonCalmSprite, "role.rokurokubi.ability.reset");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return IAssignableDocument.GetKeyInput("%KEY%", Virial.Compat.VirtualKeyInput.AidAction);
+    }
 
     [NebulaRPCHolder]
     public class LongNeckMode : FlexibleLifespan, IGameOperator, IBindPlayer
@@ -315,10 +327,11 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
     }
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.RokurokubiButton.png", 115f);
+    static private readonly Image buttonCalmSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.RokurokubiResetButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.RokurokubiButton.png", 115f);
-        static private readonly Image buttonCalmSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.RokurokubiResetButton.png", 115f);
 
         public bool InLongNeckMode => !(CurrentLongNeckMode?.IsDeadObject ?? true) && (CurrentLongNeckMode?.IsActive ?? false);
         public LongNeckMode? CurrentLongNeckMode = null;
@@ -379,7 +392,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 calmButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "rokurokubi.pause");
 
                 var killAchToken = new AchievementToken<int>("rokurokubi.common1", 0, (val, _) => val >= 2);
-                var tracker = ObjectTrackers.ForPlayerlike(this, AmongUsUtil.VanillaKillDistance + (AutoKillOption ? 0.2f : 0.5f), () => CurrentLongNeckMode?.GetHeadPos() ?? MyPlayer.VanillaPlayer.transform.position, ObjectTrackers.PlayerlikeLocalKillablePredicate, null, Color.red, false, true);
+                var tracker = ObjectTrackers.ForPlayerlike(this, AmongUsLLImpl.Instance.VanillaKillDistance + (AutoKillOption ? 0.2f : 0.5f), () => CurrentLongNeckMode?.GetHeadPos() ?? MyPlayer.VanillaPlayer.transform.position, ObjectTrackers.PlayerlikeLocalKillablePredicate, null, Color.red, false, true);
                 var killButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, new Virial.Events.Player.PlayerInteractParameter(IsKillInteraction: true), true, Virial.Compat.VirtualKeyInput.Kill, null, 1f, "kill", ModAbilityButton.LabelType.Impostor, null,
                     (target, button) => {
                         var myPos = MyPlayer.Position;
@@ -389,7 +402,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
 
                         //var deathState = PlayerState.Dead;
                         var killParam = KillParameter.RemoteKill;
-                        if (mag < AmongUsUtil.VanillaKillDistance + 0.5f && !PhysicsHelpers.AnyNonTriggersBetween(myPos, diff.normalized, mag, Constants.ShipAndObjectsMask))
+                        if (mag < AmongUsLLImpl.Instance.VanillaKillDistance + 0.5f && !PhysicsHelpers.AnyNonTriggersBetween(myPos, diff.normalized, mag, Constants.ShipAndObjectsMask))
                         {
                             killParam = KillParameter.NormalKill;
                         }

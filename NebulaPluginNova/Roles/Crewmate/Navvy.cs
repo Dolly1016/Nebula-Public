@@ -13,7 +13,7 @@ using Nebula.Map;
 
 namespace Nebula.Roles.Crewmate;
 
-internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedRole
+internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedRole, IAssignableDocument
 {
 
     private Navvy() : base("navvy", new(71, 93, 206), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SealCoolDownOption, CostOption, CostForVentSealingOption, VentRemoveStepsOption, CostForDoorSealingOption, DoorRemoveStepsOption, RemoveDurationPerStepOption, RedundantSealingOption])
@@ -41,11 +41,19 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
     static public readonly GameStatsEntry StatsRemoveVent = NebulaAPI.CreateStatsEntry("stats.navvy.removeVent", GameStatsCategory.Roles, MyRole);
     static public readonly GameStatsEntry StatsRemoveDoor = NebulaAPI.CreateStatsEntry("stats.navvy.removeDoor", GameStatsCategory.Roles, MyRole);
 
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonImage, "role.navvy.ability.seal");
+    }
+
+    static private readonly Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.CloseVentButton.png", 115f);
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
-        static private readonly Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.CloseVentButton.png", 115f);
         static private readonly Image sealImage = SpriteLoader.FromResource("Nebula.Resources.Seal.png", 100f);
 
         List<int> nextSealedVents = [];

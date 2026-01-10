@@ -1,0 +1,25 @@
+# Header
+
+"options.assignment" : "割り当てオプション"
+"options.assignment.detail" : "役職の割り当て数に関する設定です。"
+
+# Groups
+
+"options.assignment.group.assignment" : "役職割り当て"
+
+# Options
+
+"options.assignment.crewmate" : "クルーメイト役職"
+"options.assignment.impostor" : "インポスター役職"
+"options.assignment.neutral" : "第三陣営役職"
+"options.assignment.unlimited" : "無制限"
+"options.assignment.assignOpToHost" : "ホストにOP権限を付与"
+"options.assignment.assignOpToHost.detail" : "オンにすると、ホストはゲーム中にコマンドを使用できるようになります。<br>特にコマンドを使用しない場合はオフにすることをお勧めします。"
+"options.assignment.ghostAssignmentMethod" : "幽霊役職の割り当てタイプ"
+"options.assignment.ghostAssignmentMethod.detail" : "幽霊役職の割り当て方法を変更できます。<br> -<b>標準</b>: 死亡者には割り当てられる役職の何れかが必ず割り当てられます。<br> -<b>スリリング</b>: 割当確率が役職を割り当てられるか否かにまで影響を及ぼします。"
+"options.assignment.ghostAssignmentMethod.normal" : "標準"
+"options.assignment.ghostAssignmentMethod.thrilling" : "スリリング"
+"options.assignment.preview" : "配役プレビュー"
+"options.assignment.preview.withoutCrewmate" : "インポスターx%IMP% (うち役職持ち: %RIMP%), 第三陣営x%NEU%, クルーメイトは全員役職持ち"
+"options.assignment.preview.withCrewmate" : "インポスターx%IMP% (うち役職持ち: %RIMP%), 第三陣営x%NEU%, 役職持ちクルーメイトx%CREW%"
+"options.assignment.preview.hint" : "※ 黄色く縁どられているプレイヤーに役職が割り当てられます。<br>※ インポスターの総数はAmong Usの設定から変更してください。"

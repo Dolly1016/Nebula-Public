@@ -10,7 +10,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Reaper : DefinedRoleTemplate, DefinedRole
+public class Reaper : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     private Reaper() : base("reaper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ConnectVentsOption, VentConfiguration, CanUseVentWhileHoldingDeadbodyOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
@@ -32,6 +32,18 @@ public class Reaper : DefinedRoleTemplate, DefinedRole
     static private GameStatsEntry StatsVent = NebulaAPI.CreateStatsEntry("stats.reaper.ventWithDeadBody", GameStatsCategory.Roles, MyRole);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Scripts.Draggable.ButtonImage, !CanUseVentWhileHoldingDeadbodyOption ? "role.reaper.ability.drag.cannotEnter" : "role.reaper.ability.drag");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%VENT%", ConnectVentsOption ? Language.Translate(!CanUseVentWhileHoldingDeadbodyOption ? "role.reaper.doc.vent.cannotEnter" : "role.reaper.doc.vent") : "");
+    }
 
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {

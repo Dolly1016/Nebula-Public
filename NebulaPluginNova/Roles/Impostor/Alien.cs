@@ -7,7 +7,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitation, DefinedRole
+public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private Alien(): base("alien", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EMICoolDownOption, EMIDurationOption, InvalidateCoolDownOption, NumOfInvalidationsOption])
     {
@@ -28,12 +28,20 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
     static public readonly Alien MyRole = new();
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages() => [
+        new(buttonSprite, "role.alien.ability.emi"),
+        new(invalidateButtonSprite, "role.alien.ability.invalidate"),
+        ];
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
+    static private readonly Image invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
+
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EMIButton.png", 115f);
-        static private readonly Image invalidateButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AlienButton.png", 115f);
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), LeftInvalidation];
         int LeftInvalidation = NumOfInvalidationsOption;

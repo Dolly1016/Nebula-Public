@@ -19,7 +19,7 @@ using static Nebula.Roles.Impostor.Cannon;
 
 namespace Nebula.Roles.Impostor;
 
-public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, DefinedRole
+public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, DefinedRole, IAssignableDocument
 {
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     [NebulaRPCHolder]
@@ -27,8 +27,8 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
     {
         public static string MyTag = "DisturbPole";
 
-        static SpriteLoader mySprite = SpriteLoader.FromResource("Nebula.Resources.ElecPole.png", 145f);
-        static public Image PoleImage => mySprite;
+        static SpriteLoader poleImage = SpriteLoader.FromResource("Nebula.Resources.ElecPole.png", 145f);
+        static internal Image PoleImage => poleImage;
         private bool isActivated = false;
         public bool IsActivated => isActivated;
         private void Activate()
@@ -43,7 +43,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             catch { }
         }
 
-        public DisturbPole(Vector2 pos) : base(pos, ZOption.Just, true, mySprite.GetSprite(), true)
+        public DisturbPole(Vector2 pos) : base(pos, ZOption.Just, true, poleImage.GetSprite(), true)
         {
         }
 
@@ -95,6 +95,18 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
     static private readonly GameStatsEntry StatsPole = NebulaAPI.CreateStatsEntry("stats.disturber.pole", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsDisturb = NebulaAPI.CreateStatsEntry("stats.disturber.disturb", GameStatsCategory.Roles, MyRole);
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(placeButtonSprite, "role.disturber.ability.place");
+        yield return new(disturbButtonSprite, "role.disturber.ability.disturb");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%POLES%", MaxNumOfPolesOption.GetValue().ToString());
+    }
 
     public class DisturberMapLayer : MonoBehaviour
     {
@@ -305,6 +317,8 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
         }
     }
 
+    static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ElecPolePlaceButton.png", 115f);
+    static private Image disturbButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DisturbButton.png", 115f);
 
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
@@ -312,10 +326,6 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
         static float PoleDistanceMin = 0.8f;
         static float PoleDistanceMax => MaxDistanceBetweenPolesOption;
-
-
-        static public Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ElecPolePlaceButton.png", 115f);
-        static public Image disturbButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DisturbButton.png", 115f);
 
         static private Image elecAnimHSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnim.png", 100f);
         static private Image elecAnimVSprite = SpriteLoader.FromResource("Nebula.Resources.ElecAnimSub.png", 100f);

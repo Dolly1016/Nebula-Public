@@ -13,7 +13,7 @@ using Virial.Text;
 
 namespace Nebula.Roles.Impostor;
 
-public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, DefinedRole
+public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, DefinedRole, IAssignableDocument
 {
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class Thuribulum : NebulaSyncShadowObject
@@ -296,6 +296,14 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
 
     static private GameStatsEntry StatsActivate = NebulaAPI.CreateStatsEntry("stats.thurifer.activate", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsImpute = NebulaAPI.CreateStatsEntry("stats.thurifer.impute", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.thurifer.ability.curse");
+        yield return new(buttonSprite, "role.thurifer.ability.impute");
+    }
 
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {

@@ -1,0 +1,28 @@
+# Header
+
+"options.aeroGuesser" : "アモゲッサー設定"
+"options.aeroGuesser.detail" : "アモゲッサーの設定です。"
+
+# Groups
+
+"options.aeroGuesser.group.hurryTimer" : "タイマー短縮の設定"
+"options.aeroGuesser.group.filter.difficulty" : "難易度の設定"
+"options.aeroGuesser.group.filter.map" : "出題対象マップの設定"
+
+# Options
+
+"options.aeroGuesser.guessTime" : "推察時間"
+"options.aeroGuesser.numOfQuiz" : "クイズの出題数"
+"options.aeroGuesser.monochromeMode" : "モノクロモード"
+"options.aeroGuesser.monochromeMode.detail" : "オンにすると、問題画像がモノクロで表示されます。"
+"options.aeroGuesser.hurryTimer" : "タイマー短縮"
+"options.aeroGuesser.hurryTimer.detail" : "オンにすると、誰かが推察を確定したときに<br>残り解答時間を短縮できます。"
+"options.aeroGuesser.hurryTimerDuration" : "短縮後の最大タイマー"
+"options.aeroGuesser.hurryTimerDuration.detail" : "短縮後の残り解答時間です。<br>既に残り解答時間が設定された時間より短くなっている場合、残り時間は延長されません。"
+"options.aeroGuesser.skeld" : "Skeld"
+"options.aeroGuesser.mira" : "MIRA HQ"
+"options.aeroGuesser.polus" : "Polus"
+"options.aeroGuesser.airship" : "Airship"
+"options.aeroGuesser.fungle" : "Fungle"
+"options.aeroGuesser.normal" : "Normal"
+"options.aeroGuesser.hard" : "Hard"

@@ -1,0 +1,55 @@
+# Assignable
+
+"role.navvy.name" : "ナヴィ"
+"role.navvy.short" : "ナ"
+"role.navvy.blurb" : "いつでも突貫工事"
+
+# Document
+
+"role.navvy.doc" : "ベントやドアを封鎖できるクルーメイトです。"
+"role.navvy.ability.title" : "固有能力 "宇宙船の配管工""
+"role.navvy.ability.main" : ""
+"role.navvy.ability.seal" : "<title>封鎖</title>ベントやドアをテープで封鎖します。"
+
+# Options
+
+"options.role.navvy.detail" : "ナヴィはベントやドアをテープで塞げます。<br>ベントを使えるプレイヤーは、塞がれたベントやドアのテープを剥がせます。"
+"options.role.navvy.sealCooldown" : "封鎖クールダウン"
+"options.role.navvy.maxCost" : "初期コスト"
+"options.role.navvy.costForVentSealing" : "ベント封鎖のコスト"
+"options.role.navvy.costForDoorSealing" : "ドア封鎖のコスト"
+"options.role.navvy.removeDuration" : "テープ撤去の所要時間"
+"options.role.navvy.numOfVentRemovalSteps" : "ベントの封鎖あたりのテープ枚数"
+"options.role.navvy.numOfDoorRemovalSteps" : "ドアの封鎖あたりのテープ枚数"
+"options.role.navvy.redundantSealing" : "重ね掛け封鎖"
+
+# Game
+
+
+# UI
+
+"button.label.seal" : "封鎖"
+"button.label.vent.seal.remove" : "テープ撤去"
+
+# Stats
+
+"stats.navvy.sealVent" : "ベントの封鎖回数"
+"stats.navvy.sealDoor" : "ドアの封鎖回数"
+"stats.navvy.removeVent" : "ベントのテープ撤去回数"
+"stats.navvy.removeDoor" : "ドアのテープ撤去回数"
+
+# Titles
+
+"achievement.navvy.common1.title" : "抵抗するぜ、テープで"
+"achievement.navvy.common1.goal" : "通算で10回テープを貼る。"
+"achievement.navvy.common1.flavor" : ""もちろん。""
+"achievement.navvy.common1.splitted.1" : "ぜ、"
+
+"achievement.navvy.common2.title" : "妨害の妨害を妨害"
+"achievement.navvy.common2.goal" : "通算で5回テープをはがす。"
+
+"achievement.navvy.challenge.title" : "風通しのよい職場"
+"achievement.navvy.challenge.goal" : "部屋のドアを全てテープでふさぐ。"
+"achievement.navvy.challenge.cond" : "2つ以上のドアがある部屋に限る"
+"achievement.navvy.challenge.flavor" : ""フラットでオープンな労働環境が、インポスターの早期発見を後押しします。"<br>―「窓を開ける宇宙航行ノウハウ」より"
+"achievement.navvy.challenge.splitted.0" : "風通しのよい"

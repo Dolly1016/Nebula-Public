@@ -11,7 +11,7 @@ using static UnityEngine.GraphicsBuffer;
 namespace Nebula.Roles.Modifier;
 
 
-public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
+public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, IAssignableDocument
 {
     private Obsessional():base("obsessional", "OBS", new(177, 102, 156), [CanWinEvenIfObsessionalDieOption,CanWinEvenIfObsessionalTargetDieOption, ObsessionalSuicideWhenObsessionalTargetDieOption, ImpostorObsessionalObsessesOverOption]) { }
 
@@ -26,6 +26,16 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
 
     static public Obsessional MyRole = new Obsessional();
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => false;
+    bool IAssignableDocument.HasWinCondition => true;
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%SUICIDE%", ObsessionalSuicideWhenObsessionalTargetDieOption ? Language.Translate("role.obsessional.doc.suicide") : "");
+        yield return new("%WIN%", Language.Translate(CanWinEvenIfObsessionalTargetDieOption ? "role.obsessional.winCond.canWinEvenIfTargetDie" : "role.obsessional.winCond.cannotWinIfTargetDie"));
+        yield return new("%SELF%", !CanWinEvenIfObsessionalDieOption ? Language.Translate("role.obsessional.winCond.cannotWinIfSelfDie") : "");
+    }
 
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     [NebulaRPCHolder]

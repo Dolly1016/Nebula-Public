@@ -1,0 +1,8 @@
+# Header
+
+"options.soloFreePlay" : "ソロフリープレイオプション"
+"options.soloFreePlay.detail" : "フリープレイのダミーに関する設定です。"
+
+# Options
+
+"options.soloFreePlay.numOfDummies" : "ダミーのスポーン数"

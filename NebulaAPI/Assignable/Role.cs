@@ -209,6 +209,11 @@ public interface DefinedAssignable : IRoleID
     string GeneralColoredBlurb => GeneralBlurb.Color(UnityColor);
 
     /// <summary>
+    /// 役職の簡単な説明です。ロールドラフトやドキュメント中で表示される、その役職をプレイする当事者に向けたテキストにしてください。
+    /// </summary>
+    string DocumentContent => NebulaAPI.Language.Translate("role." + LocalizedName + ".doc");
+
+    /// <summary>
     /// 役職の色です。
     /// </summary>
     Virial.Color Color { get; }

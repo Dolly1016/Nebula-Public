@@ -14,7 +14,7 @@ using Virial.Text;
 namespace Nebula.Roles.Crewmate;
 
 [NebulaRPCHolder]
-public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCitation, DefinedRole
+public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private record MisfiredExtraDeadInfo(GamePlayer Target) : GamePlayer.ExtraDeadInfo(PlayerStates.Misfired)
     {
@@ -35,10 +35,23 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
 
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.sheriff.ability.kill");
+        if (SealAbilityUntilReportingDeadBodiesOption) yield return new(ButtonEffect.LockedImage, "role.sheriff.ability.seal");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%VENT%", CanKillHidingPlayerOption ? Language.Translate("role.sheriff.ability.kill.vent") : "");
+    }
+
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1,NumOfShotsOption));
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
-    static internal readonly IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sheriff.killCoolDown", CoolDownType.Relative, (10f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
+    static internal readonly IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sheriff.killCoolDown", CoolDownType.Relative, (10f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static internal readonly IntegerConfiguration NumOfShotsOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.numOfShots", (1, 15), 3);
     static private readonly BoolConfiguration CanKillMadmateOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillMadmate", false);
     static private readonly BoolConfiguration CanKillLoversOption = NebulaAPI.Configurations.Configuration("options.role.sheriff.canKillLovers", false);
@@ -51,11 +64,12 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
     static private readonly GameStatsEntry StatsMisshot = NebulaAPI.CreateStatsEntry("stats.sheriff.misshot", GameStatsCategory.Roles, MyRole);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SheriffKillButton.png", 100f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButtonImpl? killButton = null;
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SheriffKillButton.png", 100f);
         static internal Image KillButtonSprite => buttonSprite;
 
         private int leftShots = NumOfShotsOption;

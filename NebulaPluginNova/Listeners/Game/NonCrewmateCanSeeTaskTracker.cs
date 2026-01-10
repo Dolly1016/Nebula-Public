@@ -98,7 +98,7 @@ internal partial class NebulaGameEventListeners
 }
 
 [HarmonyPatch(typeof(ProgressTracker), nameof(ProgressTracker.FixedUpdate))]
-public static class AirshipExileWrapUpAnimatePatch
+public static class UpdateProgressTrackerPatch
 {
     static bool Prefix(ProgressTracker __instance)
     {

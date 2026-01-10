@@ -1,0 +1,22 @@
+# Options
+
+"options.role.guesser.detail" : "ゲッサーは会議中にプレイヤーの役職を推察してキルできます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
+"options.role.guesser.numOfGuess" : "推察可能回数"
+"options.role.guesser.numOfGuessPerMeeting" : "会議ごとの推察可能回数"
+"options.role.guesser.canCallEmergencyMeeting" : "緊急会議ボタンの使用"
+"options.role.guesser.leftGuess" : "のこり推察回数"
+"role.guesser.guessableFilter" : "推察可能フィルター"
+
+# Game
+
+"role.guesser.leftGuess" : "のこり推察回数"
+
+# Game Statictics
+
+"statistics.events.guess" : "推察"
+"statistics.events.missed" : "失敗"
+
+# Status
+
+"state.guessed" : "推察"
+"state.misguessed" : "推察失敗"

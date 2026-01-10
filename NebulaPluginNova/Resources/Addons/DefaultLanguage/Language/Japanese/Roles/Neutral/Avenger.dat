@@ -1,0 +1,64 @@
+# Assignable
+
+"role.avenger.name" : "アヴェンジャー"
+"role.avenger.short" : "ア"
+"role.avenger.blurb" : "愛に生きるということ"
+
+# Document
+
+"role.avenger.doc" : "恋人の命を奪われ、復讐に燃える第三陣営です。"
+"role.avenger.winCond" : "復讐対象をキルし、最後まで生存する。"
+
+# Options
+
+"options.role.avenger.detail" : "ラバーズの相方がキルされると、残されたもう一方はアヴェンジャーに変化します。<br>復讐を成し遂げ、勝利を奪い取りましょう。"
+"options.role.avenger.killCoolDown" : "キルクールダウン"
+"options.role.avenger.canKnowExistanceOfAvenger" : "アヴェンジャーの存在を認識可能"
+"options.role.avenger.canKnowExistanceOfAvenger.off" : "オフ"
+"options.role.avenger.canKnowExistanceOfAvenger.onlyTarget" : "復讐対象のみ"
+"options.role.avenger.canKnowExistanceOfAvenger.on" : "オン"
+"options.role.avenger.targetCanKnowAvenger" : "復讐対象へのアヴェンジャーの位置の通知"
+"options.role.avenger.showAvengerFlashForTarget" : "アヴェンジャー発生通知フラッシュの表示"
+"options.role.avenger.notificationForAvengerInterval" : "復讐対象の位置の通知間隔"
+"options.role.avenger.notificationForTargetInterval" : "アヴェンジャーの位置の通知間隔"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.avenger.killTarget" : "復讐対象のキル回数"
+"stats.avenger.failed" : "返り討ちに遭った回数"
+"stats.avenger.defend" : "キラーとして返り討ちに成功した回数"
+"role.avenger.hudText" : "You became AVENGER."
+
+# Titles
+
+"achievement.avenger.common1.title" : "報復"
+"achievement.avenger.common1.goal" : "復讐対象をキルする。"
+
+"achievement.avenger.common2.title" : "孤独は愛より強し"
+"achievement.avenger.common2.goal" : "復讐対象になったうえでアヴェンジャーをキルする。"
+"achievement.avenger.common2.flavor" : ""笑わせるな。" ―ピザの空き箱の裏側"
+
+"achievement.avenger.another1.title" : "果たせぬ誓い"
+"achievement.avenger.another1.goal" : "復讐対象にキルされる。"
+
+"achievement.avenger.another2.title" : "愛に死ぬ"
+"achievement.avenger.another2.goal" : "復讐対象をキルした上で死亡する。"
+"achievement.avenger.another2.splitted.2" : "死ぬ"
+
+"achievement.avenger.challenge.title" : "アベンジャーズ"
+"achievement.avenger.challenge.goal" : "相方と自身がともにアヴェンジャーになったうえで、アヴェンジャー勝利する。"
+
+# Team
+
+"end.avenger" : "アヴェンジャー%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.avenger.title" : "乗っ取り勝利"
+"document.tip.winCond.avenger" : "復讐相手を自身の手でキルしたうえで生存しながら、何らかの理由で<br>ゲームが終了すると、勝利を乗っ取ります。"

@@ -13,7 +13,7 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedRole
+public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedRole, IAssignableDocument
 {
     public Cannon() : base("cannon", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MarkCoolDownOption, CannonCoolDownOption, NumOfMarksOption, CannonPowerOption, CannonPowerAttenuationOption, CanBlowPlayerUsingConsoleOption])
     {
@@ -35,6 +35,15 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
     static public readonly Cannon MyRole = new();
     static private readonly GameStatsEntry StatsFire = NebulaAPI.CreateStatsEntry("stats.cannon.fire", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsBlow = NebulaAPI.CreateStatsEntry("stats.cannon.players", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.cannon.ability.mark");
+        yield return new(cannonButtonSprite, "role.cannon.ability.cannon");
+    }
+
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class CannonMark : NebulaSyncStandardObject, IGameOperator
@@ -91,6 +100,9 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
     {
         public CannonFireLocalEvent(){ }
     }
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MarkButton.png", 115f);
+    static private Image cannonButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CannonButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped) {
@@ -136,9 +148,6 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
                 new AchievementToken<bool>("cannon.another1", false, (_, _) => cannonAchievementData.Any(data => data.Sum == 0));
             }
         }
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MarkButton.png", 115f);
-        static private Image cannonButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CannonButton.png", 115f);
 
         private List<NebulaSyncStandardObject> Marks = [];
         private CannonMapLayer mapLayer = null!;

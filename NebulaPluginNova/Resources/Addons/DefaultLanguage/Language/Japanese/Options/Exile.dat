@@ -1,0 +1,22 @@
+# Header
+
+"options.exile" : "追放オプション"
+"options.exile.detail" : "プレイヤー追放に関する設定です。"
+
+# Groups
+
+# Options
+
+"options.exile.group.confirmEject" : "「追放数を確認」の詳細設定"
+"options.exile.confirmEjectCondition" : "残人数の表示条件"
+"options.exile.confirmEjectTarget" : "残人数の計上対象"
+"options.exile.confirmEject.all" : "全員"
+"options.exile.confirmEject.impostors" : "インポスター"
+"options.exile.confirmEject.killers" : "キル陣営"
+"options.exile.confirmEject.nonCrewmates" : "非クルーメイト"
+"exile.confirmEject.impostor.s" : "インポスターがあと%NUM%人残っている。"
+"exile.confirmEject.impostor.p" : "インポスターがあと%NUM%人残っている。"
+"exile.confirmEject.killer.s" : "キル陣営があと%NUM%人残っている。"
+"exile.confirmEject.killer.p" : "キル陣営があと%NUM%人残っている。"
+"exile.confirmEject.nonCrewmate.s" : "非クルーメイトが%NUM%人残っている。"
+"exile.confirmEject.nonCrewmate.p" : "非クルーメイトが%NUM%人残っている。"

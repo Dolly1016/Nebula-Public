@@ -264,7 +264,7 @@ public class UbiquitousMapLayer : MonoBehaviour
 }
 
 [NebulaRPCHolder]
-public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, DefinedRole
+public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, DefinedRole, IAssignableDocument
 {
     private Ubiquitous(): base("ubiquitous", new(56,155,223), RoleCategory.CrewmateRole, Crewmate.MyTeam, [droneCoolDownOption, droneDurationOption, droneMicrophoneRadiousOption, droneDetectionRadiousOption, doorHackCoolDownOption, doorHackRadiousOption])
     {
@@ -289,6 +289,19 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
 
     static public readonly Ubiquitous MyRole = new();
     static private readonly GameStatsEntry StatsDrones = NebulaAPI.CreateStatsEntry("stats.ubiquitous.drones", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(droneButtonSprite, "role.ubiquitous.ability.drone");
+        yield return new(callBackButtonSprite, "role.ubiquitous.ability.callBack");
+        yield return new(hackButtonSprite, "role.ubiquitous.ability.doorHack");
+    }
+
+    static private readonly Image droneButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneButton.png", 115f);
+    static private readonly Image callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
+    static private readonly Image hackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneHackButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
 
@@ -296,10 +309,6 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
         ShowPlayersMapLayer? mapLayer = null;
         List<Vector2> dronePos = new();
         AchievementToken<bool> challengeToken = null!;
-
-        static private readonly Image droneButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneButton.png", 115f);
-        static private readonly Image callBackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneCallBackButton.png", 115f);
-        static private readonly Image hackButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DroneHackButton.png", 115f);
 
         [Local]
         void OnOpenNormalMap(MapOpenNormalEvent ev)

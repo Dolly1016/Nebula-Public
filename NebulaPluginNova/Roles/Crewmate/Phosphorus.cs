@@ -9,7 +9,7 @@ using Virial.Helpers;
 namespace Nebula.Roles.Crewmate;
 
 [NebulaRPCHolder]
-public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, DefinedRole
+public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, DefinedRole, IAssignableDocument
 {
     private Phosphorus():base("phosphorus", new(249,188,81), RoleCategory.CrewmateRole, Crewmate.MyTeam, [NumOfLampsOption, PlaceCoolDownOption, LampCoolDownOption, LampDurationOption, LampStrengthOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
@@ -47,11 +47,18 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
         }
     }
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(placeButtonSprite, "role.phosphorus.ability.place");
+        yield return new(lanternButtonSprite, "role.phosphorus.ability.lantern");
+    }
+
+    static private readonly Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternPlaceButton.png", 115f);
+    static private readonly Image lanternButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
-        static private readonly Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternPlaceButton.png", 115f);
-        static private readonly Image lanternButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LanternButton.png", 115f);
 
         private int[]? globalLanterns = null;
         List<NebulaSyncStandardObject> localLanterns = null!;

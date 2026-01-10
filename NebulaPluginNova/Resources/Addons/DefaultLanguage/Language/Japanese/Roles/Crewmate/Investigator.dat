@@ -1,0 +1,59 @@
+# Assignable
+
+"role.investigator.name" : "インヴェスティゲーター"
+"role.investigator.short" : "イ"
+"role.investigator.blurb" : "決して見逃さない"
+
+# Document
+
+"role.investigator.doc" : "犯行現場に残された足跡を調査して情報を手に入れるクルーメイトです。"
+"role.investigator.ability.title" : "固有能力 "真実の追究者""
+"role.investigator.ability.main" : ""
+"role.investigator.ability.investigate" : "<title>調査</title>その場で調査を始めます。調査中は視界が変わり、足跡が見えるようになります。<br>足跡に近づくと足跡の調査を開始します。"
+
+# Options
+
+"options.role.investigator.detail" : "インヴェスティゲーターは犯行現場に残された足跡を追って<br>犯人の情報を探るクルーメイトです。"
+"options.role.investigator.investigateCooldown" : "調査クールダウン"
+"options.role.investigator.investigateDuration" : "調査効果時間"
+"options.role.investigator.investigateSpeed" : "足跡の調査に要する時間"
+"options.role.investigator.investigateSpeed.detail" : "足跡の詳細を調べるには少し時間を要します。<br>値を大きく設定するほど調査はより早く済むようになります。"
+"options.role.investigator.investigateEyesight" : "調査中の視野"
+"options.role.investigator.investigateEyesight.detail" : "調査中の視野が狭くなるほど<br>足跡の調査はより困難になります。"
+"options.role.investigator.footprintDuration" : "足跡を残す時間"
+"options.role.investigator.footprintDuration.detail" : "キラーがキルから何秒経つまで足跡を残し続けるか設定します。"
+
+# Game
+
+"role.investigator.overlay.title.unchecked" : "未調査の足跡"
+"role.investigator.overlay.title.checked" : "%ROOM%の足跡"
+"role.investigator.overlay.notFound" : "調査しています...<br>犯行直後の足跡ほどより早く調査が進行します。"
+"role.investigator.overlay.fastFind" : "犯行から足跡の調査まで、会議を挟んでいません。"
+"role.investigator.overlay.reportedImmediately" : "犯行から間もなく緊急会議が始まったようです。"
+"role.investigator.overlay.elapsed" : "緊急会議は犯行から約%ELAPSED%秒後に始まったようです。"
+"role.investigator.overlay.killer" : "また、これは%TEAM%による犯行のようです。"
+
+# UI
+
+"button.label.investigate" : "調査"
+
+# Stats
+
+"stats.investigator.found" : "足跡を調査した回数"
+
+# Titles
+
+"achievement.investigator.common1.title" : "なるほど"
+"achievement.investigator.common1.goal" : "通算で10回、足跡を調査する。"
+"achievement.investigator.common1.flavor" : ""まだできることがある。為すべきことを為すまでだ。" ―署名のない回顧録"
+
+"achievement.investigator.another1.title" : "SNOBBISM"
+"achievement.investigator.another1.goal" : "調査中、足跡の近くで死亡する。"
+
+"achievement.investigator.another2.title" : "COLD CASE"
+"achievement.investigator.another2.goal" : "調査して発見した足跡の犯人を<br>誰一人追放できないままゲームが終了する。"
+
+"achievement.investigator.challenge.title" : "真実の追究者"
+"achievement.investigator.challenge.goal" : "足跡を発見した直後の会議で犯人を追放する。"
+"achievement.investigator.challenge.splitted.0" : "真実の"
+

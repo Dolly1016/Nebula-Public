@@ -1,0 +1,57 @@
+# Assignable
+
+"role.justice.name" : "ジャスティス"
+"role.justice.short" : "ジャ"
+"role.justice.blurb" : "審判の時間"
+
+# Document
+
+"role.justice.doc" : "2人のプレイヤーを<b>審判の会議</b>にかけられるクルーメイトです。"
+"role.justice.ability.title" : "固有能力 "審判の会議""
+"role.justice.ability.main" : "会議中、<var>%NUM%</var>人のプレイヤーを選択して%PICKME%<b>審判の会議</b>を始められます。<br>審判の会議では、ジャスティスに選ばれた2人のいずれかにのみ投票できます。<br>同数投票になった場合は、<b>2人とも追放</b>されます。"
+"role.justice.ability.pickJustice" : "、<var>自身とともに</var>"
+"role.justice.ability.meeting" : "<title>選択</title>会議中、審判の会議にかける対象を選びます。"
+"role.justice.tips" : "・この役職は、<color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>コラボ役職 (元役職: 天秤)です。"
+
+# Options
+
+"options.role.justice.detail" : "ジャスティスは二人のプレイヤーを投票の対象に吊し上げ<br>いずれか、あるいは両方を追放するよう仕向けることができます。"
+"options.role.justice.putJusticeOnTheBalance" : "ジャスティス自身を審判に掛ける"
+"options.role.justice.justiceMeetingTime" : "ジャスティス会議時間"
+
+# Game
+
+"game.meeting.justiceMeeting" : "今、心を決めよ！"
+
+# UI
+
+
+# Stats
+
+"stats.justice.exiled" : "ジャスティス会議で追放した人数"
+"stats.justice.nonCrewmates" : "ジャスティス会議で追放した非クルーの人数"
+
+# Titles
+
+"achievement.justice.common1.title" : "審判の時間"
+"achievement.justice.common1.goal" : "審判の会議を始める。"
+"achievement.justice.common1.flavor" : ""突如として二人だけが秤に乗せられたんだ！" ―目撃者の証言"
+"achievement.justice.common1.splitted.0" : "審判の"
+
+"achievement.justice.common2.title" : "義心"
+"achievement.justice.common2.goal" : "インポスターを審判にかける。"
+"achievement.justice.common2.flavor" : ""怪しいと思ってたんだ。" ―破られた議事録より"
+
+"achievement.justice.another1.title" : "深まる疑心"
+"achievement.justice.another1.goal" : "審判の会議でジャスティス自身が追放される。"
+"achievement.justice.another1.flavor" : ""彼は本当は無実だったんではないだろうか？" ―薄汚れた議事録"
+"achievement.justice.another1.splitted.0" : "深まる"
+
+"achievement.justice.common3.title" : "オーバージャスティス"
+"achievement.justice.common3.goal" : "同数投票によって、二人を同時に追放する。"
+"achievement.justice.common3.flavor" : ""そんな、決められないからってどっちも追放するだなんて！" ―遥かなる雲海の底から"
+
+"achievement.justice.challenge.title" : "悪の均衡"
+"achievement.justice.challenge.goal" : "インポスター2人を審判にかけ、その両方を同時に追放する。"
+"achievement.justice.challenge.flavor" : ""この天秤は釣り合いを示した。すなわち......""
+"achievement.justice.challenge.splitted.0" : "悪の"

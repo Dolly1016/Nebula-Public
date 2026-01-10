@@ -17,7 +17,7 @@ using static UnityEngine.GraphicsBuffer;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedRole
+public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedRole, IAssignableDocument
 {
     private Raider() : base("raider", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [ThrowCoolDownOption, AxeSizeOption, AxeSpeedOption,CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
@@ -25,12 +25,12 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
 
         MetaAbility.RegisterCircle(new("role.raider.axeSize", () => AxeSizeOption * 0.4f, () => null, UnityColor));
 
-        GameActionTypes.RaiderEquippingAction = new("raider.equipping", this, isEquippingAction: true);
-        GameActionTypes.RaiderThrowingAction = new("raider.throwing", this, isPhysicalAction: true);
+        GameActionTypes.RaiderEquippingAction = new("raider.equip", this, isEquippingAction: true);
+        GameActionTypes.RaiderThrowingAction = new("raider.throw", this, isPhysicalAction: true);
     }
 
 
-    static private IRelativeCoolDownConfiguration ThrowCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.raider.throwCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
+    static private IRelativeCooldownConfiguration ThrowCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.raider.throwCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
     static private FloatConfiguration AxeSizeOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration AxeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSpeed", (0.5f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.raider.canKillImpostor", false);
@@ -41,6 +41,14 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
     static private GameStatsEntry StatsThrown = NebulaAPI.CreateStatsEntry("stats.raider.thrown", GameStatsCategory.Roles, MyRole);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.raider.ability.equip");
+        yield return new(ModAbilityButtonImpl.VanillaKillImage, "role.raider.ability.kill");
+    }
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class RaiderAxe : NebulaSyncStandardObject, IGameOperator
@@ -235,11 +243,10 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
         
     }
 
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AxeButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButton? equipButton = null;
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AxeButton.png", 115f);
         
         public RaiderAxe? MyAxe = null;
         bool IPlayerAbility.HideKillButton => !(equipButton?.IsBroken ?? false);

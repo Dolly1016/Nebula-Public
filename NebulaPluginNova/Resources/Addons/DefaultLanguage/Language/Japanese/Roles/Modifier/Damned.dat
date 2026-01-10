@@ -1,0 +1,69 @@
+# Assignable
+
+"role.damned.name" : "ダムド"
+"role.damnedImpostor.name" : "ダムド"
+"role.damned.short" : "ダ"
+"role.damnedImpostor.short" : "ダ"
+
+# Document
+
+"role.damned.doc" : "自覚できないモディファイアです。<br>一度だけキルを防ぎ、呪いを発動させます。"
+
+# Options
+
+"options.role.damned.detail" : "ダムドは自覚できないモディファイアです。<br>キルを一度だけ防ぐことができ、<b>呪い</b>が設定によって様々な効果をもたらします。"
+
+# Game
+
+"role.damned.prefix" : "ダムド"
+"role.damned.generalBlurb" : "呪われし者"
+"options.role.damned.takeOverRoleOfKiller" : "キラーの役職を乗っ取る"
+"options.role.damned.damnedMurderMyKiller" : "呪いがキラーをキルする"
+"options.role.damned.killDelay" : "呪いによるキルの遅延"
+"options.role.damned.damnedAction" : "呪いアクション"
+"options.role.damned.damnedAction.impostor" : "インポスター昇格"
+"options.role.damned.damnedAction.madmate" : "マッドメイト昇格"
+"options.role.damned.damnedAction.takeOver" : "キラー役職乗っ取り"
+"options.role.damned.canBecomeAwareOfDamned" : "ダムドを自覚可能"
+"options.role.damned.taskProgressRequiredForSelfAdmission" : "自覚に必要なタスク数"
+"options.role.damned.group.task" : "自覚に関する設定"
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.curse" : "呪詛"
+
+# Status
+
+"state.cursed" : "呪殺"
+
+# Stats
+
+
+# Titles
+
+"achievement.damned.common1.title" : "伝播する邪悪"
+"achievement.damned.common1.goal" : "呪詛によってクルーメイト陣営からインポスター陣営に変化する。"
+
+"achievement.damned.common2.title" : "呪われし者"
+"achievement.damned.common2.goal" : "呪詛によってインポスター役職のダムドに変化する。"
+
+"achievement.damned.common3.title" : "赤色のリバーシ"
+"achievement.damned.common3.goal" : "呪詛によって第三陣営からインポスター陣営に変化する。"
+"achievement.damned.common3.flavor" : ""見誤るな。立場が変わっても敵であることに変わりはない。" ―破られた議事録より"
+
+"achievement.damned.another1.title" : "裏切りの代償"
+"achievement.damned.another1.goal" : "インポスターから非インポスター陣営に寝返り、<br>その後、追放、推察、インポスターによるキルのいずれかによって死亡する。"
+
+"achievement.damned.challenge.title" : "縁切りの呪詛"
+"achievement.damned.challenge.goal" : "呪詛によってインポスター陣営からクルーメイト陣営に寝返り、<br>クルーメイト勝利する。"
+"achievement.damned.challenge.flavor" : ""......" ―呪われた勝利に関する運命学的な研究のノート"
+"achievement.damned.challenge.splitted.2" : "呪詛"
+
+"achievement.combination.2.damned.avenger.hard.title" : "惨劇のカーテンコール"
+"achievement.combination.2.damned.avenger.hard.goal" : "呪われた復讐対象をキルし、その役職を引き継いで勝利する。<br><br><size=75%><color=#aaaaaa>復讐対象がダムドであった場合、呪詛が変容する。<br>ダムドは死亡し、役職変化の呪いはアヴェンジャーに対して発動する。</color></size>"
+"achievement.combination.2.damned.avenger.hard.cond" : "元のラバーズの相方は敗北すること"
+"achievement.combination.2.damned.avenger.hard.flavor" : ""ゲームを続けようじゃないか。"<br>不敵な笑みに覗く面影を、彼は知らない。"
+"achievement.combination.2.damned.avenger.hard.splitted.2" : "カーテンコール"

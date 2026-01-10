@@ -1,0 +1,15 @@
+# Tutorial
+
+"tutorial.guide.canClose" : "クリックでチュートリアルを閉じられます。"
+"tutorial.guide.cannotClose" : "カーソルを合わせている間、チュートリアルは表示されつづけます。"
+"tutorial.variations.subAction" : "キー入力によってのみ発動できる<b>サブアクション</b>があります。<br>キーの表示にカーソルを合わせると、アクションの詳細が確認できます。"
+"tutorial.variations.helpInGame.title" : "ゲーム内ヘルプ"
+"tutorial.variations.helpInGame.caption" : "%KEY%キーを押すとヘルプ画面が開きます。<br>自身の能力や勝利条件、配役や称号を確認しましょう。"
+"tutorial.variations.meetingTool.title" : "盤面整理アシスト"
+"tutorial.variations.meetingTool.caption" : "会議中のミニマップはプレイヤーのアイコンを置いたり線を描けます。<br>まずはマップ上でどこかクリックしてみましょう！"
+"tutorial.variations.stamp.title" : "スタンプ"
+"tutorial.variations.stamp.caption" : "%KEY%キーでスタンプを送れます！(生存時のタスクフェイズ中は使用不可)<br>使用できるスタンプはヘルプ画面で設定できます。"
+"tutorial.variations.ambienceOnMeeting.title" : "会議中の環境音ミュート"
+"tutorial.variations.ambienceOnMeeting.caption" : "会議中にのみ環境音をミュートしたい場合は「会議中の環境音ミュート」を有効にすると便利です。<br>この設定は歯車マークのボタンから開ける設定のNoSタブ内からアクセスできます。"
+"tutorial.variations.meetingTool.line.title" : "全プレイヤーのアイコン作成ショートカット"
+"tutorial.variations.meetingTool.line.caption" : "ミニマップに線を描き、マウスを離す<b>前に右クリック</b>すると<br>ゲームに参加している全プレイヤーのアイコンを作成できます。"

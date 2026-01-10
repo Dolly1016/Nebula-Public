@@ -11,7 +11,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Doctor.UsurpedAbility>, DefinedRole
+public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Doctor.UsurpedAbility>, DefinedRole, IAssignableDocument
 {
 
     private Doctor() : base("doctor", new(128,255,221),RoleCategory.CrewmateRole, Crewmate.MyTeam, [PortableVitalsChargeOption, MaxPortableVitalsChargeOption, ChargesPerTasksOption]) { }
@@ -25,6 +25,13 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
     static private readonly FloatConfiguration ChargesPerTasksOption = NebulaAPI.Configurations.Configuration("options.role.doctor.chargesPerTasks", (0.5f, 10f, 0.5f), 1f, FloatConfigurationDecorator.Second);
 
     static public readonly Doctor MyRole = new();
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(GetButtonImage(), "role.doctor.ability.vital");
+    }
+
 
     internal static VitalsMinigame OpenSpecialVitalsMinigame()
     {
@@ -47,14 +54,14 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
         return vitalsMinigame;
     }
 
+    static private WrapSpriteLoader GetButtonImage() => new WrapSpriteLoader(() => HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image);
     public class UsurpedAbility : AbstractPlayerUsurpableAbility, IGameOperator, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         public UsurpedAbility(GamePlayer player, bool isUsurped) : base(player, isUsurped) {
             if (AmOwner)
             {
-                var sprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image;
-                var vitalButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "vital", new WrapSpriteLoader(() => sprite));
+                var vitalButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "vital", GetButtonImage());
                 vitalButton.OnClick = (button) =>
                 {
                     VitalsMinigame? vitalsMinigame = OpenSpecialVitalsMinigame();
@@ -110,8 +117,7 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
 
             if (AmOwner)
             {
-                var sprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image;
-                var vitalButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "vital", new WrapSpriteLoader(() => sprite), _ => this.vitalTimer > 0f, null);
+                var vitalButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, 0f, "vital", GetButtonImage(), _ => this.vitalTimer > 0f, null);
                 vitalButton.OnClick = (button) =>
                 {
                     VitalsMinigame? vitalsMinigame = OpenSpecialVitalsMinigame();

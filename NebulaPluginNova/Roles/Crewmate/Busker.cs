@@ -11,7 +11,7 @@ using Virial.Helpers;
 namespace Nebula.Roles.Crewmate;
 
 
-public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedRole
+public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedRole, IAssignableDocument
 {
     private Busker() : base("busker", new(255, 172, 117), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PseudocideCoolDownOption, PseudocideDurationOption, HidePseudocideFromVitalsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
@@ -36,11 +36,21 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable is not Lover;
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(pseudocideButtonSprite, "role.busker.ability.pseudocide");
+        yield return new(reviveButtonSprite, "role.busker.ability.revive");
+    }
+
+
+
+    static private Image pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
+    static private Image reviveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskReviveButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
-        static private Image pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
-        static private Image reviveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskReviveButton.png", 115f);
 
         AchievementToken<(bool isCleared,float lastRevive)>? acTokenChallenge;
 

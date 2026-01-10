@@ -11,7 +11,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Stirrer : DefinedRoleTemplate, DefinedRole
+public class Stirrer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     private Stirrer() : base("stirrer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [StirCoolDownOption,SabotageChargeOption, SabotageMaxChargeOption,SabotageCoolDownOption,SabotageIntervalOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
@@ -28,12 +28,22 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
     static public Stirrer MyRole = new Stirrer();
     static private GameStatsEntry StatsStir = NebulaAPI.CreateStatsEntry("stats.stirrer.stir", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsSabotage = NebulaAPI.CreateStatsEntry("stats.stirrer.sabo", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(stirButtonImage, "role.stirrer.ability.stir");
+        yield return new(sabotageButtonImage, "role.stirrer.ability.fakeSabo");
+    }
+
+
+    static private Image stirButtonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.StirButton.png", 115f);
+    static private Image sabotageButtonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.FakeSaboButton.png", 115f);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
-        
-        static public Image StirButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.StirButton.png", 115f);
-        static public Image SabotageButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FakeSaboButton.png", 115f);
+       
         
         public Instance(GamePlayer player) : base(player)
         {
@@ -49,7 +59,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
             {
                 var sampleTracker = NebulaAPI.Modules.KillTracker(this, MyPlayer);
                 var stirButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, sampleTracker, new PlayerInteractParameter(RealPlayerOnly: true), Virial.Compat.VirtualKeyInput.Ability,"stirrer.stir",
-                    StirCoolDownOption, "stir", StirButtonSprite,
+                    StirCoolDownOption, "stir", stirButtonImage,
                     (p, button) =>
                     {
                         int charge = 0;
@@ -62,7 +72,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole
                     _ => sampleTracker.CurrentTarget != null && (!sabotageChargeMap.TryGetValue(sampleTracker.CurrentTarget.PlayerId, out int charge) || charge < SabotageMaxChargeOption));
 
                 var sabotageButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility,"stirrer.fakeSabo",
-                    Mathf.Max(SabotageIntervalOption, SabotageCoolDownOption), "fakeSabotage", SabotageButtonSprite,
+                    Mathf.Max(SabotageIntervalOption, SabotageCoolDownOption), "fakeSabotage", sabotageButtonImage,
                     _ => sabotageChargeMap.Any(entry => entry.Value > 0) && PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null
                     );
                 sabotageButton.CoolDownTimer!.Start(SabotageCoolDownOption);

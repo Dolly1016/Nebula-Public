@@ -1,0 +1,55 @@
+# Assignable
+
+"role.morphing.name" : "モーフィング"
+"role.morphing.short" : "モ"
+"role.morphing.blurb" : "変身して、キルをせよ"
+
+# Document
+
+"role.morphing.doc" : "プレイヤーの見た目を採取して変身できるインポスターです。"
+"role.morphing.ability.title" : "固有能力 "モーフィング""
+"role.morphing.ability.main" : ""
+"role.morphing.ability.sample" : "<title>採取</title>プレイヤーの現在の見た目を採取します。<var>%SAMPLE%</var>"
+"role.morphing.ability.morph" : "<title>変身</title>採取した見た目に変身します。<br>効果時間が終了するか能力発動中にもう一度能力を発動すると、元の見た目に戻ります。"
+"role.morphing.ability.sample.loseSample" : "採取した見た目は会議を挟むと消失します。"
+"role.morphing.ability.sample.keepSample" : "採取した見た目は会議を跨いで持ち越せます。"
+
+# Options
+
+"options.role.morphing.detail" : "モーフィングはプレイヤーの見た目を採取し、その見た目に変身します。"
+"options.role.morphing.sampleCoolDown" : "サンプルクールダウン"
+"options.role.morphing.morphCoolDown" : "変身クールダウン"
+"options.role.morphing.morphDuration" : "変身効果時間"
+"options.role.morphing.loseSampleOnMeeting" : "緊急会議でのサンプル放棄"
+
+# Game
+
+
+# UI
+
+"button.label.morph" : "変身"
+"button.label.sample" : "採取"
+
+# Stats
+
+"stats.morphing.sample" : "サンプルの採取回数"
+"stats.morphing.morph" : "変身回数"
+"stats.morphing.paint" : "ペイント回数"
+
+# Titles
+
+"achievement.morphing.common1.title" : "浮つくアリバイ"
+"achievement.morphing.common1.goal" : "サンプルを採取し、変身する。"
+"achievement.morphing.common1.cond" : "イリュージョナーでもクリア可能"
+"achievement.morphing.common1.splitted.0" : "浮つく"
+
+"achievement.morphing.another1.title" : "デスマスク"
+"achievement.morphing.another1.goal" : "サンプルと同じ見た目の相手をキルする。"
+
+"achievement.morphing.another2.title" : "ドッペルゲンガー邂逅"
+"achievement.morphing.another2.goal" : "変身中に同じ見た目のプレイヤーと至近距離ですれ違う。"
+"achievement.morphing.another2.flavor" : ""...(暫時の間)..." ―監視カメラの映像から"
+
+"achievement.morphing.challenge.title" : "所在不明の罪業"
+"achievement.morphing.challenge.goal" : "変身状態でキルしかつ、会議時に所持しているサンプル元の<br>プレイヤーが追放される。"
+"achievement.morphing.challenge.splitted.0" : "所在不明の"

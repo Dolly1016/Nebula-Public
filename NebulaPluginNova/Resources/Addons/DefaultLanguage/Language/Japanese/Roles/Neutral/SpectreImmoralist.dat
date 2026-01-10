@@ -1,0 +1,60 @@
+# Assignable
+
+"role.spectreImmoralist.name" : "背徳者"
+"role.spectreImmoralist.short" : "背"
+"role.spectreImmoralist.blurb" : "道ならぬ道をゆく"
+
+# Document
+
+"role.spectreImmoralist.doc" : "妖狐の仲間です。お揚げを奉納して、妖狐を手助けできます。"
+"role.spectre.immoralist.winCond" : "親の妖狐が勝利する。(親の妖狐が死亡すると後を追って死亡する。)"
+"role.spectre.immoralist.ability.title" : "固有能力 "妖の信徒""
+"role.spectre.immoralist.ability.main" : "生存中と死後で異なる能力を使用できます。妖狐の勝利のために能力を活用しましょう。"
+"role.spectre.immoralist.ability.alive" : "<title>奉納</title>生きている間は空の皿にお揚げを奉納できます。<br>空の皿にインタラクトして、その場で少し待つとお揚げが出現します。"
+"role.spectre.immoralist.ability.dead" : "<title>消去</title>死後は皿に乗ったお揚げを消し去れます。<br>お揚げを消し去りすぎると妖狐が飢えてしまいやすくなる点に注意が必要です。"
+"role.spectre.immoralist.ability.suicide" : "<title>自決</title>背徳者は自由なタイミングで自決できます。"
+
+# Options
+
+"options.role.spectreImmoralist.detail" : "背徳者は妖狐の仲間です。<br>背徳者はお揚げをお供えしたり、消し去ることができます。"
+"options.role.spectreImmoralist.respawnCooldown" : "お供えクールダウン"
+"options.role.spectreImmoralist.respawnDuration" : "お供え所要時間"
+"options.role.spectreImmoralist.showDishesOnMap" : "マップ上でのお揚げの表示"
+"options.role.spectreImmoralist.canSuicide" : "自決可能"
+"options.role.spectreImmoralist.showKillFlash" : "キルフラッシュの表示"
+
+# Game
+
+
+# UI
+
+"button.label.immoralist.place" : "奉納"
+"button.label.immoralist.remove" : "消去"
+"button.label.immoralist.suicide" : "自決"
+
+# Stats
+
+"stats.spectreImmoralist.respawnFries" : "お揚げをお供えした回数"
+"stats.spectreImmoralist.removeFries" : "お揚げを消し去った回数"
+"stats.spectreImmoralist.suicide" : "自決した回数"
+
+# Titles
+
+"achievement.spectreImmoralist.common1.title" : "狐施行"
+"achievement.spectreImmoralist.common1.goal" : "通算で10回お揚げを奉納する。"
+
+"achievement.spectreImmoralist.common2.title" : "狐憑き"
+"achievement.spectreImmoralist.common2.goal" : "通算で10回お揚げを消し去る。"
+
+"achievement.spectreImmoralist.common3.title" : "よしよし"
+"achievement.spectreImmoralist.common3.goal" : "妖狐のすぐそばでお揚げを奉納する。"
+"achievement.spectreImmoralist.common3.flavor" : "※ 信心ゆえです。餌付け現場ではないです。"
+
+"achievement.spectreImmoralist.hard1.title" : "修祓の火"
+"achievement.spectreImmoralist.hard1.goal" : "背徳者から別の役職に変化し、妖狐が死亡したうえで<br>妖狐勝利以外の勝利で勝利する。"
+"achievement.spectreImmoralist.hard1.flavor" : "進めど地獄、退けど地獄。<br>無量劫の時を経て、その先に希望があらんことを。"
+"achievement.spectreImmoralist.hard1.splitted.2" : "火"
+
+"achievement.spectreImmoralist.challenge.title" : "不惜身命"
+"achievement.spectreImmoralist.challenge.goal" : "自身が追放、あるいは自殺した直後に、<br>人数都合の勝利を乗っ取って妖狐勝利する。"
+"achievement.spectreImmoralist.challenge.flavor" : ""命という名の足枷" ―破られた議事録より"

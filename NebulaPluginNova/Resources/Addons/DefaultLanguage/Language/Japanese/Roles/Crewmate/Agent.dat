@@ -1,0 +1,61 @@
+# Assignable
+
+"role.agent.name" : "エージェント"
+"role.agent.short" : "エ"
+"role.agent.blurb" : "もっと！タスクをこなせ"
+
+# Document
+
+"role.agent.doc" : "他人のタスクを肩代わりできるクルーメイトです。"
+"role.agent.ability.title" : "固有能力 "頼もしい代行者""
+"role.agent.ability.main" : "より多くのタスクをこなして、クルーメイトをタスク勝利に導きます。"
+"role.agent.ability.agent" : "<title>代行</title>保持しているすべてのタスクをクリアすると発動できます。<br>他人のタスクノルマを肩代わりできる<b>追加タスク</b>を獲得します。"
+
+# Options
+
+"options.role.agent.detail" : "ノルマとして課されている以上のタスクをこなせます。<br>追加のタスクは他のクルーメイトのタスクを肩代わりします。"
+"options.role.agent.numOfExemptedTasks" : "タスクの免除数"
+"options.role.agent.numOfExemptedTasks.detail" : "指定した数だけ、エージェントの総タスク数が少なくなります。<br>総タスクが少なくなれば、追加タスクを手に入れるのにかかる時間は短縮します。"
+"options.role.agent.numOfExtraTasks" : "追加タスク数"
+"options.role.agent.numOfExtraTasks.detail" : "一度のタスク代行で手に入れられるタスクの数を設定します。<br>死亡後はタスク代行による<b>さらなる</b>タスクの入手はできません。"
+"options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent" : "先んじてタスクを完遂されると自殺する"
+"options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent.detail" : "他生存者がエージェントより早くタスクを全て完了させるとエージェントはその場で死亡します。<br>エージェントが全タスクをこなしている、あるいは既に追加タスクを獲得している場合は自殺しません。"
+
+# Game
+
+# UI
+
+"button.label.agent" : "代行"
+
+# Game Statictics
+
+"statistics.events.layoff" : "解雇"
+
+# Status
+
+"state.layoff" : "解雇"
+
+# Stats
+
+"stats.agent.agent" : "タスクの代行回数"
+
+# Titles
+
+"achievement.agent.common1.title" : "見えない献身"
+"achievement.agent.common1.goal" : "代行タスクをこなして勝利する。"
+"achievement.agent.common1.cond" : "タスク免除数: 3以下+タスク総量: 8以上"
+"achievement.agent.common1.splitted.0" : "見えない"
+
+"achievement.agent.another1.title" : "レイオフ"
+"achievement.agent.another1.goal" : "タスクを先んじて完遂され、自滅する。"
+"achievement.agent.another1.flavor" : ""お前はいつもこうだ。" ―匿名希望の随想より、抜粋"
+
+"achievement.agent.common2.title" : "仕事人の妙技"
+"achievement.agent.common2.goal" : "ベント移動を挟んで、直前のタスククリアから15秒以内に次のタスクをこなす。"
+"achievement.agent.common2.splitted.0" : "仕事人の"
+
+"achievement.agent.challenge.title" : "パーフェクトクルーメイト"
+"achievement.agent.challenge.goal" : "代行タスクを5つ以上こなしてタスク勝利する。"
+"achievement.agent.challenge.cond" : "タスク免除数: 3以下"
+"achievement.agent.challenge.splitted.0" : "パーフェクト"
+"achievement.agent.challenge.splitted.2" : "クルーメイト"

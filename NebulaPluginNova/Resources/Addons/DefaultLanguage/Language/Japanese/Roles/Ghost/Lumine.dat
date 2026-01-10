@@ -1,0 +1,35 @@
+# Assignable
+
+"role.lumine.name" : "ルーミン"
+"role.lumine.blurb" : "いのちの燈火"
+"role.lumine.short" : "ル"
+
+# Document
+
+"role.lumine.doc" : "一度だけ、その場に明かりを灯せます。"
+
+# Options
+
+"options.role.lumine.detail" : "ルーミンはゲーム中一度だけ、自身の位置に明かりを灯せます。"
+"options.role.lumine.lightSize" : "光の大きさ"
+"options.role.lumine.lightDuration" : "光の有効時間"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.lumine.common1.title" : "霊界トランス"
+"achievement.lumine.common1.goal" : "ルーミンの光で死体を照らす。"
+"achievement.lumine.common1.cond" : ""
+"achievement.lumine.common1.splitted.2" : "トランス"
+
+"achievement.lumine.another1.title" : "未練"
+"achievement.lumine.another1.goal" : "ルーミンの光で自身の死体を照らす。"
+"achievement.lumine.another1.cond" : ""

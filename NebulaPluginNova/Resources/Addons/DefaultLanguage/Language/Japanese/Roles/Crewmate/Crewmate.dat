@@ -1,0 +1,39 @@
+# Assignable
+
+"role.crewmate.name" : "クルーメイト"
+"role.crewmate.short" : "クルー"
+"role.crewmate.blurb" : "タスクをせよ"
+
+# Document
+
+"role.crewmate.doc" : "特殊な能力を持たない普通のクルーメイトです。"
+
+# Options
+
+"options.role.crewmate.detail" : "特殊な能力を持たない素のクルーメイトです。<br>割り当てる役職が他に無い場合にもこれが割り当てられます。"
+
+# Game
+
+# UI
+
+# Status
+
+"state.alive" : "生存"
+"state.dead" : "死亡"
+"state.disconnected" : "退出"
+"state.exiled" : "追放"
+"state.suicide" : "自殺"
+
+# Stats
+
+# Titles
+
+# Team
+
+"teams.crewmate" : "クルーメイト"
+"end.crewmate" : "クルーメイト%EXTRA%勝利"
+
+"document.tip.winCond.crewmate.task.title" : "タスク勝利"
+"document.tip.winCond.crewmate.task" : "全タスクノルマを達成すると勝利します。"
+"document.tip.winCond.crewmate.exile.title" : "追放勝利"
+"document.tip.winCond.crewmate.exile" : "全%IMPOSTOR%陣営、%JACKAL%陣営プレイヤーを追放すると勝利します。"

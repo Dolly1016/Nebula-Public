@@ -1,0 +1,69 @@
+# Assignable
+
+"role.berserker.name" : "バーサーカー"
+"role.berserker.short" : "バ"
+"role.berserker.blurb" : "[FATAL ERROR] 制御不能"
+"role.berserker.hint" : "暴走して大量キルを決めよう！"
+
+# Document
+
+"role.berserker.doc" : "暴走して大量のキルを一気に決める短期決戦型のインポスターです。"
+"role.berserker.ability.title" : "固有能力 "忘我の咆哮""
+"role.berserker.ability.main" : "インポスターの本性を顕し、姿を変えて<b>暴走</b>します。暴走中はキルクールダウンが短くなり、移動速度が上昇します。<br>しかし、暴走状態でキルを重ねると次第に我を失います。<br>一度の暴走で<var>%KILL%</var>回キルすると<b>忘我</b>状態になり、プレイヤーを見た目で区別できなくなります。<br>忘我状態では、敵味方関係なくプレイヤーをキルできるようになってしまいます。"
+"role.berserker.ability.berserk" : "<title>暴走</title>姿を変化させ、パワーアップします。<br>このとき、<var>%SE%</var>のプレイヤーに咆哮が聴こえます。"
+"role.berserker.ability.berserk.se.short" : "ごく近く"
+"role.berserker.ability.berserk.se.middle" : "周囲"
+"role.berserker.ability.berserk.se.long" : "広範"
+"role.berserker.ability.calmDown" : "<title>鎮静化</title><var>このボタンを押すか、効果時間が終了すると元の姿に戻ります。</var><br>元の姿に戻る際はわずかな硬直時間があります。"
+"role.berserker.tips" : "・緊急会議が始まったり死亡すると暴走状態は解除されます。"
+
+# Options
+
+"options.role.berserker.detail" : "バーサーカーは、その正体を明らかにしてパワーアップするインポスターです。<br>暴走中はキルクールが短くなり、移動速度が上昇します。"
+"options.role.berserker.killCooldown" : "暴走中のキルクールダウン"
+"options.role.berserker.accelRate" : "暴走中の加速倍率"
+"options.role.berserker.canCalmDown" : "鎮静化可能"
+"options.role.berserker.canCalmDown.detail" : "オンにすると、時間切れになるかボタンアクションによって<br>暴走状態を終了できるようになります。"
+"options.role.berserker.berserkCooldown" : "暴走クールダウン"
+"options.role.berserker.maxBerserkDuration" : "暴走の最大効果時間"
+"options.role.berserker.killingForTrance" : "忘我までのキル数"
+"options.role.berserker.killingForTrance.detail" : "暴走中にキルを重ねると徐々に我を失います。忘我状態になると他人が区別できなくなります。<br>忘我状態では仲間のインポスターもキルできるようになってしまいます。"
+"options.role.berserker.bersekSEStrength" : "暴走SEの可聴範囲"
+
+# Game
+
+"gameAction.berserker.berserk" : "暴走"
+
+# UI
+
+"button.label.berserk" : "暴走"
+"button.label.calmDown" : "鎮静化"
+
+# Stats
+
+"stats.berserker.berserk" : "暴走回数"
+
+# Titles
+
+"achievement.berserker.common1.title" : "リミッター解除"
+"achievement.berserker.common1.goal" : "1回以上、暴走する。"
+
+"achievement.berserker.common2.title" : "闘魂ロアリング"
+"achievement.berserker.common2.goal" : "通算で10回以上、暴走する。"
+"achievement.berserker.common2.splitted.0" : "闘魂"
+
+"achievement.berserker.common3.title" : "スンッ..."
+"achievement.berserker.common3.goal" : "キルの後、自身の意思で鎮静化する。"
+
+"achievement.berserker.another1.title" : "のけものエクスパルション"
+"achievement.berserker.another1.goal" : "はじめて暴走した直後の会議で追放あるいは推察される。"
+
+"achievement.berserker.another2.title" : "荒野のワイルドビースト"
+"achievement.berserker.another2.goal" : "暴走中にインポスターをキルする。"
+"achievement.berserker.another2.splitted.1" : "ワイルド"
+
+"achievement.berserker.common4.title" : "アンストッパブル"
+"achievement.berserker.common4.goal" : "暴走状態になってキルした直後の会議を生き残る。"
+
+"achievement.berserker.challenge.title" : "獣王"
+"achievement.berserker.challenge.goal" : "暴走状態で20秒以内に3キルを決めて、生存したまま勝利する。"

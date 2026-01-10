@@ -1,4 +1,5 @@
 ﻿using Nebula.Roles.Abilities;
+using Nebula.Roles.Scripts;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
@@ -8,7 +9,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>, DefinedRole
+public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>, DefinedRole, IAssignableDocument
 {
     private Necromancer() : base("necromancer", new(108,50,160), RoleCategory.CrewmateRole, Crewmate.MyTeam, [ReviveCoolDownOption, ReviveDurationOption, DetectedRangeOption, ReviveMinRangeOption, ReviveMaxRangeOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
@@ -31,14 +32,27 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
     static public readonly Necromancer MyRole = new();
     static private readonly GameStatsEntry StatsRevive = NebulaAPI.CreateStatsEntry("stats.necromancer.revive", GameStatsCategory.Roles, MyRole);
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Draggable.ButtonImage, "role.necromancer.ability.drag");
+        yield return new(buttonSprite, "role.necromancer.ability.revive");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%DISTANCE%", Language.Translate(DetectedRangeOption < 5f ? "role.necromancer.ability.drag.near" : "role.necromancer.ability.drag.far"));
+    }
+
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ReviveButton.png", 115f);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private Arrow? myArrow;
         private TMPro.TextMeshPro message = null!;
         private SpriteRenderer? fullScreen;
-
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ReviveButton.png", 115f);
 
         private Dictionary<byte, SystemTypes> resurrectionRoom = new();
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];

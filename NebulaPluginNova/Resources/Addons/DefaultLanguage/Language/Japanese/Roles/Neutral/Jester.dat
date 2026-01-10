@@ -1,0 +1,58 @@
+# Assignable
+
+"role.jester.name" : "ジェスター"
+"role.jester.short" : "ジ"
+"role.jester.blurb" : "処刑台に舞う道化"
+
+# Document
+
+"role.jester.doc" : "吊られると勝利する第三陣営です。"
+"role.jetster.winCond" : "会議で追放される。"
+"role.jester.ability.title" : "固有能力 "道化のいたずら""
+"role.jester.ability.main" : ""
+"role.jester.ability.drag" : "<title>掴む/離す</title>死体を運べます。"
+
+# Options
+
+"options.role.jester.detail" : "ジェスターは自身が吊られることによって勝利します。<br>ジェスターの戯言に乗せられてはなりません！"
+"options.role.jester.canDragDeadBody" : "死体掴みと移動"
+"options.role.jester.canFixComms" : "通信障害を修理可能"
+"options.role.jester.canFixLight" : "停電を修理可能"
+"options.role.jester.task" : "勝利にタスクが必要"
+
+# Game
+
+"game.meeting.roleJesterText" : "残念だったな。"
+
+# UI
+
+"button.label.drag" : "掴む"
+"button.label.release" : "離す"
+
+# Stats
+
+
+# Titles
+
+"achievement.jester.common1.title" : "戯言に揺れて"
+"achievement.jester.common1.goal" : "会議で1票以上の票を得る。"
+"achievement.jester.common1.cond" : "自身の票は対象外"
+
+"achievement.jester.common2.title" : "おもちゃ大好き！"
+"achievement.jester.common2.goal" : "パーク「空砲」あるいは「憤怒」を使って、<br>偽りの痕跡を残したうえで追放され勝利する。"
+"achievement.jester.common2.splitted.0" : "おもちゃ"
+
+"achievement.jester.challenge.title" : "処刑台に踊る道化"
+"achievement.jester.challenge.goal" : "満場一致で追放された上で勝利する。"
+"achievement.jester.challenge.flavor" : ""あの奇怪な笑い声が、脳裏に焼き付いて離れない" ―署名の無い回顧録"
+"achievement.jester.challenge.splitted.2" : "道化"
+
+# Team
+
+"teams.jester" : "ジェスター"
+"end.jester" : "ジェスター%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.jester.title" : "特殊勝利"
+"document.tip.winCond.jester" : "緊急会議で追放されると勝利します。"

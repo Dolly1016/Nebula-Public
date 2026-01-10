@@ -1,0 +1,64 @@
+# Assignable
+
+"role.bubblegun.name" : "バブルガン"
+"role.bubblegun.short" : "バ"
+"role.bubblegun.blurb" : "札束と泡に黙する"
+"role.bubblegun.hint" : "バブルでプレイヤーを捕まえよう"
+
+# Document
+
+"role.bubblegun.doc" : "巨大なバブルを撃ちだす<b>バブルガン</b>でプレイヤーを捕まえられます。<br>バブルに捕まったプレイヤーは死亡します。バブルに捕まった死体は通報できません。"
+"role.bubblegun.ability.title" : "固有能力 "うちぬけ！バブルガン""
+"role.bubblegun.ability.main" : "バブルでプレイヤーを捕らえてキルできます。<br>バブルガンのクールダウンは<var>キルクールダウン%BUBBLE%</var>(<var>%SEC%</var>秒)です。"
+"role.bubblegun.ability.sec.longer" : "より長い"
+"role.bubblegun.ability.sec.shorter" : "より短い"
+"role.bubblegun.ability.sec.just" : "と同じ"
+"role.bubblegun.ability.equip" : "<title>装備</title>バブルガンを構えます。<br>構えているバブルガンは他プレイヤーからも視認できます。"
+"role.bubblegun.ability.kill" : "<title>バブル</title>バブルを撃ち出します。撃ち出す向きはマウスカーソルで調整できます。<br>バブルを撃ち出すとバブルガンをしまいます。"
+
+# Options
+
+"options.role.bubblegun.detail" : "プレイヤーを閉じ込める泡を放つバブルガンを撃てます。<br>泡に閉じ込められたプレイヤーは死亡しますが、この死体は通報できません。"
+"options.role.bubblegun.bubbleCooldown" : "バブル発砲クールダウン"
+"options.role.bubblegun.bubbleSize" : "バブルの大きさ"
+"options.role.bubblegun.bubbleSpeed" : "バブルの速度"
+"options.role.bubblegun.bubbleDuration" : "バブルの滞空時間"
+"options.role.bubblegun.maxBubbles" : "バブルの発砲可能回数"
+"options.role.bubblegun.eraseBubblesOnMeeting" : "会議時のバブル死体の消去"
+"options.role.bubblegun.canKillImpostor" : "インポスターのフレンドリーファイア"
+"options.role.bubblegun.bubblePopWhenHitWall" : "壁でバブルが弾ける"
+
+# Game
+
+
+# UI
+
+"button.label.bubble" : "バブル"
+"ui.action.bubblegun.equip" : "バブルガンを装備、格納します。バブルガンを装備している間は<br>キルボタンがバブル発砲ボタンに変化します。"
+"ui.action.bubblegun.kill" : "バブルを発射します。<br>発砲後、バブルガンは自動で格納されます。"
+
+# Game Statictics
+
+"statistics.events.bubbled" : "バブル"
+
+# Status
+
+"state.bubbled" : "バブル"
+
+# Stats
+
+"stats.bubblegun.bubble" : "バブル発砲回数"
+
+# Titles
+
+"achievement.bubblegun.common1.title" : "つーかまえたッ！"
+"achievement.bubblegun.common1.goal" : "泡でプレイヤーを1人捕らえる。"
+
+"achievement.bubblegun.another1.title" : "こわれて消えた"
+"achievement.bubblegun.another1.goal" : "はじめてバブルガンを発砲した直後の会議で追放あるいは推察される。"
+"achievement.bubblegun.another1.flavor" : ""机上の青天井へ""
+
+"achievement.bubblegun.challenge.title" : "80'sのレミニセンス"
+"achievement.bubblegun.challenge.goal" : "右上方向に発射したバブルが3人以上巻き添えにしたうえで弾ける。"
+"achievement.bubblegun.challenge.flavor" : ""あの頃はよかった。だって僕は生まれてすらいなかったのだから。" ―持ち主不明の手記"
+"achievement.bubblegun.challenge.splitted.0" : "80'sの"

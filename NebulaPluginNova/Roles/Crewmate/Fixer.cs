@@ -15,7 +15,7 @@ using Virial.Game;
 namespace Nebula.Roles.Crewmate;
 
 [NebulaRPCHolder]
-internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedRole
+internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedRole, IAssignableDocument
 {
     private Fixer() : base("fixer", new(87, 124, 109), RoleCategory.CrewmateRole, Crewmate.MyTeam, [NumOfJammingOption, CanJamPlayerContinuouslyOption, JammingSealsVoteRightOption, MaxLeftVotingTimeForJamming])
     {
@@ -33,6 +33,19 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
 
     static public readonly Fixer MyRole = new();
     static private readonly GameStatsEntry StatsAbility = NebulaAPI.CreateStatsEntry("stats.fixer.jamming", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(MeetingIcon, "role.fixer.ability.jamming");
+        yield return new(BlockedImage, "role.fixer.ability.blocked");
+    }
+
+    static private Image WifiBlockedImage = SpriteLoader.FromResource("Nebula.Resources.MeetingNoSignal.png", 100f);
+    static private Image BlockedImage = SpriteLoader.FromResource("Nebula.Resources.MeetingNoSignalPlayer.png", 100f);
+    static private Image MeetingIcon => MeetingPlayerButtonManager.Icons.AsLoader(7);
+
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
@@ -52,7 +65,7 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
         void OnMeetingStart(MeetingStartEvent ev)
         {
             var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
-            buttonManager?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(7),
+            buttonManager?.RegisterMeetingAction(new(MeetingIcon,
                p =>
                {
                    if (MyPlayer.IsSameSideOf(p.MyPlayer))
@@ -83,8 +96,6 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
         }
     }
 
-    static private Image WifiBlockedImage = SpriteLoader.FromResource("Nebula.Resources.MeetingNoSignal.png", 100f);
-    static private Image BlockedImage = SpriteLoader.FromResource("Nebula.Resources.MeetingNoSignalPlayer.png", 100f);
     static private RemoteProcess<GamePlayer> RpcInsulate = new("Insulate",
         (player, _) => {
             MeetingHudExtension.AddSealedMask(1 << player.PlayerId); //能力使用可能な対象、および投票対象から除外

@@ -274,7 +274,7 @@ file static class ModServerSearcher
             if (errorRegions.Count > 0)
             {
                 errorTxt += "<br>" + Language.Translate("ui.error.failedToSearchRoom") + "<br>";
-                errorTxt += StringHelper.Join(num => num % 3 == 0 ? "<br>" : ",  ", errorRegions);
+                errorTxt += Nebula.Utilities.StringHelper.Join(num => num % 3 == 0 ? "<br>" : ",  ", errorRegions);
             }
 
             HttpMatchmakerManager.Instance.SetDisconnectInfoAndShowPopup(new MatchmakerFailure

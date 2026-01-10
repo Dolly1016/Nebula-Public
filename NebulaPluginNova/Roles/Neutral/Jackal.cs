@@ -52,7 +52,7 @@ internal class UsurpedImpostorAbility : FlexibleLifespan, IUsurpableAbility
 }
 
 
-public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = new Team("teams.jackal", JackalAssignmentType.Color, TeamRevealType.OnlyMe, () => KillCooldown);
 
@@ -72,12 +72,12 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, 0), arguments.Get(2, 0), arguments.Get(3, 0), Roles.GetRole(arguments.Get(4, -1)), arguments.Skip(5).ToArray());
     static public int[] GenerateArgument(int jackalTeamId, DefinedRole? jackalized) => [jackalTeamId, 0, 0, 0, jackalized?.Id ?? -1, ..(jackalized?.DefaultAssignableArguments ?? [])];
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.jackal.killCoolDown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
+    static private IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.jackal.killCoolDown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static public BoolConfiguration CanCreateSidekickOption = NebulaAPI.Configurations.Configuration("options.role.jackal.canCreateSidekick", false);
     static private IntegerConfiguration NumOfKillingToCreateSidekickOption = NebulaAPI.Configurations.Configuration("options.role.jackal.numOfKillingToCreateSidekick", (0, 10), 2, () => CanCreateSidekickOption);
     static public BoolConfiguration JackalizedImpostorOption = NebulaAPI.Configurations.Configuration("options.role.jackal.jacklizedImpostor", false);
 
-    static public float KillCooldown => KillCoolDownOption.CoolDown;
+    static public float KillCooldown => KillCoolDownOption.Cooldown;
 
     static public Jackal MyRole = new Jackal();
     static private GameStatsEntry StatsSidekick = NebulaAPI.CreateStatsEntry("stats.jackal.sidekick", GameStatsCategory.Roles, MyRole);
@@ -452,7 +452,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
     static internal BoolConfiguration AssignedSidekickOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.assignedSidekick", false);
 
     static private readonly BoolConfiguration CanSuicideOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canSuicide", false, () => !IsModifierOption);
-    static private readonly IRelativeCoolDownConfiguration SuicideCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sidekick.suicideCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => CanSuicideOption && !IsModifierOption);
+    static private readonly IRelativeCooldownConfiguration SuicideCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sidekick.suicideCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => CanSuicideOption && !IsModifierOption);
     static private readonly BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canFixLight", true, () => !IsModifierOption);
     static private readonly BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.canFixComms", true, () => !IsModifierOption);
     static private readonly BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.sidekick.hasImpostorVision", false, () => !IsModifierOption);
@@ -467,7 +467,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
         ], 0);
     static internal bool CanPromoteToJackal => InheritanceRuleOption.GetValue() == 0;
     static internal bool SuicideOnMyJackalDies => InheritanceRuleOption.GetValue() == 1;
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sidekick.killCoolDown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f, () => SidekickCanKillOption ,() => Jackal.KillCooldown);
+    static private IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sidekick.killCoolDown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f, () => SidekickCanKillOption ,() => Jackal.KillCooldown);
 
     static public Sidekick MyRole = new Sidekick();
     static public bool SidekickShouldBeCountAsKillers => CanPromoteToJackal || (!IsModifierOption && SidekickCanKillOption);
@@ -503,7 +503,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
                 if (SidekickCanKillOption)
                 {
                     var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
-                        KillCoolDownOption.CoolDown, "kill", ModAbilityButton.LabelType.Impostor, null!,
+                        KillCoolDownOption.Cooldown, "kill", ModAbilityButton.LabelType.Impostor, null!,
                         (player, _) => {
                             MyPlayer.MurderPlayer(player, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                             NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
@@ -514,7 +514,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 if (CanSuicideOption)
                 {
-                    var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, SuicideCoolDownOption.CoolDown,
+                    var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, SuicideCoolDownOption.Cooldown,
                     "madmate.suicide", Crewmate.Madmate.Instance.SuicideButtonImage);
                     suicideButton.OnClick = (button) => MyPlayer.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill);
                     suicideButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);

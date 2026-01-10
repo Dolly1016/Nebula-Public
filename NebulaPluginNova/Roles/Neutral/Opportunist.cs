@@ -78,6 +78,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         private Arrow? myArrow;
 
         private TaskInfo[] myTasks = [];
+        [Local]
         void OnUpdateTaskText(PlayerTaskTextLocalEvent ev)
         {
             ev.ReplaceBody(string.Join("\n", myTasks.Select(task => task.GetTaskText())));

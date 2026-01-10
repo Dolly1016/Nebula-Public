@@ -91,7 +91,7 @@ file static class TrapperSystem
 }
 
 [NebulaRPCHolder]
-public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, DefinedRole
+public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, DefinedRole, IAssignableDocument
 {
     private Trapper(bool isEvil) : base(
         isEvil ? "evilTrapper" : "niceTrapper",
@@ -140,6 +140,29 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
     static public readonly Trapper MyNiceRole = new(false);
     static public readonly Trapper MyEvilRole = new(true);
 
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Trap.GetTrapSprite(0), "role.trapper.ability.accelTrap");
+        yield return new(Trap.GetTrapSprite(1), "role.trapper.ability.decelTrap");
+        if (IsEvil)
+        {
+            yield return new(Trap.GetTrapSprite(3), "role.evilTrapper.ability.killTrap");
+            yield return new(Trap.GetTrapSprite(4), "role.evilTrapper.ability.killTrapBroken");
+        }
+        else
+        {
+            yield return new(Trap.GetTrapSprite(2), "role.niceTrapper.ability.commTrap");
+        }
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return IAssignableDocument.GetKeyInput("%KEY%", Virial.Compat.VirtualKeyInput.AidAction);
+        yield return new("%SEC%", PlaceDurationOption.GetValue().DecimalToString("1"));
+        yield return new("%SE%", KillTrapSoundDistanceOption > 0f ? Language.Translate("role.evilTrapper.ability.killTrap.se") : "");
+    }
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class Trap : NebulaSyncStandardObject, IGameOperator
@@ -154,6 +177,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
             SpriteLoader.FromResource("Nebula.Resources.KillTrap.png",150f),
             SpriteLoader.FromResource("Nebula.Resources.KillTrapBroken.png",150f)
         ];
+        static internal Image GetTrapSprite(int index) => trapSprites[index];
 
         public int TypeId;
         private float lastAccelTime = 0f;

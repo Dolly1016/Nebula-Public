@@ -13,7 +13,7 @@ using Virial.Text;
 
 namespace Nebula.Roles.Modifier;
 
-internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, HasCitation
+internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, HasCitation, IAssignableDocument
 {
     private Nighty() : base("nighty", "NHT", new(Palette.ImpostorRed), [PlaceCooldownOption, MineSizeOption, MineDurationOption, BlindDurationOption], allocateToCrewmate: false, allocateToNeutral: false)
     {
@@ -28,6 +28,15 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
 
     static public Nighty MyRole = new Nighty();
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(placeButtonSprite, "role.nighty.ability.place");
+    }
+
+    static private readonly Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BlindTrapButton.png", 115f);
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
@@ -38,7 +47,6 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
 
         private int usedBombCounter = 0;
 
-        static private readonly Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BlindTrapButton.png", 115f);
 
         void RuntimeAssignable.OnActivated()
         {

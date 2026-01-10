@@ -27,7 +27,6 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
 
         void RuntimeAssignable.OnActivated() {}
 
-        
     }
 }
 

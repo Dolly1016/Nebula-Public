@@ -18,7 +18,7 @@ using static Virial.Game.OutfitDefinition;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, DefinedRole
+internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, DefinedRole, IAssignableDocument
 {
     private Sculptor() : base("sculptor", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MaxSamplesOption, CreateCoolDownOption, StayDurationOption, DecoyDetectionRadiusOption]) {
         GameActionTypes.SculptorAction = new("sculptor.summon", this, isPlacementAction: true);
@@ -84,12 +84,20 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
     static private GameStatsEntry StatsCreate = NebulaAPI.CreateStatsEntry("stats.sculptor.create", GameStatsCategory.Roles, MyRole);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueMapAbility;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Morphing.Ability.SampleButtonSprite, "role.sculptor.ability.sample");
+        yield return new(mapButtonSprite, "role.sculptor.ability.map");
+    }
+
+    static private Image mapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMapImpostorButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButtonImpl? sampleButton = null;
         private ModAbilityButtonImpl? summonButton = null;
-
-        static private Image mapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMapImpostorButton.png", 115f);
 
         List<(byte playerId, PoolablePlayer display, OutfitDefinition outfit)> samples = [];
 

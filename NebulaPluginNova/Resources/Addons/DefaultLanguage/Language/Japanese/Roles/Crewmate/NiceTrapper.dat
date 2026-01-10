@@ -1,0 +1,40 @@
+# Assignable
+
+"role.niceTrapper.name" : "ナイストラッパー"
+"role.niceTrapper.short" : "ト"
+"role.niceTrapper.blurb" : "罠を仕掛けよ"
+"role.niceTrapper.hint" : "トラップを使いこなせ！"
+
+# Document
+
+"role.niceTrapper.doc" : "味方の支援や敵の妨害、情報収集など、さまざまに活用できるトラップを設置するクルーメイトです。"
+"role.niceTrapper.ability.title" : "固有能力 "トラップ""
+"role.niceTrapper.ability.main" : "ナイストラッパーは3種類のトラップを設置できます。<br>トラップは設置後、会議を挟んでから有効化します。"
+"role.niceTrapper.ability.commTrap" : "<title>探知トラップ</title>不可視のトラップです。プレイヤーが踏むと、ナイストラッパーは矢印で通知を受け取ります。"
+"role.niceTrapper.tips" : "・設置するトラップの種類は%KEY%キーで切り替えられます。<br>・トラップの設置には%SEC%秒かかり、設置中はその場に硬直します。"
+
+# Options
+
+"options.role.niceTrapper.detail" : "ナイストラッパーはさまざまなトラップを仕掛けられます。"
+"options.role.niceTrapper.costOfCommTrap" : "探知トラップの設置コスト"
+"options.role.niceTrapper.commTrapSize" : "探知トラップの当たり判定"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.niceTrapper.common1.title" : "仁慈"
+"achievement.niceTrapper.common1.goal" : "加速トラップを設置する。"
+
+"achievement.niceTrapper.challenge.title" : "安楽椅子探偵"
+"achievement.niceTrapper.challenge.goal" : "探知トラップで8人の動向を把握する。"
+"achievement.niceTrapper.challenge.cond" : "会議のたびに把握人数はリセットされる"
+"achievement.niceTrapper.challenge.flavor" : ""ただ、どこで死んだのかは本当に分からないんです。" ―破られた議事録より"
+"achievement.niceTrapper.challenge.splitted.2" : "探偵"

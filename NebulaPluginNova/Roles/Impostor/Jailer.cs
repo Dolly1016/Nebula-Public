@@ -1,4 +1,5 @@
 ﻿using Hazel.Udp;
+using Nebula.Documents;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Assignment;
 using Nebula.Roles.Complex;
@@ -12,7 +13,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedRole
+public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedRole, IAssignableDocument
 {
     private Jailer() : base("jailer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CanMoveWithMapWatchingOption, CanUseAdminOnMeetingOption, CanIdentifyDeadBodiesOption, CanIdentifyImpostorsOption, InheritAbilityOnDyingOption])
     {
@@ -34,6 +35,24 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
 
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable != JailerModifier.MyRole;
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueMapAbility;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        if(CanIdentifyDeadBodiesOption || CanIdentifyImpostorsOption) yield return new(RoleDocumentHelper.MinimapCrewImage, 
+            !CanIdentifyImpostorsOption ? "role.jailer.ability.iconColor.deadBodyOnly" : 
+            !CanIdentifyDeadBodiesOption ? "role.jailer.ability.iconColor.impostorOnly" :
+            "role.jailer.ability.iconColor.both"
+            );
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%DOC%", Language.Translate(CanMoveWithMapWatchingOption ? "role.jailer.ability.main.canWalk" : "role.jailer.ability.main.cannotWalk"));
+        yield return new("%INHERIT%", InheritAbilityOnDyingOption ? Language.Translate("role.jailer.ability.main.inherit") : "");
+    }
+
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
@@ -109,7 +128,7 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
     }
 }
 
-public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
+public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, IAssignableDocument
 {
     private JailerModifier() : base("jailer", "JLR", new(Palette.ImpostorRed), [Jailer.CanMoveWithMapWatchingOption, Jailer.CanUseAdminOnMeetingOption, Jailer.CanIdentifyDeadBodiesOption, Jailer.CanIdentifyImpostorsOption], allocateToNeutral: false, allocateToCrewmate: false)
     {
@@ -125,6 +144,24 @@ public class JailerModifier : DefinedAllocatableModifierTemplate, DefinedAllocat
     static public JailerModifier MyRole = new JailerModifier();
 
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        if (Jailer.CanIdentifyDeadBodiesOption || Jailer.CanIdentifyImpostorsOption) yield return new(RoleDocumentHelper.MinimapCrewImage,
+            !Jailer.CanIdentifyImpostorsOption ? "role.jailer.ability.iconColor.deadBodyOnly" :
+            !Jailer.CanIdentifyDeadBodiesOption ? "role.jailer.ability.iconColor.impostorOnly" :
+            "role.jailer.ability.iconColor.both"
+            );
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%DOC%", Language.Translate(Jailer.CanMoveWithMapWatchingOption ? "role.jailer.ability.main.canWalk" : "role.jailer.ability.main.cannotWalk"));
+        yield return new("%INHERIT%", "");
+    }
+
 
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {

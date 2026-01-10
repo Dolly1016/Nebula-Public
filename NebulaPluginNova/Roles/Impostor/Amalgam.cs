@@ -22,7 +22,7 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityRole<Amalgam.Ability>, ICustomAssignableStatus
+internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityRole<Amalgam.Ability>, ICustomAssignableStatus, IAssignableDocument
 {
     private Amalgam() : base("amalgam", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MaxRolesOption, RandomAssignmentOption, CanBeGuessedAsLoadedRolesOption, RoleFilterOption])
     {
@@ -47,6 +47,20 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
     static private readonly BoolConfiguration RandomAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.randomAssignment", false);
     static private readonly SimpleRoleFilterConfiguration RoleFilterOption = new("options.role.amalgam.abilityFilter") { RolePredicate = r => r.MultipleAssignment != MultipleAssignmentType.NotAllowed, ScrollerTag = "amalgamFilter", InvertOption = true, PreviewOnlySpawnableRoles = false };
     static public readonly Amalgam MyRole = new();
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        if (RandomAssignmentOption) yield break;
+        yield return new(buttonSprite, "role.amalgam.ability.amalgam");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%ABILITY%", Language.Translate(RandomAssignmentOption ? "role.amalgam.ability.main.random" : "role.amalgam.ability.main.selection"));
+    }
+        
 
     int[]? DefinedAssignable.DefaultAssignableArguments => RandomAssignmentOption ? GetRandomAssignment() : null;
     static int[] GetRandomAssignment()
@@ -92,6 +106,8 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
         return [];
     }
 
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AmalgamButton.png", 115f);
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         public Ability MyAbility { get; private set; }
@@ -210,8 +226,6 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
             abilities.Add((role, role.GetAbilityOnRole(MyPlayer, AbilityAssignmentStatus.CanLoadToImpostor, args).Register(this)));
             if (AmOwner && abilities.Count == 2) new StaticAchievementToken("amalgam.common1");
         }
-
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AmalgamButton.png", 115f);
 
         int GetLeftNum() => MaxRolesOption.GetValue() - abilities.Count;
         bool IsAssignable(DefinedRole role) => CheckAssignable(role) && !abilities.Any(entry => entry.role == role);

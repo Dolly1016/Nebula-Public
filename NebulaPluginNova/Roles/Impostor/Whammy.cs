@@ -1,17 +1,8 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using MS.Internal.Xml.XPath;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Map;
-using Nebula.Roles.Neutral;
-using Newtonsoft.Json.Bson;
 using PowerTools;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.Rendering;
 using Virial;
 using Virial.Assignable;
@@ -22,9 +13,6 @@ using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Media;
-using static Nebula.Modules.ScriptComponents.NebulaSyncStandardObject;
-using static Nebula.Roles.Impostor.Thurifer;
-using static Nebula.Roles.Neutral.Spectre;
 
 namespace Nebula.Roles.Impostor;
 
@@ -1222,7 +1210,7 @@ internal class SlingshotMinigame : Minigame
     }
 }
 
-public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedRole
+public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedRole, IAssignableDocument
 {
     private Whammy() : base("whammy", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [
         new GroupConfiguration("options.role.whammy.group.place", [PlaceDurationOption,PlaySEOnPlacingBalloonOption, SEStrengthOption, AdditionalKillCooldownByPlacementOption], GroupConfigurationColor.ImpostorRed),
@@ -1252,10 +1240,24 @@ public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedR
     static public readonly Whammy MyRole = new();
     static private readonly GameStatsEntry StatsBalloon = NebulaAPI.CreateStatsEntry("stats.whammy.balloon", GameStatsCategory.Roles, MyRole);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.whammy.ability.place");
+        yield return new(BalloonConsole.ConsoleSprite, "role.whammy.ability.minigame");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%SOUND%", PlaySEOnPlacingBalloonOption ? Language.Translate("role.whammy.ability.place.sound") : "");
+        yield return new("%MINIGAME%", NumOfMaxMinigameToBreakBalloonOption.GetValue().ToString());
+    }
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BalloonButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BalloonButton.png", 115f);
-
         int leftBalloons = 0;
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), leftBalloons];
 
@@ -1268,7 +1270,7 @@ public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedR
                 acAnother1Token = new("whammy.another1", (false, false, false), (val, _) => val.cleared);
 
                 Virial.Components.ObjectTracker<Console> consoleTracker = new ObjectTrackerUnityImpl<Console, Console>(
-                    MyPlayer.VanillaPlayer, AmongUsUtil.VanillaKillDistance, () => ShipStatus.Instance.AllConsoles,
+                    MyPlayer.VanillaPlayer, AmongUsLLImpl.Instance.VanillaKillDistance, () => ShipStatus.Instance.AllConsoles,
                     c => !ModSingleton<BalloonManager>.Instance.ConsoleHasTrap(c), c => !c.TryCast<VentCleaningConsole>() && !c.TryCast<AutoTaskConsole>() && !c.TryCast<StoreArmsTaskConsole>(), c => c,
                     c => [c.transform.position], c => c.Image, Color.yellow,
                     true, false).Register(this);

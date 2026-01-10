@@ -99,7 +99,7 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
     IVentConfiguration Configurations.VentConfiguration(string id, bool isOptional, IntegerSelection? usesSelection, int usesDefaultValue, FloatSelection? coolDownSelection, float coolDownDefaultValue, FloatSelection? durationSelection, float durationDefaultValue)
      => new VentConfiguration(id, isOptional, usesSelection?.Selection, usesDefaultValue, coolDownSelection?.Selection, coolDownDefaultValue, durationSelection?.Selection, durationDefaultValue);
 
-    IRelativeCoolDownConfiguration Configurations.KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate, Func<float>? baseKillCooldown)
+    IRelativeCooldownConfiguration Configurations.KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate, Func<float>? baseKillCooldown)
      => new KillCoolDownConfiguration(title, id, defaultType, immediateSelection.Selection, immediateDefaultValue, relativeSelection.Selection, relativeDefaultValue, ratioSelection.Selection, ratioDefaultValue, predicate, baseKillCooldown);
 
     ITaskConfiguration Configurations.TaskConfiguration(string id, bool forceTasks, bool containsCommonTasks, Func<bool>? predicate, string? translationKey) => new TaskConfiguration(id, forceTasks, containsCommonTasks, predicate, translationKey);

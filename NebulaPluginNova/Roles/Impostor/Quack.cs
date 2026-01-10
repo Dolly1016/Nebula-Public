@@ -15,7 +15,7 @@ using Virial.Media;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Quack : DefinedSingleAbilityRoleTemplate<Quack.Ability>, DefinedRole
+internal class Quack : DefinedSingleAbilityRoleTemplate<Quack.Ability>, DefinedRole, IAssignableDocument
 {
     private Quack() : base("quack", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [])
     {
@@ -29,9 +29,18 @@ internal class Quack : DefinedSingleAbilityRoleTemplate<Quack.Ability>, DefinedR
     static public readonly Quack MyRole = new();
     static private readonly GameStatsEntry StatsReport = NebulaAPI.CreateStatsEntry("stats.quack.report", GameStatsCategory.Roles, MyRole);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.quack.ability.vital");
+    }
+
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImpostorVitalsButton.png", 100f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImpostorVitalsButton.png", 100f);
         static private MultiImage reportButtonSprite = DividedSpriteLoader.FromResource("Nebula.Resources.Buttons.QuackReportButton.png", 100f, 2, 1);
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {

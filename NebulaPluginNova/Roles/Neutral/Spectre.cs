@@ -30,7 +30,7 @@ using Nebula.Modules.Cosmetics;
 
 namespace Nebula.Roles.Neutral;
 
-internal class Spectre : DefinedRoleTemplate, DefinedRole
+internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.spectre", new(185, 152, 197), TeamRevealType.OnlyMe);
     static private bool alternateFlag = false;
@@ -411,6 +411,23 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
         }
     }
 
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.spectre.ability.vanish");
+        yield return new(Dish.DishSprite.AsLoader(1), "role.spectre.ability.fries");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%NUM%", RequiredSatietyForWinningOption.GetValue().DecimalToString("1"));
+    }
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectreButton.png", 115f);
+
     [NebulaRPCHolder]
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole, ISpectreTeam
     {
@@ -436,8 +453,6 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole
         GUIWidget RuntimeAssignable.ProgressWidget => ProgressGUI.Holder(
             ProgressGUI.OneLineText(Language.Translate("role.spectre.gui.gauge"), ":", 0.08f, (() => Mathn.Max(0f, Satiety).ToString("F2"), 3), ("/" + MaxSatietyOption.GetValue()))
             );
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SpectreButton.png", 115f);
         
         List<TrackingArrowAbility> killerArrows = [];
         public override void OnActivated()

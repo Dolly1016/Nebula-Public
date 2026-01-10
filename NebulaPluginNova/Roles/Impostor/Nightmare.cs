@@ -18,7 +18,7 @@ using Virial.Media;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, DefinedRole
+internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, DefinedRole, IAssignableDocument
 {
     private Nightmare() : base("nightmare", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [placeCooldownOption, nightmareCooldownOption, nightmareDurationOption, darknessSizeOption, inShadowLightSizeOption, disposableNightSeedOption, numOfNightSeedOption])
     {
@@ -41,6 +41,19 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
     static public Nightmare MyRole = new Nightmare();
     static private GameStatsEntry StatsPlaceNightSeed = NebulaAPI.CreateStatsEntry("stats.nightmare.place", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsNightmare = NebulaAPI.CreateStatsEntry("stats.nightmare.nightmare", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(placeButtonSprite, "role.nightmare.ability.place");
+        yield return new(nightmareButtonSprite, "role.nightmare.ability.nightmare");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%DESTROY%", disposableNightSeedOption ? Language.Translate("role.nightmare.ability.nightmare.destroy") : "");
+    }
 
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class NightmareSeed : NebulaSyncStandardObject
@@ -122,12 +135,12 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
     }
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.NightmarePlaceButton.png", 115f);
+    static private Image nightmareButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.NightmareButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButtonImpl? cleanButton = null;
-
-        static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.NightmarePlaceButton.png", 115f);
-        static private Image nightmareButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.NightmareButton.png", 115f);
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)

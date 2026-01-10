@@ -126,11 +126,11 @@ public static class HudManagerCoStartGamePatch
 
             yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform, GameStatistics.EventVariation.GameStart, EventDetail.GameStart);
 
-            float killCooldown = GeneralConfigurations.UseShortenCooldownAtGameStartOption ? ModAbilityButtonImpl.CoolDownOnGameStart : AmongUsUtil.VanillaKillCoolDown;
+            float killCooldown = GeneralConfigurations.UseShortenCooldownAtGameStartOption ? ModAbilityButtonImpl.CoolDownOnGameStart : AmongUsLLImpl.Instance.VanillaKillCooldown;
             PlayerControl.LocalPlayer.killTimer = killCooldown;
             if (GeneralConfigurations.EmergencyCooldownAtGameStart) AmongUsUtil.SetEmergencyCoolDown(10f, false, false);
 
-            HudManager.Instance.KillButton.SetCoolDown(killCooldown, AmongUsUtil.VanillaKillCoolDown);
+            HudManager.Instance.KillButton.SetCoolDown(killCooldown, AmongUsLLImpl.Instance.VanillaKillCooldown);
 
             if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Sabotage, out var sabo)) sabo.TryCast<SabotageSystemType>()?.SetInitialSabotageCooldown();
             if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Doors, out var door)) door.TryCast<IDoorSystem>()?.SetInitialSabotageCooldown();

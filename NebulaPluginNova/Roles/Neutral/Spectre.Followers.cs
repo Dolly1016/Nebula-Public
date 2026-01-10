@@ -17,7 +17,7 @@ using Nebula.Behavior;
 
 namespace Nebula.Roles.Neutral;
 
-internal class SpectreFollower : DefinedRoleTemplate, DefinedRole
+internal class SpectreFollower : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     string DefinedAssignable.InternalName => "spectre.follower";
     private SpectreFollower() : base("spectreFollower", Spectre.MyTeam.Color, RoleCategory.NeutralRole, Spectre.MyTeam, [VentConfiguration, SatietyRateOption, ShowDishesOnMapOption], false, optionHolderPredicate: ()=>IsSpawnableImpl){
@@ -36,6 +36,15 @@ internal class SpectreFollower : DefinedRoleTemplate, DefinedRole
 
     static private bool IsSpawnableImpl => (Spectre.MyRole as ISpawnable).IsSpawnable && Spectre.ImmoralistOption.GetValue() is 1 or >= 3;
     bool ISpawnable.IsSpawnable => IsSpawnableImpl;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Dish.DishSprite.AsLoader(1), "role.spectre.follower.ability.fries");
+
+    }
 
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole, ISpectreTeam
     {
@@ -108,7 +117,7 @@ internal class SpectreFollower : DefinedRoleTemplate, DefinedRole
     }
 }
 
-internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole
+internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     string DefinedAssignable.InternalName => "spectre.immoralist";
     private SpectreImmoralist() : base("spectreImmoralist", Spectre.MyTeam.Color, RoleCategory.NeutralRole, Spectre.MyTeam, [VentConfiguration, RespawnCooldownOption, RespawnDurationOption, ShowDishesOnMapOption, CanSuicideOption, ShowKillFlashOption], false, optionHolderPredicate: () => IsSpawnableImpl) {
@@ -132,7 +141,20 @@ internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole
 
     static private bool IsSpawnableImpl => (Spectre.MyRole as ISpawnable).IsSpawnable && Spectre.ImmoralistOption.GetValue() is 2 or >=3;
     bool ISpawnable.IsSpawnable => IsSpawnableImpl;
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(friesBoostButtonSprite, "role.spectre.immoralist.ability.alive");
+        yield return new(friesRemoveButtonSprite, "role.spectre.immoralist.ability.dead");
+        if(CanSuicideOption) yield return new(suicideButtonSprite, "role.spectre.immoralist.ability.suicide");
+    }
 
+
+    static private Image friesBoostButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImmoralistAliveButton.png", 115f);
+    static private Image friesRemoveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImmoralistDeadButton.png", 115f);
+    static private Image suicideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImmoralistSuicideButton.png", 115f);
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole, ISpectreTeam
     {
         public override DefinedRole Role => MyRole;
@@ -148,9 +170,6 @@ internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole
         }
         int[] RuntimeAssignable.RoleArguments => [SpectreId];
 
-        static private Image friesBoostButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImmoralistAliveButton.png", 115f);
-        static private Image friesRemoveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImmoralistDeadButton.png", 115f);
-        static private Image suicideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ImmoralistSuicideButton.png", 115f);
         public override void OnActivated()
         {
             if (AmOwner)

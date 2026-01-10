@@ -1,5 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Behavior;
+using Nebula.Documents;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles.Abilities;
@@ -85,7 +86,7 @@ public class TrackerPlayerMapLayer : MonoBehaviour
     }
 }
 
-public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>, HasCitation, DefinedRole
+public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private EvilTracker() : base("evilTracker", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [
         ShowKillFlashOption, TrackImpostorsOption,
@@ -113,15 +114,52 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, CanChangeTargetOption ? "role.evilTracker.ability.track.canChange" : "role.evilTracker.ability.track.cannotChange");
+        yield return new(RoleDocumentHelper.ArrowImage, TrackImpostorsOption ? "role.evilTracker.ability.arrow.withImpostor" : "role.evilTracker.ability.arrow.onlyTarget");
+        if(ShowTrackingTargetOnMapOption) yield return new(RoleDocumentHelper.MinimapCrewImage, "role.evilTracker.ability.track.minimap");
+        if(CanCheckTrackingTasksInTaskPhaseOption) yield return new(taskButtonSprite, "role.evilTracker.ability.task");
+        string? meetingIconKey = null;
+        var taskTracking = TaskTrackingOption.GetValue();
+        if (CanChangeTargetOnMeetingOption)
+        {
+            meetingIconKey = taskTracking switch
+            {
+                0 => "role.evilTracker.ability.meeting.changeOnly",
+                1 => "role.evilTracker.ability.meeting.checkChange",
+                2 => "role.evilTracker.ability.meeting.checkChange",
+                _ => null
+            };
+        }
+        else
+        {
+            meetingIconKey = taskTracking switch
+            {
+                1 => "role.evilTracker.ability.meeting.targetOnly",
+                2 => "role.evilTracker.ability.meeting.checkOnly",
+                _ => null
+            };
+        }
+        if(meetingIconKey != null) yield return new(MeetingIcon, meetingIconKey);
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%ARROWSEC%", UpdateArrowIntervalOption.GetValue().DecimalToString("1"));
+    }
+
+    static private Image MeetingIcon => MeetingPlayerButtonManager.Icons.AsLoader(1);
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TrackButton.png", 115f);
+    static private readonly Image taskButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TaskTrackButton.png", 115f);
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility 
     {
 
         private ModAbilityButtonImpl? trackButton = null;
-
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TrackButton.png", 115f);
-        static private readonly Image taskButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.TaskTrackButton.png", 115f);
-
 
         GamePlayer? trackingTarget = null;
 
@@ -236,7 +274,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
 
             GamePlayer? isChecked = null;
             NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new Behavior.MeetingPlayerAction(
-                MeetingPlayerButtonManager.Icons.AsLoader(1),
+                MeetingIcon,
                 p =>
                 {
                     if (isChecked == null)
@@ -252,7 +290,10 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                         mapLayer!.gameObject.SetActive(true);
                     }
                 },
-                p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && (!canSelectOnlyCurrentTarget || trackingTarget == p.MyPlayer) && (isChecked == null || (taskTrackingOption != 0 && isChecked == p.MyPlayer)) && (taskTrackingOption != 0 || trackingTarget != p.MyPlayer)
+                p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner &&
+                (!canSelectOnlyCurrentTarget || trackingTarget == p.MyPlayer) && 
+                (isChecked == null || (taskTrackingOption != 0 && isChecked == p.MyPlayer)) && 
+                (taskTrackingOption != 0 || trackingTarget != p.MyPlayer)
                 ));
 
         }

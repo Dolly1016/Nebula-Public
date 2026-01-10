@@ -26,7 +26,7 @@ internal static class MadmateAssignmentSetUp
     }
 }
 
-public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
 {
     private Madmate() : base("madmate", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, 
         [CanFixLightOption, CanFixCommsOption, CanSuicideOption, SuicideCoolDownOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, MaddenRoleOption, 
@@ -45,7 +45,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
     static private readonly FloatConfiguration EmbroilDelayOption = NebulaAPI.Configurations.Configuration("options.role.madmate.embroilDelay", (0f, 5f, 1f), 0f,FloatConfigurationDecorator.TaskPhase, () => EmbroilVotersOnExileOption);
 
     static private readonly BoolConfiguration CanSuicideOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canSuicide", false);
-    static private readonly IRelativeCoolDownConfiguration SuicideCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.madmate.suicideCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => CanSuicideOption);
+    static private readonly IRelativeCooldownConfiguration SuicideCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.madmate.suicideCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => CanSuicideOption);
     static private readonly BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixLight", false);
     static private readonly BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.madmate.canFixComms", false);
     static private readonly BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.madmate.hasImpostorVision", false);
@@ -95,6 +95,15 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
     static private readonly GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
     IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).IsSpawnable && !MaddenRoleOption) ? [this] : [];
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => CanSuicideOption;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Instance.SuicideButtonImage, "role.madmate.ability.suicide");
+    }
+
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;
@@ -157,7 +166,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole
 
             if (AmOwner && CanSuicideOption)
             {
-                var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, MyMadden == Sheriff.MyRole ? Virial.Compat.VirtualKeyInput.SecondaryAbility : Virial.Compat.VirtualKeyInput.Kill, SuicideCoolDownOption.CoolDown,
+                var suicideButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, MyMadden == Sheriff.MyRole ? Virial.Compat.VirtualKeyInput.SecondaryAbility : Virial.Compat.VirtualKeyInput.Kill, SuicideCoolDownOption.Cooldown,
                     "madmate.suicide", SuicideButtonImage);
                 suicideButton.OnClick = (button) =>
                 {

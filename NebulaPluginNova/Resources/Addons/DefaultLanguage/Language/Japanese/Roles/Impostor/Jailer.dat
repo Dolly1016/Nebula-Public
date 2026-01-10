@@ -1,0 +1,57 @@
+# Assignable
+
+"role.jailer.name" : "ジェイラー"
+"role.jailer.short" : "ジ"
+"role.jailer.blurb" : "全てを掌握せよ"
+
+# Document
+
+"role.jailer.doc" : "いつでもアドミン情報を確認できるインポスターです。"
+"role.jailer.ability.title" : "固有能力 "獄卒の逃れられぬ目""
+"role.jailer.ability.main" : "%DOC%"
+"role.jailer.ability.main.canWalk" : "ジェイラーはいつでも、<var>歩きながら</var>アドミン情報を確認できます。%INHERIT%"
+"role.jailer.ability.main.cannotWalk" : "ジェイラーはいつでもアドミン情報を確認できます。<br>アドミンを見ている間は<var>移動できません。</var>%INHERIT%"
+"role.jailer.ability.iconColor.both" : "<title>ミニマップ</title>死体は<var>灰色</var>で、インポスターは<var>赤色</var>で表示されます。"
+"role.jailer.ability.iconColor.deadBodyOnly" : "<title>ミニマップ</title>死体は<var>灰色</var>で表示されます。"
+"role.jailer.ability.iconColor.impostorOnly" : "<title>ミニマップ</title>インポスターは<var>赤色</var>で表示されます。"
+"role.jailer.ability.main.inherit" : "<br>また、ジェイラーが死亡したとき、この固有能力は仲間のインポスターに<var>継承されます</var>。"
+"role.jailer.tips" : "・ゲームの設定にかかわらず、ジェイラーのアドミンでは死体が計上されます。"
+
+"role.jailerModifier.doc" : "いつでもアドミン情報を確認できます。"
+"role.jailerModifier.ability.title" : "固有能力 "獄卒の逃れられぬ目""
+"role.jailerModifier.ability.main" : "%DOC%"
+"role.jailerModifier.tips" : "・ゲームの設定にかかわらず、ジェイラーのアドミンでは死体が計上されます。"
+
+# Options
+
+"options.role.jailer.detail" : "ジェイラーはマップ上でいつでもアドミンを確認できます。"
+"options.role.jailer.canMoveWithMapWatching" : "アドミンマップを開きながらの移動"
+"options.role.jailer.canUseAdminOnMeeting" : "会議中のアドミンの使用"
+"options.role.jailer.canIdentifyDeadBodies" : "アドミン上での死体の識別"
+"options.role.jailer.canIdentifyImpostors" : "アドミン上でのインポスターの識別"
+"options.role.jailer.inheritAbilityOnDying" : "継承ジェイラー"
+"options.role.jailer.inheritAbilityOnDying.detail" : "ジェイラーが死亡した時、生存している仲間にジェイラーの能力を継承します。<br>ジェイラー能力を継承しても、仲間の役職は消し去られません。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.jailer.common1.title" : "高次的存在"
+"achievement.jailer.common1.goal" : "マップを開いてからキルする。"
+"achievement.jailer.common1.splitted.2" : "存在"
+
+"achievement.jailer.common2.title" : "牢獄の守り人"
+"achievement.jailer.common2.goal" : "死体のそばで10秒以上待ち伏せする。"
+"achievement.jailer.common2.splitted.2" : "守り人"
+
+"achievement.jailer.challenge.title" : "絶対秘匿主義"
+"achievement.jailer.challenge.goal" : "死体が存在する部屋の中で合計2人のプレイヤーをキルする。"
+"achievement.jailer.challenge.flavor" : ""あれから、何の音沙汰もない。" ―キッチンに残されたメモ"
+"achievement.jailer.challenge.splitted.0" : "絶対"

@@ -1,0 +1,33 @@
+# Assignable
+
+"role.guesser.name" : "ゲッサー"
+"role.guesser.generalBlurb" : "正体見たり"
+"role.guesser.blurb" : "そして、推察せよ"
+
+# Document
+
+"role.guesser.doc" : "他プレイヤーの能力を推察してキルできます。<br>推察に失敗すると代わりに自身が死亡します。"
+
+# Options
+
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.guesser.allGuess" : "全推察回数"
+"stats.guesser.misguessed" : "推察失敗回数"
+
+# Titles
+
+"achievement.guesser.common1.title" : "尻尾を出したが最後"
+"achievement.guesser.common1.goal" : "1人のプレイヤーを推察によってキルする。"
+"achievement.guesser.common1.flavor" : ""やつは狙っている。言葉の端々から、じっと隙を伺っているんだ。" ―破られた議事録より"
+
+"achievement.guesser.challenge.title" : "破邪顕正"
+"achievement.guesser.challenge.goal" : "3人のプレイヤーを推察によってキルする。"
+"achievement.guesser.challenge.flavor" : "―その後の会議室はひどく静まり返っていた。"

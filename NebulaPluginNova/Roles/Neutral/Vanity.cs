@@ -19,7 +19,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-internal class Vanity : DefinedRoleTemplate, DefinedRole
+internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.vanity", new(170, 141, 34), TeamRevealType.OnlyMe);
 
@@ -41,6 +41,19 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole
 
     static public Vanity MyRole = new();
     static private readonly GameStatsEntry StatsKill = NebulaAPI.CreateStatsEntry("stats.vanity.kill", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Sheriff.Ability.KillButtonSprite, "role.vanity.ability.kill");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%WIN%", Language.Translate(IndependentTeamOption ? "role.vanity.winCond.independent" : "role.vanity.winCond.extra"));
+    }
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole

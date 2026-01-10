@@ -1,0 +1,54 @@
+# Assignable
+
+"role.sidekick.name" : "サイドキック"
+"role.sidekick.short" : "サ"
+"role.sidekick.blurb" : "おれたちはタッグだ！"
+"role.sidekick.generalBlurb" : "おれたちはタッグだ！"
+
+# Document
+
+"role.sidekick.doc" : "ジャッカルの仲間です。"
+
+# Options
+
+"options.role.sidekick.detail" : "サイドキックはジャッカルの仲間です。<br>ジャッカルが死亡すると、自身がジャッカルに昇格します。"
+"options.role.sidekick.canKill" : "キル可能"
+"options.role.sidekick.killCoolDown" : "キルクールダウン"
+"options.role.sidekick.isModifier" : "元役職との共存"
+"options.role.sidekick.canCreateSidekickChainly" : "サイドキックによるサイドキックの生成"
+"options.role.sidekick.inheritanceRule" : "継承ルール"
+"options.role.sidekick.inheritanceRule.inherit" : "昇格"
+"options.role.sidekick.inheritanceRule.suicide" : "自殺"
+"options.role.sidekick.inheritanceRule.none" : "なし"
+"options.role.sidekick.assignedSidekick" : "ゲーム開始時に割り当て"
+"options.role.sidekick.canSuicide" : "自決可能"
+"options.role.sidekick.suicideCooldown" : "自決クールダウン"
+"options.role.sidekick.canFixLight" : "停電を修理可能"
+"options.role.sidekick.canFixComms" : "通信障害を修理可能"
+"options.role.sidekick.hasImpostorVision" : "インポスター視界"
+"options.role.sidekick.canUseVents" : "ベントの使用"
+"options.role.sidekick.canMoveInVents" : "ベント間の移動"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.sidekick.common1.title" : "ずっと友だち"
+"achievement.sidekick.common1.goal" : "サイドキックからジャッカルに昇格する。"
+"achievement.sidekick.common1.splitted.2" : "友だち"
+
+"achievement.sidekick.common2.title" : "友情の鎖"
+"achievement.sidekick.common2.goal" : "サイドキックからジャッカルに昇格したのち、自身もサイドキックを付与する。"
+"achievement.sidekick.common2.splitted.0" : "友情の"
+
+"achievement.sidekick.challenge.title" : "裏社会の処世術"
+"achievement.sidekick.challenge.goal" : "インポスターからサイドキックに変化したうえでジャッカル勝利する。"
+"achievement.sidekick.challenge.cond" : "ゲーム中にジャッカルに昇格しても達成可能"
+"achievement.sidekick.challenge.splitted.0" : "裏社会の"

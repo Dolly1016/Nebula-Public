@@ -20,7 +20,7 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, DefinedRole
+internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, DefinedRole, IAssignableDocument
 {
     private Gimlet() : base("gimlet", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [DrillCooldownOption, DrillSizeOption, DrillSpeedOption, DrillFrictionResistanceOption, DrillSEStrengthOption, CanKillImpostorOption])
     {
@@ -32,7 +32,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
 
     
     //static private readonly BoolConfiguration SyncKillAndCleanCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.cleaner.syncKillAndCleanCoolDown", true);
-    static private readonly IRelativeCoolDownConfiguration DrillCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.gimlet.drillCooldown", CoolDownType.Relative, (10f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f);
+    static private readonly IRelativeCooldownConfiguration DrillCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.gimlet.drillCooldown", CoolDownType.Relative, (10f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f);
     static private readonly FloatConfiguration DrillSizeOption = NebulaAPI.Configurations.Configuration("options.role.gimlet.drillSize", (0.5f, 2f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private readonly FloatConfiguration DrillSpeedOption = NebulaAPI.Configurations.Configuration("options.role.gimlet.drillSpeed", (0.25f, 3f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private readonly BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.gimlet.canKillImpostor", false);
@@ -45,11 +45,17 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.gimlet.ability.drill");
+    }
 
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DrillButton.png", 115f);
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DrillButton.png", 115f);
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
 
@@ -62,7 +68,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
                 var acTokenAnother2 = AchievementTokens.FirstFailedAchievementToken("gimlet.another2", MyPlayer, this);
 
                 var drillButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility, "gimlet.drill",
-                    DrillCooldownOption.CoolDown, "drill", buttonSprite, _ => !Helpers.LocalPlayerUsingHookshot).SetAsUsurpableButton(this);
+                    DrillCooldownOption.Cooldown, "drill", buttonSprite, _ => !Helpers.LocalPlayerUsingHookshot).SetAsUsurpableButton(this);
                 drillButton.OnClick = (button) => {
                     acTokenAnother2.Value.triggered = true;
                     killstreak = 0;

@@ -10,7 +10,7 @@ using Virial.Helpers;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>, HasCitation, DefinedRole
+public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private Camouflager():base("camouflager", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CamoCoolDownOption, CamoDurationOption, CanInvokeCamoAfterDeathOption])
     {
@@ -29,9 +29,17 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
 
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.camouflager.ability.camo");
+    }
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CamoButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CamoButton.png", 115f);
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped) {

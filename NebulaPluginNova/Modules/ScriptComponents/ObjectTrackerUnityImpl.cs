@@ -45,7 +45,7 @@ public static class ObjectTrackers
         }
         IEnumerable<PlayerControl> FastPlayers() => PlayerControl.AllPlayerControls.GetFastEnumerator().Where(p => p);
 
-        return new ObjectTrackerUnityImpl<GamePlayer, PlayerControl>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, FastPlayers, predicate, predicateHeavier, p => p.GetModInfo(), p => [p.GetTruePosition()], p => p.cosmetics.currentBodySprite.BodySprite, color, ignoreCollider).Register(lifespan);
+        return new ObjectTrackerUnityImpl<GamePlayer, PlayerControl>(tracker.VanillaPlayer, distance ?? AmongUsLLImpl.Instance.VanillaKillDistance, FastPlayers, predicate, predicateHeavier, p => p.GetModInfo(), p => [p.GetTruePosition()], p => p.cosmetics.currentBodySprite.BodySprite, color, ignoreCollider).Register(lifespan);
     }
 
     public static ObjectTracker<IPlayerlike> ForPlayerlike(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<IPlayerlike> predicate, UnityEngine.Color? color = null, bool canTrackInVent = false, bool ignoreCollider = false) => ForPlayerlike(lifespan, distance, tracker, predicate, null, color ?? UnityEngine.Color.yellow, canTrackInVent, ignoreCollider);
@@ -58,17 +58,17 @@ public static class ObjectTrackers
             predicate = p => !p.Logic.InVent && lastPredicate(p);
         }
 
-        return new ObjectTrackerUnityImpl<IPlayerlike, IPlayerlike>(tracker, distance ?? AmongUsUtil.VanillaKillDistance, () => NebulaGameManager.Instance!.AllPlayerlike, predicate, predicateHeavier, p => p, p => [p.TruePosition], p => p.VanillaCosmetics.currentBodySprite.BodySprite, color, ignoreCollider).Register(lifespan);
+        return new ObjectTrackerUnityImpl<IPlayerlike, IPlayerlike>(tracker, distance ?? AmongUsLLImpl.Instance.VanillaKillDistance, () => NebulaGameManager.Instance!.AllPlayerlike, predicate, predicateHeavier, p => p, p => [p.TruePosition], p => p.VanillaCosmetics.currentBodySprite.BodySprite, color, ignoreCollider).Register(lifespan);
     }
 
     public static ObjectTracker<Virial.Game.DeadBody> ForDeadBody(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<Virial.Game.DeadBody>? predicate = null, Predicate<Virial.Game.DeadBody>? predicateHeavier = null, UnityEngine.Color? color = null, bool ignoreCollider = false)
     {
-        return new ObjectTrackerUnityImpl<Virial.Game.DeadBody, Virial.Game.DeadBody>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => ModSingleton<DeadBodyManager>.Instance.AllDeadBodies.Where(d => d.IsActive), predicate ?? (_ => true), predicateHeavier, d => d, d => [d.TruePosition], d => d.VanillaDeadBody.bodyRenderers[0], color, ignoreCollider).Register(lifespan);
+        return new ObjectTrackerUnityImpl<Virial.Game.DeadBody, Virial.Game.DeadBody>(tracker.VanillaPlayer, distance ?? AmongUsLLImpl.Instance.VanillaKillDistance, () => ModSingleton<DeadBodyManager>.Instance.AllDeadBodies.Where(d => d.IsActive), predicate ?? (_ => true), predicateHeavier, d => d, d => [d.TruePosition], d => d.VanillaDeadBody.bodyRenderers[0], color, ignoreCollider).Register(lifespan);
     }
 
     public static ObjectTracker<Vent> ForVents(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<Vent> predicate, UnityEngine.Color color, bool ignoreColliders = false)
     {
-        return new ObjectTrackerUnityImpl<Vent, Vent>(tracker.VanillaPlayer, distance ?? AmongUsUtil.VanillaKillDistance, () => ShipStatus.Instance.AllVents, predicate, _ => true, v => v, v => [v.transform.position], v => v.myRend, color, ignoreColliders).Register(lifespan);
+        return new ObjectTrackerUnityImpl<Vent, Vent>(tracker.VanillaPlayer, distance ?? AmongUsLLImpl.Instance.VanillaKillDistance, () => ShipStatus.Instance.AllVents, predicate, _ => true, v => v, v => [v.transform.position], v => v.myRend, color, ignoreColliders).Register(lifespan);
     }
 }
 

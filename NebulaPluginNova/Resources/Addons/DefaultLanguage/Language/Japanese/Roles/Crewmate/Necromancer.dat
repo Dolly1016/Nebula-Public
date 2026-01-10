@@ -1,0 +1,66 @@
+# Assignable
+
+"role.necromancer.name" : "ネクロマンサー"
+"role.necromancer.short" : "ネ"
+"role.necromancer.blurb" : "死霊を喚びさませ"
+
+# Document
+
+"role.necromancer.doc" : "死体を運んで復活させられるクルーメイトです。"
+"role.necromancer.ability.title" : "固有能力 "禁忌の降霊術""
+"role.necromancer.ability.main" : "死体を希望する場所に運ぶと<b>復活</b>の儀式を行えます。<br>自身の<var>%DISTANCE%</var>に死体があると、画面が紫がかります。"
+"role.necromancer.ability.drag" : "<title>掴む/離す</title>死体を掴んで運べます。矢印が示す復活部屋に死体を連れていくと<b>復活</b>させられます。<br>復活部屋は死体ごとに異なります。"
+"role.necromancer.ability.drag.near" : "すぐ近く"
+"role.necromancer.ability.drag.far" : "周辺"
+"role.necromancer.ability.revive" : "<title>復活</title>復活部屋内で死体を掴んでいると復活の儀式ができます。<br>復活の儀式を完遂すると、死んだプレイヤーがその場に蘇ります。"
+
+# Options
+
+"options.role.necromancer.detail" : "ネクロマンサーは死体を運び、復活させられます。<br>復活のためには、死体を指定の復活部屋まで運ぶ必要があります。"
+"options.role.necromancer.reviveCoolDown" : "復活クールダウン"
+"options.role.necromancer.reviveDuration" : "復活所要時間"
+"options.role.necromancer.reviveDuration.detail" : "復活部屋内で復活ボタンを押してから<br>死者が蘇生するまでにかかる時間です。"
+"options.role.necromancer.detectedRange" : "死体探知可能範囲"
+"options.role.necromancer.detectedRange.detail" : "ネクロマンサーが死体にある程度近づくと、画面が少し紫がかります。<br>これによって、ネクロマンサーは近くの死体の存在に気づけます。"
+"options.role.necromancer.reviveMinRange" : "復活部屋までの最小距離"
+"options.role.necromancer.reviveMinRange.detail" : "復活部屋は死体の発生位置に基づいて決定されます。<br>この設定では復活部屋と死体の発生位置の最小距離を指定できます。"
+"options.role.necromancer.reviveMaxRange" : "復活部屋までの最大距離"
+"options.role.necromancer.reviveMaxRange.detail" : "復活部屋は死体の発生位置に基づいて決定されます。<br>この設定では復活部屋と死体の発生位置の最大距離を指定できます。"
+
+# Game
+
+"role.necromancer.phantomMessage" : "%ROOM%に連れて行って..."
+"role.necromancer.reviveRange" : "ネクロマンサー<color=white>: 死体通知範囲</color>"
+"gameAction.necromancer.revive" : "復活"
+
+# UI
+
+"button.label.revive" : "復活"
+
+# Status
+
+"state.revived" : "復活"
+
+# Stats
+
+"stats.necromancer.revive" : "復活させた回数"
+
+# Titles
+
+"achievement.necromancer.common1.title" : "死灰復燃"
+"achievement.necromancer.common1.goal" : "プレイヤーを復活させる。"
+"achievement.necromancer.common1.flavor" : ""君はまだ、終わっちゃいない" ―匿名希望の随想より、抜粋"
+
+"achievement.necromancer.another2.title" : "奇跡なんてないから"
+"achievement.necromancer.another2.goal" : "死体を掴んだまま死亡する。"
+"achievement.necromancer.another2.flavor" : ""死は等しく訪れ、決して逃れられない。" ―宇宙航行の聖典"
+
+"achievement.necromancer.another.title" : "悪夢のリバイバル"
+"achievement.necromancer.another.goal" : "非クルーメイト陣営のプレイヤーを復活させる。"
+"achievement.necromancer.another.splitted.0" : "悪夢の"
+
+"achievement.necromancer.challenge.title" : "無尽の死霊兵団"
+"achievement.necromancer.challenge.goal" : "1ゲーム中に同じプレイヤーを2回復活させる。"
+"achievement.necromancer.challenge.flavor" : ""それは終わらない悪夢。あるいは、無価値な掃討戦。" ―匿名希望の随想より、抜粋"
+"achievement.necromancer.challenge.splitted.1" : "死霊"
+"achievement.necromancer.challenge.splitted.2" : "兵団"

@@ -1,0 +1,32 @@
+# Header
+
+"options.meeting" : "緊急会議オプション"
+"options.meeting.detail" : "緊急会議に関する設定です。"
+
+# Groups
+
+"options.meeting.group.gameStart" : "短縮クールダウンの設定"
+"options.meeting.group.earlySettings" : "ゲーム序盤の緊急会議設定"
+"options.meeting.group.nonCrewmateInformation" : "非クルーに開示される情報の設定"
+
+# Options
+
+"options.meeting.noticeExtraVictims" : "追加追放者の通知"
+"options.meeting.noticeExtraVictims.detail" : "追放時、巻き込みや後追い自殺で追加の死者がいるとき通知します。"
+"options.meeting.deathPenalty" : "死者一人当たりの会議時間減少"
+"options.meeting.deathPenalty.detail" : "会議時間は設定値と死者の人数をかけた秒数だけ減少します。"
+"options.meeting.numOfMeeting" : "ゲーム全体の緊急ボタンの最大回数"
+"options.meeting.emergencyCooldownAtGameStart" : "ゲーム開始時の緊急クールダウン"
+"options.meeting.showRoleOfExiled" : "追放者の役職開示"
+"options.meeting.extraEmergencyCooldownInTheEarly" : "ゲーム序盤の追加緊急クールダウン"
+"options.meeting.extraEmergencyCooldownInTheEarly.detail" : "ある程度死者が発生するまで緊急クールダウンをさらに引き伸ばします。"
+"options.meeting.earlyDiscussionReduction" : "ゲーム序盤の議論時間短縮"
+"options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "ゲーム序盤終了までに必要な死者数"
+"options.meeting.extraEmergencyCooldownInTheEarlyCondition.detail" : "設定した人数だけプレイヤーが死亡するとゲーム序盤の追加緊急クールダウンによる<br>緊急クールダウンの引き延ばしが終了します。"
+"options.meeting.waitingForHost" : "集計中"
+"options.meeting.showVoteState" : "投票状況の表示"
+"options.meeting.prohibitMeetingTool" : "盤面整理アシストの使用禁止"
+"options.meeting.shortenCooldownAtGameStart" : "ゲーム開始時の短縮クールダウン"
+"options.meeting.shortenCooldown" : "短縮クールダウン"
+"options.meeting.nonCrewCanSeeTaskTracker" : "緊急会議中のタスク進捗確認"
+"options.meeting.nonCrewCanSeeSabotageStatus" : "緊急会議中のサボタージュ状態確認"

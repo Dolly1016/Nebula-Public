@@ -16,7 +16,7 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Modifier;
 
-internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFilter
+internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFilter, IAssignableDocument
 {
     private Trilemma() : base("trilemma", new(113, 129, 155), [NumOfTrilemmaOption, RoleChanceOption, ImpostorAssignmentOption, NeutralAssignmentOption, WinConditionOption])
     {
@@ -62,6 +62,22 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
         ], 0);
 
     static public Trilemma MyRole = new Trilemma();
+
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => false;
+    bool IAssignableDocument.HasWinCondition => true;
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        var winCond = WinConditionOption.GetValue();
+        yield return new("%WIN%", Language.Translate(
+            winCond == 0 ? "role.trilemma.winCond.block" :
+            winCond == 1 ? "role.trilemma.winCond.additional" :
+            "role.trilemma.winCond.overwrite"));
+    }
+
+
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
 
 

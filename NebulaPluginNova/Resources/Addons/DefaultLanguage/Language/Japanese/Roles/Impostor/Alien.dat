@@ -1,0 +1,62 @@
+# Assignable
+
+"role.alien.name" : "エイリアン"
+"role.alien.short" : "エ"
+"role.alien.blurb" : "人智の超越"
+"role.alien.hint" : "情報を隠蔽しよう"
+
+# Document
+
+"role.alien.doc" : "アドミンやバイタルの情報を巧みに操作し、クルーメイトを混乱させるインポスターです。"
+"role.alien.ability.title" : "固有能力 "スペースインベイダー""
+"role.alien.ability.main" : "異星の奇怪な技術でクルーメイトを妨害します。"
+"role.alien.ability.emi" : "<title>E.M.I.</title>しばらくの間、アドミン・バイタル端末の情報更新を停止させます。"
+"role.alien.ability.invalidate" : "<title>無効化</title>近くのプレイヤーをアドミン・バイタル端末上から消し去ります。"
+"role.alien.tips" : "・この役職は、<color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>コラボ役職 (元役職: コウモリ, クラッカー)です。"
+
+# Options
+
+"options.role.alien.detail" : "エイリアンはE.M.I.によってアドミンやバイタルの情報の更新を妨害できます。<br>異星の技術で情報端末上から存在を消し去ってしまうこともできます。"
+"options.role.alien.emiCoolDown" : "E.M.I.クールダウン"
+"options.role.alien.emiDuration" : "E.M.I.効果時間"
+"options.role.alien.invalidateCoolDown" : "無効化クールダウン"
+"options.role.alien.numOfInvalidations" : "無効化使用可能回数"
+
+# Game
+
+
+# UI
+
+"button.label.emi" : "e.m.i."
+"button.label.invalidate" : "無効化"
+
+# Stats
+
+
+# Titles
+
+"achievement.alien.common1.title" : "異星の流儀"
+"achievement.alien.common1.goal" : "E.M.I.発動中にキルをする。"
+"achievement.alien.common1.flavor" : ""えーと、この星では『こんにちは』、だっけ？" ―とある異星人"
+"achievement.alien.common1.splitted.0" : "異星の"
+
+"achievement.alien.common2.title" : "記憶操作"
+"achievement.alien.common2.goal" : "通算10回、プレイヤーをアドミン情報から隠す。"
+"achievement.alien.common2.flavor" : ""確かに俺はそこにいたんだ！" ―行方不明になっていた船員"
+
+"achievement.alien.common3.title" : "善き隣人"
+"achievement.alien.common3.goal" : "E.M.I.で仲間のインポスターのキルを隠蔽する。"
+"achievement.alien.common3.flavor" : ""いやぁ助かったよ。見られていたら終わっていたね。" ―もう一人の殺人鬼"
+"achievement.alien.common3.splitted.0" : "善き"
+"achievement.alien.common3.splitted.2" : "隣人"
+
+"achievement.alien.common4.title" : "死を悼む星にて"
+"achievement.alien.common4.goal" : "アドミン情報から隠されたプレイヤーがインポスターのキルによって死亡する。"
+"achievement.alien.common4.flavor" : "一体どこへ行ったんだ......？"
+"achievement.alien.common4.splitted.2" : "星にて"
+
+"achievement.alien.challenge.title" : "異形の侵略者"
+"achievement.alien.challenge.goal" : "E.M.I.によって合計5回、キルの瞬間を隠蔽する。"
+"achievement.alien.challenge.cond" : "自身によるキル: 3回以上"
+"achievement.alien.challenge.flavor" : ""少なくともアンタは無いって話だったじゃないか！"<br>追い詰められた船員は、絶望に打ちひしがれた顔をしていた。"
+"achievement.alien.challenge.splitted.0" : "異形の"

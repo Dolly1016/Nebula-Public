@@ -16,12 +16,14 @@ using System.Security.Cryptography;
 using System.Text;
 using TMPro;
 using Unity.Profiling.LowLevel.Unsafe;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using Virial;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Media;
 using Virial.Runtime;
@@ -1635,21 +1637,36 @@ public class CoAddVisorPatch
     }
 }
 
-[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.StartClimb))]
-public class ClimbVisorPatch
+[HarmonyPatch(typeof(PlayerPhysics._CoClimbLadder_d__34), nameof(PlayerPhysics._CoClimbLadder_d__34.MoveNext))]
+public class ClimbPatch
 {
-    private static void Postfix(PlayerPhysics __instance, [HarmonyArgument(0)] bool down)
+    private static void OnStartClimb(PlayerPhysics._CoClimbLadder_d__34 coroutine)
     {
+        var source = coroutine.source;
+        bool down = source.IsTop;
+        var player = coroutine.__4__this.myPlayer;
+        var cosmetics = player.cosmetics;
 
-        try
+        if (cosmetics.visor && cosmetics.visor.visorData)
         {
-            if (!MoreCosmic.AllVisors.TryGetValue(__instance.myPlayer.cosmetics.visor.visorData.ProductId, out var value)) return;
-
-            if (down ? value.HasClimbDownImage : value.HasClimbUpImage) __instance.myPlayer.cosmetics.ToggleVisor(true);
+            if (MoreCosmic.AllVisors.TryGetValue(cosmetics.visor.visorData.ProductId, out var value))
+            {
+                if (down ? value.HasClimbDownImage : value.HasClimbUpImage) cosmetics.ToggleVisor(true);
+            }
+            cosmetics.ToggleVisor(true);
         }
-        catch { }
 
-        __instance.myPlayer.cosmetics.ToggleVisor(true);
+        GameOperatorManager.Instance?.Run<PlayerClimbLadderEvent>(new(player.GetModInfo()!, !down, source.transform.position, source.Destination.transform.position));
+    }
+
+    private static void Postfix(PlayerPhysics._CoClimbLadder_d__34 __instance)
+    {
+        var current = __instance.__2__current;
+        if (current == null) return;
+        if (current.GetIl2CppType().Name != "Il2CppManagedEnumerator") return; //WalkPlayerToは上書きしているので型が変わっている
+        if (!__instance.__4__this.Animations.IsPlayingClimbAnimation()) return; //再生中のアニメーションで区別する
+        
+        OnStartClimb(__instance);
     }
 }
 

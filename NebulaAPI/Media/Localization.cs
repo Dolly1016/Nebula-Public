@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Compat;
 
 namespace Virial.Media;
 
 public interface Translator
 {
     string Translate(string key);
+    string Translate(VirtualKeyInput key);
 }
 
 public static class Localization
@@ -21,4 +23,11 @@ public static class Localization
     /// <param name="key"></param>
     /// <returns></returns>
     static public string Translate(string key) => CurrentLanguage?.Translate(key) ?? "*" + key;
+
+    /// <summary>
+    /// キー入力を翻訳します。
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    static public string Translate(VirtualKeyInput input) => CurrentLanguage?.Translate(input) ?? "ERROR";
 }

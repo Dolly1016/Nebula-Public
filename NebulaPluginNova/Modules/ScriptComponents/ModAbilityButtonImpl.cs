@@ -17,6 +17,7 @@ namespace Nebula.Modules.ScriptComponents;
 public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOperator
 {
     private static readonly Image vanillaKillImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.VanillaKillButton.png", 100f);
+    internal static Image VanillaKillImage => vanillaKillImage;
     public class AbilityButtonStructure
     {
         public bool isLeftSide = false; 
@@ -548,12 +549,16 @@ public static class ButtonEffect
     {
         public static string? GetKeyDisplayName(KeyCode keyCode)
         {
+            string? rawKey = null;
+
             if (keyCode == KeyCode.Return)
-                return "Return";
-            if (keyCode == KeyCode.Slash)
-                return "/";
-            if (AllKeyInfo.TryGetValue(keyCode, out var val)) return val.TranslationKey;
-            return null;
+                rawKey = "Return";
+            else if (keyCode == KeyCode.Slash)
+                rawKey = "/";
+            else if (AllKeyInfo.TryGetValue(keyCode, out var val)) rawKey = val.TranslationKey;
+            if (rawKey == null || rawKey.Length <= 1) return rawKey;
+            if(Language.TryTranslate("key." + rawKey.HeadLower(), out var translated)) return translated;
+            return rawKey;
         }
 
         static public readonly Dictionary<KeyCode, KeyCodeInfo> AllKeyInfo = [];
@@ -595,7 +600,7 @@ public static class ButtonEffect
             _ = new KeyCodeInfo(KeyCode.LeftAlt, "LAlt", spriteLoader, 5);
             spriteLoader = DividedSpriteLoader.FromResource("Nebula.Resources.KeyBindCharacters4.png", 100f, 18, 19, true);
             for (int i = 0; i < 6; i++)
-                _ = new KeyCodeInfo(KeyCode.Mouse1 + i, "Mouse " + (i == 0 ? "Right" : i == 1 ? "Middle" : (i + 1).ToString()), spriteLoader, i);
+                _ = new KeyCodeInfo(KeyCode.Mouse1 + i, "Mouse" + (i == 0 ? "Right" : i == 1 ? "Middle" : (i + 1).ToString()), spriteLoader, i);
             spriteLoader = DividedSpriteLoader.FromResource("Nebula.Resources.KeyBindCharacters5.png", 100f, 18, 19, true);
             for (int i = 0; i < 10; i++)
                 _ = new KeyCodeInfo(KeyCode.Alpha0 + i, "Num" + (i), spriteLoader, i);
@@ -637,6 +642,7 @@ public static class ButtonEffect
     }
 
     private static readonly SpriteLoader lockedButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LockedButton.png", 100f);
+    internal static Image LockedImage => lockedButtonSprite;
     static public SpriteRenderer AddLockedOverlay(this ActionButton button) => AddOverlay(button, lockedButtonSprite.GetSprite(), 0f);
 
 

@@ -15,7 +15,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Echo : DefinedSingleAbilityRoleTemplate<Echo.Ability>, DefinedRole
+public class Echo : DefinedSingleAbilityRoleTemplate<Echo.Ability>, DefinedRole, IAssignableDocument
 {
     private Echo() : base("echo", new(117, 154, 102), RoleCategory.CrewmateRole, Crewmate.MyTeam, [EchoCooldownOption, EchoRangeOption])
     {
@@ -33,11 +33,39 @@ public class Echo : DefinedSingleAbilityRoleTemplate<Echo.Ability>, DefinedRole
     static private readonly GameStatsEntry StatsActions = NebulaAPI.CreateStatsEntry("stats.echo.actions", GameStatsCategory.Roles, MyRole);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.echo.ability.echo");
+        yield return new(iconSprite, "role.echo.ability.action");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        bool first = true;
+        StringBuilder sb = new();
+        foreach(var type in GameActionType.AllActionTypes)
+        {
+            if (first)
+            {
+                sb.Append($"<indent=3em>-{type.DisplayName} ({type.RelatedRole?.DisplayColoredName ?? "-"})</indent>");
+            }
+            else
+            {
+                sb.Append($"<indent=24em>-{type.DisplayName} ({type.RelatedRole?.DisplayColoredName ?? "-"})</indent><br>");
+            }
+            first = !first;
+        }
+
+        yield return new("%ACTIONS%", sb.ToString());
+    }
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EchoButton.png", 115f);
+    static private readonly Image iconSprite = SpriteLoader.FromResource("Nebula.Resources.EchoIcon.png", 160f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EchoButton.png", 115f);
-        static private readonly Image iconSprite = SpriteLoader.FromResource("Nebula.Resources.EchoIcon.png", 160f);
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)

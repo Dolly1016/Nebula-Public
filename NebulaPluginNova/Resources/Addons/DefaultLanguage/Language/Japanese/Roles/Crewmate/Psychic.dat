@@ -1,0 +1,60 @@
+# Assignable
+
+"role.psychic.name" : "サイキック"
+"role.psychic.short" : "サ"
+"role.psychic.blurb" : "声ならぬ声を聴く"
+
+# Document
+
+"role.psychic.doc" : "死体を捜索できるクルーメイトです。"
+"role.psychic.ability.title" : "固有能力 "死霊の囁き""
+"role.psychic.ability.main" : "死体を通報すると、追加の情報を得られます。"
+"role.psychic.ability.search" : "<title>死体探索</title>しばらくの間、死体の位置を指す矢印が現れます。"
+
+# Options
+
+"options.role.psychic.detail" : "サイキックは、自身の通報した死体に関する追加の情報を獲得できます。<br>また、死体を探索することもできます。"
+"options.role.psychic.searchCooldown" : "探索クールダウン"
+"options.role.psychic.searchDuration" : "探索効果時間"
+"options.role.psychic.message.elapsedTime" : "私はおよそ%SEC%秒前に死んだ..."
+"options.role.psychic.message.killersColor" : "私をキルしたのは%COLOR%のプレイヤーだ..."
+"options.role.psychic.message.killersRole" : "私をキルしたのは%ROLE%だ..."
+"options.role.psychic.message.killerIsDead" : "私をキルしたプレイヤーはもう死んでいる"
+"options.role.psychic.message.myRole" : "私は%ROLE%だ..."
+"options.role.psychic.message.myState" : "私の死因は%STATE%だ..."
+"options.role.psychic.message.inner.darkColor" : "暗色"
+"options.role.psychic.message.inner.lightColor" : "明色"
+"options.role.psychic.message.header" : "霊界通信"
+
+# Game
+
+
+# UI
+
+"button.label.search" : "死体探索"
+
+# Stats
+
+"stats.psychic.searching" : "死体の探索回数"
+"stats.psychic.messages" : "霊界通信の獲得回数"
+
+# Titles
+
+"achievement.psychic.common1.title" : "死口"
+"achievement.psychic.common1.goal" : "霊媒メッセージを聴く。"
+
+"record.psychic.common2.elapsedTime" : "死後経過時間"
+"record.psychic.common2.killersColor" : "キラー色の明暗"
+"record.psychic.common2.killersRole" : "キラー役職"
+"record.psychic.common2.killerIsDead" : "キラー死亡済み"
+"record.psychic.common2.myRole" : "自役職"
+"record.psychic.common2.myState" : "死因"
+
+"achievement.psychic.common2.title" : "霊媒マイスタ"
+"achievement.psychic.common2.goal" : "全霊媒メッセージを聴く。"
+"achievement.psychic.common2.splitted.2" : "マイスタ"
+
+"achievement.psychic.challenge.title" : "その命に手向ける言葉を"
+"achievement.psychic.challenge.goal" : "死後20秒以上が経過した死体の霊媒メッセージで得た<br>キラーの手がかりをもとに、その会議でキラーを追放あるいは推察する。"
+"achievement.psychic.challenge.flavor" : "辿れないまでに深く、それでもすぐ傍にいる"
+"achievement.psychic.challenge.splitted.1" : "手向ける"

@@ -13,7 +13,7 @@ using static UnityEngine.GraphicsBuffer;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, DefinedRole
+public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, DefinedRole, IAssignableDocument
 {
     private Berserker() : base("berserker", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [killCoolDownOption, accelRateOption, canCalmDownOption, berserkCooldownOption, berserkSEStrengthOption, maxBerserkDurationOption, killingForTranceOption])
     {
@@ -24,7 +24,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
     }    
 
 
-    static private readonly IRelativeCoolDownConfiguration killCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.berserker.killCooldown", CoolDownType.Immediate, (1f, 20f, 1f), 5f, (-30f, 10f, 2.5f), -15f, (0.125f, 2f, 0.125f), 0.25f);
+    static private readonly IRelativeCooldownConfiguration killCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.berserker.killCooldown", CoolDownType.Immediate, (1f, 20f, 1f), 5f, (-30f, 10f, 2.5f), -15f, (0.125f, 2f, 0.125f), 0.25f);
     static private readonly FloatConfiguration accelRateOption = NebulaAPI.Configurations.Configuration("options.role.berserker.accelRate", (1f, 3f, 0.25f), 1.5f, FloatConfigurationDecorator.Ratio);
     static private readonly FloatConfiguration berserkSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.berserker.bersekSEStrength", (1.25f, 20f, 1.25f), 7.5f, FloatConfigurationDecorator.Ratio);
     static private readonly BoolConfiguration canCalmDownOption = NebulaAPI.Configurations.Configuration("options.role.berserker.canCalmDown", true);
@@ -36,6 +36,26 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Berserker MyRole = new();
     static private readonly GameStatsEntry StatsBerserk = NebulaAPI.CreateStatsEntry("stats.berserker.berserk", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.berserker.ability.berserk");
+        if(canCalmDownOption) yield return new(buttonCalmSprite, "role.berserker.ability.calmDown");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%KILL%", killingForTranceOption.GetValue().ToString());
+        yield return new("%SE%", Language.Translate(berserkSEStrengthOption.GetValue() switch
+        {
+            < 2f => "role.berserker.ability.berserk.se.short",
+            < 17.5f => "role.berserker.ability.berserk.se.middle",
+            _ => "role.berserker.ability.berserk.se.long"
+        }));
+    }
+
     public class BerserkMode : FlexibleLifespan, IGameOperator, IBindPlayer
     {
         Berserker.Ability myBerserker;
@@ -127,11 +147,11 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
         void OnDead(PlayerDieEvent ev) => Release();
     }
 
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BerserkButton.png", 115f);
+    static private readonly Image buttonCalmSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BerserkCalmButton.png", 115f);
+
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BerserkButton.png", 115f);
-        static private readonly Image buttonCalmSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BerserkCalmButton.png", 115f);
-
         public bool AmBerserking => MyPlayer.VanillaPlayer.cosmetics.bodyType == PlayerBodyTypes.Seeker;
         public BerserkMode? CurrentBerserkerMode = null;
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];

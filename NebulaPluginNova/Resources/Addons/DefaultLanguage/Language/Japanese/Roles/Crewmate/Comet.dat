@@ -1,0 +1,56 @@
+# Assignable
+
+"role.comet.name" : "コメット"
+"role.comet.short" : "コメ"
+"role.comet.blurb" : "駆け抜けろ"
+
+# Document
+
+"role.comet.doc" : "透明化しながら高速移動できるクルーメイトです。"
+"role.comet.ability.title" : "固有能力 "船上の彗星""
+"role.comet.ability.main" : ""
+"role.comet.ability.blaze" : "<title>透明化</title>透明化し、移動速度が上昇します。<br>透明化中は他プレイヤーからのインタラクトを受けません。"
+"role.comet.tips" : "・コメットは停電の影響を受けません。"
+
+# Options
+
+"options.role.comet.detail" : "あなたは迅速に、かつ隠密に移動できます。<br>能力使用中はあなたの姿は他人から視認されません。"
+"options.role.comet.blazeCoolDown" : "ブーストクールダウン"
+"options.role.comet.blazeSpeed" : "ブースト速度"
+"options.role.comet.blazeDuration" : "ブースト効果時間"
+"options.role.comet.blazeVisionRate" : "ブースト中の視界倍率"
+"options.role.comet.blazeScreenRate" : "ブースト中の画面倍率"
+
+# Game
+
+# UI
+
+"button.label.blaze" : "透明化"
+
+# Stats
+
+"stats.comet.blazing" : "ブースト回数"
+
+# Titles
+
+"achievement.comet.common1.title" : "船上の彗星"
+"achievement.comet.common1.goal" : "透明化能力を使用する。"
+"achievement.comet.common1.cond" : "The Skeld または Airship 限定"
+"achievement.comet.common1.splitted.0" : "船上の"
+
+"achievement.comet.common2.title" : "地上の彗星"
+"achievement.comet.common2.goal" : "透明化能力を使用する。"
+"achievement.comet.common2.cond" : "MIRA HQ, Polus または The Fungle 限定"
+"achievement.comet.common2.splitted.0" : "地上の"
+
+"achievement.comet.common3.title" : "スピードスター"
+"achievement.comet.common3.goal" : "透明化能力を使用して、直線距離で45m以上移動する。"
+"achievement.comet.common3.cond" : "加速時間: 15秒以下+加速倍率: 2.5x以下"
+"achievement.comet.common3.flavor" : ""君はあらゆる容疑を背負ってくるね" ―破られた議事録より"
+
+"achievement.comet.common4.title" : "トップギア"
+"achievement.comet.common4.goal" : "加速トラップ、パーク「俊敏」の効果を受けながら加速する。"
+
+"achievement.comet.challenge.title" : "不可視の目撃者"
+"achievement.comet.challenge.goal" : "透明化能力の使用中、間近にキル現場を目撃する。"
+"achievement.comet.challenge.splitted.0" : "不可視の"

@@ -8,7 +8,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCitation, DefinedRole
+public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private Effacer() : base("effacer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [EffaceCoolDownOption, EffaceDurationOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
@@ -26,10 +26,17 @@ public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCit
     static private readonly GameStatsEntry StatsEfface = NebulaAPI.CreateStatsEntry("stats.effacer.efface", GameStatsCategory.Roles, MyRole);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.effacer.ability.efface");
+    }
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility 
     { 
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EffaceButton.png", 115f);
-      
         AchievementToken<EditableBitMask<GamePlayer>>? achChallengeToken = null;
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         public Ability(GamePlayer player, bool isUsurped) :base(player, isUsurped)

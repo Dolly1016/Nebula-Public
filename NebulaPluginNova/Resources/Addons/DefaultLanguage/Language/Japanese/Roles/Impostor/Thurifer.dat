@@ -1,0 +1,67 @@
+# Assignable
+
+"role.thurifer.name" : "サリファー"
+"role.thurifer.short" : "サ"
+"role.thurifer.blurb" : "汝は救世主なりや？"
+
+# Document
+
+"role.thurifer.doc" : "プレイヤーに香炉の煙を吸わせて、遅延キルを仕掛けるインポスターです。"
+"role.thurifer.ability.title" : "固有能力 "禍の薫陶"<pos=5.13em><voffset=0.94em><size=0.4em>まが</size></voffset></pos>"
+"role.thurifer.ability.main" : "マップ上の香炉で香を焚き、プレイヤーを"禍の薫陶"で侵します。<br>プレイヤーの"禍の薫陶"が進行しているほど、サリファーによるキルの遅延が長くなります。"
+"role.thurifer.ability.curse" : "<title>活性化</title>香炉を活性化させ、煙を発生させます。<br>活性化した香炉はサリファーを突き止めるための推理材料になります。<br>活性化した香炉は、しばらく時間がたつと再び活性を失います。"
+"role.thurifer.ability.impute" : "<title>転移</title>自身の"禍の薫陶"が50%以上進行すると、一度だけ非活性の香炉に転移させて進行度をリセットできます。<br>クルーメイトによる<b>転移</b>は香炉を永続的に活性化させます。<br>サリファーは自身の進行度を<b>転移できません。</b>"
+
+# Options
+
+"options.role.thurifer.detail" : "香炉の煙を吸わせ、遅延キルを仕掛けるインポスターです。"
+"options.role.thurifer.inhalationSpeed" : "香気の吸入速度"
+"options.role.thurifer.inhalationSpeed.detail" : "プレイヤーが香気を吸入する速度を設定します。<br>値を大きくするほど早く香気を吸入します。"
+"options.role.thurifer.curseDuration" : "活性化された香炉の効果時間"
+"options.role.thurifer.numOfThuribulums" : "香炉の最大出現数"
+"options.role.thurifer.numOfThuribulums.detail" : "マップ上に出現する香炉の最大数を設定します。<br>マップによっては実際の出現数が設定値を下回る場合があります。"
+"options.role.thurifer.thuribulumRange" : "香炉の効果範囲"
+"options.role.thurifer.maxKillDelay" : "最大キル遅延時間"
+"options.role.thurifer.maxKillDelay.detail" : "最大まで香気を吸い込んだ時のキルの遅延時間を設定します。<br>キルの遅延はこの設定値と香気の吸入具合に応じて変化します。"
+"options.role.thurifer.showBlink" : "遅延キルのブリンク"
+"options.role.thurifer.showBlink.detail" : "オフにすると、3秒以上の遅延がある遅延キルでブリンクが発生しなくなります。"
+"options.role.thurifer.activationDelay" : "香炉有効化までの遅延"
+"options.role.thurifer.activationDelay.detail" : "香炉にインタラクトしてから、実際に香炉が有効化するまでに遅延を設けます。<br>この遅延によって、香炉にインタラクトしたプレイヤーを把握しづらくなります。"
+
+# Game
+
+"gameAction.thurifer.activate" : "香炉活性化"
+"gameAction.thurifer.impute" : "香炉転移"
+
+# UI
+
+"button.label.thurifer.curse" : "活性化"
+"button.label.thurifer.impute" : "転移"
+"ui.action.thurifer.curse" : "香炉を活性化させます。"
+
+# Game Statictics
+
+"statistics.events.gassed" : "ガス中毒"
+
+# Status
+
+"state.gassed" : "中毒"
+
+# Stats
+
+"stats.thurifer.activate" : "香炉の使用回数"
+"stats.thurifer.impute" : "薫陶の転移回数"
+
+# Titles
+
+"achievement.thurifer.common1.title" : "禍の祭祀"
+"achievement.thurifer.common1.goal" : "通算で10個の香炉を活性化させる。"
+"achievement.thurifer.common1.splitted.0" : "禍の"
+
+"achievement.thurifer.common2.title" : "禍転じて禍となす"
+"achievement.thurifer.common2.goal" : "「禍の薫陶」を香炉に転移させる。"
+"achievement.thurifer.common2.flavor" : ""立ち昇る煙、その心に這い寄る邪悪。" ―偽典"
+
+"achievement.thurifer.challenge.title" : "禍のカリスマ"
+"achievement.thurifer.challenge.goal" : "8人以上が50%以上の「禍の薫陶」を受け、遅延キルで4人以上キルする。<br>1人以上は最大遅延でキルを決め、1人以上が遅延によって会議中に死亡すること。"
+"achievement.thurifer.challenge.splitted.2" : "カリスマ"

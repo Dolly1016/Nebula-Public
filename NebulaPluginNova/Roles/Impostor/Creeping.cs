@@ -21,16 +21,16 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Impostor;
 
-internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, HasCitation, DefinedRole
+internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
-    private Creeping() : base("creeping", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [PoisonDelayOption, DepoisonDurationOption, PoisonCoolDownOption])
+    private Creeping() : base("creeping", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [PoisonDelayOption, DepoisonDurationOption, PoisonCooldownOption])
     {
     }
     Citation? HasCitation.Citation => Citations.TownOfImpostors;
 
     static private readonly FloatConfiguration PoisonDelayOption = NebulaAPI.Configurations.Configuration("options.role.creeping.poisonDelay", (float[])[15f, 20f, 22.5f, 25f, 27.5f, 30f, 32.5f, 35f, 37.5f, 40f, 45f, 50f, 55f, 60f], 25f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration DepoisonDurationOption = NebulaAPI.Configurations.Configuration("options.role.creeping.depoisonDuration", (1f, 10f, 1f), 5f, FloatConfigurationDecorator.Second);
-    static private readonly IRelativeCoolDownConfiguration PoisonCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.creeping.poisonCooldown", CoolDownType.Relative, (10f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f);
+    static private readonly IRelativeCooldownConfiguration PoisonCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.creeping.poisonCooldown", CoolDownType.Relative, (10f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f);
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
 
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
@@ -38,10 +38,21 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
     static private readonly GameStatsEntry StatsPoison = NebulaAPI.CreateStatsEntry("stats.creeping.poison", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsDepoison = NebulaAPI.CreateStatsEntry("stats.creeping.depoison", GameStatsCategory.Roles, MyRole);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.creeping.ability.poison");
+        yield return new(DepoisonBox.ConsoleImage, "role.creeping.ability.depoison");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements() => IAssignableDocument.GetComparisonWithKillCooldown("%POISON%", "%SEC%", "role.creeping.ability.sec", PoisonCooldownOption.Cooldown);
+    
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PoisonButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.PoisonButton.png", 115f);
-
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
@@ -51,7 +62,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
 
                 var poisonTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeLocalKillablePredicate.Invoke(p) && !ModSingleton<DepoisonBoxManager>.Instance.PoisonedTo(p.RealPlayer));
                 var poisonButton = NebulaAPI.Modules.InteractButton(this, MyPlayer, poisonTracker, Virial.Compat.VirtualKeyInput.FixedAbility, "creeping.poison",
-                    PoisonCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "poison", buttonSprite, (target, button) =>
+                    PoisonCooldownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "poison", buttonSprite, (target, button) =>
                     {
                         if (GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, target, new(RealPlayerOnly: true))).IsCanceled ?? true) return;
 
@@ -110,6 +121,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
     public class DepoisonBox : NebulaSyncStandardObject
     {
         static private IDividedSpriteLoader sprites = DividedSpriteLoader.FromResource("Nebula.Resources.DepoisonConsole.png", 100f, 2, 1);
+        static internal Image ConsoleImage { get; } = sprites.AsLoader(0);
         private CustomConsole MyConsole;
         public DepoisonBox(Vector2 pos) : base(pos, ZOption.Just, true, sprites.GetSprite(0))
         {

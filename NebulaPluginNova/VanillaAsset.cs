@@ -182,7 +182,8 @@ public class VanillaAsset
         var scrollBar = bar.GetComponent<Scrollbar>();
 
         var scroller = UnityHelper.CreateObject<Scroller>("Scroller", transform, new Vector3(0, 0, 5));
-        scroller.gameObject.AddComponent<BoxCollider2D>().size = size;
+        var collider = scroller.gameObject.AddComponent<BoxCollider2D>();
+        collider.size = size;
 
         scrollBar.parent = scroller;
         scrollBar.graphic = bar.GetComponent<SpriteRenderer>();
@@ -198,12 +199,35 @@ public class VanillaAsset
         scroller.ScrollbarYBounds = new FloatRange(-1.8f * ratio + scrollBarLocalPos.y + 0.4f, 1.8f * ratio + scrollBarLocalPos.y - 0.4f);
         scroller.ScrollbarY = scrollBar;
         scroller.active = true;
+
+        scroller.name = ClickMaskName;
+        var instanceId = scroller.gameObject.GetInstanceID();
+        var buttonManager = PassiveButtonManager.Instance;
+        var predicate = (Il2CppSystem.Predicate<PassiveUiElement>)(b => b != null && b && b.isActiveAndEnabled && b.name == ClickMaskName);
+        scroller.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += () =>
+        {
+            var found = buttonManager.Buttons.Find(predicate);
+            if (found != null && found && found.gameObject.GetInstanceID() == instanceId)
+            {
+                scroller.MouseMustBeOverToScroll = false;
+                collider.size = size;
+            }
+            else
+            {
+                scroller.MouseMustBeOverToScroll = true;
+                collider.size = Vector2.zero;
+                scroller.mouseOver = false;
+            }
+        };
+
         //scroller.Colliders = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<Collider2D>(new Collider2D[] { hitBox });
 
         scroller.ScrollToTop();
 
         return scroller;
     }
+
+    private const string ClickMaskName = "NebulaScroller";
 
     private static Material? highlightMaterial = null;
     public static Material GetHighlightMaterial()

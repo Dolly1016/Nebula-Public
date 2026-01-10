@@ -1,0 +1,45 @@
+# Assignable
+
+"role.echo.name" : "エコー"
+"role.echo.short" : "エ"
+"role.echo.blurb" : "慟哭が谺する"
+
+# Document
+
+"role.echo.doc" : "周囲のプレイヤーを探知したり、アクションを感知できるクルーメイトです。"
+"role.echo.ability.title" : "固有能力 "ヤッホー・イン・ザ・ホロウ""
+"role.echo.ability.main" : ""
+"role.echo.ability.echo" : "<title>エコー</title>周囲のプレイヤーを探知します。近くで探知されたプレイヤーの方向が分かります。<br>遠くのプレイヤーほど探知されるまでのタイムラグが長くなります。"
+"role.echo.ability.action" : "<title>アクション感知</title>船内で発生したアクションを感知できます。"
+"role.echo.tips" : "・感知できるアクションは次の通りです。<br>%ACTIONS%"
+
+# Options
+
+"options.role.echo.detail" : "エコーは周囲のプレイヤーの存在を探知できるクルーメイトです。<br>船内で発生したアクションを感知することもできます。"
+"options.role.echo.echoCooldown" : "エコークールダウン"
+"options.role.echo.echoRange" : "エコーの効果範囲"
+
+# Game
+
+# UI
+
+"button.label.echo" : "エコー"
+
+# Stats
+
+"stats.echo.players" : "探知したプレイヤー人数"
+"stats.echo.actions" : "アクションの感知回数"
+
+# Titles
+
+"achievement.echo.common1.title" : "念波ソナー"
+"achievement.echo.common1.goal" : "周囲のプレイヤーを探知する。"
+
+"achievement.echo.common2.title" : "新星の胎動"
+"achievement.echo.common2.goal" : "他プレイヤーのアクションを累計で50回感知する。"
+"achievement.echo.common2.splitted.0" : "新星の"
+
+"achievement.echo.challenge.title" : "こだまが見ている"
+"achievement.echo.challenge.goal" : "アクションを起こした非クルーメイトプレイヤー2人を<br>自身の投じた票によって追放する。"
+"achievement.echo.challenge.flavor" : ""大丈夫。僕らがついているから。" ―残響"
+"achievement.echo.challenge.splitted.2" : "見ている"

@@ -1,0 +1,40 @@
+# Assignable
+
+"role.clog.name" : "クロッグ"
+"role.clog.blurb" : "いつでもどこでも、おじゃまむし"
+"role.clog.short" : "クロ"
+
+# Document
+
+"role.clog.doc" : "生存者の移動を妨害する幽霊を召喚できます。"
+# Options
+
+"options.role.clog.detail" : "クロッグは当たり判定のある幽霊を出現させられます。"
+"options.role.clog.ghostDuration" : "幽霊の出現時間"
+"options.role.clog.numOfGhost" : "出現可能な幽霊の数"
+"options.role.clog.ghostSize" : "幽霊の当たり判定"
+
+# Game
+
+"role.clog.ghostSize" : "クロッグ<color=white>: 幽霊の当たり判定</color>"
+"gameAction.clog.ghost" : "幽霊召喚"
+
+# UI
+
+"button.label.ghost" : "ゴースト"
+
+# Stats
+
+"stats.clog.ghosts" : "幽霊の召喚回数"
+
+# Titles
+
+"achievement.clog.common1.title" : "具現化する怨念"
+"achievement.clog.common1.goal" : "幽霊を召喚する。"
+
+"achievement.clog.another1.title" : "もしかしてお邪魔でしたか？"
+"achievement.clog.another1.goal" : "相方が幽霊のそばに近寄る。"
+"achievement.clog.another1.splitted.0" : "もしかして"
+
+"achievement.clog.common2.title" : "絶望のゲームエンド"
+"achievement.clog.common2.goal" : "生存者の動きを妨害して、サボタージュ勝利する。"

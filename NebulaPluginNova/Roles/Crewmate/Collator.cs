@@ -15,7 +15,7 @@ using Virial.Text;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasCitation, DefinedRole
+public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private Collator():base("collator",new(37, 159, 148), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SampleCoolDownOption, SelectiveCollatingOption, MaxTrialsOption, MaxTrialsPerMeetingOption, NumOfTubesOption, CarringOverSamplesOption, CanTakeDuplicateSampleOption, StrictClassificationOfNeutralRolesOption, MadmateIsClassifiedAsOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagSNR);
@@ -43,10 +43,25 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
     static private readonly GameStatsEntry StatsMatched = NebulaAPI.CreateStatsEntry("stats.collator.matched", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsUnmatched = NebulaAPI.CreateStatsEntry("stats.collator.unmatched", GameStatsCategory.Roles, MyRole);
 
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.collator.ability.sample");
+        if(SelectiveCollatingOption) yield return new(buttonSprite, "role.collator.ability.meeting");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%SELECTIVE%", Language.Translate(SelectiveCollatingOption ? "role.collator.ability.selective" : "role.collator.ability.nonSelective"));
+        yield return new("%NUM%", NumOfTubesOption.GetValue().ToString());
+    }
+
+    static private Image MeetingIcon => MeetingPlayerButtonManager.Icons.AsLoader(3);
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CollatorSampleButton.png", 100f);
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CollatorSampleButton.png", 100f);
         static private readonly IDividedSpriteLoader tubeSprite = DividedSpriteLoader.FromResource("Nebula.Resources.CollatorTube.png", 125f, 2, 1);
 
 
@@ -125,7 +140,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                     int leftTest = MaxTrialsPerMeetingOption;
 
                     var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
-                    buttonManager?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(3),
+                    buttonManager?.RegisterMeetingAction(new(MeetingIcon,
                     p =>
                     {
                         if (p.IsSelected)

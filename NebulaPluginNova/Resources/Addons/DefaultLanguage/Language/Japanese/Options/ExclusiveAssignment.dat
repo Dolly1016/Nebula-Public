@@ -1,0 +1,19 @@
+# Header
+
+"options.exclusiveAssignment" : "排他割り当て設定"
+"options.exclusiveAssignment.detail" : "役職を排他的(=択一式)に割り当てられます。"
+
+# Groups
+
+# Options
+
+"options.exclusiveAssignment.category.0" : "カテゴリ 1"
+"options.exclusiveAssignment.category.1" : "カテゴリ 2"
+"options.exclusiveAssignment.category.2" : "カテゴリ 3"
+"options.exclusiveAssignment.category.3" : "カテゴリ 4"
+"options.exclusiveAssignment.category.4" : "カテゴリ 5"
+"options.exclusiveAssignment.category.5" : "カテゴリ 6"
+"options.exclusiveAssignment.category.6" : "カテゴリ 7"
+"options.exclusiveAssignment.category.7" : "カテゴリ 8"
+"options.exclusiveAssignment.category.8" : "カテゴリ 9"
+"options.exclusiveAssignment.category.9" : "カテゴリ 10"

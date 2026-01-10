@@ -1,0 +1,58 @@
+# Assignable
+
+"role.stirrer.name" : "スターラー"
+"role.stirrer.short" : "スタ"
+"role.stirrer.blurb" : "幻惑に死す"
+
+# Document
+
+"role.stirrer.doc" : "偽サボタージュでプレイヤーを妨害するインポスターです。"
+"role.stirrer.ability.title" : "固有能力 "偽サボタージュ""
+"role.stirrer.ability.main" : "プレイヤーにチャージを付与し、付与したチャージを消費して偽サボタージュを引き起こします。"
+"role.stirrer.ability.stir" : "<title>幻惑</title>プレイヤーに、偽サボタージュの発動に必要なチャージを与えます。"
+"role.stirrer.ability.fakeSabo" : "<title>偽サボタージュ</title>プレイヤーの持つチャージを1つ消費して、偽サボタージュを引き起こします。<br>偽サボタージュの種類はプレイヤーごとにランダムに決定されます。"
+"role.stirrer.tips" : "・偽サボタージュは、自身の手でサボタージュを復旧しようとすると即座に解除されます。<br>・偽の緊急サボタージュを復旧しないまま時間切れまで放置すると、偽サボタージュを受けたプレイヤーは死亡します。"
+
+# Options
+
+"options.role.stirrer.detail" : "スターラーはプレイヤーを幻惑させ、偽のサボタージュを引き起こさせます。<br>偽の緊急サボタージュを復旧させられないと、そのプレイヤーは死んでしまいます。"
+"options.role.stirrer.stirCoolDown" : "幻惑クールダウン"
+"options.role.stirrer.sabotageCharge" : "幻惑ごとの偽サボタージュチャージ"
+"options.role.stirrer.sabotageMaxCharge" : "偽サボタージュチャージの最大数"
+"options.role.stirrer.sabotageCoolDown" : "偽サボタージュのクールダウン"
+"options.role.stirrer.sabotageInterval" : "偽サボタージュ発生後の追加クールダウン"
+"options.role.stirrer.sabotageInterval.detail" : "偽サボタージュ発動後、再び偽サボタージュを発動させるまでの間に<br>追加のクールダウンを設けます。<br><br>"
+
+# Game
+
+
+# UI
+
+"button.label.stir" : "幻惑"
+"button.label.fakeSabotage" : "偽サボタージュ"
+"ui.action.stirrer.stir" : "プレイヤーに偽サボタージュのチャージを与えます。"
+"ui.action.stirrer.fakeSabo" : "チャージを消費して偽サボタージュを引き起こします。"
+
+# Game Statictics
+
+"statistics.events.fakeSabotage" : "偽サボタージュ"
+
+# Status
+
+"state.deranged" : "幻惑死"
+
+# Stats
+
+"stats.stirrer.stir" : "幻惑回数"
+"stats.stirrer.sabo" : "偽サボタージュ発動回数"
+
+# Titles
+
+"achievement.stirrer.common1.title" : "混乱の引き金"
+"achievement.stirrer.common1.goal" : "偽サボタージュを引き起こす。"
+
+"achievement.stirrer.challenge.title" : "偽りの北斗七星"
+"achievement.stirrer.challenge.goal" : "一度に7人のプレイヤーに偽のサボタージュを付与する。"
+"achievement.stirrer.challenge.cond" : "一度のチャージの付与数: 3以下+付与クールダウン: 10秒以上"
+"achievement.stirrer.challenge.splitted.0" : "偽りの"
+"achievement.stirrer.challenge.splitted.2" : "北斗七星"

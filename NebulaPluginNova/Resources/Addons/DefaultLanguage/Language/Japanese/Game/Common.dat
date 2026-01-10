@@ -1,0 +1,76 @@
+# No Team
+
+"end.gameEnd" : "ゲーム終了"
+"end.nogame" : "無効なゲーム"
+
+"end.status.noWinners" : "勝者なし"
+
+# No Team Statictics
+
+"statistics.events.startGame" : "ゲーム開始"
+"statistics.events.endGame" : "ゲーム終了"
+"statistics.events.kill" : "キル"
+"statistics.events.exiled" : "追放"
+"statistics.events.report" : "通報"
+"statistics.events.emergency" : "緊急会議"
+"statistics.events.endMeeting" : "会議終了"
+"statistics.events.disconnect" : "切断"
+"statistics.events.revive" : "復活"
+
+# Console
+
+"console.notAvailable" : "使用不可"
+
+# Tasks
+
+"task.unknownPlace" : "？？？"
+"task.divertPower" : "電力を変換する"
+
+# Meta Information
+
+"metaInfo.meeting.sabotage" : "発生中のサボタージュ"
+"metaInfo.meeting.sabotage.electrical" : "停電"
+"metaInfo.meeting.sabotage.communications" : "通信障害"
+"metaInfo.meeting.task" : "平均完了タスク数: "
+
+# Meta Command
+
+"help.tabs.myInfo" : "情報"
+"help.tabs.roles" : "ロール"
+"help.tabs.modifiers" : "モディファイア"
+"help.tabs.overview" : "配役"
+"help.tabs.options" : "オプション"
+"help.tabs.slides" : "スライド"
+"help.tabs.achievements" : "称号"
+"help.tabs.stamps" : "スタンプ"
+"help.slides.share" : "共有"
+"help.overview.pattern.realCount" : "実際の人数"
+"help.overview.pattern.custom" : "%NUM%人"
+"help.overview.simulate" : "シミュレートする人数を指定してください。"
+"help.command" : "コマンド"
+"help.command.nogame" : "廃村"
+"help.command.quickStart" : "クイックスタート"
+"help.command.cancelStarting" : "ゲームキャンセル"
+"help.command.console" : "コンソール"
+"help.command.saveResult" : "最後のゲーム結果を保存"
+"help.command.toggleSocial" : "ゲーム内アピール可否の切り替え"
+"help.command.hideHud" : "HUDの表示切り替え"
+"help.command.vcState" : "VC情報の表示切り替え"
+
+# Button
+
+"button.label.rejoin" : "VC更新"
+"button.label.show" : "判定チェック"
+"button.label.spectator" : "観戦"
+"button.label.spectatorChange" : "視点変更"
+"button.label.spectatorExit" : "自視点"
+"button.label.task" : "タスク"
+"button.label.marketplace" : "マーケットプレイス"
+"button.label.costume" : "コスチューム"
+"button.label.appeal" : "アピール"
+"button.label.playAchievement" : "称号ハイライト"
+"button.label.suicide" : "自殺"
+"button.label.fixPos" : "場内復帰"
+"button.label.mobile.switch" : "切替"
+"button.label.afk" : "AFK"
+"button.label.scan" : "スキャン"

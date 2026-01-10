@@ -20,7 +20,7 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Neutral;
 
-internal class Scarlet : DefinedRoleTemplate, DefinedRole
+internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.scarlet", new(138, 26, 49), TeamRevealType.OnlyMe);
 
@@ -48,8 +48,26 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
     static public Scarlet MyRole = new Scarlet();
     static private GameStatsEntry StatsKept = NebulaAPI.CreateStatsEntry("stats.scarlet.kept", GameStatsCategory.Roles, MyRole);
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(flirtButtonSprite, "role.scarlet.ability.flirt");
+        yield return new(favoriteButtonSprite, "role.scarlet.ability.favorite");
+        yield return new(hourglassButtonSprite, "role.scarlet.ability.hourglass");
+        yield return new(meetingButtonSprite, "role.scarlet.ability.meeting");
+    }
+
+
     //1回の会議で投票先指定を変えられるScarletは一人だけ
     private int MeetingFixedScarlet = -1;
+
+
+    static private Image flirtButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousSubButton.png", 115f);
+    static private Image favoriteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousMainButton.png", 115f);
+    static private Image meetingButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousMeetingButton.png", 115f);
+    static private Image hourglassButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HourglassButton.png", 115f);
 
     [NebulaRPCHolder]
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
@@ -77,10 +95,6 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole
 
         int[]? RuntimeAssignable.RoleArguments => [FlirtatiousId, LeftFlirts, LeftFavorite, LeftMeeting, (int)(SuicideTimer?.CurrentTime ?? GraceUntilDecidingFavoriteOption) + 1, (int)(FavoriteGauge * 100f)];
 
-        static private Image flirtButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousSubButton.png", 115f);
-        static private Image favoriteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousMainButton.png", 115f);
-        static private Image meetingButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousMeetingButton.png", 115f);
-        static private Image hourglassButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HourglassButton.png", 115f);
 
         bool IsMyLover(GamePlayer player) => player.GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId);
         bool IsMyFavorite(GamePlayer player) => player.GetModifiers<ScarletLover.Instance>().Any(f => f.FlirtatiousId == FlirtatiousId && f.AmFavorite);

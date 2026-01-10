@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Roles.Scripts;
+using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
@@ -10,7 +11,7 @@ using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 
 namespace Nebula.Roles.Neutral;
 
-public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.jester", new(253,84,167), TeamRevealType.OnlyMe);
 
@@ -33,6 +34,13 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole
     static public bool RequiresTasksForWin => TaskConfiguration.RequiresTasks;
 
     static public Jester MyRole = new Jester();
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => CanDragDeadBodyOption;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        if(CanDragDeadBodyOption) yield return new(Draggable.ButtonImage, "role.jester.ability.drag");
+    }
 
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {

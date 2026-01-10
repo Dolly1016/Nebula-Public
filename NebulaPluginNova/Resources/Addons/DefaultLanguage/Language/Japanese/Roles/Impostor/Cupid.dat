@@ -1,0 +1,65 @@
+# Assignable
+
+"role.cupid.name" : "キューピッド"
+"role.cupid.short" : "キ"
+"role.cupid.blurb" : "堕天"
+"role.cupid.hint" : "ラバーズをつくってレーザーキル！"
+
+# Document
+
+"role.cupid.doc" : "ラバーズをつくれるインポスターです。さらに、ラバーズの間に<b>赤い糸</b>を顕現させ、大量キルを狙えます。"
+"role.cupid.ability.title" : "固有能力 "恋という名の呪縛""
+"role.cupid.ability.main" : "破滅への導き手を選びましょう。二人のプレイヤーを選んでラバーズを結べます。"
+"role.cupid.ability.lover" : "<title>選択</title>ラバーズで結び付けるプレイヤーを選択します。<br>2人選択すると、<b>赤い糸</b>が使用可能になります。"
+"role.cupid.ability.laser" : "<title>赤い糸</title>ラバーズの間に赤い糸を顕現させます。赤い糸のレーザーはボタンを押してから<var>%CUPID_DELAY%</var>秒後に出現します。<br>赤い糸はラバーズがそれぞれ1回ずつとキューピッドが2回で、合計4回顕現させられます。"
+"role.cupid.tips" : "・ラバーズとキューピッドは互いに<b>味方ではありません</b>。ゲームが終了するまでにどうにか処理しましょう。<br>　所詮、おあそびの産物よ。<br>・キューピッドは自身が作成したラバーズをキルできません。<br>・2人目選択時、あるいは初回の赤い糸顕現時に選択したプレイヤーが死亡していた場合、<br>　死亡しているプレイヤーは選択から除外され、もう一度プレイヤーを選択できます。"
+
+# Options
+
+"options.role.cupid.detail" : "キューピッドはラバーズをつくれるインポスターです。<br>キューピッドがつくったラバーズはプレイヤーをキルできる赤い糸で結ばれています。"
+"options.role.cupid.selectCooldown" : "ラバーズの選択クールダウン"
+"options.role.cupid.laserDelayByCupid" : "キューピッドによる赤い糸顕現の遅延"
+"options.role.cupid.laserDelayByLover" : "ラバーズによる赤い糸顕現の遅延"
+"options.role.cupid.laserCooldown" : "赤い糸クールダウン"
+"options.role.cupid.laserDuration" : "赤い糸の効果時間"
+"options.role.cupid.laserRadius" : "赤い糸の当たり判定"
+"options.role.cupid.laserSeStrength" : "赤い糸SEの可聴範囲"
+
+# Game
+
+
+# UI
+
+"button.label.cupid.lover" : "選択"
+"button.label.cupid.string" : "赤い糸"
+"ui.action.cupid.lover" : "ラバーズにするプレイヤーを選択します。"
+"ui.action.cupid.string" : "ラバーズの間に赤い糸を顕現させます。<br>初回の発動ではラバーズを成立させて赤い糸を顕現させます。<br>その後もう一度だけ赤い糸を発動できます。"
+"ui.action.cupid.lover.string" : "赤い糸を顕現させます。<br>ゲーム中に一度だけ使用できます。"
+
+# Status
+
+"state.laser" : "赤い糸"
+
+# Stats
+
+"stats.cupid.lovers" : "ラバーズを結んだ回数"
+"stats.cupid.laserCupid" : "キューピッドで赤い糸を顕現させた回数"
+"stats.cupid.laserLover" : "ラバーズで赤い糸を顕現させた回数"
+
+# Titles
+
+"achievement.cupid.common1.title" : "遠距離恋愛"
+"achievement.cupid.common1.goal" : "30m以上離れた状態で赤い糸を顕現させる。"
+
+"achievement.combination.2.cupid.lover.common1.title" : "血より赤い絆"
+"achievement.combination.2.cupid.lover.common1.goal" : "キューピッドに結ばれたラバーズで、赤い糸によって<br>2人以上キルしたうえでラバーズ勝利で勝利する。"
+"achievement.combination.2.cupid.lover.common1.splitted.1" : "赤い"
+
+"achievement.cupid.another1.title" : "話が違う"
+"achievement.cupid.another1.goal" : "自身が結んだラバーズの赤い糸によってキルされる。"
+"achievement.cupid.another1.splitted.0" : "話が"
+
+"achievement.cupid.challenge.title" : "愛すべき人の子たちへ"
+"achievement.cupid.challenge.goal" : "ラバーズをつくり、赤い糸で4人以上キルしたうえでラバーズを始末し、<br>自身1人だけ生き残ってインポスター勝利で勝利する。"
+"achievement.cupid.challenge.flavor" : ""愚かしくて、おかしくて、愛おしい" ―キューピッド"
+"achievement.cupid.challenge.splitted.0" : "愛すべき"

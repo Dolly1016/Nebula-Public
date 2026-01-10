@@ -15,11 +15,12 @@ using Virial.Events.Game;
 using Nebula.Roles.Abilities;
 using Virial.DI;
 using Virial.Components;
+using Nebula.Documents;
 
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, DefinedRole
+public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, DefinedRole, IAssignableDocument
 {
     private Bubblegun() : base("bubblegun", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [BubbleCoolDownOption, bubbleSizeOption, bubbleSpeedOption, bubbleDurationOption, maxBubblesOption, eraseBubblesOnMeeting, canKillImpostorOption, bubblePopWhenHitWallOption])
     {
@@ -27,7 +28,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Bubblegun.png");
     }
 
-    static private readonly IRelativeCoolDownConfiguration BubbleCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.bubblegun.bubbleCooldown", CoolDownType.Immediate, (0f, 60f, 2.5f), 30f, (-30f, 30f, 2.5f), 0f, (0.5f, 5f, 0.125f), 1.5f);
+    static private readonly IRelativeCooldownConfiguration BubbleCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.bubblegun.bubbleCooldown", CoolDownType.Immediate, (0f, 60f, 2.5f), 30f, (-30f, 30f, 2.5f), 0f, (0.5f, 5f, 0.125f), 1.5f);
     static private readonly FloatConfiguration bubbleSizeOption = NebulaAPI.Configurations.Configuration("options.role.bubblegun.bubbleSize", (0.5f, 2f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private readonly FloatConfiguration bubbleSpeedOption = NebulaAPI.Configurations.Configuration("options.role.bubblegun.bubbleSpeed", (0.5f, 2f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private readonly FloatConfiguration bubbleDurationOption = NebulaAPI.Configurations.Configuration("options.role.bubblegun.bubbleDuration", (2.5f, 40f, 2.5f), 10f, FloatConfigurationDecorator.Second);
@@ -42,6 +43,20 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
     static public readonly Bubblegun MyRole = new();
     static private readonly GameStatsEntry StatsBubble = NebulaAPI.CreateStatsEntry("stats.bubblegun.bubble", GameStatsCategory.Roles, MyRole);
     static float BubbleDistance => 1.2f;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.bubblegun.ability.equip");
+        yield return new(killButtonSprite, "role.bubblegun.ability.kill");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements() => IAssignableDocument.GetComparisonWithKillCooldown("%BUBBLE%", "%SEC%", "role.bubblegun.ability.sec", BubbleCoolDownOption.Cooldown);
+
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BubblegunButton.png", 115f);
+    static private Image killButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BubblegunKillButton.png", 115f);
 
     public class BubblegunBubble : SimpleLifespan, IGameOperator
     {
@@ -190,8 +205,6 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BubblegunButton.png", 115f);
-        static private Image killButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BubblegunKillButton.png", 115f);
 
         public BubblegunGun? MyGun { get; private set; } = null;
         public int LeftUses { get; private set; }

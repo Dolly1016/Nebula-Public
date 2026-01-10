@@ -1,0 +1,58 @@
+# Assignable
+
+"role.mayor.name" : "メイヤー"
+"role.mayor.short" : "メ"
+"role.mayor.blurb" : "恐怖政治のはじまり"
+
+# Document
+
+"role.mayor.doc" : "会議で複数票投じられるクルーメイトです。"
+
+# Options
+
+"options.role.mayor.detail" : "メイヤーは自身の票を会議を跨いで貯められます。<br>蓄えられた票は好きなタイミングで自由に投じられます。"
+"options.role.mayor.fixedVotes" : "固定票メイヤー化"
+"options.role.mayor.fixedVotes.detail" : "会議ごとに固定の票数を投じるメイヤーとして活用できるよう、<br>オプションを最適化します。"
+"options.role.mayor.minVote" : "最小投票数"
+"options.role.mayor.minVote.detail" : "会議ごとに投じられる最小の票数です。"
+"options.role.mayor.maxVote" : "最大投票数"
+"options.role.mayor.maxVote.detail" : "会議ごとに投じられる最大の票数です。"
+"options.role.mayor.maxVotesStock" : "投票ストック数"
+"options.role.mayor.maxVotesStock.detail" : "メイヤーはストックされた票を消費して投票します。<br>割り当てられた票のうち、投票に使用しなかった余りが次の会議のためにストックされます。"
+"options.role.mayor.voteAssignment" : "会議ごとの票の割り当て数"
+"options.role.mayor.voteAssignment.detail" : "メイヤーは会議が始まるたびに票のストックを獲得します。<br>この設定によってメイヤーが会議ごとに手に入れる票数を変更できます。"
+"options.role.mayor.voteAssignmentOnReporting" : "自身の死体通報による票割り当て数"
+"options.role.mayor.voteAssignmentPerTasks" : "タスク完了時の票割り当て数"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.mayor.votes" : "投じた総票数"
+"role.mayor.hud.votes" : "所持票数"
+
+# Titles
+
+"achievement.mayor.common1.title" : "鶴の一声"
+"achievement.mayor.common1.goal" : "複数票を投じてプレイヤーを追放する。"
+"achievement.mayor.common1.cond" : "追放先のプレイヤーに投票していない場合は無効"
+"achievement.mayor.common1.flavor" : ""あなたの意見に賛同したわけではないのですが、しかし..." ―破られた議事録より"
+"achievement.mayor.common1.splitted.0" : "鶴の"
+
+"achievement.mayor.another1.title" : "徒死"
+"achievement.mayor.another1.goal" : "すべての票を保持したまま死亡する。"
+"achievement.mayor.another1.cond" : "3回以上会議に参加している"
+
+"achievement.mayor.common2.title" : "秘すれば花"
+"achievement.mayor.common2.goal" : "初回の会議から連続して3回以上、一票だけの投票を続けて<br>メイヤーの存在を秘匿する。"
+"achievement.mayor.common2.cond" : "秘匿ののち、1回以上複数票を投じて誰かを追放する"
+"achievement.mayor.common2.splitted.2" : "花"
+
+"achievement.mayor.challenge.title" : "孤立無援の為政者"
+"achievement.mayor.challenge.goal" : "自身の票だけで敵陣営のプレイヤーを追放に付させる。"
+"achievement.mayor.challenge.cond" : "追放が有利にはたらく相手(ジェスター)は除く"
+"achievement.mayor.challenge.flavor" : "君に選択の余地はない。"

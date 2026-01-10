@@ -8,7 +8,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, DefinedRole
+public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, DefinedRole, IAssignableDocument
 {
     private Painter() : base("painter", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, PaintCoolDownOption, LoseSampleOnMeetingOption, TransformAfterMeetingOption]) { }
 
@@ -25,6 +25,20 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
     static private GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.painter.sample", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsPaint = NebulaAPI.CreateStatsEntry("stats.painter.paint", GameStatsCategory.Roles, MyRole);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Morphing.Ability.SampleButtonSprite, "role.painter.ability.sample");
+        yield return new(Ability.PaintButtonSprite, "role.painter.ability.paint");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%SAMPLE%", Language.Translate(LoseSampleOnMeetingOption ? "role.painter.ability.sample.loseSample" : "role.painter.ability.sample.keepSample"));
+        yield return new("%PAINT%", Language.Translate(TransformAfterMeetingOption ? "role.painter.ability.paint.afterMeeting" : "role.painter.ability.paint.immediate"));
+    }
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButtonImpl? sampleButton = null;

@@ -39,11 +39,11 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0,0), Roles.GetRole(arguments.Get(1, -1)), arguments.Skip(2).ToArray());
     static public int[] GenerateArgument(int[] lastArgs, DefinedRole? ability) => [lastArgs.Get(0, 0), ability?.Id ?? -1, ..(ability?.DefaultAssignableArguments ?? [])];
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.tyrant.killCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
+    static private IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.tyrant.killCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static private IntegerConfiguration NumOfKillingToWinOption = NebulaAPI.Configurations.Configuration("options.role.tyrant.numOfKillingToWin", (1, 10), 4);
     static public BoolConfiguration UseImpostorAbilityOption = NebulaAPI.Configurations.Configuration("options.role.tyrant.useImpostorAbility", false);
     static public int RequiredKillingToWin => NumOfKillingToWinOption;
-    static public float KillCooldown => KillCoolDownOption.CoolDown;
+    static public float KillCooldown => KillCoolDownOption.Cooldown;
 
     static public Tyrant MyRole = new Tyrant();
     static private GameStatsEntry StatsKill = NebulaAPI.CreateStatsEntry("stats.tyrant.kill", GameStatsCategory.Roles, MyRole);

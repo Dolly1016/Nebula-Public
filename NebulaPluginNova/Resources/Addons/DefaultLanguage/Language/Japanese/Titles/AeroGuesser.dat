@@ -1,0 +1,29 @@
+"achievement.aeroGuesser.oneGame.title" : "アモゲッサー"
+"achievement.aeroGuesser.oneGame.goal" : "アモゲッサーを1回プレイする。"
+
+"achievement.aeroGuesser.mapMismatch.title" : "しらない星"
+"achievement.aeroGuesser.mapMismatch.goal" : "アモゲッサーの推測で、別のマップと取り違える。"
+"achievement.aeroGuesser.mapMismatch.splitted.0" : "しらない"
+
+"achievement.aeroGuesser.doubleScore2.title" : "僕だけが知っている"
+"achievement.aeroGuesser.doubleScore2.goal" : "2番手とダブルスコア以上の差をつけて800pt以上得点する。"
+"achievement.aeroGuesser.doubleScore2.cond" : "参加者: 5人以上"
+"achievement.aeroGuesser.doubleScore2.splitted.2" : "知っている"
+
+"achievement.aeroGuesser.total0.title" : "星間旅行へようこそ"
+"achievement.aeroGuesser.total0.goal" : "アモゲッサーで累計10,000pt獲得する。"
+
+"achievement.aeroGuesser.total1.title" : "宇宙の案内人"
+"achievement.aeroGuesser.total1.goal" : "アモゲッサーで累計50,000pt獲得する。"
+
+"achievement.aeroGuesser.total2.title" : "アカシックレコード"
+"achievement.aeroGuesser.total2.goal" : "アモゲッサーで累計100,000pt獲得する。"
+
+"achievement.aeroGuesser.perfectScore.title" : "プロゲッサー"
+"achievement.aeroGuesser.perfectScore.goal" : "通算10回、完璧な推測をする。"
+"achievement.aeroGuesser.perfectScore.splitted.0" : "プロ"
+
+"achievement.aeroGuesser.allMore900.title" : "なんでも知っている"
+"achievement.aeroGuesser.allMore900.goal" : "全問で900pt以上獲得する。"
+"achievement.aeroGuesser.allMore900.cond" : "問題: Hardのみ+問題数: 10問+出題対象のマップ: 2種類以上"
+"achievement.aeroGuesser.allMore900.splitted.0" : "なんでも"

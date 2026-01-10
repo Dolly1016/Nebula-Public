@@ -244,7 +244,7 @@ static file class GuesserSystem
     }
 }
 
-public class Guesser : DefinedSingleAbilityRoleTemplate<Guesser.Ability>, HasCitation, DefinedRole
+public class Guesser : DefinedSingleAbilityRoleTemplate<Guesser.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     static internal Image IconImage = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Icons/guesser.png");
     public bool IsEvil => Category == RoleCategory.ImpostorRole;
@@ -262,6 +262,9 @@ public class Guesser : DefinedSingleAbilityRoleTemplate<Guesser.Ability>, HasCit
 
     static public Guesser MyNiceRole = new(false);
     static public Guesser MyEvilRole = new(true);
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => false;
 
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable != GuesserModifier.MyRole;
     

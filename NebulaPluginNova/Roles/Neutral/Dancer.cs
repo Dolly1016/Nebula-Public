@@ -128,7 +128,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
 }
 
 [NebulaRPCHolder]
-public class Dancer : DefinedRoleTemplate, DefinedRole
+public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.dancer", new(243, 152, 0), TeamRevealType.OnlyMe);
 
@@ -164,13 +164,28 @@ public class Dancer : DefinedRoleTemplate, DefinedRole
         if (!callByMe) (message.Item1.Role as Dancer.Instance)?.UpdateDanceState(message.Item2, message.Item3, message.Item4);
     });
 
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.dancer.ability.dance");
+        yield return new(buttonKillSprite, "role.dancer.ability.danceKill");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%NUM%", NumOfSuccessfulForecastToWinOption.GetValue().ToString());
+        yield return new("%ADD%", FinalDanceOption ? Language.Translate("role.dancer.winCond.main.lastDance") : "");
+    }
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DanceButton.png", 100f);
+    static private Image buttonKillSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DanceKillButton.png", 100f);
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
         bool RuntimeRole.IgnoreNoisemakerNotification => ShowDeahNotificationOption;
 
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DanceButton.png", 100f);
-        static private Image buttonKillSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DanceKillButton.png", 100f);
         public Instance(GamePlayer player) : base(player, VentConfiguration)
         {
         }

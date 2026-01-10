@@ -1,0 +1,30 @@
+# Meeting Tool
+
+"meeting.memo.page" : "ページ: "
+"meeting.memo.player.line" : "%PLAYER%の経路"
+"meeting.memo.player.type" : "アイコン選択"
+"meeting.memo.player.color" : "プレイヤー選択"
+"meeting.memo.control.icon" : "左クリック: 編集<br>右クリック: アイコンを削除"
+"meeting.memo.control.line" : "左クリック: 色の変更<br>右クリック: 経路を削除"
+
+# Prespawn Minigame
+
+"game.prespawn.countdown" : "残り時間: %SECOND%"
+"game.prespawn.waiting" : "ほかのプレイヤーを待機中..."
+"game.prespawn.spawnIn" : "スポーンします"
+
+# Emergency Button
+
+"game.meeting.cannotUseEmergencyButton" : "緊急会議はロックされている"
+
+# Exile Scene
+
+"game.meeting.someoneDisappeared" : "誰かが船を去ったようだ。"
+"game.meeting.roleText" : "%PLAYER%は%ROLE%だった。"
+"game.meeting.multiple" : "どちらも追放された。"
+"game.meeting.obvious" : "ほかに選択肢などなかった。"
+
+# UI
+
+"ui.meeting.leftClick" : "左クリック: 能力の使用"
+"ui.meeting.rightClick": "右クリック: 別の能力に変更"

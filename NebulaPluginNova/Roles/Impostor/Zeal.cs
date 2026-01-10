@@ -16,9 +16,9 @@ using Virial.Game;
 namespace Nebula.Roles.Impostor;
 
 
-internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRole
+internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRole, IAssignableDocument
 {
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.zeal.killCooldown", CoolDownType.Immediate, (0f, 60f, 2.5f), 40f, (-40f, 40f, 2.5f), 10f, (0.125f, 2f, 0.125f), 1.25f);
+    static private IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.zeal.killCooldown", CoolDownType.Immediate, (0f, 60f, 2.5f), 40f, (-40f, 40f, 2.5f), 10f, (0.125f, 2f, 0.125f), 1.25f);
     static private FloatConfiguration AbsorbCooldownOption = NebulaAPI.Configurations.Configuration("options.role.zeal.absorbCooldown", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration AbsorbDurationOption = NebulaAPI.Configurations.Configuration("options.role.zeal.absorbDuration", (1f, 10f, 1f), 3f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration AbsorbAdditionalDurationOption = NebulaAPI.Configurations.Configuration("options.role.zeal.absorbAdditionalDuration", (float[])[0f, 0.5f, 1f, 1.5f, 2f, 2.5f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f], 3f, FloatConfigurationDecorator.Second);
@@ -33,8 +33,17 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     static public readonly Zeal MyRole = new();
 
-    static private Image douseButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ZealButton.png", 115f);
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ZealButton.png", 115f);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.zeal.ability.absorb");
+        yield return new(ModAbilityButtonImpl.VanillaKillImage, "role.zeal.ability.kill");
+    }
+
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private class PlayerIcon
@@ -107,7 +116,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
                 var interactTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeStandardPredicate(p) && playerIcons.All(icon => icon.Player != p));
 
                 interactButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility,
-                    AbsorbCooldownOption, AbsorbDurationOption, "absorb", douseButtonSprite,
+                    AbsorbCooldownOption, AbsorbDurationOption, "absorb", buttonSprite,
                     _ => interactTracker.CurrentTarget != null);
                 interactButton.OnEffectStart = (button) =>
                 {

@@ -1,6 +1,7 @@
 ﻿using Nebula.Patches;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using Virial.Compat;
 using Virial.Runtime;
 using static Il2CppSystem.Net.Http.Headers.Parser;
 
@@ -71,6 +72,7 @@ public class Language
     private class LanguageAPI : Virial.Media.Translator
     {
         string Virial.Media.Translator.Translate(string key) => Language.Translate(key);
+        string Virial.Media.Translator.Translate(VirtualKeyInput input) => ButtonEffect.KeyCodeInfo.GetKeyDisplayName(NebulaInput.GetInput(input).TypicalKey) ?? "Empty";
     }
 
     static public readonly Virial.Media.Translator API = new LanguageAPI();
@@ -140,7 +142,7 @@ public class Language
         DefaultLanguage = new Language();
         using (var stream = StreamHelper.OpenFromResource("Nebula.Resources.Color.dat")) DefaultLanguage.Deserialize(stream);
         using (var stream = OpenDefaultLangStream()) DefaultLanguage.Deserialize(stream);
-        using (var stream = StreamHelper.OpenFromResource("Nebula.Resources.SecretLang.dat")) DefaultLanguage.Deserialize(stream);
+        //using (var stream = StreamHelper.OpenFromResource("Nebula.Resources.SecretLang.dat")) DefaultLanguage.Deserialize(stream);
         DefaultLanguage.translationMap["empty"] = "";
 
         EastAsianFontChanger.LoadFont();
@@ -169,9 +171,6 @@ public class Language
         EastAsianFontChanger.SetUpFont(lang);
 
         CurrentLanguage = new Language();
-
-        //CurrentLanguage.Deserialize(StreamHelper.OpenFromResource("Nebula.Resources.Languages." + lang + ".dat"));
-        //CurrentLanguage.Deserialize(StreamHelper.OpenFromResource("Nebula.Resources.Languages." + lang + "_Help.dat"));
 
         foreach(var addon in NebulaAddon.AllAddons)
         {

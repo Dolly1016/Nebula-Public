@@ -1,0 +1,26 @@
+# Assignable
+
+"role.niceGuesser.name" : "ナイスゲッサー"
+"role.niceGuesser.short" : "ゲ"
+"role.niceGuesser.blurb" : "敵を撃ち抜け"
+
+# Document
+
+"role.niceGuesser.doc" : "会議中にプレイヤーの能力を推察してキルできるクルーメイトです。<br>推察を誤ると代わりに自身が死亡します。"
+"role.niceGuesser.tips" : "・会議中に使用できる能力が複数ある場合、能力のアイコンを右クリックすると能力を切り替えられます。"
+
+# Options
+
+"options.role.niceGuesser.detail" : "ゲッサーは会議中にプレイヤーの能力を推察してキルできます。<br>ただし、推察に失敗すると自身が代わりに死んでしまいます。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+

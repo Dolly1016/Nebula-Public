@@ -28,7 +28,7 @@ public static class FootprintHelpers
         }
     }
 }
-internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
+internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
 {
     internal record KillData(GamePlayer Killer, GamePlayer Dead, float Time)
     {
@@ -379,6 +379,15 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
         }
     }
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonImage, "role.investigator.ability.investigate");
+    }
+
+
+    static private readonly Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.InvestigatorButton.png", 115f);
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -386,8 +395,6 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole
         DefinedRole RuntimeRole.Role => MyRole;
         public Instance(GamePlayer player) : base(player) { }
         
-
-        static private readonly Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.InvestigatorButton.png", 115f);
         void RuntimeAssignable.OnActivated() {
             if (AmOwner)
             {

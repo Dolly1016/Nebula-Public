@@ -11,7 +11,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Agent : DefinedRoleTemplate, DefinedRole
+public class Agent : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     private Agent() : base("agent", new(166, 183, 144), RoleCategory.CrewmateRole, Crewmate.MyTeam, [VentConfiguration, NumOfExemptedTasksOption, NumOfExtraTasksOption, SuicideIfSomeoneElseCompletesTasksBeforeAgentOption])
     {
@@ -28,11 +28,19 @@ public class Agent : DefinedRoleTemplate, DefinedRole
 
     static public readonly Agent MyRole = new();
     static private readonly GameStatsEntry StatsAgent = NebulaAPI.CreateStatsEntry("stats.agent.agent", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.agent.ability.agent");
+    }
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
 
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.AgentButton.png", 115f);
         bool RuntimeRole.CanUseVent => leftVent > 0;
         private int leftVent = VentConfiguration.Uses;
         private TMPro.TextMeshPro UsesText = null!;

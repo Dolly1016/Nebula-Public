@@ -16,7 +16,7 @@ using Virial.Events.Game;
 
 namespace Nebula.Roles.Crewmate;
 
-internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole
+internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     private JekyllAndHyde() : base("jekyllAndHyde", Virial.Color.White, RoleCategory.CrewmateRole, Crewmate.MyTeam, [NumOfKillOption, KillCoolDownOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, TaskConfiguration.AsGroup(new(GroupConfigurationColor.Gray))])
     {
@@ -37,7 +37,7 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole
     string DefinedCategorizedAssignable.DisplayShort => JAndHCombinationShort.Replace("%J%", JekyllDisplayShort).Replace("%H%", HydeDisplayShort);
     string DefinedCategorizedAssignable.DisplayColoredShort => JAndHCombinationShort.Replace("%J%", JekyllDisplayShort.Color(Palette.CrewmateBlue)).Replace("%H%", HydeDisplayShort.Color(Palette.ImpostorRed));
     static private readonly IntegerConfiguration NumOfKillOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.numOfKill", (0, 5), 1);
-    static private readonly IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.jekyllAndHyde.killCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => NumOfKillOption > 0);
+    static private readonly IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.jekyllAndHyde.killCooldown", CoolDownType.Relative, (0f, 60f, 2.5f), 30f, (-40f, 40f, 2.5f), 0f, (0.125f, 2f, 0.125f), 1f, () => NumOfKillOption > 0);
     static private readonly BoolConfiguration HasImpostorVisionOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.hasImpostorVision", false);
     static private readonly BoolConfiguration CanUseVentsOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.canUseVents", false);
     static private readonly BoolConfiguration CanMoveInVentsOption = NebulaAPI.Configurations.Configuration("options.role.jekyllAndHyde.canMoveInVents", false);
@@ -49,6 +49,17 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole
     static public readonly JekyllAndHyde MyRole = new();
     static private readonly GameStatsEntry StatsMedicine = NebulaAPI.CreateStatsEntry("stats.jekyllAndHyde.medicine", GameStatsCategory.Roles, MyRole);
     (Virial.Color mainColor, Virial.Color? subColor)? DefinedAssignable.IconColor => (Virial.Color.ImpostorColor, Virial.Color.CrewmateColor);
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.jekyllAndHyde.ability.drug");
+    }
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.JekyllDrugButton.png", 115f);
+
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
@@ -64,7 +75,6 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole
 
         int LeftKill = 0;
         bool UsedDrug = false;
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.JekyllDrugButton.png", 115f);
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)

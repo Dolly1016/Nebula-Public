@@ -10,6 +10,7 @@ using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Internal;
 using Virial.Text;
 using Virial.Utilities;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
@@ -80,6 +81,8 @@ public class NebulaImpl : INebula
     bool INebula.IsAndroid =>  NebulaPlugin.IsAndroid;
 
     ITitlesRegister INebula.Titles => TitleRegisterImpl.Instance;
+
+    AmongUsLL INebula.AmongUs => AmongUsLLImpl.Instance;
 }
 
 internal static class UnboxExtension

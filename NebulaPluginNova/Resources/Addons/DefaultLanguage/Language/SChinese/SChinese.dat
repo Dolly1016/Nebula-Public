@@ -384,6 +384,7 @@ $Achievement
 "options.task.noGuide.collectSamples" : "无指引收集样本任务"
 "options.map.randomizedWiring" : "随机配线任务点位"
 "options.map.stepsOfWiringGame" : "完成任务所需配线次数"
+"options.task.fakeScan" : "伪装扫描送出结果任务"
 "options.task.group.wiring" : "配线任务设定"
 "options.task.group.noGuide" : "无指引任务设定"
 
@@ -438,6 +439,8 @@ $Achievement
 "options.aeroGuesser.guessTime" : "猜测时间"
 "options.aeroGuesser.numOfQuiz" : "题目数量"
 "options.aeroGuesser.monochromeMode" : "黑白模式"
+"options.aeroGuesser.hurryTimer" : "缩短时间"
+"options.aeroGuesser.hurryTimerDuration" : "缩短最大时间"
 "options.aeroGuesser.skeld" : "Skeld"
 "options.aeroGuesser.mira" : "MIRA HQ"
 "options.aeroGuesser.polus" : "Polus"
@@ -445,6 +448,7 @@ $Achievement
 "options.aeroGuesser.fungle" : "Fungle"
 "options.aeroGuesser.normal" : "普通"
 "options.aeroGuesser.hard" : "困难"
+"options.aeroGuesser.group.hurryTimer" : "缩短时间设定"
 "options.aeroGuesser.group.filter.difficulty" : "题目难度倍率设定"
 "options.aeroGuesser.group.filter.map" : "地图题目倍率设定"
 
@@ -906,6 +910,7 @@ $Achievement
 "options.role.sheriff.numOfShots" : "击杀次数"
 "options.role.sheriff.canKillHidingPlayer" : "可以击杀通风口内玩家"
 "options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "在没有发现尸体前不能使用技能"
+"options.role.sheriff.unsealOnReportButtonTurningOn" : "报告键亮起时解锁击杀能力"
 "stats.sheriff.shot" : "执法成功次数"
 "stats.sheriff.misshot" : "执法失败次数"
 
@@ -1684,6 +1689,7 @@ $Achievement
 "role.damned.name" : "受诅咒者"
 "role.damnedImpostor.name" : "受诅咒者"
 "role.damned.short" : "受"
+"role.damnedImpostor.short" : "受"
 "options.role.damned.detail" : "拥有受诅咒者的玩家受到的第一次伤害是无效的。<br>根据设置不同，效果也不同。"
 "role.damned.prefix" : "受诅咒者"
 "role.damned.generalBlurb" : "身负诅咒的人"
@@ -2028,7 +2034,7 @@ $Achievement
 "location.fungle.meetingRoom" : "会议室"
 "location.fungle.miningPit" : "矿坑"
 "location.fungle.reactor" : "核反应堆"
-"location.fungle.recRoom" : "运输船"
+"location.fungle.recRoom" : "水花区"
 "location.fungle.splashZone" : "水花区"
 "location.fungle.storage" : "库房"
 "location.fungle.sleepingQuarters" : "食堂"
@@ -2150,6 +2156,7 @@ $Achievement
 "button.label.poison" : "投毒"
 "button.label.select" : "融合"
 "button.label.afk" : "挂机"
+"button.label.scan" : "扫描"
 
 # Game
 
@@ -2930,6 +2937,9 @@ $Achievement
 "options.map.customization.fungle.growingMushroom.detail" : "开启后，发光蘑菇周围的环境会变得可见。"
 "options.map.customization.fungle.thinFog.detail" : "开启后，丛林区域的阴影会变淡。"
 "options.map.customization.fungle.simpleLaboratory.detail" : "开启后，去除实验室右下角的墙壁，使其可以直接穿过。"
+"options.map.customization.fungle.forClassicGame.detail" : "修改地图中的建筑，使其变的更适合推理。包含以下改动：<br>・将核反应堆区域附近的梯子改为单行道。<br>・封锁会议室前往下方的通道。<br>・封锁实验室与温室左下方门口之间的通道<br>・封锁高台中间宝石上方的通道。<br>・矿坑附近新增2处通风口。"
+
+"options.task.fakeScan.detail" : "让没有送出扫描结果任务的玩家也可以移动到扫描仪上伪装自己。"
 
 "options.meeting.deathPenalty.detail" : "配置后，会议时间将减少设定值乘以死亡人数秒数。"
 "options.meeting.noticeExtraVictims.detail" : "开启后，每当会议结束有额外信息时，会进行额外通知。"
@@ -2949,6 +2959,10 @@ $Achievement
 "options.task.noGuide.helpCritter.detail" : "开启后，将无法得知帮助生物任务位置。"
 "options.task.noGuide.replaceParts.detail" : "开启后，将无法得知更换零件任务位置。"
 "options.task.noGuide.collectSamples.detail" : "开启后，将无法得知收集样本任务位置。"
+
+"options.aeroGuesser.monochromeMode.detail" : "开启后，题目图片将显示为黑白色。"
+"options.aeroGuesser.hurryTimer.detail" : "开启后，每当有人提交答案就会缩短答题时间。"
+"options.aeroGuesser.hurryTimerDuration.detail" : "这是设定每次缩短的秒数。<br>当设定时间大于当前时间，将不会缩短。"
 
 "options.role.agent.numOfExemptedTasks.detail" : "指定代理人的任务总数将减少的数量。<br>总任务越少，获取额外任务的速度更快。"
 "options.role.agent.numOfExtraTasks.detail" : "设置每次完成任务后可以额外获取的任务数量。<br>死亡后你将无法<b>获取</b>新的任务。"
@@ -3459,6 +3473,19 @@ $Achievement
 "role.vanity.ability.title" : "固有能力【正义使者？】"
 "role.vanity.ability.main" : "虚荣者在开始时与警长相同，但不会因为走火而死。"
 "role.vanity.ability.kill" : "可以击杀所有人。"
+
+"role.amalgam.ability.title" : "固有能力【融合】"
+"role.amalgam.ability.main" : "可以融合多个职业能力。可融合的职业可以在设置中进行更改。"
+"role.amalgam.ability.amalgam" : "融合能力。<br>融合后将无法修改。"
+
+"role.creeping.ability.title" : "固有能力【制毒大师】"
+"role.creeping.ability.main" : "可以对其他玩家投毒。中毒的玩家若没在规定时间内解毒，将会毒发身亡。"
+"role.creeping.ability.poison" : "对目标投毒。<br>会有闪烁提示。"
+"role.creeping.tips" : "・在紧急会议中，毒素仍然会侵蚀玩家，因此会在会议中死亡。<br>・中毒的玩家可以在地图中选择急救箱进行解毒。<br>・急救箱只会在地图中出现一个，根据不同的地图，位置会在一到两个固定点位。<br>  ・Skeld：医务室<br>  ・MIRA HQ：发射台或库房<br>  ・Polus：实验室或氧气室（装填罐子任务点后面）<br>  ・Airship：大厅（最左侧上方屋子中）或配电室左下角<br>  ・Fungle：水花区（屋子内部）或实验室左下角"
+
+"role.nighty.ability.title" : "固有能力【安眠地雷】"
+"role.nighty.ability.main" : "可以在地图中放置<b>安眠地雷</b>。<br>踩到地雷的玩家视野会在一段时间内受到限制。<br>自身和其他伪装者<b>不会</b>触发。"
+"role.nighty.ability.place" : "放置安眠地雷。"
 
 "role.extraMission.winCond" : "自身胜利条件达成时，目标必须在游戏结束前死亡，否则你将无法胜利。"
 

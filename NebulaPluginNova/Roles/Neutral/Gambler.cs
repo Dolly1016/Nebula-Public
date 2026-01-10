@@ -23,7 +23,7 @@ using Virial.Text;
 namespace Nebula.Roles.Neutral;
 
 
-internal class Gambler : DefinedRoleTemplate, DefinedRole
+internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.gambler", new(216, 194, 79), TeamRevealType.OnlyMe);
 
@@ -107,14 +107,26 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole
     }
 
     static private readonly MultiImage chipsImage = DividedSpriteLoader.FromResource("Nebula.Resources.GamblerChip.png", 100f, 10, 1);
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DeceiveButton.png", 115f);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.gambler.ability.deceive");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%NUM%", GoalChipsOption.GetValue().ToString());
+    }
 
     [NebulaRPCHolder]
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
         static private readonly MultiImage meetingButtonImage = DividedSpriteLoader.FromResource("Nebula.Resources.GamblerButton.png", 100f, 2, 2);
-
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DeceiveButton.png", 115f);
         
         private int myChips = InitialChipsOption;
 

@@ -1,0 +1,60 @@
+"options.role.count" : "割当人数"
+"options.role.chance" : "割当確率"
+"options.role.secondaryChance" : "2回目～"
+"options.role.count.jackalized" : "ジャッカル割当人数"
+"options.role.chance.jackalized" : "ジャッカル割当確率"
+"options.role.count.madden" : "マッドメイト割当人数"
+"options.role.chance.madden" : "マッドメイト割当確率"
+"options.role.count.tyrant" : "タイラント割当人数"
+"options.role.chance.tyrant" : "タイラント割当確率"
+"options.role.count.short" : "割り当て"
+"options.modifier.chance" : "割り当て確率"
+"options.role.crewmateCount" : "クルーメイト割り当て"
+"options.role.impostorCount" : "インポスター割り当て"
+"options.role.neutralCount" : "第三陣営割り当て"
+"options.role.definiteCount" : "確定"
+"options.role.randomCount" : "ランダム"
+"options.role.maxCount" : "全体の最大割当数"
+"options.role.maxCount.unlimited" : "無制限"
+
+"options.killCoolDown.type.immediate" : "即値"
+"options.killCoolDown.type.relative" : "相対"
+"options.killCoolDown.type.ratio" : "比率"
+
+"options.commonSetting" : "共通設定"
+
+"role.general.canUseVent" : "ベントの使用"
+"role.general.ventOption" : "ベントオプション"
+"role.general.ventCoolDown" : "クールダウン"
+"role.general.ventCoolDown.short" : "クール"
+"role.general.ventDuration" : "潜伏可能時間"
+"role.general.ventDuration.short" : "潜伏"
+"role.general.ventUses" : "最大使用回数"
+"role.general.ventUses.short" : "使用"
+
+# Tabs
+
+"options.tab.setting" : "各種[設定]"
+"options.tab.crewmate" : "[クルーメイト] 役職"
+"options.tab.impostor" : "[インポスター] 役職"
+"options.tab.neutral" : "[第三陣営] 役職"
+"options.tab.ghost" : "[幽霊] 役職"
+"options.tab.modifier" : "[モディファイア]"
+
+# Vanilla Options
+
+"options.vanilla.header" : "Among Us"
+"options.vanilla.header.impostor" : "インポスターオプション"
+"options.vanilla.header.crewmate" : "クルーメイトオプション"
+"options.vanilla.header.meeting" : "緊急会議オプション"
+"options.vanilla.header.task" : "タスクオプション"
+
+# UI
+
+"ui.options.nav.1.left" : "オプションを開く"
+"ui.options.nav.1.middle" : "簡易/詳細表示を切替"
+"ui.options.nav.1.right" : "役職名と詳細をコピー (役職オプションのみ)"
+"ui.options.nav.2.middle" : "オプション一覧に戻る"
+
+"ui.configuration.click" : "左クリック: 設定を開く<br>右クリック: 役職名と概要をコピー"
+"ui.configuration.copied" : "コピーしました！"

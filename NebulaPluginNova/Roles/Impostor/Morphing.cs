@@ -9,7 +9,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasCitation, DefinedRole
+public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private Morphing() : base("morphing", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption, MorphDurationOption, LoseSampleOnMeetingOption]) { }
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
@@ -26,6 +26,19 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
     static private GameStatsEntry StatsMorph = NebulaAPI.CreateStatsEntry("stats.morphing.morph", GameStatsCategory.Roles, MyRole);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Ability.SampleButtonSprite, "role.morphing.ability.sample");
+        yield return new(Ability.MorphButtonSprite, "role.morphing.ability.morph");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%SAMPLE%", Language.Translate(LoseSampleOnMeetingOption ? "role.morphing.ability.sample.loseSample" : "role.morphing.ability.sample.keepSample"));
+    }
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButton? sampleButton = null;

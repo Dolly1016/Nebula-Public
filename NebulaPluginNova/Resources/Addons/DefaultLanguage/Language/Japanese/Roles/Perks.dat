@@ -1,0 +1,102 @@
+# Perks
+
+"perkui.message.noncrew" : "クルーメイトは人外専用パークを獲得できません。"
+"perkui.message.noncrewWarning" : "**注意！人外専用パークです！**"
+"perkui.message.swap" : "所持しているパークと交換して獲得できます。"
+"perkui.message.obtain" : "インタラクトしてパークを獲得できます。"
+
+"perk.common.maxSpawn" : "最大出現数"
+"perk.common.maxSpawn.unlimited" : "無制限"
+
+"perk.empty.name" : "パーク枠"
+"perk.empty.detail" : "開花した<b>プラント</b>からパークを手に入れられます。"
+
+"perk.empty.noncrewmate.name" : "人外専用パーク枠"
+"perk.empty.noncrewmate.detail" : "開花した<b>歪んだプラント</b>からパークを手に入れられます。"
+
+"perk.acceleration.name" : "俊敏"
+"perk.acceleration.detail" : "発動すると%D%秒間、通常の%R%倍の速度で移動できる。 <br>このパークには%CD%秒のクールダウンがある。"
+"perk.acceleration.cooldown" : "パーク発動のクールダウン"
+"perk.acceleration.duration" : "加速の効果時間"
+"perk.acceleration.rate" : "加速倍率"
+
+"perk.flipX.name" : "ようこそ鏡の世界へ"
+"perk.flipX.detail" : "全プレイヤーの画面が左右反転する。"
+
+"perk.flipY.name" : "下剋上の機"
+"perk.flipY.detail" : "全プレイヤーの画面が上下反転する。"
+
+"perk.flipXY.name" : "逆転劇"
+"perk.flipXY.detail" : "全プレイヤーの画面が上下左右反転する。"
+
+"perk.sniperIcon.name" : "空砲"
+"perk.sniperIcon.detail" : "その場で空砲を撃つ。<br>このパークには%CD%秒のクールダウンがある。"
+
+"perk.raiderEvidence.name" : "憤怒"
+"perk.raiderEvidence.detail" : "すぐ近くの壁に斧を突き刺す。<br>このパークには%CD%秒のクールダウンがある。<br>レイダーはこのパークを使用できない。"
+
+"perk.fakeBubble.name" : "景気よし"
+"perk.fakeBubble.detail" : "その場でキル能力を持たないバブルを撃つ。<br>このパークには%CD%秒のクールダウンがある。"
+
+"perk.accelTrap.name" : "可能性の増幅"
+"perk.accelTrap.detail" : "その場に加速トラップを設置する。<br>設置したトラップは会議を挟んでから有効化する。"
+
+"perk.decelTrap.name" : "拘束"
+"perk.decelTrap.detail" : "その場に減速トラップを設置する。<br>設置したトラップは会議を挟んでから有効化する。"
+
+"perk.taskReduction.name" : "再計算"
+"perk.taskReduction.detail" : "タスクノルマを1だけ減少させる。<br>クルーメイトタスクを持たない場合は何も起こらない。"
+
+"perk.ventRelocate.name" : "変容する宇宙船"
+"perk.ventRelocate.detail" : "一度だけ、ベントを移設できる。<br>ベントを掴んでから%D%秒間、ベントを引きずって移動させられる。<br>効果時間中にもう一度使用するとその場でベントを手放し、効果が終了する。"
+"perk.ventRelocate.duration" : "ベント移設の効果時間"
+
+"perk.emergencyButton.name" : "緊急召集"
+"perk.emergencyButton.detail" : "どこからでも緊急ボタンを押せる。<br>このパークは緊急ボタンの使用回数制限を緩和させない。"
+
+"perk.teamLook.name" : "輝く水晶玉"
+"perk.teamLook.detail" : "緊急会議中、選択した生存者1人の陣営を知ることができる。"
+"perk.teamLook.ui.title" : "水晶玉 結果"
+"perk.teamLook.ui.team" : "%TEAM%陣営"
+
+"perk.ghostLook.name" : "刑事の薄汚れたレポート"
+"perk.ghostLook.detail" : "緊急会議中、選択した死者1人の死因を知ることができる。"
+"perk.ghostLook.ui.title" : "レポート詳細"
+
+"perk.invisible.name" : "並行宇宙の旅人"
+"perk.invisible.detail" : "%D%秒間、自身を透明化させる。<br>このパークは1度だけ発動できる。"
+
+"perk.hookshot.name" : "フックショット"
+"perk.hookshot.detail" : "一度だけ、フックショットを使用できる。<br>フックショットはカーソルの方向に射出される。"
+
+"perk.doubleVote.name" : "声高な主張"
+"perk.doubleVote.detail" : "スキップや白票、0票投票以外で<br>投じる票数を一度だけ2倍にする。"
+
+"perk.monowayX.name" : "風見鶏 -赤-"
+"perk.monowayX.detail" : "発動すると%D%秒間、縦方向の移動を禁止する。<br>このパークには%CD%秒のクールダウンがある。<br>クールダウンはタスクフェイズの間のみ進み、会議が始まるたびにリセットされない。"
+
+"perk.monowayY.name" : "風見鶏 -青-"
+"perk.monowayY.detail" : "発動すると%D%秒間、横方向の移動を禁止する。<br>このパークには%CD%秒のクールダウンがある。<br>クールダウンはタスクフェイズの間のみ進み、会議が始まるたびにリセットされない。"
+
+"perk.monowayRotate.name" : "昏迷"
+"perk.monowayRotate.detail" : "発動すると%D%秒間、移動方向をランダムに回転させる。<br>このパークには%CD%秒のクールダウンがある。<br>クールダウンはタスクフェイズの間のみ進み、会議が始まるたびにリセットされない。"
+
+"perk.meteor.name" : "死のメテオストーム"
+"perk.meteor.detail" : "発動から10秒後に、周囲に多数の隕石を落とす。<br>このパークは一度だけ発動できる。<br>発動から隕石墜落の間、緊急ボタンはブロックされ、<br>墜落地点近辺にいるプレイヤーは赤いフラッシュで警告される。<br><br>ヴァルチャーはこのパークを使用できない。"
+"perk.meteor.sabotageText" : "隕石墜落警報: 安全な場所へ逃げろ"
+"perk.meteor.meetingButtonText" : "隕石墜落の警報が鳴っているため<br>緊急会議を始められません。"
+
+"perk.footprint.name" : "放つ存在感"
+"perk.footprint.detail" : "全員から見える足跡を残すようになる。"
+
+"perk.sacrifice.name" : "身代わり"
+"perk.sacrifice.detail" : "その場に身代わりを召喚する。<br>身代わりがキルされてもパークの使用者は死亡しない。<br>身代わりは%D%秒後に消滅する。"
+"perk.sacrifice.duration" : "身代わりの効果時間"
+
+# Game Statictics
+
+"statistics.events.meteor" : "隕石墜落"
+
+# Status
+
+"state.meteor" : "隕石直撃"

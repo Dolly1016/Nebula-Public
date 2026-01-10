@@ -1,0 +1,66 @@
+# Assignable
+
+"role.marionette.name" : "マリオネット"
+"role.marionette.short" : "マ"
+"role.marionette.blurb" : "そこに意思は無い"
+
+# Document
+
+"role.marionette.doc" : "自身と位置を入れ替えられる人形を操るインポスターです。"
+"role.marionette.ability.title" : "固有能力 "マリオネット人形""
+"role.marionette.ability.main" : "%DOC%"
+"role.marionette.ability.main.player" : "<var>マリオネット本人と同じ見た目</var>の人形を設置できます。"
+"role.marionette.ability.main.player.keep" : "<var>マリオネット本人と同じ見た目</var>の人形を設置できます。<br><var>人形を設置した後に自身の見た目が変わっても、人形の見た目は変わりません。</var>"
+"role.marionette.ability.main.mannequin" : "<var>マネキンの見た目</var>をした人形を設置できます。"
+"role.marionette.ability.place" : "<title>設置</title>その場に人形を設置します。"
+"role.marionette.ability.destroy" : "<title>破壊</title>人形を撤去します。"
+"role.marionette.ability.monitor" : "<title>監視</title>人形とマリオネット自身の間で視点を切り替えます。<br>人形を監視している間、自身はその場で硬直します。"
+"role.marionette.ability.swap" : "<title>スワップ</title>人形と自身の位置をスワップします。"
+"role.marionette.ability.arrow" : "<title>矢印</title>マリオネットは人形の位置を指す矢印を視認できます。"
+"role.marionette.tips" : "・人形は会議を挟むと撤去されます。"
+
+# Options
+
+"options.role.marionette.detail" : "マリオネットは人形を設置できます。<br>人形と自分自身の位置を入れ替えて長距離移動ができます。"
+"options.role.marionette.mannequinMode" : "人形の見た目"
+"options.role.marionette.mannequinMode.mannequin" : "マネキン"
+"options.role.marionette.mannequinMode.player" : "プレイヤー"
+"options.role.marionette.fixDecoyAppearance" : "人形の見た目を固定"
+"options.role.marionette.placeCoolDown" : "設置クールダウン"
+"options.role.marionette.swapCoolDown" : "入れ替えクールダウン"
+"options.role.marionette.decoyDuration" : "人形の有効時間"
+"options.role.marionette.canSeeDecoyInShadow" : "視界外の人形の視認"
+
+# Game
+
+"gameAction.marionette.placement" : "人形設置"
+
+# UI
+
+"button.label.swap" : "スワップ"
+"button.label.monitor" : "監視"
+"ui.action.marionette.place" : "人形を設置します。"
+"ui.action.marionette.destroy" : "人形を破壊します。"
+"ui.action.marionette.monitor" : "人形と視点を切り替えます。"
+"ui.action.marionette.swap" : "人形と位置をスワップします。"
+"ui.action.marionette.switch" : "キー入力によって発動する能力を切り替えます。<br>切り替え対象: スワップ, 監視"
+
+# Stats
+
+"stats.marionette.decoy" : "人形の設置回数"
+"stats.marionette.swap" : "人形との位置スワップ回数"
+
+# Titles
+
+"achievement.marionette.common1.title" : "寸劇"
+"achievement.marionette.common1.goal" : "人形を設置する。"
+
+"achievement.marionette.another1.title" : "喜劇"
+"achievement.marionette.another1.goal" : "人形とスワップした直後の会議で追放されるか推測されて死亡する。"
+
+"achievement.marionette.common2.title" : "怱劇"
+"achievement.marionette.common2.goal" : "10秒以内に2回、人形と位置をスワップする。"
+
+"achievement.marionette.challenge.title" : "血の劇作法"
+"achievement.marionette.challenge.goal" : "キルの直後に人形とスワップして30m以上移動する。"
+"achievement.marionette.challenge.splitted.0" : "血の"

@@ -1,0 +1,23 @@
+# Header
+
+"options.voiceChat" : "ボイスチャットオプション"
+"options.voiceChat.detail" : "通話しながら遊ぼう！ゲーム内VCの設定です。"
+
+# Groups
+
+# Options
+
+"options.voiceChat.useVoiceChat" : "ゲーム内VC"
+"options.voiceChat.canTalkInWanderingPhase" : "近くのプレイヤーとの通話"
+"options.voiceChat.wallsBlockAudio" : "壁による声の遮蔽"
+"options.voiceChat.killersHearDead" : "幽霊の語り掛け"
+"options.voiceChat.killersHearDead.onlyMyKiller" : "自身のキラーのみ"
+"options.voiceChat.killersHearDead.onlyImpostors" : "インポスターのみ"
+"options.voiceChat.killersHearDead.allKillers" : "キラーのみ"
+"options.voiceChat.affectedByCommsSab" : "通信障害による通話の無効化"
+"options.voiceChat.isolateGhostsStrictly" : "厳密な幽霊チャットの隔離"
+"options.voiceChat.radio" : "ラジオの設定"
+"options.voiceChat.impostorsRadio" : "インポスターラジオ"
+"options.voiceChat.jackalRadio" : "ジャッカルラジオ"
+"options.voiceChat.loversRadio" : "ラバーズラジオ"
+"options.voiceChat.scarletRadio" : "スカーレットラジオ"

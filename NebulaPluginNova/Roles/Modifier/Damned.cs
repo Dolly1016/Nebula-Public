@@ -52,7 +52,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            if (canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
+            if (canSeeAllInfo || inEndScene) name += MyRole.GetRoleIconTagSmall();
         }
 
         [OnlyMyPlayer]

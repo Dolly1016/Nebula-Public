@@ -80,14 +80,17 @@
 	  <ProjectReference Include="..\NebulaLoader\NebulaLoader.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Documents\" />
+	</ItemGroup>
+
 	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
 		<Message Text="Construct release folders..." />
 		<Copy SourceFiles="bin\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\" />
 		<Copy SourceFiles="bin\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\Nebula_Steam\BepInEx\nebula" />
 		<Copy SourceFiles="bin\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsRelease)\Nebula_Epic\BepInEx\nebula" />
-		<Exec Command="del $(AmongUsRelease)\Nebula_Steam.zip %26 cd $(AmongUsRelease)\Nebula_Steam %26 %22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula_Steam.zip" />
-		<Exec Command="del $(AmongUsRelease)\Nebula_Epic.zip %26 cd $(AmongUsRelease)\Nebula_Epic %26 %22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula_Epic.zip" />
 		<Copy SourceFiles="bin\Release\net6.0\Nebula.dll" DestinationFolder="$(AmongUsMod)\BepInEx\nebula\" />
+		<Exec Command="del $(AmongUsRelease)\Nebula_Steam.zip %26 cd $(AmongUsRelease)\Nebula_Steam %26 %22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula_Steam.zip %26 del $(AmongUsRelease)\Nebula_Epic.zip %26 cd $(AmongUsRelease)\Nebula_Epic %26 %22$(ZipArchiver)\7z.exe%22 a $(AmongUsRelease)\Nebula_Epic.zip" />
 	</Target>
 
 	<Target Name="CopyCustomFiles" BeforeTargets="BeforeBuild">
@@ -95,11 +98,7 @@
 			<SourceFiles Include="..\NEbulaAddonDevEnv\*.cs" />
 		</ItemGroup>
 
-		<Copy
-		  SourceFiles="@(SourceFiles)"
-		  DestinationFolder="Resources\Addons\DefaultLanguage\Scripts"
-		  SkipUnchangedFiles="true"
-    />
+		<Copy SourceFiles="@(SourceFiles)" DestinationFolder="Resources\Addons\DefaultLanguage\Scripts" SkipUnchangedFiles="true" />
 
 		<Message Text="Zip DefaultLanguage addon..." />
 		<Exec Command="del Resources\Addons\DefaultLanguage.zip %26 cd Resources\Addons\DefaultLanguage %26 %22$(ZipArchiver)\7z.exe%22 a ..\DefaultLanguage.zip" />

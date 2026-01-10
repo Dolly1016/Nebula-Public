@@ -16,7 +16,7 @@ using Virial.Helpers;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitation, DefinedRole
+public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private Sniper() : base("sniper", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,AimAssistOption,DelayInAimAssistOption, CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
@@ -26,11 +26,11 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
         MetaAbility.RegisterCircle(new("role.sniper.soundRange", () => ShotNoticeRangeOption, () => null, UnityColor));
         MetaAbility.RegisterCircle(new("role.sniper.shotSize", () => ShotSizeOption * 0.25f, () => null, UnityColor));
 
-        GameActionTypes.SniperEquippingAction = new("sniper.equipping", this, isEquippingAction: true);
+        GameActionTypes.SniperEquippingAction = new("sniper.equip", this, isEquippingAction: true);
     }
     Citation? HasCitation.Citation => Citations.TownOfImpostors;
 
-    static private IRelativeCoolDownConfiguration SnipeCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sniper.snipeCoolDown", CoolDownType.Immediate, (0f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
+    static private IRelativeCooldownConfiguration SnipeCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.sniper.snipeCoolDown", CoolDownType.Immediate, (0f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
     static private FloatConfiguration ShotSizeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration ShotEffectiveRangeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotEffectiveRange", (2.5f, 50f, 2.5f), 25f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration ShotNoticeRangeOption = NebulaAPI.Configurations.Configuration("options.role.sniper.shotNoticeRange", (2.5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Ratio);
@@ -42,13 +42,29 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
     static private FloatConfiguration DelayInAimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.delayInAimAssistActivation", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second, () => AimAssistOption);
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillImpostor", false);
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, player.IsImpostor ? AmongUsUtil.VanillaKillCoolDown : Jackal.KillCooldown, arguments.GetAsBool(0));
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, player.IsImpostor ? AmongUsLLImpl.Instance.VanillaKillCooldown : Jackal.KillCooldown, arguments.GetAsBool(0));
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     static public Sniper MyRole = new Sniper();
 
     static private GameStatsEntry StatsShot = NebulaAPI.CreateStatsEntry("stats.sniper.shot", GameStatsCategory.Roles, MyRole, null, 10);
     static private GameStatsEntry StatsMisshot = NebulaAPI.CreateStatsEntry("stats.sniper.misshot", GameStatsCategory.Roles, MyRole, null, 9);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.sniper.ability.equip");
+        yield return new(ModAbilityButtonImpl.VanillaKillImage, "role.sniper.ability.kill");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%AIMASSIST%", AimAssistOption ? Language.Translate("role.sniper.tips.aimAssist") : "");
+        yield return new("%DELAY%", DelayInAimAssistOption.GetValue().DecimalToString("1"));
+        yield return new("%SOUND%", ShotNoticeRangeOption.GetValue().DecimalToString("1"));
+    }
+
     [NebulaRPCHolder]
     public class SniperRifle : EquipableAbility, IGameOperator
     {
@@ -94,12 +110,10 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
 
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnipeButton.png", 115f);
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SnipeButton.png", 115f);
         static private Image aimAssistSprite = SpriteLoader.FromResource("Nebula.Resources.SniperGuide.png", 100f);
         
         public SniperRifle? MyRifle = null;

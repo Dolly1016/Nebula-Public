@@ -144,7 +144,7 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
     }
     
 }
-internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, DefinedRole
+internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, DefinedRole, IAssignableDocument
 {
     private Oracle() : base("oracle", new(214, 156, 45), RoleCategory.CrewmateRole, Crewmate.MyTeam, [MaxOracleOption, OracleCooldownOption, OracleAdditionalCooldownOption, OracleDurationOption, NumOfCandidatesOption, DieOnDividingOpportunistOption, DieOnDividingOracleOption])
     {
@@ -165,13 +165,31 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
     static public readonly Oracle MyRole = new();
     static private readonly GameStatsEntry StatsOracle = NebulaAPI.CreateStatsEntry("stats.oracle.oracle", GameStatsCategory.Roles, MyRole);
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonImage, "role.oracle.ability.oracle");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%CAND%", Language.Translate(NumOfCandidatesOption >= 2 ? "role.oracle.ability.main.multiple" : "role.oracle.ability.main.one"));
+        yield return new("%NUM%", NumOfCandidatesOption.GetValue().ToString());
+        List<DefinedRole> roles = [];
+        if (DieOnDividingOpportunistOption) roles.Add(Neutral.Opportunist.MyRole);
+        if (DieOnDividingOracleOption) roles.Add(MyRole);
+        yield return new("%DIE%", roles.Count > 0 ? Language.Translate("role.oracle.ability.oracle.die") : "");
+        yield return new("%ROLES%", string.Join(Language.Translate("role.oracle.ability.oracle.die.split"), roles.Select(r => r.DisplayColoredName)));
+    }
+
+    static private readonly Image buttonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.OracleButton.png", 115f);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), leftUses, ..divideResults.Select(entry => (int[])[entry.Key, entry.Value.role.Length, ..entry.Value.role.Select(r => r.Id)]).Smooth()];
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.OracleButton.png", 115f);
 
         GUIWidget? IPlayerAbility.ProgressWidget => ProgressGUI.Holder(
             ProgressGUI.OneLineText(Language.Translate("role.oracle.gui.results")),
@@ -215,7 +233,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 var playerTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, (p) => ObjectTrackers.PlayerlikeStandardPredicate(p) && !divideResults.ContainsKey(p.RealPlayer.PlayerId));
 
                 var oracleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
-                    OracleCooldownOption, "oracle", buttonSprite, 
+                    OracleCooldownOption, "oracle", buttonImage, 
                     _ => playerTracker.CurrentTarget != null, _ => this.leftUses > 0);
                 if(this.leftUses < 20) oracleButton.ShowUsesIcon(3, this.leftUses.ToString());
                 

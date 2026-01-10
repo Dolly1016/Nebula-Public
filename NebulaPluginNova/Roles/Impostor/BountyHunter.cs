@@ -10,15 +10,15 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Ability>, HasCitation, DefinedRole
+public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private BountyHunter() : base("bountyHunter", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [BountyKillCoolDownOption, OthersKillCoolDownOption, ChangeBountyIntervalOption, ShowBountyArrowOption, ArrowUpdateIntervalOption]) { }
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
 
-    static private readonly IRelativeCoolDownConfiguration BountyKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.bountyHunter.bountyKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 10f, (-30f, 30f, 2.5f), -10f, (0.125f, 2f, 0.125f), 0.5f);
-    static private readonly IRelativeCoolDownConfiguration OthersKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.bountyHunter.othersKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 40f, (-30f, 30f, 2.5f), 20f, (0.125f, 2f, 0.125f), 2f);
+    static private readonly IRelativeCooldownConfiguration BountyKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.bountyHunter.bountyKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 10f, (-30f, 30f, 2.5f), -10f, (0.125f, 2f, 0.125f), 0.5f);
+    static private readonly IRelativeCooldownConfiguration OthersKillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.bountyHunter.othersKillCoolDown", CoolDownType.Ratio, (5f, 60f, 2.5f), 40f, (-30f, 30f, 2.5f), 20f, (0.125f, 2f, 0.125f), 2f);
     static private readonly BoolConfiguration ShowBountyArrowOption = NebulaAPI.Configurations.Configuration("options.role.bountyHunter.showBountyArrow", true);
     static private readonly FloatConfiguration ArrowUpdateIntervalOption = NebulaAPI.Configurations.Configuration("options.role.bountyHunter.arrowUpdateInterval", (5f, 60f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => ShowBountyArrowOption);
     static private readonly FloatConfiguration ChangeBountyIntervalOption = NebulaAPI.Configurations.Configuration("options.role.bountyHunter.changeBountyInterval", (5f, 120f, 5f), 45f, FloatConfigurationDecorator.Second);
@@ -28,7 +28,9 @@ public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Abilit
 
     static private readonly GameStatsEntry StatsBountyKill = NebulaAPI.CreateStatsEntry("stats.bountyHunter.bountyKill", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsOthersKill = NebulaAPI.CreateStatsEntry("stats.bountyHunter.othersKill", GameStatsCategory.Roles, MyRole);
-    float MaxKillCoolDown => Mathn.Max(BountyKillCoolDownOption.CoolDown, OthersKillCoolDownOption.CoolDown, AmongUsUtil.VanillaKillCoolDown);
+    float MaxKillCoolDown => Mathn.Max(BountyKillCoolDownOption.Cooldown, OthersKillCoolDownOption.Cooldown, AmongUsLLImpl.Instance.VanillaKillCooldown);
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements() => [new("%SEC%", ChangeBountyIntervalOption.GetValue().DecimalToString("2"))];
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
@@ -68,13 +70,13 @@ public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Abilit
                         if (killTracker.CurrentTarget!.RealPlayer.PlayerId == currentBounty)
                         {
                             ChangeBounty(killTracker.CurrentTarget.RealPlayer);
-                            button.CoolDownTimer!.Start(BountyKillCoolDownOption.CoolDown);
+                            button.CoolDownTimer!.Start(BountyKillCoolDownOption.Cooldown);
                             acTokenKillBounty.Value = true;
                             StatsBountyKill.Progress();
                         }
                         else
                         {
-                            button.CoolDownTimer!.Start(OthersKillCoolDownOption.CoolDown);
+                            button.CoolDownTimer!.Start(OthersKillCoolDownOption.Cooldown);
                             acTokenKillNonBounty.Value = true;
                             StatsOthersKill.Progress();
                         }
@@ -89,7 +91,7 @@ public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Abilit
                     }
 
                 };
-                killButton.CoolDownTimer = new AdvancedTimer(AmongUsUtil.VanillaKillCoolDown, MyRole.MaxKillCoolDown).SetDefault(AmongUsUtil.VanillaKillCoolDown).SetAsKillCoolDown().Start(10f).Register(this);
+                killButton.CoolDownTimer = new AdvancedTimer(AmongUsLLImpl.Instance.VanillaKillCooldown, MyRole.MaxKillCoolDown).SetDefault(AmongUsLLImpl.Instance.VanillaKillCooldown).SetAsKillCoolDown().Start(10f).Register(this);
                 killButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 killButton.SetLabel("kill");
 

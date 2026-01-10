@@ -1,0 +1,56 @@
+# Assignable
+
+"role.illusioner.name" : "イリュージョナー"
+"role.illusioner.short" : "イ"
+"role.illusioner.blurb" : "信念を凌ぐ邪悪"
+
+# Document
+
+"role.illusioner.doc" : "変身したり、他プレイヤーの見た目を塗り替えられるインポスターです。"
+"role.illusioner.ability.title" : "固有能力 "混迷のイリュージョン""
+"role.illusioner.ability.main" : "モーフィングの変身能力とペインターの塗り替え能力の両方を併せ持っています。"
+"role.illusioner.ability.sample" : "<title>採取</title>プレイヤーの<var>%LOOK%</var>の見た目を採取します。採取した見た目は<b>変身</b>および<b>ペイント</b>で使用できます。<br><var>%SAMPLE%</var>"
+"role.illusioner.ability.morph" : "<title>変身</title>採取した見た目に変身します。<br>効果時間が終了するか能力発動中にもう一度能力を発動すると、元の見た目に戻ります。"
+"role.illusioner.ability.paint" : "<title>ペイント</title>プレイヤーに採取した見た目を塗ります。%PAINT%"
+"role.illusioner.ability.look.original" : "本来"
+"role.illusioner.ability.look.current" : "現在"
+"role.illusioner.ability.sample.loseSample" : "採取した見た目は会議を挟むと消失します。"
+"role.illusioner.ability.sample.keepSample" : "採取した見た目は会議を跨いで持ち越せます。"
+"role.illusioner.ability.paint.afterMeeting" : "見た目は<var>会議後</var>に変化します。"
+"role.illusioner.ability.paint.immediate" : "見た目は<var>即座</var>に変化します。"
+
+# Options
+
+"options.role.illusioner.detail" : "イリュージョナーはモーフィングとペインターの両方の能力を併せ持つインポスターです。"
+"options.role.illusioner.sampleCoolDown" : "サンプルクールダウン"
+"options.role.illusioner.morphCoolDown" : "変身クールダウン"
+"options.role.illusioner.morphDuration" : "変身効果時間"
+"options.role.illusioner.paintCoolDown" : "ペイントクールダウン"
+"options.role.illusioner.loseSampleOnMeeting" : "緊急会議でのサンプル放棄"
+"options.role.illusioner.transformAfterMeeting" : "会議後まで見た目を変化を遅延"
+"options.role.illusioner.sampleOriginalLook" : "本来の見た目を採取"
+
+# Game
+
+
+# UI
+
+"ui.action.illusioner.sample" : "サンプルを採取します。"
+"ui.action.illusioner.paint" : "採取した見た目をプレイヤーに塗り付けます。"
+"ui.action.illusioner.morph" : "採取した見た目に変身します。"
+"ui.action.illusioner.switch" : "キー入力によって発動する能力を切り替えます。<br>切り替え対象: ペイント, 変身"
+
+# Stats
+
+"stats.illusioner.sample" : "サンプルの採取回数"
+"stats.illusioner.morph" : "変身回数"
+"stats.illusioner.paint" : "ペイント回数"
+
+# Titles
+
+"achievement.illusioner.common1.title" : "上位互換"
+"achievement.illusioner.common1.goal" : "ペイント能力と変身能力をともに1回以上使用する。"
+
+"achievement.illusioner.challenge.title" : "依拠不明の讒言"
+"achievement.illusioner.challenge.goal" : "ペイントか変身いずれかのサンプル元プレイヤーを1人以上会議で追放し、<br>1人以上自分の手でキルする。"
+"achievement.illusioner.challenge.splitted.0" : "依拠不明の"

@@ -16,7 +16,7 @@ using Nebula.Modules.Cosmetics;
 
 namespace Nebula.Roles.Crewmate;
 
-public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, DefinedRole
+public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, DefinedRole, IAssignableDocument
 {
     private Psychic() : base("psychic", new(96, 206, 137), RoleCategory.CrewmateRole, Crewmate.MyTeam, [SearchCooldownOption, SearchDurationOption])
     {
@@ -34,6 +34,15 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
     static public readonly Psychic MyRole = new();
     static private readonly GameStatsEntry StatsSearching = NebulaAPI.CreateStatsEntry("stats.psychic.searching", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsMessages = NebulaAPI.CreateStatsEntry("stats.psychic.messages", GameStatsCategory.Roles, MyRole);
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.psychic.ability.search");
+    }
+
+    static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SearchButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IGameOperator, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
@@ -51,8 +60,6 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
                 GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => ability.ShowArrow = searchButton.IsInEffect && !MyPlayer.IsDead, this);
             }
         }
-
-        static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.SearchButton.png", 115f);
 
         GamePlayer? lastReported = null;
 

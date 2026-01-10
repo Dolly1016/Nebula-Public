@@ -29,14 +29,14 @@ public class DestroyerAssets
 
 }
 
-public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, DefinedRole
+public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, DefinedRole, IAssignableDocument
 {
     private Destroyer() : base("destroyer", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [KillCoolDownOption, PhasesOfDestroyingOption, KillSEStrengthOption,LeaveKillEvidenceOption, CanReportKillSceneOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagBeginner);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Destroyer.png");
     }
 
-    static private readonly IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.destroyer.destroyCoolDown", CoolDownType.Immediate, (0f, 60f, 2.5f), 35f, (-30f, 30f, 2.5f), 10f, (0.5f, 5f, 0.125f), 1.5f);
+    static private readonly IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.destroyer.destroyCoolDown", CoolDownType.Immediate, (0f, 60f, 2.5f), 35f, (-30f, 30f, 2.5f), 10f, (0.5f, 5f, 0.125f), 1.5f);
     static private readonly IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.phasesOfDestroying", (1, 10), 3, decorator: val => val + ($" ({string.Format("{0:#.#}",3.2f + (2.05f * (val - 1)))}{Language.Translate("options.sec")})").Color(Color.gray));
     static private readonly FloatConfiguration KillSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.killSEStrength", (1f,20f,0.5f),3.5f, FloatConfigurationDecorator.Ratio);
     static private readonly BoolConfiguration LeaveKillEvidenceOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.leaveKillEvidence", true);
@@ -47,6 +47,20 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        if(LeaveKillEvidenceOption) yield return new(spriteBloodPuddle, "role.destroyer.ability.leftEvidence");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%REPORT%", CanReportKillSceneOption ? Language.Translate("role.destroyer.tips.report") : "");
+    }
+
+    static private Image spriteBloodPuddle = SpriteLoader.FromResource("Nebula.Resources.BloodPuddle.png", 130f);
 
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
@@ -104,7 +118,6 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
         }
 
         static private IDividedSpriteLoader spriteModBlood = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.DestroyerBlood.png", 136f, 6);
-        static private Image spriteBloodPuddle = SpriteLoader.FromResource("Nebula.Resources.BloodPuddle.png", 130f);
         private const string destroyerAttrTag = "nebula::destroyer";
         static private IEnumerator CoDestroyKill(PlayerControl myPlayer, PlayerControl target, Vector3 targetPos, bool moveToLeft)
         {

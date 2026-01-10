@@ -1,0 +1,218 @@
+# Title
+
+"title.buttons.nebula" : "ネブラ"
+"title.label.nebula" : "Nebula on the Ship"
+
+"title.label.discord" : "NoSの公式Discordはこちらから！"
+
+"title.buttons.update" : "バージョン変更"
+"title.buttons.achievements" : "称号"
+"title.buttons.addons" : "アドオン"
+"title.buttons.developersStudio" : "デベロッパースタジオ"
+"title.buttons.marketplace" : "マーケットプレイス"
+"title.buttons.stats" : "統計"
+"title.buttons.form" : "バグ報告"
+
+"ui.update.waitFinishing" : "バージョン変更中です"
+"ui.update.finishUpdate" : "処理が完了しました！<br>ゲームを再起動してください。"
+"ui.update.autoUpdate" : "自動更新が有効になりました。"
+
+# AFK
+
+"ui.afk.title" : "離席中"
+"ui.afk.detail" : "戻ってきたら、いずれかのキーを押してAFKを解除してください。"
+
+# Certification
+
+"certification.waiting" : "検証中"
+"certification.waiting.detail" : "Among UsおよびNoSのバージョンをチェックしています..."
+"certification.waiting.client" : "Among UsおよびNoSのバージョンをチェックしています..."
+"certification.uncertified" : "未認証"
+"certification.uncertified.detail" : "このプレイヤーはNoSを導入していません。"
+"certification.uncertified.client" : "NoSを使用しない部屋に入室したようです。<br>バニラの部屋にModを導入したまま参加しないでください。"
+"certification.unmatchedEpoch" : "エポック不一致"
+"certification.unmatchedEpoch.detail" : "このプレイヤーはバージョンが大きく離れたNoSを使用しています。<br><b>GitHub</b>から同バージョンのNoSを導入するよう案内しましょう。"
+"certification.unmatchedEpoch.client" : "ホストの導入しているNoSはバージョンが大きく離れているようです。<br><b>GitHub</b>からホストと同バージョンのNoSを導入してください。"
+"certification.unmatchedBuild" : "バージョン不一致"
+"certification.unmatchedBuild.detail" : "このプレイヤーは別バージョンのNoSを使用しています。<br><b>タイトル画面のNoSの更新</b>より同バージョンに揃えるよう案内しましょう。"
+"certification.unmatchedBuild.client" : "ホストは別バージョンのNoSを使用しています。<br><b>タイトル画面のNoSの更新</b>より同バージョンを入手し、ゲームを再起動してください。"
+"certification.unmatchedAddon" : "アドオン不一致"
+"certification.unmatchedAddon.detail" : "このプレイヤーは必要なアドオンを導入していない、あるいは余分なアドオンを導入しています。<br>導入が必要なアドオンについて案内しましょう。"
+"certification.unmatchedAddon.client" : "ホストとアドオンの導入状況が一致していません。<br><b>マーケットプレイス</b>で間違ったアドオンを追加していませんでしょうか？"
+"certification.unmatchedVanilla" : "本体不一致"
+"certification.unmatchedVanilla.detail" : "このプレイヤーは本体のバージョンが一致していません。<br>意図せぬ問題を回避するため、本体のバージョンを揃えてください。"
+"certification.unmatchedVanilla.client" : "ホストと本体バージョンが一致していません。<br>ホストにAmong Us本体のバージョンを確認してください。"
+
+# Versions
+
+"version.category.all" : "すべて"
+"version.category.major" : "安定版"
+"version.category.snapshot" : "スナップショット"
+"version.category.preRelease" : "プレリリース"
+"version.category.custom" : "カスタム"
+"version.category.unknown" : "不明"
+"version.category.auto" : "自動更新"
+"version.fetching.autoUpdate.major" : "最新の安定版"
+"version.fetching.autoUpdate.snapshot" : "最新のスナップショット"
+"version.fetching.gainPackage" : "取得"
+"version.fetching.setAutoUpdate" : "適用"
+"version.fetching.current" : "使用中"
+"version.fetching.mismatched" : "変更不可"
+"version.fetching.applied" : "適用中"
+"version.fetching.mismatched.detail" : "対応するAmong Us本体のバージョンがかけ離れているため、変更できません。<br>お手数をおかけしますが、再導入をお願いします。"
+"version.fetching.loadMore" : "さらに読み込む"
+
+# Game Mode
+
+"options.gamemode" : "ゲームモード"
+
+"gamemode.standard" : "標準"
+"gamemode.freeplay" : "フリープレイ"
+"gamemode.aeroguesser" : "アモゲッサー"
+
+# Notification
+
+"notification.lobby.noTitleForFreeplay" : "フリープレイでは称号は獲得できません。"
+"notification.lobby.noTitleForOP" : "ホストにOP権限が付与されるゲームでは称号は獲得できません。"
+
+# Inventory
+
+"inventory.palette.catalogue" : "カタログ"
+"inventory.palette.colorCode" : "色コード指定"
+"inventory.palette.colorCode.mainColor" : "メインカラー"
+"inventory.palette.colorCode.shadowColor" : "シャドウカラー"
+"inventory.palette.colorCode.visorColor" : "バイザーカラー"
+"inventory.palette.colorCode.colorName" : "色名"
+"inventory.palette.colorCode.copy" : "コピー"
+"inventory.palette.colorCode.paste" : "ペースト"
+"inventory.palette.colorCode.copied" : "クリップボードにコピーしました。"
+"inventory.palette.colorCode.pasted" : "クリップボードから色を指定しました。"
+"inventory.palette.colorCode.pasted.failed" : "フォーマットに合っていません！"
+"inventory.catalogue.innersloth" : "バニラコレクション"
+"inventory.color.vanilla0" : "レッド"
+"inventory.color.vanilla1" : "ブルー"
+"inventory.color.vanilla2" : "グリーン"
+"inventory.color.vanilla3" : "ピンク"
+"inventory.color.vanilla4" : "オレンジ"
+"inventory.color.vanilla5" : "イエロー"
+"inventory.color.vanilla6" : "ブラック"
+"inventory.color.vanilla7" : "ホワイト"
+"inventory.color.vanilla8" : "パープル"
+"inventory.color.vanilla9" : "ブラウン"
+"inventory.color.vanilla10" : "シアン"
+"inventory.color.vanilla11" : "ライム"
+"inventory.color.vanilla12" : "マルーン"
+"inventory.color.vanilla13" : "ローズ"
+"inventory.color.vanilla14" : "バナナ"
+"inventory.color.vanilla15" : "グレー"
+"inventory.color.vanilla16" : "タン"
+"inventory.color.vanilla17" : "コーラル"
+"inventory.color.visor" : "デフォルト"
+"inventory.costume.variants" : "バリアント"
+"inventory.costume.tag.0" : "このコスチュームはアニメーションがあります！"
+"inventory.costume.tag.1" : "このコスチュームはゲーム中に着替えができます！"
+"inventory.costume.tag.2" : "このコスチュームはいくつかのバリアントがあります。"
+
+# Logs
+
+"log.loadCostume" : "読み込みが完了しました。"
+"log.awaiting" : "応答を待っています... (Tag: %TAG%)"
+
+# Regions
+
+"regions.Modded NA (MNA)" : "北米 (Mod)"
+"regions.Modded EU (MEU)" : "欧州 (Mod)"
+"regions.Modded Asia (MAS)" : "アジア (Mod)"
+
+# Free Play
+
+"role.metaRole.ui.roles" : "役職"
+"button.label.operate" : "役職"
+"game.metaAbility.tabs.roles" : "役職"
+"game.metaAbility.tabs.modifiers" : "モディファイア"
+"game.metaAbility.tabs.ghostRoles" : "幽霊役職"
+"game.metaAbility.tabs.perks" : "パーク"
+"game.metaAbility.perks.standard" : "共通パーク"
+"game.metaAbility.perks.noncrewmateOnly" : "非クルー専用パーク"
+"game.metaAbility.equipped" : "配役中"
+"game.metaAbility.unequipped" : "未配役"
+
+# Social
+
+"social.appeal.detail" : "アピールによってプレイヤーの視点を自身の元に集められます。<br>より魅力的な自己紹介のために活用しましょう！"
+"social.appeal.lobby" : "ロビー内アピール"
+"social.appeal.lobby.detail" : "オンにすると、今いるロビーで自身に<br>注目を集める<b>アピール</b>が使用できます。"
+"social.appeal.game" : "ゲーム内アピール"
+"social.appeal.game.detail" : "オンにすると、ゲーム内で自身に注目を集める<b>アピール</b>が使用できます。<br>通常のゲームではなく、自己紹介のためのオープニングにお使いください！"
+
+"achievement.social.firstClear" : "%PLAYER%が初獲得"
+"achievement.social.clear" : "%PLAYER%が獲得"
+"achievement.social.clearMultiple" : "%PLAYER%と%OTHERS%人が獲得"
+"achievement.social.noAchievement" : "ハイライトがありません。"
+
+# Stats
+
+"stats.ui.title" : "統計"
+"stats.ui.caption" : "※ v2.13 (2024/12/25公開) 以降のプレイデータが集計されています。"
+"stats.group.kill" : "死因別キル回数"
+"stats.group.death" : "死因別死亡回数"
+"stats.group.game" : "ゲーム"
+"stats.group.roles" : "ロール"
+"stats.group.perks" : "パーク"
+"stats.group.aeroGuesser" : "アモゲッサー"
+"stats.role.common.assigned" : "%ROLE% プレイ回数"
+"stats.role.common.won" : "%ROLE%として勝利"
+"stats.modifier.common.assigned" : "%MODIFIER% プレイ回数"
+"stats.modifier.common.won" : "%MODIFIER%として勝利"
+"stats.ghostRole.common.assigned" : "%GHOSTROLE% プレイ回数"
+"stats.ghostRole.common.won" : "%GHOSTROLE%として勝利"
+"stats.common.kill" : "%STATE%"
+"stats.common.death" : "%STATE%"
+"stats.common.win" : "%END%で勝利"
+"stats.common.defeat" : "%END%で敗北"
+"stats.gamePlay" : "総ゲーム数"
+"stats.plants.gain.normal" : "通常のプラントからのパーク獲得回数"
+"stats.plants.gain.warped" : "歪んだプラントからのパーク獲得回数"
+"stats.perk.common.gain" : "%PERK% 獲得回数"
+"stats.aeroGuesser.gamePlay" : "総ゲーム数"
+"stats.aeroGuesser.totalScore" : "累計獲得スコア"
+"stats.aeroGuesser.perfectScore" : "フルスコア獲得回数"
+
+# Common UI
+
+"ui.dialog.yes" : "はい"
+"ui.dialog.no" : "いいえ"
+"ui.dialog.ok" : "OK"
+"ui.dialog.confirmation" : "決定"
+"ui.dialog.exit" : "退出"
+"ui.dialog.search" : "検索"
+"ui.dialog.keyword" : "キーワード"
+"ui.common.loading" : "読み込み中"
+
+# Button UI
+
+"ui.button.mainAction" : "アクション"
+"ui.button.aidAction" : "サブアクション"
+"ui.action.mouseClick" : "プレイヤー近辺を左クリックすることによってもアクションを発動できます。"
+
+# Other UI
+
+"ui.citation.openUrl" : "クリックでリンクを開きます。"
+"ui.costume.missedCostume" : "他プレイヤーのコスチュームを表示するには<br>グローバルコスチュームの有効化が必要です！<br><br>クリックして開く画面から不足したグローバルコスチュームを追加できます。"
+"ui.costume.unownedCostume" : "不足グローバルコス一覧"
+"ui.error.stamp.notLoaded" : "スタンプを読み込み中です。<br>少し待ってからお試しください。"
+"ui.error.stamp.notAllowed" : "この部屋ではスタンプを使用できません。"
+"ui.error.emote.notAllowed" : "この部屋ではエモートを使用できません。"
+"ui.error.emote.cooldown" : "少し待ってから再度エモートを送ってください。"
+"ui.stamp.onTable" : "選択中のスタンプ"
+"ui.stamp.all" : "使用可能なスタンプ"
+"ui.stamp.full" : "スタンプの枠に空きがありません。<br>入れ替えるスタンプを選択してください。"
+"ui.stamp.select" : "入れ替えるスタンプを選択してください。"
+"ui.stamp.click.top.1" : "クリックすると、下のスタンプ一覧から入れ替え対象を選択できます。"
+"ui.stamp.click.top.2" : "クリックでスタンプを入れ替えます。"
+"ui.stamp.click.bottom.1" : "クリックでスタンプを追加します。"
+"ui.stamp.click.bottom.2" : "クリックでスタンプを外します。"
+"ui.stamp.loading" : " (読み込み中 or 不明なスタンプ)"
+"ui.warning.unrecommendedResolution" : "アスペクト比が16:9でない解像度は<br>推奨されません。"
+"ui.error.failedToSearchRoom" : "以下のリージョンで部屋の検索に失敗しました:"
+"ui.error.quickStart.cannotStart" : "人数が足りないためスタートできません。"

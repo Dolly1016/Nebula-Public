@@ -516,6 +516,10 @@ class ZiplineSetCoolDownPatch
                 {
                     var modPlayer = __instance.player.GetModInfo();
                     modPlayer?.Unbox().AddPlayerColorRenderers(apjz.hand.handRenderer);
+                    if(modPlayer != null)
+                    {
+                        GameOperatorManager.Instance?.Run<PlayerUseZiplineEvent>(new(modPlayer, !__instance.fromTop, __instance.start.position, __instance.end.position));
+                    }
                     try
                     {
                         modPlayer?.DeathPosition = new(

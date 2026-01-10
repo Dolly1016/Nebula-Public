@@ -10,7 +10,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Impostor;
 
-public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRole
+public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRole, IAssignableDocument
 {
     private Hadar() : base("hadar", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [DiveCoolDownOption, AccelRateUndergroundOption, GushFromVentsOption, VentDetectionRangeOption, LeftDivingEvidenceOption]) {
         GameActionTypes.HadarDisappearingAction = new("hadar.disappear", this, isPhysicalAction: true);
@@ -30,11 +30,21 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
     static public readonly Hadar MyRole = new();
     static private readonly GameStatsEntry StatsDive = NebulaAPI.CreateStatsEntry("stats.hadar.dive", GameStatsCategory.Roles, MyRole);
 
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(diveButtonSprite, "role.hadar.ability.dive");
+        yield return new(gushButtonSprite, GushFromVentsOption ? "role.hadar.ability.gush.vent" : "role.hadar.ability.gush");
+        if(LeftDivingEvidenceOption) yield return new(HadarEvidence.GetEvidenceImage(0), "role.hadar.ability.evidence");
+    }
+
     [NebulaPreprocess(PreprocessPhase.PostRoles)]
     public class HadarEvidence : NebulaSyncStandardObject, IGameOperator
     {
         public static string MyTag = "HadarEvidence";
         private static IDividedSpriteLoader evidenceSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.HadarEvidence.png", 100f, 3);
+        internal static Image GetEvidenceImage(int index) => evidenceSprite.AsLoader(index);
         private int stage = 0;
         public HadarEvidence(Vector2 pos) : base(pos, ZOption.Back, true, evidenceSprite.GetSprite(0))
         {
@@ -55,13 +65,12 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
 
     //MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
+    static private readonly Image diveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarHideButton.png", 115f);
+    static private readonly Image gushButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarAppearButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         private ModAbilityButtonImpl? diveButton = null;
         private ModAbilityButtonImpl? gushButton = null;
-
-        static private readonly Image diveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarHideButton.png", 115f);
-        static private readonly Image gushButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarAppearButton.png", 115f);
 
         AchievementToken<(float lastGush, bool cleared)> acToken1 = new("hadar.common1", (-100f, false), (a, _) => a.cleared);
         AchievementToken<(float lastKill, bool cleared)> acToken2 = new("hadar.common2", (-100f, false), (a, _) => a.cleared);

@@ -1,0 +1,34 @@
+# Assignable
+
+"role.bloody.name" : "ブラッディ"
+"role.bloody.generalBlurb" : "連綿、その血に想い託して"
+
+# Document
+
+"role.bloody.doc" : "自身をキルした相手はしばらくの間、血の足跡を残します。"
+
+# Options
+
+"options.role.bloody.detail" : "キルした相手にしばらくの間、血の足跡を残させます。"
+"options.role.bloody.curseDuration" : "血の足跡の効果時間"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.bloody.bloody" : "血の足跡を発動させた回数"
+"stats.bloody.killer" : "血の足跡を付けさせられた回数"
+
+# Titles
+
+"achievement.bloody.common1.title" : "死してなお"
+"achievement.bloody.common1.goal" : "効果「血の足跡」を付与する。"
+"achievement.bloody.common1.flavor" : ""たとえこの命が尽きようとも、私の使命はまだ終わっちゃいない。""
+
+"achievement.bloody.challenge.title" : "後は任せた！"
+"achievement.bloody.challenge.goal" : "自身の能力によって効果「血の足跡」を付与された相手が<br>直後の会議で追放される。"
+"achievement.bloody.challenge.flavor" : ""呪われた血に乾杯！""

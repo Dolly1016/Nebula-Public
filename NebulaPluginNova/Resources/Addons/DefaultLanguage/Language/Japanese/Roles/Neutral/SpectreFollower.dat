@@ -1,0 +1,43 @@
+# Assignable
+
+"role.spectreFollower.name" : "子狐"
+"role.spectreFollower.short" : "子"
+"role.spectreFollower.blurb" : "大妖怪を夢見て"
+
+# Document
+
+"role.spectreFollower.doc" : "妖狐の仲間です。お揚げを食べて、妖狐の満腹度を満たす手伝いができます。"
+"role.spectre.follower.winCond" : "親の妖狐が勝利する。(親の妖狐が死亡すると後を追って死亡する。)"
+"role.spectre.follower.ability.title" : "固有能力 "食べ盛りの子狐""
+"role.spectre.follower.ability.main" : "子狐は妖狐と満腹度ゲージを共有しています。<br>お揚げを食べて妖狐の満腹度の維持に貢献できます。"
+"role.spectre.follower.ability.fries" : "<title>お揚げ</title>マップ中に皿が出現します。<br>お揚げが載っている皿にインタラクトするとお揚げを食べるミニゲームが始まります。"
+
+# Options
+
+"options.role.spectreFollower.detail" : "子狐は妖狐の仲間です。<br>子狐はお揚げを食べることで妖狐の満腹ゲージの維持に貢献できます。"
+"options.role.spectreFollower.satietyRate" : "お揚げ1個当たりの腹持ち"
+"options.role.spectreFollower.showDishesOnMap" : "マップ上でのお揚げの表示"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.spectreFollower.eatFries" : "お揚げを食べた回数"
+
+# Titles
+
+"achievement.spectreFollower.common1.title" : "おいしいもの大好き"
+"achievement.spectreFollower.common1.goal" : "通算で10回お揚げを食べる。"
+
+"achievement.spectreFollower.hard1.title" : "狐視眈々"
+"achievement.spectreFollower.hard1.goal" : "妖狐に変化して勝利する。元の妖狐は敗北すること。"
+
+"achievement.spectreFollower.challenge.title" : "食べ盛りの元気っ狐"
+"achievement.spectreFollower.challenge.goal" : "妖狐以上に満腹度を回復させて勝利する。"
+"achievement.spectreFollower.challenge.flavor" : "たんと食えよ、大きくなれよ。"
+"achievement.spectreFollower.challenge.splitted.0" : "食べ盛りの"
+"achievement.spectreFollower.challenge.splitted.2" : "元気っ狐"

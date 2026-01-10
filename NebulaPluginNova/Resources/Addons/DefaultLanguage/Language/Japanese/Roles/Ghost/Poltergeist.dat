@@ -1,0 +1,31 @@
+# Assignable
+
+"role.poltergeist.name" : "ポルターガイスト"
+"role.poltergeist.blurb" : "ワタシハココニイルヨ"
+"role.poltergeist.short" : "ポ"
+
+# Document
+
+"role.poltergeist.doc" : "死体を引き寄せるように動かせます。"
+
+# Options
+
+"options.role.poltergeist.detail" : "ポルターガイストは死体を引き寄せるように動かせます。"
+"options.role.poltergeist.poltergeistCoolDown" : "ポルターガイストクールダウン"
+
+# Game
+
+
+# UI
+
+"button.label.poltergeist" : "ポルターガイスト"
+
+# Stats
+
+"stats.poltergeist.poltergeist" : "ポルターガイスト発動回数"
+
+# Titles
+
+"achievement.poltergeist.common1.title" : "亡霊の気まぐれ"
+"achievement.poltergeist.common1.goal" : "死体を引き寄せる。"
+"achievement.poltergeist.common1.splitted.2" : "気まぐれ"

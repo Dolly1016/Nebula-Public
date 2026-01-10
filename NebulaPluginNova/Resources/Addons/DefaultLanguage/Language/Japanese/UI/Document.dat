@@ -1,0 +1,19 @@
+# Categories
+
+"role.category.crewmate" : "クルーメイト役職"
+"role.category.impostor" : "インポスター役職"
+"role.category.neutral" : "第三陣営役職"
+"role.category.ghost" : "幽霊役職"
+"role.category.modifier" : "モディファイア"
+
+# Document
+
+"document.canAssignTo" : "割当可能" 
+"document.caption.configuration" : "* オプションで変更可能な部分は<var>水色</var>、クライアントオプションで変更可能な部分は<client>緑色</client>で表示されています。"
+"document.configurations.title" : "オプション" 
+"document.configurations.none" : "なし" 
+"document.configurations.empty" : "なし" 
+"document.tips.title" : "Tips"
+"document.winCond.title" : "勝利条件"
+"document.titles.title" : "称号" 
+"document.titles.none" : "なし" 

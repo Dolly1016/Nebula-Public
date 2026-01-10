@@ -1,0 +1,44 @@
+# Assignable
+
+"role.evilTrapper.name" : "イビルトラッパー"
+"role.evilTrapper.short" : "ト"
+"role.evilTrapper.blurb" : "罠を仕掛け、キルをせよ"
+"role.evilTrapper.hint" : "トラップを使いこなせ！"
+
+# Document
+
+"role.evilTrapper.doc" : "敵の妨害やキルなど、さまざまに活用できるトラップを設置するインポスターです。<br>トラップは設置後、会議を挟んでから有効化します。"
+"role.evilTrapper.ability.title" : "固有能力 "トラップ""
+"role.evilTrapper.ability.main" : "イビルトラッパーは3種類のトラップを設置できます。"
+"role.evilTrapper.ability.killTrap" : "<title>キルトラップ</title>不可視のトラップです。踏んだプレイヤー(味方除く)をキルします。<br>イビルトラッパーのキルクールダウンがあがっている間のみ発動します。<br>%SE%"
+"role.evilTrapper.ability.killTrap.se" : "キルトラップを仕掛けると、独特な設置音が発生します。"
+"role.evilTrapper.ability.killTrapBroken" : "<title>壊れたキルトラップ</title>キルトラップの発動は一度きりです。<br>プレイヤーをキルしたトラップは壊れ、全プレイヤーから見えるようになります。"
+"role.evilTrapper.tips" : "・設置するトラップの種類は%KEY%キーで切り替えられます。<br>・トラップの設置には%SEC%秒かかり、設置中はその場に硬直します。"
+
+# Options
+
+"options.role.evilTrapper.detail" : "イビルトラッパーはさまざまなトラップを仕掛けられます。"
+"options.role.evilTrapper.killTrapSoundDistance" : "キルトラップ設置音の可聴範囲"
+"options.role.evilTrapper.costOfKillTrap" : "キルトラップの設置コスト"
+"options.role.evilTrapper.killTrapSize" : "キルトラップの当たり判定"
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.trap" : "トラップキル"
+
+# Stats
+
+
+# Titles
+
+"achievement.evilTrapper.common1.title" : "妨害"
+"achievement.evilTrapper.common1.goal" : "減速トラップを設置する。"
+
+"achievement.evilTrapper.challenge.title" : "計画的犯行"
+"achievement.evilTrapper.challenge.goal" : "2回以上トラップキルを起こし、最後まで生き延びて勝利する。"

@@ -1,0 +1,43 @@
+# Assignable
+
+"role.bountyHunter.name" : "バウンティハンター"
+"role.bountyHunter.short" : "バ"
+"role.bountyHunter.blurb" : "めざせ、一刻千金"
+"role.bountyHunter.hint" : "賞金首をキルしよう"
+
+# Document
+
+"role.bountyHunter.doc" : "<b>賞金首</b>をキルして、より短いキルクールダウンを得られるインポスターです。<br>賞金首は生存者の中から一人が選ばれ、<var>%SEC%</var>秒ごとに更新されます。また、<b>賞金首</b>をキルすると即座に更新されます。<br>賞金首<b>以外</b>のプレイヤーをキルすると次のキルクールダウンが長くなってしまいます。"
+
+# Options
+
+"options.role.bountyHunter.detail" : "賞金首をキルするとキルクールが短くなります。<br>ただし、それ以外のプレイヤーをキルするとキルクールが長くなってしまいます。"
+"options.role.bountyHunter.bountyKillCoolDown" : "キルクールダウン(バウンティキル)"
+"options.role.bountyHunter.othersKillCoolDown" : "キルクールダウン(その他のキル)"
+"options.role.bountyHunter.changeBountyInterval" : "バウンティの変更クールダウン"
+"options.role.bountyHunter.showBountyArrow" : "バウンティの矢印を表示"
+"options.role.bountyHunter.arrowUpdateInterval" : "矢印の位置更新間隔"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.bountyHunter.bountyKill" : "賞金首のキル回数"
+"stats.bountyHunter.othersKill" : "賞金首以外のキル回数"
+
+# Titles
+
+"achievement.bountyHunter.common1.title" : "欲深き凶行"
+"achievement.bountyHunter.common1.goal" : "賞金首をキルする。"
+"achievement.bountyHunter.common1.splitted.0" : "欲深き"
+
+"achievement.bountyHunter.another1.title" : "はした金にもならない"
+"achievement.bountyHunter.another1.goal" : "賞金首以外をキルする。"
+
+"achievement.bountyHunter.challenge.title" : "誰も逃しはしない"
+"achievement.bountyHunter.challenge.goal" : "30秒以内に3キルを決める。"
+"achievement.bountyHunter.challenge.splitted.2" : "しない"

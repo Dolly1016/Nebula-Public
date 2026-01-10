@@ -16,7 +16,7 @@ using Virial.Utilities;
 namespace Nebula.Roles.Modifier;
 
 
-public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCitation, RoleFilter
+public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCitation, RoleFilter, IAssignableDocument
 {
     private Lover() : base("lover", new(255, 0, 184), [NumOfPairsOption, RoleChanceOption, ChanceOfAssigningImpostorsOption, AllowExtraWinOption, AllowExtraWinViaCrewWinOption, BlockRoleWinOption, AvengerModeOption]) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Neutral.Avenger.MyRole.ConfigurationHolder!]);
@@ -102,6 +102,17 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         (Color)new Color32(255, 255, 40, 255),
         (Color)new Color32(211, 129, 142, 255),
         (Color)new Color32(255, 189, 99, 255),};
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => false;
+    bool IAssignableDocument.HasWinCondition => true;
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%SUICIDE%", Language.Translate(AvengerModeOption ? "role.lover.doc.avenger" : "role.lover.doc.standard"));
+        yield return new("%AVENGER%", (Neutral.Avenger.MyRole as DefinedRole).DisplayColoredName);
+        yield return new("%EXTRA%", AllowExtraWinOption ? Language.Translate("role.lover.winCond.additional") : "");
+    }
 
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {

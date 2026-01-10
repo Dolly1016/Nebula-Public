@@ -1,0 +1,46 @@
+# Common Role Options
+
+"options.common.group.task" : "タスクの設定"
+"options.common.task" : "タスク設定"
+"options.common.task.none" : "オフ"
+"options.common.task.simple" : "オン"
+"options.common.task.advanced" : "オン(詳細設定)"
+"options.common.task.force" : "タスク設定"
+"options.common.task.force.simple" : "簡易設定"
+"options.common.task.force.advanced" : "詳細設定"
+"options.common.task.num" : "タスク数"
+"options.common.task.numShort" : "ショートタスク数"
+"options.common.task.numLong" : "ロングタスク数"
+"options.common.task.numCommon" : "コモンタスク数"
+
+# Role Filter
+
+"roleFilter.none" : "なし"
+"roleFilter.separator" : "、"
+"roleFilter.categorySeparator" : "、"
+"roleFilter.exceptPattern.all" : "%ROLES%除く全役職"
+"roleFilter.exceptPattern.crewmate" : "全クルーメイト役職(%ROLES%除く)"
+"roleFilter.exceptPattern.impostor" : "全インポスター役職(%ROLES%除く)"
+"roleFilter.exceptPattern.neutral" : "全第三陣営役職(%ROLES%除く)"
+"roleFilter.allPattern.all" : "全役職"
+"roleFilter.allPattern.crewmate" : "全クルーメイト役職"
+"roleFilter.allPattern.impostor" : "全インポスター役職"
+"roleFilter.allPattern.neutral" : "全第三陣営役職"
+"roleFilter.shortcut.all" : "すべて"
+"roleFilter.shortcut.allImpostor" : "全インポスター"
+"roleFilter.shortcut.allNeutral" : "全第三陣営"
+"roleFilter.shortcut.allCrewmate" : "全クルーメイト"
+"roleFilter.preview.excludes" : "%ROLES% 以外"
+"roleFilter.preview.etc" : "%ROLES% など"
+"roleFilter.showOnlySpawnable" : "出現しうる役職のみ表示"
+
+"options.role.modifierFilter" : "モディファイアフィルター"
+"options.role.ghostRoleFilter" : "幽霊役職フィルター"
+
+# Tag
+
+"configuration.tag.chaotic" : "この役職は闇鍋向きです。"
+"configuration.tag.beginner" : "この役職は操作が簡単で、初心者にもおすすめです。"
+"configuration.tag.funny" : "この役職は独特で面白い能力を持っています。<br>一味違うゲームを楽しみたい方にお勧めです。"
+"configuration.tag.difficult" : "この役職は特殊で難しい操作が求められます。<br>フリープレイなどで一度確認してみることをお勧めします。"
+"configuration.tag.superNewRoles" : "この役職はSNRコラボの役職です。"

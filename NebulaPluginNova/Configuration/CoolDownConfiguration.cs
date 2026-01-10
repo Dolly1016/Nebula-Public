@@ -9,7 +9,7 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Configuration;
 
-internal class KillCoolDownConfiguration : IRelativeCoolDownConfiguration
+internal class KillCoolDownConfiguration : IRelativeCooldownConfiguration
 {
     static string[] typeTranslateKeys = ["options.killCoolDown.type.immediate", "options.killCoolDown.type.relative", "options.killCoolDown.type.ratio"];
     IOrderedSharableVariable<int> coolDownTypeEntry;
@@ -37,8 +37,8 @@ internal class KillCoolDownConfiguration : IRelativeCoolDownConfiguration
     string relativeCoolDownStr => relativeEntry.Value switch { < 0 => "", > 0 => "+", _ => "±" } + relativeEntry.Value + Language.Translate("options.sec");
     string ratioCoolDownStr => ratioEntry.Value + Language.Translate("options.cross");
 
-    float IRelativeCoolDownConfiguration.CoolDown => (this as IRelativeCoolDownConfiguration).GetCoolDown(baseKillCooldown?.Invoke() ?? AmongUsUtil.VanillaKillCoolDown);
-    float IRelativeCoolDownConfiguration.GetCoolDown(float baseCooldown) => coolDownTypeEntry.Value switch
+    float IRelativeCooldownConfiguration.Cooldown => (this as IRelativeCooldownConfiguration).GetCoolDown(baseKillCooldown?.Invoke() ?? AmongUsLLImpl.Instance.VanillaKillCooldown);
+    float IRelativeCooldownConfiguration.GetCoolDown(float baseCooldown) => coolDownTypeEntry.Value switch
     {
         2 => ratioEntry.Value * baseCooldown,
         1 => System.Math.Max(0f, relativeEntry.Value + baseCooldown),
@@ -48,7 +48,7 @@ internal class KillCoolDownConfiguration : IRelativeCoolDownConfiguration
 
     bool IConfiguration.IsShown => predicate?.Invoke() ?? true;
 
-    string? IConfiguration.GetDisplayText() => title.GetString() + ": " + CurrentCoolDownStr +( " (" + (this as IRelativeCoolDownConfiguration).CoolDown + Language.Translate("options.sec") + ")").Color(Color.gray);
+    string? IConfiguration.GetDisplayText() => title.GetString() + ": " + CurrentCoolDownStr +( " (" + (this as IRelativeCooldownConfiguration).Cooldown + Language.Translate("options.sec") + ")").Color(Color.gray);
 
     GUIWidgetSupplier IConfiguration.GetEditor() =>
     new HorizontalWidgetsHolder(GUIAlignment.Left,

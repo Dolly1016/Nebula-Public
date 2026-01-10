@@ -1,0 +1,30 @@
+# Assignable
+
+"role.tieBreaker.name" : "タイブレイカー"
+"role.tieBreaker.generalBlurb" : "かませ、一発逆転"
+
+# Document
+
+"role.tieBreaker.doc" : "タイ投票が発生すると追加の票を投じます。"
+
+# Options
+
+"options.role.tieBreaker.detail" : "タイ投票が発生すると、タイブレイカーは追加の票を投じます。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.tieBreaker.tieBreaking" : "追加票を投じた回数"
+
+# Titles
+
+"achievement.tieBreaker.common1.title" : "革命家"
+"achievement.tieBreaker.common1.goal" : "追加投票を決める。"
+
+"achievement.tieBreaker.challenge.title" : "執念の一票"
+"achievement.tieBreaker.challenge.goal" : "自身の追加票によって敵を追放させる。"

@@ -18,6 +18,7 @@ public class Ghost : FlexibleLifespan, IGameOperator
     static XOnlyDividedSpriteLoader ghostSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.Ghost.png", 160f, 9);
     static XOnlyDividedSpriteLoader ghostWSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.GhostW.png", 160f, 9);
     static XOnlyDividedSpriteLoader ghostBSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.GhostB.png", 160f, 9);
+    static internal Image GetGhostImage(bool dark = false) => (dark ? ghostBSprite : ghostWSprite).WrapLoader(0);
     private float time;
     private float indexTime;
     private int index;

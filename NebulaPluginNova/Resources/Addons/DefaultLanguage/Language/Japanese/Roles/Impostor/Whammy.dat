@@ -1,0 +1,73 @@
+# Assignable
+
+"role.whammy.name" : "ワーミー"
+"role.whammy.short" : "ワ"
+"role.whammy.blurb" : "ふわふわレイジング"
+
+# Document
+
+"role.whammy.doc" : "タスクや緊急タスクに<b>風船</b>を仕掛けて、ゲームの進行を妨害するインポスターです。"
+"role.whammy.ability.title" : "固有能力 "それを付けられたら、終わり？""
+"role.whammy.ability.main" : "タスク等に風船を仕掛けて、タスクに触れたプレイヤーに風船を拾わせます。<br>風船を手にしたプレイヤーは、制限時間内に風船を割らないと死亡してしまいます。"
+"role.whammy.ability.place" : "<title>設置</title>タスクや緊急タスクに風船を仕掛けます。<var>%SOUND%</var><br>自身以外のプレイヤーがそのタスクに触れると、風船を手にします。"
+"role.whammy.ability.place.sound" : "風船を仕掛けると、周囲に聞こえる音が発生します。"
+"role.whammy.ability.minigame" : "<title>パチンコ</title>マップ内にいくつかあるパチンコで風船を割れます。<br>最大で<var>%MINIGAME%</var>箇所回れば確実に風船を割れます。"
+"role.whammy.tips" : "・風船は風になびきます。強い風が吹きそうな場所に行ってみると...？"
+
+# Options
+
+"options.role.whammy.detail" : "ワーミーはタスクに風船を仕掛けられます。<br>風船をつけられてしまったら、急いで風船を割りに行きましょう。"
+"options.role.whammy.balloonsInStarting" : "ゲーム開始時の風船所持数"
+"options.role.whammy.balloonsInStarting.detail" : "ゲーム開始時に所持している風船の数です。<br>所持している風船を消費してタスクに風船を仕掛けます。"
+"options.role.whammy.balloonsByKilling" : "キル時の風船獲得数"
+"options.role.whammy.balloonsByKilling.detail" : "キルのたびに指定数だけの風船を獲得します。"
+"options.role.whammy.balloonsTimeLimit" : "風船解除までの猶予時間"
+"options.role.whammy.balloonsTimeLimit.detail" : "仕掛けられた風船を手にしてしまってから、<br>解除までの時間の猶予を設定します。"
+"options.role.whammy.numOfMaxMinigameConsoles" : "パチンコの最大数"
+"options.role.whammy.numOfMaxMinigameConsoles.detail" : "マップ中に出現するパチンコの<br>最大数を設定します。"
+"options.role.whammy.numOfMaxMinigameToBreakBalloon" : "解除に必要なパチンコの最大数"
+"options.role.whammy.numOfMaxMinigameToBreakBalloon.detail" : "風船の解除までにまわる必要のあるパチンコの上限を<br>設定できます。"
+"options.role.whammy.playSeOnPlacingBalloon" : "風船設置SE"
+"options.role.whammy.seStrength" : "風船設置SEの可聴範囲"
+"options.role.whammy.placeDuration" : "設置に要する時間"
+"options.role.whammy.additionalKillCooldownByPlacement" : "風船設置時の追加キルクールダウン"
+"options.role.whammy.stoneAssignment" : "パチンコごとの石の割り当て数"
+"options.role.whammy.group.place" : "バルーン設置の設定"
+"options.role.whammy.group.gaining" : "バルーン獲得の設定"
+"options.role.whammy.group.balloon" : "バルーン解除の設定"
+
+# Game
+
+"gameAction.whammy.placement" : "風船設置"
+
+# UI
+
+"button.label.balloon" : "設置"
+
+# Status
+
+"state.balloon" : "宙吊り"
+
+# Stats
+
+"stats.whammy.balloon" : "風船を仕掛けた回数"
+"roles.whammy.taskText" : "風船を割る (%TIME%s)"
+
+# Titles
+
+"achievement.whammy.common1.title" : "ピッチシフト"
+"achievement.whammy.common1.goal" : "風船で浮上させ、キルする。"
+
+"achievement.whammy.common2.title" : "進撃のキラークラウン"
+"achievement.whammy.common2.goal" : "風船で浮上させ、通算で10回キルする。"
+"achievement.whammy.common2.splitted.0" : "進撃の"
+"achievement.whammy.common2.splitted.1" : "キラー"
+
+"achievement.whammy.another1.title" : "あんしんピエロおじさん"
+"achievement.whammy.another1.goal" : "キルせず、風船を仕掛けただけの段階で<br>追放あるいは推察されて死亡する。"
+"achievement.whammy.another1.splitted.2" : "おじさん"
+
+"achievement.whammy.challenge.title" : "夜明けはまだ来ない"
+"achievement.whammy.challenge.goal" : "風船解除に追われ、生存者のタスクが一切進まないターンを過ごす。"
+"achievement.whammy.challenge.cond" : "タスクフェイズで3人の生存者が同時に風船解除に追われること"
+"achievement.whammy.challenge.splitted.1" : "まだ"

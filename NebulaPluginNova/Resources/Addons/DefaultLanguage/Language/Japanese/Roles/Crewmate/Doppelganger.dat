@@ -1,0 +1,49 @@
+# Assignable
+
+"role.doppelganger.name" : "ドッペルゲンガー"
+"role.doppelganger.short" : "ド"
+"role.doppelganger.blurb" : "ワタシ と オトモダチ"
+
+# Document
+
+"role.doppelganger.doc" : "自在に操れる幻影を持つクルーメイトです。"
+"role.doppelganger.ability.title" : "固有能力 "遊離する自意識""
+"role.doppelganger.ability.main" : "自身と同じ姿をした<b>幻影</b>を召喚できます。"
+"role.doppelganger.ability.map" : "<title>ミニマップ</title>幻影に移動先を指示できるミニマップを開きます。通常のマップからも召喚できます。<br>マップ上に幻影がいないときに移動先を指示すると、その場に幻影を召喚します。"
+"role.doppelganger.ability.swap" : "<title>スワップ</title>幻影と自分自身の位置を入れ替えます。スワップには少し時間を要します。"
+"role.doppelganger.ability.despawn" : "<title>デスポーン</title>幻影を消滅させます。"
+"role.doppelganger.tips" : "・幻影がキルされるとドッペルゲンガー自身も<b>死亡します</b>。<br>・ミニマップ上で幻影周囲にいるプレイヤーの位置と色の明暗を確認できます。"
+
+# Options
+
+"options.role.doppelganger.detail" : "ドッペルゲンガーは自身の幻影を生み出せます。<br>大移動や、敵の目を欺くために使えます。"
+"options.role.doppelganger.swapCooldown" : "スワップクールダウン" 
+"options.role.doppelganger.swapDuration" : "スワップに要する時間"
+"options.role.doppelganger.detectionRadius" : "幻像のプレイヤー探知範囲"
+
+# Game
+
+"gameAction.doppelganger.summon" : "幻影召喚"
+
+# UI
+
+"button.label.doppelganger.command" : "配置"
+"button.label.despawn" : "デスポーン"
+"ui.action.doppelganger.swap" : "幻影と位置を交換します。"
+"ui.action.doppelganger.despawn" : "幻影を消滅させます。"
+
+# Stats
+
+# Titles
+
+"achievement.doppelganger.common1.title" : "バイロケーション"
+"achievement.doppelganger.common1.goal" : "幻影と位置を交換して20m以上移動する。"
+
+"achievement.doppelganger.another1.title" : "一蓮托生"
+"achievement.doppelganger.another1.goal" : "幻影がキルされて、自身共々死亡する。"
+
+"achievement.doppelganger.challenge.title" : "頼れる相棒"
+"achievement.doppelganger.challenge.goal" : "幻影と協力して、タスクを超早く完遂する。"
+"achievement.doppelganger.challenge.cond" : "タスクを完遂した時点で全クルーメイトのタスクノルマが4つ以上残っていること"
+"achievement.doppelganger.challenge.splitted.0" : "頼れる"
+"achievement.doppelganger.challenge.splitted.2" : "相棒"

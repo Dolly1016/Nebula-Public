@@ -74,11 +74,11 @@ public enum CoolDownType
 /// <summary>
 /// クールダウン設定のエディタです。
 /// </summary>
-public interface IRelativeCoolDownConfiguration : IConfiguration{
+public interface IRelativeCooldownConfiguration : IConfiguration{
     /// <summary>
     /// 現在のクールダウンです。
     /// </summary>
-    float CoolDown { get; }
+    float Cooldown { get; }
     float GetCoolDown(float baseCooldown);
 }
 
@@ -171,9 +171,9 @@ public interface Configurations
 
     ITaskConfiguration TaskConfiguration(string id, bool forceTasks, bool containsCommonTasks, Func<bool>? predicate = null, string? translationKey = null);
 
-    IRelativeCoolDownConfiguration KillConfiguration(string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate = null, Func<float>? baseKillCooldown = null)
+    IRelativeCooldownConfiguration KillConfiguration(string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate = null, Func<float>? baseKillCooldown = null)
         => KillConfiguration(NebulaAPI.GUI.LocalizedTextComponent(id), id, defaultType, immediateSelection, immediateDefaultValue, relativeSelection, relativeDefaultValue, ratioSelection, ratioDefaultValue, predicate, baseKillCooldown);
-    IRelativeCoolDownConfiguration KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate = null, Func<float>? baseKillCooldown = null);
+    IRelativeCooldownConfiguration KillConfiguration(TextComponent title, string id, CoolDownType defaultType, FloatSelection immediateSelection, float immediateDefaultValue, FloatSelection relativeSelection, float relativeDefaultValue, FloatSelection ratioSelection, float ratioDefaultValue, Func<bool>? predicate = null, Func<float>? baseKillCooldown = null);
 
     /// <summary>
     /// ゲーム内設定画面を開いているとき、画面の更新を要求します。

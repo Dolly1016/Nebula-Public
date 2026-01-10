@@ -1,0 +1,41 @@
+# Assignable
+
+"role.seer.name" : "シア"
+"role.seer.short" : "シア"
+"role.seer.blurb" : "その死を見逃すな"
+
+# Document
+
+"role.seer.doc" : "プレイヤーが死亡したタイミングが分かるクルーメイトです。"
+
+# Options
+
+"options.role.seer.detail" : "シアはプレイヤーの死亡時にフラッシュや、<br>死亡地点に現れるゴーストを視認できます。"
+"options.role.seer.ghostDuration" : "ゴーストの出現時間"
+"options.role.seer.canSeeGhostsInShadow" : "視界外の幽霊を視認可能"
+"options.role.seer.canSeeGhostsInShadow.detail" : "オンに設定すると、視界外(影の部分)の幽霊も見えるようになります。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.seer.common1.title" : "亡者を見る者"
+"achievement.seer.common1.goal" : "幽霊を間近に目撃する。"
+"achievement.seer.common1.cond" : ""
+"achievement.seer.common1.splitted.2" : "者"
+
+"achievement.seer.another1.title" : "現世を見る者"
+"achievement.seer.another1.goal" : "一番目の犠牲者になる。"
+"achievement.seer.another1.cond" : ""
+
+"achievement.seer.challenge2.title" : "真理を見る者"
+"achievement.seer.challenge2.goal" : "全ての投票で非クルーメイト陣営に票を投じる。"
+"achievement.seer.challenge2.cond" : "スキップ票および白票投票をした場合クリア不可+投票回数: 3回以上"
+"achievement.seer.challenge2.splitted.1" : "見る"

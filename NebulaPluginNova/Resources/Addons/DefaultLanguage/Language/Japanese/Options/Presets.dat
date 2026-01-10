@@ -1,0 +1,18 @@
+# Preset
+
+"preset.preset" : "プリセット"
+"preset.saveAs" : "名前を付けて保存"
+"preset.enterPresetName" : "プリセット名を入力してください。"
+"preset.save" : "保存"
+"preset.reload" : "再読み込み"
+"preset.saveSuccess" : "保存が完了しました。"
+"preset.saveFailed" : "保存に失敗しました。<br>NebulaLog.txtからより詳細な情報を確認できます。"
+"preset.loadSuccess" : "プリセットを読み込みました。"
+"preset.loadFailed" : "プリセットの読み込みに失敗しました。"
+"preset.load" : "読み込み"
+"preset.overwrite" : "上書き保存"
+"preset.overwrite.confirm" : "プリセットを上書きします。<br>よろしいですか？"
+"preset.rename" : "名前変更"
+"preset.delete" : "プリセット削除"
+"preset.delete.confirm" : "プリセットを削除します。<br>よろしいですか？"
+"preset.openFailed" : "プリセットファイルが<br>見つかりませんでした。"

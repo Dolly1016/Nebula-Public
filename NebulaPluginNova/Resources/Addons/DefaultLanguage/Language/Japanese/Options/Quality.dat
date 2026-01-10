@@ -1,0 +1,11 @@
+# Header
+
+"options.quality" : "クオリティオプション"
+"options.quality.detail" : "ゲームのクオリティに関する設定です。<br>パフォーマンスに影響を及ぼす恐れがあります。参加者の様子を見て調整してください。"
+
+# Groups
+
+# Options
+
+"options.quality.lowLatencyPlayerSync" : "低遅延のプレイヤー位置同期"
+"options.quality.lowLatencyPlayerSync.detail" : "<b>カスタムサーバー限定</b><br>プレイヤーの位置を同期するタイミングをより短くします。"

@@ -12,7 +12,7 @@ namespace Nebula.Roles.Impostor;
 
 
 [NebulaRPCHolder]
-internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedRole
+internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedRole, IAssignableDocument
 {
     private Cupid() : base("cupid", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [
         SelectCooldownOption,
@@ -44,10 +44,22 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
     static private readonly GameStatsEntry StatsLaserLover = NebulaAPI.CreateStatsEntry("stats.cupid.laserLover", GameStatsCategory.Roles, MyRole);
 
     static private Image stringButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CupidStringButton.png", 115f);
+    static private Image loverButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CupidLoverButton.png", 115f);
 
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(loverButtonSprite, "role.cupid.ability.lover");
+        yield return new(stringButtonSprite, "role.cupid.ability.laser");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%CUPID_DELAY%", LaserDelayByCupidOption.GetValue().DecimalToString("1"));
+    }
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image loverButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CupidLoverButton.png", 115f);
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), 
             used == 0 ? byte.MaxValue : selected1?.PlayerId ?? byte.MaxValue,

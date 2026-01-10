@@ -1,0 +1,62 @@
+# Assignable
+
+"role.lover.name" : "ラバー"
+
+# Document
+
+"role.lover.doc" : "2人1組のモディファイアです。%SUICIDE%"
+"role.lover.doc.standard" : "相方が死亡すると、後を追って死亡します。"
+"role.lover.doc.avenger" : "相方がキルされると、%AVENGER%になって復讐劇がはじまります。<br>追放等の理由で復讐相手がいない場合はそのまま後を追って自殺します。"
+"role.lover.winCond" : "全生存者が3人以下になった段階で、相方とともに生存していること。%EXTRA%"
+"role.lover.winCond.additional" : "<br>または、相方が勝利しかつ生存していると自身も<var>追加勝利</var>します。"
+
+# Options
+
+"options.role.lover.detail" : "ラバーズは相方が死亡すると後追いして自殺します。<br>プレイヤーの勝利方法に変化をもたらします。"
+
+# Game
+
+"role.lover.blurb" : "あなたは%NAME%と<color=#fc04bdff>恋</color>に落ちている"
+"role.lover.generalBlurb" : "恋は落ちるもの"
+"options.role.lover.numOfPairs" : "ラバーズのペア数"
+"options.role.lover.chanceOfAssigningImpostors" : "インポスターの割り当て確率"
+"options.role.lover.allowExtraWin" : "ラバーズの追加勝利"
+"options.role.lover.allowExtraWin.detail" : "オンにすると、相方が生きて勝利すれば自身も一緒に勝利できます。"
+"options.role.lover.allowExtraWinViaCrewmateWin" : "クルーメイト勝利による追加勝利"
+"options.role.lover.blockRoleWin" : "役職による勝利をブロック"
+"options.role.lover.blockRoleWin.detail" : "オンにすると、自身の役職によって勝利できなくなります。<br><br>・オフの場合: ラバーズとして勝利できなくとも、自身の役職で勝利すれば勝利できます。<br>・オンの場合: ラバーズの勝利条件以外で勝利できなくなります。"
+"options.role.lover.avengerMode" : "アヴェンジャーモード" 
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.lover.common1.title" : "それはときに盲目"
+"achievement.lover.common1.goal" : "ラバーズ単独勝利する。"
+"achievement.lover.common1.splitted.0" : "それは"
+
+"achievement.lover.another1.title" : "それはときに激情"
+"achievement.lover.another1.goal" : "相方を失い、後追い自殺する。"
+"achievement.lover.another1.splitted.1" : "ときに"
+
+"achievement.lover.challenge.title" : "未必の恋"
+"achievement.lover.challenge.goal" : "インポスターが2人生存しており、<br>自身はインポスターではない状態でラバーズ単独勝利する。"
+"achievement.lover.challenge.splitted.2" : "恋"
+
+# Team
+
+"end.lover" : "ラバーズ%EXTRA%勝利"
+"end.extra.lover" : " <color=#FFFFFF>+</color> ラバーズ"
+
+# Document
+
+"document.tip.winCond.teams.lover" : "ラバーズ"
+
+"document.tip.winCond.lovers.normal.title" : "ラバーズ単独勝利"
+"document.tip.winCond.lovers.normal" : "生存者数が3人のとき、互いに生存していると勝利します。"
+"document.tip.winCond.lovers.extra.title" : "ラバーズ追加勝利"
+"document.tip.winCond.lovers.extra" : "相方が生存して且つ勝利していると、自身もともに勝利します。"

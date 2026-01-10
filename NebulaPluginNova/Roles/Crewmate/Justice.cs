@@ -569,7 +569,7 @@ public class JusticeMeetingHud : MonoBehaviour
 }
 
 [NebulaRPCHolder]
-public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCitation, DefinedRole
+public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private Justice():base("justice", new(255, 128, 0), RoleCategory.CrewmateRole, Crewmate.MyTeam, [PutJusticeOnTheBalanceOption, JusticeMeetingTimeOption])
     {
@@ -604,6 +604,20 @@ public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCit
         });
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(MeetingIcon, "role.justice.ability.meeting");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%NUM%", PutJusticeOnTheBalanceOption ? "1" : "2");
+        yield return new("%PICKME%", PutJusticeOnTheBalanceOption ? Language.Translate("role.justice.ability.pickJustice") : "");
+    }
+
+    static private Image MeetingIcon => MeetingPlayerButtonManager.Icons.AsLoader(2);
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
@@ -633,7 +647,7 @@ public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCit
             if (!usedBalance)
             {
                 var buttonManager = NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>();
-                buttonManager?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(2),
+                buttonManager?.RegisterMeetingAction(new(MeetingIcon,
                    p =>
                    {
                        if (PutJusticeOnTheBalanceOption)

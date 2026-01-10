@@ -10,7 +10,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
+public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.vulture", new(140, 70, 18), TeamRevealType.OnlyMe);
 
@@ -21,19 +21,32 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private IRelativeCoolDownConfiguration EatCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.vulture.eatCoolDown", CoolDownType.Immediate, (5f, 60f, 5f), 20f, (-40f, 20f, 5f), -10f, (0.125f, 2f, 0.125f), 0.75f);
+    static private IRelativeCooldownConfiguration EatCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.vulture.eatCoolDown", CoolDownType.Immediate, (5f, 60f, 5f), 20f, (-40f, 20f, 5f), -10f, (0.125f, 2f, 0.125f), 0.75f);
     static private IntegerConfiguration NumOfEatenToWinOption = NebulaAPI.Configurations.Configuration("options.role.vulture.numOfTheEatenToWin", (1,8),3);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("options.role.vulture.vent", true);
 
     static public Vulture MyRole = new Vulture();
     static private GameStatsEntry StatsEaten = NebulaAPI.CreateStatsEntry("stats.vulture.eaten", GameStatsCategory.Roles, MyRole);
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    bool IAssignableDocument.HasWinCondition => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.vulture.ability.eat");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%NUM%", NumOfEatenToWinOption.GetValue().ToString());
+    }
+
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EatButton.png", 115f);
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
 
         private Modules.ScriptComponents.ModAbilityButtonImpl? eatButton = null;
-
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.EatButton.png", 115f);
 
         int leftEaten = NumOfEatenToWinOption;
 
@@ -65,7 +78,7 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole
                 var eatTracker = ObjectTrackers.ForDeadBody(this, null, MyPlayer, (d) => true);
 
                 var eatButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
-                    EatCoolDownOption.CoolDown, "eat", buttonSprite,
+                    EatCoolDownOption.Cooldown, "eat", buttonSprite,
                     _ => eatTracker.CurrentTarget != null);
                 eatButton.ShowUsesIcon(2, leftEaten.ToString());
                 eatButton.OnClick = (button) => {

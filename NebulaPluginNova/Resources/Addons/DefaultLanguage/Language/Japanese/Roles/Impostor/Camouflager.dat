@@ -1,0 +1,43 @@
+# Assignable
+
+"role.camouflager.name" : "カモフラージャー"
+"role.camouflager.short" : "カ"
+"role.camouflager.blurb" : "迷彩に紛れてキルせよ"
+"role.camouflager.hint" : "みんな同じ見た目にしてしまおう！"
+
+# Document
+
+"role.camouflager.doc" : "全プレイヤーの見た目を真っ黒にしてしまう<b>カモフラージュ</b>を発生させられます。"
+"role.camouflager.ability.main" : ""
+"role.camouflager.ability.title" : "固有能力 "カモフラージュ""
+"role.camouflager.ability.camo" : "<b>カモフラージュ</b>を発動します。"
+
+# Options
+
+"options.role.camouflager.detail" : "カモフラージュによってプレイヤーは互いを識別できなくなります。"
+"options.role.camouflager.camoCoolDown" : "カモフラージュクールダウン"
+"options.role.camouflager.camoDuration" : "カモフラージュ効果時間"
+"options.role.camouflager.canInvokeCamoAfterDeath" : "死亡後のカモフラージュ能力の発動"
+"options.role.camouflager.canInvokeCamoAfterDeath.detail" : "オンにすると、死亡後もカモフラージュ能力を発動できます。"
+
+# Game
+
+
+# UI
+
+"button.label.camo" : "カモ"
+
+# Stats
+
+"stats.camouflager.camo" : "カモフラージュ発動回数" 
+
+# Titles
+
+"achievement.camouflager.common1.title" : "あなたは誰？"
+"achievement.camouflager.common1.goal" : "カモフラージュを発動する。"
+"achievement.camouflager.common1.splitted.0" : "あなたは"
+
+"achievement.camouflager.challenge.title" : "見境のない残虐行為"
+"achievement.camouflager.challenge.goal" : "カモフラージュ発動中に自他問わず合計4回以上のキルが発生する。"
+"achievement.camouflager.challenge.flavor" : ""鑑識作業は困難を極めていた。" ―署名の無い回顧録"
+"achievement.camouflager.challenge.splitted.0" : "見境のない"

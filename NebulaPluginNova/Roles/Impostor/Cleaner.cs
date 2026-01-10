@@ -11,7 +11,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCitation, DefinedRole
+public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
     private Cleaner() : base("cleaner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [CleanCoolDownOption, SyncKillAndCleanCoolDownOption]){
         GameActionTypes.CleanCorpseAction = new("cleaner.clean", this, isCleanDeadBodyAction: true);
@@ -28,10 +28,22 @@ public class Cleaner : DefinedSingleAbilityRoleTemplate<Cleaner.Ability>, HasCit
     static public readonly Cleaner MyRole = new();
     static private readonly GameStatsEntry StatsClean = NebulaAPI.CreateStatsEntry("stats.cleaner.clean", GameStatsCategory.Roles, MyRole);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(buttonSprite, "role.cleaner.ability.clean");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%COOLDOWN%", Language.Translate(SyncKillAndCleanCoolDownOption ? "role.cleaner.doc.cooldown" : "role.cleaner.doc.notSyncCooldown"));
+    }
+
+    static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CleanButton.png", 115f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.CleanButton.png", 115f);
-
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {

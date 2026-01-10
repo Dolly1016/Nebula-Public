@@ -12,7 +12,7 @@ using Virial.Game;
 
 namespace Nebula.Roles.Neutral;
 
-public class Avenger : DefinedRoleTemplate, DefinedRole
+public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.avenger", new(141,111,131), TeamRevealType.OnlyMe);
     private Avenger() : base("avenger", MyTeam.Color, RoleCategory.NeutralRole, MyTeam,
@@ -31,7 +31,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
     static private BoolConfiguration AvengerFlashForMurdererOption = NebulaAPI.Configurations.Configuration("options.role.avenger.showAvengerFlashForTarget", true);
     static private FloatConfiguration NotificationForAvengerIntervalOption = NebulaAPI.Configurations.Configuration("options.role.avenger.notificationForAvengerInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration NotificationForMurdererIntervalOption = NebulaAPI.Configurations.Configuration("options.role.avenger.notificationForTargetInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private IRelativeCoolDownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.avenger.killCoolDown", CoolDownType.Relative, (2.5f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
+    static private IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.avenger.killCoolDown", CoolDownType.Relative, (2.5f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static private IVentConfiguration VentOption = NebulaAPI.Configurations.NeutralVentConfiguration("options.role.avenger.vent", false);
     static private Opportunist.OpportunistFallbackOption OpportunistFallbackOption = Opportunist.FallbackConfiguration(null, null, "options.role.avenger");
 
@@ -49,7 +49,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole
         if (!player.TryGetModifier<Modifier.Lover.Instance>(out _)) return Opportunist.GenerateFallback(OpportunistFallbackOption.Tasks);
         return null;
     }
-
+    bool IAssignableDocument.HasWinCondition => true;
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;

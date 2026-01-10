@@ -1,0 +1,56 @@
+# Assignable
+
+"role.rokurokubi.name" : "ろくろ首"
+"role.rokurokubi.short" : "ろ"
+"role.rokurokubi.blurb" : "長アくしても、あぐれつしゔ"
+
+# Document
+
+"role.rokurokubi.doc" : "首を伸ばして、遠くのプレイヤーをキルできるインポスターです。"
+"role.rokurokubi.ability.title" : "固有能力 "妖怪ろくろ首""
+"role.rokurokubi.ability.main" : "首をながぁ～く伸ばします。首は壁を跨いで伸ばせます。"
+"role.rokurokubi.ability.rokurokubi" : "首を伸ばします。%KEY%キーを押下している間、首の伸長を一時停止できます。"
+"role.rokurokubi.ability.reset" : "収縮ボタンを押すか、キルすると首の長さが元に戻ります。"
+
+# Options
+
+"options.role.rokurokubi.detail" : "ろくろ首は首を伸ばして、遠くのプレイヤーをキルできます。<br>首は壁を跨いで伸ばせます。"
+"options.role.rokurokubi.craneSpeed" : "首の伸長速度"
+"options.role.rokurokubi.maxNeckLength" : "首の最大長"
+"options.role.rokurokubi.autoKillInCraning" :  "首伸長中の自動キル"
+
+# Game
+
+
+# UI
+
+"button.label.rokuro" : "ろくろ首"
+"button.label.rokuro.reset" : "収縮"
+"ui.action.rokurokubi.pause" : "押下している間、首の伸長を停止します。"
+
+# Stats
+
+
+# Titles
+
+"achievement.rokurokubi.common1.title" : "走る寒気"
+"achievement.rokurokubi.common1.goal" : "首を伸ばして2回キルする。"
+"achievement.rokurokubi.common1.splitted.0" : "走る"
+
+"achievement.rokurokubi.common2.title" : "お待ちしております"
+"achievement.rokurokubi.common2.goal" : "3秒以上、首の伸長を止めながらキルする。"
+"achievement.rokurokubi.common2.flavor" : ""いつまでも、首を長アくしてゐます。" ―どこからか声がする。"
+
+"achievement.rokurokubi.common3.title" : "霊障"
+"achievement.rokurokubi.common3.goal" : "透明化しながら首を伸ばしてキルする。"
+"achievement.rokurokubi.common3.cond" : "本体から10m以上離れたプレイヤーをキルすること"
+
+"achievement.rokurokubi.another1.title" : "つるすべボディ"
+"achievement.rokurokubi.another1.goal" : "首を伸ばしている間にキルされ、死亡する。"
+"achievement.rokurokubi.another1.flavor" : ""なんて無防備な！""
+"achievement.rokurokubi.another1.splitted.0" : "つるすべ"
+
+"achievement.rokurokubi.challenge.title" : "異世界混合タッグ"
+"achievement.rokurokubi.challenge.goal" : "首を伸ばして、仲間によるキルから間もなくキルし、ダブルキルを決める。"
+"achievement.rokurokubi.challenge.cond" : "既に物の怪っぽい仲間を除く"
+"achievement.rokurokubi.challenge.splitted.1" : "混合"

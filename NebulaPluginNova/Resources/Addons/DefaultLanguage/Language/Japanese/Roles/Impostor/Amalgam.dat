@@ -1,0 +1,47 @@
+# Assignable
+
+"role.amalgam.name" : "アマルガム"
+"role.amalgam.short" : "ア"
+"role.amalgam.blurb" : "不定形の恐怖"
+"role.amalgam.hint" : "能力いっぱい、使い放題！"
+
+# Document
+
+"role.amalgam.doc" : "融合した役職の能力を同時に使用できるインポスターです。"
+"role.amalgam.ability.title" : "固有能力 "とけてつないで、いっぱいつよい""
+"role.amalgam.ability.main" : "%ABILITY%"
+"role.amalgam.ability.main.selection" : "<var>役職の能力を融合できます。</var>"
+"role.amalgam.ability.main.random" : "<var>いくつかの役職の能力が融合されています。</var><br>融合されている役職はヘルプ画面の「情報」タブを開くと簡単に確認できます。"
+"role.amalgam.ability.amalgam" : "<title>融合</title>能力を融合します。<br>一度融合した能力は取り外せません。"
+"role.amalgam.tips" : "・<b>キル、エイム能力</b>と<b>ミニマップに関連する能力</b>はそれぞれ同時に一つまで融合できます。<br>・キー割り当てはキル、エイム能力のみ有効です。"
+
+# Options
+
+"options.role.amalgam.detail" : "アマルガムはさまざまな役職の能力を融合できます。"
+"options.role.amalgam.maxRoles" : "役職の最大融合回数"
+"options.role.amalgam.randomAssignment" : "ランダム融合"
+"options.role.amalgam.abilityFilter" : "役職フィルタ"
+"options.role.amalgam.canBeGuessedAsLoadedRoles" : "融合した役職で推察可能"
+
+# Game
+
+"role.amalgam.tabs.kill" : "キル・エイム役職"
+"role.amalgam.tabs.map" : "マップ役職"
+"role.amalgam.tabs.others" : "その他役職"
+
+# UI
+
+"button.label.select" : "選択"
+
+# Stats
+
+
+# Titles
+
+"achievement.amalgam.common1.title" : "第二の刃"
+"achievement.amalgam.common1.goal" : "2つ目の能力を獲得する。"
+
+"achievement.amalgam.challenge.title" : "究極の融合生命体"
+"achievement.amalgam.challenge.goal" : "役職のチャレンジ称号を2つ以上獲得する。"
+"achievement.amalgam.challenge.splitted.0" : "究極の"
+"achievement.amalgam.challenge.splitted.2" : "生命体"

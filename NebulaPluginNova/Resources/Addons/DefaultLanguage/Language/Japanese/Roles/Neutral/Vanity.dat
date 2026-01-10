@@ -1,0 +1,68 @@
+# Assignable
+
+"role.vanity.name" : "ヴァニティ"
+"role.vanity.short" : "ヴ"
+"role.vanity.blurb" : "あなたの正義でありたい"
+
+# Document
+
+"role.vanity.doc" : "自身をシェリフだと思い込んでいる第三陣営です。"
+"role.vanity.winCond" : "%WIN%"
+"role.vanity.winCond.independent" : "クルーメイトをキルしていない場合、クルーメイトが勝利すれば追加勝利します。<br><var>クルーメイトをキルしている場合、他のキル陣営を殲滅したうえで全生存者が2人以下になると勝利します。</var>"
+"role.vanity.winCond.extra" : "クルーメイトをキルしていない場合、クルーメイトが勝利すれば追加勝利します。<br><var>クルーメイトをキルした場合、クルーメイトが敗北すれば追加勝利します。</var>"
+"role.vanity.ability.title" : "固有能力 "正義の執行？""
+"role.vanity.ability.main" : "シェリフとは異なり、キルに失敗しません。"
+"role.vanity.ability.kill" : "相手の陣営を問わずキルできます。"
+
+# Options
+
+"options.role.vanity.detail" : "ヴァニティは自身をシェリフだと思い込んでいるキラーです。<br>自身のキルに応じて勝利条件が変化します。"
+"options.role.vanity.canExtraWinEvenIfVanityDied" : "自身の生死に依らず追加勝利可能"
+"options.role.vanity.independentTeam" : "単独キラー陣営"
+"options.role.vanity.becomeAwareOfVanityWhenKillCrewmate" : "クルーをキルするとヴァニティを自覚可能"
+"options.role.vanity.canBecomeAwareOfVanity" : "タスクでヴァニティを自覚可能"
+"options.role.vanity.taskProgressRequiredForSelfAdmission" : "自覚に必要なタスク数"
+"options.role.vanity.group.task" : "自覚に関する設定"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.vanity.kill" : "Num of Killing"
+
+# Titles
+
+"achievement.vanity.common1.title" : "反転する運命"
+"achievement.vanity.common1.goal" : "ヴァニティを自覚する。"
+
+"achievement.vanity.another1.title" : "慢心"
+"achievement.vanity.another1.goal" : "クルーメイトをキルした上で、追放と推察以外の原因で死亡する。"
+
+"achievement.combination.2.sheriff.vanity.common2.title" : "私に正義があったなら"
+"achievement.combination.2.sheriff.vanity.common2.goal" : "シェリフで非クルーをキルし、最後にクルーメイトを追放して敗北する。"
+"achievement.combination.2.sheriff.vanity.common2.cond" : "ヴァニティが出現しうるゲームでのみ獲得可能"
+"achievement.combination.2.sheriff.vanity.common2.flavor" : ""つい、魔が差したんだ。" ―署名の無い回顧録"
+
+"achievement.vanity.challenge.title" : "さらば、来し日の盟友よ"
+"achievement.vanity.challenge.goal" : "最後のクルーメイトをキルし、勝利する。"
+"achievement.vanity.challenge.splitted.0" : "さらば、"
+
+# Team
+
+"teams.vanity" : "ヴァニティ"
+"end.vanity" : "ヴァニティ%EXTRA%勝利"
+"end.extra.vanity" : " <color=#FFFFFF>+</color> ヴァニティ"
+
+# Document
+
+"document.tip.winCond.vanity.kill.title" : "キル勝利"
+"document.tip.winCond.vanity.kill" : "クルーメイトをキルしている場合、他のキル陣営を殲滅したうえで<br>自陣営の生存者が全生存者の半数以上を占めると勝利します。"
+"document.tip.winCond.vanity.extra.crewOnly.title" : "追加勝利"
+"document.tip.winCond.vanity.extra.crewOnly" : "クルーメイトをキルしていない場合、クルーメイトが勝利すれば追加勝利します。"
+"document.tip.winCond.vanity.extra.title" : "追加勝利"
+"document.tip.winCond.vanity.extra" : "クルーメイトをキルしていない場合、クルーメイトが勝利すれば追加勝利します。<br>クルーメイトをキルした場合、クルーメイトが敗北すれば追加勝利します。"
+"document.tip.winCond.vanity.extra.surviveCond" : "追加勝利するには、ヴァニティは<b>生存</b>している必要があります。"

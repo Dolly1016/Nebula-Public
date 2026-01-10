@@ -13,7 +13,7 @@ using Virial.Helpers;
 namespace Nebula.Roles.Impostor;
 
 [NebulaRPCHolder]
-public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, DefinedRole
+public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, DefinedRole, IAssignableDocument
 {
     private Marionette() : base("marionette", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MannequinModeOption, FixDecoyAppearanceOption, PlaceCoolDownOption, SwapCoolDownOption, DecoyDurationOption, CanSeeDecoyInShadowOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
@@ -125,14 +125,29 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
     static internal bool MannequinMode => MannequinModeOption.GetValue() == 0;
     static internal Decoy? GetMannequinDecoyById(int id) => NebulaSyncObject.GetObject<Decoy>(id);
     static internal IFakePlayer? GetFakePlayerById(int id) => IPlayerlike.GetPlayerlike(id) as IFakePlayer;
+
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(placeButtonSprite, "role.marionette.ability.place");
+        yield return new(destroyButtonSprite, "role.marionette.ability.destroy");
+        yield return new(monitorButtonSprite, "role.marionette.ability.monitor");
+        yield return new(swapButtonSprite, "role.marionette.ability.swap");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%DOC%", Language.Translate(MannequinMode ? "role.marionette.ability.main.mannequin" : FixDecoyAppearanceOption ? "role.marionette.ability.main.player.keep" : "role.marionette.ability.main.player"));
+    }
+
+    static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyButton.png", 115f);
+    static private Image destroyButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyDestroyButton.png", 115f);
+    static private Image swapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoySwapButton.png", 115f);
+    static private Image monitorButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMonitorButton.png", 115f);
+    static private Image decoyArrowSprite = SpriteLoader.FromResource("Nebula.Resources.DecoyArrow.png", 180f);
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility, IDecoyController
     {
-        static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyButton.png", 115f);
-        static private Image destroyButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyDestroyButton.png", 115f);
-        static private Image swapButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoySwapButton.png", 115f);
-        static private Image monitorButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.DecoyMonitorButton.png", 115f);
-        static private Image decoyArrowSprite = SpriteLoader.FromResource("Nebula.Resources.DecoyArrow.png", 180f);
-
         private Decoy? myDecoy = null;
         private IFakePlayer? myFakePlayer = null;
         Decoy? IDecoyController.Decoy => myDecoy;

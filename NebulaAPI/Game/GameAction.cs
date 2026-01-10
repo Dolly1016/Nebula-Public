@@ -44,7 +44,11 @@ public class GameActionType
 {
     private static Dictionary<string, GameActionType> allActionTypes = new();
     public static bool TryGetActionType(string id, [MaybeNullWhen(false)] out GameActionType gameActionType) => allActionTypes.TryGetValue(id, out gameActionType);
+    public static IEnumerable<GameActionType> AllActionTypes => allActionTypes.Values;
+
     public string Id { get; private set; }
+    public string TranslationKey { get; private set; }
+    public string DisplayName => NebulaAPI.Language.Translate(TranslationKey);
     public bool IsPlacementAction { get;private set; }
     public bool IsEquippingAction { get; private set; }
     public bool IsPhysicalAction { get; private set; }
@@ -55,6 +59,7 @@ public class GameActionType
     public GameActionType(string id, DefinedAssignable? relatedRole, bool isPlacementAction = false, bool isEquippingAction = false, bool isPhysicalAction = false, bool isCleanDeadBodyAction = false)
     {
         this.Id = id;
+        this.TranslationKey = "gameAction." + id;
         this.RelatedRole = relatedRole;
         this.IsPlacementAction = isPlacementAction;
         this.IsEquippingAction = isEquippingAction;

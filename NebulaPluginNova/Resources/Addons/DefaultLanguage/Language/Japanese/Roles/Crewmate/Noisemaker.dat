@@ -1,0 +1,35 @@
+# Assignable
+
+"role.noisemaker.name" : "ノイズメーカー"
+"role.noisemaker.short" : "ノ"
+"role.noisemaker.blurb" : "騒がしい死体"
+
+# Document
+
+"role.noisemaker.doc" : "死亡時に、死亡地点を指すアラートを発生させるクルーメイトです。"
+
+# Options
+
+"options.role.noisemaker.detail" : "ノイズメーカーはキルされたときにアラートを発します。"
+"options.role.noisemaker.noiseDuration" : "アラートの効果時間"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.noisemaker.common1.title" : "防犯意識"
+"achievement.noisemaker.common1.goal" : "死亡してアラートを発生させる。"
+"achievement.noisemaker.common1.flavor" : ""防犯ブザーは、命を失う前に鳴らしましょう" ―『クルーメイト 命のあんぜん講習』抜粋"
+
+"achievement.noisemaker.challenge.title" : "よい子のひっさつ戦法"
+"achievement.noisemaker.challenge.goal" : "アラートが発生した直後の会議で、自身をキルしたプレイヤーが追放される。"
+"achievement.noisemaker.challenge.splitted.0" : "よい子の"
+"achievement.noisemaker.challenge.splitted.1" : "ひっさつ"
+"achievement.noisemaker.challenge.splitted.2" : "戦法"

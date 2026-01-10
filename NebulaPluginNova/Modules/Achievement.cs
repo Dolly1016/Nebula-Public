@@ -273,7 +273,7 @@ public interface INebulaAchievement
     {
         foreach (var r in RelatedRole) yield return r.DisplayName;
         yield return Language.Translate(GoalTranslationKey);
-        yield return Language.Translate(CondTranslationKey);
+        yield return Language.Find(CondTranslationKey) ?? "";
         if (IsCleared) {
             yield return Language.Translate(TranslationKey);
             yield return Language.Find(FlavorTranslationKey) ?? "";
@@ -403,8 +403,8 @@ public interface INebulaAchievement
         list.Add(new LazyTextComponent(() =>
         {
             StringBuilder builder = new();
-            var cond = Language.Translate(CondTranslationKey);
-            if (cond.Length > 0)
+            var cond = Language.Find(CondTranslationKey);
+            if ((cond?.Length ?? 0) > 0)
             {
                 builder.Append("<size=75%><br><br>");
                 builder.Append(Language.Translate("achievement.ui.cond"));

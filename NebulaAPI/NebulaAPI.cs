@@ -11,6 +11,7 @@ using Virial.Components;
 using Virial.Configuration;
 using Virial.Events;
 using Virial.Game;
+using Virial.Internal;
 using Virial.Media;
 using Virial.Runtime;
 using Virial.Text;
@@ -57,6 +58,9 @@ internal interface INebula
 
     //DocumentTipAPI
     void RegisterTip(IDocumentTip tip);
+
+    //LowLevel
+    internal AmongUsLL AmongUs { get; }
 
     E RunEvent<E>(E ev) where E : class, Virial.Events.Event;
 
@@ -106,7 +110,10 @@ public static class NebulaAPI
     /// </summary>
     static public Utilities.IHasher Hasher => instance.Hasher;
 
-
+    /// <summary>
+    /// 役職に関する情報を提供するモジュールです。
+    /// </summary>
+    static public Assignable.Assignables Assignables => instance.Assignables;
 
 
     /// <summary>
@@ -166,6 +173,8 @@ public static class NebulaAPI
     /// </summary>
     static public IModuleFactory Modules => instance.Modules;
     static public ITitlesRegister Titles => instance.Titles;
+
+    static internal AmongUsLL AmongUs => instance.AmongUs;
 
     /// <summary>
     /// 一括で送信するRPCをまとめるセクションを取得します。

@@ -619,8 +619,9 @@ public static class UsePlatformPatch
             Vector3 worldUseTargetPos = parent.TransformPoint(vector2);
             Vector3 worldSourcePos = parent.TransformPoint(sourcePos);
             Vector3 worldTargetPos = parent.TransformPoint(targetPos);
+            var modPlayer = target.GetModInfo();
 
-            target.GetModInfo()?.DeathPosition = new(worldUseSourcePos, worldUseSourcePos);
+            modPlayer?.DeathPosition = new(worldUseSourcePos, worldUseSourcePos);
             
             yield return target.MyPhysics.WalkPlayerTo(worldUseSourcePos, 0.01f, 1f, false);
             yield return target.MyPhysics.WalkPlayerTo(worldSourcePos, 0.01f, 1f, false);
@@ -630,7 +631,7 @@ public static class UsePlatformPatch
             worldTargetPos -= (Vector3)target.Collider.offset;
             if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlayDynamicSound("PlatformMoving", __instance.MovingSound, true, (GetDynamicsFunction)__instance.SoundDynamics, SoundManager.Instance.SfxChannel);
 
-            target.GetModInfo()?.DeathPosition = new(worldUseSourcePos, worldUseTargetPos);
+            modPlayer?.DeathPosition = new(worldUseSourcePos, worldUseTargetPos);
 
             __instance.IsLeft = !__instance.IsLeft;
             yield return Effects.All(
@@ -645,6 +646,9 @@ public static class UsePlatformPatch
                 yield break;
             }
 
+            if(modPlayer != null) GameOperatorManager.Instance?.Run<PlayerUseMovingPlatformEvent>(new(modPlayer, sourcePos, targetPos));
+
+
             yield return target.MyPhysics.WalkPlayerTo(worldUseTargetPos, 0.01f, 1f, false);
             target.SetPetPosition(target.transform.position);
             target.inMovingPlat = false;
@@ -654,7 +658,7 @@ public static class UsePlatformPatch
             target.SetKinematic(false);
             target.NetTransform.Halt();
 
-            target.GetModInfo()?.DeathPosition = null;
+            modPlayer?.DeathPosition = null;
 
             yield return Effects.Wait(0.1f);
             __instance.Target = null;
@@ -680,6 +684,7 @@ public static class UseLadderPatch
         }
     }
 }
+
 
 [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.CoClimbLadder))]
 public static class CoUseLadderPatch

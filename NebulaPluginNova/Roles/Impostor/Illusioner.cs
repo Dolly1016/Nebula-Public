@@ -8,7 +8,7 @@ using Virial.Helpers;
 
 namespace Nebula.Roles.Impostor;
 
-public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, DefinedRole
+public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, DefinedRole, IAssignableDocument
 {
     private Illusioner() : base("illusioner", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [SampleCoolDownOption, MorphCoolDownOption,MorphDurationOption,PaintCoolDownOption, LoseSampleOnMeetingOption, TransformAfterMeetingOption,SampleOriginalLookOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagChaotic, ConfigurationTags.TagDifficult);
@@ -33,6 +33,22 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
     static private GameStatsEntry StatsPaint = NebulaAPI.CreateStatsEntry("stats.illusioner.paint", GameStatsCategory.Roles, MyRole);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    bool IAssignableDocument.HasTips => false;
+    bool IAssignableDocument.HasAbility => true;
+    IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
+    {
+        yield return new(Morphing.Ability.SampleButtonSprite, "role.illusioner.ability.sample");
+        yield return new(Morphing.Ability.MorphButtonSprite, "role.illusioner.ability.morph");
+        yield return new(Painter.Ability.PaintButtonSprite, "role.illusioner.ability.paint");
+    }
+
+    IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
+    {
+        yield return new("%SAMPLE%", Language.Translate(LoseSampleOnMeetingOption ? "role.illusioner.ability.sample.loseSample" : "role.illusioner.ability.sample.keepSample"));
+        yield return new("%PAINT%", Language.Translate(TransformAfterMeetingOption ? "role.illusioner.ability.paint.afterMeeting" : "role.illusioner.ability.paint.immediate"));
+        yield return new("%LOOK%", Language.Translate(SampleOriginalLookOption ? "role.illusioner.ability.look.original" : "role.illusioner.ability.look.current"));
+    }
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         StaticAchievementToken? acTokenMorphingCommon = null, acTokenPainterCommon = null, acTokenCommon = null;

@@ -1,0 +1,53 @@
+# Assignable
+
+"role.vulture.name" : "ヴァルチャー"
+"role.vulture.short" : "ヴ"
+"role.vulture.blurb" : "死体を食い漁れ"
+
+# Document
+
+"role.vulture.doc" : "死体を捕食する第三陣営です。"
+"role.vulture.winCond" : "死体を<var>%NUM%</var>体捕食する。"
+"role.vulture.ability.title" : "固有能力 "屍の捕食者""
+"role.vulture.ability.main" : ""
+"role.vulture.ability.eat" : "<title>捕食</title>死体を食べます。"
+
+# Options
+
+"options.role.vulture.detail" : "ヴァルチャーは指定数の死体を捕食することで勝利します。<br>クルーメイトは素早く死体を発見する必要があります。"
+"options.role.vulture.eatCoolDown" : "捕食クールダウン"
+"options.role.vulture.numOfTheEatenToWin" : "勝利に必要な死体の捕食数"
+
+# Game
+
+"gameAction.vulture.eat" : "死体捕食"
+
+# UI
+
+"button.label.eat" : "捕食"
+
+# Game Statictics
+
+"statistics.events.eat" : "死体捕食"
+
+# Stats
+
+"stats.vulture.eaten" : "死体の捕食回数"
+
+# Titles
+
+"achievement.vulture.common1.title" : "捕食者"
+"achievement.vulture.common1.goal" : "死体を1つ捕食する。"
+
+"achievement.vulture.challenge.title" : "不自然な平穏"
+"achievement.vulture.challenge.goal" : "死体がレポートされること無く勝利する。"
+
+# Team
+
+"teams.vulture" : "ヴァルチャー"
+"end.vulture" : "ヴァルチャー%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.vulture.title" : "特殊勝利"
+"document.tip.winCond.vulture" : "指定数の死体を捕食すると勝利します。"

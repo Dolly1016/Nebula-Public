@@ -1,0 +1,59 @@
+# Assignable
+
+"role.oracle.name" : "オラクル"
+"role.oracle.short" : "オ"
+"role.oracle.blurb" : "心を視よ"
+
+# Document
+
+"role.oracle.doc" : "占いで他人の役職を調べられるクルーメイトです。"
+"role.oracle.ability.title" : "固有能力 "神託を告げる宝玉""
+"role.oracle.ability.main" : "プレイヤーの役職を占い、そのプレイヤーの役職%CAND%。"
+"role.oracle.ability.main.one" : "を<var>占います</var>"
+"role.oracle.ability.main.multiple" : "の候補を<var>%NUM%つに絞れます</var>"
+"role.oracle.ability.oracle" : "<title>占う</title>プレイヤーの現在の役職を占います。<br>%DIE%"
+"role.oracle.ability.oracle.die" : "ただし、%ROLES%を占うと<var>死亡してしまいます</var>。"
+"role.oracle.ability.oracle.die.split" : "、"
+
+# Options
+
+"options.role.oracle.detail" : "オラクルは占いで他人の役職をいくつかの候補に絞ります。"
+"options.role.oracle.maxOracle" : "最大占い回数"
+"options.role.oracle.oracleCooldown" : "占いクールダウン"
+"options.role.oracle.oracleAdditionalCooldown" : "占いの追加クールダウン"
+"options.role.oracle.oracleDuration" : "占いの所要時間"
+"options.role.oracle.numOfCandidates" : "役職候補数"
+"options.role.oracle.dieOnDividingOpportunist" : "オポチュニストを占うと自殺"
+"options.role.oracle.dieOnDividingOracle" : "オラクルを占うと自殺"
+
+# Game
+
+"role.oracle.gui.results" : "占い結果"
+"role.oracle.gui.results.zero" : "なし"
+
+# UI
+
+"button.label.oracle" : "占う"
+
+# Status
+
+"status.punished" : "天誅"
+
+# Stats
+
+"stats.oracle.oracle" : "占った回数"
+
+# Titles
+
+"achievement.oracle.common1.title" : "神は言った"
+"achievement.oracle.common1.goal" : "通算で10回役職を占う。"
+"achievement.oracle.common1.splitted.0" : "神は"
+"achievement.oracle.common1.splitted.2" : "言った"
+
+"achievement.oracle.another1.title" : "私は言った"
+"achievement.oracle.another1.goal" : "占ったクルーメイトを追放するか、誰かを誤射する。"
+"achievement.oracle.another1.splitted.0" : "私は"
+
+"achievement.oracle.challenge.title" : "我々の見解"
+"achievement.oracle.challenge.goal" : "占ったインポスターが1人以上クルーメイトに推察され、<br>マッドメイト除くクルーメイトを一人も追放せず勝利する。"
+"achievement.oracle.challenge.splitted.0" : "我々の"
