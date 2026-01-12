@@ -52,7 +52,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
             {
                 var predicate = ObjectTrackers.PlayerlikeLocalKillablePredicate;
                 var killButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill, null,
-                    AcidCooldownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "acid", Virial.Components.ModAbilityButton.LabelType.Impostor,
+                    AcidCooldownOption.GetCooldown(MyPlayer.TeamKillCooldown), "acid", Virial.Components.ModAbilityButton.LabelType.Impostor,
                     new WrapSpriteLoader(()=> AmongUsUtil.GetRolePrefab<ViperRole>()!.killSprite),
                     (player, button) => {
                         MyPlayer.MurderPlayer(player, PlayerState.Dissolved, null, KillParameter.NormalKill | KillParameter.WithViperDeadBody);

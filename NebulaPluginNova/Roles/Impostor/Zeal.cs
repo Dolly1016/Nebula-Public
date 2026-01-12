@@ -70,7 +70,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
                 HudContent emptyContent = HudContent.InstantiateContent("Empty", false, false, true, false);
                 List<(IPlayerlike player, float time)> killHistory = [];
 
-                GameTimer cooldownTimer = NebulaAPI.Modules.Timer(this, KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer().ResetsAtTaskPhase();
+                GameTimer cooldownTimer = NebulaAPI.Modules.Timer(this, KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer().ResetsAtTaskPhase();
                 cooldownTimer.Start();
 
                 var iconHolder = new PlayersIconHolder(false).Register(this);

@@ -83,7 +83,7 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole, IAssignableDocu
                 //var killTracker = NebulaAPI.Modules.KillTracker(this, MyPlayer, _ => !AmJekyll);
 
                 var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true,
-                    Virial.Compat.VirtualKeyInput.Kill, KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "kill", Virial.Components.ModAbilityButton.LabelType.Impostor,
+                    Virial.Compat.VirtualKeyInput.Kill, KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown), "kill", Virial.Components.ModAbilityButton.LabelType.Impostor,
                     null, (player, button) =>
                     {
                         using (RPCRouter.CreateSection("HydeKill"))

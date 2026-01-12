@@ -71,7 +71,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
             NebulaManager.Instance.ScheduleDelayAction(() =>
             {
                 RpcBerserk.Invoke(myPlayer);
-                var berserkKillCooldown = killCoolDownOption.GetCoolDown(myPlayer.TeamKillCooldown);
+                var berserkKillCooldown = killCoolDownOption.GetCooldown(myPlayer.TeamKillCooldown);
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.SetCooldown(0f);
             });
 
@@ -118,7 +118,7 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
             if (killingFlash > 0f) killingFlash -= Time.deltaTime;
         }
 
-        void OnResetKillCooldown(ResetKillCooldownLocalEvent ev) => ev.SetFixedCooldown(killCoolDownOption.GetCoolDown(ev.Player.TeamKillCooldown));
+        void OnResetKillCooldown(ResetKillCooldownLocalEvent ev) => ev.SetFixedCooldown(killCoolDownOption.GetCooldown(ev.Player.TeamKillCooldown));
         
 
         [OnlyMyPlayer]

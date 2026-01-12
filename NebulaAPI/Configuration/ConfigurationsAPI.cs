@@ -79,7 +79,7 @@ public interface IRelativeCooldownConfiguration : IConfiguration{
     /// 現在のクールダウンです。
     /// </summary>
     float Cooldown { get; }
-    float GetCoolDown(float baseCooldown);
+    float GetCooldown(float baseCooldown);
 }
 
 public interface ITaskConfiguration

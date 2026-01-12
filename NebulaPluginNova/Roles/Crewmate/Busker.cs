@@ -87,7 +87,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
                         using (RPCRouter.CreateSection("BuskerPseudocide"))
                         {
                             if (HidePseudocideFromVitalsOption) MyPlayer.GainAttribute(PlayerAttributes.BuskerEffect, 10000f, false, 0);
-                            MyPlayer.Suicide(PlayerState.Pseudocide, null, KillParameter.WithDeadBody);
+                            MyPlayer.MurderPlayer(MyPlayer, PlayerState.Pseudocide, null, KillParameter.WithDeadBody, KillCondition.NormalKill);
                             StatsPseudocide.Progress();
                         }
                         reviveButton.StartEffect();

@@ -87,7 +87,7 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 GameObject? lockSprite = null;
                 bool killedLastCrewmate = false;
                 ModAbilityButton killButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, true,
-                    Virial.Compat.VirtualKeyInput.Kill, null, Sheriff.KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "kill", ModAbilityButton.LabelType.Standard,
+                    Virial.Compat.VirtualKeyInput.Kill, null, Sheriff.KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown), "kill", ModAbilityButton.LabelType.Standard,
                     Sheriff.Ability.KillButtonSprite, (target, button) =>
                     {
                         using (RPCRouter.CreateSection("vanity"))
@@ -247,11 +247,4 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         RoleTaskType RuntimeRole.TaskType => amAware ? RoleTaskType.NoTask : RoleTaskType.CrewmateTask;
         bool RuntimeAssignable.MyCrewmateTaskIsIgnored => true;
     }
-}
-
-[NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
-internal class VanityCriteria : AbstractModule<IGameModeStandard>, IGameOperator
-{
-    static VanityCriteria() => DIManager.Instance.RegisterModule(() => new JackalCriteria().Register(NebulaAPI.CurrentGame!));
-
 }

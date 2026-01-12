@@ -312,7 +312,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
 
                     acTokenAnother.Value.triggered = true;
                 };
-                killButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, ThrowCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer().Start();
+                killButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, ThrowCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer().Start();
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
             }
         }

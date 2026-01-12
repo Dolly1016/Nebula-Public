@@ -181,7 +181,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                 GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev => equipButton.SetLabel("equip"), this);
 
                 var killButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, true, false, Virial.Compat.VirtualKeyInput.Kill, "sniper.kill",
-                    SnipeCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "snipe", null,
+                    SnipeCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown), "snipe", null,
                     _ => MyRifle != null, _ => !equipButton.IsBroken)
                     .SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor)
                     .SetAsMouseClickButton().SetAsUsurpableButton(this);

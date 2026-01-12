@@ -74,7 +74,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
                 AchievementToken<int> achChallengeToken = new("destroyer.challenge", 0, (val, _) => val >= 3 && (NebulaGameManager.Instance?.EndState?.Winners.Test(MyPlayer) ?? false));
 
                 destroyButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, new Virial.Events.Player.PlayerInteractParameter(RealPlayerOnly: true, IsKillInteraction: true), true, Virial.Compat.VirtualKeyInput.Kill, "destroyer.kill",
-                   KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "destroyerKill", Virial.Components.ModAbilityButton.LabelType.Impostor,
+                   KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown), "destroyerKill", Virial.Components.ModAbilityButton.LabelType.Impostor,
                    null, (player, _) =>
                    {
                        //左右どちらでキルすればよいか考える

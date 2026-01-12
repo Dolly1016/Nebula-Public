@@ -70,7 +70,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 AmongUsUtil.PlayCustomFlash(MyRole.RoleColor.ToUnityColor(), 0f, 0.8f, 0.7f);
 
                 var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
-                        KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown), "kill", ModAbilityButton.LabelType.Impostor, null,
+                        KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown), "kill", ModAbilityButton.LabelType.Impostor, null,
                         (player, button) => {
                             MyPlayer.MurderPlayer(player, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                             button.StartCoolDown();

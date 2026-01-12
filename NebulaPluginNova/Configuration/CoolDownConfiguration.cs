@@ -37,8 +37,8 @@ internal class KillCoolDownConfiguration : IRelativeCooldownConfiguration
     string relativeCoolDownStr => relativeEntry.Value switch { < 0 => "", > 0 => "+", _ => "±" } + relativeEntry.Value + Language.Translate("options.sec");
     string ratioCoolDownStr => ratioEntry.Value + Language.Translate("options.cross");
 
-    float IRelativeCooldownConfiguration.Cooldown => (this as IRelativeCooldownConfiguration).GetCoolDown(baseKillCooldown?.Invoke() ?? AmongUsLLImpl.Instance.VanillaKillCooldown);
-    float IRelativeCooldownConfiguration.GetCoolDown(float baseCooldown) => coolDownTypeEntry.Value switch
+    float IRelativeCooldownConfiguration.Cooldown => (this as IRelativeCooldownConfiguration).GetCooldown(baseKillCooldown?.Invoke() ?? AmongUsLLImpl.Instance.VanillaKillCooldown);
+    float IRelativeCooldownConfiguration.GetCooldown(float baseCooldown) => coolDownTypeEntry.Value switch
     {
         2 => ratioEntry.Value * baseCooldown,
         1 => System.Math.Max(0f, relativeEntry.Value + baseCooldown),

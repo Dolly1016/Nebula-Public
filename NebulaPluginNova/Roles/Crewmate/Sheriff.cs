@@ -145,7 +145,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
 
                     leftText.text = (--leftShots).ToString();
                 };
-                killButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, KillCoolDownOption.GetCoolDown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer();
+                killButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer();
                 killButton.CoolDownTimer.Start();
                 killButton.SetLabel(MyPlayer.IsMadmate ? "madmate.suicide" : "kill");
                 killButton.OnMeeting = button =>

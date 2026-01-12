@@ -50,4 +50,6 @@ public interface GameMap : ILifespan
     /// <param name="position2"></param>
     /// <returns></returns>
     bool AnyWallsBetween(Virial.Compat.Vector2 position1, Virial.Compat.Vector2 position2);
+
+    Virial.Compat.Vector2 EmergencyButtonPosition { get; }
 }
