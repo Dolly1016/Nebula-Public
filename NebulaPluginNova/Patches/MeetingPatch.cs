@@ -206,7 +206,8 @@ class ReportDeadBodyPatch
 {
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo target)
     {
-        MeetingHudExtension.ModReportDeadBody(__instance, target, target == null ? MeetingHudExtension.ReportType.EmergencyMeeting : MeetingHudExtension.ReportType.ReportDeadBody);
+        var type = target == null ? MeetingHudExtension.ReportType.EmergencyMeeting : MeetingHudExtension.ReportType.ReportDeadBody;
+        MeetingHudExtension.ModReportDeadBody(__instance, target, type, type == MeetingHudExtension.ReportType.ReportDeadBody, type == MeetingHudExtension.ReportType.EmergencyMeeting);
         return false;
     }
 }

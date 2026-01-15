@@ -1408,6 +1408,10 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     void GamePlayer.Revive(GamePlayer? healer, Virial.Compat.Vector2 position, bool eraseDeadBody, bool recordEvent) => MyControl.ModRevive(healer?.VanillaPlayer, new(position.x, position.y), eraseDeadBody, recordEvent);
     GamePlayer? GamePlayer.MyKiller => MyKiller;
 
+    // Virial::ReportAPI
+    void GamePlayer.ReportDeadBody(GamePlayer deadBody, bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, deadBody, MeetingHudExtension.ReportType.ReportDeadBody, canInvokeInSabo, consumeEmergencyButton);
+    void GamePlayer.RequestEmergencyMeeting(bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, null, MeetingHudExtension.ReportType.ReportDeadBody, canInvokeInSabo, consumeEmergencyButton);
+
     // Virial::HoldingAPI
     GamePlayer? GamePlayer.HoldingPlayer => null;
     bool GamePlayer.HoldingAnyPlayer => false;

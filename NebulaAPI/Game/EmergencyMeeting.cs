@@ -25,5 +25,6 @@ public interface EmergencyMeeting : ILifespan
     /// </summary>
     /// <param name="deltaSec">残り時間に足しこむ秒数。正数を指定すると延長する。</param>
     void EditMeetingTime(int deltaSec);
+    void EndVotingForcibly(bool keepCurrentVoting);
 }
 

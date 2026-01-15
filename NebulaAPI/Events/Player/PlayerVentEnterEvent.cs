@@ -8,7 +8,7 @@ namespace Virial.Events.Player;
 
 public class PlayerVentEnterEvent : AbstractPlayerEvent
 {
-    internal Vent Vent { get; set; }
+    internal Vent Vent { get; }
 
     internal PlayerVentEnterEvent(Virial.Game.Player player, Vent vent) : base(player)
     {

@@ -14,7 +14,7 @@ namespace Virial.Events.Player;
 /// </remarks>
 public class PlayerBeginMinigameByConsoleLocalEvent : AbstractPlayerEvent
 {
-    internal Console Console { get; private init; }
+    internal Console Console { get; }
     internal PlayerBeginMinigameByConsoleLocalEvent(Virial.Game.Player player, Console console) : base(player)
     {
         this.Console = console;

@@ -889,7 +889,7 @@ public class DissolvedDeadBodyClickPatch
             if (Vector2.Distance(truePosition2, truePosition) <= localPlayer.MaxReportDistance && localPlayer.CanMove && !PhysicsHelpers.AnythingBetween(truePosition, truePosition2, Constants.ShipAndObjectsMask, false))
             {
                 __instance.Reported = true;
-                MeetingHudExtension.ModCmdReportDeadBody(GamePlayer.LocalPlayer, GamePlayer.GetPlayer((byte)(__instance.ParentId & ~DissolvedDeadBodyMask)), MeetingHudExtension.ReportType.ReportDissolvedBody);
+                MeetingHudExtension.ModCmdReportDeadBody(GamePlayer.LocalPlayer, GamePlayer.GetPlayer((byte)(__instance.ParentId & ~DissolvedDeadBodyMask)), MeetingHudExtension.ReportType.ReportDissolvedBody, true, false);
             }
             return false;
         }

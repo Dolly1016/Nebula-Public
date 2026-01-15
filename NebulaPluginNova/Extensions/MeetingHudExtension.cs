@@ -279,13 +279,13 @@ public static class MeetingHudExtension
         ReportDissolvedBody,
     }
 
-    internal static void ModCmdReportDeadBody(GamePlayer player, GamePlayer? deadBody, ReportType reportType)
+    internal static void ModCmdReportDeadBody(GamePlayer player, GamePlayer? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton)
     {
-        RpcModCmdReportDeadBody.Invoke((player, deadBody, reportType));
+        RpcModCmdReportDeadBody.Invoke((player, deadBody, reportType, canInvokeInSabo, consumeEmergencyButton));
     }
-    private static readonly RemoteProcess<(GamePlayer player, GamePlayer? deadBody, ReportType reportType)> RpcModCmdReportDeadBody = new("ReportDissolvedDeadBody", (message, _) =>
+    private static readonly RemoteProcess<(GamePlayer player, GamePlayer? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton)> RpcModCmdReportDeadBody = new("ReportDissolvedDeadBody", (message, _) =>
     {
-        if (AmongUsClient.Instance.AmHost) ModReportDeadBody(message.player.VanillaPlayer, GameData.Instance.GetPlayerById(message.deadBody?.PlayerId ?? 255), message.reportType);
+        if (AmongUsClient.Instance.AmHost) ModReportDeadBody(message.player.VanillaPlayer, GameData.Instance.GetPlayerById(message.deadBody?.PlayerId ?? 255), message.reportType, message.canInvokeInSabo, message.consumeEmergencyButton);
     });
 
     private static readonly RemoteProcess<(GamePlayer reporter, GamePlayer? dead, ReportType reportType)> RpcStartMeeting = new("ReportDeadBody", (message, _) =>
@@ -294,13 +294,13 @@ public static class MeetingHudExtension
     });
 
     //PlayerControl.ReportDeadBodyの代替メソッド
-    internal static void ModReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType)
+    internal static void ModReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton)
     {
         //会議室が開くか否かのチェック
         if (AmongUsClient.Instance.IsGameOver || MeetingHud.Instance) return;
 
         //フェイクタスクでない緊急タスクがある場合ボタンは押せない
-        if (reportType == ReportType.EmergencyMeeting &&
+        if (!canInvokeInSabo &&
             PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)
             (task => PlayerTask.TaskIsEmergency(task) &&
                 (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.All(
@@ -315,7 +315,7 @@ public static class MeetingHudExtension
 
         MeetingModRpc.RpcNoticeStartMeeting.Invoke((reporter.PlayerId, deadBody?.PlayerId ?? 255));
 
-        if (reportType == ReportType.EmergencyMeeting)
+        if (consumeEmergencyButton)
         {
             NebulaGameManager.Instance!.EmergencyCalls++;
             if (NebulaGameManager.Instance!.EmergencyCalls == GeneralConfigurations.NumOfMeetingsOption) MeetingModRpc.RpcBreakEmergencyButton.Invoke();
@@ -488,6 +488,20 @@ public static class MeetingHudExtension
         }
 
         (message.sec > 0 ? CoExpandDiscussionTime(message.sec, message.discussion) : CoReduceDiscussionTime(-message.sec, message.discussion)).StartOnScene();
+    });
+
+    internal static void RequestForceSkip(bool keepCurrentVoting) => RpcRequestForceSkip.Invoke(keepCurrentVoting);
+    private static RemoteProcess<bool> RpcRequestForceSkip = new("RequestForceSkip", (keepCurrentVoting, _) =>
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        var meetingHud = MeetingHud.Instance;
+        if (!meetingHud) return;
+        var state = meetingHud.state;
+        if (state == MeetingHud.VoteStates.Voted || state == MeetingHud.VoteStates.NotVoted)
+        {
+            if (!keepCurrentVoting) meetingHud.ResetPlayerState();
+            meetingHud.ForceSkipAll();
+        }
     });
 
 }

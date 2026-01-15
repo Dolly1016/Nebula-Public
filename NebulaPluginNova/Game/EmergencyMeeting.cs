@@ -29,4 +29,9 @@ internal class EmergencyMeetingImpl : EmergencyMeeting
     {
         MeetingHudExtension.RequestEditDiscussionTime.Invoke(deltaSec);
     }
+
+    void EmergencyMeeting.EndVotingForcibly(bool keepCurrentVoting)
+    {
+        MeetingHudExtension.RequestForceSkip(keepCurrentVoting);
+    }
 }

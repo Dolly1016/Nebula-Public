@@ -277,6 +277,18 @@ public static class ConsoleCanUsePatch
     }
 }
 
+[HarmonyPatch(typeof(DoorConsole), nameof(DoorConsole.Use))]
+public static class DoorConsoleUsePatch
+{
+    public static void Postfix(DoorConsole __instance)
+    {
+        if (Minigame.Instance && Minigame.Instance.TryCast<IDoorMinigame>(out var doorMinigame))
+        {
+            GameOperatorManager.Instance?.Run(new PlayerBeginMinigameByDoorLocalEvent(GamePlayer.LocalPlayer!, __instance));
+        }
+    }
+}
+
 [HarmonyPatch(typeof(Console), nameof(Console.Use))]
 public static class ConsoleUsePatch
 {

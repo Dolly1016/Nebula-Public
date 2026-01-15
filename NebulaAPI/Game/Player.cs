@@ -487,7 +487,9 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// </summary>
     Player? MyKiller { get; }
 
-
+    // ReportAPI
+    void ReportDeadBody(Player deadBody, bool canInvokeInSabo = true, bool consumeEmergencyButton = false);
+    void RequestEmergencyMeeting(bool canInvokeInSabo = false, bool consumeEmergencyButton = true);
 
 
     // AttributeAPI
