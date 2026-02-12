@@ -97,6 +97,18 @@ public static class HudManagerUpdatePatch
         {
             HelpScreen.TryOpenHelpScreen(HelpTab.MyInfo);
         }
+        if(GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.AeroGuesser)
+        {
+            if (__instance.MapButton.isActiveAndEnabled)
+            {
+                __instance.MapButton.gameObject.SetActive(false);
+            }
+            if (!__instance.Chat.isActiveAndEnabled)
+            {
+                __instance.Chat.SetVisible(true);
+                __instance.Chat.gameObject.SetActive(true);
+            }
+        }
     }
 }
 
