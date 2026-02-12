@@ -87,6 +87,13 @@ public interface ModAbilityButton : ILifespan, IHudContent
     ModAbilityButton SetLabelType(LabelType type);
 
     /// <summary>
+    /// カスタムカラー。
+    /// </summary>
+    /// <param name="color"></param>
+    /// <returns></returns>
+    ModAbilityButton SetColorLabel(UnityEngine.Color color);
+
+    /// <summary>
     /// ボタンの可用性を設定します。可視状態でなければ呼び出されません。
     /// </summary>
     Predicate<ModAbilityButton> Availability { set; }
