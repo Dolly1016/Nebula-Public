@@ -1,7 +1,6 @@
 ﻿using Virial.Compat;
 using Virial.Game;
 using Virial.Media;
-using Color = UnityEngine.Color;
 
 namespace Virial.Components;
 
@@ -10,6 +9,29 @@ namespace Virial.Components;
 /// </summary>
 public interface ModAbilityButton : ILifespan, IHudContent
 {
+    /// <summary>
+    /// ボタンのラベルの種類を表します。
+    /// </summary>
+    public enum LabelType
+    {
+        /// <summary>
+        /// 通常の黒い文字。
+        /// </summary>
+        Standard,
+        /// <summary>
+        /// キルボタンなどの赤い文字。
+        /// </summary>
+        Impostor,
+        /// <summary>
+        /// アドミンやバイタルなどの緑色の文字。
+        /// </summary>
+        Utility,
+        /// <summary>
+        /// エンジニアやサイエンティストの能力などの青い文字。
+        /// </summary>
+        Crewmate,
+    }
+
     /// <summary>
     /// ボタンの画像を設定します。
     /// </summary>
@@ -60,9 +82,9 @@ public interface ModAbilityButton : ILifespan, IHudContent
     /// <summary>
     /// ラベルの見た目を設定します。
     /// </summary>
-    /// <param name="color"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
-    ModAbilityButton SetColorLabel(Color color);
+    ModAbilityButton SetLabelType(LabelType type);
 
     /// <summary>
     /// ボタンの可用性を設定します。可視状態でなければ呼び出されません。
