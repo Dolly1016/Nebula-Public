@@ -579,6 +579,103 @@ public static class AmongUsUtil
         if (playSound) SoundManager.Instance.PlaySoundImmediate(notifier.settingsChangeSound, false, 1f, 1f, null);
     }
 
+    public static void AddCustomChat(PlayerControl sourcePlayer, PlayerControl cosmetics, string title, string chatText, bool censor = true)
+    {
+        if (sourcePlayer == null || PlayerControl.LocalPlayer == null || string.IsNullOrEmpty(chatText))
+        {
+            return;
+        }
+
+        ChatController chatController = Object.FindObjectOfType<ChatController>();
+        if (chatController == null)
+        {
+            return;
+        }
+
+        NetworkedPlayerInfo localPlayerData = PlayerControl.LocalPlayer.Data;
+        NetworkedPlayerInfo sourcePlayerData = sourcePlayer.Data;
+        if (localPlayerData == null || sourcePlayerData == null)
+        {
+            return;
+        }
+
+        if (sourcePlayerData.IsDead && !localPlayerData.IsDead)
+        {
+            return;
+        }
+
+        NetworkedPlayerInfo cosmeticsData = cosmetics?.Data ?? sourcePlayerData;
+
+        ChatBubble pooledBubble = chatController.GetPooledBubble();
+        if (pooledBubble == null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (chatController.scroller == null || chatController.scroller.Inner == null)
+            {
+                return;
+            }
+            pooledBubble.transform.SetParent(chatController.scroller.Inner);
+            pooledBubble.transform.localScale = Vector3.one;
+
+            bool isLocalPlayer = sourcePlayer == PlayerControl.LocalPlayer;
+            if (isLocalPlayer)
+            {
+                pooledBubble.SetRight();
+            }
+            else
+            {
+                pooledBubble.SetLeft();
+            }
+
+            bool didVote = MeetingHud.Instance != null && MeetingHud.Instance.DidVote(sourcePlayer.PlayerId);
+
+            pooledBubble.SetCosmetics(cosmeticsData);
+            pooledBubble.SetName(title ?? sourcePlayerData.PlayerName, sourcePlayerData.IsDead, didVote, PlayerNameColor.Get(sourcePlayerData));
+
+            if (censor && DataManager.Settings?.Multiplayer?.CensorChat == true)
+            {
+                chatText = BlockedWords.CensorWords(chatText, false);
+            }
+            pooledBubble.SetText(chatText);
+            pooledBubble.AlignChildren();
+
+            chatController.AlignAllBubbles();
+
+            if (!chatController.IsOpenOrOpening && chatController.notificationRoutine == null)
+            {
+                chatController.notificationRoutine = chatController.StartCoroutine(chatController.BounceDot());
+            }
+
+            if (!isLocalPlayer && !chatController.IsOpenOrOpening)
+            {
+                if (SoundManager.Instance != null && chatController.messageSound != null)
+                {
+                    var soundPlayer = SoundManager.Instance.PlaySound(chatController.messageSound, false, 1f, null);
+                    if (soundPlayer is not null)
+                    {
+                        soundPlayer.pitch = 0.5f + (float)sourcePlayer.PlayerId / 15f;
+                    }
+                }
+
+                if (chatController.chatNotification is not null)
+                {
+                    chatController.chatNotification.SetUp(sourcePlayer, chatText);
+                }
+            }
+        }
+        catch ()
+        {
+            if (pooledBubble != null && chatController.chatBubblePool != null)
+            {
+                chatController.chatBubblePool.Reclaim(pooledBubble);
+            }
+        }
+    }
+
     public static void SetHue(this GameObject rendererHolder, float hue)
     {
         rendererHolder.GetComponentsInChildren<Renderer>().Do(renderer =>
