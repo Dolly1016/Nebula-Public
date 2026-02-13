@@ -393,6 +393,12 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         return this;
     }
 
+    public ModAbilityButtonImpl SetColorLabel(UnityEngine.Color color)
+    {
+        if (VanillaButton != null) VanillaButton.buttonLabelText.SetOutlineColor(color);
+        return this;
+    }
+
     internal GameObject UsesIcon = null!;
     private TMPro.TextMeshPro UsesIconText = null!;
     public TMPro.TextMeshPro ShowUsesIcon(int iconVariation)
