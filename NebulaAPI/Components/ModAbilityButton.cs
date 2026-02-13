@@ -47,6 +47,13 @@ public interface ModAbilityButton : ILifespan, IHudContent
     ModAbilityButton SetLabel(string translationKey);
 
     /// <summary>
+    /// カスタムカラー。
+    /// </summary>
+    /// <param name="color"></param>
+    /// <returns></returns>
+    ModAbilityButton SetColorLabel(UnityEngine.Color color);
+
+    /// <summary>
     /// クールダウンを表すタイマーです。
     /// </summary>
     IVisualTimer? CoolDownTimer { get; set; }
