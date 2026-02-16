@@ -393,6 +393,12 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         return this;
     }
 
+    internal ModAbilityButtonImpl SetColorLabel(UnityEngine.Color color)
+    {
+        if (VanillaButton != null) VanillaButton.buttonLabelText.SetOutlineColor(color);
+        return this;
+    }
+
     internal GameObject UsesIcon = null!;
     private TMPro.TextMeshPro UsesIconText = null!;
     public TMPro.TextMeshPro ShowUsesIcon(int iconVariation)
@@ -511,6 +517,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     ModAbilityButton ModAbilityButton.InterruptEffect() => InactivateEffect();
     ModAbilityButton ModAbilityButton.ToggleEffect() => ToggleEffect();
     ModAbilityButton ModAbilityButton.SetLabelType(ModAbilityButton.LabelType type) => SetLabelType(type);
+    ModAbilityButton ModAbilityButton.SetColorLabel(UnityEngine.Color color) => SetColorLabel(color);
 
     Predicate<ModAbilityButton> ModAbilityButton.Availability { set => Availability = value; }
     Predicate<ModAbilityButton> ModAbilityButton.Visibility { set => Visibility = value; }
