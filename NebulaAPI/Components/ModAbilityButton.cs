@@ -51,7 +51,7 @@ public interface ModAbilityButton : ILifespan, IHudContent
     /// </summary>
     /// <param name="color"></param>
     /// <returns></returns>
-    ModAbilityButton SetColorLabel(UnityEngine.Color color);
+    internal ModAbilityButton SetColorLabel(UnityEngine.Color color);
 
     /// <summary>
     /// クールダウンを表すタイマーです。
